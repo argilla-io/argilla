@@ -15,7 +15,6 @@ import argilla as rg
 import pytest
 from argilla.client import api
 from argilla.client.api import delete, get_workspace, init
-from argilla.client.apis.datasets import Datasets
 from argilla.client.client import Argilla
 from argilla.client.sdk.commons.errors import ForbiddenApiError
 from argilla.datasets import TextClassificationSettings, TokenClassificationSettings
@@ -83,7 +82,7 @@ def test_delete_dataset_by_non_creator(mocked_client, mock_user, argilla_user, d
     rg = Argilla()
 
     delete(dataset)
-    Datasets.configure(
+    rg.datasets.configure(
         dataset, settings=TextClassificationSettings(label_schema={"A", "B", "C"}), workspace=get_workspace()
     )
 

@@ -66,7 +66,7 @@ def test_delete_records_without_permission(mocked_client, owner: User, role: Use
 
     argilla_client.delete(dataset)
     records = [
-        argilla.TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)
+        TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)
     ]
     argilla_client.log(name=dataset, records=records)
 
@@ -95,7 +95,7 @@ def test_delete_records_with_unmatched_records(mocked_client, api):
     api.log(
         name=dataset,
         records=[
-            argilla.TextClassificationRecord(
+            TextClassificationRecord(
                 id=i,
                 text="This is the text",
                 metadata=dict(idx=i),

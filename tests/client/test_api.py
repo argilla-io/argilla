@@ -38,6 +38,8 @@ from argilla.client.datasets import (
     DatasetForTokenClassification,
 )
 from argilla.client.models import TextClassificationRecord
+from argilla.client.models import Text2TextRecord
+from argilla.client.models import TokenClassificationRecord
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.api import Response
 from argilla.client.sdk.commons.errors import (
