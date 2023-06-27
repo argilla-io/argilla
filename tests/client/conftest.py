@@ -27,6 +27,7 @@ from argilla.client.feedback.schemas import (
     FeedbackRecord,
     LabelQuestion,
     MultiLabelQuestion,
+    RankingQuestion,
     RatingQuestion,
     TextField,
     TextQuestion,
@@ -404,6 +405,7 @@ def feedback_dataset_questions() -> List["AllowedQuestionTypes"]:
         RatingQuestion(name="question-2", values=[0, 1], required=True),
         LabelQuestion(name="question-3", labels=["a", "b", "c"], required=True),
         MultiLabelQuestion(name="question-4", labels=["a", "b", "c"], required=True),
+        RankingQuestion(name="question-5", values=["a", "b"], required=True),
     ]
 
 
@@ -419,6 +421,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                         "question-2": {"value": 1},
                         "question-3": {"value": "a"},
                         "question-4": {"value": ["a", "b"]},
+                        "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
                     },
                     "status": "submitted",
                 },
@@ -440,6 +443,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                         "question-2": {"value": 0},
                         "question-3": {"value": "b"},
                         "question-4": {"value": ["b", "c"]},
+                        "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
                     },
                     "status": "submitted",
                 }
@@ -455,6 +459,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                         "question-2": {"value": 0},
                         "question-3": {"value": "c"},
                         "question-4": {"value": ["a", "c"]},
+                        "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
                     },
                     "status": "submitted",
                 }
@@ -470,6 +475,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                         "question-2": {"value": 1},
                         "question-3": {"value": "a"},
                         "question-4": {"value": ["a"]},
+                        "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
                     },
                     "status": "submitted",
                 }
@@ -489,6 +495,13 @@ def feedback_dataset_huggingface() -> Dataset:
             "question-2": [{"user_id": [None], "value": [1], "status": ["submitted"]}],
             "question-3": [{"user_id": [None], "value": ["a"], "status": ["submitted"]}],
             "question-4": [{"user_id": [None], "value": [["a", "b"]], "status": ["submitted"]}],
+            "question-5": [
+                {
+                    "user_id": [None],
+                    "value": [[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]],
+                    "status": ["submitted"],
+                }
+            ],
             "external_id": ["1"],
         }
     )
