@@ -35,6 +35,7 @@ These are the section headers that we use:
 
 - Fixed URLs in Weak Supervision with Sentence Tranformers tutorial [#3241](https://github.com/argilla-io/argilla/pull/3241).
 - Fixed library buttons' formatting on Tutorials page [#2819](https://github.com/argilla-io/argilla/pull/2819).
+- Removed template notebook from table of contents ([#2567](https://github.com/argilla-io/argilla/pull/2567)).
 
 ### Added
 
