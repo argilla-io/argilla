@@ -320,6 +320,7 @@ class ArgillaSpaCyTrainer(_ArgillaSpaCyTrainerBase):
 
 
 class ArgillaSpaCyTransformersTrainer(_ArgillaSpaCyTrainerBase):
+    require_version("spacy>=3.5.3")  # Required to generate the `spacy-transformers` configuration
     require_version("spacy-transformers")
 
     def __init__(self, update_transformer: bool = True, **kwargs) -> None:
