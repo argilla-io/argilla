@@ -106,7 +106,7 @@ class User:
             error_msg += f" As the `name` argument is not None, you should use `User.from_name('{name}')` instead."
         raise Exception(error_msg)
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         return (
             f"User(id={self.id}, username={self.username}, role={self.role},"
             f" workspaces={self.workspaces}, api_key={self.api_key},"

@@ -28,7 +28,7 @@ from argilla.client.feedback.unification import (
     MultiLabelQuestionUnification,
     RatingQuestionStrategy,
     RatingQuestionUnification,
-    UnificatiedValueSchema,
+    UnifiedValueSchema,
 )
 from pydantic import ValidationError
 
@@ -228,7 +228,7 @@ def test_rating_question_strategy(strategy, unified_response):
     question = RatingQuestion(**question_payload)
     strategy = RatingQuestionStrategy(strategy)
     strategy.unify_responses([record], question)
-    unified_response = [UnificatiedValueSchema(**resp) for resp in unified_response]
+    unified_response = [UnifiedValueSchema(**resp) for resp in unified_response]
     assert record._unified_responses[question_name] == unified_response
     assert RatingQuestionUnification(question=question, strategy=strategy)
 
@@ -267,7 +267,7 @@ def test_label_question_strategy(strategy, unified_response):
     question = LabelQuestion(**question_payload)
     strategy = LabelQuestionStrategy(strategy)
     strategy.unify_responses([record], question)
-    unified_response = [UnificatiedValueSchema(**resp) for resp in unified_response]
+    unified_response = [UnifiedValueSchema(**resp) for resp in unified_response]
     assert record._unified_responses[question_name] == unified_response
     assert LabelQuestionUnification(question=question, strategy=strategy)
 
@@ -306,7 +306,7 @@ def test_multi_label_question_strategy(strategy, unified_response):
     question = MultiLabelQuestion(**question_payload)
     strategy = MultiLabelQuestionStrategy(strategy)
     strategy.unify_responses([record], question)
-    unified_response = [UnificatiedValueSchema(**resp) for resp in unified_response]
+    unified_response = [UnifiedValueSchema(**resp) for resp in unified_response]
     assert record._unified_responses[question_name] == unified_response
     assert MultiLabelQuestionUnification(question=question, strategy=strategy)
 

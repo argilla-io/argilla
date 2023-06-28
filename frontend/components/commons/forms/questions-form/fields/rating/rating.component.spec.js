@@ -1,9 +1,23 @@
 import { shallowMount } from "@vue/test-utils";
 import RatingComponent from "./Rating.component";
 
+const QuestionHeaderComponentStub = {
+  name: "QuestionHeaderComponent",
+  template: "<div />",
+  props: ["title", "isRequired", "tooltipMessage"],
+};
+const RatingMonoSelectionComponentStub = {
+  name: "RatingMonoSelectionComponent",
+  template: "<div />",
+  props: ["options"],
+};
+
 let wrapper = null;
 const options = {
-  stubs: ["QuestionHeaderComponent", "RatingMonoSelectionComponent"],
+  stubs: {
+    QuestionHeaderComponent: QuestionHeaderComponentStub,
+    RatingMonoSelectionComponent: RatingMonoSelectionComponentStub,
+  },
   propsData: {
     title: "This is the title",
     options: [
@@ -31,14 +45,14 @@ describe("RatingComponent", () => {
     expect(wrapper.vm.isRequired).toBe(false);
     expect(wrapper.vm.description).toBe("");
 
-    const QuestionHeaderWrapper = wrapper.findComponent({
-      name: "QuestionHeaderComponent",
-    });
+    const QuestionHeaderWrapper = wrapper.findComponent(
+      QuestionHeaderComponentStub
+    );
     expect(QuestionHeaderWrapper.exists()).toBe(true);
 
-    const RatingMonoSelectionWrapper = wrapper.findComponent({
-      name: "RatingMonoSelectionComponent",
-    });
+    const RatingMonoSelectionWrapper = wrapper.findComponent(
+      RatingMonoSelectionComponentStub
+    );
     expect(RatingMonoSelectionWrapper.exists()).toBe(true);
   });
 });

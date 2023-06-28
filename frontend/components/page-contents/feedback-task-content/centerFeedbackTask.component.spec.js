@@ -1,10 +1,25 @@
 import { shallowMount } from "@vue/test-utils";
 import CenterFeedbackTaskComponent from "./CenterFeedbackTask.content";
 
+const BaseLoadingStub = {
+  name: "BaseLoading",
+  template: "<div />",
+};
+
+const RecordFeedbackTaskAndQuestionnaireContentStub = {
+  name: "RecordFeedbackTaskAndQuestionnaireContent",
+  template: "<div />",
+  props: ["datasetId"],
+};
+
 describe("CenterFeedbackTaskComponent", () => {
   it("render the BaseLoading component while fetching data", () => {
     const options = {
-      stubs: ["RecordFeedbackTaskAndQuestionnaireContent", "BaseLoading"],
+      stubs: {
+        BaseLoading: BaseLoadingStub,
+        RecordFeedbackTaskAndQuestionnaireContent:
+          RecordFeedbackTaskAndQuestionnaireContentStub,
+      },
       mocks: {
         $fetchState: {
           pending: true,
@@ -17,20 +32,22 @@ describe("CenterFeedbackTaskComponent", () => {
 
     const wrapper = shallowMount(CenterFeedbackTaskComponent, options);
 
-    const BaseLoadingWrapper = wrapper.findComponent({ name: "BaseLoading" });
+    const BaseLoadingWrapper = wrapper.findComponent(BaseLoadingStub);
     expect(BaseLoadingWrapper.exists()).toBe(true);
 
     const RecordFeedbackTaskAndQuestionnaireContentWrapper =
-      wrapper.findComponent({
-        name: "RecordFeedbackTaskAndQuestionnaireContent",
-      });
+      wrapper.findComponent(RecordFeedbackTaskAndQuestionnaireContentStub);
     expect(RecordFeedbackTaskAndQuestionnaireContentWrapper.exists()).toBe(
       false
     );
   });
   it("render the RecordFeedbackTaskAndQuestionnaireContent component after fetching data", () => {
     const options = {
-      stubs: ["RecordFeedbackTaskAndQuestionnaireContent", "BaseLoading"],
+      stubs: {
+        BaseLoading: BaseLoadingStub,
+        RecordFeedbackTaskAndQuestionnaireContent:
+          RecordFeedbackTaskAndQuestionnaireContentStub,
+      },
       mocks: {
         $fetchState: {
           pending: false,
@@ -43,13 +60,11 @@ describe("CenterFeedbackTaskComponent", () => {
 
     const wrapper = shallowMount(CenterFeedbackTaskComponent, options);
 
-    const BaseLoadingWrapper = wrapper.findComponent({ name: "BaseLoading" });
+    const BaseLoadingWrapper = wrapper.findComponent(BaseLoadingStub);
     expect(BaseLoadingWrapper.exists()).toBe(false);
 
     const RecordFeedbackTaskAndQuestionnaireContentWrapper =
-      wrapper.findComponent({
-        name: "RecordFeedbackTaskAndQuestionnaireContent",
-      });
+      wrapper.findComponent(RecordFeedbackTaskAndQuestionnaireContentStub);
     expect(RecordFeedbackTaskAndQuestionnaireContentWrapper.exists()).toBe(
       true
     );
