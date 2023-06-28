@@ -779,7 +779,7 @@ class FeedbackDataset:
                 elif question.settings["type"] == "rating":
                     value = Value(dtype="int32")
                 elif question.settings["type"] == "ranking":
-                    value = Sequence({"rank": Value(dtype="int32"), "value": Value(dtype="string")})
+                    value = Sequence({"rank": Value(dtype="uint8"), "value": Value(dtype="string")})
                 elif question.settings["type"] in "multi_label_selection":
                     value = Sequence(Value(dtype="string"))
                 else:
