@@ -40,8 +40,8 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           @on-error="onError"
-          @on-focus="updateautofocusPosition(index)"
-          @on-blur="updateautofocusPosition(null)"
+          @on-focus="updateAutofocusPosition(index)"
+          @on-blur="updateAutofocusPosition(null)"
         />
 
         <SingleLabelComponent
@@ -53,7 +53,7 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
-          @on-focus="updateautofocusPosition(index)"
+          @on-focus="updateAutofocusPosition(index)"
         />
         <MultiLabelComponent
           v-if="input.component_type === COMPONENT_TYPE.MULTI_LABEL"
@@ -64,7 +64,7 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
-          @on-focus="updateautofocusPosition(index)"
+          @on-focus="updateAutofocusPosition(index)"
         />
 
         <RatingComponent
@@ -75,15 +75,17 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           @on-error="onError"
-          @on-focus="updateautofocusPosition(index)"
+          @on-focus="updateAutofocusPosition(index)"
         />
-
         <RankingComponent
           v-if="input.component_type === COMPONENT_TYPE.RANKING"
           :title="input.question"
           :isRequired="input.is_required"
+          :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           v-model="input.options"
+          :key="JSON.stringify(input.options)"
+          @on-focus="updateAutofocusPosition(index)"
         />
       </div>
     </div>
@@ -588,9 +590,12 @@ export default {
       this.$root.$emit("are-responses-untouched", isFormUntouched);
     },
     checkIfQuestionIsFocused(index) {
-      return this.isRecordPending && index === this.autofocusPosition;
+      return (
+        this.recordStatus === RECORD_STATUS.PENDING &&
+        index === this.autofocusPosition
+      );
     },
-    updateautofocusPosition(index) {
+    updateAutofocusPosition(index) {
       this.focusedQuestion = index;
     },
     updateQuestionAutofocus(index) {
