@@ -33,10 +33,6 @@ if TYPE_CHECKING:
     from argilla.client.feedback.unification import UnifiedValueSchema
 
 
-FETCHING_BATCH_SIZE = 250
-PUSHING_BATCH_SIZE = 32
-
-
 class RankingValueSchema(BaseModel):
     """Schema for the `RankingQuestion` response value.
 
