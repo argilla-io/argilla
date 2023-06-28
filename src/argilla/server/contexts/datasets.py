@@ -17,7 +17,7 @@ from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, func, select
-from sqlalchemy.orm import Session, contains_eager, joinedload, selectinload
+from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
 from argilla.server.enums import ResponseStatusFilter
@@ -111,7 +111,7 @@ async def publish_dataset(db: "AsyncSession", search_engine: SearchEngine, datas
     return dataset
 
 
-async def delete_dataset(db: Session, search_engine: SearchEngine, dataset: Dataset) -> Dataset:
+async def delete_dataset(db: "AsyncSession", search_engine: SearchEngine, dataset: Dataset) -> Dataset:
     try:
         await db.delete(dataset)
         await search_engine.delete_index(dataset)
@@ -122,7 +122,7 @@ async def delete_dataset(db: Session, search_engine: SearchEngine, dataset: Data
     return dataset
 
 
-async def get_field_by_id(db: Session, field_id: UUID) -> Union[Field, None]:
+async def get_field_by_id(db: "AsyncSession", field_id: UUID) -> Union[Field, None]:
     result = await db.execute(select(Field).filter_by(id=field_id).options(selectinload(Field.dataset)))
     return result.scalar_one_or_none()
 
@@ -160,7 +160,7 @@ async def delete_field(db: "AsyncSession", field: Field) -> Field:
     return field
 
 
-async def get_question_by_id(db: Session, question_id: UUID) -> Union[Question, None]:
+async def get_question_by_id(db: "AsyncSession", question_id: UUID) -> Union[Question, None]:
     result = await db.execute(select(Question).filter_by(id=question_id).options(selectinload(Question.dataset)))
     return result.scalar_one_or_none()
 
@@ -331,7 +331,7 @@ async def create_records(
         raise
 
 
-async def get_response_by_id(db: Session, response_id: UUID) -> Union[Response, None]:
+async def get_response_by_id(db: "AsyncSession", response_id: UUID) -> Union[Response, None]:
     result = await db.execute(
         select(Response)
         .filter_by(id=response_id)
@@ -347,10 +347,6 @@ async def get_response_by_record_id_and_user_id(
     return result.scalar_one_or_none()
 
 
-def list_responses_by_record_id(db: Session, record_id: UUID):
-    return db.query(Response).filter_by(record_id=record_id).order_by(Response.inserted_at.asc()).all()
-
-
 async def count_responses_by_dataset_id_and_user_id(
     db: "AsyncSession", dataset_id: UUID, user_id: UUID, response_status: Optional[ResponseStatus] = None
 ) -> int:
@@ -364,22 +360,6 @@ async def count_responses_by_dataset_id_and_user_id(
         .filter(*expressions)
     )
     return result.scalar()
-
-
-def count_records_with_missing_responses_by_dataset_id_and_user_id(db: Session, dataset_id: UUID, user_id: UUID):
-    return (
-        db.query(Record.id)
-        .outerjoin(
-            Response,
-            and_(
-                Response.record_id == Record.id,
-                Response.user_id == user_id,
-            ),
-        )
-        .with_entities(func.count())
-        .filter(and_(Record.dataset_id == dataset_id, Response.status == None))
-        .scalar()
-    )
 
 
 async def create_response(
