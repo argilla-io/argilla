@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
-from argilla.client.api import ArgillaSingleton
+from argilla.client.api import ArgillaSingleton, init
 from argilla.client.users import User
 
 if TYPE_CHECKING:
@@ -96,11 +96,9 @@ def test_user_delete_user(owner: "ServerUser") -> None:
 
 
 def test_print_user(owner: "ServerUser"):
-    import argilla as rg
+    init(api_key=owner.api_key)
 
-    rg.init(api_key=owner.api_key)
-
-    assert str(rg.User.me()) == (
+    assert str(User.me()) == (
         f"User(id={owner.id}, username={owner.username}, role={owner.role.value},"
         f" workspaces={owner.workspaces}, api_key={owner.api_key}, first_name={owner.first_name}, last_name={owner.last_name},"
         f" role={owner.role}, inserted_at={owner.inserted_at}, updated_at={owner.updated_at})"
