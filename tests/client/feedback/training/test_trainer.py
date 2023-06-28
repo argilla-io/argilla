@@ -44,6 +44,7 @@ __OUTPUT_DIR__ = "tmp"
     "framework",
     [
         Framework("spacy"),
+        Framework("spacy-transformers"),
         Framework("transformers"),
         Framework("spark-nlp"),
         Framework("span_marker"),
@@ -98,6 +99,10 @@ def test_prepare_for_training_text_classification(
             trainer = ArgillaTrainer(
                 dataset=dataset, task_mapping=task_mapping, framework=framework, fetch_records=False
             )
+            if framework in [Framework("spacy"), Framework("spacy-transformers")]:
+                trainer.update_config(max_steps=1)
+            elif framework in [Framework("transformers"), Framework("setfit")]:
+                trainer.update_config(num_iterations=1)
             trainer.train(__OUTPUT_DIR__)
 
     if Path(__OUTPUT_DIR__).exists():

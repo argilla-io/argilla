@@ -80,6 +80,7 @@ class ArgillaTrainer(object):
                 the GPU ID to use when training a SpaCy model. Defaults to -1, which means that the CPU
                 will be used by default. GPU IDs start in 0, which stands for the default GPU in the system,
                 if available.
+            framework_kwargs (dict): additional arguments for the framework.
             **load_kwargs: arguments for the rg.load() function.
         """
         self._name = name

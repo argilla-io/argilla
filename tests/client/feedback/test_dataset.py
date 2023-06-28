@@ -452,7 +452,14 @@ def test_push_to_huggingface_and_from_huggingface(
 
 
 @pytest.mark.parametrize(
-    "framework", [Framework("spacy"), Framework("transformers"), Framework("spark-nlp"), Framework("openai")]
+    "framework",
+    [
+        Framework("spacy"),
+        Framework("transformers"),
+        Framework("spark-nlp"),
+        Framework("openai"),
+        Framework("spacy-transformers"),
+    ],
 )
 @pytest.mark.usefixtures(
     "feedback_dataset_guidelines",

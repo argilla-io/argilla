@@ -44,6 +44,7 @@ class Framework(Enum):
         peft: PEFT Transformers library
         setfit: SetFit Transformers library
         spacy: Spacy Explosion
+        spacy-transformers: Spacy Transformers Explosion library
         span_marker: SpanMarker Tom Aarsen library
         spark-nlp: Spark NLP John Snow Labs library
         openai: OpenAI LLMs
