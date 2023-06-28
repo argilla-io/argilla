@@ -26,6 +26,7 @@ These are the section headers that we use:
 
 - All docker related files have been moved into the `docker` folder
 - `release.Dockerfile` have been renamed to `Dockerfile`
+- Update `rg.load` function to raise a `ValueError` with a explanatory message for the cases in which the user tries to use the function to load a `FeedbackDataset` ([#3289](https://github.com/argilla-io/argilla/pull/3289)).
 
 ## [1.11.0](https://github.com/argilla-io/argilla/compare/v1.10.0...v1.11.0)
 
