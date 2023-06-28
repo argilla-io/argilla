@@ -337,8 +337,7 @@ def load(
                 f"The dataset '{name}' exists but it is a `FeedbackDataset`. Use `rg.FeedbackDataset.from_argilla`"
                 " instead to load it."
             )
-        else:
-            raise e
+        raise e
 
 
 def copy(
