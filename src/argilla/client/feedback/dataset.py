@@ -31,8 +31,6 @@ from argilla.client.feedback.constants import (
     PUSHING_BATCH_SIZE,
 )
 from argilla.client.feedback.schemas import (
-    AllowedFieldTypes,
-    AllowedQuestionTypes,
     FeedbackDatasetConfig,
     FeedbackRecord,
     FieldSchema,
@@ -46,6 +44,7 @@ from argilla.client.feedback.schemas import (
 from argilla.client.feedback.training.schemas import (
     TrainingTaskMappingForTextClassification,
 )
+from argilla.client.feedback.typing import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.feedback.unification import (
     LabelQuestionStrategy,
     MultiLabelQuestionStrategy,

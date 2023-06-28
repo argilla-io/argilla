@@ -462,10 +462,6 @@ class RankingQuestion(QuestionSchema):
         return values
 
 
-AllowedFieldTypes = TextField
-AllowedQuestionTypes = Union[TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion, RankingQuestion]
-
-
 class FeedbackDatasetConfig(BaseModel):
     """`FeedbackDatasetConfig`
 
