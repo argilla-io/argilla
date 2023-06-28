@@ -148,7 +148,7 @@ async def list_dataset_records(
 ):
     dataset = await _get_dataset(db, dataset_id)
 
-    await authorize(current_user, DatasetPolicyV1.list_dataset_records_will_all_responses(dataset))
+    await authorize(current_user, DatasetPolicyV1.list_dataset_records_with_all_responses(dataset))
 
     records = await datasets.list_records_by_dataset_id(db, dataset_id, include=include, offset=offset, limit=limit)
 
