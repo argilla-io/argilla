@@ -25,13 +25,13 @@ from pydantic import (
 from tqdm import tqdm
 
 import argilla as rg
+from argilla.client.feedback.config import FeedbackDatasetConfig
 from argilla.client.feedback.constants import (
     FETCHING_BATCH_SIZE,
     FIELD_TYPE_TO_PYTHON_TYPE,
     PUSHING_BATCH_SIZE,
 )
 from argilla.client.feedback.schemas import (
-    FeedbackDatasetConfig,
     FeedbackRecord,
     FieldSchema,
     LabelQuestion,

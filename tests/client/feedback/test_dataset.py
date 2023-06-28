@@ -18,9 +18,9 @@ from typing import TYPE_CHECKING, List, Type, Union
 import datasets
 import pytest
 from argilla.client import api
+from argilla.client.feedback.config import FeedbackDatasetConfig
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
-    FeedbackDatasetConfig,
     FeedbackRecord,
     RatingQuestion,
     TextField,
