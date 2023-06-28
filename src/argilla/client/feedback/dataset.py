@@ -234,12 +234,10 @@ class FeedbackDataset:
         any_required = False
         unique_names = set()
         for question in questions:
-            if not isinstance(
-                question, (TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion, RankingQuestion)
-            ):
+            if not isinstance(question, AllowedQuestionTypes.__args__):
                 raise TypeError(
-                    "Expected `questions` to be a list of `TextQuestion`, `RatingQuestion`,"
-                    " `LabelQuestion`, `MultiLabelQuestion`, and/or `RankingQuestion` got a"
+                    "Expected `questions` to be a list of"
+                    f" `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}` got a"
                     f" question in the list with type {type(question)} instead."
                 )
             if question.name in unique_names:
@@ -728,8 +726,7 @@ class FeedbackDataset:
             else:
                 raise ValueError(
                     f"Question '{question.name}' is not a supported question in the current Python package"
-                    " version, supported question types are: `RatingQuestion`, `TextQuestion`,"
-                    " `LabelQuestion`, `MultiLabelQuestion`, and/or `RankingQuestion`."
+                    f" version, supported question types are: `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}`."
                 )
             questions.append(question)
         self = cls(
