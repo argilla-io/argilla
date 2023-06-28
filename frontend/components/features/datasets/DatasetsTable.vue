@@ -245,7 +245,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .container {
 	@extend %container;
 	padding-top: 0.2em;
