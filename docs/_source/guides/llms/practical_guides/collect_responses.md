@@ -103,7 +103,8 @@ Once you have unified your responses, you will have a dataset that's ready for [
 
 #### For numerical values: `RankingQuestion` and `RatingQuestion`
 
-* *Majority vote*: If a record has more than 2 submitted responses, you can take the most popular option as the final score. In the case of a tie, you can break it by choosing a random option or the lowest / highest score.
+* *Majority vote*: If a record has more than 2 submitted responses, you can take the most popular value (for `RankingQuestion`s the most popular rank, for `RatingQuestion`s the most popular rating) as the final score. In the case of a tie, you can break it by choosing a random option or the lowest / highest score.
+* *Weighted majority vote*: As explained [above](#for-labels-labelquestion-and-multilabelquestion), you may want to weight the responses of different annotators. In that case, calculate a score from 0 to 1 for each annotator, then apply these weights to their responses. Finally, sum all the values and choose the option with the highest score.
 * *Mean score*: For this technique, you can take all responses and calculate the mean score.
 * *Lowest / highest score*: Depending on how the question is formulated, you can take the `max` or `min` value.
 
