@@ -123,14 +123,17 @@ def test_workspace_delete_user(owner: "ServerUser") -> None:
     with pytest.raises(ValueError, match="Either the user with id="):
         workspace.delete_user(owner.id)
 
+
 def test_print_workspace(owner: "ServerUser"):
     import argilla as rg
+
     rg.init(api_key=owner.api_key)
 
     assert str(rg.Workspace.from_name(workspace.name)) == (
         f"Workspace(id={workspace.id}, name={workspace.name}, "
         f"inserted_at={workspace.inserted_at}, updated_at={workspace.updated_at})"
     )
+
 
 def test_set_new_workspace(owner: "ServerUser"):
     import argilla as rg
@@ -166,4 +169,3 @@ def test_init_with_missing_workspace(owner: "ServerUser"):
 
     with pytest.raises(ValueError):
         rg.init(api_key=owner.api_key, workspace="missing-workspace")
-
