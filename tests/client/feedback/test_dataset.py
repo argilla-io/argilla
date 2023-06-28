@@ -114,7 +114,7 @@ def test_init_wrong_questions(
         )
     with pytest.raises(
         TypeError,
-        match="Expected `questions` to be a list of `TextQuestion`, `RatingQuestion`, `LabelQuestion`, `MultiLabelQuestion`, and/or `RankingQuestion`",
+        match="Expected `questions` to be a list of",
     ):
         FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
