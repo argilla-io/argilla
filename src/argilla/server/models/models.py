@@ -15,7 +15,7 @@
 import secrets
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
+from typing import Any, List, Optional
 from uuid import UUID, uuid4
 
 from pydantic import parse_obj_as
@@ -125,14 +125,23 @@ class Suggestion(TimestampMixin, Base):
     __tablename__ = "suggestions"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    value: Mapped[dict] = mapped_column(JSON)
+    value: Mapped[Any] = mapped_column(JSON)
     score: Mapped[Optional[float]] = mapped_column(nullable=True)
     agent: Mapped[Optional[str]] = mapped_column(nullable=True)
     type: Mapped[Optional[SuggestionType]] = mapped_column(SuggestionTypeEnum, nullable=True, index=True)
     record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id", ondelete="CASCADE"), index=True)
     question_id: Mapped[UUID] = mapped_column(ForeignKey("questions.id", ondelete="CASCADE"), index=True)
 
+    record: Mapped["Record"] = relationship(back_populates="suggestions")
+
     __table_args__ = (CheckConstraint("score IS NULL OR score >= 0 AND score <= 1", name="suggestion_score_check"),)
+
+    def __repr__(self) -> str:
+        return (
+            f"Suggestion(id={self.id}, score={self.score}, agent={self.agent}, type={self.type}, "
+            f"record_id={self.record_id}, question_id={self.question_id}, inserted_at={self.inserted_at}, "
+            f"updated_at={self.updated_at})"
+        )
 
 
 class Record(TimestampMixin, Base):
@@ -146,6 +155,9 @@ class Record(TimestampMixin, Base):
 
     dataset: Mapped["Dataset"] = relationship(back_populates="records")
     responses: Mapped[List["Response"]] = relationship(back_populates="record", order_by=Response.inserted_at.asc())
+    suggestions: Mapped[List["Suggestion"]] = relationship(
+        back_populates="record", order_by=Suggestion.inserted_at.asc()
+    )
 
     __table_args__ = (UniqueConstraint("external_id", "dataset_id", name="record_external_id_dataset_id_uq"),)
 
