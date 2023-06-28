@@ -24,6 +24,9 @@ from argilla.client.models import (  # TODO Remove TextGenerationRecord
     BulkResponse,
     Record,
 )
+from argilla.client.sdk.commons import errors
+from argilla.client.sdk.v1.datasets.api import list_datasets as list_datasets_api_v1
+from argilla.client.sdk.workspaces.api import list_workspaces as list_workspaces_api_v0
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -235,6 +238,22 @@ async def log_async(
     return await asyncio.wrap_future(future)
 
 
+def _check_if_feedback_dataset_exists(client: Argilla, name: str, workspace: str) -> bool:
+    response = list_workspaces_api_v0(client.http_client.httpx)
+    workspace_id = None
+    for ws in response.parsed:
+        if ws.name == workspace:
+            workspace_id = ws.id
+            break
+
+    response = list_datasets_api_v1(client.http_client.httpx)
+    for dataset in response.parsed:
+        if dataset.name == name and dataset.workspace_id == workspace_id:
+            return True
+
+    return False
+
+
 def load(
     name: str,
     workspace: Optional[str] = None,
@@ -295,20 +314,31 @@ def load(
         >>> dataset_batch_2 = rg.load(name="example-dataset", limit=1000, id_from=dataset_batch_1[-1].id)
 
     """
-    return ArgillaSingleton.get().load(
-        name=name,
-        workspace=workspace,
-        query=query,
-        vector=vector,
-        ids=ids,
-        limit=limit,
-        sort=sort,
-        id_from=id_from,
-        batch_size=batch_size,
-        include_metrics=include_metrics,
-        include_vectors=include_vectors,
-        as_pandas=as_pandas,
-    )
+    argilla = ArgillaSingleton.get()
+    try:
+        return argilla.load(
+            name=name,
+            workspace=workspace,
+            query=query,
+            vector=vector,
+            ids=ids,
+            limit=limit,
+            sort=sort,
+            id_from=id_from,
+            batch_size=batch_size,
+            include_metrics=include_metrics,
+            include_vectors=include_vectors,
+            as_pandas=as_pandas,
+        )
+    except errors.NotFoundApiError as e:
+        workspace = workspace or argilla.get_workspace()
+        if _check_if_feedback_dataset_exists(client=argilla, name=name, workspace=workspace):
+            raise ValueError(
+                f"The dataset '{name}' exists but it is a `FeedbackDataset`. Use `rg.FeedbackDataset.from_argilla`"
+                " instead to load it."
+            )
+        else:
+            raise e
 
 
 def copy(
