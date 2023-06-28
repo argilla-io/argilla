@@ -13,23 +13,24 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import argilla as rg
-from argilla import TextClassificationRecord
 from argilla.client import api
+from argilla.client.api import log
+from argilla.client.models import TextClassificationRecord
 from argilla.metrics.text_classification import f1, f1_multilabel
 
 
 def test_metrics_for_text_classification(mocked_client):
     dataset = "test_metrics_for_text_classification"
 
-    rg.log(
+    log(
         [
-            rg.TextClassificationRecord(
+            TextClassificationRecord(
                 id=1,
                 text="my first argilla example",
                 prediction=[("spam", 0.8), ("ham", 0.2)],
                 annotation=["spam"],
             ),
-            rg.TextClassificationRecord(
+            TextClassificationRecord(
                 id=2,
                 inputs={"text": "my first argilla example"},
                 prediction=[("ham", 0.8), ("spam", 0.2)],
@@ -81,13 +82,13 @@ def test_metrics_for_text_classification(mocked_client):
 def test_f1_without_results(mocked_client):
     dataset = "test_f1_without_results"
 
-    rg.log(
+    log(
         [
-            rg.TextClassificationRecord(
+            TextClassificationRecord(
                 id=1,
                 text="my first argilla example",
             ),
-            rg.TextClassificationRecord(
+            TextClassificationRecord(
                 id=2,
                 inputs={"text": "my first argilla example"},
             ),
@@ -133,7 +134,7 @@ def test_dataset_labels_metric(mocked_client):
             for i in range(2000, 3000)
         ]
     )
-    rg.log(
+    log(
         name=dataset,
         records=records,
     )

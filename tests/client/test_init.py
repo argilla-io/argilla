@@ -12,9 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla import TextClassificationRecord
 from argilla.client import api
 from argilla.client.api import active_api
+from argilla.client.models import TextClassificationRecord
 
 
 def test_resource_leaking_with_several_init(mocked_client):

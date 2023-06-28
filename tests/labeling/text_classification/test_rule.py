@@ -14,7 +14,7 @@
 #  limitations under the License.
 import httpx
 import pytest
-from argilla import load
+from argilla.client.api import copy, delete, load
 from argilla.client.models import TextClassificationRecord
 from argilla.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
@@ -263,8 +263,8 @@ def test_copy_dataset_with_rules(mocked_client, log_dataset):
     )
 
     copied_dataset = f"{log_dataset}_copy"
-    rg.delete(copied_dataset)
-    rg.copy(log_dataset, name_of_copy=copied_dataset)
+    delete(copied_dataset)
+    copy(log_dataset, name_of_copy=copied_dataset)
 
     assert [{"q": r.query, "l": r.label} for r in load_rules(copied_dataset)] == [
         {"q": r.query, "l": r.label} for r in load_rules(log_dataset)
