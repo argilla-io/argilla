@@ -133,3 +133,39 @@ def test_print_workspace(owner: "ServerUser"):
         f"Workspace(id={workspace.id}, name={workspace.name}, "
         f"inserted_at={workspace.inserted_at}, updated_at={workspace.updated_at})"
     )
+
+
+def test_set_new_workspace(owner: "ServerUser"):
+    import argilla as rg
+
+    rg.init(api_key=owner.api_key)
+    ws = rg.Workspace.create("new-workspace")
+
+    rg.set_workspace(ws.name)
+    assert rg.get_workspace() == ws.name
+
+
+def test_init_with_workspace(owner: "ServerUser"):
+    workspace = WorkspaceFactory.create(name="test_workspace")
+
+    import argilla as rg
+
+    rg.init(api_key=owner.api_key, workspace=workspace.name)
+
+    assert rg.get_workspace() == workspace.name
+
+
+def test_set_workspace_with_missing_workspace(owner: "ServerUser"):
+    import argilla as rg
+
+    rg.init(api_key=owner.api_key)
+
+    with pytest.raises(ValueError):
+        rg.set_workspace("missing-workspace")
+
+
+def test_init_with_missing_workspace(owner: "ServerUser"):
+    import argilla as rg
+
+    with pytest.raises(ValueError):
+        rg.init(api_key=owner.api_key, workspace="missing-workspace")

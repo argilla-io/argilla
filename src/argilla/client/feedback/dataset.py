@@ -25,19 +25,18 @@ from pydantic import (
 from tqdm import tqdm
 
 import argilla as rg
+from argilla.client.feedback.config import FeedbackDatasetConfig
 from argilla.client.feedback.constants import (
     FETCHING_BATCH_SIZE,
     FIELD_TYPE_TO_PYTHON_TYPE,
     PUSHING_BATCH_SIZE,
 )
 from argilla.client.feedback.schemas import (
-    AllowedFieldTypes,
-    AllowedQuestionTypes,
-    FeedbackDatasetConfig,
     FeedbackRecord,
     FieldSchema,
     LabelQuestion,
     MultiLabelQuestion,
+    RankingQuestion,
     RatingQuestion,
     TextField,
     TextQuestion,
@@ -45,6 +44,7 @@ from argilla.client.feedback.schemas import (
 from argilla.client.feedback.training.schemas import (
     TrainingTaskMappingForTextClassification,
 )
+from argilla.client.feedback.typing import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.feedback.unification import (
     LabelQuestionStrategy,
     MultiLabelQuestionStrategy,
@@ -234,10 +234,10 @@ class FeedbackDataset:
         any_required = False
         unique_names = set()
         for question in questions:
-            if not isinstance(question, (TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion)):
+            if not isinstance(question, AllowedQuestionTypes.__args__):
                 raise TypeError(
-                    "Expected `questions` to be a list of `TextQuestion`, `RatingQuestion`,"
-                    " `LabelQuestion`, and/or `MultiLabelQuestion` got a"
+                    "Expected `questions` to be a list of"
+                    f" `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}` got a"
                     f" question in the list with type {type(question)} instead."
                 )
             if question.name in unique_names:
@@ -707,7 +707,7 @@ class FeedbackDataset:
                 question = RatingQuestion(**question_dict, values=[v["value"] for v in question.settings["options"]])
             elif question.settings["type"] == "text":
                 question = TextQuestion(**question_dict, use_markdown=question.settings["use_markdown"])
-            elif question.settings["type"].__contains__("label_selection"):
+            elif question.settings["type"] in ["label_selection", "multi_label_selection", "ranking"]:
                 if all([label["value"] == label["text"] for label in question.settings["options"]]):
                     labels = [label["value"] for label in question.settings["options"]]
                 else:
@@ -721,11 +721,12 @@ class FeedbackDataset:
                     question = MultiLabelQuestion(
                         **question_dict, labels=labels, visible_labels=question.settings["visible_options"]
                     )
+                elif question.settings["type"] == "ranking":
+                    question = RankingQuestion(**question_dict, values=labels)
             else:
                 raise ValueError(
                     f"Question '{question.name}' is not a supported question in the current Python package"
-                    " version, supported question types are: `RatingQuestion`, `TextQuestion`,"
-                    " `LabelQuestion`, and/or `MultiLabelQuestion`."
+                    f" version, supported question types are: `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}`."
                 )
             questions.append(question)
         self = cls(
@@ -777,13 +778,15 @@ class FeedbackDataset:
                     value = Value(dtype="string")
                 elif question.settings["type"] == "rating":
                     value = Value(dtype="int32")
-                elif question.settings["type"] == "multi_label_selection":
+                elif question.settings["type"] == "ranking":
+                    value = Sequence({"rank": Value(dtype="uint8"), "value": Value(dtype="string")})
+                elif question.settings["type"] in "multi_label_selection":
                     value = Sequence(Value(dtype="string"))
                 else:
                     raise ValueError(
                         f"Question {question.name} has an unsupported type: {question.settings['type']}, for the"
-                        " moment only the following types are supported: 'text', 'rating', 'label_selection', and"
-                        " 'multi_label_selection'"
+                        " moment only the following types are supported: 'text', 'rating', 'label_selection',"
+                        " 'multi_label_selection', and 'ranking'."
                     )
                 # TODO(alvarobartt): if we constraint ranges from 0 to N, then we can use `ClassLabel` for ratings
                 features[question.name] = Sequence(
@@ -803,17 +806,24 @@ class FeedbackDataset:
                 for field in self.fields:
                     dataset[field.name].append(record.fields[field.name])
                 for question in self.questions:
+                    if not record.responses:
+                        dataset[question.name].append(None)
+                        continue
+                    responses = []
+                    for response in record.responses:
+                        if question.name not in response.values:
+                            responses.append(None)
+                            continue
+                        if question.settings["type"] == "ranking":
+                            responses.append([r.dict() for r in response.values[question.name].value])
+                        else:
+                            responses.append(response.values[question.name].value)
                     dataset[question.name].append(
                         {
                             "user_id": [r.user_id for r in record.responses],
-                            "value": [
-                                r.values[question.name].value if question.name in r.values else None
-                                for r in record.responses
-                            ],
+                            "value": responses,
                             "status": [r.status for r in record.responses],
                         }
-                        if record.responses
-                        else None
                     )
                 dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else None)
                 dataset["external_id"].append(record.external_id or None)
@@ -974,6 +984,8 @@ class FeedbackDataset:
                             "status": status,
                             "values": {},
                         }
+                    if question.settings["type"] == "ranking":
+                        value = [{"rank": r, "value": v} for r, v in zip(value["rank"], value["value"])]
                     responses[user_id]["values"].update({question.name: {"value": value}})
 
             metadata = None
@@ -1046,7 +1058,6 @@ class FeedbackDataset:
             Framework.SETFIT,
             Framework.SPAN_MARKER,
             Framework.PEFT,
-            # Framework.AUTOTRAIN,
         ]:
             return task_mapping._prepare_for_training_with_transformers(
                 data=data, train_size=train_size, seed=seed, framework=framework
