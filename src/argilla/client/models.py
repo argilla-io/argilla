@@ -345,7 +345,6 @@ class TokenClassificationRecord(_Validators):
         ...     vectors = {
         ...            "bert_base_uncased": [3.2, 4.5, 5.6, 8.9]
         ...          }
-        ...       ]
         ... )
     """
 
