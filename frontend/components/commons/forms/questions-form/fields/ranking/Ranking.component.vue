@@ -5,8 +5,13 @@
       :isRequired="isRequired"
       :tooltipMessage="description"
     />
-
-    <DndSelectionComponent :ranking="ranking" @on-reorder="onChanged" />
+    <DndSelectionComponent
+      :ranking="ranking"
+      @on-reorder="onChanged"
+      @on-keyboard-selection="onChangedWithKeyboard"
+      :isFocused="isFocused"
+      @on-focus="onFocus"
+    />
   </div>
 </template>
 
@@ -23,6 +28,10 @@ export default {
     isRequired: {
       type: Boolean,
       default: false,
+    },
+    isFocused: {
+      type: Boolean,
+      default: () => false,
     },
     description: {
       type: String,
@@ -56,6 +65,16 @@ export default {
           rank: newQuestionRanked.getRanking(option),
         }))
       );
+    },
+    onChangedWithKeyboard(value, rank) {
+      const optionIndex = this.options.findIndex(
+        (option) => option.value === value
+      );
+      this.options[optionIndex].rank = rank;
+      this.$emit("on-change", this.options);
+    },
+    onFocus() {
+      this.$emit("on-focus");
     },
   },
 };
