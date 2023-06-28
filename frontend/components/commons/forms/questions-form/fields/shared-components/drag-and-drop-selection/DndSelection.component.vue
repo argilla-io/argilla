@@ -179,6 +179,9 @@ $max-visible-card-items: 12;
       &:focus {
         outline: 2px solid $card-primary-color;
       }
+      &:focus:not(:focus-visible) {
+        outline: none;
+      }
       &:hover {
         box-shadow: $shadow-100;
         transition: box-shadow 0.2s ease-in;

@@ -275,13 +275,16 @@ input[type="checkbox"] {
   &:focus {
     & + .label-text {
       outline: 2px solid palette(purple, 200);
+      &.label-active {
+        outline: none;
+      }
     }
   }
-  // &:focus:not(:focus-visible) {
-  //   & + .label-text {
-  //     outline: none;
-  //   }
-  // }
+  &:focus:not(:focus-visible) {
+    & + .label-text {
+      outline: none;
+    }
+  }
 }
 .label-active {
   color: white;
