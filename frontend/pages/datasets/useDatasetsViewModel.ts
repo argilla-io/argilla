@@ -3,13 +3,13 @@ import { DatasetRepository } from "~/v1/infrastructure/DatasetRepository";
 import { useDatasets } from "~/v1/infrastructure/DatasetStorage";
 
 export const useDatasetsViewModel = () => {
-	const { state: datasets, ...service } = useDatasets();
+	const { state: datasets, ...datasetStorage } = useDatasets();
 
 	const loadDatasets = async (axios, fetchDatasets) => {
 		const datasetRepository = new DatasetRepository(axios, fetchDatasets);
 		const getDatasetsUseCase = new GetDatasetsUseCase(
 			datasetRepository,
-			service
+			datasetStorage
 		);
 
 		await getDatasetsUseCase.execute();
