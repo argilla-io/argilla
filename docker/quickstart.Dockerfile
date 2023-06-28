@@ -9,8 +9,7 @@ USER root
 RUN mkdir /data
 RUN chown -R elasticsearch:elasticsearch /data
 
-COPY scripts/start_quickstart_argilla.sh /
-COPY scripts/load_data.py /
+COPY scripts/* /
 COPY quickstart.requirements.txt /packages/requirements.txt
 COPY dist/*.whl /packages/
 

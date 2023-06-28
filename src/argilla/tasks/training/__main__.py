@@ -46,9 +46,10 @@ def train(
     import json
 
     import argilla as rg
+    from argilla.client.api import init
     from argilla.training import ArgillaTrainer
 
-    rg.init(api_url=api_url, api_key=api_key)
+    init(api_url=api_url, api_key=api_key)
     trainer = ArgillaTrainer(
         name=name,
         framework=framework,
