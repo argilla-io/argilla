@@ -27,12 +27,8 @@
         v-for="(input, index) in inputs"
         ref="inputs"
         :key="input.id"
-        @keydown.arrow-down="
-          updateFocusedQuestionPosition(focusedQuestionPosition + 1)
-        "
-        @keydown.arrow-up="
-          updateFocusedQuestionPosition(focusedQuestionPosition - 1)
-        "
+        @keydown.shift.arrow-down="updateQuestionAutofocus(focusedQuestion + 1)"
+        @keydown.shift.arrow-up="updateQuestionAutofocus(focusedQuestion - 1)"
       >
         <TextAreaComponent
           v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
@@ -44,8 +40,8 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           @on-error="onError"
-          @on-focus="updateFocusedQuestionPosition(index)"
-          @on-blur="updateFocusedQuestionPosition(null)"
+          @on-focus="updateautofocusPosition(index)"
+          @on-blur="updateautofocusPosition(null)"
         />
 
         <SingleLabelComponent
@@ -57,7 +53,7 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
-          @on-focus="updateFocusedQuestionPosition(index)"
+          @on-focus="updateautofocusPosition(index)"
         />
         <MultiLabelComponent
           v-if="input.component_type === COMPONENT_TYPE.MULTI_LABEL"
@@ -68,7 +64,7 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
-          @on-focus="updateFocusedQuestionPosition(index)"
+          @on-focus="updateautofocusPosition(index)"
         />
 
         <RatingComponent
@@ -79,7 +75,7 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           @on-error="onError"
-          @on-focus="updateFocusedQuestionPosition(index)"
+          @on-focus="updateautofocusPosition(index)"
         />
       </div>
     </div>
@@ -165,7 +161,8 @@ export default {
       inputs: [],
       renderForm: 0,
       isError: false,
-      focusedQuestionPosition: 0,
+      focusedQuestion: 0,
+      autofocusPosition: 0,
     };
   },
   computed: {
@@ -573,11 +570,14 @@ export default {
       this.$root.$emit("are-responses-untouched", isFormUntouched);
     },
     checkIfQuestionIsFocused(index) {
-      return this.isRecordPending && index === this.focusedQuestionPosition;
+      return this.isRecordPending && index === this.autofocusPosition;
     },
-    updateFocusedQuestionPosition(index) {
+    updateautofocusPosition(index) {
+      this.focusedQuestion = index;
+    },
+    updateQuestionAutofocus(index) {
       const numberOfQuestions = this.inputs.length;
-      this.focusedQuestionPosition = Math.min(
+      this.autofocusPosition = Math.min(
         numberOfQuestions - 1,
         Math.max(0, index)
       );
