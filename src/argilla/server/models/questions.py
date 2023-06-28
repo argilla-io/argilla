@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from enum import Enum
-from typing import Any, Generic, List, Literal, Optional, TypeVar, Union
+from typing import Any, Generic, List, Literal, Optional, Protocol, TypeVar, Union
 
 from pydantic import BaseModel, Field
 
@@ -31,7 +31,7 @@ class QuestionType(str, Enum):
     ranking = "ranking"
 
 
-class ResponseValue(BaseModel):
+class ResponseValue(Protocol):
     value: Any
 
 

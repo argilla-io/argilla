@@ -30,6 +30,7 @@ from argilla.server.models import (
     Response,
     ResponseStatus,
     ResponseValue,
+    Suggestion,
 )
 from argilla.server.schemas.v1.datasets import (
     DatasetCreate,
@@ -45,6 +46,8 @@ from argilla.server.security.model import User
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
+
+    from argilla.server.schemas.v1.suggestions import SuggestionCreate
 
 LIST_RECORDS_LIMIT = 20
 
@@ -88,6 +91,16 @@ async def create_dataset(db: "AsyncSession", dataset_create: DatasetCreate):
     await db.refresh(dataset)
 
     return dataset
+
+
+async def _count_fields_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
+    result = await db.execute(select(func.count(Field.id)).filter_by(dataset_id=dataset_id))
+    return result.scalar()
+
+
+async def _count_questions_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
+    result = await db.execute(select(func.count(Question.id)).filter_by(dataset_id=dataset_id))
+    return result.scalar()
 
 
 async def publish_dataset(db: "AsyncSession", search_engine: SearchEngine, dataset: Dataset) -> Dataset:
@@ -235,6 +248,8 @@ async def list_records_by_dataset_id(
     query = select(Record).filter(Record.dataset_id == dataset_id)
     if RecordInclude.responses in include:
         query = query.options(joinedload(Record.responses))
+    if RecordInclude.suggestions in include:
+        query = query.options(joinedload(Record.suggestions))
     query = query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
     result = await db.execute(query)
     return result.unique().scalars().all()
@@ -248,33 +263,34 @@ async def list_records_by_dataset_id_and_user_id(
     response_status: Optional[ResponseStatusFilter] = None,
     offset: int = 0,
     limit: int = LIST_RECORDS_LIMIT,
-):
+) -> List[Record]:
     query = select(Record).filter(Record.dataset_id == dataset_id)
 
     if response_status == ResponseStatusFilter.missing:
-        query = (
-            query.outerjoin(
-                Response,
-                and_(Response.record_id == Record.id, Response.user_id == user_id),
-            )
-            .filter(Response.status == None)
-            .options(contains_eager(Record.responses))
+        query = query.outerjoin(
+            Response,
+            and_(
+                Response.record_id == Record.id,
+                Response.user_id == user_id,
+                Response.status == None,  # noqa: E711
+            ),
         )
     else:
-        if response_status:
-            query = query.join(
-                Response,
-                and_(
-                    Response.record_id == Record.id,
-                    Response.user_id == user_id,
-                    Response.status == ResponseStatus(response_status),
-                ),
-            ).options(contains_eager(Record.responses))
-        elif RecordInclude.responses in include:
-            query = query.outerjoin(
-                Response,
-                and_(Response.record_id == Record.id, Response.user_id == user_id),
-            ).options(contains_eager(Record.responses))
+        status = ResponseStatus(response_status) if response_status else None
+        query = query.join(
+            Response,
+            and_(
+                Response.record_id == Record.id,
+                Response.user_id == user_id,
+                Response.status == status,
+            ),
+        )
+
+    if RecordInclude.responses in include:
+        query = query.options(contains_eager(Record.responses))
+
+    if RecordInclude.suggestions in include:
+        query = query.options(joinedload(Record.suggestions))
 
     query = query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
     result = await db.execute(query)
@@ -308,13 +324,37 @@ async def create_records(
 
         if record_create.responses:
             for response in record_create.responses:
+                # TODO(gabrielmbmb): the result of this query should be cached
                 if not await accounts.get_user_by_id(db, response.user_id):
                     raise ValueError(f"Provided user_id: {response.user_id!r} is not a valid user id")
 
                 validate_response_values(dataset, values=response.values, status=response.status)
 
                 record.responses.append(
-                    Response(values=jsonable_encoder(response.values), status=response.status, user_id=response.user_id)
+                    Response(
+                        values=jsonable_encoder(response.values),
+                        status=response.status,
+                        user_id=response.user_id,
+                    )
+                )
+
+        if record_create.suggestions:
+            for suggestion in record_create.suggestions:
+                # TODO(gabrielmbmb): the result of this query should be cached
+                question = await get_question_by_id(db, suggestion.question_id)
+                if not question:
+                    raise ValueError(f"Provided question_id: {suggestion.question_id!r} is not a valid question id")
+
+                question.parsed_settings.check_response(suggestion)
+
+                record.suggestions.append(
+                    Suggestion(
+                        type=suggestion.type,
+                        score=suggestion.score,
+                        value=suggestion.value,
+                        agent=suggestion.agent,
+                        question_id=suggestion.question_id,
+                    )
                 )
 
         records.append(record)
@@ -457,11 +497,21 @@ def validate_record_fields(dataset: Dataset, fields: Dict[str, Any]):
         raise ValueError(f"Error: found fields values for non configured fields: {list(fields_copy.keys())!r}")
 
 
-async def _count_fields_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
-    result = await db.execute(select(func.count(Field.id)).filter_by(dataset_id=dataset_id))
-    return result.scalar()
+async def get_suggestion_by_record_id_and_question_id(
+    db: "AsyncSession", record_id: UUID, question_id: UUID
+) -> Union[Suggestion, None]:
+    result = await db.execute(select(Suggestion).filter_by(record_id=record_id, question_id=question_id))
+    return result.scalar_one_or_none()
 
 
-async def _count_questions_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
-    result = await db.execute(select(func.count(Question.id)).filter_by(dataset_id=dataset_id))
-    return result.scalar()
+async def create_suggestion(
+    db: "AsyncSession", record: Record, question: Question, suggestion_create: "SuggestionCreate"
+) -> Suggestion:
+    question.parsed_settings.check_response(suggestion_create)
+
+    suggestion = Suggestion(record_id=record.id, **suggestion_create.dict())
+    db.add(suggestion)
+    await db.commit()
+    await db.refresh(suggestion)
+
+    return suggestion
