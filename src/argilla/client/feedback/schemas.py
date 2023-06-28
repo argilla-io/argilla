@@ -435,6 +435,22 @@ class RankingQuestion(QuestionSchema):
         settings: The settings for the question, including the type and options.
         values: The values for the question, to be formatted and included as part of
             the settings.
+
+    Examples:
+        >>> import argilla as rg
+        >>> question = rg.RankingQuestion(
+        ...     values=["Yes", "No"]
+        ... )
+        RankingQuestion(
+            settings={
+                'type': 'ranking',
+                'options': [
+                    {'value': 'Yes', 'text': 'Yes'},
+                    {'value': 'No', 'text': 'No'}
+                ]
+            },
+            values=['Yes', 'No']
+        )
     """
 
     settings: Dict[str, Any] = Field({"type": "ranking"}, allow_mutation=False)
