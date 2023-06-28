@@ -167,11 +167,31 @@ export default {
           );
 
         if (correspondingResponseToQuestion) {
-          const formattedOptions = correspondingResponseToQuestion.options.map(
-            (option) => {
-              return { ...option, is_selected: option.is_selected || false };
-            }
-          );
+          let formattedOptions = [];
+
+          // TODO - remove is_selected from object pass to the free_text case and ensure we can submit a form with one text
+          switch (question.component_type) {
+            case COMPONENT_TYPE.RANKING:
+              formattedOptions = correspondingResponseToQuestion.options;
+              break;
+            case COMPONENT_TYPE.FREE_TEXT:
+            case COMPONENT_TYPE.SINGLE_LABEL:
+            case COMPONENT_TYPE.MULTI_LABEL:
+            case COMPONENT_TYPE.RATING:
+              formattedOptions = correspondingResponseToQuestion.options.map(
+                (option) => {
+                  return {
+                    ...option,
+                    is_selected: option.is_selected || false,
+                  };
+                }
+              );
+              break;
+            default:
+              console.log(
+                `The component ${question.component_type} is unknown`
+              );
+          }
           return {
             ...question,
             response_id: correspondingResponseToQuestion.id,
@@ -185,6 +205,13 @@ export default {
         ) {
           const formattedOptions = question.options.map((option) => {
             return { ...option, is_selected: false };
+          });
+          return { ...question, options: formattedOptions, response_id: null };
+        }
+
+        if (question.component_type === COMPONENT_TYPE.RANKING) {
+          const formattedOptions = question.options.map((option) => {
+            return { ...option, rank: null };
           });
           return { ...question, options: formattedOptions, response_id: null };
         }
@@ -491,6 +518,41 @@ export default {
         ));
       }
 
+      // FIXME - to remove
+      records.push({
+        id: "053ef371-4258-4064-ba19-edee2b480274",
+        fields: {
+          text: "I'm feeling really really bad",
+        },
+        metadata: null,
+        external_id: null,
+        responses: [
+          {
+            id: "536f3595-0688-453c-847c-0dafe5f27102",
+            values: {
+              "my-ranking-question": {
+                value: [
+                  {
+                    value: "label-01",
+                    rank: 1,
+                  },
+                  {
+                    value: "label-02",
+                    rank: 2,
+                  },
+                ],
+              },
+            },
+            status: "submitted",
+            user_id: "3e760b76-e19a-480a-b436-a85812b98843",
+            inserted_at: "2023-06-20T13:09:24.968698",
+            updated_at: "2023-06-20T13:09:24.968698",
+          },
+        ],
+        inserted_at: "2023-06-20T13:08:59.937365",
+        updated_at: "2023-06-20T13:08:59.937365",
+      });
+
       this.totalRecords = isNil(totalRecords) ? null : totalRecords;
 
       // FORMAT records for orm
@@ -666,6 +728,26 @@ export default {
                         return { id, text, value, is_selected: false };
                       });
                     break;
+                  case COMPONENT_TYPE.RANKING:
+                    formattedOptionsWithRecordResponse =
+                      optionsByQuestionName.map(({ id, text, value }) => {
+                        const correspondingResponse =
+                          recordResponseByQuestionName.value.find(
+                            (response) => response.value === value
+                          );
+
+                        if (correspondingResponse) {
+                          return {
+                            id,
+                            text,
+                            value,
+                            rank: correspondingResponse.rank ?? null,
+                          };
+                        }
+                        return { id, text, value, rank: null };
+                      });
+
+                    break;
                   case COMPONENT_TYPE.FREE_TEXT:
                     formattedOptionsWithRecordResponse = [
                       {
@@ -679,6 +761,7 @@ export default {
                       `The corresponding component with a question name:'${questionName}' was not found`
                     );
                 }
+
                 formattedRecordResponsesForOrm.push({
                   id: responsesByRecordAndUser.id,
                   question_name: questionName,
@@ -686,6 +769,11 @@ export default {
                   record_id: recordId,
                   user_id: responsesByRecordAndUser.user_id ?? null,
                 });
+
+                console.log(
+                  correspondingComponentTypeOfTheAnswer,
+                  formattedRecordResponsesForOrm
+                );
               }
             );
           }
