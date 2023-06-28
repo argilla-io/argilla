@@ -518,41 +518,6 @@ export default {
         ));
       }
 
-      // FIXME - to remove
-      records.push({
-        id: "053ef371-4258-4064-ba19-edee2b480274",
-        fields: {
-          text: "I'm feeling really really bad",
-        },
-        metadata: null,
-        external_id: null,
-        responses: [
-          {
-            id: "536f3595-0688-453c-847c-0dafe5f27102",
-            values: {
-              "my-ranking-question": {
-                value: [
-                  {
-                    value: "label-01",
-                    rank: 1,
-                  },
-                  {
-                    value: "label-02",
-                    rank: 2,
-                  },
-                ],
-              },
-            },
-            status: "submitted",
-            user_id: "3e760b76-e19a-480a-b436-a85812b98843",
-            inserted_at: "2023-06-20T13:09:24.968698",
-            updated_at: "2023-06-20T13:09:24.968698",
-          },
-        ],
-        inserted_at: "2023-06-20T13:08:59.937365",
-        updated_at: "2023-06-20T13:08:59.937365",
-      });
-
       this.totalRecords = isNil(totalRecords) ? null : totalRecords;
 
       // FORMAT records for orm
@@ -769,11 +734,6 @@ export default {
                   record_id: recordId,
                   user_id: responsesByRecordAndUser.user_id ?? null,
                 });
-
-                console.log(
-                  correspondingComponentTypeOfTheAnswer,
-                  formattedRecordResponsesForOrm
-                );
               }
             );
           }
