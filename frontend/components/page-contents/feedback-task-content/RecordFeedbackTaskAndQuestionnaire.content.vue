@@ -167,11 +167,31 @@ export default {
           );
 
         if (correspondingResponseToQuestion) {
-          const formattedOptions = correspondingResponseToQuestion.options.map(
-            (option) => {
-              return { ...option, is_selected: option.is_selected || false };
-            }
-          );
+          let formattedOptions = [];
+
+          // TODO - remove is_selected from object pass to the free_text case and ensure we can submit a form with one text
+          switch (question.component_type) {
+            case COMPONENT_TYPE.RANKING:
+              formattedOptions = correspondingResponseToQuestion.options;
+              break;
+            case COMPONENT_TYPE.FREE_TEXT:
+            case COMPONENT_TYPE.SINGLE_LABEL:
+            case COMPONENT_TYPE.MULTI_LABEL:
+            case COMPONENT_TYPE.RATING:
+              formattedOptions = correspondingResponseToQuestion.options.map(
+                (option) => {
+                  return {
+                    ...option,
+                    is_selected: option.is_selected || false,
+                  };
+                }
+              );
+              break;
+            default:
+              console.log(
+                `The component ${question.component_type} is unknown`
+              );
+          }
           return {
             ...question,
             response_id: correspondingResponseToQuestion.id,
@@ -185,6 +205,13 @@ export default {
         ) {
           const formattedOptions = question.options.map((option) => {
             return { ...option, is_selected: false };
+          });
+          return { ...question, options: formattedOptions, response_id: null };
+        }
+
+        if (question.component_type === COMPONENT_TYPE.RANKING) {
+          const formattedOptions = question.options.map((option) => {
+            return { ...option, rank: null };
           });
           return { ...question, options: formattedOptions, response_id: null };
         }
@@ -666,6 +693,26 @@ export default {
                         return { id, text, value, is_selected: false };
                       });
                     break;
+                  case COMPONENT_TYPE.RANKING:
+                    formattedOptionsWithRecordResponse =
+                      optionsByQuestionName.map(({ id, text, value }) => {
+                        const correspondingResponse =
+                          recordResponseByQuestionName.value.find(
+                            (response) => response.value === value
+                          );
+
+                        if (correspondingResponse) {
+                          return {
+                            id,
+                            text,
+                            value,
+                            rank: correspondingResponse.rank ?? null,
+                          };
+                        }
+                        return { id, text, value, rank: null };
+                      });
+
+                    break;
                   case COMPONENT_TYPE.FREE_TEXT:
                     formattedOptionsWithRecordResponse = [
                       {
@@ -679,6 +726,7 @@ export default {
                       `The corresponding component with a question name:'${questionName}' was not found`
                     );
                 }
+
                 formattedRecordResponsesForOrm.push({
                   id: responsesByRecordAndUser.id,
                   question_name: questionName,

@@ -72,6 +72,7 @@ export default {
     { src: "~/plugins/custom-directives/required-field.directive.js" },
     { src: "~/plugins/custom-directives/optional-field.directive.js" },
     { src: "~/plugins/custom-directives/tooltip.directive.js" },
+    { src: "~plugins/vue-draggable.js" },
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
