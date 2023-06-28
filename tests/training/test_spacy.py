@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import argilla as rg
+from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training import ArgillaTrainer
 
 from .helpers import cleanup_spacy_config, train_with_cleanup
@@ -35,7 +36,7 @@ def test_train_textcat(dataset_text_classification):
     output_dir = "tmp_spacy_train_textcat"
     train_with_cleanup(trainer, output_dir)
     record = trainer.predict("This is a text", as_argilla_records=True)
-    assert isinstance(record, rg.TextClassificationRecord)
+    assert isinstance(record, TextClassificationRecord)
     assert record.multi_label is False
     not_record = trainer.predict("This is a text", as_argilla_records=False)
     assert isinstance(not_record.cats, dict)
@@ -51,7 +52,7 @@ def test_train_textcat_multi_label(dataset_text_classification_multi_label):
     trainer.update_config(max_steps=1)
     train_with_cleanup(trainer, output_dir)
     record = trainer.predict("This is a text", as_argilla_records=True)
-    assert isinstance(record, rg.TextClassificationRecord)
+    assert isinstance(record, TextClassificationRecord)
     assert record.multi_label is True
     not_record = trainer.predict("This is a text", as_argilla_records=False)
     assert isinstance(not_record.cats, dict)
@@ -65,9 +66,9 @@ def test_train_tokencat(dataset_token_classification):
     output_dir = "tmp_spacy_train_tokencat"
     train_with_cleanup(trainer, output_dir)
     record = trainer.predict("This is a text", as_argilla_records=True)
-    assert isinstance(record, rg.TokenClassificationRecord)
+    assert isinstance(record, TokenClassificationRecord)
     not_record = trainer.predict("This is a text", as_argilla_records=False)
-    assert not isinstance(not_record, rg.TokenClassificationRecord)
+    assert not isinstance(not_record, TokenClassificationRecord)
     train_with_cleanup(trainer, output_dir, train=False)
     cleanup_spacy_config(trainer)
 
