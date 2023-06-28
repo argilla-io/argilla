@@ -90,6 +90,8 @@ export default {
   buildModules: [
     // https://go.nuxtjs.dev/typescript
     "@nuxt/typescript-build",
+    "@nuxtjs/composition-api/module",
+    ["@pinia/nuxt", { disableVuex: false }],
   ],
 
   // Modules (https://go.nuxtjs.dev/config-modules)
