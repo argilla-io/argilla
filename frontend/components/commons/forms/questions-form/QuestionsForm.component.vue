@@ -617,6 +617,7 @@ export default {
     }
   }
   &__content {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: $base-space * 4;
