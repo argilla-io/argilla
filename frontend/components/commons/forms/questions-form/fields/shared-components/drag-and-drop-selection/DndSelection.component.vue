@@ -11,6 +11,10 @@
         :key="value"
         class="draggable__rank-card--unranked"
         :title="text"
+        tabindex="0"
+        ref="question"
+        @keydown="rankWithKeyboard($event, value)"
+        @focus="onFocus"
       >
         <svgicon width="7" name="draggable" />
         <span class="draggable__rank-card__title" v-text="text" />
@@ -37,6 +41,10 @@
             :key="value"
             class="draggable__rank-card--ranked"
             :title="text"
+            tabindex="0"
+            ref="items"
+            @keydown="rankWithKeyboard($event, value)"
+            @focus="onFocus"
           >
             <svgicon width="7" name="draggable" />
             <span class="draggable__rank-card__title" v-text="text" />
@@ -56,10 +64,37 @@ export default {
       type: Object,
       required: true,
     },
+    isFocused: {
+      type: Boolean,
+      default: () => false,
+    },
+  },
+  watch: {
+    isFocused: {
+      immediate: true,
+      handler(newValue) {
+        this.$nextTick(() => {
+          if (this.$refs.question) {
+            newValue && this.$refs.question[0].focus();
+          } else {
+            newValue && this.$refs.items[0].focus();
+          }
+        });
+      },
+    },
   },
   methods: {
+    rankWithKeyboard(event, value) {
+      const keyNumber = event.key;
+      if (!isNaN(keyNumber) && keyNumber <= this.ranking.slots.length) {
+        this.$emit("on-keyboard-selection", value, keyNumber);
+      }
+    },
     onMoveEnd() {
       this.$emit("on-reorder", this.ranking);
+    },
+    onFocus() {
+      this.$emit("on-focus");
     },
   },
 };
@@ -88,6 +123,7 @@ $max-visible-card-items: 12;
     display: flex;
     flex-direction: column;
     gap: $cards-separation;
+    padding: 2px;
     overflow: auto;
   }
 
@@ -140,6 +176,9 @@ $max-visible-card-items: 12;
       background-color: $card-secondary-color;
       color: $card-primary-color;
       transition: box-shadow 0.2s ease-out;
+      &:focus {
+        outline: 2px solid $card-primary-color;
+      }
       &:hover {
         box-shadow: $shadow-100;
         transition: box-shadow 0.2s ease-in;
@@ -149,6 +188,9 @@ $max-visible-card-items: 12;
       @extend .draggable__rank-card;
       background-color: $card-primary-color;
       color: palette(white);
+      &:focus {
+        outline: 2px solid palette(apricot);
+      }
     }
     &__title {
       overflow: hidden;
