@@ -57,6 +57,8 @@ from argilla.client.sdk.commons.errors import (
 from argilla.client.sdk.datasets.models import TaskType
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import UserModel
+from argilla.client.sdk.workspaces import api as workspaces_api
+from argilla.client.sdk.workspaces.models import WorkspaceModel
 from argilla.server.models import User, UserRole
 from httpx import ConnectError
 
@@ -87,8 +89,24 @@ def mock_init_ok(monkeypatch):
             updated_at=datetime.datetime.now(),
         )
 
+    def mock_list_workspaces(*args, **kwargs):
+        return Response(
+            content=b"",
+            parsed=[
+                WorkspaceModel(
+                    id=uuid4(),
+                    name="mock_workspace",
+                    inserted_at=datetime.datetime.utcnow(),
+                    updated_at=datetime.datetime.utcnow(),
+                )
+            ],
+            status_code=200,
+            headers={},
+        )
+
     monkeypatch.setattr(Status, "get_info", mock_get_info)
     monkeypatch.setattr(users_api, "whoami", mock_whoami)
+    monkeypatch.setattr(workspaces_api, "list_workspaces", mock_list_workspaces)
 
 
 @pytest.fixture
@@ -170,7 +188,7 @@ def test_init_environment_url(mock_init_ok, monkeypatch):
     It checks the url in the environment variable gets passed to client.
     """
     workspace_name = "mock_workspace"
-    url = "mock_url"
+    url = "http://mock_url"
     api_key = "mock_api_key"
 
     monkeypatch.setenv("ARGILLA_API_URL", url)
@@ -741,7 +759,7 @@ def test_client_workspace(api: Argilla, argilla_user: User):
     with pytest.raises(Exception, match="Must provide a workspace"):
         api.set_workspace(None)
 
-    with pytest.raises(Exception, match="Wrong provided workspace not-found"):
+    with pytest.raises(Exception, match="Wrong provided workspace 'not-found'"):
         api.set_workspace("not-found")
 
     api.set_workspace(argilla_user.username)
@@ -800,4 +818,5 @@ def test_not_aligned_argilla_versions(monkeypatch):
 def test_aligned_argilla_versions(mock_init_ok):
     with pytest.warns(None) as record:
         Argilla()
-    assert len(record) == 0
+        for warning in record:
+            assert "You're connecting to Argilla Server" not in str(warning.message)

@@ -188,6 +188,8 @@ def using_test_client_from_argilla_python_client(monkeypatch, test_telemetry: "M
         client_arg = args[-1] if args else kwargs["client"]
 
         monkeypatch.setattr(client_arg, "__httpx__", client)
+        client.headers.update(client_arg.get_headers())
+
         return real_whoami(client_arg)
 
     monkeypatch.setattr(users_api, "whoami", whoami_mocked)

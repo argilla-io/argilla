@@ -31,6 +31,7 @@ from argilla.server.settings import settings
 from sqlalchemy.orm import Session
 
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
+from tests.factories import WorkspaceFactory
 from tests.helpers import SecuredClient
 
 
@@ -163,32 +164,29 @@ def test_log_data_with_vectors_and_update_ko(mocked_client: SecuredClient):
         )
 
 
-def test_log_data_in_several_workspaces(mocked_client: SecuredClient, owner, db: Session):
-    workspace_name = "my-fun-workspace"
+def test_log_data_in_several_workspaces(owner: User, db: Session):
     dataset_name = "test_log_data_in_several_workspaces"
     text = "This is a text"
 
-    for ws_name in [workspace_name, owner.username]:
-        workspace = accounts.create_workspace(db, WorkspaceCreate(name=ws_name))
-        accounts.create_workspace_user(db, WorkspaceUserCreate(workspace_id=workspace.id, user_id=owner.id))
+    workspace = WorkspaceFactory.create()
+    other_workspace = WorkspaceFactory.create()
 
-    api = Argilla(api_key=owner.api_key)
+    api = Argilla(api_key=owner.api_key, workspace=workspace.name)
 
-    current_workspace = api.get_workspace()
-    for ws in [current_workspace, workspace_name]:
-        api.set_workspace(ws)
+    for ws in [workspace, other_workspace]:
+        api.set_workspace(ws.name)
         api.delete(dataset_name)
 
-    api.set_workspace(current_workspace)
-    api.log(TextClassificationRecord(id=0, inputs=text), name=dataset_name)
+    api.set_workspace(workspace.name)
+    api.log(rg.TextClassificationRecord(id=0, inputs=text), name=dataset_name)
 
-    api.set_workspace(workspace_name)
-    api.log(TextClassificationRecord(id=1, inputs=text), name=dataset_name)
+    api.set_workspace(other_workspace.name)
+    api.log(rg.TextClassificationRecord(id=1, inputs=text), name=dataset_name)
 
     ds = api.load(dataset_name)
     assert len(ds) == 1
 
-    api.set_workspace(current_workspace)
+    api.set_workspace(workspace.name)
 
     ds = api.load(dataset_name)
     assert len(ds) == 1
