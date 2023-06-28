@@ -17,7 +17,6 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 
 from argilla.server.commons.telemetry import TelemetryClient, get_telemetry_client
 from argilla.server.contexts import accounts, datasets
@@ -59,7 +58,7 @@ router = APIRouter(tags=["datasets"])
 
 
 async def _get_dataset(
-    db: Session, dataset_id: UUID, with_fields: bool = False, with_questions: bool = False
+    db: AsyncSession, dataset_id: UUID, with_fields: bool = False, with_questions: bool = False
 ) -> DatasetModel:
     dataset = await datasets.get_dataset_by_id(db, dataset_id, with_fields=with_fields, with_questions=with_questions)
     if not dataset:
