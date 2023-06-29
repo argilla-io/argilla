@@ -50,7 +50,7 @@ export default {
           if (someLabelsAreFocused || !newValue) {
             return;
           }
-          this.$refs?.options?[0].focus();
+          this.$refs?.options[0].focus();
         });
       },
     },
