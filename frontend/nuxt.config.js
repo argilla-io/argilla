@@ -182,6 +182,6 @@ export default {
 
   router: {
     middleware: ["auth-guard", "register-dependencies"],
-    base: process.env.BASE_URL ? process.env.BASE_URL : "/",
+    base: process.env.BASE_URL ?? "/",
   },
 };
