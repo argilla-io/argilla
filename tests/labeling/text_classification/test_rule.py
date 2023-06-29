@@ -266,12 +266,9 @@ def test_copy_dataset_with_rules(mocked_client: SecuredClient, argilla_user: Use
         json={"name": dataset_name, "task": TaskType.text_classification.value, "workspace": argilla_user.username},
     )
 
-    rule = Rule(query="a query", label="LALA")
-    delete_rule_silently(mocked_client, dataset_name, rule)
-
     mocked_client.post(
         f"/api/datasets/TextClassification/{log_dataset}/labeling/rules",
-        json={"query": rule.query, "label": rule.label},
+        json={"query": "a query", "label": "LALA"},
     )
 
     copied_dataset = f"{dataset_name}_copy"
