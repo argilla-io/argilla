@@ -1,19 +1,15 @@
+import { useStore } from "@nuxtjs/composition-api";
+import { useResolve } from "ts-injecty";
 import { GetDatasetsUseCase } from "~/v1/domain/usecases/get-datasets-use-case";
-import { DatasetRepository } from "~/v1/infrastructure/DatasetRepository";
 import { useDatasets } from "~/v1/infrastructure/DatasetsStorage";
 
 export const useDatasetsViewModel = () => {
-	const { state: datasets, ...datasetsStorage } = useDatasets();
+  const { state: datasets } = useDatasets();
+  const getDatasetsUseCase = useResolve(GetDatasetsUseCase);
 
-	const loadDatasets = async (axios, fetchDatasets) => {
-		const datasetRepository = new DatasetRepository(axios, fetchDatasets);
-		const getDatasetsUseCase = new GetDatasetsUseCase(
-			datasetRepository,
-			datasetsStorage
-		);
+  const loadDatasets = async () => {
+    await getDatasetsUseCase.execute();
+  };
 
-		await getDatasetsUseCase.execute();
-	};
-
-	return { loadDatasets, datasets };
+  return { loadDatasets, datasets };
 };

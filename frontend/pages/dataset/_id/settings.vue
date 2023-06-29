@@ -53,7 +53,7 @@ export default {
     return useDatasetSetting();
   },
   fetch() {
-    this.loadDataset(this.datasetId, this.$axios);
+    this.loadDataset(this.datasetId);
   },
 };
 </script>

@@ -16,77 +16,73 @@
   -->
 
 <template>
-	<div>
-		<base-loading v-if="$fetchState.pending" />
-		<div v-else class="wrapper">
-			<div class="main">
-				<app-header
-					:copy-button="false"
-					:sticky="false"
-					:breadcrumbs="[{ action: 'clearFilters', name: 'Home' }]"
-					@breadcrumb-action="onBreadcrumbAction($event)"
-				/>
-				<error
-					v-if="$fetchState.error"
-					where="workspace datasets"
-					:error="$fetchState.error"
-				/>
-				<datasets-table v-else ref="table" :datasets="datasets.datasets" />
-			</div>
-			<sidebar-menu
-				class="sidebar"
-				@refresh="$fetch"
-				:sidebar-items="[
-					{
-						id: 'refresh',
-						tooltip: 'Refresh',
-						icon: 'refresh',
-						group: 'Refresh',
-						action: 'refresh',
-					},
-				]"
-			/>
-		</div>
-	</div>
+  <div>
+    <base-loading v-if="$fetchState.pending" />
+    <div v-else class="wrapper">
+      <div class="main">
+        <app-header
+          :copy-button="false"
+          :sticky="false"
+          :breadcrumbs="[{ action: 'clearFilters', name: 'Home' }]"
+          @breadcrumb-action="onBreadcrumbAction($event)"
+        />
+        <error
+          v-if="$fetchState.error"
+          where="workspace datasets"
+          :error="$fetchState.error"
+        />
+        <datasets-table v-else ref="table" :datasets="datasets.datasets" />
+      </div>
+      <sidebar-menu
+        class="sidebar"
+        @refresh="$fetch"
+        :sidebar-items="[
+          {
+            id: 'refresh',
+            tooltip: 'Refresh',
+            icon: 'refresh',
+            group: 'Refresh',
+            action: 'refresh',
+          },
+        ]"
+      />
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
-import { mapActions } from "vuex";
 import { useDatasetsViewModel } from "./useDatasetsViewModel";
 
 export default {
-	layout: "app",
-	methods: {
-		...mapActions({
-			fetchDatasets: "entities/datasets/fetchAll",
-		}),
-		onBreadcrumbAction(e: string) {
-			if (e === "clearFilters") {
-				this.$refs.table?.clearFilters();
-			}
-		},
-	},
-	setup() {
-		return useDatasetsViewModel();
-	},
-	fetch() {
-		this.loadDatasets(this.$axios, this.fetchDatasets);
-	},
+  layout: "app",
+  methods: {
+    onBreadcrumbAction(e: string) {
+      if (e === "clearFilters") {
+        this.$refs.table?.clearFilters();
+      }
+    },
+  },
+  setup() {
+    return useDatasetsViewModel();
+  },
+  fetch() {
+    this.loadDatasets(this.fetchDatasets);
+  },
 };
 </script>
 
 <style lang="scss" scoped>
 .wrapper {
-	display: flex;
-	.main {
-		width: 100%;
-	}
+  display: flex;
+  .main {
+    width: 100%;
+  }
 }
 
 .sidebar {
-	position: fixed;
-	top: 56px;
-	right: 0;
-	border-left: 1px solid palette(grey, 600);
+  position: fixed;
+  top: 56px;
+  right: 0;
+  border-left: 1px solid palette(grey, 600);
 }
 </style>
