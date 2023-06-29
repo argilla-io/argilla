@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import warnings
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 from pydantic import (
@@ -29,25 +29,32 @@ from pydantic import (
     validator,
 )
 
-FETCHING_BATCH_SIZE = 250
-PUSHING_BATCH_SIZE = 32
+if TYPE_CHECKING:
+    from argilla.client.feedback.unification import UnifiedValueSchema
+
+
+class RankingValueSchema(BaseModel):
+    """Schema for the `RankingQuestion` response value.
+
+    Note: we may have more than one record in the same rank.
+
+    Args:
+        value: The value of the record.
+        rank: The rank of the record.
+    """
+
+    value: StrictStr
+    rank: conint(ge=1)
 
 
 class ValueSchema(BaseModel):
-    """A value schema for a record.
+    """Schema for any `FeedbackRecord` response value.
 
     Args:
-        value (Union[StrictStr, StrictInt, List[str]]): The value of the record.
-
-    Examples:
-        >>> import argilla as rg
-        >>> value = rg.ValueSchema(value="Yes")
-        >>> # or use a dict
-        >>> value = {"value": "Yes"}
-
+        value: The value of the record.
     """
 
-    value: Union[StrictStr, StrictInt, List[str]]
+    value: Union[StrictStr, StrictInt, List[str], List[RankingValueSchema]]
 
 
 class ResponseSchema(BaseModel):
@@ -119,9 +126,7 @@ class FeedbackRecord(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
     responses: Optional[Union[ResponseSchema, List[ResponseSchema]]] = None
     external_id: Optional[str] = None
-    _unified_responses: Optional[
-        Dict[str, List["argilla.client.feedback.unificaiton.UnificatiedValueSchema"]]
-    ] = PrivateAttr(default={})
+    _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default={})
 
     @validator("responses", always=True)
     def responses_must_be_a_list(cls, v: Optional[Union[ResponseSchema, List[ResponseSchema]]]) -> List[ResponseSchema]:
@@ -423,60 +428,47 @@ class MultiLabelQuestion(_LabelQuestion):
     settings: Dict[str, Any] = Field({"type": "multi_label_selection"})
 
 
-AllowedFieldTypes = TextField
-AllowedQuestionTypes = Union[TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion]
-
-
-class FeedbackDatasetConfig(BaseModel):
-    """`FeedbackDatasetConfig`
+class RankingQuestion(QuestionSchema):
+    """Schema for the `RankingQuestion` question-type.
 
     Args:
-        fields (List[AllowedFieldTypes]): The fields of the feedback dataset.
-        questions (List[AllowedQuestionTypes]): The questions of the feedback dataset.
-        guidelines (Optional[str]): the guidelines of the feedback dataset. Defaults to None.
+        settings: The settings for the question, including the type and options.
+        values: The values for the question, to be formatted and included as part of
+            the settings.
 
     Examples:
         >>> import argilla as rg
-        >>> config = rg.FeedbackDatasetConfig(
-        ...     fields=[
-        ...         rg.TextField(name="text", title="Human prompt"),
-        ...     ],
-        ...     questions =[
-        ...         rg.TextQuestion(
-        ...             name="question-1",
-        ...             description="This is the first question",
-        ...             required=True,
-        ...         ),
-        ...         rg.RatingQuestion(
-        ...             name="question-2",
-        ...             description="This is the second question",
-        ...             required=True,
-        ...             values=[1, 2, 3, 4, 5],
-        ...         ),
-        ...         rg.LabelQuestion(
-        ...             name="relevant",
-        ...             title="Is the response relevant for the given prompt?",
-        ...             labels=["Yes","No"],
-        ...             required=True,
-        ...             visible_labels=None
-        ...         ),
-        ...         rg.MultiLabelQuestion(
-        ...             name="content_class",
-        ...             title="Does the response include any of the following?",
-        ...             description="Select all that apply",
-        ...             labels={"cat-1": "Category 1" , "cat-2": "Category 2"},
-        ...             required=False,
-        ...             visible_labels=4
-        ...         ),
-        ...     ],
-        ...     guidelines="Add some guidelines for the annotation team here."
+        >>> question = rg.RankingQuestion(
+        ...     values=["Yes", "No"]
         ... )
-
+        RankingQuestion(
+            settings={
+                'type': 'ranking',
+                'options': [
+                    {'value': 'Yes', 'text': 'Yes'},
+                    {'value': 'No', 'text': 'No'}
+                ]
+            },
+            values=['Yes', 'No']
+        )
     """
 
-    fields: List[AllowedFieldTypes]
-    questions: List[AllowedQuestionTypes]
-    guidelines: Optional[str] = None
+    settings: Dict[str, Any] = Field({"type": "ranking"}, allow_mutation=False)
+    values: Union[conlist(str, unique_items=True, min_items=2), Dict[str, str]]
 
-    class Config:
-        smart_union = True
+    @validator("values", always=True)
+    def values_dict_must_be_valid(cls, v: Union[List[str], Dict[str, str]]) -> Union[List[str], Dict[str, str]]:
+        if isinstance(v, dict):
+            assert len(v.keys()) > 1, "ensure this dict has at least 2 items"
+            assert len(set(v.values())) == len(v.values()), "ensure this dict has unique values"
+        return v
+
+    @root_validator(skip_on_failure=True)
+    def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        if isinstance(values.get("values"), dict):
+            values["settings"]["options"] = [
+                {"value": key, "text": value} for key, value in values.get("values").items()
+            ]
+        if isinstance(values.get("values"), list):
+            values["settings"]["options"] = [{"value": value, "text": value} for value in values.get("values")]
+        return values

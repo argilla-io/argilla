@@ -29,7 +29,7 @@ from argilla.client.feedback.schemas import (
 )
 
 
-class UnificatiedValueSchema(ValueSchema):
+class UnifiedValueSchema(ValueSchema):
     """A value schema for a unification value.
 
     Args:
@@ -38,7 +38,7 @@ class UnificatiedValueSchema(ValueSchema):
 
     Examples:
         >>> import argilla as rg
-        >>> value = rg.UnificatiedValueSchema(value="Yes", strategy="majority")
+        >>> value = rg.UnifiedValueSchema(value="Yes", strategy="majority")
         >>> # or use a dict
         >>> value = {"value": "Yes", "strategy": "majority"}
     """
@@ -61,7 +61,7 @@ class RatingQuestionStrategy(Enum):
     MIN: str = "min"
 
     def unify_responses(self, records: List[FeedbackRecord], question: RatingQuestion):
-        UnificatiedValueSchema.update_forward_refs()
+        UnifiedValueSchema.update_forward_refs()
         # check if field is a str or a RatingQuestion
         if isinstance(question, str):
             pass
@@ -97,7 +97,7 @@ class RatingQuestionStrategy(Enum):
                 unified_value = str(min(ratings))
             else:
                 raise ValueError("Invalid aggregation method")
-            rec._unified_responses[question] = [UnificatiedValueSchema(value=unified_value, strategy=self.value)]
+            rec._unified_responses[question] = [UnifiedValueSchema(value=unified_value, strategy=self.value)]
         return records
 
     def _majority(self, records: List[FeedbackRecord], question: str):
@@ -121,13 +121,13 @@ class RatingQuestionStrategy(Enum):
                 majority_value = random.choice(most_common_values)
             else:
                 majority_value = counter.most_common(1)[0][0]
-            rec._unified_responses[question] = [UnificatiedValueSchema(value=majority_value, strategy=self.value)]
+            rec._unified_responses[question] = [UnifiedValueSchema(value=majority_value, strategy=self.value)]
         return records
 
 
 class LabelQuestionStrategyMixin:
     def unify_responses(self, records: List[FeedbackRecord], question: Union[str, LabelQuestion, MultiLabelQuestion]):
-        UnificatiedValueSchema.update_forward_refs()
+        UnifiedValueSchema.update_forward_refs()
         # check if field is a str or a LabelQuestion
         if isinstance(question, (LabelQuestion, MultiLabelQuestion)):
             question = question.name
@@ -166,7 +166,7 @@ class LabelQuestionStrategyMixin:
                     continue
                 else:
                     rec._unified_responses[question].append(
-                        UnificatiedValueSchema(value=resp.values[question].value, strategy=self.value)
+                        UnifiedValueSchema(value=resp.values[question].value, strategy=self.value)
                     )
         return unified_records
 
@@ -210,7 +210,7 @@ class LabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
             else:
                 majority_value = counter.most_common(1)[0][0]
 
-            rec._unified_responses[question] = [UnificatiedValueSchema(value=majority_value, strategy=self.value)]
+            rec._unified_responses[question] = [UnifiedValueSchema(value=majority_value, strategy=self.value)]
         return rec
 
     @classmethod
@@ -251,7 +251,7 @@ class MultiLabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
                 if count >= majority:
                     majority_value.append(value)
 
-            rec._unified_responses[question] = [UnificatiedValueSchema(value=majority_value, strategy=self.value)]
+            rec._unified_responses[question] = [UnifiedValueSchema(value=majority_value, strategy=self.value)]
         return records
 
     @classmethod

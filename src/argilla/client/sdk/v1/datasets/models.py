@@ -17,7 +17,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Field, StrictInt, StrictStr
+from pydantic import BaseModel, Field, StrictInt, StrictStr, conint
 
 
 class FeedbackDatasetModel(BaseModel):
@@ -30,8 +30,13 @@ class FeedbackDatasetModel(BaseModel):
     updated_at: datetime
 
 
+class FeedbackRankingValueModel(BaseModel):
+    value: StrictStr
+    rank: conint(ge=1)
+
+
 class FeedbackValueModel(BaseModel):
-    value: Union[StrictStr, StrictInt, List[str]]
+    value: Union[StrictStr, StrictInt, List[str], List[FeedbackRankingValueModel]]
 
 
 class FeedbackResponseModel(BaseModel):

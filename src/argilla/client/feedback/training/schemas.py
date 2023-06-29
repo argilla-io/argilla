@@ -190,7 +190,7 @@ class TrainingTaskMappingForTextClassification(BaseModel, TrainingData):
 
     @property
     def supported_frameworks(self):
-        names = ["transformers", "spacy", "openai", "setfit", "peft", "spark-nlp"]
+        names = ["transformers", "spacy", "openai", "setfit", "peft", "spark-nlp", "spacy-transformers"]
         return [Framework(name) for name in names]
 
     @property
