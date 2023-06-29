@@ -14,7 +14,6 @@
         tabindex="0"
         ref="question"
         @keydown="rankWithKeyboard($event, value)"
-        @focus="onFocus"
       >
         <svgicon width="7" name="draggable" />
         <span class="draggable__rank-card__title" v-text="text" />
@@ -44,7 +43,6 @@
             tabindex="0"
             ref="items"
             @keydown="rankWithKeyboard($event, value)"
-            @focus="onFocus"
           >
             <svgicon width="7" name="draggable" />
             <span class="draggable__rank-card__title" v-text="text" />
@@ -92,9 +90,6 @@ export default {
     },
     onMoveEnd() {
       this.$emit("on-reorder", this.ranking);
-    },
-    onFocus() {
-      this.$emit("on-focus");
     },
   },
 };

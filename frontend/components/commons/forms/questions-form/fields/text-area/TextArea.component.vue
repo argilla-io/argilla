@@ -86,11 +86,6 @@ export default {
     },
     onChangeFocus(status) {
       this.isEditionModeActive = status;
-      if (status) {
-        this.$emit("on-focus");
-      } else {
-        this.$emit("on-blur");
-      }
     },
   },
 };

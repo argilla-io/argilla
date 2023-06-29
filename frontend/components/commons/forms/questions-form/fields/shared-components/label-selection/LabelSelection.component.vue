@@ -49,7 +49,6 @@
           :id="option.id"
           v-model="option.is_selected"
           @change="onSelect(option)"
-          @focus="onFocus"
         />
         <label
           class="label-text cursor-pointer"
@@ -183,9 +182,6 @@ export default {
           return option;
         });
       }
-    },
-    onFocus() {
-      this.$emit("on-focus");
     },
     toggleShowLess() {
       this.isExpanded = !this.isExpanded;

@@ -9,7 +9,6 @@
           :id="option.id"
           v-model="option.is_selected"
           @change="onSelect(option)"
-          @focus="onFocus"
         />
         <label
           class="label-text cursor-pointer"
@@ -61,9 +60,6 @@ export default {
       });
 
       this.$emit("on-change", this.options);
-    },
-    onFocus() {
-      this.$emit("on-focus");
     },
   },
 };
