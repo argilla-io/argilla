@@ -41,15 +41,18 @@ module.exports = {
   overrides: [
     {
       files: ["**/*.ts"],
-      extends: ["@nuxtjs/eslint-config-typescript"],
+      extends: ["@nuxtjs/eslint-config-typescript", "prettier"],
       parser: "@typescript-eslint/parser",
+      plugins: ["@typescript-eslint", "prettier"],
+      parserOptions: { project: ["./tsconfig.json"] },
       rules: {
+        "prettier/prettier": ["error"],
         quotes: ["error", "double"],
         semi: ["error", "always"],
-        "comma-dangle": ["error", "always"],
         "import/no-named-as-default-member": 0,
         "no-useless-constructor": 0,
         "space-before-function-paren": 0,
+        "no-throw-literal": 0,
       },
     },
   ],

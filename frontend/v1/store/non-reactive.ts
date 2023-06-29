@@ -12,8 +12,8 @@ const hydrate = (base: any, data: any) => {
   return base;
 };
 
-export const create = <T>(ctor: any, data: any): T => {
-  const base = new ctor() as T;
+export const create = <T>(Ctor: any, data: any): T => {
+  const base = new Ctor() as T;
 
   hydrate(base, data);
 

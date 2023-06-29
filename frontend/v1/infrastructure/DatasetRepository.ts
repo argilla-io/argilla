@@ -1,13 +1,13 @@
+import { type NuxtAxiosInstance } from "@nuxtjs/axios";
+import { Store } from "vuex";
+import { Dataset } from "../domain/entities/Dataset";
+import { IDatasetRepository } from "../domain/services/IDatasetRepository";
 import {
   URL_GET_V1_DATASETS,
   URL_GET_WORKSPACES,
 } from "~/utils/url.properties";
-import { Dataset } from "../domain/entities/Dataset";
-import { IDatasetRepository } from "../domain/services/IDatasetRepository";
 import { upsertDataset } from "~/models/dataset.utilities";
 import { upsertFeedbackDataset } from "~/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
-import { NuxtAxiosInstance } from "@nuxtjs/axios";
-import { Store } from "vuex";
 
 export const TYPE_OF_FEEDBACK = {
   ERROR_FETCHING_FEEDBACK_DATASETS: "ERROR_FETCHING_FEEDBACK_DATASETS",

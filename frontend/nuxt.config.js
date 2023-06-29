@@ -60,7 +60,6 @@ export default {
     { src: "~/plugins/svgicon.js" },
     { src: "~/plugins/vue-vega.js" },
     { src: "~/plugins/click-outside.js" },
-    { src: "~/plugins/mock.js" },
     { src: "~/plugins/virtualScroller.js" },
     { src: "~/plugins/toast.js" },
     { src: "~/plugins/highlight-search.js" },

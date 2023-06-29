@@ -7,7 +7,7 @@ export class Dataset {
     public readonly workspaceId: string,
     public readonly workspaceName: string,
     public readonly createdAt: string,
-    public readonly lastUpdated: string,
+    public readonly lastUpdated: string
   ) {}
 
   public get workspace() {

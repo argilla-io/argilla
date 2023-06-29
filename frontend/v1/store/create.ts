@@ -5,17 +5,17 @@ interface Class<T> extends Function {
   new (...args: any[]): T;
 }
 
-export const useStoreFor = <T, R>(ctor: Class<T>) => {
-  const store = defineStore(ctor.name, {
+export const useStoreFor = <T, R>(Ctor: Class<T>) => {
+  const store = defineStore(Ctor.name, {
     state: () => ({
-      state: new ctor() as T,
+      state: new Ctor() as T,
     }),
     actions: {
       save(state: T) {
         this.$patch({ state });
       },
       get(): T {
-        return create(ctor, this.$state.state);
+        return create(Ctor, this.$state.state);
       },
     },
   });
