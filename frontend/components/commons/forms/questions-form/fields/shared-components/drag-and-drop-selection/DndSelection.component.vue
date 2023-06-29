@@ -85,7 +85,7 @@ export default {
     rankWithKeyboard(event, value) {
       const keyNumber = event.key;
       if (!isNaN(keyNumber) && keyNumber <= this.ranking.slots.length) {
-        this.$emit("on-keyboard-selection", value, keyNumber);
+        this.$emit("on-keyboard-selection", value, Number(keyNumber));
       }
     },
     onMoveEnd() {
