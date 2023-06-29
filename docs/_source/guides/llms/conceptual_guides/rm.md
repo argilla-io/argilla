@@ -14,7 +14,23 @@ For a practical hands-on introduction, you may directly proceed to the How-to Gu
 
 In this phase, you'll set up a dataset to gather ranked responses to each `prompt`.
 
-First, let's configure a **dataset** using the Argilla Python SDK. This dataset will contain **questions** for labelers to answer. In this case, we want to collect ranked responses from our labelers. We’ll define a **RatingQuestion**:
+First, let's configure a **dataset** using the Argilla Python SDK. This dataset will contain **questions** for labelers to answer. In this case, we want to collect ranked responses from our labelers. We’ll define a **RankingQuestion**:
+
+```python
+import argilla as rg
+
+questions = [
+    rg.RankingQuestion(
+        name="response_ranking",
+        title="Order the responses based on their accuracy and helpfulness:",
+        required=True,
+        values={"response-1": "Response 1", "response-2", "Response 2"} # or ["response-1", "response-2"]
+    )
+]
+```
+
+:::{hint}
+If you only have 2 options, you can also do this with a `RatingQuestion`:
 
 ```python
 import argilla as rg
@@ -22,19 +38,12 @@ import argilla as rg
 questions = [
     rg.RatingQuestion(
         name="response_ranking",
-        title="Select the most accurate and helpful response (1) or (2). If both are equal select (3):",
+        title="Select the most accurate and helpful response (1) or (2). If both are equal select (0):",
         required=True,
-        values=[1, 2,3]
+        values=[0, 1, 2]
     )
 ]
 ```
-
-:::{tip}
-While the proposed setup in this guide is designed for comparing two responses, it is possible to include more than two responses for each prompt. At the end of this guide, we discuss additional approaches.
-:::
-
-:::{note}
-In future versions, Argilla will include a `RankingQuestion`, specifically tailored for this workflow. You can track the progress, provide feedback, and leave comments on [this GitHub issue](https://github.com/argilla-io/argilla/issues/3021).
 :::
 
 The dataset consists of **records**. Each **record** is a data point that can be labeled by one or more labelers. A record has one or more **fields**. For this task, we need to present labelers with a prompt and two responses to rank. We’ll define a **text field**:
@@ -181,14 +190,49 @@ Each record in `feedback.records` contain a `responses` attribute, which houses 
 - `values`: The feedback provided by the labeler. This is formatted as a dictionary, with keys for each question and values holding the respective answers.
 - `status`: The status of the response, which can be either submitted or discarded. For our purposes, we"re only interested in the submitted responses.
 
-For datasets where each record has a single response (no annotation overlap), post-processing is straightforward as there's no need to resolve conflicts between different annotations. However, if annotation overlaps exist, conflict resolution becomes necessary. For strategies on conflict resolution, refer to this guide.
+For datasets where each record has a single response (no annotation overlap), post-processing is straightforward as there's no need to resolve conflicts between different annotations. However, if annotation overlaps exist, conflict resolution becomes necessary. For strategies on conflict resolution, refer to [this guide](../practical_guides/collect_responses.md#unifying-disagreements).
+
+```{tip}
+Sharing the comparison data collection among multiple labelers can be beneficial. Each labeler identifies their favored response for a specific prompt. By pooling these choices, we can derive a collective ranking for all responses.
+````
 
 In addition, each record contains a `fields` attribute, which includes all the fields set during dataset creation. In this case, prompt, response 1, and response 2 are inputs for the reward model, with preference rankings attached.
 
 Upon resolving conflicts, the aim is to have a list of records each indicating a preference for one response over the other to a prompt. These will be used for training the reward model.
 
 For demonstration purposes, here is a step-by-step code snippet to create a dataset of triplets `(prompt, preferred response, less preferred response)` from a single dataset without overlapping annotations:
+```python
+# Define an empty list to store the triplets
+triplets = []
 
+# Loop over all records in the dataset
+for record in feedback.records:
+    # Ensure that the record has responses
+    if record.responses is None or len(record.responses) == 0:
+        continue
+
+    # Ensure the response has been submitted (not discarded)
+    response = record.responses[0]
+
+    if response.status == 'submitted':
+        # Get the ranking value from the response for the preferred and least preferred
+        # responses, assuming there are no ties
+        preferred_rank = response.values["response_ranking"].value[0]["value"]
+        least_preferred_rank = response.values["response_ranking"].value[1]["value"]
+
+        # Construct the triplet and append to the list
+        triplets.append({
+            "prompt": record.fields["prompt"],
+            "preferred_response": record.fields[preferred_rank],
+            "least_preferred_response": record.fields[least_preferred_rank],
+        })
+
+# Now, "triplets" is a list of dictionaries, each containing a prompt and the associated
+# preferred and less preferred responses
+````
+
+```{tip}
+If you used the `RatingQuestion` instead, here's the corresponding code snippet:
 ```python
 # Define an empty list to store the triplets
 triplets = []
@@ -218,25 +262,6 @@ for record in feedback.records:
 
 # Now, "triplets" is a list of dictionaries, each containing a prompt and the associated
 # preferred and less preferred responses
-```
+````
 
-The final step is to prepare your dataset for training your reward model. This preparation depends on the chosen framework. This guide provides a comprehensive overview of the options and corresponding data preparation methods.
-
-## Other approaches to ranking
-While the proposed setup in this guide is designed for comparing two responses, it is possible to include more than two responses for each prompt. This approach provides richer data for training your reward model but increases the complexity of the task for the labelers. To include three responses per prompt, for instance, you would need to add additional fields for the extra responses and adjust the RatingQuestion to be:
-
-```python
-rg.RatingQuestion(name="rankings", title="Rank the responses in terms of accuracy.", choices=["1", "2", "3"]).
-```
-
-Once the rankings have been collected, there's a unique way to process this data into prompt-response pairs for training your reward model. For instance, if response 1 was ranked as the best, you can form two triplets: `(prompt, response 1, response 2)` and `(prompt, response 1, response 3)`, indicating the model should prefer the first response over the second in each triplet.
-
-This approach generates more diversified training examples. However, it doesn't presume any preference between the lower-ranked responses (response 2 and response 3 in this case), given that the labeler only ranked the best response. This method ensures that the model learns to prefer higher-ranked responses without making assumptions about preferences among lower-ranked ones.
-
-:::{note}
-In future versions, Argilla will include a `RankingQuestion`, specifically tailored for this workflow. You can track the progress, provide feedback, and leave comments on [this GitHub issue](https://github.com/argilla-io/argilla/issues/3021).
-:::
-
-Sharing the comparison data collection among multiple labelers can be beneficial. Each labeler identifies their favored response for a specific prompt. By pooling these choices, we can derive a collective ranking for all responses.
-
-Consider a scenario with three responses: response 1, response 2, and response 3. If labelers have differing preferences, these individual preferences can be aggregated to create an overall ranking. This collective insight, accumulated from many labelers and prompts, can provide valuable data for the training of the reward model.
+The final step is to prepare your dataset for training your reward model. This preparation depends on the chosen framework. [This guide](../practical_guides/fine_tune.md#rlhf) provides a comprehensive overview of the options and corresponding data preparation methods.
