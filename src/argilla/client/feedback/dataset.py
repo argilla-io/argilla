@@ -1062,7 +1062,7 @@ class FeedbackDataset:
             return task_mapping._prepare_for_training_with_transformers(
                 data=data, train_size=train_size, seed=seed, framework=framework
             )
-        elif framework is Framework.SPACY:
+        elif framework is Framework.SPACY or framework is Framework.SPACY_TRANSFORMERS:
             require_version("spacy")
             import spacy
 
