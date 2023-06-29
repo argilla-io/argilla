@@ -12,38 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.feedback import (
-    ArgillaTrainer,
-    LabelQuestionStrategy,
-    MultiLabelQuestionStrategy,
-    RatingQuestionStrategy,
-)
-from argilla.client.feedback.dataset import FeedbackDataset
+from typing import Union
+
 from argilla.client.feedback.schemas import (
-    FeedbackRecord,
     LabelQuestion,
     MultiLabelQuestion,
     RankingQuestion,
     RatingQuestion,
-    ResponseSchema,
     TextField,
     TextQuestion,
-    ValueSchema,
 )
 
-__all__ = [
-    "ArgillaTrainer",
-    "LabelQuestionStrategy",
-    "MultiLabelQuestionStrategy",
-    "RatingQuestionStrategy",
-    "FeedbackDataset",
-    "FeedbackRecord",
-    "LabelQuestion",
-    "MultiLabelQuestion",
-    "RatingQuestion",
-    "RankingQuestion",
-    "ResponseSchema",
-    "TextField",
-    "TextQuestion",
-    "ValueSchema",
-]
+AllowedFieldTypes = TextField
+AllowedQuestionTypes = Union[TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion, RankingQuestion]

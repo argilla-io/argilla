@@ -110,12 +110,13 @@ class Workspace:
         Returns:
             A list of `WorkspaceUserModel` instances.
         """
+        # TODO(@alvarobartt): Maybe we should return a list of rg.User instead.
         return workspaces_api.list_workspace_users(self.__client, self.id).parsed
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         return (
-            f"Workspace(id={self.id}, name={self.name}, users={self.users},"
-            f" insterted_at={self.inserted_at}, updated_at={self.updated_at}"
+            f"Workspace(id={self.id}, name={self.name},"
+            f" inserted_at={self.inserted_at}, updated_at={self.updated_at})"
         )
 
     def add_user(self, user_id: str) -> None:

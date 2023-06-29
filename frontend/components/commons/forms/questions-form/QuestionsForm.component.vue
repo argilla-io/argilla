@@ -487,7 +487,6 @@ export default {
                 case COMPONENT_TYPE.SINGLE_LABEL:
                 case COMPONENT_TYPE.RATING:
                 case COMPONENT_TYPE.RANKING:
-                  debugger;
                   formattedOptions = formattedOptions.map((option) => {
                     const currentOptionsFromForm = this.inputs.find(
                       (input) => input.name === questionName
