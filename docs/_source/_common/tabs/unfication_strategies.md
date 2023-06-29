@@ -1,5 +1,3 @@
-You can unify responses by using a `FeedbackRecord`s in combination with a `QuestionStrategy`.
-
 ::::{tab-set}
 
 :::{tab-item} RatingQuestion

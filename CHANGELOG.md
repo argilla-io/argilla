@@ -18,20 +18,26 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
-### Fixed
-
-- Check available workspaces on Argilla on `rg.set_workspace` (Closes [#3262](https://github.com/argilla-io/argilla/issues/3262))
+## [1.12.0](https://github.com/argilla-io/argilla/compare/v1.11.0...v1.12.0)
 
 ### Added
 
 - Added `RankingQuestionSettings` class allowing to create ranking questions in the API using `POST /api/v1/datasets/{dataset_id}/questions` endpoint ([#3232](https://github.com/argilla-io/argilla/pull/3232))
 - Added `RankingQuestion` in the Python client to create ranking questions ([#3275](https://github.com/argilla-io/argilla/issues/3275)).
+- Added `Ranking` component in feedback task question form ([#3177](https://github.com/argilla-io/argilla/pull/3177) & [#3246](https://github.com/argilla-io/argilla/pull/3246)).
+- Added `FeedbackDataset.prepare_for_training` method for generaring a framework-specific dataset with the responses provided for `RatingQuestion`, `LabelQuestion` and `MultiLabelQuestion` ([#3151](https://github.com/argilla-io/argilla/pull/3151)).
+- Added `ArgillaSpaCyTransformersTrainer` class for supporting the training with `spacy-transformers` ([#3256](https://github.com/argilla-io/argilla/pull/3256)).
 
 ### Changed
 
-- All docker related files have been moved into the `docker` folder
-- `release.Dockerfile` have been renamed to `Dockerfile`
-- Update `rg.load` function to raise a `ValueError` with a explanatory message for the cases in which the user tries to use the function to load a `FeedbackDataset` ([#3289](https://github.com/argilla-io/argilla/pull/3289)).
+- All docker related files have been moved into the `docker` folder ([#3053](https://github.com/argilla-io/argilla/pull/3053)).
+- `release.Dockerfile` have been renamed to `Dockerfile` ([#3133](https://github.com/argilla-io/argilla/pull/3133)).
+- Updated `rg.load` function to raise a `ValueError` with a explanatory message for the cases in which the user tries to use the function to load a `FeedbackDataset` ([#3289](https://github.com/argilla-io/argilla/pull/3289)).
+- Updated `ArgillaSpaCyTrainer` to allow re-using `tok2vec` ([#3256](https://github.com/argilla-io/argilla/pull/3256)).
+
+### Fixed
+
+- Check available workspaces on Argilla on `rg.set_workspace` (Closes [#3262](https://github.com/argilla-io/argilla/issues/3262))
 
 ## [1.11.0](https://github.com/argilla-io/argilla/compare/v1.10.0...v1.11.0)
 
