@@ -83,9 +83,31 @@ export default {
   },
   methods: {
     rankWithKeyboard(event, value) {
-      const keyNumber = event.key;
-      if (!isNaN(keyNumber) && keyNumber <= this.ranking.slots.length) {
-        this.$emit("on-keyboard-selection", value, Number(keyNumber));
+      const keyCode = event.key;
+      const validKeyCodes = [
+        { key: "1", rank: 1 },
+        { key: "2", rank: 2 },
+        { key: "3", rank: 3 },
+        { key: "4", rank: 4 },
+        { key: "5", rank: 5 },
+        { key: "6", rank: 6 },
+        { key: "7", rank: 7 },
+        { key: "8", rank: 8 },
+        { key: "9", rank: 9 },
+        { key: "=", rank: 10 },
+        { key: "!", rank: 11 },
+        { key: '"', rank: 12 },
+      ];
+
+      const keysForAvailableRankingSlots = validKeyCodes.slice(
+        0,
+        this.ranking.slots.length
+      );
+      const getRankPosition =
+        keysForAvailableRankingSlots.find((item) => item.key === keyCode)
+          ?.rank || null;
+      if (getRankPosition) {
+        this.$emit("on-keyboard-selection", value, Number(getRankPosition));
       }
     },
     onMoveEnd() {
