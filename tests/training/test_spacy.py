@@ -64,6 +64,7 @@ class TestSpaCyTrainer:
         train_with_cleanup(trainer, output_dir, train=False)
         cleanup_spacy_config(trainer)
 
+    @pytest.mark.skip(reason="CI doesn't have enough memory to run this test")
     def test_train_tokencat(
         self, framework: str, model: str, dataset_token_classification: rg.DatasetForTokenClassification
     ) -> None:
