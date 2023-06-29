@@ -28,12 +28,11 @@
 <script lang="ts">
 import { Base64 } from "js-base64";
 import { currentWorkspace } from "@/models/Workspace";
-import { Dataset } from "@/v1/domain/entities/Dataset";
 
 export default {
 	props: {
 		datasets: {
-			type: Array as () => Dataset[],
+			type: Array,
 			required: true,
 		},
 	},

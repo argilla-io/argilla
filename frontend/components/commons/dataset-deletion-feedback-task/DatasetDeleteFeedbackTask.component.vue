@@ -37,7 +37,6 @@
 import { Notification } from "@/models/Notifications";
 import { deleteDatasetById } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
 import { urlDeleteDatasetV1 } from "@/utils/url.properties";
-import { Dataset } from "~/v1/domain/entities/Dataset";
 
 const TYPE_OF_FEEDBACK = Object.freeze({
   NOT_ALLOWED_TO_DELETE_DATASET: "NOT_ALLOWED_TO_DELETE_DATASET",
@@ -47,7 +46,7 @@ export default {
   name: "DatasetDeleteFeedbackTaskComponent",
   props: {
     dataset: {
-      type: Object as () => Dataset,
+      type: Object,
       required: true,
     },
   },
@@ -64,7 +63,7 @@ export default {
     };
   },
   methods: {
-    toggleDeleteModal(show: boolean) {
+    toggleDeleteModal(show) {
       this.showDeleteModal = show;
     },
     async onConfirmDeleteDataset() {
