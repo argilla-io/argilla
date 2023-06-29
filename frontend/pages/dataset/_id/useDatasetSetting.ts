@@ -1,9 +1,9 @@
-import { useRouter, useStore } from "@nuxtjs/composition-api";
+import { useRouter } from "@nuxtjs/composition-api";
 import { useResolve } from "ts-injecty";
-import { Notification } from "~/models/Notifications";
-import { GetDatasetByIdUseCase } from "~/v1/domain/usecases/get-dataset-by-id-use.case";
-import { TYPE_OF_FEEDBACK } from "~/v1/infrastructure/DatasetRepository";
-import { useDataset } from "~/v1/infrastructure/DatasetStorage";
+import { Notification } from "@/models/Notifications";
+import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use.case";
+import { TYPE_OF_FEEDBACK } from "@/v1/infrastructure/DatasetRepository";
+import { useDataset } from "@/v1/infrastructure/DatasetStorage";
 
 export const useDatasetSetting = () => {
   const { state: dataset } = useDataset();

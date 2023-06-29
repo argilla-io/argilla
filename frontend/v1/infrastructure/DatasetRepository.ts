@@ -5,10 +5,7 @@ import {
 import { Dataset } from "../domain/entities/Dataset";
 import { IDatasetRepository } from "../domain/services/IDatasetRepository";
 import { upsertDataset } from "~/models/dataset.utilities";
-import {
-  deleteDatasetById,
-  upsertFeedbackDataset,
-} from "~/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
+import { upsertFeedbackDataset } from "~/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
 import { NuxtAxiosInstance } from "@nuxtjs/axios";
 import { Store } from "vuex";
 
