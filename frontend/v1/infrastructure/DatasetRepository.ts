@@ -8,15 +8,63 @@ import { upsertDataset } from "~/models/dataset.utilities";
 import { upsertFeedbackDataset } from "~/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
 import { NuxtAxiosInstance } from "@nuxtjs/axios";
 
-const TYPE_OF_FEEDBACK = {
+export const TYPE_OF_FEEDBACK = {
 	ERROR_FETCHING_FEEDBACK_DATASETS: "ERROR_FETCHING_FEEDBACK_DATASETS",
 	ERROR_FETCHING_WORKSPACES: "ERROR_FETCHING_WORKSPACES",
+	ERROR_FETCHING_DATASET_INFO: "ERROR_FETCHING_DATASET_INFO",
+	ERROR_FETCHING_WORKSPACE_INFO: "ERROR_FETCHING_WORKSPACE_INFO",
 };
 export class DatasetRepository implements IDatasetRepository {
 	constructor(
 		private readonly axios: NuxtAxiosInstance,
 		private readonly fetchDatasets: () => Promise<any>
 	) {}
+
+	async getDatasetInfo(datasetId) {
+		try {
+			const { data } = await this.axios.get(`/v1/datasets/${datasetId}`);
+
+			return data;
+		} catch (err) {
+			throw {
+				response: TYPE_OF_FEEDBACK.ERROR_FETCHING_DATASET_INFO,
+			};
+		}
+	}
+
+	async getWorkspaceInfo(workspaceId) {
+		try {
+			const { data: responseWorkspace } = await this.axios.get(
+				`/v1/workspaces/${workspaceId}`
+			);
+
+			const { name } = responseWorkspace || { name: null };
+
+			return name;
+		} catch (err) {
+			throw {
+				response: TYPE_OF_FEEDBACK.ERROR_FETCHING_WORKSPACE_INFO,
+			};
+		}
+	}
+
+	async getById(id: string): Promise<Dataset> {
+		const dataset = await this.getDatasetInfo(id);
+		const workspace = await this.getWorkspaceInfo(dataset.workspace_id);
+
+		upsertFeedbackDataset({ ...dataset, workspace_name: workspace });
+
+		return new Dataset(
+			dataset.id,
+			dataset.name,
+			dataset.guidelines,
+			dataset.status,
+			dataset.workspace_id,
+			workspace,
+			dataset.inserted_at,
+			dataset.updated_at
+		);
+	}
 
 	async getAll(): Promise<Dataset[]> {
 		const response = await this.saveAndGetDatasets();

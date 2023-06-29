@@ -1,5 +1,6 @@
 import { Dataset } from "../entities/Dataset";
 
 export interface IDatasetRepository {
-  getAll(): Promise<Dataset[]>;
+	getById(id: string): Promise<Dataset>;
+	getAll(): Promise<Dataset[]>;
 }

@@ -1,5 +1,4 @@
 export class Dataset {
-	task: "FeedbackTask";
 	constructor(
 		public readonly id: string,
 		public readonly name: string,
@@ -17,6 +16,10 @@ export class Dataset {
 
 	public get tags() {
 		return {};
+	}
+
+	public get task() {
+		return "FeedbackTask";
 	}
 
 	public get link() {

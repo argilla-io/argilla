@@ -21,39 +21,36 @@
         :isColorLight="!settingsDescription"
       />
     </div>
-    <div class="delete-dataset-component" v-if="datasetId">
-      <DatasetDeleteFeedbackTaskComponent :datasetId="datasetId" />
+    <div class="delete-dataset-component" v-if="dataset">
+      <DatasetDeleteFeedbackTaskComponent :dataset="dataset" />
     </div>
   </div>
 </template>
 
-<script>
-import {
-  getFeedbackDatasetNameById,
-  getDatasetTaskByDatasetId,
-  getDatasetGuidelinesByDatasetId,
-} from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
+<script lang="ts">
+import { Dataset } from "~/v1/domain/entities/Dataset";
 export default {
   name: "LeftDatasetSettingsFeedbackTaskContent",
   props: {
-    datasetId: {
-      type: String,
+    dataset: {
+      type: Object as () => Dataset,
       required: true,
     },
   },
-  beforeMount() {
+  data() {
     const { fullPath } = this.$route;
 
-    this.datasetSettingsUrl = `${window.origin}${fullPath}`;
-    this.datasetName = getFeedbackDatasetNameById(this.datasetId);
-    this.datasetTask = getDatasetTaskByDatasetId(this.datasetId);
-    this.settingsDescription = getDatasetGuidelinesByDatasetId(this.datasetId);
-    this.settingsDescriptionText =
-      this.settingsDescription || "This dataset has no annotation guidelines";
+    return {
+      datasetSettingsUrl: `${window.origin}${fullPath}`,
+      datasetName: this.dataset.name,
+      datasetTask: this.dataset.task,
+      settingsDescription: this.dataset.guidelines,
+      settingsDescriptionText:
+        this.dataset.guidelines || "This dataset has no annotation guidelines",
+    };
   },
 };
 </script>
-
 <style lang="scss" scoped>
 .left-content {
   display: flex;

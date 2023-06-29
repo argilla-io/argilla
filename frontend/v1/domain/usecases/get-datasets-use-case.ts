@@ -1,10 +1,10 @@
 import { IDatasetRepository } from "../services/IDatasetRepository";
-import { IDatasetStorage } from "../services/IDatasetStorage";
+import { IDatasetsStorage } from "../services/IDatasetsStorage";
 
 export class GetDatasetsUseCase {
 	constructor(
 		private readonly datasetRepository: IDatasetRepository,
-		private readonly datasetStorage: IDatasetStorage
+		private readonly datasetStorage: IDatasetsStorage
 	) {}
 
 	async execute() {

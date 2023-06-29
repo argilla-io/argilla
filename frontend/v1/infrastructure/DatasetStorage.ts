@@ -1,18 +1,11 @@
 import { Dataset } from "../domain/entities/Dataset";
+import { IDatasetStorage } from "../domain/services/IDatasetStorage";
 import { useStoreFor } from "../store/create";
 
-class Datasets {
-	constructor(public readonly datasets: Dataset[]) {}
-}
+const useDatasetStore = useStoreFor(Dataset);
 
-const useDatasetsStore = useStoreFor(Datasets);
+export const useDataset = () => {
+	const internalStore = useDatasetStore();
 
-export const useDatasets = () => {
-	const internalStore = useDatasetsStore();
-
-	const save = (datasets: Dataset[]) => {
-		internalStore.save(new Datasets(datasets));
-	};
-
-	return { ...internalStore, save };
+	return { ...internalStore } as IDatasetStorage & typeof internalStore;
 };
