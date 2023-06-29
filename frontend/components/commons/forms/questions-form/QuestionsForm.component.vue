@@ -27,8 +27,13 @@
         v-for="(input, index) in inputs"
         ref="inputs"
         :key="input.id"
-        @keydown.shift.arrow-down="updateFocusedQuestion(focusedQuestion + 1)"
-        @keydown.shift.arrow-up="updateFocusedQuestion(focusedQuestion - 1)"
+        @keyup.shift.arrow-down="
+          updateFocusedQuestionWithArrows(focusedQuestion + 1)
+        "
+        @keyup.shift.arrow-up="
+          updateFocusedQuestionWithArrows(focusedQuestion - 1)
+        "
+        @keyup.tab="updateFocusedQuestionWithTab"
       >
         <TextAreaComponent
           v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
@@ -253,18 +258,6 @@ export default {
   watch: {
     isFormUntouched(isFormUntouched) {
       this.emitIsQuestionsFormUntouched(isFormUntouched);
-    },
-    autofocusPosition: {
-      immediate: true,
-      handler(newValue) {
-        this.$nextTick(() => {
-          if (!!newValue) {
-            this.focusedQuestion = this.$refs.inputs.findIndex(
-              (input) => input.contains(document.activeElement) || 0
-            );
-          }
-        });
-      },
     },
   },
   created() {
@@ -600,11 +593,16 @@ export default {
         index === this.focusedQuestion
       );
     },
-    updateFocusedQuestion(index) {
+    updateFocusedQuestionWithArrows(index) {
       const numberOfQuestions = this.inputs.length;
       this.focusedQuestion = Math.min(
         numberOfQuestions - 1,
         Math.max(0, index)
+      );
+    },
+    updateFocusedQuestionWithTab() {
+      this.focusedQuestion = this.$refs.inputs?.findIndex(
+        (input) => input.contains(document.activeElement) || 0
       );
     },
   },
