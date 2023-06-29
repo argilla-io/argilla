@@ -18,9 +18,9 @@ from typing import TYPE_CHECKING, List, Type, Union
 import datasets
 import pytest
 from argilla.client import api
+from argilla.client.feedback.config import FeedbackDatasetConfig
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
-    FeedbackDatasetConfig,
     FeedbackRecord,
     RatingQuestion,
     TextField,
@@ -32,7 +32,7 @@ from argilla.client.feedback.training.schemas import (
 from argilla.client.models import Framework
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.typing import AllowedFieldTypes, AllowedQuestionTypes
     from argilla.server.models import User as ServerUser
     from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -115,7 +115,7 @@ def test_init_wrong_questions(
         )
     with pytest.raises(
         TypeError,
-        match="Expected `questions` to be a list of `TextQuestion`, `RatingQuestion`, `LabelQuestion`, and/or `MultiLabelQuestion`",
+        match="Expected `questions` to be a list of",
     ):
         FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
@@ -188,6 +188,7 @@ def test_add_records(
                         "question-2": {"value": 0},
                         "question-3": {"value": "a"},
                         "question-4": {"value": ["a", "b"]},
+                        "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
                     },
                     "status": "submitted",
                 },
@@ -209,6 +210,7 @@ def test_add_records(
             "question-2": {"value": 0},
             "question-3": {"value": "a"},
             "question-4": {"value": ["a", "b"]},
+            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
         },
         "status": "submitted",
     }
@@ -310,6 +312,7 @@ async def test_push_to_argilla_and_from_argilla(
                             "question-2": {"value": 0},
                             "question-3": {"value": "a"},
                             "question-4": {"value": ["a", "b"]},
+                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
                         },
                         "status": "submitted",
                     },
@@ -339,6 +342,7 @@ async def test_push_to_argilla_and_from_argilla(
                             "question-2": {"value": 0},
                             "question-3": {"value": "a"},
                             "question-4": {"value": ["a", "b"]},
+                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
                         },
                         "status": "submitted",
                     },
@@ -348,6 +352,7 @@ async def test_push_to_argilla_and_from_argilla(
                             "question-2": {"value": 0},
                             "question-3": {"value": "a"},
                             "question-4": {"value": ["a", "b"]},
+                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
                         },
                         "status": "submitted",
                     },
@@ -463,7 +468,14 @@ def test_push_to_huggingface_and_from_huggingface(
 
 
 @pytest.mark.parametrize(
-    "framework", [Framework("spacy"), Framework("transformers"), Framework("spark-nlp"), Framework("openai")]
+    "framework",
+    [
+        Framework("spacy"),
+        Framework("transformers"),
+        Framework("spark-nlp"),
+        Framework("openai"),
+        Framework("spacy-transformers"),
+    ],
 )
 @pytest.mark.usefixtures(
     "feedback_dataset_guidelines",

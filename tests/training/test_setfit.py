@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import argilla as rg
+from argilla.client.models import TextClassificationRecord
 from argilla.training import ArgillaTrainer
 
 from .helpers import train_with_cleanup
@@ -35,10 +36,10 @@ def test_setfit_train(dataset_text_classification):
     trainer.update_config(num_epochs=1, num_iterations=1)
     train_with_cleanup(trainer, output_dir)
     record = trainer.predict("This is a text", as_argilla_records=True)
-    assert isinstance(record, rg.TextClassificationRecord)
+    assert isinstance(record, TextClassificationRecord)
     assert record.multi_label is False
     not_record = trainer.predict("This is a text", as_argilla_records=False)
-    assert not isinstance(not_record, rg.TextClassificationRecord)
+    assert not isinstance(not_record, TextClassificationRecord)
     train_with_cleanup(trainer, output_dir, train=False)
 
 
@@ -50,8 +51,8 @@ def test_setfit_train_multi_label(dataset_text_classification_multi_label):
     trainer.update_config(num_epochs=1, num_iterations=1)
     train_with_cleanup(trainer, output_dir)
     record = trainer.predict("This is a text", as_argilla_records=True)
-    assert isinstance(record, rg.TextClassificationRecord)
+    assert isinstance(record, TextClassificationRecord)
     assert record.multi_label is True
     not_record = trainer.predict("This is a text", as_argilla_records=False)
-    assert not isinstance(not_record, rg.TextClassificationRecord)
+    assert not isinstance(not_record, TextClassificationRecord)
     train_with_cleanup(trainer, output_dir, train=False)

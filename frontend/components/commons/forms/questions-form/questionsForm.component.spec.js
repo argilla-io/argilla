@@ -53,7 +53,6 @@ describe("QuestionsFormComponent when initialInputs is empty", () => {
     expect(wrapper.vm.responseId).toBe("response-id");
     expect(wrapper.vm.initialInputs).toStrictEqual([]);
     expect(wrapper.vm.inputs).toStrictEqual([]);
-    expect(wrapper.vm.isSomeRequiredQuestionHaveNoAnswer).toBe(false);
     expect(wrapper.vm.renderForm).toBe(1);
     expect(wrapper.vm.isError).toBe(false);
 

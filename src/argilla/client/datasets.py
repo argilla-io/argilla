@@ -460,11 +460,12 @@ class DatasetBase:
             Framework.PEFT,
         ]:
             return self._prepare_for_training_with_transformers(train_size=train_size, test_size=test_size, seed=seed)
-        elif framework is Framework.SPACY and lang is None:
+        elif framework in [Framework.SPACY, Framework.SPACY_TRANSFORMERS] and lang is None:
             raise ValueError(
-                "Please provide a spacy language model to prepare the dataset for training with the spacy framework."
+                "Please provide a `spaCy` language model to prepare the dataset for"
+                " training with the `spaCy`/`spaCy-transformers` framework."
             )
-        elif framework in [Framework.SPACY, Framework.SPARK_NLP, Framework.OPENAI]:
+        elif framework in [Framework.SPACY, Framework.SPACY_TRANSFORMERS, Framework.SPARK_NLP, Framework.OPENAI]:
             if train_size and test_size:
                 require_version("scikit-learn")
                 from sklearn.model_selection import train_test_split
@@ -475,7 +476,7 @@ class DatasetBase:
                     shuffle=False,
                     random_state=seed,
                 )
-                if framework is Framework.SPACY:
+                if framework in [Framework.SPACY, Framework.SPACY_TRANSFORMERS]:
                     train_docbin = self._prepare_for_training_with_spacy(nlp=lang, records=records_train)
                     test_docbin = self._prepare_for_training_with_spacy(nlp=lang, records=records_test)
                     return train_docbin, test_docbin
@@ -488,7 +489,7 @@ class DatasetBase:
                     test_jsonl = self._prepare_for_training_with_openai(records=records_test)
                     return train_jsonl, test_jsonl
             else:
-                if framework is Framework.SPACY:
+                if framework in [Framework.SPACY, Framework.SPACY_TRANSFORMERS]:
                     return self._prepare_for_training_with_spacy(nlp=lang, records=shuffled_records)
                 elif framework is Framework.SPARK_NLP:
                     return self._prepare_for_training_with_spark_nlp(records=shuffled_records)
