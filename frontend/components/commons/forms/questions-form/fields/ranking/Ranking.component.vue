@@ -10,7 +10,6 @@
       @on-reorder="onChanged"
       @on-keyboard-selection="onChangedWithKeyboard"
       :isFocused="isFocused"
-      @on-focus="onFocus"
     />
   </div>
 </template>
@@ -72,9 +71,6 @@ export default {
       );
       this.options[optionIndex].rank = rank;
       this.$emit("on-change", this.options);
-    },
-    onFocus() {
-      this.$emit("on-focus");
     },
   },
 };

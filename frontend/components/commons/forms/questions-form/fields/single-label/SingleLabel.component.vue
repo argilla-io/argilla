@@ -12,7 +12,6 @@
       :componentId="questionId"
       :isFocused="isFocused"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
-      @on-focus="onFocus"
     />
   </div>
 </template>
@@ -69,11 +68,6 @@ export default {
   computed: {
     maxOptionsToShowBeforeCollapse() {
       return this.visibleOptions ?? -1;
-    },
-  },
-  methods: {
-    onFocus() {
-      this.$emit("on-focus");
     },
   },
 };

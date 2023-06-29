@@ -6,11 +6,7 @@
       :tooltipMessage="description"
     />
 
-    <RatingMonoSelectionComponent
-      v-model="options"
-      :isFocused="isFocused"
-      @on-focus="onFocus"
-    />
+    <RatingMonoSelectionComponent v-model="options" :isFocused="isFocused" />
   </div>
 </template>
 
@@ -41,11 +37,6 @@ export default {
   },
   model: {
     prop: "options",
-  },
-  methods: {
-    onFocus() {
-      this.$emit("on-focus");
-    },
   },
 };
 </script>
