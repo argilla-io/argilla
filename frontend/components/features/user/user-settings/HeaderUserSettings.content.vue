@@ -5,7 +5,7 @@
       :breadcrumbs="breadcrumbs"
       @breadcrumb-action="$emit('breadcrumb-action', $event)"
     />
-    <user />
+    <user-avatar-tooltip />
   </BaseTopbarBrand>
 </template>
 

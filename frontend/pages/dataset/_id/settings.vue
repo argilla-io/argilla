@@ -2,7 +2,6 @@
   <HeaderAndTopAndTwoColumns v-if="!$fetchState.error && !$fetchState.pending">
     <template v-slot:header>
       <HeaderFeedbackTaskComponent
-        v-if="datasetName && workspace"
         :datasetId="datasetId"
         :breadcrumbs="breadcrumbs"
       />
@@ -13,18 +12,11 @@
     <template v-slot:left>
       <LeftDatasetSettingsFeedbackTaskContent :dataset="dataset" />
     </template>
-    <template v-slot:right>
-      <div class="right-content"></div>
-    </template>
   </HeaderAndTopAndTwoColumns>
 </template>
 
 <script>
 import HeaderAndTopAndTwoColumns from "@/layouts/HeaderAndTopAndTwoColumns";
-import {
-  getFeedbackDatasetNameById,
-  getFeedbackDatasetWorkspaceNameById,
-} from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
 import { useDatasetSetting } from "./useDatasetSetting";
 
 export default {
@@ -35,12 +27,6 @@ export default {
   computed: {
     datasetId() {
       return this.$route.params.id;
-    },
-    datasetName() {
-      return getFeedbackDatasetNameById(this.datasetId);
-    },
-    workspace() {
-      return getFeedbackDatasetWorkspaceNameById(this.datasetId);
     },
     breadcrumbs() {
       return [
