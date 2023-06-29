@@ -21,7 +21,7 @@ export class DatasetRepository implements IDatasetRepository {
     private readonly store: Store<unknown>
   ) {}
 
-  async getDatasetInfo(datasetId) {
+  async getDatasetById(datasetId: string) {
     try {
       const { data } = await this.axios.get(`/v1/datasets/${datasetId}`);
 
@@ -33,7 +33,7 @@ export class DatasetRepository implements IDatasetRepository {
     }
   }
 
-  async getWorkspaceInfo(workspaceId) {
+  async getWorkspaceById(workspaceId: string) {
     try {
       const { data: responseWorkspace } = await this.axios.get(
         `/v1/workspaces/${workspaceId}`
@@ -50,8 +50,8 @@ export class DatasetRepository implements IDatasetRepository {
   }
 
   async getById(id: string): Promise<Dataset> {
-    const dataset = await this.getDatasetInfo(id);
-    const workspace = await this.getWorkspaceInfo(dataset.workspace_id);
+    const dataset = await this.getDatasetById(id);
+    const workspace = await this.getWorkspaceById(dataset.workspace_id);
 
     upsertFeedbackDataset({ ...dataset, workspace_name: workspace });
 
