@@ -117,7 +117,14 @@ export default {
       immediate: true,
       handler(newValue) {
         this.$nextTick(() => {
-          !!newValue && this.$refs?.options[0].focus();
+          const someLabelsAreFocused = this.$refs.options.some((option) =>
+            option.contains(document.activeElement)
+          );
+
+          if (someLabelsAreFocused || !newValue) {
+            return;
+          }
+          this.$refs?.options[0].focus();
         });
       },
     },
