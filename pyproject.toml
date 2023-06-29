@@ -42,7 +42,7 @@ dependencies = [
     # for logging, tracebacks, printing, progressbars
     "rich <= 13.0.1",
     # for CLI
-    "typer >= 0.6.0, < 1.0.0",
+    "typer >= 0.6.0, < 0.8.0", # spaCy only supports typer<0.8.0
 ]
 dynamic = ["version"]
 
@@ -93,7 +93,8 @@ integrations = [
     "pgmpy",
     "plotly >= 4.1.0",
     "snorkel >= 0.9.7",
-    "spacy == 3.5.0",
+    "spacy == 3.5.3",
+    "spacy-transformers >= 1.2.5",
     "transformers[torch] >= 4.19.0",
     "evaluate",
     "seqeval",
@@ -130,6 +131,7 @@ log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 log_cli = "True"
 testpaths = ["tests"]
+addopts = ["--ignore", "tests/training"]
 
 [tool.coverage.report]
 exclude_lines = [

@@ -62,6 +62,14 @@
           :description="input.description"
           @on-error="onError"
         />
+
+        <RankingComponent
+          v-if="input.component_type === COMPONENT_TYPE.RANKING"
+          :title="input.question"
+          :isRequired="input.is_required"
+          :description="input.description"
+          v-model="input.options"
+        />
       </div>
     </div>
     <div class="footer-form">
@@ -164,52 +172,69 @@ export default {
     isFormUntouched() {
       return isEqual(this.initialInputs, this.inputs);
     },
-    isSomeRequiredQuestionHaveNoAnswer() {
-      return this.inputs
+    questionAreCompletedCorrectly() {
+      const requiredQuestionsAreCompletedCorrectly = this.inputs
         .filter((input) => input.is_required)
-        .some((input) => {
+        .every((input) => {
           if (input.component_type === COMPONENT_TYPE.FREE_TEXT) {
-            return input.options[0].value.length === 0;
-          } else {
-            return input.options.every((option) => !option.is_selected);
+            return input.options[0]?.value.trim() != "";
           }
+
+          if (input.component_type === COMPONENT_TYPE.RANKING) {
+            return input.options.every((option) => option.rank);
+          }
+
+          return input.options.some((option) => option.is_selected);
         });
+
+      const optionalQuestionsCompletedAreCorrectlyEntered = this.inputs
+        .filter((input) => !input.is_required)
+        .every((input) => {
+          if (input.component_type === COMPONENT_TYPE.RANKING) {
+            return (
+              !input.options.some((option) => option.rank) ||
+              input.options.every((option) => option.rank)
+            );
+          }
+
+          return true;
+        });
+
+      return (
+        requiredQuestionsAreCompletedCorrectly &&
+        optionalQuestionsCompletedAreCorrectlyEntered
+      );
     },
     isRecordDiscarded() {
       return this.recordStatus === RECORD_STATUS.DISCARDED;
-    },
-    isRecordPending() {
-      return this.recordStatus === RECORD_STATUS.PENDING;
     },
     isRecordSubmitted() {
       return this.recordStatus === RECORD_STATUS.SUBMITTED;
     },
     disableSubmitButton() {
-      let isButtonDisable = false;
-      switch (true) {
-        case this.isRecordSubmitted:
-          if (this.isFormUntouched || this.isSomeRequiredQuestionHaveNoAnswer) {
-            isButtonDisable = true;
-          }
-          break;
-        case this.isRecordDiscarded:
-        case this.isRecordPending:
-          if (this.isSomeRequiredQuestionHaveNoAnswer) isButtonDisable = true;
-          break;
-        default:
-          isButtonDisable = false;
-      }
+      if (this.isRecordSubmitted)
+        return this.isFormUntouched || !this.questionAreCompletedCorrectly;
 
-      return isButtonDisable;
+      return !this.questionAreCompletedCorrectly;
     },
     currentInputsWithNoResponses() {
-      return this.inputs.filter(
-        (input) =>
-          (input.component_type === COMPONENT_TYPE.RATING ||
-            input.component_type === COMPONENT_TYPE.SINGLE_LABEL ||
-            input.component_type === COMPONENT_TYPE.MULTI_LABEL) &&
-          input.options.every((option) => !option.is_selected)
-      );
+      return this.inputs.filter((input) => {
+        if (
+          input.component_type === COMPONENT_TYPE.RATING ||
+          input.component_type === COMPONENT_TYPE.SINGLE_LABEL ||
+          input.component_type === COMPONENT_TYPE.MULTI_LABEL
+        ) {
+          return input.options.every((option) => !option.is_selected);
+        }
+
+        if (input.component_type === COMPONENT_TYPE.RANKING) {
+          return input.options.every((option) => !option.rank);
+        }
+
+        if (input.component_type === COMPONENT_TYPE.FREE_TEXT) {
+          return !input.options[0]?.value.trim();
+        }
+      });
     },
   },
   watch: {
@@ -303,8 +328,9 @@ export default {
       }
     },
     async onSubmit() {
-      if (this.isSomeRequiredQuestionHaveNoAnswer) {
+      if (!this.questionAreCompletedCorrectly) {
         this.isError = true;
+
         return;
       }
 
@@ -434,37 +460,18 @@ export default {
               switch (componentType) {
                 case COMPONENT_TYPE.MULTI_LABEL:
                 case COMPONENT_TYPE.SINGLE_LABEL:
-                  formattedOptions = formattedOptions.map((option) => {
-                    const currentOptionsFromForm = this.inputs.find(
-                      (input) => input.name === questionName
-                    )?.options;
-                    const currentOption = currentOptionsFromForm.find(
-                      (currentOption) => currentOption.id === option.id
-                    );
-
-                    return {
-                      id: option.id,
-                      text: option.text,
-                      is_selected: currentOption.is_selected,
-                      value: option.value,
-                    };
-                  });
-                  break;
                 case COMPONENT_TYPE.RATING:
+                case COMPONENT_TYPE.RANKING:
                   formattedOptions = formattedOptions.map((option) => {
                     const currentOptionsFromForm = this.inputs.find(
                       (input) => input.name === questionName
                     )?.options;
-
                     const currentOption = currentOptionsFromForm.find(
                       (currentOption) => currentOption.id === option.id
                     );
 
                     return {
-                      id: option.id,
-                      text: option.text,
-                      is_selected: currentOption.is_selected,
-                      value: option.text,
+                      ...currentOption,
                     };
                   });
                   break;
@@ -523,13 +530,23 @@ export default {
             break;
           }
           case COMPONENT_TYPE.FREE_TEXT: {
-            const selectedOption = input.options[0] ?? false;
+            const text = input.options[0]?.value.trim();
 
-            if (selectedOption) {
+            if (text) {
               responseByQuestionName[input.name] = {
-                value: selectedOption.value,
+                value: text,
               };
             }
+
+            break;
+          }
+          case COMPONENT_TYPE.RANKING: {
+            if (input.options.some((o) => !o.rank)) return;
+
+            responseByQuestionName[input.name] = {
+              value: input.options,
+            };
+
             break;
           }
           default:
@@ -562,6 +579,7 @@ export default {
   flex-direction: column;
   flex-basis: 37em;
   height: 100%;
+  min-width: 0;
   justify-content: space-between;
   border-radius: $border-radius-m;
   box-shadow: $shadow;

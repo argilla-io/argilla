@@ -15,8 +15,9 @@
 from typing import Dict, List, Optional, Union
 
 import argilla as rg
-from argilla import TextClassificationRecord
 from argilla.client import api
+from argilla.client.api import load
+from argilla.client.models import TextClassificationRecord
 from argilla.client.sdk.text_classification.models import LabelingRule
 
 
@@ -106,7 +107,7 @@ class Rule:
         Args:
             dataset: The name of the dataset.
         """
-        records = rg.load(name=dataset, query=self._query)
+        records = load(name=dataset, query=self._query)
 
         self._matching_ids = {record.id: None for record in records}
 

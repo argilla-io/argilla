@@ -20,6 +20,7 @@ from pydantic import (
 )
 
 import argilla as rg
+from argilla.client.api import active_client
 from argilla.client.feedback.constants import (
     FIELD_TYPE_TO_PYTHON_TYPE,
 )
@@ -27,6 +28,7 @@ from argilla.client.feedback.schemas import (
     FieldSchema,
 )
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
+from argilla.client.workspaces import Workspace
 
 if TYPE_CHECKING:
     import httpx
@@ -76,7 +78,7 @@ def generate_pydantic_schema(fields: List[FieldSchema], name: Optional[str] = "F
 def feedback_dataset_in_argilla(
     name: Optional[str] = None,
     *,
-    workspace: Optional[Union[str, rg.Workspace]] = None,
+    workspace: Optional[Union[str, Workspace]] = None,
     id: Optional[str] = None,
 ) -> Union["FeedbackDatasetModel", None]:
     """Checks whether a `FeedbackDataset` exists in Argilla or not, based on the `name`, `id`, or the combination of
@@ -91,7 +93,7 @@ def feedback_dataset_in_argilla(
         The `FeedbackDataset` if it exists in Argilla, `None` otherwise.
 
     Raises:
-        ValueError: if the `workspace` is not a `rg.Workspace` instance or a string.
+        ValueError: if the `workspace` is not a `Workspace` instance or a string.
         Exception: if the `FeedbackDataset` could not be listed from Argilla.
 
     Examples:
@@ -106,15 +108,15 @@ def feedback_dataset_in_argilla(
         " is the Argilla ID of the `rg.FeedbackDataset`."
     )
 
-    client = rg.active_client()
+    client = active_client()
     httpx_client: "httpx.Client" = client.http_client.httpx
 
     if name:
         if workspace is None:
-            workspace = rg.Workspace.from_name(client.get_workspace())
+            workspace = Workspace.from_name(client.get_workspace())
         elif isinstance(workspace, str):
-            workspace = rg.Workspace.from_name(workspace)
-        elif not isinstance(workspace, rg.Workspace):
+            workspace = Workspace.from_name(workspace)
+        elif not isinstance(workspace, Workspace):
             raise ValueError(f"Workspace must be a `rg.Workspace` instance or a string, got {type(workspace)}")
 
         try:

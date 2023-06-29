@@ -37,14 +37,28 @@ Vectors = Dict[str, List[float]]
 
 
 class Framework(Enum):
+    """Frameworks supported by Argilla
+
+    Options:
+        transformers: Transformers
+        peft: PEFT Transformers library
+        setfit: SetFit Transformers library
+        spacy: Spacy Explosion
+        spacy-transformers: Spacy Transformers Explosion library
+        span_marker: SpanMarker Tom Aarsen library
+        spark-nlp: Spark NLP John Snow Labs library
+        openai: OpenAI LLMs
+    """
+
     TRANSFORMERS = "transformers"
     PEFT = "peft"
     SETFIT = "setfit"
     SPACY = "spacy"
+    SPACY_TRANSFORMERS = "spacy-transformers"
     SPAN_MARKER = "span_marker"
     SPARK_NLP = "spark-nlp"
     OPENAI = "openai"
-    AUTOTRAIN = "autotrain"
+    # AUTOTRAIN = "autotrain"
 
     @classmethod
     def _missing_(cls, value):

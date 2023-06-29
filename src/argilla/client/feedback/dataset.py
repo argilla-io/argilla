@@ -25,29 +25,38 @@ from pydantic import (
 from tqdm import tqdm
 
 import argilla as rg
+from argilla.client.feedback.config import FeedbackDatasetConfig
 from argilla.client.feedback.constants import (
     FETCHING_BATCH_SIZE,
     FIELD_TYPE_TO_PYTHON_TYPE,
     PUSHING_BATCH_SIZE,
 )
 from argilla.client.feedback.schemas import (
-    AllowedFieldTypes,
-    AllowedQuestionTypes,
-    FeedbackDatasetConfig,
     FeedbackRecord,
     FieldSchema,
     LabelQuestion,
     MultiLabelQuestion,
+    RankingQuestion,
     RatingQuestion,
     TextField,
     TextQuestion,
+)
+from argilla.client.feedback.training.schemas import (
+    TrainingTaskMappingForTextClassification,
+)
+from argilla.client.feedback.typing import AllowedFieldTypes, AllowedQuestionTypes
+from argilla.client.feedback.unification import (
+    LabelQuestionStrategy,
+    MultiLabelQuestionStrategy,
+    RatingQuestionStrategy,
 )
 from argilla.client.feedback.utils import (
     feedback_dataset_in_argilla,
     generate_pydantic_schema,
 )
+from argilla.client.models import Framework
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
-from argilla.utils.dependency import requires_version
+from argilla.utils.dependency import require_version, requires_version
 
 if TYPE_CHECKING:
     import httpx
@@ -203,6 +212,7 @@ class FeedbackDataset:
         """
         if not isinstance(fields, list):
             raise TypeError(f"Expected `fields` to be a list, got {type(fields)} instead.")
+
         any_required = False
         unique_names = set()
         for field in fields:
@@ -220,13 +230,14 @@ class FeedbackDataset:
 
         if not isinstance(questions, list):
             raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
+
         any_required = False
         unique_names = set()
         for question in questions:
-            if not isinstance(question, (TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion)):
+            if not isinstance(question, AllowedQuestionTypes.__args__):
                 raise TypeError(
-                    "Expected `questions` to be a list of `TextQuestion`, `RatingQuestion`,"
-                    " `LabelQuestion`, and/or `MultiLabelQuestion` got a"
+                    "Expected `questions` to be a list of"
+                    f" `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}` got a"
                     f" question in the list with type {type(question)} instead."
                 )
             if question.name in unique_names:
@@ -307,10 +318,22 @@ class FeedbackDataset:
         """Returns the fields that define the schema of the records in the dataset."""
         return self.__fields
 
+    def field_by_name(self, name: str) -> Dict[str, FieldSchema]:
+        for item in self.fields:
+            if item.name == name:
+                return item
+        raise KeyError(f"Field with name '{name}' not found in self.fields")
+
     @property
     def questions(self) -> List["FeedbackQuestionModel"]:
         """Returns the questions that will be used to annotate the dataset."""
         return self.__questions
+
+    def question_by_name(self, name: str) -> Dict[str, "FeedbackQuestionModel"]:
+        for item in self.questions:
+            if item.name == name:
+                return item
+        raise KeyError(f"Question with name '{name}' not found in self.questions")
 
     @property
     def records(self) -> List[FeedbackRecord]:
@@ -684,7 +707,7 @@ class FeedbackDataset:
                 question = RatingQuestion(**question_dict, values=[v["value"] for v in question.settings["options"]])
             elif question.settings["type"] == "text":
                 question = TextQuestion(**question_dict, use_markdown=question.settings["use_markdown"])
-            elif question.settings["type"].__contains__("label_selection"):
+            elif question.settings["type"] in ["label_selection", "multi_label_selection", "ranking"]:
                 if all([label["value"] == label["text"] for label in question.settings["options"]]):
                     labels = [label["value"] for label in question.settings["options"]]
                 else:
@@ -698,11 +721,12 @@ class FeedbackDataset:
                     question = MultiLabelQuestion(
                         **question_dict, labels=labels, visible_labels=question.settings["visible_options"]
                     )
+                elif question.settings["type"] == "ranking":
+                    question = RankingQuestion(**question_dict, values=labels)
             else:
                 raise ValueError(
                     f"Question '{question.name}' is not a supported question in the current Python package"
-                    " version, supported question types are: `RatingQuestion`, `TextQuestion`,"
-                    " `LabelQuestion`, and/or `MultiLabelQuestion`."
+                    f" version, supported question types are: `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}`."
                 )
             questions.append(question)
         self = cls(
@@ -754,13 +778,15 @@ class FeedbackDataset:
                     value = Value(dtype="string")
                 elif question.settings["type"] == "rating":
                     value = Value(dtype="int32")
-                elif question.settings["type"] == "multi_label_selection":
+                elif question.settings["type"] == "ranking":
+                    value = Sequence({"rank": Value(dtype="uint8"), "value": Value(dtype="string")})
+                elif question.settings["type"] in "multi_label_selection":
                     value = Sequence(Value(dtype="string"))
                 else:
                     raise ValueError(
                         f"Question {question.name} has an unsupported type: {question.settings['type']}, for the"
-                        " moment only the following types are supported: 'text', 'rating', 'label_selection', and"
-                        " 'multi_label_selection'"
+                        " moment only the following types are supported: 'text', 'rating', 'label_selection',"
+                        " 'multi_label_selection', and 'ranking'."
                     )
                 # TODO(alvarobartt): if we constraint ranges from 0 to N, then we can use `ClassLabel` for ratings
                 features[question.name] = Sequence(
@@ -780,17 +806,24 @@ class FeedbackDataset:
                 for field in self.fields:
                     dataset[field.name].append(record.fields[field.name])
                 for question in self.questions:
+                    if not record.responses:
+                        dataset[question.name].append(None)
+                        continue
+                    responses = []
+                    for response in record.responses:
+                        if question.name not in response.values:
+                            responses.append(None)
+                            continue
+                        if question.settings["type"] == "ranking":
+                            responses.append([r.dict() for r in response.values[question.name].value])
+                        else:
+                            responses.append(response.values[question.name].value)
                     dataset[question.name].append(
                         {
                             "user_id": [r.user_id for r in record.responses],
-                            "value": [
-                                r.values[question.name].value if question.name in r.values else None
-                                for r in record.responses
-                            ],
+                            "value": responses,
                             "status": [r.status for r in record.responses],
                         }
-                        if record.responses
-                        else None
                     )
                 dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else None)
                 dataset["external_id"].append(record.external_id or None)
@@ -951,6 +984,8 @@ class FeedbackDataset:
                             "status": status,
                             "values": {},
                         }
+                    if question.settings["type"] == "ranking":
+                        value = [{"rank": r, "value": v} for r, v in zip(value["rank"], value["value"])]
                     responses[user_id]["values"].update({question.name: {"value": value}})
 
             metadata = None
@@ -967,3 +1002,84 @@ class FeedbackDataset:
             )
         del hfds
         return cls
+
+    def unify_responses(
+        self,
+        question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
+        strategy: Union[str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy],
+    ) -> None:
+        """Unify responses for a given question using a given strategy"""
+        if isinstance(question, str):
+            question = self.question_by_name(question)
+        if isinstance(strategy, str):
+            strategy = LabelQuestionStrategy(strategy)
+        strategy.unify_responses(self.records, question)
+
+    def prepare_for_training(
+        self,
+        framework: Union[Framework, str],
+        task_mapping: TrainingTaskMappingForTextClassification,
+        train_size: Optional[float] = 1,
+        test_size: Optional[float] = None,
+        seed: Optional[int] = None,
+        fetch_records: bool = True,
+        lang: Optional[str] = None,
+    ):
+        if isinstance(framework, str):
+            framework = Framework(framework)
+
+        # validate train and test sizes
+        if train_size is None:
+            train_size = 1
+        if test_size is None:
+            test_size = 1 - train_size
+
+        # check if all numbers are larger than 0
+        if not [abs(train_size), abs(test_size)] == [train_size, test_size]:
+            raise ValueError("`train_size` and `test_size` must be larger than 0.")
+        # check if train sizes sum up to 1
+        if not (train_size + test_size) == 1:
+            raise ValueError("`train_size` and `test_size` must sum to 1.")
+
+        if test_size == 0:
+            test_size = None
+
+        if fetch_records:
+            self.fetch_records()
+
+        if isinstance(task_mapping, TrainingTaskMappingForTextClassification):
+            self.unify_responses(question=task_mapping.label.question, strategy=task_mapping.label.strategy)
+        else:
+            raise ValueError(f"Training data {type(task_mapping)} is not supported yet")
+
+        data = task_mapping._format_data(self.records)
+        if framework in [
+            Framework.TRANSFORMERS,
+            Framework.SETFIT,
+            Framework.SPAN_MARKER,
+            Framework.PEFT,
+        ]:
+            return task_mapping._prepare_for_training_with_transformers(
+                data=data, train_size=train_size, seed=seed, framework=framework
+            )
+        elif framework is Framework.SPACY or framework is Framework.SPACY_TRANSFORMERS:
+            require_version("spacy")
+            import spacy
+
+            if lang is None:
+                _LOGGER.warning("spaCy `lang` is not provided. Using `en`(English) as default language.")
+                lang = spacy.blank("en")
+            elif lang.isinstance(str):
+                if len(lang) == 2:
+                    lang = spacy.blank(lang)
+                else:
+                    lang = spacy.load(lang)
+            return task_mapping._prepare_for_training_with_spacy(data=data, train_size=train_size, seed=seed, lang=lang)
+        elif framework is Framework.SPARK_NLP:
+            return task_mapping._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
+        elif framework is Framework.OPENAI:
+            return task_mapping._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
+        else:
+            raise NotImplementedError(
+                f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
+            )

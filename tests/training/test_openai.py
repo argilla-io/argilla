@@ -15,7 +15,6 @@
 import os
 
 import pytest
-from argilla.client.models import Framework
 from argilla.training import ArgillaTrainer
 
 FRAMEWORK = "openai"
@@ -38,13 +37,13 @@ def test_setfit_train(dataset_text_classification):
 
 def test_openai_train_multi_label(dataset_text_classification_multi_label):
     with pytest.raises(
-        NotImplementedError, match=f"{Framework.OPENAI} does not support multi-label TextClassification tasks."
+        NotImplementedError, match="OpenAI does not support `multi-label=True` TextClassification tasks."
     ):
         ArgillaTrainer(name=dataset_text_classification_multi_label, model=MODEL, train_size=0.5, framework=FRAMEWORK)
 
 
 def test_openai_train_token(dataset_token_classification):
-    with pytest.raises(NotImplementedError, match=f"{Framework.OPENAI} does not support `TokenClassification` tasks."):
+    with pytest.raises(NotImplementedError, match="OpenAI does not support `TokenClassification` tasks."):
         ArgillaTrainer(name=dataset_token_classification, model=MODEL, train_size=0.5, framework=FRAMEWORK)
 
 
