@@ -23,10 +23,10 @@ module.exports = {
     jest: true,
   },
   extends: [
-    "plugin:nuxt/recommended",
     "eslint:recommended",
-    "prettier/vue",
     "plugin:prettier/recommended",
+    "plugin:nuxt/recommended",
+    "prettier/vue",
   ],
   rules: {
     "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
