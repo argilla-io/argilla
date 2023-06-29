@@ -264,27 +264,16 @@ async def list_records_by_dataset_id_and_user_id(
     offset: int = 0,
     limit: int = LIST_RECORDS_LIMIT,
 ) -> List[Record]:
-    query = select(Record).filter(Record.dataset_id == dataset_id)
+    query = (
+        select(Record)
+        .filter(Record.dataset_id == dataset_id)
+        .outerjoin(Response, and_(Response.record_id == Record.id, Response.user_id == user_id))
+    )
 
     if response_status == ResponseStatusFilter.missing:
-        query = query.outerjoin(
-            Response,
-            and_(
-                Response.record_id == Record.id,
-                Response.user_id == user_id,
-                Response.status == None,  # noqa: E711
-            ),
-        )
-    else:
-        status = ResponseStatus(response_status) if response_status else None
-        query = query.join(
-            Response,
-            and_(
-                Response.record_id == Record.id,
-                Response.user_id == user_id,
-                Response.status == status,
-            ),
-        )
+        query = query.filter(Response.status == None)  # noqa: E711
+    elif response_status is not None:
+        query = query.filter(Response.status == ResponseStatus(response_status))
 
     if RecordInclude.responses in include:
         query = query.options(contains_eager(Record.responses))
