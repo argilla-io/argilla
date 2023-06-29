@@ -43,7 +43,7 @@ export default {
       immediate: true,
       handler(newValue) {
         this.$nextTick(() => {
-          const someLabelsAreFocused = this.$refs.options.some((option) =>
+          const someLabelsAreFocused = this.$refs?.options.some((option) =>
             option.contains(document.activeElement)
           );
 
