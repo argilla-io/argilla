@@ -5,7 +5,7 @@ import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-us
 import { TYPE_OF_FEEDBACK } from "@/v1/infrastructure/DatasetRepository";
 import { useDataset } from "@/v1/infrastructure/DatasetStorage";
 
-export const useDatasetSetting = () => {
+export const useDatasetSettingViewModel = () => {
   const { state: dataset } = useDataset();
   const getDatasetUseCase = useResolve(GetDatasetByIdUseCase);
   const router = useRouter();

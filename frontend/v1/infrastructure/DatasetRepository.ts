@@ -21,34 +21,6 @@ export class DatasetRepository implements IDatasetRepository {
     private readonly store: Store<unknown>
   ) {}
 
-  async getDatasetById(datasetId: string) {
-    try {
-      const { data } = await this.axios.get(`/v1/datasets/${datasetId}`);
-
-      return data;
-    } catch (err) {
-      throw {
-        response: TYPE_OF_FEEDBACK.ERROR_FETCHING_DATASET_INFO,
-      };
-    }
-  }
-
-  async getWorkspaceById(workspaceId: string) {
-    try {
-      const { data: responseWorkspace } = await this.axios.get(
-        `/v1/workspaces/${workspaceId}`
-      );
-
-      const { name } = responseWorkspace || { name: null };
-
-      return name;
-    } catch (err) {
-      throw {
-        response: TYPE_OF_FEEDBACK.ERROR_FETCHING_WORKSPACE_INFO,
-      };
-    }
-  }
-
   async getById(id: string): Promise<Dataset> {
     const dataset = await this.getDatasetById(id);
     const workspace = await this.getWorkspaceById(dataset.workspace_id);
@@ -84,7 +56,35 @@ export class DatasetRepository implements IDatasetRepository {
     });
   }
 
-  fetchFeedbackDatasets = async (axios) => {
+  private async getDatasetById(datasetId: string) {
+    try {
+      const { data } = await this.axios.get(`/v1/datasets/${datasetId}`);
+
+      return data;
+    } catch (err) {
+      throw {
+        response: TYPE_OF_FEEDBACK.ERROR_FETCHING_DATASET_INFO,
+      };
+    }
+  }
+
+  private async getWorkspaceById(workspaceId: string) {
+    try {
+      const { data: responseWorkspace } = await this.axios.get(
+        `/v1/workspaces/${workspaceId}`
+      );
+
+      const { name } = responseWorkspace || { name: null };
+
+      return name;
+    } catch (err) {
+      throw {
+        response: TYPE_OF_FEEDBACK.ERROR_FETCHING_WORKSPACE_INFO,
+      };
+    }
+  }
+
+  private fetchFeedbackDatasets = async (axios) => {
     const url = URL_GET_V1_DATASETS;
     try {
       const { data } = await axios.get(url);
@@ -97,7 +97,7 @@ export class DatasetRepository implements IDatasetRepository {
     }
   };
 
-  fetchWorkspaces = async (axios) => {
+  private fetchWorkspaces = async (axios) => {
     const url = URL_GET_WORKSPACES;
     try {
       const { data } = await axios.get(url);
@@ -110,7 +110,7 @@ export class DatasetRepository implements IDatasetRepository {
     }
   };
 
-  factoryFeedbackDatasetsWithCorrespondingWorkspaceName = (
+  private factoryFeedbackDatasetsWithCorrespondingWorkspaceName = (
     feedbackDatasets,
     workspaces
   ) => {
@@ -126,7 +126,7 @@ export class DatasetRepository implements IDatasetRepository {
     return newFeedbackDatasets;
   };
 
-  saveAndGetDatasets = async () => {
+  private saveAndGetDatasets = async () => {
     // FETCH old list of datasets (Text2Text, TextClassification, TokenClassification)
     const oldDatasets = await this.store.dispatch("entities/datasets/fetchAll");
 

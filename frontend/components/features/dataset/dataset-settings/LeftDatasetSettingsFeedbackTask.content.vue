@@ -28,7 +28,8 @@
 </template>
 
 <script lang="ts">
-import { Dataset } from "~/v1/domain/entities/Dataset";
+import { Dataset } from "@/v1/domain/entities/Dataset";
+
 export default {
   name: "LeftDatasetSettingsFeedbackTaskContent",
   props: {

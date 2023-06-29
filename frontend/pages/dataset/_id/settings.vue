@@ -17,7 +17,7 @@
 
 <script>
 import HeaderAndTopAndTwoColumns from "@/layouts/HeaderAndTopAndTwoColumns";
-import { useDatasetSetting } from "./useDatasetSetting";
+import { useDatasetSettingViewModel } from "./useDatasetSettingViewModel";
 
 export default {
   name: "SettingsPage",
@@ -50,7 +50,7 @@ export default {
     },
   },
   setup() {
-    return useDatasetSetting();
+    return useDatasetSettingViewModel();
   },
   fetch() {
     this.loadDataset(this.datasetId);

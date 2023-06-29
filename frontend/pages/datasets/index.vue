@@ -50,13 +50,13 @@
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import { useDatasetsViewModel } from "./useDatasetsViewModel";
 
 export default {
   layout: "app",
   methods: {
-    onBreadcrumbAction(e: string) {
+    onBreadcrumbAction(e) {
       if (e === "clearFilters") {
         this.$refs.table?.clearFilters();
       }
@@ -66,7 +66,7 @@ export default {
     return useDatasetsViewModel();
   },
   fetch() {
-    this.loadDatasets(this.fetchDatasets);
+    this.loadDatasets();
   },
 };
 </script>
