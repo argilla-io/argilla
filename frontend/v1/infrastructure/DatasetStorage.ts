@@ -1,11 +1,5 @@
 import { Dataset } from "../domain/entities/Dataset";
-import { IDatasetStorage } from "../domain/services/IDatasetStorage";
+import { IDatasetRepository } from "../domain/services/IDatasetRepository";
 import { useStoreFor } from "../store/create";
 
-const useDatasetStore = useStoreFor(Dataset);
-
-export const useDataset = () => {
-	const internalStore = useDatasetStore();
-
-	return { ...internalStore } as IDatasetStorage & typeof internalStore;
-};
+export const useDataset = useStoreFor<Dataset, IDatasetRepository>(Dataset);

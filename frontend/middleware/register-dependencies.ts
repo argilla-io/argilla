@@ -16,7 +16,8 @@
  */
 
 import { loadDependencyContainer } from "@/v1/di";
+import { Context } from "@nuxt/types";
 
-export default (instance) => {
+export default (instance: Context) => {
   loadDependencyContainer(instance);
 };

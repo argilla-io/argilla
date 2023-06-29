@@ -1,20 +1,20 @@
+import { Context } from "@nuxt/types";
 import Container, { register } from "ts-injecty";
 import { Registration } from "ts-injecty/types";
-import { mapActions } from "vuex";
 import { DatasetRepository } from "../infrastructure/DatasetRepository";
 import { GetDatasetsUseCase } from "../domain/usecases/get-datasets-use-case";
 import { useDatasets } from "../infrastructure/DatasetsStorage";
 import { useDataset } from "../infrastructure/DatasetStorage";
 import { GetDatasetByIdUseCase } from "../domain/usecases/get-dataset-by-id-use.case";
 
-export const loadDependencyContainer = (root) => {
+export const loadDependencyContainer = (context: Context) => {
   const dependencies: Registration[] = [
     register("axios")
-      .withImplementation(() => root.$axios)
+      .withImplementation(() => context.$axios)
       .build(),
 
     register("store")
-      .withImplementation(() => root.store)
+      .withImplementation(() => context.store)
       .build(),
 
     register(DatasetRepository).withDependency("axios").and("store").build(),

@@ -3,17 +3,17 @@ import { IDatasetsStorage } from "../domain/services/IDatasetsStorage";
 import { useStoreFor } from "../store/create";
 
 class Datasets {
-	constructor(public readonly datasets: Dataset[] = []) {}
+  constructor(public readonly datasets: Dataset[] = []) {}
 }
 
-const useDatasetsStore = useStoreFor(Datasets);
+const useDatasetsStore = useStoreFor<Datasets, IDatasetsStorage>(Datasets);
 
 export const useDatasets = () => {
-	const internalStore = useDatasetsStore();
+  const internalStore = useDatasetsStore();
 
-	const save = (datasets: Dataset[]) => {
-		internalStore.save(new Datasets(datasets));
-	};
+  const save = (datasets: Dataset[]) => {
+    internalStore.save(new Datasets(datasets));
+  };
 
-	return { ...internalStore, save } as IDatasetsStorage & typeof internalStore;
+  return { ...internalStore, save };
 };

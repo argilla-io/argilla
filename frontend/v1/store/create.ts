@@ -5,8 +5,8 @@ interface Class<T> extends Function {
   new (...args: any[]): T;
 }
 
-export const useStoreFor = <T>(ctor: Class<T>) => {
-  return defineStore(ctor.name, {
+export const useStoreFor = <T, R>(ctor: Class<T>) => {
+  const store = defineStore(ctor.name, {
     state: () => ({
       state: new ctor() as T,
     }),
@@ -19,4 +19,6 @@ export const useStoreFor = <T>(ctor: Class<T>) => {
       },
     },
   });
+
+  return store as R & typeof store;
 };

@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
-export default ({ $auth, route, redirect }) => {
+import { Context } from "@nuxt/types";
+
+export default ({ $auth, route, redirect }: Context) => {
   switch (route.name) {
     case "login":
       break;
