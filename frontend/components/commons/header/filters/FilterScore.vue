@@ -128,7 +128,7 @@ export default {
   }),
   computed: {
     options() {
-      let test = Object.keys(this.filter.options).map((key) => {
+      const test = Object.keys(this.filter.options).map((key) => {
         return {
           key: Number(key),
           count: this.filter.options[key],
@@ -144,10 +144,10 @@ export default {
     },
   },
   beforeMount() {
-    let from = this.filter.selected
+    const from = this.filter.selected
       ? this.filter.selected.from * 100
       : this.rangeOptions.min;
-    let to = this.filter.selected
+    const to = this.filter.selected
       ? this.filter.selected.to * 100
       : this.rangeOptions.max;
     this.scoreRanges = [from, to];

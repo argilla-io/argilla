@@ -102,7 +102,7 @@ export default {
       if (text === undefined) {
         return options;
       }
-      let filtered = options.filter((id) =>
+      const filtered = options.filter((id) =>
         JSON.stringify(id).toLowerCase().match(text.toLowerCase())
       );
       return filtered;

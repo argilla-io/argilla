@@ -95,7 +95,7 @@ export default {
         message = `${this.datasetName} has been deleted`;
         typeOfNotification = "success";
       } catch ({ response }) {
-        let { status } = response;
+        const { status } = response;
         statusCall = status;
         message = `It is not possible to delete ${this.datasetName}`;
         typeOfNotification = "error";

@@ -7,7 +7,7 @@ const localVue = createLocalVue();
 localVue.use(Vuex);
 
 let store = null;
-let getters = {};
+const getters = {};
 store = new Vuex.Store({ getters });
 
 let wrapper = null;
