@@ -38,4 +38,19 @@ module.exports = {
   parserOptions: {
     parser: "@babel/eslint-parser",
   },
+  overrides: [
+    {
+      files: ["**/*.ts"],
+      extends: ["@nuxtjs/eslint-config-typescript"],
+      parser: "@typescript-eslint/parser",
+      rules: {
+        quotes: ["error", "double"],
+        semi: ["error", "always"],
+        "comma-dangle": ["error", "always"],
+        "import/no-named-as-default-member": 0,
+        "no-useless-constructor": 0,
+        "space-before-function-paren": 0,
+      },
+    },
+  ],
 };
