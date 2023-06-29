@@ -44,7 +44,7 @@ You can contribute to the docs by
 
 For contributing to the docs, here are two references:
 1. [How to locally build the docs](./developer_docs.md)
-2. [A template for tutorials](https://github.com/argilla-io/argilla/blob/develop/docs/_source/tutorials/notebooks/template.ipynb)
+2. [A template for tutorials in our Github repository](https://github.com/argilla-io/argilla/blob/develop/docs/template.ipynb)
 
 
 #### Create a new feature

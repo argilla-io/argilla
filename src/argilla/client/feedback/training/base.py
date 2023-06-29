@@ -40,6 +40,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
         train_size: Optional[float] = None,
         seed: Optional[int] = None,
         gpu_id: Optional[int] = -1,
+        framework_kwargs: Optional[dict] = {},
         fetch_records: bool = True,
     ) -> None:
         """
@@ -65,6 +66,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 the GPU ID to use when training a SpaCy model. Defaults to -1, which means that the CPU
                 will be used by default. GPU IDs start in 0, which stands for the default GPU in the system,
                 if available.
+            framework_kwargs (dict): arguments for the framework's trainer.
             **load_kwargs: arguments for the rg.load() function.
         """
         self._dataset = dataset
@@ -135,6 +137,21 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 seed=self._seed,
                 model=self._model,
                 gpu_id=gpu_id,
+                framework_kwargs=framework_kwargs,  # freeze_tok2vec
+            )
+        elif framework is Framework.SPACY_TRANSFORMERS:
+            from argilla.client.feedback.training.frameworks.spacy import (
+                ArgillaSpaCyTransformersTrainer,
+            )
+
+            self._trainer = ArgillaSpaCyTransformersTrainer(
+                feedback_dataset=self._dataset,
+                task_mapping=self._task_mapping,
+                prepared_data=self._prepared_data,
+                seed=self._seed,
+                model=self._model,
+                gpu_id=gpu_id,
+                framework_kwargs=framework_kwargs,  # update_transformer
             )
         elif framework is Framework.OPENAI:
             from argilla.client.feedback.training.frameworks.openai import (

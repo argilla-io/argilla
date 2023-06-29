@@ -85,6 +85,48 @@ label_question_payload = {
             DocBin,
         ),
         (
+            Framework("spacy-transformers"),
+            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            0.5,
+            None,
+            (DocBin, DocBin),
+        ),
+        (
+            Framework("spacy-transformers"),
+            LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
+            0.5,
+            None,
+            (DocBin, DocBin),
+        ),
+        (
+            Framework("spacy-transformers"),
+            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            0.5,
+            None,
+            (DocBin, DocBin),
+        ),
+        (
+            Framework("spacy-transformers"),
+            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            1,
+            42,
+            DocBin,
+        ),
+        (
+            Framework("spacy-transformers"),
+            LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
+            1,
+            42,
+            DocBin,
+        ),
+        (
+            Framework("spacy-transformers"),
+            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            1,
+            42,
+            DocBin,
+        ),
+        (
             Framework("openai"),
             RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
             0.5,
@@ -210,7 +252,7 @@ def test_task_mapping_for_text_classification(framework, label, train_size, seed
     data = [{"text": "This is a text", "label": "1"}, {"text": "This is a text", "label": "2"}]
     field = TextField(name="text")
     task_mapping = TrainingTaskMapping.for_text_classification(text=field, label=label)
-    if framework == Framework.SPACY:
+    if framework == Framework.SPACY or framework == Framework.SPACY_TRANSFORMERS:
         data = task_mapping._prepare_for_training_with_spacy(
             data=data, train_size=train_size, seed=seed, lang=spacy.blank("en")
         )

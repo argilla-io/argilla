@@ -23,6 +23,11 @@ Before getting started with any textual data project, we advise setting up annot
 ```{include} /_common/tabs/dataset_settings.md
 ```
 
+Note that feedback datasets support different types of questions. For more info on each of them, check out [this section](../guides/llms/practical_guides/create_dataset.md#define-questions).
+
+```{include} /_common/tabs/question_settings.md
+```
+
 ## Create records
 
 ```{include} /_common/tabs/records_create.md

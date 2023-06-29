@@ -21,7 +21,7 @@ from argilla.client.feedback.unification import (
     LabelQuestionStrategy,
     MultiLabelQuestionStrategy,
     RatingQuestionStrategy,
-    UnificatiedValueSchema,
+    UnifiedValueSchema,
 )
 
 __all__ = [
@@ -31,5 +31,5 @@ __all__ = [
     "RatingQuestionStrategy",
     "TrainingTaskMapping",
     "TrainingTaskMappingForTextClassification",
-    "UnificatiedValueSchema",
+    "UnifiedValueSchema",
 ]

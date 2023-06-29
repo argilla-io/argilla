@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from typing import List, Optional, Union
+from uuid import UUID
 
 import httpx
 
@@ -26,11 +27,9 @@ from argilla.client.sdk.commons.models import (
 from argilla.client.sdk.users.models import UserCreateModel, UserModel, UserRole
 
 
-# TODO(alvarobartt,frascuchon): use `httpx.Client` instead of `AuthenticatedClient` and
+# TODO(alvarobartt,frascuchon): use ONLY `httpx.Client` instead of `AuthenticatedClient` and
 # fix mock in `tests/conftest.py` to use `httpx.Client` instead of `AuthenticatedClient`
-def whoami(
-    client: AuthenticatedClient,
-) -> UserModel:
+def whoami(client: AuthenticatedClient) -> UserModel:
     """Sends a GET request to `/api/me` endpoint to get the current user information.
 
     Args:
@@ -124,7 +123,7 @@ def create_user(
 
 def delete_user(
     client: httpx.Client,
-    user_id: str,
+    user_id: UUID,
 ) -> Response[Union[UserModel, ErrorMessage, HTTPValidationError]]:
     """Sends a DELETE request to `/api/users/{user_id}` endpoint to delete a user.
 

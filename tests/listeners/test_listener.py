@@ -18,7 +18,8 @@ from typing import List
 import argilla as rg
 import pytest
 from argilla import RGListenerContext, listener
-from argilla.client.models import Record
+from argilla.client.api import delete, log
+from argilla.client.models import Record, TextClassificationRecord
 
 
 def condition_check_params(search):
@@ -40,7 +41,7 @@ def condition_check_params(search):
     ],
 )
 def test_listener_with_parameters(mocked_client, dataset, query, metrics, condition, query_params):
-    rg.delete(dataset)
+    delete(dataset)
 
     class TestListener:
         executed = False
@@ -78,7 +79,7 @@ def test_listener_with_parameters(mocked_client, dataset, query, metrics, condit
 
     time.sleep(1.5)
     assert test.action.is_running()
-    rg.log(rg.TextClassificationRecord(text="This is a text"), name=dataset)
+    log(TextClassificationRecord(text="This is a text"), name=dataset)
 
     with pytest.raises(ValueError):
         test.action.start()
