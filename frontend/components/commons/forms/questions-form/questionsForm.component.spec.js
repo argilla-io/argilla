@@ -741,4 +741,28 @@ describe("QuestionsFormComponent when initialInputs is empty", () => {
   it.skip("update the input object regarding the value emitted by the question components", () => {
     // TODO - do a test of the 4 components
   });
+  it("update focusedQuestion by keydown (shift + arrow-down)", () => {
+    const options = {
+      mocks: {
+        $auth: authMock,
+      },
+      stubs: {
+        NuxtLink: RouterLinkStub,
+        BaseButton,
+        TextAreaComponent,
+      },
+      propsData: {
+        datasetId: "datasetId",
+        recordId: "recordId",
+        recordStatus: "pending",
+        initialInputs: ["1", "2", "3"],
+      },
+    };
+    const wrapper = shallowMount(QuestionsFormComponent, options);
+    wrapper.find({ ref: "inputs" }).trigger("keyup", {
+      shiftKey: true,
+      key: "arrowDown",
+    });
+    expect(wrapper.vm.focusedQuestion).toBe(1);
+  });
 });
