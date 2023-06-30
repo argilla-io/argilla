@@ -645,11 +645,20 @@ async def test_list_dataset_records_as_annotator(client: TestClient):
 
 
 @pytest.mark.asyncio
-async def test_list_current_user_dataset_records(client: TestClient, owner_auth_header: dict):
+async def test_list_current_user_dataset_records(client: TestClient, owner: User, owner_auth_header: dict):
     dataset = await DatasetFactory.create()
     record_a = await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
     record_b = await RecordFactory.create(fields={"record_b": "value_b"}, metadata_={"unit": "test"}, dataset=dataset)
     record_c = await RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
+    # This response should not be included in the response
+    await ResponseFactory.create(
+        values={
+            "input_ok": {"value": "yes"},
+            "output_ok": {"value": "yes"},
+        },
+        record=record_a,
+        user=owner,
+    )
 
     other_dataset = await DatasetFactory.create()
     await RecordFactory.create_batch(size=2, dataset=other_dataset)

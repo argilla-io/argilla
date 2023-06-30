@@ -62,12 +62,7 @@ from argilla.client.sdk.workspaces.models import WorkspaceModel
 from argilla.server.models import User, UserRole
 from httpx import ConnectError
 
-from tests.factories import (
-    DatasetFactory,
-    UserFactory,
-    WorkspaceFactory,
-    WorkspaceUserFactory,
-)
+from tests.factories import DatasetFactory, UserFactory, WorkspaceFactory
 from tests.server.test_api import create_some_data_for_text_classification
 
 
@@ -262,9 +257,10 @@ def test_load_limits(argilla_user: User, supported_vector_search: bool):
     assert len(ds) == limit_data_to
 
 
-def test_load_with_feedback_dataset(mocked_client, argilla_user: User):
+@pytest.mark.asyncio
+async def test_load_with_feedback_dataset(mocked_client, argilla_user: User):
     workspace = argilla_user.workspaces[0]
-    dataset = DatasetFactory.create(name="dataset-a", workspace=workspace)
+    dataset = await DatasetFactory.create(name="dataset-a", workspace=workspace)
 
     with pytest.raises(
         ValueError,
