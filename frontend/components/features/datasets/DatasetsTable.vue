@@ -268,4 +268,8 @@ export default {
   align-items: flex-end;
   margin: 2em 0 1em 0;
 }
+
+.search-area {
+  width: clamp(300px, 30vw, 800px);
+}
 </style>
