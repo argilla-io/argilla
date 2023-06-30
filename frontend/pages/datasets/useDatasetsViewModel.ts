@@ -6,8 +6,8 @@ export const useDatasetsViewModel = () => {
   const { state: datasets } = useDatasets();
   const getDatasetsUseCase = useResolve(GetDatasetsUseCase);
 
-  const loadDatasets = async () => {
-    await getDatasetsUseCase.execute();
+  const loadDatasets = () => {
+    getDatasetsUseCase.execute();
   };
 
   return { loadDatasets, datasets };
