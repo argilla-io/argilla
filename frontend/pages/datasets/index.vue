@@ -17,7 +17,7 @@
 
 <template>
   <div>
-    <base-loading v-if="$fetchState.pending" />
+    <base-loading v-if="isLoadingDatasets" />
     <div v-else class="wrapper">
       <div class="main">
         <app-header
@@ -64,9 +64,6 @@ export default {
   },
   setup() {
     return useDatasetsViewModel();
-  },
-  fetch() {
-    this.loadDatasets();
   },
 };
 </script>

@@ -69,14 +69,14 @@ export default {
         },
         {
           name: "Created at",
-          field: "created_at",
+          field: "createdAt",
           class: "date",
           type: "date",
           sortable: "true",
         },
         {
           name: "Updated at",
-          field: "last_updated",
+          field: "updatedAt",
           class: "date",
           type: "date",
           sortable: "true",
@@ -101,7 +101,7 @@ export default {
       },
       externalLinks: [],
       sortedOrder: "desc",
-      sortedByField: "last_updated",
+      sortedByField: "updatedAt",
     };
   },
   computed: {

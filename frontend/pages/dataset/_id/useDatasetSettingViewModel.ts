@@ -1,4 +1,10 @@
-import { useRouter } from "@nuxtjs/composition-api";
+import {
+  onBeforeMount,
+  onMounted,
+  ref,
+  useRoute,
+  useRouter,
+} from "@nuxtjs/composition-api";
 import { useResolve } from "ts-injecty";
 import { Notification } from "@/models/Notifications";
 import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use.case";
@@ -6,18 +12,22 @@ import { TYPE_OF_FEEDBACK } from "@/v1/infrastructure/DatasetRepository";
 import { useDataset } from "@/v1/infrastructure/DatasetStorage";
 
 export const useDatasetSettingViewModel = () => {
+  const isLoadingDataset = ref(false);
+  const router = useRouter();
+  const route = useRoute();
+  const datasetId = route.value.params.id;
+
   const { state: dataset } = useDataset();
   const getDatasetUseCase = useResolve(GetDatasetByIdUseCase);
-  const router = useRouter();
 
-  const handleError = (id: string, response: string) => {
+  const handleError = (response: string) => {
     let message = "";
     switch (response) {
       case TYPE_OF_FEEDBACK.ERROR_FETCHING_DATASET_INFO:
-        message = `Can't get dataset info for dataset_id: ${id}`;
+        message = `Can't get dataset info for dataset_id: ${datasetId}`;
         break;
       case TYPE_OF_FEEDBACK.ERROR_FETCHING_WORKSPACE_INFO:
-        message = `Can't get workspace info for dataset_id: ${id}`;
+        message = `Can't get workspace info for dataset_id: ${datasetId}`;
         break;
       default:
         message =
@@ -33,15 +43,23 @@ export const useDatasetSettingViewModel = () => {
     Notification.dispatch("notify", paramsForNotification);
   };
 
-  const loadDataset = async (id: string) => {
+  const loadDataset = async () => {
     try {
-      await getDatasetUseCase.execute(id);
+      isLoadingDataset.value = true;
+
+      await getDatasetUseCase.execute(datasetId);
     } catch (error) {
-      handleError(id, error.response);
+      handleError(error.response);
 
       router.push("/");
+    } finally {
+      isLoadingDataset.value = false;
     }
   };
 
-  return { loadDataset, dataset };
+  onBeforeMount(() => {
+    loadDataset();
+  });
+
+  return { dataset, datasetId, isLoadingDataset };
 };

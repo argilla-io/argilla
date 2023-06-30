@@ -1,5 +1,5 @@
 <template>
-  <HeaderAndTopAndTwoColumns v-if="!$fetchState.error && !$fetchState.pending">
+  <HeaderAndTopAndTwoColumns v-if="!isLoadingDataset">
     <template v-slot:header>
       <HeaderFeedbackTaskComponent
         :datasetId="datasetId"
@@ -25,22 +25,19 @@ export default {
     HeaderAndTopAndTwoColumns,
   },
   computed: {
-    datasetId() {
-      return this.$route.params.id;
-    },
     breadcrumbs() {
       return [
         { link: { name: "datasets" }, name: "Home" },
         {
-          link: { path: `/datasets?workspace=${this.workspace}` },
-          name: this.workspace,
+          link: { path: `/datasets?workspace=${this.dataset.workspace}` },
+          name: this.dataset.workspace,
         },
         {
           link: {
             name: "dataset-id-annotation-mode",
             params: { id: this.datasetId },
           },
-          name: this.datasetName,
+          name: this.dataset.name,
         },
         {
           link: null,
@@ -51,9 +48,6 @@ export default {
   },
   setup() {
     return useDatasetSettingViewModel();
-  },
-  fetch() {
-    this.loadDataset(this.datasetId);
   },
 };
 </script>

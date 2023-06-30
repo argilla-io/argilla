@@ -6,8 +6,6 @@ import {
   URL_GET_V1_DATASETS,
   URL_GET_WORKSPACES,
 } from "~/utils/url.properties";
-import { upsertDataset } from "~/models/dataset.utilities";
-import { upsertFeedbackDataset } from "~/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
 
 export const TYPE_OF_FEEDBACK = {
   ERROR_FETCHING_FEEDBACK_DATASETS: "ERROR_FETCHING_FEEDBACK_DATASETS",
@@ -15,6 +13,7 @@ export const TYPE_OF_FEEDBACK = {
   ERROR_FETCHING_DATASET_INFO: "ERROR_FETCHING_DATASET_INFO",
   ERROR_FETCHING_WORKSPACE_INFO: "ERROR_FETCHING_WORKSPACE_INFO",
 };
+
 export class DatasetRepository implements IDatasetRepository {
   constructor(
     private readonly axios: NuxtAxiosInstance,
@@ -25,15 +24,15 @@ export class DatasetRepository implements IDatasetRepository {
     const dataset = await this.getDatasetById(id);
     const workspace = await this.getWorkspaceById(dataset.workspace_id);
 
-    upsertFeedbackDataset({ ...dataset, workspace_name: workspace });
-
     return new Dataset(
       dataset.id,
       dataset.name,
+      "FeedbackTask",
       dataset.guidelines,
       dataset.status,
       dataset.workspace_id,
       workspace,
+      {},
       dataset.inserted_at,
       dataset.updated_at
     );
@@ -42,18 +41,39 @@ export class DatasetRepository implements IDatasetRepository {
   async getAll(): Promise<Dataset[]> {
     const response = await this.saveAndGetDatasets();
 
-    return response.feedbackDatasetsWithWorkspaces.map((datasetFromBackend) => {
+    const otherDatasets = response.oldDatasets.map((dataset) => {
       return new Dataset(
-        datasetFromBackend.id,
-        datasetFromBackend.name,
-        datasetFromBackend.guidelines,
-        datasetFromBackend.status,
-        datasetFromBackend.workspace_id,
-        datasetFromBackend.workspace_name,
-        datasetFromBackend.inserted_at,
-        datasetFromBackend.updated_at
+        dataset.id,
+        dataset.name,
+        dataset.task,
+        "",
+        "",
+        "",
+        dataset.workspace,
+        dataset.tags,
+        dataset.created_at,
+        dataset.last_updated
       );
     });
+
+    const feedbackDatasets = response.feedbackDatasetsWithWorkspaces.map(
+      (datasetFromBackend) => {
+        return new Dataset(
+          datasetFromBackend.id,
+          datasetFromBackend.name,
+          "FeedbackTask",
+          datasetFromBackend.guidelines,
+          datasetFromBackend.status,
+          datasetFromBackend.workspace_id,
+          datasetFromBackend.workspace_name,
+          {},
+          datasetFromBackend.inserted_at,
+          datasetFromBackend.updated_at
+        );
+      }
+    );
+
+    return [...otherDatasets, ...feedbackDatasets];
   }
 
   private async getDatasetById(datasetId: string) {
@@ -127,29 +147,19 @@ export class DatasetRepository implements IDatasetRepository {
   };
 
   private saveAndGetDatasets = async () => {
-    // FETCH old list of datasets (Text2Text, TextClassification, TokenClassification)
-    const oldDatasets = await this.store.dispatch("entities/datasets/fetchAll");
+    const [oldDatasets, newDatasets, workspaces] = await Promise.all([
+      this.store.dispatch("entities/datasets/fetchAll"),
+      this.fetchFeedbackDatasets(this.axios),
+      this.fetchWorkspaces(this.axios),
+    ]);
 
-    // FETCH new FeedbackTask list
-    const { items: feedbackTaskDatasets } = await this.fetchFeedbackDatasets(
-      this.axios
-    );
-
-    // TODO - remove next line when workspace will be include in the api endpoint to fetch feedbackTask
-    const workspaces = await this.fetchWorkspaces(this.axios);
+    const { items: feedbackTaskDatasets } = newDatasets;
 
     const feedbackDatasetsWithWorkspaces =
       this.factoryFeedbackDatasetsWithCorrespondingWorkspaceName(
         feedbackTaskDatasets,
         workspaces
       );
-
-    // UPSERT old dataset (Text2Text, TextClassification, TokenClassification) into the old orm
-    upsertDataset(oldDatasets);
-
-    // TODO - when workspaces will be include in feedbackDatasets, upsert directly "feedbackTaskDatasets" instead of "feedbackDatasetsWithWorkspaces"
-    // UPSERT FeedbackDataset into the new orm for this task
-    upsertFeedbackDataset(feedbackDatasetsWithWorkspaces);
 
     return { oldDatasets, feedbackDatasetsWithWorkspaces };
   };

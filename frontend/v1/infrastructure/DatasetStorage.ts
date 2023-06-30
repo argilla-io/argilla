@@ -1,5 +1,5 @@
 import { Dataset } from "../domain/entities/Dataset";
-import { IDatasetRepository } from "../domain/services/IDatasetRepository";
+import { IDatasetStorage } from "../domain/services/IDatasetStorage";
 import { useStoreFor } from "../store/create";
 
-export const useDataset = useStoreFor<Dataset, IDatasetRepository>(Dataset);
+export const useDataset = useStoreFor<Dataset, IDatasetStorage>(Dataset);
