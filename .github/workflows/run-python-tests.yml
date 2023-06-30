@@ -2,6 +2,20 @@ name: Run Argilla python tests
 
 on:
   workflow_call:
+    inputs:
+      searchEngine:
+        description: "Backend search engine to use. Available values are 'elasticsearch' and 'opensearch'."
+        default: elasticsearch
+        required: true
+        type: string
+      searchEngineVersion:
+        description: "Backend search engine version to use. This value must be aligned to the 'search_engine' input value."
+        default: 8
+        type: number
+      coverageReport:
+        description: "If true, a coverage report will be published."
+        default: false
+        type: boolean
     secrets:
       HF_HUB_ACCESS_TOKEN:
 
@@ -16,9 +30,6 @@ jobs:
   run-python-tests:
     name: Argilla python tests
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: [ 8.8, 8.5, 8.0, 7.17]
     defaults:
       run:
         shell: bash -l {0}
@@ -35,11 +46,6 @@ jobs:
               - 'tests/**'
               - 'pyproject.toml'
               - 'setup.py'
-      - name: Setup ElasticSearch 🔎
-        if: steps.filter.outputs.python_code == 'true'
-        uses: ankane/setup-elasticsearch@v1
-        with:
-          elasticsearch-version: ${{ matrix.version }}
       - name: Setup Conda Env 🐍
         uses: conda-incubator/setup-miniconda@v2
         if: steps.filter.outputs.python_code == 'true'
@@ -74,6 +80,16 @@ jobs:
         env:
           HF_HUB_ACCESS_TOKEN: ${{ secrets.HF_HUB_ACCESS_TOKEN }}
         run: echo "Enable HF access token"
+      - name: Setup ElasticSearch 🔎
+        if: inputs.searchEngine == 'elasticsearch'
+        uses: ankane/setup-elasticsearch@v1
+        with:
+          elasticsearch-version: ${{ inputs.searchEngineVersion }}
+      - name: Setup OpenSearch 🔎
+        if: inputs.searchEngine == 'opensearch'
+        uses: ankane/setup-opensearch@v1
+        with:
+          opensearch-version: ${{ inputs.searchEngineVersion }}
       - name: Run tests 📈
         if: steps.filter.outputs.python_code == 'true'
         run: |
@@ -82,7 +98,7 @@ jobs:
           pytest --cov=argilla --cov-report=xml
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
-        if: steps.filter.outputs.python_code == 'true' && matrix.version == '8.5'
+        if: inputs.coverageReport
         with:
           files: ./coverage.xml
           flags: pytest
