@@ -170,7 +170,6 @@ export default {
       inputs: [],
       renderForm: 0,
       isError: false,
-      autofocusPosition: 0,
       focusedQuestion: 0,
     };
   },
