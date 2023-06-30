@@ -18,9 +18,6 @@ on:
         required: false
         default: false
         type: boolean
-    secrets:
-      HF_HUB_ACCESS_TOKEN:
-
 
 env:
   # Increase this value to reset cache if etc/example-environment.yml has not changed
