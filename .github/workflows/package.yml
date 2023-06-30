@@ -94,6 +94,7 @@ jobs:
         if: steps.filter.outputs.python_code == 'true'
         run: |
           pip install -e ".[server,listeners]"
+          alembic upgrade head
           pytest tests/server --cov=argilla --cov-report=xml
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
