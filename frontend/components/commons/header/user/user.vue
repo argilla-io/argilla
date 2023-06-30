@@ -23,7 +23,7 @@
         </NuxtLink>
         <a
           class="user__link"
-          href="https://docs.argilla.io/en/latest/"
+          :href="$config.documentationSite"
           target="_blank"
           v-text="'View docs'"
         />

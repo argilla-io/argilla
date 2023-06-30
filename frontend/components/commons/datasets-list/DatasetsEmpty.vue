@@ -10,8 +10,8 @@
     <p class="datasets-empty__subtitle">
       The Argilla web app allows you to log, explore and annotate your data.<br />
       Start logging data with our Python client, or
-      <a href="https://docs.rubrix.ml/" target="_blank">see the docs</a> for
-      more information.
+      <a :href="$config.documentationSite" target="_blank">see the docs</a>
+      for more information.
     </p>
     <base-code :code="generateCodeSnippet()"></base-code>
   </div>
@@ -19,6 +19,7 @@
 
 <script>
 import "assets/icons/unavailable";
+
 export default {
   props: {
     workspace: {

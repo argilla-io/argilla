@@ -35,7 +35,7 @@
       associated with each record when they create the dataset. More in
       <a
         class="link"
-        href="https://docs.argilla.io/en/latest/guides/features/semantic-search.html"
+        :href="$config.documentationSiteSemanticSearch"
         target="_blank"
         >docs
       </a>
