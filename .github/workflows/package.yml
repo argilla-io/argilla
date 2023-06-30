@@ -29,7 +29,7 @@ env:
 
 jobs:
 
-  run-tests:
+  run_tests:
     uses: ./.github/workflows/run-python-tests.yml
     secrets: inherit
 
@@ -93,7 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build
-      - run-tests
+      - run_tests
     env:
       IS_DEPLOYABLE: ${{ secrets.AR_DOCKER_USERNAME != '' }}
     if: needs.build.outputs.code_changes == 'true'
