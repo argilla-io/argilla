@@ -130,8 +130,9 @@ async def test_workspace_delete_user(owner: "ServerUser", db: "AsyncSession") ->
         workspace.delete_user(owner.id)
 
 
-def test_print_workspace(owner: "ServerUser"):
-    workspace = WorkspaceFactory.create(name="test_workspace")
+@pytest.mark.asyncio
+async def test_print_workspace(owner: "ServerUser"):
+    workspace = await WorkspaceFactory.create(name="test_workspace")
 
     init(api_key=owner.api_key)
 
@@ -151,8 +152,9 @@ def test_set_new_workspace(owner: "ServerUser"):
     assert rg.get_workspace() == ws.name
 
 
-def test_init_with_workspace(owner: "ServerUser"):
-    workspace = WorkspaceFactory.create(name="test_workspace")
+@pytest.mark.asyncio
+async def test_init_with_workspace(owner: "ServerUser"):
+    workspace = await WorkspaceFactory.create(name="test_workspace")
 
     import argilla as rg
 
