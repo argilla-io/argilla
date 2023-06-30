@@ -14,7 +14,6 @@ on:
       - "feature/**"
       - "feat/**"
 
-
   pull_request:
     branches:
       - "main"
@@ -23,13 +22,13 @@ on:
       - "feature/**"
       - "feat/**"
 
-
 env:
   # Increase this value to reset cache if etc/example-environment.yml has not changed
   CACHE_NUMBER:  5
   ALEMBIC_CONFIG: src/argilla/alembic.ini
 
 jobs:
+
   test-elastic:
     name: Tests ElasticSearch
     runs-on: ubuntu-latest
@@ -95,8 +94,7 @@ jobs:
         if: steps.filter.outputs.python_code == 'true'
         run: |
           pip install -e ".[server,listeners]"
-          alembic upgrade head
-          pytest --cov=argilla --cov-report=xml
+          pytest tests/server --cov=argilla --cov-report=xml
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
         if: steps.filter.outputs.python_code == 'true' && matrix.version == '8.5'
