@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-const LOCAL_ENVIRONMENT = "https://dev.argilla.io/";
+const LOCAL_ENVIRONMENT = "http://localhost:6900";
 const BASE_URL = process.env.BASE_URL ?? LOCAL_ENVIRONMENT;
 const DIST_FOLDER = process.env.DIST_FOLDER || "dist";
 
