@@ -33,14 +33,10 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { Notification } from "@/models/Notifications";
-import {
-  getFeedbackDatasetNameById,
-  getFeedbackDatasetWorkspaceNameById,
-  deleteDatasetById,
-} from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
-import { urlDeleteDatasetV1 } from "/utils/url.properties";
+import { deleteDatasetById } from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
+import { urlDeleteDatasetV1 } from "@/utils/url.properties";
 
 const TYPE_OF_FEEDBACK = Object.freeze({
   NOT_ALLOWED_TO_DELETE_DATASET: "NOT_ALLOWED_TO_DELETE_DATASET",
@@ -49,28 +45,26 @@ const TYPE_OF_FEEDBACK = Object.freeze({
 export default {
   name: "DatasetDeleteFeedbackTaskComponent",
   props: {
-    datasetId: {
-      type: String,
+    dataset: {
+      type: Object,
       required: true,
     },
   },
-  created() {
-    this.sectionTitle = "Danger zone";
-    this.datasetName = getFeedbackDatasetNameById(this.datasetId);
-    this.workspace = getFeedbackDatasetWorkspaceNameById(this.datasetId);
-
-    this.datasetDeleteTitle = `Delete <strong>${this.datasetName}</strong>`;
-    this.modalTitle = `Delete confirmation`;
-    this.modalDescription = `You are about to delete: <strong>${this.datasetName}</strong> from workspace <strong>${this.workspace}</strong>. This action cannot be undone`;
-  },
+  created() {},
   data() {
     return {
       showDeleteModal: false,
+      sectionTitle: "Danger zone",
+      datasetName: this.dataset.name,
+      workspace: this.dataset.workspace,
+      datasetDeleteTitle: `Delete <strong>${this.dataset.name}</strong>`,
+      modalTitle: `Delete confirmation`,
+      modalDescription: `You are about to delete: <strong>${this.dataset.name}</strong> from workspace <strong>${this.dataset.workspace}</strong>. This action cannot be undone`,
     };
   },
   methods: {
-    toggleDeleteModal(value) {
-      this.showDeleteModal = value;
+    toggleDeleteModal(show) {
+      this.showDeleteModal = show;
     },
     async onConfirmDeleteDataset() {
       try {
@@ -101,12 +95,14 @@ export default {
         message = `${this.datasetName} has been deleted`;
         typeOfNotification = "success";
       } catch ({ response }) {
-        let { status } = response;
+        const { status } = response;
         statusCall = status;
         message = `It is not possible to delete ${this.datasetName}`;
         typeOfNotification = "error";
         if (status === 403) {
-          throw { response: TYPE_OF_FEEDBACK.NOT_ALLOWED_TO_DELETE_DATASET };
+          throw {
+            response: TYPE_OF_FEEDBACK.NOT_ALLOWED_TO_DELETE_DATASET,
+          };
         }
       } finally {
         statusCall === 403 ||

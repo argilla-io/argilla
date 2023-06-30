@@ -20,13 +20,6 @@
 <script>
 import "assets/icons/unavailable";
 export default {
-  props: {
-    workspace: {
-      required: true,
-      type: String,
-    },
-  },
-
   methods: {
     generateCodeSnippet() {
       return `# install datasets library with pip install datasets

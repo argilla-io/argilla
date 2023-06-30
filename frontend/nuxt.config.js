@@ -60,7 +60,6 @@ export default {
     { src: "~/plugins/svgicon.js" },
     { src: "~/plugins/vue-vega.js" },
     { src: "~/plugins/click-outside.js" },
-    { src: "~/plugins/mock.js" },
     { src: "~/plugins/virtualScroller.js" },
     { src: "~/plugins/toast.js" },
     { src: "~/plugins/highlight-search.js" },
@@ -87,7 +86,12 @@ export default {
   },
 
   // Modules for dev and build (recommended) (https://go.nuxtjs.dev/config-modules)
-  buildModules: [],
+  buildModules: [
+    // https://go.nuxtjs.dev/typescript
+    "@nuxt/typescript-build",
+    "@nuxtjs/composition-api/module",
+    ["@pinia/nuxt", { disableVuex: false }],
+  ],
 
   // Modules (https://go.nuxtjs.dev/config-modules)
   modules: [
@@ -176,7 +180,7 @@ export default {
   },
 
   router: {
-    middleware: ["auth-guard"],
-    base: process.env.BASE_URL ? process.env.BASE_URL : "/",
+    middleware: ["auth-guard", "register-dependencies"],
+    base: process.env.BASE_URL ?? "/",
   },
 };
