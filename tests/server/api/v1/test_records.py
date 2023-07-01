@@ -763,6 +763,46 @@ async def test_create_record_response_with_nonexistent_record_id(
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
 
+@pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin, UserRole.owner])
+@pytest.mark.asyncio
+async def test_get_record_suggestions(client: TestClient, role: UserRole):
+    dataset = await DatasetFactory.create()
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+    record = await RecordFactory.create(dataset=dataset)
+    question_a = await TextQuestionFactory.create(dataset=dataset)
+    question_b = await TextQuestionFactory.create(dataset=dataset)
+    suggestion_a = await SuggestionFactory.create(
+        question=question_a, record=record, value="This is a unit test suggestion"
+    )
+    suggestion_b = await SuggestionFactory.create(
+        question=question_b, record=record, value="This is a another unit test suggestion"
+    )
+
+    response = client.get(f"/api/v1/records/{record.id}/suggestions", headers={API_KEY_HEADER_NAME: user.api_key})
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "items": [
+            {
+                "id": str(suggestion_a.id),
+                "question_id": str(question_a.id),
+                "type": None,
+                "score": None,
+                "value": "This is a unit test suggestion",
+                "agent": None,
+            },
+            {
+                "id": str(suggestion_b.id),
+                "question_id": str(question_b.id),
+                "type": None,
+                "score": None,
+                "value": "This is a another unit test suggestion",
+                "agent": None,
+            },
+        ]
+    }
+
+
 @pytest.mark.parametrize(
     "payload",
     [
@@ -780,15 +820,17 @@ async def test_create_record_response_with_nonexistent_record_id(
         },
     ],
 )
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
-async def test_create_record_suggestion(client: TestClient, db: "AsyncSession", owner_auth_header: dict, payload: dict):
+async def test_create_record_suggestion(client: TestClient, db: "AsyncSession", role: UserRole, payload: dict):
     dataset = await DatasetFactory.create()
     question = await TextQuestionFactory.create(dataset=dataset)
-    record = await RecordFactory.create()
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+    record = await RecordFactory.create(dataset=dataset)
 
     response = client.post(
         f"/api/v1/records/{record.id}/suggestions",
-        headers=owner_auth_header,
+        headers={API_KEY_HEADER_NAME: user.api_key},
         json={"question_id": str(question.id), **payload},
     )
 
