@@ -234,6 +234,8 @@ async def get_records_by_ids(
             ).options(contains_eager(Record.responses))
         else:
             query = query.options(joinedload(Record.responses))
+    if RecordInclude.suggestions in include:
+        query = query.options(joinedload(Record.suggestions))
     result = await db.execute(query)
     return result.unique().scalars().all()
 
