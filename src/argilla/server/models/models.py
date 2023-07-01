@@ -133,6 +133,7 @@ class Suggestion(TimestampMixin, Base):
     question_id: Mapped[UUID] = mapped_column(ForeignKey("questions.id", ondelete="CASCADE"), index=True)
 
     record: Mapped["Record"] = relationship(back_populates="suggestions")
+    question: Mapped["Question"] = relationship(back_populates="suggestions")
 
     __table_args__ = (CheckConstraint("score IS NULL OR score >= 0 AND score <= 1", name="suggestion_score_check"),)
 
@@ -180,6 +181,7 @@ class Question(TimestampMixin, Base):
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
 
     dataset: Mapped["Dataset"] = relationship(back_populates="questions")
+    suggestions: Mapped[List["Suggestion"]] = relationship(back_populates="question")
 
     __table_args__ = (UniqueConstraint("name", "dataset_id", name="question_name_dataset_id_uq"),)
 
