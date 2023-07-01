@@ -18,7 +18,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.models import Record, Response, User, UserRole
+from argilla.server.models import Response, Suggestion, User, UserRole
 from argilla.server.search_engine import SearchEngine
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
@@ -32,6 +32,7 @@ from tests.factories import (
     RatingQuestionFactory,
     RecordFactory,
     ResponseFactory,
+    SuggestionFactory,
     TextQuestionFactory,
     UserFactory,
     WorkspaceFactory,
@@ -760,3 +761,81 @@ async def test_create_record_response_with_nonexistent_record_id(
 
     assert response.status_code == 404
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {
+            "type": "model",
+            "score": 1,
+            "value": "This is a unit test suggestion",
+            "agent": "unit-test-agent",
+        },
+        {
+            "type": None,
+            "score": None,
+            "value": "This is a unit test suggestion",
+            "agent": None,
+        },
+    ],
+)
+@pytest.mark.asyncio
+async def test_create_record_suggestion(client: TestClient, db: "AsyncSession", owner_auth_header: dict, payload: dict):
+    dataset = await DatasetFactory.create()
+    question = await TextQuestionFactory.create(dataset=dataset)
+    record = await RecordFactory.create()
+
+    response = client.post(
+        f"/api/v1/records/{record.id}/suggestions",
+        headers=owner_auth_header,
+        json={"question_id": str(question.id), **payload},
+    )
+
+    response_body = response.json()
+    assert response.status_code == 201
+    assert response_body == {"id": response_body["id"], "question_id": str(question.id), **payload}
+    assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 1
+
+
+@pytest.mark.asyncio
+async def test_create_record_suggestion_already_existing(client: TestClient, owner_auth_header: dict):
+    dataset = await DatasetFactory.create()
+    question = await TextQuestionFactory.create(dataset=dataset)
+    record = await RecordFactory.create()
+    await SuggestionFactory.create(question=question, record=record)
+
+    response = client.post(
+        f"/api/v1/records/{record.id}/suggestions",
+        headers=owner_auth_header,
+        json={"question_id": str(question.id), "value": "This is a unit test suggestion"},
+    )
+
+    assert response.status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_create_record_suggestion_for_non_existent_question(client: TestClient, owner_auth_header: dict):
+    record = await RecordFactory.create()
+
+    response = client.post(
+        f"/api/v1/records/{record.id}/suggestions",
+        headers=owner_auth_header,
+        json={"question_id": str(uuid4()), "value": "This is a unit test suggestion"},
+    )
+
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_create_record_suggestion_as_annotator(client: TestClient):
+    annotator = await UserFactory.create(role=UserRole.annotator)
+    record = await RecordFactory.create()
+
+    response = client.post(
+        f"/api/v1/records/{record.id}/suggestions",
+        headers={API_KEY_HEADER_NAME: annotator.api_key},
+        json={"question_id": str(uuid4()), "value": "This is a unit test suggestion"},
+    )
+
+    assert response.status_code == 403
