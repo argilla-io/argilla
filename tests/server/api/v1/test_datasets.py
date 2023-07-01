@@ -28,8 +28,10 @@ from argilla.server.models import (
     Record,
     Response,
     ResponseStatus,
+    Suggestion,
     User,
     UserRole,
+    Workspace,
 )
 from argilla.server.schemas.v1.datasets import (
     DATASET_CREATE_GUIDELINES_MAX_LENGTH,
@@ -69,6 +71,7 @@ from tests.factories import (
     RatingQuestionFactory,
     RecordFactory,
     ResponseFactory,
+    SuggestionFactory,
     TextFieldFactory,
     TextQuestionFactory,
     UserFactory,
@@ -437,38 +440,100 @@ async def test_list_dataset_records(client: TestClient, owner_auth_header: dict)
     }
 
 
+@pytest.mark.parametrize(
+    "includes",
+    [[RecordInclude.responses], [RecordInclude.suggestions], [RecordInclude.responses, RecordInclude.suggestions]],
+)
 @pytest.mark.asyncio
-async def test_list_dataset_records_with_include_responses(client: TestClient, owner_auth_header: dict):
-    dataset = await DatasetFactory.create()
-    record_a = await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
-    record_b = await RecordFactory.create(fields={"record_b": "value_b"}, metadata_={"unit": "test"}, dataset=dataset)
-    record_c = await RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
-
-    response_a = await ResponseFactory.create(
-        values={
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "yes"},
-        },
-        record=record_a,
-    )
-
-    response_b_1 = await ResponseFactory.create(
-        values={
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "no"},
-        },
-        record=record_b,
-    )
-    response_b_2 = await ResponseFactory.create(
-        values={
-            "input_ok": {"value": "no"},
-            "output_ok": {"value": "no"},
-        },
-        record=record_b,
-    )
+async def test_list_dataset_records_with_include(
+    client: TestClient, owner: User, owner_auth_header: dict, includes: List[RecordInclude]
+):
+    workspace = await WorkspaceFactory.create()
+    dataset, questions, records, responses, suggestions = await create_dataset_with_user_responses(owner, workspace)
+    record_a, record_b, record_c = records
+    response_a_user, response_b_user = responses[1], responses[3]
+    suggestion_a, suggestion_b = suggestions
 
     other_dataset = await DatasetFactory.create()
     await RecordFactory.create_batch(size=2, dataset=other_dataset)
+
+    expected = {
+        "items": [
+            {
+                "id": str(record_a.id),
+                "fields": {"input": "value_a"},
+                "metadata": None,
+                "external_id": record_a.external_id,
+                "inserted_at": record_a.inserted_at.isoformat(),
+                "updated_at": record_a.updated_at.isoformat(),
+            },
+            {
+                "id": str(record_b.id),
+                "fields": {"input": "value_b"},
+                "metadata": {"unit": "test"},
+                "external_id": record_b.external_id,
+                "inserted_at": record_b.inserted_at.isoformat(),
+                "updated_at": record_b.updated_at.isoformat(),
+            },
+            {
+                "id": str(record_c.id),
+                "fields": {"input": "value_c"},
+                "metadata": None,
+                "external_id": record_c.external_id,
+                "inserted_at": record_c.inserted_at.isoformat(),
+                "updated_at": record_c.updated_at.isoformat(),
+            },
+        ],
+    }
+
+    if RecordInclude.responses in includes:
+        expected["items"][0]["responses"] = [
+            {
+                "id": str(response_a_user.id),
+                "values": None,
+                "status": "discarded",
+                "user_id": str(owner.id),
+                "inserted_at": response_a_user.inserted_at.isoformat(),
+                "updated_at": response_a_user.updated_at.isoformat(),
+            }
+        ]
+        expected["items"][1]["responses"] = [
+            {
+                "id": str(response_b_user.id),
+                "values": {
+                    "input_ok": {"value": "no"},
+                    "output_ok": {"value": "no"},
+                },
+                "status": "submitted",
+                "user_id": str(owner.id),
+                "inserted_at": response_b_user.inserted_at.isoformat(),
+                "updated_at": response_b_user.updated_at.isoformat(),
+            },
+        ]
+        expected["items"][2]["responses"] = []
+
+    if RecordInclude.suggestions in includes:
+        expected["items"][0]["suggestions"] = [
+            {
+                "id": str(suggestion_a.id),
+                "value": "option-1",
+                "score": None,
+                "agent": None,
+                "type": None,
+                "question_id": str(questions[0].id),
+            }
+        ]
+        expected["items"][1]["suggestions"] = [
+            {
+                "id": str(suggestion_b.id),
+                "value": "option-2",
+                "score": 0.75,
+                "agent": "unit-test-agent",
+                "type": "model",
+                "question_id": str(questions[0].id),
+            }
+        ]
+        expected["items"][2]["suggestions"] = []
 
     response = client.get(
         f"/api/v1/datasets/{dataset.id}/records",
@@ -477,72 +542,6 @@ async def test_list_dataset_records_with_include_responses(client: TestClient, o
     )
 
     assert response.status_code == 200
-    assert response.json() == {
-        "items": [
-            {
-                "id": str(record_a.id),
-                "fields": {"record_a": "value_a"},
-                "metadata": None,
-                "external_id": record_a.external_id,
-                "responses": [
-                    {
-                        "id": str(response_a.id),
-                        "values": {
-                            "input_ok": {"value": "yes"},
-                            "output_ok": {"value": "yes"},
-                        },
-                        "status": "submitted",
-                        "user_id": str(response_a.user_id),
-                        "inserted_at": response_a.inserted_at.isoformat(),
-                        "updated_at": response_a.updated_at.isoformat(),
-                    },
-                ],
-                "inserted_at": record_a.inserted_at.isoformat(),
-                "updated_at": record_a.updated_at.isoformat(),
-            },
-            {
-                "id": str(record_b.id),
-                "fields": {"record_b": "value_b"},
-                "metadata": {"unit": "test"},
-                "external_id": record_b.external_id,
-                "responses": [
-                    {
-                        "id": str(response_b_1.id),
-                        "values": {
-                            "input_ok": {"value": "yes"},
-                            "output_ok": {"value": "no"},
-                        },
-                        "status": "submitted",
-                        "user_id": str(response_b_1.user_id),
-                        "inserted_at": response_b_1.inserted_at.isoformat(),
-                        "updated_at": response_b_1.updated_at.isoformat(),
-                    },
-                    {
-                        "id": str(response_b_2.id),
-                        "values": {
-                            "input_ok": {"value": "no"},
-                            "output_ok": {"value": "no"},
-                        },
-                        "status": "submitted",
-                        "user_id": str(response_b_2.user_id),
-                        "inserted_at": response_b_2.inserted_at.isoformat(),
-                        "updated_at": response_b_2.updated_at.isoformat(),
-                    },
-                ],
-                "inserted_at": record_b.inserted_at.isoformat(),
-                "updated_at": record_b.updated_at.isoformat(),
-            },
-            {
-                "id": str(record_c.id),
-                "fields": {"record_c": "value_c"},
-                "metadata": None,
-                "external_id": record_c.external_id,
-                "responses": [],
-                "inserted_at": record_c.inserted_at.isoformat(),
-                "updated_at": record_c.updated_at.isoformat(),
-            },
-        ],
-    }
 
 
 @pytest.mark.asyncio
@@ -644,21 +643,87 @@ async def test_list_dataset_records_as_annotator(client: TestClient):
     assert response.status_code == 403
 
 
+async def create_dataset_with_user_responses(
+    user: User, workspace: Workspace
+) -> Tuple[Dataset, List[Question], List[Record], List[Response], List[Suggestion]]:
+    dataset = await DatasetFactory.create(workspace=workspace)
+    await TextFieldFactory.create(name="input", dataset=dataset)
+    await TextFieldFactory.create(name="output", dataset=dataset)
+
+    annotator = await AnnotatorFactory.create(workspaces=[dataset.workspace])
+
+    questions = [
+        await LabelSelectionQuestionFactory.create(dataset=dataset),
+        await TextQuestionFactory.create(name="input_ok", dataset=dataset),
+        await TextQuestionFactory.create(name="output_ok", dataset=dataset),
+    ]
+
+    records = [
+        await RecordFactory.create(fields={"input": "input_a", "output": "output_a"}, dataset=dataset),
+        await RecordFactory.create(
+            fields={"input": "input_b", "output": "output_b"}, metadata_={"unit": "test"}, dataset=dataset
+        ),
+        await RecordFactory.create(fields={"input": "input_c", "output": "output_c"}, dataset=dataset),
+    ]
+
+    responses = [
+        await ResponseFactory.create(
+            values={
+                "input_ok": {"value": "yes"},
+                "output_ok": {"value": "yes"},
+            },
+            record=records[0],
+            user=annotator,
+        ),
+        await ResponseFactory.create(status="discarded", record=records[0], user=user),
+        await ResponseFactory.create(
+            values={
+                "input_ok": {"value": "yes"},
+                "output_ok": {"value": "no"},
+            },
+            record=records[1],
+            user=annotator,
+        ),
+        await ResponseFactory.create(
+            values={
+                "input_ok": {"value": "no"},
+                "output_ok": {"value": "no"},
+            },
+            record=records[1],
+            user=user,
+        ),
+        await ResponseFactory.create(
+            values={
+                "input_ok": {"value": "yes"},
+                "output_ok": {"value": "yes"},
+            },
+            record=records[1],
+        ),
+    ]
+
+    # Add some responses from other users
+    await ResponseFactory.create_batch(10, record=records[0], status=ResponseStatus.submitted)
+
+    suggestions = [
+        await SuggestionFactory.create(record=records[0], question=questions[0], value="option-1"),
+        await SuggestionFactory.create(
+            record=records[1],
+            question=questions[0],
+            value="option-2",
+            score=0.75,
+            agent="unit-test-agent",
+            type="model",
+        ),
+    ]
+
+    return dataset, questions, records, responses, suggestions
+
+
 @pytest.mark.asyncio
 async def test_list_current_user_dataset_records(client: TestClient, owner: User, owner_auth_header: dict):
-    dataset = await DatasetFactory.create()
-    record_a = await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
-    record_b = await RecordFactory.create(fields={"record_b": "value_b"}, metadata_={"unit": "test"}, dataset=dataset)
-    record_c = await RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
-    # This response should not be included in the response
-    await ResponseFactory.create(
-        values={
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "yes"},
-        },
-        record=record_a,
-        user=owner,
-    )
+    workspace = await WorkspaceFactory.create()
+    dataset, _, records, _, _ = await create_dataset_with_user_responses(owner, workspace)
+    record_a, record_b, record_c = records
 
     other_dataset = await DatasetFactory.create()
     await RecordFactory.create_batch(size=2, dataset=other_dataset)
@@ -670,7 +735,7 @@ async def test_list_current_user_dataset_records(client: TestClient, owner: User
         "items": [
             {
                 "id": str(record_a.id),
-                "fields": {"record_a": "value_a"},
+                "fields": {"input": "input_a", "output": "output_a"},
                 "metadata": None,
                 "external_id": record_a.external_id,
                 "inserted_at": record_a.inserted_at.isoformat(),
@@ -678,7 +743,7 @@ async def test_list_current_user_dataset_records(client: TestClient, owner: User
             },
             {
                 "id": str(record_b.id),
-                "fields": {"record_b": "value_b"},
+                "fields": {"input": "input_b", "output": "output_b"},
                 "metadata": {"unit": "test"},
                 "external_id": record_b.external_id,
                 "inserted_at": record_b.inserted_at.isoformat(),
@@ -686,7 +751,7 @@ async def test_list_current_user_dataset_records(client: TestClient, owner: User
             },
             {
                 "id": str(record_c.id),
-                "fields": {"record_c": "value_c"},
+                "fields": {"input": "input_c", "output": "output_c"},
                 "metadata": None,
                 "external_id": record_c.external_id,
                 "inserted_at": record_c.inserted_at.isoformat(),
@@ -696,115 +761,110 @@ async def test_list_current_user_dataset_records(client: TestClient, owner: User
     }
 
 
+@pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin, UserRole.owner])
+@pytest.mark.parametrize(
+    "includes",
+    [[RecordInclude.responses], [RecordInclude.suggestions], [RecordInclude.responses, RecordInclude.suggestions]],
+)
 @pytest.mark.asyncio
-async def test_list_current_user_dataset_records_with_include_responses(
-    client: TestClient, owner: "User", owner_auth_header: dict
+async def test_list_current_user_dataset_records_with_include(
+    client: TestClient, role: UserRole, includes: List[RecordInclude]
 ):
-    dataset = await DatasetFactory.create()
-    annotator = await AnnotatorFactory.create(workspaces=[dataset.workspace])
-    record_a = await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
-    record_b = await RecordFactory.create(fields={"record_b": "value_b"}, metadata_={"unit": "test"}, dataset=dataset)
-    record_c = await RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
-
-    await ResponseFactory.create(
-        values={
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "yes"},
-        },
-        record=record_a,
-        user=annotator,
-    )
-    response_a_owner = await ResponseFactory.create(
-        status="discarded",
-        record=record_a,
-        user=owner,
-    )
-    await ResponseFactory.create(
-        values={
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "no"},
-        },
-        record=record_b,
-        user=annotator,
-    )
-    response_b_owner = await ResponseFactory.create(
-        values={
-            "input_ok": {"value": "no"},
-            "output_ok": {"value": "no"},
-        },
-        record=record_b,
-        user=owner,
-    )
-    await ResponseFactory.create(
-        values={
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "yes"},
-        },
-        record=record_b,
-    )
+    workspace = await WorkspaceFactory.create()
+    user = await UserFactory.create(workspaces=[workspace], role=role)
+    dataset, questions, records, responses, suggestions = await create_dataset_with_user_responses(user, workspace)
+    record_a, record_b, record_c = records
+    response_a_user, response_b_user = responses[1], responses[3]
+    suggestion_a, suggestion_b = suggestions
 
     other_dataset = await DatasetFactory.create()
     await RecordFactory.create_batch(size=2, dataset=other_dataset)
 
+    params = [("include", include.value) for include in includes]
     response = client.get(
-        f"/api/v1/me/datasets/{dataset.id}/records",
-        params={"include": RecordInclude.responses.value},
-        headers=owner_auth_header,
+        f"/api/v1/me/datasets/{dataset.id}/records", params=params, headers={API_KEY_HEADER_NAME: user.api_key}
     )
 
-    assert response.status_code == 200
-    assert response.json() == {
+    expected = {
         "items": [
             {
                 "id": str(record_a.id),
-                "fields": {"record_a": "value_a"},
+                "fields": {"input": "input_a", "output": "output_a"},
                 "metadata": None,
                 "external_id": record_a.external_id,
-                "responses": [
-                    {
-                        "id": str(response_a_owner.id),
-                        "values": None,
-                        "status": "discarded",
-                        "user_id": str(owner.id),
-                        "inserted_at": response_a_owner.inserted_at.isoformat(),
-                        "updated_at": response_a_owner.updated_at.isoformat(),
-                    }
-                ],
                 "inserted_at": record_a.inserted_at.isoformat(),
                 "updated_at": record_a.updated_at.isoformat(),
             },
             {
                 "id": str(record_b.id),
-                "fields": {"record_b": "value_b"},
+                "fields": {"input": "input_b", "output": "output_b"},
                 "metadata": {"unit": "test"},
                 "external_id": record_b.external_id,
-                "responses": [
-                    {
-                        "id": str(response_b_owner.id),
-                        "values": {
-                            "input_ok": {"value": "no"},
-                            "output_ok": {"value": "no"},
-                        },
-                        "status": "submitted",
-                        "user_id": str(owner.id),
-                        "inserted_at": response_b_owner.inserted_at.isoformat(),
-                        "updated_at": response_b_owner.updated_at.isoformat(),
-                    },
-                ],
                 "inserted_at": record_b.inserted_at.isoformat(),
                 "updated_at": record_b.updated_at.isoformat(),
             },
             {
                 "id": str(record_c.id),
-                "fields": {"record_c": "value_c"},
+                "fields": {"input": "input_c", "output": "output_c"},
                 "metadata": None,
                 "external_id": record_c.external_id,
-                "responses": [],
                 "inserted_at": record_c.inserted_at.isoformat(),
                 "updated_at": record_c.updated_at.isoformat(),
             },
         ],
     }
+
+    if RecordInclude.responses in includes:
+        expected["items"][0]["responses"] = [
+            {
+                "id": str(response_a_user.id),
+                "values": None,
+                "status": "discarded",
+                "user_id": str(user.id),
+                "inserted_at": response_a_user.inserted_at.isoformat(),
+                "updated_at": response_a_user.updated_at.isoformat(),
+            }
+        ]
+        expected["items"][1]["responses"] = [
+            {
+                "id": str(response_b_user.id),
+                "values": {
+                    "input_ok": {"value": "no"},
+                    "output_ok": {"value": "no"},
+                },
+                "status": "submitted",
+                "user_id": str(user.id),
+                "inserted_at": response_b_user.inserted_at.isoformat(),
+                "updated_at": response_b_user.updated_at.isoformat(),
+            },
+        ]
+        expected["items"][2]["responses"] = []
+
+    if RecordInclude.suggestions in includes:
+        expected["items"][0]["suggestions"] = [
+            {
+                "id": str(suggestion_a.id),
+                "value": "option-1",
+                "score": None,
+                "agent": None,
+                "type": None,
+                "question_id": str(questions[0].id),
+            }
+        ]
+        expected["items"][1]["suggestions"] = [
+            {
+                "id": str(suggestion_b.id),
+                "value": "option-2",
+                "score": 0.75,
+                "agent": "unit-test-agent",
+                "type": "model",
+                "question_id": str(questions[0].id),
+            }
+        ]
+        expected["items"][2]["suggestions"] = []
+
+    assert response.status_code == 200
+    assert response.json() == expected
 
 
 @pytest.mark.asyncio
@@ -961,119 +1021,6 @@ async def test_list_current_user_dataset_records_as_restricted_user(client: Test
                 "fields": {"record_c": "value_c"},
                 "metadata": None,
                 "external_id": record_c.external_id,
-                "inserted_at": record_c.inserted_at.isoformat(),
-                "updated_at": record_c.updated_at.isoformat(),
-            },
-        ],
-    }
-
-
-@pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-@pytest.mark.asyncio
-async def test_list_current_user_dataset_records_as_restricted_user_with_include_responses(
-    client: TestClient, owner: User, role: UserRole
-):
-    dataset = await DatasetFactory.create()
-
-    user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
-    record_a = await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
-    record_b = await RecordFactory.create(fields={"record_b": "value_b"}, metadata_={"unit": "test"}, dataset=dataset)
-    record_c = await RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
-
-    response_a_owner = await ResponseFactory.create(
-        values={
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "yes"},
-        },
-        record=record_a,
-        user=owner,
-    )
-    response_a_annotator = await ResponseFactory.create(
-        status="discarded",
-        record=record_a,
-        user=user,
-    )
-    response_b_owner = await ResponseFactory.create(
-        values={
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "no"},
-        },
-        record=record_b,
-        user=owner,
-    )
-    response_b_annotator = await ResponseFactory.create(
-        values={
-            "input_ok": {"value": "no"},
-            "output_ok": {"value": "no"},
-        },
-        record=record_b,
-        user=user,
-    )
-    await ResponseFactory.create(
-        values={
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "yes"},
-        },
-        record=record_b,
-    )
-
-    other_dataset = await DatasetFactory.create()
-    await RecordFactory.create_batch(size=2, dataset=other_dataset)
-
-    response = client.get(
-        f"/api/v1/me/datasets/{dataset.id}/records",
-        params={"include": RecordInclude.responses.value},
-        headers={API_KEY_HEADER_NAME: user.api_key},
-    )
-
-    assert response.status_code == 200
-    assert response.json() == {
-        "items": [
-            {
-                "id": str(record_a.id),
-                "fields": {"record_a": "value_a"},
-                "metadata": None,
-                "external_id": record_a.external_id,
-                "responses": [
-                    {
-                        "id": str(response_a_annotator.id),
-                        "values": None,
-                        "status": "discarded",
-                        "user_id": str(user.id),
-                        "inserted_at": response_a_annotator.inserted_at.isoformat(),
-                        "updated_at": response_a_annotator.updated_at.isoformat(),
-                    }
-                ],
-                "inserted_at": record_a.inserted_at.isoformat(),
-                "updated_at": record_a.updated_at.isoformat(),
-            },
-            {
-                "id": str(record_b.id),
-                "fields": {"record_b": "value_b"},
-                "metadata": {"unit": "test"},
-                "external_id": record_b.external_id,
-                "responses": [
-                    {
-                        "id": str(response_b_annotator.id),
-                        "values": {
-                            "input_ok": {"value": "no"},
-                            "output_ok": {"value": "no"},
-                        },
-                        "status": "submitted",
-                        "user_id": str(user.id),
-                        "inserted_at": response_b_annotator.inserted_at.isoformat(),
-                        "updated_at": response_b_annotator.updated_at.isoformat(),
-                    },
-                ],
-                "inserted_at": record_b.inserted_at.isoformat(),
-                "updated_at": record_b.updated_at.isoformat(),
-            },
-            {
-                "id": str(record_c.id),
-                "fields": {"record_c": "value_c"},
-                "metadata": None,
-                "external_id": record_c.external_id,
-                "responses": [],
                 "inserted_at": record_c.inserted_at.isoformat(),
                 "updated_at": record_c.updated_at.isoformat(),
             },
@@ -2806,56 +2753,12 @@ async def test_create_dataset_records_with_nonexistent_dataset_id(
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
 
-async def create_dataset_for_search(user: Optional[User] = None) -> Tuple[Dataset, List[Record], List[Response]]:
-    dataset = await DatasetFactory.create(status=DatasetStatus.ready)
-    await TextFieldFactory.create(name="input", dataset=dataset)
-    await TextFieldFactory.create(name="output", dataset=dataset)
-    await TextQuestionFactory.create(name="input_ok", dataset=dataset)
-    await TextQuestionFactory.create(name="output_ok", dataset=dataset)
-    records = [
-        await RecordFactory.create(dataset=dataset, fields={"input": "Say Hello", "output": "Hello"}),
-        await RecordFactory.create(
-            dataset=dataset, metadata_={"unit": "test"}, fields={"input": "Hello", "output": "Hi"}
-        ),
-        await RecordFactory.create(dataset=dataset, fields={"input": "Say Goodbye", "output": "Goodbye"}),
-        await RecordFactory.create(dataset=dataset, fields={"input": "Say bye", "output": "Bye"}),
-    ]
-    responses = [
-        await ResponseFactory.create(
-            record=records[0],
-            values={"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
-            status=ResponseStatus.submitted,
-            user=user,
-        ),
-        await ResponseFactory.create(
-            record=records[1],
-            values={"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
-            status=ResponseStatus.submitted,
-            user=user,
-        ),
-        await ResponseFactory.create(
-            record=records[2],
-            values={"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
-            status=ResponseStatus.submitted,
-            user=user,
-        ),
-        await ResponseFactory.create(
-            record=records[3],
-            values={"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
-            status=ResponseStatus.submitted,
-            user=user,
-        ),
-    ]
-    # Add some responses from other users
-    await ResponseFactory.create_batch(10, record=records[0], status=ResponseStatus.submitted)
-    return dataset, records, responses
-
-
 @pytest.mark.asyncio
 async def test_search_dataset_records(
     client: TestClient, mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
 ):
-    dataset, records, _ = await create_dataset_for_search(user=owner)
+    workspace = await WorkspaceFactory.create()
+    dataset, _, records, _, _ = await create_dataset_with_user_responses(owner, workspace)
 
     mock_search_engine.search.return_value = SearchResponses(
         items=[
@@ -2888,10 +2791,7 @@ async def test_search_dataset_records(
             {
                 "record": {
                     "id": str(records[0].id),
-                    "fields": {
-                        "input": "Say Hello",
-                        "output": "Hello",
-                    },
+                    "fields": {"input": "input_a", "output": "output_a"},
                     "metadata": None,
                     "external_id": records[0].external_id,
                     "inserted_at": records[0].inserted_at.isoformat(),
@@ -2902,10 +2802,7 @@ async def test_search_dataset_records(
             {
                 "record": {
                     "id": str(records[1].id),
-                    "fields": {
-                        "input": "Hello",
-                        "output": "Hi",
-                    },
+                    "fields": {"input": "input_b", "output": "output_b"},
                     "metadata": {"unit": "test"},
                     "external_id": records[1].external_id,
                     "inserted_at": records[1].inserted_at.isoformat(),
@@ -2918,11 +2815,20 @@ async def test_search_dataset_records(
     }
 
 
+@pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin, UserRole.owner])
+@pytest.mark.parametrize(
+    "includes",
+    [[RecordInclude.responses], [RecordInclude.suggestions], [RecordInclude.responses, RecordInclude.suggestions]],
+)
 @pytest.mark.asyncio
-async def test_search_dataset_records_including_responses(
-    client: TestClient, mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+async def test_search_dataset_records_with_include(
+    client: TestClient, mock_search_engine: SearchEngine, role: UserRole, includes: List[RecordInclude]
 ):
-    dataset, records, responses = await create_dataset_for_search(user=owner)
+    workspace = await WorkspaceFactory.create()
+    user = await UserFactory.create(workspaces=[workspace], role=role)
+    dataset, questions, records, responses, suggestions = await create_dataset_with_user_responses(user, workspace)
+    response_a_user, response_b_user = responses[1], responses[3]
+    suggestion_a, suggestion_b = suggestions
 
     mock_search_engine.search.return_value = SearchResponses(
         items=[
@@ -2933,11 +2839,12 @@ async def test_search_dataset_records_including_responses(
     )
 
     query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
+    params = [("include", include.value) for include in includes]
     response = client.post(
         f"/api/v1/me/datasets/{dataset.id}/records/search",
-        headers=owner_auth_header,
+        headers={API_KEY_HEADER_NAME: user.api_key},
         json=query_json,
-        params={"include": RecordInclude.responses.value},
+        params=params,
     )
 
     mock_search_engine.search.assert_called_once_with(
@@ -2952,31 +2859,18 @@ async def test_search_dataset_records_including_responses(
         offset=0,
         limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
     )
-    assert response.status_code == 200
-    assert response.json() == {
+
+    expected = {
         "items": [
             {
                 "record": {
                     "id": str(records[0].id),
                     "fields": {
-                        "input": "Say Hello",
-                        "output": "Hello",
+                        "input": "input_a",
+                        "output": "output_a",
                     },
                     "metadata": None,
                     "external_id": records[0].external_id,
-                    "responses": [
-                        {
-                            "id": str(responses[0].id),
-                            "values": {
-                                "input_ok": {"value": "yes"},
-                                "output_ok": {"value": "yes"},
-                            },
-                            "status": "submitted",
-                            "user_id": str(responses[0].user_id),
-                            "inserted_at": responses[0].inserted_at.isoformat(),
-                            "updated_at": responses[0].updated_at.isoformat(),
-                        }
-                    ],
                     "inserted_at": records[0].inserted_at.isoformat(),
                     "updated_at": records[0].updated_at.isoformat(),
                 },
@@ -2986,24 +2880,11 @@ async def test_search_dataset_records_including_responses(
                 "record": {
                     "id": str(records[1].id),
                     "fields": {
-                        "input": "Hello",
-                        "output": "Hi",
+                        "input": "input_b",
+                        "output": "output_b",
                     },
                     "metadata": {"unit": "test"},
                     "external_id": records[1].external_id,
-                    "responses": [
-                        {
-                            "id": str(responses[1].id),
-                            "values": {
-                                "input_ok": {"value": "yes"},
-                                "output_ok": {"value": "yes"},
-                            },
-                            "status": "submitted",
-                            "user_id": str(responses[1].user_id),
-                            "inserted_at": responses[1].inserted_at.isoformat(),
-                            "updated_at": responses[1].updated_at.isoformat(),
-                        }
-                    ],
                     "inserted_at": records[1].inserted_at.isoformat(),
                     "updated_at": records[1].updated_at.isoformat(),
                 },
@@ -3013,12 +2894,63 @@ async def test_search_dataset_records_including_responses(
         "total": 2,
     }
 
+    if RecordInclude.responses in includes:
+        expected["items"][0]["record"]["responses"] = [
+            {
+                "id": str(response_a_user.id),
+                "values": None,
+                "status": "discarded",
+                "user_id": str(response_a_user.user_id),
+                "inserted_at": response_a_user.inserted_at.isoformat(),
+                "updated_at": response_a_user.updated_at.isoformat(),
+            }
+        ]
+        expected["items"][1]["record"]["responses"] = [
+            {
+                "id": str(response_b_user.id),
+                "values": {
+                    "input_ok": {"value": "no"},
+                    "output_ok": {"value": "no"},
+                },
+                "status": "submitted",
+                "user_id": str(response_b_user.user_id),
+                "inserted_at": response_b_user.inserted_at.isoformat(),
+                "updated_at": response_b_user.updated_at.isoformat(),
+            }
+        ]
+
+    if RecordInclude.suggestions in includes:
+        expected["items"][0]["record"]["suggestions"] = [
+            {
+                "id": str(suggestion_a.id),
+                "value": "option-1",
+                "score": None,
+                "agent": None,
+                "type": None,
+                "question_id": str(questions[0].id),
+            }
+        ]
+        expected["items"][1]["record"]["suggestions"] = [
+            {
+                "id": str(suggestion_b.id),
+                "value": "option-2",
+                "score": 0.75,
+                "agent": "unit-test-agent",
+                "type": "model",
+                "question_id": str(questions[0].id),
+            }
+        ]
+
+    assert response.status_code == 200
+    assert response.json() == expected
+
 
 @pytest.mark.asyncio
 async def test_search_dataset_records_with_response_status_filter(
     client: TestClient, mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
 ):
-    dataset, _, _ = await create_dataset_for_search(user=owner)
+    workspace = await WorkspaceFactory.create()
+    dataset, _, _, _, _ = await create_dataset_with_user_responses(owner, workspace)
     mock_search_engine.search.return_value = SearchResponses(items=[])
 
     query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
@@ -3043,7 +2975,9 @@ async def test_search_dataset_records_with_response_status_filter(
 async def test_search_dataset_records_with_offset_and_limit(
     client: TestClient, mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
 ):
-    dataset, records, _ = await create_dataset_for_search(user=owner)
+    workspace = await WorkspaceFactory.create()
+    dataset, _, records, _, _ = await create_dataset_with_user_responses(owner, workspace)
+
     mock_search_engine.search.return_value = SearchResponses(
         items=[
             SearchResponseItem(record_id=records[0].id, score=14.2),
@@ -3075,48 +3009,11 @@ async def test_search_dataset_records_with_offset_and_limit(
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
 @pytest.mark.asyncio
-async def test_search_dataset_records_as_restricted_user(
-    client: TestClient, owner: User, mock_search_engine: SearchEngine, role: UserRole
-):
-    dataset, records, _ = await create_dataset_for_search(user=owner)
-    user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
-
-    mock_search_engine.search.return_value = SearchResponses(
-        items=[
-            SearchResponseItem(record_id=records[0].id, score=14.2),
-            SearchResponseItem(record_id=records[1].id, score=12.2),
-        ],
-        total=2,
-    )
-
-    query_json = {"query": {"text": {"q": "unit test", "field": "input"}}}
-    response = client.post(
-        f"/api/v1/me/datasets/{dataset.id}/records/search",
-        headers={API_KEY_HEADER_NAME: user.api_key},
-        json=query_json,
-    )
-
-    mock_search_engine.search.assert_called_once_with(
-        dataset=dataset,
-        query=Query(
-            text=TextQuery(
-                q="unit test",
-                field="input",
-            )
-        ),
-        user_response_status_filter=None,
-        offset=0,
-        limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
-    )
-    assert response.status_code == 200
-
-
-@pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
-@pytest.mark.asyncio
 async def test_search_dataset_records_as_restricted_user_from_different_workspace(client: TestClient, role: UserRole):
-    dataset, _, _ = await create_dataset_for_search()
-    workspace = await WorkspaceFactory.create()
-    user = await UserFactory.create(workspaces=[workspace], role=role)
+    workspace_a = await WorkspaceFactory.create()
+    workspace_b = await WorkspaceFactory.create()
+    user = await UserFactory.create(workspaces=[workspace_a], role=role)
+    dataset, _, _, _, _ = await create_dataset_with_user_responses(user, workspace_b)
 
     query_json = {"query": {"text": {"q": "unit test", "field": "input"}}}
     response = client.post(
@@ -3129,8 +3026,9 @@ async def test_search_dataset_records_as_restricted_user_from_different_workspac
 
 
 @pytest.mark.asyncio
-async def test_search_dataset_records_with_non_existent_field(client: TestClient, owner_auth_header: dict):
-    dataset, _, _ = await create_dataset_for_search()
+async def test_search_dataset_records_with_non_existent_field(client: TestClient, owner: User, owner_auth_header: dict):
+    workspace = await WorkspaceFactory.create()
+    dataset, _, _, _, _ = await create_dataset_with_user_responses(owner, workspace)
 
     query_json = {"query": {"text": {"q": "unit test", "field": "i do not exist"}}}
     response = client.post(

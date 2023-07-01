@@ -24,6 +24,7 @@ from argilla.server.models import (
     QuestionType,
     Record,
     Response,
+    Suggestion,
     User,
     UserRole,
     Workspace,
@@ -300,3 +301,12 @@ class RankingQuestionFactory(QuestionFactory):
             {"value": "completion-c", "text": "Completion C"},
         ],
     }
+
+
+class SuggestionFactory(BaseFactory):
+    class Meta:
+        model = Suggestion
+
+    record = factory.SubFactory(RecordFactory)
+    question = factory.SubFactory(QuestionFactory)
+    value = "negative"
