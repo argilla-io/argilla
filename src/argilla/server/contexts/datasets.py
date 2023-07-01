@@ -212,10 +212,15 @@ async def delete_question(db: "AsyncSession", question: Question) -> Question:
     return question
 
 
-async def get_record_by_id(db: "AsyncSession", record_id: UUID) -> Union[Record, None]:
-    result = await db.execute(
-        select(Record).filter_by(id=record_id).options(selectinload(Record.dataset).selectinload(Dataset.questions))
-    )
+async def get_record_by_id(
+    db: "AsyncSession", record_id: UUID, with_dataset: bool = False, with_suggestions: bool = False
+) -> Union[Record, None]:
+    query = select(Record).filter_by(id=record_id)
+    if with_dataset:
+        query = query.options(selectinload(Record.dataset).selectinload(Dataset.questions))
+    if with_suggestions:
+        query = query.options(selectinload(Record.suggestions))
+    result = await db.execute(query)
     return result.scalar_one_or_none()
 
 

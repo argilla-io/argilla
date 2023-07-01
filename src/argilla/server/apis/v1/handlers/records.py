@@ -22,7 +22,11 @@ from argilla.server.database import get_async_db
 from argilla.server.models import User
 from argilla.server.policies import RecordPolicyV1, authorize
 from argilla.server.schemas.v1.records import Response, ResponseCreate
-from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
+from argilla.server.schemas.v1.suggestions import (
+    Suggestion,
+    SuggestionCreate,
+    Suggestions,
+)
 from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.security import auth
 
@@ -32,8 +36,10 @@ if TYPE_CHECKING:
 router = APIRouter(tags=["records"])
 
 
-async def _get_record(db: AsyncSession, record_id: UUID) -> "Record":
-    record = await datasets.get_record_by_id(db, record_id)
+async def _get_record(
+    db: AsyncSession, record_id: UUID, with_dataset: bool = False, with_suggestions: bool = False
+) -> "Record":
+    record = await datasets.get_record_by_id(db, record_id, with_dataset, with_suggestions)
     if not record:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -51,7 +57,7 @@ async def create_record_response(
     response_create: ResponseCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    record = await _get_record(db, record_id)
+    record = await _get_record(db, record_id, with_dataset=True)
 
     await authorize(current_user, RecordPolicyV1.create_response(record))
 
@@ -69,6 +75,20 @@ async def create_record_response(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
 
+@router.get("/records/{record_id}/suggestions", status_code=status.HTTP_200_OK, response_model=Suggestions)
+async def get_record_suggestions(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    record_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    record = await _get_record(db, record_id, with_dataset=True, with_suggestions=True)
+
+    await authorize(current_user, RecordPolicyV1.get_suggestions(record))
+
+    return Suggestions(items=record.suggestions)
+
+
 @router.post("/records/{record_id}/suggestions", status_code=status.HTTP_201_CREATED, response_model=Suggestion)
 async def create_record_suggestion(
     *,
@@ -77,7 +97,7 @@ async def create_record_suggestion(
     suggestion_create: SuggestionCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    record = await _get_record(db, record_id)
+    record = await _get_record(db, record_id, with_dataset=True)
 
     await authorize(current_user, RecordPolicyV1.create_suggestion(record))
 

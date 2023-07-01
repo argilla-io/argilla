@@ -311,6 +311,15 @@ class RecordPolicyV1:
         return is_allowed
 
     @classmethod
+    def get_suggestions(cls, record: Record) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or await _exists_workspace_user_by_user_and_workspace_id(
+                actor, record.dataset.workspace_id
+            )
+
+        return is_allowed
+
+    @classmethod
     def create_suggestion(cls, record: Record) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
             return actor.is_owner or (
