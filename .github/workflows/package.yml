@@ -46,15 +46,17 @@ jobs:
         --ignore=tests/listeners
     secrets: inherit
 
-#  run_training_tests:
-#    name: Run training tests
-#    uses: ./.github/workflows/run-python-tests.yml
-#    needs: check_repo_files
-#    if: ${{ needs.check_repo_files.outputs.pythonCode }}
-#    # continue-on-error: true
-#    with:
-#      testFolders: tests/client/feedback/training tests/training
-#    secrets: inherit
+  run_training_tests:
+    name: Run training tests
+    uses: ./.github/workflows/run-python-tests.yml
+    needs: check_repo_files
+    if: ${{ needs.check_repo_files.outputs.pythonChanges }}
+    # continue-on-error: true
+    with:
+      pytestArgs: |
+        tests/training \
+        tests/client/feedback/training \
+    secrets: inherit
 
   build:
     name: Build the python package
@@ -117,7 +119,7 @@ jobs:
     needs:
       - build
       - run_tests
-      #- run_training_tests
+      - run_training_tests
     env:
       IS_DEPLOYABLE: ${{ secrets.AR_DOCKER_USERNAME != '' }}
     if: needs.build.outputs.code_changes == 'true'
