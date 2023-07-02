@@ -46,7 +46,7 @@ jobs:
         --ignore=tests/listeners
     secrets: inherit
 
-  run_extra_tests:
+  run_tests_extra:
     name: Run extra tests (training, monitoring and listeners)
     uses: ./.github/workflows/run-python-tests.yml
     needs: check_repo_files
@@ -60,71 +60,24 @@ jobs:
         tests/listeners
     secrets: inherit
 
-  build:
-    name: Build the python package
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash -l {0}
-    # Only build the package if we can deploy it as a docker image
-    env:
-      IS_DEPLOYABLE: ${{ secrets.AR_DOCKER_USERNAME != '' }}
-    outputs:
-      code_changes: ${{ steps.filter.outputs.code_changes }}
-
-    steps:
-      - name: Checkout Code 🛎
-        uses: actions/checkout@v2
-      - name: Check affected files
-        uses: dorny/paths-filter@v2
-        id: filter
-        with:
-          filters: |
-            code_changes:
-              - 'src/**'
-              - 'frontend/**'
-              - 'pyproject.toml'
-              - 'setup.py'
-              - 'docker/**'
-              - 'docker/scripts/*.sh'
-              - '.dockerignore'
-              - '.github/workflows/package.yml'
-      - name: Cache pip 👜
-        uses: actions/cache@v2
-        if: steps.filter.outputs.code_changes == 'true' && env.IS_DEPLOYABLE == 'true'
-        env:
-          # Increase this value to reset cache if pyproject.toml has not changed
-          CACHE_NUMBER: 0
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        if: steps.filter.outputs.code_changes == 'true' && env.IS_DEPLOYABLE == 'true'
-        with:
-          node-version: "14"
-      - name: Build Package 🍟
-        if: steps.filter.outputs.code_changes == 'true' && env.IS_DEPLOYABLE == 'true'
-        run: |
-          pip install -U build
-          scripts/build_distribution.sh
-      - name: Upload package artifact
-        if: steps.filter.outputs.code_changes == 'true' && env.IS_DEPLOYABLE == 'true'
-        uses: actions/upload-artifact@v2
-        with:
-          name: python-package
-          path: dist
+  build_python_package:
+    name: Build Argilla python package
+    uses: ./.github/workflows/build-python-package.yml
+    needs:  check_repo_files
+    if: needs.check_repo_files.outputs.buildChanges
+    secrets: inherit
 
   deploy_docker:
     name: Build docker image
     runs-on: ubuntu-latest
     needs:
-      - build
+      - check_repo_files
+      - build_python_package
       - run_tests
-      - run_training_tests
+      - run_tests_extra
     env:
       IS_DEPLOYABLE: ${{ secrets.AR_DOCKER_USERNAME != '' }}
-    if: needs.build.outputs.code_changes == 'true'
+    if: needs.check_repo_files.outputs.buildChanges
     strategy:
       matrix:
         include:
@@ -137,7 +90,6 @@ jobs:
             dockerfile: docker/quickstart.Dockerfile
             readme: docker/quickstart.README.md
             platforms: linux/amd64,linux/arm64
-
     defaults:
       run:
         shell: bash -l {0}
