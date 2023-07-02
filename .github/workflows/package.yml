@@ -29,9 +29,15 @@ env:
 
 jobs:
 
+  check_repo_files:
+    name: Check source changes
+    uses: ./.github/workflows/check-repo-files.yml
+
   run_tests:
     name: Run server tests
     uses: ./.github/workflows/run-python-tests.yml
+    needs:  check_repo_files
+    if:  ${{ needs.check_repo_files.outputs.pythonCode }}
     with:
       testFolders: tests/server
     secrets: inherit

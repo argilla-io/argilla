@@ -1,0 +1,28 @@
+name: Check repository files
+
+on:
+  workflow_call:
+    outputs:
+      pythonCode:
+        description: "True if some files in python code have changed"
+        value: ${{ jobs.check-repo-files.outputs.pythonCode }}
+
+jobs:
+  check-repo-files:
+    name: Check repo files
+    runs-on: ubuntu-latest
+    outputs:
+      pythonCode: ${{ steps.path_filter.outputs.pythonCode }}
+    steps:
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v2
+      - name: Check affected files
+        uses: dorny/paths-filter@v2
+        id: path_filter
+        with:
+          filters: |
+            pythonCode:
+              - 'src/**'
+              - 'tests/**'
+              - 'pyproject.toml'
+              - 'setup.py'
