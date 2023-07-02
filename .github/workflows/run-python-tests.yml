@@ -50,16 +50,16 @@ jobs:
         run: echo "::set-output name=today::$(/bin/date -u '+%Y%m%d')"
         shell: bash
       - name: Cache Conda env
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache
         with:
           path: ${{ env.CONDA }}/envs
           key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
       - name: Update environment
-        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+        if: steps.cache.outputs.cache-hit != 'true'
         run: mamba env update -n argilla -f environment_dev.yml
       - name: Cache pip 👜
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
