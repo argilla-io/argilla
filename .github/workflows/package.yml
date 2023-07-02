@@ -37,7 +37,7 @@ jobs:
     name: Run base tests
     uses: ./.github/workflows/run-python-tests.yml
     needs:  check_repo_files
-    if:  ${{ needs.check_repo_files.outputs.pythonChanges }}
+    if: needs.check_repo_files.outputs.pythonChanges
     with:
       pytestArgs: |
         --ignore=tests/training \
@@ -46,16 +46,18 @@ jobs:
         --ignore=tests/listeners
     secrets: inherit
 
-  run_training_tests:
-    name: Run training tests
+  run_extra_tests:
+    name: Run extra tests (training, monitoring and listeners)
     uses: ./.github/workflows/run-python-tests.yml
     needs: check_repo_files
-    if: ${{ needs.check_repo_files.outputs.pythonChanges }}
+    if: needs.check_repo_files.outputs.pythonChanges
     # continue-on-error: true
     with:
       pytestArgs: |
         tests/training \
         tests/client/feedback/training \
+        tests/monitoring \
+        tests/listeners
     secrets: inherit
 
   build:
