@@ -3,6 +3,10 @@ name: Run Argilla python tests
 on:
   workflow_call:
     inputs:
+      testFolders:
+        description: "Provide test folders to run"
+        required: true
+        type: string
       searchEngine:
         description: "Backend search engine to use. Available values are 'elasticsearch' and 'opensearch'."
         default: elasticsearch
@@ -23,7 +27,6 @@ env:
   # Increase this value to reset cache if etc/example-environment.yml has not changed
   CACHE_NUMBER:  5
   ALEMBIC_CONFIG: src/argilla/alembic.ini
-
 
 jobs:
   run-python-tests:
@@ -94,7 +97,7 @@ jobs:
         run: |
           pip install -e ".[server,listeners]"
           alembic upgrade head
-          pytest --ignore=tests/server --cov=argilla --cov-report=xml
+          pytest --cov=argilla --cov-report=xml ${{ inputs.testFolders }}
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
         if: inputs.coverageReport

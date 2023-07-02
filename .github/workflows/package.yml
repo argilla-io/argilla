@@ -30,7 +30,10 @@ env:
 jobs:
 
   run_tests:
+    name: Run server tests
     uses: ./.github/workflows/run-python-tests.yml
+    with:
+      testFolders: tests/server
     secrets: inherit
 
   build:
