@@ -37,7 +37,7 @@ jobs:
     name: Run base tests
     uses: ./.github/workflows/run-python-tests.yml
     needs:  check_repo_files
-    if:  ${{ needs.check_repo_files.outputs.pythonCode }}
+    if:  ${{ needs.check_repo_files.outputs.pythonChanges }}
     with:
       pytestArgs: |
         --ignore=tests/training \
