@@ -15,7 +15,7 @@ on:
       searchEngineVersion:
         description: "Backend search engine version to use. This value must be aligned to the 'search_engine' input value."
         required: false
-        default: 8
+        default: 8.8
         type: number
       coverageReport:
         description: "If true, a coverage report will be published."
