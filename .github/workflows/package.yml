@@ -34,11 +34,27 @@ jobs:
     uses: ./.github/workflows/check-repo-files.yml
 
   run_tests:
+    strategy:
+      matrix:
+        include:
+        - searchEngine: elasticsearch
+          searchEngineVersion: 8.8
+        - searchEngine: elasticsearch
+          searchEngineVersion: 8.0
+        - searchEngine: elasticsearch
+          searchEngineVersion: 7.17
+        - searchEngine: opensearch
+          searchEngineVersion: 2.4
+        - searchEngine: opensearch
+          searchEngineVersion: 1.3
+
     name: Run base tests
     uses: ./.github/workflows/run-python-tests.yml
     needs:  check_repo_files
     if: needs.check_repo_files.outputs.pythonChanges
     with:
+      searchEngine: ${{ matrix.searchEngine }}
+      searchEngineVersion: ${{ matrix.searchEngineVersion }}
       pytestArgs: |
         --ignore=tests/training \
         --ignore=tests/client/feedback/training \
