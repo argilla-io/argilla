@@ -39,11 +39,8 @@ jobs:
     needs:  check_repo_files
     if:  ${{ needs.check_repo_files.outputs.pythonCode }}
     with:
-      pytestArgs: >
-        --ignore=tests/training \
-        --ignore=tests/client/feedback/training \
-        --ignore=tests/monitoring
-        --ignore=tests/listeners
+      pytestArgs:
+        --ignore=tests/training --ignore=tests/client/feedback/training --ignore=tests/monitoring --ignore=tests/listeners
     secrets: inherit
 
 #  run_training_tests:
