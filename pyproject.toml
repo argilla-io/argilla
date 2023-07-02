@@ -131,12 +131,7 @@ log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 log_cli = "True"
 testpaths = ["tests"]
-addopts = [
-    "--ignore", "tests/monitoring",
-    "--ignore", "tests/listeners",
-    "--ignore", "tests/training",
-    "--ignore", "tests/client/feedback/training"
-]
+
 
 [tool.coverage.report]
 exclude_lines = [
