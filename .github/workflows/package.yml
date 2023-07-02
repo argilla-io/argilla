@@ -22,11 +22,6 @@ on:
       - "feature/**"
       - "feat/**"
 
-env:
-  # Increase this value to reset cache if etc/example-environment.yml has not changed
-  CACHE_NUMBER:  5
-  ALEMBIC_CONFIG: src/argilla/alembic.ini
-
 jobs:
 
   check_repo_files:
@@ -51,7 +46,7 @@ jobs:
     name: Run base tests
     uses: ./.github/workflows/run-python-tests.yml
     needs:  check_repo_files
-    if: needs.check_repo_files.outputs.pythonChanges
+    if: needs.check_repo_files.outputs.pythonChanges && secrets.AR_DOCKER_USERNAME == ''
     with:
       searchEngine: ${{ matrix.searchEngine }}
       searchEngineVersion: ${{ matrix.searchEngineVersion }}
@@ -66,7 +61,7 @@ jobs:
     name: Run extra tests (training, monitoring and listeners)
     uses: ./.github/workflows/run-python-tests.yml
     needs: check_repo_files
-    if: needs.check_repo_files.outputs.pythonChanges
+    if: needs.check_repo_files.outputs.pythonChanges && secrets.AR_DOCKER_USERNAME == ''
     # continue-on-error: true
     with:
       pytestArgs: |
@@ -80,7 +75,7 @@ jobs:
     name: Build Argilla python package
     uses: ./.github/workflows/build-python-package.yml
     needs:  check_repo_files
-    if: needs.check_repo_files.outputs.buildChanges
+    if: needs.check_repo_files.outputs.buildChanges && secrets.AR_DOCKER_USERNAME == ''
     secrets: inherit
 
   deploy_docker:
