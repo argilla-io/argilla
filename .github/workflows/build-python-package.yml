@@ -7,18 +7,11 @@ jobs:
   build:
     name: Build the python package
     runs-on: ubuntu-latest
-    #defaults:
-    #  run:
-    #    shell: bash -l {0}
-    # Only build the package if we can deploy it as a docker image
-    env:
-      IS_DEPLOYABLE: ${{ secrets.AR_DOCKER_USERNAME != '' }}
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v2
       - name: Cache pip 👜
         uses: actions/cache@v3
-        if: env.IS_DEPLOYABLE == 'true'
         env:
           # Increase this value to reset cache if pyproject.toml has not changed
           CACHE_NUMBER: 0
@@ -27,16 +20,13 @@ jobs:
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
       - name: Setup Node.js
         uses: actions/setup-node@v2
-        if: env.IS_DEPLOYABLE == 'true'
         with:
           node-version: "14"
       - name: Build Package 🍟
-        if: env.IS_DEPLOYABLE == 'true'
         run: |
           pip install -U build
           scripts/build_distribution.sh
       - name: Upload package artifact
-        if: env.IS_DEPLOYABLE == 'true'
         uses: actions/upload-artifact@v2
         with:
           name: python-package
