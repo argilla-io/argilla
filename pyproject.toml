@@ -124,7 +124,7 @@ where = ["src"]
 version = { attr = "argilla.__version__" }
 
 [tool.setuptools.package-data]
-"argilla.client.feedback.card" = ["argilla_template.md"]
+"argilla.client.feedback.integrations.huggingface.card" = ["argilla_template.md"]
 
 [tool.pytest.ini_options]
 log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
