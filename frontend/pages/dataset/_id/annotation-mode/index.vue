@@ -31,7 +31,10 @@
       />
     </template>
     <template v-slot:top>
-      <DatasetFiltersComponent :datasetId="datasetId" />
+      <section class="dataset__top-area">
+        <DatasetFiltersComponent :datasetId="datasetId" />
+        <DatasetHelpInfo />
+      </section>
     </template>
     <template v-slot:center>
       <CenterFeedbackTaskContent :datasetId="datasetId" />
@@ -258,3 +261,13 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.dataset {
+  &__top-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+</style>
