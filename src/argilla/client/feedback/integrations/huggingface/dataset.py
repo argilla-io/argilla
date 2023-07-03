@@ -15,7 +15,7 @@
 import json
 import logging
 import tempfile
-from typing import TYPE_CHECKING, Any, Optional, Type
+from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar
 
 import huggingface_hub
 from datasets import Dataset, DatasetDict, Features, Sequence, Value, load_dataset
@@ -32,10 +32,12 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 
+T = TypeVar("T", bound="FeedbackDataset")
+
 
 class HuggingFaceDatasetMixIn:
     @staticmethod
-    def _huggingface_format(feedback_dataset: "FeedbackDataset") -> "Dataset":
+    def _huggingface_format(feedback_dataset: T) -> "Dataset":
         """Formats a `FeedbackDataset` as a `datasets.Dataset` object.
 
         Returns:
@@ -91,6 +93,8 @@ class HuggingFaceDatasetMixIn:
         features["external_id"] = Value(dtype="string", id="external_id")
         dataset["external_id"] = []
 
+        dataset["metadata"] = []
+
         for record in feedback_dataset.records:
             for field in feedback_dataset.fields:
                 dataset[field.name].append(record.fields[field.name])
@@ -126,7 +130,7 @@ class HuggingFaceDatasetMixIn:
         )
 
     def _push_to_huggingface(
-        self, feedback_dataset: "FeedbackDataset", repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs
+        self, feedback_dataset: T, repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs
     ) -> None:
         """Pushes the `FeedbackDataset` to the HuggingFace Hub. If the dataset has been previously pushed to the
         HuggingFace Hub, it will be updated instead. Note that some params as `private` have no effect at all
@@ -194,7 +198,7 @@ class HuggingFaceDatasetMixIn:
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
 
     @staticmethod
-    def _from_huggingface(cls: Type["FeedbackDataset"], repo_id: str, *args: Any, **kwargs: Any) -> "FeedbackDataset":
+    def _from_huggingface(cls: Type[T], repo_id: str, *args: Any, **kwargs: Any) -> T:
         """Loads a `FeedbackDataset` from the HuggingFace Hub.
 
         Args:
