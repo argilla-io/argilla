@@ -22,6 +22,10 @@ These are the section headers that we use:
 
 - Fixed `sqlalchemy.error.OperationalError` being raised when running the unit tests if the local SQLite database file didn't exist and the migrations hadn't been applied ([#3307](https://github.com/argilla-io/argilla/pull/3307)).
 
+### Changed
+
+- The `POST /api/datasets/:dataset-id/:task/bulk` endpoint don't create the dataset if does not exists (Closes [#3244](https://github.com/argilla-io/argilla/issues/3244))
+
 ## [1.12.0](https://github.com/argilla-io/argilla/compare/v1.11.0...v1.12.0)
 
 ### Added

@@ -90,7 +90,11 @@ def create_some_data_for_text_classification(
             record.vectors = record_vectors
 
     client.post(
-        f"/api/datasets/{name}/{TaskType.text_classification}:bulk",
+        "/api/datasets", json={"name": name, "task": TaskType.text_classification.value, "workspace": "argilla"}
+    )
+
+    client.post(
+        f"/api/datasets/{name}/{TaskType.text_classification.value}:bulk",
         json=TextClassificationBulkRequest(
             tags={"env": "test", "class": "text classification"},
             metadata={"config": {"the": "config"}},

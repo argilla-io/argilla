@@ -36,9 +36,15 @@ from tests.helpers import SecuredClient
 
 
 @pytest.fixture
-def log_dataset_without_annotations(mocked_client) -> str:
+def log_dataset_without_annotations(mocked_client: SecuredClient) -> str:
     dataset_name = "test_dataset_for_rule"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
+    assert (
+        mocked_client.post(
+            "/api/datasets", json={"name": dataset_name, "task": TaskType.text_classification.value}
+        ).status_code
+        == 200
+    )
     records = [
         CreationTextClassificationRecord.parse_obj(
             {
@@ -62,6 +68,12 @@ def log_dataset_without_annotations(mocked_client) -> str:
 def log_dataset(mocked_client) -> str:
     dataset_name = "test_dataset_for_rule"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
+    assert (
+        mocked_client.post(
+            "/api/datasets", json={"name": dataset_name, "task": TaskType.text_classification.value}
+        ).status_code
+        == 200
+    )
     records = [
         CreationTextClassificationRecord.parse_obj(
             {
