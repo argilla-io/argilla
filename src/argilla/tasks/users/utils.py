@@ -12,22 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import asyncio
+from typing import TYPE_CHECKING
 
-from sqlalchemy import orm
-from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
+from argilla.server.models import Workspace
 
-task = None
-
-
-def set_task(t: asyncio.Task):
-    global task
-    task = t
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 
-def get_task() -> asyncio.Task:
-    return task
-
-
-TestSession = async_scoped_session(orm.sessionmaker(class_=AsyncSession, expire_on_commit=False), get_task)
-SyncTestSession = orm.scoped_session(orm.sessionmaker(class_=orm.Session, expire_on_commit=False))
+def get_or_new_workspace(session: "Session", workspace_name: str) -> Workspace:
+    workspace = session.query(Workspace).filter_by(name=workspace_name).first()
+    return workspace or Workspace(name=workspace_name)

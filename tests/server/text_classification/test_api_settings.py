@@ -16,7 +16,6 @@ import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.client.api import delete
 from argilla.server.commons.models import TaskType
-from argilla.server.models import User
 from starlette.testclient import TestClient
 
 from tests.factories import AnnotatorFactory, WorkspaceFactory
@@ -135,10 +134,12 @@ def log_some_data(mocked_client, name):
 # TODO: These tests are the same for token an text classification. We will move them to a common test_dataset_settings
 #  module where settings will be tested in a per-task fashion.
 @pytest.mark.parametrize("task", [TaskType.text_classification, TaskType.token_classification])
-def test_save_settings_as_annotator(client: TestClient, owner_auth_header: dict, task: TaskType):
+@pytest.mark.asyncio
+async def test_save_settings_as_annotator(client: TestClient, owner_auth_header: dict, task: TaskType):
     dataset_name = "test_save_settings_as_annotator"
     workspace_name = "workspace-a"
-    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build(name=workspace_name)])
+    workspace = await WorkspaceFactory.create(name="workspace-a")
+    annotator = await AnnotatorFactory.create(workspaces=[workspace])
 
     client.delete(f"/api/datasets/{dataset_name}?workspace={workspace_name}", headers=owner_auth_header)
 
@@ -165,10 +166,12 @@ def test_save_settings_as_annotator(client: TestClient, owner_auth_header: dict,
 
 
 @pytest.mark.parametrize("task", [TaskType.text_classification, TaskType.token_classification])
-def test_delete_settings_as_annotator(client: TestClient, owner_auth_header: dict, task: TaskType):
+@pytest.mark.asyncio
+async def test_delete_settings_as_annotator(client: TestClient, owner_auth_header: dict, task: TaskType):
     dataset_name = "test_delete_settings_as_annotator"
     workspace_name = "workspace-a"
-    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build(name=workspace_name)])
+    workspace = await WorkspaceFactory.create(name="workspace-a")
+    annotator = await AnnotatorFactory.create(workspaces=[workspace])
 
     client.delete(f"/api/datasets/{dataset_name}?workspace={workspace_name}", headers=owner_auth_header)
 
@@ -194,10 +197,12 @@ def test_delete_settings_as_annotator(client: TestClient, owner_auth_header: dic
 
 
 @pytest.mark.parametrize("task", [TaskType.text_classification, TaskType.token_classification])
-def test_get_settings_as_annotator(client: TestClient, owner_auth_header: dict, task: TaskType):
+@pytest.mark.asyncio
+async def test_get_settings_as_annotator(client: TestClient, owner_auth_header: dict, task: TaskType):
     dataset_name = "test_get_settings_as_annotator"
     workspace_name = "workspace-a"
-    annotator = AnnotatorFactory.create(workspaces=[WorkspaceFactory.build(name=workspace_name)])
+    workspace = await WorkspaceFactory.create(name="workspace-a")
+    annotator = await AnnotatorFactory.create(workspaces=[workspace])
 
     client.delete(f"/api/datasets/{dataset_name}?workspace={workspace_name}", headers=owner_auth_header)
 

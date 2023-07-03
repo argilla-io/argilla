@@ -93,7 +93,7 @@ class RecordsStorageService:
                 status=TaskStatus.discarded,
             )
         else:
-            if not is_authorized(user, DatasetPolicy.delete_records(dataset)):
+            if not await is_authorized(user, DatasetPolicy.delete_records(dataset)):
                 raise ForbiddenOperationError(
                     "You don't have the necessary permissions to delete records on this dataset. "
                     "Only administrators can delete datasets"
