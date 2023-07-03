@@ -15,20 +15,12 @@
 from typing import Any, List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, confloat
+from pydantic import BaseModel
 
 from argilla.server.models import SuggestionType
 
 
-class SuggestionCreate(BaseModel):
-    question_id: UUID
-    type: Optional[SuggestionType]
-    score: Optional[confloat(ge=0, le=1)]
-    value: Any
-    agent: Optional[str]
-
-
-class Suggestion(BaseModel):
+class BaseSuggestion(BaseModel):
     id: UUID
     question_id: UUID
     type: Optional[SuggestionType]
@@ -36,6 +28,12 @@ class Suggestion(BaseModel):
     value: Any
     agent: Optional[str]
 
+
+class SuggestionCreate(BaseSuggestion):
+    pass
+
+
+class Suggestion(BaseSuggestion):
     class Config:
         orm_mode = True
 

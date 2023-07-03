@@ -19,7 +19,7 @@ from typing import Any, List, Optional
 from uuid import UUID, uuid4
 
 from pydantic import parse_obj_as
-from sqlalchemy import JSON, CheckConstraint, ForeignKey, Text, UniqueConstraint, and_
+from sqlalchemy import JSON, ForeignKey, Text, UniqueConstraint, and_
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -134,8 +134,6 @@ class Suggestion(TimestampMixin, Base):
 
     record: Mapped["Record"] = relationship(back_populates="suggestions")
     question: Mapped["Question"] = relationship(back_populates="suggestions")
-
-    __table_args__ = (CheckConstraint("score IS NULL OR score >= 0 AND score <= 1", name="suggestion_score_check"),)
 
     def __repr__(self) -> str:
         return (

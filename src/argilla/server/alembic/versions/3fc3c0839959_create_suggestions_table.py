@@ -49,7 +49,6 @@ def upgrade() -> None:
         sa.Column("question_id", sa.Uuid(), nullable=False),
         sa.Column("inserted_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
-        sa.CheckConstraint("score IS NULL OR score >= 0 AND score <= 1", name="suggestion_score_check"),
         sa.ForeignKeyConstraint(["question_id"], ["questions.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["record_id"], ["records.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
