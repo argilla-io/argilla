@@ -27,13 +27,8 @@
         v-for="(input, index) in inputs"
         ref="inputs"
         :key="input.id"
-        @keyup.shift.arrow-down="
-          updateFocusedQuestionWithArrows(focusedQuestion + 1)
-        "
-        @keyup.shift.arrow-up="
-          updateFocusedQuestionWithArrows(focusedQuestion - 1)
-        "
-        @keyup.tab="updateFocusedQuestionWithTab"
+        @keydown.shift.arrow-down="updateQuestionAutofocus(focusedQuestion + 1)"
+        @keydown.shift.arrow-up="updateQuestionAutofocus(focusedQuestion - 1)"
       >
         <TextAreaComponent
           v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
@@ -45,6 +40,8 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           @on-error="onError"
+          @on-focus="updateAutofocusPosition(index)"
+          @on-blur="updateAutofocusPosition(null)"
         />
 
         <SingleLabelComponent
@@ -56,6 +53,7 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
+          @on-focus="updateAutofocusPosition(index)"
         />
         <MultiLabelComponent
           v-if="input.component_type === COMPONENT_TYPE.MULTI_LABEL"
@@ -66,6 +64,7 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
+          @on-focus="updateAutofocusPosition(index)"
         />
 
         <RatingComponent
@@ -76,6 +75,7 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           @on-error="onError"
+          @on-focus="updateAutofocusPosition(index)"
         />
         <RankingComponent
           v-if="input.component_type === COMPONENT_TYPE.RANKING"
@@ -85,6 +85,7 @@
           :description="input.description"
           v-model="input.options"
           :key="JSON.stringify(input.options)"
+          @on-focus="updateAutofocusPosition(index)"
         />
       </div>
     </div>
@@ -171,6 +172,7 @@ export default {
       renderForm: 0,
       isError: false,
       focusedQuestion: 0,
+      autofocusPosition: 0,
     };
   },
   computed: {
@@ -589,19 +591,17 @@ export default {
     checkIfQuestionIsFocused(index) {
       return (
         this.recordStatus === RECORD_STATUS.PENDING &&
-        index === this.focusedQuestion
+        index === this.autofocusPosition
       );
     },
-    updateFocusedQuestionWithArrows(index) {
+    updateAutofocusPosition(index) {
+      this.focusedQuestion = index;
+    },
+    updateQuestionAutofocus(index) {
       const numberOfQuestions = this.inputs.length;
-      this.focusedQuestion = Math.min(
+      this.autofocusPosition = Math.min(
         numberOfQuestions - 1,
         Math.max(0, index)
-      );
-    },
-    updateFocusedQuestionWithTab() {
-      this.focusedQuestion = this.$refs.inputs?.findIndex(
-        (input) => input.contains(document.activeElement) || 0
       );
     },
   },
