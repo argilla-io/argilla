@@ -21,7 +21,6 @@ from argilla.server.models import SuggestionType
 
 
 class BaseSuggestion(BaseModel):
-    id: UUID
     question_id: UUID
     type: Optional[SuggestionType]
     score: Optional[float]
@@ -34,6 +33,8 @@ class SuggestionCreate(BaseSuggestion):
 
 
 class Suggestion(BaseSuggestion):
+    id: UUID
+
     class Config:
         orm_mode = True
 
