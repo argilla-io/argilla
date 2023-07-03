@@ -26,14 +26,14 @@ from argilla.server.apis.v0.models.token_classification import (
 )
 from argilla.server.commons.models import TaskType
 
+from tests.helpers import SecuredClient
 
-def create_dataset(
-    mocked_client,
-    task: TaskType,
-):
+
+def create_dataset(mocked_client, task: TaskType):
     dataset = "test-dataset"
     record_text = "This is my text"
-    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert mocked_client.delete(f"/api/datasets/{dataset}").status_code in [200, 404]
+    assert mocked_client.post("/api/datasets", json={"name": dataset, "task": task.value}).status_code == 200
     tags = {
         "env": "test",
         "type": task,
@@ -102,10 +102,7 @@ def create_dataset(
     ],
 )
 def test_get_record_by_id(mocked_client, task, expected_record_class):
-    dataset = create_dataset(
-        mocked_client,
-        task=task,
-    )
+    dataset = create_dataset(mocked_client, task=task)
 
     record_id = 0
     response = mocked_client.get(f"/api/datasets/{dataset}/records/{record_id}")
@@ -123,11 +120,8 @@ def test_get_record_by_id(mocked_client, task, expected_record_class):
         TaskType.text2text,
     ],
 )
-def test_get_record_by_id_not_found(mocked_client, task):
-    dataset = create_dataset(
-        mocked_client,
-        task=task,
-    )
+def test_get_record_by_id_not_found(mocked_client: SecuredClient, task: TaskType):
+    dataset = create_dataset(mocked_client, task=task)
 
     record_id = "not-found"
     response = mocked_client.get(f"/api/datasets/{dataset}/records/{record_id}")
