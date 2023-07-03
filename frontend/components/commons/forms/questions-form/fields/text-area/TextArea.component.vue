@@ -5,7 +5,6 @@
       :isRequired="isRequired"
       :tooltipMessage="description"
     />
-
     <div class="container">
       <RenderMarkdownBaseComponent
         v-if="visibleMarkdown"
@@ -86,6 +85,11 @@ export default {
     },
     onChangeFocus(status) {
       this.isEditionModeActive = status;
+      if (status) {
+        this.$emit("on-focus");
+      } else {
+        this.$emit("on-blur");
+      }
     },
   },
 };

@@ -9,6 +9,7 @@
           :id="option.id"
           v-model="option.is_selected"
           @change="onSelect(option)"
+          @focus="onFocus"
         />
         <label
           class="label-text cursor-pointer"
@@ -43,14 +44,7 @@ export default {
       immediate: true,
       handler(newValue) {
         this.$nextTick(() => {
-          const someLabelsAreFocused = this.$refs?.options?.some((option) =>
-            option.contains(document.activeElement)
-          );
-
-          if (someLabelsAreFocused || !newValue) {
-            return;
-          }
-          this.$refs?.options[0].focus();
+          !!newValue && this.$refs?.options[0].focus();
         });
       },
     },
@@ -67,6 +61,9 @@ export default {
       });
 
       this.$emit("on-change", this.options);
+    },
+    onFocus() {
+      this.$emit("on-focus");
     },
   },
 };
