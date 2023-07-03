@@ -27,7 +27,6 @@ on:
 env:
   # Increase this value to reset cache if etc/example-environment.yml has not changed
   CACHE_NUMBER:  5
-  ALEMBIC_CONFIG: src/argilla/alembic.ini
 
 jobs:
   test-elastic:
@@ -95,7 +94,6 @@ jobs:
         if: steps.filter.outputs.python_code == 'true'
         run: |
           pip install -e ".[server,listeners]"
-          alembic upgrade head
           pytest --cov=argilla --cov-report=xml
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
@@ -171,7 +169,6 @@ jobs:
         if: steps.filter.outputs.python_code == 'true'
         run: |
           pip install -e ".[server,listeners]"
-          alembic upgrade head
           pytest --cov=argilla --cov-report=xml
       - name: Upload Coverage to Codecov 📦
         uses: codecov/codecov-action@v1
