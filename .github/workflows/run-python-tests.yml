@@ -68,6 +68,7 @@ jobs:
         env:
           HF_HUB_ACCESS_TOKEN: ${{ secrets.HF_HUB_ACCESS_TOKEN }}
         run: echo "Enable HF access token"
+      # TODO: Review and use github action services section instead. See https://docs.github.com/en/actions/using-containerized-services/about-service-containers#creating-service-containers
       - name: Setup ElasticSearch 🔎
         if: inputs.searchEngine == 'elasticsearch'
         uses: ankane/setup-elasticsearch@v1
