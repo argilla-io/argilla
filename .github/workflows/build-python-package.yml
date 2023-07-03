@@ -19,7 +19,7 @@ jobs:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: "14"
       - name: Build Package 🍟
@@ -27,7 +27,7 @@ jobs:
           pip install -U build
           scripts/build_distribution.sh
       - name: Upload package artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: python-package
           path: dist
