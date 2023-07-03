@@ -765,4 +765,28 @@ describe("QuestionsFormComponent when initialInputs is empty", () => {
     });
     expect(wrapper.vm.focusedQuestion).toBe(1);
   });
+  it("update focusedQuestion with a min value of 0 by keydown (shift + arrow-up)", () => {
+    const options = {
+      mocks: {
+        $auth: authMock,
+      },
+      stubs: {
+        NuxtLink: RouterLinkStub,
+        BaseButton,
+        TextAreaComponent,
+      },
+      propsData: {
+        datasetId: "datasetId",
+        recordId: "recordId",
+        recordStatus: "pending",
+        initialInputs: ["1", "2", "3"],
+      },
+    };
+    const wrapper = shallowMount(QuestionsFormComponent, options);
+    wrapper.find({ ref: "inputs" }).trigger("keyup", {
+      shiftKey: true,
+      key: "arrowUp",
+    });
+    expect(wrapper.vm.focusedQuestion).toBe(0);
+  });
 });
