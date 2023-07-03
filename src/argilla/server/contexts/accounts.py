@@ -70,6 +70,16 @@ async def list_workspaces(db: "AsyncSession") -> List[Workspace]:
     return result.scalars().all()
 
 
+async def list_workspaces_by_user_id(db: "AsyncSession", user_id: UUID) -> List[Workspace]:
+    result = await db.execute(
+        select(Workspace)
+        .join(WorkspaceUser)
+        .filter(WorkspaceUser.user_id == user_id)
+        .order_by(Workspace.inserted_at.asc())
+    )
+    return result.scalars().all()
+
+
 async def create_workspace(db: "AsyncSession", workspace_create: WorkspaceCreate) -> Workspace:
     workspace = Workspace(name=workspace_create.name)
     db.add(workspace)

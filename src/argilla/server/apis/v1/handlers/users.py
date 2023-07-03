@@ -17,18 +17,23 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Security
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from argilla.server.contexts import accounts
 from argilla.server.database import get_async_db
 from argilla.server.models import User
+from argilla.server.policies import UserPolicyV1, authorize
+from argilla.server.schemas.v1.workspaces import Workspaces
 from argilla.server.security import auth
 
 router = APIRouter(tags=["users"])
 
 
-@router.get("/users/{user_id}/workspaces")
-async def get_user_workspaces(
+@router.get("/users/{user_id}/workspaces", response_model=Workspaces)
+async def list_user_workspaces(
     *,
     db: AsyncSession = Depends(get_async_db),
     user_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    pass
+    await authorize(current_user, UserPolicyV1.list_workspaces)
+    workspaces = await accounts.list_workspaces_by_user_id(db, user_id)
+    return Workspaces(items=workspaces)
