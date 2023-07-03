@@ -7,6 +7,10 @@ on:
         description: "Provide extra args to pytest command line"
         required: true
         type: string
+      coverageReport:
+        required: false
+        type: string
+        default: coverage
       searchEngine:
         description: "Backend search engine to use. Available values are 'elasticsearch' and 'opensearch'."
         default: elasticsearch
@@ -17,11 +21,6 @@ on:
         required: false
         default: 8.8
         type: number
-      coverageReport:
-        description: "If true, a coverage report will be published."
-        required: false
-        default: false
-        type: boolean
 
 env:
   # Increase this value to reset cache if etc/example-environment.yml has not changed
@@ -35,6 +34,8 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+    env:
+      COVERAGE_REPORT: ${{ inputs.coverageReport }}-${{ inputs.searchEngine }}-${{ inputs.searchEngineVersion }}
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v2
@@ -83,11 +84,9 @@ jobs:
         run: |
           pip install -e ".[server,listeners]"
           alembic upgrade head
-          pytest --cov=argilla --cov-report=xml ${{ inputs.pytestArgs }}
-      - name: Upload Coverage to Codecov 📦
-        uses: codecov/codecov-action@v1
-        if: inputs.coverageReport
+          pytest --cov=argilla --cov-report=xml:${{ env.COVERAGE_REPORT }}.xml ${{ inputs.pytestArgs }}
+      - name: Upload coverage report artifact
+        uses: actions/upload-artifact@v3
         with:
-          files: ./coverage.xml
-          flags: pytest
-          fail_ci_if_error: false
+          name: coverage-report-${{ env.COVERAGE_REPORT }}
+          path: ${{ env.COVERAGE_REPORT }}.xml
