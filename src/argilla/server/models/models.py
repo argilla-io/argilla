@@ -19,7 +19,8 @@ from typing import List, Optional
 from uuid import UUID, uuid4
 
 from pydantic import parse_obj_as
-from sqlalchemy import JSON, ForeignKey, Index, Text, UniqueConstraint, and_
+from sqlalchemy import JSON, ForeignKey, Text, UniqueConstraint, and_
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from argilla.server.database import Base
@@ -82,12 +83,15 @@ class Field(Base):
         )
 
 
+ResponseStatusEnum = SAEnum(ResponseStatus, name="response_status_enum")
+
+
 class Response(Base):
     __tablename__ = "responses"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     values: Mapped[Optional[dict]] = mapped_column(JSON)
-    status: Mapped[ResponseStatus] = mapped_column(default=ResponseStatus.submitted, index=True)
+    status: Mapped[ResponseStatus] = mapped_column(ResponseStatusEnum, default=ResponseStatus.submitted, index=True)
     record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id", ondelete="CASCADE"), index=True)
     user_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), index=True)
 
@@ -164,13 +168,16 @@ class Question(Base):
         )
 
 
+DatasetStatusEnum = SAEnum(DatasetStatus, name="dataset_status_enum")
+
+
 class Dataset(Base):
     __tablename__ = "datasets"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     name: Mapped[str] = mapped_column(index=True)
     guidelines: Mapped[Optional[str]] = mapped_column(Text)
-    status: Mapped[DatasetStatus] = mapped_column(default=DatasetStatus.draft, index=True)
+    status: Mapped[DatasetStatus] = mapped_column(DatasetStatusEnum, default=DatasetStatus.draft, index=True)
     workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
 
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
@@ -178,13 +185,22 @@ class Dataset(Base):
 
     workspace: Mapped["Workspace"] = relationship(back_populates="datasets")
     fields: Mapped[List["Field"]] = relationship(
-        back_populates="dataset", passive_deletes=True, order_by=Field.inserted_at.asc()
+        back_populates="dataset",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Field.inserted_at.asc(),
     )
     questions: Mapped[List["Question"]] = relationship(
-        back_populates="dataset", passive_deletes=True, order_by=Question.inserted_at.asc()
+        back_populates="dataset",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Question.inserted_at.asc(),
     )
     records: Mapped[List["Record"]] = relationship(
-        back_populates="dataset", passive_deletes=True, order_by=Record.inserted_at.asc()
+        back_populates="dataset",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Record.inserted_at.asc(),
     )
 
     __table_args__ = (UniqueConstraint("name", "workspace_id", name="dataset_name_workspace_id_uq"),)
@@ -249,6 +265,9 @@ class Workspace(Base):
         )
 
 
+UserRoleEnum = SAEnum(UserRole, name="user_role_enum")
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -256,7 +275,7 @@ class User(Base):
     first_name: Mapped[str]
     last_name: Mapped[Optional[str]]
     username: Mapped[str] = mapped_column(unique=True, index=True)
-    role: Mapped[UserRole] = mapped_column(default=UserRole.annotator, index=True)
+    role: Mapped[UserRole] = mapped_column(UserRoleEnum, default=UserRole.annotator, index=True)
     api_key: Mapped[str] = mapped_column(Text, unique=True, index=True, default=generate_user_api_key)
     password_hash: Mapped[str] = mapped_column(Text)
 

@@ -15,10 +15,10 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Security, status
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla.server.contexts import accounts
-from argilla.server.database import get_db
+from argilla.server.database import get_async_db
 from argilla.server.policies import WorkspacePolicyV1, authorize
 from argilla.server.schemas.v1.workspaces import Workspace
 from argilla.server.security import auth
@@ -28,15 +28,15 @@ router = APIRouter(tags=["workspaces"])
 
 
 @router.get("/workspaces/{workspace_id}", response_model=Workspace)
-def get_workspace(
+async def get_workspace(
     *,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     workspace_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    authorize(current_user, WorkspacePolicyV1.get(workspace_id))
+    await authorize(current_user, WorkspacePolicyV1.get(workspace_id))
 
-    workspace = accounts.get_workspace_by_id(db, workspace_id)
+    workspace = await accounts.get_workspace_by_id(db, workspace_id)
     if not workspace:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

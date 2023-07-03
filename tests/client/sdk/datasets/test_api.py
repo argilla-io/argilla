@@ -14,9 +14,7 @@
 #  limitations under the License.
 import httpx
 import pytest
-from argilla._constants import DEFAULT_API_KEY
 from argilla.client.client import Argilla
-from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors import (
     GenericApiError,
     NotFoundApiError,
@@ -31,13 +29,14 @@ from tests.factories import UserFactory, WorkspaceFactory
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-def test_get_dataset(role: UserRole):
+@pytest.mark.asyncio
+async def test_get_dataset(role: UserRole):
     # create test dataset
     bulk_data = TextClassificationBulkData(records=[])
     dataset_name = "test_dataset"
 
-    workspace = WorkspaceFactory.create()
-    user = UserFactory.create(role=role, workspaces=[workspace])
+    workspace = await WorkspaceFactory.create()
+    user = await UserFactory.create(role=role, workspaces=[workspace])
     api = Argilla(api_key=user.api_key, workspace=workspace.name)
 
     api.delete(dataset_name)

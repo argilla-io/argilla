@@ -27,7 +27,7 @@ def create_default(
 ):
     """Creates a user with default credentials on database suitable to start experimenting with argilla."""
     with SessionLocal() as session:
-        if accounts.get_user_by_username(session, DEFAULT_USERNAME):
+        if accounts.get_user_by_username_sync(session, DEFAULT_USERNAME):
             if not quiet:
                 typer.echo("User with default username already found on database, will not do anything.")
 
