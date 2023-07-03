@@ -25,16 +25,17 @@
         </BaseButton>
       </span>
       <span slot="dropdown-content">
-        <ul
-          class="options"
-          role="listbox"
-          :aria-activedescendant="selectedOption"
-        >
+        <ul class="options" role="radiogroup">
           <li
             v-for="{ id, name } in options"
             class="option"
             :class="id"
             :key="id"
+            tabindex="0"
+            :aria-checked="id"
+            role="radio"
+            @keydown.space="changeOption(id)"
+            @keydown.enter="changeOption(id)"
           >
             <BaseRadioButton
               class="option__radio"
@@ -43,11 +44,8 @@
               :model="id"
               :value="selectedOption"
               @change="changeOption(id)"
-              @keydown.native.space="changeOption(id)"
-              @keydown.native.enter="changeOption(id)"
-              :aria-selected="selectedOption === id"
-              tabindex="0"
-              role="option"
+              tabindex="-1"
+              aria-hidden="true"
               >{{ name }}</BaseRadioButton
             >
           </li>
