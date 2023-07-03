@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import warnings
 from typing import List, Optional
 
 try:
@@ -36,3 +37,23 @@ class DatasetConfig(BaseModel):
     @classmethod
     def from_yaml(cls, yaml):
         return cls(**load(yaml, Loader=SafeLoader))
+
+    # TODO(alvarobartt): here for backwards compatibility, remove in 1.14.0
+    def from_json(self, json):
+        warnings.warn(
+            "`DatasetConfig` can just be loaded from YAML, so make sure that you are"
+            " loading a YAML file instead of a JSON file. `DatasetConfig` will be dumped"
+            " as YAML from now on, instead of JSON.",
+            DeprecationWarning,
+        )
+        return self.parse_raw(json)
+
+    # TODO(alvarobartt): here for backwards compatibility, remove in 1.14.0
+    def to_json(self):
+        warnings.warn(
+            "`DatasetConfig` can just be dumped to YAML, so make sure that you are"
+            " dumping to a YAML file instead of a JSON file. `DatasetConfig` will come"
+            " in YAML format from now on, instead of JSON format.",
+            DeprecationWarning,
+        )
+        return self.json()

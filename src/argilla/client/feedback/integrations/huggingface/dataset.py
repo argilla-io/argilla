@@ -15,11 +15,13 @@
 import json
 import logging
 import tempfile
+import warnings
 from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar
 
 import huggingface_hub
 from datasets import Dataset, DatasetDict, Features, Sequence, Value, load_dataset
 from huggingface_hub import DatasetCardData, HfApi, hf_hub_download
+from huggingface_hub.utils import EntryNotFoundError
 from packaging.version import parse as parse_version
 
 from argilla.client.feedback.config import DatasetConfig
@@ -228,14 +230,41 @@ class HuggingFaceDatasetMixIn:
             if parse_version(huggingface_hub.__version__) < parse_version("0.11.0")
             else {"token": auth}
         )
-        config_path = hf_hub_download(
-            repo_id=repo_id,
-            filename="argilla.yaml",
-            repo_type="dataset",
-            **hub_auth,
-        )
-        with open(config_path, "r") as f:
-            config = DatasetConfig.from_yaml(f.read())
+
+        try:
+            config_path = hf_hub_download(
+                repo_id=repo_id,
+                filename="argilla.yaml",
+                repo_type="dataset",
+                **hub_auth,
+            )
+            with open(config_path, "r") as f:
+                config = DatasetConfig.from_yaml(f.read())
+        except EntryNotFoundError:
+            # TODO(alvarobartt): here for backwards compatibility, remove in 1.14.0
+            warnings.warn(
+                "No `argilla.yaml` file found in the HuggingFace Hub repository, which"
+                " means that the `DatasetConfig` was dumped using Argilla 1.12.0 or"
+                " lower, and the `argilla.yaml` file was not generated. Please consider"
+                " re-dumping the `DatasetConfig` using Argilla 1.13.0 or higher, or"
+                " manually create the `argilla.yaml` file in the HuggingFace Hub.",
+                UserWarning,
+            )
+            config_path = hf_hub_download(
+                repo_id=repo_id,
+                filename="argilla.cfg",
+                repo_type="dataset",
+                **hub_auth,
+            )
+            with open(config_path, "r") as f:
+                config = DatasetConfig.from_json(f.read())
+        except Exception as e:
+            raise FileNotFoundError(
+                "Neither `argilla.yaml` nor `argilla.cfg` files were found in the"
+                " HuggingFace Hub repository. Please make sure to dump the `DatasetConfig`"
+                " using `FeedbackDataset.push_to_huggingface` to automatically upload"
+                " the `DatasetConfig` as `argilla.yaml` to the HuggingFace Hub."
+            )
 
         hfds = load_dataset(repo_id, use_auth_token=auth, *args, **kwargs)
         if isinstance(hfds, DatasetDict) and "split" not in kwargs:
