@@ -2031,8 +2031,8 @@ async def test_create_dataset_records(
     await TextFieldFactory.create(name="input", dataset=dataset)
     await TextFieldFactory.create(name="output", dataset=dataset)
 
-    await TextQuestionFactory.create(name="input_ok", dataset=dataset)
-    await TextQuestionFactory.create(name="output_ok", dataset=dataset)
+    question_a = await TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    question_b = await TextQuestionFactory.create(name="output_ok", dataset=dataset)
 
     records_json = {
         "items": [
@@ -2046,9 +2046,23 @@ async def test_create_dataset_records(
                         "user_id": str(owner.id),
                     }
                 ],
+                "suggestions": [
+                    {
+                        "question_id": str(question_a.id),
+                        "type": "model",
+                        "score": 0.8,
+                        "value": "yes",
+                        "agent": "unit-test-agent",
+                    },
+                    {
+                        "question_id": str(question_b.id),
+                        "value": "yes",
+                    },
+                ],
             },
             {
                 "fields": {"input": "Say Hello", "output": "Hi"},
+                "suggestions": [{"question_id": str(question_a.id), "value": "no"}],
             },
             {
                 "fields": {"input": "Say Pello", "output": "Hello World"},
@@ -2088,6 +2102,7 @@ async def test_create_dataset_records(
     assert response.status_code == 204, response.json()
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 5
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 4
+    assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 3
 
     records = (await db.execute(select(Record))).scalars().all()
     mock_search_engine.add_records.assert_called_once_with(dataset, records)
@@ -2238,6 +2253,32 @@ async def test_create_dataset_records_with_duplicated_response_for_an_user(
     }
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {},
+        {"question_id": str(uuid4()), "value": "yes"},
+        {"value": {"this": "is not a valid response for a TextQuestion"}},
+    ],
+)
+@pytest.mark.asyncio
+async def test_create_dataset_records_with_not_valid_suggestion(
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict, payload: dict
+):
+    dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+    question = await TextFieldFactory.create(name="input", dataset=dataset)
+
+    response = client.post(
+        f"/api/v1/datasets/{dataset.id}/records",
+        headers=owner_auth_header,
+        json={"question_id": str(question.id), **payload},
+    )
+
+    assert response.status_code == 422
+    assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
+    assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 0
 
 
 @pytest.mark.asyncio
