@@ -79,7 +79,7 @@ export default {
       immediate: true,
       handler(newValue) {
         this.$nextTick(() => {
-          newValue && this.$refs.text.focus();
+          !!newValue && this.$refs.text.focus();
         });
       },
     },
