@@ -127,7 +127,7 @@ def mock_search_engine(mocker) -> Generator["SearchEngine", None, None]:
 
 
 @pytest.fixture(scope="function")
-def client(request, mock_search_engine: SearchEngine, mocker, db) -> Generator[TestClient, None, None]:
+def client(request, mock_search_engine: SearchEngine, mocker: "MockerFixture") -> Generator[TestClient, None, None]:
     async def override_get_async_db():
         session = TestSession()
         yield session
