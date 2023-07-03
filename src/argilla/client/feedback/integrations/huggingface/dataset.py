@@ -237,12 +237,6 @@ class HuggingFaceDatasetMixIn:
         with open(config_path, "r") as f:
             config = DatasetConfig.from_yaml(f.read())
 
-        cls: "FeedbackDataset" = cls(
-            fields=config.fields,
-            questions=config.questions,
-            guidelines=config.guidelines,
-        )
-
         hfds = load_dataset(repo_id, use_auth_token=auth, *args, **kwargs)
         if isinstance(hfds, DatasetDict) and "split" not in kwargs:
             if len(hfds.keys()) > 1:
@@ -252,9 +246,10 @@ class HuggingFaceDatasetMixIn:
                 )
             hfds = hfds[list(hfds.keys())[0]]
 
+        records = []
         for index in range(len(hfds)):
             responses = {}
-            for question in cls.questions:
+            for question in config.questions:
                 if hfds[index][question.name] is None or len(hfds[index][question.name]) < 1:
                     continue
                 for user_id, value, status in zip(
@@ -276,13 +271,19 @@ class HuggingFaceDatasetMixIn:
             if "metadata" in hfds[index] and hfds[index]["metadata"] is not None:
                 metadata = json.loads(hfds[index]["metadata"])
 
-            cls.__records.append(
+            records.append(
                 FeedbackRecord(
-                    fields={field.name: hfds[index][field.name] for field in cls.fields},
+                    fields={field.name: hfds[index][field.name] for field in config.fields},
                     metadata=metadata,
                     responses=list(responses.values()) or None,
                     external_id=hfds[index]["external_id"],
                 )
             )
         del hfds
+        cls = cls(
+            fields=config.fields,
+            questions=config.questions,
+            guidelines=config.guidelines,
+        )
+        cls.add_records(records)
         return cls

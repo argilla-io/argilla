@@ -767,7 +767,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
     @requires_version("datasets")
     @requires_version("huggingface_hub")
     def from_huggingface(cls, repo_id: str, *args: Any, **kwargs: Any) -> "FeedbackDataset":
-        return cls._from_huggingface(repo_id, *args, **kwargs)
+        return cls._from_huggingface(cls, repo_id, *args, **kwargs)
 
     def unify_responses(
         self,
