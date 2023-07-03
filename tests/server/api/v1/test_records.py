@@ -840,6 +840,30 @@ async def test_create_record_suggestion(client: TestClient, db: "AsyncSession", 
     assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 1
 
 
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {},  # missing value
+        {
+            "value": {"this": "is not valid response for a TextQuestion"},
+        },
+    ],
+)
+@pytest.mark.asyncio
+async def test_create_record_suggestion_not_valid(client: TestClient, owner_auth_header: dict, payload: dict):
+    dataset = await DatasetFactory.create()
+    question = await TextQuestionFactory.create(dataset=dataset)
+    record = await RecordFactory.create(dataset=dataset)
+
+    response = client.post(
+        f"/api/v1/records/{record.id}/suggestions",
+        headers=owner_auth_header,
+        json={"question_id": str(question.id), **payload},
+    )
+
+    assert response.status_code == 422
+
+
 @pytest.mark.asyncio
 async def test_create_record_suggestion_already_existing(client: TestClient, owner_auth_header: dict):
     dataset = await DatasetFactory.create()
