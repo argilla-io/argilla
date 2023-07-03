@@ -759,11 +759,11 @@ describe("QuestionsFormComponent when initialInputs is empty", () => {
       },
     };
     const wrapper = shallowMount(QuestionsFormComponent, options);
-    wrapper.find({ ref: "inputs" }).trigger("keyup", {
+    wrapper.find({ ref: "inputs" }).trigger("keydown", {
       shiftKey: true,
       key: "arrowDown",
     });
-    expect(wrapper.vm.focusedQuestion).toBe(1);
+    expect(wrapper.vm.autofocusPosition).toBe(1);
   });
   it("update focusedQuestion with a min value of 0 by keydown (shift + arrow-up)", () => {
     const options = {
@@ -783,10 +783,10 @@ describe("QuestionsFormComponent when initialInputs is empty", () => {
       },
     };
     const wrapper = shallowMount(QuestionsFormComponent, options);
-    wrapper.find({ ref: "inputs" }).trigger("keyup", {
+    wrapper.find({ ref: "inputs" }).trigger("keydown", {
       shiftKey: true,
       key: "arrowUp",
     });
-    expect(wrapper.vm.focusedQuestion).toBe(0);
+    expect(wrapper.vm.autofocusPosition).toBe(0);
   });
 });
