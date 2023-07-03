@@ -267,7 +267,6 @@ def test_update_rules(mocked_client, log_dataset):
         assert actual_rule.query == expected_rule.query
 
 
-@pytest.mark.skip("Failing in CI pipeline")
 def test_copy_dataset_with_rules(mocked_client: SecuredClient, argilla_user: User):
     dataset_name = "test_copy_dataset_with_rules"
 
