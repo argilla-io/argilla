@@ -73,32 +73,17 @@ def configure_router():
     ) -> BulkResponse:
         task = task_type
         workspace = common_params.workspace
-        try:
-            dataset = await datasets.find_by_name(
-                current_user,
-                name=name,
-                task=task,
-                workspace=workspace,
-            )
-            await datasets.update(
-                user=current_user,
-                dataset=dataset,
-                tags=bulk.tags,
-                metadata=bulk.metadata,
-            )
-        except EntityNotFoundError:
-            dataset = CreateDatasetRequest(name=name, workspace=workspace, task=task, **bulk.dict())
-            dataset = await datasets.create_dataset(user=current_user, dataset=dataset)
+
+        dataset = await datasets.find_by_name(current_user, name=name, task=task, workspace=workspace)
+
+        await datasets.update(user=current_user, dataset=dataset, tags=bulk.tags, metadata=bulk.metadata)
 
         result = await service.add_records(
             dataset=dataset,
             records=[ServiceText2TextRecord.parse_obj(r) for r in bulk.records],
         )
-        return BulkResponse(
-            dataset=name,
-            processed=result.processed,
-            failed=result.failed,
-        )
+
+        return BulkResponse(dataset=name, processed=result.processed, failed=result.failed)
 
     @router.post(
         path=f"{base_endpoint}:search",
