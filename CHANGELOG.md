@@ -18,6 +18,10 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed `sqlalchemy.error.OperationalError` being raised when running the unit tests if the local SQLite database file didn't exist and the migrations hadn't been applied ([#3307](https://github.com/argilla-io/argilla/pull/3307)).
+
 ## [1.12.0](https://github.com/argilla-io/argilla/compare/v1.11.0...v1.12.0)
 
 ### Added
