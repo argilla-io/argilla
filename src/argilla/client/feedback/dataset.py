@@ -351,7 +351,6 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
             )
             return self.records
 
-        # TODO(alvarobartt): create `ArgillaMixIn` and `HuggingFaceMixIn` classes to inherit their specific methods
         if self.argilla_id:
             httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
             first_batch = datasets_api_v1.get_records(
