@@ -2794,6 +2794,81 @@ async def test_create_dataset_records_with_nonexistent_dataset_id(
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
 
+@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+@pytest.mark.asyncio
+async def test_bulk_delete_dataset_records(client: TestClient, db: "AsyncSession", role: UserRole):
+    dataset = await DatasetFactory.create()
+    user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
+    records = await RecordFactory.create_batch(10, dataset=dataset)
+    random_uuids = [str(uuid4()) for _ in range(0, 5)]
+
+    records_ids = [str(record.id) for record in records]
+
+    response = client.post(
+        f"/api/v1/datasets/{dataset.id}/records/bulk-delete",
+        headers={API_KEY_HEADER_NAME: user.api_key},
+        json={"ids": records_ids + random_uuids},
+    )
+
+    assert response.status_code == 200
+    response_json = response.json()
+    assert all([record_id in response_json["deleted"] for record_id in records_ids])
+    assert all([record_id in response_json["not_deleted"] for record_id in random_uuids])
+    assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
+
+
+@pytest.mark.asyncio
+async def test_bulk_delete_records_from_another_dataset(
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
+):
+    dataset_a = await DatasetFactory.create()
+    dataset_b = await DatasetFactory.create()
+    records_a = await RecordFactory.create_batch(10, dataset=dataset_a)
+    records_b = await RecordFactory.create_batch(10, dataset=dataset_b)
+
+    records_ids_a = [str(record.id) for record in records_a]
+    records_ids_b = [str(record.id) for record in records_b]
+
+    response = client.post(
+        f"/api/v1/datasets/{dataset_a.id}/records/bulk-delete",
+        headers=owner_auth_header,
+        json={"ids": records_ids_a + records_ids_b},
+    )
+
+    assert response.status_code == 200
+    response_json = response.json()
+    assert all([record_id in response_json["deleted"] for record_id in records_ids_a])
+    assert all([record_id in response_json["not_deleted"] for record_id in records_ids_b])
+
+
+@pytest.mark.asyncio
+async def test_bulk_delete_dataset_records_as_admin_from_another_workspace(client: TestClient):
+    dataset = await DatasetFactory.create()
+    user = await UserFactory.create(role=UserRole.admin)
+
+    response = client.post(
+        f"/api/v1/datasets/{dataset.id}/records/bulk-delete",
+        headers={API_KEY_HEADER_NAME: user.api_key},
+        json={"ids": []},
+    )
+
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_bulk_delete_dataset_records_as_annotator(client: TestClient):
+    dataset = await DatasetFactory.create()
+    user = await UserFactory.create(workspaces=[dataset.workspace], role=UserRole.annotator)
+
+    response = client.post(
+        f"/api/v1/datasets/{dataset.id}/records/bulk-delete",
+        headers={API_KEY_HEADER_NAME: user.api_key},
+        json={"ids": []},
+    )
+
+    assert response.status_code == 403
+
+
 @pytest.mark.asyncio
 async def test_search_dataset_records(
     client: TestClient, mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
