@@ -15,7 +15,10 @@
 from typing import TYPE_CHECKING, List
 
 import pytest
-from argilla.client.feedback.card import ArgillaDatasetCard, size_categories_parser
+from argilla.client.feedback.integrations.huggingface.card import (
+    ArgillaDatasetCard,
+    size_categories_parser,
+)
 from huggingface_hub import DatasetCardData
 
 if TYPE_CHECKING:

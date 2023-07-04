@@ -45,7 +45,4 @@ FeedbackDataset
    :members: FeedbackDataset
 
 .. automodule:: argilla.client.feedback.schemas
-   :members: FeedbackDatasetConfig, RatingQuestion, TextQuestion, LabelQuestion, MultiLabelQuestion, RankingQuestion, QuestionSchema, TextField, FieldSchema, FeedbackRecord
-
-.. automodule:: argilla.client.feedback.config
-   :members: FeedbackDatasetConfig
+   :members: RatingQuestion, TextQuestion, LabelQuestion, MultiLabelQuestion, RankingQuestion, TextField, FeedbackRecord
