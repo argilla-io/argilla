@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
-from argilla.client.api import ArgillaSingleton, init
+from argilla.client.api import ArgillaSingleton
 from argilla.client.users import User
 
 if TYPE_CHECKING:
@@ -66,24 +66,9 @@ async def test_user_from_id(owner: "ServerUser") -> None:
 
 
 def test_user_me(owner: "ServerUser") -> None:
+    ArgillaSingleton.init(api_key=owner.api_key)
 
-    import argilla as rg
-
-    rg.init(api_key=owner.api_key)
-
-    user = rg.User.from_name(owner.username)
-
-    assert len(workspaces) == len(user.workspaces)
-    assert [ws.name for ws in workspaces] == user.workspaces
-
-
-def test_user_me(owner: "ServerUser"):
-    import argilla as rg
-
-    rg.init(api_key=owner.api_key)
-
-    user = rg.User.me()
-
+    user = User.me()
     assert user.id == owner.id
     assert user.username == owner.username
 
@@ -123,10 +108,11 @@ async def test_user_delete_user(owner: "ServerUser") -> None:
 
 
 def test_user_repr(owner: "ServerUser") -> None:
-    init(api_key=owner.api_key)
+    ArgillaSingleton(api_key=owner.api_key)
 
     assert str(User.me()) == (
         f"User(id={owner.id}, username={owner.username}, role={owner.role.value},"
-        f" workspaces={owner.workspaces}, api_key={owner.api_key}, first_name={owner.first_name}, last_name={owner.last_name},"
-        f" role={owner.role}, inserted_at={owner.inserted_at}, updated_at={owner.updated_at})"
+        f" workspaces={owner.workspaces}, api_key={owner.api_key}, first_name={owner.first_name},"
+        f" last_name={owner.last_name}, role={owner.role}, inserted_at={owner.inserted_at},"
+        f" updated_at={owner.updated_at})"
     )
