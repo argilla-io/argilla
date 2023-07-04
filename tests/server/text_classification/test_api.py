@@ -302,9 +302,9 @@ def test_create_records_for_text_classification_vector_search(mocked_client, tes
     assert results.total == 3
     assert all(hasattr(record, "vectors") for record in results.records)
     assert [record.id for record in results.records] == [
-        1,
-        2,
-        0,
+        "1",
+        "2",
+        "0",
     ]  ## similarity ordered records
 
 
@@ -412,7 +412,7 @@ def test_sort_by_last_updated(mocked_client):
         json={"sort": [{"id": "last_updated", "order": "asc"}]},
     )
 
-    assert [r["id"] for r in response.json()["records"]] == list(range(0, 10))
+    assert [r["id"] for r in response.json()["records"]] == list(map(str, range(0, 10)))
 
 
 def test_sort_by_id_as_default(mocked_client):
@@ -441,16 +441,16 @@ def test_sort_by_id_as_default(mocked_client):
     results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == 100
     assert list(map(lambda r: r.id, results.records)) == [
-        0,
-        1,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17,
+        "0",
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
     ]
 
 
@@ -517,18 +517,7 @@ def test_some_sort_by(mocked_client):
 
     results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == expected_records_length
-    assert list(map(lambda r: r.id, results.records)) == [
-        14,
-        19,
-        24,
-        29,
-        34,
-        39,
-        4,
-        44,
-        49,
-        9,
-    ]
+    assert list(map(lambda r: r.id, results.records)) == ["14", "19", "24", "29", "34", "39", "4", "44", "49", "9"]
 
 
 def test_disable_aggregations_when_scroll(mocked_client):

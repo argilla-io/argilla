@@ -80,7 +80,7 @@ def test_model_dict():
                 ]
             }
         },
-        "id": 1,
+        "id": "1",
         "inputs": {"text": "This is a text"},
         "metrics": {},
         "multi_label": True,
@@ -122,7 +122,7 @@ def test_model_with_annotations():
                 ]
             }
         },
-        "id": 1,
+        "id": "1",
         "inputs": {"text": "This is a text"},
         "metrics": {},
         "multi_label": True,
