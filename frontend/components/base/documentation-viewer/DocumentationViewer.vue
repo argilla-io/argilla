@@ -1,40 +1,35 @@
 <template>
-  <div class="training-snippets">
-    <div class="snippet__container">
-      <BaseTabs
-        v-if="content.tabs.length"
-        class="training-snippets__tabs"
-        :tabs="content.tabs"
-        :active-tab="currentTab"
-        @change-tab="onChangeTab"
-      />
-      <transition v-if="currentTab" name="fade" mode="out-in" appear>
-        {{ currentTab }}
-        <div class="snippet" :key="currentTab.id" v-if="currentTab">
-          <h1 v-if="currentTab.title" class="snippet__title --heading5">
-            {{ currentTab.title }}
-          </h1>
-          <h2
-            v-if="currentTab.description"
-            class="snippet__description --body2"
+  <div class="snippet__container">
+    <BaseTabs
+      v-if="content.tabs.length"
+      class="snippets__tabs"
+      :tabs="content.tabs"
+      :active-tab="currentTab"
+      @change-tab="onChangeTab"
+    />
+    <transition v-if="currentTab" name="fade" mode="out-in" appear>
+      {{ currentTab }}
+      <div class="snippet" :key="currentTab.id" v-if="currentTab">
+        <h1 v-if="currentTab.title" class="snippet__title --heading5">
+          {{ currentTab.title }}
+        </h1>
+        <h2 v-if="currentTab.description" class="snippet__description --body2">
+          {{ currentTab.description }}
+        </h2>
+        <BaseRenderHtml v-if="currentTab.html" :html="currentTab.html" />
+        <div class="library__buttons" v-if="currentTab.links">
+          <p class="library__section__title">Links</p>
+          <base-button
+            v-for="(button, index) in currentTab.links"
+            :key="index"
+            class="library__button primary small text"
+            :href="button.linkLink"
+            target="_blank"
+            >{{ button.linkText }}</base-button
           >
-            {{ currentTab.description }}
-          </h2>
-          <BaseRenderHtml v-if="currentTab.html" :html="currentTab.html" />
-          <div class="library__buttons" v-if="currentTab.links">
-            <p class="library__section__title">Links</p>
-            <base-button
-              v-for="(button, index) in currentTab.links"
-              :key="index"
-              class="library__button primary small text"
-              :href="button.linkLink"
-              target="_blank"
-              >{{ button.linkText }}</base-button
-            >
-          </div>
         </div>
-      </transition>
-    </div>
+      </div>
+    </transition>
   </div>
 </template>
 <script>
@@ -59,8 +54,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.training-snippets {
-  min-width: 800px;
+.snippets {
   &__tabs.tabs {
     margin: 0 -2.5em 2em;
     padding: 0 2.5em;
@@ -70,8 +64,6 @@ export default {
 .snippet {
   margin: 0 -2.5em;
   padding: 0 2.5em;
-  max-height: calc(100vh - 240px);
-  overflow: auto;
   @extend %hide-scrollbar;
   &__container {
     width: 800px;
