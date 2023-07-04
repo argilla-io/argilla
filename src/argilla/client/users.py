@@ -161,7 +161,7 @@ class User:
         instance = cls.__new__(cls)
         instance.__client = client or cls.__active_client()
         if isinstance(user, UserModel):
-            instance.__dict__.update(user.dict())
+            instance.__dict__.update(user.dict(exclude={"workspaces"}))
         return instance
 
     @classmethod
