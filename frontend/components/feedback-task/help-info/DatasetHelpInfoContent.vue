@@ -44,10 +44,11 @@ export default {
 <style lang="scss" scoped>
 .help-info__content {
   width: auto;
-  max-height: calc(100vh - 340px);
+}
+:deep(.snippet) {
+  max-height: calc(100vh - 400px);
   overflow: auto;
   margin-bottom: 2em;
-  @extend %hide-scrollbar;
 }
 :deep(table) {
   width: 100%;
@@ -90,6 +91,4 @@ export default {
     background: $black-4;
   }
 }
-</style>
-
 </style>
