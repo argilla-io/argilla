@@ -17,12 +17,13 @@ from uuid import UUID
 
 import pytest
 from argilla.client.api import ArgillaSingleton
+from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 from argilla.client.users import User
 
 if TYPE_CHECKING:
     from argilla.server.models import User as ServerUser
 
-from tests.factories import UserFactory, WorkspaceFactory
+from tests.factories import UserFactory, WorkspaceFactory, WorkspaceUserFactory
 
 
 def test_user_cls_init() -> None:
@@ -121,10 +122,12 @@ def test_user_repr(owner: "ServerUser") -> None:
 @pytest.mark.asyncio
 async def test_user_workspaces(owner: "ServerUser") -> None:
     workspaces = await WorkspaceFactory.create_batch(3)
+    for workspace in workspaces:
+        await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
     ArgillaSingleton.init(api_key=owner.api_key)
 
     user = User.me()
     assert isinstance(user.workspaces, list)
     assert len(user.workspaces) == len(workspaces)
-    assert all(isinstance(workspace, str) for workspace in workspaces)
-    assert all(workspace in user.workspaces for workspace in workspaces)
+    assert all(isinstance(workspace, WorkspaceModel) for workspace in user.workspaces)
+    assert [workspace.name for workspace in workspaces] == [workspace.name for workspace in user.workspaces]
