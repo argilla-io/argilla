@@ -17,7 +17,7 @@ from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, func, select
-from sqlalchemy.orm import Session, contains_eager, joinedload, selectinload
+from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
 from argilla.server.enums import ResponseStatusFilter
@@ -30,6 +30,7 @@ from argilla.server.models import (
     Response,
     ResponseStatus,
     ResponseValue,
+    Suggestion,
 )
 from argilla.server.schemas.v1.datasets import (
     DatasetCreate,
@@ -45,6 +46,8 @@ from argilla.server.security.model import User
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
+
+    from argilla.server.schemas.v1.suggestions import SuggestionCreate
 
 LIST_RECORDS_LIMIT = 20
 
@@ -90,6 +93,16 @@ async def create_dataset(db: "AsyncSession", dataset_create: DatasetCreate):
     return dataset
 
 
+async def _count_fields_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
+    result = await db.execute(select(func.count(Field.id)).filter_by(dataset_id=dataset_id))
+    return result.scalar()
+
+
+async def _count_questions_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
+    result = await db.execute(select(func.count(Question.id)).filter_by(dataset_id=dataset_id))
+    return result.scalar()
+
+
 async def publish_dataset(db: "AsyncSession", search_engine: SearchEngine, dataset: Dataset) -> Dataset:
     if dataset.is_ready:
         raise ValueError("Dataset is already published")
@@ -111,7 +124,7 @@ async def publish_dataset(db: "AsyncSession", search_engine: SearchEngine, datas
     return dataset
 
 
-async def delete_dataset(db: Session, search_engine: SearchEngine, dataset: Dataset) -> Dataset:
+async def delete_dataset(db: "AsyncSession", search_engine: SearchEngine, dataset: Dataset) -> Dataset:
     try:
         await db.delete(dataset)
         await search_engine.delete_index(dataset)
@@ -122,7 +135,7 @@ async def delete_dataset(db: Session, search_engine: SearchEngine, dataset: Data
     return dataset
 
 
-async def get_field_by_id(db: Session, field_id: UUID) -> Union[Field, None]:
+async def get_field_by_id(db: "AsyncSession", field_id: UUID) -> Union[Field, None]:
     result = await db.execute(select(Field).filter_by(id=field_id).options(selectinload(Field.dataset)))
     return result.scalar_one_or_none()
 
@@ -160,7 +173,7 @@ async def delete_field(db: "AsyncSession", field: Field) -> Field:
     return field
 
 
-async def get_question_by_id(db: Session, question_id: UUID) -> Union[Question, None]:
+async def get_question_by_id(db: "AsyncSession", question_id: UUID) -> Union[Question, None]:
     result = await db.execute(select(Question).filter_by(id=question_id).options(selectinload(Question.dataset)))
     return result.scalar_one_or_none()
 
@@ -199,10 +212,15 @@ async def delete_question(db: "AsyncSession", question: Question) -> Question:
     return question
 
 
-async def get_record_by_id(db: "AsyncSession", record_id: UUID) -> Union[Record, None]:
-    result = await db.execute(
-        select(Record).filter_by(id=record_id).options(selectinload(Record.dataset).selectinload(Dataset.questions))
-    )
+async def get_record_by_id(
+    db: "AsyncSession", record_id: UUID, with_dataset: bool = False, with_suggestions: bool = False
+) -> Union[Record, None]:
+    query = select(Record).filter_by(id=record_id)
+    if with_dataset:
+        query = query.options(selectinload(Record.dataset).selectinload(Dataset.questions))
+    if with_suggestions:
+        query = query.options(selectinload(Record.suggestions))
+    result = await db.execute(query)
     return result.scalar_one_or_none()
 
 
@@ -221,6 +239,8 @@ async def get_records_by_ids(
             ).options(contains_eager(Record.responses))
         else:
             query = query.options(joinedload(Record.responses))
+    if RecordInclude.suggestions in include:
+        query = query.options(joinedload(Record.suggestions))
     result = await db.execute(query)
     return result.unique().scalars().all()
 
@@ -235,6 +255,8 @@ async def list_records_by_dataset_id(
     query = select(Record).filter(Record.dataset_id == dataset_id)
     if RecordInclude.responses in include:
         query = query.options(joinedload(Record.responses))
+    if RecordInclude.suggestions in include:
+        query = query.options(joinedload(Record.suggestions))
     query = query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
     result = await db.execute(query)
     return result.unique().scalars().all()
@@ -248,33 +270,23 @@ async def list_records_by_dataset_id_and_user_id(
     response_status: Optional[ResponseStatusFilter] = None,
     offset: int = 0,
     limit: int = LIST_RECORDS_LIMIT,
-):
-    query = select(Record).filter(Record.dataset_id == dataset_id)
+) -> List[Record]:
+    query = (
+        select(Record)
+        .filter(Record.dataset_id == dataset_id)
+        .outerjoin(Response, and_(Response.record_id == Record.id, Response.user_id == user_id))
+    )
 
     if response_status == ResponseStatusFilter.missing:
-        query = (
-            query.outerjoin(
-                Response,
-                and_(Response.record_id == Record.id, Response.user_id == user_id),
-            )
-            .filter(Response.status == None)
-            .options(contains_eager(Record.responses))
-        )
-    else:
-        if response_status:
-            query = query.join(
-                Response,
-                and_(
-                    Response.record_id == Record.id,
-                    Response.user_id == user_id,
-                    Response.status == ResponseStatus(response_status),
-                ),
-            ).options(contains_eager(Record.responses))
-        elif RecordInclude.responses in include:
-            query = query.outerjoin(
-                Response,
-                and_(Response.record_id == Record.id, Response.user_id == user_id),
-            ).options(contains_eager(Record.responses))
+        query = query.filter(Response.status == None)  # noqa: E711
+    elif response_status is not None:
+        query = query.filter(Response.status == ResponseStatus(response_status))
+
+    if RecordInclude.responses in include:
+        query = query.options(contains_eager(Record.responses))
+
+    if RecordInclude.suggestions in include:
+        query = query.options(joinedload(Record.suggestions))
 
     query = query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
     result = await db.execute(query)
@@ -308,13 +320,37 @@ async def create_records(
 
         if record_create.responses:
             for response in record_create.responses:
+                # TODO(gabrielmbmb): the result of this query should be cached
                 if not await accounts.get_user_by_id(db, response.user_id):
                     raise ValueError(f"Provided user_id: {response.user_id!r} is not a valid user id")
 
                 validate_response_values(dataset, values=response.values, status=response.status)
 
                 record.responses.append(
-                    Response(values=jsonable_encoder(response.values), status=response.status, user_id=response.user_id)
+                    Response(
+                        values=jsonable_encoder(response.values),
+                        status=response.status,
+                        user_id=response.user_id,
+                    )
+                )
+
+        if record_create.suggestions:
+            for suggestion in record_create.suggestions:
+                # TODO(gabrielmbmb): the result of this query should be cached
+                question = await get_question_by_id(db, suggestion.question_id)
+                if not question:
+                    raise ValueError(f"Provided question_id: {suggestion.question_id!r} is not a valid question id")
+
+                question.parsed_settings.check_response(suggestion)
+
+                record.suggestions.append(
+                    Suggestion(
+                        type=suggestion.type,
+                        score=suggestion.score,
+                        value=suggestion.value,
+                        agent=suggestion.agent,
+                        question_id=suggestion.question_id,
+                    )
                 )
 
         records.append(record)
@@ -331,7 +367,7 @@ async def create_records(
         raise
 
 
-async def get_response_by_id(db: Session, response_id: UUID) -> Union[Response, None]:
+async def get_response_by_id(db: "AsyncSession", response_id: UUID) -> Union[Response, None]:
     result = await db.execute(
         select(Response)
         .filter_by(id=response_id)
@@ -347,10 +383,6 @@ async def get_response_by_record_id_and_user_id(
     return result.scalar_one_or_none()
 
 
-def list_responses_by_record_id(db: Session, record_id: UUID):
-    return db.query(Response).filter_by(record_id=record_id).order_by(Response.inserted_at.asc()).all()
-
-
 async def count_responses_by_dataset_id_and_user_id(
     db: "AsyncSession", dataset_id: UUID, user_id: UUID, response_status: Optional[ResponseStatus] = None
 ) -> int:
@@ -364,22 +396,6 @@ async def count_responses_by_dataset_id_and_user_id(
         .filter(*expressions)
     )
     return result.scalar()
-
-
-def count_records_with_missing_responses_by_dataset_id_and_user_id(db: Session, dataset_id: UUID, user_id: UUID):
-    return (
-        db.query(Record.id)
-        .outerjoin(
-            Response,
-            and_(
-                Response.record_id == Record.id,
-                Response.user_id == user_id,
-            ),
-        )
-        .with_entities(func.count())
-        .filter(and_(Record.dataset_id == dataset_id, Response.status == None))
-        .scalar()
-    )
 
 
 async def create_response(
@@ -477,11 +493,21 @@ def validate_record_fields(dataset: Dataset, fields: Dict[str, Any]):
         raise ValueError(f"Error: found fields values for non configured fields: {list(fields_copy.keys())!r}")
 
 
-async def _count_fields_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
-    result = await db.execute(select(func.count(Field.id)).filter_by(dataset_id=dataset_id))
-    return result.scalar()
+async def get_suggestion_by_record_id_and_question_id(
+    db: "AsyncSession", record_id: UUID, question_id: UUID
+) -> Union[Suggestion, None]:
+    result = await db.execute(select(Suggestion).filter_by(record_id=record_id, question_id=question_id))
+    return result.scalar_one_or_none()
 
 
-async def _count_questions_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
-    result = await db.execute(select(func.count(Question.id)).filter_by(dataset_id=dataset_id))
-    return result.scalar()
+async def create_suggestion(
+    db: "AsyncSession", record: Record, question: Question, suggestion_create: "SuggestionCreate"
+) -> Suggestion:
+    question.parsed_settings.check_response(suggestion_create)
+
+    suggestion = Suggestion(record_id=record.id, **suggestion_create.dict())
+    db.add(suggestion)
+    await db.commit()
+    await db.refresh(suggestion)
+
+    return suggestion
