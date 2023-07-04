@@ -97,7 +97,7 @@ Then, you can proceed with the `pre-commit` hooks installation by simply running
 pre-commit install
 ```
 
-### Running Frontend  
+### Running Frontend
 
 First, make sure you have Docker installed. If you don't have it installed, please download and install it, using [this guide](../getting_started/quickstart_installation.ipynb#Running-Argilla-Quickstart) as reference.
 

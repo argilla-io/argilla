@@ -8,7 +8,7 @@ To get started you just need to run the docker image with the following command:
   docker run -d --network argilla-net --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest
 ```
 
-```{warning} 
+```{warning}
 
 Apple Silicon M1/M2 users might have issues with this deployment. To resolve this, use the `--platform linux/arm64` parameter. If this doesn't work, deploying separate images or via docker-compose will work.
 
