@@ -12,22 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime
-from typing import List
-from uuid import UUID
+from ._dataset_card import ArgillaDatasetCard
+from ._parser import size_categories_parser
 
-from pydantic import BaseModel
-
-
-class Workspace(BaseModel):
-    id: UUID
-    name: str
-    inserted_at: datetime
-    updated_at: datetime
-
-    class Config:
-        orm_mode = True
-
-
-class Workspaces(BaseModel):
-    items: List[Workspace]
+__all__ = ["ArgillaDatasetCard", "size_categories_parser"]
