@@ -1,19 +1,23 @@
 <template>
   <div class="datasets-empty">
-    <svgicon
-      class="datasets-empty__icon"
-      width="44"
-      height="46"
-      name="unavailable"
-    />
-    <p class="datasets-empty__title">There aren't any datasets yet</p>
-    <p class="datasets-empty__subtitle">
-      The Argilla web app allows you to log, explore and annotate your data.<br />
-      Start logging data with our Python client, or
-      <a :href="$config.documentationSite" target="_blank">see the docs</a>
-      for more information.
-    </p>
-    <base-code :code="generateCodeSnippet()"></base-code>
+    <div class="datasets-empty__body">
+      <svgicon
+        class="datasets-empty__icon"
+        width="44"
+        height="46"
+        name="unavailable"
+      />
+      <p class="datasets-empty__title">There aren't any datasets yet</p>
+      <p class="datasets-empty__subtitle">
+        The Argilla web app allows you to log, explore and annotate your
+        data.<br />
+        Start logging data with our Python client, or
+        <a :href="$config.documentationSite" target="_blank">see the docs</a>
+        for more information.
+      </p>
+    </div>
+    <base-spinner v-if="$fetchState.pending" />
+    <documentation-viewer v-else :content="content" />
   </div>
 </template>
 
@@ -21,39 +25,59 @@
 import "assets/icons/unavailable";
 
 export default {
-  props: {
-    workspace: {
-      required: true,
-      type: String,
-    },
+  data() {
+    return {
+      content: {
+        tabs: [],
+      },
+    };
   },
+  async fetch() {
+    const folderContent = require.context(
+      `../../../../docs/_source/_common/snippets`,
+      false,
+      /.start_page.md/,
+      "lazy"
+    );
 
-  methods: {
-    generateCodeSnippet() {
-      return `# install datasets library with pip install datasets
-import argilla as rg
-from datasets import load_dataset
+    const startPage = await folderContent("./start_page.md");
 
-# load dataset from the hub
-dataset = load_dataset("argilla/gutenberg_spacy-ner", split="train")
+    const docElement = new DOMParser().parseFromString(
+      startPage.html,
+      "text/html"
+    ).documentElement;
 
-# read in dataset, assuming its a dataset for token classification
-dataset_rg = rg.read_datasets(dataset, task="TokenClassification")
+    const codeBlocks = docElement.getElementsByTagName("pre");
 
-# log the dataset
-rg.log(dataset_rg, "gutenberg_spacy-ner")`;
-    },
+    for (const codeBlock of codeBlocks) {
+      const tabName = codeBlock.previousElementSibling.innerText.replace(
+        ":::{tab-item} ",
+        ""
+      );
+      const code = codeBlock.innerText;
+
+      this.content.tabs.push({
+        id: tabName.trim().toLowerCase(),
+        name: tabName,
+        html: `<base-code code='${code}'></base-code>`,
+      });
+    }
   },
 };
 </script>
 <style lang="scss" scoped>
 .datasets-empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
   text-align: center;
-  margin: auto;
-  margin-top: 12%;
   color: $black-54;
-  max-width: 610px;
   line-height: 20px;
+  margin-top: 3em;
+  &__body {
+    height: fit-content;
+  }
   &__icon {
     margin-bottom: 1em;
   }
