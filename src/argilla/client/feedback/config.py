@@ -21,7 +21,14 @@ except ImportError:
     from typing_extensions import Annotated
 
 from pydantic import BaseModel, Field
-from yaml import SafeLoader, dump, load
+
+try:
+    from yaml import SafeLoader, dump, load
+except ImportError:
+    raise ImportError(
+        "Please make sure to install `PyYAML` in order to use `DatasetConfig`. To do"
+        " so you can run `pip install pyyaml`."
+    )
 
 from argilla.client.feedback.typing import AllowedFieldTypes, AllowedQuestionTypes
 
