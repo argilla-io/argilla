@@ -23,7 +23,5 @@ You can track your progress and the number of `Pending`, `Submitted` and `Discar
 
 ## Shortcuts
 
-You can speed up the annotation process by using these shortcuts:
-
 ```{include} /_common/shortcuts.md
 ```
