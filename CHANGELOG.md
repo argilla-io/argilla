@@ -18,13 +18,18 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
-### Changed
-
-- Renamed `FeedbackDatasetConfig` to `DatasetConfig` and export/import from YAML as default instead of JSON (just used internally on `push_to_huggingface` and `from_huggingface` methods of `FeedbackDataset`) ([#3326](https://github.com/argilla-io/argilla/pull/3326)).
-
 ### Refactored
 
 - Added `HuggingFaceDatasetMixIn` for internal usage, to detach the `FeedbackDataset` integrations from the class itself, and use MixIns instead ([#3326](https://github.com/argilla-io/argilla/pull/3326)).
+
+### Fixed
+
+- Fixed `sqlalchemy.error.OperationalError` being raised when running the unit tests if the local SQLite database file didn't exist and the migrations hadn't been applied ([#3307](https://github.com/argilla-io/argilla/pull/3307)).
+
+### Changed
+
+- The `POST /api/datasets/:dataset-id/:task/bulk` endpoint don't create the dataset if does not exists (Closes [#3244](https://github.com/argilla-io/argilla/issues/3244))
+- Renamed `FeedbackDatasetConfig` to `DatasetConfig` and export/import from YAML as default instead of JSON (just used internally on `push_to_huggingface` and `from_huggingface` methods of `FeedbackDataset`) ([#3326](https://github.com/argilla-io/argilla/pull/3326)).
 
 ## [1.12.0](https://github.com/argilla-io/argilla/compare/v1.11.0...v1.12.0)
 

@@ -11,3 +11,15 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+from typing import TYPE_CHECKING
+
+from argilla.server.models import Workspace
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
+
+def get_or_new_workspace(session: "Session", workspace_name: str) -> Workspace:
+    workspace = session.query(Workspace).filter_by(name=workspace_name).first()
+    return workspace or Workspace(name=workspace_name)

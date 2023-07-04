@@ -33,13 +33,22 @@ from argilla.labeling.text_classification.weak_labels import (
     NoRulesFoundError,
     WeakLabelsBase,
 )
+from argilla.server.commons.models import TaskType
 from pandas.testing import assert_frame_equal
+
+from tests.helpers import SecuredClient
 
 
 @pytest.fixture
-def log_dataset(mocked_client) -> str:
+def log_dataset(mocked_client: SecuredClient) -> str:
     dataset_name = "test_dataset_for_applier"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
+    assert (
+        mocked_client.post(
+            "/api/datasets", json={"name": dataset_name, "task": TaskType.text_classification.value}
+        ).status_code
+        == 200
+    )
     records = [
         CreationTextClassificationRecord.parse_obj(
             {
@@ -92,9 +101,15 @@ def rules(monkeypatch) -> List[Callable]:
 
 
 @pytest.fixture
-def log_multilabel_dataset(mocked_client) -> str:
+def log_multilabel_dataset(mocked_client: SecuredClient) -> str:
     dataset_name = "test_dataset_for_multilabel_applier"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
+    assert (
+        mocked_client.post(
+            "/api/datasets", json={"name": dataset_name, "task": TaskType.text_classification.value}
+        ).status_code
+        == 200
+    )
     records = [
         CreationTextClassificationRecord.parse_obj(
             {

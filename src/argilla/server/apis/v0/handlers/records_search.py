@@ -74,7 +74,7 @@ def configure_router(router: APIRouter):
         engine: GenericElasticEngineBackend = Depends(GenericElasticEngineBackend.get_instance),
         current_user: User = Security(auth.get_current_user),
     ):
-        found = service.find_by_name(user=current_user, name=name, workspace=request_deps.workspace)
+        found = await service.find_by_name(user=current_user, name=name, workspace=request_deps.workspace)
 
         request = request or ScanDatasetRecordsRequest()
         paginated_sort = PaginatedSortInfo(sort_by=request.sort_by or [SortableField(id="id")])

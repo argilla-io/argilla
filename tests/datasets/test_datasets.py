@@ -11,6 +11,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+from typing import TYPE_CHECKING
+
 import argilla as rg
 import pytest
 from argilla.client import api
@@ -20,9 +23,14 @@ from argilla.client.sdk.commons.errors import ForbiddenApiError
 from argilla.datasets import TextClassificationSettings, TokenClassificationSettings
 from argilla.datasets.__init__ import configure_dataset
 from argilla.server.contexts import accounts
-from argilla.server.models import User
 from argilla.server.security.model import WorkspaceUserCreate
-from sqlalchemy.orm import Session
+
+if TYPE_CHECKING:
+    from argilla.client.apis.datasets import LabelsSchemaSettings
+    from argilla.server.models import User
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    from tests.helpers import SecuredClient
 
 
 @pytest.mark.parametrize(
@@ -38,7 +46,9 @@ from sqlalchemy.orm import Session
         ),
     ],
 )
-def test_settings_workflow(argilla_user: User, settings_, wrong_settings):
+def test_settings_workflow(
+    argilla_user: "User", settings_: "LabelsSchemaSettings", wrong_settings: "LabelsSchemaSettings"
+):
     dataset = "test-dataset"
 
     init(api_key=argilla_user.api_key, workspace=argilla_user.username)
@@ -63,7 +73,7 @@ def test_settings_workflow(argilla_user: User, settings_, wrong_settings):
         configure_dataset(dataset, wrong_settings, workspace=workspace)
 
 
-def test_list_dataset(mocked_client):
+def test_list_dataset(mocked_client: "SecuredClient"):
     from argilla.client.api import active_client
 
     client = active_client()
@@ -73,11 +83,16 @@ def test_list_dataset(mocked_client):
         assert ds["owner"] == ds["workspace"]
 
 
-def test_delete_dataset_by_non_creator(mocked_client, mock_user, argilla_user, db: Session):
+@pytest.mark.asyncio
+async def test_delete_dataset_by_non_creator(
+    mocked_client: "SecuredClient", mock_user: "User", argilla_user: "User", db: "AsyncSession"
+):
     dataset = "test_delete_dataset_by_non_creator"
 
     for workspace in argilla_user.workspaces:
-        accounts.create_workspace_user(db, WorkspaceUserCreate(user_id=mock_user.id, workspace_id=workspace.id))
+        await accounts.create_workspace_user(db, WorkspaceUserCreate(user_id=mock_user.id, workspace_id=workspace.id))
+
+    await db.refresh(mock_user, attribute_names=["workspaces"])
 
     rg = Argilla()
 

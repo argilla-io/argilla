@@ -87,8 +87,9 @@ def test_create_user_errors(owner: User, annotator: User) -> None:
         )
 
 
-def test_delete_user(owner: User) -> None:
-    user = UserFactory.create(username="user_1")
+@pytest.mark.asyncio
+async def test_delete_user(owner: User) -> None:
+    user = await UserFactory.create(username="user_1")
     httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
 
     response = delete_user(client=httpx_client, user_id=user.id)

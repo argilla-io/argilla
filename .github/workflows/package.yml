@@ -14,7 +14,6 @@ on:
       - "feature/**"
       - "feat/**"
 
-
   pull_request:
     branches:
       - "main"
@@ -23,229 +22,103 @@ on:
       - "feature/**"
       - "feat/**"
 
-
-env:
-  # Increase this value to reset cache if etc/example-environment.yml has not changed
-  CACHE_NUMBER:  5
-  ALEMBIC_CONFIG: src/argilla/alembic.ini
-
 jobs:
-  test-elastic:
-    name: Tests ElasticSearch
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: [ 8.8, 8.5, 8.0, 7.17]
-    defaults:
-      run:
-        shell: bash -l {0}
-    steps:
-      - name: Checkout Code 🛎
-        uses: actions/checkout@v2
-      - name: Check affected files
-        uses: dorny/paths-filter@v2
-        id: filter
-        with:
-          filters: |
-            python_code:
-              - 'src/**'
-              - 'tests/**'
-              - 'pyproject.toml'
-              - 'setup.py'
-      - name: Setup ElasticSearch 🔎
-        if: steps.filter.outputs.python_code == 'true'
-        uses: ankane/setup-elasticsearch@v1
-        with:
-          elasticsearch-version: ${{ matrix.version }}
-      - name: Setup Conda Env 🐍
-        uses: conda-incubator/setup-miniconda@v2
-        if: steps.filter.outputs.python_code == 'true'
-        with:
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          use-mamba: true
-          activate-environment: argilla
-      - name: Get date for conda cache
-        if: steps.filter.outputs.python_code == 'true'
-        id: get-date
-        run: echo "::set-output name=today::$(/bin/date -u '+%Y%m%d')"
-        shell: bash
-      - name: Cache Conda env
-        if: steps.filter.outputs.python_code == 'true'
-        uses: actions/cache@v2
-        id: cache
-        with:
-          path: ${{ env.CONDA }}/envs
-          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
-      - name: Update environment
-        if: steps.filter.outputs.python_code == 'true' && steps.cache.outputs.cache-hit != 'true'
-        run: mamba env update -n argilla -f environment_dev.yml
-      - name: Cache pip 👜
-        uses: actions/cache@v2
-        if: steps.filter.outputs.python_code == 'true'
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
-      - name: Set huggingface hub credentials
-        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/releases')
-        env:
-          HF_HUB_ACCESS_TOKEN: ${{ secrets.HF_HUB_ACCESS_TOKEN }}
-        run: echo "Enable HF access token"
-      - name: Run tests 📈
-        if: steps.filter.outputs.python_code == 'true'
-        run: |
-          pip install -e ".[server,listeners]"
-          alembic upgrade head
-          pytest --cov=argilla --cov-report=xml
-      - name: Upload Coverage to Codecov 📦
-        uses: codecov/codecov-action@v1
-        if: steps.filter.outputs.python_code == 'true' && matrix.version == '8.5'
-        with:
-          files: ./coverage.xml
-          flags: pytest
-          fail_ci_if_error: false
 
-  test-opensearch:
-    name: Test OpenSearch
-    runs-on: ubuntu-latest
+  check_repo_files:
+    name: Check source changes
+    uses: ./.github/workflows/check-repo-files.yml
 
-    strategy:
-      matrix:
-        version: [ 1.3, 2.3 ]
-    defaults:
-      run:
-        shell: bash -l {0}
-    steps:
-      - name: Checkout Code 🛎
-        uses: actions/checkout@v2
-      - name: Check affected files
-        uses: dorny/paths-filter@v2
-        id: filter
-        with:
-          filters: |
-            python_code:
-              - 'src/**'
-              - 'tests/**'
-              - 'pyproject.toml'
-              - 'setup.py'
-      - name: Setup OpenSearch 🔎
-        if: steps.filter.outputs.python_code == 'true'
-        uses: ankane/setup-opensearch@v1
-        with:
-          opensearch-version: ${{ matrix.version }}
-      - name: Setup Conda Env 🐍
-        uses: conda-incubator/setup-miniconda@v2
-        if: steps.filter.outputs.python_code == 'true'
-        with:
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          use-mamba: true
-          activate-environment: argilla
-      - name: Get date for conda cache
-        if: steps.filter.outputs.python_code == 'true'
-        id: get-date
-        run: echo "::set-output name=today::$(/bin/date -u '+%Y%m%d')"
-        shell: bash
-      - name: Cache Conda env
-        if: steps.filter.outputs.python_code == 'true'
-        uses: actions/cache@v2
-        id: cache
-        with:
-          path: ${{ env.CONDA }}/envs
-          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
-      - name: Update environment
-        if: steps.filter.outputs.python_code == 'true' && steps.cache.outputs.cache-hit != 'true'
-        run: mamba env update -n argilla -f environment_dev.yml
-      - name: Cache pip 👜
-        uses: actions/cache@v2
-        if: steps.filter.outputs.python_code == 'true'
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
-      - name: Set huggingface hub credentials
-        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/releases')
-        env:
-          HF_HUB_ACCESS_TOKEN: ${{ secrets.HF_HUB_ACCESS_TOKEN }}
-        run: echo "Enable HF access token"
-      - name: Run tests 📈
-        if: steps.filter.outputs.python_code == 'true'
-        run: |
-          pip install -e ".[server,listeners]"
-          alembic upgrade head
-          pytest --cov=argilla --cov-report=xml
-      - name: Upload Coverage to Codecov 📦
-        uses: codecov/codecov-action@v1
-        if: steps.filter.outputs.python_code == 'true' && matrix.version == '2.3'
-        with:
-          files: ./coverage.xml
-          flags: pytest
-          fail_ci_if_error: false
-
-  build:
-    name: Build the python package
+  deployable_check:
+    name: Check if must build & deploy from environment
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash -l {0}
-    # Only build the package if we can deploy it as a docker image
+    needs: check_repo_files
     env:
-      IS_DEPLOYABLE: ${{ secrets.AR_DOCKER_USERNAME != '' }}
+      IS_DEPLOYABLE: ${{ secrets.AR_DOCKER_USERNAME != '' && needs.check_repo_files.outputs.buildChanges }}
     outputs:
-      code_changes: ${{ steps.filter.outputs.code_changes }}
+      isDeployable: ${{ steps.set_output.outputs.is_deployable }}
+    steps:
+      - name: set output
+        id: set_output
+        run: |
+          echo "is_deployable=$IS_DEPLOYABLE" >> $GITHUB_OUTPUT
 
+  run_tests:
+    strategy:
+      matrix:
+        include:
+        - searchEngine: elasticsearch
+          searchEngineVersion: 8.8
+        - searchEngine: elasticsearch
+          searchEngineVersion: 8.0
+        - searchEngine: elasticsearch
+          searchEngineVersion: 7.17
+        - searchEngine: opensearch
+          searchEngineVersion: 2.4
+        - searchEngine: opensearch
+          searchEngineVersion: 1.3
+    name: Run base tests
+    uses: ./.github/workflows/run-python-tests.yml
+    needs:  check_repo_files
+    if: needs.check_repo_files.outputs.pythonChanges
+    with:
+      searchEngine: ${{ matrix.searchEngine }}
+      searchEngineVersion: ${{ matrix.searchEngineVersion }}
+      coverageReport: coverage
+      pytestArgs: |
+        --ignore=tests/training \
+        --ignore=tests/client/feedback/training \
+        --ignore=tests/monitoring \
+        --ignore=tests/listeners
+    secrets: inherit
+
+  run_tests_extra:
+    name: Run extra tests (training, monitoring and listeners)
+    uses: ./.github/workflows/run-python-tests.yml
+    needs: check_repo_files
+    if: needs.check_repo_files.outputs.pythonChanges
+    # continue-on-error: true
+    with:
+      coverageReport: coverage-extra
+      pytestArgs: |
+        tests/training \
+        tests/client/feedback/training \
+        tests/monitoring \
+        tests/listeners
+    secrets: inherit
+
+  push_coverage:
+    name: Upload code coverage
+    runs-on: ubuntu-latest
+    needs:
+      - run_tests
+      - run_tests_extra
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v2
-      - name: Check affected files
-        uses: dorny/paths-filter@v2
-        id: filter
-        with:
-          filters: |
-            code_changes:
-              - 'src/**'
-              - 'frontend/**'
-              - 'pyproject.toml'
-              - 'setup.py'
-              - 'docker/**'
-              - 'docker/scripts/*.sh'
-              - '.dockerignore'
-              - '.github/workflows/package.yml'
-      - name: Cache pip 👜
-        uses: actions/cache@v2
-        if: steps.filter.outputs.code_changes == 'true' && env.IS_DEPLOYABLE == 'true'
-        env:
-          # Increase this value to reset cache if pyproject.toml has not changed
-          CACHE_NUMBER: 0
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        if: steps.filter.outputs.code_changes == 'true' && env.IS_DEPLOYABLE == 'true'
-        with:
-          node-version: "14"
-      - name: Build Package 🍟
-        if: steps.filter.outputs.code_changes == 'true' && env.IS_DEPLOYABLE == 'true'
-        run: |
-          pip install -U build
-          scripts/build_distribution.sh
-      - name: Upload package artifact
-        if: steps.filter.outputs.code_changes == 'true' && env.IS_DEPLOYABLE == 'true'
-        uses: actions/upload-artifact@v2
-        with:
-          name: python-package
-          path: dist
+      - uses: actions/download-artifact@v3
+      - name: Copy all reports
+        run: find coverage-report*/ -name "*.xml" -exec mv '{}' . \;
+      - name: Display current files structure
+        run: ls -R
+      - name: Upload Coverage reports to Codecov 📦
+        uses: codecov/codecov-action@v2
+
+  build_python_package:
+    name: Build Argilla python package
+    uses: ./.github/workflows/build-python-package.yml
+    needs: deployable_check
+    if: needs.deployable_check.outputs.isDeployable
+    secrets: inherit
 
   deploy_docker:
     name: Build docker image
     runs-on: ubuntu-latest
     needs:
-      - build
-      - test-elastic
-      - test-opensearch
-    env:
-      IS_DEPLOYABLE: ${{ secrets.AR_DOCKER_USERNAME != '' }}
-    if: needs.build.outputs.code_changes == 'true'
+      - build_python_package
+      - run_tests
+      - run_tests_extra
+      - deployable_check
+    if: needs.deployable_check.outputs.isDeployable
     strategy:
       matrix:
         include:
@@ -253,43 +126,35 @@ jobs:
             dockerfile: docker/Dockerfile
             readme: README.md
             platforms: linux/amd64
-
           - image: argilla/argilla-quickstart
             dockerfile: docker/quickstart.Dockerfile
             readme: docker/quickstart.README.md
             platforms: linux/amd64,linux/arm64
-
     defaults:
       run:
         shell: bash -l {0}
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v2
-        if: env.IS_DEPLOYABLE == 'true'
       - name: Download python package
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: python-package
           path: docker/dist
-        if: env.IS_DEPLOYABLE == 'true'
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
-        if: env.IS_DEPLOYABLE == 'true'
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-        if: env.IS_DEPLOYABLE == 'true'
       - name: Docker meta
         id: meta
         uses: crazy-max/ghaction-docker-meta@v2
         with:
           images: ${{ matrix.image }}
-        if: env.IS_DEPLOYABLE == 'true'
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.AR_DOCKER_USERNAME }}
           password: ${{ secrets.AR_DOCKER_PASSWORD }}
-        if: env.IS_DEPLOYABLE == 'true'
       - name: Build & push Docker image
         uses: docker/build-push-action@v2
         with:
@@ -299,16 +164,14 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           push: true
-        if: env.IS_DEPLOYABLE == 'true'
       - name: Docker Hub Description
         uses: peter-evans/dockerhub-description@v3
-        if: github.event_name == 'release' && env.IS_DEPLOYABLE == 'true'
+        if: github.event_name == 'release'
         with:
           username: ${{ secrets.AR_DOCKER_USERNAME }}
           password: ${{ secrets.AR_DOCKER_PASSWORD }}
           repository: ${{ matrix.image }}
           readme-filepath: ${{ matrix.readme }}
-
   # This job will upload a Python Package using Twine when a release is created
   # For more information see:
   # https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries

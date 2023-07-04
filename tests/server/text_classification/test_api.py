@@ -25,17 +25,24 @@ from argilla.server.apis.v0.models.text_classification import (
     TextClassificationSearchRequest,
     TextClassificationSearchResults,
 )
-from argilla.server.commons.models import PredictionStatus
+from argilla.server.commons.models import PredictionStatus, TaskType
 from argilla.server.models import User
 from argilla.server.schemas.datasets import Dataset
-from starlette.testclient import TestClient
 
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
+from tests.helpers import SecuredClient
 
 
-def test_create_records_for_text_classification_with_multi_label(mocked_client):
+def test_create_records_for_text_classification_with_multi_label(mocked_client: SecuredClient, argilla_user: User):
     dataset = "test_create_records_for_text_classification_with_multi_label"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            f"/api/datasets",
+            json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
 
     records = [
         TextClassificationRecord.parse_obj(data)
@@ -135,9 +142,16 @@ def test_create_records_for_text_classification_with_multi_label(mocked_client):
     assert results.aggregations.predicted_by == {"testA": 1}
 
 
-def test_create_records_for_text_classification(mocked_client, test_telemetry):
+def test_create_records_for_text_classification(mocked_client: SecuredClient, argilla_user: User, test_telemetry):
     dataset = "test_create_records_for_text_classification"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            f"/api/datasets",
+            json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
     tags = {"env": "test", "class": "text classification"}
     metadata = {"config": {"the": "config"}}
     classification_bulk = TextClassificationBulkRequest(
@@ -202,9 +216,18 @@ def test_create_records_for_text_classification(mocked_client, test_telemetry):
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
-def test_create_records_for_text_classification_vector_search(mocked_client, test_telemetry):
+def test_create_records_for_text_classification_vector_search(
+    mocked_client: SecuredClient, argilla_user: User, test_telemetry
+):
     dataset = "test_create_records_for_text_classification_vector_search"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            f"/api/datasets",
+            json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
     tags = {"env": "test", "class": "text classification"}
     metadata = {"config": {"the": "config"}}
     classification_bulk = TextClassificationBulkRequest(
@@ -308,9 +331,16 @@ def test_create_records_for_text_classification_vector_search(mocked_client, tes
     ]  ## similarity ordered records
 
 
-def test_partial_record_update(mocked_client):
+def test_partial_record_update(mocked_client: SecuredClient, argilla_user: User):
     name = "test_partial_record_update"
     assert mocked_client.delete(f"/api/datasets/{name}").status_code == 200
+    assert (
+        mocked_client.post(
+            f"/api/datasets",
+            json={"name": name, "task": TaskType.text_classification, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
 
     record = TextClassificationRecord(
         **{
@@ -388,9 +418,16 @@ def test_partial_record_update(mocked_client):
     )
 
 
-def test_sort_by_last_updated(mocked_client):
+def test_sort_by_last_updated(mocked_client: SecuredClient, argilla_user: User):
     dataset = "test_sort_by_last_updated"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            f"/api/datasets",
+            json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
     for i in range(0, 10):
         mocked_client.post(
             f"/api/datasets/{dataset}/TextClassification:bulk",
@@ -415,9 +452,16 @@ def test_sort_by_last_updated(mocked_client):
     assert [r["id"] for r in response.json()["records"]] == list(range(0, 10))
 
 
-def test_sort_by_id_as_default(mocked_client):
+def test_sort_by_id_as_default(mocked_client: SecuredClient, argilla_user: User):
     dataset = "test_sort_by_id_as_default"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            f"/api/datasets",
+            json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
         json=TextClassificationBulkRequest(
@@ -454,11 +498,18 @@ def test_sort_by_id_as_default(mocked_client):
     ]
 
 
-def test_some_sort_by(mocked_client):
+def test_some_sort_by(mocked_client: SecuredClient, argilla_user: User):
     dataset = "test_some_sort_by"
 
     expected_records_length = 50
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            f"/api/datasets",
+            json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
     mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
         json=TextClassificationBulkRequest(
@@ -531,9 +582,16 @@ def test_some_sort_by(mocked_client):
     ]
 
 
-def test_disable_aggregations_when_scroll(mocked_client):
+def test_disable_aggregations_when_scroll(mocked_client: SecuredClient, argilla_user: User):
     dataset = "test_disable_aggregations_when_scroll"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            f"/api/datasets",
+            json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
@@ -571,9 +629,16 @@ def test_disable_aggregations_when_scroll(mocked_client):
     assert results.aggregations is None
 
 
-def test_include_event_timestamp(mocked_client):
+def test_include_event_timestamp(mocked_client: SecuredClient, argilla_user: User):
     dataset = "test_include_event_timestamp"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            f"/api/datasets",
+            json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
@@ -612,9 +677,16 @@ def test_include_event_timestamp(mocked_client):
     assert all(map(lambda record: record.event_timestamp is not None, results.records))
 
 
-def test_words_cloud(mocked_client):
+def test_words_cloud(mocked_client: SecuredClient, argilla_user: User):
     dataset = "test_language_detection"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            f"/api/datasets",
+            json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
@@ -652,9 +724,16 @@ def test_words_cloud(mocked_client):
     assert results.aggregations.words is not None
 
 
-def test_metadata_with_point_in_field_name(mocked_client):
+def test_metadata_with_point_in_field_name(mocked_client: SecuredClient, argilla_user: User):
     dataset = "test_metadata_with_point_in_field_name"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            f"/api/datasets",
+            json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
@@ -689,9 +768,16 @@ def test_metadata_with_point_in_field_name(mocked_client):
     assert results.aggregations.metadata.get("field.two", {})["2"] == 2
 
 
-def test_wrong_text_query(mocked_client):
+def test_wrong_text_query(mocked_client: SecuredClient, argilla_user: User):
     dataset = "test_wrong_text_query"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            f"/api/datasets",
+            json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
 
     mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",
@@ -721,9 +807,16 @@ def test_wrong_text_query(mocked_client):
     }
 
 
-def test_search_using_text(mocked_client):
+def test_search_using_text(mocked_client: SecuredClient, argilla_user: User):
     dataset = "test_search_using_text"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            f"/api/datasets",
+            json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
 
     mocked_client.post(
         f"/api/datasets/{dataset}/TextClassification:bulk",

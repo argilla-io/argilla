@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from unittest.mock import AsyncMock
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import pytest
@@ -21,7 +21,7 @@ from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import DatasetStatus, Response, ResponseStatus, UserRole
 from argilla.server.search_engine import SearchEngine
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
+from sqlalchemy import func, select
 
 from tests.factories import (
     AdminFactory,
@@ -34,14 +34,20 @@ from tests.factories import (
     WorkspaceFactory,
 )
 
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
-def test_update_response(client: TestClient, db: Session, mock_search_engine: SearchEngine, owner_auth_header):
-    dataset = DatasetFactory.create(status=DatasetStatus.ready)
-    TextQuestionFactory.create(name="input_ok", dataset=dataset)
-    TextQuestionFactory.create(name="output_ok", dataset=dataset)
-    record = RecordFactory.create(dataset=dataset)
 
-    response = ResponseFactory.create(
+@pytest.mark.asyncio
+async def test_update_response(
+    client: TestClient, db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict
+):
+    dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+    await TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    await TextQuestionFactory.create(name="output_ok", dataset=dataset)
+    record = await RecordFactory.create(dataset=dataset)
+
+    response = await ResponseFactory.create(
         record=record,
         values={"input_ok": {"value": "no"}, "output_ok": {"value": "no"}},
         status=ResponseStatus.submitted,
@@ -54,7 +60,7 @@ def test_update_response(client: TestClient, db: Session, mock_search_engine: Se
     resp = client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
 
     assert resp.status_code == 200
-    assert db.get(Response, response.id).values == {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}
+    assert (await db.get(Response, response.id)).values == {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}
 
     resp_body = resp.json()
     assert resp_body == {
@@ -70,8 +76,9 @@ def test_update_response(client: TestClient, db: Session, mock_search_engine: Se
     mock_search_engine.update_record_response.assert_called_once_with(response)
 
 
-def test_update_response_without_authentication(client: TestClient, db: Session):
-    response = ResponseFactory.create(
+@pytest.mark.asyncio
+async def test_update_response_without_authentication(client: TestClient, db: "AsyncSession"):
+    response = await ResponseFactory.create(
         values={
             "input_ok": {"value": "no"},
             "output_ok": {"value": "no"},
@@ -89,19 +96,22 @@ def test_update_response_without_authentication(client: TestClient, db: Session)
     resp = client.put(f"/api/v1/responses/{response.id}", json=response_json)
 
     assert resp.status_code == 401
-    assert db.get(Response, response.id).values == {
+    assert (await db.get(Response, response.id)).values == {
         "input_ok": {"value": "no"},
         "output_ok": {"value": "no"},
     }
 
 
-def test_update_response_from_submitted_to_discarded(client: TestClient, db: Session, owner_auth_header):
-    dataset = DatasetFactory.create(status=DatasetStatus.ready)
-    TextQuestionFactory.create(name="input_ok", dataset=dataset)
-    TextQuestionFactory.create(name="output_ok", dataset=dataset)
-    record = RecordFactory.create(dataset=dataset)
+@pytest.mark.asyncio
+async def test_update_response_from_submitted_to_discarded(
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
+):
+    dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+    await TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    await TextQuestionFactory.create(name="output_ok", dataset=dataset)
+    record = await RecordFactory.create(dataset=dataset)
 
-    response = ResponseFactory.create(
+    response = await ResponseFactory.create(
         record=record,
         values={
             "input_ok": {"value": "no"},
@@ -121,7 +131,7 @@ def test_update_response_from_submitted_to_discarded(client: TestClient, db: Ses
 
     assert resp.status_code == 200
 
-    response = db.get(Response, response.id)
+    response = await db.get(Response, response.id)
     assert response.values == {
         "input_ok": {"value": "yes"},
         "output_ok": {"value": "yes"},
@@ -143,8 +153,11 @@ def test_update_response_from_submitted_to_discarded(client: TestClient, db: Ses
     }
 
 
-def test_update_response_from_submitted_to_discarded_without_values(client: TestClient, db: Session, owner_auth_header):
-    response = ResponseFactory.create(
+@pytest.mark.asyncio
+async def test_update_response_from_submitted_to_discarded_without_values(
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
+):
+    response = await ResponseFactory.create(
         values={
             "input_ok": {"value": "no"},
             "output_ok": {"value": "no"},
@@ -159,8 +172,8 @@ def test_update_response_from_submitted_to_discarded_without_values(client: Test
 
     assert resp.status_code == 200
 
-    response = db.get(Response, response.id)
-    assert response.values == None
+    response = await db.get(Response, response.id)
+    assert response.values is None
     assert response.status == ResponseStatus.discarded
 
     resp_body = resp.json()
@@ -175,8 +188,11 @@ def test_update_response_from_submitted_to_discarded_without_values(client: Test
     }
 
 
-def test_update_response_from_discarded_to_submitted(client: TestClient, db: Session, owner_auth_header):
-    response = ResponseFactory.create(status="discarded")
+@pytest.mark.asyncio
+async def test_update_response_from_discarded_to_submitted(
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
+):
+    response = await ResponseFactory.create(status="discarded")
     response_json = {
         "status": "submitted",
     }
@@ -186,8 +202,11 @@ def test_update_response_from_discarded_to_submitted(client: TestClient, db: Ses
     assert resp.status_code == 422
 
 
-def test_update_response_from_discarded_to_submitted_without_values(client: TestClient, db: Session, owner_auth_header):
-    response = ResponseFactory.create(status="discarded")
+@pytest.mark.asyncio
+async def test_update_response_from_discarded_to_submitted_without_values(
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
+):
+    response = await ResponseFactory.create(status="discarded")
     response_json = {
         "status": "submitted",
     }
@@ -196,13 +215,14 @@ def test_update_response_from_discarded_to_submitted_without_values(client: Test
 
     assert resp.status_code == 422
 
-    response = db.get(Response, response.id)
-    assert response.values == None
+    response = await db.get(Response, response.id)
+    assert response.values is None
     assert response.status == ResponseStatus.discarded
 
 
-def test_update_response_with_wrong_values(client: TestClient, db: Session, owner_auth_header):
-    response = ResponseFactory.create(status="discarded")
+@pytest.mark.asyncio
+async def test_update_response_with_wrong_values(client: TestClient, db: "AsyncSession", owner_auth_header: dict):
+    response = await ResponseFactory.create(status="discarded")
     response_json = {"status": "submitted", "values": {"wrong_question": {"value": "wrong value"}}}
 
     resp = client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
@@ -210,19 +230,20 @@ def test_update_response_with_wrong_values(client: TestClient, db: Session, owne
     assert resp.status_code == 422
     assert resp.json() == {"detail": "Error: found responses for non configured questions: ['wrong_question']"}
 
-    response = db.get(Response, response.id)
+    response = await db.get(Response, response.id)
     assert response.values is None
     assert response.status == ResponseStatus.discarded
 
 
-def test_update_response_as_annotator(client: TestClient, db: Session):
-    dataset = DatasetFactory.create(status=DatasetStatus.ready)
-    TextQuestionFactory.create(name="input_ok", dataset=dataset)
-    TextQuestionFactory.create(name="output_ok", dataset=dataset)
-    record = RecordFactory.create(dataset=dataset)
-    annotator = AnnotatorFactory.create()
+@pytest.mark.asyncio
+async def test_update_response_as_annotator(client: TestClient, db: "AsyncSession"):
+    dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+    await TextQuestionFactory.create(name="input_ok", dataset=dataset)
+    await TextQuestionFactory.create(name="output_ok", dataset=dataset)
+    record = await RecordFactory.create(dataset=dataset)
+    annotator = await AnnotatorFactory.create()
 
-    response = ResponseFactory.create(
+    response = await ResponseFactory.create(
         record=record,
         values={
             "input_ok": {"value": "no"},
@@ -244,7 +265,7 @@ def test_update_response_as_annotator(client: TestClient, db: Session):
     )
 
     assert resp.status_code == 200
-    assert db.get(Response, response.id).values == {
+    assert (await db.get(Response, response.id)).values == {
         "input_ok": {"value": "yes"},
         "output_ok": {"value": "yes"},
     }
@@ -264,9 +285,10 @@ def test_update_response_as_annotator(client: TestClient, db: Session):
     }
 
 
-def test_update_response_as_annotator_for_different_user_response(client: TestClient, db: Session):
-    annotator = AnnotatorFactory.create()
-    response = ResponseFactory.create(
+@pytest.mark.asyncio
+async def test_update_response_as_annotator_for_different_user_response(client: TestClient, db: "AsyncSession"):
+    annotator = await AnnotatorFactory.create()
+    response = await ResponseFactory.create(
         values={
             "input_ok": {"value": "no"},
             "output_ok": {"value": "no"},
@@ -286,14 +308,17 @@ def test_update_response_as_annotator_for_different_user_response(client: TestCl
     )
 
     assert resp.status_code == 403
-    assert db.get(Response, response.id).values == {
+    assert (await db.get(Response, response.id)).values == {
         "input_ok": {"value": "no"},
         "output_ok": {"value": "no"},
     }
 
 
-def test_update_response_with_nonexistent_response_id(client: TestClient, db: Session, owner_auth_header):
-    response = ResponseFactory.create(
+@pytest.mark.asyncio
+async def test_update_response_with_nonexistent_response_id(
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
+):
+    response = await ResponseFactory.create(
         values={
             "input_ok": {"value": "no"},
             "output_ok": {"value": "no"},
@@ -311,68 +336,80 @@ def test_update_response_with_nonexistent_response_id(client: TestClient, db: Se
     resp = client.put(f"/api/v1/responses/{uuid4()}", headers=owner_auth_header, json=response_json)
 
     assert resp.status_code == 404
-    assert db.get(Response, response.id).values == {
+    assert (await db.get(Response, response.id)).values == {
         "input_ok": {"value": "no"},
         "output_ok": {"value": "no"},
     }
 
 
-def test_delete_response(client: TestClient, mock_search_engine: SearchEngine, db: Session, owner_auth_header):
-    response = ResponseFactory.create()
+@pytest.mark.asyncio
+async def test_delete_response(
+    client: TestClient, mock_search_engine: SearchEngine, db: "AsyncSession", owner_auth_header: dict
+):
+    response = await ResponseFactory.create()
 
     resp = client.delete(f"/api/v1/responses/{response.id}", headers=owner_auth_header)
 
     assert resp.status_code == 200
-    assert db.query(Response).count() == 0
+    assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
     mock_search_engine.delete_record_response.assert_called_once_with(response)
 
 
-def test_delete_response_without_authentication(client: TestClient, db: Session):
-    response = ResponseFactory.create()
+@pytest.mark.asyncio
+async def test_delete_response_without_authentication(client: TestClient, db: "AsyncSession"):
+    response = await ResponseFactory.create()
 
     resp = client.delete(f"/api/v1/responses/{response.id}")
 
     assert resp.status_code == 401
-    assert db.query(Response).count() == 1
+    assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
-def test_delete_response_as_restricted_user(client: TestClient, db: Session, role: UserRole):
-    user = UserFactory.create(role=role)
-    response = ResponseFactory.create(user=user)
+@pytest.mark.asyncio
+async def test_delete_response_as_restricted_user(client: TestClient, db: "AsyncSession", role: UserRole):
+    user = await UserFactory.create(role=role)
+    response = await ResponseFactory.create(user=user)
 
     resp = client.delete(f"/api/v1/responses/{response.id}", headers={API_KEY_HEADER_NAME: user.api_key})
 
     assert resp.status_code == 200
-    assert db.query(Response).count() == 0
+    assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
 
-def test_delete_response_as_admin_for_different_user_response(client: TestClient, db: Session):
-    workspace = WorkspaceFactory.create()
-    admin = AdminFactory.create(workspaces=[workspace])
-    response = ResponseFactory.create(record=RecordFactory.create(dataset=DatasetFactory.create(workspace=workspace)))
+@pytest.mark.asyncio
+async def test_delete_response_as_admin_for_different_user_response(client: TestClient, db: "AsyncSession"):
+    workspace = await WorkspaceFactory.create()
+    admin = await AdminFactory.create(workspaces=[workspace])
+    dataset = await DatasetFactory.create(workspace=workspace)
+    record = await RecordFactory.create(dataset=dataset)
+    response = await ResponseFactory.create(record=record)
 
     resp = client.delete(f"/api/v1/responses/{response.id}", headers={API_KEY_HEADER_NAME: admin.api_key})
 
     assert resp.status_code == 200
-    assert db.query(Response).count() == 0
+    assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
 
-def test_delete_response_as_annotator_for_different_user_response(client: TestClient, db: Session):
-    annotator = AnnotatorFactory.create()
-    response = ResponseFactory.create()
+@pytest.mark.asyncio
+async def test_delete_response_as_annotator_for_different_user_response(client: TestClient, db: "AsyncSession"):
+    annotator = await AnnotatorFactory.create()
+    response = await ResponseFactory.create()
 
     resp = client.delete(f"/api/v1/responses/{response.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
     assert resp.status_code == 403
-    assert db.query(Response).count() == 1
+    assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
 
 
-def test_delete_response_with_nonexistent_response_id(client: TestClient, db: Session, owner_auth_header):
-    ResponseFactory.create()
+@pytest.mark.asyncio
+async def test_delete_response_with_nonexistent_response_id(
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
+):
+    await ResponseFactory.create()
 
     resp = client.delete(f"/api/v1/responses/{uuid4()}", headers=owner_auth_header)
 
     assert resp.status_code == 404
-    assert db.query(Response).count() == 1
+    assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
