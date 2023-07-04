@@ -117,6 +117,12 @@ class UserPolicy:
         return is_allowed
 
 
+class UserPolicyV1:
+    @classmethod
+    async def list_workspaces(cls, actor: User) -> bool:
+        return actor.is_owner
+
+
 class DatasetPolicy:
     @classmethod
     async def list(cls, user: User) -> bool:

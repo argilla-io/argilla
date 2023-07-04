@@ -18,6 +18,10 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+### Added
+
+- Added `GET /api/v1/users/{user_id}/workspaces` endpoint to list the workspaces to which a user belongs ([#3308](https://github.com/argilla-io/argilla/pull/3308)).
+- 
 ### Fixed
 
 - Fixed `sqlalchemy.error.OperationalError` being raised when running the unit tests if the local SQLite database file didn't exist and the migrations hadn't been applied ([#3307](https://github.com/argilla-io/argilla/pull/3307)).
