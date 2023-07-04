@@ -123,7 +123,7 @@ async def create_record_suggestion(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
 
-@router.delete("/records/{record_id}", response_model=RecordSchema)
+@router.delete("/records/{record_id}", response_model=RecordSchema, response_model_exclude_unset=True)
 async def delete_record(
     *,
     db: AsyncSession = Depends(get_async_db),
