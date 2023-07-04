@@ -1,0 +1,90 @@
+name: Run Argilla python tests
+
+on:
+  workflow_call:
+    inputs:
+      pytestArgs:
+        description: "Provide extra args to pytest command line"
+        required: true
+        type: string
+      coverageReport:
+        required: false
+        type: string
+        default: coverage
+      searchEngine:
+        description: "Backend search engine to use. Available values are 'elasticsearch' and 'opensearch'."
+        default: elasticsearch
+        required: false
+        type: string
+      searchEngineVersion:
+        description: "Backend search engine version to use. This value must be aligned to the 'search_engine' input value."
+        required: false
+        default: 8.8
+        type: number
+
+env:
+  # Increase this value to reset cache if etc/example-environment.yml has not changed
+  CACHE_NUMBER:  5
+
+jobs:
+  run-python-tests:
+    name: Argilla python tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    env:
+      COVERAGE_REPORT: ${{ inputs.coverageReport }}-${{ inputs.searchEngine }}-${{ inputs.searchEngineVersion }}
+    steps:
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v2
+      - name: Setup Conda Env 🐍
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          use-mamba: true
+          activate-environment: argilla
+      - name: Get date for conda cache
+        id: get-date
+        run: echo "::set-output name=today::$(/bin/date -u '+%Y%m%d')"
+        shell: bash
+      - name: Cache Conda env
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: ${{ env.CONDA }}/envs
+          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
+      - name: Update environment
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: mamba env update -n argilla -f environment_dev.yml
+      - name: Cache pip 👜
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
+      - name: Set huggingface hub credentials
+        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/releases')
+        env:
+          HF_HUB_ACCESS_TOKEN: ${{ secrets.HF_HUB_ACCESS_TOKEN }}
+        run: echo "Enable HF access token"
+      # TODO: Review and use github action services section instead. See https://docs.github.com/en/actions/using-containerized-services/about-service-containers#creating-service-containers
+      - name: Setup ElasticSearch 🔎
+        if: inputs.searchEngine == 'elasticsearch'
+        uses: ankane/setup-elasticsearch@v1
+        with:
+          elasticsearch-version: ${{ inputs.searchEngineVersion }}
+      - name: Setup OpenSearch 🔎
+        if: inputs.searchEngine == 'opensearch'
+        uses: ankane/setup-opensearch@v1
+        with:
+          opensearch-version: ${{ inputs.searchEngineVersion }}
+      - name: Run tests 📈
+        run: |
+          pip install -e ".[server,listeners]"
+          pytest --cov=argilla --cov-report=xml:${{ env.COVERAGE_REPORT }}.xml ${{ inputs.pytestArgs }}
+      - name: Upload coverage report artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report-${{ env.COVERAGE_REPORT }}
+          path: ${{ env.COVERAGE_REPORT }}.xml

@@ -12,10 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import asyncio
+import contextlib
 import tempfile
 from typing import TYPE_CHECKING, AsyncGenerator, Dict, Generator
 
-import argilla as rg
 import httpx
 import pytest
 import pytest_asyncio
@@ -127,13 +127,15 @@ def mock_search_engine(mocker) -> Generator["SearchEngine", None, None]:
 
 
 @pytest.fixture(scope="function")
-def client(request, mock_search_engine: SearchEngine) -> Generator[TestClient, None, None]:
+def client(request, mock_search_engine: SearchEngine, mocker: "MockerFixture") -> Generator[TestClient, None, None]:
     async def override_get_async_db():
         session = TestSession()
         yield session
 
     async def override_get_search_engine():
         yield mock_search_engine
+
+    mocker.patch("argilla.server.server._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
 
     argilla_app.dependency_overrides[get_async_db] = override_get_async_db
     argilla_app.dependency_overrides[get_search_engine] = override_get_search_engine
@@ -222,6 +224,7 @@ def test_telemetry(mocker: "MockerFixture") -> "MagicMock":
     return mocker.spy(telemetry._CLIENT, "track_data")
 
 
+@pytest.mark.parametrize("client", [True], indirect=True)
 @pytest.fixture(autouse=True)
 def using_test_client_from_argilla_python_client(monkeypatch, test_telemetry: "MagicMock", client: TestClient):
     real_whoami = users_api.whoami

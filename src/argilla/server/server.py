@@ -212,9 +212,10 @@ def configure_telemetry(app: FastAPI):
             print(message, flush=True)
 
 
-def configure_database(app: FastAPI):
-    get_db_wrapper = contextlib.asynccontextmanager(get_async_db)
+_get_db_wrapper = contextlib.asynccontextmanager(get_async_db)
 
+
+def configure_database(app: FastAPI):
     def _user_has_default_credentials(user: User):
         return user.api_key == DEFAULT_API_KEY or accounts.verify_password(DEFAULT_PASSWORD, user.password_hash)
 
@@ -227,7 +228,7 @@ def configure_database(app: FastAPI):
 
     @app.on_event("startup")
     async def log_default_user_warning_if_present():
-        async with get_db_wrapper() as db:
+        async with _get_db_wrapper() as db:
             default_user = await accounts.get_user_by_username(db, DEFAULT_USERNAME)
             if default_user and _user_has_default_credentials(default_user):
                 _log_default_user_warning()

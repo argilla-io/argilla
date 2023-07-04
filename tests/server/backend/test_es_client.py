@@ -17,7 +17,6 @@ from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.backend.generic_elastic import dataset_records_index
 
 
-@pytest.mark.skip("This test fails in CI randomly. We will enable again once we discover the problem")
 def test_copy_index_as_alias(es: GenericElasticEngineBackend, opensearch):
     source_id = "source_id"
     source_id_alias = f"{source_id}_alias"
