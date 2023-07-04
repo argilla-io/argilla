@@ -155,7 +155,10 @@ class Record(TimestampMixin, Base):
     dataset: Mapped["Dataset"] = relationship(back_populates="records")
     responses: Mapped[List["Response"]] = relationship(back_populates="record", order_by=Response.inserted_at.asc())
     suggestions: Mapped[List["Suggestion"]] = relationship(
-        back_populates="record", order_by=Suggestion.inserted_at.asc()
+        back_populates="record",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Suggestion.inserted_at.asc(),
     )
 
     __table_args__ = (UniqueConstraint("external_id", "dataset_id", name="record_external_id_dataset_id_uq"),)
@@ -179,7 +182,12 @@ class Question(TimestampMixin, Base):
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
 
     dataset: Mapped["Dataset"] = relationship(back_populates="questions")
-    suggestions: Mapped[List["Suggestion"]] = relationship(back_populates="question")
+    suggestions: Mapped[List["Suggestion"]] = relationship(
+        back_populates="question",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Suggestion.inserted_at.asc(),
+    )
 
     __table_args__ = (UniqueConstraint("name", "dataset_id", name="question_name_dataset_id_uq"),)
 
