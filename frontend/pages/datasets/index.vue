@@ -16,23 +16,23 @@
   -->
 
 <template>
-  <div>
-    <base-loading v-if="$fetchState.pending" />
-    <div v-else class="wrapper">
-      <div class="main">
-        <app-header
-          :copy-button="false"
-          :breadcrumbs="breadcrumbs"
-          :sticky="false"
-          @breadcrumb-action="onBreadcrumbAction($event)"
-        />
-        <error
-          v-if="$fetchState.error"
-          where="workspace datasets"
-          :error="$fetchState.error"
-        />
-        <datasets-empty v-else-if="!datasets.length" :workspace="workspace" />
-        <div v-else class="container">
+  <base-loading v-if="$fetchState.pending" />
+  <div v-else>
+    <div class="main">
+      <app-header
+        :copy-button="false"
+        :breadcrumbs="breadcrumbs"
+        :sticky="false"
+        @breadcrumb-action="onBreadcrumbAction($event)"
+      />
+      <error
+        v-if="$fetchState.error"
+        where="workspace datasets"
+        :error="$fetchState.error"
+      />
+      <div v-else class="container">
+        <datasets-empty v-if="!datasets.length" :workspace="workspace" />
+        <div v-else>
           <div class="interactions">
             <base-search-bar @input="onSearch" placeholder="Search datasets" />
           </div>
@@ -56,12 +56,12 @@
           </div>
         </div>
       </div>
-      <sidebar-menu
-        class="home__sidebar"
-        @refresh="$fetch"
-        :sidebar-items="sidebarItems"
-      />
     </div>
+    <sidebar-menu
+      class="home__sidebar"
+      @refresh="$fetch"
+      :sidebar-items="sidebarItems"
+    />
   </div>
 </template>
 
@@ -426,29 +426,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.wrapper {
+.main {
   display: flex;
-  .main {
-    width: 100%;
-  }
+  flex-direction: column;
+  height: 100vh;
 }
 .container {
-  @extend %container;
-  padding-top: 0.2em;
-  padding-bottom: 0;
-  padding-right: calc($sidebarMenuWidth + 4em);
-  &--intro {
-    padding-top: 2em;
-    margin-bottom: 1.5em;
-    &:after {
-      border-bottom: 1px solid palette(grey, 700);
-      content: "";
-      margin-bottom: 1.5em;
-      position: absolute;
-      left: 0;
-      right: 0;
-    }
-  }
+  display: flex;
+  justify-content: center;
+  padding: 0.2em calc($sidebarMenuWidth + 4em) 0 4em;
+  flex-grow: 1;
+  overflow: auto;
 }
 
 .interactions {
