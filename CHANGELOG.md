@@ -25,6 +25,7 @@ These are the section headers that we use:
 ### Changed
 
 - The `POST /api/datasets/:dataset-id/:task/bulk` endpoint don't create the dataset if does not exists (Closes [#3244](https://github.com/argilla-io/argilla/issues/3244))
+- `User.workspaces` is no longer an attribute but a property, and is calling `list_user_workspaces` to list all the workspace names for a given user ID ([#3334](https://github.com/argilla-io/argilla/pull/3334))
 
 ## [1.12.0](https://github.com/argilla-io/argilla/compare/v1.11.0...v1.12.0)
 
