@@ -86,6 +86,7 @@ postgresql = [
 ]
 listeners = ["schedule ~= 1.1.0", "prodict ~= 0.8.0"]
 integrations = [
+    "PyYAML >= 5.4.1,< 6.1.0", # Required by `argilla.client.feedback.config` just used in `HuggingFaceDatasetMixIn`
     "cleanlab ~= 2.0.0",
     # TODO: `push_to_hub` fails up to 2.3.2, check patches when they come out eventually
     "datasets > 1.17.0,!= 2.3.2",
@@ -129,7 +130,7 @@ where = ["src"]
 version = { attr = "argilla.__version__" }
 
 [tool.setuptools.package-data]
-"argilla.client.feedback.card" = ["argilla_template.md"]
+"argilla.client.feedback.integrations.huggingface.card" = ["argilla_template.md"]
 
 [tool.pytest.ini_options]
 log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
