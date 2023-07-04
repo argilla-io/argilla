@@ -1,4 +1,4 @@
-name: Link new issues to Team work
+name: Link new issues to an specific board
 
 on:
   issues:
@@ -14,5 +14,5 @@ jobs:
         with:
           # You can target a repository in a different organization
           # to the issue
-          project-url: https://github.com/orgs/argilla-io/projects/4
+          project-url: https://github.com/orgs/argilla-io/projects/12
           github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
