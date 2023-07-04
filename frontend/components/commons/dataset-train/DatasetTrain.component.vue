@@ -1,9 +1,10 @@
 <template>
   <div>
     <base-spinner v-if="$fetchState.pending" />
-    <documentation-viewer v-else :content="content" />
+    <documentation-viewer class="dataset-training" v-else :content="content" />
   </div>
 </template>
+
 
 <script>
 export default {
@@ -98,55 +99,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.training-snippets {
+.dataset-training {
   min-width: 800px;
-  &__tabs.tabs {
-    margin: 0 -2.5em 2em;
-    padding: 0 2.5em;
-  }
 }
-
-.snippet {
-  margin: 0 -2.5em;
-  padding: 0 2.5em;
+:deep(.snippet) {
   max-height: calc(100vh - 240px);
   overflow: auto;
-  @extend %hide-scrollbar;
-  &__container {
-    width: 800px;
-  }
-  &__code {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  &__description {
-    font-weight: normal;
-    margin-bottom: $base-space * 2;
-  }
-  :deep(em) {
-    color: $black-54;
-  }
-}
-.library {
-  &__buttons {
-    display: flex;
-    flex-direction: column;
-    gap: $base-space;
-    margin-top: $base-space * 3;
-  }
-  &__button {
-    display: inline-flex;
-    padding: 0;
-    @include line-height(16px);
-  }
-  &__section {
-    &__title {
-      margin-bottom: $base-space;
-      color: $black-54;
-      font-weight: 600;
-      @include font-size(15px);
-    }
-  }
 }
 </style>
