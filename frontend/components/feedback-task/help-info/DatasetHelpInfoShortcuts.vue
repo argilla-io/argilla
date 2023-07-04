@@ -77,7 +77,6 @@ export default {
   }
   code {
     padding: calc($base-space / 2);
-    color: palette(crayola);
     border: 1px solid $black-10;
     border-radius: $border-radius;
     background: $black-4;
