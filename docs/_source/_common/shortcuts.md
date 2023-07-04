@@ -1,3 +1,5 @@
+You can speed up your annotation by using these keyboard shortcuts:
+
 |Action|Keys|
 |------|----|
 |Go to next interactive element|⇥ `Tab`|
