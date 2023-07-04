@@ -106,6 +106,15 @@ class User:
             error_msg += f" As the `name` argument is not None, you should use `User.from_name('{name}')` instead."
         raise Exception(error_msg)
 
+    @property
+    def workspaces(self) -> Optional[List[str]]:
+        """Returns the workspace names the current user is linked to.
+
+        Returns:
+            A list of workspace names the current user is linked to.
+        """
+        return users_api.list_user_workspaces(self.__client, self.id).parsed
+
     def __repr__(self) -> str:
         return (
             f"User(id={self.id}, username={self.username}, role={self.role},"
