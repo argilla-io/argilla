@@ -179,7 +179,12 @@ class Question(TimestampMixin, Base):
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
 
     dataset: Mapped["Dataset"] = relationship(back_populates="questions")
-    suggestions: Mapped[List["Suggestion"]] = relationship(back_populates="question")
+    suggestions: Mapped[List["Suggestion"]] = relationship(
+        back_populates="question",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Suggestion.inserted_at.asc(),
+    )
 
     __table_args__ = (UniqueConstraint("name", "dataset_id", name="question_name_dataset_id_uq"),)
 
