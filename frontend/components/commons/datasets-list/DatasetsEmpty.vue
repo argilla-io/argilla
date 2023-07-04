@@ -74,7 +74,7 @@ export default {
   text-align: center;
   color: $black-54;
   line-height: 20px;
-  padding-top: 3em;
+  padding-top: 3vh;
   &__body {
     height: fit-content;
   }
