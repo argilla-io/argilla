@@ -28,6 +28,10 @@ These are the section headers that we use:
 - Added `FeedbackDataset.prepare_for_training` method for generaring a framework-specific dataset with the responses provided for `RatingQuestion`, `LabelQuestion` and `MultiLabelQuestion` ([#3151](https://github.com/argilla-io/argilla/pull/3151)).
 - Added `ArgillaSpaCyTransformersTrainer` class for supporting the training with `spacy-transformers` ([#3256](https://github.com/argilla-io/argilla/pull/3256)).
 
+#### Docs
+
+- Added instructions for how to run the Argilla frontend in the developer docs ([#3314](https://github.com/argilla-io/argilla/pull/3314)).
+
 ### Changed
 
 - All docker related files have been moved into the `docker` folder ([#3053](https://github.com/argilla-io/argilla/pull/3053)).
@@ -94,7 +98,7 @@ These are the section headers that we use:
 - Move `ArgillaDatasetCard` import under `@requires_version` decorator, so that the `ImportError` on `huggingface_hub` is handled properly ([#3174](https://github.com/argilla-io/argilla/pull/3174))
 - Allow flow `FeedbackDataset.from_argilla` -> `FeedbackDataset.push_to_argilla` under different dataset names and/or workspaces ([#3192](https://github.com/argilla-io/argilla/issues/3192))
 
-### Docs
+#### Docs
 
 - Resolved typos in the docs ([#3240](https://github.com/argilla-io/argilla/pull/3240)).
 - Fixed mention of master branch ([#3254](https://github.com/argilla-io/argilla/pull/3254)).
