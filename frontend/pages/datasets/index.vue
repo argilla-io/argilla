@@ -32,7 +32,7 @@
       />
       <div v-else class="container">
         <datasets-empty v-if="!datasets.length" :workspace="workspace" />
-        <div v-else>
+        <div class="dataset__table" v-else>
           <div class="interactions">
             <base-search-bar @input="onSearch" placeholder="Search datasets" />
           </div>
@@ -437,6 +437,12 @@ export default {
   padding: 0.2em calc($sidebarMenuWidth + 4em) 0 4em;
   flex-grow: 1;
   overflow: auto;
+}
+
+.dataset {
+  &__table {
+    width: 100%;
+  }
 }
 
 .interactions {
