@@ -18,6 +18,14 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+### Changed
+
+- Renamed `FeedbackDatasetConfig` to `DatasetConfig` and export/import from YAML as default instead of JSON (just used internally on `push_to_huggingface` and `from_huggingface` methods of `FeedbackDataset`) ([#3326](https://github.com/argilla-io/argilla/pull/3326)).
+
+### Refactored
+
+- Added `HuggingFaceDatasetMixIn` for internal usage, to detach the `FeedbackDataset` integrations from the class itself, and use MixIns instead ([#3326](https://github.com/argilla-io/argilla/pull/3326)).
+
 ## [1.12.0](https://github.com/argilla-io/argilla/compare/v1.11.0...v1.12.0)
 
 ### Added
