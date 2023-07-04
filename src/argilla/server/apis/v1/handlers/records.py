@@ -21,6 +21,7 @@ from argilla.server.contexts import datasets
 from argilla.server.database import get_async_db
 from argilla.server.models import User
 from argilla.server.policies import RecordPolicyV1, authorize
+from argilla.server.schemas.v1.datasets import Record as RecordSchema
 from argilla.server.schemas.v1.records import Response, ResponseCreate
 from argilla.server.schemas.v1.suggestions import (
     Suggestion,
@@ -120,3 +121,17 @@ async def create_record_suggestion(
         return await datasets.create_suggestion(db, record, question, suggestion_create)
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+
+
+@router.delete("/records/{record_id}", response_model=RecordSchema)
+async def delete_record(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    record_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    record = await _get_record(db, record_id, with_dataset=True)
+
+    await authorize(current_user, RecordPolicyV1.delete(record))
+
+    return await datasets.delete_record(db, record)

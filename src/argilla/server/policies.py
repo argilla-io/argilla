@@ -257,6 +257,15 @@ class DatasetPolicyV1:
         return is_allowed
 
     @classmethod
+    def bulk_delete_records(cls, dataset: Dataset) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (
+                actor.is_admin and await _exists_workspace_user_by_user_and_workspace_id(actor, dataset.workspace_id)
+            )
+
+        return is_allowed
+
+    @classmethod
     def search_records(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
             return actor.is_owner or await _exists_workspace_user_by_user_and_workspace_id(actor, dataset.workspace_id)
@@ -307,6 +316,20 @@ class QuestionPolicyV1:
 
 
 class RecordPolicyV1:
+    @classmethod
+    def delete(cls, record: Record) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (
+                actor.is_admin
+                and await _exists_workspace_user_by_user_and_workspace_id(actor, record.dataset.workspace_id)
+            )
+
+        return is_allowed
+
+    @classmethod
+    def bulk_delete(cls, actor: User) -> bool:
+        pass
+
     @classmethod
     def create_response(cls, record: Record) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
