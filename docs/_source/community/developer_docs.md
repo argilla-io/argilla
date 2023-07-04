@@ -97,6 +97,26 @@ Then, you can proceed with the `pre-commit` hooks installation by simply running
 pre-commit install
 ```
 
+### Running Frontend  
+
+First, make sure you have Docker installed. If you don't have it installed, please download and install it, using [this guide](../getting_started/quickstart_installation.ipynb#Running-Argilla-Quickstart) as reference.
+
+Run the Argilla backend using Docker with the following command:
+
+```sh
+docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest
+```
+
+Navigate to the `frontend` folder from your project's root directory.
+
+Then, execute the command:
+
+```sh
+npm run dev
+```
+
+To log in, use the username `admin` and the password `12345678`. If you need more information, please check [here](../getting_started/quickstart_installation.ipynb).
+
 ### Building Frontend static files
 
 Build the static UI files in case you want to work on the UI:
