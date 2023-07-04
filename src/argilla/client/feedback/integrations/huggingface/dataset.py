@@ -263,8 +263,8 @@ class HuggingFaceDatasetMixIn:
                 "Neither `argilla.yaml` nor `argilla.cfg` files were found in the"
                 " HuggingFace Hub repository. Please make sure to dump the `DatasetConfig`"
                 " using `FeedbackDataset.push_to_huggingface` to automatically upload"
-                " the `DatasetConfig` as `argilla.yaml` to the HuggingFace Hub."
-            )
+                f" the `DatasetConfig` as `argilla.yaml` to the HuggingFace Hub."
+            ) from e
 
         hfds = load_dataset(repo_id, use_auth_token=auth, *args, **kwargs)
         if isinstance(hfds, DatasetDict) and "split" not in kwargs:
