@@ -1,11 +1,11 @@
 <template>
-  <div class="docs-shortcuts">
+  <div>
     <base-spinner v-if="$fetchState.pending" />
-    <div v-else-if="!$fetchState.error" class="docs-shortcuts__container">
-      <transition v-if="shortcuts.html" name="fade" mode="out-in" appear>
-        <BaseRenderHtml v-if="shortcuts" :html="shortcuts.html" />
-      </transition>
-    </div>
+    <documentation-viewer
+      class="help-info__content"
+      v-else
+      :content="content"
+    />
   </div>
 </template>
 
@@ -13,33 +13,37 @@
 export default {
   data() {
     return {
-      shortcuts: null,
+      content: {
+        tabs: [],
+      },
     };
   },
   async fetch() {
-    this.shortcuts = this.getShortcutsMd();
-  },
-  methods: {
-    getShortcutsMd() {
-      let shortcutsMd = null;
-      try {
-        console.log();
-        shortcutsMd = require(`../../../../docs/_source/_common/shortcuts.md`);
-      } catch (e) {
-        console.log(e);
-      }
-      return shortcutsMd;
-    },
+    try {
+      const folderContent = require.context(
+        `../../../../docs/_source/_common/`,
+        false,
+        /^[^_]+\.md$/,
+        "lazy"
+      );
+
+      const helpContent = await folderContent("./shortcuts.md");
+
+      this.content.tabs.push({
+        id: "shortcuts",
+        name: "Shortcuts",
+        html: helpContent.html,
+      });
+    } catch (e) {
+      console.log(e);
+    }
   },
 };
 </script>
 
 <style lang="scss" scoped>
-.docs-shortcuts {
+.help-info__content {
   min-width: 450px;
-  &__container {
-    padding: 5px;
-  }
 }
 :deep(table) {
   width: 100%;
@@ -82,4 +86,6 @@ export default {
     background: $black-4;
   }
 }
+</style>
+
 </style>

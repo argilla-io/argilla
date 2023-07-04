@@ -1,5 +1,5 @@
 <template>
-  <div v-if="helpContents.length">
+  <div>
     <base-button
       title="Info"
       class="help-info__action-button"
@@ -15,7 +15,7 @@
       :modal-visible="isModalVisible"
       @close-modal="close()"
     >
-      <help-info-content :help-contents="helpContents" />
+      <dataset-help-info-content />
       <div class="help-info__buttons">
         <base-button class="primary" @click="close()">Ok, got it!</base-button>
       </div>
@@ -29,28 +29,14 @@ export default {
   data() {
     return {
       isModalVisible: false,
-      shortcuts: {
-        id: "shortcuts",
-        name: "Shortcuts",
-        component: "DatasetHelpInfoShortcuts",
-      },
     };
   },
   computed: {
-    helpContents() {
-      return [...this.setHelpContent(this.shortcuts, this.availableShortcuts)];
-    },
-    availableShortcuts() {
-      return true;
-    },
     buttonClass() {
       return this.isModalVisible ? "--active" : null;
     },
   },
   methods: {
-    setHelpContent(obj, condition) {
-      return condition ? [obj] : [];
-    },
     showHelpModal() {
       this.isModalVisible = !this.isModalVisible;
     },
