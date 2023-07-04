@@ -45,7 +45,7 @@ class UserModel(BaseModel):
     full_name: Optional[str]
     username: str
     role: UserRole
-    workspaces: Optional[List[str]]
+    workspaces: List[str]
     api_key: str
     inserted_at: datetime
     updated_at: datetime
