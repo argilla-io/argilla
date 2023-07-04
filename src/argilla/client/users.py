@@ -25,6 +25,8 @@ from argilla.client.sdk.commons.errors import (
 )
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import UserCreateModel, UserModel, UserRole
+from argilla.client.sdk.v1.users import api as users_api_v1
+from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 
 if TYPE_CHECKING:
     import httpx
@@ -68,7 +70,7 @@ class User:
     last_name: Optional[str]
     full_name: Optional[str]
     role: UserRole
-    workspaces: Optional[List[str]]
+    workspaces: Optional[List[WorkspaceModel]]
     api_key: str
     inserted_at: datetime
     updated_at: datetime
@@ -107,13 +109,13 @@ class User:
         raise Exception(error_msg)
 
     @property
-    def workspaces(self) -> Optional[List[str]]:
+    def workspaces(self) -> Optional[List[WorkspaceModel]]:
         """Returns the workspace names the current user is linked to.
 
         Returns:
-            A list of workspace names the current user is linked to.
+            A list of `WorkspaceModel` the current user is linked to.
         """
-        return users_api.list_user_workspaces(self.__client, self.id).parsed
+        return users_api_v1.list_user_workspaces(self.__client, self.id).parsed
 
     def __repr__(self) -> str:
         return (
