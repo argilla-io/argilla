@@ -435,8 +435,13 @@ def test_push_to_huggingface_and_from_huggingface(
         )
         config_file = f.name
 
-    monkeypatch.setattr("huggingface_hub.file_download.hf_hub_download", lambda *args, **kwargs: config_file)
-    monkeypatch.setattr("datasets.load_dataset", lambda *args, **kwargs: dataset.format_as("datasets"))
+    monkeypatch.setattr(
+        "argilla.client.feedback.integrations.huggingface.dataset.hf_hub_download", lambda *args, **kwargs: config_file
+    )
+    monkeypatch.setattr(
+        "argilla.client.feedback.integrations.huggingface.dataset.load_dataset",
+        lambda *args, **kwargs: dataset.format_as("datasets"),
+    )
 
     dataset_from_huggingface = FeedbackDataset.from_huggingface(repo_id="test-dataset")
     assert isinstance(dataset_from_huggingface, FeedbackDataset)
