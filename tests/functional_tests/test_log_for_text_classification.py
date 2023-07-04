@@ -12,9 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import TYPE_CHECKING
+
 import argilla as rg
 import pytest
-from argilla.client import api
 from argilla.client.api import delete, load, log
 from argilla.client.client import Argilla
 from argilla.client.datasets import read_datasets
@@ -24,15 +25,15 @@ from argilla.client.sdk.commons.errors import (
     GenericApiError,
     ValidationApiError,
 )
-from argilla.server.contexts import accounts
-from argilla.server.models import User
-from argilla.server.security.model import WorkspaceCreate, WorkspaceUserCreate
 from argilla.server.settings import settings
-from sqlalchemy.orm import Session
 
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 from tests.factories import WorkspaceFactory
-from tests.helpers import SecuredClient
+
+if TYPE_CHECKING:
+    from argilla.server.models import User
+
+    from tests.helpers import SecuredClient
 
 
 def test_log_records_with_multi_and_single_label_task(api: Argilla):
@@ -144,7 +145,7 @@ def test_log_data_with_vectors_and_update_ok(api: Argilla):
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
-def test_log_data_with_vectors_and_update_ko(mocked_client: SecuredClient):
+def test_log_data_with_vectors_and_update_ko(mocked_client: "SecuredClient"):
     dataset = "test_log_data_with_vectors_and_update_ko"
     text = "This is a text"
     vectors = {"my_bert": [1, 2, 3, 4]}
@@ -164,12 +165,13 @@ def test_log_data_with_vectors_and_update_ko(mocked_client: SecuredClient):
         )
 
 
-def test_log_data_in_several_workspaces(owner: User, db: Session):
+@pytest.mark.asyncio
+async def test_log_data_in_several_workspaces(owner: "User"):
     dataset_name = "test_log_data_in_several_workspaces"
     text = "This is a text"
 
-    workspace = WorkspaceFactory.create()
-    other_workspace = WorkspaceFactory.create()
+    workspace = await WorkspaceFactory.create()
+    other_workspace = await WorkspaceFactory.create()
 
     api = Argilla(api_key=owner.api_key, workspace=workspace.name)
 

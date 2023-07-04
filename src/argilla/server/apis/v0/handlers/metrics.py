@@ -70,13 +70,13 @@ def configure_router(router: APIRouter, cfg: TaskConfig):
         operation_id="get_dataset_metrics",
         name="get_dataset_metrics",
     )
-    def get_dataset_metrics(
+    async def get_dataset_metrics(
         name: str,
         request_deps: CommonTaskHandlerDependencies = Depends(),
         current_user: User = Security(auth.get_current_user),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
     ) -> List[MetricInfo]:
-        dataset = datasets.find_by_name(
+        dataset = await datasets.find_by_name(
             user=current_user,
             name=name,
             task=cfg.task,
@@ -95,7 +95,7 @@ def configure_router(router: APIRouter, cfg: TaskConfig):
         operation_id="metric_summary",
         name="metric_summary",
     )
-    def metric_summary(
+    async def metric_summary(
         name: str,
         metric: str,
         query: cfg.query,
@@ -105,7 +105,7 @@ def configure_router(router: APIRouter, cfg: TaskConfig):
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         metrics: MetricsService = Depends(MetricsService.get_instance),
     ):
-        dataset = datasets.find_by_name(
+        dataset = await datasets.find_by_name(
             user=current_user,
             name=name,
             task=cfg.task,

@@ -12,17 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 
-from huggingface_hub import DatasetCard
+from argilla.server.models import Workspace
 
-TEMPLATE_ARGILLA_DATASET_CARD_PATH = Path(__file__).parent / "argilla_template.md"
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 
-class ArgillaDatasetCard(DatasetCard):
-    """`ArgillaDatasetCard` has been created similarly to `DatasetCard` from
-    `huggingface_hub` but with a different template. The template is located at
-    `argilla/client/feedback/card/argilla_template.md`.
-    """
-
-    default_template_path = TEMPLATE_ARGILLA_DATASET_CARD_PATH
+def get_or_new_workspace(session: "Session", workspace_name: str) -> Workspace:
+    workspace = session.query(Workspace).filter_by(name=workspace_name).first()
+    return workspace or Workspace(name=workspace_name)

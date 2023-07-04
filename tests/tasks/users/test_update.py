@@ -12,28 +12,33 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import TYPE_CHECKING
+
 import pytest
 from argilla.server.models import User, UserRole
 from click.testing import CliRunner
-from sqlalchemy.orm import Session
 from typer import Typer
 
-from tests.factories import UserFactory
+from tests.factories import UserSyncFactory
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 
 @pytest.mark.parametrize("new_role_string", ["owner", "admin"])
-def test_update(db: Session, cli_runner: CliRunner, cli: Typer, new_role_string: str):
-    UserFactory.create(username="username", role=UserRole.annotator)
+def test_update(sync_db: "Session", cli_runner: CliRunner, cli: Typer, new_role_string: str):
+    user = UserSyncFactory.create(username="username", role=UserRole.annotator)
 
     result = cli_runner.invoke(cli, f"users update username --role {new_role_string}")
 
     assert result.exit_code == 0
 
-    user = db.query(User).filter_by(username="username").first()
+    # user = (await db.execute(select(User).filter_by(username="username"))).scalar_one_or_none()
+    user = sync_db.query(User).filter_by(username="username").first()
     assert user.role.value == UserRole(new_role_string).value
 
 
-def test_update_with_invalid_role(db: Session, cli_runner: CliRunner, cli: Typer):
+def test_update_with_invalid_role(cli_runner: CliRunner, cli: Typer):
     bad_role_str = "bad-role"
     result = cli_runner.invoke(cli, f"users update username --role {bad_role_str}")
 
@@ -41,7 +46,7 @@ def test_update_with_invalid_role(db: Session, cli_runner: CliRunner, cli: Typer
     assert f"{bad_role_str!r} is not" in result.output
 
 
-def test_update_with_missing_username(db: Session, cli_runner: CliRunner, cli: Typer):
+def test_update_with_missing_username(cli_runner: CliRunner, cli: Typer):
     missing_username = "missing-username"
     result = cli_runner.invoke(cli, f"users update {missing_username} --role owner")
 
@@ -50,9 +55,9 @@ def test_update_with_missing_username(db: Session, cli_runner: CliRunner, cli: T
 
 
 @pytest.mark.parametrize("role_string", ["owner", "admin", "annotator"])
-def test_update_with_same_user_role(db: Session, cli_runner: CliRunner, cli: Typer, role_string):
+def test_update_with_same_user_role(cli_runner: CliRunner, cli: Typer, role_string):
     username = "username"
-    UserFactory.create(username=username, role=UserRole(role_string))
+    UserSyncFactory.create(username=username, role=UserRole(role_string))
 
     result = cli_runner.invoke(cli, f"users update {username} --role {role_string}")
 

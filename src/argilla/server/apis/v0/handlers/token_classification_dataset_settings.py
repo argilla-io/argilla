@@ -12,8 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Type
-
 from fastapi import APIRouter, Body, Depends, Security
 
 from argilla.server.apis.v0.helpers import deprecate_endpoint
@@ -22,7 +20,6 @@ from argilla.server.apis.v0.models.commons.params import (
     CommonTaskHandlerDependencies,
 )
 from argilla.server.apis.v0.models.dataset_settings import TokenClassificationSettings
-from argilla.server.apis.v0.validators.commons import validate_is_super_user
 from argilla.server.apis.v0.validators.token_classification import DatasetValidator
 from argilla.server.commons.models import TaskType
 from argilla.server.models import User
@@ -51,7 +48,7 @@ def configure_router(router: APIRouter):
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_current_user),
     ) -> TokenClassificationSettings:
-        found_ds = datasets.find_by_name(
+        found_ds = await datasets.find_by_name(
             user=current_user,
             name=name,
             workspace=ws_params.workspace,
@@ -79,7 +76,7 @@ def configure_router(router: APIRouter):
         validator: DatasetValidator = Depends(DatasetValidator.get_instance),
         current_user: User = Security(auth.get_current_user),
     ) -> TokenClassificationSettings:
-        found_ds = datasets.find_by_name(
+        found_ds = await datasets.find_by_name(
             user=current_user,
             name=name,
             task=task,
@@ -130,7 +127,7 @@ def configure_router(router: APIRouter):
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
         current_user: User = Security(auth.get_current_user),
     ) -> None:
-        found_ds = datasets.find_by_name(
+        found_ds = await datasets.find_by_name(
             user=current_user,
             name=name,
             task=task,

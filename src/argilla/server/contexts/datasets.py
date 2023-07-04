@@ -12,13 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import copy
-import logging
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import and_, func
-from sqlalchemy.orm import Session, contains_eager, joinedload
+from sqlalchemy import and_, func, select
+from sqlalchemy.orm import Session, contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
 from argilla.server.enums import ResponseStatusFilter
@@ -44,24 +43,40 @@ from argilla.server.schemas.v1.responses import ResponseUpdate
 from argilla.server.search_engine import SearchEngine
 from argilla.server.security.model import User
 
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
 LIST_RECORDS_LIMIT = 20
 
-_LOGGER = logging.getLogger("argilla.server")
+
+async def get_dataset_by_id(
+    db: "AsyncSession", dataset_id: UUID, with_fields: bool = False, with_questions: bool = False
+) -> Dataset:
+    query = select(Dataset).filter_by(id=dataset_id)
+    options = []
+    if with_fields:
+        options.append(selectinload(Dataset.fields))
+    if with_questions:
+        options.append(selectinload(Dataset.questions))
+    if options:
+        query = query.options(*options)
+    result = await db.execute(query)
+    return result.scalar_one_or_none()
 
 
-def get_dataset_by_id(db: Session, dataset_id: UUID):
-    return db.get(Dataset, dataset_id)
+async def get_dataset_by_name_and_workspace_id(
+    db: "AsyncSession", name: str, workspace_id: UUID
+) -> Union[Dataset, None]:
+    result = await db.execute(select(Dataset).filter_by(name=name, workspace_id=workspace_id))
+    return result.scalar_one_or_none()
 
 
-def get_dataset_by_name_and_workspace_id(db: Session, name: str, workspace_id: UUID):
-    return db.query(Dataset).filter_by(name=name, workspace_id=workspace_id).first()
+async def list_datasets(db: "AsyncSession") -> List[Dataset]:
+    result = await db.execute(select(Dataset).order_by(Dataset.inserted_at.asc()))
+    return result.scalars().all()
 
 
-def list_datasets(db: Session):
-    return db.query(Dataset).order_by(Dataset.inserted_at.asc()).all()
-
-
-def create_dataset(db: Session, dataset_create: DatasetCreate):
+async def create_dataset(db: "AsyncSession", dataset_create: DatasetCreate):
     dataset = Dataset(
         name=dataset_create.name,
         guidelines=dataset_create.guidelines,
@@ -69,56 +84,55 @@ def create_dataset(db: Session, dataset_create: DatasetCreate):
     )
 
     db.add(dataset)
-    db.commit()
-    db.refresh(dataset)
+    await db.commit()
+    await db.refresh(dataset)
 
     return dataset
 
 
-async def publish_dataset(db: Session, search_engine: SearchEngine, dataset: Dataset):
+async def publish_dataset(db: "AsyncSession", search_engine: SearchEngine, dataset: Dataset) -> Dataset:
     if dataset.is_ready:
         raise ValueError("Dataset is already published")
 
-    if _count_fields_by_dataset_id(db, dataset.id) == 0:
+    if await _count_fields_by_dataset_id(db, dataset.id) == 0:
         raise ValueError("Dataset cannot be published without fields")
 
-    if _count_questions_by_dataset_id(db, dataset.id) == 0:
+    if await _count_questions_by_dataset_id(db, dataset.id) == 0:
         raise ValueError("Dataset cannot be published without questions")
 
-    dataset.status = DatasetStatus.ready
-    db.commit()
-    db.expire(dataset)
-
     try:
+        dataset.status = DatasetStatus.ready
         await search_engine.create_index(dataset)
+        await db.commit()
     except:
-        # TODO: Improve this action using some rollback mechanism
-        dataset.status = DatasetStatus.draft
-        db.commit()
-        db.expire(dataset)
+        await db.rollback()
         raise
 
     return dataset
 
 
-async def delete_dataset(db: Session, search_engine: SearchEngine, dataset: Dataset):
-    db.delete(dataset)
-    await search_engine.delete_index(dataset)
-
-    db.commit()
-
+async def delete_dataset(db: Session, search_engine: SearchEngine, dataset: Dataset) -> Dataset:
+    try:
+        await db.delete(dataset)
+        await search_engine.delete_index(dataset)
+        await db.commit()
+    except:
+        await db.rollback()
+        raise
     return dataset
 
 
-def get_field_by_id(db: Session, field_id: UUID):
-    return db.get(Field, field_id)
+async def get_field_by_id(db: Session, field_id: UUID) -> Union[Field, None]:
+    result = await db.execute(select(Field).filter_by(id=field_id).options(selectinload(Field.dataset)))
+    return result.scalar_one_or_none()
 
 
-def get_field_by_name_and_dataset_id(db: Session, name: str, dataset_id: UUID):
-    return db.query(Field).filter_by(name=name, dataset_id=dataset_id).first()
+async def get_field_by_name_and_dataset_id(db: "AsyncSession", name: str, dataset_id: UUID) -> Union[Field, None]:
+    result = await db.execute(select(Field).filter_by(name=name, dataset_id=dataset_id))
+    return result.scalar_one_or_none()
 
 
-def create_field(db: Session, dataset: Dataset, field_create: FieldCreate):
+async def create_field(db: "AsyncSession", dataset: Dataset, field_create: FieldCreate) -> Field:
     if dataset.is_ready:
         raise ValueError("Field cannot be created for a published dataset")
 
@@ -131,31 +145,32 @@ def create_field(db: Session, dataset: Dataset, field_create: FieldCreate):
     )
 
     db.add(field)
-    db.commit()
-    db.refresh(field)
+    await db.commit()
+    await db.refresh(field)
 
     return field
 
 
-def delete_field(db: Session, field: Field):
+async def delete_field(db: "AsyncSession", field: Field) -> Field:
     if field.dataset.is_ready:
         raise ValueError("Fields cannot be deleted for a published dataset")
 
-    db.delete(field)
-    db.commit()
-
+    await db.delete(field)
+    await db.commit()
     return field
 
 
-def get_question_by_id(db: Session, question_id: UUID):
-    return db.get(Question, question_id)
+async def get_question_by_id(db: Session, question_id: UUID) -> Union[Question, None]:
+    result = await db.execute(select(Question).filter_by(id=question_id).options(selectinload(Question.dataset)))
+    return result.scalar_one_or_none()
 
 
-def get_question_by_name_and_dataset_id(db: Session, name: str, dataset_id: UUID):
-    return db.query(Question).filter_by(name=name, dataset_id=dataset_id).first()
+async def get_question_by_name_and_dataset_id(db: "AsyncSession", name: str, dataset_id: UUID) -> Union[Question, None]:
+    result = await db.execute(select(Question).filter_by(name=name, dataset_id=dataset_id))
+    return result.scalar_one_or_none()
 
 
-def create_question(db: Session, dataset: Dataset, question_create: QuestionCreate):
+async def create_question(db: "AsyncSession", dataset: Dataset, question_create: QuestionCreate) -> Question:
     if dataset.is_ready:
         raise ValueError("Question cannot be created for a published dataset")
 
@@ -169,34 +184,36 @@ def create_question(db: Session, dataset: Dataset, question_create: QuestionCrea
     )
 
     db.add(question)
-    db.commit()
-    db.refresh(question)
+    await db.commit()
+    await db.refresh(question)
 
     return question
 
 
-def delete_question(db: Session, question: Question):
+async def delete_question(db: "AsyncSession", question: Question) -> Question:
     if question.dataset.is_ready:
         raise ValueError("Questions cannot be deleted for a published dataset")
 
-    db.delete(question)
-    db.commit()
-
+    await db.delete(question)
+    await db.commit()
     return question
 
 
-def get_record_by_id(db: Session, record_id: UUID):
-    return db.get(Record, record_id)
+async def get_record_by_id(db: "AsyncSession", record_id: UUID) -> Union[Record, None]:
+    result = await db.execute(
+        select(Record).filter_by(id=record_id).options(selectinload(Record.dataset).selectinload(Dataset.questions))
+    )
+    return result.scalar_one_or_none()
 
 
-def get_records_by_ids(
-    db: Session,
+async def get_records_by_ids(
+    db: "AsyncSession",
     dataset_id: UUID,
     record_ids: List[UUID],
     include: List[RecordInclude] = [],
     user_id: Optional[UUID] = None,
 ) -> List[Record]:
-    query = db.query(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(record_ids))
+    query = select(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(record_ids))
     if RecordInclude.responses in include:
         if user_id:
             query = query.outerjoin(
@@ -204,32 +221,27 @@ def get_records_by_ids(
             ).options(contains_eager(Record.responses))
         else:
             query = query.options(joinedload(Record.responses))
-    return query.all()
+    result = await db.execute(query)
+    return result.unique().scalars().all()
 
 
-def list_records_by_dataset_id(
-    db: Session,
+async def list_records_by_dataset_id(
+    db: "AsyncSession",
     dataset_id: UUID,
     include: List[RecordInclude] = [],
     offset: int = 0,
     limit: int = LIST_RECORDS_LIMIT,
-):
-    query = db.query(Record)
-
+) -> List[Record]:
+    query = select(Record).filter(Record.dataset_id == dataset_id)
     if RecordInclude.responses in include:
         query = query.options(joinedload(Record.responses))
-
-    return (
-        query.filter(Record.dataset_id == dataset_id)
-        .order_by(Record.inserted_at.asc())
-        .offset(offset)
-        .limit(limit)
-        .all()
-    )
+    query = query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
+    result = await db.execute(query)
+    return result.unique().scalars().all()
 
 
-def list_records_by_dataset_id_and_user_id(
-    db: Session,
+async def list_records_by_dataset_id_and_user_id(
+    db: "AsyncSession",
     dataset_id: UUID,
     user_id: UUID,
     include: List[RecordInclude] = [],
@@ -237,7 +249,7 @@ def list_records_by_dataset_id_and_user_id(
     offset: int = 0,
     limit: int = LIST_RECORDS_LIMIT,
 ):
-    query = db.query(Record).filter(Record.dataset_id == dataset_id)
+    query = select(Record).filter(Record.dataset_id == dataset_id)
 
     if response_status == ResponseStatusFilter.missing:
         query = (
@@ -264,15 +276,18 @@ def list_records_by_dataset_id_and_user_id(
                 and_(Response.record_id == Record.id, Response.user_id == user_id),
             ).options(contains_eager(Record.responses))
 
-    return query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit).all()
+    query = query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
+    result = await db.execute(query)
+    return result.unique().scalars().all()
 
 
-def count_records_by_dataset_id(db: Session, dataset_id: UUID):
-    return db.query(func.count(Record.id)).filter_by(dataset_id=dataset_id).scalar()
+async def count_records_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
+    result = await db.execute(select(func.count(Record.id)).filter_by(dataset_id=dataset_id))
+    return result.scalar()
 
 
 async def create_records(
-    db: Session,
+    db: "AsyncSession",
     search_engine: SearchEngine,
     dataset: Dataset,
     records_create: RecordsCreate,
@@ -293,7 +308,7 @@ async def create_records(
 
         if record_create.responses:
             for response in record_create.responses:
-                if not accounts.get_user_by_id(db, response.user_id):
+                if not await accounts.get_user_by_id(db, response.user_id):
                     raise ValueError(f"Provided user_id: {response.user_id!r} is not a valid user id")
 
                 validate_response_values(dataset, values=response.values, status=response.status)
@@ -306,44 +321,49 @@ async def create_records(
 
     try:
         db.add_all(records)
-
-        db.commit()
-        db.expire_all()
-
-        await search_engine.add_records(dataset, records)
-    except:
-        # TODO: Improve this action using some rollback mechanism
+        await db.flush(records)
         for record in records:
-            db.delete(record)
-        db.commit()
+            await record.awaitable_attrs.responses
+        await search_engine.add_records(dataset, records)
+        await db.commit()
+    except:
+        await db.rollback()
         raise
 
 
-def get_response_by_id(db: Session, response_id: UUID):
-    return db.get(Response, response_id)
+async def get_response_by_id(db: Session, response_id: UUID) -> Union[Response, None]:
+    result = await db.execute(
+        select(Response)
+        .filter_by(id=response_id)
+        .options(selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.questions))
+    )
+    return result.scalar_one_or_none()
 
 
-def get_response_by_record_id_and_user_id(db: Session, record_id: UUID, user_id: UUID):
-    return db.query(Response).filter_by(record_id=record_id, user_id=user_id).first()
+async def get_response_by_record_id_and_user_id(
+    db: "AsyncSession", record_id: UUID, user_id: UUID
+) -> Union[Response, None]:
+    result = await db.execute(select(Response).filter_by(record_id=record_id, user_id=user_id))
+    return result.scalar_one_or_none()
 
 
 def list_responses_by_record_id(db: Session, record_id: UUID):
     return db.query(Response).filter_by(record_id=record_id).order_by(Response.inserted_at.asc()).all()
 
 
-def count_responses_by_dataset_id_and_user_id(
-    db: Session, dataset_id: UUID, user_id: UUID, response_status: Optional[ResponseStatus] = None
+async def count_responses_by_dataset_id_and_user_id(
+    db: "AsyncSession", dataset_id: UUID, user_id: UUID, response_status: Optional[ResponseStatus] = None
 ) -> int:
     expressions = [Response.user_id == user_id]
     if response_status:
         expressions.append(Response.status == response_status)
 
-    return (
-        db.query(func.count(Response.id))
+    result = await db.execute(
+        select(func.count(Response.id))
         .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
         .filter(*expressions)
-        .scalar()
     )
+    return result.scalar()
 
 
 def count_records_with_missing_responses_by_dataset_id_and_user_id(db: Session, dataset_id: UUID, user_id: UUID):
@@ -363,8 +383,8 @@ def count_records_with_missing_responses_by_dataset_id_and_user_id(db: Session, 
 
 
 async def create_response(
-    db: Session, search_engine: SearchEngine, record: Record, user: User, response_create: ResponseCreate
-):
+    db: "AsyncSession", search_engine: SearchEngine, record: Record, user: User, response_create: ResponseCreate
+) -> Response:
     validate_response_values(record.dataset, values=response_create.values, status=response_create.status)
 
     response = Response(
@@ -374,42 +394,47 @@ async def create_response(
         user_id=user.id,
     )
 
-    db.add(response)
-    db.flush([response])
-    # TODO: Rollback
-    await search_engine.update_record_response(response)
-
-    db.commit()
-    db.refresh(response)
+    try:
+        db.add(response)
+        await db.flush([response])
+        await search_engine.update_record_response(response)
+        await db.commit()
+        await db.refresh(response)
+    except Exception:
+        await db.rollback()
+        raise
 
     return response
 
 
 async def update_response(
-    db: Session, search_engine: SearchEngine, response: Response, response_update: ResponseUpdate
+    db: "AsyncSession", search_engine: SearchEngine, response: Response, response_update: ResponseUpdate
 ):
     validate_response_values(response.record.dataset, values=response_update.values, status=response_update.status)
 
     response.values = jsonable_encoder(response_update.values)
     response.status = response_update.status
 
-    db.flush([response])
-    # TODO: Rollback
-    await search_engine.update_record_response(response)
-
-    db.commit()
-    db.refresh(response)
+    try:
+        await db.flush([response])
+        await search_engine.update_record_response(response)
+        await db.commit()
+        await db.refresh(response)
+    except Exception:
+        await db.rollback()
+        raise
 
     return response
 
 
-async def delete_response(db: Session, search_engine: SearchEngine, response: Response):
-    db.delete(response)
-    # TODO: Rollback
-    await search_engine.delete_record_response(response)
-
-    db.commit()
-
+async def delete_response(db: "AsyncSession", search_engine: SearchEngine, response: Response) -> Response:
+    try:
+        await db.delete(response)
+        await search_engine.delete_record_response(response)
+        await db.commit()
+    except Exception:
+        await db.rollback()
+        raise
     return response
 
 
@@ -452,9 +477,11 @@ def validate_record_fields(dataset: Dataset, fields: Dict[str, Any]):
         raise ValueError(f"Error: found fields values for non configured fields: {list(fields_copy.keys())!r}")
 
 
-def _count_fields_by_dataset_id(db: Session, dataset_id: UUID):
-    return db.query(func.count(Field.id)).filter_by(dataset_id=dataset_id).scalar()
+async def _count_fields_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
+    result = await db.execute(select(func.count(Field.id)).filter_by(dataset_id=dataset_id))
+    return result.scalar()
 
 
-def _count_questions_by_dataset_id(db: Session, dataset_id: UUID):
-    return db.query(func.count(Question.id)).filter_by(dataset_id=dataset_id).scalar()
+async def _count_questions_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
+    result = await db.execute(select(func.count(Question.id)).filter_by(dataset_id=dataset_id))
+    return result.scalar()
