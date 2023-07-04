@@ -16,7 +16,7 @@ import json
 import logging
 import tempfile
 import warnings
-from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Optional, Type
 
 import huggingface_hub
 from datasets import Dataset, DatasetDict, Features, Sequence, Value, load_dataset
@@ -34,13 +34,14 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 
-T = TypeVar("T", bound="FeedbackDataset")
-
 
 class HuggingFaceDatasetMixIn:
     @staticmethod
-    def _huggingface_format(feedback_dataset: T) -> "Dataset":
+    def _huggingface_format(dataset: "FeedbackDataset") -> "Dataset":
         """Formats a `FeedbackDataset` as a `datasets.Dataset` object.
+
+        Args:
+            dataset: The `FeedbackDataset` to format as `datasets.Dataset`.
 
         Returns:
             The `FeedbackDataset.records` formatted as a `datasets.Dataset` object,
@@ -53,19 +54,19 @@ class HuggingFaceDatasetMixIn:
             >>> dataset = rg.FeedbackDataset.from_argilla(name="my-dataset")
             >>> huggingface_dataset = rg.HuggingFaceDatasetMixIn.set_format(dataset)
         """
-        dataset, features = {}, {}
+        hf_dataset, hf_features = {}, {}
 
-        for field in feedback_dataset.fields:
+        for field in dataset.fields:
             if field.settings["type"] not in FIELD_TYPE_TO_PYTHON_TYPE.keys():
                 raise ValueError(
                     f"Field {field.name} has an unsupported type: {field.settings['type']}, for the moment"
                     f" only the following types are supported: {list(FIELD_TYPE_TO_PYTHON_TYPE.keys())}"
                 )
-            features[field.name] = Value(dtype="string", id="field")
-            if field.name not in dataset:
-                dataset[field.name] = []
+            hf_features[field.name] = Value(dtype="string", id="field")
+            if field.name not in hf_dataset:
+                hf_dataset[field.name] = []
 
-        for question in feedback_dataset.questions:
+        for question in dataset.questions:
             if question.settings["type"] in ["text", "label_selection"]:
                 value = Value(dtype="string")
             elif question.settings["type"] == "rating":
@@ -81,7 +82,7 @@ class HuggingFaceDatasetMixIn:
                     f" `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}`."
                 )
 
-            features[question.name] = Sequence(
+            hf_features[question.name] = Sequence(
                 {
                     "user_id": Value(dtype="string"),
                     "value": value,
@@ -89,20 +90,20 @@ class HuggingFaceDatasetMixIn:
                 },
                 id="question",
             )
-            if question.name not in dataset:
-                dataset[question.name] = []
+            if question.name not in hf_dataset:
+                hf_dataset[question.name] = []
 
-        features["external_id"] = Value(dtype="string", id="external_id")
-        dataset["external_id"] = []
+        hf_features["external_id"] = Value(dtype="string", id="external_id")
+        hf_dataset["external_id"] = []
 
-        dataset["metadata"] = []
+        hf_dataset["metadata"] = []
 
-        for record in feedback_dataset.records:
-            for field in feedback_dataset.fields:
-                dataset[field.name].append(record.fields[field.name])
-            for question in feedback_dataset.questions:
+        for record in dataset.records:
+            for field in dataset.fields:
+                hf_dataset[field.name].append(record.fields[field.name])
+            for question in dataset.questions:
                 if not record.responses:
-                    dataset[question.name].append(None)
+                    hf_dataset[question.name].append(None)
                     continue
                 responses = []
                 for response in record.responses:
@@ -113,32 +114,33 @@ class HuggingFaceDatasetMixIn:
                         responses.append([r.dict() for r in response.values[question.name].value])
                     else:
                         responses.append(response.values[question.name].value)
-                dataset[question.name].append(
+                hf_dataset[question.name].append(
                     {
                         "user_id": [r.user_id for r in record.responses],
                         "value": responses,
                         "status": [r.status for r in record.responses],
                     }
                 )
-            dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else None)
-            dataset["external_id"].append(record.external_id or None)
+            hf_dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else None)
+            hf_dataset["external_id"].append(record.external_id or None)
 
-        if dataset.get("metadata", None) is not None:
-            features["metadata"] = Value(dtype="string")
+        if hf_dataset.get("metadata", None) is not None:
+            hf_features["metadata"] = Value(dtype="string")
 
         return Dataset.from_dict(
-            dataset,
-            features=Features(features),
+            hf_dataset,
+            features=Features(hf_features),
         )
 
     def _push_to_huggingface(
-        self, feedback_dataset: T, repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs
+        self, dataset: "FeedbackDataset", repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs
     ) -> None:
         """Pushes the `FeedbackDataset` to the HuggingFace Hub. If the dataset has been previously pushed to the
         HuggingFace Hub, it will be updated instead. Note that some params as `private` have no effect at all
         when a dataset is previously uploaded to the HuggingFace Hub.
 
         Args:
+            dataset: the `FeedbackDataset` to push to the HuggingFace Hub.
             repo_id: the ID of the HuggingFace Hub repo to push the `FeedbackDataset` to.
             generate_card: whether to generate a dataset card for the `FeedbackDataset` in the HuggingFace Hub. Defaults
                 to `True`.
@@ -164,9 +166,9 @@ class HuggingFaceDatasetMixIn:
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
             f.write(
                 DatasetConfig(
-                    fields=feedback_dataset.fields,
-                    questions=feedback_dataset.questions,
-                    guidelines=feedback_dataset.guidelines,
+                    fields=dataset.fields,
+                    questions=dataset.questions,
+                    guidelines=dataset.guidelines,
                 ).to_yaml()
             )
             f.flush()
@@ -187,23 +189,24 @@ class HuggingFaceDatasetMixIn:
 
             card = ArgillaDatasetCard.from_template(
                 card_data=DatasetCardData(
-                    size_categories=size_categories_parser(len(feedback_dataset.records)),
+                    size_categories=size_categories_parser(len(dataset.records)),
                     tags=["rlfh", "argilla", "human-feedback"],
                 ),
                 repo_id=repo_id,
-                argilla_fields=feedback_dataset.fields,
-                argilla_questions=feedback_dataset.questions,
-                argilla_guidelines=feedback_dataset.guidelines,
-                argilla_record=json.loads(feedback_dataset.records[0].json()),
+                argilla_fields=dataset.fields,
+                argilla_questions=dataset.questions,
+                argilla_guidelines=dataset.guidelines,
+                argilla_record=json.loads(dataset.records[0].json()),
                 huggingface_record=hfds[0],
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
 
     @staticmethod
-    def _from_huggingface(cls: Type[T], repo_id: str, *args: Any, **kwargs: Any) -> T:
+    def _from_huggingface(cls: Type["FeedbackDataset"], repo_id: str, *args: Any, **kwargs: Any) -> "FeedbackDataset":
         """Loads a `FeedbackDataset` from the HuggingFace Hub.
 
         Args:
+            cls: the class to use to instantiate the `FeedbackDataset`.
             repo_id: the ID of the HuggingFace Hub repo to load the `FeedbackDataset` from.
             *args: the args to pass to `datasets.Dataset.load_from_hub`.
             **kwargs: the kwargs to pass to `datasets.Dataset.load_from_hub`.
