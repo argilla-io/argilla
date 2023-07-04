@@ -41,9 +41,7 @@
         </div>
         <p v-if="deployment === 'quickstart'">
           You are using the Quickstart version of Argilla. Check
-          <a
-            href="https://docs.argilla.io/en/latest/getting_started/quickstart.html"
-            target="_blank"
+          <a :href="$config.documentationSiteQuickStart" target="_blank"
             >this guide</a
           >
           to learn more about usage and configuration options.
@@ -59,11 +57,7 @@
       <geometric-shape-a />
       <p class="login__text">
         To get support from the community, join us on
-        <a
-          href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g"
-          target="_blank"
-          >Slack</a
-        >
+        <a :href="$config.slackCommunity" target="_blank">Slack</a>
       </p>
     </div>
   </div>

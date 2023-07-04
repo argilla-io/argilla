@@ -58,6 +58,7 @@ server = [
     # Database dependencies
     "alembic ~= 1.9.0",
     "SQLAlchemy ~= 2.0.0",
+    "greenlet >= 2.0.0",
     # Async SQLite
     "aiosqlite >=0.19.0",
     # Advanced query search dsl
@@ -135,7 +136,7 @@ log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 log_cli = "True"
 testpaths = ["tests"]
-addopts = ["--ignore", "tests/training"]
+
 
 [tool.coverage.run]
 concurrency = ["greenlet", "thread", "multiprocessing"]
