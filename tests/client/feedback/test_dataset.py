@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, List, Type, Union
 import datasets
 import pytest
 from argilla.client import api
-from argilla.client.feedback.config import FeedbackDatasetConfig
+from argilla.client.feedback.config import DatasetConfig
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
@@ -425,13 +425,13 @@ def test_push_to_huggingface_and_from_huggingface(
 
     dataset.push_to_huggingface(repo_id="test-dataset", generate_card=True)
 
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".cfg", delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
         f.write(
-            FeedbackDatasetConfig(
+            DatasetConfig(
                 fields=feedback_dataset_fields,
                 questions=feedback_dataset_questions,
                 guidelines=feedback_dataset_guidelines,
-            ).json()
+            ).to_yaml()
         )
         config_file = f.name
 
