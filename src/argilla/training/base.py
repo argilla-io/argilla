@@ -85,7 +85,6 @@ class ArgillaTrainer(object):
             framework_kwargs (dict): additional arguments for the framework.
             **load_kwargs: arguments for the rg.load() function.
         """
-        self._track_trainer_usage(framework)
         self._name = name
         self._workspace = workspace or get_workspace()
         self._multi_label = False

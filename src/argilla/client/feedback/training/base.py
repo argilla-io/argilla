@@ -181,7 +181,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             raise NotImplementedError(f"{framework} is not a valid framework.")
 
         self._logger.info(self)
-        self._track_trainer_usage(framework=framework, task=self._task_mapping.__name__)
+        self._track_trainer_usage(framework=framework, task=self._task_mapping.__class__.__name__)
 
     def __repr__(self) -> str:
         """
