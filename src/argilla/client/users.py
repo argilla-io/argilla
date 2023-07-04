@@ -165,6 +165,26 @@ class User:
         last_name: Optional[str] = None,
         role: Optional[UserRole] = None,
     ) -> "User":
+        """Creates a new user in Argilla.
+
+        Args:
+            username: the username of the user to be created.
+            password: the password of the user to be created.
+            first_name: the first name of the user to be created. Defaults to None.
+            last_name: the last name of the user to be created. Defaults to None.
+            role: the role of the user to be created. Defaults to None.
+
+        Returns:
+            A new `User` instance.
+
+        Raises:
+            ValueError: if the user already exists in Argilla.
+            RuntimeError: if the user cannot be created in Argilla.
+
+        Examples:
+            >>> from argilla import rg
+            >>> user = rg.User.create("my-user", "my-password", role="admin")
+        """
         if not first_name:
             warnings.warn(
                 "Since the `first_name` hasn't been provided, it will be set to the same value as the `username`."
