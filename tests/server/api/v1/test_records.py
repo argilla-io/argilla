@@ -18,7 +18,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.models import Response, Suggestion, User, UserRole
+from argilla.server.models import Record, Response, Suggestion, User, UserRole
 from argilla.server.search_engine import SearchEngine
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
@@ -903,5 +903,48 @@ async def test_create_record_suggestion_as_annotator(client: TestClient):
         headers={API_KEY_HEADER_NAME: annotator.api_key},
         json={"question_id": str(uuid4()), "value": "This is a unit test suggestion"},
     )
+
+    assert response.status_code == 403
+
+
+@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+@pytest.mark.asyncio
+async def test_delete_record(client: TestClient, db: "AsyncSession", role: UserRole):
+    dataset = await DatasetFactory.create()
+    record = await RecordFactory.create(dataset=dataset)
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+    response = client.delete(f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: user.api_key})
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": str(record.id),
+        "fields": record.fields,
+        "metadata": None,
+        "external_id": record.external_id,
+        "inserted_at": record.inserted_at.isoformat(),
+        "updated_at": record.updated_at.isoformat(),
+    }
+    assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
+
+
+@pytest.mark.asyncio
+async def test_delete_record_as_admin_from_another_workspace(client: TestClient, db: "AsyncSession"):
+    dataset = await DatasetFactory.create()
+    record = await RecordFactory.create(dataset=dataset)
+    user = await UserFactory.create(role=UserRole.admin)
+
+    response = client.delete(f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: user.api_key})
+
+    assert response.status_code == 403
+    assert (await db.execute(select(func.count(Record.id)))).scalar() == 1
+
+
+@pytest.mark.asyncio
+async def test_delete_record_as_annotator(client: TestClient):
+    annotator = await UserFactory.create(role=UserRole.annotator)
+    record = await RecordFactory.create()
+
+    response = client.delete(f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
     assert response.status_code == 403
