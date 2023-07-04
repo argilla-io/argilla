@@ -23,6 +23,11 @@ Before getting started with any textual data project, we advise setting up annot
 ```{include} /_common/tabs/dataset_settings.md
 ```
 
+Note that feedback datasets support different types of questions. For more info on each of them, check out [this section](../guides/llms/practical_guides/create_dataset.md#define-questions).
+
+```{include} /_common/tabs/question_settings.md
+```
+
 ## Create records
 
 ```{include} /_common/tabs/records_create.md
@@ -217,7 +222,7 @@ rg.log(records_for_training, name="majority_voter_results")
 
 ## Train Models
 
-We love our open-source training libraries as much as you do, so we provide integrations with all of them to limit the time you spend on data preparation and have more fun with actual training. As of now, we support `spacy`, `transformers`, `setfit`, `openai`, `autotrain`, and way more. Want to get to know all support? Take a look [here](/guides/train_a_model.md).
+We love our open-source training libraries as much as you do, so we provide integrations with all of them to limit the time you spend on data preparation and have more fun with actual training. As of now, we support `spacy`, `transformers`, `setfit`, `openai`, `autotrain`, and way more. Want to get to know all support? Train/fine-tune a model from a `FeedbackDataset` as explained [here](/guides/llms/practical_guides/practical_guides.html), or either a `TextClassificationDataset` or a `TokenClassificationDataset`[here](/guides/train_a_model.md).
 
 ```python
 from argilla.training import ArgillaTrainer

@@ -28,6 +28,7 @@ from rich.progress import Progress
 
 from argilla._constants import (
     DEFAULT_API_KEY,
+    DEFAULT_USERNAME,
     ES_INDEX_REGEX_PATTERN,
     WORKSPACE_HEADER_NAME,
 )
@@ -85,7 +86,6 @@ from argilla.client.sdk.token_classification.models import (
     TokenClassificationRecord as SdkTokenClassificationRecord,
 )
 from argilla.client.sdk.users import api as users_api
-from argilla.client.sdk.users.models import User
 from argilla.client.sdk.workspaces import api as workspaces_api
 from argilla.client.sdk.workspaces.models import WorkspaceModel
 
@@ -136,8 +136,26 @@ class Argilla:
             headers=headers.copy(),
         )
 
-        self._user: User = users_api.whoami(client=self._client)
-        self.set_workspace(workspace or self._user.username)
+        self._user = users_api.whoami(client=self.http_client)  # .parsed
+
+        if not workspace and self._user.username == DEFAULT_USERNAME:
+            warnings.warn(
+                "Default user was detected and no workspace configuration was provided,"
+                f" so the default {DEFAULT_USERNAME!r} workspace will be used. If you"
+                " want to setup another workspace, use the `rg.set_workspace` function"
+                " or provide a different one on `rg.init`",
+                category=UserWarning,
+            )
+            workspace = DEFAULT_USERNAME
+        if workspace:
+            self.set_workspace(workspace or self._user.username)
+        else:
+            warnings.warn(
+                "No workspace configuration was detected. To work with Argilla "
+                " datasets, specify a valid workspace name on `rg.init` or set it"
+                " up through the `rg.set_workspace` function.",
+                category=UserWarning,
+            )
 
         self._check_argilla_versions()
 
@@ -215,10 +233,10 @@ class Argilla:
             )
 
         if workspace != self.get_workspace():
-            if workspace == self.user.username or (self.user.workspaces and workspace in self.user.workspaces):
+            if workspace in [ws.name for ws in self.list_workspaces()]:
                 self.http_client.update_headers({WORKSPACE_HEADER_NAME: workspace})
             else:
-                raise Exception(f"Wrong provided workspace {workspace}")
+                raise ValueError(f"Wrong provided workspace {workspace!r}")
 
     def get_workspace(self) -> str:
         """Returns the name of the active workspace.
@@ -229,13 +247,15 @@ class Argilla:
         return self.http_client.headers.get(WORKSPACE_HEADER_NAME)
 
     def list_workspaces(self) -> List[WorkspaceModel]:
-        """Lists all the availble workspaces for the current user.
+        """Lists all the available workspaces for the current user.
 
         Returns:
             A list of `WorkspaceModel` objects, containing the workspace
             attributes: name, id, created_at, and updated_at.
         """
-        return workspaces_api.list_workspaces(client=self.http_client.httpx).parsed
+        user_workspaces = users_api.whoami(self.http_client).workspaces
+        all_workspaces = workspaces_api.list_workspaces(client=self.http_client.httpx).parsed
+        return [workspace for workspace in all_workspaces if workspace.name in user_workspaces]
 
     def copy(self, dataset: str, name_of_copy: str, workspace: str = None):
         """Creates a copy of a dataset including its tags and metadata

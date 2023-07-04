@@ -19,11 +19,8 @@ from argilla.client.feedback.card import ArgillaDatasetCard, size_categories_par
 from huggingface_hub import DatasetCardData
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas import (
-        AllowedFieldTypes,
-        AllowedQuestionTypes,
-        FeedbackRecord,
-    )
+    from argilla.client.feedback.schemas import FeedbackRecord
+    from argilla.client.feedback.typing import AllowedFieldTypes, AllowedQuestionTypes
     from datasets import Dataset
 
 

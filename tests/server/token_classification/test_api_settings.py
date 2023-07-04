@@ -13,7 +13,10 @@
 #  limitations under the License.
 
 import argilla as rg
+from argilla.client.api import delete
 from argilla.server.commons.models import TaskType
+
+from tests.helpers import SecuredClient
 
 
 def create_dataset(client, name: str):
@@ -23,7 +26,7 @@ def create_dataset(client, name: str):
 
 def test_create_dataset_settings(mocked_client):
     name = "test_create_dataset_settings"
-    rg.delete(name)
+    delete(name)
     create_dataset(mocked_client, name)
 
     response = create_settings(mocked_client, name)
@@ -44,7 +47,7 @@ def create_settings(mocked_client, name):
 
 def test_get_dataset_settings_not_found(mocked_client):
     name = "test_get_dataset_settings"
-    rg.delete(name)
+    delete(name)
     create_dataset(mocked_client, name)
 
     response = fetch_settings(mocked_client, name)
@@ -53,7 +56,7 @@ def test_get_dataset_settings_not_found(mocked_client):
 
 def test_delete_settings(mocked_client):
     name = "test_delete_settings"
-    rg.delete(name)
+    delete(name)
 
     create_dataset(mocked_client, name)
     assert create_settings(mocked_client, name).status_code == 200
@@ -65,7 +68,7 @@ def test_delete_settings(mocked_client):
 
 def test_validate_settings_when_logging_data(mocked_client):
     name = "test_validate_settings_when_logging_data"
-    rg.delete(name)
+    delete(name)
 
     create_dataset(mocked_client, name)
     assert create_settings(mocked_client, name).status_code == 200
@@ -108,9 +111,10 @@ def log_some_data(mocked_client, name):
     return response
 
 
-def test_validate_settings_after_logging(mocked_client):
+def test_validate_settings_after_logging(mocked_client: SecuredClient):
     name = "test_validate_settings_after_logging"
-    rg.delete(name)
+    delete(name)
+    create_dataset(mocked_client, name)
     response = log_some_data(mocked_client, name)
     assert response.status_code == 200
 

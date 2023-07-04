@@ -31,7 +31,7 @@
         <BaseButton
           class="header__button small"
           @on-click="onClickTrain"
-          v-if="isOwnerRole"
+          v-if="isAdminOrOwnerRole"
         >
           <svgicon name="code" width="20" height="20" />Train
         </BaseButton>
@@ -121,8 +121,9 @@ export default {
     viewSettings() {
       return DatasetViewSettings.query().whereId(this.datasetName).first();
     },
-    isOwnerRole() {
-      return this.$auth.user.role === "owner";
+    isAdminOrOwnerRole() {
+      const role = this.$auth.user.role;
+      return role === "admin" || role === "owner";
     },
     globalHeaderHeight() {
       if (this.sticky && this.dataset) {

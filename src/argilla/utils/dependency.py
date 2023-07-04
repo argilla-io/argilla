@@ -16,7 +16,12 @@ import functools
 import operator
 import re
 import sys
-from typing import Optional
+from typing import Callable, Optional, TypeVar
+
+if sys.version_info >= (3, 10):
+    from typing import ParamSpec
+else:
+    from typing_extensions import ParamSpec
 
 from packaging import version
 
@@ -121,16 +126,11 @@ def require_version(requirement: str, func_name: Optional[str] = None) -> None:
             _compare_versions(op, got_version, want_version, requirement, package, func_name=func_name)
 
 
-def requires_decorator(requirement, func):
-    @functools.wraps(func)
-    def check_if_installed(*args, **kwargs):
-        require_version(requirement, func.__name__)
-        return func(*args, **kwargs)
-
-    return check_if_installed
+_P = ParamSpec("_P")
+_R = TypeVar("_R")
 
 
-def requires_version(requirement):
+def requires_version(requirement: str) -> Callable[[Callable[_P, _R]], Callable[_P, _R]]:
     """Decorator variant of `require_version`.
     Perform a runtime check of the dependency versions, using the exact same syntax used by pip.
     The installed module version comes from the *site-packages* dir via *importlib_metadata*.
@@ -145,7 +145,16 @@ def requires_version(requirement):
         ...
     ```
     """
-    return functools.partial(requires_decorator, requirement)
+
+    def decorator(func: Callable[_P, _R]) -> Callable[_P, _R]:
+        @functools.wraps(func)
+        def wrapper(*args: _P.args, **kwargs: _P.kwargs) -> _R:
+            require_version(requirement, func.__name__)
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
 
 
 __all__ = ["requires_version", "require_version"]

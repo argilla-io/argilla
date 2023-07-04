@@ -197,7 +197,7 @@ export default {
                 To explore more records, you can combine queries, filters, and sorting to reduce your search results.
                 Visit this
                 <a
-                  href="https://docs.argilla.io/en/latest/guides/features/queries.html?highlight=queries#"
+                  href="${this.$config.documentationSiteQueryDatasets}"
                   target="_blank"
                 >
                   guide</a

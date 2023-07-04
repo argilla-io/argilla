@@ -11,21 +11,25 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import asyncio
+import contextlib
 import tempfile
-from typing import TYPE_CHECKING, Dict, Generator
+from typing import TYPE_CHECKING, AsyncGenerator, Dict, Generator
 
-import argilla as rg
 import httpx
 import pytest
+import pytest_asyncio
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
-from argilla.client.api import ArgillaSingleton
+from argilla.client.api import ArgillaSingleton, delete, log
 from argilla.client.apis.datasets import TextClassificationSettings
-from argilla.client.client import Argilla
-from argilla.client.sdk.client import AuthenticatedClient
+from argilla.client.client import Argilla, AuthenticatedClient
+from argilla.client.datasets import read_datasets
+from argilla.client.models import Text2TextRecord, TextClassificationRecord
 from argilla.client.sdk.users import api as users_api
+from argilla.datasets.__init__ import configure_dataset
 from argilla.server.commons import telemetry
 from argilla.server.commons.telemetry import TelemetryClient
-from argilla.server.database import Base, get_db
+from argilla.server.database import Base, get_async_db
 from argilla.server.models import User, UserRole, Workspace
 from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.server import app, argilla_app
@@ -33,8 +37,9 @@ from argilla.server.settings import settings
 from fastapi.testclient import TestClient
 from opensearchpy import OpenSearch
 from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import create_async_engine
 
-from tests.database import TestSession
+from tests.database import SyncTestSession, TestSession, set_task
 from tests.factories import (
     AnnotatorFactory,
     OwnerFactory,
@@ -48,35 +53,72 @@ if TYPE_CHECKING:
 
     from pytest_mock import MockerFixture
     from sqlalchemy import Connection
+    from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession
     from sqlalchemy.orm import Session
 
 
 @pytest.fixture(scope="session")
-def connection() -> Generator["Connection", None, None]:
+def event_loop() -> Generator["asyncio.AbstractEventLoop", None, None]:
+    loop = asyncio.get_event_loop_policy().get_event_loop()
+    yield loop
+    loop.close()
+
+
+@pytest_asyncio.fixture(scope="session")
+async def connection() -> AsyncGenerator["AsyncConnection", None]:
+    set_task(asyncio.current_task())
     # Create a temp directory to store a SQLite database used for testing
     with tempfile.TemporaryDirectory() as tmpdir:
-        database_url = f"sqlite:///{tmpdir}/test.db"
-        engine = create_engine(database_url, connect_args={"check_same_thread": False})
-        conn = engine.connect()
+        database_url = f"sqlite+aiosqlite:///{tmpdir}/test.db"
+        engine = create_async_engine(database_url, connect_args={"check_same_thread": False})
+        conn = await engine.connect()
         TestSession.configure(bind=conn)
-        Base.metadata.create_all(conn)
+        await conn.run_sync(Base.metadata.create_all)
 
         yield conn
 
-        Base.metadata.drop_all(conn)
-        conn.close()
-        engine.dispose()
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.close()
+        await engine.dispose()
 
 
-@pytest.fixture(autouse=True)
-def db(connection: "Connection") -> Generator["Session", None, None]:
-    nested_transaction = connection.begin_nested()
+@pytest_asyncio.fixture(autouse=True)
+async def db(connection: "AsyncConnection") -> AsyncGenerator["AsyncSession", None]:
+    await connection.begin_nested()
     session = TestSession()
 
     yield session
 
+    await session.close()
+    await TestSession.remove()
+    await connection.rollback()
+
+
+@pytest.fixture
+def sync_connection() -> Generator["Connection", None, None]:
+    with tempfile.TemporaryDirectory() as tmpdir:
+        database_url = f"sqlite:///{tmpdir}/test.db"
+        engine = create_engine(database_url, connect_args={"check_same_thread": False})
+        conn = engine.connect()
+        SyncTestSession.configure(bind=conn)
+        Base.metadata.create_all(engine)
+
+        yield conn
+
+        Base.metadata.drop_all(engine)
+        conn.close()
+        engine.dispose()
+
+
+@pytest.fixture
+def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
+    session = SyncTestSession()
+
+    yield session
+
     session.close()
-    nested_transaction.rollback()
+    SyncTestSession.remove()
+    sync_connection.rollback()
 
 
 @pytest.fixture(scope="function")
@@ -85,16 +127,17 @@ def mock_search_engine(mocker) -> Generator["SearchEngine", None, None]:
 
 
 @pytest.fixture(scope="function")
-def client(request, mock_search_engine: SearchEngine) -> Generator[TestClient, None, None]:
-    session = TestSession()
-
-    def override_get_db():
+def client(request, mock_search_engine: SearchEngine, mocker: "MockerFixture") -> Generator[TestClient, None, None]:
+    async def override_get_async_db():
+        session = TestSession()
         yield session
 
     async def override_get_search_engine():
         yield mock_search_engine
 
-    argilla_app.dependency_overrides[get_db] = override_get_db
+    mocker.patch("argilla.server.server._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
+
+    argilla_app.dependency_overrides[get_async_db] = override_get_async_db
     argilla_app.dependency_overrides[get_search_engine] = override_get_search_engine
 
     raise_server_exceptions = request.param if hasattr(request, "param") else False
@@ -127,23 +170,26 @@ def opensearch(elasticsearch_config):
         client.indices.delete(index=index_info["index"])
 
 
-@pytest.fixture(scope="function")
-def owner() -> User:
-    return OwnerFactory.create(first_name="Owner", username="owner", api_key="owner.apikey")
+@pytest_asyncio.fixture(scope="function")
+async def owner() -> User:
+    return await OwnerFactory.create(first_name="Owner", username="owner", api_key="owner.apikey")
 
 
-@pytest.fixture(scope="function")
-def annotator() -> User:
-    return AnnotatorFactory.create(first_name="Annotator", username="annotator", api_key="annotator.apikey")
+@pytest_asyncio.fixture(scope="function")
+async def annotator() -> User:
+    return await AnnotatorFactory.create(first_name="Annotator", username="annotator", api_key="annotator.apikey")
 
 
-@pytest.fixture(scope="function")
-def mock_user() -> User:
-    return UserFactory.create(
+@pytest_asyncio.fixture(scope="function")
+async def mock_user() -> User:
+    workspace_a = await WorkspaceFactory.create(name="workspace-a")
+    workspace_b = await WorkspaceFactory.create(name="workspace-b")
+    return await UserFactory.create(
         first_name="Mock",
         username="mock-user",
         password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
         api_key="mock-user.apikey",
+        workspaces=[workspace_a, workspace_b],
     )
 
 
@@ -152,9 +198,9 @@ def owner_auth_header(owner: User) -> Dict[str, str]:
     return {API_KEY_HEADER_NAME: owner.api_key}
 
 
-@pytest.fixture(scope="function")
-def argilla_user() -> User:
-    user = UserFactory.create(
+@pytest_asyncio.fixture(scope="function")
+async def argilla_user() -> Generator[User, None, None]:
+    user = await UserFactory.create(
         first_name="Argilla",
         username="argilla",
         role=UserRole.admin,  # Force to use an admin user
@@ -178,6 +224,7 @@ def test_telemetry(mocker: "MockerFixture") -> "MagicMock":
     return mocker.spy(telemetry._CLIENT, "track_data")
 
 
+@pytest.mark.parametrize("client", [True], indirect=True)
 @pytest.fixture(autouse=True)
 def using_test_client_from_argilla_python_client(monkeypatch, test_telemetry: "MagicMock", client: TestClient):
     real_whoami = users_api.whoami
@@ -186,6 +233,8 @@ def using_test_client_from_argilla_python_client(monkeypatch, test_telemetry: "M
         client_arg = args[-1] if args else kwargs["client"]
 
         monkeypatch.setattr(client_arg, "__httpx__", client)
+        client.headers.update(client_arg.get_headers())
+
         return real_whoami(client_arg)
 
     monkeypatch.setattr(users_api, "whoami", whoami_mocked)
@@ -226,13 +275,13 @@ def mocked_client(
     from argilla.client.api import active_api
 
     rb_api = active_api()
-    monkeypatch.setattr(rb_api._client, "__httpx__", client_)
+    monkeypatch.setattr(rb_api.http_client, "__httpx__", client_)
 
     return client_
 
 
 @pytest.fixture
-def dataset_token_classification(mocked_client):
+def dataset_token_classification(mocked_client: SecuredClient) -> str:
     from datasets import load_dataset
 
     dataset = "gutenberg_spacy_ner"
@@ -244,7 +293,7 @@ def dataset_token_classification(mocked_client):
         revision="fff5f572e4cc3127f196f46ba3f9914c6fd0d763",
     )
 
-    dataset_rb = rg.read_datasets(dataset_ds, task="TokenClassification")
+    dataset_rb = read_datasets(dataset_ds, task="TokenClassification")
     # Set annotations, required for training tests
     for rec in dataset_rb:
         # Strip off "score"
@@ -253,14 +302,14 @@ def dataset_token_classification(mocked_client):
         rec.prediction = []
         rec.prediction_agent = None
 
-    rg.delete(dataset)
-    rg.log(name=dataset, records=dataset_rb)
+    delete(dataset)
+    log(name=dataset, records=dataset_rb)
 
     return dataset
 
 
 @pytest.fixture
-def dataset_text_classification(mocked_client):
+def dataset_text_classification(mocked_client: SecuredClient) -> str:
     from datasets import load_dataset
 
     dataset = "banking_sentiment_setfit"
@@ -269,36 +318,36 @@ def dataset_text_classification(mocked_client):
         f"argilla/{dataset}",
         split="train[:100]",
     )
-    dataset_rb = [rg.TextClassificationRecord(text=rec["text"], annotation=rec["label"]) for rec in dataset_ds]
+    dataset_rb = [TextClassificationRecord(text=rec["text"], annotation=rec["label"]) for rec in dataset_ds]
     labels = set([rec.annotation for rec in dataset_rb])
-    rg.configure_dataset(dataset, settings=TextClassificationSettings(label_schema=labels))
+    configure_dataset(dataset, settings=TextClassificationSettings(label_schema=labels))
 
-    rg.delete(dataset)
-    rg.log(name=dataset, records=dataset_rb)
+    delete(dataset)
+    log(name=dataset, records=dataset_rb)
 
     return dataset
 
 
 @pytest.fixture
-def dataset_text_classification_multi_label(mocked_client):
+def dataset_text_classification_multi_label(mocked_client: SecuredClient) -> str:
     from datasets import load_dataset
 
     dataset = "research_titles_multi_label"
 
     dataset_ds = load_dataset("argilla/research_titles_multi-label", split="train[:100]")
 
-    dataset_rb = rg.read_datasets(dataset_ds, task="TextClassification")
+    dataset_rb = read_datasets(dataset_ds, task="TextClassification")
 
     dataset_rb = [rec for rec in dataset_rb if rec.annotation]
 
-    rg.delete(dataset)
-    rg.log(name=dataset, records=dataset_rb)
+    delete(dataset)
+    log(name=dataset, records=dataset_rb)
 
     return dataset
 
 
 @pytest.fixture
-def dataset_text2text(mocked_client):
+def dataset_text2text(mocked_client: SecuredClient) -> str:
     from datasets import load_dataset
 
     dataset = "news_summary"
@@ -307,9 +356,9 @@ def dataset_text2text(mocked_client):
 
     records = []
     for entry in dataset_ds:
-        records.append(rg.Text2TextRecord(text=entry["text"], annotation=entry["prediction"][0]["text"]))
+        records.append(Text2TextRecord(text=entry["text"], annotation=entry["prediction"][0]["text"]))
 
-    rg.delete(dataset)
-    rg.log(name=dataset, records=records)
+    delete(dataset)
+    log(name=dataset, records=records)
 
     return dataset

@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import json
 import logging
 import tempfile
@@ -24,34 +25,44 @@ from pydantic import (
 from tqdm import tqdm
 
 import argilla as rg
+from argilla.client.feedback.config import FeedbackDatasetConfig
 from argilla.client.feedback.constants import (
     FETCHING_BATCH_SIZE,
     FIELD_TYPE_TO_PYTHON_TYPE,
     PUSHING_BATCH_SIZE,
 )
 from argilla.client.feedback.schemas import (
-    AllowedFieldTypes,
-    AllowedQuestionTypes,
-    FeedbackDatasetConfig,
     FeedbackRecord,
     FieldSchema,
     LabelQuestion,
     MultiLabelQuestion,
+    RankingQuestion,
     RatingQuestion,
     TextField,
     TextQuestion,
+)
+from argilla.client.feedback.training.schemas import (
+    TrainingTaskMappingForTextClassification,
+)
+from argilla.client.feedback.typing import AllowedFieldTypes, AllowedQuestionTypes
+from argilla.client.feedback.unification import (
+    LabelQuestionStrategy,
+    MultiLabelQuestionStrategy,
+    RatingQuestionStrategy,
 )
 from argilla.client.feedback.utils import (
     feedback_dataset_in_argilla,
     generate_pydantic_schema,
 )
+from argilla.client.models import Framework
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
-from argilla.utils.dependency import requires_version
+from argilla.utils.dependency import require_version, requires_version
 
 if TYPE_CHECKING:
     import httpx
     from datasets import Dataset
 
+    from argilla.client.client import Argilla as ArgillaClient
     from argilla.client.sdk.v1.datasets.models import (
         FeedbackDatasetModel,
         FeedbackFieldModel,
@@ -201,6 +212,7 @@ class FeedbackDataset:
         """
         if not isinstance(fields, list):
             raise TypeError(f"Expected `fields` to be a list, got {type(fields)} instead.")
+
         any_required = False
         unique_names = set()
         for field in fields:
@@ -218,13 +230,14 @@ class FeedbackDataset:
 
         if not isinstance(questions, list):
             raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
+
         any_required = False
         unique_names = set()
         for question in questions:
-            if not isinstance(question, (TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion)):
+            if not isinstance(question, AllowedQuestionTypes.__args__):
                 raise TypeError(
-                    "Expected `questions` to be a list of `TextQuestion`, `RatingQuestion`,"
-                    " `LabelQuestion`, and/or `MultiLabelQuestion` got a"
+                    "Expected `questions` to be a list of"
+                    f" `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}` got a"
                     f" question in the list with type {type(question)} instead."
                 )
             if question.name in unique_names:
@@ -305,10 +318,22 @@ class FeedbackDataset:
         """Returns the fields that define the schema of the records in the dataset."""
         return self.__fields
 
+    def field_by_name(self, name: str) -> Dict[str, FieldSchema]:
+        for item in self.fields:
+            if item.name == name:
+                return item
+        raise KeyError(f"Field with name '{name}' not found in self.fields")
+
     @property
     def questions(self) -> List["FeedbackQuestionModel"]:
         """Returns the questions that will be used to annotate the dataset."""
         return self.__questions
+
+    def question_by_name(self, name: str) -> Dict[str, "FeedbackQuestionModel"]:
+        for item in self.questions:
+            if item.name == name:
+                return item
+        raise KeyError(f"Question with name '{name}' not found in self.questions")
 
     @property
     def records(self) -> List[FeedbackRecord]:
@@ -470,7 +495,12 @@ class FeedbackDataset:
         for i in range(0, len(self.records), batch_size):
             yield self.records[i : i + batch_size]
 
-    def push_to_argilla(self, name: Optional[str] = None, workspace: Optional[Union[str, rg.Workspace]] = None) -> None:
+    def push_to_argilla(
+        self,
+        name: Optional[str] = None,
+        workspace: Optional[Union[str, rg.Workspace]] = None,
+        show_progress: bool = False,
+    ) -> None:
         """Pushes the `FeedbackDataset` to Argilla. If the dataset has been previously pushed to Argilla, it will be updated
         with the new records.
 
@@ -481,8 +511,10 @@ class FeedbackDataset:
             name: the name of the dataset to push to Argilla. If not provided, the `argilla_id` will be used if the dataset
                 has been previously pushed to Argilla.
             workspace: the workspace where to push the dataset to. If not provided, the active workspace will be used.
+            show_progress: the option to choose to show/hide tqdm progress bar while looping over records.
         """
-        httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
+        client: "ArgillaClient" = rg.active_client()
+        httpx_client: "httpx.Client" = client.http_client.httpx
 
         if name is None:
             if self.argilla_id is None:
@@ -504,7 +536,14 @@ class FeedbackDataset:
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=self.argilla_id,
-                        records=[record.dict() for record in self.__new_records[i : i + PUSHING_BATCH_SIZE]],
+                        records=[
+                            record.dict()
+                            for record in tqdm(
+                                self.__new_records[i : i + PUSHING_BATCH_SIZE],
+                                desc="Pushing records to Argilla...",
+                                disable=show_progress,
+                            )
+                        ],
                     )
                 self.__records += self.__new_records
                 self.__new_records = []
@@ -514,7 +553,7 @@ class FeedbackDataset:
                 ) from e
         else:
             if workspace is None:
-                workspace = rg.Workspace.from_name(rg.active_client().get_workspace())
+                workspace = rg.Workspace.from_name(client.get_workspace())
 
             if isinstance(workspace, str):
                 workspace = rg.Workspace.from_name(workspace)
@@ -547,7 +586,7 @@ class FeedbackDataset:
 
             for field in self.fields:
                 try:
-                    datasets_api_v1.add_field(client=httpx_client, id=argilla_id, field=json.loads(field.json()))
+                    datasets_api_v1.add_field(client=httpx_client, id=argilla_id, field=field.dict())
                 except Exception as e:
                     delete_dataset(dataset_id=argilla_id)
                     raise Exception(
@@ -557,9 +596,7 @@ class FeedbackDataset:
 
             for question in self.questions:
                 try:
-                    datasets_api_v1.add_question(
-                        client=httpx_client, id=argilla_id, question=json.loads(question.json())
-                    )
+                    datasets_api_v1.add_question(client=httpx_client, id=argilla_id, question=question.dict())
                 except Exception as e:
                     delete_dataset(dataset_id=argilla_id)
                     raise Exception(
@@ -580,7 +617,10 @@ class FeedbackDataset:
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=argilla_id,
-                        records=[json.loads(record.json()) for record in batch],
+                        records=[
+                            record.dict()
+                            for record in tqdm(batch, desc="Pushing records to Argilla...", disable=show_progress)
+                        ],
                     )
                 except Exception as e:
                     delete_dataset(dataset_id=argilla_id)
@@ -649,11 +689,11 @@ class FeedbackDataset:
                 )
             )
 
-        cls.argilla_id = existing_dataset.id
         fields = []
         for field in datasets_api_v1.get_fields(client=httpx_client, id=existing_dataset.id).parsed:
+            base_field = field.dict(include={"name", "title", "required"})
             if field.settings["type"] == "text":
-                field = TextField.construct(**field.dict())
+                field = TextField(**base_field, use_markdown=field.settings["use_markdown"])
             else:
                 raise ValueError(
                     f"Field '{field.name}' is not a supported field in the current Python package version,"
@@ -662,19 +702,31 @@ class FeedbackDataset:
             fields.append(field)
         questions = []
         for question in datasets_api_v1.get_questions(client=httpx_client, id=existing_dataset.id).parsed:
+            question_dict = question.dict(include={"name", "title", "description", "required"})
             if question.settings["type"] == "rating":
-                question = RatingQuestion.construct(**question.dict())
+                question = RatingQuestion(**question_dict, values=[v["value"] for v in question.settings["options"]])
             elif question.settings["type"] == "text":
-                question = TextQuestion.construct(**question.dict())
-            elif question.settings["type"] == "label_selection":
-                question = LabelQuestion.construct(**question.dict())
-            elif question.settings["type"] == "multi_label_selection":
-                question = MultiLabelQuestion.construct(**question.dict())
+                question = TextQuestion(**question_dict, use_markdown=question.settings["use_markdown"])
+            elif question.settings["type"] in ["label_selection", "multi_label_selection", "ranking"]:
+                if all([label["value"] == label["text"] for label in question.settings["options"]]):
+                    labels = [label["value"] for label in question.settings["options"]]
+                else:
+                    labels = {label["value"]: label["text"] for label in question.settings["options"]}
+
+                if question.settings["type"] == "label_selection":
+                    question = LabelQuestion(
+                        **question_dict, labels=labels, visible_labels=question.settings["visible_options"]
+                    )
+                elif question.settings["type"] == "multi_label_selection":
+                    question = MultiLabelQuestion(
+                        **question_dict, labels=labels, visible_labels=question.settings["visible_options"]
+                    )
+                elif question.settings["type"] == "ranking":
+                    question = RankingQuestion(**question_dict, values=labels)
             else:
                 raise ValueError(
                     f"Question '{question.name}' is not a supported question in the current Python package"
-                    " version, supported question types are: `RatingQuestion`, `TextQuestion`,"
-                    " `LabelQuestion`, and/or `MultiLabelQuestion`."
+                    f" version, supported question types are: `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}`."
                 )
             questions.append(question)
         self = cls(
@@ -682,6 +734,7 @@ class FeedbackDataset:
             questions=questions,
             guidelines=existing_dataset.guidelines or None,
         )
+        self.argilla_id = existing_dataset.id
         if with_records:
             self.fetch_records()
         return self
@@ -725,13 +778,15 @@ class FeedbackDataset:
                     value = Value(dtype="string")
                 elif question.settings["type"] == "rating":
                     value = Value(dtype="int32")
-                elif question.settings["type"] == "multi_label_selection":
+                elif question.settings["type"] == "ranking":
+                    value = Sequence({"rank": Value(dtype="uint8"), "value": Value(dtype="string")})
+                elif question.settings["type"] in "multi_label_selection":
                     value = Sequence(Value(dtype="string"))
                 else:
                     raise ValueError(
                         f"Question {question.name} has an unsupported type: {question.settings['type']}, for the"
-                        " moment only the following types are supported: 'text', 'rating', 'label_selection', and"
-                        " 'multi_label_selection'"
+                        " moment only the following types are supported: 'text', 'rating', 'label_selection',"
+                        " 'multi_label_selection', and 'ranking'."
                     )
                 # TODO(alvarobartt): if we constraint ranges from 0 to N, then we can use `ClassLabel` for ratings
                 features[question.name] = Sequence(
@@ -751,16 +806,24 @@ class FeedbackDataset:
                 for field in self.fields:
                     dataset[field.name].append(record.fields[field.name])
                 for question in self.questions:
+                    if not record.responses:
+                        dataset[question.name].append(None)
+                        continue
+                    responses = []
+                    for response in record.responses:
+                        if question.name not in response.values:
+                            responses.append(None)
+                            continue
+                        if question.settings["type"] == "ranking":
+                            responses.append([r.dict() for r in response.values[question.name].value])
+                        else:
+                            responses.append(response.values[question.name].value)
                     dataset[question.name].append(
-                        [
-                            {
-                                "user_id": r.user_id,
-                                "value": r.values[question.name].value,
-                                "status": r.status,
-                            }
-                            for r in record.responses
-                        ]
-                        or None
+                        {
+                            "user_id": [r.user_id for r in record.responses],
+                            "value": responses,
+                            "status": [r.status for r in record.responses],
+                        }
                     )
                 dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else None)
                 dataset["external_id"].append(record.external_id or None)
@@ -838,7 +901,7 @@ class FeedbackDataset:
                 argilla_fields=self.fields,
                 argilla_questions=self.questions,
                 argilla_guidelines=self.guidelines,
-                argilla_record=self.records[0].dict(),
+                argilla_record=json.loads(self.records[0].json()),
                 huggingface_record=hfds[0],
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
@@ -887,7 +950,7 @@ class FeedbackDataset:
             repo_type="dataset",
             **hub_auth,
         )
-        with open(config_path, "rb") as f:
+        with open(config_path, "r") as f:
             config = FeedbackDatasetConfig.parse_raw(f.read())
 
         cls = cls(
@@ -921,6 +984,8 @@ class FeedbackDataset:
                             "status": status,
                             "values": {},
                         }
+                    if question.settings["type"] == "ranking":
+                        value = [{"rank": r, "value": v} for r, v in zip(value["rank"], value["value"])]
                     responses[user_id]["values"].update({question.name: {"value": value}})
 
             metadata = None
@@ -937,3 +1002,84 @@ class FeedbackDataset:
             )
         del hfds
         return cls
+
+    def unify_responses(
+        self,
+        question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
+        strategy: Union[str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy],
+    ) -> None:
+        """Unify responses for a given question using a given strategy"""
+        if isinstance(question, str):
+            question = self.question_by_name(question)
+        if isinstance(strategy, str):
+            strategy = LabelQuestionStrategy(strategy)
+        strategy.unify_responses(self.records, question)
+
+    def prepare_for_training(
+        self,
+        framework: Union[Framework, str],
+        task_mapping: TrainingTaskMappingForTextClassification,
+        train_size: Optional[float] = 1,
+        test_size: Optional[float] = None,
+        seed: Optional[int] = None,
+        fetch_records: bool = True,
+        lang: Optional[str] = None,
+    ):
+        if isinstance(framework, str):
+            framework = Framework(framework)
+
+        # validate train and test sizes
+        if train_size is None:
+            train_size = 1
+        if test_size is None:
+            test_size = 1 - train_size
+
+        # check if all numbers are larger than 0
+        if not [abs(train_size), abs(test_size)] == [train_size, test_size]:
+            raise ValueError("`train_size` and `test_size` must be larger than 0.")
+        # check if train sizes sum up to 1
+        if not (train_size + test_size) == 1:
+            raise ValueError("`train_size` and `test_size` must sum to 1.")
+
+        if test_size == 0:
+            test_size = None
+
+        if fetch_records:
+            self.fetch_records()
+
+        if isinstance(task_mapping, TrainingTaskMappingForTextClassification):
+            self.unify_responses(question=task_mapping.label.question, strategy=task_mapping.label.strategy)
+        else:
+            raise ValueError(f"Training data {type(task_mapping)} is not supported yet")
+
+        data = task_mapping._format_data(self.records)
+        if framework in [
+            Framework.TRANSFORMERS,
+            Framework.SETFIT,
+            Framework.SPAN_MARKER,
+            Framework.PEFT,
+        ]:
+            return task_mapping._prepare_for_training_with_transformers(
+                data=data, train_size=train_size, seed=seed, framework=framework
+            )
+        elif framework is Framework.SPACY or framework is Framework.SPACY_TRANSFORMERS:
+            require_version("spacy")
+            import spacy
+
+            if lang is None:
+                _LOGGER.warning("spaCy `lang` is not provided. Using `en`(English) as default language.")
+                lang = spacy.blank("en")
+            elif lang.isinstance(str):
+                if len(lang) == 2:
+                    lang = spacy.blank(lang)
+                else:
+                    lang = spacy.load(lang)
+            return task_mapping._prepare_for_training_with_spacy(data=data, train_size=train_size, seed=seed, lang=lang)
+        elif framework is Framework.SPARK_NLP:
+            return task_mapping._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
+        elif framework is Framework.OPENAI:
+            return task_mapping._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
+        else:
+            raise NotImplementedError(
+                f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
+            )

@@ -27,7 +27,7 @@ def create_default(
 ):
     """Creates a user with default credentials on database suitable to start experimenting with argilla."""
     with SessionLocal() as session:
-        if accounts.get_user_by_username(session, DEFAULT_USERNAME):
+        if accounts.get_user_by_username_sync(session, DEFAULT_USERNAME):
             if not quiet:
                 typer.echo("User with default username already found on database, will not do anything.")
 
@@ -37,7 +37,7 @@ def create_default(
             User(
                 first_name="",
                 username=DEFAULT_USERNAME,
-                role=UserRole.admin,
+                role=UserRole.owner,
                 api_key=api_key,
                 password_hash=accounts.hash_password(password),
                 workspaces=[Workspace(name=DEFAULT_USERNAME)],
@@ -49,6 +49,7 @@ def create_default(
             typer.echo("User with default credentials successfully created:")
             typer.echo(f"• username: {DEFAULT_USERNAME!r}")
             typer.echo(f"• password: {password!r}")
+            typer.echo(f"• role:     {UserRole.owner.value!r}")
             typer.echo(f"• api_key:  {api_key!r}")
 
 

@@ -12,17 +12,40 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from datetime import datetime
+from enum import Enum
 from typing import List, Optional
+from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
-class User(BaseModel):
-    """User data model"""
+class UserRole(str, Enum):
+    owner = "owner"
+    admin = "admin"
+    annotator = "annotator"
 
+
+class UserCreateModel(BaseModel):
+    first_name: str = Field(min_length=1)
+    last_name: Optional[str] = Field(min_length=1)
+    username: str = Field(min_length=1, regex=r"^(?!-|_)[a-z0-9-_]+$")
+    role: UserRole = UserRole.annotator
+    password: str = Field(min_length=8, max_length=100)
+
+    # TODO(alvarobartt): confirm with @frascuchon
+    # disabled: Optional[bool] = None
+    # api_key: Optional[str]  # backward compatibility
+
+
+class UserModel(BaseModel):
+    id: UUID
+    first_name: str
+    last_name: Optional[str]
+    full_name: Optional[str]
     username: str
-    email: Optional[str] = None
-    full_name: Optional[str] = None
-    disabled: Optional[bool] = None
-    api_key: Optional[str]  # backward compatibility
-    workspaces: List[str] = None
+    role: UserRole
+    workspaces: Optional[List[str]]
+    api_key: str
+    inserted_at: datetime
+    updated_at: datetime

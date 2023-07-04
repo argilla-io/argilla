@@ -37,14 +37,28 @@ Vectors = Dict[str, List[float]]
 
 
 class Framework(Enum):
+    """Frameworks supported by Argilla
+
+    Options:
+        transformers: Transformers
+        peft: PEFT Transformers library
+        setfit: SetFit Transformers library
+        spacy: Spacy Explosion
+        spacy-transformers: Spacy Transformers Explosion library
+        span_marker: SpanMarker Tom Aarsen library
+        spark-nlp: Spark NLP John Snow Labs library
+        openai: OpenAI LLMs
+    """
+
     TRANSFORMERS = "transformers"
     PEFT = "peft"
     SETFIT = "setfit"
     SPACY = "spacy"
+    SPACY_TRANSFORMERS = "spacy-transformers"
     SPAN_MARKER = "span_marker"
     SPARK_NLP = "spark-nlp"
     OPENAI = "openai"
-    AUTOTRAIN = "autotrain"
+    # AUTOTRAIN = "autotrain"
 
     @classmethod
     def _missing_(cls, value):
@@ -271,7 +285,7 @@ class TextClassificationRecord(_Validators):
             and values.get("inputs") is not None
             and values["text"] != values["inputs"].get("text")
         ):
-            raise ValueError("For a TextClassificationRecord you must provide either 'text' or" " 'inputs'")
+            raise ValueError("For a TextClassificationRecord you must provide either 'text' or 'inputs'")
 
         if values.get("text") is not None:
             values["inputs"] = dict(text=values["text"])
@@ -363,7 +377,7 @@ class TokenClassificationRecord(_Validators):
         **data,
     ):
         if text is None and tokens is None:
-            raise AssertionError("Missing fields: At least one of `text` or `tokens` argument must be" " provided!")
+            raise AssertionError("Missing fields: At least one of `text` or `tokens` argument must be provided!")
 
         if (data.get("annotation") or data.get("prediction")) and text is None:
             raise AssertionError("Missing field `text`: " "char level spans must be provided with a raw text sentence")

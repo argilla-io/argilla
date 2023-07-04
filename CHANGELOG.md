@@ -18,23 +18,66 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed `sqlalchemy.error.OperationalError` being raised when running the unit tests if the local SQLite database file didn't exist and the migrations hadn't been applied ([#3307](https://github.com/argilla-io/argilla/pull/3307)).
+
+### Changed
+
+- The `POST /api/datasets/:dataset-id/:task/bulk` endpoint don't create the dataset if does not exists (Closes [#3244](https://github.com/argilla-io/argilla/issues/3244))
+
+## [1.12.0](https://github.com/argilla-io/argilla/compare/v1.11.0...v1.12.0)
+
+### Added
+
+- Added `RankingQuestionSettings` class allowing to create ranking questions in the API using `POST /api/v1/datasets/{dataset_id}/questions` endpoint ([#3232](https://github.com/argilla-io/argilla/pull/3232))
+- Added `RankingQuestion` in the Python client to create ranking questions ([#3275](https://github.com/argilla-io/argilla/issues/3275)).
+- Added `Ranking` component in feedback task question form ([#3177](https://github.com/argilla-io/argilla/pull/3177) & [#3246](https://github.com/argilla-io/argilla/pull/3246)).
+- Added `FeedbackDataset.prepare_for_training` method for generaring a framework-specific dataset with the responses provided for `RatingQuestion`, `LabelQuestion` and `MultiLabelQuestion` ([#3151](https://github.com/argilla-io/argilla/pull/3151)).
+- Added `ArgillaSpaCyTransformersTrainer` class for supporting the training with `spacy-transformers` ([#3256](https://github.com/argilla-io/argilla/pull/3256)).
+
+### Changed
+
+- All docker related files have been moved into the `docker` folder ([#3053](https://github.com/argilla-io/argilla/pull/3053)).
+- `release.Dockerfile` have been renamed to `Dockerfile` ([#3133](https://github.com/argilla-io/argilla/pull/3133)).
+- Updated `rg.load` function to raise a `ValueError` with a explanatory message for the cases in which the user tries to use the function to load a `FeedbackDataset` ([#3289](https://github.com/argilla-io/argilla/pull/3289)).
+- Updated `ArgillaSpaCyTrainer` to allow re-using `tok2vec` ([#3256](https://github.com/argilla-io/argilla/pull/3256)).
+
+### Fixed
+
+- Check available workspaces on Argilla on `rg.set_workspace` (Closes [#3262](https://github.com/argilla-io/argilla/issues/3262))
+
 ## [1.11.0](https://github.com/argilla-io/argilla/compare/v1.10.0...v1.11.0)
 
 ### Fixed
 
 - Replaced `np.float` alias by `float` to avoid `AttributeError` when using `find_label_errors` function with `numpy>=1.24.0` ([#3214](https://github.com/argilla-io/argilla/pull/3214)).
+- Fixed `format_as("datasets")` when no responses or optional respones in `FeedbackRecord`, to set their value to what 🤗 Datasets expects instead of just `None` ([#3224](https://github.com/argilla-io/argilla/pull/3224)).
+- Fixed `push_to_huggingface()` when `generate_card=True` (default behaviour), as we were passing a sample record to the `ArgillaDatasetCard` class, and `UUID`s introduced in 1.10.0 ([#3192](https://github.com/argilla-io/argilla/pull/3192)), are not JSON-serializable ([#3231](https://github.com/argilla-io/argilla/pull/3231)).
+- Fixed `from_argilla` and `push_to_argilla` to ensure consistency on both field and question re-construction, and to ensure `UUID`s are properly serialized as `str`, respectively ([#3234](https://github.com/argilla-io/argilla/pull/3234)).
+- Refactored usage of `import argilla as rg` to clarify package navigation ([#3279](https://github.com/argilla-io/argilla/pull/3279)).
+
+#### Docs
+
+- Fixed URLs in Weak Supervision with Sentence Tranformers tutorial [#3243](https://github.com/argilla-io/argilla/pull/3243).
+- Fixed library buttons' formatting on Tutorials page ([#3255](https://github.com/argilla-io/argilla/pull/3255)).
+- Modified styling of error code outputs in notebooks ([#3270](https://github.com/argilla-io/argilla/pull/3270)).
+- Added ElasticSearch and OpenSearch versions ([#3280](https://github.com/argilla-io/argilla/pull/3280)).
+- Removed template notebook from table of contents ([#3271](https://github.com/argilla-io/argilla/pull/3271)).
 
 ### Added
 
 - Added `metadata` attribute to the `Record` of the `FeedbackDataset` ([#3194](https://github.com/argilla-io/argilla/pull/3194))
 - New `users update` command to update the role for an existing user ([#3188](https://github.com/argilla-io/argilla/pull/3188))
 - New `Workspace` class to allow users manage their Argilla workspaces and the users assigned to those workspaces via the Python client ([#3180](https://github.com/argilla-io/argilla/pull/3180))
+- Added `User` class to let users manage their Argilla users via the Python client ([#3169](https://github.com/argilla-io/argilla/pull/3169)).
+- Added an option to display `tqdm` progress bar to `FeedbackDataset.push_to_argilla` when looping over the records to upload ([#3233](https://github.com/argilla-io/argilla/pull/3233)).
 
 ### Changed
 
 - The role system now support three different roles `owner`, `admin` and `annotator` ([#3104](https://github.com/argilla-io/argilla/pull/3104))
 - `admin` role is scoped to workspace-level operations ([#3115](https://github.com/argilla-io/argilla/pull/3115))
-- Default argilla user has the `admin` role instead of `owner` one ([#3188](https://github.com/argilla-io/argilla/pull/3188))
+- The `owner` user is created among the default pool of users in the quickstart, and the default user in the server has now `owner` role ([#3248](https://github.com/argilla-io/argilla/pull/3248)), reverting ([#3188](https://github.com/argilla-io/argilla/pull/3188)).
 
 ### Deprecated
 
@@ -58,6 +101,12 @@ These are the section headers that we use:
 - Resolve breaking issue with `ArgillaSpanMarkerTrainer` for Named Entity Recognition with `span_marker` v1.1.x onwards.
 - Move `ArgillaDatasetCard` import under `@requires_version` decorator, so that the `ImportError` on `huggingface_hub` is handled properly ([#3174](https://github.com/argilla-io/argilla/pull/3174))
 - Allow flow `FeedbackDataset.from_argilla` -> `FeedbackDataset.push_to_argilla` under different dataset names and/or workspaces ([#3192](https://github.com/argilla-io/argilla/issues/3192))
+
+### Docs
+
+- Resolved typos in the docs ([#3240](https://github.com/argilla-io/argilla/pull/3240)).
+- Fixed mention of master branch ([#3254](https://github.com/argilla-io/argilla/pull/3254)).
+
 
 ## [1.9.0](https://github.com/argilla-io/argilla/compare/v1.8.0...v1.9.0)
 

@@ -19,7 +19,6 @@ as well as in the `_import_structure` dictionary.
 """
 
 import sys as _sys
-import warnings
 from typing import TYPE_CHECKING as _TYPE_CHECKING
 
 from argilla.logging import configure_logging as _configure_logging
@@ -57,17 +56,6 @@ if _TYPE_CHECKING:
         read_datasets,
         read_pandas,
     )
-    from argilla.client.feedback.dataset import FeedbackDataset
-    from argilla.client.feedback.schemas import (
-        FeedbackRecord,
-        LabelQuestion,
-        MultiLabelQuestion,
-        RatingQuestion,
-        ResponseSchema,
-        TextField,
-        TextQuestion,
-        ValueSchema,
-    )
     from argilla.client.models import (
         Text2TextRecord,
         TextClassificationRecord,
@@ -75,6 +63,7 @@ if _TYPE_CHECKING:
         TokenAttributions,
         TokenClassificationRecord,
     )
+    from argilla.client.users import User
     from argilla.client.workspaces import Workspace
     from argilla.datasets import (
         TextClassificationSettings,
@@ -83,6 +72,18 @@ if _TYPE_CHECKING:
         configure_dataset_settings,
         load_dataset_settings,
     )
+    from argilla.feedback import (
+        FeedbackDataset,
+        FeedbackRecord,
+        LabelQuestion,
+        MultiLabelQuestion,
+        RankingQuestion,
+        RatingQuestion,
+        ResponseSchema,
+        TextField,
+        TextQuestion,
+        ValueSchema,
+    )
     from argilla.listeners import Metrics, RGListenerContext, Search, listener
     from argilla.monitoring.model_monitor import monitor
     from argilla.server.server import app
@@ -90,6 +91,22 @@ if _TYPE_CHECKING:
 
 # TODO: remove me
 _import_structure = {
+    "feedback": [
+        "ArgillaTrainer",
+        "LabelQuestionStrategy",
+        "MultiLabelQuestionStrategy",
+        "RatingQuestionStrategy",
+        "FeedbackDataset",
+        "FeedbackRecord",
+        "LabelQuestion",
+        "MultiLabelQuestion",
+        "RatingQuestion",
+        "RankingQuestion",
+        "ResponseSchema",
+        "TextField",
+        "TextQuestion",
+        "ValueSchema",
+    ],
     "client.api": [
         "copy",
         "delete",
@@ -116,17 +133,7 @@ _import_structure = {
         "read_datasets",
         "read_pandas",
     ],
-    "client.feedback.dataset": ["FeedbackDataset"],
-    "client.feedback.schemas": [
-        "FeedbackRecord",
-        "LabelQuestion",
-        "MultiLabelQuestion",
-        "RatingQuestion",
-        "ResponseSchema",
-        "TextField",
-        "TextQuestion",
-        "ValueSchema",
-    ],
+    "client.users": ["User"],
     "client.workspaces": ["Workspace"],
     "monitoring.model_monitor": ["monitor"],
     "listeners.listener": [

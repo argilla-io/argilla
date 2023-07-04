@@ -17,6 +17,10 @@ All you need to take into account is:
 
 Argilla uses the `ELASTICSEARCH` environment variable to set the ES connection.
 
+:::{note}
+Argilla supports ElasticSearch versions 8.8, 8.5, 8.0, and 7.17.
+:::
+
 You can provide the credentials using the following scheme:
 
 ```bash

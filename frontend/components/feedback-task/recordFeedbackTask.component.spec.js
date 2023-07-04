@@ -1,10 +1,25 @@
 import { shallowMount } from "@vue/test-utils";
 import RecordFeedbackTaskComponent from "./RecordFeedbackTask.component";
 
+const StatusTagComponentStub = {
+  name: "StatusTagComponent",
+  template: "<div />",
+  props: ["title"],
+};
+
+const TextFieldComponentStub = {
+  name: "TextFieldComponent",
+  template: "<div />",
+  props: ["title", "fieldText", "useMarkdown"],
+};
+
 describe("RecordFeedbackTaskComponent", () => {
   it("render the component with ONE textFieldComponent", () => {
     const options = {
-      stubs: ["StatusTag", "TextFieldComponent"],
+      stubs: {
+        StatusTag: StatusTagComponentStub,
+        TextFieldComponent: TextFieldComponentStub,
+      },
       propsData: {
         recordStatus: "PENDING",
         fields: [
@@ -27,17 +42,20 @@ describe("RecordFeedbackTaskComponent", () => {
     const wrapper = shallowMount(RecordFeedbackTaskComponent, options);
 
     expect(wrapper.is(RecordFeedbackTaskComponent)).toBe(true);
-    const StatusTagWrapper = wrapper.findComponent({ name: "StatusTag" });
-
+    const StatusTagWrapper = wrapper.findComponent(StatusTagComponentStub);
     expect(StatusTagWrapper.exists()).toBe(true);
-    const TextFieldComponents = wrapper.findAllComponents({
-      name: "TextFieldComponent",
-    });
+
+    const TextFieldComponents = wrapper.findAllComponents(
+      TextFieldComponentStub
+    );
     expect(TextFieldComponents.length).toBe(1);
   });
-  it("render the component with TWO textFieldComponent", () => {
+  it("render the component with TWO textFieldComponent", async () => {
     const options = {
-      stubs: ["StatusTag", "TextFieldComponent"],
+      stubs: {
+        StatusTag: StatusTagComponentStub,
+        TextFieldComponent: TextFieldComponentStub,
+      },
       propsData: {
         recordStatus: "PENDING",
         fields: [
@@ -70,14 +88,15 @@ describe("RecordFeedbackTaskComponent", () => {
     };
 
     const wrapper = shallowMount(RecordFeedbackTaskComponent, options);
-
+    await wrapper.vm.$nextTick();
     expect(wrapper.is(RecordFeedbackTaskComponent)).toBe(true);
-    const StatusTagWrapper = wrapper.findComponent({ name: "StatusTag" });
 
+    const StatusTagWrapper = wrapper.findComponent(StatusTagComponentStub);
     expect(StatusTagWrapper.exists()).toBe(true);
-    const TextFieldComponents = wrapper.findAllComponents({
-      name: "TextFieldComponent",
-    });
+
+    const TextFieldComponents = wrapper.findAllComponents(
+      TextFieldComponentStub
+    );
     expect(TextFieldComponents.length).toBe(2);
   });
 });

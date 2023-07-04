@@ -17,16 +17,25 @@ from typing import TYPE_CHECKING, List
 
 import argilla as rg
 import pytest
+from argilla.client.api import delete, log
+from argilla.client.datasets import read_datasets
+from argilla.client.models import (
+    Text2TextRecord,
+    TextClassificationRecord,
+    TokenAttributions,
+    TokenClassificationRecord,
+)
 from argilla.client.sdk.datasets.models import TaskType
 from datasets import Dataset
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.typing import AllowedFieldTypes, AllowedQuestionTypes
 
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     LabelQuestion,
     MultiLabelQuestion,
+    RankingQuestion,
     RatingQuestion,
     TextField,
     TextQuestion,
@@ -76,10 +85,10 @@ def gutenberg_spacy_ner(mocked_client):
         revision="fff5f572e4cc3127f196f46ba3f9914c6fd0d763",
     )
 
-    dataset_rb = rg.read_datasets(dataset_ds, task="TokenClassification")
+    dataset_rb = read_datasets(dataset_ds, task="TokenClassification")
 
-    rg.delete(dataset)
-    rg.log(name=dataset, records=dataset_rb)
+    delete(dataset)
+    log(name=dataset, records=dataset_rb)
 
     return dataset
 
@@ -87,9 +96,9 @@ def gutenberg_spacy_ner(mocked_client):
 @pytest.fixture(scope="session")
 def singlelabel_textclassification_records(
     request,
-) -> List[rg.TextClassificationRecord]:
+) -> List[TextClassificationRecord]:
     return [
-        rg.TextClassificationRecord(
+        TextClassificationRecord(
             inputs={"text": "mock", "context": "mock"},
             prediction=[("a", 0.5), ("b", 0.5)],
             prediction_agent="mock_pagent",
@@ -98,27 +107,27 @@ def singlelabel_textclassification_records(
             id=1,
             event_timestamp=datetime.datetime(2000, 1, 1),
             metadata={"mock_metadata": "mock"},
-            explanation={"text": [rg.TokenAttributions(token="mock", attributions={"a": 0.1, "b": 0.5})]},
+            explanation={"text": [TokenAttributions(token="mock", attributions={"a": 0.1, "b": 0.5})]},
             status="Validated",
         ),
-        rg.TextClassificationRecord(
+        TextClassificationRecord(
             inputs={"text": "mock2", "context": "mock2"},
             prediction=[("a", 0.5), ("b", 0.2)],
             prediction_agent="mock2_pagent",
             id=2,
             event_timestamp=datetime.datetime(2000, 2, 1),
             metadata={"mock2_metadata": "mock2"},
-            explanation={"text": [rg.TokenAttributions(token="mock2", attributions={"a": 0.7, "b": 0.2})]},
+            explanation={"text": [TokenAttributions(token="mock2", attributions={"a": 0.7, "b": 0.2})]},
             status="Default",
         ),
-        rg.TextClassificationRecord(
+        TextClassificationRecord(
             inputs={"text": "mock2", "context": "mock2"},
             prediction=[("a", 0.5), ("b", 0.2)],
             prediction_agent="mock2_pagent",
             id=3,
             status="Discarded",
         ),
-        rg.TextClassificationRecord(
+        TextClassificationRecord(
             inputs={"text": "mock3", "context": "mock3"},
             annotation="a",
             annotation_agent="mock_aagent",
@@ -126,7 +135,7 @@ def singlelabel_textclassification_records(
             event_timestamp=datetime.datetime(2000, 3, 1),
             metadata={"mock_metadata": "mock"},
         ),
-        rg.TextClassificationRecord(
+        TextClassificationRecord(
             text="mock",
             id="b",
             status="Default",
@@ -160,9 +169,9 @@ def log_singlelabel_textclassification_records(
 
 
 @pytest.fixture(scope="session")
-def multilabel_textclassification_records(request) -> List[rg.TextClassificationRecord]:
+def multilabel_textclassification_records(request) -> List[TextClassificationRecord]:
     return [
-        rg.TextClassificationRecord(
+        TextClassificationRecord(
             inputs={"text": "mock", "context": "mock"},
             prediction=[("a", 0.6), ("b", 0.4)],
             prediction_agent="mock_pagent",
@@ -172,10 +181,10 @@ def multilabel_textclassification_records(request) -> List[rg.TextClassification
             id=1,
             event_timestamp=datetime.datetime(2000, 1, 1),
             metadata={"mock_metadata": "mock"},
-            explanation={"text": [rg.TokenAttributions(token="mock", attributions={"a": 0.1, "b": 0.5})]},
+            explanation={"text": [TokenAttributions(token="mock", attributions={"a": 0.1, "b": 0.5})]},
             status="Validated",
         ),
-        rg.TextClassificationRecord(
+        TextClassificationRecord(
             inputs={"text": "mock2", "context": "mock2"},
             prediction=[("a", 0.5), ("b", 0.2)],
             prediction_agent="mock2_pagent",
@@ -183,10 +192,10 @@ def multilabel_textclassification_records(request) -> List[rg.TextClassification
             id=2,
             event_timestamp=datetime.datetime(2000, 2, 1),
             metadata={"mock2_metadata": "mock2"},
-            explanation={"text": [rg.TokenAttributions(token="mock2", attributions={"a": 0.7, "b": 0.2})]},
+            explanation={"text": [TokenAttributions(token="mock2", attributions={"a": 0.7, "b": 0.2})]},
             status="Default",
         ),
-        rg.TextClassificationRecord(
+        TextClassificationRecord(
             inputs={"text": "mock2", "context": "mock2"},
             prediction=[("a", 0.5), ("b", 0.2)],
             prediction_agent="mock2_pagent",
@@ -194,7 +203,7 @@ def multilabel_textclassification_records(request) -> List[rg.TextClassification
             id=3,
             status="Discarded",
         ),
-        rg.TextClassificationRecord(
+        TextClassificationRecord(
             inputs={"text": "mock3", "context": "mock3"},
             annotation=["a"],
             annotation_agent="mock_aagent",
@@ -204,7 +213,7 @@ def multilabel_textclassification_records(request) -> List[rg.TextClassification
             metadata={"mock_metadata": "mock"},
             metrics={},
         ),
-        rg.TextClassificationRecord(
+        TextClassificationRecord(
             text="mock",
             multi_label=True,
             id="b",
@@ -240,9 +249,9 @@ def log_multilabel_textclassification_records(
 
 
 @pytest.fixture(scope="session")
-def tokenclassification_records(request) -> List[rg.TokenClassificationRecord]:
+def tokenclassification_records(request) -> List[TokenClassificationRecord]:
     return [
-        rg.TokenClassificationRecord(
+        TokenClassificationRecord(
             text="This is an example",
             tokens=["This", "is", "an", "example"],
             prediction=[("a", 5, 7), ("b", 11, 18)],
@@ -254,7 +263,7 @@ def tokenclassification_records(request) -> List[rg.TokenClassificationRecord]:
             metadata={"mock_metadata": "mock"},
             status="Validated",
         ),
-        rg.TokenClassificationRecord(
+        TokenClassificationRecord(
             text="This is a second example",
             tokens=["This", "is", "a", "second", "example"],
             prediction=[("a", 5, 7), ("b", 8, 9)],
@@ -263,7 +272,7 @@ def tokenclassification_records(request) -> List[rg.TokenClassificationRecord]:
             event_timestamp=datetime.datetime(2000, 1, 1),
             metadata={"mock_metadata": "mock"},
         ),
-        rg.TokenClassificationRecord(
+        TokenClassificationRecord(
             text="This is a secondd example",
             tokens=["This", "is", "a", "secondd", "example"],
             prediction=[("a", 5, 7), ("b", 8, 9, 0.5)],
@@ -271,7 +280,7 @@ def tokenclassification_records(request) -> List[rg.TokenClassificationRecord]:
             id=3,
             status="Default",
         ),
-        rg.TokenClassificationRecord(
+        TokenClassificationRecord(
             text="This is a third example",
             tokens=["This", "is", "a", "third", "example"],
             annotation=[("a", 0, 4), ("b", 16, 23)],
@@ -281,7 +290,7 @@ def tokenclassification_records(request) -> List[rg.TokenClassificationRecord]:
             metadata={"mock_metadata": "mock"},
             metrics={},
         ),
-        rg.TokenClassificationRecord(
+        TokenClassificationRecord(
             text="This is a third example",
             tokens=["This", "is", "a", "third", "example"],
             id="b",
@@ -314,9 +323,9 @@ def log_tokenclassification_records(
 
 
 @pytest.fixture(scope="session")
-def text2text_records(request) -> List[rg.Text2TextRecord]:
+def text2text_records(request) -> List[Text2TextRecord]:
     return [
-        rg.Text2TextRecord(
+        Text2TextRecord(
             text="This is an example",
             prediction=["Das ist ein Beispiel", "Esto es un ejemplo"],
             prediction_agent="mock_pagent",
@@ -327,7 +336,7 @@ def text2text_records(request) -> List[rg.Text2TextRecord]:
             metadata={"mock_metadata": "mock"},
             status="Validated",
         ),
-        rg.Text2TextRecord(
+        Text2TextRecord(
             text="This is a one and a half example",
             prediction=[("Das ist ein Beispiell", 0.9), ("Esto es un ejemploo", 0.1)],
             prediction_agent="mock_pagent",
@@ -335,7 +344,7 @@ def text2text_records(request) -> List[rg.Text2TextRecord]:
             event_timestamp=datetime.datetime(2000, 1, 1),
             metadata={"mock_metadata": "mock"},
         ),
-        rg.Text2TextRecord(
+        Text2TextRecord(
             text="This is a second example",
             prediction=["Esto es un ejemplooo", ("Das ist ein Beispielll", 0.9)],
             prediction_agent="mock_pagent",
@@ -344,7 +353,7 @@ def text2text_records(request) -> List[rg.Text2TextRecord]:
             metadata={"mock_metadata": "mock"},
             metrics={},
         ),
-        rg.Text2TextRecord(
+        Text2TextRecord(
             text="This is a third example",
             annotation="C'est une très bonne baguette",
             annotation_agent="mock_pagent",
@@ -353,7 +362,7 @@ def text2text_records(request) -> List[rg.Text2TextRecord]:
             metadata={"mock_metadata": "mock"},
             metrics={},
         ),
-        rg.Text2TextRecord(
+        Text2TextRecord(
             text="This is a forth example",
             id="b",
             status="Discarded",
@@ -404,6 +413,7 @@ def feedback_dataset_questions() -> List["AllowedQuestionTypes"]:
         RatingQuestion(name="question-2", values=[0, 1], required=True),
         LabelQuestion(name="question-3", labels=["a", "b", "c"], required=True),
         MultiLabelQuestion(name="question-4", labels=["a", "b", "c"], required=True),
+        RankingQuestion(name="question-5", values=["a", "b"], required=True),
     ]
 
 
@@ -419,12 +429,50 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                         "question-2": {"value": 1},
                         "question-3": {"value": "a"},
                         "question-4": {"value": ["a", "b"]},
+                        "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
+                    },
+                    "status": "submitted",
+                },
+            ],
+            metadata={"unit": "test"},
+            external_id="1",
+        ),
+        FeedbackRecord(
+            fields={"text": "This is a negative example", "label": "negative"},
+            metadata={"another unit": "test"},
+            external_id="2",
+        ),
+        FeedbackRecord(
+            fields={"text": "This is a negative example", "label": "negative"},
+            responses=[
+                {
+                    "values": {
+                        "question-1": {"value": "This is a response to question 1"},
+                        "question-2": {"value": 0},
+                        "question-3": {"value": "b"},
+                        "question-4": {"value": ["b", "c"]},
+                        "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
                     },
                     "status": "submitted",
                 }
             ],
-            metadata={"unit": "test"},
-            external_id="1",
+            external_id="3",
+        ),
+        FeedbackRecord(
+            fields={"text": "This is a negative example", "label": "negative"},
+            responses=[
+                {
+                    "values": {
+                        "question-1": {"value": "This is a response to question 1"},
+                        "question-2": {"value": 0},
+                        "question-3": {"value": "c"},
+                        "question-4": {"value": ["a", "c"]},
+                        "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
+                    },
+                    "status": "submitted",
+                }
+            ],
+            external_id="4",
         ),
         FeedbackRecord(
             fields={"text": "This is a negative example", "label": "negative"},
@@ -434,13 +482,13 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                         "question-1": {"value": "This is a response to question 1"},
                         "question-2": {"value": 1},
                         "question-3": {"value": "a"},
-                        "question-4": {"value": ["a", "b"]},
+                        "question-4": {"value": ["a"]},
+                        "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
                     },
                     "status": "submitted",
                 }
             ],
-            metadata={"another unit": "test"},
-            external_id="2",
+            external_id="5",
         ),
     ]
 
@@ -455,6 +503,13 @@ def feedback_dataset_huggingface() -> Dataset:
             "question-2": [{"user_id": [None], "value": [1], "status": ["submitted"]}],
             "question-3": [{"user_id": [None], "value": ["a"], "status": ["submitted"]}],
             "question-4": [{"user_id": [None], "value": [["a", "b"]], "status": ["submitted"]}],
+            "question-5": [
+                {
+                    "user_id": [None],
+                    "value": [[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]],
+                    "status": ["submitted"],
+                }
+            ],
             "external_id": ["1"],
         }
     )
