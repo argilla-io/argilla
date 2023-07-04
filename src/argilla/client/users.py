@@ -51,7 +51,6 @@ class User:
         last_name: the last name of the user. Defaults to None.
         full_name: the full name of the user. Defaults to None.
         role: the role of the user.
-        workspaces: the list of workspaces the user is linked to. Defaults to None.
         api_key: the API key of the user.
         inserted_at: the datetime when the user was created.
         updated_at: the datetime when the user was last updated.
@@ -60,7 +59,7 @@ class User:
         >>> from argilla import rg
         >>> user = rg.User.from_name("my-user") # or `User.from_id("...")`
         >>> print(user)
-        User(id='...', username='my-user', first_name='Luke', last_name="Skywalker', full_name='Luke Skywalker', role='annotator', workspaces=['my-workspace'], api_key='...', inserted_at=datetime.datetime(2021, 8, 31, 10, 0, 0), updated_at=datetime.datetime(2021, 8, 31, 10, 0, 0))
+        User(id='...', username='my-user', first_name='Luke', last_name="Skywalker', full_name='Luke Skywalker', role='annotator', workspaces=[WorkspaceModel(...), ...], api_key='...', inserted_at=datetime.datetime(2021, 8, 31, 10, 0, 0), updated_at=datetime.datetime(2021, 8, 31, 10, 0, 0))
     """
 
     __client: "httpx.Client"
@@ -70,7 +69,6 @@ class User:
     last_name: Optional[str]
     full_name: Optional[str]
     role: UserRole
-    workspaces: Optional[List[WorkspaceModel]]
     api_key: str
     inserted_at: datetime
     updated_at: datetime
