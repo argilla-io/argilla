@@ -8,7 +8,7 @@ export default {
   },
   render(h) {
     return h({
-      template: this.html,
+      template: `<div>${this.html}</div>`,
     });
   },
 };
