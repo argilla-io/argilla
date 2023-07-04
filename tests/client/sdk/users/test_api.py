@@ -29,7 +29,6 @@ from argilla.client.sdk.commons.errors import (
 from argilla.client.sdk.users.api import (
     create_user,
     delete_user,
-    list_user_workspaces,
     list_users,
     whoami,
 )
@@ -38,7 +37,7 @@ from argilla.client.sdk.users.models import UserModel
 if TYPE_CHECKING:
     from argilla.server.models import User as ServerUser
 
-from tests.factories import UserFactory, WorkspaceFactory, WorkspaceUserFactory
+from tests.factories import UserFactory
 
 
 def test_whoami(api: Argilla) -> None:
@@ -122,23 +121,3 @@ def test_delete_user_errors(owner: "ServerUser", annotator: "ServerUser") -> Non
     delete_user(client=httpx_client, user_id=owner.id)
     with pytest.raises(UnauthorizedApiError):
         delete_user(client=httpx_client, user_id=owner.id)
-
-
-@pytest.mark.asyncio
-async def test_list_user_workspaces(owner: "ServerUser") -> None:
-    httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
-
-    response = list_user_workspaces(client=httpx_client, user_id=owner.id)
-    assert response.status_code == 200
-    assert isinstance(response.parsed, list)
-    if len(response.parsed) > 0:
-        assert all(isinstance(workspace, str) for workspace in response.parsed)
-
-    workspace = await WorkspaceFactory.create(name="test_workspace")
-    await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
-
-    response = list_user_workspaces(client=httpx_client, user_id=owner.id)
-    assert response.status_code == 200
-    assert isinstance(response.parsed, list)
-    assert len(response.parsed) > 0
-    assert any("test_workspace" == workspace for workspace in response.parsed)
