@@ -2,7 +2,7 @@
   <div class="docs-shortcuts">
     <base-spinner v-if="$fetchState.pending" />
     <div v-else-if="!$fetchState.error" class="docs-shortcuts__container">
-      <transition v-if="shortcuts" name="fade" mode="out-in" appear>
+      <transition v-if="shortcuts.html" name="fade" mode="out-in" appear>
         <BaseRenderHtml v-if="shortcuts" :html="shortcuts.html" />
       </transition>
     </div>
@@ -36,6 +36,7 @@ export default {
 
 <style lang="scss" scoped>
 .docs-shortcuts {
+  min-width: 450px;
   &__container {
     padding: 5px;
   }
