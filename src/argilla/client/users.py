@@ -160,6 +160,7 @@ class User:
         cls,
         username: str,
         password: str,
+        *,
         first_name: Optional[str] = None,
         last_name: Optional[str] = None,
         role: Optional[UserRole] = None,
