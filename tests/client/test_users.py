@@ -116,3 +116,15 @@ def test_user_repr(owner: "ServerUser") -> None:
         f" last_name={owner.last_name}, role={owner.role}, inserted_at={owner.inserted_at},"
         f" updated_at={owner.updated_at})"
     )
+
+
+@pytest.mark.asyncio
+async def test_user_workspaces(owner: "ServerUser") -> None:
+    workspaces = await WorkspaceFactory.create_batch(3)
+    ArgillaSingleton.init(api_key=owner.api_key)
+
+    user = User.me()
+    assert isinstance(user.workspaces, list)
+    assert len(user.workspaces) == len(workspaces)
+    assert all(isinstance(workspace, str) for workspace in workspaces)
+    assert all(workspace in user.workspaces for workspace in workspaces)
