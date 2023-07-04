@@ -27,8 +27,10 @@
         v-for="(input, index) in inputs"
         ref="inputs"
         :key="input.id"
-        @keydown.shift.arrow-down="updateQuestionAutofocus(focusedQuestion + 1)"
-        @keydown.shift.arrow-up="updateQuestionAutofocus(focusedQuestion - 1)"
+        @keydown.shift.arrow-down="
+          updateQuestionAutofocus(autofocusPosition + 1)
+        "
+        @keydown.shift.arrow-up="updateQuestionAutofocus(autofocusPosition - 1)"
       >
         <TextAreaComponent
           v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
@@ -40,8 +42,7 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           @on-error="onError"
-          @on-focus="updateAutofocusPosition(index)"
-          @on-blur="updateAutofocusPosition(null)"
+          @on-focus="updateQuestionAutofocus(index)"
         />
 
         <SingleLabelComponent
@@ -53,7 +54,7 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
-          @on-focus="updateAutofocusPosition(index)"
+          @on-focus="updateQuestionAutofocus(index)"
         />
         <MultiLabelComponent
           v-if="input.component_type === COMPONENT_TYPE.MULTI_LABEL"
@@ -64,7 +65,7 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
-          @on-focus="updateAutofocusPosition(index)"
+          @on-focus="updateQuestionAutofocus(index)"
         />
 
         <RatingComponent
@@ -75,7 +76,7 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           @on-error="onError"
-          @on-focus="updateAutofocusPosition(index)"
+          @on-focus="updateQuestionAutofocus(index)"
         />
         <RankingComponent
           v-if="input.component_type === COMPONENT_TYPE.RANKING"
@@ -85,7 +86,7 @@
           :description="input.description"
           v-model="input.options"
           :key="JSON.stringify(input.options)"
-          @on-focus="updateAutofocusPosition(index)"
+          @on-focus="updateQuestionAutofocus(index)"
         />
       </div>
     </div>
@@ -171,7 +172,6 @@ export default {
       inputs: [],
       renderForm: 0,
       isError: false,
-      focusedQuestion: 0,
       autofocusPosition: 0,
     };
   },
@@ -593,9 +593,6 @@ export default {
         this.recordStatus === RECORD_STATUS.PENDING &&
         index === this.autofocusPosition
       );
-    },
-    updateAutofocusPosition(index) {
-      this.focusedQuestion = index;
     },
     updateQuestionAutofocus(index) {
       const numberOfQuestions = this.inputs.length;
