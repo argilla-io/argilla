@@ -148,3 +148,32 @@ def delete_user(
             parsed=parsed_response,
         )
     return handle_response_error(response)
+
+
+def list_user_workspaces(
+    client: httpx.Client, user_id: UUID
+) -> Response[Union[Optional[List[str]], ErrorMessage, HTTPValidationError]]:
+    """Sends a GET request to `/api/users/{user_id}/workspaces` endpoint to get the
+    list of workspaces the user has access to.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        user_id: the id of the user to get the workspaces from.
+
+    Returns:
+        A `Response` object containing a `parsed` attribute with the parsed response if
+        the request was successful, which is a list of `str` with the workspaces names.
+    """
+    url = f"/api/users/{user_id}/workspaces"
+
+    response = client.get(url=url)
+
+    if response.status_code == 200:
+        parsed_response = response.json()
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+            parsed=parsed_response,
+        )
+    return handle_response_error(response)
