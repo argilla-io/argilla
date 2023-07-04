@@ -20,6 +20,8 @@ These are the section headers that we use:
 
 - Added `GET /api/v1/users/{user_id}/workspaces` endpoint to list the workspaces to which a user belongs ([#3308](https://github.com/argilla-io/argilla/pull/3308)).
 - Added `HuggingFaceDatasetMixIn` for internal usage, to detach the `FeedbackDataset` integrations from the class itself, and use MixIns instead ([#3326](https://github.com/argilla-io/argilla/pull/3326)).
+- Added `DELETE /api/v1/records/{record_id}` endpoint to remove a record given its ID ([#3337](https://github.com/argilla-io/argilla/pull/3337)).
+- Added `POST /api/v1/datasets/{dataset_id}/records/bulk-delete` endpoint to remove a list of records given their IDs and the dataset ID to which they belong ([#3337](https://github.com/argilla-io/argilla/pull/3337)).
 
 ### Fixed
 
