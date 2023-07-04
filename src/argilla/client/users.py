@@ -159,7 +159,7 @@ class User:
     def create(
         cls,
         username: str,
-        password: Union[str, UUID],
+        password: str,
         first_name: Optional[str] = None,
         last_name: Optional[str] = None,
         role: Optional[UserRole] = None,
@@ -179,7 +179,7 @@ class User:
                 client,
                 **UserCreateModel(
                     username=username,
-                    password=str(password),
+                    password=password,
                     first_name=first_name,
                     last_name=last_name,
                     role=role,
