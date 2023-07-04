@@ -108,7 +108,7 @@ async def test_user_delete_user(owner: "ServerUser") -> None:
 
 
 def test_user_repr(owner: "ServerUser") -> None:
-    ArgillaSingleton(api_key=owner.api_key)
+    ArgillaSingleton.init(api_key=owner.api_key)
 
     assert str(User.me()) == (
         f"User(id={owner.id}, username={owner.username}, role={owner.role.value},"
