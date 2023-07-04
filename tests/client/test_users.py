@@ -40,7 +40,7 @@ def test_user_cls_init() -> None:
 
 
 @pytest.mark.asyncio
-async def test_user_from_name(owner: "ServerUser"):
+async def test_user_from_name(owner: "ServerUser") -> None:
     new_user = await UserFactory.create(username="test_user")
     ArgillaSingleton.init(api_key=owner.api_key)
 
@@ -53,7 +53,7 @@ async def test_user_from_name(owner: "ServerUser"):
 
 
 @pytest.mark.asyncio
-async def test_user_from_id(owner: "ServerUser"):
+async def test_user_from_id(owner: "ServerUser") -> None:
     new_user = await UserFactory.create(username="test_user")
     ArgillaSingleton.init(api_key=owner.api_key)
 
@@ -65,9 +65,7 @@ async def test_user_from_id(owner: "ServerUser"):
         User.from_id(id="00000000-0000-0000-0000-000000000000")
 
 
-@pytest.mark.skip(reason="This behaviour is not yet implemented. Onwer users won't have workspaces through this")
-def test_user_workspaces(owner: "ServerUser"):
-    workspaces = WorkspaceFactory.create_batch(3)
+def test_user_me(owner: "ServerUser") -> None:
 
     import argilla as rg
 
@@ -124,7 +122,7 @@ async def test_user_delete_user(owner: "ServerUser") -> None:
         user.delete()
 
 
-def test_print_user(owner: "ServerUser"):
+def test_user_repr(owner: "ServerUser") -> None:
     init(api_key=owner.api_key)
 
     assert str(User.me()) == (
