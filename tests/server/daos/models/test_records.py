@@ -29,3 +29,11 @@ def test_metadata_limit():
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         BaseRecordInDB(metadata=dict(a=short_value))
+
+
+def test_metadata_for_protected_fields():
+    long_value = "a" * (settings.metadata_field_length + 1)
+
+    record = BaseRecordInDB(metadata=dict(a=long_value, _protected=long_value))
+    assert record.metadata["a"] == long_value[: settings.metadata_field_length]
+    assert record.metadata["_protected"] == long_value
