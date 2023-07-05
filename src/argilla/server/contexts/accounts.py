@@ -94,7 +94,7 @@ async def delete_workspace(db: "AsyncSession", workspace: Workspace):
     return workspace
 
 
-async def get_user_by_id(db: Session, user_id: UUID) -> Union[User, None]:
+async def get_user_by_id(db: "AsyncSession", user_id: UUID) -> Union[User, None]:
     return await db.get(User, user_id)
 
 
