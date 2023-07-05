@@ -127,9 +127,9 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
         return TaskStatus.default if status is None else status
 
     @validator("metadata", pre=True)
-    def flatten_metadata(cls, metadata: Dict[str, Any]):
+    def parse_metadata(cls, metadata: Dict[str, Any]):
         """
-        A fastapi validator for flatten metadata dictionary
+        A fastapi validator for parsing metadata dictionary
 
         Parameters
         ----------
@@ -142,13 +142,16 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
 
         """
         if metadata:
-            metadata = flatten_dict(metadata, drop_empty=True)
+            metadata_protected = {}
             metadata_parsed = {}
-            for k, value in metadata.items():
+
+            for k, v in metadata.items():
                 if k.startswith(PROTECTED_METADATA_FIELD_PREFIX):
-                    metadata_parsed[k] = value
+                    metadata_protected[k] = v
                 else:
-                    metadata_parsed[k] = limit_value_length(value, settings.metadata_field_length)
+                    metadata_parsed[k] = limit_value_length(v, settings.metadata_field_length)
+
+            metadata_parsed = {**flatten_dict(metadata_parsed, drop_empty=True), **metadata_protected}
 
             if metadata != metadata_parsed:
                 message = (
