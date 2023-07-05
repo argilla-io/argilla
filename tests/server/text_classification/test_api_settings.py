@@ -19,6 +19,7 @@ from argilla.server.commons.models import TaskType
 from starlette.testclient import TestClient
 
 from tests.factories import AnnotatorFactory, WorkspaceFactory
+from tests.helpers import SecuredClient
 
 
 def create_dataset(client, name: str):
@@ -90,10 +91,11 @@ def test_validate_settings_when_logging_data(mocked_client):
     }
 
 
-def test_validate_settings_after_logging(mocked_client):
+def test_validate_settings_after_logging(mocked_client: SecuredClient):
     name = "test_validate_settings_after_logging"
 
     delete(name)
+    create_dataset(mocked_client, name)
     response = log_some_data(mocked_client, name)
     assert response.status_code == 200
 

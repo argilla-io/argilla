@@ -12,17 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from pathlib import Path
+from .dataset import HuggingFaceDatasetMixIn
 
-from huggingface_hub import DatasetCard
-
-TEMPLATE_ARGILLA_DATASET_CARD_PATH = Path(__file__).parent / "argilla_template.md"
-
-
-class ArgillaDatasetCard(DatasetCard):
-    """`ArgillaDatasetCard` has been created similarly to `DatasetCard` from
-    `huggingface_hub` but with a different template. The template is located at
-    `argilla/client/feedback/card/argilla_template.md`.
-    """
-
-    default_template_path = TEMPLATE_ARGILLA_DATASET_CARD_PATH
+__all__ = ["HuggingFaceDatasetMixIn"]

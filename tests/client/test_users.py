@@ -16,13 +16,14 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
-from argilla.client.api import ArgillaSingleton, init
+from argilla.client.api import ArgillaSingleton
+from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 from argilla.client.users import User
 
 if TYPE_CHECKING:
     from argilla.server.models import User as ServerUser
 
-from tests.factories import UserFactory, WorkspaceFactory
+from tests.factories import UserFactory, WorkspaceFactory, WorkspaceUserFactory
 
 
 def test_user_cls_init() -> None:
@@ -40,7 +41,7 @@ def test_user_cls_init() -> None:
 
 
 @pytest.mark.asyncio
-async def test_user_from_name(owner: "ServerUser"):
+async def test_user_from_name(owner: "ServerUser") -> None:
     new_user = await UserFactory.create(username="test_user")
     ArgillaSingleton.init(api_key=owner.api_key)
 
@@ -53,7 +54,7 @@ async def test_user_from_name(owner: "ServerUser"):
 
 
 @pytest.mark.asyncio
-async def test_user_from_id(owner: "ServerUser"):
+async def test_user_from_id(owner: "ServerUser") -> None:
     new_user = await UserFactory.create(username="test_user")
     ArgillaSingleton.init(api_key=owner.api_key)
 
@@ -65,27 +66,10 @@ async def test_user_from_id(owner: "ServerUser"):
         User.from_id(id="00000000-0000-0000-0000-000000000000")
 
 
-@pytest.mark.skip(reason="This behaviour is not yet implemented. Onwer users won't have workspaces through this")
-def test_user_workspaces(owner: "ServerUser"):
-    workspaces = WorkspaceFactory.create_batch(3)
+def test_user_me(owner: "ServerUser") -> None:
+    ArgillaSingleton.init(api_key=owner.api_key)
 
-    import argilla as rg
-
-    rg.init(api_key=owner.api_key)
-
-    user = rg.User.from_name(owner.username)
-
-    assert len(workspaces) == len(user.workspaces)
-    assert [ws.name for ws in workspaces] == user.workspaces
-
-
-def test_user_me(owner: "ServerUser"):
-    import argilla as rg
-
-    rg.init(api_key=owner.api_key)
-
-    user = rg.User.me()
-
+    user = User.me()
     assert user.id == owner.id
     assert user.username == owner.username
 
@@ -124,11 +108,26 @@ async def test_user_delete_user(owner: "ServerUser") -> None:
         user.delete()
 
 
-def test_print_user(owner: "ServerUser"):
-    init(api_key=owner.api_key)
+def test_user_repr(owner: "ServerUser") -> None:
+    ArgillaSingleton.init(api_key=owner.api_key)
 
     assert str(User.me()) == (
         f"User(id={owner.id}, username={owner.username}, role={owner.role.value},"
-        f" workspaces={owner.workspaces}, api_key={owner.api_key}, first_name={owner.first_name}, last_name={owner.last_name},"
-        f" role={owner.role}, inserted_at={owner.inserted_at}, updated_at={owner.updated_at})"
+        f" workspaces={owner.workspaces}, api_key={owner.api_key}, first_name={owner.first_name},"
+        f" last_name={owner.last_name}, role={owner.role}, inserted_at={owner.inserted_at},"
+        f" updated_at={owner.updated_at})"
     )
+
+
+@pytest.mark.asyncio
+async def test_user_workspaces(owner: "ServerUser") -> None:
+    workspaces = await WorkspaceFactory.create_batch(3)
+    for workspace in workspaces:
+        await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
+    ArgillaSingleton.init(api_key=owner.api_key)
+
+    user = User.me()
+    assert isinstance(user.workspaces, list)
+    assert len(user.workspaces) == len(workspaces)
+    assert all(isinstance(workspace, WorkspaceModel) for workspace in user.workspaces)
+    assert [workspace.name for workspace in workspaces] == [workspace.name for workspace in user.workspaces]

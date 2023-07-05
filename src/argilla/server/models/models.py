@@ -15,7 +15,7 @@
 import secrets
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
+from typing import Any, List, Optional
 from uuid import UUID, uuid4
 
 from pydantic import parse_obj_as
@@ -47,6 +47,11 @@ class ResponseStatus(str, Enum):
     discarded = "discarded"
 
 
+class SuggestionType(str, Enum):
+    model = "model"
+    human = "human"
+
+
 class DatasetStatus(str, Enum):
     draft = "draft"
     ready = "ready"
@@ -58,7 +63,12 @@ class UserRole(str, Enum):
     annotator = "annotator"
 
 
-class Field(Base):
+class TimestampMixin:
+    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
+
+
+class Field(TimestampMixin, Base):
     __tablename__ = "fields"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
@@ -67,9 +77,6 @@ class Field(Base):
     required: Mapped[bool] = mapped_column(default=False)
     settings: Mapped[dict] = mapped_column(JSON, default={})
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
-
-    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     dataset: Mapped["Dataset"] = relationship(back_populates="fields")
 
@@ -86,7 +93,7 @@ class Field(Base):
 ResponseStatusEnum = SAEnum(ResponseStatus, name="response_status_enum")
 
 
-class Response(Base):
+class Response(TimestampMixin, Base):
     __tablename__ = "responses"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
@@ -94,9 +101,6 @@ class Response(Base):
     status: Mapped[ResponseStatus] = mapped_column(ResponseStatusEnum, default=ResponseStatus.submitted, index=True)
     record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id", ondelete="CASCADE"), index=True)
     user_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), index=True)
-
-    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     record: Mapped["Record"] = relationship(back_populates="responses")
     user: Mapped["User"] = relationship(back_populates="responses")
@@ -114,7 +118,32 @@ class Response(Base):
         )
 
 
-class Record(Base):
+SuggestionTypeEnum = SAEnum(SuggestionType, name="suggestion_type_enum")
+
+
+class Suggestion(TimestampMixin, Base):
+    __tablename__ = "suggestions"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    value: Mapped[Any] = mapped_column(JSON)
+    score: Mapped[Optional[float]] = mapped_column(nullable=True)
+    agent: Mapped[Optional[str]] = mapped_column(nullable=True)
+    type: Mapped[Optional[SuggestionType]] = mapped_column(SuggestionTypeEnum, nullable=True, index=True)
+    record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id", ondelete="CASCADE"), index=True)
+    question_id: Mapped[UUID] = mapped_column(ForeignKey("questions.id", ondelete="CASCADE"), index=True)
+
+    record: Mapped["Record"] = relationship(back_populates="suggestions")
+    question: Mapped["Question"] = relationship(back_populates="suggestions")
+
+    def __repr__(self) -> str:
+        return (
+            f"Suggestion(id={self.id}, score={self.score}, agent={self.agent}, type={self.type}, "
+            f"record_id={self.record_id}, question_id={self.question_id}, inserted_at={self.inserted_at}, "
+            f"updated_at={self.updated_at})"
+        )
+
+
+class Record(TimestampMixin, Base):
     __tablename__ = "records"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
@@ -123,11 +152,14 @@ class Record(Base):
     external_id: Mapped[Optional[str]] = mapped_column(index=True)
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
 
-    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
-
     dataset: Mapped["Dataset"] = relationship(back_populates="records")
     responses: Mapped[List["Response"]] = relationship(back_populates="record", order_by=Response.inserted_at.asc())
+    suggestions: Mapped[List["Suggestion"]] = relationship(
+        back_populates="record",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Suggestion.inserted_at.asc(),
+    )
 
     __table_args__ = (UniqueConstraint("external_id", "dataset_id", name="record_external_id_dataset_id_uq"),)
 
@@ -138,7 +170,7 @@ class Record(Base):
         )
 
 
-class Question(Base):
+class Question(TimestampMixin, Base):
     __tablename__ = "questions"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
@@ -149,10 +181,13 @@ class Question(Base):
     settings: Mapped[dict] = mapped_column(JSON, default={})
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
 
-    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
-
     dataset: Mapped["Dataset"] = relationship(back_populates="questions")
+    suggestions: Mapped[List["Suggestion"]] = relationship(
+        back_populates="question",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Suggestion.inserted_at.asc(),
+    )
 
     __table_args__ = (UniqueConstraint("name", "dataset_id", name="question_name_dataset_id_uq"),)
 
@@ -171,7 +206,7 @@ class Question(Base):
 DatasetStatusEnum = SAEnum(DatasetStatus, name="dataset_status_enum")
 
 
-class Dataset(Base):
+class Dataset(TimestampMixin, Base):
     __tablename__ = "datasets"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
@@ -179,9 +214,6 @@ class Dataset(Base):
     guidelines: Mapped[Optional[str]] = mapped_column(Text)
     status: Mapped[DatasetStatus] = mapped_column(DatasetStatusEnum, default=DatasetStatus.draft, index=True)
     workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
-
-    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     workspace: Mapped["Workspace"] = relationship(back_populates="datasets")
     fields: Mapped[List["Field"]] = relationship(
@@ -221,15 +253,12 @@ class Dataset(Base):
         )
 
 
-class WorkspaceUser(Base):
+class WorkspaceUser(TimestampMixin, Base):
     __tablename__ = "workspaces_users"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
-
-    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     workspace: Mapped["Workspace"] = relationship(viewonly=True)
     user: Mapped["User"] = relationship(viewonly=True)
@@ -244,14 +273,11 @@ class WorkspaceUser(Base):
         )
 
 
-class Workspace(Base):
+class Workspace(TimestampMixin, Base):
     __tablename__ = "workspaces"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     name: Mapped[str] = mapped_column(unique=True, index=True)
-
-    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     datasets: Mapped[List["Dataset"]] = relationship(back_populates="workspace", order_by=Dataset.inserted_at.asc())
     users: Mapped[List["User"]] = relationship(
@@ -268,7 +294,7 @@ class Workspace(Base):
 UserRoleEnum = SAEnum(UserRole, name="user_role_enum")
 
 
-class User(Base):
+class User(TimestampMixin, Base):
     __tablename__ = "users"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
@@ -278,9 +304,6 @@ class User(Base):
     role: Mapped[UserRole] = mapped_column(UserRoleEnum, default=UserRole.annotator, index=True)
     api_key: Mapped[str] = mapped_column(Text, unique=True, index=True, default=generate_user_api_key)
     password_hash: Mapped[str] = mapped_column(Text)
-
-    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
 
     workspaces: Mapped[List["Workspace"]] = relationship(
         secondary="workspaces_users", back_populates="users", order_by=WorkspaceUser.inserted_at.asc()

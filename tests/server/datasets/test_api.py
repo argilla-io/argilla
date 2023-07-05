@@ -41,6 +41,13 @@ def delete_dataset(client: TestClient, dataset_name: str, workspace: str, header
 def create_mock_dataset(
     client: TestClient, dataset_name: str, headers: Dict[str, Any], workspace: str, records: List = None
 ):
+    response = client.post(
+        "/api/datasets",
+        json={"name": dataset_name, "workspace": workspace, "task": TaskType.text_classification.value},
+        headers=headers,
+    )
+    assert response.status_code == 200
+
     url = f"/api/datasets/{dataset_name}/TextClassification:bulk?workspace={workspace}"
 
     bulk_data = TextClassificationBulkRequest(
@@ -191,16 +198,11 @@ async def test_create_dataset_using_several_workspaces(client: TestClient, role:
 @pytest.mark.parametrize("task", [TaskType.text_classification, TaskType.token_classification, TaskType.text2text])
 @pytest.mark.asyncio
 async def test_dataset_naming_validation(client: TestClient, owner_auth_header: dict, task):
-    request = TextClassificationBulkRequest(records=[])
     dataset_name = "Wrong dataset name"
-
     workspace = await WorkspaceFactory.create()
 
-    response = client.post(
-        f"/api/datasets/{dataset_name}/{task}:bulk?workspace={workspace.name}",
-        json=request.dict(by_alias=True),
-        headers=owner_auth_header,
-    )
+    request = {"name": dataset_name, "task": task.value, "workspace": workspace.name}
+    response = client.post("/api/datasets", json=request, headers=owner_auth_header)
 
     assert response.status_code == 422
     assert response.json() == {
@@ -210,12 +212,12 @@ async def test_dataset_naming_validation(client: TestClient, owner_auth_header: 
                 "errors": [
                     {
                         "ctx": {"pattern": "^(?!-|_)[a-z0-9-_]+$"},
-                        "loc": ["name"],
+                        "loc": ["body", "name"],
                         "msg": "string does not match regex " '"^(?!-|_)[a-z0-9-_]+$"',
                         "type": "value_error.str.regex",
                     }
                 ],
-                "model": "CreateDatasetRequest",
+                "model": "Request",
             },
         }
     }

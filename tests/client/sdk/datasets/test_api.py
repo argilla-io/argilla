@@ -21,7 +21,7 @@ from argilla.client.sdk.commons.errors import (
     ValidationApiError,
 )
 from argilla.client.sdk.datasets.api import _build_response, get_dataset
-from argilla.client.sdk.datasets.models import Dataset
+from argilla.client.sdk.datasets.models import Dataset, TaskType
 from argilla.client.sdk.text_classification.models import TextClassificationBulkData
 from argilla.server.models import UserRole
 
@@ -40,6 +40,13 @@ async def test_get_dataset(role: UserRole):
     api = Argilla(api_key=user.api_key, workspace=workspace.name)
 
     api.delete(dataset_name)
+    assert (
+        api.http_client.httpx.post(
+            "/api/datasets",
+            json={"name": dataset_name, "workspace": workspace.name, "task": TaskType.text_classification.value},
+        ).status_code
+        == 200
+    )
     api.http_client.httpx.post(
         f"/api/datasets/{dataset_name}/TextClassification:bulk", json=bulk_data.dict(by_alias=True)
     )

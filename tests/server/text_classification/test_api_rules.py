@@ -20,6 +20,7 @@ from argilla.server.apis.v0.models.text_classification import (
     TextClassificationBulkRequest,
     TextClassificationRecord,
 )
+from argilla.server.commons.models import TaskType
 
 
 def log_some_records(
@@ -31,6 +32,11 @@ def log_some_records(
 ):
     if delete:
         assert client.delete(f"/api/datasets/{dataset}").status_code == 200
+
+    client.post(
+        "/api/datasets",
+        json={"name": dataset, "task": TaskType.text_classification.value, "workspace": "argilla"},
+    )
 
     record = {
         "id": 0,
