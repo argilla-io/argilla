@@ -18,13 +18,14 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
-## Fixed
-
-- Big number ids are properly rendered in UI (Closes [#3265](https://github.com/argilla-io/argilla/issues/3265))
-
 ## Changed
 
 - Record id for text classification, token classification and text2text datasets are defined as string. Use string values for id's before upgrade to this version
+
+### Fixed
+
+- Using `rg.init` with default `argilla` user skips setting the default workspace if not available. (Closes [#3340](https://github.com/argilla-io/argilla/issues/3340))
+- Big number ids are properly rendered in UI (Closes [#3265](https://github.com/argilla-io/argilla/issues/3265))
 
 ## [1.12.0](https://github.com/argilla-io/argilla/compare/v1.11.0...v1.12.0)
 
