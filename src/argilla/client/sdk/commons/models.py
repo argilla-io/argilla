@@ -57,7 +57,7 @@ class SdkVectorSearch(BaseModel):
 
 
 class BaseRecord(GenericModel, Generic[T]):
-    id: Optional[str] = Field(default_factory=lambda: str(uuid4()))
+    id: Optional[Union[int, str]] = Field(default_factory=lambda: str(uuid4()))
     metadata: Dict[str, Any] = Field(default=None)
     event_timestamp: Optional[datetime] = None
     status: Optional[TaskStatus] = None
