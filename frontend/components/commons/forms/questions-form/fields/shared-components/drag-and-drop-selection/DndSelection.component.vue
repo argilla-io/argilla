@@ -216,6 +216,9 @@ $max-visible-card-items: 12;
       &:focus {
         outline: 2px solid palette(apricot);
       }
+      &:focus:not(:focus-visible) {
+        outline: none;
+      }
     }
     &__title {
       overflow: hidden;
