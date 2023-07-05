@@ -14,12 +14,12 @@
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Security
+from fastapi import APIRouter, Depends, HTTPException, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla.server.contexts import accounts
 from argilla.server.database import get_async_db
-from argilla.server.models import User
+from argilla.server.models import User, UserRole
 from argilla.server.policies import UserPolicyV1, authorize
 from argilla.server.schemas.v1.workspaces import Workspaces
 from argilla.server.security import auth
@@ -35,5 +35,17 @@ async def list_user_workspaces(
     current_user: User = Security(auth.get_current_user),
 ):
     await authorize(current_user, UserPolicyV1.list_workspaces)
-    workspaces = await accounts.list_workspaces_by_user_id(db, user_id)
+
+    user = await accounts.get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with id `{user_id}` not found",
+        )
+
+    if user.is_owner:
+        workspaces = await accounts.list_workspaces(db)
+    else:
+        workspaces = await accounts.list_workspaces_by_user_id(db, user_id)
+
     return Workspaces(items=workspaces)
