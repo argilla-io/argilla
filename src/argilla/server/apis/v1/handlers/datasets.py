@@ -19,7 +19,6 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
-from argilla.server.commons.telemetry import TelemetryClient, get_telemetry_client
 from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_async_db
 from argilla.server.enums import ResponseStatusFilter
@@ -51,6 +50,7 @@ from argilla.server.search_engine import (
     get_search_engine,
 )
 from argilla.server.security import auth
+from argilla.utils.telemetry import TelemetryClient, get_telemetry_client
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
 LIST_DATASET_RECORDS_LIMIT_LTE = 1000

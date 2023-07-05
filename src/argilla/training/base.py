@@ -34,7 +34,7 @@ from argilla.datasets import (
     TokenClassificationSettings,
     load_dataset_settings,
 )
-from argilla.server.commons.telemetry import TelemetryClient
+from argilla.utils.telemetry import get_telemetry_client
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
@@ -45,7 +45,7 @@ if TYPE_CHECKING:
 class ArgillaTrainer(object):
     _logger = logging.getLogger("ArgillaTrainer")
     _logger.setLevel(logging.INFO)
-    _CLIENT = TelemetryClient()
+    _CLIENT = get_telemetry_client()
 
     def __init__(
         self,

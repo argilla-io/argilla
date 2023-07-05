@@ -16,9 +16,7 @@ import uuid
 from unittest.mock import MagicMock
 
 import pytest
-from argilla.server.commons import telemetry
 from argilla.server.commons.models import TaskType
-from argilla.server.commons.telemetry import TelemetryClient, get_telemetry_client
 from argilla.server.errors import (
     EntityAlreadyExistsError,
     EntityNotFoundError,
@@ -26,6 +24,8 @@ from argilla.server.errors import (
     ServerError,
 )
 from argilla.server.schemas.datasets import Dataset
+from argilla.utils import telemetry
+from argilla.utils.telemetry import TelemetryClient, get_telemetry_client
 from fastapi import Request
 
 mock_request = Request(scope={"type": "http", "headers": {}})
