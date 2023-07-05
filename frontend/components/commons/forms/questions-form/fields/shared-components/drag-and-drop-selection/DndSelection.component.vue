@@ -7,17 +7,17 @@
       :sort="false"
     >
       <div
-        v-for="{ text, value } in ranking.questions"
-        :key="value"
+        v-for="item in ranking.questions"
+        :key="item.value"
         class="draggable__rank-card--unranked"
-        :title="text"
+        :title="item.text"
         tabindex="0"
         ref="question"
-        @keydown="rankWithKeyboard($event, value)"
+        @keydown="rankWithKeyboard($event, item)"
         @focus="onFocus"
       >
         <svgicon width="7" name="draggable" />
-        <span class="draggable__rank-card__title" v-text="text" />
+        <span class="draggable__rank-card__title" v-text="item.text" />
       </div>
     </draggable>
 
@@ -37,17 +37,17 @@
           @remove="onMoveEnd"
         >
           <div
-            v-for="{ text, value } in items"
-            :key="value"
+            v-for="item in items"
+            :key="item.value"
             class="draggable__rank-card--ranked"
-            :title="text"
+            :title="item.text"
             tabindex="0"
             ref="items"
-            @keydown="rankWithKeyboard($event, value)"
+            @keydown="rankWithKeyboard($event, item)"
             @focus="onFocus"
           >
             <svgicon width="7" name="draggable" />
-            <span class="draggable__rank-card__title" v-text="text" />
+            <span class="draggable__rank-card__title" v-text="item.text" />
           </div>
         </draggable>
       </div>
@@ -84,7 +84,7 @@ export default {
     },
   },
   methods: {
-    rankWithKeyboard(event, value) {
+    rankWithKeyboard(event, item) {
       const keyCode = event.key;
       const validKeyCodes = [
         { key: "1", rank: 1 },
@@ -109,7 +109,16 @@ export default {
         keysForAvailableRankingSlots.find((item) => item.key === keyCode)
           ?.rank || null;
       if (getRankPosition) {
-        this.$emit("on-keyboard-selection", value, Number(getRankPosition));
+        const selectedItemRank = item.rank;
+        if (!!selectedItemRank) {
+          const rankingWithSelectedExcluded = this.ranking.slots[
+            selectedItemRank - 1
+          ].items.filter((it) => it.id !== item.id);
+          this.ranking.slots[selectedItemRank - 1].items =
+            rankingWithSelectedExcluded;
+        }
+        this.ranking.slots[Number(getRankPosition) - 1].items.push(item);
+        this.$emit("on-reorder", this.ranking);
       }
     },
     onMoveEnd() {

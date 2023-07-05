@@ -8,7 +8,6 @@
     <DndSelectionComponent
       :ranking="ranking"
       @on-reorder="onChanged"
-      @on-keyboard-selection="onChangedWithKeyboard"
       :isFocused="isFocused"
       @on-focus="onFocus"
     />
@@ -65,13 +64,6 @@ export default {
           rank: newQuestionRanked.getRanking(option),
         }))
       );
-    },
-    onChangedWithKeyboard(value, rank) {
-      const optionIndex = this.options.findIndex(
-        (option) => option.value === value
-      );
-      this.options[optionIndex].rank = rank;
-      this.$emit("on-change", this.options);
     },
     onFocus() {
       this.$emit("on-focus");
