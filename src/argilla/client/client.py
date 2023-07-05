@@ -138,7 +138,7 @@ class Argilla:
 
         self._user = users_api.whoami(client=self.http_client)  # .parsed
 
-        if not workspace and self._user.username == DEFAULT_USERNAME:
+        if not workspace and self._user.username == DEFAULT_USERNAME and DEFAULT_USERNAME in self._user.workspaces:
             warnings.warn(
                 "Default user was detected and no workspace configuration was provided,"
                 f" so the default {DEFAULT_USERNAME!r} workspace will be used. If you"
