@@ -55,28 +55,13 @@ export default {
 </script>
 <style lang="scss" scoped>
 .tabs {
+  position: relative;
   display: flex;
   padding: 0;
   list-style: none;
   overflow-y: auto;
   border-bottom: 1px solid $black-10;
   @extend %hide-scrollbar;
-  &:before,
-  &:after {
-    position: absolute;
-    content: "";
-    height: 40px;
-    width: 30px;
-    z-index: 1;
-  }
-  &:before {
-    left: 0;
-    background: linear-gradient(to right, palette(white), transparent 100%);
-  }
-  &:after {
-    right: 0;
-    background: linear-gradient(to left, palette(white), transparent 100%);
-  }
 }
 .tab {
   display: flex;
