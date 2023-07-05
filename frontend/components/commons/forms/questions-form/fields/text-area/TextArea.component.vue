@@ -5,7 +5,12 @@
       :isRequired="isRequired"
       :tooltipMessage="description"
     />
-    <div class="container">
+    <div
+      class="container"
+      @focus="onChangeFocus(true)"
+      @blur="onChangeFocus(false)"
+      :tabindex="isEditionModeActive ? '-1' : '0'"
+    >
       <RenderMarkdownBaseComponent
         v-if="visibleMarkdown"
         class="textarea--markdown"
@@ -69,9 +74,17 @@ export default {
     prop: "value",
     event: "on-change-value",
   },
+  watch: {
+    isFocused: {
+      immediate: true,
+      handler(newValue) {
+        this.isEditionModeActive = newValue;
+      },
+    },
+  },
   computed: {
     visibleMarkdown() {
-      return this.useMarkdown && !this.isEditionModeActive && !this.isFocused;
+      return this.useMarkdown && !this.isEditionModeActive;
     },
   },
   methods: {
@@ -87,8 +100,6 @@ export default {
       this.isEditionModeActive = status;
       if (status) {
         this.$emit("on-focus");
-      } else {
-        this.$emit("on-blur");
       }
     },
   },
