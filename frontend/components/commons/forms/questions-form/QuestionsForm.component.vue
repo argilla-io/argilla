@@ -85,7 +85,6 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :description="input.description"
           v-model="input.options"
-          :key="JSON.stringify(input.options)"
           @on-focus="updateQuestionAutofocus(index)"
         />
       </div>

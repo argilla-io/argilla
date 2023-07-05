@@ -73,13 +73,7 @@ export default {
     isFocused: {
       immediate: true,
       handler(newValue) {
-        this.$nextTick(() => {
-          if (this.$refs.question) {
-            !!newValue && this.$refs.question[0].focus();
-          } else {
-            !!newValue && this.$refs.items[0].focus();
-          }
-        });
+        !!newValue && this.onAutoFocusFirstItem();
       },
     },
   },
@@ -109,16 +103,34 @@ export default {
         keysForAvailableRankingSlots.find((item) => item.key === keyCode)
           ?.rank || null;
       if (getRankPosition) {
-        const selectedItemRank = item.rank;
-        if (selectedItemRank) {
-          const rankingWithSelectedExcluded = this.ranking.slots[
-            selectedItemRank - 1
-          ].items.filter((it) => it.id !== item.id);
-          this.ranking.slots[selectedItemRank - 1].items =
-            rankingWithSelectedExcluded;
+        const slots = this.ranking.slots;
+        const questions = this.ranking.questions;
+        const getIndexInSlot = this.ranking.slots[
+          Number(getRankPosition) - 1
+        ].items.findIndex((it) => it.id === item.id);
+
+        const getIndexInQuestions = questions.findIndex(
+          (q) => q.id === item.id
+        );
+
+        if (getIndexInSlot > -1) {
+          return;
+        } else {
+          if (getIndexInQuestions > -1) {
+            questions.splice(getIndexInQuestions, 1);
+          } else {
+            const getIndexInRanking = slots.findIndex((slot) =>
+              slot.items.some((i) => i.id === item.id)
+            );
+            const getIndexOfElement = slots[getIndexInRanking].items.findIndex(
+              (i) => i.id === item.id
+            );
+            slots[getIndexInRanking].items.splice(getIndexOfElement, 1);
+          }
+          slots[Number(getRankPosition) - 1].items.push(item);
         }
-        this.ranking.slots[Number(getRankPosition) - 1].items.push(item);
         this.$emit("on-reorder", this.ranking);
+        this.onAutoFocusFirstItem();
       }
     },
     onMoveEnd() {
@@ -126,6 +138,15 @@ export default {
     },
     onFocus() {
       this.$emit("on-focus");
+    },
+    onAutoFocusFirstItem() {
+      this.$nextTick(() => {
+        if (this.$refs.question && this.$refs.question[0]) {
+          this.$refs.question[0].focus();
+        } else {
+          this.$refs.items[0].focus();
+        }
+      });
     },
   },
 };
