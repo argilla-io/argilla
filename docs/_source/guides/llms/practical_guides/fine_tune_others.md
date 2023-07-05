@@ -46,12 +46,12 @@ Now we know which unification strategy to apply, we can now define our `Training
 
 :::{tab-item} RatingQuestion
 ```python
-from argilla import FeedbackDataset, TrainingTaskMapping
+import argilla.feedback as rg
 
-dataset = FeedbackDataset.from_huggingface(
+dataset = rg.FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
 )
-task_mapping = TrainingTaskMapping.for_text_classification(
+task_mapping = rg.TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("title"),
     label=dataset.question_by_name("answer_quality"), # RatingQuestion
     label_strategy=None # default to "majority", or use "min", "max", "disagreement"
@@ -61,12 +61,12 @@ task_mapping = TrainingTaskMapping.for_text_classification(
 
 :::{tab-item} LabelQuestion
 ```python
-from argilla import FeedbackDataset, TrainingTaskMapping
+import argilla.feedback as rg
 
-dataset = FeedbackDataset.from_huggingface(
+dataset = rg.FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
 )
-task_mapping = TrainingTaskMapping.for_text_classification(
+task_mapping = rg.TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("title"),
     label=dataset.question_by_name("title_question_fit"), # LabelQuestion
     label_strategy=None # default to "majority", or use "disagreement"
@@ -76,12 +76,12 @@ task_mapping = TrainingTaskMapping.for_text_classification(
 
 :::{tab-item} MultiLabelQuestion
 ```python
-from argilla import FeedbackDataset, TrainingTaskMapping
+import argilla.feedback as rg
 
-dataset = FeedbackDataset.from_huggingface(
+dataset = rg.FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
 )
-task_mapping = TrainingTaskMapping.for_text_classification(
+task_mapping = rg.TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("title"),
     label=dataset.question_by_name("tags"), # MultiLabelQuestion
     label_strategy=None # default to "majority", or use "disagreement"
@@ -108,7 +108,7 @@ dataset = rg.FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
 )
 task_mapping = rg.TrainingTaskMapping.for_text_classification(
-    text=dataset.field_by_name("my_text_field"),
+    text=dataset.field_by_name("title"),
     label=dataset.question_by_name("tags")
 )
 trainer = rg.ArgillaTrainer(

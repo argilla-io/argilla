@@ -17,6 +17,7 @@ from argilla.client.feedback import (
     LabelQuestionStrategy,
     MultiLabelQuestionStrategy,
     RatingQuestionStrategy,
+    TrainingTaskMapping,
 )
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
@@ -36,6 +37,7 @@ __all__ = [
     "LabelQuestionStrategy",
     "MultiLabelQuestionStrategy",
     "RatingQuestionStrategy",
+    "TrainingTaskMapping",
     "FeedbackDataset",
     "FeedbackRecord",
     "LabelQuestion",
