@@ -110,7 +110,7 @@ export default {
           ?.rank || null;
       if (getRankPosition) {
         const selectedItemRank = item.rank;
-        if (!!selectedItemRank) {
+        if (selectedItemRank) {
           const rankingWithSelectedExcluded = this.ranking.slots[
             selectedItemRank - 1
           ].items.filter((it) => it.id !== item.id);
