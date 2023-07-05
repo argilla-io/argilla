@@ -18,6 +18,10 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+### Fixed
+
+- Using `rg.init` with default `argilla` user skips setting the default workspace if not available. (Closes [#3340](https://github.com/argilla-io/argilla/issues/3340))
+
 ## [1.12.0](https://github.com/argilla-io/argilla/compare/v1.11.0...v1.12.0)
 
 ### Added
