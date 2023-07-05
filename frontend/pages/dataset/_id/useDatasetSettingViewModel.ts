@@ -1,6 +1,5 @@
 import {
   onBeforeMount,
-  onMounted,
   ref,
   useRoute,
   useRouter,
