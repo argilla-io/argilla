@@ -82,6 +82,12 @@ In the new Conda environment, _Argilla_ will already be installed in [editable m
 with all the server dependencies. But if you're willing to install any other dependency you can do so via `pip` to install your own, or just
 see the available extras besides the `server` extras, which are: `listeners`, `postgresql`, and `tests`; all those installable as `pip install -e ".[<EXTRA_NAME>]"`.
 
+
+### Running tests
+To make sure there are no breaking changes, you should run all the tests as follows:
+```sh
+pytest tests
+```
 ### Code formatting tools
 
 To keep a consistent code format, we use [pre-commit](https://pre-commit.com) hooks. So on, you first need to install
@@ -96,6 +102,26 @@ Then, you can proceed with the `pre-commit` hooks installation by simply running
 ```sh
 pre-commit install
 ```
+
+### Running Frontend
+
+First, make sure you have Docker installed. If you don't have it installed, please download and install it, using [this guide](../getting_started/quickstart_installation.ipynb#Running-Argilla-Quickstart) as reference.
+
+Run the Argilla backend using Docker with the following command:
+
+```sh
+docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest
+```
+
+Navigate to the `frontend` folder from your project's root directory.
+
+Then, execute the command:
+
+```sh
+npm run dev
+```
+
+To log in, use the username `admin` and the password `12345678`. If you need more information, please check [here](../getting_started/quickstart_installation.ipynb).
 
 ### Building Frontend static files
 
