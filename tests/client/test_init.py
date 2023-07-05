@@ -58,8 +58,9 @@ def test_init(argilla_user: User):
     assert client.user.username == "argilla"
 
 
-def test_init_with_default_user_without_workspaces():
-    argilla_user = UserFactory.create(username="argilla")
+@pytest.mark.asyncio
+async def test_init_with_default_user_without_workspaces():
+    argilla_user = await UserFactory.create(username="argilla")
 
     api.init(api_key=argilla_user.api_key)
     client = active_client()
@@ -70,9 +71,10 @@ def test_init_with_default_user_without_workspaces():
         client.set_workspace("argilla")
 
 
-def test_init_with_default_user_and_different_workspace():
-    workspace = WorkspaceFactory.create()
-    argilla_user = UserFactory.create(username="argilla", workspaces=[workspace])
+@pytest.mark.asyncio
+async def test_init_with_default_user_and_different_workspace():
+    workspace = await WorkspaceFactory.create()
+    argilla_user = await UserFactory.create(username="argilla", workspaces=[workspace])
 
     api.init(api_key=argilla_user.api_key)
     client = active_client()
