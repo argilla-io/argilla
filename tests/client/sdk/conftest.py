@@ -72,8 +72,14 @@ class Helpers:
                     different_props.append(name)
                     continue
                 elif definition != server_props[name]:
-                    if isinstance(definition, dict) and isinstance(server_props[name], dict):
-                        if not check_schema_props(definition, server_props[name]):
+                    server_prop_definition = server_props[name]
+                    if isinstance(definition, dict) and isinstance(server_prop_definition, dict):
+                        if check_schema_props(definition, server_prop_definition):
+                            continue
+                        elif "anyOf" in definition:
+                            if any(map(lambda t: t["type"] == server_prop_definition["type"], definition["anyOf"])):
+                                continue
+                        else:
                             return False
             return len(different_props) < len(client_props) / 2
 
