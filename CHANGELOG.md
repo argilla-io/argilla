@@ -31,11 +31,13 @@ These are the section headers that we use:
 - Added Telemetry support for `ArgillaTrainer` (closes [#3325](https://github.com/argilla-io/argilla/issues/3325))
 - `User.workspaces` is no longer an attribute but a property, and is calling `list_user_workspaces` to list all the workspace names for a given user ID ([#3334](https://github.com/argilla-io/argilla/pull/3334))
 - Renamed `FeedbackDatasetConfig` to `DatasetConfig` and export/import from YAML as default instead of JSON (just used internally on `push_to_huggingface` and `from_huggingface` methods of `FeedbackDataset`) ([#3326](https://github.com/argilla-io/argilla/pull/3326)).
+- The protected metadata fields support other than textual info - existing datasets must be reindex. See [docs](https://docs.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html#elasticsearch) for more detail (Closes [#3332](https://github.com/argilla-io/argilla/issues/3332)).
 
 ### Fixed
 
 - Fixed `GET /api/v1/me/datasets/{dataset_id}/records` endpoint returning always the responses for the records even if `responses` was not provided via the `include` query parameter ([#3304](https://github.com/argilla-io/argilla/pull/3304)).
 - Fixed `sqlalchemy.error.OperationalError` being raised when running the unit tests if the local SQLite database file didn't exist and the migrations hadn't been applied ([#3307](https://github.com/argilla-io/argilla/pull/3307)).
+- Values for protected metadata fields are not truncated (Closes [#3331](https://github.com/argilla-io/argilla/issues/3331)).
 - Using `rg.init` with default `argilla` user skips setting the default workspace if not available. (Closes [#3340](https://github.com/argilla-io/argilla/issues/3340))
 
 ## [1.12.0](https://github.com/argilla-io/argilla/compare/v1.11.0...v1.12.0)
