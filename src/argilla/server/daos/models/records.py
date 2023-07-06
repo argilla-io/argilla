@@ -21,6 +21,7 @@ from pydantic import BaseModel, Field, root_validator, validator
 from pydantic.generics import GenericModel
 
 from argilla import _messages
+from argilla._constants import PROTECTED_METADATA_FIELD_PREFIX
 from argilla.server.commons.models import PredictionStatus, TaskStatus, TaskType
 from argilla.server.daos.backend.search.model import BaseRecordsQuery, SortConfig
 from argilla.server.helpers import flatten_dict
@@ -126,9 +127,9 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
         return TaskStatus.default if status is None else status
 
     @validator("metadata", pre=True)
-    def flatten_metadata(cls, metadata: Dict[str, Any]):
+    def parse_metadata(cls, metadata: Dict[str, Any]):
         """
-        A fastapi validator for flatten metadata dictionary
+        A FastAPI validator for parsing metadata dictionary
 
         Parameters
         ----------
@@ -141,20 +142,25 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
 
         """
         if metadata:
-            metadata = flatten_dict(metadata, drop_empty=True)
-            new_metadata = limit_value_length(
-                data=metadata,
-                max_length=settings.metadata_field_length,
-            )
+            metadata_protected = {}
+            metadata_parsed = {}
 
-            if metadata != new_metadata:
+            for k, v in metadata.items():
+                if k.startswith(PROTECTED_METADATA_FIELD_PREFIX):
+                    metadata_protected[k] = v
+                else:
+                    metadata_parsed[k] = limit_value_length(v, settings.metadata_field_length)
+
+            metadata_parsed = {**flatten_dict(metadata_parsed, drop_empty=True), **metadata_protected}
+
+            if metadata != metadata_parsed:
                 message = (
                     "Some metadata values exceed the max length. Those values will be"
                     f" truncated by keeping only the last {settings.metadata_field_length} characters. "
                     + _messages.ARGILLA_METADATA_FIELD_WARNING_MESSAGE
                 )
                 warnings.warn(message, UserWarning)
-                metadata = new_metadata
+                metadata = metadata_parsed
         return metadata
 
     @classmethod

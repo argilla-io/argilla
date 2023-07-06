@@ -11,12 +11,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import uuid
 from typing import TYPE_CHECKING
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.models import UserRole
+from argilla.server.models import User, UserRole
 
 from tests.factories import UserFactory, WorkspaceFactory
 
@@ -45,6 +45,24 @@ class TestsUsersV1Endpoints:
             ]
         }
 
+    async def test_list_user_workspaces_for_owner(self, client: "TestClient"):
+        workspaces = await WorkspaceFactory.create_batch(5)
+        owner = await UserFactory.create(role=UserRole.owner)
+
+        response = client.get(f"/api/v1/users/{owner.id}/workspaces", headers={API_KEY_HEADER_NAME: owner.api_key})
+        assert response.status_code == 200
+        assert response.json() == {
+            "items": [
+                {
+                    "id": str(workspace.id),
+                    "name": workspace.name,
+                    "inserted_at": workspace.inserted_at.isoformat(),
+                    "updated_at": workspace.updated_at.isoformat(),
+                }
+                for workspace in workspaces
+            ]
+        }
+
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
     async def test_list_user_workspaces_as_restricted_user(self, client: "TestClient", role: UserRole):
         workspaces = await WorkspaceFactory.create_batch(3)
@@ -56,3 +74,7 @@ class TestsUsersV1Endpoints:
         )
 
         assert response.status_code == 403
+
+    async def test_list_user_for_non_existing_user(self, client: "TestClient", owner_auth_header: dict):
+        response = client.get(f"/api/v1/users/{uuid.uuid4()}/workspaces", headers=owner_auth_header)
+        assert response.status_code == 404

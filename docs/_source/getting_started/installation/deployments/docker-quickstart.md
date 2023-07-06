@@ -8,13 +8,11 @@ To get started you just need to run the docker image with the following command:
   docker run -d --network argilla-net --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest
 ```
 
-<div class="alert alert-warning">
-
-Apple Silicon Issues
+```{warning}
 
 Apple Silicon M1/M2 users might have issues with this deployment. To resolve this, use the `--platform linux/arm64` parameter. If this doesn't work, deploying separate images or via docker-compose will work.
 
-</div>
+```
 
 This will run the latest quickstart docker image with 3 users `owner`, `admin` and `argilla`. The password for these users is `12345678`. You can also configure these [environment variables](#environment-variables) as per your needs.
 

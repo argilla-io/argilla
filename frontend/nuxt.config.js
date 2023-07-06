@@ -16,7 +16,7 @@
  */
 
 const LOCAL_ENVIRONMENT = "http://localhost:6900";
-const BASE_URL = process.env.BASE_URL ?? LOCAL_ENVIRONMENT;
+const BASE_URL = process.env.API_BASE_URL ?? LOCAL_ENVIRONMENT;
 const DIST_FOLDER = process.env.DIST_FOLDER || "dist";
 
 export default {
@@ -173,7 +173,7 @@ export default {
 
   router: {
     middleware: ["auth-guard"],
-    base: process.env.BASE_URL ? process.env.BASE_URL : "/",
+    base: process.env.BASE_URL ?? "/",
   },
 
   publicRuntimeConfig: {
