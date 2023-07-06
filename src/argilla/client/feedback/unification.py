@@ -18,12 +18,14 @@ from collections import Counter
 from enum import Enum
 from typing import Any, Dict, List, Union
 
+import pandas as pd
 from pydantic import BaseModel, root_validator, validator
 
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     LabelQuestion,
     MultiLabelQuestion,
+    RankingQuestion,
     RatingQuestion,
     ValueSchema,
 )
@@ -122,6 +124,91 @@ class RatingQuestionStrategy(Enum):
             else:
                 majority_value = counter.most_common(1)[0][0]
             rec._unified_responses[question] = [UnifiedValueSchema(value=majority_value, strategy=self.value)]
+        return records
+
+
+class RankingQuestionStrategy(Enum):
+    """
+    Options:
+        - "mean": the mean value of the rankings
+        - "majority": the majority value of the rankings
+        - "max": the max value of the rankings
+        - "min": the min value of the rankings
+    """
+
+    MEAN: str = "mean"
+    MAJORITY: str = "majority"
+    MAX: str = "max"
+    MIN: str = "min"
+
+    def unify_responses(self, records: List[FeedbackRecord], question: RankingQuestion):
+        UnifiedValueSchema.update_forward_refs()
+        # check if field is a str or a RankingQuestion
+        if isinstance(question, str):
+            pass
+        elif isinstance(question, RankingQuestion):
+            question = question.name
+        else:
+            raise ValueError("Invalid field type. Must be a str or RankingQuestion")
+        # choose correct unification method
+        if self.value == self.MAJORITY.value:
+            return self._majority(records, question)
+        else:
+            return self._aggregate(records, question)
+
+    def _aggregate(self, records: List[FeedbackRecord], question: str):
+        for rec in records:
+            if not rec.responses:
+                continue
+            # only allow for submitted responses
+            responses = [resp for resp in rec.responses if resp.status == "submitted"]
+            # get responses with a value that is most frequent
+            ratings = []
+            for resp in responses:
+                if question in resp.values:
+                    for idx, value in enumerate(resp.values[question].value):
+                        ratings.append([value, idx])
+            if not ratings:
+                continue
+            df = pd.DataFrame(ratings, columns=["value", "rank"])
+            # unified response
+            if self.value == self.MEAN.value:
+                df = df.groupby("value").mean().reset_index(drop=True)
+            elif self.value == self.MAX.value:
+                df = df.groupby("value").max().reset_index(drop=True)
+            elif self.value == self.MIN.value:
+                df = df.groupby("value").min().reset_index(drop=True)
+            else:
+                raise ValueError("Invalid aggregation method")
+            unified_value = random.choice(df["value"].tolist())
+            rec._unified_responses[question] = [UnifiedValueSchema(value=unified_value, strategy=self.value)]
+        return records
+
+    def _majority(self, records: List[FeedbackRecord], question: str):
+        UnifiedValueSchema.update_forward_refs()
+        for rec in records:
+            if not rec.responses:
+                continue
+            counter = Counter()
+            # only allow for submitted responses
+            responses = [resp for resp in rec.responses if resp.status == "submitted"]
+            # get responses with a value that is most frequent
+            for resp in responses:
+                if question in resp.values:
+                    for idx, value in resp.values[question].value:
+                        [counter.update([value]) for _ in range(idx)]
+            if not counter.values():
+                continue
+            # Find the minimum count
+            min_count = min(counter.values())
+            # Get a list of values with the minimum count
+            least_common_values = [value for value, count in counter.items() if count == min_count]
+            if len(least_common_values) > 1:
+                majority_value = random.choice(least_common_values)
+            else:
+                majority_value = counter.most_common()[-1][0]
+            rec._unified_responses[question] = [UnifiedValueSchema(value=majority_value, strategy=self.value)]
+
         return records
 
 
