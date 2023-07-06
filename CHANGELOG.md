@@ -28,6 +28,7 @@ These are the section headers that we use:
 - Updated output payload for `GET /api/v1/datasets/{dataset_id}/records`, `GET /api/v1/me/datasets/{dataset_id}/records`, `POST /api/v1/me/datasets/{dataset_id}/records/search` endpoints to include the suggestions of the records based on the value of the `include` query parameter ([#3304](https://github.com/argilla-io/argilla/pull/3304)).
 - Updated `POST /api/v1/datasets/{dataset_id}/records` input payload to add suggestions ([#3304](https://github.com/argilla-io/argilla/pull/3304)).
 - The `POST /api/datasets/:dataset-id/:task/bulk` endpoint don't create the dataset if does not exists (Closes [#3244](https://github.com/argilla-io/argilla/issues/3244))
+- Added Telemetry support for `ArgillaTrainer` (closes [#3325](https://github.com/argilla-io/argilla/issues/3325))
 - `User.workspaces` is no longer an attribute but a property, and is calling `list_user_workspaces` to list all the workspace names for a given user ID ([#3334](https://github.com/argilla-io/argilla/pull/3334))
 - Renamed `FeedbackDatasetConfig` to `DatasetConfig` and export/import from YAML as default instead of JSON (just used internally on `push_to_huggingface` and `from_huggingface` methods of `FeedbackDataset`) ([#3326](https://github.com/argilla-io/argilla/pull/3326)).
 
