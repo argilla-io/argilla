@@ -16,7 +16,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Set, TypeVar, Union
 
 from pydantic import BaseModel
-from sqlalchemy import sql
+from sqlalchemy import func, sql
 from sqlalchemy.dialects.mysql import insert as mysql_insert
 from sqlalchemy.dialects.postgresql import insert as postgres_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
@@ -87,7 +87,7 @@ class CRUDMixin:
         objects: List[Schema],
         constraints: List["InstrumentedAttribute[Any]"],
         autocommit: bool = True,
-    ):
+    ) -> List[Self]:
         if len(objects) == 0:
             raise ValueError("Cannot upsert empty list of objects")
         values = [obj.dict() for obj in objects]
@@ -96,19 +96,31 @@ class CRUDMixin:
         insert_stmt = _INSERT_FUNC[db.bind.dialect.name](cls).values(values)
 
         # On conflict, update the columns that are upsertable (defined in `Model.__upsertable_columns__`)
-        upsert_stmt = insert_stmt.on_conflict_do_update(
-            index_elements=constraints,
-            set_={column: getattr(insert_stmt.excluded, column) for column in cls.__upsertable_columns__},
+        upsert_stmt = (
+            insert_stmt.on_conflict_do_update(
+                index_elements=constraints,
+                set_={column: getattr(insert_stmt.excluded, column) for column in cls.__upsertable_columns__},
+            )
+            .returning(cls)
+            .execution_options(populate_existing=True)
         )
 
         result = await db.execute(upsert_stmt)
+        if autocommit:
+            await db.commit()
 
-        # if autocommit:
-        #     await db.commit()
+        return result.scalars().all()
 
     @classmethod
-    async def upsert(cls, db: "AsyncSession", schema: Schema, autocommit: bool = True) -> Self:
-        return await cls.upsert_many(db, [schema], autocommit)
+    async def upsert(
+        cls,
+        db: "AsyncSession",
+        schema: Schema,
+        constraints: List["InstrumentedAttribute[Any]"],
+        autocommit: bool = True,
+    ) -> Self:
+        upserted = await cls.upsert_many(db, [schema], constraints, autocommit)
+        return upserted[0]
 
     async def remove(self, db: "AsyncSession", autocommit: bool = True) -> Self:
         await db.delete(self)
@@ -123,10 +135,6 @@ class CRUDMixin:
         return self
 
 
-def default_inserted_at(context):
-    return context.get_current_parameters()["inserted_at"]
-
-
 class TimestampMixin:
-    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default=default_inserted_at, onupdate=datetime.utcnow)
+    inserted_at: Mapped[datetime] = mapped_column(default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(default=func.now(), onupdate=func.now())
