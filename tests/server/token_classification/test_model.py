@@ -95,7 +95,7 @@ def test_model_dict():
     )
 
     assert record.dict(exclude_none=True) == {
-        "id": "1",
+        "id": 1,
         "metrics": {},
         "prediction": {
             "agent": "test",
@@ -128,7 +128,7 @@ def test_model_with_predictions():
         }
     )
     assert record.dict(exclude_none=True) == {
-        "id": "1",
+        "id": 1,
         "metrics": {},
         "prediction": {
             "agent": "test",

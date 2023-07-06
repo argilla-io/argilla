@@ -376,7 +376,7 @@ def test_create_records_for_token_classification_vector_search(
 
     assert "This" in results.aggregations.predicted_mentions[entity_label]
     assert "This" in results.aggregations.mentions[entity_label]
-    expected_record_ids = ["1", "2", "0"]
+    expected_record_ids = [1, 2, 0]
     for index, record in enumerate(results.records):
         assert metrics_validator(record)
         assert expected_record_ids[index] == record.id

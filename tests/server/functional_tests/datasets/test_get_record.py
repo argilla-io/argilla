@@ -109,7 +109,7 @@ def test_get_record_by_id(mocked_client, task, expected_record_class):
 
     assert response.status_code == 200
     record = expected_record_class.parse_obj(response.json())
-    assert record.id == str(record_id)
+    assert record.id == record_id
 
 
 @pytest.mark.parametrize(

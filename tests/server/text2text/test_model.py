@@ -41,7 +41,7 @@ def test_sentences_sorted_by_score():
 
 def test_model_dict():
     record = Text2TextRecord(
-        id="0",
+        id=0,
         text="The input text",
         prediction=Text2TextAnnotation(
             agent="test_sentences_sorted_by_score",
@@ -53,7 +53,7 @@ def test_model_dict():
         ),
     )
     assert record.dict(exclude_none=True) == {
-        "id": "0",
+        "id": 0,
         "metrics": {},
         "prediction": {
             "agent": "test_sentences_sorted_by_score",
@@ -95,7 +95,7 @@ def test_model_with_predictions():
         }
     )
     assert record.dict(exclude_none=True) == {
-        "id": "0",
+        "id": 0,
         "metrics": {},
         "prediction": {
             "agent": "test_sentences_sorted_by_score",
