@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Optional
 import pytest
 from argilla.server.models.base import DatabaseModel
 from pydantic import BaseModel
-from sqlalchemy import inspect
+from sqlalchemy import inspect, select
 from sqlalchemy.orm import Mapped, mapped_column
 
 if TYPE_CHECKING:
@@ -102,3 +102,8 @@ class TestDatabaseModel:
         )
         assert model.str_col == "unit-test-updated"
         assert model.int_col == 2
+
+    async def test_database_model_delete(self, db: "AsyncSession"):
+        model = await Model.create(db, str_col="unit-test", int_col=1, autocommit=True)
+        model = await model.delete(db)
+        assert (await db.execute(select(Model).filter_by(id=model.id))).scalar_one_or_none() is None
