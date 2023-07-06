@@ -34,6 +34,7 @@
     "@pinia/nuxt": "^0.2.1",
     "@vuex-orm/core": "^0.36.4",
     "@vuex-orm/plugin-axios": "^0.9.3",
+    "axios": "^1.4.0",
     "core-js": "^3.6.5",
     "dompurify": "^3.0.3",
     "frontmatter-markdown-loader": "^3.7.0",

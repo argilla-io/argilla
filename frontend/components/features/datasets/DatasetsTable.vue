@@ -36,6 +36,11 @@ export default {
       required: true,
     },
   },
+  created() {
+    this.datasets.forEach((dataset) => {
+      dataset.link = this.getDatasetLinkPage(dataset);
+    });
+  },
   data() {
     return {
       querySearch: undefined,
@@ -143,6 +148,23 @@ export default {
     },
   },
   methods: {
+    getDatasetLinkPage(dataset) {
+      if (this.isOldTask(dataset.task))
+        return {
+          name: "datasets-workspace-dataset",
+          params: {
+            dataset: dataset.name,
+            workspace: dataset.workspace,
+          },
+        };
+
+      return {
+        name: "dataset-id-annotation-mode",
+        params: {
+          id: dataset.id,
+        },
+      };
+    },
     clearFilters() {
       if (this.$refs.table) {
         this.activeFilters.forEach((filter) => {
