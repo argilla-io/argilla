@@ -39,13 +39,19 @@ def test_creating_index_with_non_searchable_metadata(engine: GenericElasticEngin
     engine.create_dataset(
         id=dataset_id,
         task=TaskType.text_classification,
-        metadata_values={"a": "value", "other": "value", "_this": "is non searchable"},
+        metadata_values={
+            "a": "value",
+            "other": "value",
+            "_this": "is non searchable",
+            "_other": "other disabled field",
+        },
         force_recreate=True,
     )
 
     # Check the schema definition
     schema = engine.get_schema(dataset_id)
-    assert schema["mappings"]["properties"]["metadata"]["properties"]["_this"] == {"type": "text", "index": False}
+    assert schema["mappings"]["properties"]["metadata"]["properties"]["_this"] == {"type": "object", "enabled": False}
+    assert schema["mappings"]["properties"]["metadata"]["properties"]["_other"] == {"type": "object", "enabled": False}
 
 
 def test_non_searchable_docs_are_not_present_in_metrics(engine: GenericElasticEngineBackend, dataset_id: str):
@@ -67,10 +73,18 @@ def test_non_searchable_fields_are_present_in_documents(engine: GenericElasticEn
     engine.create_dataset(
         id=dataset_id,
         task=TaskType.text_classification,
-        metadata_values={"a": "value", "other": "value", "_this": "is non searchable"},
+        metadata_values={
+            "a": "value",
+            "other": "value",
+            "_this": "is non searchable",
+            "_other": "other disabled field",
+        },
         force_recreate=True,
     )
-    documents = [{"id": f"{i:03d}", "text": "This is my text", "metadata": {"_this": "value"}} for i in range(0, 100)]
+    documents = [
+        {"id": f"{i:03d}", "text": "This is my text", "metadata": {"_this": "value", "_other": {"with": "key"}}}
+        for i in range(0, 100)
+    ]
 
     assert engine.add_dataset_records(dataset_id, documents=documents) == 0
 
@@ -83,14 +97,18 @@ def test_non_searchable_fields_cannot_be_used_for_search(engine: GenericElasticE
     engine.create_dataset(
         id=dataset_id,
         task=TaskType.text_classification,
-        metadata_values={"a": "value", "other": "value", "_this": "is non searchable"},
+        metadata_values={"a": "value", "_protected": "is non searchable", "non_protected": "normal field"},
         force_recreate=True,
     )
-    documents = [{"id": f"{i:03d}", "text": "This is my text", "metadata": {"_this": "value"}} for i in range(0, 100)]
+    documents = [
+        {"id": f"{i:03d}", "text": "This is my text", "metadata": {"_protected": "value", "non_protected": "value"}}
+        for i in range(0, 100)
+    ]
 
     assert engine.add_dataset_records(dataset_id, documents=documents) == 0
 
-    with pytest.raises(
-        InvalidTextSearchError, match=r"Cannot search on field \[metadata._this\] since it is not indexed"
-    ):
-        engine.search_records(id=dataset_id, query=BaseRecordsQuery(query_text="metadata._this:value"))
+    total, _ = engine.search_records(id=dataset_id, query=BaseRecordsQuery(query_text="metadata.non_protected:value"))
+    assert total == 100
+
+    total, _ = engine.search_records(id=dataset_id, query=BaseRecordsQuery(query_text="metadata._protected:value"))
+    assert total == 0
