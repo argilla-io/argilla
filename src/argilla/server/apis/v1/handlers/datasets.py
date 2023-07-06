@@ -25,8 +25,8 @@ from argilla.server.enums import ResponseStatusFilter
 from argilla.server.models import Dataset as DatasetModel
 from argilla.server.models import ResponseStatus, User
 from argilla.server.policies import DatasetPolicyV1, authorize
-from argilla.server.schemas.v1.common import BulkDelete, BulkDeleteResponse
 from argilla.server.schemas.v1.datasets import (
+    BulkDelete,
     Dataset,
     DatasetCreate,
     Datasets,
@@ -301,7 +301,7 @@ async def create_dataset_records(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
 
-@router.post("/datasets/{dataset_id}/records/bulk-delete", response_model=BulkDeleteResponse)
+@router.post("/datasets/{dataset_id}/records/bulk-delete", status_code=status.HTTP_204_NO_CONTENT)
 async def bulk_delete_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
@@ -313,11 +313,7 @@ async def bulk_delete_dataset_records(
 
     await authorize(current_user, DatasetPolicyV1.bulk_delete_records(dataset))
 
-    deleted_records_ids = await datasets.bulk_delete_records(db, dataset=dataset, records_ids=bulk_delete.ids)
-
-    return BulkDeleteResponse(
-        deleted=deleted_records_ids, not_deleted=list(set(bulk_delete.ids) - set(deleted_records_ids))
-    )
+    await datasets.bulk_delete_records(db, dataset=dataset, records_ids=bulk_delete.ids)
 
 
 @router.post(

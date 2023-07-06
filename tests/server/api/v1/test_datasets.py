@@ -2810,10 +2810,7 @@ async def test_bulk_delete_dataset_records(client: TestClient, db: "AsyncSession
         json={"ids": records_ids + random_uuids},
     )
 
-    assert response.status_code == 200
-    response_json = response.json()
-    assert all([record_id in response_json["deleted"] for record_id in records_ids])
-    assert all([record_id in response_json["not_deleted"] for record_id in random_uuids])
+    assert response.status_code == 204
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
 
@@ -2835,10 +2832,8 @@ async def test_bulk_delete_records_from_another_dataset(
         json={"ids": records_ids_a + records_ids_b},
     )
 
-    assert response.status_code == 200
-    response_json = response.json()
-    assert all([record_id in response_json["deleted"] for record_id in records_ids_a])
-    assert all([record_id in response_json["not_deleted"] for record_id in records_ids_b])
+    assert response.status_code == 204
+    assert (await db.execute(select(func.count(Record.id)))).scalar() == 10
 
 
 @pytest.mark.asyncio

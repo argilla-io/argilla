@@ -387,3 +387,7 @@ class SearchRecord(BaseModel):
 class SearchRecordsResult(BaseModel):
     items: List[SearchRecord]
     total: int = 0
+
+
+class BulkDelete(BaseModel):
+    ids: List[UUID]
