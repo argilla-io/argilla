@@ -301,11 +301,11 @@ def test_cast_record_id():
         record = TextClassificationRecord(text="This is a text", id=record_id)
         assert record.id == record_id
         assert (
-            "Integer ids won't be supported in future versions. We recommend start using "
-            "strings instead. For dataset already containing integer values, you can take "
-            "a look into the docs section to migrate them. See "
+            "Integer ids won't be supported in future versions. We recommend to start using strings instead. "
+            "For datasets already containing integer values we recommend migrating them to avoid deprecation issues."
+            "See https://docs.argilla.io/en/latest/getting_started/installation/configurations"
             "https://docs.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html"
-            "#elasticsearch"
+            "/database_migrations.html#elasticsearch"
         ) in [str(warn.message) for warn in warn_record]
 
 
@@ -317,7 +317,7 @@ def test_big_integer_record_id():
         record = TextClassificationRecord(text="This is a text", id=record_id)
         assert record.id == record_id
         assert (
-            "You've provided a big integer value. Use a string instead, otherwise may experiment with some "
+            "You've provided a big integer value. Use a string instead, otherwise you may experience some "
             "problems using the UI. See "
             "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER"
         ) in [str(warn.message) for warn in warn_record]

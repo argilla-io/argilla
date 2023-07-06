@@ -118,16 +118,16 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
     def _normalize_id(cls, v):
         if isinstance(v, int):
             message = (
-                f"Integer ids won't be supported in future versions. We recommend start using strings instead. "
-                "For dataset already containing integer values, you can take a look into the docs section "
-                "to migrate them. See https://docs.argilla.io/en/latest/getting_started/installation/configurations"
+                f"Integer ids won't be supported in future versions. We recommend to start using strings instead. "
+                "For datasets already containing integer values we recommend migrating them to avoid deprecation issues."
+                "See https://docs.argilla.io/en/latest/getting_started/installation/configurations"
                 "/database_migrations.html#elasticsearch"
             )
             warnings.warn(message, DeprecationWarning)
             # See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
             if v > _JS_MAX_SAFE_INTEGER:
                 message = (
-                    "You've provided a big integer value. Use a string instead, otherwise may experiment with some "
+                    "You've provided a big integer value. Use a string instead, otherwise you may experience some "
                     "problems using the UI. See "
                     "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number"
                     "/MAX_SAFE_INTEGER"
