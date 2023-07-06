@@ -57,7 +57,7 @@ EmbeddingDB = TypeVar("EmbeddingDB", bound=BaseEmbeddingVectorDB)
 
 
 class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
-    id: Optional[Union[conint(strict=True), constr(strict=True)]] = Field(default=None)
+    id: Optional[Union[conint(strict=True), constr(strict=True)]] = None
     metadata: Dict[str, Any] = Field(default=None)
     event_timestamp: Optional[datetime] = None
     status: Optional[TaskStatus] = None

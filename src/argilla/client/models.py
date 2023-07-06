@@ -290,7 +290,7 @@ class TextClassificationRecord(_Validators):
     multi_label: bool = False
     explanation: Optional[Dict[str, List[TokenAttributions]]] = None
 
-    id: Optional[Union[constr(strict=True), conint(strict=True)]] = None
+    id: Optional[Union[int, str]] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     status: Optional[str] = None
     event_timestamp: Optional[datetime.datetime] = None
@@ -392,7 +392,7 @@ class TokenClassificationRecord(_Validators):
     annotation_agent: Optional[str] = None
     vectors: Optional[Vectors] = None
 
-    id: Optional[Union[constr(strict=True), conint(strict=True)]] = None
+    id: Optional[Union[int, str]] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     status: Optional[str] = None
     event_timestamp: Optional[datetime.datetime] = None
@@ -598,7 +598,7 @@ class Text2TextRecord(_Validators):
     annotation_agent: Optional[str] = None
     vectors: Optional[Vectors] = None
 
-    id: Optional[Union[constr(strict=True), conint(strict=True)]] = None
+    id: Optional[Union[int, str]] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     status: Optional[str] = None
     event_timestamp: Optional[datetime.datetime] = None
