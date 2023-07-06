@@ -239,8 +239,6 @@ class ArgillaTrainer(object):
         self._track_trainer_usage(framework=framework, task=self._rg_dataset_type._RECORD_TYPE.__name__)
 
     def _track_trainer_usage(self, framework: str, task: str):
-        if not self._CLIENT:
-            return
         self._CLIENT.track_data(action="ArgillaTrainerUsage", data={"framework": framework, "task": task})
 
     def __repr__(self) -> str:
