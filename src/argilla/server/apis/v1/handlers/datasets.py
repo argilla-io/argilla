@@ -119,7 +119,7 @@ async def list_current_user_dataset_records(
     db: AsyncSession = Depends(get_async_db),
     dataset_id: UUID,
     include: List[RecordInclude] = Query([], description="Relationships to include in the response"),
-    response_status: Optional[ResponseStatusFilter] = Query(None),
+    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
@@ -129,7 +129,13 @@ async def list_current_user_dataset_records(
     await authorize(current_user, DatasetPolicyV1.get(dataset))
 
     records = await datasets.list_records_by_dataset_id_and_user_id(
-        db, dataset_id, current_user.id, include=include, response_status=response_status, offset=offset, limit=limit
+        db,
+        dataset_id,
+        current_user.id,
+        include=include,
+        response_statuses=response_statuses,
+        offset=offset,
+        limit=limit,
     )
 
     return Records(items=records)
@@ -314,7 +320,7 @@ async def search_dataset_records(
     dataset_id: UUID,
     query: SearchRecordsQuery,
     include: List[RecordInclude] = Query([]),
-    response_status: Optional[ResponseStatusFilter] = Query(None),
+    response_status: List[ResponseStatusFilter] = Query([]),
     offset: int = Query(0, ge=0),
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
