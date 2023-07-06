@@ -173,7 +173,7 @@ export default {
 
   router: {
     middleware: ["auth-guard"],
-    base: process.env.BASE_URL ? process.env.BASE_URL : "/",
+    base: process.env.BASE_URL ?? "/",
   },
 
   publicRuntimeConfig: {
