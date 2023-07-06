@@ -23,4 +23,9 @@ from argilla.server.models.mixins import CRUDMixin, TimestampMixin
 class DatabaseModel(DeclarativeBase, AsyncAttrs, CRUDMixin, TimestampMixin):
     __abstract__ = True
 
+    # Required in order to access columns with server defaults or SQL expression defaults, subsequent to a flush, without
+    # triggering an expired load
+    # https://docs.sqlalchemy.org/en/14/orm/extensions/asyncio.html#preventing-implicit-io-when-using-asyncsession
+    __mapper_args__ = {"eager_defaults": True}
+
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
