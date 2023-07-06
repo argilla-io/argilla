@@ -14,16 +14,14 @@
 #  limitations under the License.
 import httpx
 import pytest
-from argilla._constants import DEFAULT_API_KEY
 from argilla.client.client import Argilla
-from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors import (
     GenericApiError,
     NotFoundApiError,
     ValidationApiError,
 )
 from argilla.client.sdk.datasets.api import _build_response, get_dataset
-from argilla.client.sdk.datasets.models import Dataset
+from argilla.client.sdk.datasets.models import Dataset, TaskType
 from argilla.client.sdk.text_classification.models import TextClassificationBulkData
 from argilla.server.models import UserRole
 
@@ -31,16 +29,24 @@ from tests.factories import UserFactory, WorkspaceFactory
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-def test_get_dataset(role: UserRole):
+@pytest.mark.asyncio
+async def test_get_dataset(role: UserRole):
     # create test dataset
     bulk_data = TextClassificationBulkData(records=[])
     dataset_name = "test_dataset"
 
-    workspace = WorkspaceFactory.create()
-    user = UserFactory.create(role=role, workspaces=[workspace])
+    workspace = await WorkspaceFactory.create()
+    user = await UserFactory.create(role=role, workspaces=[workspace])
     api = Argilla(api_key=user.api_key, workspace=workspace.name)
 
     api.delete(dataset_name)
+    assert (
+        api.http_client.httpx.post(
+            "/api/datasets",
+            json={"name": dataset_name, "workspace": workspace.name, "task": TaskType.text_classification.value},
+        ).status_code
+        == 200
+    )
     api.http_client.httpx.post(
         f"/api/datasets/{dataset_name}/TextClassification:bulk", json=bulk_data.dict(by_alias=True)
     )

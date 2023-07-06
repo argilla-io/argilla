@@ -15,6 +15,7 @@
 from typing import Callable
 
 import pytest
+from argilla import User
 from argilla.server.apis.v0.models.commons.model import BulkResponse, SortableField
 from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationBulkRequest,
@@ -23,13 +24,22 @@ from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationSearchRequest,
     TokenClassificationSearchResults,
 )
+from argilla.server.commons.models import TaskType
 
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
+from tests.helpers import SecuredClient
 
 
-def test_load_as_different_task(mocked_client):
+def test_load_as_different_task(mocked_client: SecuredClient, argilla_user: User):
     dataset = "test_load_as_different_task"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            "/api/datasets",
+            json={"name": dataset, "workspace": argilla_user.username, "task": TaskType.token_classification.value},
+        ).status_code
+        == 200
+    )
     expected_text = "This is a text with !"
     records = [
         TokenClassificationRecord.parse_obj(data)
@@ -63,9 +73,16 @@ def test_load_as_different_task(mocked_client):
     }
 
 
-def test_search_special_characters(mocked_client):
+def test_search_special_characters(mocked_client: SecuredClient, argilla_user: User):
     dataset = "test_search_special_characters"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            "/api/datasets",
+            json={"name": dataset, "workspace": argilla_user.username, "task": TaskType.token_classification.value},
+        ).status_code
+        == 200
+    )
     expected_text = "This is a text with !"
     records = [
         TokenClassificationRecord.parse_obj(data)
@@ -102,9 +119,16 @@ def test_search_special_characters(mocked_client):
     assert results.total == 1
 
 
-def test_some_sort(mocked_client):
+def test_some_sort(mocked_client: SecuredClient, argilla_user: User):
     dataset = "test_some_sort"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            "/api/datasets",
+            json={"name": dataset, "workspace": argilla_user.username, "task": TaskType.token_classification.value},
+        ).status_code
+        == 200
+    )
     expected_text = "This is a text with !"
     records = [
         TokenClassificationRecord.parse_obj(data)
@@ -154,9 +178,18 @@ def test_some_sort(mocked_client):
         (None, lambda r: len(r.metrics) == 0),
     ],
 )
-def test_create_records_for_token_classification(mocked_client, include_metrics: bool, metrics_validator: Callable):
+def test_create_records_for_token_classification(
+    mocked_client: SecuredClient, argilla_user: User, include_metrics: bool, metrics_validator: Callable
+):
     dataset = "test_create_records_for_token_classification"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            "/api/datasets",
+            json={"name": dataset, "workspace": argilla_user.username, "task": TaskType.token_classification.value},
+        ).status_code
+        == 200
+    )
     entity_label = "TEST"
     expected_records = 2
     record = {
@@ -229,12 +262,20 @@ def test_create_records_for_token_classification(mocked_client, include_metrics:
     ],
 )
 def test_create_records_for_token_classification_vector_search(
-    mocked_client,
+    mocked_client: SecuredClient,
+    argilla_user: User,
     include_metrics: bool,
     metrics_validator: Callable,
 ):
     dataset = "test_create_records_for_token_classification_vector_search"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            "/api/datasets",
+            json={"name": dataset, "workspace": argilla_user.username, "task": TaskType.token_classification.value},
+        ).status_code
+        == 200
+    )
     entity_label = "TEST"
     expected_records = 3
     record_dicts = [
@@ -342,9 +383,16 @@ def test_create_records_for_token_classification_vector_search(
         assert hasattr(record, "vectors")
 
 
-def test_multiple_mentions_in_same_record(mocked_client):
+def test_multiple_mentions_in_same_record(mocked_client: SecuredClient, argilla_user: User):
     dataset = "test_multiple_mentions_in_same_record"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            "/api/datasets",
+            json={"name": dataset, "workspace": argilla_user.username, "task": TaskType.token_classification.value},
+        ).status_code
+        == 200
+    )
     entity_a, entity_b = ("TESTA", "TESTB")
 
     records = [
@@ -406,9 +454,16 @@ def test_multiple_mentions_in_same_record(mocked_client):
     assert results.aggregations.predicted_mentions[entity_b]["is"] == 1
 
 
-def test_show_not_aggregable_metadata_fields(mocked_client):
+def test_show_not_aggregable_metadata_fields(mocked_client: SecuredClient, argilla_user: User):
     dataset = "test_show_not_aggregable_metadata_fields"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            "/api/datasets",
+            json={"name": dataset, "workspace": argilla_user.username, "task": TaskType.token_classification.value},
+        ).status_code
+        == 200
+    )
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:bulk",
@@ -452,7 +507,7 @@ def test_show_not_aggregable_metadata_fields(mocked_client):
     assert "argilla:stats" in results.aggregations.metadata["field_one"]
 
 
-def test_search_with_raw_query(mocked_client):
+def test_search_with_raw_query(mocked_client: SecuredClient):
     dataset = log_some_data_for_token_classification(mocked_client)
 
     raw_es_query_matching_all = {
@@ -482,10 +537,16 @@ def test_search_with_raw_query(mocked_client):
     assert len(results.records) == 3
 
 
-def log_some_data_for_token_classification(mocked_client):
+def log_some_data_for_token_classification(mocked_client: SecuredClient):
     dataset = "log_some_data_for_token_classification"
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
-
+    assert (
+        mocked_client.post(
+            "/api/datasets",
+            json={"name": dataset, "workspace": "argilla", "task": TaskType.token_classification.value},
+        ).status_code
+        == 200
+    )
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:bulk",
         json=TokenClassificationBulkRequest(

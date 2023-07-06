@@ -25,6 +25,8 @@ from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationBulkRequest,
     TokenClassificationRecord,
 )
+from argilla.server.commons.models import TaskType
+from argilla.server.models import User
 from argilla.server.services.metrics.models import CommonTasksMetrics
 from argilla.server.services.tasks.text_classification.metrics import (
     TextClassificationMetrics,
@@ -33,11 +35,13 @@ from argilla.server.services.tasks.token_classification.metrics import (
     TokenClassificationMetrics,
 )
 
+from tests.helpers import SecuredClient
+
 COMMON_METRICS_LENGTH = len(CommonTasksMetrics.metrics)
 CLASSIFICATION_METRICS_LENGTH = len(TextClassificationMetrics.metrics)
 
 
-def test_wrong_dataset_metrics(mocked_client):
+def test_wrong_dataset_metrics(mocked_client: SecuredClient, argilla_user: User):
     text = "This is a text"
     records = [
         Text2TextRecord.parse_obj(data)
@@ -52,6 +56,13 @@ def test_wrong_dataset_metrics(mocked_client):
     dataset = "test_wrong_dataset_metrics"
 
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            "/api/datasets",
+            json={"name": dataset, "task": TaskType.text2text.value, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
     assert (
         mocked_client.post(
             f"/api/datasets/{dataset}/Text2Text:bulk",
@@ -83,7 +94,7 @@ def test_wrong_dataset_metrics(mocked_client):
     }
 
 
-def test_dataset_for_text2text(mocked_client):
+def test_dataset_for_text2text(mocked_client: SecuredClient, argilla_user: User):
     text = "This is a text"
     records = [
         Text2TextRecord.parse_obj(data)
@@ -100,6 +111,13 @@ def test_dataset_for_text2text(mocked_client):
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     assert (
         mocked_client.post(
+            "/api/datasets",
+            json={"name": dataset, "task": TaskType.text2text.value, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
+    assert (
+        mocked_client.post(
             f"/api/datasets/{dataset}/Text2Text:bulk",
             json=request.dict(by_alias=True),
         ).status_code
@@ -110,7 +128,7 @@ def test_dataset_for_text2text(mocked_client):
     assert len(metrics) == COMMON_METRICS_LENGTH
 
 
-def test_dataset_for_token_classification(mocked_client):
+def test_dataset_for_token_classification(mocked_client: SecuredClient, argilla_user: User):
     text = "This is a contaminated text"
     metadata = {"metadata": {"field": 1}}
     prediction = {"prediction": {"entities": [], "agent": "test", "score": 0.3}}
@@ -128,7 +146,13 @@ def test_dataset_for_token_classification(mocked_client):
     dataset = "test_dataset_for_token_classification"
 
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
-
+    assert (
+        mocked_client.post(
+            "/api/datasets",
+            json={"name": dataset, "task": TaskType.token_classification.value, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
     assert (
         mocked_client.post(
             f"/api/datasets/{dataset}/TokenClassification:bulk",
@@ -154,7 +178,7 @@ def test_dataset_for_token_classification(mocked_client):
             assert summary, (metric_id, summary)
 
 
-def test_dataset_metrics(mocked_client):
+def test_dataset_metrics(mocked_client: SecuredClient, argilla_user: User):
     records = [
         TextClassificationRecord.parse_obj(data)
         for data in [
@@ -176,7 +200,13 @@ def test_dataset_metrics(mocked_client):
     dataset = "test_get_dataset_metrics"
 
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
-
+    assert (
+        mocked_client.post(
+            "/api/datasets",
+            json={"name": dataset, "task": TaskType.text_classification.value, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
     assert (
         mocked_client.post(
             f"/api/datasets/{dataset}/TextClassification:bulk",
@@ -210,10 +240,16 @@ def test_dataset_metrics(mocked_client):
         assert response.status_code == 200, f"{metric}: {response.json()}"
 
 
-def create_some_classification_data(mocked_client, dataset: str, records: list):
+def create_some_classification_data(mocked_client: SecuredClient, dataset: str, records: list):
     request = TextClassificationBulkRequest(records=[TextClassificationRecord.parse_obj(r) for r in records])
 
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
+    assert (
+        mocked_client.post(
+            "/api/datasets", json={"name": dataset, "task": TaskType.text_classification.value, "workspace": "argilla"}
+        ).status_code
+        == 200
+    )
     assert (
         mocked_client.post(
             f"/api/datasets/{dataset}/TextClassification:bulk",
@@ -223,7 +259,7 @@ def create_some_classification_data(mocked_client, dataset: str, records: list):
     )
 
 
-def test_labeling_rule_metric(mocked_client):
+def test_labeling_rule_metric(mocked_client: SecuredClient):
     dataset = "test_labeling_rule_metric"
     create_some_classification_data(
         mocked_client, dataset, records=[{"inputs": {"text": "This is classification record"}}] * 10
@@ -242,7 +278,7 @@ def test_labeling_rule_metric(mocked_client):
     }
 
 
-def test_dataset_labels_for_text_classification(mocked_client):
+def test_dataset_labels_for_text_classification(mocked_client: SecuredClient, argilla_user: User):
     records = [
         TextClassificationRecord.parse_obj(data)
         for data in [
@@ -277,7 +313,13 @@ def test_dataset_labels_for_text_classification(mocked_client):
     dataset = "test_dataset_labels_for_text_classification"
 
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
-
+    assert (
+        mocked_client.post(
+            "/api/datasets",
+            json={"name": dataset, "task": TaskType.text_classification.value, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
     assert (
         mocked_client.post(
             f"/api/datasets/{dataset}/TextClassification:bulk",
