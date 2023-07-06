@@ -96,6 +96,7 @@ async def create_user(
         raise EntityAlreadyExistsError(name=user_create.username, type=User)
 
     user = await accounts.create_user(db, user_create)
+    await user.awaitable_attrs.workspaces
 
     return User.from_orm(user)
 
