@@ -394,6 +394,7 @@ async def create_response(
     )
 
     try:
+        await db.flush([response])
         await search_engine.update_record_response(response)
         await db.commit()
     except Exception:
@@ -408,7 +409,7 @@ async def update_response(
 ):
     validate_response_values(response.record.dataset, values=response_update.values, status=response_update.status)
 
-    await response.update(
+    response = await response.update(
         db, values=jsonable_encoder(response_update.values), status=response_update.status, autocommit=False
     )
 
