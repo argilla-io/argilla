@@ -129,7 +129,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
     @validator("metadata", pre=True)
     def parse_metadata(cls, metadata: Dict[str, Any]):
         """
-        A fastapi validator for parsing metadata dictionary
+        A FastAPI validator for parsing metadata dictionary
 
         Parameters
         ----------
