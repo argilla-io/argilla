@@ -62,6 +62,7 @@ task_mapping = TrainingTaskMapping.for_text_classification(
 :::{tab-item} LabelQuestion
 ```python
 from argilla.feedback import FeedbackDataset, TrainingTaskMapping
+
 dataset = FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
 )
@@ -139,7 +140,14 @@ dataset.prepare_for_training(
 Underneath, you can also find an end-to-end example of how to use the `ArgillaTrainer`.
 
 ```python
-from argilla.feedback as FeedbackDataset, TextField, LabelQuestion, FeedbackRecord, TrainingTaskMapping, ArgillaTrainer
+from argilla.feedback import (
+    ArgillaTrainer,
+    FeedbackDataset,
+    FeedbackRecord,
+    LabelQuestion,
+    TextField,
+    TrainingTaskMapping,
+)
 
 dataset = FeedbackDataset(
     guidelines="Add some guidelines for the annotation team here.",
@@ -147,7 +155,7 @@ dataset = FeedbackDataset(
         TextField(name="text", title="Human prompt"),
     ],
     questions =[
-        rg.LabelQuestion(
+        rLabelQuestion(
             name="relevant",
             title="Is the response relevant for the given prompt?",
             labels=["yes","no"],
