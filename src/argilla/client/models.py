@@ -25,7 +25,15 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 from deprecated import deprecated
-from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
+from pydantic import (
+    BaseModel,
+    Field,
+    PrivateAttr,
+    conint,
+    constr,
+    root_validator,
+    validator,
+)
 
 from argilla import _messages
 from argilla._constants import (
@@ -33,6 +41,8 @@ from argilla._constants import (
     PROTECTED_METADATA_FIELD_PREFIX,
 )
 from argilla.utils.span_utils import SpanUtils
+
+_JS_MAX_SAFE_INTEGER = 9007199254740991
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -107,7 +117,25 @@ class _Validators(BaseModel):
         return v
 
     @validator("id", check_fields=False, always=True)
-    def _none_to_generated_uid64(cls, v):
+    def _normalize_id(cls, v):
+        if isinstance(v, int):
+            message = (
+                f"Integer ids won't be supported in future versions. We recommend start using strings instead. "
+                "For dataset already containing integer values, you can take a look into the docs section "
+                "to migrate them. See https://docs.argilla.io/en/latest/getting_started/installation/configurations"
+                "/database_migrations.html#elasticsearch"
+            )
+            warnings.warn(message, DeprecationWarning)
+            # See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
+            if v > _JS_MAX_SAFE_INTEGER:
+                message = (
+                    "You've provided a big integer value. Use a string instead, otherwise may experiment with some "
+                    "problems using the UI. See "
+                    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number"
+                    "/MAX_SAFE_INTEGER"
+                )
+                warnings.warn(message, UserWarning)
+
         if v is None:
             return str(uuid.uuid4())
         return v
@@ -263,7 +291,7 @@ class TextClassificationRecord(_Validators):
     multi_label: bool = False
     explanation: Optional[Dict[str, List[TokenAttributions]]] = None
 
-    id: Optional[Union[int, str]] = None
+    id: Optional[Union[constr(strict=True), conint(strict=True)]] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     status: Optional[str] = None
     event_timestamp: Optional[datetime.datetime] = None
@@ -365,7 +393,7 @@ class TokenClassificationRecord(_Validators):
     annotation_agent: Optional[str] = None
     vectors: Optional[Vectors] = None
 
-    id: Optional[Union[int, str]] = None
+    id: Optional[Union[constr(strict=True), conint(strict=True)]] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     status: Optional[str] = None
     event_timestamp: Optional[datetime.datetime] = None
@@ -571,7 +599,7 @@ class Text2TextRecord(_Validators):
     annotation_agent: Optional[str] = None
     vectors: Optional[Vectors] = None
 
-    id: Optional[Union[int, str]] = None
+    id: Optional[Union[constr(strict=True), conint(strict=True)]] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     status: Optional[str] = None
     event_timestamp: Optional[datetime.datetime] = None

@@ -292,3 +292,37 @@ def test_record_validation_on_assignment(record):
 
     with pytest.raises(ValidationError):
         record.vectors = "rubbish"
+
+
+def test_cast_record_id():
+    record_id = 1000
+
+    with pytest.warns(DeprecationWarning) as warn_record:
+        record = TextClassificationRecord(text="This is a text", id=record_id)
+        assert record.id == record_id
+        assert (
+            "Integer ids won't be supported in future versions. We recommend start using "
+            "strings instead. For dataset already containing integer values, you can take "
+            "a look into the docs section to migrate them. See "
+            "https://docs.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html"
+            "#elasticsearch"
+        ) in [str(warn.message) for warn in warn_record]
+
+
+def test_big_integer_record_id():
+    import random
+
+    record_id = random.getrandbits(64)
+    with pytest.warns(UserWarning) as warn_record:
+        record = TextClassificationRecord(text="This is a text", id=record_id)
+        assert record.id == record_id
+        assert (
+            "You've provided a big integer value. Use a string instead, otherwise may experiment with some "
+            "problems using the UI. See "
+            "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER"
+        ) in [str(warn.message) for warn in warn_record]
+
+
+def test_create_record_with_wrong_id_type():
+    with pytest.raises(ValidationError):
+        TextClassificationRecord(text="This is a text", id=uuid.uuid4())

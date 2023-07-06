@@ -17,7 +17,7 @@ from datetime import datetime
 from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
 from uuid import uuid4
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, Field, conint, constr, root_validator, validator
 from pydantic.generics import GenericModel
 
 from argilla import _messages
@@ -57,7 +57,7 @@ EmbeddingDB = TypeVar("EmbeddingDB", bound=BaseEmbeddingVectorDB)
 
 
 class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
-    id: Optional[str] = Field(default=None)
+    id: Optional[Union[conint(strict=True), constr(strict=True)]] = Field(default=None)
     metadata: Dict[str, Any] = Field(default=None)
     event_timestamp: Optional[datetime] = None
     status: Optional[TaskStatus] = None
@@ -115,11 +115,19 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
         return values
 
     @validator("id", always=True, pre=True)
-    def default_id_if_none_provided(cls, id: Optional[str]) -> str:
+    def _normalize_id(cls, v):
         """Validates id info and sets a random uuid if not provided"""
-        if id is None:
+        if isinstance(v, int):
+            message = (
+                f"Integer ids won't be supported in future versions. We recommend start using strings instead. "
+                "For dataset already containing integer values, you can take a look into the docs section "
+                "to migrate them. See https://docs.argilla.io/en/latest/getting_started/installation/configurations"
+                "/database_migrations.html#elasticsearch"
+            )
+            warnings.warn(message, DeprecationWarning)
+        if v is None:
             return str(uuid4())
-        return id
+        return v
 
     @validator("status", always=True)
     def fill_default_value(cls, status: TaskStatus):
