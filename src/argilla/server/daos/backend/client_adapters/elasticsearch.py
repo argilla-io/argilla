@@ -23,6 +23,7 @@ try:
     import elasticsearch8 as elasticsearch
     from elasticsearch8 import (
         ApiError,
+        ConnectionError,
         Elasticsearch,
         ElasticsearchWarning,
         NotFoundError,
@@ -35,6 +36,7 @@ except ModuleNotFoundError:
     import elasticsearch
     from elasticsearch import (
         ApiError,
+        ConnectionError,
         Elasticsearch,
         ElasticsearchWarning,
         NotFoundError,

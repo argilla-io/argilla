@@ -14,7 +14,18 @@
 import logging
 from typing import Tuple, Type, Union
 
-from opensearchpy import OpenSearch
+from opensearchpy import (
+    ConnectionError as OpenSearchConnectionError,
+)
+from opensearchpy import (
+    NotFoundError as OpenSearchNotFoundError,
+)
+from opensearchpy import (
+    OpenSearch,
+)
+from opensearchpy import (
+    RequestError as OpenSearchRequestError,
+)
 from packaging.version import parse
 
 from argilla.server.daos.backend.base import GenericSearchError
@@ -23,8 +34,22 @@ from argilla.server.daos.backend.client_adapters import (
     IClientAdapter,
     OpenSearchClient,
 )
-from argilla.server.daos.backend.client_adapters.elasticsearch import Elasticsearch
+from argilla.server.daos.backend.client_adapters.elasticsearch import (
+    ApiError as ElasticSearchApiError,
+)
+from argilla.server.daos.backend.client_adapters.elasticsearch import (
+    ConnectionError as ElasticConnectionError,
+)
+from argilla.server.daos.backend.client_adapters.elasticsearch import (
+    Elasticsearch,
+)
 from argilla.server.settings import settings
+
+ELASTICSEARCH_DISTRIBUTION = "elasticsearch"
+OPENSEARCH_DISTRIBUTION = "opensearch"
+
+_DEFAULT_DISTRIBUTION = OPENSEARCH_DISTRIBUTION
+_DEFAULT_VERSION = "2.0"
 
 _LOGGER = logging.getLogger("argilla")
 
@@ -48,7 +73,7 @@ class ClientAdapterFactory:
             client_config.update(settings.opensearch_extra_args)
             client = OpenSearch(**client_config)
 
-        version, distribution = cls._fetch_cluster_version_info(client)
+        distribution, version = cls._fetch_cluster_version_info(client)
         client.close()
 
         (adapter_class, support_vector_search) = cls._resolve_adapter_class_with_vector_support(version, distribution)
@@ -63,7 +88,7 @@ class ClientAdapterFactory:
     def _resolve_adapter_class_with_vector_support(cls, version: str, distribution: str) -> Tuple[Type, bool]:
         support_vector_search = True
 
-        if distribution == "elasticsearch" and parse("8.5") <= parse(version):
+        if distribution == ELASTICSEARCH_DISTRIBUTION and parse("8.5") <= parse(version):
             if parse("8.5") <= parse(ElasticsearchClient.ES_CLIENT_VERSION):
                 adapter_class = ElasticsearchClient
             else:
@@ -74,7 +99,7 @@ class ClientAdapterFactory:
                 )
                 adapter_class = OpenSearchClient
                 support_vector_search = False
-        elif distribution == "opensearch" and parse("2.2") <= parse(version):
+        elif distribution == OPENSEARCH_DISTRIBUTION and parse("2.2") <= parse(version):
             adapter_class = OpenSearchClient
         else:
             adapter_class = OpenSearchClient
@@ -91,6 +116,13 @@ class ClientAdapterFactory:
             version: str = version_info["number"]
             distribution: str = version_info.get("distribution", "elasticsearch")
 
-            return version, distribution
+            return distribution, version
+        except (ElasticSearchApiError, OpenSearchNotFoundError, OpenSearchRequestError) as error:
+            default = (_DEFAULT_DISTRIBUTION, _DEFAULT_VERSION)
+            _LOGGER.warning(
+                f"Cannot identify version and distribution from connected backend. Error: {error}.\n"
+                f"Using default one: {default!r}"
+            )
+            return default
         except Exception as error:
             raise GenericSearchError(error)
