@@ -6,14 +6,13 @@ class Datasets {
   constructor(public readonly datasets: Dataset[] = []) {}
 }
 
-const useDatasetsStore = useStoreFor<Datasets, IDatasetsStorage>(Datasets);
-
+const useStoreForDatasets = useStoreFor<Datasets, IDatasetsStorage>(Datasets);
 export const useDatasets = () => {
-  const internalStore = useDatasetsStore();
+  const datasetsStore = useStoreForDatasets();
 
   const save = (datasets: Dataset[]) => {
-    internalStore.save(new Datasets(datasets));
+    datasetsStore.save(new Datasets(datasets));
   };
 
-  return { ...internalStore, save };
+  return { ...datasetsStore, save };
 };

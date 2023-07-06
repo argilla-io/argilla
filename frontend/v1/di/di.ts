@@ -10,11 +10,9 @@ import { GetDatasetByIdUseCase } from "../domain/usecases/get-dataset-by-id-use.
 export const loadDependencyContainer = (context: Context) => {
   const useAxios = () => context.$axios;
   const useStore = () => context.store;
-  const dependencies: Registration[] = [
-    register("axios").withImplementation(useAxios).build(),
-    register("store").withImplementation(useStore).build(),
 
-    register(DatasetRepository).withDependency("axios").and("store").build(),
+  const dependencies: Registration[] = [
+    register(DatasetRepository).withDependency(useAxios).and(useStore).build(),
 
     register(GetDatasetsUseCase)
       .withDependency(DatasetRepository)
