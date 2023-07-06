@@ -2,6 +2,10 @@
 
 Argilla nicely integrates with the Hugging Face stack (`datasets`, `transformers`, `hub`, and `setfit`), and now it can also be deployed using the Hub's Spaces.
 
+```{warning}
+HuggingFace Spaces now have persistent storage and this is supported from Argilla 1.11.0 onwards, but you will need to manually activate it via the HuggingFace Spaces settings. Otherwise, unless you're on a paid space upgrade, after 48 hours of inactivity the space will be shut off and you will lose all the data. To avoid losing data, we highly recommend using the persistent storage layer offered by HuggingFace.
+```
+
 In this guide, you'll learn to deploy your own Argilla app and use it for data labeling workflows right from the Hub.
 
 ## Your first Argilla Space

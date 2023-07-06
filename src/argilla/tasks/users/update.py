@@ -32,7 +32,7 @@ def update(
     ),
 ):
     with SessionLocal() as session:
-        user = accounts.get_user_by_username(session, username)
+        user = accounts.get_user_by_username_sync(session, username)
 
         if not user:
             typer.echo(f"User with username {username!r} does not exists in database. Skipping...")

@@ -14,7 +14,7 @@
 
 import argilla as rg
 import pytest
-from argilla.client.api import active_api
+from argilla.client.api import active_api, load
 from argilla.client.sdk.token_classification.models import TokenClassificationRecord
 
 
@@ -32,7 +32,7 @@ def test_scan_records(gutenberg_spacy_ner, fields):
     )
 
     df = pd.DataFrame(data=data).set_index("id", drop=True)
-    ds = rg.load(gutenberg_spacy_ner)
+    ds = load(gutenberg_spacy_ner)
     assert len(df) == len(ds)
     assert set([c for c in df.columns]) == fields
     print(df)
@@ -80,7 +80,7 @@ def test_scan_fail_negative_limit(
 
 
 @pytest.mark.parametrize(("limit"), [6, 23, 20])
-@pytest.mark.parametrize(("load_method"), [lambda: active_api().datasets.scan, lambda: rg.load])
+@pytest.mark.parametrize(("load_method"), [lambda: active_api().datasets.scan, lambda: load])
 def test_scan_efficient_limiting(
     monkeypatch: pytest.MonkeyPatch,
     limit,

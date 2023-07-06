@@ -11,6 +11,11 @@ There are two ways to train custom models on top of your annotated data:
 1. Train models using the Argilla training module, which is quick and easy but does not offer specific customization.
 2. Train with a custom workflow using the prepare for training methods, which requires some configuration but also offers more flexibility to integrate with your existing training workflows.
 
+
+````{note}
+For training models with the `FeedbackDataset` take a look [here](/guides/llms/practical_guides/practical_guides).
+````
+
 ## Train directly
 
 This is, quick and easy but does not offer specific customizations.

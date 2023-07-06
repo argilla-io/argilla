@@ -22,7 +22,7 @@ As shown in the sections below, this dataset can be loaded into Argilla as expla
 
 This dataset contains:
 
-* A dataset configuration file conforming to the Argilla dataset format named `argilla.cfg`. This configuration file will be used to configure the dataset when using the `FeedbackDataset.from_huggingface` method in Argilla.
+* A dataset configuration file conforming to the Argilla dataset format named `argilla.yaml`. This configuration file will be used to configure the dataset when using the `FeedbackDataset.from_huggingface` method in Argilla.
 
 * Dataset records in a format compatible with HuggingFace `datasets`. These records will be loaded automatically when using `FeedbackDataset.from_huggingface` and can be loaded independently using the `datasets` library via `load_dataset`.
 

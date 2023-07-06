@@ -16,13 +16,14 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
-from argilla.client.api import ArgillaSingleton
+from argilla.client.api import ArgillaSingleton, init
 from argilla.client.workspaces import Workspace
+
+from tests.factories import WorkspaceFactory, WorkspaceUserFactory
 
 if TYPE_CHECKING:
     from argilla.server.models import User as ServerUser
-
-from tests.factories import WorkspaceFactory, WorkspaceUserFactory
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 
 def test_workspace_cls_init() -> None:
@@ -39,9 +40,10 @@ def test_workspace_cls_init() -> None:
         Workspace(id="00000000-0000-0000-0000-000000000000")
 
 
-def test_workspace_from_name(owner: "ServerUser"):
-    workspace = WorkspaceFactory.create(name="test_workspace")
-    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
+@pytest.mark.asyncio
+async def test_workspace_from_name(owner: "ServerUser"):
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+    await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
     ArgillaSingleton.init(api_key=owner.api_key)
 
     found_workspace = Workspace.from_name(workspace.name)
@@ -52,8 +54,9 @@ def test_workspace_from_name(owner: "ServerUser"):
         Workspace.from_name("non-existing-workspace")
 
 
-def test_workspace_from_id(owner: "ServerUser"):
-    workspace = WorkspaceFactory.create(name="test_workspace")
+@pytest.mark.asyncio
+async def test_workspace_from_id(owner: "ServerUser"):
+    workspace = await WorkspaceFactory.create(name="test_workspace")
     ArgillaSingleton.init(api_key=owner.api_key)
 
     found_workspace = Workspace.from_id(workspace.id)
@@ -82,16 +85,18 @@ def test_workspace_create(owner: "ServerUser") -> None:
     assert any(ws["name"] == "test_workspace" for ws in workspaces)
 
 
-def test_workspace_list(owner: "ServerUser") -> None:
-    WorkspaceFactory.create(name="test_workspace")
+@pytest.mark.asyncio
+async def test_workspace_list(owner: "ServerUser") -> None:
+    await WorkspaceFactory.create(name="test_workspace")
     ArgillaSingleton.init(api_key=owner.api_key)
 
     workspaces = Workspace.list()
     assert any(ws.name == "test_workspace" for ws in workspaces)
 
 
-def test_workspace_add_user(owner: "ServerUser") -> None:
-    workspace = WorkspaceFactory.create(name="test_workspace")
+@pytest.mark.asyncio
+async def test_workspace_add_user(owner: "ServerUser") -> None:
+    workspace = await WorkspaceFactory.create(name="test_workspace")
     ArgillaSingleton.init(api_key=owner.api_key)
 
     workspace = Workspace.from_name("test_workspace")
@@ -109,9 +114,10 @@ def test_workspace_add_user(owner: "ServerUser") -> None:
     assert any(user.username == owner.username for user in workspace.users)
 
 
-def test_workspace_delete_user(owner: "ServerUser") -> None:
-    workspace = WorkspaceFactory.create(name="test_workspace")
-    WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
+@pytest.mark.asyncio
+async def test_workspace_delete_user(owner: "ServerUser", db: "AsyncSession") -> None:
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+    await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
     ArgillaSingleton.init(api_key=owner.api_key)
 
     workspace = Workspace.from_name("test_workspace")
@@ -122,3 +128,52 @@ def test_workspace_delete_user(owner: "ServerUser") -> None:
 
     with pytest.raises(ValueError, match="Either the user with id="):
         workspace.delete_user(owner.id)
+
+
+@pytest.mark.asyncio
+async def test_print_workspace(owner: "ServerUser"):
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+
+    init(api_key=owner.api_key)
+
+    assert str(Workspace.from_name(workspace.name)) == (
+        f"Workspace(id={workspace.id}, name={workspace.name}, "
+        f"inserted_at={workspace.inserted_at}, updated_at={workspace.updated_at})"
+    )
+
+
+def test_set_new_workspace(owner: "ServerUser"):
+    import argilla as rg
+
+    rg.init(api_key=owner.api_key)
+    ws = rg.Workspace.create("new-workspace")
+
+    rg.set_workspace(ws.name)
+    assert rg.get_workspace() == ws.name
+
+
+@pytest.mark.asyncio
+async def test_init_with_workspace(owner: "ServerUser"):
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+
+    import argilla as rg
+
+    rg.init(api_key=owner.api_key, workspace=workspace.name)
+
+    assert rg.get_workspace() == workspace.name
+
+
+def test_set_workspace_with_missing_workspace(owner: "ServerUser"):
+    import argilla as rg
+
+    rg.init(api_key=owner.api_key)
+
+    with pytest.raises(ValueError):
+        rg.set_workspace("missing-workspace")
+
+
+def test_init_with_missing_workspace(owner: "ServerUser"):
+    import argilla as rg
+
+    with pytest.raises(ValueError):
+        rg.init(api_key=owner.api_key, workspace="missing-workspace")

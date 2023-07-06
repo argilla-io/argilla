@@ -8,6 +8,10 @@ Here we provide some guides for the development of _Argilla_.
 
 Argilla supports ElasticSearch and OpenSearch as his main search engine. One of the two is required to correctly run Argilla in your development environment.
 
+:::{note}
+Argilla supports ElasticSearch versions 8.8, 8.5, 8.0, and 7.17 and OpenSearch versions 1.3 and 2.3.
+:::
+
 For more information please visit our [Setup and Installation](../getting_started/installation/deployments/deployments.md) section.
 
 ### SQLite
@@ -29,7 +33,7 @@ git clone https://github.com/[your-github-username]/argilla.git
 cd argilla
 ```
 
-To keep your fork's master branch up to date with our repo you should add it as an
+To keep your fork's main/develop branch up to date with our repo you should add it as an
 [upstream remote branch](https://dev.to/louhayes3/git-add-an-upstream-to-a-forked-repo-1mik>):
 
 ```sh
@@ -78,6 +82,12 @@ In the new Conda environment, _Argilla_ will already be installed in [editable m
 with all the server dependencies. But if you're willing to install any other dependency you can do so via `pip` to install your own, or just
 see the available extras besides the `server` extras, which are: `listeners`, `postgresql`, and `tests`; all those installable as `pip install -e ".[<EXTRA_NAME>]"`.
 
+
+### Running tests
+To make sure there are no breaking changes, you should run all the tests as follows:
+```sh
+pytest tests
+```
 ### Code formatting tools
 
 To keep a consistent code format, we use [pre-commit](https://pre-commit.com) hooks. So on, you first need to install
@@ -93,11 +103,25 @@ Then, you can proceed with the `pre-commit` hooks installation by simply running
 pre-commit install
 ```
 
-Install the `commit-msg` hook if you want to check your commit messages too:
+### Running Frontend
+
+First, make sure you have Docker installed. If you don't have it installed, please download and install it, using [this guide](../getting_started/quickstart_installation.ipynb#Running-Argilla-Quickstart) as reference.
+
+Run the Argilla backend using Docker with the following command:
 
 ```sh
-pre-commit install --hook-type commit-msg
+docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest
 ```
+
+Navigate to the `frontend` folder from your project's root directory.
+
+Then, execute the command:
+
+```sh
+npm run dev
+```
+
+To log in, use the username `admin` and the password `12345678`. If you need more information, please check [here](../getting_started/quickstart_installation.ipynb).
 
 ### Building Frontend static files
 

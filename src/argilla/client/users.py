@@ -25,6 +25,8 @@ from argilla.client.sdk.commons.errors import (
 )
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import UserCreateModel, UserModel, UserRole
+from argilla.client.sdk.v1.users import api as users_api_v1
+from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 
 if TYPE_CHECKING:
     import httpx
@@ -49,7 +51,6 @@ class User:
         last_name: the last name of the user. Defaults to None.
         full_name: the full name of the user. Defaults to None.
         role: the role of the user.
-        workspaces: the list of workspaces the user is linked to. Defaults to None.
         api_key: the API key of the user.
         inserted_at: the datetime when the user was created.
         updated_at: the datetime when the user was last updated.
@@ -58,7 +59,7 @@ class User:
         >>> from argilla import rg
         >>> user = rg.User.from_name("my-user") # or `User.from_id("...")`
         >>> print(user)
-        User(id='...', username='my-user', first_name='Luke', last_name="Skywalker', full_name='Luke Skywalker', role='annotator', workspaces=['my-workspace'], api_key='...', inserted_at=datetime.datetime(2021, 8, 31, 10, 0, 0), updated_at=datetime.datetime(2021, 8, 31, 10, 0, 0))
+        User(id='...', username='my-user', first_name='Luke', last_name="Skywalker', full_name='Luke Skywalker', role='annotator', workspaces=[WorkspaceModel(...), ...], api_key='...', inserted_at=datetime.datetime(2021, 8, 31, 10, 0, 0), updated_at=datetime.datetime(2021, 8, 31, 10, 0, 0))
     """
 
     __client: "httpx.Client"
@@ -68,7 +69,6 @@ class User:
     last_name: Optional[str]
     full_name: Optional[str]
     role: UserRole
-    workspaces: Optional[List[str]]
     api_key: str
     inserted_at: datetime
     updated_at: datetime
@@ -106,7 +106,16 @@ class User:
             error_msg += f" As the `name` argument is not None, you should use `User.from_name('{name}')` instead."
         raise Exception(error_msg)
 
-    def __str__(self) -> str:
+    @property
+    def workspaces(self) -> Optional[List[WorkspaceModel]]:
+        """Returns the workspace names the current user is linked to.
+
+        Returns:
+            A list of `WorkspaceModel` the current user is linked to.
+        """
+        return users_api_v1.list_user_workspaces(self.__client, self.id).parsed
+
+    def __repr__(self) -> str:
         return (
             f"User(id={self.id}, username={self.username}, role={self.role},"
             f" workspaces={self.workspaces}, api_key={self.api_key},"
@@ -152,18 +161,39 @@ class User:
         instance = cls.__new__(cls)
         instance.__client = client or cls.__active_client()
         if isinstance(user, UserModel):
-            instance.__dict__.update(user.dict())
+            instance.__dict__.update(user.dict(exclude={"workspaces"}))
         return instance
 
     @classmethod
     def create(
         cls,
         username: str,
-        password: Union[str, UUID],
+        password: str,
+        *,
         first_name: Optional[str] = None,
         last_name: Optional[str] = None,
         role: Optional[UserRole] = None,
     ) -> "User":
+        """Creates a new user in Argilla.
+
+        Args:
+            username: the username of the user to be created.
+            password: the password of the user to be created.
+            first_name: the first name of the user to be created. Defaults to None.
+            last_name: the last name of the user to be created. Defaults to None.
+            role: the role of the user to be created. Defaults to None.
+
+        Returns:
+            A new `User` instance.
+
+        Raises:
+            ValueError: if the user already exists in Argilla.
+            RuntimeError: if the user cannot be created in Argilla.
+
+        Examples:
+            >>> from argilla import rg
+            >>> user = rg.User.create("my-user", "my-password", role="admin")
+        """
         if not first_name:
             warnings.warn(
                 "Since the `first_name` hasn't been provided, it will be set to the same value as the `username`."
@@ -179,7 +209,7 @@ class User:
                 client,
                 **UserCreateModel(
                     username=username,
-                    password=str(password),
+                    password=password,
                     first_name=first_name,
                     last_name=last_name,
                     role=role,

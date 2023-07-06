@@ -17,8 +17,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel
 
-from argilla import TextClassificationRecord
 from argilla.client.api import Api
+from argilla.client.models import TextClassificationRecord
 from argilla.monitoring.base import BaseMonitor
 from argilla.monitoring.types import MissingType
 

@@ -17,12 +17,13 @@ from uuid import UUID
 
 import pytest
 from argilla.client.api import ArgillaSingleton
+from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 from argilla.client.users import User
 
 if TYPE_CHECKING:
     from argilla.server.models import User as ServerUser
 
-from tests.factories import UserFactory
+from tests.factories import UserFactory, WorkspaceFactory, WorkspaceUserFactory
 
 
 def test_user_cls_init() -> None:
@@ -39,8 +40,9 @@ def test_user_cls_init() -> None:
         User(id="00000000-0000-0000-0000-000000000000")
 
 
-def test_user_from_name(owner: "ServerUser"):
-    new_user = UserFactory.create(username="test_user")
+@pytest.mark.asyncio
+async def test_user_from_name(owner: "ServerUser") -> None:
+    new_user = await UserFactory.create(username="test_user")
     ArgillaSingleton.init(api_key=owner.api_key)
 
     user = User.from_name(new_user.username)
@@ -51,8 +53,9 @@ def test_user_from_name(owner: "ServerUser"):
         User.from_name("non-existing-user")
 
 
-def test_user_from_id(owner: "ServerUser"):
-    new_user = UserFactory.create(username="test_user")
+@pytest.mark.asyncio
+async def test_user_from_id(owner: "ServerUser") -> None:
+    new_user = await UserFactory.create(username="test_user")
     ArgillaSingleton.init(api_key=owner.api_key)
 
     user = User.from_id(id=new_user.id)
@@ -61,6 +64,14 @@ def test_user_from_id(owner: "ServerUser"):
 
     with pytest.raises(ValueError, match="User with id="):
         User.from_id(id="00000000-0000-0000-0000-000000000000")
+
+
+def test_user_me(owner: "ServerUser") -> None:
+    ArgillaSingleton.init(api_key=owner.api_key)
+
+    user = User.me()
+    assert user.id == owner.id
+    assert user.username == owner.username
 
 
 def test_user_create(owner: "ServerUser") -> None:
@@ -74,17 +85,19 @@ def test_user_create(owner: "ServerUser") -> None:
         User.create("test_user", password="test_password")
 
 
-def test_user_list(owner: "ServerUser") -> None:
-    UserFactory.create(username="user_1")
-    UserFactory.create(username="user_2")
+@pytest.mark.asyncio
+async def test_user_list(owner: "ServerUser") -> None:
+    await UserFactory.create(username="user_1")
+    await UserFactory.create(username="user_2")
     ArgillaSingleton.init(api_key=owner.api_key)
 
     users = User.list()
     assert all(user.username in ["user_1", "user_2", owner.username] for user in users)
 
 
-def test_user_delete_user(owner: "ServerUser") -> None:
-    new_user = UserFactory.create(username="test_user")
+@pytest.mark.asyncio
+async def test_user_delete_user(owner: "ServerUser") -> None:
+    new_user = await UserFactory.create(username="test_user")
     ArgillaSingleton.init(api_key=owner.api_key)
 
     user = User.from_name("test_user")
@@ -93,3 +106,28 @@ def test_user_delete_user(owner: "ServerUser") -> None:
     user.delete()
     with pytest.raises(ValueError, match="doesn't exist in Argilla"):
         user.delete()
+
+
+def test_user_repr(owner: "ServerUser") -> None:
+    ArgillaSingleton.init(api_key=owner.api_key)
+
+    assert str(User.me()) == (
+        f"User(id={owner.id}, username={owner.username}, role={owner.role.value},"
+        f" workspaces={owner.workspaces}, api_key={owner.api_key}, first_name={owner.first_name},"
+        f" last_name={owner.last_name}, role={owner.role}, inserted_at={owner.inserted_at},"
+        f" updated_at={owner.updated_at})"
+    )
+
+
+@pytest.mark.asyncio
+async def test_user_workspaces(owner: "ServerUser") -> None:
+    workspaces = await WorkspaceFactory.create_batch(3)
+    for workspace in workspaces:
+        await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
+    ArgillaSingleton.init(api_key=owner.api_key)
+
+    user = User.me()
+    assert isinstance(user.workspaces, list)
+    assert len(user.workspaces) == len(workspaces)
+    assert all(isinstance(workspace, WorkspaceModel) for workspace in user.workspaces)
+    assert [workspace.name for workspace in workspaces] == [workspace.name for workspace in user.workspaces]

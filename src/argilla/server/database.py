@@ -18,6 +18,12 @@ from typing import TYPE_CHECKING, Generator
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
+from sqlalchemy.ext.asyncio import (
+    AsyncAttrs,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 import argilla
@@ -27,7 +33,7 @@ if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
 ALEMBIC_CONFIG_FILE = os.path.normpath(os.path.join(os.path.dirname(argilla.__file__), "alembic.ini"))
-TAGGED_REVISIONS = OrderedDict({"1.7": "1769ee58fbb4", "1.8": "ae5522b4c674"})
+TAGGED_REVISIONS = OrderedDict({"1.7": "1769ee58fbb4", "1.8": "ae5522b4c674", "1.11": "3ff6484f8b37"})
 
 
 @event.listens_for(Engine, "connect")
@@ -41,6 +47,9 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 engine = create_engine(settings.database_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+async_engine = create_async_engine(settings.database_url_async)
+AsyncSessionLocal = async_sessionmaker(autocommit=False, autoflush=False, expire_on_commit=False, bind=async_engine)
+
 
 def get_db() -> Generator["Session", None, None]:
     try:
@@ -50,5 +59,13 @@ def get_db() -> Generator["Session", None, None]:
         db.close()
 
 
-class Base(DeclarativeBase):
+async def get_async_db() -> Generator["AsyncSession", None, None]:
+    try:
+        db: "AsyncSession" = AsyncSessionLocal()
+        yield db
+    finally:
+        await db.close()
+
+
+class Base(AsyncAttrs, DeclarativeBase):
     pass

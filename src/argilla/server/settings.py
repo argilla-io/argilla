@@ -128,7 +128,7 @@ class Settings(BaseSettings):
         return base_url
 
     @validator("database_url", always=True)
-    def set_database_url_default(cls, database_url: str, values: dict):
+    def set_database_url_default(cls, database_url: str, values: dict) -> str:
         return database_url or f"sqlite:///{os.path.join(values['home_path'], 'argilla.db')}?check_same_thread=False"
 
     @root_validator(skip_on_failure=True)
@@ -166,6 +166,19 @@ class Settings(BaseSettings):
         if ns is None:
             return index_name.replace("<NAMESPACE>", "")
         return index_name.replace("<NAMESPACE>", f".{ns}")
+
+    @property
+    def database_url_async(self) -> str:
+        if self.database_url.startswith("sqlite:///"):
+            return self.database_url.replace("sqlite:///", "sqlite+aiosqlite:///")
+
+        if self.database_url.startswith("postgresql://"):
+            return self.database_url.replace("postgresql://", "postgresql+asyncpg://")
+
+        if self.database_url.startswith("mysql://"):
+            return self.database_url.replace("mysql://", "mysql+aiomysql://")
+
+        raise ValueError(f"Unsupported database url: '{self.database_url}'")
 
     def obfuscated_elasticsearch(self) -> str:
         """Returns configured elasticsearch url obfuscating the provided password, if any"""

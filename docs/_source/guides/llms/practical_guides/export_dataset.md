@@ -39,7 +39,7 @@ dataset.push_to_huggingface("argilla/my-dataset")
 dataset.push_to_huggingface("argilla/my-dataset", private=True, token="...")
 ```
 
-Note that the `FeedbackDataset.push_to_huggingface()` method uploads not just the dataset records, but also a configuration file named `argilla.cfg`, that contains the dataset configuration i.e. the fields, questions, and guidelines, if any. This way you can load any `FeedbackDataset` that has been pushed to the Hub back in Argilla using the `from_huggingface` method.
+Note that the `FeedbackDataset.push_to_huggingface()` method uploads not just the dataset records, but also a configuration file named `argilla.yaml`, that contains the dataset configuration i.e. the fields, questions, and guidelines, if any. This way you can load any `FeedbackDataset` that has been pushed to the Hub back in Argilla using the `from_huggingface` method.
 
 ```python
 # Load a public dataset

@@ -35,11 +35,12 @@ from . import helpers
         (TaskType.text2text, Text2TextRecord),
     ],
 )
-def test_update_record_ok(client: TestClient, owner: User, task, expected_record_class, role: UserRole):
+@pytest.mark.asyncio
+async def test_update_record_ok(client: TestClient, owner: User, task, expected_record_class, role: UserRole):
     expected_id = 0
-    workspace = WorkspaceFactory.create()
+    workspace = await WorkspaceFactory.create()
     dataset = helpers.create_dataset(Argilla(api_key=owner.api_key, workspace=workspace.name), task=task)
-    user = UserFactory.create(role=role, workspaces=[workspace])
+    user = await UserFactory.create(role=role, workspaces=[workspace])
 
     text = "A new value for record 0"
     response = client.patch(
@@ -76,9 +77,10 @@ def test_update_record_ok(client: TestClient, owner: User, task, expected_record
         (TaskType.text2text),
     ],
 )
-def test_update_with_not_found(client: TestClient, task: TaskType, role: UserRole):
-    workspace = WorkspaceFactory.create()
-    user = UserFactory.create(role=role, workspaces=[workspace])
+@pytest.mark.asyncio
+async def test_update_with_not_found(client: TestClient, task: TaskType, role: UserRole):
+    workspace = await WorkspaceFactory.create()
+    user = await UserFactory.create(role=role, workspaces=[workspace])
 
     dataset = helpers.create_dataset(client=Argilla(api_key=user.api_key, workspace=workspace.name), task=task)
 
@@ -102,8 +104,9 @@ def test_update_with_not_found(client: TestClient, task: TaskType, role: UserRol
     }
 
 
-def test_with_wrong_values(client: TestClient, owner: User):
-    workspace = WorkspaceFactory.create()
+@pytest.mark.asyncio
+async def test_with_wrong_values(client: TestClient, owner: User):
+    workspace = await WorkspaceFactory.create()
     dataset = helpers.create_dataset(
         client=Argilla(api_key=owner.api_key, workspace=workspace.name), task=TaskType.text_classification
     )

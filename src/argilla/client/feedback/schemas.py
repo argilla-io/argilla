@@ -13,13 +13,14 @@
 #  limitations under the License.
 
 import warnings
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 from pydantic import (
     BaseModel,
     Extra,
     Field,
+    PrivateAttr,
     StrictInt,
     StrictStr,
     conint,
@@ -28,25 +29,32 @@ from pydantic import (
     validator,
 )
 
-FETCHING_BATCH_SIZE = 250
-PUSHING_BATCH_SIZE = 32
+if TYPE_CHECKING:
+    from argilla.client.feedback.unification import UnifiedValueSchema
+
+
+class RankingValueSchema(BaseModel):
+    """Schema for the `RankingQuestion` response value.
+
+    Note: we may have more than one record in the same rank.
+
+    Args:
+        value: The value of the record.
+        rank: The rank of the record.
+    """
+
+    value: StrictStr
+    rank: conint(ge=1)
 
 
 class ValueSchema(BaseModel):
-    """A value schema for a record.
+    """Schema for any `FeedbackRecord` response value.
 
     Args:
-        value (Union[StrictStr, StrictInt, List[str]]): The value of the record.
-
-    Examples:
-        >>> import argilla as rg
-        >>> value = rg.ValueSchema(value="Yes")
-        >>> # or use a dict
-        >>> value = {"value": "Yes"}
-
+        value: The value of the record.
     """
 
-    value: Union[StrictStr, StrictInt, List[str]]
+    value: Union[StrictStr, StrictInt, List[str], List[RankingValueSchema]]
 
 
 class ResponseSchema(BaseModel):
@@ -82,7 +90,6 @@ class ResponseSchema(BaseModel):
                 "`user_id` not provided, so it will be set to `None`. Which is not an"
                 " issue, unless you're planning to log the response in Argilla, as "
                 " it will be automatically set to the active `user_id`.",
-                stacklevel=2,
             )
         return v
 
@@ -118,6 +125,7 @@ class FeedbackRecord(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
     responses: Optional[Union[ResponseSchema, List[ResponseSchema]]] = None
     external_id: Optional[str] = None
+    _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default={})
 
     @validator("responses", always=True)
     def responses_must_be_a_list(cls, v: Optional[Union[ResponseSchema, List[ResponseSchema]]]) -> List[ResponseSchema]:
@@ -129,6 +137,10 @@ class FeedbackRecord(BaseModel):
 
     class Config:
         extra = Extra.ignore
+        fields = {"_unified_responses": {"exclude": True}}
+
+
+FieldTypes = Literal["text"]
 
 
 class FieldSchema(BaseModel):
@@ -152,6 +164,7 @@ class FieldSchema(BaseModel):
     name: str
     title: Optional[str] = None
     required: bool = True
+    type: Optional[FieldTypes] = None
     settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)
 
     @validator("title", always=True)
@@ -163,6 +176,7 @@ class FieldSchema(BaseModel):
     class Config:
         validate_assignment = True
         extra = Extra.forbid
+        exclude = {"type"}
 
 
 class TextField(FieldSchema):
@@ -185,13 +199,17 @@ class TextField(FieldSchema):
 
     """
 
-    settings: Dict[str, Any] = Field({"type": "text"}, allow_mutation=False)
+    type: Literal["text"] = "text"
     use_markdown: bool = False
 
     @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        values["settings"]["type"] = values.get("type")
         values["settings"]["use_markdown"] = values.get("use_markdown", False)
         return values
+
+
+QuestionTypes = Literal["text", "rating", "label_selection", "multi_label_selection", "ranking"]
 
 
 class QuestionSchema(BaseModel):
@@ -218,6 +236,7 @@ class QuestionSchema(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     required: bool = True
+    type: Optional[QuestionTypes] = None
     settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)
 
     @validator("title", always=True)
@@ -229,6 +248,7 @@ class QuestionSchema(BaseModel):
     class Config:
         validate_assignment = True
         extra = Extra.forbid
+        exclude = {"type"}
 
 
 # TODO(alvarobartt): add `TextResponse` and `RatingResponse` classes
@@ -254,11 +274,12 @@ class TextQuestion(QuestionSchema):
 
     """
 
-    settings: Dict[str, Any] = Field({"type": "text", "use_markdown": False}, allow_mutation=False)
+    type: Literal["text"] = Field("text", allow_mutation=False)
     use_markdown: bool = False
 
     @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        values["settings"]["type"] = values.get("type")
         values["settings"]["use_markdown"] = values.get("use_markdown", False)
         return values
 
@@ -285,17 +306,29 @@ class RatingQuestion(QuestionSchema):
 
     """
 
-    settings: Dict[str, Any] = Field({"type": "rating"}, allow_mutation=False)
+    type: Literal["rating"] = Field("rating", allow_mutation=False)
     values: List[int] = Field(unique_items=True, min_items=2)
+
+    @property
+    def __all_labels__(self):
+        return [entry["value"] for entry in self.settings["options"]]
+
+    @property
+    def __label2id__(self):
+        return {label: idx for idx, label in enumerate(self.__all_labels__)}
+
+    @property
+    def __id2label__(self):
+        return {idx: label for idx, label in enumerate(self.__all_labels__)}
 
     @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        values["settings"]["type"] = values.get("type")
         values["settings"]["options"] = [{"value": value} for value in values.get("values")]
         return values
 
 
 class _LabelQuestion(QuestionSchema):
-    settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)
     labels: Union[conlist(str, unique_items=True, min_items=2), Dict[str, str]]
     visible_labels: Optional[conint(ge=3)] = 20
 
@@ -308,6 +341,7 @@ class _LabelQuestion(QuestionSchema):
 
     @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        values["settings"]["type"] = values.get("type")
         if isinstance(values.get("labels"), dict):
             values["settings"]["options"] = [
                 {"value": key, "text": value} for key, value in values.get("labels").items()
@@ -318,6 +352,18 @@ class _LabelQuestion(QuestionSchema):
             "visible_labels"
         )  # `None` is a possible value, which means all labels are visible
         return values
+
+    @property
+    def __all_labels__(self):
+        return [entry["value"] for entry in self.settings["options"]]
+
+    @property
+    def __label2id__(self):
+        return {label: idx for idx, label in enumerate(self.__all_labels__)}
+
+    @property
+    def __id2label__(self):
+        return {idx: label for idx, label in enumerate(self.__all_labels__)}
 
 
 class LabelQuestion(_LabelQuestion):
@@ -354,7 +400,7 @@ class LabelQuestion(_LabelQuestion):
 
     """
 
-    settings: Dict[str, Any] = Field({"type": "label_selection"})
+    type: Literal["label_selection"] = Field("label_selection", allow_mutation=False)
 
 
 class MultiLabelQuestion(_LabelQuestion):
@@ -391,63 +437,51 @@ class MultiLabelQuestion(_LabelQuestion):
 
     """
 
-    settings: Dict[str, Any] = Field({"type": "multi_label_selection"})
+    type: Literal["multi_label_selection"] = Field("multi_label_selection", allow_mutation=False)
 
 
-AllowedFieldTypes = TextField
-AllowedQuestionTypes = Union[TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion]
-
-
-class FeedbackDatasetConfig(BaseModel):
-    """`FeedbackDatasetConfig`
+class RankingQuestion(QuestionSchema):
+    """Schema for the `RankingQuestion` question-type.
 
     Args:
-        fields (List[AllowedFieldTypes]): The fields of the feedback dataset.
-        questions (List[AllowedQuestionTypes]): The questions of the feedback dataset.
-        guidelines (Optional[str]): the guidelines of the feedback dataset. Defaults to None.
+        settings: The settings for the question, including the type and options.
+        values: The values for the question, to be formatted and included as part of
+            the settings.
 
     Examples:
         >>> import argilla as rg
-        >>> config = rg.FeedbackDatasetConfig(
-        ...     fields=[
-        ...         rg.TextField(name="text", title="Human prompt"),
-        ...     ],
-        ...     questions =[
-        ...         rg.TextQuestion(
-        ...             name="question-1",
-        ...             description="This is the first question",
-        ...             required=True,
-        ...         ),
-        ...         rg.RatingQuestion(
-        ...             name="question-2",
-        ...             description="This is the second question",
-        ...             required=True,
-        ...             values=[1, 2, 3, 4, 5],
-        ...         ),
-        ...         rg.LabelQuestion(
-        ...             name="relevant",
-        ...             title="Is the response relevant for the given prompt?",
-        ...             labels=["Yes","No"],
-        ...             required=True,
-        ...             visible_labels=None
-        ...         ),
-        ...         rg.MultiLabelQuestion(
-        ...             name="content_class",
-        ...             title="Does the response include any of the following?",
-        ...             description="Select all that apply",
-        ...             labels={"cat-1": "Category 1" , "cat-2": "Category 2"},
-        ...             required=False,
-        ...             visible_labels=4
-        ...         ),
-        ...     ],
-        ...     guidelines="Add some guidelines for the annotation team here."
+        >>> question = rg.RankingQuestion(
+        ...     values=["Yes", "No"]
         ... )
-
+        RankingQuestion(
+            settings={
+                'type': 'ranking',
+                'options': [
+                    {'value': 'Yes', 'text': 'Yes'},
+                    {'value': 'No', 'text': 'No'}
+                ]
+            },
+            values=['Yes', 'No']
+        )
     """
 
-    fields: List[AllowedFieldTypes]
-    questions: List[AllowedQuestionTypes]
-    guidelines: Optional[str] = None
+    type: Literal["ranking"] = Field("ranking", allow_mutation=False)
+    values: Union[conlist(str, unique_items=True, min_items=2), Dict[str, str]]
 
-    class Config:
-        smart_union = True
+    @validator("values", always=True)
+    def values_dict_must_be_valid(cls, v: Union[List[str], Dict[str, str]]) -> Union[List[str], Dict[str, str]]:
+        if isinstance(v, dict):
+            assert len(v.keys()) > 1, "ensure this dict has at least 2 items"
+            assert len(set(v.values())) == len(v.values()), "ensure this dict has unique values"
+        return v
+
+    @root_validator(skip_on_failure=True)
+    def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        values["settings"]["type"] = values.get("type")
+        if isinstance(values.get("values"), dict):
+            values["settings"]["options"] = [
+                {"value": key, "text": value} for key, value in values.get("values").items()
+            ]
+        if isinstance(values.get("values"), list):
+            values["settings"]["options"] = [{"value": value, "text": value} for value in values.get("values")]
+        return values

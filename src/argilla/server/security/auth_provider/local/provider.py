@@ -23,17 +23,17 @@ from fastapi.security import (
     SecurityScopes,
 )
 from jose import JWTError, jwt
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla.server.contexts import accounts
-from argilla.server.database import get_db
+from argilla.server.database import get_async_db
 from argilla.server.errors import UnauthorizedError
 from argilla.server.models import User
 from argilla.server.security.auth_provider.base import (
     AuthProvider,
     api_key_header,
 )
-from argilla.server.security.model import Token, User
+from argilla.server.security.model import Token
 
 from .settings import Settings
 from .settings import settings as local_security
@@ -45,50 +45,21 @@ _oauth2_scheme = OAuth2PasswordBearer(
 
 
 class LocalAuthProvider(AuthProvider):
-    def __init__(
-        self,
-        settings: Settings,
-    ):
+    def __init__(self, settings: Settings):
         self.router = APIRouter(tags=["security"])
         self.settings = settings
 
+        # TODO: maybe it's better if we move this endpoint to apis/v0/handlers
         @self.router.post(
             settings.token_api_url,
             response_model=Token,
             operation_id="login_for_access_token",
         )
         async def login_for_access_token(
-            db: Session = Depends(get_db),
+            db: AsyncSession = Depends(get_async_db),
             form_data: OAuth2PasswordRequestForm = Depends(),
         ) -> Token:
-            """
-            Login access token api endpoint
-
-            Parameters
-            ----------
-            form_data:
-                The user/password form
-
-            Returns
-            -------
-                Logging token if user is properly authenticated.
-                Unauthorized exception otherwise
-
-            """
-            # user = self.users.authenticate_user(form_data.username, form_data.password)
-            # if not user:
-            #     raise UnauthorizedError()
-            # access_token_expires = timedelta(
-            #     minutes=self.settings.token_expiration_in_minutes
-            # )
-            # access_token = self._create_access_token(
-            #     user.username, expires_delta=access_token_expires
-            # )
-            # return Token(access_token=access_token)
-
-            #################
-
-            user = accounts.authenticate_user(db, form_data.username, form_data.password)
+            user = await accounts.authenticate_user(db, form_data.username, form_data.password)
             if not user:
                 raise UnauthorizedError()
             access_token_expires = timedelta(minutes=self.settings.token_expiration_in_minutes)
@@ -122,7 +93,7 @@ class LocalAuthProvider(AuthProvider):
             algorithm=self.settings.algorithm,
         )
 
-    def fetch_token_user(self, db: Session, token: str) -> Optional[User]:
+    async def fetch_token_user(self, db: AsyncSession, token: str) -> Optional[User]:
         """
         Fetch the user for a given access token
 
@@ -143,23 +114,24 @@ class LocalAuthProvider(AuthProvider):
             )
             username: str = payload.get("sub")
             if username:
-                return accounts.get_user_by_username(db, username)
+                user = await accounts.get_user_by_username(db, username)
+                return user
         except JWTError:
             return None
 
-    def get_current_user(
+    async def get_current_user(
         self,
         security_scopes: SecurityScopes,
-        db: Session = Depends(get_db),
+        db: AsyncSession = Depends(get_async_db),
         api_key: Optional[str] = Depends(api_key_header),
         token: Optional[str] = Depends(_oauth2_scheme),
     ) -> User:
         user = None
 
         if api_key:
-            user = accounts.get_user_by_api_key(db, api_key)
+            user = await accounts.get_user_by_api_key(db, api_key)
         elif token:
-            user = self.fetch_token_user(db, token)
+            user = await self.fetch_token_user(db, token)
 
         if user is None:
             raise UnauthorizedError()

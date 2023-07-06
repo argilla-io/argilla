@@ -12,7 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.feedback.card._dataset_card import ArgillaDatasetCard
-from argilla.client.feedback.card._parser import size_categories_parser
+from typing import TYPE_CHECKING
 
-__all__ = ["ArgillaDatasetCard", "size_categories_parser"]
+from argilla.server.models import Workspace
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
+
+def get_or_new_workspace(session: "Session", workspace_name: str) -> Workspace:
+    workspace = session.query(Workspace).filter_by(name=workspace_name).first()
+    return workspace or Workspace(name=workspace_name)

@@ -12,9 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import json
 import logging
-import tempfile
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Literal, Optional, Union
 from uuid import UUID
 
@@ -27,27 +25,35 @@ from tqdm import tqdm
 import argilla as rg
 from argilla.client.feedback.constants import (
     FETCHING_BATCH_SIZE,
-    FIELD_TYPE_TO_PYTHON_TYPE,
     PUSHING_BATCH_SIZE,
 )
+from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixIn
 from argilla.client.feedback.schemas import (
-    AllowedFieldTypes,
-    AllowedQuestionTypes,
-    FeedbackDatasetConfig,
     FeedbackRecord,
     FieldSchema,
     LabelQuestion,
     MultiLabelQuestion,
+    RankingQuestion,
     RatingQuestion,
     TextField,
     TextQuestion,
+)
+from argilla.client.feedback.training.schemas import (
+    TrainingTaskMappingForTextClassification,
+)
+from argilla.client.feedback.typing import AllowedFieldTypes, AllowedQuestionTypes
+from argilla.client.feedback.unification import (
+    LabelQuestionStrategy,
+    MultiLabelQuestionStrategy,
+    RatingQuestionStrategy,
 )
 from argilla.client.feedback.utils import (
     feedback_dataset_in_argilla,
     generate_pydantic_schema,
 )
+from argilla.client.models import Framework
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
-from argilla.utils.dependency import requires_version
+from argilla.utils.dependency import require_version, requires_version
 
 if TYPE_CHECKING:
     import httpx
@@ -63,7 +69,7 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 
-class FeedbackDataset:
+class FeedbackDataset(HuggingFaceDatasetMixIn):
     """Class to work with `FeedbackDataset`s either locally, or remotely (Argilla or HuggingFace Hub).
 
     Args:
@@ -203,6 +209,7 @@ class FeedbackDataset:
         """
         if not isinstance(fields, list):
             raise TypeError(f"Expected `fields` to be a list, got {type(fields)} instead.")
+
         any_required = False
         unique_names = set()
         for field in fields:
@@ -220,13 +227,14 @@ class FeedbackDataset:
 
         if not isinstance(questions, list):
             raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
+
         any_required = False
         unique_names = set()
         for question in questions:
-            if not isinstance(question, (TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion)):
+            if not isinstance(question, AllowedQuestionTypes.__args__):
                 raise TypeError(
-                    "Expected `questions` to be a list of `TextQuestion`, `RatingQuestion`,"
-                    " `LabelQuestion`, and/or `MultiLabelQuestion` got a"
+                    "Expected `questions` to be a list of"
+                    f" `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}` got a"
                     f" question in the list with type {type(question)} instead."
                 )
             if question.name in unique_names:
@@ -307,10 +315,22 @@ class FeedbackDataset:
         """Returns the fields that define the schema of the records in the dataset."""
         return self.__fields
 
+    def field_by_name(self, name: str) -> Dict[str, FieldSchema]:
+        for item in self.fields:
+            if item.name == name:
+                return item
+        raise KeyError(f"Field with name '{name}' not found in self.fields")
+
     @property
     def questions(self) -> List["FeedbackQuestionModel"]:
         """Returns the questions that will be used to annotate the dataset."""
         return self.__questions
+
+    def question_by_name(self, name: str) -> Dict[str, "FeedbackQuestionModel"]:
+        for item in self.questions:
+            if item.name == name:
+                return item
+        raise KeyError(f"Question with name '{name}' not found in self.questions")
 
     @property
     def records(self) -> List[FeedbackRecord]:
@@ -331,7 +351,6 @@ class FeedbackDataset:
             )
             return self.records
 
-        # TODO(alvarobartt): create `ArgillaMixIn` and `HuggingFaceMixIn` classes to inherit their specific methods
         if self.argilla_id:
             httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
             first_batch = datasets_api_v1.get_records(
@@ -684,7 +703,7 @@ class FeedbackDataset:
                 question = RatingQuestion(**question_dict, values=[v["value"] for v in question.settings["options"]])
             elif question.settings["type"] == "text":
                 question = TextQuestion(**question_dict, use_markdown=question.settings["use_markdown"])
-            elif question.settings["type"].__contains__("label_selection"):
+            elif question.settings["type"] in ["label_selection", "multi_label_selection", "ranking"]:
                 if all([label["value"] == label["text"] for label in question.settings["options"]]):
                     labels = [label["value"] for label in question.settings["options"]]
                 else:
@@ -698,11 +717,12 @@ class FeedbackDataset:
                     question = MultiLabelQuestion(
                         **question_dict, labels=labels, visible_labels=question.settings["visible_options"]
                     )
+                elif question.settings["type"] == "ranking":
+                    question = RankingQuestion(**question_dict, values=labels)
             else:
                 raise ValueError(
                     f"Question '{question.name}' is not a supported question in the current Python package"
-                    " version, supported question types are: `RatingQuestion`, `TextQuestion`,"
-                    " `LabelQuestion`, and/or `MultiLabelQuestion`."
+                    f" version, supported question types are: `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}`."
                 )
             questions.append(question)
         self = cls(
@@ -736,234 +756,96 @@ class FeedbackDataset:
             >>> huggingface_dataset = dataset.format_as("datasets")
         """
         if format == "datasets":
-            from datasets import Dataset, Features, Sequence, Value
-
-            dataset = {"metadata": []}
-            features = {}
-            for field in self.fields:
-                if field.settings["type"] not in FIELD_TYPE_TO_PYTHON_TYPE.keys():
-                    raise ValueError(
-                        f"Field {field.name} has an unsupported type: {field.settings['type']}, for the moment"
-                        f" only the following types are supported: {list(FIELD_TYPE_TO_PYTHON_TYPE.keys())}"
-                    )
-                features[field.name] = Value(dtype="string", id="field")
-                if field.name not in dataset:
-                    dataset[field.name] = []
-            for question in self.questions:
-                if question.settings["type"] in ["text", "label_selection"]:
-                    value = Value(dtype="string")
-                elif question.settings["type"] == "rating":
-                    value = Value(dtype="int32")
-                elif question.settings["type"] == "multi_label_selection":
-                    value = Sequence(Value(dtype="string"))
-                else:
-                    raise ValueError(
-                        f"Question {question.name} has an unsupported type: {question.settings['type']}, for the"
-                        " moment only the following types are supported: 'text', 'rating', 'label_selection', and"
-                        " 'multi_label_selection'"
-                    )
-                # TODO(alvarobartt): if we constraint ranges from 0 to N, then we can use `ClassLabel` for ratings
-                features[question.name] = Sequence(
-                    {
-                        "user_id": Value(dtype="string"),
-                        "value": value,
-                        "status": Value(dtype="string"),
-                    },
-                    id="question",
-                )
-                if question.name not in dataset:
-                    dataset[question.name] = []
-            features["external_id"] = Value(dtype="string", id="external_id")
-            dataset["external_id"] = []
-
-            for record in self.records:
-                for field in self.fields:
-                    dataset[field.name].append(record.fields[field.name])
-                for question in self.questions:
-                    dataset[question.name].append(
-                        {
-                            "user_id": [r.user_id for r in record.responses],
-                            "value": [
-                                r.values[question.name].value if question.name in r.values else None
-                                for r in record.responses
-                            ],
-                            "status": [r.status for r in record.responses],
-                        }
-                        if record.responses
-                        else None
-                    )
-                dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else None)
-                dataset["external_id"].append(record.external_id or None)
-
-            if len(dataset["metadata"]) > 0:
-                features["metadata"] = Value(dtype="string")
-            else:
-                del dataset["metadata"]
-
-            return Dataset.from_dict(
-                dataset,
-                features=Features(features),
-            )
+            return self._huggingface_format(self)
         raise ValueError(f"Unsupported format '{format}'.")
 
     @requires_version("huggingface_hub")
     def push_to_huggingface(self, repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs) -> None:
-        """Pushes the `FeedbackDataset` to the HuggingFace Hub. If the dataset has been previously pushed to the
-        HuggingFace Hub, it will be updated instead. Note that some params as `private` have no effect at all
-        when a dataset is previously uploaded to the HuggingFace Hub.
-
-        Args:
-            repo_id: the ID of the HuggingFace Hub repo to push the `FeedbackDataset` to.
-            generate_card: whether to generate a dataset card for the `FeedbackDataset` in the HuggingFace Hub. Defaults
-                to `True`.
-            *args: the args to pass to `datasets.Dataset.push_to_hub`.
-            **kwargs: the kwargs to pass to `datasets.Dataset.push_to_hub`.
-        """
-        import huggingface_hub
-        from huggingface_hub import DatasetCardData, HfApi
-        from packaging.version import parse as parse_version
-
-        if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
-            _LOGGER.warning(
-                "Recommended `huggingface_hub` version is 0.14.0 or higher, and you have"
-                f" {huggingface_hub.__version__}, so in case you have any issue when pushing the dataset to the"
-                " HuggingFace Hub upgrade it as `pip install huggingface_hub --upgrade`."
-            )
-
-        if len(self) < 1:
-            raise ValueError(
-                "Cannot push an empty `rg.FeedbackDataset` to the HuggingFace Hub, please make sure to add at"
-                " least one record, via the method `add_records`."
-            )
-
-        hfds = self.format_as("datasets")
-        hfds.push_to_hub(repo_id, *args, **kwargs)
-
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".cfg", delete=False) as f:
-            f.write(
-                FeedbackDatasetConfig(fields=self.fields, questions=self.questions, guidelines=self.guidelines).json()
-            )
-            f.flush()
-
-            HfApi().upload_file(
-                path_or_fileobj=f.name,
-                path_in_repo="argilla.cfg",
-                repo_id=repo_id,
-                repo_type="dataset",
-                token=kwargs.get("token"),
-            )
-
-        if generate_card:
-            from argilla.client.feedback.card import (
-                ArgillaDatasetCard,
-                size_categories_parser,
-            )
-
-            card = ArgillaDatasetCard.from_template(
-                card_data=DatasetCardData(
-                    size_categories=size_categories_parser(len(self.records)),
-                    tags=["rlfh", "argilla", "human-feedback"],
-                ),
-                repo_id=repo_id,
-                argilla_fields=self.fields,
-                argilla_questions=self.questions,
-                argilla_guidelines=self.guidelines,
-                argilla_record=json.loads(self.records[0].json()),
-                huggingface_record=hfds[0],
-            )
-            card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
+        return self._push_to_huggingface(self, repo_id, generate_card=generate_card, *args, **kwargs)
 
     @classmethod
     @requires_version("datasets")
     @requires_version("huggingface_hub")
     def from_huggingface(cls, repo_id: str, *args: Any, **kwargs: Any) -> "FeedbackDataset":
-        """Loads a `FeedbackDataset` from the HuggingFace Hub.
+        return cls._from_huggingface(cls, repo_id, *args, **kwargs)
 
-        Args:
-            repo_id: the ID of the HuggingFace Hub repo to load the `FeedbackDataset` from.
-            *args: the args to pass to `datasets.Dataset.load_from_hub`.
-            **kwargs: the kwargs to pass to `datasets.Dataset.load_from_hub`.
+    def unify_responses(
+        self,
+        question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
+        strategy: Union[str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy],
+    ) -> None:
+        """Unify responses for a given question using a given strategy"""
+        if isinstance(question, str):
+            question = self.question_by_name(question)
+        if isinstance(strategy, str):
+            strategy = LabelQuestionStrategy(strategy)
+        strategy.unify_responses(self.records, question)
 
-        Returns:
-            A `FeedbackDataset` loaded from the HuggingFace Hub.
-        """
-        import huggingface_hub
-        from datasets import DatasetDict, load_dataset
-        from huggingface_hub import hf_hub_download
-        from packaging.version import parse as parse_version
+    def prepare_for_training(
+        self,
+        framework: Union[Framework, str],
+        task_mapping: TrainingTaskMappingForTextClassification,
+        train_size: Optional[float] = 1,
+        test_size: Optional[float] = None,
+        seed: Optional[int] = None,
+        fetch_records: bool = True,
+        lang: Optional[str] = None,
+    ):
+        if isinstance(framework, str):
+            framework = Framework(framework)
 
-        if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
-            _LOGGER.warning(
-                "Recommended `huggingface_hub` version is 0.14.0 or higher, and you have"
-                f" {huggingface_hub.__version__}, so in case you have any issue when pushing the dataset to the"
-                " HuggingFace Hub upgrade it as `pip install huggingface_hub --upgrade`."
-            )
+        # validate train and test sizes
+        if train_size is None:
+            train_size = 1
+        if test_size is None:
+            test_size = 1 - train_size
 
-        if "token" in kwargs:
-            auth = kwargs.pop("token")
-        elif "use_auth_token" in kwargs:
-            auth = kwargs.pop("use_auth_token")
+        # check if all numbers are larger than 0
+        if not [abs(train_size), abs(test_size)] == [train_size, test_size]:
+            raise ValueError("`train_size` and `test_size` must be larger than 0.")
+        # check if train sizes sum up to 1
+        if not (train_size + test_size) == 1:
+            raise ValueError("`train_size` and `test_size` must sum to 1.")
+
+        if test_size == 0:
+            test_size = None
+
+        if fetch_records:
+            self.fetch_records()
+
+        if isinstance(task_mapping, TrainingTaskMappingForTextClassification):
+            self.unify_responses(question=task_mapping.label.question, strategy=task_mapping.label.strategy)
         else:
-            auth = None
+            raise ValueError(f"Training data {type(task_mapping)} is not supported yet")
 
-        hub_auth = (
-            {"use_auth_token": auth}
-            if parse_version(huggingface_hub.__version__) < parse_version("0.11.0")
-            else {"token": auth}
-        )
-        config_path = hf_hub_download(
-            repo_id=repo_id,
-            filename="argilla.cfg",
-            repo_type="dataset",
-            **hub_auth,
-        )
-        with open(config_path, "r") as f:
-            config = FeedbackDatasetConfig.parse_raw(f.read())
-
-        cls = cls(
-            fields=config.fields,
-            questions=config.questions,
-            guidelines=config.guidelines,
-        )
-
-        hfds = load_dataset(repo_id, use_auth_token=auth, *args, **kwargs)
-        if isinstance(hfds, DatasetDict) and "split" not in kwargs:
-            if len(hfds.keys()) > 1:
-                raise ValueError(
-                    "Only one dataset can be loaded at a time, use `split` to select a split, available splits"
-                    f" are: {', '.join(hfds.keys())}."
-                )
-            hfds = hfds[list(hfds.keys())[0]]
-
-        for index in range(len(hfds)):
-            responses = {}
-            for question in cls.questions:
-                if hfds[index][question.name] is None or len(hfds[index][question.name]) < 1:
-                    continue
-                for user_id, value, status in zip(
-                    hfds[index][question.name]["user_id"],
-                    hfds[index][question.name]["value"],
-                    hfds[index][question.name]["status"],
-                ):
-                    if user_id not in responses:
-                        responses[user_id] = {
-                            "user_id": user_id,
-                            "status": status,
-                            "values": {},
-                        }
-                    responses[user_id]["values"].update({question.name: {"value": value}})
-
-            metadata = None
-            if "metadata" in hfds[index] and hfds[index]["metadata"] is not None:
-                metadata = json.loads(hfds[index]["metadata"])
-
-            cls.__records.append(
-                FeedbackRecord(
-                    fields={field.name: hfds[index][field.name] for field in cls.fields},
-                    metadata=metadata,
-                    responses=list(responses.values()) or None,
-                    external_id=hfds[index]["external_id"],
-                )
+        data = task_mapping._format_data(self.records)
+        if framework in [
+            Framework.TRANSFORMERS,
+            Framework.SETFIT,
+            Framework.SPAN_MARKER,
+            Framework.PEFT,
+        ]:
+            return task_mapping._prepare_for_training_with_transformers(
+                data=data, train_size=train_size, seed=seed, framework=framework
             )
-        del hfds
-        return cls
+        elif framework is Framework.SPACY or framework is Framework.SPACY_TRANSFORMERS:
+            require_version("spacy")
+            import spacy
+
+            if lang is None:
+                _LOGGER.warning("spaCy `lang` is not provided. Using `en`(English) as default language.")
+                lang = spacy.blank("en")
+            elif lang.isinstance(str):
+                if len(lang) == 2:
+                    lang = spacy.blank(lang)
+                else:
+                    lang = spacy.load(lang)
+            return task_mapping._prepare_for_training_with_spacy(data=data, train_size=train_size, seed=seed, lang=lang)
+        elif framework is Framework.SPARK_NLP:
+            return task_mapping._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
+        elif framework is Framework.OPENAI:
+            return task_mapping._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
+        else:
+            raise NotImplementedError(
+                f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
+            )

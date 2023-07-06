@@ -55,7 +55,7 @@ def configure_router(router: APIRouter):
         storage: RecordsStorageService = Depends(RecordsStorageService.get_instance),
         current_user: User = Security(auth.get_current_user, scopes=[]),
     ) -> RecordType:
-        dataset = service.find_by_name(
+        dataset = await service.find_by_name(
             user=current_user,
             name=name,
             workspace=request_deps.workspace,
