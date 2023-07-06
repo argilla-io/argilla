@@ -122,7 +122,7 @@ class CRUDMixin:
         upserted = await cls.upsert_many(db, [schema], constraints, autocommit)
         return upserted[0]
 
-    async def remove(self, db: "AsyncSession", autocommit: bool = True) -> Self:
+    async def delete(self, db: "AsyncSession", autocommit: bool = True) -> Self:
         await db.delete(self)
         if autocommit:
             await db.commit()
