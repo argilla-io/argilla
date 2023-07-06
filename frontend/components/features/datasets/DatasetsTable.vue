@@ -25,9 +25,10 @@
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import { Base64 } from "js-base64";
 import { currentWorkspace } from "@/models/Workspace";
+import { useRoutes } from "@/v1/infrastructure/services";
 
 export default {
   props: {
@@ -148,29 +149,13 @@ export default {
     },
   },
   methods: {
-    getDatasetLinkPage(dataset) {
-      if (this.isOldTask(dataset.task))
-        return {
-          name: "datasets-workspace-dataset",
-          params: {
-            dataset: dataset.name,
-            workspace: dataset.workspace,
-          },
-        };
-
-      return {
-        name: "dataset-id-annotation-mode",
-        params: {
-          id: dataset.id,
-        },
-      };
-    },
     clearFilters() {
       if (this.$refs.table) {
         this.activeFilters.forEach((filter) => {
           this.$refs.table.onApplyFilters({ field: filter.column }, []);
         });
-        this.$router.push({ path: "/datasets" });
+
+        this.goToDatasetsLits();
       }
     },
     onSearch(event) {
@@ -221,47 +206,18 @@ export default {
           console.warn(action);
       }
     },
-    isOldTask(task) {
-      // NOTE - we need to detect old/new task because the redirection corresponding pages does not have the same route
-      return [
-        "TokenClassification",
-        "TextClassification",
-        "Text2Text",
-      ].includes(task);
-    },
     copy(value) {
       this.$copyToClipboard(value);
     },
-    copyUrl({ task, id, workspace, name }) {
-      const isOldTask = this.isOldTask(task);
-
-      const url = isOldTask
-        ? `/datasets/${workspace}/${name}`
-        : `/dataset/${id}/annotation-mode`;
-
-      this.copy(`${window.origin}${url}`);
+    copyUrl(dataset) {
+      this.copy(`${window.origin}${this.getDatasetLink(dataset)}`);
     },
     copyName({ name }) {
       this.copy(name);
     },
-    goToSetting({ id, workspace, name, task }) {
-      const isOldTask = this.isOldTask(task);
-
-      if (isOldTask) {
-        this.$router.push({
-          name: "datasets-workspace-dataset-settings",
-          params: {
-            workspace,
-            dataset: name,
-          },
-        });
-      } else {
-        this.$router.push({
-          name: "dataset-id-settings",
-          params: { id },
-        });
-      }
-    },
+  },
+  setup() {
+    return useRoutes();
   },
 };
 </script>
