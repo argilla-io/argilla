@@ -116,6 +116,8 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
 
     @validator("id", always=True, pre=True)
     def _normalize_id(cls, v):
+        if v is None:
+            return str(uuid.uuid4())
         if isinstance(v, int):
             message = (
                 f"Integer ids won't be supported in future versions. We recommend to start using strings instead. "
@@ -133,9 +135,6 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
                     "/MAX_SAFE_INTEGER"
                 )
                 warnings.warn(message, UserWarning)
-
-        if v is None:
-            return str(uuid.uuid4())
         return v
 
     @validator("status", always=True)
