@@ -948,3 +948,9 @@ async def test_delete_record_as_annotator(client: TestClient):
     response = client.delete(f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
     assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_delete_record_non_existent(client: TestClient, owner_auth_header: dict):
+    response = client.delete(f"/api/v1/records/{uuid4()}", headers=owner_auth_header)
+    assert response.status_code == 404
