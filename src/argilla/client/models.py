@@ -28,7 +28,10 @@ from deprecated import deprecated
 from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
 
 from argilla import _messages
-from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
+from argilla._constants import (
+    DEFAULT_MAX_KEYWORD_LENGTH,
+    PROTECTED_METADATA_FIELD_PREFIX,
+)
 from argilla.utils.span_utils import SpanUtils
 
 _LOGGER = logging.getLogger(__name__)
@@ -80,7 +83,9 @@ class _Validators(BaseModel):
             return metadata
 
         default_length_exceeded = False
-        for v in metadata.values():
+        for k, v in metadata.items():
+            if k.startswith(PROTECTED_METADATA_FIELD_PREFIX):
+                continue
             if isinstance(v, str) and len(v) > DEFAULT_MAX_KEYWORD_LENGTH:
                 default_length_exceeded = True
                 break
