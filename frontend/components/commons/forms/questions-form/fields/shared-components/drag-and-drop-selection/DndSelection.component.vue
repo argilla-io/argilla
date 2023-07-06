@@ -57,6 +57,22 @@
 
 <script>
 import "assets/icons/draggable";
+
+const validKeyCodes = {
+  1: 1,
+  2: 2,
+  3: 3,
+  4: 4,
+  5: 5,
+  6: 6,
+  7: 7,
+  8: 8,
+  9: 9,
+  "=": 10,
+  "!": 11,
+  '"': 12,
+};
+
 export default {
   name: "DndSelectionComponent",
   props: {
@@ -78,57 +94,14 @@ export default {
     },
   },
   methods: {
-    rankWithKeyboard(event, item) {
+    rankWithKeyboard(event, questionToMove) {
       const keyCode = event.key;
-      const validKeyCodes = [
-        { key: "1", rank: 1 },
-        { key: "2", rank: 2 },
-        { key: "3", rank: 3 },
-        { key: "4", rank: 4 },
-        { key: "5", rank: 5 },
-        { key: "6", rank: 6 },
-        { key: "7", rank: 7 },
-        { key: "8", rank: 8 },
-        { key: "9", rank: 9 },
-        { key: "=", rank: 10 },
-        { key: "!", rank: 11 },
-        { key: '"', rank: 12 },
-      ];
 
-      const keysForAvailableRankingSlots = validKeyCodes.slice(
-        0,
-        this.ranking.slots.length
-      );
-      const getRankPosition =
-        keysForAvailableRankingSlots.find((item) => item.key === keyCode)
-          ?.rank || null;
-      if (getRankPosition) {
-        const slots = this.ranking.slots;
-        const questions = this.ranking.questions;
-        const getIndexInSlot = this.ranking.slots[
-          Number(getRankPosition) - 1
-        ].items.findIndex((it) => it.id === item.id);
+      const slotTo = this.ranking.slots[validKeyCodes[keyCode] - 1];
 
-        const getIndexInQuestions = questions.findIndex(
-          (q) => q.id === item.id
-        );
+      if (slotTo) {
+        this.ranking.moveQuestionToSlot(questionToMove, slotTo);
 
-        if (getIndexInSlot > -1) {
-          return;
-        } else {
-          if (getIndexInQuestions > -1) {
-            questions.splice(getIndexInQuestions, 1);
-          } else {
-            const getIndexInRanking = slots.findIndex((slot) =>
-              slot.items.some((i) => i.id === item.id)
-            );
-            const getIndexOfElement = slots[getIndexInRanking].items.findIndex(
-              (i) => i.id === item.id
-            );
-            slots[getIndexInRanking].items.splice(getIndexOfElement, 1);
-          }
-          slots[Number(getRankPosition) - 1].items.push(item);
-        }
         this.$emit("on-reorder", this.ranking);
         this.onAutoFocusFirstItem();
       }
