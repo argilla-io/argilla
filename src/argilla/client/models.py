@@ -37,12 +37,11 @@ from pydantic import (
 
 from argilla import _messages
 from argilla._constants import (
+    _JS_MAX_SAFE_INTEGER,
     DEFAULT_MAX_KEYWORD_LENGTH,
     PROTECTED_METADATA_FIELD_PREFIX,
 )
 from argilla.utils.span_utils import SpanUtils
-
-_JS_MAX_SAFE_INTEGER = 9007199254740991
 
 _LOGGER = logging.getLogger(__name__)
 
