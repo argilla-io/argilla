@@ -276,7 +276,7 @@ export default {
       switch (code) {
         case "Enter": {
           const elem = this.$refs.submitButton.$el;
-          elem.click();
+          shiftKey && elem.click();
           break;
         }
         case "Space": {
