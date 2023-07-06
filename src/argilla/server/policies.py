@@ -326,7 +326,6 @@ class RecordPolicyV1:
 
         return is_allowed
 
-
     @classmethod
     def create_response(cls, record: Record) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
