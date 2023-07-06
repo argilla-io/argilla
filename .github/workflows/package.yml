@@ -63,7 +63,7 @@ jobs:
     name: Run base tests
     uses: ./.github/workflows/run-python-tests.yml
     needs:  check_repo_files
-    if: needs.check_repo_files.outputs.pythonChanges
+    if: needs.check_repo_files.outputs.pythonChanges == 'true'
     with:
       searchEngine: ${{ matrix.searchEngine }}
       searchEngineVersion: ${{ matrix.searchEngineVersion }}
@@ -79,7 +79,7 @@ jobs:
     name: Run extra tests (training, monitoring and listeners)
     uses: ./.github/workflows/run-python-tests.yml
     needs: check_repo_files
-    if: needs.check_repo_files.outputs.pythonChanges
+    if: needs.check_repo_files.outputs.pythonChanges == 'true'
     # continue-on-error: true
     with:
       coverageReport: coverage-extra
