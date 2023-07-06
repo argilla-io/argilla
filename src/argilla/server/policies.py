@@ -326,9 +326,6 @@ class RecordPolicyV1:
 
         return is_allowed
 
-    @classmethod
-    def bulk_delete(cls, actor: User) -> bool:
-        pass
 
     @classmethod
     def create_response(cls, record: Record) -> PolicyAction:
