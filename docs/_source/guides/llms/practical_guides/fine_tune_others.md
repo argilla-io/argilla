@@ -155,7 +155,7 @@ dataset = FeedbackDataset(
         TextField(name="text", title="Human prompt"),
     ],
     questions =[
-        rLabelQuestion(
+        LabelQuestion(
             name="relevant",
             title="Is the response relevant for the given prompt?",
             labels=["yes","no"],
