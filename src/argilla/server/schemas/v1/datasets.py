@@ -21,6 +21,7 @@ from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, va
 from pydantic import Field as PydanticField
 from pydantic.utils import GetterDict
 
+from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
 from argilla.server.search_engine import Query
 
 try:
@@ -298,6 +299,7 @@ class Response(BaseModel):
 
 class RecordInclude(str, Enum):
     responses = "responses"
+    suggestions = "suggestions"
 
 
 class RecordGetterDict(GetterDict):
@@ -305,6 +307,8 @@ class RecordGetterDict(GetterDict):
         if key == "metadata":
             return getattr(self._obj, "metadata_", None)
         if key == "responses" and "responses" not in self._obj.__dict__:
+            return default
+        if key == "suggestions" and "suggestions" not in self._obj.__dict__:
             return default
         return super().get(key, default)
 
@@ -317,6 +321,7 @@ class Record(BaseModel):
     # TODO: move `responses` to `response` since contextualized endpoint will contains only the user response
     # response: Optional[Response]
     responses: Optional[List[Response]]
+    suggestions: Optional[List[Suggestion]]
     inserted_at: datetime
     updated_at: datetime
 
@@ -352,6 +357,7 @@ class RecordCreate(BaseModel):
     metadata: Optional[Dict[str, Any]]
     external_id: Optional[str]
     responses: Optional[List[UserResponseCreate]]
+    suggestions: Optional[List[SuggestionCreate]]
 
     @validator("responses")
     def check_user_id_is_unique(cls, values):

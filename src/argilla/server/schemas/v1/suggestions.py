@@ -12,22 +12,32 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime
-from typing import List
+from typing import Any, List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel
 
+from argilla.server.models import SuggestionType
 
-class Workspace(BaseModel):
+
+class BaseSuggestion(BaseModel):
+    question_id: UUID
+    type: Optional[SuggestionType]
+    score: Optional[float]
+    value: Any
+    agent: Optional[str]
+
+
+class SuggestionCreate(BaseSuggestion):
+    pass
+
+
+class Suggestion(BaseSuggestion):
     id: UUID
-    name: str
-    inserted_at: datetime
-    updated_at: datetime
 
     class Config:
         orm_mode = True
 
 
-class Workspaces(BaseModel):
-    items: List[Workspace]
+class Suggestions(BaseModel):
+    items: List[Suggestion]

@@ -117,6 +117,12 @@ class UserPolicy:
         return is_allowed
 
 
+class UserPolicyV1:
+    @classmethod
+    async def list_workspaces(cls, actor: User) -> bool:
+        return actor.is_owner
+
+
 class DatasetPolicy:
     @classmethod
     async def list(cls, user: User) -> bool:
@@ -206,7 +212,7 @@ class DatasetPolicyV1:
         return is_allowed
 
     @classmethod
-    def list_dataset_records_will_all_responses(cls, dataset: Dataset) -> PolicyAction:
+    def list_dataset_records_with_all_responses(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
             return actor.is_owner or (
                 actor.is_admin and await _exists_workspace_user_by_user_and_workspace_id(actor, dataset.workspace_id)
@@ -306,6 +312,25 @@ class RecordPolicyV1:
         async def is_allowed(actor: User) -> bool:
             return actor.is_owner or await _exists_workspace_user_by_user_and_workspace_id(
                 actor, record.dataset.workspace_id
+            )
+
+        return is_allowed
+
+    @classmethod
+    def get_suggestions(cls, record: Record) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or await _exists_workspace_user_by_user_and_workspace_id(
+                actor, record.dataset.workspace_id
+            )
+
+        return is_allowed
+
+    @classmethod
+    def create_suggestion(cls, record: Record) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (
+                actor.is_admin
+                and await _exists_workspace_user_by_user_and_workspace_id(actor, record.dataset.workspace_id)
             )
 
         return is_allowed

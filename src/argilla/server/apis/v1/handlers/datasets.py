@@ -17,7 +17,6 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 
 from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_async_db
@@ -59,7 +58,7 @@ router = APIRouter(tags=["datasets"])
 
 
 async def _get_dataset(
-    db: Session, dataset_id: UUID, with_fields: bool = False, with_questions: bool = False
+    db: AsyncSession, dataset_id: UUID, with_fields: bool = False, with_questions: bool = False
 ) -> DatasetModel:
     dataset = await datasets.get_dataset_by_id(db, dataset_id, with_fields=with_fields, with_questions=with_questions)
     if not dataset:
@@ -119,7 +118,7 @@ async def list_current_user_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     dataset_id: UUID,
-    include: List[RecordInclude] = Query([]),
+    include: List[RecordInclude] = Query([], description="Relationships to include in the response"),
     response_status: Optional[ResponseStatusFilter] = Query(None),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
@@ -141,14 +140,14 @@ async def list_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     dataset_id: UUID,
-    include: Optional[List[RecordInclude]] = Query([]),
+    include: List[RecordInclude] = Query([], description="Relationships to include in the response"),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
 ):
     dataset = await _get_dataset(db, dataset_id)
 
-    await authorize(current_user, DatasetPolicyV1.list_dataset_records_will_all_responses(dataset))
+    await authorize(current_user, DatasetPolicyV1.list_dataset_records_with_all_responses(dataset))
 
     records = await datasets.list_records_by_dataset_id(db, dataset_id, include=include, offset=offset, limit=limit)
 
