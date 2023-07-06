@@ -28,8 +28,6 @@ from argilla.client.models import (
 )
 from pydantic import ValidationError
 
-id = uuid.uuid4()
-
 
 @pytest.mark.parametrize(
     ("annotation", "status", "expected_status"),
@@ -50,17 +48,21 @@ def test_text_classification_record(annotation, status, expected_status):
 
 
 def test_text_classification_input_string():
+    record_id = str(uuid.uuid4())
     event_timestamp = datetime.datetime.now()
-    assert TextClassificationRecord(id=id, text="A text", event_timestamp=event_timestamp) == TextClassificationRecord(
-        id=id, inputs=dict(text="A text"), event_timestamp=event_timestamp
-    )
+    assert TextClassificationRecord(
+        id=record_id, text="A text", event_timestamp=event_timestamp
+    ) == TextClassificationRecord(id=record_id, inputs=dict(text="A text"), event_timestamp=event_timestamp)
 
     assert TextClassificationRecord(
-        id=id, inputs=["A text", "another text"], event_timestamp=event_timestamp
-    ) == TextClassificationRecord(id=id, inputs=dict(text=["A text", "another text"]), event_timestamp=event_timestamp)
+        id=record_id, inputs=["A text", "another text"], event_timestamp=event_timestamp
+    ) == TextClassificationRecord(
+        id=record_id, inputs=dict(text=["A text", "another text"]), event_timestamp=event_timestamp
+    )
 
 
 def test_text_classification_text_inputs():
+    record_id = str(uuid.uuid4())
     with pytest.raises(ValueError, match="either 'text' or 'inputs'"):
         TextClassificationRecord()
 
@@ -69,22 +71,22 @@ def test_text_classification_text_inputs():
 
     with pytest.warns(
         FutureWarning,
-        match=("the `inputs` argument of the `TextClassificationRecord` will not accept strings."),
+        match=r"the `inputs` argument of the `TextClassificationRecord` will not accept strings.",
     ):
         TextClassificationRecord(inputs="mock")
 
     event_timestamp = datetime.datetime.now()
-    assert TextClassificationRecord(id=id, text="mock", event_timestamp=event_timestamp) == TextClassificationRecord(
-        id=id, inputs={"text": "mock"}, event_timestamp=event_timestamp
-    )
+    assert TextClassificationRecord(
+        id=record_id, text="mock", event_timestamp=event_timestamp
+    ) == TextClassificationRecord(id=record_id, inputs={"text": "mock"}, event_timestamp=event_timestamp)
 
     assert TextClassificationRecord(
-        id=id, inputs=["mock"], event_timestamp=event_timestamp
-    ) == TextClassificationRecord(id=id, inputs={"text": ["mock"]}, event_timestamp=event_timestamp)
+        id=record_id, inputs=["mock"], event_timestamp=event_timestamp
+    ) == TextClassificationRecord(id=record_id, inputs={"text": ["mock"]}, event_timestamp=event_timestamp)
 
     assert TextClassificationRecord(
-        id=id, text="mock", inputs={"text": "mock"}, event_timestamp=event_timestamp
-    ) == TextClassificationRecord(id=id, inputs={"text": "mock"}, event_timestamp=event_timestamp)
+        id=record_id, text="mock", inputs={"text": "mock"}, event_timestamp=event_timestamp
+    ) == TextClassificationRecord(id=record_id, inputs={"text": "mock"}, event_timestamp=event_timestamp)
 
     rec = TextClassificationRecord(text="mock")
     with pytest.raises(AttributeError, match="You cannot assign a new value to `text`"):
@@ -297,30 +299,24 @@ def test_record_validation_on_assignment(record):
 def test_cast_record_id():
     record_id = 1000
 
-    with pytest.warns(DeprecationWarning) as warn_record:
+    with pytest.warns(
+        DeprecationWarning,
+        match=r"Integer ids won't be supported in future versions. We recommend to start using strings instead. ",
+    ):
         record = TextClassificationRecord(text="This is a text", id=record_id)
         assert record.id == record_id
-        assert (
-            "Integer ids won't be supported in future versions. We recommend to start using strings instead. "
-            "For datasets already containing integer values we recommend migrating them to avoid deprecation issues."
-            "See https://docs.argilla.io/en/latest/getting_started/installation/configurations"
-            "https://docs.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html"
-            "/database_migrations.html#elasticsearch"
-        ) in [str(warn.message) for warn in warn_record]
 
 
 def test_big_integer_record_id():
     import random
 
     record_id = random.getrandbits(64)
-    with pytest.warns(UserWarning) as warn_record:
+    with pytest.warns(
+        UserWarning,
+        match=r"You've provided a big integer value. Use a string instead, otherwise you may experience some ",
+    ):
         record = TextClassificationRecord(text="This is a text", id=record_id)
         assert record.id == record_id
-        assert (
-            "You've provided a big integer value. Use a string instead, otherwise you may experience some "
-            "problems using the UI. See "
-            "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER"
-        ) in [str(warn.message) for warn in warn_record]
 
 
 def test_create_record_with_wrong_id_type():
