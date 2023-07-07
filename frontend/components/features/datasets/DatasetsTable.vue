@@ -39,7 +39,7 @@ export default {
   },
   created() {
     this.datasets.forEach((dataset) => {
-      dataset.link = this.getDatasetLinkPage(dataset);
+      dataset.link = this.getDatasetLink(dataset);
     });
   },
   data() {
@@ -155,7 +155,7 @@ export default {
           this.$refs.table.onApplyFilters({ field: filter.column }, []);
         });
 
-        this.goToDatasetsLits();
+        this.goToDatasetsList();
       }
     },
     onSearch(event) {

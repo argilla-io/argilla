@@ -10,24 +10,6 @@ export const useRoutes = () => {
     );
   };
 
-  const getDatasetLinkPage = ({ task, name, workspace, id }: Dataset) => {
-    if (isOldTask(task))
-      return {
-        name: "datasets-workspace-dataset",
-        params: {
-          dataset: name,
-          workspace,
-        },
-      };
-
-    return {
-      name: "dataset-id-annotation-mode",
-      params: {
-        id,
-      },
-    };
-  };
-
   const getDatasetLink = ({ task, name, workspace, id }: Dataset): string => {
     return isOldTask(task)
       ? `/datasets/${workspace}/${name}`
@@ -55,5 +37,5 @@ export const useRoutes = () => {
     router.push({ path: "/datasets" });
   };
 
-  return { goToDatasetsList, getDatasetLinkPage, goToSetting, getDatasetLink };
+  return { goToDatasetsList, goToSetting, getDatasetLink };
 };
