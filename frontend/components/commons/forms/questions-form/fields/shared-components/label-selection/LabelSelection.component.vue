@@ -242,7 +242,6 @@ export default {
   }
   .--less {
     @include font-size(14px);
-    font-weight: 400;
   }
   .svg-icon {
     color: $black-37;
