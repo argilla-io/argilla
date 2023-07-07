@@ -1,7 +1,12 @@
 <template>
   <div class="container">
     <div class="inputs-area">
-      <div class="input-button" v-for="option in options" :key="option.id">
+      <div
+        class="input-button"
+        v-for="option in options"
+        :key="option.id"
+        @keydown.enter.prevent
+      >
         <input
           ref="options"
           type="checkbox"

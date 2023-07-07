@@ -4,7 +4,6 @@
     class="questions-form"
     :class="{ '--edited-form': !isFormUntouched }"
     @submit.prevent="onSubmit"
-    @keydown.enter.prevent
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
