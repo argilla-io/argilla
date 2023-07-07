@@ -91,6 +91,9 @@ class TestSuiteWorkspaces:
 
     async def test_delete_workspace(self, client: TestClient, owner_auth_header: dict):
         workspace = await WorkspaceFactory.create(name="workspace_delete")
+        other_workspace = await WorkspaceFactory.create()
+
+        await DatasetFactory.create_batch(3, workspace=other_workspace)
 
         response = client.delete(f"/api/v1/workspaces/{workspace.id}", headers=owner_auth_header)
 
