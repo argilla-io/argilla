@@ -39,8 +39,9 @@
     >
       <div
         class="input-button"
-        v-for="option in visibleOptions"
+        v-for="(option, index) in visibleOptions"
         :key="option.id"
+        @keydown.enter.prevent
       >
         <input
           ref="options"
@@ -50,6 +51,7 @@
           v-model="option.is_selected"
           @change="onSelect(option)"
           @focus="onFocus"
+          @keydown.tab="expandLabelsOnTab(index)"
         />
         <label
           class="label-text cursor-pointer"
@@ -196,6 +198,14 @@ export default {
     },
     onFocus() {
       this.$emit("on-focus");
+    },
+    expandLabelsOnTab(index) {
+      if (!this.showCollapseButton) {
+        return;
+      }
+      if (index === this.maxOptionsToShowBeforeCollapse - 1) {
+        this.isExpanded = true;
+      }
     },
   },
 };
