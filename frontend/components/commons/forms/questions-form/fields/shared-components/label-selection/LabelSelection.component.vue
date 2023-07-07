@@ -118,9 +118,15 @@ export default {
     isFocused: {
       immediate: true,
       handler(newValue) {
-        this.$nextTick(() => {
-          !!newValue && this.$refs?.options[0].focus();
-        });
+        if (newValue) {
+          this.$nextTick(() => {
+            const options = this.$refs?.options;
+            if (options.some((o) => o.contains(document.activeElement))) {
+              return;
+            }
+            options[0].focus();
+          });
+        }
       },
     },
   },
@@ -278,13 +284,20 @@ input[type="checkbox"] {
     & + .label-text {
       outline: 2px solid palette(purple, 200);
       &.label-active {
-        outline: none;
+        outline: 2px solid palette(apricot);
       }
     }
   }
-  &:focus:not(:focus-visible) {
-    & + .label-text {
-      outline: none;
+}
+.input-button:not(:first-of-type) {
+  input[type="checkbox"] {
+    &:focus:not(:focus-visible) {
+      & + .label-text {
+        outline: none;
+        &.label-active {
+          outline: none;
+        }
+      }
     }
   }
 }

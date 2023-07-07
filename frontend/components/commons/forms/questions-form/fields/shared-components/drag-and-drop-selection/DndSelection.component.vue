@@ -204,7 +204,7 @@ $max-visible-card-items: 12;
       &:focus {
         outline: 2px solid $card-primary-color;
       }
-      &:focus:not(:focus-visible) {
+      &:not(:firt-of-type):focus:not(:focus-visible) {
         outline: none;
       }
       &:hover {
@@ -219,7 +219,7 @@ $max-visible-card-items: 12;
       &:focus {
         outline: 2px solid palette(apricot);
       }
-      &:focus:not(:focus-visible) {
+      &:not(:firt-of-type):focus:not(:focus-visible) {
         outline: none;
       }
     }

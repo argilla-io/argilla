@@ -78,9 +78,11 @@ export default {
     isFocused: {
       immediate: true,
       handler(newValue) {
-        this.$nextTick(() => {
-          !!newValue && this.$refs.text.focus();
-        });
+        if (newValue) {
+          this.$nextTick(() => {
+            this.$refs.text.focus();
+          });
+        }
       },
     },
   },
