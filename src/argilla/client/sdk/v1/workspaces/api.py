@@ -53,3 +53,21 @@ def get_workspace(
             parsed=parsed_response,
         )
     return handle_response_error(response)
+
+
+def delete_workspace(
+    client: httpx.Client, id: UUID
+) -> Response[Union[WorkspaceModel, ErrorMessage, HTTPValidationError]]:
+    url = f"/api/v1/workspaces/{id}"
+
+    response = client.delete(url=url)
+
+    if response.status_code == 200:
+        parsed_response = WorkspaceModel(**response.json())
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+            parsed=parsed_response,
+        )
+    return handle_response_error(response)

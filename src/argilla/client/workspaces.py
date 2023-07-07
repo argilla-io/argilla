@@ -119,7 +119,7 @@ class Workspace:
             f" inserted_at={self.inserted_at}, updated_at={self.updated_at})"
         )
 
-    def add_user(self, user_id: str) -> None:
+    def add_user(self, user_id: UUID) -> None:
         """Adds an existing user to the workspace in Argilla.
 
         Args:
@@ -145,7 +145,7 @@ class Workspace:
         except BaseClientError as e:
             raise RuntimeError(f"Error while adding user with id=`{user_id}` to workspace with id=`{self.id}`.") from e
 
-    def delete_user(self, user_id: str) -> None:
+    def delete_user(self, user_id: UUID) -> None:
         """Deletes an existing user from the workspace in Argilla. Note that the user
         will not be deleted from Argilla, but just from the workspace.
 
@@ -176,6 +176,14 @@ class Workspace:
             raise RuntimeError(
                 f"Error while deleting user with id=`{user_id}` from workspace with id=`{self.id}`."
             ) from e
+
+    def delete(self):
+        try:
+            workspaces_api_v1.delete_workspace(client=self.__client, id=self.id)
+        except NotFoundApiError as e:
+            raise ValueError(f"Workspace with id {self.id!r} doesn't exist in Argilla.") from e
+        except BaseClientError as e:
+            raise RuntimeError(f"Error while deleting workspace with id {self.id!r}.") from e
 
     @staticmethod
     def __active_client() -> "httpx.Client":
