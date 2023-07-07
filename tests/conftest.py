@@ -161,7 +161,7 @@ def elasticsearch_config():
     return {"hosts": settings.elasticsearch}
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def opensearch(elasticsearch_config):
     client = OpenSearch(**elasticsearch_config)
     yield client

@@ -19,7 +19,7 @@ import pytest
 from argilla.client.api import ArgillaSingleton, init
 from argilla.client.workspaces import Workspace
 
-from tests.factories import WorkspaceFactory, WorkspaceUserFactory
+from tests.factories import UserFactory, WorkspaceFactory, WorkspaceUserFactory
 
 if TYPE_CHECKING:
     from argilla.server.models import User as ServerUser
@@ -177,3 +177,43 @@ def test_init_with_missing_workspace(owner: "ServerUser"):
 
     with pytest.raises(ValueError):
         rg.init(api_key=owner.api_key, workspace="missing-workspace")
+
+
+@pytest.mark.asyncio
+async def test_delete_workspace(owner: "ServerUser"):
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+
+    init(api_key=owner.api_key)
+
+    ws = Workspace.from_id(workspace.id)
+    ws.delete()
+
+    with pytest.raises(ValueError):
+        Workspace.from_id(workspace.id)
+
+
+@pytest.mark.asyncio
+async def test_delete_non_existing_workspace(owner: "ServerUser"):
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+
+    init(api_key=owner.api_key)
+
+    ws = Workspace.from_id(workspace.id)
+    ws.delete()
+
+    with pytest.raises(ValueError):
+        ws.delete()
+
+
+@pytest.mark.asyncio
+async def test_delete_workspace_without_permissions():
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+
+    user = await UserFactory.create(workspaces=[workspace])
+
+    init(api_key=user.api_key)
+
+    ws = Workspace.from_id(workspace.id)
+
+    with pytest.raises(RuntimeError):
+        ws.delete()
