@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List, Optional
+from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
@@ -320,7 +320,7 @@ async def search_dataset_records(
     dataset_id: UUID,
     query: SearchRecordsQuery,
     include: List[RecordInclude] = Query([]),
-    response_status: List[ResponseStatusFilter] = Query([]),
+    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = Query(0, ge=0),
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
@@ -338,8 +338,8 @@ async def search_dataset_records(
         )
 
     user_response_status_filter = None
-    if response_status:
-        user_response_status_filter = UserResponseStatusFilter(user=current_user, status=response_status)
+    if response_statuses:
+        user_response_status_filter = UserResponseStatusFilter(user=current_user, statuses=response_statuses)
 
     search_responses = await search_engine.search(
         dataset=dataset,

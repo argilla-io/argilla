@@ -78,7 +78,7 @@ class Query:
 @dataclasses.dataclass
 class UserResponseStatusFilter:
     user: User
-    status: ResponseStatusFilter
+    statuses: List[ResponseStatusFilter]
 
 
 @dataclasses.dataclass
@@ -185,15 +185,12 @@ class SearchEngine:
 
         text_query = self._text_query_builder(dataset, text=query.text)
 
-        bool_query: dict = {"must": [text_query]}
+        bool_query = {"must": [text_query]}
         if user_response_status_filter:
-            bool_query["filter"] = self._response_status_filter_builder(user_response_status_filter)
+            bool_query["should"] = self._response_status_filter_builder(user_response_status_filter)
+            bool_query["minimum_should_match"] = 1
 
-        body = {
-            "_source": False,
-            "query": {"bool": bool_query},
-            # "sort": [{"_score": "desc"}, {"id": "asc"}],
-        }
+        body = {"_source": False, "query": {"bool": bool_query}}
 
         response = await self.client.search(
             index=self._index_name_for_dataset(dataset),
@@ -230,7 +227,7 @@ class SearchEngine:
     def _dynamic_templates_for_question_responses(self, questions: List[Question]) -> List[dict]:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic-templates.html
         return [
-            {"status_responses": {"path_match": f"responses.*.status", "mapping": {"type": "keyword"}}},
+            {"status_responses": {"path_match": "responses.*.status", "mapping": {"type": "keyword"}}},
             *[
                 {
                     f"{question.name}_responses": {
@@ -280,15 +277,23 @@ class SearchEngine:
     def _index_name_for_dataset(dataset: Dataset):
         return f"rg.{dataset.id}"
 
-    def _response_status_filter_builder(self, status_filter: UserResponseStatusFilter):
+    def _response_status_filter_builder(self, status_filter: UserResponseStatusFilter) -> Dict[str, Any]:
         user_response_field = f"responses.{status_filter.user.username}"
 
-        if status_filter.status == ResponseStatusFilter.missing:
+        statuses = [
+            ResponseStatus(status).value for status in status_filter.statuses if status != ResponseStatusFilter.missing
+        ]
+
+        filters = []
+        if ResponseStatusFilter.missing in status_filter.statuses:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
-            return [{"bool": {"must_not": {"exists": {"field": user_response_field}}}}]
-        else:
+            filters.append({"bool": {"must_not": {"exists": {"field": user_response_field}}}})
+
+        if statuses:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html
-            return [{"term": {f"{user_response_field}.status": status_filter.status}}]
+            filters.append({"terms": {f"{user_response_field}.status": statuses}})
+
+        return filters
 
 
 async def get_search_engine() -> AsyncGenerator[SearchEngine, None]:
