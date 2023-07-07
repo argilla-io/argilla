@@ -19,9 +19,9 @@ from fastapi import HTTPException, Request
 from fastapi.exception_handlers import http_exception_handler
 from pydantic import BaseModel
 
-from argilla.server.commons import telemetry
 from argilla.server.errors.adapter import exception_to_argilla_error
 from argilla.server.errors.base_errors import ServerError
+from argilla.utils import telemetry
 
 _LOGGER = logging.getLogger("argilla")
 

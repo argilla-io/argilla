@@ -46,7 +46,7 @@ Now we know which unification strategy to apply, we can now define our `Training
 
 :::{tab-item} RatingQuestion
 ```python
-from argilla import FeedbackDataset, TrainingTaskMapping
+from argilla.feedback import FeedbackDataset, TrainingTaskMapping
 
 dataset = FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
@@ -61,7 +61,7 @@ task_mapping = TrainingTaskMapping.for_text_classification(
 
 :::{tab-item} LabelQuestion
 ```python
-from argilla import FeedbackDataset, TrainingTaskMapping
+from argilla.feedback import FeedbackDataset, TrainingTaskMapping
 
 dataset = FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
@@ -76,7 +76,7 @@ task_mapping = TrainingTaskMapping.for_text_classification(
 
 :::{tab-item} MultiLabelQuestion
 ```python
-from argilla import FeedbackDataset, TrainingTaskMapping
+from argilla.feedback import FeedbackDataset, TrainingTaskMapping
 
 dataset = FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
@@ -102,16 +102,16 @@ This is a newer version and can be imported via `from argilla.feedback import Ar
 ````
 
 ```python
-import argilla.feedback as rg
+from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTaskMapping
 
-dataset = rg.FeedbackDataset.from_huggingface(
+dataset = FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
 )
-task_mapping = rg.TrainingTaskMapping.for_text_classification(
-    text=dataset.field_by_name("my_text_field"),
+task_mapping = TrainingTaskMapping.for_text_classification(
+    text=dataset.field_by_name("title"),
     label=dataset.question_by_name("tags")
 )
-trainer = rg.ArgillaTrainer(
+trainer = ArgillaTrainer(
     dataset=dataset,
     task_mapping=task_mapping,
     framework="setfit",
@@ -140,15 +140,22 @@ dataset.prepare_for_training(
 Underneath, you can also find an end-to-end example of how to use the `ArgillaTrainer`.
 
 ```python
-import argilla.feedback as rg
+from argilla.feedback import (
+    ArgillaTrainer,
+    FeedbackDataset,
+    FeedbackRecord,
+    LabelQuestion,
+    TextField,
+    TrainingTaskMapping,
+)
 
-dataset = rg.FeedbackDataset(
+dataset = FeedbackDataset(
     guidelines="Add some guidelines for the annotation team here.",
     fields=[
-        rg.TextField(name="text", title="Human prompt"),
+        TextField(name="text", title="Human prompt"),
     ],
     questions =[
-        rg.LabelQuestion(
+        LabelQuestion(
             name="relevant",
             title="Is the response relevant for the given prompt?",
             labels=["yes","no"],
@@ -158,21 +165,21 @@ dataset = rg.FeedbackDataset(
 )
 dataset.add_records(
     records=[
-        rg.FeedbackRecord(
+        FeedbackRecord(
             fields={"text": "What is your favorite color?"},
             responses=[{"values": {"relevant": {"value": "no"}}}]
         ),
-        rg.FeedbackRecord(
+        FeedbackRecord(
             fields={"text": "What do you think about the new iPhone?"},
             responses=[{"values": {"relevant": {"value": "yes"}}}]
         ),
-        rg.FeedbackRecord(
+        FeedbackRecord(
             fields={"text": "What is your feeling about the technology?"},
             responses=[{"values": {"relevant": {"value": "yes"}}},
                        {"values": {"relevant": {"value": "no"}}},
                        {"values": {"relevant": {"value": "yes"}}}]
         ),
-        rg.FeedbackRecord(
+        FeedbackRecord(
             fields={"text": "When do you expect to buy a new phone?"},
             responses=[{"values": {"relevant": {"value": "no"}}},
                        {"values": {"relevant": {"value": "yes"}}}]
@@ -181,12 +188,12 @@ dataset.add_records(
     ]
 )
 
-task_mapping = rg.TrainingTaskMapping.for_text_classification(
+task_mapping = TrainingTaskMapping.for_text_classification(
     text=dataset.field_by_name("text"),
     label=dataset.question_by_name("relevant")
 )
 
-trainer = rg.ArgillaTrainer(
+trainer = ArgillaTrainer(
     dataset=dataset,
     task_mapping=task_mapping,
     framework="setfit",

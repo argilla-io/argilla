@@ -13,15 +13,18 @@
 #  limitations under the License.
 
 import os
+from typing import TYPE_CHECKING
 
 from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
 from argilla.server.security.auth_provider.local.settings import settings
 from click.testing import CliRunner
-from sqlalchemy.orm import Session
 from typer import Typer
 
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
-def test_migrate(monkeypatch, db: Session, cli_runner: CliRunner, cli: Typer):
+
+def test_migrate(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     monkeypatch.setattr(
         settings, "users_db_file", os.path.join(os.path.dirname(__file__), "test_user_files", "users.yml")
     )
@@ -29,11 +32,11 @@ def test_migrate(monkeypatch, db: Session, cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(cli, "users migrate")
 
     assert result.exit_code == 0
-    assert db.query(User).count() == 5
-    assert db.query(Workspace).count() == 9
-    assert db.query(WorkspaceUser).count() == 11
+    assert sync_db.query(User).count() == 5
+    assert sync_db.query(Workspace).count() == 9
+    assert sync_db.query(WorkspaceUser).count() == 11
 
-    user = db.query(User).filter_by(username="john").first()
+    user = sync_db.query(User).filter_by(username="john").first()
     assert user.first_name == "John Doe"
     assert user.username == "john"
     assert user.role == UserRole.owner
@@ -41,7 +44,7 @@ def test_migrate(monkeypatch, db: Session, cli_runner: CliRunner, cli: Typer):
     assert user.password_hash == "$2y$05$xtl7iy3bpqchUwiQMjEHe.tY7OaIjDrg43W3TB4EHQ7izvdjvGtPS"
     assert [ws.name for ws in user.workspaces] == ["john"]
 
-    user = db.query(User).filter_by(username="tanya").first()
+    user = sync_db.query(User).filter_by(username="tanya").first()
     assert user.first_name == "Tanya Franklin"
     assert user.username == "tanya"
     assert user.role == UserRole.annotator
@@ -49,7 +52,7 @@ def test_migrate(monkeypatch, db: Session, cli_runner: CliRunner, cli: Typer):
     assert user.password_hash == "$2y$05$aqNyXcXRXddNj5toZwT0HugHqKZypvqlBAkZviAGGbsAC8oTj/P5K"
     assert [ws.name for ws in user.workspaces] == ["tanya", "argilla", "team"]
 
-    user = db.query(User).filter_by(username="daisy").first()
+    user = sync_db.query(User).filter_by(username="daisy").first()
     assert user.first_name == "Daisy Gonzalez"
     assert user.username == "daisy"
     assert user.role == UserRole.annotator
@@ -57,7 +60,7 @@ def test_migrate(monkeypatch, db: Session, cli_runner: CliRunner, cli: Typer):
     assert user.password_hash == "$2y$05$l83IhUs4ZDaxsgZ/P12FO.RFTi2wKQ2AxMK2vYtLx//yKramuCcZG"
     assert [ws.name for ws in user.workspaces] == ["daisy", "argilla", "team", "latam"]
 
-    user = db.query(User).filter_by(username="macleod").first()
+    user = sync_db.query(User).filter_by(username="macleod").first()
     assert user.first_name == ""
     assert user.username == "macleod"
     assert user.role == UserRole.annotator
@@ -65,7 +68,7 @@ def test_migrate(monkeypatch, db: Session, cli_runner: CliRunner, cli: Typer):
     assert user.password_hash == "$2y$05$Fb3iv7AGv8k.o5cl9qdCtuwkrLcDcSYKWyJk1QNl6RXKUecvP.Ium"
     assert [ws.name for ws in user.workspaces] == ["macleod", "highlands"]
 
-    user = db.query(User).filter_by(username="sanchez").first()
+    user = sync_db.query(User).filter_by(username="sanchez").first()
     assert user.first_name == "Juan Sánchez Villalobos Ramírez"
     assert user.username == "sanchez"
     assert user.role == UserRole.annotator
@@ -74,7 +77,7 @@ def test_migrate(monkeypatch, db: Session, cli_runner: CliRunner, cli: Typer):
     assert [ws.name for ws in user.workspaces] == ["sanchez"]
 
 
-def test_migrate_with_one_user_file(monkeypatch, db: Session, cli_runner: CliRunner, cli: Typer):
+def test_migrate_with_one_user_file(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     monkeypatch.setattr(
         settings, "users_db_file", os.path.join(os.path.dirname(__file__), "test_user_files", "users_one.yml")
     )
@@ -82,11 +85,11 @@ def test_migrate_with_one_user_file(monkeypatch, db: Session, cli_runner: CliRun
     result = cli_runner.invoke(cli, "users migrate")
 
     assert result.exit_code == 0
-    assert db.query(User).count() == 1
-    assert db.query(Workspace).count() == 3
-    assert db.query(WorkspaceUser).count() == 3
+    assert sync_db.query(User).count() == 1
+    assert sync_db.query(Workspace).count() == 3
+    assert sync_db.query(WorkspaceUser).count() == 3
 
-    user = db.query(User).filter_by(username="john").first()
+    user = sync_db.query(User).filter_by(username="john").first()
     assert user.first_name == "John Doe"
     assert user.username == "john"
     assert user.role == UserRole.annotator
@@ -95,7 +98,7 @@ def test_migrate_with_one_user_file(monkeypatch, db: Session, cli_runner: CliRun
     assert [ws.name for ws in user.workspaces] == ["john", "argilla", "team"]
 
 
-def test_migrate_with_invalid_user(monkeypatch, db: Session, cli_runner: CliRunner, cli: Typer):
+def test_migrate_with_invalid_user(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     monkeypatch.setattr(
         settings, "users_db_file", os.path.join(os.path.dirname(__file__), "test_user_files", "users_invalid_user.yml")
     )
@@ -103,12 +106,12 @@ def test_migrate_with_invalid_user(monkeypatch, db: Session, cli_runner: CliRunn
     result = cli_runner.invoke(cli, "users migrate")
 
     assert result.exit_code == 1
-    assert db.query(User).count() == 0
-    assert db.query(Workspace).count() == 0
-    assert db.query(WorkspaceUser).count() == 0
+    assert sync_db.query(User).count() == 0
+    assert sync_db.query(Workspace).count() == 0
+    assert sync_db.query(WorkspaceUser).count() == 0
 
 
-def test_migrate_with_invalid_workspace(monkeypatch, db: Session, cli_runner: CliRunner, cli: Typer):
+def test_migrate_with_invalid_workspace(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     monkeypatch.setattr(
         settings,
         "users_db_file",
@@ -118,17 +121,17 @@ def test_migrate_with_invalid_workspace(monkeypatch, db: Session, cli_runner: Cl
     result = cli_runner.invoke(cli, "users migrate")
 
     assert result.exit_code == 1
-    assert db.query(User).count() == 0
-    assert db.query(Workspace).count() == 0
-    assert db.query(WorkspaceUser).count() == 0
+    assert sync_db.query(User).count() == 0
+    assert sync_db.query(Workspace).count() == 0
+    assert sync_db.query(WorkspaceUser).count() == 0
 
 
-def test_migrate_with_nonexistent_file(monkeypatch, db: Session, cli_runner: CliRunner, cli: Typer):
+def test_migrate_with_nonexistent_file(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     monkeypatch.setattr(settings, "users_db_file", "nonexistent.yml")
 
     result = cli_runner.invoke(cli, "users migrate")
 
     assert result.exit_code == 1
-    assert db.query(User).count() == 0
-    assert db.query(Workspace).count() == 0
-    assert db.query(WorkspaceUser).count() == 0
+    assert sync_db.query(User).count() == 0
+    assert sync_db.query(Workspace).count() == 0
+    assert sync_db.query(WorkspaceUser).count() == 0

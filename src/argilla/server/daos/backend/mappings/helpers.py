@@ -100,8 +100,8 @@ class mappings:
         return {"type": "float"}
 
     @staticmethod
-    def non_searchable_text_field():
-        return {"type": "text", "index": False}
+    def protected_non_searchable_field():
+        return {"type": "object", "enabled": False}
 
     @classmethod
     def dynamic_field(cls):

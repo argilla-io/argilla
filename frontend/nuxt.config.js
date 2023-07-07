@@ -15,10 +15,8 @@
  * limitations under the License.
  */
 
-require("dotenv").config();
-const API_BASE_URL =
-  process.env.API_BASE_URL || process.env.BASE_URL || "http://localhost:6900";
-
+const LOCAL_ENVIRONMENT = "http://localhost:6900";
+const BASE_URL = process.env.API_BASE_URL ?? LOCAL_ENVIRONMENT;
 const DIST_FOLDER = process.env.DIST_FOLDER || "dist";
 
 export default {
@@ -97,7 +95,6 @@ export default {
   modules: [
     "@nuxtjs/style-resources",
     "@nuxtjs/axios",
-    "@nuxtjs/dotenv",
     "@nuxtjs/auth-next",
     "nuxt-highlightjs",
     [
@@ -120,8 +117,7 @@ export default {
 
   proxy: {
     "/api/": {
-      target: API_BASE_URL,
-      // pathRewrite: { "^/api/": "" },
+      target: BASE_URL,
     },
   },
 
@@ -182,5 +178,19 @@ export default {
   router: {
     middleware: ["auth-guard", "register-dependencies"],
     base: process.env.BASE_URL ?? "/",
+  },
+
+  publicRuntimeConfig: {
+    slackCommunity:
+      "https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g",
+    documentationSite: "https://docs.argilla.io/",
+    documentationSiteQuickStart:
+      "https://docs.argilla.io/en/latest/getting_started/quickstart.html",
+    documentationSiteSemanticSearch:
+      "https://docs.argilla.io/en/latest/reference/webapp/features.html#semantic-search",
+    documentationSiteLabelScheme:
+      "https://docs.argilla.io/en/latest/guides/log_load_and_prepare_data.html#define-a-labeling-schema",
+    documentationSiteQueryDatasets:
+      "https://docs.argilla.io/en/latest/guides/query_datasets.html",
   },
 };

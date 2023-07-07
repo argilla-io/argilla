@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <datasets-empty v-if="!datasets.length" />
-    <div v-else>
+    <div class="dataset__table" v-else>
       <div class="interactions">
         <base-search-bar @input="onSearch" placeholder="Search datasets" />
       </div>
@@ -224,21 +224,15 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-  @extend %container;
-  padding-top: 0.2em;
-  padding-bottom: 0;
-  padding-right: calc($sidebarMenuWidth + 4em);
-  &--intro {
-    padding-top: 2em;
-    margin-bottom: 1.5em;
-    &:after {
-      border-bottom: 1px solid palette(grey, 700);
-      content: "";
-      margin-bottom: 1.5em;
-      position: absolute;
-      left: 0;
-      right: 0;
-    }
+  display: flex;
+  justify-content: center;
+  padding: 0.2em calc($sidebarMenuWidth + 4em) 0 4em;
+  flex-grow: 1;
+  overflow: auto;
+}
+.dataset {
+  &__table {
+    width: 100%;
   }
 }
 .interactions {

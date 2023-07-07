@@ -729,10 +729,10 @@ class OpenSearchClient(IClientAdapter):
         is_phrase_query: bool = True,
         add_sort_info: bool = False,
     ):
-        data = {
-            **document["_source"],
-            "id": document["_id"],
-        }
+        data = document["_source"]
+
+        if "id" not in data:
+            data["id"] = document["_id"]
 
         if add_sort_info and "sort" in document:
             data["sort"] = document["sort"]

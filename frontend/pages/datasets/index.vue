@@ -69,11 +69,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.wrapper {
+.main {
   display: flex;
-  .main {
-    width: 100%;
-  }
+  flex-direction: column;
+  height: 100vh;
 }
 
 .sidebar {

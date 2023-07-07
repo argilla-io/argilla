@@ -20,13 +20,24 @@ from argilla.server.apis.v0.models.text2text import (
     Text2TextRecordInputs,
     Text2TextSearchResults,
 )
+from argilla.server.commons.models import TaskType
+from argilla.server.models import User
 
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
+from tests.helpers import SecuredClient
 
 
-def test_search_records(mocked_client):
+def test_search_records(mocked_client: SecuredClient, argilla_user: User):
     dataset = "test_search_records"
     delete_dataset(dataset, mocked_client)
+
+    assert (
+        mocked_client.post(
+            "/api/datasets",
+            json={"name": dataset, "task": TaskType.text2text.value, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
 
     records = [
         Text2TextRecordInputs.parse_obj(data)
@@ -114,10 +125,17 @@ def search_data(
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
-def test_search_with_vectors(mocked_client):
+def test_search_with_vectors(mocked_client: SecuredClient, argilla_user: User):
     dataset = "test_search_with_vectors"
 
     delete_dataset(dataset, mocked_client)
+    assert (
+        mocked_client.post(
+            "/api/datasets",
+            json={"name": dataset, "task": TaskType.text2text.value, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
 
     records_for_text2text_with_vectors = [
         Text2TextRecordInputs.parse_obj(data)
@@ -172,9 +190,16 @@ def test_search_with_vectors(mocked_client):
     )
 
 
-def test_api_with_new_predictions_data_model(mocked_client):
+def test_api_with_new_predictions_data_model(mocked_client: SecuredClient, argilla_user: User):
     dataset = "test_api_with_new_predictions_data_model"
     delete_dataset(dataset, mocked_client)
+    assert (
+        mocked_client.post(
+            "/api/datasets",
+            json={"name": dataset, "task": TaskType.text2text.value, "workspace": argilla_user.username},
+        ).status_code
+        == 200
+    )
 
     records = [
         Text2TextRecordInputs.parse_obj(

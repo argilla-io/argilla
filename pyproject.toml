@@ -29,7 +29,7 @@ dependencies = [
     # pandas -> For data loading
     "pandas >=1.0.0,<2.0.0",
     # Aligned pydantic version with server fastAPI
-    "pydantic >= 1.10.7",
+    "pydantic >= 1.10.7,< 2.0",
     # monitoring
     "wrapt >= 1.13,< 1.15",
     # weaksupervision
@@ -58,6 +58,9 @@ server = [
     # Database dependencies
     "alembic ~= 1.9.0",
     "SQLAlchemy ~= 2.0.0",
+    "greenlet >= 2.0.0",
+    # Async SQLite
+    "aiosqlite >=0.19.0",
     # Advanced query search dsl
     "luqum >= 0.11,< 0.13",
     # metrics
@@ -78,9 +81,12 @@ postgresql = [
     "psycopg2 ~= 2.9.5; sys_platform != 'darwin'",
     # If we're on macOS, then install `psycopg2-binary` instead
     "psycopg2-binary ~= 2.9.5; sys_platform == 'darwin'",
+    # Async PostgreSQL
+    "asyncpg >=0.27.0"
 ]
 listeners = ["schedule ~= 1.1.0", "prodict ~= 0.8.0"]
 integrations = [
+    "PyYAML >= 5.4.1,< 6.1.0", # Required by `argilla.client.feedback.config` just used in `HuggingFaceDatasetMixIn`
     "cleanlab ~= 2.0.0",
     # TODO: `push_to_hub` fails up to 2.3.2, check patches when they come out eventually
     "datasets > 1.17.0,!= 2.3.2",
@@ -101,8 +107,7 @@ integrations = [
     "setfit",
     "span_marker",
     "openai",
-    "peft",
-    "autotrain-advanced == 0.5.2",
+    "peft"
 ]
 tests = [
     "pytest",
@@ -124,14 +129,17 @@ where = ["src"]
 version = { attr = "argilla.__version__" }
 
 [tool.setuptools.package-data]
-"argilla.client.feedback.card" = ["argilla_template.md"]
+"argilla.client.feedback.integrations.huggingface.card" = ["argilla_template.md"]
 
 [tool.pytest.ini_options]
 log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 log_cli = "True"
 testpaths = ["tests"]
-addopts = ["--ignore", "tests/training"]
+
+
+[tool.coverage.run]
+concurrency = ["greenlet", "thread", "multiprocessing"]
 
 [tool.coverage.report]
 exclude_lines = [
