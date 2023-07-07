@@ -277,7 +277,7 @@ class SearchEngine:
     def _index_name_for_dataset(dataset: Dataset):
         return f"rg.{dataset.id}"
 
-    def _response_status_filter_builder(self, status_filter: UserResponseStatusFilter) -> Dict[str, Any]:
+    def _response_status_filter_builder(self, status_filter: UserResponseStatusFilter) -> List[Dict[str, Any]]:
         user_response_field = f"responses.{status_filter.user.username}"
 
         statuses = [
