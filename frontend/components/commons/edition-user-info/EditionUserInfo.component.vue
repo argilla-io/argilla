@@ -71,6 +71,7 @@ export default {
   gap: 5px;
   display: flex;
   flex-wrap: wrap;
+  width: 90%;
 }
 
 .bubble {
@@ -113,6 +114,11 @@ export default {
 
 .clickable {
   cursor: pointer;
+  background-color: $black-4;
+  border: unset;
+  &:hover {
+    background-color: $black-10;
+  }
 }
 
 .description {
