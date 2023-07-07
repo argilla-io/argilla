@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import random
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 import pytest
 import pytest_asyncio
@@ -109,32 +109,8 @@ async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine) ->
             ),
             await RecordFactory.create(
                 dataset=dataset,
-                fields={"textId": "00002", "text": "Why was I charged for getting cash?", "label": "neutral"},
-                responses=[],
-            ),
-            await RecordFactory.create(
-                dataset=dataset,
                 fields={
-                    "textId": "00003",
-                    "text": "I deposited cash into my account a week ago and it is still not available,"
-                    " please tell me why? I need the cash back now.",
-                    "label": "negative",
-                },
-                responses=[],
-            ),
-            await RecordFactory.create(
-                dataset=dataset,
-                fields={
-                    "textId": "00004",
-                    "text": "Why was I charged for getting cash?",
-                    "label": "neutral",
-                },
-                responses=[],
-            ),
-            await RecordFactory.create(
-                dataset=dataset,
-                fields={
-                    "textId": "00005",
+                    "textId": "00002",
                     "text": "I tried to make a payment with my card and it was declined.",
                     "label": "negative",
                 },
@@ -143,8 +119,50 @@ async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine) ->
             await RecordFactory.create(
                 dataset=dataset,
                 fields={
-                    "textId": "00006",
+                    "textId": "00003",
                     "text": "My credit card was declined when I tried to make a payment.",
+                    "label": "negative",
+                },
+                responses=[],
+            ),
+            await RecordFactory.create(
+                dataset=dataset,
+                fields={
+                    "textId": "00004",
+                    "text": "I made a successful payment towards my mortgage loan earlier today.",
+                    "label": "positive",
+                },
+                responses=[],
+            ),
+            await RecordFactory.create(
+                dataset=dataset,
+                fields={
+                    "textId": "00005",
+                    "text": "Please confirm the receipt of my payment for the credit card bill due on the 15th.",
+                    "label": "neutral",
+                },
+                responses=[],
+            ),
+            await RecordFactory.create(
+                dataset=dataset,
+                fields={
+                    "textId": "00006",
+                    "text": "Why was I charged for getting cash?",
+                    "label": "neutral",
+                },
+                responses=[],
+            ),
+            await RecordFactory.create(
+                dataset=dataset,
+                fields={"textId": "00007", "text": "Why was I charged for getting cash?", "label": "neutral"},
+                responses=[],
+            ),
+            await RecordFactory.create(
+                dataset=dataset,
+                fields={
+                    "textId": "00008",
+                    "text": "I deposited cash into my account a week ago and it is still not available,"
+                    " please tell me why? I need the cash back now.",
                     "label": "negative",
                 },
                 responses=[],
@@ -309,23 +327,23 @@ class TestSuiteElasticSearchEngine:
     @pytest.mark.parametrize(
         ("query", "expected_items"),
         [
-            ("card", 4),
+            ("card", 5),
             ("account", 1),
-            ("payment", 4),
+            ("payment", 6),
             ("cash", 3),
             ("negative", 4),
             ("00000", 1),
-            ("card payment", 4),
+            ("card payment", 5),
             ("nothing", 0),
-            (SearchQuery(text=TextQuery(q="card")), 4),
+            (SearchQuery(text=TextQuery(q="card")), 5),
             (SearchQuery(text=TextQuery(q="account")), 1),
-            (SearchQuery(text=TextQuery(q="payment")), 4),
+            (SearchQuery(text=TextQuery(q="payment")), 6),
             (SearchQuery(text=TextQuery(q="cash")), 3),
-            (SearchQuery(text=TextQuery(q="card payment")), 4),
+            (SearchQuery(text=TextQuery(q="card payment")), 5),
             (SearchQuery(text=TextQuery(q="nothing")), 0),
             (SearchQuery(text=TextQuery(q="negative", field="label")), 4),
             (SearchQuery(text=TextQuery(q="00000", field="textId")), 1),
-            (SearchQuery(text=TextQuery(q="card payment", field="text")), 4),
+            (SearchQuery(text=TextQuery(q="card payment", field="text")), 5),
         ],
     )
     async def test_search_with_query_string(
@@ -352,12 +370,15 @@ class TestSuiteElasticSearchEngine:
         assert scores == sorted_scores
 
     @pytest.mark.parametrize(
-        "status",
+        "statuses, expected_items",
         [
-            ResponseStatusFilter.discarded,
-            ResponseStatusFilter.submitted,
-            ResponseStatusFilter.draft,
-            ResponseStatusFilter.missing,
+            ([ResponseStatusFilter.missing], 6),
+            ([ResponseStatusFilter.draft], 2),
+            ([ResponseStatusFilter.submitted], 2),
+            ([ResponseStatusFilter.discarded], 2),
+            ([ResponseStatusFilter.missing, ResponseStatusFilter.draft], 6),
+            ([ResponseStatusFilter.submitted, ResponseStatusFilter.discarded], 4),
+            ([ResponseStatusFilter.missing, ResponseStatusFilter.draft, ResponseStatusFilter.discarded], 6),
         ],
     )
     async def test_search_with_response_status_filter(
@@ -365,14 +386,19 @@ class TestSuiteElasticSearchEngine:
         elastic_search_engine: SearchEngine,
         opensearch: OpenSearch,
         test_banking_sentiment_dataset: Dataset,
-        status: ResponseStatusFilter,
+        statuses: List[ResponseStatusFilter],
+        expected_items: int,
     ):
         index_name = f"rg.{test_banking_sentiment_dataset.id}"
         user = await UserFactory.create()
         another_user = await UserFactory.create()
 
-        if status != ResponseStatusFilter.missing:
-            for record in test_banking_sentiment_dataset.records:
+        # Create two responses with the same status (one in each record)
+        for i, status in enumerate(statuses):
+            if status == ResponseStatusFilter.missing:
+                continue
+            offset = i * 2
+            for record in test_banking_sentiment_dataset.records[offset : offset + 2]:
                 users_responses = {
                     f"{user.username}.status": status.value,
                     f"{another_user.username}.status": status.value,
@@ -383,10 +409,10 @@ class TestSuiteElasticSearchEngine:
         result = await elastic_search_engine.search(
             test_banking_sentiment_dataset,
             query=SearchQuery(text=TextQuery(q="payment")),
-            user_response_status_filter=UserResponseStatusFilter(user=user, status=status),
+            user_response_status_filter=UserResponseStatusFilter(user=user, statuses=statuses),
         )
-        assert len(result.items) == 4
-        assert result.total == 4
+        assert len(result.items) == expected_items
+        assert result.total == expected_items
 
     @pytest.mark.parametrize(("offset", "limit"), [(0, 50), (10, 5), (0, 0), (90, 100)])
     async def test_search_with_pagination(
