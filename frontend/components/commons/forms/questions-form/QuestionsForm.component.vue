@@ -4,6 +4,7 @@
     class="questions-form"
     :class="{ '--edited-form': !isFormUntouched }"
     @submit.prevent="onSubmit"
+    @keydown.enter.prevent
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
@@ -286,7 +287,7 @@ export default {
         }
         case "Backspace": {
           const elem = this.$refs.discardButton.$el;
-          elem.click();
+          shiftKey && elem.click();
           break;
         }
         default:
