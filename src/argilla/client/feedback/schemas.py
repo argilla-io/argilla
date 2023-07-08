@@ -161,6 +161,7 @@ class FieldSchema(BaseModel):
 
     """
 
+    id: Optional[UUID] = None
     name: str
     title: Optional[str] = None
     required: bool = True
@@ -176,7 +177,7 @@ class FieldSchema(BaseModel):
     class Config:
         validate_assignment = True
         extra = Extra.forbid
-        exclude = {"type"}
+        exclude = {"id", "type"}
 
 
 class TextField(FieldSchema):
@@ -232,6 +233,7 @@ class QuestionSchema(BaseModel):
 
     """
 
+    id: Optional[UUID] = None
     name: str
     title: Optional[str] = None
     description: Optional[str] = None
@@ -248,7 +250,7 @@ class QuestionSchema(BaseModel):
     class Config:
         validate_assignment = True
         extra = Extra.forbid
-        exclude = {"type"}
+        exclude = {"id", "type"}
 
 
 # TODO(alvarobartt): add `TextResponse` and `RatingResponse` classes
