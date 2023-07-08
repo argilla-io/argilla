@@ -725,15 +725,15 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                     f" version, supported question types are: `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}`."
                 )
             questions.append(question)
-        self = cls(
+        instance = cls(
             fields=fields,
             questions=questions,
             guidelines=existing_dataset.guidelines or None,
         )
-        self.argilla_id = existing_dataset.id
+        instance.argilla_id = existing_dataset.id
         if with_records:
-            self.fetch_records()
-        return self
+            instance.fetch_records()
+        return instance
 
     @requires_version("datasets")
     def format_as(self, format: Literal["datasets"]) -> "Dataset":
