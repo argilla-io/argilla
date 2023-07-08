@@ -244,7 +244,7 @@ def add_records(
         if "responses" not in record:
             continue
         for response in record["responses"]:
-            if response["user_id"] is None:
+            if response.get("user_id") is None:
                 if response_without_user_id:
                     warnings.warn(
                         f"Multiple responses without `user_id` found in record {record}, so just the first one will be"
@@ -256,8 +256,8 @@ def add_records(
                         active_user_id = client.get("api/me").json()["id"]
                     response["user_id"] = active_user_id
                     response_without_user_id = True
-            if isinstance(response["user_id"], UUID):
-                response["user_id"] = str(response["user_id"])
+            if isinstance(response.get("user_id"), UUID):
+                response["user_id"] = str(response.get("user_id"))
             cleaned_responses.append(response)
         record["responses"] = cleaned_responses
 
