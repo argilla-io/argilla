@@ -305,7 +305,7 @@ def add_field(
     client: httpx.Client,
     id: UUID,
     field: Dict[str, Any],
-) -> Response[Union[ErrorMessage, HTTPValidationError]]:
+) -> Response[Union[FeedbackFieldModel, ErrorMessage, HTTPValidationError]]:
     """Sends a POST request to `/api/v1/datasets/{id}/fields` endpoint to add a `FeedbackTask` field.
 
     Args:
@@ -314,17 +314,20 @@ def add_field(
         field: the field to be added to the dataset.
 
     Returns:
-        A `Response` object with the response itself, and/or the error codes if applicable.
+        A `Response` object containing a `parsed` attribute with the parsed response if the
+        request was successful, which is an instance of `FeedbackFieldModel`.
     """
     url = f"/api/v1/datasets/{id}/fields"
 
     response = client.post(url=url, json=field)
 
     if response.status_code == 201:
+        parsed_response = FeedbackFieldModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
             headers=response.headers,
+            parsed=parsed_response,
         )
     return handle_response_error(response)
 
@@ -363,24 +366,27 @@ def add_question(
     client: httpx.Client,
     id: UUID,
     question: Dict[str, Any],
-) -> Response[Union[ErrorMessage, HTTPValidationError]]:
+) -> Response[Union[FeedbackQuestionModel, ErrorMessage, HTTPValidationError]]:
     """Sends a POST request to `/api/v1/datasets/{id}/questions` endpoint to add a
-    question to the `FeedbackTask` dataset.
+    question to the `FeedbackDataset`.
 
     Args:
         client: the authenticated Argilla client to be used to send the request to the API.
 
     Returns:
-        A Response object containing the response itself, and/or the error codes if applicable.
+        A `Response` object containing a `parsed` attribute with the parsed response if the
+        request was successful, which is a `FeedbackQuestionModel`.
     """
     url = f"/api/v1/datasets/{id}/questions"
 
     response = client.post(url=url, json=question)
 
     if response.status_code == 201:
+        parsed_response = FeedbackQuestionModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
             headers=response.headers,
+            parsed=parsed_response,
         )
     return handle_response_error(response)
