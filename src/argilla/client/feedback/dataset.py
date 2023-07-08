@@ -311,7 +311,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
         self.__guidelines = guidelines
 
     @property
-    def fields(self) -> List["FeedbackFieldModel"]:
+    def fields(self) -> List[AllowedFieldTypes]:
         """Returns the fields that define the schema of the records in the dataset."""
         return self.__fields
 
@@ -322,7 +322,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
         raise KeyError(f"Field with name '{name}' not found in self.fields")
 
     @property
-    def questions(self) -> List["FeedbackQuestionModel"]:
+    def questions(self) -> List[AllowedQuestionTypes]:
         """Returns the questions that will be used to annotate the dataset."""
         return self.__questions
 
