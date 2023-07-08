@@ -687,7 +687,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
 
         fields = []
         for field in datasets_api_v1.get_fields(client=httpx_client, id=existing_dataset.id).parsed:
-            base_field = field.dict(include={"name", "title", "required"})
+            base_field = field.dict(include={"id", "name", "title", "required"})
             if field.settings["type"] == "text":
                 field = TextField(**base_field, use_markdown=field.settings["use_markdown"])
             else:
@@ -698,7 +698,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
             fields.append(field)
         questions = []
         for question in datasets_api_v1.get_questions(client=httpx_client, id=existing_dataset.id).parsed:
-            question_dict = question.dict(include={"name", "title", "description", "required"})
+            question_dict = question.dict(include={"id", "name", "title", "description", "required"})
             if question.settings["type"] == "rating":
                 question = RatingQuestion(**question_dict, values=[v["value"] for v in question.settings["options"]])
             elif question.settings["type"] == "text":
