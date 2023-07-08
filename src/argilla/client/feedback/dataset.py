@@ -545,7 +545,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                 self.__new_records = []
             except Exception as e:
                 raise Exception(
-                    f"Failed while adding new records to the current `FeedbackTask` dataset in Argilla with exception: {e}"
+                    f"Failed while adding records to the current `FeedbackDataset` in Argilla with exception: {e}"
                 ) from e
         else:
             if workspace is None:
@@ -568,7 +568,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                 argilla_id = new_dataset.id
             except Exception as e:
                 raise Exception(
-                    f"Failed while creating the `FeedbackTask` dataset in Argilla with exception: {e}"
+                    f"Failed while creating the `FeedbackDataset` in Argilla with exception: {e}"
                 ) from e
 
             def delete_dataset(dataset_id: UUID) -> None:
@@ -576,7 +576,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                     datasets_api_v1.delete_dataset(client=httpx_client, id=dataset_id)
                 except Exception as e:
                     raise Exception(
-                        f"Failed while deleting the `FeedbackTask` dataset with ID '{dataset_id}' from Argilla with"
+                        f"Failed while deleting the `FeedbackDataset` with ID '{dataset_id}' from Argilla with"
                         f" exception: {e}"
                     ) from e
 
@@ -586,7 +586,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                 except Exception as e:
                     delete_dataset(dataset_id=argilla_id)
                     raise Exception(
-                        f"Failed while adding the field '{field.name}' to the `FeedbackTask` dataset in Argilla with"
+                        f"Failed while adding the field '{field.name}' to the `FeedbackDataset` in Argilla with"
                         f" exception: {e}"
                     ) from e
 
@@ -596,7 +596,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                 except Exception as e:
                     delete_dataset(dataset_id=argilla_id)
                     raise Exception(
-                        f"Failed while adding the question '{question.name}' to the `FeedbackTask` dataset in Argilla"
+                        f"Failed while adding the question '{question.name}' to the `FeedbackDataset` in Argilla"
                         f" with exception: {e}"
                     ) from e
 
@@ -605,7 +605,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
             except Exception as e:
                 delete_dataset(dataset_id=argilla_id)
                 raise Exception(
-                    f"Failed while publishing the `FeedbackTask` dataset in Argilla with exception: {e}"
+                    f"Failed while publishing the `FeedbackDataset` in Argilla with exception: {e}"
                 ) from e
 
             for batch in self.iter():
@@ -621,7 +621,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                 except Exception as e:
                     delete_dataset(dataset_id=argilla_id)
                     raise Exception(
-                        f"Failed while adding the records to the `FeedbackTask` dataset in Argilla with exception: {e}"
+                        f"Failed while adding the records to the `FeedbackDataset` in Argilla with exception: {e}"
                     ) from e
 
             self.__records += self.__new_records
@@ -675,13 +675,13 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
         existing_dataset = feedback_dataset_in_argilla(name=name, workspace=workspace, id=id)
         if existing_dataset is None:
             raise ValueError(
-                f"Could not find a `FeedbackTask` dataset in Argilla with name='{name}'."
+                f"Could not find a `FeedbackDataset` in Argilla with name='{name}'."
                 if name and not workspace
                 else (
-                    "Could not find a `FeedbackTask` dataset in Argilla with"
+                    "Could not find a `FeedbackDataset` in Argilla with"
                     f" name='{name}' and workspace='{workspace}'."
                     if name and workspace
-                    else (f"Could not find a `FeedbackTask` dataset in Argilla with ID='{id}'.")
+                    else (f"Could not find a `FeedbackDataset` in Argilla with ID='{id}'.")
                 )
             )
 
