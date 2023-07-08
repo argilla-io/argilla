@@ -39,7 +39,7 @@ def create_dataset(
     workspace_id: UUID,
     guidelines: Optional[str] = None,
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
-    """Sends a POST request to `/api/v1/datasets` endpoint to create a new `FeedbackTask` dataset.
+    """Sends a POST request to `/api/v1/datasets` endpoint to create a new `FeedbackDataset`.
 
     Args:
         client: the authenticated Argilla client to be used to send the request to the API.
@@ -74,7 +74,7 @@ def get_dataset(
     client: httpx.Client,
     id: UUID,
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
-    """Sends a GET request to `/api/v1/datasets/{id}` endpoint to retrieve a `FeedbackTask` dataset.
+    """Sends a GET request to `/api/v1/datasets/{id}` endpoint to retrieve a `FeedbackDataset`.
 
     Args:
         client: the authenticated Argilla client to be used to send the request to the API.
@@ -103,7 +103,7 @@ def delete_dataset(
     client: httpx.Client,
     id: UUID,
 ) -> Response[Union[ErrorMessage, HTTPValidationError]]:
-    """Sends a DELETE request to `/api/v1/datasets/{id}` endpoint to delete a `FeedbackTask` dataset.
+    """Sends a DELETE request to `/api/v1/datasets/{id}` endpoint to delete a `FeedbackDataset`.
 
     Args:
         client: the authenticated Argilla client to be used to send the request to the API.
@@ -129,7 +129,7 @@ def publish_dataset(
     client: httpx.Client,
     id: UUID,
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
-    """Sends a PUT request to `/api/v1/datasets/{id}/publish` endpoint to publish a `FeedbackTask` dataset.
+    """Sends a PUT request to `/api/v1/datasets/{id}/publish` endpoint to publish a `FeedbackDataset`.
     Publishing in Argilla means setting the status of the dataset from `draft` to `ready`, so that
     it can be used to add records to it.
 
