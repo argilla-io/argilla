@@ -81,3 +81,12 @@ class FeedbackQuestionModel(BaseModel):
     settings: Dict[str, Any]
     inserted_at: datetime
     updated_at: datetime
+
+
+class FeedbackSuggestionModel(BaseModel):
+    id: UUID
+    question_id: UUID
+    type: Optional[Literal["human", "model"]] = None
+    score: Optional[float] = None
+    value: Any
+    agent: Optional[str] = None
