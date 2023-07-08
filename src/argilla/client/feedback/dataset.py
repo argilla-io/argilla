@@ -315,22 +315,22 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
         """Returns the fields that define the schema of the records in the dataset."""
         return self.__fields
 
-    def field_by_name(self, name: str) -> Dict[str, FieldSchema]:
-        for item in self.fields:
-            if item.name == name:
-                return item
-        raise KeyError(f"Field with name '{name}' not found in self.fields")
+    def field_by_name(self, name: str) -> AllowedFieldTypes:
+        try:
+            return next(filter(lambda f: f.name == name, self.fields))
+        except Exception as e:
+            raise ValueError(f"Field with name='{name}' not found, available fields are: {self.fields}") from e
 
     @property
     def questions(self) -> List[AllowedQuestionTypes]:
         """Returns the questions that will be used to annotate the dataset."""
         return self.__questions
 
-    def question_by_name(self, name: str) -> Dict[str, "FeedbackQuestionModel"]:
-        for item in self.questions:
-            if item.name == name:
-                return item
-        raise KeyError(f"Question with name '{name}' not found in self.questions")
+    def question_by_name(self, name: str) -> AllowedQuestionTypes:
+        try:
+            return next(filter(lambda q: q.name == name, self.questions))
+        except Exception as e:
+            raise ValueError(f"Question with name='{name}' not found, available questions are: {self.questions}") from e
 
     @property
     def records(self) -> List[FeedbackRecord]:
