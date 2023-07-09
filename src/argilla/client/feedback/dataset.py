@@ -41,10 +41,11 @@ from argilla.client.feedback.schemas import (
 from argilla.client.feedback.training.schemas import (
     TrainingTaskMappingForTextClassification,
 )
-from argilla.client.feedback.typing import AllowedFieldTypes, AllowedQuestionTypes
+from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.feedback.unification import (
     LabelQuestionStrategy,
     MultiLabelQuestionStrategy,
+    RankingQuestionStrategy,
     RatingQuestionStrategy,
 )
 from argilla.client.feedback.utils import (
@@ -772,13 +773,26 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
     def unify_responses(
         self,
         question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
-        strategy: Union[str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy],
+        strategy: Union[
+            str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy, RankingQuestionStrategy
+        ],
     ) -> None:
         """Unify responses for a given question using a given strategy"""
         if isinstance(question, str):
             question = self.question_by_name(question)
+
         if isinstance(strategy, str):
-            strategy = LabelQuestionStrategy(strategy)
+            if isinstance(question, LabelQuestion):
+                strategy = LabelQuestionStrategy(strategy)
+            elif isinstance(question, MultiLabelQuestion):
+                strategy = MultiLabelQuestionStrategy(strategy)
+            elif isinstance(question, RatingQuestion):
+                strategy = RatingQuestionStrategy(strategy)
+            elif isinstance(question, RankingQuestion):
+                strategy = RankingQuestionStrategy(strategy)
+            else:
+                raise ValueError(f"Question {question} is not supported yet")
+
         strategy.unify_responses(self.records, question)
 
     def prepare_for_training(

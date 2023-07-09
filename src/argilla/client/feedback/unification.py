@@ -166,22 +166,26 @@ class RankingQuestionStrategy(Enum):
             ratings = []
             for resp in responses:
                 if question in resp.values:
-                    for idx, value in enumerate(resp.values[question].value):
-                        ratings.append([value, idx])
+                    for value in resp.values[question].value:
+                        ratings.append([value.value, value.rank])
             if not ratings:
                 continue
             df = pd.DataFrame(ratings, columns=["value", "rank"])
             # unified response
             if self.value == self.MEAN.value:
-                df = df.groupby("value").mean().reset_index(drop=True)
+                df = df.groupby("value", sort=False).mean().reset_index()
+                df = df.sort_values(by="rank", ascending=True)
             elif self.value == self.MAX.value:
-                df = df.groupby("value").max().reset_index(drop=True)
+                df = df.groupby("value", sort=False).min().reset_index()  # inverse due to higher rank better
+                df = df.sort_values(by="rank", ascending=True)
             elif self.value == self.MIN.value:
-                df = df.groupby("value").min().reset_index(drop=True)
+                df = df.groupby("value", sort=False).max().reset_index()  # inverse due to higher rank better
             else:
                 raise ValueError("Invalid aggregation method")
-            unified_value = random.choice(df["value"].tolist())
-            rec._unified_responses[question] = [UnifiedValueSchema(value=unified_value, strategy=self.value)]
+            options = df["value"].tolist()
+            if options:
+                unified_value = options[0]
+                rec._unified_responses[question] = [UnifiedValueSchema(value=unified_value, strategy=self.value)]
         return records
 
     def _majority(self, records: List[FeedbackRecord], question: str):
@@ -195,8 +199,8 @@ class RankingQuestionStrategy(Enum):
             # get responses with a value that is most frequent
             for resp in responses:
                 if question in resp.values:
-                    for idx, value in resp.values[question].value:
-                        [counter.update([value]) for _ in range(idx)]
+                    for value in resp.values[question].value:
+                        counter.update([value.value] * value.rank)
             if not counter.values():
                 continue
             # Find the minimum count
@@ -208,7 +212,6 @@ class RankingQuestionStrategy(Enum):
             else:
                 majority_value = counter.most_common()[-1][0]
             rec._unified_responses[question] = [UnifiedValueSchema(value=majority_value, strategy=self.value)]
-
         return records
 
 
@@ -358,10 +361,10 @@ class RatingQuestionUnification(BaseModel):
             min (str): the min value of the ratings
 
     Examples:
-        >>> from argilla import RatingQuestion, RatingUnification, RatingQuestionStrategy
-        >>> RatingUnification(question=RatingQuestion(...), strategy="mean")
+        >>> from argilla import RatingQuestion, RatingQuestionUnification, RatingQuestionStrategy
+        >>> RatingQuestionUnification(question=RatingQuestion(...), strategy="mean")
         >>> # or use a RatingQuestionStrategy
-        >>> RatingUnification(question=RatingQuestion(...), strategy=RatingQuestionStrategy.MEAN)
+        >>> RatingQuestionUnification(question=RatingQuestion(...), strategy=RatingQuestionStrategy.MEAN)
     """
 
     question: RatingQuestion
@@ -371,6 +374,34 @@ class RatingQuestionUnification(BaseModel):
     def strategy_must_be_valid(cls, v: Union[str, RatingQuestionStrategy]) -> RatingQuestionStrategy:
         if isinstance(v, str):
             return RatingQuestionStrategy(v)
+        return v
+
+
+class RankingQuestionUnification(BaseModel):
+    """Ranking unification for a ranking question
+
+    Args:
+        question (RankingQuestion): ranking question
+        strategy (Union[str, RankingQuestionStrategy]): unification strategy. Defaults to "mean".
+            mean (str): the mean value of the ratings.
+            majority (str): the majority value of the ratings.
+            max (str): the max value of the ratings
+            min (str): the min value of the ratings
+
+    Examples:
+        >>> from argilla import RankingQuestionUnification, RankingQuestionStrategy, RankingQuestion
+        >>> RankingQuestionUnification(question=RankingQuestion(...), strategy="mean")
+        >>> # or use a RankingQuestionStrategy
+        >>> RankingQuestionUnification(question=RankingQuestion(...), strategy=RankingQuestionStrategy.MEAN)
+    """
+
+    question: RankingQuestion
+    strategy: Union[str, RankingQuestionStrategy] = "mean"
+
+    @validator("strategy", always=True)
+    def strategy_must_be_valid(cls, v: Union[str, RankingQuestionStrategy]) -> RankingQuestionStrategy:
+        if isinstance(v, str):
+            return RankingQuestionStrategy(v)
         return v
 
 
@@ -385,10 +416,10 @@ class LabelQuestionUnification(BaseModel):
             disagreement (str): preserve the natural disagreement between annotators
 
     Examples:
-        >>> from argilla import LabelQuestion, LabelUnification, LabelQuestionStrategy
-        >>> LabelUnification(question=LabelQuestion(...), strategy="majority")
+        >>> from argilla import LabelQuestion, LabelQuestionStrategy, LabelQuestionUnification
+        >>> LabelQuestionUnification(question=LabelQuestion(...), strategy="majority")
         >>> # or use a LabelQuestionStrategy
-        >>> LabelUnification(question=LabelQuestion(...), strategy=LabelQuestionStrategy.MAJORITY)
+        >>> LabelQuestionUnification(question=LabelQuestion(...), strategy=LabelQuestionStrategy.MAJORITY)
     """
 
     question: Union[LabelQuestion, MultiLabelQuestion]

@@ -32,7 +32,7 @@ from argilla.client.feedback.training.schemas import (
 from argilla.client.models import Framework
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.typing import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
     from argilla.server.models import User as ServerUser
     from sqlalchemy.ext.asyncio import AsyncSession
 

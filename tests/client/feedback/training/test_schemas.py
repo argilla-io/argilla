@@ -18,6 +18,7 @@ import spacy
 from argilla import (
     LabelQuestion,
     MultiLabelQuestion,
+    RankingQuestion,
     RatingQuestion,
     TextField,
 )
@@ -25,6 +26,7 @@ from argilla.client.feedback.training.schemas import TrainingTaskMapping
 from argilla.client.feedback.unification import (
     LabelQuestionUnification,
     MultiLabelQuestionUnification,
+    RankingQuestionUnification,
     RatingQuestionUnification,
 )
 from argilla.client.models import Framework
@@ -43,6 +45,12 @@ label_question_payload = {
     "required": True,
     "labels": ["1", "2"],
 }
+ranking_question_payload = {
+    "name": "label",
+    "description": "label",
+    "required": True,
+    "values": ["1", "2"],
+}
 
 
 @pytest.mark.parametrize(
@@ -51,6 +59,13 @@ label_question_payload = {
         (
             Framework("spacy"),
             RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            0.5,
+            None,
+            (DocBin, DocBin),
+        ),
+        (
+            Framework("spacy"),
+            RankingQuestionUnification(question=RankingQuestion(**ranking_question_payload)),
             0.5,
             None,
             (DocBin, DocBin),
@@ -72,6 +87,13 @@ label_question_payload = {
         (
             Framework("spacy"),
             RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            1,
+            42,
+            DocBin,
+        ),
+        (
+            Framework("spacy"),
+            RankingQuestionUnification(question=RankingQuestion(**ranking_question_payload)),
             1,
             42,
             DocBin,
@@ -93,6 +115,13 @@ label_question_payload = {
         ),
         (
             Framework("spacy-transformers"),
+            RankingQuestionUnification(question=RankingQuestion(**ranking_question_payload)),
+            0.5,
+            None,
+            (DocBin, DocBin),
+        ),
+        (
+            Framework("spacy-transformers"),
             LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
             0.5,
             None,
@@ -114,6 +143,13 @@ label_question_payload = {
         ),
         (
             Framework("spacy-transformers"),
+            RankingQuestionUnification(question=RankingQuestion(**ranking_question_payload)),
+            1,
+            42,
+            DocBin,
+        ),
+        (
+            Framework("spacy-transformers"),
             LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
             1,
             42,
@@ -135,6 +171,13 @@ label_question_payload = {
         ),
         (
             Framework("openai"),
+            RankingQuestionUnification(question=RankingQuestion(**ranking_question_payload)),
+            0.5,
+            None,
+            (list, list),
+        ),
+        (
+            Framework("openai"),
             LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
             0.5,
             None,
@@ -150,6 +193,13 @@ label_question_payload = {
         (
             Framework("openai"),
             RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            1,
+            42,
+            list,
+        ),
+        (
+            Framework("openai"),
+            RankingQuestionUnification(question=RankingQuestion(**ranking_question_payload)),
             1,
             42,
             list,
@@ -171,6 +221,13 @@ label_question_payload = {
         ),
         (
             Framework("transformers"),
+            RankingQuestionUnification(question=RankingQuestion(**ranking_question_payload)),
+            0.5,
+            None,
+            DatasetDict,
+        ),
+        (
+            Framework("transformers"),
             LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
             0.5,
             None,
@@ -192,6 +249,13 @@ label_question_payload = {
         ),
         (
             Framework("transformers"),
+            RankingQuestionUnification(question=RankingQuestion(**ranking_question_payload)),
+            1,
+            42,
+            Dataset,
+        ),
+        (
+            Framework("transformers"),
             LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
             1,
             42,
@@ -213,6 +277,13 @@ label_question_payload = {
         ),
         (
             Framework("spark-nlp"),
+            RankingQuestionUnification(question=RankingQuestion(**ranking_question_payload)),
+            0.5,
+            None,
+            (pd.DataFrame, pd.DataFrame),
+        ),
+        (
+            Framework("spark-nlp"),
             LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
             0.5,
             None,
@@ -228,6 +299,13 @@ label_question_payload = {
         (
             Framework("spark-nlp"),
             RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            1,
+            42,
+            pd.DataFrame,
+        ),
+        (
+            Framework("spark-nlp"),
+            RankingQuestionUnification(question=RankingQuestion(**ranking_question_payload)),
             1,
             42,
             pd.DataFrame,
