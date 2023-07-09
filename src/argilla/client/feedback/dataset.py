@@ -20,7 +20,7 @@ from pydantic import (
     ValidationError,
     parse_obj_as,
 )
-from tqdm import tqdm
+from tqdm import tqdm, trange
 
 import argilla as rg
 from argilla.client.feedback.constants import (
@@ -520,27 +520,68 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                 )
                 return
 
-            if len(self.__new_records) < 1:
-                _LOGGER.warning(
-                    "No new records have been added to the current `FeedbackTask` dataset, so no records will be pushed"
-                    " to Argilla."
-                )
-                return
-
             try:
-                for i in range(0, len(self.__new_records), PUSHING_BATCH_SIZE):
-                    datasets_api_v1.add_records(
-                        client=httpx_client,
-                        id=self.argilla_id,
-                        records=[
-                            record.dict()
-                            for record in tqdm(
-                                self.__new_records[i : i + PUSHING_BATCH_SIZE],
-                                desc="Pushing records to Argilla...",
-                                disable=show_progress,
-                            )
-                        ],
+                updated_records = []
+                for record in self.__records[:]:
+                    if record._update:
+                        self.__records.remove(record)
+                        record._update = False
+                        updated_records.append(record)
+
+                if len(self.__new_records) < 1 and len(updated_records) < 1:
+                    _LOGGER.warning(
+                        "Neither new records have been added nor existing records updated"
+                        " in the current `FeedbackDataset`, which means there are no"
+                        " records to push to Argilla."
                     )
+                    return
+
+                question_name2id = {question.name: question.id for question in self.questions}
+                if len(updated_records) > 0:
+                    for i in trange(
+                        0,
+                        len(updated_records),
+                        PUSHING_BATCH_SIZE,
+                        desc="Updating records in Argilla...",
+                        disable=show_progress,
+                    ):
+                        for record in self.__new_records[i : i + PUSHING_BATCH_SIZE]:
+                            for suggestion in record.suggestions:
+                                suggestion = suggestion.dict(exclude_unset=True)
+                                suggestion["question_id"] = str(question_name2id[suggestion.pop("name")])
+                                datasets_api_v1.add_suggestion(
+                                    client=httpx_client,
+                                    record_id=record.id,
+                                    **suggestion,
+                                )
+
+                if len(self.__new_records) > 0:
+                    for i in trange(
+                        0,
+                        len(self.__new_records),
+                        PUSHING_BATCH_SIZE,
+                        desc="Adding new records to Argilla...",
+                        disable=show_progress,
+                    ):
+                        records = []
+                        for record in self.__new_records[i : i + PUSHING_BATCH_SIZE]:
+                            record_dict = record.dict(exclude={"id", "suggestions"}, exclude_none=True)
+                            if record.suggestions:
+                                record_dict["suggestions"] = []
+                                for suggestion in record.suggestions:
+                                    suggestion = suggestion.dict(exclude_unset=True)
+                                    suggestion["question_id"] = str(question_name2id[suggestion.pop("name")])
+                                    record_dict["suggestions"].append(suggestion)
+                            records.append(record_dict)
+                        datasets_api_v1.add_records(
+                            client=httpx_client,
+                            id=argilla_id,
+                            records=records,
+                        )
+
+                self.__new_records += updated_records
+                for record in self.__new_records:
+                    record._update = False
                 self.__records += self.__new_records
                 self.__new_records = []
             except Exception as e:
@@ -567,10 +608,9 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                 ).parsed
                 argilla_id = new_dataset.id
             except Exception as e:
-                raise Exception(
-                    f"Failed while creating the `FeedbackDataset` in Argilla with exception: {e}"
-                ) from e
+                raise Exception(f"Failed while creating the `FeedbackDataset` in Argilla with exception: {e}") from e
 
+            # TODO(alvarobartt): remove when `delete` is implemented
             def delete_dataset(dataset_id: UUID) -> None:
                 try:
                     datasets_api_v1.delete_dataset(client=httpx_client, id=dataset_id)
@@ -580,9 +620,13 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                         f" exception: {e}"
                     ) from e
 
-            for field in self.fields:
+            for field in self.__fields:
                 try:
-                    datasets_api_v1.add_field(client=httpx_client, id=argilla_id, field=field.dict())
+                    new_field = datasets_api_v1.add_field(
+                        client=httpx_client, id=argilla_id, field=field.dict(exclude={"id"})
+                    ).parsed
+                    if self.argilla_id is None:
+                        field.id = new_field.id
                 except Exception as e:
                     delete_dataset(dataset_id=argilla_id)
                     raise Exception(
@@ -590,9 +634,15 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                         f" exception: {e}"
                     ) from e
 
-            for question in self.questions:
+            question_name2id = {}
+            for question in self.__questions:
                 try:
-                    datasets_api_v1.add_question(client=httpx_client, id=argilla_id, question=question.dict())
+                    new_question = datasets_api_v1.add_question(
+                        client=httpx_client, id=argilla_id, question=question.dict(exclude={"id"})
+                    ).parsed
+                    if self.argilla_id is None:
+                        question.id = new_question.id
+                    question_name2id[question.name] = question.id
                 except Exception as e:
                     delete_dataset(dataset_id=argilla_id)
                     raise Exception(
@@ -604,28 +654,32 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                 datasets_api_v1.publish_dataset(client=httpx_client, id=argilla_id)
             except Exception as e:
                 delete_dataset(dataset_id=argilla_id)
-                raise Exception(
-                    f"Failed while publishing the `FeedbackDataset` in Argilla with exception: {e}"
-                ) from e
+                raise Exception(f"Failed while publishing the `FeedbackDataset` in Argilla with exception: {e}") from e
 
-            for batch in self.iter():
+            for i in trange(
+                0, len(self.records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=show_progress
+            ):
                 try:
+                    records = []
+                    for record in self.__new_records[i : i + PUSHING_BATCH_SIZE]:
+                        record_dict = record.dict(exclude={"id", "suggestions"}, exclude_none=True)
+                        if record.suggestions:
+                            record_dict["suggestions"] = []
+                            for suggestion in record.suggestions:
+                                suggestion = suggestion.dict(exclude_unset=True)
+                                suggestion["question_id"] = str(question_name2id[suggestion.pop("name")])
+                                record_dict["suggestions"].append(suggestion)
+                        records.append(record_dict)
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=argilla_id,
-                        records=[
-                            record.dict()
-                            for record in tqdm(batch, desc="Pushing records to Argilla...", disable=show_progress)
-                        ],
+                        records=records,
                     )
                 except Exception as e:
                     delete_dataset(dataset_id=argilla_id)
                     raise Exception(
                         f"Failed while adding the records to the `FeedbackDataset` in Argilla with exception: {e}"
                     ) from e
-
-            self.__records += self.__new_records
-            self.__new_records = []
 
             if self.argilla_id is not None:
                 _LOGGER.warning(
@@ -635,7 +689,13 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                     f" instead, please use `FeedbackDataset.from_argilla(id='{argilla_id}')`."
                 )
                 return
+
             self.argilla_id = argilla_id
+
+            for record in self.__new_records:
+                record._update = False
+            self.__records += self.__new_records
+            self.__new_records = []
 
     @classmethod
     def from_argilla(
@@ -678,8 +738,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                 f"Could not find a `FeedbackDataset` in Argilla with name='{name}'."
                 if name and not workspace
                 else (
-                    "Could not find a `FeedbackDataset` in Argilla with"
-                    f" name='{name}' and workspace='{workspace}'."
+                    "Could not find a `FeedbackDataset` in Argilla with" f" name='{name}' and workspace='{workspace}'."
                     if name and workspace
                     else (f"Could not find a `FeedbackDataset` in Argilla with ID='{id}'.")
                 )
