@@ -129,23 +129,38 @@ class FeedbackRecord(BaseModel):
 
     """
 
+    id: Optional[UUID] = None
     fields: Dict[str, str]
     metadata: Optional[Dict[str, Any]] = None
     responses: Optional[List[ResponseSchema]] = None
+    suggestions: Optional[List[SuggestionSchema]] = None
     external_id: Optional[str] = None
+
     _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default={})
 
-    @validator("responses", always=True)
-    def responses_must_be_a_list(cls, v: Optional[Union[ResponseSchema, List[ResponseSchema]]]) -> List[ResponseSchema]:
-        if not v:
-            return []
-        if isinstance(v, ResponseSchema):
-            return [v]
-        return v
+    _update: bool = PrivateAttr(default=False)
+
+    @root_validator
+    def set_update_flag(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        if values.get("suggestions") and values.get("id"):
+            values["_update"] = True
+        if values.get("suggestions") and values.get("id") is None:
+            warnings.warn(
+                "Ignore the following if you are creating a new `FeedbackDataset` with"
+                " `FeedbackRecord`s, or if you are just working with a `FeedbackRecord`."
+                " Otherwise, if the `FeedbackRecord` is already pushed"
+                " to Argilla, note that `suggestions` have been provided, but the `id`"
+                " is not set, which means that the `FeedbackRecord` has been pushed to"
+                " Argilla, but hasn't been fetched, so the `id` is missing. To solve that,"
+                " you can simply call `FeedbackDataset.fetch_records()` to fetch them and"
+                " automatically set the `id`, to add the `suggestions` on top of that."
+            )
+        return values
 
     class Config:
-        extra = Extra.ignore
-        fields = {"_unified_responses": {"exclude": True}}
+        extra = Extra.forbid
+        validate_assignment = True
+        exclude = {"_unified_responses", "_update"}
 
 
 FieldTypes = Literal["text"]
