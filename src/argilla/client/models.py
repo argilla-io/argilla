@@ -25,10 +25,22 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 from deprecated import deprecated
-from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
+from pydantic import (
+    BaseModel,
+    Field,
+    PrivateAttr,
+    conint,
+    constr,
+    root_validator,
+    validator,
+)
 
 from argilla import _messages
-from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
+from argilla._constants import (
+    _JS_MAX_SAFE_INTEGER,
+    DEFAULT_MAX_KEYWORD_LENGTH,
+    PROTECTED_METADATA_FIELD_PREFIX,
+)
 from argilla.utils.span_utils import SpanUtils
 
 _LOGGER = logging.getLogger(__name__)
@@ -80,7 +92,9 @@ class _Validators(BaseModel):
             return metadata
 
         default_length_exceeded = False
-        for v in metadata.values():
+        for k, v in metadata.items():
+            if k.startswith(PROTECTED_METADATA_FIELD_PREFIX):
+                continue
             if isinstance(v, str) and len(v) > DEFAULT_MAX_KEYWORD_LENGTH:
                 default_length_exceeded = True
                 break
@@ -101,10 +115,29 @@ class _Validators(BaseModel):
             return {}
         return v
 
-    @validator("id", check_fields=False, always=True)
-    def _none_to_generated_uid64(cls, v):
+    @validator("id", check_fields=False, pre=True, always=True)
+    def _normalize_id(cls, v):
         if v is None:
             return str(uuid.uuid4())
+        if isinstance(v, int):
+            message = (
+                f"Integer ids won't be supported in future versions. We recommend to start using strings instead. "
+                "For datasets already containing integer values we recommend migrating them to avoid deprecation issues."
+                "See https://docs.argilla.io/en/latest/getting_started/installation/configurations"
+                "/database_migrations.html#elasticsearch"
+            )
+            warnings.warn(message, DeprecationWarning)
+            # See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
+            if v > _JS_MAX_SAFE_INTEGER:
+                message = (
+                    "You've provided a big integer value. Use a string instead, otherwise you may experience some "
+                    "problems using the UI. See "
+                    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number"
+                    "/MAX_SAFE_INTEGER"
+                )
+                warnings.warn(message, UserWarning)
+        elif not isinstance(v, str):
+            raise TypeError(f"Invalid type for id. Expected {int} or {str}; found:{type(v)}")
         return v
 
     @validator("prediction_agent", check_fields=False)

@@ -8,7 +8,7 @@ on:
         value: ${{ jobs.check-repo-files.outputs.pythonChanges }}
       buildChanges:
         description: "True if some files affecting the build have changed"
-        value: ${{ jobs.check-repo-files.outputs.pythonChanges }}
+        value: ${{ jobs.check-repo-files.outputs.buildChanges }}
 
 jobs:
   check-repo-files:

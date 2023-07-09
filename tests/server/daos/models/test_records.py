@@ -19,6 +19,13 @@ from argilla.server.daos.models.records import BaseRecordInDB
 from argilla.server.settings import settings
 
 
+def test_metadata_flatten():
+    raw_data = {"a": 1, "b": "value"}
+
+    record = BaseRecordInDB(metadata={"a": {"json": raw_data}})
+    assert record.metadata == {"a.json.a": 1, "a.json.b": "value"}
+
+
 def test_metadata_limit():
     long_value = "a" * (settings.metadata_field_length + 1)
     short_value = "a" * (settings.metadata_field_length - 1)
@@ -29,3 +36,18 @@ def test_metadata_limit():
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         BaseRecordInDB(metadata=dict(a=short_value))
+
+
+def test_protected_metadata_without_truncation():
+    long_value = "a" * (settings.metadata_field_length + 1)
+
+    record = BaseRecordInDB(metadata=dict(a=long_value, _protected=long_value))
+    assert record.metadata["a"] == long_value[: settings.metadata_field_length]
+    assert record.metadata["_protected"] == long_value
+
+
+def test_protected_metadata_with_json_dict():
+    raw_data = {"a": 1, "b": "value"}
+
+    record = BaseRecordInDB(metadata={"json": raw_data, "_json": raw_data})
+    assert record.metadata == {"json.a": 1, "json.b": "value", "_json": {"a": 1, "b": "value"}}
