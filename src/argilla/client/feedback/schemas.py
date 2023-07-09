@@ -94,6 +94,14 @@ class ResponseSchema(BaseModel):
         return v
 
 
+class SuggestionSchema(BaseModel):
+    name: str
+    type: Optional[Literal["model", "human"]] = None
+    score: Optional[float] = None
+    value: Any
+    agent: Optional[str] = None
+
+
 class FeedbackRecord(BaseModel):
     """A feedback record.
 
