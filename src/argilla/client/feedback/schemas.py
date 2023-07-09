@@ -100,7 +100,7 @@ class FeedbackRecord(BaseModel):
     Args:
         fields (Dict[str, str]): The fields of the record.
         metadata (Optional[Dict[str, Any]]): The metadata of the record. Defaults to None.
-        responses (Optional[Union[ResponseSchema, List[ResponseSchema]]]): The responses of the record. Defaults to None.
+        responses (Optional[List[ResponseSchema]]): The responses of the record. Defaults to None.
         external_id (Optional[str]): The external id of the record. Defaults to None.
 
     Examples:
@@ -123,7 +123,7 @@ class FeedbackRecord(BaseModel):
 
     fields: Dict[str, str]
     metadata: Optional[Dict[str, Any]] = None
-    responses: Optional[Union[ResponseSchema, List[ResponseSchema]]] = None
+    responses: Optional[List[ResponseSchema]] = None
     external_id: Optional[str] = None
     _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default={})
 
