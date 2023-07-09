@@ -1,5 +1,23 @@
 ::::{tab-set}
 
+:::{tab-item} RankinQuestion
+
+```python
+from argilla import RankinQuestionStrategy, FeedbackRecord
+
+dataset = FeedbackDataset.from_huggingface(
+    repo_id="argilla/stackoverflow_feedback_demo"
+)
+strategy = RankinQuestionStrategy("majority") # "mean", "max", "min"
+dataset.unify_responses(
+    question=dataset.get_question_by_name("relevance_ranking")
+    strategy=strategy
+)
+dataset.records[0].unified_responses
+```
+
+:::
+
 :::{tab-item} RatingQuestion
 
 ```python
