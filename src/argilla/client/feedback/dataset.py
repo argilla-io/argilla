@@ -550,7 +550,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                 return
 
             try:
-                updated_records = []
+                updated_records: List[FeedbackRecord] = []
                 for record in self.__records[:]:
                     if record._updated:
                         self.__records.remove(record)
