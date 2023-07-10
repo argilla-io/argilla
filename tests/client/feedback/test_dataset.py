@@ -171,8 +171,9 @@ def test_add_records(
         "text": "A",
         "label": "B",
     }
-    assert dataset.records[0].metadata is None
+    assert dataset.records[0].metadata == {}
     assert dataset.records[0].responses == []
+    assert dataset.records[0].suggestions == []
 
     dataset.add_records(
         [
@@ -182,16 +183,40 @@ def test_add_records(
                     "label": "D",
                 },
                 metadata={"unit": "test"},
-                responses={
-                    "values": {
-                        "question-1": {"value": "answer"},
-                        "question-2": {"value": 0},
-                        "question-3": {"value": "a"},
-                        "question-4": {"value": ["a", "b"]},
-                        "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
+                responses=[
+                    {
+                        "values": {
+                            "question-1": {"value": "answer"},
+                            "question-2": {"value": 0},
+                            "question-3": {"value": "a"},
+                            "question-4": {"value": ["a", "b"]},
+                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
+                        },
+                        "status": "submitted",
                     },
-                    "status": "submitted",
-                },
+                ],
+                suggestions=[
+                    {
+                        "question_name": "question-1",
+                        "value": "answer",
+                    },
+                    {
+                        "question_name": "question-2",
+                        "value": 0,
+                    },
+                    {
+                        "question_name": "question-3",
+                        "value": "a",
+                    },
+                    {
+                        "question_name": "question-4",
+                        "value": ["a", "b"],
+                    },
+                    {
+                        "question_name": "question-5",
+                        "value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}],
+                    },
+                ],
                 external_id="test-id",
             ),
         ]
@@ -213,6 +238,14 @@ def test_add_records(
             "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
         },
         "status": "submitted",
+    }
+    assert dataset.records[1].suggestions[0].dict() == {
+        "question_id": None,
+        "question_name": "question-1",
+        "value": "answer",
+        "type": None,
+        "score": None,
+        "agent": None,
     }
 
     with pytest.raises(ValueError, match="Expected `records` to be a non-empty list"):
@@ -408,8 +441,12 @@ async def test_copy_dataset_in_argilla(
 
     same_dataset = FeedbackDataset.from_argilla("copy-dataset")
     assert same_dataset.argilla_id != dataset.argilla_id
-    assert same_dataset.fields == dataset.fields
-    assert same_dataset.questions == dataset.questions
+    assert [field.dict(exclude={"id"}) for field in same_dataset.fields] == [
+        field.dict(exclude={"id"}) for field in dataset.fields
+    ]
+    assert [question.dict(exclude={"id"}) for question in same_dataset.questions] == [
+        question.dict(exclude={"id"}) for question in dataset.questions
+    ]
 
 
 def test_push_to_huggingface_and_from_huggingface(
