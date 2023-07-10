@@ -456,6 +456,28 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                     "status": "submitted",
                 }
             ],
+            suggestions=[
+                {
+                    "question_name": "question-1",
+                    "value": "This is a suggestion to question 1",
+                },
+                {
+                    "question_name": "question-2",
+                    "value": 1,
+                },
+                {
+                    "question_name": "question-3",
+                    "value": "a",
+                },
+                {
+                    "question_name": "question-4",
+                    "value": ["a", "b"],
+                },
+                {
+                    "question_name": "question-5",
+                    "value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}],
+                },
+            ],
             external_id="3",
         ),
         FeedbackRecord(
@@ -510,6 +532,16 @@ def feedback_dataset_huggingface() -> Dataset:
                     "status": ["submitted"],
                 }
             ],
+            "question-1-suggestion": ["This is a suggestion to question 1"],
+            "question-1-suggestion-metadata": [{"type": None, "score": None, "agent": None}],
+            "question-2-suggestion": [1],
+            "question-2-suggestion-metadata": [{"type": None, "score": None, "agent": None}],
+            "question-3-suggestion": ["a"],
+            "question-3-suggestion-metadata": [{"type": None, "score": None, "agent": None}],
+            "question-4-suggestion": [["a", "b"]],
+            "question-4-suggestion-metadata": [{"type": None, "score": None, "agent": None}],
+            "question-5-suggestion": [[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]],
+            "question-5-suggestion-metadata": [{"type": None, "score": None, "agent": None}],
             "external_id": ["1"],
         }
     )
