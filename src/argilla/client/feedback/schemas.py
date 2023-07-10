@@ -143,31 +143,41 @@ class FeedbackRecord(BaseModel):
     suggestions: Optional[List[SuggestionSchema]] = Field(default_factory=list)
     external_id: Optional[str] = None
 
+    _original_values: Dict[str, Any] = PrivateAttr(default_factory=dict)
     _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default_factory=dict)
+    _updated: bool = PrivateAttr(default=False)
 
-    _update: bool = PrivateAttr(default=False)
+    def __init__(self, **data: Dict[str, Any]) -> None:
+        super().__init__(**data)
+        self._original_values = self.dict(exclude={"_updated"})
 
-    @root_validator
-    def set_update_flag(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        if values.get("suggestions") and values.get("id"):
-            values["_update"] = True
-        if values.get("suggestions") and values.get("id") is None:
-            warnings.warn(
-                "Ignore the following if you are creating a new `FeedbackDataset` with"
-                " `FeedbackRecord`s, or if you are just working with a `FeedbackRecord`."
-                " Otherwise, if the `FeedbackRecord` is already pushed"
-                " to Argilla, note that `suggestions` have been provided, but the `id`"
-                " is not set, which means that the `FeedbackRecord` has been pushed to"
-                " Argilla, but hasn't been fetched, so the `id` is missing. To solve that,"
-                " you can simply call `FeedbackDataset.fetch_records()` to fetch them and"
-                " automatically set the `id`, to add the `suggestions` on top of that."
-            )
-        return values
+    def __setattr__(self, name: str, value: Any) -> None:
+        # TODO(alvarobartt): the line below should do the work when we allow updates on more fields than just suggestions
+        # if name != "_updated" and name in self.__fields_set__:
+        if name == "suggestions" and hasattr(self, name):
+            if getattr(self, name) != value:
+                self._updated = True
+                if not getattr(self, "id"):
+                    warnings.warn(
+                        "Ignore the following if you are creating a new `FeedbackDataset` with"
+                        " `FeedbackRecord`s, or if you are just working with a `FeedbackRecord`."
+                        " Otherwise, if the `FeedbackRecord` is already pushed"
+                        " to Argilla, note that `suggestions` have been provided, but the `id`"
+                        " is not set, which means that the `FeedbackRecord` has been pushed to"
+                        " Argilla, but hasn't been fetched, so the `id` is missing. To solve that,"
+                        " you can simply call `FeedbackDataset.fetch_records()` to fetch them and"
+                        " automatically set the `id`, to add the `suggestions` on top of that."
+                    )
+        super().__setattr__(name, value)
+
+    def reset_updated(self) -> None:
+        self._updated = False
+        self._original_values = self.dict(exclude={"_updated"})
 
     class Config:
         extra = Extra.forbid
         validate_assignment = True
-        exclude = {"_unified_responses", "_update"}
+        exclude = {"_original_values", "_unified_responses", "_updated"}
 
 
 FieldTypes = Literal["text"]
