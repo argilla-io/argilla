@@ -9,7 +9,7 @@ Vue.directive("has-suggestions", {
       const emoji = document.createTextNode("✨ ");
       const emojiWrapper = document.createElement("span");
       emojiWrapper.style.fontSize = "1.2em";
-      textWrapper.appendChild(emoji);
+      emojiWrapper.appendChild(emoji);
       element.prepend(emojiWrapper);
     }
   },
