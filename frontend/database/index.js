@@ -25,6 +25,7 @@ import { DatasetFilter } from "@/models/feedback-task-model/dataset-filter/Datas
 import { Record } from "@/models/feedback-task-model/record/Record.model";
 import { RecordField } from "@/models/feedback-task-model/record-field/RecordField.model";
 import { RecordResponse } from "@/models/feedback-task-model/record-response/RecordResponse.model";
+import { RecordSuggestion } from "@/models/feedback-task-model/record-suggestion/RecordSuggestion.model";
 import { Pagination, DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { Notification } from "@/models/Notifications";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
@@ -55,6 +56,7 @@ database.register(DatasetFilter);
 database.register(Record);
 database.register(RecordField);
 database.register(RecordResponse);
+database.register(RecordSuggestion);
 database.register(DatasetViewSettings);
 database.register(Pagination);
 database.register(AnnotationProgress);

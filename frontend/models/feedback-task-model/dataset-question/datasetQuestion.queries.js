@@ -36,9 +36,16 @@ const getOptionsOfQuestionByDatasetIdAndQuestionName = (
     .where("name", questionName)
     .first()?.options;
 
+const getNameOfQuestionByDatasetIdAndQuestionId = (datasetId, questionId) =>
+  DatasetQuestionModel.query()
+    .where("dataset_id", datasetId)
+    .where("id", questionId)
+    .first()?.name;
+
 export {
   upsertDatasetQuestions,
   getQuestionsByDatasetId,
   getComponentTypeOfQuestionByDatasetIdAndQuestionName,
   getOptionsOfQuestionByDatasetIdAndQuestionName,
+  getNameOfQuestionByDatasetIdAndQuestionId,
 };
