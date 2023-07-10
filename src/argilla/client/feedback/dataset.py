@@ -552,7 +552,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                 for record in self.__records[:]:
                     if record._updated:
                         self.__records.remove(record)
-                        record.reset_updated()
+                        record._reset_updated()
                         updated_records.append(record)
 
                 if len(self.__new_records) < 1 and len(updated_records) < 1:
@@ -608,7 +608,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
 
                 self.__new_records += updated_records
                 for record in self.__new_records:
-                    record.reset_updated()
+                    record._reset_updated()
                 self.__records += self.__new_records
                 self.__new_records = []
             except Exception as e:
@@ -720,7 +720,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
             self.argilla_id = argilla_id
 
             for record in self.__new_records:
-                record.reset_updated()
+                record._reset_updated()
             self.__records += self.__new_records
             self.__new_records = []
 

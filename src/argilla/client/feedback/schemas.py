@@ -170,7 +170,7 @@ class FeedbackRecord(BaseModel):
                     )
         super().__setattr__(name, value)
 
-    def reset_updated(self) -> None:
+    def _reset_updated(self) -> None:
         self._updated = False
         self._original_values = self.dict(exclude={"_updated"})
 
