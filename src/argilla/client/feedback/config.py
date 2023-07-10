@@ -64,3 +64,6 @@ class DatasetConfig(BaseModel):
             DeprecationWarning,
         )
         return self.json()
+
+
+dummy = True
