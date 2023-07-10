@@ -93,6 +93,9 @@ class ResponseSchema(BaseModel):
             )
         return v
 
+    class Config:
+        extra = Extra.forbid
+
 
 class SuggestionSchema(BaseModel):
     question_id: Optional[UUID] = None
@@ -101,6 +104,9 @@ class SuggestionSchema(BaseModel):
     score: Optional[float] = None
     value: Any
     agent: Optional[str] = None
+
+    class Config:
+        extra = Extra.forbid
 
 
 class FeedbackRecord(BaseModel):
