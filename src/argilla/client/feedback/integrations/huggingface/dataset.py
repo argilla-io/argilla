@@ -333,11 +333,15 @@ class HuggingFaceDatasetMixIn:
                             value = [{"rank": r, "value": v} for r, v in zip(value["rank"], value["value"])]
                         if value is not None:
                             responses[user_id]["values"].update({question.name: {"value": value}})
-                if f"{question.name}-suggestion" in hfds[index]:
-                    suggestion = {"question_name": question.name, "value": hfds[index][f"{question.name}-suggestion"]}
-                    if hfds[index][f"{question.name}-suggestion-metadata"] is not None:
-                        suggestion.update(hfds[index][f"{question.name}-suggestion-metadata"])
-                    suggestions.append(suggestion)
+                if f"{question.name}-suggestion" in hfds[index]:  # Here for backwards compatibility
+                    if hfds[index][f"{question.name}-suggestion"] is not None:
+                        suggestion = {
+                            "question_name": question.name,
+                            "value": hfds[index][f"{question.name}-suggestion"],
+                        }
+                        if hfds[index][f"{question.name}-suggestion-metadata"] is not None:
+                            suggestion.update(hfds[index][f"{question.name}-suggestion-metadata"])
+                        suggestions.append(suggestion)
 
             metadata = None
             if "metadata" in hfds[index] and hfds[index]["metadata"] is not None:
