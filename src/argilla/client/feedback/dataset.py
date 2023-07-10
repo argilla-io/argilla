@@ -366,6 +366,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                         "inserted_at": ...,
                         "updated_at": ...,
                         "responses": {"__all__": {"id", "inserted_at", "updated_at"}},
+                        "suggestions": {"__all__": {"id"}},
                     },
                     exclude_none=True,
                 )
@@ -391,6 +392,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                                 "inserted_at": ...,
                                 "updated_at": ...,
                                 "responses": {"__all__": {"id", "inserted_at", "updated_at"}},
+                                "suggestions": {"__all__": {"id"}},
                             },
                             exclude_none=True,
                         )
