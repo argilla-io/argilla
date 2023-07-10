@@ -138,12 +138,12 @@ class FeedbackRecord(BaseModel):
 
     id: Optional[UUID] = None
     fields: Dict[str, str]
-    metadata: Optional[Dict[str, Any]] = None
-    responses: Optional[List[ResponseSchema]] = None
-    suggestions: Optional[List[SuggestionSchema]] = None
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    responses: Optional[List[ResponseSchema]] = Field(default_factory=list)
+    suggestions: Optional[List[SuggestionSchema]] = Field(default_factory=list)
     external_id: Optional[str] = None
 
-    _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default={})
+    _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default_factory=dict)
 
     _update: bool = PrivateAttr(default=False)
 
