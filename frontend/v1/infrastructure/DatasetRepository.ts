@@ -39,7 +39,7 @@ export class DatasetRepository implements IDatasetRepository {
   }
 
   async getAll(): Promise<Dataset[]> {
-    const response = await this.saveAndGetDatasets();
+    const response = await this.getDatasets();
 
     const otherDatasets = response.oldDatasets.map((dataset) => {
       return new Dataset(
@@ -146,7 +146,7 @@ export class DatasetRepository implements IDatasetRepository {
     return newFeedbackDatasets;
   };
 
-  private saveAndGetDatasets = async () => {
+  private getDatasets = async () => {
     const [oldDatasets, newDatasets, workspaces] = await Promise.all([
       this.store.dispatch("entities/datasets/fetchAll"),
       this.fetchFeedbackDatasets(this.axios),
