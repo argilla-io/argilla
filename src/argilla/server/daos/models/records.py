@@ -12,16 +12,16 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import uuid
 import warnings
 from datetime import datetime
 from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
-from uuid import uuid4
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, Field, conint, constr, root_validator, validator
 from pydantic.generics import GenericModel
 
 from argilla import _messages
-from argilla._constants import PROTECTED_METADATA_FIELD_PREFIX
+from argilla._constants import _JS_MAX_SAFE_INTEGER, PROTECTED_METADATA_FIELD_PREFIX
 from argilla.server.commons.models import PredictionStatus, TaskStatus, TaskType
 from argilla.server.daos.backend.search.model import BaseRecordsQuery, SortConfig
 from argilla.server.helpers import flatten_dict
@@ -57,7 +57,7 @@ EmbeddingDB = TypeVar("EmbeddingDB", bound=BaseEmbeddingVectorDB)
 
 
 class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
-    id: Optional[Union[int, str]] = Field(default=None)
+    id: Optional[Union[conint(strict=True), constr(strict=True)]] = None
     metadata: Dict[str, Any] = Field(default=None)
     event_timestamp: Optional[datetime] = None
     status: Optional[TaskStatus] = None
@@ -115,11 +115,27 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
         return values
 
     @validator("id", always=True, pre=True)
-    def default_id_if_none_provided(cls, id: Optional[str]) -> str:
-        """Validates id info and sets a random uuid if not provided"""
-        if id is None:
-            return str(uuid4())
-        return id
+    def _normalize_id(cls, v):
+        if v is None:
+            return str(uuid.uuid4())
+        if isinstance(v, int):
+            message = (
+                f"Integer ids won't be supported in future versions. We recommend to start using strings instead. "
+                "For datasets already containing integer values we recommend migrating them to avoid deprecation issues."
+                "See https://docs.argilla.io/en/latest/getting_started/installation/configurations"
+                "/database_migrations.html#elasticsearch"
+            )
+            warnings.warn(message, DeprecationWarning)
+            # See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
+            if v > _JS_MAX_SAFE_INTEGER:
+                message = (
+                    "You've provided a big integer value. Use a string instead, otherwise you may experience some "
+                    "problems using the UI. See "
+                    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number"
+                    "/MAX_SAFE_INTEGER"
+                )
+                warnings.warn(message, UserWarning)
+        return v
 
     @validator("status", always=True)
     def fill_default_value(cls, status: TaskStatus):
