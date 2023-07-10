@@ -257,8 +257,8 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                 )
         self.__guidelines = guidelines
 
-        self.__records = []
-        self.__new_records = []
+        self.__records: List[FeedbackRecord] = []
+        self.__new_records: List[FeedbackRecord] = []
 
     def __len__(self) -> int:
         """Returns the number of records in the dataset."""
