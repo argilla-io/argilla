@@ -110,7 +110,7 @@ Among the dataset fields, we differentiate between the following:
 
 * **✨ NEW** **Suggestions:** As of Argilla 1.13.0, the suggestions have been included to provide the annotators with suggestions to ease or assist during the annotation process. Suggestions are linked to the existing questions, are always optional, and contain not just the suggestion itself, but also the metadata linked to it, if applicable.
     {% for question in argilla_questions %}
-    * {% if question.required == false %}(optional) {% endif %}**{{ question.name }}-suggestion** is of type `{{ question.type }}`{% if question.settings.type in ["rating", "label_selection", "multi_label_selection", "ranking"] %} with the following allowed values {{ question.settings.options | map(attribute="value") | list }}{% endif %}.{% endfor %}
+    * (optional) **{{ question.name }}-suggestion** is of type `{{ question.type }}`{% if question.settings.type in ["rating", "label_selection", "multi_label_selection", "ranking"] %} with the following allowed values {{ question.settings.options | map(attribute="value") | list }}{% endif %}.{% endfor %}
 
 Additionally, we also have one more field which is optional and is the following:
 
