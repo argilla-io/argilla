@@ -117,23 +117,23 @@ class HuggingFaceDatasetMixIn:
             for question in dataset.questions:
                 if not record.responses:
                     hf_dataset[question.name].append(None)
-                    continue
-                responses = []
-                for response in record.responses:
-                    if question.name not in response.values:
-                        responses.append(None)
-                        continue
-                    if question.settings["type"] == "ranking":
-                        responses.append([r.dict() for r in response.values[question.name].value])
-                    else:
-                        responses.append(response.values[question.name].value)
-                hf_dataset[question.name].append(
-                    {
-                        "user_id": [r.user_id for r in record.responses],
-                        "value": responses,
-                        "status": [r.status for r in record.responses],
-                    }
-                )
+                else:
+                    responses = []
+                    for response in record.responses:
+                        if question.name not in response.values:
+                            responses.append(None)
+                            continue
+                        if question.settings["type"] == "ranking":
+                            responses.append([r.dict() for r in response.values[question.name].value])
+                        else:
+                            responses.append(response.values[question.name].value)
+                    hf_dataset[question.name].append(
+                        {
+                            "user_id": [r.user_id for r in record.responses],
+                            "value": responses,
+                            "status": [r.status for r in record.responses],
+                        }
+                    )
 
                 suggestion = next(filter(lambda s: s.question_name == question.name, record.suggestions), None)
                 if not record.suggestions or not suggestion:
