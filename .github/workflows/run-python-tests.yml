@@ -33,6 +33,7 @@ jobs:
           discovery.type: single-node
           xpack.security.enabled: false
           plugins.security.disabled: true
+          network.host: "0.0.0.0"
     defaults:
       run:
         shell: bash -l {0}
