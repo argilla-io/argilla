@@ -95,7 +95,8 @@ class ResponseSchema(BaseModel):
 
 
 class SuggestionSchema(BaseModel):
-    name: str
+    question_id: Optional[UUID] = None
+    question_name: str
     type: Optional[Literal["model", "human"]] = None
     score: Optional[float] = None
     value: Any
