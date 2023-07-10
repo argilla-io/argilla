@@ -565,7 +565,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                     )
                     return
 
-                question_name2id = {question.name: question.id for question in self.questions}
+                question_name2id = {question.name: question.id for question in self.__questions}
                 if len(updated_records) > 0:
                     for i in trange(
                         0,
@@ -574,7 +574,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                         desc="Updating records in Argilla...",
                         disable=show_progress,
                     ):
-                        for record in self.__new_records[i : i + PUSHING_BATCH_SIZE]:
+                        for record in updated_records[i : i + PUSHING_BATCH_SIZE]:
                             for suggestion in record.suggestions:
                                 suggestion.question_id = question_name2id[suggestion.question_name]
                                 datasets_api_v1.add_suggestion(
@@ -671,7 +671,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                     ).parsed
                     if self.argilla_id is None:
                         question.id = new_question.id
-                    question_name2id[question.name] = question.id
+                    question_name2id[new_question.name] = new_question.id
                 except Exception as e:
                     delete_dataset(dataset_id=argilla_id)
                     raise Exception(
@@ -690,7 +690,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
             ):
                 try:
                     records = []
-                    for record in self.__new_records[i : i + PUSHING_BATCH_SIZE]:
+                    for record in self.records[i : i + PUSHING_BATCH_SIZE]:
                         if record.suggestions:
                             for suggestion in record.suggestions:
                                 suggestion.question_id = question_name2id[suggestion.question_name]
