@@ -29,6 +29,8 @@ jobs:
         image: ${{ inputs.searchEngineDockerImage }}
         ports:
           - 9200:9200
+        env:
+          discovery.type: single-node
     defaults:
       run:
         shell: bash -l {0}
