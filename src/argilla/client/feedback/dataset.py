@@ -572,12 +572,11 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                     ):
                         for record in self.__new_records[i : i + PUSHING_BATCH_SIZE]:
                             for suggestion in record.suggestions:
-                                suggestion = suggestion.dict(exclude_unset=True)
-                                suggestion["question_id"] = str(question_name2id[suggestion.pop("name")])
+                                suggestion.question_id = question_name2id[suggestion.question_name]
                                 datasets_api_v1.add_suggestion(
                                     client=httpx_client,
                                     record_id=record.id,
-                                    **suggestion,
+                                    **suggestion.dict(exclude={"question_name"}, exclude_none=True),
                                 )
 
                 if len(self.__new_records) > 0:
@@ -590,17 +589,18 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                     ):
                         records = []
                         for record in self.__new_records[i : i + PUSHING_BATCH_SIZE]:
-                            record_dict = record.dict(exclude={"id", "suggestions"}, exclude_none=True)
                             if record.suggestions:
-                                record_dict["suggestions"] = []
                                 for suggestion in record.suggestions:
-                                    suggestion = suggestion.dict(exclude_unset=True)
-                                    suggestion["question_id"] = str(question_name2id[suggestion.pop("name")])
-                                    record_dict["suggestions"].append(suggestion)
-                            records.append(record_dict)
+                                    suggestion.question_id = question_name2id[suggestion.question_name]
+                            records.append(
+                                record.dict(
+                                    exclude={"id": ..., "suggestions": {"__all__": {"question_name"}}},
+                                    exclude_none=True,
+                                )
+                            )
                         datasets_api_v1.add_records(
                             client=httpx_client,
-                            id=argilla_id,
+                            id=self.argilla_id,
                             records=records,
                         )
 
@@ -687,14 +687,14 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                 try:
                     records = []
                     for record in self.__new_records[i : i + PUSHING_BATCH_SIZE]:
-                        record_dict = record.dict(exclude={"id", "suggestions"}, exclude_none=True)
                         if record.suggestions:
-                            record_dict["suggestions"] = []
                             for suggestion in record.suggestions:
-                                suggestion = suggestion.dict(exclude_unset=True)
-                                suggestion["question_id"] = str(question_name2id[suggestion.pop("name")])
-                                record_dict["suggestions"].append(suggestion)
-                        records.append(record_dict)
+                                suggestion.question_id = question_name2id[suggestion.question_name]
+                        records.append(
+                            record.dict(
+                                exclude={"id": ..., "suggestions": {"__all__": {"question_name"}}}, exclude_none=True
+                            )
+                        )
                     datasets_api_v1.add_records(
                         client=httpx_client,
                         id=argilla_id,
