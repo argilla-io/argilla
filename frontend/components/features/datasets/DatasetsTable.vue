@@ -116,33 +116,27 @@ export default {
       const tasks = this.tasks;
       const tags = this.tags;
       return [
-        { column: "workspace", values: workspaces || [] },
-        { column: "task", values: tasks || [] },
-        { column: "tags", values: tags || [] },
+        { column: "workspace", values: workspaces },
+        { column: "task", values: tasks },
+        { column: "tags", values: tags },
       ];
     },
     workspaces() {
-      let _workspaces = this.$route.query.workspace;
-      if (typeof _workspaces == "string") {
-        _workspaces = [_workspaces];
-      }
-      return _workspaces;
+      return this.$route.query.workspaces?.split(",") ?? [];
     },
     tasks() {
-      let _tasks = this.$route.query.task;
-      if (typeof _tasks == "string") {
-        _tasks = [_tasks];
-      }
-      return _tasks;
+      return this.$route.query.tasks?.split(",") ?? [];
     },
     tags() {
-      let _tags = this.$route.query.tags
+      const tags = this.$route.query.tags
         ? JSON.parse(Base64.decode(this.$route.query.tags))
-        : undefined;
-      if (typeof _tags == "string") {
-        _tags = [_tags];
-      }
-      return _tags;
+        : [];
+
+      return tags.map((tag) => {
+        return {
+          [tag.key]: tag.value,
+        };
+      });
     },
     workspace() {
       return currentWorkspace(this.$route);
@@ -168,26 +162,53 @@ export default {
     onColumnFilterApplied({ column, values }) {
       if (column === "workspace") {
         if (values !== this.workspaces) {
-          this.$router.push({
-            query: { ...this.$route.query, workspace: values },
-          });
+          if (values.length) {
+            this.$router.push({
+              query: { ...this.$route.query, workspaces: values.join(",") },
+            });
+          } else {
+            const { workspaces, ...rest } = this.$route.query;
+
+            this.$router.push({
+              query: { ...rest },
+            });
+          }
         }
       }
       if (column === "task") {
         if (values !== this.tasks) {
-          this.$router.push({ query: { ...this.$route.query, task: values } });
+          if (values.length) {
+            this.$router.push({
+              query: { ...this.$route.query, tasks: values.join(",") },
+            });
+          } else {
+            const { tasks, ...rest } = this.$route.query;
+
+            this.$router.push({
+              query: { ...rest },
+            });
+          }
         }
       }
       if (column === "tags") {
         if (values !== this.tags) {
-          this.$router.push({
-            query: {
-              ...this.$route.query,
-              tags: values.length
-                ? Base64.encodeURI(JSON.stringify(values))
-                : undefined,
-            },
-          });
+          if (values.length) {
+            debugger;
+            this.$router.push({
+              query: {
+                ...this.$route.query,
+                tags: values.length
+                  ? Base64.encodeURI(JSON.stringify(values))
+                  : undefined,
+              },
+            });
+          } else {
+            const { tags, ...rest } = this.$route.query;
+
+            this.$router.push({
+              query: { ...rest },
+            });
+          }
         }
       }
     },

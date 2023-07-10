@@ -83,7 +83,7 @@ export default {
       this.$emit("applyFilters", this.column, this.selectedOptions);
     },
     filters(val) {
-      if (!Object.keys(val).length) {
+      if (!Object.keys(val).length && this.selectedOptions.length) {
         this.selectedOptions = [];
       }
     },
