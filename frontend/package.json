@@ -2,11 +2,6 @@
   "name": "argilla",
   "version": "1.13.0-dev",
   "private": true,
-  "eslintIgnore": [
-    "node_modules/**/*",
-    ".nuxt/**/*",
-    "dist/**/*"
-  ],
   "scripts": {
     "dev": "nuxt",
     "yarn-dev:argilla": "cross-env API_URL_CUSTOM=$base_router nuxt",
