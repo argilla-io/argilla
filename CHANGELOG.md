@@ -43,6 +43,7 @@ These are the section headers that we use:
 - Resolved wrong import structure `ArgillaTrainer` `TrainingTaskMapping` (Closes [#3345](https://github.com/argilla-io/argilla/issues/3345))
 - Pin pydantic dependency to version < 2 (Closes [3348](https://github.com/argilla-io/argilla/issues/3348))
 - Big number ids are properly rendered in UI (Closes [#3265](https://github.com/argilla-io/argilla/issues/3265))
+- Fixed `ArgillaDatasetCard` to include the values/labels for all the existing questions ([#3366](https://github.com/argilla-io/argilla/pull/3265))
 
 ### Deprecated
 
