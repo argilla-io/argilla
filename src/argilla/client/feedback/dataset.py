@@ -317,9 +317,9 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
 
     def field_by_name(self, name: str) -> AllowedFieldTypes:
         try:
-            return next(filter(lambda f: f.name == name, self.fields))
+            return next(filter(lambda f: f.name == name, self.__fields))
         except Exception as e:
-            raise ValueError(f"Field with name='{name}' not found, available fields are: {self.fields}") from e
+            raise ValueError(f"Field with name='{name}' not found, available fields are: {self.__fields}") from e
 
     @property
     def questions(self) -> List[AllowedQuestionTypes]:
@@ -328,9 +328,11 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
 
     def question_by_name(self, name: str) -> AllowedQuestionTypes:
         try:
-            return next(filter(lambda q: q.name == name, self.questions))
+            return next(filter(lambda q: q.name == name, self.__questions))
         except Exception as e:
-            raise ValueError(f"Question with name='{name}' not found, available questions are: {self.questions}") from e
+            raise ValueError(
+                f"Question with name='{name}' not found, available questions are: {self.__questions}"
+            ) from e
 
     @property
     def records(self) -> List[FeedbackRecord]:
@@ -358,7 +360,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                 client=httpx_client, id=self.argilla_id, offset=0, limit=FETCHING_BATCH_SIZE
             ).parsed
 
-            question_id2name = {question.id: question.name for question in self.questions}
+            question_id2name = {question.id: question.name for question in self.__questions}
             self.__records = []
             for record in first_batch.items:
                 record = record.dict(
@@ -494,7 +496,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
             )
 
         if self.__fields_schema is None:
-            self.__fields_schema = generate_pydantic_schema(self.fields)
+            self.__fields_schema = generate_pydantic_schema(self.__fields)
 
         for record in records:
             try:
