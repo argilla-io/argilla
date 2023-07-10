@@ -350,9 +350,9 @@ class HuggingFaceDatasetMixIn:
             records.append(
                 FeedbackRecord(
                     fields={field.name: hfds[index][field.name] for field in config.fields},
-                    metadata=metadata,
-                    responses=list(responses.values()) or None,
-                    suggestions=[suggestion for suggestion in suggestions if suggestion["value"] is not None] or None,
+                    metadata=metadata or {},
+                    responses=list(responses.values()) or [],
+                    suggestions=[suggestion for suggestion in suggestions if suggestion["value"] is not None] or [],
                     external_id=hfds[index]["external_id"],
                 )
             )
