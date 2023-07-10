@@ -317,7 +317,7 @@ class HuggingFaceDatasetMixIn:
             responses = {}
             suggestions = []
             for question in config.questions:
-                if hfds[index][question.name] is not None or len(hfds[index][question.name]) > 0:
+                if hfds[index][question.name] is not None and len(hfds[index][question.name]) > 0:
                     for user_id, value, status in zip(
                         hfds[index][question.name]["user_id"],
                         hfds[index][question.name]["value"],
