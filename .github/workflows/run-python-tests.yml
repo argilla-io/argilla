@@ -11,17 +11,11 @@ on:
         required: false
         type: string
         default: coverage
-      searchEngine:
-        description: "Backend search engine to use. Available values are 'elasticsearch' and 'opensearch'."
-        default: elasticsearch
+      searchEngineDockerImage:
+        description: "The name of the Docker image of the search engine to use."
+        default: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
         required: false
         type: string
-      searchEngineVersion:
-        description: "Backend search engine version to use. This value must be aligned to the 'search_engine' input value."
-        required: false
-        default: 8.8
-        type: number
-
 env:
   # Increase this value to reset cache if etc/example-environment.yml has not changed
   CACHE_NUMBER:  5
@@ -30,6 +24,11 @@ jobs:
   run-python-tests:
     name: Argilla python tests
     runs-on: ubuntu-latest
+    services:
+      search_engine:
+        image: ${{ inputs.searchEngineDockerImage }}
+        ports:
+          - 9200:9200
     defaults:
       run:
         shell: bash -l {0}
@@ -68,17 +67,6 @@ jobs:
         env:
           HF_HUB_ACCESS_TOKEN: ${{ secrets.HF_HUB_ACCESS_TOKEN }}
         run: echo "Enable HF access token"
-      # TODO: Review and use github action services section instead. See https://docs.github.com/en/actions/using-containerized-services/about-service-containers#creating-service-containers
-      - name: Setup ElasticSearch 🔎
-        if: inputs.searchEngine == 'elasticsearch'
-        uses: ankane/setup-elasticsearch@v1
-        with:
-          elasticsearch-version: ${{ inputs.searchEngineVersion }}
-      - name: Setup OpenSearch 🔎
-        if: inputs.searchEngine == 'opensearch'
-        uses: ankane/setup-opensearch@v1
-        with:
-          opensearch-version: ${{ inputs.searchEngineVersion }}
       - name: Run tests 📈
         run: |
           pip install -e ".[server,listeners]"
