@@ -353,10 +353,25 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
 
         if self.argilla_id:
             httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
+
             first_batch = datasets_api_v1.get_records(
                 client=httpx_client, id=self.argilla_id, offset=0, limit=FETCHING_BATCH_SIZE
             ).parsed
-            self.__records = parse_obj_as(List[FeedbackRecord], first_batch.items)
+
+            question_id2name = {question.id: question.name for question in self.questions}
+            self.__records = []
+            for record in first_batch.items:
+                record = record.dict(
+                    exclude={
+                        "inserted_at": ...,
+                        "updated_at": ...,
+                        "responses": {"__all__": {"id", "inserted_at", "updated_at"}},
+                    },
+                    exclude_none=True,
+                )
+                for suggestion in record.get("suggestions", []):
+                    suggestion.update({"question_name": question_id2name[suggestion["question_id"]]})
+                self.__records.append(FeedbackRecord(**record))
             current_batch = 1
             # TODO(alvarobartt): use `total` from Argilla Metrics API
             with tqdm(
@@ -370,12 +385,22 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                         offset=FETCHING_BATCH_SIZE * current_batch,
                         limit=FETCHING_BATCH_SIZE,
                     ).parsed
-                    records = parse_obj_as(List[FeedbackRecord], batch.items)
-                    self.__records += records
+                    for record in batch.items:
+                        record = record.dict(
+                            exclude={
+                                "inserted_at": ...,
+                                "updated_at": ...,
+                                "responses": {"__all__": {"id", "inserted_at", "updated_at"}},
+                            },
+                            exclude_none=True,
+                        )
+                        for suggestion in record.get("suggestions", []):
+                            suggestion.update({"question_name": question_id2name[suggestion["question_id"]]})
+                        self.__records.append(FeedbackRecord(**record))
                     current_batch += 1
                     pbar.update(1)
 
-                    if len(records) < FETCHING_BATCH_SIZE:
+                    if len(batch.items) < FETCHING_BATCH_SIZE:
                         break
 
     def add_records(
