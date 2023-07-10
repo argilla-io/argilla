@@ -419,7 +419,7 @@ def add_suggestion(
     url = f"/api/v1/records/{record_id}/suggestions"
 
     suggestion = {
-        "question_id": question_id,
+        "question_id": str(question_id),
         "value": value,
     }
     if type is not None:
