@@ -122,7 +122,10 @@ jobs:
       - run_tests
       - run_tests_extra
       - deployable_check
-    if: needs.deployable_check.outputs.isDeployable == 'true'
+    if: |
+      needs.deployable_check.outputs.isDeployable == 'true'
+      && needs.run_tests.result != 'failure'
+      && needs.run_tests_extra.result != 'failure'
     strategy:
       matrix:
         include:
