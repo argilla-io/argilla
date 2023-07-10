@@ -52,9 +52,10 @@ def test_whoami_errors() -> None:
         whoami(AuthenticatedClient(base_url="http://localhost:6900", token="wrong-apikey"))
 
 
-def test_list_users(owner: "ServerUser") -> None:
-    UserFactory.create(username="user_1")
-    UserFactory.create(username="user_2")
+@pytest.mark.asyncio
+async def test_list_users(owner: "ServerUser") -> None:
+    await UserFactory.create(username="user_1")
+    await UserFactory.create(username="user_2")
     httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
 
     response = list_users(client=httpx_client)
