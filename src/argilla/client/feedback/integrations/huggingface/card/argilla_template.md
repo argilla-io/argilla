@@ -78,7 +78,7 @@ The **questions** are the questions that will be asked to the annotators. They c
 {% for question in argilla_questions %}| {{ question.name }} | {{ question.title }} | {{ question.__class__.__name__  }} | {{ question.required | default(true, true) }} | {{ question.description | default("N/A", true) }} | {% if question.settings.type == 'rating' %}{{ question.settings.options | map(attribute="value") | list }}{% else %} N/A {% endif %} |
 {% endfor %}
 
-**[✨ NEW!]** Additionally, we also have **suggestions**, which are linked to the existing questions, and so on, named appending "-suggestion" and "-suggestion-metadata" to those, containing the value/s of the suggestion and its metadata, respectively. So on, the possible values are the same as in the table above.
+**✨ NEW** Additionally, we also have **suggestions**, which are linked to the existing questions, and so on, named appending "-suggestion" and "-suggestion-metadata" to those, containing the value/s of the suggestion and its metadata, respectively. So on, the possible values are the same as in the table above.
 
 Finally, the **guidelines** are just a plain string that can be used to provide instructions to the annotators. Find those in the [annotation guidelines](#annotation-guidelines) section.
 
@@ -108,7 +108,7 @@ Among the dataset fields, we differentiate between the following:
     {% for question in argilla_questions %}
     * {% if question.required == false %}(optional) {% endif %}**{{ question.name }}** is of type `{{ question.__class__.__name__ }}`{% if question.settings.type == 'rating' %} with the following allowed values {{ question.settings.options | map(attribute="value") | list }}{% endif %}{% if question.description %}, and description "{{ question.description }}"{% endif %}.{% endfor %}
 
-* **[✨ NEW!]** **Suggestions:** As of Argilla 1.13.0, the suggestions have been included to provide the annotators with suggestions to ease or assist during the annotation process. Suggestions are linked to the existing questions, are always optional, and contain not just the suggestion itself, but also the metadata linked to it, if applicable.
+* **✨ NEW** **Suggestions:** As of Argilla 1.13.0, the suggestions have been included to provide the annotators with suggestions to ease or assist during the annotation process. Suggestions are linked to the existing questions, are always optional, and contain not just the suggestion itself, but also the metadata linked to it, if applicable.
     {% for question in argilla_questions %}
     * {% if question.required == false %}(optional) {% endif %}**{{ question.name }}-suggestion** is of type `{{ question.type }}`{% if question.settings.type in ["rating", "label_selection", "multi_label_selection", "ranking"] %} with the following allowed values {{ question.settings.options | map(attribute="value") | list }}{% endif %}.{% endfor %}
 
