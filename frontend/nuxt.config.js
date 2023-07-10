@@ -139,6 +139,12 @@ export default {
     babel: {
       plugins: [["@babel/plugin-proposal-private-methods", { loose: true }]],
     },
+    terser: {
+      terserOptions: {
+        keep_classnames: true,
+        keep_fnames: true,
+      },
+    },
   },
 
   // https://github.com/nuxt-community/style-resources-module
