@@ -241,9 +241,7 @@ def add_records(
     for record in records:
         cleaned_responses = []
         response_without_user_id = False
-        if "responses" not in record:
-            continue
-        for response in record["responses"]:
+        for response in record.get("responses", []):
             if response.get("user_id") is None:
                 if response_without_user_id:
                     warnings.warn(
@@ -260,6 +258,10 @@ def add_records(
                 response["user_id"] = str(response.get("user_id"))
             cleaned_responses.append(response)
         record["responses"] = cleaned_responses
+
+        for suggestion in record.get("suggestions", []):
+            if isinstance(suggestion.get("question_id"), UUID):
+                suggestion["question_id"] = str(suggestion.get("question_id"))
 
     response = client.post(url=url, json={"items": records})
 
