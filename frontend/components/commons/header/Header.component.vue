@@ -11,7 +11,7 @@
       :datasetId="datasetId"
       @click-settings-icon="goToSettings()"
     />
-    <user />
+    <user-avatar-tooltip />
   </BaseTopbarBrand>
 </template>
 
