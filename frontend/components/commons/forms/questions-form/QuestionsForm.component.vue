@@ -116,6 +116,7 @@ import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properti
 import {
   getOptionsOfQuestionByDatasetIdAndQuestionName,
   getComponentTypeOfQuestionByDatasetIdAndQuestionName,
+  getNameOfQuestionByDatasetIdAndQuestionId,
 } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
 import {
   getRecordIndexByRecordId,
@@ -128,6 +129,7 @@ import {
   upsertRecordResponses,
   deleteRecordResponsesByUserIdAndResponseId,
 } from "@/models/feedback-task-model/record-response/recordResponse.queries";
+import { upsertRecordSuggestions } from "@/models/feedback-task-model/record-suggestion/recordSuggestion.queries";
 
 export default {
   name: "QuestionsFormComponent",
@@ -144,10 +146,23 @@ export default {
       type: String,
       required: true,
     },
+    recordSuggestions: {
+      type: Array,
+      default: [],
+    },
     initialInputs: {
       type: Array,
       required: true,
     },
+  },
+  async fetch() {
+    // FETCH suggestions
+    const { items: suggestions } = await this.getSuggestions(this.recordId);
+    // // FORMAT
+    const formattedSuggestionsForOrm =
+      this.factorySuggestionsForOrm(suggestions);
+    // UPSERT
+    await upsertRecordSuggestions(formattedSuggestionsForOrm);
   },
   data() {
     return {
@@ -521,7 +536,6 @@ export default {
           case COMPONENT_TYPE.RATING: {
             const selectedOption =
               input.options?.find((option) => option.is_selected) ?? false;
-
             if (selectedOption) {
               responseByQuestionName[input.name] = {
                 value: selectedOption.value,
@@ -531,7 +545,6 @@ export default {
           }
           case COMPONENT_TYPE.FREE_TEXT: {
             const text = input.options[0]?.value.trim();
-
             if (text) {
               responseByQuestionName[input.name] = {
                 value: text,
@@ -557,6 +570,18 @@ export default {
       });
       return responseByQuestionName;
     },
+    factorySuggestionsForOrm(suggestions) {
+      return suggestions.map((suggestion) => {
+        return {
+          record_id: this.recordId,
+          question_name: getNameOfQuestionByDatasetIdAndQuestionId(
+            this.datasetId,
+            suggestion.question_id
+          ),
+          ...suggestion,
+        };
+      });
+    },
     showNotificationComponent(message, typeOfToast) {
       Notification.dispatch("notify", {
         message,
@@ -568,6 +593,19 @@ export default {
       this.$emit("on-question-form-touched", !isFormUntouched);
       // TODO: Once notifications are centralized in one single point, we can remove this.
       this.$root.$emit("are-responses-untouched", isFormUntouched);
+    },
+    async getSuggestions(recordId) {
+      try {
+        const { data } = await this.$axios.get(
+          `/v1/records/${recordId}/suggestions`
+        );
+
+        return data;
+      } catch (err) {
+        throw {
+          response: "ERROR FETCHING SUGGESTIONS",
+        };
+      }
     },
   },
 };
