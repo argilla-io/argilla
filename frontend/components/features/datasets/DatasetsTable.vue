@@ -128,15 +128,9 @@ export default {
       return this.$route.query.tasks?.split(",") ?? [];
     },
     tags() {
-      const tags = this.$route.query.tags
+      return this.$route.query.tags
         ? JSON.parse(Base64.decode(this.$route.query.tags))
         : [];
-
-      return tags.map((tag) => {
-        return {
-          [tag.key]: tag.value,
-        };
-      });
     },
     workspace() {
       return currentWorkspace(this.$route);
@@ -193,13 +187,10 @@ export default {
       if (column === "tags") {
         if (values !== this.tags) {
           if (values.length) {
-            debugger;
             this.$router.push({
               query: {
                 ...this.$route.query,
-                tags: values.length
-                  ? Base64.encodeURI(JSON.stringify(values))
-                  : undefined,
+                tags: Base64.encodeURI(JSON.stringify(values)),
               },
             });
           } else {
