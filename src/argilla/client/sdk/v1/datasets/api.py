@@ -201,12 +201,9 @@ def get_records(
         A `Response` object containing a `parsed` attribute with the parsed response if the
         request was successful, which is an instance of `FeedbackRecordsModel`.
     """
-    url = f"/api/v1/datasets/{id}/records"
+    url = f"/api/v1/datasets/{id}/records?offset={offset}&limit={limit}&include=responses&include=suggestions"
 
-    response = client.get(
-        url=url,
-        params={"include": "responses", "offset": offset, "limit": limit},
-    )
+    response = client.get(url=url)
 
     if response.status_code == 200:
         parsed_response = FeedbackRecordsModel(**response.json())
