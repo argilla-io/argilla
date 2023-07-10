@@ -14,6 +14,7 @@
         :datasetId="datasetId"
         :recordId="recordId"
         :recordStatus="record.record_status"
+        :recordSuggestions="record.record_suggestions"
         :initialInputs="questionsWithRecordAnswers"
         @on-submit-responses="goToNextPageAndRefreshMetrics"
         @on-discard-responses="goToNextPageAndRefreshMetrics"
@@ -47,7 +48,7 @@ import {
   RESPONSE_STATUS_FOR_API,
   upsertRecords,
   deleteAllRecords,
-  getRecordWithFieldsAndResponsesByUserId,
+  getRecordWithFieldsSuggestionsAndResponsesByUserId,
   isRecordWithRecordIndexByDatasetIdExists,
   isAnyRecordByDatasetId,
 } from "@/models/feedback-task-model/record/record.queries";
@@ -126,7 +127,7 @@ export default {
       return paramForUrl;
     },
     record() {
-      return getRecordWithFieldsAndResponsesByUserId(
+      return getRecordWithFieldsSuggestionsAndResponsesByUserId(
         this.datasetId,
         this.userId,
         this.currentPage - 1
@@ -158,6 +159,9 @@ export default {
     recordFields() {
       return this.record?.record_fields ?? [];
     },
+    recordSuggestions() {
+      return this.record?.record_suggestions ?? [];
+    },
     questionsWithRecordAnswers() {
       // TODO - do this in a hook instead of computed => it's expensive
       return this.questions?.map((question) => {
@@ -165,7 +169,6 @@ export default {
           this.recordResponsesFromCurrentUser.find(
             (recordResponse) => question.name === recordResponse.question_name
           );
-
         if (correspondingResponseToQuestion) {
           let formattedOptions = [];
 
