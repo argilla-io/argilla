@@ -449,6 +449,73 @@ async def test_copy_dataset_in_argilla(
     ]
 
 
+@pytest.mark.asyncio
+async def test_update_dataset_records_in_argilla(
+    mocked_client: "SecuredClient",
+    argilla_user: "ServerUser",
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records: List[FeedbackRecord],
+    db: "AsyncSession",
+) -> None:
+    api.active_api()
+    api.init(api_key=argilla_user.api_key)
+
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    for record in feedback_dataset_records:
+        record.suggestions = []
+        record._reset_updated()
+    dataset.add_records(records=feedback_dataset_records)
+    dataset.push_to_argilla(name="test-dataset")
+    await db.refresh(argilla_user, attribute_names=["datasets"])
+
+    for record in dataset.records:
+        record.suggestions = [
+            {
+                "question_name": "question-1",
+                "value": "This is a suggestion to question 1",
+            },
+        ]
+        assert record._updated is True
+
+    with pytest.warns(UserWarning, match="You are trying to update records that have not been fetched from Argilla"):
+        dataset.push_to_argilla()
+        await db.refresh(argilla_user, attribute_names=["datasets"])
+    assert all(record._updated is True for record in dataset.records)
+
+    dataset = FeedbackDataset.from_argilla("test-dataset")
+    for record in dataset.records:
+        record.suggestions = [
+            {
+                "question_name": "question-1",
+                "value": "This is a suggestion to question 1",
+            },
+        ]
+        assert record._updated is True
+
+    dataset.push_to_argilla()
+    await db.refresh(argilla_user, attribute_names=["datasets"])
+    assert all(record._updated is False for record in dataset.records)
+
+    for record in dataset.records:
+        record.suggestions = [
+            {
+                "question_name": "question-2",
+                "value": 1,
+            },
+        ]
+        assert record._updated is True
+
+    dataset.push_to_argilla("new-test-dataset")
+    await db.refresh(argilla_user, attribute_names=["datasets"])
+    assert all(record._updated is True for record in dataset.records)
+
+
 def test_push_to_huggingface_and_from_huggingface(
     mocked_client: "SecuredClient",
     monkeypatch: pytest.MonkeyPatch,
