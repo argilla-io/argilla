@@ -510,7 +510,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
             workspace: the workspace where to push the dataset to. If not provided, the active workspace will be used.
             show_progress: the option to choose to show/hide tqdm progress bar while looping over records.
         """
-        client: "ArgillaClient" = rg.active_client()
+        client: "ArgillaClient" = ArgillaSingleton.get()
         httpx_client: "httpx.Client" = client.http_client.httpx
 
         if name is None:
