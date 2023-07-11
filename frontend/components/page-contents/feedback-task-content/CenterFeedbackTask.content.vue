@@ -10,11 +10,7 @@ import {
   CORRESPONDING_QUESTION_COMPONENT_TYPE_FROM_API,
   CORRESPONDING_FIELD_COMPONENT_TYPE_FROM_API,
 } from "@/components/feedback-task/feedbackTask.properties";
-
-const TYPE_OF_FEEDBACK = Object.freeze({
-  ERROR_FETCHING_QUESTIONS: "ERROR_FETCHING_QUESTIONS",
-  ERROR_FETCHING_FIELDS: "ERROR_FETCHING_FIELDS",
-});
+import { useFeedbackTask } from "./useFeedbackTask";
 
 export default {
   name: "CenterFeedbackTaskContent",
@@ -24,20 +20,12 @@ export default {
       required: true,
     },
   },
-  async fetch() {
-    // FETCH questions AND fields by dataset
-    const { items: questions } = await this.getQuestions(this.datasetId);
-    const { items: fields } = await this.getFields(this.datasetId);
-
-    // FORMAT questions AND fields to have the shape of ORM
-    const formattedQuestionsForOrm = this.factoryQuestionsForOrm(questions);
-    const formattedFieldsForOrm = this.factoryFieldsForOrm(fields);
-
-    // UPSERT formatted questions in ORM
-    await upsertDatasetQuestions(formattedQuestionsForOrm);
-    await upsertDatasetFields(formattedFieldsForOrm);
+  fetch() {
+    return this.loadFeedback(this.datasetId);
   },
-
+  setup() {
+    return useFeedbackTask();
+  },
   methods: {
     factoryQuestionsForOrm(initialQuestions) {
       return initialQuestions.map(
@@ -147,32 +135,6 @@ export default {
         value,
         text,
       };
-    },
-    async getQuestions(datasetId) {
-      try {
-        const { data } = await this.$axios.get(
-          `/v1/datasets/${datasetId}/questions`
-        );
-
-        return data;
-      } catch (err) {
-        throw {
-          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_QUESTIONS,
-        };
-      }
-    },
-    async getFields(datasetId) {
-      try {
-        const { data } = await this.$axios.get(
-          `/v1/datasets/${datasetId}/fields`
-        );
-
-        return data;
-      } catch (err) {
-        throw {
-          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_FIELDS,
-        };
-      }
     },
   },
 };

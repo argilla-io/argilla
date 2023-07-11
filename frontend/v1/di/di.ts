@@ -6,6 +6,7 @@ import { GetDatasetsUseCase } from "../domain/usecases/get-datasets-use-case";
 import { useDatasets } from "../infrastructure/DatasetsStorage";
 import { useDataset } from "../infrastructure/DatasetStorage";
 import { GetDatasetByIdUseCase } from "../domain/usecases/get-dataset-by-id-use.case";
+import { FeedbackRepository } from "~/components/page-contents/feedback-task-content/useFeedbackTask";
 
 export const loadDependencyContainer = (context: Context) => {
   const useAxios = () => context.$axios;
@@ -23,6 +24,8 @@ export const loadDependencyContainer = (context: Context) => {
       .withDependency(DatasetRepository)
       .and(useDataset)
       .build(),
+
+    register(FeedbackRepository).withDependency(useAxios).build(),
   ];
 
   Container.register(dependencies);
