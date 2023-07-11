@@ -9,7 +9,6 @@ const mountLoginPage = ({ auth } = {}) => {
   return shallowMount(Login, {
     stubs,
     mocks: {
-      $auth: { logout: () => {} },
       $config: {},
       $route: {
         query: {

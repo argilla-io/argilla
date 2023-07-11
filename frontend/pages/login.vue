@@ -78,9 +78,6 @@ export default {
     };
   },
   async created() {
-    // ensure the auth info are cleanned
-    await this.$auth.logout();
-
     const rawAuthToken = this.$route.query.auth;
 
     if (!rawAuthToken) return;
@@ -103,8 +100,8 @@ export default {
   },
   async mounted() {
     try {
-      // TODO - Next call is failling in local: it would be nice to make this call on server only
       const response = await fetch("deployment.json");
+
       const { deployment } = await response.json();
 
       this.deployment = deployment;
@@ -129,6 +126,7 @@ export default {
       });
     },
     async loginUser(authData) {
+      await this.$auth.logout();
       await this.$store.dispatch("entities/deleteAll");
       await this.$auth.loginWith("authProvider", {
         data: this.encodedLoginData(authData),
