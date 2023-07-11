@@ -760,16 +760,6 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
             return self._huggingface_format(self)
         raise ValueError(f"Unsupported format '{format}'.")
 
-    @requires_version("huggingface_hub")
-    def push_to_huggingface(self, repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs) -> None:
-        return self._push_to_huggingface(self, repo_id, generate_card=generate_card, *args, **kwargs)
-
-    @classmethod
-    @requires_version("datasets")
-    @requires_version("huggingface_hub")
-    def from_huggingface(cls, repo_id: str, *args: Any, **kwargs: Any) -> "FeedbackDataset":
-        return cls._from_huggingface(cls, repo_id, *args, **kwargs)
-
     def unify_responses(
         self,
         question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],

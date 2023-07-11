@@ -139,7 +139,7 @@ class HuggingFaceDatasetMixIn:
             features=Features(hf_features),
         )
 
-    def _push_to_huggingface(
+    def push_to_huggingface(
         self, dataset: "FeedbackDataset", repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs
     ) -> None:
         """Pushes the `FeedbackDataset` to the HuggingFace Hub. If the dataset has been previously pushed to the
@@ -224,7 +224,7 @@ class HuggingFaceDatasetMixIn:
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
 
     @staticmethod
-    def _from_huggingface(cls: Type["FeedbackDataset"], repo_id: str, *args: Any, **kwargs: Any) -> "FeedbackDataset":
+    def from_huggingface(cls: Type["FeedbackDataset"], repo_id: str, *args: Any, **kwargs: Any) -> "FeedbackDataset":
         """Loads a `FeedbackDataset` from the HuggingFace Hub.
 
         Args:
