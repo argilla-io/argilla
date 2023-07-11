@@ -177,7 +177,6 @@ export default {
 
       switch (column) {
         case "workspace":
-          // NOTE - the key in the url is workspaceS
           updateUrlParamsFor(
             values,
             "workspaces",
@@ -186,7 +185,6 @@ export default {
           );
           break;
         case "task":
-          // NOTE - the key in the url is taskS
           updateUrlParamsFor(values, "tasks", this.tasks, values.join(","));
           break;
         case "tags":
@@ -197,8 +195,6 @@ export default {
             Base64.encodeURI(JSON.stringify(values))
           );
           break;
-        default:
-        // unknown column : do nothing
       }
     },
     onActionClicked(action, dataset) {
