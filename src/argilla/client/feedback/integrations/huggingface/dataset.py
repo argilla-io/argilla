@@ -140,7 +140,7 @@ class HuggingFaceDatasetMixIn:
         )
 
     def push_to_huggingface(
-        self, dataset: "FeedbackDataset", repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs
+        self: "FeedbackDataset", repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs
     ) -> None:
         """Pushes the `FeedbackDataset` to the HuggingFace Hub. If the dataset has been previously pushed to the
         HuggingFace Hub, it will be updated instead. Note that some params as `private` have no effect at all
@@ -188,9 +188,9 @@ class HuggingFaceDatasetMixIn:
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
             f.write(
                 DatasetConfig(
-                    fields=dataset.fields,
-                    questions=dataset.questions,
-                    guidelines=dataset.guidelines,
+                    fields=self.fields,
+                    questions=self.questions,
+                    guidelines=self.guidelines,
                 ).to_yaml()
             )
             f.flush()
@@ -211,24 +211,23 @@ class HuggingFaceDatasetMixIn:
 
             card = ArgillaDatasetCard.from_template(
                 card_data=DatasetCardData(
-                    size_categories=size_categories_parser(len(dataset.records)),
+                    size_categories=size_categories_parser(len(self.records)),
                     tags=["rlfh", "argilla", "human-feedback"],
                 ),
                 repo_id=repo_id,
-                argilla_fields=dataset.fields,
-                argilla_questions=dataset.questions,
-                argilla_guidelines=dataset.guidelines,
-                argilla_record=json.loads(dataset.records[0].json()),
+                argilla_fields=self.fields,
+                argilla_questions=self.questions,
+                argilla_guidelines=self.guidelines,
+                argilla_record=json.loads(self.records[0].json()),
                 huggingface_record=hfds[0],
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
 
-    @staticmethod
+    @classmethod
     def from_huggingface(cls: Type["FeedbackDataset"], repo_id: str, *args: Any, **kwargs: Any) -> "FeedbackDataset":
         """Loads a `FeedbackDataset` from the HuggingFace Hub.
 
         Args:
-            cls: the class to use to instantiate the `FeedbackDataset`.
             repo_id: the ID of the HuggingFace Hub repo to load the `FeedbackDataset` from.
             *args: the args to pass to `datasets.Dataset.load_from_hub`.
             **kwargs: the kwargs to pass to `datasets.Dataset.load_from_hub`.
@@ -351,10 +350,10 @@ class HuggingFaceDatasetMixIn:
                 )
             )
         del hfds
-        cls = cls(
+        instance = cls(
             fields=config.fields,
             questions=config.questions,
             guidelines=config.guidelines,
         )
-        cls.add_records(records)
-        return cls
+        instance.add_records(records)
+        return instance
