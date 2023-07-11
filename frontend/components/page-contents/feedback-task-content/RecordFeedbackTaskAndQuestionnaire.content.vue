@@ -8,9 +8,9 @@
       />
       <QuestionsFormComponent
         :key="questionFormKey"
+        v-if="questionsWithRecordAnswers && questionsWithRecordAnswers.length"
         class="question-form"
         :class="statusClass"
-        v-if="questionsWithRecordAnswers && questionsWithRecordAnswers.length"
         :datasetId="datasetId"
         :recordId="recordId"
         :recordStatus="record.record_status"
@@ -69,17 +69,9 @@ export default {
       type: String,
       required: true,
     },
-    orderQuestions: {
+    feedback: {
       type: Object,
-      default: () => {
-        return { orderQuestionsBy: "order", ascendent: true };
-      },
-    },
-    orderFields: {
-      type: Object,
-      default: () => {
-        return { orderFieldsBy: "order", ascendent: true };
-      },
+      required: true,
     },
   },
   data() {
@@ -140,18 +132,10 @@ export default {
       return this.record?.id;
     },
     questions() {
-      return getQuestionsByDatasetId(
-        this.datasetId,
-        this.orderQuestions?.orderQuestionsBy,
-        this.orderQuestions?.ascendent
-      );
+      return this.feedback.questions;
     },
     fields() {
-      return getFieldsByDatasetId(
-        this.datasetId,
-        this.orderFields?.orderFieldsBy,
-        this.orderFields?.ascendent
-      );
+      return this.feedback.fields;
     },
     recordResponsesFromCurrentUser() {
       return this.record?.record_responses ?? [];
@@ -163,7 +147,6 @@ export default {
       return this.record?.record_suggestions ?? [];
     },
     questionsWithRecordAnswers() {
-      // TODO - do this in a hook instead of computed => it's expensive
       return this.questions?.map((question) => {
         const correspondingResponseToQuestion =
           this.recordResponsesFromCurrentUser.find(
@@ -201,6 +184,7 @@ export default {
             options: formattedOptions,
           };
         }
+
         if (
           question.component_type === COMPONENT_TYPE.RATING ||
           question.component_type === COMPONENT_TYPE.SINGLE_LABEL ||

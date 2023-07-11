@@ -1,11 +1,18 @@
 import { DatasetQuestion as DatasetQuestionModel } from "./DatasetQuestion.model";
 
 // UPSERT
+/**
+ * @deprecated use V1 store
+ */
 const upsertDatasetQuestions = (globalQuestions) => {
   DatasetQuestionModel.insertOrUpdate({ data: globalQuestions });
 };
 
 // GET
+
+/**
+ * @deprecated use V1 store
+ */
 const getQuestionsByDatasetId = (
   datasetId,
   orderBy = "order",
