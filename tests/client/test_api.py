@@ -28,7 +28,16 @@ from argilla._constants import (
     DEFAULT_API_KEY,
     WORKSPACE_HEADER_NAME,
 )
-from argilla.client.api import active_client, delete, delete_records, init, load, log
+from argilla.client.api import (
+    active_client,
+    delete,
+    delete_records,
+    get_workspace,
+    init,
+    load,
+    log,
+    set_workspace,
+)
 from argilla.client.apis.status import ApiInfo, Status
 from argilla.client.client import Argilla
 from argilla.client.datasets import (
@@ -201,6 +210,25 @@ def test_init_environment_url(mock_init_ok, monkeypatch):
         timeout=60,
         headers={WORKSPACE_HEADER_NAME: workspace_name},
     )
+
+
+@pytest.mark.asyncio
+async def test_init_with_workspace(owner: User) -> None:
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+
+    init(api_key=owner.api_key, workspace=workspace.name)
+    assert get_workspace() == workspace.name
+
+
+def test_set_workspace_with_missing_workspace(owner: User) -> None:
+    init(api_key=owner.api_key)
+    with pytest.raises(ValueError):
+        set_workspace("missing-workspace")
+
+
+def test_init_with_missing_workspace(owner: User) -> None:
+    with pytest.raises(ValueError):
+        init(api_key=owner.api_key, workspace="missing-workspace")
 
 
 def test_trailing_slash(mock_init_ok):
