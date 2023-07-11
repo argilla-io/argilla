@@ -322,12 +322,11 @@ class HuggingFaceDatasetMixIn:
                             }
                         user_without_id_response = True
                     if user_id is not None and user_id not in responses:
-                        if user_id not in responses:
-                            responses[user_id] = {
-                                "user_id": user_id,
-                                "status": status,
-                                "values": {},
-                            }
+                        responses[user_id] = {
+                            "user_id": user_id,
+                            "status": status,
+                            "values": {},
+                        }
                     if value is not None:
                         if question.settings["type"] == "ranking":
                             value = [{"rank": r, "value": v} for r, v in zip(value["rank"], value["value"])]
