@@ -1,7 +1,6 @@
 import { Model } from "@vuex-orm/core";
 import { RecordField as RecordFieldModel } from "../record-field/RecordField.model";
 import { RecordResponse as RecordResponseModel } from "../record-response/RecordResponse.model";
-import { RecordSuggestion as RecordSuggestionModel } from "../record-suggestion/RecordSuggestion.model";
 import { RECORD_STATUS } from "./record.queries";
 class Record extends Model {
   static entity = "records";
@@ -16,7 +15,6 @@ class Record extends Model {
       // relationships
       record_responses: this.hasMany(RecordResponseModel, "record_id"),
       record_fields: this.hasMany(RecordFieldModel, "record_id"),
-      record_suggestions: this.hasMany(RecordSuggestionModel, "record_id"),
     };
   }
 

@@ -8,13 +8,12 @@
       />
       <QuestionsFormComponent
         :key="questionFormKey"
-        v-if="questionsWithRecordAnswers && questionsWithRecordAnswers.length"
+        v-if="questionsWithRecordAnswers?.length"
         class="question-form"
         :class="statusClass"
         :datasetId="datasetId"
         :recordId="recordId"
         :recordStatus="record.record_status"
-        :recordSuggestions="record.record_suggestions"
         :initialInputs="questionsWithRecordAnswers"
         @on-submit-responses="goToNextPageAndRefreshMetrics"
         @on-discard-responses="goToNextPageAndRefreshMetrics"
@@ -57,7 +56,7 @@ import { deleteRecordResponsesByUserIdAndResponseId } from "@/models/feedback-ta
 import { deleteAllRecordFields } from "@/models/feedback-task-model/record-field/recordField.queries";
 import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
 import { LABEL_PROPERTIES } from "../../feedback-task/feedbackTask.properties";
-import { useRecordFeedbackTaskViewModel } from "./useRecordFeebackTaskViewModel";
+import { useRecordFeedbackTaskViewModel } from "./useRecordFeedbackTaskViewModel";
 
 export default {
   name: "RecordFeedbackTaskAndQuestionnaireComponent",
@@ -134,73 +133,11 @@ export default {
     fields() {
       return this.feedback.fields;
     },
-    recordResponsesFromCurrentUser() {
-      return this.record?.record_responses ?? [];
-    },
     recordFields() {
       return this.record?.record_fields ?? [];
     },
-    recordSuggestions() {
-      return this.record?.record_suggestions ?? [];
-    },
     questionsWithRecordAnswers() {
-      return this.questions?.map((question) => {
-        const correspondingResponseToQuestion =
-          this.recordResponsesFromCurrentUser.find(
-            (recordResponse) => question.name === recordResponse.question_name
-          );
-        if (correspondingResponseToQuestion) {
-          let formattedOptions = [];
-
-          // TODO - remove is_selected from object pass to the free_text case and ensure we can submit a form with one text
-          switch (question.component_type) {
-            case COMPONENT_TYPE.RANKING:
-              formattedOptions = correspondingResponseToQuestion.options;
-              break;
-            case COMPONENT_TYPE.FREE_TEXT:
-            case COMPONENT_TYPE.SINGLE_LABEL:
-            case COMPONENT_TYPE.MULTI_LABEL:
-            case COMPONENT_TYPE.RATING:
-              formattedOptions = correspondingResponseToQuestion.options.map(
-                (option) => {
-                  return {
-                    ...option,
-                    is_selected: option.is_selected || false,
-                  };
-                }
-              );
-              break;
-            default:
-              console.log(
-                `The component ${question.component_type} is unknown`
-              );
-          }
-          return {
-            ...question,
-            response_id: correspondingResponseToQuestion.id,
-            options: formattedOptions,
-          };
-        }
-
-        if (
-          question.component_type === COMPONENT_TYPE.RATING ||
-          question.component_type === COMPONENT_TYPE.SINGLE_LABEL ||
-          question.component_type === COMPONENT_TYPE.MULTI_LABEL
-        ) {
-          const formattedOptions = question.options.map((option) => {
-            return { ...option, is_selected: false };
-          });
-          return { ...question, options: formattedOptions, response_id: null };
-        }
-
-        if (question.component_type === COMPONENT_TYPE.RANKING) {
-          const formattedOptions = question.options.map((option) => {
-            return { ...option, rank: null };
-          });
-          return { ...question, options: formattedOptions, response_id: null };
-        }
-        return { ...question, response_id: null };
-      });
+      return this.feedback.getAnswer(this.recordId);
     },
     fieldsWithRecordFieldText() {
       return this.fields?.map((field) => {
@@ -483,7 +420,7 @@ export default {
       status = this.recordStatusFilterValueForGetRecords,
       searchText = this.searchTextToFilterWith
     ) {
-      const { records, totalRecords } = this.getRecordsFromBackend(
+      const { records, totalRecords } = await this.getRecordsFromBackend(
         this.datasetId,
         offset,
         status,

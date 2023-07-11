@@ -129,7 +129,6 @@ import {
   upsertRecordResponses,
   deleteRecordResponsesByUserIdAndResponseId,
 } from "@/models/feedback-task-model/record-response/recordResponse.queries";
-import { upsertRecordSuggestions } from "@/models/feedback-task-model/record-suggestion/recordSuggestion.queries";
 
 export default {
   name: "QuestionsFormComponent",
@@ -146,23 +145,10 @@ export default {
       type: String,
       required: true,
     },
-    recordSuggestions: {
-      type: Array,
-      default: [],
-    },
     initialInputs: {
       type: Array,
       required: true,
     },
-  },
-  async fetch() {
-    // FETCH suggestions
-    const { items: suggestions } = await this.getSuggestions(this.recordId);
-    // // FORMAT
-    const formattedSuggestionsForOrm =
-      this.factorySuggestionsForOrm(suggestions);
-    // UPSERT
-    await upsertRecordSuggestions(formattedSuggestionsForOrm);
   },
   data() {
     return {
@@ -570,18 +556,6 @@ export default {
       });
       return responseByQuestionName;
     },
-    factorySuggestionsForOrm(suggestions) {
-      return suggestions.map((suggestion) => {
-        return {
-          record_id: this.recordId,
-          question_name: getNameOfQuestionByDatasetIdAndQuestionId(
-            this.datasetId,
-            suggestion.question_id
-          ),
-          ...suggestion,
-        };
-      });
-    },
     showNotificationComponent(message, typeOfToast) {
       Notification.dispatch("notify", {
         message,
@@ -593,19 +567,6 @@ export default {
       this.$emit("on-question-form-touched", !isFormUntouched);
       // TODO: Once notifications are centralized in one single point, we can remove this.
       this.$root.$emit("are-responses-untouched", isFormUntouched);
-    },
-    async getSuggestions(recordId) {
-      try {
-        const { data } = await this.$axios.get(
-          `/v1/records/${recordId}/suggestions`
-        );
-
-        return data;
-      } catch (err) {
-        throw {
-          response: "ERROR FETCHING SUGGESTIONS",
-        };
-      }
     },
   },
 };
