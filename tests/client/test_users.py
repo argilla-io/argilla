@@ -17,7 +17,9 @@ from uuid import UUID
 
 import pytest
 from argilla.client.api import ArgillaSingleton
-from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
+from argilla.client.sdk.users.models import UserRole
+from argilla.client.sdk.v1.workspaces.models import WorkspaceModel as WorkspaceModelV1
+from argilla.client.sdk.workspaces.models import WorkspaceModel as WorkspaceModelV0
 from argilla.client.users import User
 
 if TYPE_CHECKING:
@@ -53,6 +55,16 @@ async def test_user_from_name(owner: "ServerUser") -> None:
         User.from_name("non-existing-user")
 
 
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
+@pytest.mark.asyncio
+async def test_user_from_name_not_allowed_role(role: UserRole) -> None:
+    user = await UserFactory.create(role=role)
+    ArgillaSingleton.init(api_key=user.api_key)
+
+    with pytest.raises(ValueError, match=f"User with role={role} is not allowed to call `from_name`"):
+        User.from_name(name=user.username)
+
+
 @pytest.mark.asyncio
 async def test_user_from_id(owner: "ServerUser") -> None:
     new_user = await UserFactory.create(username="test_user")
@@ -64,6 +76,16 @@ async def test_user_from_id(owner: "ServerUser") -> None:
 
     with pytest.raises(ValueError, match="User with id="):
         User.from_id(id="00000000-0000-0000-0000-000000000000")
+
+
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
+@pytest.mark.asyncio
+async def test_user_from_id_not_allowed_role(role: UserRole) -> None:
+    user = await UserFactory.create(role=role)
+    ArgillaSingleton.init(api_key=user.api_key)
+
+    with pytest.raises(ValueError, match=f"User with role={role} is not allowed to call `from_id`"):
+        User.from_id(id=user.id)
 
 
 def test_user_me(owner: "ServerUser") -> None:
@@ -85,6 +107,16 @@ def test_user_create(owner: "ServerUser") -> None:
         User.create("test_user", password="test_password")
 
 
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
+@pytest.mark.asyncio
+async def test_user_create_not_allowed_role(role: UserRole) -> None:
+    user = await UserFactory.create(role=role)
+    ArgillaSingleton.init(api_key=user.api_key)
+
+    with pytest.raises(ValueError, match=f"User with role={role} is not allowed to call `create`"):
+        User.create("test_user", password="test_password", role=role)
+
+
 @pytest.mark.asyncio
 async def test_user_list(owner: "ServerUser") -> None:
     await UserFactory.create(username="user_1")
@@ -93,6 +125,16 @@ async def test_user_list(owner: "ServerUser") -> None:
 
     users = User.list()
     assert all(user.username in ["user_1", "user_2", owner.username] for user in users)
+
+
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
+@pytest.mark.asyncio
+async def test_user_list_not_allowed_role(role: UserRole) -> None:
+    user = await UserFactory.create(role=role)
+    ArgillaSingleton.init(api_key=user.api_key)
+
+    with pytest.raises(ValueError, match=f"User with role={role} is not allowed to call `list`"):
+        User.list()
 
 
 @pytest.mark.asyncio
@@ -105,6 +147,17 @@ async def test_user_delete_user(owner: "ServerUser") -> None:
 
     user.delete()
     with pytest.raises(ValueError, match="doesn't exist in Argilla"):
+        user.delete()
+
+
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
+@pytest.mark.asyncio
+async def test_user_delete_not_allowed_role(role: UserRole) -> None:
+    user = await UserFactory.create(role=role)
+    ArgillaSingleton.init(api_key=user.api_key)
+
+    user = User.me()
+    with pytest.raises(ValueError, match=f"User with role={role} is not allowed to call `delete`"):
         user.delete()
 
 
@@ -129,5 +182,16 @@ async def test_user_workspaces(owner: "ServerUser") -> None:
     user = User.me()
     assert isinstance(user.workspaces, list)
     assert len(user.workspaces) == len(workspaces)
-    assert all(isinstance(workspace, WorkspaceModel) for workspace in user.workspaces)
+    assert all(isinstance(workspace, (WorkspaceModelV0, WorkspaceModelV1)) for workspace in user.workspaces)
     assert [workspace.name for workspace in workspaces] == [workspace.name for workspace in user.workspaces]
+
+
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
+@pytest.mark.asyncio
+async def test_user_workspaces_not_allowed_role(role: UserRole) -> None:
+    user = await UserFactory.create(role=role)
+    ArgillaSingleton.init(api_key=user.api_key)
+
+    user = User.me()
+    with pytest.raises(ValueError, match=f"User with role={role} is not allowed to call `workspaces`"):
+        user.workspaces
