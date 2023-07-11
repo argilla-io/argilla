@@ -18,18 +18,17 @@ import tempfile
 import warnings
 from typing import TYPE_CHECKING, Any, Optional, Type
 
-import huggingface_hub
-from datasets import Dataset, DatasetDict, Features, Sequence, Value, load_dataset
-from huggingface_hub import DatasetCardData, HfApi, hf_hub_download
-from huggingface_hub.utils import EntryNotFoundError
 from packaging.version import parse as parse_version
 
 from argilla.client.feedback.config import DatasetConfig
 from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
+from argilla.client.feedback.integrations.config import CONFIG
 from argilla.client.feedback.schemas import FeedbackRecord
 from argilla.client.feedback.typing import AllowedQuestionTypes
 
 if TYPE_CHECKING:
+    from datasets import Dataset
+
     from argilla.client.feedback.dataset import FeedbackDataset
 
 _LOGGER = logging.getLogger(__name__)
@@ -54,6 +53,14 @@ class HuggingFaceDatasetMixIn:
             >>> dataset = rg.FeedbackDataset.from_argilla(name="my-dataset")
             >>> huggingface_dataset = rg.HuggingFaceDatasetMixIn.set_format(dataset)
         """
+        if not CONFIG.datasets_installed:
+            raise ImportError(
+                "The `datasets` library is required to use the `HuggingFaceDatasetMixIn`."
+                " You can install it as `pip install datasets`."
+            )
+
+        from datasets import Dataset, Features, Sequence, Value
+
         hf_dataset, hf_features = {}, {}
 
         for field in dataset.fields:
@@ -147,6 +154,21 @@ class HuggingFaceDatasetMixIn:
             *args: the args to pass to `datasets.Dataset.push_to_hub`.
             **kwargs: the kwargs to pass to `datasets.Dataset.push_to_hub`.
         """
+        if not CONFIG.datasets_installed:
+            raise ImportError(
+                "The `datasets` library is required to use the `HuggingFaceDatasetMixIn`."
+                " You can install it as `pip install datasets`."
+            )
+        if not CONFIG.huggingface_hub_installed:
+            raise ImportError(
+                "The `huggingface_hub` library is required to use the `HuggingFaceDatasetMixIn`."
+                " You can install it as `pip install huggingface_hub`. Make sure to upgrade it"
+                " to 0.14.0 or higher to avoid potential issues with older versions."
+            )
+
+        import huggingface_hub
+        from huggingface_hub import DatasetCardData, HfApi
+
         if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
             _LOGGER.warning(
                 "Recommended `huggingface_hub` version is 0.14.0 or higher, and you have"
@@ -214,6 +236,23 @@ class HuggingFaceDatasetMixIn:
         Returns:
             A `FeedbackDataset` loaded from the HuggingFace Hub.
         """
+        if not CONFIG.datasets_installed:
+            raise ImportError(
+                "The `datasets` library is required to use the `HuggingFaceDatasetMixIn`."
+                " You can install it as `pip install datasets`."
+            )
+        if not CONFIG.huggingface_hub_installed:
+            raise ImportError(
+                "The `huggingface_hub` library is required to use the `HuggingFaceDatasetMixIn`."
+                " You can install it as `pip install huggingface_hub`. Make sure to upgrade it"
+                " to 0.14.0 or higher to avoid potential issues with older versions."
+            )
+
+        import huggingface_hub
+        from datasets import DatasetDict, load_dataset
+        from huggingface_hub import hf_hub_download
+        from huggingface_hub.utils import EntryNotFoundError
+
         if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
             _LOGGER.warning(
                 "Recommended `huggingface_hub` version is 0.14.0 or higher, and you have"
