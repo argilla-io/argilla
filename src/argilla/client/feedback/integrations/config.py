@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from argilla.utils.dependency import require_version
 
 
-def __check_if_installed(dependency: str) -> None:
+def _check_if_installed(dependency: str) -> None:
     try:
         require_version(dependency)
         return True
@@ -27,8 +27,8 @@ def __check_if_installed(dependency: str) -> None:
 
 @dataclass
 class Config:
-    datasets_installed: bool = __check_if_installed("datasets")
-    huggingface_hub_installed: bool = __check_if_installed("datasets")
+    datasets_installed: bool = _check_if_installed("datasets")
+    huggingface_hub_installed: bool = _check_if_installed("datasets")
 
 
 CONFIG = Config()
