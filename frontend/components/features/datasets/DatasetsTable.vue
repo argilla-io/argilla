@@ -154,53 +154,51 @@ export default {
       this.sortedOrder = order;
     },
     onColumnFilterApplied({ column, values }) {
-      if (column === "workspace") {
-        if (values !== this.workspaces) {
-          if (values.length) {
-            this.$router.push({
-              query: { ...this.$route.query, workspaces: values.join(",") },
-            });
-          } else {
-            const { workspaces, ...rest } = this.$route.query;
+      const updateUrlParamsFor = (
+        values,
+        paramKey,
+        currentParams,
+        valuesToPush
+      ) => {
+        if (values === currentParams) return;
 
-            this.$router.push({
-              query: { ...rest },
-            });
-          }
-        }
-      }
-      if (column === "task") {
-        if (values !== this.tasks) {
-          if (values.length) {
-            this.$router.push({
-              query: { ...this.$route.query, tasks: values.join(",") },
-            });
-          } else {
-            const { tasks, ...rest } = this.$route.query;
+        const query = createQueryFor(values, paramKey, valuesToPush);
+        this.$router.push({ query });
+      };
 
-            this.$router.push({
-              query: { ...rest },
-            });
-          }
+      const createQueryFor = (values, paramKey, valuesToPush) => {
+        if (values.length) {
+          return { ...this.$route.query, [paramKey]: valuesToPush };
         }
-      }
-      if (column === "tags") {
-        if (values !== this.tags) {
-          if (values.length) {
-            this.$router.push({
-              query: {
-                ...this.$route.query,
-                tags: Base64.encodeURI(JSON.stringify(values)),
-              },
-            });
-          } else {
-            const { tags, ...rest } = this.$route.query;
 
-            this.$router.push({
-              query: { ...rest },
-            });
-          }
-        }
+        const { [paramKey]: keyToEscape, ...rest } = this.$route.query;
+        return { ...rest };
+      };
+
+      switch (column) {
+        case "workspace":
+          // NOTE - the key in the url is workspaceS
+          updateUrlParamsFor(
+            values,
+            "workspaces",
+            this.workspaces,
+            values.join(",")
+          );
+          break;
+        case "task":
+          // NOTE - the key in the url is taskS
+          updateUrlParamsFor(values, "tasks", this.tasks, values.join(","));
+          break;
+        case "tags":
+          updateUrlParamsFor(
+            values,
+            "tags",
+            this.tags,
+            Base64.encodeURI(JSON.stringify(values))
+          );
+          break;
+        default:
+        // unknown column : do nothing
       }
     },
     onActionClicked(action, dataset) {
