@@ -16,10 +16,7 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import (
-    ValidationError,
-    parse_obj_as,
-)
+from pydantic import ValidationError
 from tqdm import tqdm, trange
 
 import argilla as rg
@@ -60,11 +57,7 @@ if TYPE_CHECKING:
     from datasets import Dataset
 
     from argilla.client.client import Argilla as ArgillaClient
-    from argilla.client.sdk.v1.datasets.models import (
-        FeedbackDatasetModel,
-        FeedbackFieldModel,
-        FeedbackQuestionModel,
-    )
+    from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel
 
 _LOGGER = logging.getLogger(__name__)
 
