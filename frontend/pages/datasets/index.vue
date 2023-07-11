@@ -16,10 +16,10 @@
   -->
 
 <template>
-  <div>
+  <div class="home">
     <base-loading v-if="isLoadingDatasets" />
-    <div v-else class="wrapper">
-      <div class="main">
+    <div v-else>
+      <div class="home__main">
         <app-header
           :copy-button="false"
           :sticky="false"
@@ -34,7 +34,7 @@
         <datasets-table v-else ref="table" :datasets="datasets.datasets" />
       </div>
       <sidebar-menu
-        class="sidebar"
+        class="home__sidebar"
         @refresh="$fetch"
         :sidebar-items="[
           {
@@ -69,16 +69,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.main {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
+.home {
+  &__main {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
 
-.sidebar {
-  position: fixed;
-  top: 56px;
-  right: 0;
-  border-left: 1px solid palette(grey, 600);
+  &__sidebar.sidebar {
+    position: fixed;
+    top: 56px;
+    right: 0;
+    border-left: 1px solid palette(grey, 600);
+  }
 }
 </style>
