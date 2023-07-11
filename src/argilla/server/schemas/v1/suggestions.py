@@ -32,6 +32,10 @@ class SuggestionCreate(BaseSuggestion):
     pass
 
 
+class SuggestionCreateWithRecordId(BaseSuggestion):
+    record_id: UUID
+
+
 class Suggestion(BaseSuggestion):
     id: UUID
 

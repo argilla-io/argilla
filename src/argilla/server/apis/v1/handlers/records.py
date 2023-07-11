@@ -89,7 +89,7 @@ async def get_record_suggestions(
     return Suggestions(items=record.suggestions)
 
 
-@router.post("/records/{record_id}/suggestions", status_code=status.HTTP_201_CREATED, response_model=Suggestion)
+@router.put("/records/{record_id}/suggestions", status_code=status.HTTP_201_CREATED, response_model=Suggestion)
 async def create_record_suggestion(
     *,
     db: AsyncSession = Depends(get_async_db),
@@ -101,12 +101,6 @@ async def create_record_suggestion(
 
     await authorize(current_user, RecordPolicyV1.create_suggestion(record))
 
-    if await datasets.get_suggestion_by_record_id_and_question_id(db, record_id, suggestion_create.question_id):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Suggestion already exists for record with id `{record_id}` and question with id `{suggestion_create.question_id}`",
-        )
-
     question = await datasets.get_question_by_id(db, suggestion_create.question_id)
     if not question:
         raise HTTPException(
@@ -117,6 +111,6 @@ async def create_record_suggestion(
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
     # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
-        return await datasets.create_suggestion(db, record, question, suggestion_create)
+        return await datasets.upsert_suggestion(db, record, question, suggestion_create)
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
