@@ -777,7 +777,17 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
             str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy, RankingQuestionStrategy
         ],
     ) -> None:
-        """Unify responses for a given question using a given strategy"""
+        """
+        The `unify_responses` function takes a question and a strategy as input and applies the strategy
+        to unify the responses for that question.
+
+        Args:
+            question The `question` parameter can be either a string representing the name of the
+                question, or an instance of one of the question classes (`LabelQuestion`, `MultiLabelQuestion`,
+                `RatingQuestion`, `RankingQuestion`).
+            strategy The `strategy` parameter is used to specify the strategy to be used for unifying
+                responses for a given question. It can be either a string or an instance of a strategy class.
+        """
         if isinstance(question, str):
             question = self.question_by_name(question)
 

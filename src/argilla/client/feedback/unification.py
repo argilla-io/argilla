@@ -63,6 +63,23 @@ class RatingQuestionStrategy(Enum):
     MIN: str = "min"
 
     def unify_responses(self, records: List[FeedbackRecord], question: RatingQuestion):
+        """
+        The function `unify_responses` takes a list of feedback records and a rating question, and
+        returns a unified value based on the specified unification method.
+
+        Args:
+        - records The `records` parameter is a list of `FeedbackRecord` objects. Each
+            `FeedbackRecord` object represents a feedback response and contains information such as the
+            respondent's name, the question being answered, and the response value.
+        - question The `question` parameter is the question for which you want to unify the
+            responses. It can be either a string or a `RatingQuestion` object. If it is a string, it
+            represents the name of the question. If it is a `RatingQuestion` object, it represents the
+            actual question
+
+        Returns:
+        The method `unify_responses` returns the result of either the `_majority` or
+        `_aggregate` method, depending on the value of `self.value`.
+        """
         UnifiedValueSchema.update_forward_refs()
         # check if field is a str or a RatingQuestion
         if isinstance(question, str):
@@ -78,6 +95,22 @@ class RatingQuestionStrategy(Enum):
             return self._aggregate(records, question)
 
     def _aggregate(self, records: List[FeedbackRecord], question: str):
+        """
+        The function `_aggregate` takes a list of feedback records and a question, and aggregates the
+        responses for that question using a specified method (mean, max, or min) and returns the updated
+        records.
+
+        Args:
+        - records The `records` parameter is a list of `FeedbackRecord` objects. Each
+            `FeedbackRecord` object represents a feedback submission and contains information about the
+            responses given by the user.
+        - question The "question" parameter in the code represents the specific question or
+            attribute for which the feedback records need to be aggregated. It is a string that identifies
+            the question or attribute being considered.
+
+        Returns: the updated list of feedback records with the unified responses for the specified
+        question.
+        """
         for rec in records:
             if not rec.responses:
                 continue
@@ -142,6 +175,22 @@ class RankingQuestionStrategy(Enum):
     MIN: str = "min"
 
     def unify_responses(self, records: List[FeedbackRecord], question: RankingQuestion):
+        """
+        The function `unify_responses` takes a list of feedback records and a ranking question, and
+        returns a unified value based on the specified unification method.
+
+        Args:
+
+        - records The `records` parameter is a list of `FeedbackRecord` objects. It is assumed that
+        `FeedbackRecord` is a custom class defined elsewhere in the code.
+        - question The `question` parameter is the question for which you want to unify the
+        responses. It can be either a string or a `RankingQuestion` object. If it is a string, it
+        represents the name of the question. If it is a `RankingQuestion` object, it represents the
+
+        Returns:
+        The method `unify_responses` returns the result of either the `_majority` or
+        `_aggregate` method, depending on the value of `self.value`.
+        """
         UnifiedValueSchema.update_forward_refs()
         # check if field is a str or a RankingQuestion
         if isinstance(question, str):
@@ -157,6 +206,21 @@ class RankingQuestionStrategy(Enum):
             return self._aggregate(records, question)
 
     def _aggregate(self, records: List[FeedbackRecord], question: str):
+        """
+        The function `_aggregate` takes a list of `FeedbackRecord` objects and a question, and
+        aggregates the responses for that question based on a specified aggregation method.
+
+        Args:
+        - records The `records` parameter is a list of `FeedbackRecord` objects. Each
+        `FeedbackRecord` object represents a feedback record and contains information about the
+        responses given for a particular feedback.
+        - question The `question` parameter in the `_aggregate` method is a string that represents
+        the question for which the responses are being aggregated.
+
+        Returns:
+        the updated list of FeedbackRecord objects after aggregating the responses for the
+        specified question.
+        """
         for rec in records:
             if not rec.responses:
                 continue
@@ -189,6 +253,22 @@ class RankingQuestionStrategy(Enum):
         return records
 
     def _majority(self, records: List[FeedbackRecord], question: str):
+        """
+        The `_majority` function calculates the majority value for a given question based on the
+        responses in a list of feedback records.
+
+        Args:
+        - records The `records` parameter is a list of `FeedbackRecord` objects. Each
+        `FeedbackRecord` object represents a feedback record and contains information such as the
+        responses given by the user.
+        - question The "question" parameter in the code represents the specific question for which
+        you want to determine the majority value. It is a string that identifies the question in the
+        feedback records.
+
+        Returns:
+        The updated list of FeedbackRecord objects, with the "_unified_responses" attribute of
+        each record updated for the specified question.
+        """
         UnifiedValueSchema.update_forward_refs()
         for rec in records:
             if not rec.responses:
@@ -217,6 +297,22 @@ class RankingQuestionStrategy(Enum):
 
 class LabelQuestionStrategyMixin:
     def unify_responses(self, records: List[FeedbackRecord], question: Union[str, LabelQuestion, MultiLabelQuestion]):
+        """
+        The function `unify_responses` takes a list of feedback records and a question, and returns a
+        unified value based on the specified unification method.
+
+        Args:
+        - records `records` is a list of `FeedbackRecord` objects. Each `FeedbackRecord` represents
+        a feedback response and contains information such as the respondent's ID, the question being
+        answered, and the response value.
+        - question The `question` parameter can be either a string, a `LabelQuestion` object, or a
+        `MultiLabelQuestion` object. It represents the question for which you want to unify the
+        responses.
+
+        Returns: The method `unify_responses` returns the result of one of the following methods:
+        `_majority`, `_majority_weighted`, or `_disagreement`. The specific method that is called
+        depends on the value of `self.value`.
+        """
         UnifiedValueSchema.update_forward_refs()
         # check if field is a str or a LabelQuestion
         if isinstance(question, (LabelQuestion, MultiLabelQuestion)):
@@ -242,6 +338,19 @@ class LabelQuestionStrategyMixin:
         """Must be implemented by subclasses"""
 
     def _disagreement(self, records: List[FeedbackRecord], question: str):
+        """
+        The function `_disagreement` takes a list of `FeedbackRecord` objects and a question as input,
+        and returns a list of unified records based on the most frequent responses for that question.
+
+        Args:
+        - records The "records" parameter is a list of FeedbackRecord objects. Each FeedbackRecord
+        object represents a feedback record and contains information about the responses given by a
+        user.
+        - question The "question" parameter is a string that represents the specific question for
+        which you want to unify the responses.
+
+        Returns: a list of unified records.
+        """
         unified_records = []
         for rec in records:
             if not rec.responses:
@@ -279,6 +388,19 @@ class LabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
     DISAGREEMENT: str = "disagreement"
 
     def _majority(self, records: List[FeedbackRecord], question: str):
+        """
+        The function `_majority` takes a list of feedback records and a question, and determines the
+        majority value for that question based on the submitted responses.
+
+        Args:
+        - records The `records` parameter is a list of `FeedbackRecord` objects. Each
+        `FeedbackRecord` object represents a feedback record and contains information about the
+        responses given by a user.
+        - question The "question" parameter is a string that represents the specific question for
+        which you want to determine the majority value.
+
+        Returns: a modified version of the input `FeedbackRecord` object.
+        """
         for rec in records:
             if not rec.responses:
                 continue
@@ -321,6 +443,20 @@ class MultiLabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
     DISAGREEMENT: str = "disagreement"
 
     def _majority(self, records: List[FeedbackRecord], question: str):
+        """
+        The `_majority` function calculates the majority value for a given question based on the
+        submitted responses in a list of feedback records.
+
+        Args:
+        - records The `records` parameter is a list of `FeedbackRecord` objects. Each
+        `FeedbackRecord` object represents a feedback record and contains information about the
+        responses given by a user.
+        - question The "question" parameter in the code represents the specific question for which
+        you want to determine the majority response. It is a string that identifies the question.
+
+        Returns: the updated list of FeedbackRecord objects with the "_unified_responses" attribute
+        updated for each record.
+        """
         for rec in records:
             if not rec.responses:
                 continue
@@ -426,6 +562,16 @@ class LabelQuestionUnification(BaseModel):
     strategy: Union[str, LabelQuestionStrategy, MultiLabelQuestionStrategy] = "majority"
 
     def unify_responses(self, records: List[FeedbackRecord]):
+        """
+        The function `unify_responses` takes a list of `FeedbackRecord` objects and returns the unified
+        responses using a strategy and a specific question.
+
+        Args:
+        - records The "records" parameter is a list of FeedbackRecord objects.
+
+        Returns: The method `unify_responses` returns the result of calling the `unify_responses` method
+        of the `strategy` object, passing in the `records` and `question` as arguments.
+        """
         return self.strategy.unify_responses(records, self.question)
 
     @root_validator
