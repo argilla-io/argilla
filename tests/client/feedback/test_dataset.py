@@ -466,6 +466,48 @@ def test_push_to_huggingface_and_from_huggingface(
             for hf_response, response in zip(hf_record.responses, record.responses)
         )
 
+    dataset.add_records(
+        records=[
+            FeedbackRecord(
+                fields={"text": "This is a negative example", "label": "negative"},
+                responses=[
+                    {
+                        "values": {
+                            "question-1": {"value": "This is a response to question 1"},
+                            "question-2": {"value": 0},
+                            "question-3": {"value": "b"},
+                            "question-4": {"value": ["b", "c"]},
+                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
+                        },
+                        "status": "submitted",
+                    },
+                    {
+                        "values": {
+                            "question-1": {"value": "This is a response to question 1"},
+                            "question-2": {"value": 0},
+                            "question-3": {"value": "b"},
+                            "question-4": {"value": ["b", "c"]},
+                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
+                        },
+                        "status": "submitted",
+                    },
+                ],
+            ),
+        ],
+    )
+
+    monkeypatch.setattr("datasets.arrow_dataset.Dataset.push_to_hub", lambda *args, **kwargs: None)
+    monkeypatch.setattr("huggingface_hub.hf_api.HfApi.upload_file", lambda *args, **kwargs: None)
+    monkeypatch.setattr("huggingface_hub.repocard.RepoCard.push_to_hub", lambda *args, **kwargs: None)
+
+    dataset.push_to_huggingface(repo_id="test-dataset", generate_card=True)
+
+    monkeypatch.setattr("huggingface_hub.hf_hub_download", lambda *args, **kwargs: config_file)
+    monkeypatch.setattr("datasets.load_dataset", lambda *args, **kwargs: dataset.format_as("datasets"))
+
+    with pytest.warns(UserWarning, match="Found more than one user without ID"):
+        dataset_from_huggingface = FeedbackDataset.from_huggingface(repo_id="test-dataset")
+
 
 @pytest.mark.parametrize(
     "framework",
