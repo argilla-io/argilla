@@ -57,10 +57,7 @@ import { deleteRecordResponsesByUserIdAndResponseId } from "@/models/feedback-ta
 import { deleteAllRecordFields } from "@/models/feedback-task-model/record-field/recordField.queries";
 import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
 import { LABEL_PROPERTIES } from "../../feedback-task/feedbackTask.properties";
-
-const TYPE_OF_FEEDBACK = Object.freeze({
-  ERROR_FETCHING_RECORDS: "ERROR_FETCHING_RECORDS",
-});
+import { useRecordFeedbackTaskViewModel } from "./useRecordFeebackTaskViewModel";
 
 export default {
   name: "RecordFeedbackTaskAndQuestionnaireComponent",
@@ -486,24 +483,12 @@ export default {
       status = this.recordStatusFilterValueForGetRecords,
       searchText = this.searchTextToFilterWith
     ) {
-      let records = [];
-      let totalRecords = null;
-
-      if (isNil(searchText) || !searchText.length) {
-        // FETCH records from offset, status + 10 next records
-        ({ items: records } = await this.getRecords(
-          this.datasetId,
-          offset,
-          status
-        ));
-      } else {
-        ({ items: records, totalRecords } = await this.searchRecords(
-          this.datasetId,
-          offset,
-          status,
-          searchText
-        ));
-      }
+      const { records, totalRecords } = this.getRecordsFromBackend(
+        this.datasetId,
+        offset,
+        status,
+        searchText
+      );
 
       this.totalRecords = isNil(totalRecords) ? null : totalRecords;
 
@@ -512,68 +497,6 @@ export default {
 
       // UPSERT records in ORM
       await upsertRecords(formattedRecords);
-    },
-    async getRecords(
-      datasetId,
-      offset,
-      responseStatus,
-      numberOfRecordsToFetch = 10
-    ) {
-      try {
-        const url = `/v1/me/datasets/${datasetId}/records`;
-        const params = {
-          include: "responses",
-          offset,
-          limit: numberOfRecordsToFetch,
-          response_status: responseStatus,
-        };
-        const { data } = await this.$axios.get(url, { params });
-        return data;
-      } catch (err) {
-        console.warn(err);
-        throw {
-          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_RECORDS,
-        };
-      }
-    },
-    async searchRecords(
-      datasetId,
-      offset,
-      responseStatus,
-      searchText,
-      numberOfRecordsToFetch = 10
-    ) {
-      try {
-        const url = `/v1/me/datasets/${datasetId}/records/search`;
-
-        const body = JSON.parse(
-          JSON.stringify({
-            query: {
-              text: {
-                q: searchText,
-              },
-            },
-          })
-        );
-
-        const params = {
-          include: "responses",
-          response_status: responseStatus,
-          limit: numberOfRecordsToFetch,
-          offset,
-        };
-
-        const { data } = await this.$axios.post(url, body, { params });
-        const { items, total: totalRecords } = data;
-
-        const formattedItems = items.map((item) => item.record);
-        return { items: formattedItems, totalRecords };
-      } catch (err) {
-        console.warn(err);
-        throw {
-          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_RECORDS,
-        };
-      }
     },
     factoryRecordsForOrm(records, offset) {
       return records.map(
@@ -743,6 +666,9 @@ export default {
     this.$root.$off("go-to-prev-page");
     this.$root.$off("status-filter-changed");
     this.$root.$off("search-filter-changed");
+  },
+  setup() {
+    return useRecordFeedbackTaskViewModel();
   },
 };
 </script>
