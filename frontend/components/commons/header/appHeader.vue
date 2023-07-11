@@ -40,7 +40,7 @@
           @click-settings-icon="goToSettings()"
         />
       </template>
-      <user />
+      <user-avatar-tooltip />
     </base-topbar-brand>
     <loading-line v-if="showRecordsLoader" />
     <task-sidebar

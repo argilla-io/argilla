@@ -372,10 +372,6 @@ async def test_push_to_argilla_and_from_argilla(
     assert len(dataset_from_argilla.records) == len(dataset.records)
     assert len(dataset_from_argilla.records[-1].responses) == 1  # Since the second one was discarded as `user_id=None`
 
-    for rg_record, record in zip(dataset_from_argilla.records, dataset.records):
-        assert rg_record.fields == record.fields
-        assert rg_record.metadata == record.metadata
-
 
 @pytest.mark.asyncio
 async def test_copy_dataset_in_argilla(

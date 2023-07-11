@@ -1,6 +1,9 @@
 import { FeedbackDataset as FeedbackDatasetModel } from "./FeedbackDataset.model";
 
 // UPSERT
+/**
+ * @deprecated use V1 store
+ */
 const upsertFeedbackDataset = (feedbackDataset) => {
   FeedbackDatasetModel.insertOrUpdate({ data: feedbackDataset });
 };

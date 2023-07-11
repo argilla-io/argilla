@@ -143,7 +143,7 @@ export default {
             : this.record.text.indexOf(this.record.tokens[index + 1], end);
           const charsBetweenTokens = this.record.text.slice(end, nextStart);
           let highlighted = false;
-          for (let highlight of searchKeywordsSpans) {
+          for (const highlight of searchKeywordsSpans) {
             if (highlight.start <= start && highlight.end >= end) {
               highlighted = true;
               break;
