@@ -319,23 +319,44 @@ class HuggingFaceDatasetMixIn:
         records = []
         for index in range(len(hfds)):
             responses = {}
+            user_without_id = False
             for question in config.questions:
                 if hfds[index][question.name] is None or len(hfds[index][question.name]) < 1:
                     continue
+                if len([None for user_id in hfds[index][question.name]["user_id"] if user_id is None]) > 1:
+                    warnings.warn(
+                        "Found more than one user without ID in the dataset, so just the"
+                        " responses for the first user without ID will be used, the rest"
+                        " will be discarded."
+                    )
+                user_without_id_response = False
                 for user_id, value, status in zip(
                     hfds[index][question.name]["user_id"],
                     hfds[index][question.name]["value"],
                     hfds[index][question.name]["status"],
                 ):
-                    if user_id not in responses:
-                        responses[user_id] = {
-                            "user_id": user_id,
-                            "status": status,
-                            "values": {},
-                        }
-                    if question.settings["type"] == "ranking":
-                        value = [{"rank": r, "value": v} for r, v in zip(value["rank"], value["value"])]
-                    responses[user_id]["values"].update({question.name: {"value": value}})
+                    if user_without_id_response:
+                        continue
+                    if user_id is None:
+                        if not user_without_id:
+                            user_without_id = True
+                            responses["user_without_id"] = {
+                                "user_id": user_id,
+                                "status": status,
+                                "values": {},
+                            }
+                        user_without_id_response = True
+                    if user_id is not None and user_id not in responses:
+                        if user_id not in responses:
+                            responses[user_id] = {
+                                "user_id": user_id,
+                                "status": status,
+                                "values": {},
+                            }
+                    if value is not None:
+                        if question.settings["type"] == "ranking":
+                            value = [{"rank": r, "value": v} for r, v in zip(value["rank"], value["value"])]
+                        responses[user_id or "user_without_id"]["values"].update({question.name: {"value": value}})
 
             metadata = None
             if "metadata" in hfds[index] and hfds[index]["metadata"] is not None:
