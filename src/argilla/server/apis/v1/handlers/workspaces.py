@@ -66,13 +66,13 @@ async def delete_workspace(
 
     if await datasets.list_datasets_by_workspace_id(db, workspace_id):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_409_CONFLICT,
             detail=f"Cannot delete the workspace {workspace_id}. This workspace has some feedback datasets linked",
         )
 
     if await datasets_service.list(current_user, workspaces=[workspace.name]):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_409_CONFLICT,
             detail=f"Cannot delete the workspace {workspace_id}. This workspace has some datasets linked",
         )
 

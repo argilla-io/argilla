@@ -106,7 +106,7 @@ class TestSuiteWorkspaces:
 
         response = client.delete(f"/api/v1/workspaces/{workspace.id}", headers=owner_auth_header)
 
-        assert response.status_code == 422
+        assert response.status_code == 409
         assert response.json() == {
             "detail": f"Cannot delete the workspace {workspace.id}. This workspace has some feedback datasets linked"
         }
@@ -121,7 +121,7 @@ class TestSuiteWorkspaces:
         with create_old_argilla_dataset(client, name="dataset", workspace_name=workspace.name, task=task):
             response = client.delete(f"/api/v1/workspaces/{workspace.id}")
 
-            assert response.status_code == 422
+            assert response.status_code == 409
             assert response.json() == {
                 "detail": f"Cannot delete the workspace {workspace.id}. This workspace has some datasets linked"
             }
