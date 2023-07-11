@@ -130,9 +130,9 @@ export default {
     },
     async loginUser(authData) {
       await this.$store.dispatch("entities/deleteAll");
-        await this.$auth.loginWith("authProvider", {
+      await this.$auth.loginWith("authProvider", {
         data: this.encodedLoginData(authData),
-        });
+      });
 
       this.nextRedirect();
     },
