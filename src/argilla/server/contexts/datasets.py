@@ -484,10 +484,4 @@ async def create_suggestion(
     db: "AsyncSession", record: Record, question: Question, suggestion_create: "SuggestionCreate"
 ) -> Suggestion:
     question.parsed_settings.check_response(suggestion_create)
-
-    suggestion = Suggestion(record_id=record.id, **suggestion_create.dict())
-    db.add(suggestion)
-    await db.commit()
-    await db.refresh(suggestion)
-
-    return suggestion
+    return await Suggestion.create(db, record_id=record.id, **suggestion_create.dict())
