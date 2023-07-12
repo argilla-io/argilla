@@ -116,7 +116,6 @@ import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properti
 import {
   getOptionsOfQuestionByDatasetIdAndQuestionName,
   getComponentTypeOfQuestionByDatasetIdAndQuestionName,
-  getNameOfQuestionByDatasetIdAndQuestionId,
 } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
 import {
   getRecordIndexByRecordId,

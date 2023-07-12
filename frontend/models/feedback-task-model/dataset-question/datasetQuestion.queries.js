@@ -38,6 +38,9 @@ const getComponentTypeOfQuestionByDatasetIdAndQuestionName = (
     .where("name", questionName)
     .first()?.component_type;
 
+/**
+ * @deprecated use V1 store
+ */
 const getOptionsOfQuestionByDatasetIdAndQuestionName = (
   datasetId,
   questionName
