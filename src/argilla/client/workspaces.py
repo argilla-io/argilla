@@ -194,7 +194,7 @@ class Workspace:
         Examples:
             >>> from argilla import rg
             >>> workspace = rg.Workspace.from_name("my-workspace")
-            >>> workspace.delete_user("my-user-id")
+            >>> workspace.delete()
         """
         try:
             workspaces_api_v1.delete_workspace(client=self.__client, id=self.id)
