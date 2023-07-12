@@ -210,6 +210,7 @@ export class Feedback {
       return {
         ...question,
         options: suggestion ? [{ ...suggestion }] : question.options,
+        hasSuggestion: !!suggestion,
       };
     }
 
@@ -221,7 +222,12 @@ export class Feedback {
       const formattedOptions = question.options.map((option) => {
         return { ...option, is_selected: option.value === suggestion?.value };
       });
-      return { ...question, options: formattedOptions, response_id: null };
+      return {
+        ...question,
+        options: formattedOptions,
+        response_id: null,
+        hasSuggestion: !!suggestion,
+      };
     }
 
     if (question.component_type === COMPONENT_TYPE.RANKING) {
@@ -231,10 +237,14 @@ export class Feedback {
           rank: suggestion?.value.find((s) => s.value === option.value)?.rank,
         };
       });
-
-      return { ...question, options: formattedOptions, response_id: null };
+      return {
+        ...question,
+        options: formattedOptions,
+        response_id: null,
+        hasSuggestion: !!suggestion,
+      };
     }
 
-    return { ...question, response_id: null };
+    return { ...question, response_id: null, hasSuggestion: !!suggestion };
   }
 }
