@@ -142,6 +142,12 @@ export class Feedback {
     return this.questionsWithRecordAnswers(recordId, userId);
   }
 
+  getAnswerWithNoSuggestions() {
+    return this.questions?.map((question) => {
+      return this.createEmptyResponse(question);
+    });
+  }
+
   questionsWithRecordAnswers(recordId: string, userId: string) {
     const record = this.records.find((r) => r.id === recordId);
     const response = record?.responses.filter(
@@ -165,28 +171,21 @@ export class Feedback {
     });
   }
 
-  private completeQuestionAnswered(
-    question: Question,
-    correspondingResponseToQuestion: any
-  ) {
+  private completeQuestionAnswered(question: Question, response: any) {
     let formattedOptions = [];
     switch (question.component_type) {
       case COMPONENT_TYPE.RANKING:
-        formattedOptions = correspondingResponseToQuestion.value;
+        formattedOptions = response.value;
         break;
 
       case COMPONENT_TYPE.FREE_TEXT:
-        formattedOptions = [
-          { ...question.options, value: correspondingResponseToQuestion.value },
-        ];
+        formattedOptions = [{ ...question.options, value: response.value }];
         break;
       case COMPONENT_TYPE.MULTI_LABEL:
         formattedOptions = question.options.map((option) => {
           return {
             ...option,
-            is_selected: correspondingResponseToQuestion.value.includes(
-              option.value
-            ),
+            is_selected: response.value.includes(option.value),
           };
         });
         break;
@@ -195,19 +194,18 @@ export class Feedback {
         formattedOptions = question.options.map((option) => {
           return {
             ...option,
-            is_selected: option.value === correspondingResponseToQuestion.value,
+            is_selected: option.value === response.value,
           };
         });
         break;
     }
     return {
       ...question,
-      response_id: correspondingResponseToQuestion.id,
       options: formattedOptions,
     };
   }
 
-  private createEmptyResponse(question: Question, suggestion: any) {
+  private createEmptyResponse(question: Question, suggestion: any = undefined) {
     if (question.component_type === COMPONENT_TYPE.FREE_TEXT) {
       return {
         ...question,

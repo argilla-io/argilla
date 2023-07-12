@@ -90,12 +90,12 @@ export class RecordRepository {
         })
       );
 
-      const params = {
-        include: "responses",
-        response_status: status,
-        limit: numberOfRecordsToFetch,
-        offset,
-      };
+      const params = new URLSearchParams();
+      params.append("include", "responses");
+      if (status === "missing") params.append("include", "suggestions");
+      params.append("offset", offset);
+      params.append("limit", numberOfRecordsToFetch.toString());
+      params.append("response_status", status);
 
       const { data } = await this.axios.post(url, body, { params });
       const { items, total: totalRecords } = data;

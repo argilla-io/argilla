@@ -331,7 +331,6 @@ export default {
 
         this.$emit("on-discard-responses");
 
-        // TODO - reset only when we know that we fetch and computed all the necessary records data
         this.onReset();
       } catch (error) {
         console.log(error);
@@ -359,7 +358,6 @@ export default {
 
         this.$emit("on-submit-responses");
 
-        // TODO - reset only when we know that we fetch and computed all the necessary records data
         this.onReset();
       } catch (error) {
         console.log(error);
@@ -386,6 +384,11 @@ export default {
 
         this.$emit("on-clear-responses");
         this.onReset();
+
+        if (!this.responseId) {
+          this.initialInputs = this.feedback.getAnswerWithNoSuggestions();
+          this.inputs = cloneDeep(this.initialInputs);
+        }
       } catch (err) {
         console.log(err);
       }
