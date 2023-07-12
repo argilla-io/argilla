@@ -31,9 +31,6 @@ jobs:
           - 9200:9200
         env:
           discovery.type: single-node
-          xpack.security.enabled: false
-          plugins.security.disabled: true
-          network.host: "0.0.0.0"
     defaults:
       run:
         shell: bash -l {0}
@@ -72,6 +69,8 @@ jobs:
         env:
           HF_HUB_ACCESS_TOKEN: ${{ secrets.HF_HUB_ACCESS_TOKEN }}
         run: echo "Enable HF access token"
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
       - name: Run tests 📈
         run: |
           pip install -e ".[server,listeners]"

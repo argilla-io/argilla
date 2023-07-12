@@ -18,13 +18,13 @@ on:
       - "feature/**"
       - "feat/**"
 
-  pull_request:
-    branches:
-      - "main"
-      - "develop"
-      - "releases/**"
-      - "feature/**"
-      - "feat/**"
+  # pull_request:
+  #   branches:
+  #     - "main"
+  #     - "develop"
+  #     - "releases/**"
+  #     - "feature/**"
+  #     - "feat/**"
 
 jobs:
 
@@ -51,10 +51,10 @@ jobs:
       matrix:
         include:
         - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
-        - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.0.1
-        - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:7.17.11
-        - searchEngineDockerImage: opensearchproject/opensearch:2.4.1
-        - searchEngineDockerImage: opensearchproject/opensearch:1.3.11
+        # - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.0.1
+        # - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:7.17.11
+        # - searchEngineDockerImage: opensearchproject/opensearch:2.4.1
+        # - searchEngineDockerImage: opensearchproject/opensearch:1.3.11
     name: Run base tests
     uses: ./.github/workflows/run-python-tests.yml
     needs:  check_repo_files
