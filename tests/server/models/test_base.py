@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import asyncio
 from typing import TYPE_CHECKING, Optional
 
 import pytest
@@ -78,15 +79,22 @@ class TestDatabaseModel:
     async def test_database_model_upsert_many(self, db: "AsyncSession"):
         models = []
         schemas = []
+        # These ones will be updated
         for i in range(5):
             models.append(await Model.create(db, str_col=f"unit-test-{i}", int_col=i, external_id=f"external-id-{i}"))
             schemas.append(
                 ModelCreateSchema(str_col=f"unit-test-{i}-updated", int_col=i * 10, external_id=f"external-id-{i}")
             )
+        # This one has to be inserted
+        schemas.append(
+            ModelCreateSchema(str_col="unit-test-inserted", int_col=99999, external_id="external-id-inserted")
+        )
         models = await Model.upsert_many(db, schemas, constraints=[Model.external_id], autocommit=True)
-        for i, model in enumerate(models):
+        for i, model in enumerate(models[:5]):
             assert model.str_col == f"unit-test-{i}-updated"
             assert model.int_col == i * 10
+        assert models[-1].str_col == "unit-test-inserted"
+        assert models[-1].int_col == 99999
 
     async def test_database_model_upsert_many_without_objects(self, db: "AsyncSession"):
         with pytest.raises(ValueError, match="Cannot upsert empty list of objects"):
@@ -102,6 +110,18 @@ class TestDatabaseModel:
         )
         assert model.str_col == "unit-test-updated"
         assert model.int_col == 2
+
+    async def test_database_model_upsert_updated_at(self, db: "AsyncSession"):
+        model = await Model.create(db, str_col="unit-test", int_col=1, external_id="12345", autocommit=True)
+        updated_at = model.updated_at
+        await asyncio.sleep(1)
+        model = await Model.upsert(
+            db,
+            ModelCreateSchema(str_col="unit-test-updated", int_col=2, external_id=model.external_id),
+            constraints=[Model.external_id],
+            autocommit=True,
+        )
+        assert model.updated_at > updated_at
 
     async def test_database_model_delete(self, db: "AsyncSession"):
         model = await Model.create(db, str_col="unit-test", int_col=1, autocommit=True)
