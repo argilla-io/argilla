@@ -26,13 +26,14 @@ from argilla.client.sdk.commons.errors import (
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import UserCreateModel, UserModel, UserRole
 from argilla.client.sdk.v1.users import api as users_api_v1
-from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
+from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
 from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
     import httpx
 
     from argilla.client.sdk.client import AuthenticatedClient
+    from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 
 
 class User:
@@ -108,13 +109,16 @@ class User:
         raise Exception(error_msg)
 
     @property
-    def workspaces(self) -> Optional[List[WorkspaceModel]]:
+    def workspaces(self) -> Optional[List["WorkspaceModel"]]:
         """Returns the workspace names the current user is linked to.
 
         Returns:
             A list of `WorkspaceModel` the current user is linked to.
         """
-        return users_api_v1.list_user_workspaces(self.__client, self.id).parsed
+        if self.role == UserRole.owner:
+            return users_api_v1.list_user_workspaces(self.__client, self.id).parsed
+        else:
+            return workspaces_api_v1.list_workspaces_me(self.__client).parsed
 
     def __repr__(self) -> str:
         return (
