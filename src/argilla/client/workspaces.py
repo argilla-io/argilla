@@ -149,7 +149,7 @@ class Workspace:
         except BaseClientError as e:
             raise RuntimeError(f"Error while adding user with id=`{user_id}` to workspace with id=`{self.id}`.") from e
 
-    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    @allowed_for_roles(roles=[UserRole.owner])
     def delete_user(self, user_id: str) -> None:
         """Deletes an existing user from the workspace in Argilla. Note that the user
         will not be deleted from Argilla, but just from the workspace.
