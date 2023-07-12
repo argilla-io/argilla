@@ -29,6 +29,7 @@
           :placeholder="input.placeholder"
           v-model="input.options[0].value"
           :useMarkdown="input.settings.use_markdown"
+          :hasSuggestion="checkIsQuestionHasSuggestion(input.id)"
           :isRequired="input.isRequired"
           :description="input.description"
           @on-error="onError"
@@ -39,6 +40,7 @@
           :questionId="input.id"
           :title="input.question"
           v-model="input.options"
+          :hasSuggestion="checkIsQuestionHasSuggestion(input.id)"
           :isRequired="input.isRequired"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
@@ -49,6 +51,7 @@
           :questionId="input.id"
           :title="input.question"
           v-model="input.options"
+          :hasSuggestion="checkIsQuestionHasSuggestion(input.id)"
           :isRequired="input.isRequired"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
@@ -58,6 +61,7 @@
           v-if="input.isRatingType"
           :title="input.question"
           v-model="input.options"
+          :hasSuggestion="checkIsQuestionHasSuggestion(input.id)"
           :isRequired="input.isRequired"
           :description="input.description"
           @on-error="onError"
@@ -66,6 +70,7 @@
         <RankingComponent
           v-if="input.isRankingType"
           :title="input.question"
+          :hasSuggestion="checkIsQuestionHasSuggestion(input.id)"
           :isRequired="input.isRequired"
           :description="input.description"
           v-model="input.options"
@@ -581,6 +586,12 @@ export default {
       this.$emit("on-question-form-touched", !isFormUntouched);
       // TODO: Once notifications are centralized in one single point, we can remove this.
       this.$root.$emit("are-responses-untouched", isFormUntouched);
+    },
+    checkIsQuestionHasSuggestion(questionId) {
+      return this.feedback.checkIfQuestionHasSuggestion(
+        this.recordId,
+        questionId
+      );
     },
   },
 };

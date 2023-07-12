@@ -1,11 +1,14 @@
 <template>
   <div class="title-area --body1">
     <span
+      class="suggestion-info"
       v-text="title"
       v-optional-field="!isRequired"
-      v-has-suggestions="true"
+      v-has-suggestions="{
+        show: hasSuggestion,
+        tooltip: 'This question has a suggestion',
+      }"
     />
-
     <BaseIconWithBadge
       class="icon-info"
       v-if="showIcon"
@@ -35,6 +38,10 @@ export default {
       default: () => "",
     },
     isRequired: {
+      type: Boolean,
+      default: () => false,
+    },
+    hasSuggestion: {
       type: Boolean,
       default: () => false,
     },
@@ -82,6 +89,16 @@ span {
     &:after {
       margin-top: 0;
     }
+  }
+}
+:deep([data-title]) {
+  position: relative;
+  cursor: pointer;
+  @extend %has-tooltip--top;
+  &:after {
+    transform: none;
+    right: auto;
+    left: -1.5em;
   }
 }
 </style>

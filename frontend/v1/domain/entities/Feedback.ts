@@ -228,6 +228,11 @@ export class Feedback {
     record.status = status;
   }
 
+  checkIfQuestionHasSuggestion(recordId: string, questionId: string) {
+    const record = this.records.find((r) => r.id === recordId);
+    return record.suggestions?.some((s) => s.question_id === questionId);
+  }
+
   getAnswer(recordId: string, userId: string) {
     return this.questionsWithRecordAnswers(recordId, userId);
   }
