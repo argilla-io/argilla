@@ -16,6 +16,11 @@ on:
         default: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
         required: false
         type: string
+      searchEngineDockerEnv:
+        description: "The name of the Docker image of the search engine to use."
+        default: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
+        required: false
+        type: string
 env:
   # Increase this value to reset cache if etc/example-environment.yml has not changed
   CACHE_NUMBER:  5
@@ -29,14 +34,12 @@ jobs:
         image: ${{ inputs.searchEngineDockerImage }}
         ports:
           - 9200:9200
-        env:
-          discovery.type: single-node
-          xpack.security.enabled: false
+        env: ${{ fromJson(inputs.searchEngineDockerEnv) }}
     defaults:
       run:
         shell: bash -l {0}
     env:
-      COVERAGE_REPORT: ${{ inputs.coverageReport }}-${{ inputs.searchEngine }}-${{ inputs.searchEngineVersion }}
+      COVERAGE_REPORT: ${{ inputs.coverageReport }}-${{ inputs.searchEngineDockerImage }}
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v2
