@@ -116,33 +116,21 @@ export default {
       const tasks = this.tasks;
       const tags = this.tags;
       return [
-        { column: "workspace", values: workspaces || [] },
-        { column: "task", values: tasks || [] },
-        { column: "tags", values: tags || [] },
+        { column: "workspace", values: workspaces },
+        { column: "task", values: tasks },
+        { column: "tags", values: tags },
       ];
     },
     workspaces() {
-      let _workspaces = this.$route.query.workspace;
-      if (typeof _workspaces == "string") {
-        _workspaces = [_workspaces];
-      }
-      return _workspaces;
+      return this.$route.query.workspaces?.split(",") ?? [];
     },
     tasks() {
-      let _tasks = this.$route.query.task;
-      if (typeof _tasks == "string") {
-        _tasks = [_tasks];
-      }
-      return _tasks;
+      return this.$route.query.tasks?.split(",") ?? [];
     },
     tags() {
-      let _tags = this.$route.query.tags
+      return this.$route.query.tags
         ? JSON.parse(Base64.decode(this.$route.query.tags))
-        : undefined;
-      if (typeof _tags == "string") {
-        _tags = [_tags];
-      }
-      return _tags;
+        : [];
     },
     workspace() {
       return currentWorkspace(this.$route);
@@ -166,29 +154,47 @@ export default {
       this.sortedOrder = order;
     },
     onColumnFilterApplied({ column, values }) {
-      if (column === "workspace") {
-        if (values !== this.workspaces) {
-          this.$router.push({
-            query: { ...this.$route.query, workspace: values },
-          });
+      const updateUrlParamsFor = (
+        values,
+        paramKey,
+        currentParams,
+        valuesToPush
+      ) => {
+        if (values === currentParams) return;
+
+        const query = createQueryFor(values, paramKey, valuesToPush);
+        this.$router.push({ query });
+      };
+
+      const createQueryFor = (values, paramKey, valuesToPush) => {
+        if (values.length) {
+          return { ...this.$route.query, [paramKey]: valuesToPush };
         }
-      }
-      if (column === "task") {
-        if (values !== this.tasks) {
-          this.$router.push({ query: { ...this.$route.query, task: values } });
-        }
-      }
-      if (column === "tags") {
-        if (values !== this.tags) {
-          this.$router.push({
-            query: {
-              ...this.$route.query,
-              tags: values.length
-                ? Base64.encodeURI(JSON.stringify(values))
-                : undefined,
-            },
-          });
-        }
+
+        const { [paramKey]: keyToEscape, ...rest } = this.$route.query;
+        return { ...rest };
+      };
+
+      switch (column) {
+        case "workspace":
+          updateUrlParamsFor(
+            values,
+            "workspaces",
+            this.workspaces,
+            values.join(",")
+          );
+          break;
+        case "task":
+          updateUrlParamsFor(values, "tasks", this.tasks, values.join(","));
+          break;
+        case "tags":
+          updateUrlParamsFor(
+            values,
+            "tags",
+            this.tags,
+            Base64.encodeURI(JSON.stringify(values))
+          );
+          break;
       }
     },
     onActionClicked(action, dataset) {
