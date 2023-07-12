@@ -50,6 +50,14 @@ These are the section headers that we use:
 
 - Integer support for record id in text classification, token classification and text2text datasets.
 
+## [1.12.1](https://github.com/argilla-io/argilla/compare/v1.12.0...v1.12.1)
+
+### Fixed
+
+- Using `rg.init` with default `argilla` user skips setting the default workspace if not available. (Closes [#3340](https://github.com/argilla-io/argilla/issues/3340))
+- Resolved wrong import structure `ArgillaTrainer` `TrainingTaskMapping` (Closes [#3345](https://github.com/argilla-io/argilla/issues/3345))
+- Pin pydantic dependency to version < 2 (Closes [3348](https://github.com/argilla-io/argilla/issues/3348))
+
 ## [1.12.0](https://github.com/argilla-io/argilla/compare/v1.11.0...v1.12.0)
 
 ### Added
