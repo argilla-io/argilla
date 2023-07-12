@@ -27,8 +27,9 @@ from argilla.client.datasets import read_datasets
 from argilla.client.models import Text2TextRecord, TextClassificationRecord
 from argilla.client.sdk.users import api as users_api
 from argilla.datasets.__init__ import configure_dataset
-from argilla.server.database import Base, get_async_db
+from argilla.server.database import get_async_db
 from argilla.server.models import User, UserRole, Workspace
+from argilla.server.models.base import DatabaseModel
 from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.server import app, argilla_app
 from argilla.server.settings import settings
@@ -73,11 +74,11 @@ async def connection() -> AsyncGenerator["AsyncConnection", None]:
         engine = create_async_engine(database_url, connect_args={"check_same_thread": False})
         conn = await engine.connect()
         TestSession.configure(bind=conn)
-        await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(DatabaseModel.metadata.create_all)
 
         yield conn
 
-        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(DatabaseModel.metadata.drop_all)
         await conn.close()
         await engine.dispose()
 
@@ -101,11 +102,11 @@ def sync_connection() -> Generator["Connection", None, None]:
         engine = create_engine(database_url, connect_args={"check_same_thread": False})
         conn = engine.connect()
         SyncTestSession.configure(bind=conn)
-        Base.metadata.create_all(engine)
+        DatabaseModel.metadata.create_all(engine)
 
         yield conn
 
-        Base.metadata.drop_all(engine)
+        DatabaseModel.metadata.drop_all(engine)
         conn.close()
         engine.dispose()
 

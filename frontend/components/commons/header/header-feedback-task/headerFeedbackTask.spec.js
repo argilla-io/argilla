@@ -8,7 +8,7 @@ const options = {
     "BaseBreadcrumbs",
     "BaseButton",
     "DatasetSettingsIconFeedbackTaskComponent",
-    "User",
+    "UserAvatarTooltip",
     "NuxtLink",
   ],
   mocks: {

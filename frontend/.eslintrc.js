@@ -33,6 +33,7 @@ module.exports = {
     "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
     "prefer-const": "error",
     "prefer-arrow-callback": "error",
+    "no-unused-vars": ["error", { ignoreRestSiblings: true }],
   },
   globals: {
     $nuxt: true,

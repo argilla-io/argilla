@@ -20,7 +20,6 @@ from time import sleep
 from typing import Iterable
 from uuid import uuid4
 
-import argilla as rg
 import datasets
 import httpx
 import pandas as pd
@@ -29,7 +28,16 @@ from argilla._constants import (
     DEFAULT_API_KEY,
     WORKSPACE_HEADER_NAME,
 )
-from argilla.client.api import active_client, delete, delete_records, init, load, log
+from argilla.client.api import (
+    active_client,
+    delete,
+    delete_records,
+    get_workspace,
+    init,
+    load,
+    log,
+    set_workspace,
+)
 from argilla.client.apis.status import ApiInfo, Status
 from argilla.client.client import Argilla
 from argilla.client.datasets import (
@@ -204,6 +212,25 @@ def test_init_environment_url(mock_init_ok, monkeypatch):
     )
 
 
+@pytest.mark.asyncio
+async def test_init_with_workspace(owner: User) -> None:
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+
+    init(api_key=owner.api_key, workspace=workspace.name)
+    assert get_workspace() == workspace.name
+
+
+def test_set_workspace_with_missing_workspace(owner: User) -> None:
+    init(api_key=owner.api_key)
+    with pytest.raises(ValueError):
+        set_workspace("missing-workspace")
+
+
+def test_init_with_missing_workspace(owner: User) -> None:
+    with pytest.raises(ValueError):
+        init(api_key=owner.api_key, workspace="missing-workspace")
+
+
 def test_trailing_slash(mock_init_ok):
     """Testing initialization with provided api_url via environment variable and argument
 
@@ -258,7 +285,7 @@ def test_load_limits(argilla_user: User, supported_vector_search: bool):
 
 
 @pytest.mark.asyncio
-async def test_load_with_feedback_dataset(mocked_client, argilla_user: User):
+async def test_load_with_feedback_dataset(mocked_client, argilla_user: User) -> None:
     workspace = argilla_user.workspaces[0]
     dataset = await DatasetFactory.create(name="dataset-a", workspace=workspace)
 
@@ -266,7 +293,7 @@ async def test_load_with_feedback_dataset(mocked_client, argilla_user: User):
         ValueError,
         match=f"The dataset '{dataset.name}' exists but it is a `FeedbackDataset`. Use `rg.FeedbackDataset.from_argilla` instead to load it.",
     ):
-        rg.load(name=dataset.name, workspace=workspace.name)
+        load(name=dataset.name, workspace=workspace.name)
 
 
 def test_log_records_with_too_long_text(api: Argilla):

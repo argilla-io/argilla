@@ -18,13 +18,8 @@ from typing import TYPE_CHECKING, Generator
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
-from sqlalchemy.ext.asyncio import (
-    AsyncAttrs,
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
-)
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
 import argilla
 from argilla.server.settings import settings
@@ -45,10 +40,10 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 
 
 engine = create_engine(settings.database_url)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(autocommit=False, bind=engine)
 
 async_engine = create_async_engine(settings.database_url_async)
-AsyncSessionLocal = async_sessionmaker(autocommit=False, autoflush=False, expire_on_commit=False, bind=async_engine)
+AsyncSessionLocal = async_sessionmaker(autocommit=False, expire_on_commit=False, bind=async_engine)
 
 
 def get_db() -> Generator["Session", None, None]:
@@ -65,7 +60,3 @@ async def get_async_db() -> Generator["AsyncSession", None, None]:
         yield db
     finally:
         await db.close()
-
-
-class Base(AsyncAttrs, DeclarativeBase):
-    pass
