@@ -1,6 +1,6 @@
 <template>
   <div class="title-area --body1">
-    <span v-text="title" v-optional-field="!isRequired" />
+    <span v-text="title" v-required-field="isRequired" />
 
     <BaseIconWithBadge
       class="icon-info"
