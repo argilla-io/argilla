@@ -27,6 +27,7 @@ export class Question {
   // OLD NAME WAS OPTION
   public options: any;
   public readonly placeholder: string; // IT'S THING RELATED TO COMPONENT; REMOVE IT
+  private suggestion: any;
 
   constructor(
     public readonly id: string,
@@ -53,6 +54,30 @@ export class Question {
     return this.settings.type.toLowerCase();
   }
 
+  public get isRankingType(): boolean {
+    return this.type === "ranking";
+  }
+
+  public get isMultiLabelType(): boolean {
+    return this.type === "multi_label_selection";
+  }
+
+  public get isSingleLabelType(): boolean {
+    return this.type === "label_selection";
+  }
+
+  public get isTextType(): boolean {
+    return this.type === "text";
+  }
+
+  public get isRatingType(): boolean {
+    return this.type === "rating";
+  }
+
+  public get hasSuggestion(): boolean {
+    return !!this.suggestion;
+  }
+
   clearAnswer() {
     this.options = this.createEmptyAnswers();
   }
@@ -62,6 +87,8 @@ export class Question {
   }
 
   answerQuestionWithSuggestion(suggestion: any) {
+    this.suggestion = suggestion;
+
     this.options = this.createEmptyAnswers(suggestion);
   }
 
@@ -84,26 +111,6 @@ export class Question {
         };
       });
     }
-  }
-
-  public get isRankingType(): boolean {
-    return this.type === "ranking";
-  }
-
-  public get isMultiLabelType(): boolean {
-    return this.type === "multi_label_selection";
-  }
-
-  public get isSingleLabelType(): boolean {
-    return this.type === "label_selection";
-  }
-
-  public get isTextType(): boolean {
-    return this.type === "text";
-  }
-
-  public get isRatingType(): boolean {
-    return this.type === "rating";
   }
 
   private completeQuestionAnswered(response: any) {
@@ -228,17 +235,12 @@ export class Feedback {
     record.status = status;
   }
 
-  checkIfQuestionHasSuggestion(recordId: string, questionId: string) {
-    const record = this.records.find((r) => r.id === recordId);
-    return record.suggestions?.some((s) => s.question_id === questionId);
-  }
-
   getAnswer(recordId: string, userId: string) {
     return this.questionsWithRecordAnswers(recordId, userId);
   }
 
   getAnswerWithNoSuggestions() {
-    this.questions?.forEach((question) => {
+    this.questions.forEach((question) => {
       question.clearAnswer();
     });
 
