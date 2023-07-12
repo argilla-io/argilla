@@ -22,12 +22,12 @@ from pydantic import (
 )
 from tqdm import tqdm
 
-import argilla as rg
+from argilla.client.api import ArgillaSingleton
 from argilla.client.feedback.constants import (
     FETCHING_BATCH_SIZE,
     PUSHING_BATCH_SIZE,
 )
-from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixIn
+from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     FieldSchema,
@@ -53,6 +53,7 @@ from argilla.client.feedback.utils import (
 )
 from argilla.client.models import Framework
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
+from argilla.client.workspaces import Workspace
 from argilla.utils.dependency import require_version, requires_version
 
 if TYPE_CHECKING:
@@ -69,7 +70,7 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 
-class FeedbackDataset(HuggingFaceDatasetMixIn):
+class FeedbackDataset(HuggingFaceDatasetMixin):
     """Class to work with `FeedbackDataset`s either locally, or remotely (Argilla or HuggingFace Hub).
 
     Args:
@@ -352,7 +353,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
             return self.records
 
         if self.argilla_id:
-            httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
+            httpx_client: "httpx.Client" = ArgillaSingleton.get().http_client.httpx
             first_batch = datasets_api_v1.get_records(
                 client=httpx_client, id=self.argilla_id, offset=0, limit=FETCHING_BATCH_SIZE
             ).parsed
@@ -494,7 +495,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
     def push_to_argilla(
         self,
         name: Optional[str] = None,
-        workspace: Optional[Union[str, rg.Workspace]] = None,
+        workspace: Optional[Union[str, Workspace]] = None,
         show_progress: bool = False,
     ) -> None:
         """Pushes the `FeedbackDataset` to Argilla. If the dataset has been previously pushed to Argilla, it will be updated
@@ -509,7 +510,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
             workspace: the workspace where to push the dataset to. If not provided, the active workspace will be used.
             show_progress: the option to choose to show/hide tqdm progress bar while looping over records.
         """
-        client: "ArgillaClient" = rg.active_client()
+        client: "ArgillaClient" = ArgillaSingleton.get()
         httpx_client: "httpx.Client" = client.http_client.httpx
 
         if name is None:
@@ -549,10 +550,10 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
                 ) from e
         else:
             if workspace is None:
-                workspace = rg.Workspace.from_name(client.get_workspace())
+                workspace = Workspace.from_name(client.get_workspace())
 
             if isinstance(workspace, str):
-                workspace = rg.Workspace.from_name(workspace)
+                workspace = Workspace.from_name(workspace)
 
             dataset = feedback_dataset_in_argilla(name=name, workspace=workspace)
             if dataset is not None:
@@ -670,7 +671,7 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
             >>> rg.init(...)
             >>> dataset = rg.FeedbackDataset.from_argilla(name="my_dataset")
         """
-        httpx_client: "httpx.Client" = rg.active_client().http_client.httpx
+        httpx_client: "httpx.Client" = ArgillaSingleton.get().http_client.httpx
 
         existing_dataset = feedback_dataset_in_argilla(name=name, workspace=workspace, id=id)
         if existing_dataset is None:
@@ -758,16 +759,6 @@ class FeedbackDataset(HuggingFaceDatasetMixIn):
         if format == "datasets":
             return self._huggingface_format(self)
         raise ValueError(f"Unsupported format '{format}'.")
-
-    @requires_version("huggingface_hub")
-    def push_to_huggingface(self, repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs) -> None:
-        return self._push_to_huggingface(self, repo_id, generate_card=generate_card, *args, **kwargs)
-
-    @classmethod
-    @requires_version("datasets")
-    @requires_version("huggingface_hub")
-    def from_huggingface(cls, repo_id: str, *args: Any, **kwargs: Any) -> "FeedbackDataset":
-        return cls._from_huggingface(cls, repo_id, *args, **kwargs)
 
     def unify_responses(
         self,

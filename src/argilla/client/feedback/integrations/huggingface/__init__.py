@@ -12,6 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .dataset import HuggingFaceDatasetMixIn
+from .dataset import HuggingFaceDatasetMixin
 
-__all__ = ["HuggingFaceDatasetMixIn"]
+__all__ = ["HuggingFaceDatasetMixin"]
