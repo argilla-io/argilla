@@ -45,7 +45,7 @@ def allowed_for_roles(roles: List[UserRole]) -> Callable[[Callable[_P, _R]], Cal
         def wrapper(*args: _P.args, **kwargs: _P.kwargs) -> _R:
             role = ArgillaSingleton.get().user.role
             if role not in roles:
-                raise ValueError(
+                raise PermissionError(
                     f"User with role={role} is not allowed to call `{func.__name__}`."
                     f" Only users with role={roles} are allowed to call this function."
                 )

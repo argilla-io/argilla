@@ -61,7 +61,7 @@ async def test_user_from_name_not_allowed_role(role: UserRole) -> None:
     user = await UserFactory.create(role=role)
     ArgillaSingleton.init(api_key=user.api_key)
 
-    with pytest.raises(ValueError, match=f"User with role={role} is not allowed to call `from_name`"):
+    with pytest.raises(PermissionError, match=f"User with role={role} is not allowed to call `from_name`"):
         User.from_name(name=user.username)
 
 
@@ -84,7 +84,7 @@ async def test_user_from_id_not_allowed_role(role: UserRole) -> None:
     user = await UserFactory.create(role=role)
     ArgillaSingleton.init(api_key=user.api_key)
 
-    with pytest.raises(ValueError, match=f"User with role={role} is not allowed to call `from_id`"):
+    with pytest.raises(PermissionError, match=f"User with role={role} is not allowed to call `from_id`"):
         User.from_id(id=user.id)
 
 
@@ -113,7 +113,7 @@ async def test_user_create_not_allowed_role(role: UserRole) -> None:
     user = await UserFactory.create(role=role)
     ArgillaSingleton.init(api_key=user.api_key)
 
-    with pytest.raises(ValueError, match=f"User with role={role} is not allowed to call `create`"):
+    with pytest.raises(PermissionError, match=f"User with role={role} is not allowed to call `create`"):
         User.create("test_user", password="test_password", role=role)
 
 
@@ -133,7 +133,7 @@ async def test_user_list_not_allowed_role(role: UserRole) -> None:
     user = await UserFactory.create(role=role)
     ArgillaSingleton.init(api_key=user.api_key)
 
-    with pytest.raises(ValueError, match=f"User with role={role} is not allowed to call `list`"):
+    with pytest.raises(PermissionError, match=f"User with role={role} is not allowed to call `list`"):
         User.list()
 
 
@@ -157,7 +157,7 @@ async def test_user_delete_not_allowed_role(role: UserRole) -> None:
     ArgillaSingleton.init(api_key=user.api_key)
 
     user = User.me()
-    with pytest.raises(ValueError, match=f"User with role={role} is not allowed to call `delete`"):
+    with pytest.raises(PermissionError, match=f"User with role={role} is not allowed to call `delete`"):
         user.delete()
 
 
@@ -193,5 +193,5 @@ async def test_user_workspaces_not_allowed_role(role: UserRole) -> None:
     ArgillaSingleton.init(api_key=user.api_key)
 
     user = User.me()
-    with pytest.raises(ValueError, match=f"User with role={role} is not allowed to call `workspaces`"):
+    with pytest.raises(PermissionError, match=f"User with role={role} is not allowed to call `workspaces`"):
         user.workspaces
