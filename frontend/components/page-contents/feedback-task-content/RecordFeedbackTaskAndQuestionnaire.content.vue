@@ -36,11 +36,9 @@
 import { isNil } from "lodash";
 import { Notification } from "@/models/Notifications";
 import {
-  getQuestionsByDatasetId,
   getComponentTypeOfQuestionByDatasetIdAndQuestionName,
   getOptionsOfQuestionByDatasetIdAndQuestionName,
 } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
-import { getFieldsByDatasetId } from "@/models/feedback-task-model/dataset-field/datasetField.queries";
 import {
   RECORD_STATUS,
   RESPONSE_STATUS_FOR_API,
