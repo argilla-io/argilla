@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 
-class HuggingFaceDatasetMixIn:
+class HuggingFaceDatasetMixin:
     @staticmethod
     @requires_version("datasets")
     def _huggingface_format(dataset: "FeedbackDataset") -> "Dataset":
@@ -52,7 +52,7 @@ class HuggingFaceDatasetMixIn:
             >>> import argilla as rg
             >>> rg.init(...)
             >>> dataset = rg.FeedbackDataset.from_argilla(name="my-dataset")
-            >>> huggingface_dataset = rg.HuggingFaceDatasetMixIn.set_format(dataset)
+            >>> huggingface_dataset = rg.HuggingFaceDatasetMixin.set_format(dataset)
         """
         from datasets import Dataset, Features, Sequence, Value
 
