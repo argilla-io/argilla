@@ -283,6 +283,7 @@ export default {
     async sendBackendRequest(responseValues) {
       try {
         let responseData = null;
+        debugger;
         if (this.responseId) {
           responseData = await this.updateResponseValues(
             this.responseId,
