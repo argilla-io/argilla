@@ -117,7 +117,7 @@ export class Feedback {
     const recordPosition = this.records.findIndex((r) => r.id === record.id);
     this.records[recordPosition] = record;
   }
-    
+
   getAnswer(recordId: string, userId: string) {
     return this.questionsWithRecordAnswers(recordId, userId);
   }
