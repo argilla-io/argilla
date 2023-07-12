@@ -199,11 +199,11 @@ class Workspace:
         try:
             workspaces_api_v1.delete_workspace(client=self.__client, id=self.id)
         except NotFoundApiError as e:
-            raise ValueError(f"Workspace with id {self.id!r} doesn't exist in Argilla.") from e
+            raise ValueError(f"Workspace with id {self.id} doesn't exist in Argilla.") from e
         except AlreadyExistsApiError as e:
             # TODO: the already exists is to explicit for this context and should be generalized
             raise ValueError(
-                f"Cannot delete workspace {self.id!r}. Some datasets are still linked to this workspace."
+                f"Cannot delete workspace with id {self.id}. Some datasets are still linked to this workspace."
             ) from e
         except BaseClientError as e:
             raise RuntimeError(f"Error while deleting workspace with id {self.id!r}.") from e

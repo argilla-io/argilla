@@ -251,7 +251,7 @@ async def test_delete_workspace(owner: "ServerUser"):
     ws = Workspace.from_id(workspace.id)
     ws.delete()
 
-    with pytest.raises(ValueError, match=rf"Workspace with id=`{id}` doesn't exist in Argilla"):
+    with pytest.raises(ValueError, match=rf"Workspace with id=`{ws.id}` doesn't exist in Argilla"):
         Workspace.from_id(workspace.id)
 
 
@@ -264,7 +264,7 @@ async def test_delete_non_existing_workspace(owner: "ServerUser"):
     ws = Workspace.from_id(workspace.id)
     ws.delete()
 
-    with pytest.raises(ValueError, match=rf"Workspace with id {ws.id!r} doesn't exist in Argilla."):
+    with pytest.raises(ValueError, match=rf"Workspace with id {ws.id} doesn't exist in Argilla."):
         ws.delete()
 
 
@@ -276,10 +276,9 @@ async def test_delete_workspace_with_linked_datasets(owner: "ServerUser"):
     ArgillaSingleton.init(api_key=owner.api_key)
 
     ws = Workspace.from_id(workspace.id)
-    ws.delete()
-
     with pytest.raises(
-        ValueError, match=rf"Cannot delete workspace {ws.id!r}. Some datasets are still linked to this workspace."
+        ValueError,
+        match=rf"Cannot delete workspace with id {ws.id}. Some datasets are still linked to this workspace.",
     ):
         ws.delete()
 
@@ -294,5 +293,5 @@ async def test_delete_workspace_without_permissions():
 
     ws = Workspace.from_id(workspace.id)
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(PermissionError, match=rf"User with role={user.role.value} is not allowed to call `delete`"):
         ws.delete()
