@@ -32,7 +32,8 @@ env:
 jobs:
   test-elastic:
     name: Tests ElasticSearch
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
+    runs-on: extended-runner
     strategy:
       matrix:
         version: [ 8.8, 8.5, 8.0, 7.17]
