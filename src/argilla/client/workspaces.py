@@ -23,10 +23,12 @@ from argilla.client.sdk.commons.errors import (
     NotFoundApiError,
     ValidationApiError,
 )
+from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
 from argilla.client.sdk.v1.workspaces.models import WorkspaceModel as WorkspaceModelV1
 from argilla.client.sdk.workspaces import api as workspaces_api
 from argilla.client.sdk.workspaces.models import WorkspaceModel as WorkspaceModelV0
+from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
     import httpx
@@ -104,6 +106,7 @@ class Workspace:
         raise Exception(error_msg)
 
     @property
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def users(self) -> List["WorkspaceUserModel"]:
         """Returns the list of users linked to the workspace.
 
@@ -119,6 +122,7 @@ class Workspace:
             f" inserted_at={self.inserted_at}, updated_at={self.updated_at})"
         )
 
+    @allowed_for_roles(roles=[UserRole.owner])
     def add_user(self, user_id: UUID) -> None:
         """Adds an existing user to the workspace in Argilla.
 
@@ -145,6 +149,7 @@ class Workspace:
         except BaseClientError as e:
             raise RuntimeError(f"Error while adding user with id=`{user_id}` to workspace with id=`{self.id}`.") from e
 
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def delete_user(self, user_id: UUID) -> None:
         """Deletes an existing user from the workspace in Argilla. Note that the user
         will not be deleted from Argilla, but just from the workspace.
@@ -205,6 +210,7 @@ class Workspace:
         return instance
 
     @classmethod
+    @allowed_for_roles(roles=[UserRole.owner])
     def create(cls, name: str) -> "Workspace":
         """Creates a new workspace in Argilla.
 

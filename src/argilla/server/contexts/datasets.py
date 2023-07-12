@@ -87,17 +87,12 @@ async def list_datasets_by_workspace_id(db: "AsyncSession", workspace_id: UUID) 
 
 
 async def create_dataset(db: "AsyncSession", dataset_create: DatasetCreate):
-    dataset = Dataset(
+    return await Dataset.create(
+        db,
         name=dataset_create.name,
         guidelines=dataset_create.guidelines,
         workspace_id=dataset_create.workspace_id,
     )
-
-    db.add(dataset)
-    await db.commit()
-    await db.refresh(dataset)
-
-    return dataset
 
 
 async def _count_fields_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
@@ -121,7 +116,7 @@ async def publish_dataset(db: "AsyncSession", search_engine: SearchEngine, datas
         raise ValueError("Dataset cannot be published without questions")
 
     try:
-        dataset.status = DatasetStatus.ready
+        dataset = await dataset.update(db, status=DatasetStatus.ready, autocommit=False)
         await search_engine.create_index(dataset)
         await db.commit()
     except:
@@ -132,8 +127,8 @@ async def publish_dataset(db: "AsyncSession", search_engine: SearchEngine, datas
 
 
 async def delete_dataset(db: "AsyncSession", search_engine: SearchEngine, dataset: Dataset) -> Dataset:
+    dataset = await dataset.delete(db)
     try:
-        await db.delete(dataset)
         await search_engine.delete_index(dataset)
         await db.commit()
     except:
@@ -156,7 +151,8 @@ async def create_field(db: "AsyncSession", dataset: Dataset, field_create: Field
     if dataset.is_ready:
         raise ValueError("Field cannot be created for a published dataset")
 
-    field = Field(
+    return await Field.create(
+        db,
         name=field_create.name,
         title=field_create.title,
         required=field_create.required,
@@ -164,20 +160,12 @@ async def create_field(db: "AsyncSession", dataset: Dataset, field_create: Field
         dataset_id=dataset.id,
     )
 
-    db.add(field)
-    await db.commit()
-    await db.refresh(field)
-
-    return field
-
 
 async def delete_field(db: "AsyncSession", field: Field) -> Field:
     if field.dataset.is_ready:
         raise ValueError("Fields cannot be deleted for a published dataset")
 
-    await db.delete(field)
-    await db.commit()
-    return field
+    return await field.delete(db)
 
 
 async def get_question_by_id(db: "AsyncSession", question_id: UUID) -> Union[Question, None]:
@@ -194,7 +182,8 @@ async def create_question(db: "AsyncSession", dataset: Dataset, question_create:
     if dataset.is_ready:
         raise ValueError("Question cannot be created for a published dataset")
 
-    question = Question(
+    return await Question.create(
+        db,
         name=question_create.name,
         title=question_create.title,
         description=question_create.description,
@@ -203,20 +192,12 @@ async def create_question(db: "AsyncSession", dataset: Dataset, question_create:
         dataset_id=dataset.id,
     )
 
-    db.add(question)
-    await db.commit()
-    await db.refresh(question)
-
-    return question
-
 
 async def delete_question(db: "AsyncSession", question: Question) -> Question:
     if question.dataset.is_ready:
         raise ValueError("Questions cannot be deleted for a published dataset")
 
-    await db.delete(question)
-    await db.commit()
-    return question
+    return await question.delete(db)
 
 
 async def get_record_by_id(
@@ -410,19 +391,19 @@ async def create_response(
 ) -> Response:
     validate_response_values(record.dataset, values=response_create.values, status=response_create.status)
 
-    response = Response(
+    response = await Response.create(
+        db,
         values=jsonable_encoder(response_create.values),
         status=response_create.status,
         record_id=record.id,
         user_id=user.id,
+        autocommit=False,
     )
 
     try:
-        db.add(response)
         await db.flush([response])
         await search_engine.update_record_response(response)
         await db.commit()
-        await db.refresh(response)
     except Exception:
         await db.rollback()
         raise
@@ -435,14 +416,13 @@ async def update_response(
 ):
     validate_response_values(response.record.dataset, values=response_update.values, status=response_update.status)
 
-    response.values = jsonable_encoder(response_update.values)
-    response.status = response_update.status
+    response = await response.update(
+        db, values=jsonable_encoder(response_update.values), status=response_update.status, autocommit=False
+    )
 
     try:
-        await db.flush([response])
         await search_engine.update_record_response(response)
         await db.commit()
-        await db.refresh(response)
     except Exception:
         await db.rollback()
         raise
@@ -451,8 +431,8 @@ async def update_response(
 
 
 async def delete_response(db: "AsyncSession", search_engine: SearchEngine, response: Response) -> Response:
+    response = await response.delete(db)
     try:
-        await db.delete(response)
         await search_engine.delete_record_response(response)
         await db.commit()
     except Exception:
@@ -511,10 +491,4 @@ async def create_suggestion(
     db: "AsyncSession", record: Record, question: Question, suggestion_create: "SuggestionCreate"
 ) -> Suggestion:
     question.parsed_settings.check_response(suggestion_create)
-
-    suggestion = Suggestion(record_id=record.id, **suggestion_create.dict())
-    db.add(suggestion)
-    await db.commit()
-    await db.refresh(suggestion)
-
-    return suggestion
+    return await Suggestion.create(db, record_id=record.id, **suggestion_create.dict())

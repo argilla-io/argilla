@@ -34,10 +34,10 @@ jobs:
 
   deployable_check:
     name: Check if must build & deploy from environment
-    runs-on: ubuntu-latest
+    runs-on: extended-runner
     needs: check_repo_files
     env:
-      IS_DEPLOYABLE: ${{ secrets.AR_DOCKER_USERNAME != '' && needs.check_repo_files.outputs.buildChanges }}
+      IS_DEPLOYABLE: ${{ secrets.AR_DOCKER_USERNAME != '' && needs.check_repo_files.outputs.buildChanges == 'true' }}
     outputs:
       isDeployable: ${{ steps.set_output.outputs.is_deployable }}
     steps:
@@ -63,7 +63,7 @@ jobs:
     name: Run base tests
     uses: ./.github/workflows/run-python-tests.yml
     needs:  check_repo_files
-    if: needs.check_repo_files.outputs.pythonChanges
+    if: needs.check_repo_files.outputs.pythonChanges == 'true'
     with:
       searchEngine: ${{ matrix.searchEngine }}
       searchEngineVersion: ${{ matrix.searchEngineVersion }}
@@ -79,7 +79,7 @@ jobs:
     name: Run extra tests (training, monitoring and listeners)
     uses: ./.github/workflows/run-python-tests.yml
     needs: check_repo_files
-    if: needs.check_repo_files.outputs.pythonChanges
+    if: needs.check_repo_files.outputs.pythonChanges == 'true'
     # continue-on-error: true
     with:
       coverageReport: coverage-extra
@@ -111,7 +111,7 @@ jobs:
     name: Build Argilla python package
     uses: ./.github/workflows/build-python-package.yml
     needs: deployable_check
-    if: needs.deployable_check.outputs.isDeployable
+    if: needs.deployable_check.outputs.isDeployable == 'true'
     secrets: inherit
 
   deploy_docker:
@@ -122,7 +122,11 @@ jobs:
       - run_tests
       - run_tests_extra
       - deployable_check
-    if: needs.deployable_check.outputs.isDeployable
+    if: |
+      always() &&
+      needs.deployable_check.outputs.isDeployable == 'true' &&
+      needs.run_tests.result != 'failure' &&
+      needs.run_tests_extra.result != 'failure'
     strategy:
       matrix:
         include:
