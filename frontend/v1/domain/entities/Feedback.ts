@@ -226,8 +226,12 @@ export class Feedback {
 
     if (question.component_type === COMPONENT_TYPE.RANKING) {
       const formattedOptions = question.options.map((option) => {
-        return { ...option, rank: null };
+        return {
+          ...option,
+          rank: suggestion?.value.find((s) => s.value === option.value)?.rank,
+        };
       });
+
       return { ...question, options: formattedOptions, response_id: null };
     }
 
