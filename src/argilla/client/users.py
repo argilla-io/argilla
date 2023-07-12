@@ -115,7 +115,7 @@ class User:
         Returns:
             A list of `WorkspaceModel` the current user is linked to.
         """
-        if self.role == UserRole.owner:
+        if active_client().user.role == UserRole.owner:
             return users_api_v1.list_user_workspaces(self.__client, self.id).parsed
         else:
             return workspaces_api_v1.list_workspaces_me(self.__client).parsed
