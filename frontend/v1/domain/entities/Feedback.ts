@@ -11,12 +11,21 @@ const CORRESPONDING_QUESTION_COMPONENT_TYPE_FROM_API = {
   multi_label_selection: COMPONENT_TYPE.MULTI_LABEL,
 };
 
+type QuestionType =
+  | "text"
+  | "rating"
+  | "ranking"
+  | "label_selection"
+  | "multi_label_selection";
+
 export class Question {
   public readonly question: string;
   public readonly component_type: string;
   public readonly dataset_id: string;
   public readonly is_required: boolean;
-  public readonly options: any;
+  public readonly initialOptions: any;
+  // OLD NAME WAS OPTION
+  public options: any;
   public readonly placeholder: string; // IT'S THING RELATED TO COMPONENT; REMOVE IT
 
   constructor(
@@ -29,19 +38,100 @@ export class Question {
     public readonly settings: any
   ) {
     this.component_type =
-      CORRESPONDING_QUESTION_COMPONENT_TYPE_FROM_API[this.questionType];
+      CORRESPONDING_QUESTION_COMPONENT_TYPE_FROM_API[this.type];
     this.dataset_id = this.datasetId;
     this.is_required = this.isRequired;
     this.question = this.title;
     this.placeholder = this.settings?.placeholder ?? null;
-    this.options = this.formatOptionsFromQuestionApi(
+    this.initialOptions = this.formatOptionsFromQuestionApi(
       this.settings.options,
       this.name
     );
   }
 
-  public get questionType(): string {
+  public get type(): QuestionType {
     return this.settings.type.toLowerCase();
+  }
+
+  clearAnswer() {
+    this.options = this.createEmptyAnswers();
+  }
+
+  answerQuestionWithResponse(response: any) {
+    this.options = this.completeQuestionAnswered(response);
+  }
+
+  answerQuestionWithSuggestion(suggestion: any) {
+    this.options = this.createEmptyAnswers(suggestion);
+  }
+
+  private createEmptyAnswers(suggestion: any = undefined) {
+    if (this.isTextType) {
+      return suggestion ? [{ ...suggestion }] : this.initialOptions;
+    }
+
+    if (this.isRatingType || this.isSingleLabelType || this.isMultiLabelType) {
+      return this.initialOptions.map((option) => {
+        return { ...option, is_selected: option.value === suggestion?.value };
+      });
+    }
+
+    if (this.isRankingType) {
+      return this.initialOptions.map((option) => {
+        return {
+          ...option,
+          rank: suggestion?.value.find((s) => s.value === option.value)?.rank,
+        };
+      });
+    }
+  }
+
+  public get isRankingType(): boolean {
+    return this.type === "ranking";
+  }
+
+  public get isMultiLabelType(): boolean {
+    return this.type === "multi_label_selection";
+  }
+
+  public get isSingleLabelType(): boolean {
+    return this.type === "label_selection";
+  }
+
+  public get isTextType(): boolean {
+    return this.type === "text";
+  }
+
+  public get isRatingType(): boolean {
+    return this.type === "rating";
+  }
+
+  private completeQuestionAnswered(response: any) {
+    if (this.isRankingType) {
+      return response.value;
+    }
+
+    if (this.isTextType) {
+      return [{ ...this.initialOptions, value: response.value }];
+    }
+
+    if (this.isMultiLabelType) {
+      return this.initialOptions.map((option) => {
+        return {
+          ...option,
+          is_selected: response.value.includes(option.value),
+        };
+      });
+    }
+
+    if (this.isSingleLabelType || this.isRatingType) {
+      return this.initialOptions.map((option) => {
+        return {
+          ...option,
+          is_selected: option.value === response.value,
+        };
+      });
+    }
   }
 
   private formatOptionsFromQuestionApi(options, questionName) {
@@ -103,8 +193,8 @@ export class Field {
 
 export class Feedback {
   constructor(
-    public readonly questions: Question[],
-    public readonly fields: Field[]
+    public readonly questions: Question[] = [],
+    public readonly fields: Field[] = []
   ) {}
 
   public records: any[] = [];
@@ -143,98 +233,33 @@ export class Feedback {
   }
 
   getAnswerWithNoSuggestions() {
-    return this.questions?.map((question) => {
-      return this.createEmptyResponse(question);
+    this.questions?.forEach((question) => {
+      question.clearAnswer();
     });
+
+    return this.questions;
   }
 
   questionsWithRecordAnswers(recordId: string, userId: string) {
     const record = this.records.find((r) => r.id === recordId);
+
     const response = record?.responses.filter(
       (response) => response.user_id === userId
     )[0];
 
-    return this.questions?.map((question) => {
-      const correspondingResponseToQuestion = response?.values[question.name];
-      if (correspondingResponseToQuestion) {
-        return this.completeQuestionAnswered(
-          question,
-          correspondingResponseToQuestion
+    return this.questions.map((question) => {
+      const userAnswer = response?.values[question.name];
+      if (userAnswer) {
+        question.answerQuestionWithResponse(userAnswer);
+      } else {
+        const suggestion = record.suggestions?.find(
+          (s) => s.question_id === question.id
         );
+
+        question.answerQuestionWithSuggestion(suggestion);
       }
 
-      const suggestion = record.suggestions?.find(
-        (s) => s.question_id === question.id
-      );
-
-      return this.createEmptyResponse(question, suggestion);
+      return question;
     });
-  }
-
-  private completeQuestionAnswered(question: Question, response: any) {
-    let formattedOptions = [];
-    switch (question.component_type) {
-      case COMPONENT_TYPE.RANKING:
-        formattedOptions = response.value;
-        break;
-
-      case COMPONENT_TYPE.FREE_TEXT:
-        formattedOptions = [{ ...question.options, value: response.value }];
-        break;
-      case COMPONENT_TYPE.MULTI_LABEL:
-        formattedOptions = question.options.map((option) => {
-          return {
-            ...option,
-            is_selected: response.value.includes(option.value),
-          };
-        });
-        break;
-      case COMPONENT_TYPE.SINGLE_LABEL:
-      case COMPONENT_TYPE.RATING:
-        formattedOptions = question.options.map((option) => {
-          return {
-            ...option,
-            is_selected: option.value === response.value,
-          };
-        });
-        break;
-    }
-    return {
-      ...question,
-      options: formattedOptions,
-    };
-  }
-
-  private createEmptyResponse(question: Question, suggestion: any = undefined) {
-    if (question.component_type === COMPONENT_TYPE.FREE_TEXT) {
-      return {
-        ...question,
-        options: suggestion ? [{ ...suggestion }] : question.options,
-      };
-    }
-
-    if (
-      question.component_type === COMPONENT_TYPE.RATING ||
-      question.component_type === COMPONENT_TYPE.SINGLE_LABEL ||
-      question.component_type === COMPONENT_TYPE.MULTI_LABEL
-    ) {
-      const formattedOptions = question.options.map((option) => {
-        return { ...option, is_selected: option.value === suggestion?.value };
-      });
-      return { ...question, options: formattedOptions, response_id: null };
-    }
-
-    if (question.component_type === COMPONENT_TYPE.RANKING) {
-      const formattedOptions = question.options.map((option) => {
-        return {
-          ...option,
-          rank: suggestion?.value.find((s) => s.value === option.value)?.rank,
-        };
-      });
-
-      return { ...question, options: formattedOptions, response_id: null };
-    }
-
-    return { ...question, response_id: null };
   }
 }

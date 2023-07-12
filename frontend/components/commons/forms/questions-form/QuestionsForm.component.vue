@@ -24,49 +24,49 @@
       </div>
       <div class="form-group" v-for="input in inputs" :key="input.id">
         <TextAreaComponent
-          v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
+          v-if="input.isTextType"
           :title="input.question"
           :placeholder="input.placeholder"
           v-model="input.options[0].value"
           :useMarkdown="input.settings.use_markdown"
-          :isRequired="input.is_required"
+          :isRequired="input.isRequired"
           :description="input.description"
           @on-error="onError"
         />
 
         <SingleLabelComponent
-          v-if="input.component_type === COMPONENT_TYPE.SINGLE_LABEL"
+          v-if="input.isSingleLabelType"
           :questionId="input.id"
           :title="input.question"
           v-model="input.options"
-          :isRequired="input.is_required"
+          :isRequired="input.isRequired"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
         />
 
         <MultiLabelComponent
-          v-if="input.component_type === COMPONENT_TYPE.MULTI_LABEL"
+          v-if="input.isMultiLabelType"
           :questionId="input.id"
           :title="input.question"
           v-model="input.options"
-          :isRequired="input.is_required"
+          :isRequired="input.isRequired"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
         />
 
         <RatingComponent
-          v-if="input.component_type === COMPONENT_TYPE.RATING"
+          v-if="input.isRatingType"
           :title="input.question"
           v-model="input.options"
-          :isRequired="input.is_required"
+          :isRequired="input.isRequired"
           :description="input.description"
           @on-error="onError"
         />
 
         <RankingComponent
-          v-if="input.component_type === COMPONENT_TYPE.RANKING"
+          v-if="input.isRankingType"
           :title="input.question"
-          :isRequired="input.is_required"
+          :isRequired="input.isRequired"
           :description="input.description"
           v-model="input.options"
         />
@@ -292,19 +292,19 @@ export default {
         }
 
         const { data: updatedResponse } = responseData;
-        const response = {
+        const answer = {
           record_id: this.recordId,
           ...updatedResponse,
         };
 
         if (this.responseId) {
-          this.updateResponse(response);
+          this.updateResponse(answer);
         } else {
-          this.addResponse(response);
+          this.addResponse(answer);
         }
 
         if (updatedResponse) {
-          this.updateResponsesInOrm(response);
+          this.updateResponsesInOrm(answer);
         }
       } catch (error) {
         console.log(error);

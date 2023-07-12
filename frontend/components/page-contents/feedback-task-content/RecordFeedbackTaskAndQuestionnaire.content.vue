@@ -8,7 +8,7 @@
       />
       <QuestionsFormComponent
         :key="questionFormKey"
-        v-if="questionsWithRecordAnswers?.length"
+        v-if="questionsWithRecordAnswers.length"
         class="question-form"
         :class="statusClass"
         :datasetId="datasetId"
