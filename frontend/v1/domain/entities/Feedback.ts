@@ -138,6 +138,11 @@ export class Feedback {
     record.status = status;
   }
 
+  checkIfQuestionHasSuggestion(recordId: string, questionId: string) {
+    const record = this.records.find((r) => r.id === recordId);
+    return record.suggestions?.some((s) => s.question_id === questionId);
+  }
+
   getAnswer(recordId: string, userId: string) {
     return this.questionsWithRecordAnswers(recordId, userId);
   }
@@ -210,7 +215,6 @@ export class Feedback {
       return {
         ...question,
         options: suggestion ? [{ ...suggestion }] : question.options,
-        hasSuggestion: !!suggestion,
       };
     }
 
@@ -226,7 +230,6 @@ export class Feedback {
         ...question,
         options: formattedOptions,
         response_id: null,
-        hasSuggestion: !!suggestion,
       };
     }
 
@@ -241,10 +244,9 @@ export class Feedback {
         ...question,
         options: formattedOptions,
         response_id: null,
-        hasSuggestion: !!suggestion,
       };
     }
 
-    return { ...question, response_id: null, hasSuggestion: !!suggestion };
+    return { ...question, response_id: null };
   }
 }

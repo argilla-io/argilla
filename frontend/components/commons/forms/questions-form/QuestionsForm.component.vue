@@ -29,7 +29,7 @@
           :placeholder="input.placeholder"
           v-model="input.options[0].value"
           :useMarkdown="input.settings.use_markdown"
-          :hasSuggestion="input.hasSuggestion"
+          :hasSuggestion="checkIsQuestionHasSuggestion(input.id)"
           :isRequired="input.is_required"
           :description="input.description"
           @on-error="onError"
@@ -40,7 +40,7 @@
           :questionId="input.id"
           :title="input.question"
           v-model="input.options"
-          :hasSuggestion="input.hasSuggestion"
+          :hasSuggestion="checkIsQuestionHasSuggestion(input.id)"
           :isRequired="input.is_required"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
@@ -51,7 +51,7 @@
           :questionId="input.id"
           :title="input.question"
           v-model="input.options"
-          :hasSuggestion="input.hasSuggestion"
+          :hasSuggestion="checkIsQuestionHasSuggestion(input.id)"
           :isRequired="input.is_required"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
@@ -61,7 +61,7 @@
           v-if="input.component_type === COMPONENT_TYPE.RATING"
           :title="input.question"
           v-model="input.options"
-          :hasSuggestion="input.hasSuggestion"
+          :hasSuggestion="checkIsQuestionHasSuggestion(input.id)"
           :isRequired="input.is_required"
           :description="input.description"
           @on-error="onError"
@@ -70,7 +70,7 @@
         <RankingComponent
           v-if="input.component_type === COMPONENT_TYPE.RANKING"
           :title="input.question"
-          :hasSuggestion="input.hasSuggestion"
+          :hasSuggestion="checkIsQuestionHasSuggestion(input.id)"
           :isRequired="input.is_required"
           :description="input.description"
           v-model="input.options"
@@ -587,6 +587,12 @@ export default {
       this.$emit("on-question-form-touched", !isFormUntouched);
       // TODO: Once notifications are centralized in one single point, we can remove this.
       this.$root.$emit("are-responses-untouched", isFormUntouched);
+    },
+    checkIsQuestionHasSuggestion(questionId) {
+      return this.feedback.checkIfQuestionHasSuggestion(
+        this.recordId,
+        questionId
+      );
     },
   },
 };
