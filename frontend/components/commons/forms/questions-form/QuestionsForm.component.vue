@@ -294,13 +294,21 @@ export default {
             responseValues
           );
         }
-        const { data: updatedResponses } = responseData;
 
-        if (updatedResponses) {
-          this.updateResponsesInOrm({
-            record_id: this.recordId,
-            ...updatedResponses,
-          });
+        const { data: updatedResponse } = responseData;
+        const response = {
+          record_id: this.recordId,
+          ...updatedResponse,
+        };
+
+        if (this.responseId) {
+          this.updateResponse(response);
+        } else {
+          this.addResponse(response);
+        }
+
+        if (updatedResponse) {
+          this.updateResponsesInOrm(response);
         }
       } catch (error) {
         console.log(error);
@@ -377,6 +385,8 @@ export default {
           RECORD_STATUS.PENDING
         );
 
+        this.clearRecord(this.responseId, RECORD_STATUS.PENDING);
+
         this.$emit("on-clear-responses");
         this.onReset();
       } catch (err) {
@@ -401,7 +411,7 @@ export default {
     async updateResponsesInOrm(responsesFromApi) {
       const newResponseToUpsertInOrm =
         this.formatResponsesApiForOrm(responsesFromApi);
-      this.updateRecord(responsesFromApi);
+
       await upsertRecordResponses(newResponseToUpsertInOrm);
     },
     async updateResponseValues(responseId, responseByQuestionName) {

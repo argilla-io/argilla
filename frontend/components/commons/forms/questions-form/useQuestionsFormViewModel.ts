@@ -2,10 +2,30 @@ import { useFeedback } from "~/v1/infrastructure/FeedbackStorage";
 
 export const useQuestionFormViewModel = () => {
   const feedbackTask = useFeedback();
-  const updateRecord = (record) => {
+
+  const updateResponse = (response) => {
     const feedback = feedbackTask.get();
-    feedback.updateRecord(record);
+
+    feedback.updateResponse(response);
+
     feedbackTask.save(feedback);
   };
-  return { updateRecord };
+
+  const addResponse = (response) => {
+    const feedback = feedbackTask.get();
+
+    feedback.addResponse(response);
+
+    feedbackTask.save(feedback);
+  };
+
+  const clearRecord = (recordId: string, status: string) => {
+    const feedback = feedbackTask.get();
+
+    feedback.clearRecord(recordId, status);
+
+    feedbackTask.save(feedback);
+  };
+
+  return { updateResponse, addResponse, clearRecord };
 };

@@ -113,11 +113,29 @@ export class Feedback {
     this.records = [...this.records, ...records];
   }
 
-  updateRecord(record: any) {
-    const recordPosition = this.records.findIndex((r) => r.id === record.id);
-    this.records[recordPosition] = record;
+  updateResponse(response: any) {
+    const record = this.records.find((r) => r.id === response.record_id);
+
+    record.responses = record.responses.map((r) => {
+      if (r.id === response.id) return response;
+
+      return r;
+    });
   }
-    
+
+  addResponse(response: any) {
+    const record = this.records.find((r) => r.id === response.record_id);
+
+    record.responses.push(response);
+  }
+
+  clearRecord(recordId: string, status: string) {
+    const record = this.records.find((r) => r.id === recordId);
+
+    record.responses = [];
+    record.status = status;
+  }
+
   getAnswer(recordId: string, userId: string) {
     return this.questionsWithRecordAnswers(recordId, userId);
   }
@@ -129,7 +147,7 @@ export class Feedback {
     )[0];
 
     return this.questions?.map((question) => {
-      const correspondingResponseToQuestion = response.values[question.name];
+      const correspondingResponseToQuestion = response?.values[question.name];
       if (correspondingResponseToQuestion) {
         return this.completeQuestionAnswered(
           question,
