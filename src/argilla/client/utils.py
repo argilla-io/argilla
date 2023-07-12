@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import functools
-from typing import Callable, List, Literal, TypeVar
+from typing import Callable, List, TypeVar
 
 try:
     from typing import ParamSpec
@@ -21,14 +21,13 @@ except ImportError:
     from typing_extensions import ParamSpec
 
 from argilla.client.api import ArgillaSingleton
+from argilla.client.sdk.users.models import UserRole
 
 _P = ParamSpec("_P")
 _R = TypeVar("_R")
 
 
-def allowed_for_roles(
-    roles: List[Literal["owner", "admin", "annotator"]]
-) -> Callable[[Callable[_P, _R]], Callable[_P, _R]]:
+def allowed_for_roles(roles: List[UserRole]) -> Callable[[Callable[_P, _R]], Callable[_P, _R]]:
     """Decorator function to check the role of the user calling the function, to restrict
     access to certain Argilla functions for users with certain roles.
 
