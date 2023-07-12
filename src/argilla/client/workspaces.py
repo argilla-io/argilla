@@ -182,11 +182,29 @@ class Workspace:
                 f"Error while deleting user with id=`{user_id}` from workspace with id=`{self.id}`."
             ) from e
 
-    def delete(self):
+    @allowed_for_roles(roles=[UserRole.owner])
+    def delete(self) -> None:
+        """Deletes an existing workspace from Argilla. Note that the workspace
+        cannot have any linked dataset to be removed from Argilla. Otherwise an error will be raised.
+
+        Raises:
+            ValueError: if the workspace does not exists or some datasets are linked to it.
+            RuntimeError: if there was an unexpected error while deleting the user from the workspace.
+
+        Examples:
+            >>> from argilla import rg
+            >>> workspace = rg.Workspace.from_name("my-workspace")
+            >>> workspace.delete_user("my-user-id")
+        """
         try:
             workspaces_api_v1.delete_workspace(client=self.__client, id=self.id)
         except NotFoundApiError as e:
             raise ValueError(f"Workspace with id {self.id!r} doesn't exist in Argilla.") from e
+        except AlreadyExistsApiError as e:
+            # TODO: the already exists is to explicit for this context and should be generalized
+            raise ValueError(
+                f"Cannot delete workspace {self.id!r}. Some datasets are still linked to this workspace."
+            ) from e
         except BaseClientError as e:
             raise RuntimeError(f"Error while deleting workspace with id {self.id!r}.") from e
 
