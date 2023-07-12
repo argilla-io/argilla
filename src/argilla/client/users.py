@@ -108,7 +108,6 @@ class User:
         raise Exception(error_msg)
 
     @property
-    @allowed_for_roles(roles=[UserRole.owner])
     def workspaces(self) -> Optional[List[WorkspaceModel]]:
         """Returns the workspace names the current user is linked to.
 
