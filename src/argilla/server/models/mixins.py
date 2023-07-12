@@ -96,11 +96,11 @@ class CRUDMixin:
         insert_stmt = _INSERT_FUNC[db.bind.dialect.name](cls).values(values)
 
         # On conflict, update the columns that are upsertable (defined in `Model.__upsertable_columns__`)
+        columns_to_update = {column: getattr(insert_stmt.excluded, column) for column in cls.__upsertable_columns__}
+        if hasattr(cls, "updated_at"):
+            columns_to_update["updated_at"] = func.now()
         upsert_stmt = (
-            insert_stmt.on_conflict_do_update(
-                index_elements=constraints,
-                set_={column: getattr(insert_stmt.excluded, column) for column in cls.__upsertable_columns__},
-            )
+            insert_stmt.on_conflict_do_update(index_elements=constraints, set_=columns_to_update)
             .returning(cls)
             .execution_options(populate_existing=True)
         )

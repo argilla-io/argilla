@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import asyncio
 from typing import TYPE_CHECKING, Optional
 
 import pytest
@@ -109,6 +110,18 @@ class TestDatabaseModel:
         )
         assert model.str_col == "unit-test-updated"
         assert model.int_col == 2
+
+    async def test_database_model_upsert_updated_at(self, db: "AsyncSession"):
+        model = await Model.create(db, str_col="unit-test", int_col=1, external_id="12345", autocommit=True)
+        updated_at = model.updated_at
+        await asyncio.sleep(1)
+        model = await Model.upsert(
+            db,
+            ModelCreateSchema(str_col="unit-test-updated", int_col=2, external_id=model.external_id),
+            constraints=[Model.external_id],
+            autocommit=True,
+        )
+        assert model.updated_at > updated_at
 
     async def test_database_model_delete(self, db: "AsyncSession"):
         model = await Model.create(db, str_col="unit-test", int_col=1, autocommit=True)
