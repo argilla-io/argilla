@@ -24,6 +24,7 @@ These are the section headers that we use:
 - Added `POST /api/v1/records/{record_id}/suggestions` API endpoint to create a suggestion for a response associated to a record ([#3304](https://github.com/argilla-io/argilla/pull/3304)).
 - Added breaking simutaneously running tests within GitHub package worflows. ([#3354](https://github.com/argilla-io/argilla/pull/3354)).
 - Added `allowed_for_roles` Python decorator to check whether the current user has the required role to access the decorated function/method for `User` and `Workspace` ([#3383](https://github.com/argilla-io/argilla/pull/3383))
+- Added `GET /api/v1/me/workspaces` endpoint to list the workspaces of the current active user ([#3390](https://github.com/argilla-io/argilla/pull/3390))
 
 ### Changed
 
