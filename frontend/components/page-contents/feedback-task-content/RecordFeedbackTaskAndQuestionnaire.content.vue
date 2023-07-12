@@ -137,7 +137,7 @@ export default {
       return this.record?.record_fields ?? [];
     },
     questionsWithRecordAnswers() {
-      return this.feedback.getAnswer(this.recordId);
+      return this.feedback.getAnswer(this.recordId, this.userId);
     },
     fieldsWithRecordFieldText() {
       return this.fields?.map((field) => {

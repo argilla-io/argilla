@@ -1,24 +1,101 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
-import {
-  CORRESPONDING_FIELD_COMPONENT_TYPE_FROM_API,
-  CORRESPONDING_QUESTION_COMPONENT_TYPE_FROM_API,
-} from "~/components/feedback-task/feedbackTask.properties";
+import { Field, Question } from "../domain/entities/Feedback";
 
 const TYPE_OF_FEEDBACK = {
   ERROR_FETCHING_QUESTIONS: "ERROR_FETCHING_QUESTIONS",
   ERROR_FETCHING_FIELDS: "ERROR_FETCHING_FIELDS",
 };
 
+interface Response<T> {
+  items: T;
+}
+
+interface RatingSetting {
+  type: "rating";
+  options: {
+    value: number;
+  }[];
+}
+
+interface TextSetting {
+  type: "text";
+  use_markdown: boolean;
+}
+
+interface RankingSetting {
+  type: "ranking";
+  options: {
+    description?: string;
+    text: string;
+    value: string;
+  }[];
+}
+
+interface MultiSelectionSetting {
+  type: "multi_label_selection";
+  visible_options: number;
+  options: {
+    description?: string;
+    text: string;
+    value: string;
+  }[];
+}
+
+interface SingleSelectionSetting {
+  type: "label_selection";
+  options: {
+    description?: string;
+    text: string;
+    value: string;
+  }[];
+}
+
+interface BackendQuestion {
+  id: string;
+  description?: string;
+  name: string;
+  title: string;
+  required: boolean;
+  settings:
+    | TextSetting
+    | MultiSelectionSetting
+    | SingleSelectionSetting
+    | RatingSetting
+    | RankingSetting;
+}
+
+interface BackendField {
+  id: string;
+  name: string;
+  required: boolean;
+  title: string;
+  settings:
+    | TextSetting
+    | MultiSelectionSetting
+    | SingleSelectionSetting
+    | RatingSetting
+    | RankingSetting;
+}
+
 export class FeedbackRepository {
   constructor(private readonly axios: NuxtAxiosInstance) {}
 
-  async getQuestions(datasetId: string): Promise<unknown[]> {
+  async getQuestions(datasetId: string): Promise<Question[]> {
     try {
-      const { data } = await this.axios.get(
+      const { data } = await this.axios.get<Response<BackendQuestion[]>>(
         `/v1/datasets/${datasetId}/questions`
       );
-
-      return this.factoryQuestionsForOrm(data.items, datasetId);
+      return data.items.map((question) => {
+        return new Question(
+          question.id,
+          question.name,
+          question.description,
+          datasetId,
+          question.title,
+          question.required,
+          question.settings
+        );
+      });
     } catch (err) {
       throw {
         response: TYPE_OF_FEEDBACK.ERROR_FETCHING_QUESTIONS,
@@ -26,121 +103,26 @@ export class FeedbackRepository {
     }
   }
 
-  async getFields(datasetId: string): Promise<unknown[]> {
+  async getFields(datasetId: string): Promise<Field[]> {
     try {
-      const { data } = await this.axios.get(`/v1/datasets/${datasetId}/fields`);
+      const { data } = await this.axios.get<Response<BackendField[]>>(
+        `/v1/datasets/${datasetId}/fields`
+      );
 
-      return this.factoryFieldsForOrm(data.items, datasetId);
+      return data.items.map((field) => {
+        return new Field(
+          field.id,
+          field.name,
+          field.title,
+          datasetId,
+          field.required,
+          field.settings
+        );
+      });
     } catch (err) {
       throw {
         response: TYPE_OF_FEEDBACK.ERROR_FETCHING_FIELDS,
       };
     }
-  }
-
-  private factoryQuestionsForOrm(
-    initialQuestions: unknown[],
-    datasetId: string
-  ): unknown[] {
-    return initialQuestions.map(
-      (
-        {
-          id: questionId,
-          name: questionName,
-          title: questionTitle,
-          required: isRequired,
-          settings: questionSettings,
-          description: questionDescription,
-        },
-        index
-      ) => {
-        const componentTypeFromBack = questionSettings.type.toLowerCase();
-        const componentType =
-          CORRESPONDING_QUESTION_COMPONENT_TYPE_FROM_API[componentTypeFromBack];
-
-        const formattedOptions = this.formatOptionsFromQuestionApi(
-          questionSettings.options,
-          questionName
-        );
-
-        return {
-          id: questionId,
-          name: questionName,
-          dataset_id: datasetId,
-          order: index,
-          question: questionTitle,
-          options: formattedOptions,
-          is_required: isRequired,
-          component_type: componentType,
-          placeholder: questionSettings?.placeholder ?? null,
-          description: questionDescription ?? null,
-          settings: questionSettings,
-        };
-      }
-    );
-  }
-
-  private formatOptionsFromQuestionApi(options, questionName) {
-    if (options) {
-      return options?.map((option) => {
-        const optionText = option.text ?? option.value;
-        const paramObject = {
-          value: option.value,
-          text: optionText,
-          prefixId: questionName,
-          suffixId: option.value,
-        };
-
-        return this.factoryOption(paramObject);
-      });
-    }
-
-    return [
-      this.factoryOption({
-        value: "",
-        prefixId: questionName,
-      }),
-    ];
-  }
-
-  private factoryOption({ value = null, text = "", prefixId, suffixId }: any) {
-    return {
-      id: `${prefixId}${suffixId ? `_${suffixId}` : ""}`,
-      value,
-      text,
-    };
-  }
-
-  private factoryFieldsForOrm(initialFields: unknown[], datasetId: string) {
-    return initialFields.map(
-      (
-        {
-          id: fieldId,
-          name: fieldName,
-          title: fieldTitle,
-          required: isRequired,
-          settings: fieldSettings,
-        },
-        index
-      ) => {
-        const componentTypeFromBack =
-          fieldSettings?.type?.toLowerCase() ?? null;
-
-        const componentType = componentTypeFromBack
-          ? CORRESPONDING_FIELD_COMPONENT_TYPE_FROM_API[componentTypeFromBack]
-          : null;
-
-        return {
-          id: fieldId,
-          name: fieldName,
-          dataset_id: datasetId,
-          order: index,
-          title: fieldTitle,
-          is_required: isRequired,
-          component_type: componentType,
-          settings: fieldSettings,
-        };
-      }
-    );
   }
 }

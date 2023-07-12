@@ -25,6 +25,10 @@ const getQuestionsByDatasetId = (
     .orderBy(orderBy, direction)
     .get();
 };
+
+/**
+ * @deprecated use V1 store
+ */
 const getComponentTypeOfQuestionByDatasetIdAndQuestionName = (
   datasetId,
   questionName

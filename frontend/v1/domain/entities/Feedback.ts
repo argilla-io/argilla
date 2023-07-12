@@ -1,36 +1,104 @@
-import { COMPONENT_TYPE } from "~/components/feedback-task/feedbackTask.properties";
+import {
+  COMPONENT_TYPE,
+  CORRESPONDING_FIELD_COMPONENT_TYPE_FROM_API,
+} from "~/components/feedback-task/feedbackTask.properties";
+
+const CORRESPONDING_QUESTION_COMPONENT_TYPE_FROM_API = {
+  text: COMPONENT_TYPE.FREE_TEXT,
+  rating: COMPONENT_TYPE.RATING,
+  ranking: COMPONENT_TYPE.RANKING,
+  label_selection: COMPONENT_TYPE.SINGLE_LABEL,
+  multi_label_selection: COMPONENT_TYPE.MULTI_LABEL,
+};
 
 export class Question {
+  public readonly question: string;
+  public readonly component_type: string;
+  public readonly dataset_id: string;
+  public readonly is_required: boolean;
+  public readonly options: any;
+  public readonly placeholder: string; // IT'S THING RELATED TO COMPONENT; REMOVE IT
+
   constructor(
     public readonly id: string,
     public readonly name: string,
     public readonly description: string,
-    public readonly dataset_id: string,
-    public readonly question: string,
-    public readonly order: number,
-    public readonly is_required: boolean,
-    public readonly settings: any,
-    public readonly options: any,
-    public readonly component_type: string,
-    public readonly placeholder: string
-  ) {}
+    public readonly datasetId: string,
+    public readonly title: string,
+    public readonly isRequired: boolean,
+    public readonly settings: any
+  ) {
+    this.component_type =
+      CORRESPONDING_QUESTION_COMPONENT_TYPE_FROM_API[this.questionType];
+    this.dataset_id = this.datasetId;
+    this.is_required = this.isRequired;
+    this.question = this.title;
+    this.placeholder = this.settings?.placeholder ?? null;
+    this.options = this.formatOptionsFromQuestionApi(
+      this.settings.options,
+      this.name
+    );
+  }
 
   public get questionType(): string {
     return this.settings.type.toLowerCase();
   }
+
+  private formatOptionsFromQuestionApi(options, questionName) {
+    if (options) {
+      return options?.map((option) => {
+        const optionText = option.text ?? option.value;
+        const paramObject = {
+          value: option.value,
+          text: optionText,
+          prefixId: questionName,
+          suffixId: option.value,
+        };
+
+        return this.factoryOption(paramObject);
+      });
+    }
+
+    return [
+      this.factoryOption({
+        value: "",
+        prefixId: questionName,
+      }),
+    ];
+  }
+
+  private factoryOption({ value = null, text = "", prefixId, suffixId }: any) {
+    return {
+      id: `${prefixId}${suffixId ? `_${suffixId}` : ""}`,
+      value,
+      text,
+    };
+  }
 }
 
 export class Field {
+  public readonly component_type: string;
+  public readonly dataset_id: string;
+  public readonly is_required: boolean;
+
   constructor(
     public readonly id: string,
     public readonly name: string,
     public readonly title: string,
-    public readonly dataset_id: string,
-    public readonly order: number,
+    public readonly datasetId: string,
     public readonly required: boolean,
-    public readonly settings: any,
-    public readonly component_type: string
-  ) {}
+    public readonly settings: any
+  ) {
+    this.dataset_id = this.datasetId;
+    this.is_required = this.required;
+    this.component_type = this.fieldSetting
+      ? CORRESPONDING_FIELD_COMPONENT_TYPE_FROM_API[this.fieldSetting]
+      : null;
+  }
+
+  private get fieldSetting() {
+    return this.settings?.type?.toLowerCase() ?? null;
+  }
 }
 
 export class Feedback {
@@ -42,19 +110,21 @@ export class Feedback {
   public records: any[] = [];
 
   addRecords(records: unknown[]) {
-    this.records = records;
+    this.records = [...this.records, ...records];
   }
 
-  getAnswer(recordId: string) {
-    return this.questionsWithRecordAnswers(recordId);
+  getAnswer(recordId: string, userId: string) {
+    return this.questionsWithRecordAnswers(recordId, userId);
   }
 
-  questionsWithRecordAnswers(recordId: string) {
+  questionsWithRecordAnswers(recordId: string, userId: string) {
     const record = this.records.find((r) => r.id === recordId);
+    const response = record?.responses.filter(
+      (response) => response.user_id === userId
+    )[0];
+
     return this.questions?.map((question) => {
-      const correspondingResponseToQuestion = record.responses.find(
-        (recordResponse) => question.name === recordResponse.question_name
-      );
+      const correspondingResponseToQuestion = response.values[question.name];
       if (correspondingResponseToQuestion) {
         return this.completeQuestionAnswered(
           question,
@@ -62,14 +132,9 @@ export class Feedback {
         );
       }
 
-      const suggestion = [
-        ...record.suggestions,
-        { question_id: "fe94beff-cdd2-4e3b-b19b-3023fbce5258", value: "Hola" },
-        {
-          question_id: "8919dcf4-882c-4dd8-b0f5-9483df80beb4",
-          value: "positive",
-        },
-      ].find((s) => s.question_id === question.id);
+      const suggestion = record.suggestions?.find(
+        (s) => s.question_id === question.id
+      );
 
       return this.createEmptyResponse(question, suggestion);
     });
@@ -80,26 +145,35 @@ export class Feedback {
     correspondingResponseToQuestion: any
   ) {
     let formattedOptions = [];
-
     switch (question.component_type) {
       case COMPONENT_TYPE.RANKING:
-        formattedOptions = correspondingResponseToQuestion.options;
+        formattedOptions = correspondingResponseToQuestion.value;
         break;
+
       case COMPONENT_TYPE.FREE_TEXT:
-      case COMPONENT_TYPE.SINGLE_LABEL:
-      case COMPONENT_TYPE.MULTI_LABEL:
-      case COMPONENT_TYPE.RATING:
-        formattedOptions = correspondingResponseToQuestion.options.map(
-          (option) => {
-            return {
-              ...option,
-              is_selected: option.is_selected || false,
-            };
-          }
-        );
+        formattedOptions = [
+          { ...question.options, value: correspondingResponseToQuestion.value },
+        ];
         break;
-      default:
-        console.log(`The component ${question.component_type} is unknown`);
+      case COMPONENT_TYPE.MULTI_LABEL:
+        formattedOptions = question.options.map((option) => {
+          return {
+            ...option,
+            is_selected: correspondingResponseToQuestion.value.includes(
+              option.value
+            ),
+          };
+        });
+        break;
+      case COMPONENT_TYPE.SINGLE_LABEL:
+      case COMPONENT_TYPE.RATING:
+        formattedOptions = question.options.map((option) => {
+          return {
+            ...option,
+            is_selected: option.value === correspondingResponseToQuestion.value,
+          };
+        });
+        break;
     }
     return {
       ...question,
@@ -109,10 +183,10 @@ export class Feedback {
   }
 
   private createEmptyResponse(question: Question, suggestion: any) {
-    if (question.component_type === COMPONENT_TYPE.FREE_TEXT && suggestion) {
+    if (question.component_type === COMPONENT_TYPE.FREE_TEXT) {
       return {
         ...question,
-        options: [{ ...suggestion }],
+        options: suggestion ? [{ ...suggestion }] : question.options,
       };
     }
 
