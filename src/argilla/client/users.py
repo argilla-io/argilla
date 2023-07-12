@@ -27,6 +27,7 @@ from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import UserCreateModel, UserModel, UserRole
 from argilla.client.sdk.v1.users import api as users_api_v1
 from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
+from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
     import httpx
@@ -107,6 +108,7 @@ class User:
         raise Exception(error_msg)
 
     @property
+    @allowed_for_roles(roles=[UserRole.owner])
     def workspaces(self) -> Optional[List[WorkspaceModel]]:
         """Returns the workspace names the current user is linked to.
 
@@ -134,6 +136,7 @@ class User:
         except Exception as e:
             raise RuntimeError(f"The `rg.active_client()` is not available or not respoding.") from e
 
+    @allowed_for_roles(roles=[UserRole.owner])
     def delete(self) -> None:
         """Deletes the user from Argilla.
 
@@ -165,6 +168,7 @@ class User:
         return instance
 
     @classmethod
+    @allowed_for_roles(roles=[UserRole.owner])
     def create(
         cls,
         username: str,
@@ -225,6 +229,7 @@ class User:
             raise RuntimeError(f"Error while creating user with username=`{username}` in Argilla.") from e
 
     @classmethod
+    @allowed_for_roles(roles=[UserRole.owner])
     def from_id(cls, id: UUID) -> "User":
         """Gets an existing user from Argilla by its ID.
 
@@ -257,6 +262,7 @@ class User:
             raise RuntimeError(f"Error while retrieving user with id=`{id}` from Argilla.") from e
 
     @classmethod
+    @allowed_for_roles(roles=[UserRole.owner])
     def from_name(cls, name: str) -> "User":
         """Gets an existing user from Argilla by its name.
 
@@ -316,6 +322,7 @@ class User:
             raise RuntimeError("Error while retrieving the current user from Argilla.") from e
 
     @classmethod
+    @allowed_for_roles(roles=[UserRole.owner])
     def list(cls) -> Iterator["User"]:
         """Lists all the users in Argilla.
 
