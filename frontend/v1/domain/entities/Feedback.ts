@@ -132,6 +132,8 @@ export class Feedback {
   clearRecord(recordId: string, status: string) {
     const record = this.records.find((r) => r.id === recordId);
 
+    if (!record) return;
+
     record.responses = [];
     record.status = status;
   }

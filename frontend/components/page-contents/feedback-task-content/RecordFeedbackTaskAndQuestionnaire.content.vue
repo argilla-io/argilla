@@ -14,7 +14,6 @@
         :datasetId="datasetId"
         :recordId="recordId"
         :recordStatus="record.record_status"
-        :initialInputs="questionsWithRecordAnswers"
         @on-submit-responses="goToNextPageAndRefreshMetrics"
         @on-discard-responses="goToNextPageAndRefreshMetrics"
         @on-clear-responses="refreshMetrics"

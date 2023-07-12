@@ -146,14 +146,11 @@ export default {
       type: String,
       required: true,
     },
-    initialInputs: {
-      type: Array,
-      required: true,
-    },
   },
   data() {
     return {
       inputs: [],
+      initialInputs: [],
       renderForm: 0,
       isError: false,
     };
@@ -385,7 +382,7 @@ export default {
           RECORD_STATUS.PENDING
         );
 
-        this.clearRecord(this.responseId, RECORD_STATUS.PENDING);
+        this.clearRecord(this.recordId, RECORD_STATUS.PENDING);
 
         this.$emit("on-clear-responses");
         this.onReset();
@@ -394,6 +391,7 @@ export default {
       }
     },
     onReset() {
+      this.initialInputs = this.feedback.getAnswer(this.recordId, this.userId);
       this.inputs = cloneDeep(this.initialInputs);
       this.isError = false;
       this.renderForm++;

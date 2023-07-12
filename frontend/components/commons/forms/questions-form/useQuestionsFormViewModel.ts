@@ -27,5 +27,10 @@ export const useQuestionFormViewModel = () => {
     feedbackTask.save(feedback);
   };
 
-  return { updateResponse, addResponse, clearRecord };
+  return {
+    feedback: feedbackTask.state,
+    updateResponse,
+    addResponse,
+    clearRecord,
+  };
 };
