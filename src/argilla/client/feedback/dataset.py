@@ -27,7 +27,7 @@ from argilla.client.feedback.constants import (
     FETCHING_BATCH_SIZE,
     PUSHING_BATCH_SIZE,
 )
-from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixIn
+from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     FieldSchema,
@@ -70,7 +70,7 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 
-class FeedbackDataset(HuggingFaceDatasetMixIn):
+class FeedbackDataset(HuggingFaceDatasetMixin):
     """Class to work with `FeedbackDataset`s either locally, or remotely (Argilla or HuggingFace Hub).
 
     Args:
