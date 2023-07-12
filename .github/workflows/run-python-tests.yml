@@ -39,7 +39,7 @@ jobs:
       run:
         shell: bash -l {0}
     env:
-      COVERAGE_REPORT: ${{ inputs.coverageReport }}-${{ inputs.searchEngineDockerImage }}
+      COVERAGE_REPORT: ${{ inputs.coverageReport }}
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v2
