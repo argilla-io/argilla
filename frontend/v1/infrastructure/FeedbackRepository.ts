@@ -1,5 +1,6 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
-import { Field, Question } from "../domain/entities/Feedback";
+import { Field } from "../domain/entities/Field";
+import { Question } from "../domain/entities/Question";
 
 const TYPE_OF_FEEDBACK = {
   ERROR_FETCHING_QUESTIONS: "ERROR_FETCHING_QUESTIONS",

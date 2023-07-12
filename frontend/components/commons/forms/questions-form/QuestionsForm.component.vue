@@ -182,11 +182,11 @@ export default {
       const requiredQuestionsAreCompletedCorrectly = this.inputs
         .filter((input) => input.is_required)
         .every((input) => {
-          if (input.component_type === COMPONENT_TYPE.FREE_TEXT) {
-            return input.options[0]?.value.trim() != "";
+          if (input.isTextType) {
+            return input.options[0]?.value.trim() !== "";
           }
 
-          if (input.component_type === COMPONENT_TYPE.RANKING) {
+          if (input.isRankingType) {
             return input.options.every((option) => option.rank);
           }
 
@@ -196,7 +196,7 @@ export default {
       const optionalQuestionsCompletedAreCorrectlyEntered = this.inputs
         .filter((input) => !input.is_required)
         .every((input) => {
-          if (input.component_type === COMPONENT_TYPE.RANKING) {
+          if (input.isRankingType) {
             return (
               !input.options.some((option) => option.rank) ||
               input.options.every((option) => option.rank)
@@ -226,18 +226,18 @@ export default {
     currentInputsWithNoResponses() {
       return this.inputs.filter((input) => {
         if (
-          input.component_type === COMPONENT_TYPE.RATING ||
-          input.component_type === COMPONENT_TYPE.SINGLE_LABEL ||
-          input.component_type === COMPONENT_TYPE.MULTI_LABEL
+          input.isRatingType ||
+          input.isSingleLabelType ||
+          input.isMultiLabelType
         ) {
           return input.options.every((option) => !option.is_selected);
         }
 
-        if (input.component_type === COMPONENT_TYPE.RANKING) {
+        if (input.isRankingType) {
           return input.options.every((option) => !option.rank);
         }
 
-        if (input.component_type === COMPONENT_TYPE.FREE_TEXT) {
+        if (input.isTextType) {
           return !input.options[0]?.value.trim();
         }
       });

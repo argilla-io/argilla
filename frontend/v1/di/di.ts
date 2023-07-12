@@ -7,7 +7,7 @@ import { useDatasets } from "@/v1/infrastructure/DatasetsStorage";
 import { useDataset } from "@/v1/infrastructure/DatasetStorage";
 import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use.case";
 import { FeedbackRepository } from "@/v1/infrastructure/FeedbackRepository";
-import { RecordRepository } from "~/components/page-contents/feedback-task-content/useRecordFeedbackTaskViewModel";
+import { RecordRepository } from "@/v1/infrastructure/RecordRepository";
 
 export const loadDependencyContainer = (context: Context) => {
   const useAxios = () => context.$axios;
