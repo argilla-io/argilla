@@ -21,7 +21,12 @@ from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.workspaces.models import WorkspaceUserModel
 from argilla.client.workspaces import Workspace
 
-from tests.factories import UserFactory, WorkspaceFactory, WorkspaceUserFactory
+from tests.factories import (
+    DatasetFactory,
+    UserFactory,
+    WorkspaceFactory,
+    WorkspaceUserFactory,
+)
 
 if TYPE_CHECKING:
     from argilla.server.models import User as ServerUser
@@ -246,7 +251,7 @@ async def test_delete_workspace(owner: "ServerUser"):
     ws = Workspace.from_id(workspace.id)
     ws.delete()
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=rf"Workspace with id=`{id}` doesn't exist in Argilla"):
         Workspace.from_id(workspace.id)
 
 
@@ -259,7 +264,23 @@ async def test_delete_non_existing_workspace(owner: "ServerUser"):
     ws = Workspace.from_id(workspace.id)
     ws.delete()
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=rf"Workspace with id {ws.id!r} doesn't exist in Argilla."):
+        ws.delete()
+
+
+@pytest.mark.asyncio
+async def test_delete_workspace_with_linked_datasets(owner: "ServerUser"):
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+    await DatasetFactory.create(workspace=workspace)
+
+    ArgillaSingleton.init(api_key=owner.api_key)
+
+    ws = Workspace.from_id(workspace.id)
+    ws.delete()
+
+    with pytest.raises(
+        ValueError, match=rf"Cannot delete workspace {ws.id!r}. Some datasets are still linked to this workspace."
+    ):
         ws.delete()
 
 
