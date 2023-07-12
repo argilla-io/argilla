@@ -99,6 +99,10 @@ class WorkspacePolicyV1:
 
         return is_allowed
 
+    @classmethod
+    async def list_workspaces_me(cls, actor: User) -> bool:
+        return True
+
 
 class UserPolicy:
     @classmethod
