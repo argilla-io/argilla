@@ -129,6 +129,7 @@ import {
   upsertRecordResponses,
   deleteRecordResponsesByUserIdAndResponseId,
 } from "@/models/feedback-task-model/record-response/recordResponse.queries";
+import { useQuestionFormViewModel } from "./useQuestionsFormViewModel";
 
 export default {
   name: "QuestionsFormComponent",
@@ -156,6 +157,9 @@ export default {
       renderForm: 0,
       isError: false,
     };
+  },
+  setup() {
+    return useQuestionFormViewModel();
   },
   computed: {
     userId() {
@@ -397,7 +401,7 @@ export default {
     async updateResponsesInOrm(responsesFromApi) {
       const newResponseToUpsertInOrm =
         this.formatResponsesApiForOrm(responsesFromApi);
-
+      this.updateRecord(responsesFromApi);
       await upsertRecordResponses(newResponseToUpsertInOrm);
     },
     async updateResponseValues(responseId, responseByQuestionName) {
