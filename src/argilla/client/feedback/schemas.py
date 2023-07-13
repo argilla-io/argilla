@@ -98,6 +98,28 @@ class ResponseSchema(BaseModel):
 
 
 class SuggestionSchema(BaseModel):
+    """Schema for the suggestions for the questions related to the record.
+
+    Args:
+        question_id: ID of the question in Argilla. Defaults to None, and is automatically
+           fulfilled internally once the question is pushed to Argilla.
+        question_name: name of the question.
+        type: type of the question. Defaults to None. Possible values are `model` or `human`.
+        score: score of the suggestion. Defaults to None.
+        value: value of the suggestion, which should match the type of the question.
+        agent: agent that generated the suggestion. Defaults to None.
+
+    Examples:
+        >>> import argilla as rg
+        >>> rg.SuggestionSchema(
+        ...     question_name="question-1",
+        ...     type="model",
+        ...     score=0.9,
+        ...     value="This is the first suggestion",
+        ...     agent="agent-1",
+        ... )
+    """
+
     question_id: Optional[UUID] = None
     question_name: str
     type: Optional[Literal["model", "human"]] = None
