@@ -78,7 +78,7 @@ async def test_get_workspace_with_nonexistent_workspace_id(client: TestClient, o
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin, UserRole.annotator])
+@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
 async def test_list_workspaces_me(client: TestClient, role: UserRole) -> None:
     workspaces = await WorkspaceFactory.create_batch(size=5)
     user = await UserFactory.create(role=role, workspaces=workspaces)
@@ -104,7 +104,7 @@ async def test_list_workspaces_me_without_authentication(client: TestClient) -> 
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin, UserRole.annotator])
+@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
 async def test_list_workspaces_me_no_workspaces(client: TestClient, role: UserRole) -> None:
     user = await UserFactory.create(role=role)
 
