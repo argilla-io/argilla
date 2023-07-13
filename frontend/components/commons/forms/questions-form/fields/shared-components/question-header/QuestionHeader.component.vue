@@ -91,7 +91,7 @@ span {
     }
   }
 }
-:deep([data-title]) {
+:deep([data-title]):hover {
   position: relative;
   cursor: pointer;
   @extend %has-tooltip--top;
