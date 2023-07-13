@@ -115,10 +115,10 @@ class User:
         Returns:
             A list of `WorkspaceModel` the current user is linked to.
         """
-        if active_client().user.role == UserRole.owner:
+        connected_user = users_api.whoami_httpx(self.__client).parsed
+        if connected_user.role == UserRole.owner:
             return users_api_v1.list_user_workspaces(self.__client, self.id).parsed
-        else:
-            return workspaces_api_v1.list_workspaces_me(self.__client).parsed
+        return workspaces_api_v1.list_workspaces_me(self.__client).parsed
 
     def __repr__(self) -> str:
         return (
