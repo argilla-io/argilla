@@ -429,9 +429,9 @@ def add_suggestion(
     if agent is not None:
         suggestion["agent"] = agent
 
-    response = client.post(url=url, json=suggestion)
+    response = client.put(url=url, json=suggestion)
 
-    if response.status_code == 201:
+    if response.status_code in [200, 201]:
         parsed_response = FeedbackSuggestionModel(**response.json())
         return Response(
             status_code=response.status_code,
