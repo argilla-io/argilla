@@ -44,6 +44,31 @@ def whoami(client: AuthenticatedClient) -> UserModel:
     return UserModel(**response)
 
 
+def whoami_httpx(client: httpx.Client) -> Response[Union[UserModel, ErrorMessage, HTTPValidationError]]:
+    """Sends a GET request to `/api/me` endpoint to get the current user information.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+
+    Returns:
+        A `Response` object containing a `parsed` attribute with the parsed response if
+        the request was successful, which is an instance of `UserModel`.
+    """
+    url = "/api/me"
+
+    response = client.get(url)
+
+    if response.status_code == 200:
+        parsed_response = UserModel(**response.json())
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+            parsed=parsed_response,
+        )
+    return handle_response_error(response)
+
+
 def list_users(
     client: httpx.Client,
 ) -> Response[Union[List[UserModel], ErrorMessage, HTTPValidationError]]:
