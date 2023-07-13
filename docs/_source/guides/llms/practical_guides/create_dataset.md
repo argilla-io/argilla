@@ -138,6 +138,7 @@ The next step is to create records following Argilla's `FeedbackRecord` format. 
 - `metadata` (optional): A dictionary with the metadata of the record. This can include any information about the record that is not part of the fields. For example, the source of the record or the date it was created. If there is no metadata, this will be `None`.
 - `external_id` (optional): An ID of the record defined by the user. If there is no external ID, this will be `None`.
 - `responses` (optional): A list of all responses to a record. There is no need to configure this when creating a record, it will be filled automatically with the responses collected from the Argilla UI.
+- `suggestions`(optional): A list of all suggested responses for a record e.g., model predictions or other helpful hints for the annotators. These will need to follow the same schema as the responses of the type of question answered by the suggestion. If these are added, suggestions will appear in the UI as pre-filled responses.
 
 ```python
 # create a single Feedback Record
@@ -147,7 +148,7 @@ record = rg.FeedbackRecord(
         "answer": "Camels use the fat in their humps to keep them filled with energy and hydration for long periods of time."
     },
     metadata={"source": "encyclopedia"},
-    external_id=None
+    external_id=None,
 )
 ```
 
@@ -157,12 +158,61 @@ As an example, here is how you can transform a whole dataset into records at onc
 records = [rg.FeedbackRecord(fields={"question": record["instruction"], "answer": record["response"]}) for record in hf_dataset if record["category"]=="open_qa"]
 ```
 
+
 Now, we simply add our records to the dataset we configured [above](#configure-the-dataset):
 
 ```python
 #add records to the dataset
 dataset.add_records(records)
 ```
+
+## Add suggestions
+
+Suggestions refer to suggested responses (e.g. model predictions) that you can add to your records to make the annotation process faster. These can be added upon the creation of the record or at a later stage. The suggestion should follow the schema of the response of the type of question answered by the suggestion:
+
+::::{tab-set}
+
+:::{tab-item} Label
+
+```python
+record = rg.FeedbackRecord(
+    ...,
+    suggestions = [
+
+    ]
+)
+````
+:::
+
+:::{tab-item} Multi-label
+
+Select all applicable labels from a selection of labels.
+
+![Multi-label Question](/_static/images/llms/questions/multilabel_question.png)
+:::
+
+:::{tab-item} Ranking
+
+Order a selection of values. Note that you will need to order all the values to complete the response to this question. Ties are allowed.
+
+![Ranking question](/_static/images/llms/questions/ranking_question.png)
+:::
+
+:::{tab-item} Rating
+
+Select a single value from a list of values.
+
+![Rating question](/_static/images/llms/questions/rating_question.png)
+:::
+
+:::{tab-item} Text
+
+Provide a text response inside the text area.
+
+![Text Question](/_static/images/llms/questions/text_question.png)
+:::
+
+::::
 
 ## Push to Argilla
 
