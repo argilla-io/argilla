@@ -176,9 +176,6 @@ export default {
       });
     },
     isFormUntouched() {
-      console.log(isEqual(this.initialInputs, this.inputs));
-      console.log("INPUTS", this.inputs);
-      console.log("INITINPUTS", this.initialInputs);
       return isEqual(this.initialInputs, this.inputs);
     },
     questionAreCompletedCorrectly() {
