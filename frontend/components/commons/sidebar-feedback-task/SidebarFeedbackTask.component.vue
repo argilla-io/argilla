@@ -1,16 +1,17 @@
 <template>
   <div class="sidebar__container">
     <SidebarFeedbackTaskPanel v-if="isPanelVisible" @close-panel="closePanel">
+      <HelpShortcut v-if="currentPanel === 'help-shortcut'" />
       <FeedbackTaskProgress
-        v-if="getProgressComponentName === 'FeedbackTaskProgress'"
+        v-else-if="currentPanel === 'metrics'"
         :userIdToShowMetrics="userId"
       />
     </SidebarFeedbackTaskPanel>
     <SidebarFeedbackTask
       @on-click-sidebar-action="onClickSidebarAction"
       :sidebar-items="sidebarItems"
-      :active-buttons="[currentMetric, currentMode]"
-      :expanded-component="currentMetric"
+      :active-buttons="[currentPanel, currentMode]"
+      :expanded-component="currentPanel"
     />
   </div>
 </template>
@@ -27,48 +28,34 @@ export default {
     },
   },
   data: () => ({
-    currentMetric: null,
+    currentPanel: null,
     currentMode: "annotate",
+    isPanelVisible: false,
   }),
   computed: {
     userId() {
       return this.$auth.user.id;
     },
-    isDatasetMetrics() {
+    datasetExists() {
       return isDatasetExistsByDatasetIdAndUserId({
         userId: this.userId,
         datasetId: this.datasetId,
       });
     },
-    getProgressComponentName() {
-      return (
-        this.sidebarItems.metrics.buttons.find(
-          ({ id }) => id === this.currentMetric
-        )?.component || null
-      );
-    },
-    isPanelVisible() {
-      return !!this.currentMetric;
-    },
   },
   created() {
     this.sidebarItems = {
-      // TODO - Hidden for MVP
-      // mode: {
-      //   buttonType: "non-expandable",
-      //   buttons: [
-      //     {
-      //       id: "annotate",
-      //       tooltip: "Hand labeling",
-      //       icon: "hand-labeling",
-      //       action: "change-view-mode",
-      //       relatedMetrics: ["progress", "stats"],
-      //     },
-      //   ],
-      // },
       metrics: {
         buttonType: "expandable",
         buttons: [
+          {
+            id: "help-shortcut",
+            tooltip: "Help",
+            icon: "support",
+            action: "show-help",
+            type: "expandable",
+            component: "HelpShortcut",
+          },
           {
             id: "metrics",
             tooltip: "Progress",
@@ -98,7 +85,7 @@ export default {
     onClickSidebarAction(group, info) {
       switch (group.toUpperCase()) {
         case SIDEBAR_GROUP.METRICS:
-          this.toggleMetrics(info);
+          this.togglePanel(info);
           break;
         case SIDEBAR_GROUP.MODE:
           console.log("change-view-mode", info);
@@ -110,16 +97,20 @@ export default {
           console.warn(info);
       }
     },
-    toggleMetrics(panelContent) {
-      if (!this.isDatasetMetrics) return;
+    togglePanel(panelContent) {
+      if (!this.datasetExists) return;
 
-      this.currentMetric =
-        this.currentMetric !== panelContent ? panelContent : null;
-      $nuxt.$emit("on-sidebar-toggle-metrics", !!this.currentMetric);
+      this.currentPanel =
+        this.currentPanel !== panelContent ? panelContent : null;
+
+      this.isPanelVisible = !!this.currentPanel;
+
+      $nuxt.$emit("on-sidebar-toggle-panel", this.isPanelVisible);
     },
     closePanel() {
-      this.currentMetric = null;
-      $nuxt.$emit("on-sidebar-toggle-metrics", null);
+      this.isPanelVisible = false;
+      this.currentPanel = null;
+      $nuxt.$emit("on-sidebar-toggle-panel", null);
     },
   },
 };
