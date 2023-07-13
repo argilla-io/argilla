@@ -20,7 +20,8 @@ try:
 except ImportError:
     from typing_extensions import ParamSpec
 
-from argilla.client.api import ArgillaSingleton
+from argilla.client.api import active_client
+from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import UserRole
 
 _P = ParamSpec("_P")
@@ -43,10 +44,11 @@ def allowed_for_roles(roles: List[UserRole]) -> Callable[[Callable[_P, _R]], Cal
     def decorator(func: Callable[_P, _R]) -> Callable[_P, _R]:
         @functools.wraps(func)
         def wrapper(*args: _P.args, **kwargs: _P.kwargs) -> _R:
-            role = ArgillaSingleton.get().user.role
-            if role not in roles:
+            client = args[0].__client if hasattr(args[0], "__client") else active_client().http_client.httpx
+            user = users_api.whoami_httpx(client).parsed
+            if user.role not in roles:
                 raise PermissionError(
-                    f"User with role={role} is not allowed to call `{func.__name__}`."
+                    f"User with role={user.role} is not allowed to call `{func.__name__}`."
                     f" Only users with role={roles} are allowed to call this function."
                 )
             return func(*args, **kwargs)
