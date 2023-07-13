@@ -1,3 +1,4 @@
+import { isEqual, cloneDeep } from "lodash";
 import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
 
 export const CORRESPONDING_QUESTION_COMPONENT_TYPE_FROM_API = {
@@ -75,6 +76,14 @@ export class Question {
     return !!this.suggestion;
   }
 
+  public get matchSuggestion(): boolean {
+    if (this.hasSuggestion) {
+      return isEqual(this.options, this.suggestedAnswer);
+    }
+
+    return false;
+  }
+
   clearAnswer() {
     this.options = this.createEmptyAnswers();
   }
@@ -83,9 +92,11 @@ export class Question {
     this.options = this.completeQuestionAnswered(response);
   }
 
+  private suggestedAnswer: any;
   answerQuestionWithSuggestion(suggestion: any) {
     this.suggestion = suggestion;
     this.options = this.createEmptyAnswers(suggestion);
+    this.suggestedAnswer = cloneDeep(this.options);
   }
 
   private createEmptyAnswers(suggestion: any = undefined) {
