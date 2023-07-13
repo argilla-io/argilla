@@ -14,7 +14,7 @@
 
 import warnings
 from datetime import datetime
-from typing import TYPE_CHECKING, Iterator, List, Optional, Union
+from typing import TYPE_CHECKING, Iterator, List, Optional, Tuple, Union
 from uuid import UUID
 
 from argilla.client import active_client
@@ -32,7 +32,7 @@ from argilla.client.utils import allowed_for_roles
 if TYPE_CHECKING:
     import httpx
 
-    from argilla.client.sdk.client import AuthenticatedClient
+    from argilla.client.api import Argilla
     from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 
 
@@ -46,7 +46,8 @@ class User:
         id: the ID of the user to be managed. Defaults to None.
 
     Attributes:
-        __client: the `httpx.Client` initialized to interact with the Argilla API.
+        __client: the `Argilla` client initialized for the current active user.
+        __httpx_client: the `httpx.Client` initialized to interact with the Argilla API.
         id: the ID of the user.
         username: the username of the user.
         first_name: the first name of the user.
@@ -64,7 +65,8 @@ class User:
         User(id='...', username='my-user', first_name='Luke', last_name="Skywalker', full_name='Luke Skywalker', role='annotator', workspaces=[WorkspaceModel(...), ...], api_key='...', inserted_at=datetime.datetime(2021, 8, 31, 10, 0, 0), updated_at=datetime.datetime(2021, 8, 31, 10, 0, 0))
     """
 
-    __client: "httpx.Client"
+    __client: "Argilla"
+    __httpx_client: "httpx.Client"
     username: str
     id: UUID
     first_name: str
@@ -115,10 +117,10 @@ class User:
         Returns:
             A list of `WorkspaceModel` the current user is linked to.
         """
-        if active_client().user.role == UserRole.owner:
-            return users_api_v1.list_user_workspaces(self.__client, self.id).parsed
+        if self.__client.user.role == UserRole.owner:
+            return users_api_v1.list_user_workspaces(self.__httpx_client, self.id).parsed
         else:
-            return workspaces_api_v1.list_workspaces_me(self.__client).parsed
+            return workspaces_api_v1.list_workspaces_me(self.__httpx_client).parsed
 
     def __repr__(self) -> str:
         return (
@@ -129,15 +131,30 @@ class User:
         )
 
     @staticmethod
-    def __active_client(httpx: bool = True) -> Union["httpx.Client", "AuthenticatedClient"]:
-        """Returns the active Argilla `httpx.Client` instance."""
+    def __active_client() -> Tuple["Argilla", "httpx.Client"]:
+        """Returns the active `Argilla` client and `httpx.Client` instances."""
         try:
-            client = active_client().http_client
-            if httpx:
-                client = client.httpx
-            return client
+            client = active_client()
+            return (client, client.http_client.httpx)
         except Exception as e:
             raise RuntimeError(f"The `rg.active_client()` is not available or not respoding.") from e
+
+    @classmethod
+    def __new_instance(
+        cls,
+        client: Optional["Argilla"] = None,
+        httpx_client: Optional["httpx.Client"] = None,
+        user: Optional["UserModel"] = None,
+    ) -> "User":
+        """Returns a new `User` instance."""
+        instance = cls.__new__(cls)
+        if not client or not httpx_client:
+            _client, _httpx_client = cls.__active_client()
+        instance.__client = client or _client
+        instance.__httpx_client = httpx_client or _httpx_client
+        if isinstance(user, UserModel):
+            instance.__dict__.update(user.dict(exclude={"workspaces"}))
+        return instance
 
     @allowed_for_roles(roles=[UserRole.owner])
     def delete(self) -> None:
@@ -152,7 +169,7 @@ class User:
             >>> user.delete()
         """
         try:
-            users_api.delete_user(self.__client, user_id=self.id)
+            users_api.delete_user(self.__httpx_client, user_id=self.id)
         except NotFoundApiError as e:
             raise ValueError(
                 f"User with username=`{self.username}` doesn't exist in Argilla, so please"
@@ -160,15 +177,6 @@ class User:
             ) from e
         except BaseClientError as e:
             raise RuntimeError(f"Error while deleting user with username=`{self.username}` from Argilla.") from e
-
-    @classmethod
-    def __new_instance(cls, client: Optional["httpx.Client"] = None, user: Optional["UserModel"] = None) -> "User":
-        """Returns a new `User` instance."""
-        instance = cls.__new__(cls)
-        instance.__client = client or cls.__active_client()
-        if isinstance(user, UserModel):
-            instance.__dict__.update(user.dict(exclude={"workspaces"}))
-        return instance
 
     @classmethod
     @allowed_for_roles(roles=[UserRole.owner])
@@ -210,10 +218,10 @@ class User:
             warnings.warn("Since the `role` hasn't been provided, it will be set to `annotator`.")
             role = UserRole.annotator
 
-        client = cls.__active_client()
+        client, httpx_client = cls.__active_client()
         try:
             user = users_api.create_user(
-                client,
+                httpx_client,
                 **UserCreateModel(
                     username=username,
                     password=password,
@@ -222,7 +230,7 @@ class User:
                     role=role,
                 ).dict(),
             ).parsed
-            return cls.__new_instance(client, user)
+            return cls.__new_instance(client, httpx_client, user)
         except AlreadyExistsApiError as e:
             raise ValueError(
                 f"User with username=`{username}` already exists in Argilla, so please"
@@ -250,9 +258,9 @@ class User:
             >>> from argilla import rg
             >>> user = rg.User.from_id("my-user")
         """
-        client = cls.__active_client()
+        client, httpx_client = cls.__active_client()
         try:
-            users = users_api.list_users(client).parsed
+            users = users_api.list_users(httpx_client).parsed
             try:
                 user = next(filter(lambda u: u.id == id, users))
             except StopIteration as e:
@@ -260,7 +268,7 @@ class User:
                     f"User with id=`{id}` doesn't exist in Argilla, so please"
                     " make sure that the ID you provided is a valid one."
                 ) from e
-            return cls.__new_instance(client, user)
+            return cls.__new_instance(client, httpx_client, user)
         except BaseClientError as e:
             raise RuntimeError(f"Error while retrieving user with id=`{id}` from Argilla.") from e
 
@@ -283,9 +291,9 @@ class User:
             >>> from argilla import rg
             >>> user = rg.User.from_name("my-user")
         """
-        client = cls.__active_client()
+        client, httpx_client = cls.__active_client()
         try:
-            users = users_api.list_users(client).parsed
+            users = users_api.list_users(httpx_client).parsed
             try:
                 user = next(filter(lambda u: u.username == name, users))
             except StopIteration as e:
@@ -293,7 +301,7 @@ class User:
                     f"User with username=`{name}` doesn't exist in Argilla, so please"
                     " make sure that the name you provided is a valid one."
                 ) from e
-            return cls.__new_instance(client, user)
+            return cls.__new_instance(client, httpx_client, user)
         except NotFoundApiError as e:
             raise ValueError(
                 f"User with username=`{name}` doesn't exist in Argilla, so please"
@@ -317,10 +325,10 @@ class User:
             >>> from argilla import rg
             >>> user = rg.User.me()
         """
-        client = cls.__active_client(httpx=False)
+        client, httpx_client = cls.__active_client()
         try:
-            user = users_api.whoami(client)  # .parsed
-            return cls.__new_instance(client.httpx, user)
+            user = users_api.whoami(client.http_client)  # .parsed
+            return cls.__new_instance(client, httpx_client, user)
         except Exception as e:
             raise RuntimeError("Error while retrieving the current user from Argilla.") from e
 
@@ -340,10 +348,10 @@ class User:
             >>> for user in rg.User.list():
             ...     print(user)
         """
-        client = cls.__active_client()
+        client, httpx_client = cls.__active_client()
         try:
-            users = users_api.list_users(client).parsed
+            users = users_api.list_users(httpx_client).parsed
             for user in users:
-                yield cls.__new_instance(client, user)
+                yield cls.__new_instance(client, httpx_client, user)
         except Exception as e:
             raise RuntimeError("Error while listing the users from Argilla.") from e

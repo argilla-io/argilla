@@ -13,10 +13,10 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Iterator, List, Optional, Union
+from typing import TYPE_CHECKING, Iterator, List, Optional, Tuple, Union
 from uuid import UUID
 
-from argilla.client import active_client
+from argilla.client.api import active_client
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
     BaseClientError,
@@ -33,6 +33,7 @@ from argilla.client.utils import allowed_for_roles
 if TYPE_CHECKING:
     import httpx
 
+    from argilla.client.api import Argilla
     from argilla.client.sdk.workspaces.models import WorkspaceUserModel
 
 
@@ -47,7 +48,8 @@ class Workspace:
         id: the ID of the workspace to be managed. Defaults to None.
 
     Attributes:
-        __client: the `httpx.Client` initialized to interact with the Argilla API.
+        __client: the `Argilla` client initialized for the current active user.
+        __httpx_client: the `httpx.Client` initialized to interact with the Argilla API.
         id: the ID of the workspace.
         name: the name of the workspace.
         users: the list of users linked to the workspace. Defaults to None.
@@ -65,7 +67,8 @@ class Workspace:
         []
     """
 
-    __client: "httpx.Client"
+    __client: "Argilla"
+    __httpx_client: "httpx.Client"
     id: UUID
     name: str
     users: Optional[List["WorkspaceUserModel"]] = None
@@ -114,7 +117,7 @@ class Workspace:
             A list of `WorkspaceUserModel` instances.
         """
         # TODO(@alvarobartt): Maybe we should return a list of rg.User instead.
-        return workspaces_api.list_workspace_users(self.__client, self.id).parsed
+        return workspaces_api.list_workspace_users(self.__httpx_client, self.id).parsed
 
     def __repr__(self) -> str:
         return (
@@ -140,7 +143,7 @@ class Workspace:
         """
         try:
             workspaces_api.create_workspace_user(
-                client=self.__client,
+                client=self.__httpx_client,
                 id=self.id,
                 user_id=user_id,
             )
@@ -168,7 +171,7 @@ class Workspace:
         """
         try:
             workspaces_api.delete_workspace_user(
-                client=self.__client,
+                client=self.__httpx_client,
                 id=self.id,
                 user_id=user_id,
             )
@@ -183,20 +186,27 @@ class Workspace:
             ) from e
 
     @staticmethod
-    def __active_client() -> "httpx.Client":
-        """Returns the active Argilla `httpx.Client` instance."""
+    def __active_client() -> Tuple["Argilla", "httpx.Client"]:
+        """Returns the active `Argilla` client and `httpx.Client` instances."""
         try:
-            return active_client().http_client.httpx
+            client = active_client()
+            return (client, client.http_client.httpx)
         except Exception as e:
             raise RuntimeError(f"The `rg.active_client()` is not available or not respoding.") from e
 
     @classmethod
     def __new_instance(
-        cls, client: Optional["httpx.Client"] = None, ws: Optional[Union[WorkspaceModelV0, WorkspaceModelV1]] = None
+        cls,
+        client: Optional["Argilla"] = None,
+        httpx_client: Optional["httpx.Client"] = None,
+        ws: Optional[Union[WorkspaceModelV0, WorkspaceModelV1]] = None,
     ) -> "Workspace":
         """Returns a new `Workspace` instance."""
         instance = cls.__new__(cls)
-        instance.__client = client or cls.__active_client()
+        if not client or not httpx_client:
+            _client, _httpx_client = cls.__active_client()
+        instance.__client = client or _client
+        instance.__httpx_client = httpx_client or _httpx_client
         if isinstance(ws, (WorkspaceModelV0, WorkspaceModelV1)):
             instance.__dict__.update(ws.dict())
         return instance
@@ -219,10 +229,10 @@ class Workspace:
             >>> from argilla import rg
             >>> workspace = rg.Workspace.create("my-workspace")
         """
-        client = cls.__active_client()
+        client, httpx_client = cls.__active_client()
         try:
-            ws = workspaces_api.create_workspace(client, name).parsed
-            return cls.__new_instance(client, ws)
+            ws = workspaces_api.create_workspace(httpx_client, name).parsed
+            return cls.__new_instance(client, httpx_client, ws)
         except AlreadyExistsApiError as e:
             raise ValueError(f"Workspace with name=`{name}` already exists, so please use a different name.") from e
         except (ValidationApiError, BaseClientError) as e:
@@ -247,10 +257,10 @@ class Workspace:
             >>> from argilla import rg
             >>> workspace = rg.Workspace.from_id("my-workspace-id")
         """
-        client = cls.__active_client()
+        client, httpx_client = cls.__active_client()
         try:
-            ws = workspaces_api_v1.get_workspace(client, id).parsed
-            return cls.__new_instance(client, ws)
+            ws = workspaces_api_v1.get_workspace(httpx_client, id).parsed
+            return cls.__new_instance(client, httpx_client, ws)
         except NotFoundApiError as e:
             raise ValueError(
                 f"Workspace with id=`{id}` doesn't exist in Argilla, so please"
@@ -283,15 +293,15 @@ class Workspace:
             >>> from argilla import rg
             >>> workspace = rg.Workspace.from_name("my-workspace")
         """
-        client = cls.__active_client()
+        client, httpx_client = cls.__active_client()
         try:
-            workspaces = workspaces_api.list_workspaces(client).parsed
+            workspaces = workspaces_api.list_workspaces(httpx_client).parsed
         except Exception as e:
             raise RuntimeError("Error while retrieving the list of workspaces from Argilla.") from e
 
         for ws in workspaces:
             if ws.name == name:
-                return cls.__new_instance(client, ws)
+                return cls.__new_instance(client, httpx_client, ws)
 
         raise ValueError(
             f"Workspace with name=`{name}` doesn't exist in Argilla, so please"
@@ -313,10 +323,10 @@ class Workspace:
             >>> from argilla import rg
             >>> workspaces = rg.Workspace.list()
         """
-        client = cls.__active_client()
+        client, httpx_client = cls.__active_client()
         try:
-            workspaces = workspaces_api.list_workspaces(client).parsed
+            workspaces = workspaces_api.list_workspaces(httpx_client).parsed
             for ws in workspaces:
-                yield cls.__new_instance(client, ws)
+                yield cls.__new_instance(client, httpx_client, ws)
         except Exception as e:
             raise RuntimeError("Error while retrieving the list of workspaces from Argilla.") from e
