@@ -33,7 +33,6 @@
     <template v-slot:top>
       <section class="dataset__top-area">
         <DatasetFiltersComponent :datasetId="datasetId" />
-        <DatasetHelpInfo />
       </section>
     </template>
     <template v-slot:center>

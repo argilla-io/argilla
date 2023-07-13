@@ -11,6 +11,7 @@
 
 <script>
 export default {
+  name: "HelpShortcut",
   data() {
     return {
       content: {
@@ -46,9 +47,8 @@ export default {
   width: auto;
 }
 :deep(.snippet) {
-  max-height: calc(100vh - 400px);
+  max-height: calc(100vh - 140px);
   overflow: auto;
-  margin-bottom: 2em;
 }
 :deep(table) {
   width: 100%;
