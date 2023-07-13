@@ -19,14 +19,9 @@ from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.commons.models import TaskType
 from argilla.server.models import UserRole
 from fastapi.testclient import TestClient
-from opensearchpy import OpenSearch
-from sqlalchemy.orm import Session
 
 from tests.factories import (
-    AnnotatorFactory,
     DatasetFactory,
-    UserFactory,
-    WorkspaceFactory,
 )
 
 
@@ -40,6 +35,9 @@ def create_old_argilla_dataset(client: TestClient, name: str, workspace_name: st
     finally:
         response = client.delete(f"/api/datasets/{name}?workspace={workspace_name}")
         assert response.status_code == 200
+
+
+from tests.factories import AnnotatorFactory, UserFactory, WorkspaceFactory
 
 
 @pytest.mark.asyncio
@@ -141,3 +139,34 @@ class TestSuiteWorkspaces:
         response = client.delete(f"/api/v1/workspaces/{workspace.id}")
 
         assert response.status_code == 403
+
+    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
+    async def test_list_workspaces_me(client: TestClient, role: UserRole) -> None:
+        workspaces = await WorkspaceFactory.create_batch(size=5)
+        user = await UserFactory.create(role=role, workspaces=workspaces if role != UserRole.owner else [])
+
+        response = client.get("/api/v1/me/workspaces", headers={API_KEY_HEADER_NAME: user.api_key})
+
+        assert response.status_code == 200
+        assert len(response.json()["items"]) == len(workspaces)
+        for workspace in workspaces:
+            assert {
+                "id": str(workspace.id),
+                "name": workspace.name,
+                "inserted_at": workspace.inserted_at.isoformat(),
+                "updated_at": workspace.updated_at.isoformat(),
+            } in response.json()["items"]
+
+    async def test_list_workspaces_me_without_authentication(client: TestClient) -> None:
+        response = client.get("/api/v1/me/workspaces")
+
+        assert response.status_code == 401
+
+    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
+    async def test_list_workspaces_me_no_workspaces(client: TestClient, role: UserRole) -> None:
+        user = await UserFactory.create(role=role)
+
+        response = client.get("/api/v1/me/workspaces", headers={API_KEY_HEADER_NAME: user.api_key})
+
+        assert response.status_code == 200
+        assert len(response.json()["items"]) == 0

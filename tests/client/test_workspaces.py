@@ -124,8 +124,8 @@ async def test_workspace_users(owner: "ServerUser") -> None:
 @pytest.mark.parametrize("role", [UserRole.annotator])
 @pytest.mark.asyncio
 async def test_workspace_users_not_allowed_role(role: UserRole) -> None:
-    user = await UserFactory.create(role=role)
     workspace = await WorkspaceFactory.create(name="test_workspace")
+    user = await UserFactory.create(role=role, workspaces=[workspace])
     ArgillaSingleton.init(api_key=user.api_key)
 
     workspace = Workspace.from_name(name=workspace.name)
@@ -156,8 +156,8 @@ async def test_workspace_add_user(owner: "ServerUser") -> None:
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
 @pytest.mark.asyncio
 async def test_workspace_add_user_not_allowed_role(role: UserRole) -> None:
-    user = await UserFactory.create(role=role)
     workspace = await WorkspaceFactory.create(name="test_workspace")
+    user = await UserFactory.create(role=role, workspaces=[workspace])
     ArgillaSingleton.init(api_key=user.api_key)
 
     workspace = Workspace.from_name(workspace.name)
@@ -181,12 +181,11 @@ async def test_workspace_delete_user(owner: "ServerUser", db: "AsyncSession") ->
         workspace.delete_user(owner.id)
 
 
-@pytest.mark.parametrize("role", [UserRole.annotator])
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
 @pytest.mark.asyncio
 async def test_workspace_delete_user_not_allowed_role(role: UserRole) -> None:
-    user = await UserFactory.create(role=role)
     workspace = await WorkspaceFactory.create(name="test_workspace")
-    await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=user.id)
+    user = await UserFactory.create(role=role, workspaces=[workspace])
     ArgillaSingleton.init(api_key=user.api_key)
 
     workspace = Workspace.from_name(workspace.name)

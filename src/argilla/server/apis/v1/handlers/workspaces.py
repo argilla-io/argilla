@@ -19,10 +19,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_async_db
+from argilla.server.models import User
 from argilla.server.policies import WorkspacePolicyV1, authorize
-from argilla.server.schemas.v1.workspaces import Workspace
+from argilla.server.schemas.v1.workspaces import Workspace, Workspaces
 from argilla.server.security import auth
-from argilla.server.security.model import User
 from argilla.server.services.datasets import DatasetsService
 
 router = APIRouter(tags=["workspaces"])
@@ -77,3 +77,19 @@ async def delete_workspace(
         )
 
     return await accounts.delete_workspace(db, workspace)
+
+
+@router.get("/me/workspaces", response_model=Workspaces)
+async def list_workspaces_me(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    current_user: User = Security(auth.get_current_user),
+) -> Workspaces:
+    await authorize(current_user, WorkspacePolicyV1.list_workspaces_me)
+
+    if current_user.is_owner:
+        workspaces = await accounts.list_workspaces(db)
+    else:
+        workspaces = await accounts.list_workspaces_by_user_id(db, current_user.id)
+
+    return Workspaces(items=workspaces)
