@@ -3230,6 +3230,10 @@ async def test_publish_dataset_with_nonexistent_dataset_id(
             "guidelines": "New Guidelines",
         },
         {},
+        {
+            "name": None,
+            "guidelines": None,
+        },
         {"random": "field", "another": "random field"},
     ],
 )
@@ -3250,8 +3254,8 @@ async def test_update_dataset(client: TestClient, role: UserRole, payload: dict)
     assert response.status_code == 200
     assert response.json() == {
         "id": str(dataset.id),
-        "name": payload.get("name", dataset.name),
-        "guidelines": payload.get("guidelines", dataset.guidelines),
+        "name": payload.get("name") or dataset.name,
+        "guidelines": payload.get("guidelines") or dataset.guidelines,
         "status": "ready",
         "workspace_id": str(dataset.workspace_id),
         "inserted_at": dataset.inserted_at.isoformat(),
