@@ -44,6 +44,8 @@ def whoami(client: AuthenticatedClient) -> UserModel:
     return UserModel(**response)
 
 
+# TODO(frascuchon): rename this to `whoami` and deprecate the current `whoami` function
+# in favor of this one, as this is just a patch.
 def whoami_httpx(client: httpx.Client) -> Response[Union[UserModel, ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/me` endpoint to get the current user information.
 
