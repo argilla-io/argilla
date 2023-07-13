@@ -17,7 +17,15 @@ from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
+from pydantic import (
+    BaseModel,
+    Field,
+    PositiveInt,
+    conlist,
+    constr,
+    root_validator,
+    validator,
+)
 from pydantic import Field as PydanticField
 from pydantic.utils import GetterDict
 
@@ -91,15 +99,24 @@ class Datasets(BaseModel):
     items: List[Dataset]
 
 
+Guidelines = Annotated[
+    constr(
+        min_length=DATASET_CREATE_GUIDELINES_MIN_LENGTH,
+        max_length=DATASET_CREATE_GUIDELINES_MAX_LENGTH,
+    ),
+    Field(..., description="Dataset guidelines"),
+]
+
+
 class DatasetCreate(BaseModel):
     name: str
-    guidelines: Optional[
-        constr(
-            min_length=DATASET_CREATE_GUIDELINES_MIN_LENGTH,
-            max_length=DATASET_CREATE_GUIDELINES_MAX_LENGTH,
-        )
-    ]
+    guidelines: Optional[Guidelines]
     workspace_id: UUID
+
+
+class DatasetUpdate(BaseModel):
+    name: Optional[str]
+    guidelines: Optional[Guidelines]
 
 
 class RecordMetrics(BaseModel):
