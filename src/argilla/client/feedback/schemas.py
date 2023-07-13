@@ -132,27 +132,48 @@ class SuggestionSchema(BaseModel):
 
 
 class FeedbackRecord(BaseModel):
-    """A feedback record.
+    """Schema for the records of a `FeedbackDataset` in Argilla.
 
     Args:
-        fields (Dict[str, str]): The fields of the record.
-        metadata (Optional[Dict[str, Any]]): The metadata of the record. Defaults to None.
-        responses (Optional[List[ResponseSchema]]): The responses of the record. Defaults to None.
-        external_id (Optional[str]): The external id of the record. Defaults to None.
+        id: The ID of the record in Argilla. Defaults to None, and is automatically
+            fulfilled internally once the record is pushed to Argilla.
+        fields: Fields that match the `FeedbackDataset` defined fields. So this attribute
+            contains the actual information shown in the UI for each record, being the
+            record itself.
+        metadata: Metadata to be included to enrich the information for a given record.
+            Note that the metadata is not shown in the UI so you'll just be able to see
+            that programatically after pulling the records. Defaults to None.
+        responses: Responses given by either the current user, or one or a collection of
+            users that must exist in Argilla. Each response corresponds to one of the
+            `FeedbackDataset` questions, so the values should match the question type.
+            Defaults to None.
+        external_id: The external ID of the record, which means that the user can
+            specify this ID to identify the record no matter what the Argilla ID is.
+            Defaults to None.
 
     Examples:
-        >>> import argilla as rg
-        >>> rg.FeedbackRecord(
+        >>> from argilla.client.feedback.schemas import FeedbackRecord, ResponseSchema, ValueSchema
+        >>> FeedbackRecord(
         ...     fields={"text": "This is the first record", "label": "positive"},
         ...     metadata={"first": True, "nested": {"more": "stuff"}},
-        ...     responses=[{"values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}],
-        ...     external_id="entry-1",
-        ... )
-        >>> # or use a ResponseSchema directly
-        >>> rg.FeedbackRecord(
-        ...     fields={"text": "This is the first record", "label": "positive"},
-        ...     metadata={"first": True, "nested": {"more": "stuff"}},
-        ...     responses=[rg.ResponseSchema(values={"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}))],
+        ...     responses=[ # optional
+        ...         ResponseSchema(
+        ...             user_id="user-1",
+        ...             values={
+        ...                 "question-1": ValueSchema(value="This is the first answer"),
+        ...                 "question-2": ValueSchema(value=5),
+        ...             },
+        ...             status="submitted",
+        ...         ),
+        ...     ],
+        ...     suggestions=[ # optional
+        ...         SuggestionSchema(
+        ...            question_name="question-1",
+        ...            type="model",
+        ...            score=0.9,
+        ...            value="This is the first suggestion",
+        ...            agent="agent-1",
+        ...         ),
         ...     external_id="entry-1",
         ... )
 
