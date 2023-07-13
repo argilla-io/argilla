@@ -21,8 +21,8 @@ These are the section headers that we use:
 - Added `GET /api/v1/users/{user_id}/workspaces` endpoint to list the workspaces to which a user belongs ([#3308](https://github.com/argilla-io/argilla/pull/3308) and [#3343](https://github.com/argilla-io/argilla/pull/3343)).
 - Added `HuggingFaceDatasetMixin` for internal usage, to detach the `FeedbackDataset` integrations from the class itself, and use Mixins instead ([#3326](https://github.com/argilla-io/argilla/pull/3326)).
 - Added `GET /api/v1/records/{record_id}/suggestions` API endpoint to get the list of suggestions for the responses associated to a record ([#3304](https://github.com/argilla-io/argilla/pull/3304)).
-- Added `POST /api/v1/records/{record_id}/suggestions` API endpoint to create a suggestion for a response associated to a record ([#3304](https://github.com/argilla-io/argilla/pull/3304)).
-- Added breaking simultaneously running tests within GitHub package workflows ([#3354](https://github.com/argilla-io/argilla/pull/3354))
+- Added `PUT /api/v1/records/{record_id}/suggestions` API endpoint to create or update a suggestion for a response associated to a record ([#3304](https://github.com/argilla-io/argilla/pull/3304) & [3391](https://github.com/argilla-io/argilla/pull/3391)).
+- Added breaking simultaneously running tests within GitHub package workflows. ([#3354](https://github.com/argilla-io/argilla/pull/3354)).
 - Added `allowed_for_roles` Python decorator to check whether the current user has the required role to access the decorated function/method for `User` and `Workspace` ([#3383](https://github.com/argilla-io/argilla/pull/3383))
 - Added API and Python Client support for workspace deletion (Closes [#3260](https://github.com/argilla-io/argilla/issues/3260))
 
@@ -35,6 +35,10 @@ These are the section headers that we use:
 - `User.workspaces` is no longer an attribute but a property, and is calling `list_user_workspaces` to list all the workspace names for a given user ID ([#3334](https://github.com/argilla-io/argilla/pull/3334))
 - Renamed `FeedbackDatasetConfig` to `DatasetConfig` and export/import from YAML as default instead of JSON (just used internally on `push_to_huggingface` and `from_huggingface` methods of `FeedbackDataset`) ([#3326](https://github.com/argilla-io/argilla/pull/3326)).
 - The protected metadata fields support other than textual info - existing datasets must be reindex. See [docs](https://docs.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html#elasticsearch) for more detail (Closes [#3332](https://github.com/argilla-io/argilla/issues/3332)).
+
+### Removed
+
+- Removed support to non-prefixed environment variables. All valid env vars start with `ARGILLA_` (See [#3392](https://github.com/argilla-io/argilla/pull/3392)).
 
 ### Fixed
 
