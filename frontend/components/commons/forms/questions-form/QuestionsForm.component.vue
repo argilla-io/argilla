@@ -520,7 +520,7 @@ export default {
       return formattedRecordResponsesForOrm;
     },
     factoryInputsToResponseValues() {
-      let responseByQuestionName = {};
+      const responseByQuestionName = {};
 
       this.inputs.forEach((input) => {
         switch (input.component_type) {

@@ -150,7 +150,7 @@ export default {
   methods: {
     checkIfUrlHaveRecordStatusOrInitiateQueryParams() {
       this.$route.query?._status ??
-        this.$router.push({
+        this.$router.replace({
           query: {
             ...this.$route.query,
             _search: "",

@@ -34,7 +34,7 @@ jobs:
 
   deployable_check:
     name: Check if must build & deploy from environment
-    runs-on: ubuntu-latest
+    runs-on: extended-runner
     needs: check_repo_files
     env:
       IS_DEPLOYABLE: ${{ secrets.AR_DOCKER_USERNAME != '' && needs.check_repo_files.outputs.buildChanges == 'true' }}
@@ -122,7 +122,11 @@ jobs:
       - run_tests
       - run_tests_extra
       - deployable_check
-    if: needs.deployable_check.outputs.isDeployable == 'true'
+    if: |
+      always() &&
+      needs.deployable_check.outputs.isDeployable == 'true' &&
+      needs.run_tests.result != 'failure' &&
+      needs.run_tests_extra.result != 'failure'
     strategy:
       matrix:
         include:

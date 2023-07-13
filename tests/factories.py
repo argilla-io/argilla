@@ -15,7 +15,6 @@
 import inspect
 
 import factory
-from argilla.server.database import Base
 from argilla.server.models import (
     Dataset,
     Field,
@@ -30,6 +29,7 @@ from argilla.server.models import (
     Workspace,
     WorkspaceUser,
 )
+from argilla.server.models.base import DatabaseModel
 from factory.alchemy import SESSION_PERSISTENCE_COMMIT, SESSION_PERSISTENCE_FLUSH
 from factory.builder import BuildStep, StepBuilder, parse_declarations
 from sqlalchemy.ext.asyncio import async_object_session
@@ -56,7 +56,7 @@ class AsyncSQLAlchemyModelFactory(factory.alchemy.SQLAlchemyModelFactory):
         for key, value in kwargs.items():
             if inspect.isawaitable(value):
                 kwargs[key] = await value
-            if isinstance(value, Base):
+            if isinstance(value, DatabaseModel):
                 old_session = async_object_session(value)
                 session = cls._meta.sqlalchemy_session.registry().sync_session
                 if old_session.sync_session.hash_key != session.hash_key:
