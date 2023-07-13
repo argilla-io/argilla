@@ -19,7 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla.server.contexts import accounts
 from argilla.server.database import get_async_db
-from argilla.server.models import User, UserRole
+from argilla.server.models import User
 from argilla.server.policies import UserPolicyV1, authorize
 from argilla.server.schemas.v1.workspaces import Workspaces
 from argilla.server.security import auth

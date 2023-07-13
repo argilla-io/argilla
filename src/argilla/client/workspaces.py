@@ -149,7 +149,7 @@ class Workspace:
         except BaseClientError as e:
             raise RuntimeError(f"Error while adding user with id=`{user_id}` to workspace with id=`{self.id}`.") from e
 
-    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    @allowed_for_roles(roles=[UserRole.owner])
     def delete_user(self, user_id: str) -> None:
         """Deletes an existing user from the workspace in Argilla. Note that the user
         will not be deleted from Argilla, but just from the workspace.
@@ -285,7 +285,7 @@ class Workspace:
         """
         client = cls.__active_client()
         try:
-            workspaces = workspaces_api.list_workspaces(client).parsed
+            workspaces = workspaces_api_v1.list_workspaces_me(client).parsed
         except Exception as e:
             raise RuntimeError("Error while retrieving the list of workspaces from Argilla.") from e
 
@@ -315,7 +315,7 @@ class Workspace:
         """
         client = cls.__active_client()
         try:
-            workspaces = workspaces_api.list_workspaces(client).parsed
+            workspaces = workspaces_api_v1.list_workspaces_me(client).parsed
             for ws in workspaces:
                 yield cls.__new_instance(client, ws)
         except Exception as e:
