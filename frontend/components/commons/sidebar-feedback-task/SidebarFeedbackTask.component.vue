@@ -17,7 +17,6 @@
 </template>
 
 <script>
-import { SIDEBAR_GROUP } from "@/models/feedback-task-model/dataset-filter/datasetFilter.queries";
 import { isDatasetExistsByDatasetIdAndUserId } from "@/models/feedback-task-model/dataset-metric/datasetMetric.queries";
 
 export default {
@@ -45,7 +44,7 @@ export default {
   },
   created() {
     this.sidebarItems = {
-      metrics: {
+      firstGroup: {
         buttonType: "expandable",
         buttons: [
           {
@@ -66,7 +65,7 @@ export default {
           },
         ],
       },
-      refresh: {
+      lastGroup: {
         buttonType: "default",
         buttons: [
           {
@@ -84,13 +83,10 @@ export default {
   methods: {
     onClickSidebarAction(group, info) {
       switch (group.toUpperCase()) {
-        case SIDEBAR_GROUP.METRICS:
+        case "FIRSTGROUP":
           this.togglePanel(info);
           break;
-        case SIDEBAR_GROUP.MODE:
-          console.log("change-view-mode", info);
-          break;
-        case SIDEBAR_GROUP.REFRESH:
+        case "LASTGROUP":
           this.$emit("refresh");
           break;
         default:
