@@ -192,7 +192,7 @@ class FeedbackRecord(BaseModel):
     def __init__(self, **data: Dict[str, Any]) -> None:
         super().__init__(**data)
 
-    def add_suggestions(self, suggestions: Union[SuggestionSchema, List[SuggestionSchema]]) -> None:
+    def set_suggestions(self, suggestions: Union[SuggestionSchema, List[SuggestionSchema]]) -> None:
         if isinstance(suggestions, (dict, SuggestionSchema)):
             suggestions = [suggestions]
         parsed_suggestions = []
@@ -209,7 +209,7 @@ class FeedbackRecord(BaseModel):
                 " is not set, which means that the `FeedbackRecord` has been pushed to"
                 " Argilla, but hasn't been fetched, so the `id` is missing. To solve that,"
                 " you can simply call `FeedbackDataset.fetch_records()` to fetch them and"
-                " automatically set the `id`, to call `add_suggestions` on top of that."
+                " automatically set the `id`, to call `set_suggestions` on top of that."
             )
         for suggestion in parsed_suggestions:
             existing_suggestion = next(
@@ -234,12 +234,12 @@ class FeedbackRecord(BaseModel):
         if name == "suggestions" and hasattr(self, name):
             warnings.warn(
                 "You are trying to set `suggestions` directly, which is not allowed. You"
-                " should use the `add_suggestions` method instead."
+                " should use the `set_suggestions` method instead."
             )
             if getattr(self, name) != value:
                 warnings.warn(
                     "You are trying to update the existing `suggestions` with a new value,"
-                    " which is not allowed. You should use the `add_suggestions` method"
+                    " which is not allowed. You should use the `set_suggestions` method"
                     " instead, and the existing `suggestions` will be overwritten based"
                     " on the provided `question_id`s/`question_name`/s for those `suggestions`."
                 )

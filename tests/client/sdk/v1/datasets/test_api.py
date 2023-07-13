@@ -19,7 +19,6 @@ from argilla.client.sdk.v1.datasets.api import (
     add_field,
     add_question,
     add_records,
-    add_suggestion,
     create_dataset,
     delete_dataset,
     get_dataset,
@@ -28,6 +27,7 @@ from argilla.client.sdk.v1.datasets.api import (
     get_records,
     list_datasets,
     publish_dataset,
+    set_suggestion,
 )
 from argilla.client.sdk.v1.datasets.models import (
     FeedbackDatasetModel,
@@ -254,7 +254,7 @@ async def test_add_suggestion(role: UserRole) -> None:
     api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
 
     for record in records:
-        response = add_suggestion(
+        response = set_suggestion(
             client=api.http_client.httpx, record_id=record.id, question_id=rating_question.id, value=1
         )
         assert response.status_code == 201

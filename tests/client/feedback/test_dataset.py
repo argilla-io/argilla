@@ -469,7 +469,7 @@ async def test_update_dataset_records_in_argilla(
 
     dataset.fetch_records()
     for record in dataset.records:
-        record.add_suggestions(
+        record.set_suggestions(
             [
                 {
                     "question_name": "question-1",
@@ -482,18 +482,10 @@ async def test_update_dataset_records_in_argilla(
     dataset.push_to_argilla()
     await db.refresh(argilla_user, attribute_names=["datasets"])
     assert all(record._updated is False for record in dataset.records)
-
-    dataset.fetch_records()
-    with pytest.warns(UserWarning, match="You are trying to update records that have not been fetched from Argilla"):
-        record_id = dataset.records[0].id
-        dataset.records[0].id = None
-        dataset.records[0]._updated = True
-        dataset.push_to_argilla()
-        dataset.records[0].id = record_id
 
     dataset = FeedbackDataset.from_argilla("test-dataset")
     for record in dataset.records:
-        record.add_suggestions(
+        record.set_suggestions(
             [
                 {
                     "question_name": "question-1",
@@ -508,7 +500,7 @@ async def test_update_dataset_records_in_argilla(
     assert all(record._updated is False for record in dataset.records)
 
     for record in dataset.records:
-        record.add_suggestions(
+        record.set_suggestions(
             [
                 {
                     "question_name": "question-2",
@@ -522,11 +514,11 @@ async def test_update_dataset_records_in_argilla(
     await db.refresh(argilla_user, attribute_names=["datasets"])
     assert all(record._updated is True for record in dataset.records)
 
-    record = dataset.records[0]
     with pytest.warns(UserWarning, match="Ignore the following if you are creating a new `FeedbackDataset` with"):
-        record_id = record.id
-        record.id = None
-        record.add_suggestions(
+        record = FeedbackRecord(
+            fields={"prompt": "text"},
+        )
+        record.set_suggestions(
             [
                 {
                     "question_name": "question-1",
@@ -534,9 +526,10 @@ async def test_update_dataset_records_in_argilla(
                 },
             ]
         )
-        record.id = record_id
+
+    record = dataset.records[0]
     with pytest.warns(UserWarning, match="A suggestion for question `question-1`"):
-        record.add_suggestions(
+        record.set_suggestions(
             [
                 {
                     "question_name": "question-1",

@@ -391,7 +391,7 @@ def add_question(
     return handle_response_error(response)
 
 
-def add_suggestion(
+def set_suggestion(
     client: httpx.Client,
     record_id: UUID,
     question_id: UUID,
@@ -400,8 +400,8 @@ def add_suggestion(
     score: Optional[float] = None,
     agent: Optional[str] = None,
 ) -> Response[Union[FeedbackSuggestionModel, ErrorMessage, HTTPValidationError]]:
-    """Sends a POST request to `/api/v1/records/{id}/suggestions` endpoint to add a
-    suggestion for a question in the `FeedbackDataset`.
+    """Sends a PUT request to `/api/v1/records/{id}/suggestions` endpoint to add or update
+    a suggestion for a question in the `FeedbackDataset`.
 
     Args:
         client: the authenticated Argilla client to be used to send the request to the API.

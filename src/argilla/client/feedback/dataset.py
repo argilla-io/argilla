@@ -546,17 +546,6 @@ class FeedbackDataset(HuggingFaceDatasetMixin):
             try:
                 updated_records: List[FeedbackRecord] = []
                 for record in self.__records[:]:
-                    if record._updated and record.id is None:
-                        warnings.warn(
-                            "You are trying to update records that have not been fetched"
-                            " from Argilla yet and, so on, don't have an Argilla ID, which"
-                            " means that you may have pushed those in the same session"
-                            " and are trying to update them right after the `push_to_argilla`"
-                            " call. So on, you need to fetch those first with `fetch_records`"
-                            " before updating them, or just call `from_argilla`. For the"
-                            " moment the `suggestions` update will be ignored."
-                        )
-                        continue
                     if record._updated:
                         self.__records.remove(record)
                         record._reset_updated()
@@ -582,7 +571,7 @@ class FeedbackDataset(HuggingFaceDatasetMixin):
                         for record in updated_records[i : i + PUSHING_BATCH_SIZE]:
                             for suggestion in record.suggestions:
                                 suggestion.question_id = question_name2id[suggestion.question_name]
-                                datasets_api_v1.add_suggestion(
+                                datasets_api_v1.set_suggestion(
                                     client=httpx_client,
                                     record_id=record.id,
                                     **suggestion.dict(exclude={"question_name"}, exclude_none=True),
