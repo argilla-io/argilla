@@ -3,7 +3,7 @@ import Vue from "vue";
 // NOTE - to use this directive, add to your html text element where to put the "(optional)" :
 //  v-has-suggestions-field='{ show: false, tooltip: 'text' }'
 
-Vue.directive("has-suggestions", {
+Vue.directive("prefix-star", {
   bind: (element, binding) => {
     if (binding?.value.show) {
       const emoji = document.createTextNode("✨ ");

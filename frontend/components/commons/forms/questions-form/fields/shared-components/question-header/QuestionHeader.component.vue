@@ -4,7 +4,7 @@
       class="suggestion-info"
       v-text="title"
       v-optional-field="!isRequired"
-      v-has-suggestions="{
+      v-prefix-star="{
         show: hasSuggestion,
         tooltip: 'This question has a suggestion',
       }"
