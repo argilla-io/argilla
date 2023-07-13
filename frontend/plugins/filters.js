@@ -8,11 +8,11 @@ const locale = [
   navigator.systemLanguage,
 ].filter(Boolean);
 
-Vue.filter("formatNumber", function (value) {
+Vue.filter("formatNumber", (value) => {
   return new Intl.NumberFormat(locale.length ? locale[0] : "en").format(value);
 });
 
-Vue.filter("percent", function (value, min, max) {
+Vue.filter("percent", (value, min, max) => {
   const formatter = new Intl.NumberFormat(locale.length ? locale[0] : "en", {
     style: "percent",
     minimumFractionDigits: min !== undefined ? min : 2,
@@ -21,7 +21,7 @@ Vue.filter("percent", function (value, min, max) {
   return formatter.format(value);
 });
 
-Vue.filter("capitalize", function (value) {
+Vue.filter("capitalize", (value) => {
   const textInLowerCase = value.toLowerCase();
   const capitalize = ([firstLetter, ...restOfWord]) =>
     firstLetter.toUpperCase() + restOfWord.join("");

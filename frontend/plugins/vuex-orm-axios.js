@@ -31,7 +31,7 @@ export default ({ $axios, app }) => {
       return config;
     }
 
-    let ws = currentWorkspace(app.context.route);
+    const ws = currentWorkspace(app.context.route);
     if (ws) {
       config.headers["X-Argilla-Workspace"] = ws;
     }
