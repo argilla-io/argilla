@@ -81,7 +81,7 @@ async def test_get_workspace_with_nonexistent_workspace_id(client: TestClient, o
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
 async def test_list_workspaces_me(client: TestClient, role: UserRole) -> None:
     workspaces = await WorkspaceFactory.create_batch(size=5)
-    user = await UserFactory.create(role=role, workspaces=workspaces)
+    user = await UserFactory.create(role=role, workspaces=workspaces if role != UserRole.owner else [])
 
     response = client.get("/api/v1/me/workspaces", headers={API_KEY_HEADER_NAME: user.api_key})
 

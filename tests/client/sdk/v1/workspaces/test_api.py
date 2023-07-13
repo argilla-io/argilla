@@ -39,7 +39,7 @@ async def test_get_workspace(role: UserRole) -> None:
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
 async def test_list_workspaces_me(role: UserRole) -> None:
     workspaces = await WorkspaceFactory.create_batch(size=5)
-    user = await UserFactory.create(role=role, workspaces=workspaces)
+    user = await UserFactory.create(role=role, workspaces=workspaces if role != UserRole.owner else [])
 
     httpx_client = ArgillaSingleton.init(api_key=user.api_key).http_client.httpx
 
