@@ -66,7 +66,8 @@ export class Feedback {
           (s) => s.question_id === question.id
         );
 
-        question.answerQuestionWithSuggestion(suggestion);
+        if (response) question.clearAnswer();
+        else question.answerQuestionWithSuggestion(suggestion);
       }
 
       return question;

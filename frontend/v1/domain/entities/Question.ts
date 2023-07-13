@@ -93,7 +93,16 @@ export class Question {
       return suggestion ? [{ ...suggestion }] : this.initialOptions;
     }
 
-    if (this.isRatingType || this.isSingleLabelType || this.isMultiLabelType) {
+    if (this.isMultiLabelType) {
+      return this.initialOptions.map((option) => {
+        return {
+          ...option,
+          is_selected: suggestion?.value.includes(option.value),
+        };
+      });
+    }
+
+    if (this.isRatingType || this.isSingleLabelType) {
       return this.initialOptions.map((option) => {
         return { ...option, is_selected: option.value === suggestion?.value };
       });

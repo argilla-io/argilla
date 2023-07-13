@@ -8,7 +8,6 @@
       />
       <QuestionsFormComponent
         :key="questionFormKey"
-        v-if="questionsWithRecordAnswers.length"
         class="question-form"
         :class="statusClass"
         :datasetId="datasetId"
@@ -132,9 +131,6 @@ export default {
     },
     recordFields() {
       return this.record?.record_fields ?? [];
-    },
-    questionsWithRecordAnswers() {
-      return this.feedback.getAnswer(this.recordId, this.userId);
     },
     fieldsWithRecordFieldText() {
       return this.fields?.map((field) => {

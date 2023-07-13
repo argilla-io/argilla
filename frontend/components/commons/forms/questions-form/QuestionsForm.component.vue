@@ -248,8 +248,6 @@ export default {
   },
   watch: {
     isFormUntouched(isFormUntouched) {
-      console.log("isFormUntouched", isFormUntouched);
-      debugger;
       this.emitIsQuestionsFormUntouched(isFormUntouched);
     },
   },
@@ -392,12 +390,17 @@ export default {
         this.clearRecord(this.recordId, RECORD_STATUS.PENDING);
 
         this.$emit("on-clear-responses");
-        this.onReset();
 
-        if (!this.responseId) {
+        if (this.responseId) {
+          this.$nextTick(() => {
+            this.onReset();
+          });
+        } else {
           this.$nextTick(() => {
             this.initialInputs = this.feedback.getAnswerWithNoSuggestions();
             this.inputs = cloneDeep(this.initialInputs);
+            this.isError = false;
+            this.renderForm++;
           });
         }
       } catch (err) {
