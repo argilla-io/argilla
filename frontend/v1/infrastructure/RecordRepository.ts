@@ -12,7 +12,7 @@ export class RecordRepository {
 
       const params = new URLSearchParams();
       params.append("include", "responses");
-      if (status === "missing") params.append("include", "suggestions");
+      params.append("include", "suggestions");
       params.append("offset", offset);
       params.append("limit", numberOfRecordsToFetch.toString());
       params.append("response_status", status);
@@ -48,7 +48,7 @@ export class RecordRepository {
 
       const params = new URLSearchParams();
       params.append("include", "responses");
-      if (status === "missing") params.append("include", "suggestions");
+      params.append("include", "suggestions");
       params.append("offset", offset);
       params.append("limit", numberOfRecordsToFetch.toString());
       params.append("response_status", status);

@@ -29,7 +29,7 @@
           :placeholder="input.placeholder"
           v-model="input.options[0].value"
           :useMarkdown="input.settings.use_markdown"
-          :hasSuggestion="input.hasSuggestion"
+          :hasSuggestion="!isRecordSubmitted && input.hasSuggestion"
           :isRequired="input.isRequired"
           :description="input.description"
           @on-error="onError"
@@ -40,7 +40,7 @@
           :questionId="input.id"
           :title="input.question"
           v-model="input.options"
-          :hasSuggestion="input.hasSuggestion"
+          :hasSuggestion="!isRecordSubmitted && input.hasSuggestion"
           :isRequired="input.isRequired"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
@@ -51,7 +51,7 @@
           :questionId="input.id"
           :title="input.question"
           v-model="input.options"
-          :hasSuggestion="input.hasSuggestion"
+          :hasSuggestion="!isRecordSubmitted && input.hasSuggestion"
           :isRequired="input.isRequired"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
@@ -61,7 +61,7 @@
           v-if="input.isRatingType"
           :title="input.question"
           v-model="input.options"
-          :hasSuggestion="input.hasSuggestion"
+          :hasSuggestion="!isRecordSubmitted && input.hasSuggestion"
           :isRequired="input.isRequired"
           :description="input.description"
           @on-error="onError"
@@ -70,7 +70,7 @@
         <RankingComponent
           v-if="input.isRankingType"
           :title="input.question"
-          :hasSuggestion="input.hasSuggestion"
+          :hasSuggestion="!isRecordSubmitted && input.hasSuggestion"
           :isRequired="input.isRequired"
           :description="input.description"
           v-model="input.options"
@@ -176,6 +176,9 @@ export default {
       });
     },
     isFormUntouched() {
+      console.log(isEqual(this.initialInputs, this.inputs));
+      console.log("INPUTS", this.inputs);
+      console.log("INITINPUTS", this.initialInputs);
       return isEqual(this.initialInputs, this.inputs);
     },
     questionAreCompletedCorrectly() {
@@ -245,6 +248,8 @@ export default {
   },
   watch: {
     isFormUntouched(isFormUntouched) {
+      console.log("isFormUntouched", isFormUntouched);
+      debugger;
       this.emitIsQuestionsFormUntouched(isFormUntouched);
     },
   },
@@ -390,8 +395,10 @@ export default {
         this.onReset();
 
         if (!this.responseId) {
-          this.initialInputs = this.feedback.getAnswerWithNoSuggestions();
-          this.inputs = cloneDeep(this.initialInputs);
+          this.$nextTick(() => {
+            this.initialInputs = this.feedback.getAnswerWithNoSuggestions();
+            this.inputs = cloneDeep(this.initialInputs);
+          });
         }
       } catch (err) {
         console.log(err);
