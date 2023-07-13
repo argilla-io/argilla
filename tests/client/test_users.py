@@ -169,8 +169,8 @@ async def test_user_repr(role: UserRole) -> None:
 
     assert str(User.me()) == (
         f"User(id={user.id}, username={user.username}, role={user.role},"
-        f" workspaces={user.workspaces}, api_key={user.api_key}, first_name={user.first_name},"
-        f" last_name={user.last_name}, role={user.role}, inserted_at={user.inserted_at},"
+        f" api_key={user.api_key}, first_name={user.first_name},"
+        f" last_name={user.last_name}, inserted_at={user.inserted_at},"
         f" updated_at={user.updated_at})"
     )
 

@@ -123,9 +123,9 @@ class User:
     def __repr__(self) -> str:
         return (
             f"User(id={self.id}, username={self.username}, role={self.role},"
-            f" workspaces={self.workspaces}, api_key={self.api_key},"
-            f" first_name={self.first_name}, last_name={self.last_name}, role={self.role},"
-            f" inserted_at={self.inserted_at}, updated_at={self.updated_at})"
+            f" api_key={self.api_key}, first_name={self.first_name},"
+            f" last_name={self.last_name}, inserted_at={self.inserted_at},"
+            f" updated_at={self.updated_at})"
         )
 
     @staticmethod
