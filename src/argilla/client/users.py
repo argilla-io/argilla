@@ -61,7 +61,7 @@ class User:
         >>> from argilla import rg
         >>> user = rg.User.from_name("my-user") # or `User.from_id("...")`
         >>> print(user)
-        User(id='...', username='my-user', first_name='Luke', last_name="Skywalker', full_name='Luke Skywalker', role='annotator', workspaces=[WorkspaceModel(...), ...], api_key='...', inserted_at=datetime.datetime(2021, 8, 31, 10, 0, 0), updated_at=datetime.datetime(2021, 8, 31, 10, 0, 0))
+        User(id='...', username='my-user', role='annotator', first_name='Luke', last_name="Skywalker', full_name='Luke Skywalker', role='annotator', api_key='...', inserted_at=datetime.datetime(2021, 8, 31, 10, 0, 0), updated_at=datetime.datetime(2021, 8, 31, 10, 0, 0))
     """
 
     __client: "httpx.Client"
