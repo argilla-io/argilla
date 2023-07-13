@@ -32,6 +32,7 @@ from argilla.server.models import (
     ResponseValue,
     Suggestion,
 )
+from argilla.server.models.suggestions import SuggestionCreateWithRecordId
 from argilla.server.schemas.v1.datasets import (
     DatasetCreate,
     FieldCreate,
@@ -41,7 +42,6 @@ from argilla.server.schemas.v1.datasets import (
 )
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
-from argilla.server.schemas.v1.suggestions import SuggestionCreateWithRecordId
 from argilla.server.search_engine import SearchEngine
 from argilla.server.security.model import User
 

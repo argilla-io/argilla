@@ -12,32 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel
-
-from argilla.server.models import SuggestionType
+from argilla.server.schemas.v1.suggestions import SuggestionCreate
 
 
-class BaseSuggestion(BaseModel):
-    question_id: UUID
-    type: Optional[SuggestionType]
-    score: Optional[float]
-    value: Any
-    agent: Optional[str]
-
-
-class SuggestionCreate(BaseSuggestion):
-    pass
-
-
-class Suggestion(BaseSuggestion):
-    id: UUID
-
-    class Config:
-        orm_mode = True
-
-
-class Suggestions(BaseModel):
-    items: List[Suggestion]
+class SuggestionCreateWithRecordId(SuggestionCreate):
+    record_id: UUID
