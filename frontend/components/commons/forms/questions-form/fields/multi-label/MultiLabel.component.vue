@@ -3,7 +3,7 @@
     <QuestionHeaderComponent
       :title="title"
       :isRequired="isRequired"
-      :hasSuggestions="hasSuggestion"
+      :hasSuggestion="hasSuggestion"
       :tooltipMessage="description"
     />
 
