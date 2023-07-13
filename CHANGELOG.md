@@ -35,6 +35,10 @@ These are the section headers that we use:
 - Renamed `FeedbackDatasetConfig` to `DatasetConfig` and export/import from YAML as default instead of JSON (just used internally on `push_to_huggingface` and `from_huggingface` methods of `FeedbackDataset`) ([#3326](https://github.com/argilla-io/argilla/pull/3326)).
 - The protected metadata fields support other than textual info - existing datasets must be reindex. See [docs](https://docs.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html#elasticsearch) for more detail (Closes [#3332](https://github.com/argilla-io/argilla/issues/3332)).
 
+### Removed
+
+- Removed support to non-prefixed environment variables. All valid env vars start with `ARGILLA_` (See [#3392](https://github.com/argilla-io/argilla/pull/3392)).
+
 ### Fixed
 
 - Fixed `GET /api/v1/me/datasets/{dataset_id}/records` endpoint returning always the responses for the records even if `responses` was not provided via the `include` query parameter ([#3304](https://github.com/argilla-io/argilla/pull/3304)).
