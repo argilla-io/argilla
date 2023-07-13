@@ -140,44 +140,75 @@ class FeedbackRecord(BaseModel):
     fields: Dict[str, str]
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     responses: Optional[List[ResponseSchema]] = Field(default_factory=list)
-    suggestions: Optional[List[SuggestionSchema]] = Field(default_factory=list)
+    suggestions: Optional[List[SuggestionSchema]] = Field(default_factory=list, allow_mutation=True)
     external_id: Optional[str] = None
 
-    _original_values: Dict[str, Any] = PrivateAttr(default_factory=dict)
     _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default_factory=dict)
     _updated: bool = PrivateAttr(default=False)
 
     def __init__(self, **data: Dict[str, Any]) -> None:
         super().__init__(**data)
-        self._original_values = self.dict(exclude={"_updated"})
+
+    def add_suggestions(self, suggestions: Union[SuggestionSchema, List[SuggestionSchema]]) -> None:
+        if isinstance(suggestions, (dict, SuggestionSchema)):
+            suggestions = [suggestions]
+        parsed_suggestions = []
+        for suggestion in suggestions:
+            if not isinstance(suggestion, SuggestionSchema):
+                suggestion = SuggestionSchema(**suggestion)
+            parsed_suggestions.append(suggestion)
+        if not self.id:
+            warnings.warn(
+                "Ignore the following if you are creating a new `FeedbackDataset` with"
+                " `FeedbackRecord`s, or if you are just working with a `FeedbackRecord`."
+                " Otherwise, if the `FeedbackRecord` is already pushed"
+                " to Argilla, note that `suggestions` have been provided, but the `id`"
+                " is not set, which means that the `FeedbackRecord` has been pushed to"
+                " Argilla, but hasn't been fetched, so the `id` is missing. To solve that,"
+                " you can simply call `FeedbackDataset.fetch_records()` to fetch them and"
+                " automatically set the `id`, to call `add_suggestions` on top of that."
+            )
+        for suggestion in parsed_suggestions:
+            existing_suggestion = next(
+                filter(
+                    lambda s: (s.question_id == suggestion.question_id)
+                    or (s.question_name == suggestion.question_name),
+                    self.suggestions,
+                ),
+                None,
+            )
+            if existing_suggestion:
+                warnings.warn(
+                    f"A suggestion for question `{existing_suggestion.question_name}` has already"
+                    " been provided, so the provided suggestion will overwrite it."
+                )
+                self.suggestions.remove(existing_suggestion)
+        self.suggestions.append(suggestion)
+        if self.id and not self._updated:
+            self._updated = True
 
     def __setattr__(self, name: str, value: Any) -> None:
-        # TODO(alvarobartt): the line below should do the work when we allow updates on more fields than just suggestions
-        # if name != "_updated" and name in self.__fields_set__:
         if name == "suggestions" and hasattr(self, name):
+            warnings.warn(
+                "You are trying to set `suggestions` directly, which is not allowed. You"
+                " should use the `add_suggestions` method instead."
+            )
             if getattr(self, name) != value:
-                self._updated = True
-                if not getattr(self, "id"):
-                    warnings.warn(
-                        "Ignore the following if you are creating a new `FeedbackDataset` with"
-                        " `FeedbackRecord`s, or if you are just working with a `FeedbackRecord`."
-                        " Otherwise, if the `FeedbackRecord` is already pushed"
-                        " to Argilla, note that `suggestions` have been provided, but the `id`"
-                        " is not set, which means that the `FeedbackRecord` has been pushed to"
-                        " Argilla, but hasn't been fetched, so the `id` is missing. To solve that,"
-                        " you can simply call `FeedbackDataset.fetch_records()` to fetch them and"
-                        " automatically set the `id`, to add the `suggestions` on top of that."
-                    )
+                warnings.warn(
+                    "You are trying to update the existing `suggestions` with a new value,"
+                    " which is not allowed. You should use the `add_suggestions` method"
+                    " instead, and the existing `suggestions` will be overwritten based"
+                    " on the provided `question_id`s/`question_name`/s for those `suggestions`."
+                )
         super().__setattr__(name, value)
 
     def _reset_updated(self) -> None:
         self._updated = False
-        self._original_values = self.dict(exclude={"_updated"})
 
     class Config:
         extra = Extra.forbid
         validate_assignment = True
-        exclude = {"_original_values", "_unified_responses", "_updated"}
+        exclude = {"_unified_responses", "_updated"}
 
 
 FieldTypes = Literal["text"]
