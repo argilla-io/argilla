@@ -1,11 +1,5 @@
 import { DatasetFilter as DatasetFilterModel } from "./DatasetFilter.model";
 
-const SIDEBAR_GROUP = Object.freeze({
-  METRICS: "METRICS",
-  MODE: "MODE",
-  REFRESH: "REFRESH",
-});
-
 // UPSERT
 const upsertDatasetFilters = (globalFilters) => {
   DatasetFilterModel.insertOrUpdate({ data: globalFilters });
@@ -24,4 +18,4 @@ const getFiltersByDatasetId = (
     .get();
 };
 
-export { upsertDatasetFilters, getFiltersByDatasetId, SIDEBAR_GROUP };
+export { upsertDatasetFilters, getFiltersByDatasetId };
