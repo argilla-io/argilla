@@ -45,7 +45,14 @@ class DatasetConfig(BaseModel):
     def from_yaml(cls, yaml):
         return cls(**load(yaml, Loader=SafeLoader))
 
-    # TODO(alvarobartt): here for backwards compatibility, remove in 1.14.0
+
+# TODO(alvarobartt): here for backwards compatibility, remove in 1.14.0
+class DeprecatedDatasetConfig(BaseModel):
+    fields: List[AllowedFieldTypes]
+    questions: List[AllowedQuestionTypes]
+    guidelines: Optional[str] = None
+
+    @classmethod
     def from_json(self, json):
         warnings.warn(
             "`DatasetConfig` can just be loaded from YAML, so make sure that you are"
@@ -55,7 +62,6 @@ class DatasetConfig(BaseModel):
         )
         return self.parse_raw(json)
 
-    # TODO(alvarobartt): here for backwards compatibility, remove in 1.14.0
     def to_json(self):
         warnings.warn(
             "`DatasetConfig` can just be dumped to YAML, so make sure that you are"
