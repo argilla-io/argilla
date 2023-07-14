@@ -3,6 +3,7 @@
     <QuestionHeaderComponent
       :title="title"
       :isRequired="isRequired"
+      :hasSuggestion="hasSuggestion"
       :tooltipMessage="description"
     />
 
@@ -31,6 +32,10 @@ export default {
     options: {
       type: Array,
       required: true,
+    },
+    hasSuggestion: {
+      type: Boolean,
+      default: () => false,
     },
   },
   model: {
