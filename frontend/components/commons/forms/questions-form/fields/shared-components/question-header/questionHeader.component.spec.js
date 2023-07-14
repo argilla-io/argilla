@@ -11,6 +11,9 @@ const options = {
     tooltip() {
       // this directive is used to show a tooltip
     },
+    "prefix-star"() {
+      // this directive is used to show a prefix start
+    },
   },
   propsData: {
     title: "This is a question to ask",

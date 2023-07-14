@@ -15,11 +15,13 @@
  * limitations under the License.
  */
 
+import { NuxtConfig } from "@nuxt/types";
+
 const LOCAL_ENVIRONMENT = "http://localhost:6900";
 const BASE_URL = process.env.API_BASE_URL ?? LOCAL_ENVIRONMENT;
 const DIST_FOLDER = process.env.DIST_FOLDER || "dist";
 
-export default {
+const config: NuxtConfig = {
   // Disable server-side rendering (https://go.nuxtjs.dev/ssr-mode)
   ssr: false,
   telemetry: false,
@@ -74,15 +76,13 @@ export default {
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
-  components: {
-    dirs: [
-      {
-        path: "~/components",
-        pattern: "**/*.vue",
-        pathPrefix: false,
-      },
-    ],
-  },
+  components: [
+    {
+      path: "~/components",
+      pattern: "**/*.vue",
+      pathPrefix: false,
+    },
+  ],
 
   // Modules for dev and build (recommended) (https://go.nuxtjs.dev/config-modules)
   buildModules: [
@@ -126,7 +126,7 @@ export default {
   build: {
     cssSourceMap: false,
     extend(config) {
-      config.resolve.alias["vue"] = "vue/dist/vue.common";
+      config.resolve.alias.vue = "vue/dist/vue.common";
       config.module.rules.push({
         test: /\.md$/,
         loader: "frontmatter-markdown-loader",
@@ -179,7 +179,7 @@ export default {
       },
     },
     resetOnError: true,
-    redirect: { login: "/login", logout: "/login", home: false },
+    redirect: { login: "/login", logout: "/login" },
   },
 
   router: {
@@ -201,3 +201,4 @@ export default {
       "https://docs.argilla.io/en/latest/guides/query_datasets.html",
   },
 };
+export default config;
