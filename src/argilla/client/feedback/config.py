@@ -38,11 +38,11 @@ class DatasetConfig(BaseModel):
     questions: List[Annotated[AllowedQuestionTypes, Field(..., discriminator="type")]]
     guidelines: Optional[str] = None
 
-    def to_yaml(self):
+    def to_yaml(self) -> str:
         return dump(self.dict())
 
     @classmethod
-    def from_yaml(cls, yaml):
+    def from_yaml(cls, yaml: str) -> "DatasetConfig":
         return cls(**load(yaml, Loader=SafeLoader))
 
 
@@ -52,17 +52,7 @@ class DeprecatedDatasetConfig(BaseModel):
     questions: List[AllowedQuestionTypes]
     guidelines: Optional[str] = None
 
-    @classmethod
-    def from_json(self, json):
-        warnings.warn(
-            "`DatasetConfig` can just be loaded from YAML, so make sure that you are"
-            " loading a YAML file instead of a JSON file. `DatasetConfig` will be dumped"
-            " as YAML from now on, instead of JSON.",
-            DeprecationWarning,
-        )
-        return self.parse_raw(json)
-
-    def to_json(self):
+    def to_json(self) -> str:
         warnings.warn(
             "`DatasetConfig` can just be dumped to YAML, so make sure that you are"
             " dumping to a YAML file instead of a JSON file. `DatasetConfig` will come"
@@ -70,3 +60,13 @@ class DeprecatedDatasetConfig(BaseModel):
             DeprecationWarning,
         )
         return self.json()
+
+    @classmethod
+    def from_json(self, json: str) -> "DeprecatedDatasetConfig":
+        warnings.warn(
+            "`DatasetConfig` can just be loaded from YAML, so make sure that you are"
+            " loading a YAML file instead of a JSON file. `DatasetConfig` will be dumped"
+            " as YAML from now on, instead of JSON.",
+            DeprecationWarning,
+        )
+        return self.parse_raw(json)
