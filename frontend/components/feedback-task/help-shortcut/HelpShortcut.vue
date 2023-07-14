@@ -2,11 +2,10 @@
   <div>
     <p class="shortcuts__title">Shortcuts</p>
     <base-spinner v-if="$fetchState.pending" />
-    <documentation-viewer
+    <documentation-viewer-without-tabs
       class="shortcuts__content"
       v-else
       :content="content"
-      :hidden-tabs="true"
     />
   </div>
 </template>

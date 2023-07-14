@@ -1,12 +1,5 @@
 <template>
   <div class="snippet__container">
-    <BaseTabs
-      v-if="content.tabs.length"
-      class="snippets__tabs"
-      :tabs="content.tabs"
-      :active-tab="currentTab"
-      @change-tab="onChangeTab"
-    />
     <transition v-if="currentTab" name="fade" mode="out-in" appear>
       {{ currentTab }}
       <div class="snippet" :key="currentTab.id" v-if="currentTab">
