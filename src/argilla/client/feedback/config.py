@@ -46,6 +46,7 @@ class DatasetConfig(BaseModel):
         return cls(**load(yaml, Loader=SafeLoader))
 
     # TODO(alvarobartt): here for backwards compatibility, remove in 1.14.0
+    @classmethod
     def from_json(self, json):
         warnings.warn(
             "`DatasetConfig` can just be loaded from YAML, so make sure that you are"

@@ -74,7 +74,7 @@ def test_dataset_config_json_deprecated(
     assert f'"guidelines": "{feedback_dataset_guidelines}"' in to_json_config
 
     with pytest.warns(DeprecationWarning, match="`DatasetConfig` can just be loaded from YAML"):
-        from_json_config = config.from_json(to_json_config)
+        from_json_config = DatasetConfig.from_json(to_json_config)
     assert isinstance(from_json_config, DatasetConfig)
     assert from_json_config.fields == feedback_dataset_fields
     assert from_json_config.questions == feedback_dataset_questions
