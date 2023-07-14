@@ -137,8 +137,8 @@ The next step is to create records following Argilla's `FeedbackRecord` format. 
 - `fields`: A dictionary with the name (key) and content (value) of each of the fields in the record. These will need to match the fields set up in the dataset configuration (see [Define record fields](#define-record-fields)).
 - `metadata` (optional): A dictionary with the metadata of the record. This can include any information about the record that is not part of the fields. For example, the source of the record or the date it was created. If there is no metadata, this will be `None`.
 - `external_id` (optional): An ID of the record defined by the user. If there is no external ID, this will be `None`.
-- `responses` (optional): A list of all responses to a record. There is no need to configure this when creating a record, it will be filled automatically with the responses collected from the Argilla UI.
 - `suggestions`(optional): A list of all suggested responses for a record e.g., model predictions or other helpful hints for the annotators. These will need to follow the same schema as the responses of the type of question answered by the suggestion. If these are added, suggestions will appear in the UI as pre-filled responses.
+- `responses` (optional): A list of all responses to a record. You will only need to add them if your dataset already has some annotated records. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered.
 
 ```python
 # create a single Feedback Record
@@ -148,7 +148,7 @@ record = rg.FeedbackRecord(
         "answer": "Camels use the fat in their humps to keep them filled with energy and hydration for long periods of time."
     },
     metadata={"source": "encyclopedia"},
-    external_id=None,
+    external_id=None
 )
 ```
 
@@ -168,7 +168,7 @@ dataset.add_records(records)
 
 ## Add suggestions
 
-Suggestions refer to suggested responses (e.g. model predictions) that you can add to your records to make the annotation process faster. These can be added upon the creation of the record or at a later stage. The suggestion should follow the schema of the response of the type of question answered by the suggestion:
+Suggestions refer to suggested responses (e.g. model predictions) that you can add to your records to make the annotation process faster. These can be added during the creation of the record or at a later stage. The suggestion should follow the schema of the response of the type of question answered by the suggestion:
 
 ::::{tab-set}
 
@@ -176,40 +176,205 @@ Suggestions refer to suggested responses (e.g. model predictions) that you can a
 
 ```python
 record = rg.FeedbackRecord(
-    ...,
+    fields=...,
     suggestions = [
-
+        {
+            "question_name": "relevant",
+            "value": "YES",
+        }
     ]
 )
-````
+```
 :::
 
 :::{tab-item} Multi-label
 
-Select all applicable labels from a selection of labels.
+```python
+record = rg.FeedbackRecord(
+    fields=...,
+    suggestions = [
+        {
+            "question_name": "content_class",
+            "value": ["hate", "violent"]
+        }
+    ]
+)
+```
 
-![Multi-label Question](/_static/images/llms/questions/multilabel_question.png)
 :::
 
 :::{tab-item} Ranking
 
-Order a selection of values. Note that you will need to order all the values to complete the response to this question. Ties are allowed.
+```python
+record = rg.FeedbackRecord(
+    fields=...,
+    suggestions = [
+        {
+            "question_name": "preference",
+            "value":[
+                {"rank": 1, "value": "reply-2"},
+                {"rank": 2, "value": "reply-1"},
+                {"rank": 3, "value": "reply-3"},
+            ],
+        }
+    ]
+)
+```
 
-![Ranking question](/_static/images/llms/questions/ranking_question.png)
 :::
 
 :::{tab-item} Rating
 
-Select a single value from a list of values.
+```python
+record = rg.FeedbackRecord(
+    fields=...,
+    suggestions = [
+        {
+            "question_name": "quality",
+            "value": 5,
+        }
+    ]
+)
+```
 
-![Rating question](/_static/images/llms/questions/rating_question.png)
 :::
 
 :::{tab-item} Text
 
-Provide a text response inside the text area.
+```python
+record = rg.FeedbackRecord(
+    fields=...,
+    suggestions = [
+        {
+            "question_name": "corrected-text",
+            "value": "This is a *suggestion*.",
+        }
+    ]
+)
+```
 
-![Text Question](/_static/images/llms/questions/text_question.png)
+:::
+
+::::
+
+You can also add suggestions to existing records that have been already pushed to Argilla:
+
+```python
+import argilla as rg
+
+rg.init()
+
+records = fetch_records(name="my_dataset", workspace="my_workspace")
+# if you need to get the questions and fields as well you can use this line instead:
+# dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_workspace")
+# and in the following lines subsitute `records` for `dataset`
+
+records = [record['suggestions']: [{"question_name": "question", "value": ...}] for record in records]
+
+records.push_to_argilla()
+```
+
+## Add responses
+If your dataset includes some annotations, you can add those to the records as you create them. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered.
+
+::::{tab-set}
+
+:::{tab-item} Label
+
+```python
+record = rg.FeedbackRecord(
+    fields=...,
+    responses = [
+        {
+            "values":{
+                "relevant":{
+                    "value": "YES"
+                }
+            }
+        }
+    ]
+)
+```
+:::
+
+:::{tab-item} Multi-label
+
+```python
+record = rg.FeedbackRecord(
+    fields=...,
+    responses = [
+        {
+            "values":{
+                "content_class":{
+                    "value": ["hate", "violent"]
+                }
+            }
+        }
+    ]
+)
+```
+
+:::
+
+:::{tab-item} Ranking
+
+```python
+record = rg.FeedbackRecord(
+    fields=...,
+    responses = [
+        {
+            "values":{
+                "preference":{
+                    "value":[
+                        {"rank": 1, "value": "reply-2"},
+                        {"rank": 2, "value": "reply-1"},
+                        {"rank": 3, "value": "reply-3"},
+                    ],
+                }
+            }
+        }
+    ]
+)
+```
+
+:::
+
+:::{tab-item} Rating
+
+```python
+record = rg.FeedbackRecord(
+    fields=...,
+    responses = [
+        {
+            "values":{
+                "quality":{
+                    "value": 5
+                }
+            }
+        }
+    ]
+)
+```
+
+:::
+
+:::{tab-item} Text
+
+```python
+record = rg.FeedbackRecord(
+    fields=...,
+    responses = [
+        {
+            "values":{
+                "corrected-text":{
+                    "value": "This is a *response*."
+                }
+            }
+        }
+    ]
+)
+```
+
 :::
 
 ::::
