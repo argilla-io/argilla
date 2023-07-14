@@ -141,7 +141,7 @@ class TestSuiteWorkspaces:
         assert response.status_code == 403
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
-    async def test_list_workspaces_me(client: TestClient, role: UserRole) -> None:
+    async def test_list_workspaces_me(self, client: TestClient, role: UserRole) -> None:
         workspaces = await WorkspaceFactory.create_batch(size=5)
         user = await UserFactory.create(role=role, workspaces=workspaces if role != UserRole.owner else [])
 
@@ -157,13 +157,13 @@ class TestSuiteWorkspaces:
                 "updated_at": workspace.updated_at.isoformat(),
             } in response.json()["items"]
 
-    async def test_list_workspaces_me_without_authentication(client: TestClient) -> None:
+    async def test_list_workspaces_me_without_authentication(self, client: TestClient) -> None:
         response = client.get("/api/v1/me/workspaces")
 
         assert response.status_code == 401
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
-    async def test_list_workspaces_me_no_workspaces(client: TestClient, role: UserRole) -> None:
+    async def test_list_workspaces_me_no_workspaces(self, client: TestClient, role: UserRole) -> None:
         user = await UserFactory.create(role=role)
 
         response = client.get("/api/v1/me/workspaces", headers={API_KEY_HEADER_NAME: user.api_key})
