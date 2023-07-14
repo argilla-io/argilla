@@ -527,6 +527,19 @@ async def test_update_dataset_records_in_argilla(
             ]
         )
 
+    with pytest.warns(UserWarning, match="Ignore this warning if you're already using `set_suggestions` method"):
+        record = FeedbackRecord(
+            fields={"prompt": "text"},
+        )
+        record.set_suggestions(
+            [
+                {
+                    "question_name": "question-1",
+                    "value": "This is a suggestion to question 1",
+                },
+            ]
+        )
+
     record = dataset.records[0]
     with pytest.warns(UserWarning, match="A suggestion for question `question-1`"):
         record.set_suggestions(
@@ -546,13 +559,6 @@ async def test_update_dataset_records_in_argilla(
             {
                 "question_name": "question-1",
                 "value": "This is a suggestion to question 1",
-            },
-        ]
-    with pytest.warns(UserWarning, match="You are trying to update the existing `suggestions` with a new value"):
-        record.suggestions = [
-            {
-                "question_name": "question-1",
-                "value": "This is another suggestion to question 1",
             },
         ]
 

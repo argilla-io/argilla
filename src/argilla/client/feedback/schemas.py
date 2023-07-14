@@ -229,16 +229,10 @@ class FeedbackRecord(BaseModel):
     def __setattr__(self, name: str, value: Any) -> None:
         if name == "suggestions" and hasattr(self, name):
             warnings.warn(
-                "You are trying to set `suggestions` directly, which is not allowed. You"
-                " should use the `set_suggestions` method instead."
+                "Ignore this warning if you're already using `set_suggestions` method."
+                " Otherwise, if you are trying to set `suggestions` directly, which is"
+                " not allowed. You should use the `set_suggestions` method instead."
             )
-            if getattr(self, name) != value:
-                warnings.warn(
-                    "You are trying to update the existing `suggestions` with a new value,"
-                    " which is not allowed. You should use the `set_suggestions` method"
-                    " instead, and the existing `suggestions` will be overwritten based"
-                    " on the provided `question_id`s/`question_name`/s for those `suggestions`."
-                )
         super().__setattr__(name, value)
 
     def _reset_updated(self) -> None:
