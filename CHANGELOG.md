@@ -52,6 +52,7 @@ These are the section headers that we use:
 - Pin pydantic dependency to version < 2 (Closes [3348](https://github.com/argilla-io/argilla/issues/3348))
 - Big number ids are properly rendered in UI (Closes [#3265](https://github.com/argilla-io/argilla/issues/3265))
 - Fixed `ArgillaDatasetCard` to include the values/labels for all the existing questions ([#3366](https://github.com/argilla-io/argilla/pull/3265))
+- Fixed TypeError when loading an Argilla dataset from the Hub from Argilla 1.12.0 or lower ([#3414](https://github.com/argilla-io/argilla/issues/3414))
 
 ### Deprecated
 
