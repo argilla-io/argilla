@@ -17,12 +17,13 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla.server.contexts import accounts
+from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_async_db
 from argilla.server.models import User
 from argilla.server.policies import WorkspacePolicyV1, authorize
 from argilla.server.schemas.v1.workspaces import Workspace, Workspaces
 from argilla.server.security import auth
+from argilla.server.services.datasets import DatasetsService
 
 router = APIRouter(tags=["workspaces"])
 
@@ -44,6 +45,38 @@ async def get_workspace(
         )
 
     return workspace
+
+
+@router.delete("/workspaces/{workspace_id}", response_model=Workspace)
+async def delete_workspace(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    datasets_service: DatasetsService = Depends(DatasetsService.get_instance),
+    workspace_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    await authorize(current_user, WorkspacePolicyV1.delete)
+
+    workspace = await accounts.get_workspace_by_id(db, workspace_id)
+    if not workspace:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Workspace with id `{workspace_id}` not found",
+        )
+
+    if await datasets.list_datasets_by_workspace_id(db, workspace_id):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Cannot delete the workspace {workspace_id}. This workspace has some feedback datasets linked",
+        )
+
+    if await datasets_service.list(current_user, workspaces=[workspace.name]):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Cannot delete the workspace {workspace_id}. This workspace has some datasets linked",
+        )
+
+    return await accounts.delete_workspace(db, workspace)
 
 
 @router.get("/me/workspaces", response_model=Workspaces)

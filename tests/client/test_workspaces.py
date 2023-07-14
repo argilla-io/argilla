@@ -21,7 +21,12 @@ from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.workspaces.models import WorkspaceUserModel
 from argilla.client.workspaces import Workspace
 
-from tests.factories import UserFactory, WorkspaceFactory, WorkspaceUserFactory
+from tests.factories import (
+    DatasetFactory,
+    UserFactory,
+    WorkspaceFactory,
+    WorkspaceUserFactory,
+)
 
 if TYPE_CHECKING:
     from argilla.server.models import User as ServerUser
@@ -197,3 +202,86 @@ async def test_print_workspace(owner: "ServerUser"):
         f"Workspace(id={workspace.id}, name={workspace.name}, "
         f"inserted_at={workspace.inserted_at}, updated_at={workspace.updated_at})"
     )
+
+
+def test_set_new_workspace(owner: "ServerUser"):
+    ArgillaSingleton.init(api_key=owner.api_key)
+    ws = Workspace.create("new-workspace")
+
+    ArgillaSingleton.get().set_workspace(ws.name)
+    assert ArgillaSingleton.get().get_workspace() == ws.name
+
+
+@pytest.mark.asyncio
+async def test_init_with_workspace(owner: "ServerUser"):
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+
+    ArgillaSingleton.init(api_key=owner.api_key, workspace=workspace.name)
+
+    assert ArgillaSingleton.get().get_workspace() == workspace.name
+
+
+def test_set_workspace_with_missing_workspace(owner: "ServerUser"):
+    ArgillaSingleton.init(api_key=owner.api_key)
+    with pytest.raises(ValueError):
+        ArgillaSingleton.get().set_workspace("missing-workspace")
+
+
+def test_init_with_missing_workspace(owner: "ServerUser"):
+    with pytest.raises(ValueError):
+        ArgillaSingleton.init(api_key=owner.api_key, workspace="missing-workspace")
+
+
+@pytest.mark.asyncio
+async def test_delete_workspace(owner: "ServerUser"):
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+
+    ArgillaSingleton.init(api_key=owner.api_key)
+
+    ws = Workspace.from_id(workspace.id)
+    ws.delete()
+
+    with pytest.raises(ValueError, match=rf"Workspace with id=`{ws.id}` doesn't exist in Argilla"):
+        Workspace.from_id(workspace.id)
+
+
+@pytest.mark.asyncio
+async def test_delete_non_existing_workspace(owner: "ServerUser"):
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+
+    ArgillaSingleton.init(api_key=owner.api_key)
+
+    ws = Workspace.from_id(workspace.id)
+    ws.delete()
+
+    with pytest.raises(ValueError, match=rf"Workspace with id {ws.id} doesn't exist in Argilla."):
+        ws.delete()
+
+
+@pytest.mark.asyncio
+async def test_delete_workspace_with_linked_datasets(owner: "ServerUser"):
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+    await DatasetFactory.create(workspace=workspace)
+
+    ArgillaSingleton.init(api_key=owner.api_key)
+
+    ws = Workspace.from_id(workspace.id)
+    with pytest.raises(
+        ValueError,
+        match=rf"Cannot delete workspace with id {ws.id}. Some datasets are still linked to this workspace.",
+    ):
+        ws.delete()
+
+
+@pytest.mark.asyncio
+async def test_delete_workspace_without_permissions():
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+
+    user = await UserFactory.create(workspaces=[workspace])
+
+    ArgillaSingleton.init(api_key=user.api_key)
+
+    ws = Workspace.from_id(workspace.id)
+
+    with pytest.raises(PermissionError, match=rf"User with role={user.role.value} is not allowed to call `delete`"):
+        ws.delete()

@@ -14,7 +14,7 @@
 import asyncio
 import contextlib
 import tempfile
-from typing import TYPE_CHECKING, AsyncGenerator, Dict, Generator
+from typing import TYPE_CHECKING, AsyncGenerator, Dict, Generator, Iterator
 
 import httpx
 import pytest
@@ -162,8 +162,8 @@ def elasticsearch_config():
     return {"hosts": settings.elasticsearch}
 
 
-@pytest.fixture(scope="session")
-def opensearch(elasticsearch_config):
+@pytest.fixture(scope="session", autouse=True)
+def opensearch(elasticsearch_config) -> Generator[OpenSearch, None, None]:
     client = OpenSearch(**elasticsearch_config)
     yield client
 

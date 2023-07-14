@@ -80,7 +80,14 @@ async def list_datasets(db: "AsyncSession") -> List[Dataset]:
     return result.scalars().all()
 
 
-async def create_dataset(db: "AsyncSession", dataset_create: DatasetCreate) -> Dataset:
+async def list_datasets_by_workspace_id(db: "AsyncSession", workspace_id: UUID) -> List[Dataset]:
+    result = await db.execute(
+        select(Dataset).where(Dataset.workspace_id == workspace_id).order_by(Dataset.inserted_at.asc())
+    )
+    return result.scalars().all()
+
+
+async def create_dataset(db: "AsyncSession", dataset_create: DatasetCreate):
     return await Dataset.create(
         db,
         name=dataset_create.name,
