@@ -16,6 +16,8 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+## [1.13.0](https://github.com/argilla-io/argilla/compare/v1.12.1...v1.13.0)
+
 ### Added
 
 - Added `GET /api/v1/users/{user_id}/workspaces` endpoint to list the workspaces to which a user belongs ([#3308](https://github.com/argilla-io/argilla/pull/3308) and [#3343](https://github.com/argilla-io/argilla/pull/3343)).
