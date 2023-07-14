@@ -15,7 +15,6 @@
 import datetime
 from typing import TYPE_CHECKING, List
 
-import argilla as rg
 import pytest
 from argilla.client.api import delete, log
 from argilla.client.datasets import read_datasets
@@ -460,22 +459,37 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                 {
                     "question_name": "question-1",
                     "value": "This is a suggestion to question 1",
+                    "type": "human",
+                    "score": 0.0,
+                    "agent": "agent-1",
                 },
                 {
                     "question_name": "question-2",
                     "value": 1,
+                    "type": "human",
+                    "score": 0.0,
+                    "agent": "agent-1",
                 },
                 {
                     "question_name": "question-3",
                     "value": "a",
+                    "type": "human",
+                    "score": 0.0,
+                    "agent": "agent-1",
                 },
                 {
                     "question_name": "question-4",
                     "value": ["a", "b"],
+                    "type": "human",
+                    "score": 0.0,
+                    "agent": "agent-1",
                 },
                 {
                     "question_name": "question-5",
                     "value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}],
+                    "type": "human",
+                    "score": 0.0,
+                    "agent": "agent-1",
                 },
             ],
             external_id="3",

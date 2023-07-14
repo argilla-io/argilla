@@ -181,18 +181,17 @@ class FeedbackRecord(BaseModel):
 
     id: Optional[UUID] = None
     fields: Dict[str, str]
-    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
-    responses: Optional[List[ResponseSchema]] = Field(default_factory=list)
-    suggestions: Optional[List[SuggestionSchema]] = Field(default_factory=list, allow_mutation=True)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    responses: List[ResponseSchema] = Field(default_factory=list)
+    suggestions: List[SuggestionSchema] = Field(default_factory=list, allow_mutation=True)
     external_id: Optional[str] = None
 
     _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default_factory=dict)
     _updated: bool = PrivateAttr(default=False)
 
-    def __init__(self, **data: Dict[str, Any]) -> None:
-        super().__init__(**data)
-
-    def set_suggestions(self, suggestions: Union[SuggestionSchema, List[SuggestionSchema]]) -> None:
+    def set_suggestions(
+        self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
+    ) -> None:
         if isinstance(suggestions, (dict, SuggestionSchema)):
             suggestions = [suggestions]
         parsed_suggestions = []
@@ -212,21 +211,18 @@ class FeedbackRecord(BaseModel):
                 " automatically set the `id`, to call `set_suggestions` on top of that."
             )
         for suggestion in parsed_suggestions:
-            existing_suggestion = next(
-                filter(
-                    lambda s: (s.question_id == suggestion.question_id)
-                    or (s.question_name == suggestion.question_name),
-                    self.suggestions,
-                ),
-                None,
-            )
-            if existing_suggestion:
-                warnings.warn(
-                    f"A suggestion for question `{existing_suggestion.question_name}` has already"
-                    " been provided, so the provided suggestion will overwrite it."
-                )
-                self.suggestions.remove(existing_suggestion)
-        self.suggestions.append(suggestion)
+            for existing_suggestion in self.suggestions:
+                if (
+                    existing_suggestion.question_id == suggestion.question_id
+                    or existing_suggestion.question_name == suggestion.question_name
+                ):
+                    warnings.warn(
+                        f"A suggestion for question `{existing_suggestion.question_name}` has already"
+                        " been provided, so the provided suggestion will overwrite it."
+                    )
+                    self.suggestions.remove(existing_suggestion)
+                    break
+        self.suggestions += parsed_suggestions
         if self.id and not self._updated:
             self._updated = True
 

@@ -311,10 +311,13 @@ class FeedbackDataset(HuggingFaceDatasetMixin):
         return self.__fields
 
     def field_by_name(self, name: str) -> AllowedFieldTypes:
-        try:
-            return next(filter(lambda f: f.name == name, self.__fields))
-        except Exception as e:
-            raise ValueError(f"Field with name='{name}' not found, available fields are: {self.__fields}") from e
+        for field in self.__fields:
+            if field.name == name:
+                return field
+        raise ValueError(
+            f"Field with name='{name}' not found, available field names are:"
+            f" {', '.join(f.name for f in self.__fields)}"
+        )
 
     @property
     def questions(self) -> List[AllowedQuestionTypes]:
@@ -322,12 +325,13 @@ class FeedbackDataset(HuggingFaceDatasetMixin):
         return self.__questions
 
     def question_by_name(self, name: str) -> AllowedQuestionTypes:
-        try:
-            return next(filter(lambda q: q.name == name, self.__questions))
-        except Exception as e:
-            raise ValueError(
-                f"Question with name='{name}' not found, available questions are: {self.__questions}"
-            ) from e
+        for question in self.__questions:
+            if question.name == name:
+                return question
+        raise ValueError(
+            f"Question with name='{name}' not found, available question names are:"
+            f" {', '.join(q.name for q in self.__questions)}"
+        )
 
     @property
     def records(self) -> List[FeedbackRecord]:
