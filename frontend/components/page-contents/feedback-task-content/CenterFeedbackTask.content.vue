@@ -1,15 +1,8 @@
 <template>
-  <BaseLoading v-if="$fetchState.pending" />
-  <RecordFeedbackTaskAndQuestionnaireContent
-    v-else
-    :datasetId="datasetId"
-    :feedback="feedback"
-  />
+  <RecordFeedbackTaskAndQuestionnaireContent :datasetId="datasetId" />
 </template>
 
 <script>
-import { useFeedbackTaskViewModel } from "./useFeedbackTaskViewModel";
-
 export default {
   name: "CenterFeedbackTaskContent",
   props: {
@@ -17,12 +10,6 @@ export default {
       type: String,
       required: true,
     },
-  },
-  fetch() {
-    return this.loadFeedback(this.datasetId);
-  },
-  setup() {
-    return useFeedbackTaskViewModel();
   },
 };
 </script>

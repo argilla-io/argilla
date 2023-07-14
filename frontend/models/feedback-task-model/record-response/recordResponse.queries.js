@@ -7,6 +7,10 @@ const getRecordResponsesByRecordId = ({ userId, recordId }) => {
     .where("user_id", userId)
     .get();
 };
+
+/**
+ * @deprecated
+ */
 const getRecordResponsesIdByRecordId = ({ userId, recordId }) => {
   return RecordResponseModel.query()
     .where("record_id", recordId)

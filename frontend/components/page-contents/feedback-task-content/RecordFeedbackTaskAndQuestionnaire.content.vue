@@ -1,18 +1,17 @@
 <template>
-  <div v-if="!$fetchState.pending && !$fetchState.error" class="wrapper">
-    <template v-if="recordId">
+  <BaseLoading v-if="$fetchState.pending" />
+  <div v-else-if="!$fetchState.error" class="wrapper">
+    <template v-if="!!record">
       <RecordFeedbackTaskComponent
-        v-if="fieldsWithRecordFieldText"
-        :recordStatus="record.record_status"
-        :fields="fieldsWithRecordFieldText"
+        :recordStatus="record.status"
+        :fields="record.fields"
       />
       <QuestionsFormComponent
         :key="questionFormKey"
         class="question-form"
         :class="statusClass"
         :datasetId="datasetId"
-        :recordId="recordId"
-        :recordStatus="record.record_status"
+        :record="record"
         @on-submit-responses="goToNextPageAndRefreshMetrics"
         @on-discard-responses="goToNextPageAndRefreshMetrics"
         @on-clear-responses="refreshMetrics"
@@ -22,7 +21,7 @@
 
     <div v-else class="wrapper--empty">
       <p
-        v-if="!hasRecords"
+        v-if="!records.hasRecordsToAnnotate"
         class="wrapper__text --heading3"
         v-text="noRecordsMessage"
       />
@@ -35,22 +34,10 @@
 import { isNil } from "lodash";
 import { Notification } from "@/models/Notifications";
 import {
-  getComponentTypeOfQuestionByDatasetIdAndQuestionName,
-  getOptionsOfQuestionByDatasetIdAndQuestionName,
-} from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
-import {
   RECORD_STATUS,
   RESPONSE_STATUS_FOR_API,
-  upsertRecords,
-  deleteAllRecords,
-  getRecordWithFieldsSuggestionsAndResponsesByUserId,
-  isRecordWithRecordIndexByDatasetIdExists,
-  isAnyRecordByDatasetId,
 } from "@/models/feedback-task-model/record/record.queries";
 import { upsertDatasetMetrics } from "@/models/feedback-task-model/dataset-metric/datasetMetric.queries.js";
-import { deleteRecordResponsesByUserIdAndResponseId } from "@/models/feedback-task-model/record-response/recordResponse.queries";
-import { deleteAllRecordFields } from "@/models/feedback-task-model/record-field/recordField.queries";
-import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
 import { LABEL_PROPERTIES } from "../../feedback-task/feedbackTask.properties";
 import { useRecordFeedbackTaskViewModel } from "./useRecordFeedbackTaskViewModel";
 
@@ -59,10 +46,6 @@ export default {
   props: {
     datasetId: {
       type: String,
-      required: true,
-    },
-    feedback: {
-      type: Object,
       required: true,
     },
   },
@@ -111,40 +94,7 @@ export default {
       return paramForUrl;
     },
     record() {
-      return getRecordWithFieldsSuggestionsAndResponsesByUserId(
-        this.datasetId,
-        this.userId,
-        this.currentPage - 1
-      );
-    },
-    hasRecords() {
-      return isAnyRecordByDatasetId(this.datasetId);
-    },
-    recordId() {
-      return this.record?.id;
-    },
-    questions() {
-      return this.feedback.questions;
-    },
-    fields() {
-      return this.feedback.fields;
-    },
-    recordFields() {
-      return this.record?.record_fields ?? [];
-    },
-    fieldsWithRecordFieldText() {
-      return this.fields?.map((field) => {
-        const correspondingRecordFieldToField = this.recordFields.find(
-          (recordField) => field.name === recordField.field_name
-        );
-
-        if (correspondingRecordFieldToField) {
-          return {
-            ...field,
-            field_text: correspondingRecordFieldToField.text,
-          };
-        }
-      });
+      return this.records.records[this.currentPage - 1];
     },
     noRecordsMessage() {
       if (
@@ -155,7 +105,7 @@ export default {
       return `You have no ${this.recordStatusToFilterWith} records matching the search input`;
     },
     statusClass() {
-      return `--${this.record.record_status.toLowerCase()}`;
+      return `--${this.record.status.toLowerCase()}`;
     },
     questionFormKey() {
       return `${this.currentPage}-${this.reRenderQuestionForm}`;
@@ -172,16 +122,29 @@ export default {
     },
   },
   async fetch() {
-    await this.cleanRecordOrm();
+    this.clearRecords();
 
-    await this.initRecordsInDatabase(this.currentPage - 1);
+    await this.loadRecords(
+      this.datasetId,
+      this.currentPage - 1,
+      this.recordStatusFilterValueForGetRecords,
+      this.searchTextToFilterWith
+    );
 
     const offset = this.currentPage - 1;
-    const isRecordExistForCurrentPage =
-      isRecordWithRecordIndexByDatasetIdExists(this.datasetId, offset);
+    const isRecordExistForCurrentPage = this.records.exists(
+      this.datasetId,
+      offset
+    );
 
     if (!isRecordExistForCurrentPage) {
-      await this.initRecordsInDatabase(0);
+      await this.loadRecords(
+        this.datasetId,
+        0,
+        this.recordStatusFilterValueForGetRecords,
+        this.searchTextToFilterWith
+      );
+
       this.currentPage = 1;
     }
 
@@ -300,7 +263,6 @@ export default {
       this.reRenderQuestionForm++;
     },
     async applySearchFilter(searchFilter) {
-      // NOTE - the order of both next line is important because of the watcher update
       this.currentPage = 1;
       this.searchTextToFilterWith = searchFilter;
 
@@ -378,25 +340,22 @@ export default {
     },
     async setCurrentPage(newPage) {
       const offset = newPage - 1;
-      let isNextRecordExist = isRecordWithRecordIndexByDatasetIdExists(
-        this.datasetId,
-        offset
-      );
+      let isNextRecordExist = this.records.exists(this.datasetId, offset);
 
-      // if isNextRecordExist => move to the next one
-      // else fetch new set of records and move to next one
       if (!isNextRecordExist) {
-        await this.initRecordsInDatabase(offset);
-        isNextRecordExist = isRecordWithRecordIndexByDatasetIdExists(
+        const records = await this.loadRecords(
           this.datasetId,
-          offset
+          this.currentPage - 1,
+          this.recordStatusFilterValueForGetRecords,
+          this.searchTextToFilterWith
         );
+
+        isNextRecordExist = records.exists(this.datasetId, offset);
       }
 
       if (isNextRecordExist) {
         this.currentPage = newPage;
       } else if (this.currentPage < newPage) {
-        // notify there is no more records
         Notification.dispatch("notify", {
           message: this.noMoreDataMessage,
           numberOfChars: this.noMoreDataMessage.length,
@@ -408,194 +367,12 @@ export default {
       this.setCurrentPage(this.currentPage + 1);
       await this.refreshMetrics();
     },
-    async initRecordsInDatabase(
-      offset,
-      status = this.recordStatusFilterValueForGetRecords,
-      searchText = this.searchTextToFilterWith
-    ) {
-      const { records, totalRecords } = await this.getRecordsFromBackend(
-        this.datasetId,
-        offset,
-        status,
-        searchText
-      );
-
-      this.totalRecords = isNil(totalRecords) ? null : totalRecords;
-
-      // FORMAT records for orm
-      const formattedRecords = this.factoryRecordsForOrm(records, offset);
-
-      // UPSERT records in ORM
-      await upsertRecords(formattedRecords);
+    beforeDestroy() {
+      this.$root.$off("go-to-next-page");
+      this.$root.$off("go-to-prev-page");
+      this.$root.$off("status-filter-changed");
+      this.$root.$off("search-filter-changed");
     },
-    factoryRecordsForOrm(records, offset) {
-      return records.map(
-        (
-          { id: recordId, responses: recordResponses, fields: recordFields },
-          index
-        ) => {
-          const formattedRecordFields = this.factoryRecordFieldsForOrm(
-            recordFields,
-            recordId
-          );
-
-          // NOTE - the record status come from the corresponding responses
-          const { formattedRecordResponsesForOrm, recordStatus } =
-            this.factoryRecordResponsesForOrm({ recordId, recordResponses });
-
-          return {
-            id: recordId,
-            record_index: index + offset,
-            dataset_id: this.datasetId,
-            record_status: recordStatus ?? RECORD_STATUS.PENDING,
-            record_fields: formattedRecordFields,
-            record_responses: formattedRecordResponsesForOrm,
-          };
-        }
-      );
-    },
-    factoryRecordFieldsForOrm(fieldsObj, recordId) {
-      const fields = Object.entries(fieldsObj).map(
-        ([fieldKey, fieldValue], index) => {
-          return {
-            id: `${recordId}_${index}`,
-            field_name: fieldKey,
-            text: fieldValue,
-          };
-        }
-      );
-      return fields;
-    },
-    factoryRecordResponsesForOrm({ recordId, recordResponses }) {
-      const formattedRecordResponsesForOrm = [];
-      // NOTE - by default, recordStatus is at "PENDING"
-      let recordStatus = RECORD_STATUS.PENDING;
-      recordResponses.forEach((responsesByRecordAndUser) => {
-        recordStatus = responsesByRecordAndUser.status ?? RECORD_STATUS.PENDING;
-        if (responsesByRecordAndUser.values) {
-          if (Object.keys(responsesByRecordAndUser.values).length === 0) {
-            // IF responses.value  is an empty object, init formatted responses with questions data
-            this.questions.forEach(
-              ({ name: questionName, options: questionOptions }) => {
-                formattedRecordResponsesForOrm.push({
-                  id: responsesByRecordAndUser.id,
-                  question_name: questionName,
-                  options: questionOptions,
-                  record_id: recordId,
-                  user_id: responsesByRecordAndUser.user_id ?? null,
-                });
-              }
-            );
-          } else {
-            // ELSE responses.value is not an empty object, init formatted responses with questions data and corresponding responses
-            Object.entries(responsesByRecordAndUser.values).forEach(
-              ([questionName, recordResponseByQuestionName]) => {
-                let formattedOptionsWithRecordResponse = [];
-
-                const optionsByQuestionName =
-                  getOptionsOfQuestionByDatasetIdAndQuestionName(
-                    this.datasetId,
-                    questionName
-                  );
-                const correspondingComponentTypeOfTheAnswer =
-                  getComponentTypeOfQuestionByDatasetIdAndQuestionName(
-                    this.datasetId,
-                    questionName
-                  );
-
-                switch (correspondingComponentTypeOfTheAnswer) {
-                  case COMPONENT_TYPE.MULTI_LABEL:
-                    optionsByQuestionName.forEach(({ id, text, value }) => {
-                      const isValueInRecordResponse =
-                        recordResponseByQuestionName.value.includes(value);
-
-                      formattedOptionsWithRecordResponse.push({
-                        id,
-                        text,
-                        value,
-                        is_selected: isValueInRecordResponse,
-                      });
-                    });
-                    break;
-                  case COMPONENT_TYPE.SINGLE_LABEL:
-                  case COMPONENT_TYPE.RATING:
-                    // NOTE - the 'value' of the recordResponseByQuestionName is the text of the optionsByQuestionName
-                    formattedOptionsWithRecordResponse =
-                      optionsByQuestionName.map(({ id, text, value }) => {
-                        if (value === recordResponseByQuestionName.value) {
-                          return {
-                            id,
-                            text,
-                            value,
-                            is_selected: true,
-                          };
-                        }
-                        return { id, text, value, is_selected: false };
-                      });
-                    break;
-                  case COMPONENT_TYPE.RANKING:
-                    formattedOptionsWithRecordResponse =
-                      optionsByQuestionName.map(({ id, text, value }) => {
-                        const correspondingResponse =
-                          recordResponseByQuestionName.value.find(
-                            (response) => response.value === value
-                          );
-
-                        if (correspondingResponse) {
-                          return {
-                            id,
-                            text,
-                            value,
-                            rank: correspondingResponse.rank ?? null,
-                          };
-                        }
-                        return { id, text, value, rank: null };
-                      });
-
-                    break;
-                  case COMPONENT_TYPE.FREE_TEXT:
-                    formattedOptionsWithRecordResponse = [
-                      {
-                        id: questionName,
-                        value: recordResponseByQuestionName.value,
-                      },
-                    ];
-                    break;
-                  default:
-                    console.log(
-                      `The corresponding component with a question name:'${questionName}' was not found`
-                    );
-                }
-
-                formattedRecordResponsesForOrm.push({
-                  id: responsesByRecordAndUser.id,
-                  question_name: questionName,
-                  options: formattedOptionsWithRecordResponse,
-                  record_id: recordId,
-                  user_id: responsesByRecordAndUser.user_id ?? null,
-                });
-              }
-            );
-          }
-        }
-      });
-
-      return { formattedRecordResponsesForOrm, recordStatus };
-    },
-    async cleanRecordOrm() {
-      await deleteAllRecords();
-      await deleteRecordResponsesByUserIdAndResponseId(
-        this.userId,
-        this.datasetId
-      );
-      await deleteAllRecordFields();
-    },
-  },
-  beforeDestroy() {
-    this.$root.$off("go-to-next-page");
-    this.$root.$off("go-to-prev-page");
-    this.$root.$off("status-filter-changed");
-    this.$root.$off("search-filter-changed");
   },
   setup() {
     return useRecordFeedbackTaskViewModel();

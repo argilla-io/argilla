@@ -1,5 +1,5 @@
 import { Field } from "./Field";
-import { Question } from "./Question";
+import { Question } from "./question/Question";
 
 export class Feedback {
   constructor(

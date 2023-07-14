@@ -22,58 +22,62 @@
           </NuxtLink>
         </p>
       </div>
-      <div class="form-group" v-for="input in inputs" :key="input.id">
+      <div
+        class="form-group"
+        v-for="question in record.questions"
+        :key="question.id"
+      >
         <TextAreaComponent
-          v-if="input.isTextType"
-          :title="input.question"
-          :placeholder="input.placeholder"
-          v-model="input.options[0].value"
-          :useMarkdown="input.settings.use_markdown"
-          :hasSuggestion="!isRecordSubmitted && input.hasSuggestion"
-          :isRequired="input.isRequired"
-          :description="input.description"
+          v-if="question.isTextType"
+          :title="question.title"
+          :placeholder="question.settings.placeholder"
+          v-model="question.answer.value"
+          :useMarkdown="question.settings.use_markdown"
+          :hasSuggestion="!record.isSubmitted && question.hasSuggestion"
+          :isRequired="question.isRequired"
+          :description="question.description"
           @on-error="onError"
         />
 
         <SingleLabelComponent
-          v-if="input.isSingleLabelType"
-          :questionId="input.id"
-          :title="input.question"
-          v-model="input.options"
-          :hasSuggestion="!isRecordSubmitted && input.hasSuggestion"
-          :isRequired="input.isRequired"
-          :description="input.description"
-          :visibleOptions="input.settings.visible_options"
+          v-if="question.isSingleLabelType"
+          :questionId="question.id"
+          :title="question.title"
+          v-model="question.answer.values"
+          :hasSuggestion="!record.isSubmitted && question.hasSuggestion"
+          :isRequired="question.isRequired"
+          :description="question.description"
+          :visibleOptions="question.settings.visible_options"
         />
 
         <MultiLabelComponent
-          v-if="input.isMultiLabelType"
-          :questionId="input.id"
-          :title="input.question"
-          v-model="input.options"
-          :hasSuggestion="!isRecordSubmitted && input.hasSuggestion"
-          :isRequired="input.isRequired"
-          :description="input.description"
-          :visibleOptions="input.settings.visible_options"
+          v-if="question.isMultiLabelType"
+          :questionId="question.id"
+          :title="question.title"
+          v-model="question.answer.values"
+          :hasSuggestion="!record.isSubmitted && question.hasSuggestion"
+          :isRequired="question.isRequired"
+          :description="question.description"
+          :visibleOptions="question.settings.visible_options"
         />
 
         <RatingComponent
-          v-if="input.isRatingType"
-          :title="input.question"
-          v-model="input.options"
-          :hasSuggestion="!isRecordSubmitted && input.hasSuggestion"
-          :isRequired="input.isRequired"
-          :description="input.description"
+          v-if="question.isRatingType"
+          :title="question.title"
+          v-model="question.answer.values"
+          :hasSuggestion="!record.isSubmitted && question.hasSuggestion"
+          :isRequired="question.isRequired"
+          :description="question.description"
           @on-error="onError"
         />
 
         <RankingComponent
-          v-if="input.isRankingType"
-          :title="input.question"
-          :hasSuggestion="!isRecordSubmitted && input.hasSuggestion"
-          :isRequired="input.isRequired"
-          :description="input.description"
-          v-model="input.options"
+          v-if="question.isRankingType"
+          :title="question.title"
+          :hasSuggestion="!record.isSubmitted && question.hasSuggestion"
+          :isRequired="question.isRequired"
+          :description="question.description"
+          v-model="question.answer.values"
         />
       </div>
     </div>
@@ -94,7 +98,7 @@
           ref="discardButton"
           class="primary outline"
           @on-click="onDiscard"
-          :disabled="isRecordDiscarded"
+          :disabled="record.isDiscarded"
         >
           <span v-text="'Discard'" />
         </BaseButton>
@@ -117,22 +121,6 @@
 import "assets/icons/external-link";
 import { isEqual, cloneDeep } from "lodash";
 import { Notification } from "@/models/Notifications";
-import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
-import {
-  getOptionsOfQuestionByDatasetIdAndQuestionName,
-  getComponentTypeOfQuestionByDatasetIdAndQuestionName,
-} from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
-import {
-  getRecordIndexByRecordId,
-  updateRecordStatusByRecordId,
-  RECORD_STATUS,
-  RESPONSE_STATUS_FOR_API,
-} from "@/models/feedback-task-model/record/record.queries";
-import {
-  getRecordResponsesIdByRecordId,
-  upsertRecordResponses,
-  deleteRecordResponsesByUserIdAndResponseId,
-} from "@/models/feedback-task-model/record-response/recordResponse.queries";
 import { useQuestionFormViewModel } from "./useQuestionsFormViewModel";
 
 export default {
@@ -142,19 +130,14 @@ export default {
       type: String,
       required: true,
     },
-    recordId: {
-      type: String,
-      required: true,
-    },
-    recordStatus: {
-      type: String,
+    record: {
+      type: Object,
       required: true,
     },
   },
   data() {
     return {
-      inputs: [],
-      initialInputs: [],
+      originalRecord: null,
       renderForm: 0,
       isError: false,
     };
@@ -163,62 +146,14 @@ export default {
     return useQuestionFormViewModel();
   },
   computed: {
-    userId() {
-      return this.$auth.user.id;
-    },
-    recordIdIndex() {
-      return getRecordIndexByRecordId(this.recordId);
-    },
-    responseId() {
-      return getRecordResponsesIdByRecordId({
-        userId: this.userId,
-        recordId: this.recordId,
-      });
-    },
     isFormUntouched() {
-      return isEqual(this.initialInputs, this.inputs);
+      return isEqual(this.originalRecord, this.record);
     },
     questionAreCompletedCorrectly() {
-      const requiredQuestionsAreCompletedCorrectly = this.inputs
-        .filter((input) => input.is_required)
-        .every((input) => {
-          if (input.isTextType) {
-            return input.options[0]?.value.trim() !== "";
-          }
-
-          if (input.isRankingType) {
-            return input.options.every((option) => option.rank);
-          }
-
-          return input.options.some((option) => option.is_selected);
-        });
-
-      const optionalQuestionsCompletedAreCorrectlyEntered = this.inputs
-        .filter((input) => !input.is_required)
-        .every((input) => {
-          if (input.isRankingType) {
-            return (
-              !input.options.some((option) => option.rank) ||
-              input.options.every((option) => option.rank)
-            );
-          }
-
-          return true;
-        });
-
-      return (
-        requiredQuestionsAreCompletedCorrectly &&
-        optionalQuestionsCompletedAreCorrectlyEntered
-      );
-    },
-    isRecordDiscarded() {
-      return this.recordStatus === RECORD_STATUS.DISCARDED;
-    },
-    isRecordSubmitted() {
-      return this.recordStatus === RECORD_STATUS.SUBMITTED;
+      return this.record.questionAreCompletedCorrectly();
     },
     disableSubmitButton() {
-      if (this.isRecordSubmitted)
+      if (this.record.isSubmitted)
         return this.isFormUntouched || !this.questionAreCompletedCorrectly;
 
       return !this.questionAreCompletedCorrectly;
@@ -249,14 +184,13 @@ export default {
     },
   },
   created() {
-    this.COMPONENT_TYPE = COMPONENT_TYPE;
     this.onReset();
   },
   mounted() {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
   },
   destroyed() {
-    this.emitIsQuestionsFormUntouched(true); // NOTE - ensure that on destroy, all parents and siblings have the flag well reinitiate
+    this.emitIsQuestionsFormUntouched(true);
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
@@ -280,58 +214,9 @@ export default {
         default:
       }
     },
-
-    async sendBackendRequest(responseValues) {
-      try {
-        let responseData = null;
-        if (this.responseId) {
-          responseData = await this.updateResponseValues(
-            this.responseId,
-            responseValues
-          );
-        } else {
-          responseData = await this.createRecordResponses(
-            this.recordId,
-            responseValues
-          );
-        }
-
-        const { data: updatedResponse } = responseData;
-        const answer = {
-          record_id: this.recordId,
-          ...updatedResponse,
-        };
-
-        if (this.responseId) {
-          this.updateResponse(answer);
-        } else {
-          this.addResponse(answer);
-        }
-
-        if (updatedResponse) {
-          this.updateResponsesInOrm(answer);
-        }
-      } catch (error) {
-        console.log(error);
-
-        const message = "There was a problem to save the response";
-
-        this.showNotificationComponent(message, "error");
-      }
-    },
     async onDiscard() {
       try {
-        const responseValues = this.factoryInputsToResponseValues();
-
-        await this.sendBackendRequest({
-          status: RESPONSE_STATUS_FOR_API.DISCARDED,
-          values: responseValues,
-        });
-
-        await updateRecordStatusByRecordId(
-          this.recordId,
-          RECORD_STATUS.DISCARDED
-        );
+        await this.discard(this.record);
 
         this.$emit("on-discard-responses");
 
@@ -348,17 +233,7 @@ export default {
       }
 
       try {
-        const responseValues = this.factoryInputsToResponseValues();
-
-        await this.sendBackendRequest({
-          status: RESPONSE_STATUS_FOR_API.SUBMITTED,
-          values: responseValues,
-        });
-
-        await updateRecordStatusByRecordId(
-          this.recordId,
-          RECORD_STATUS.SUBMITTED
-        );
+        await this.submit(this.record);
 
         this.$emit("on-submit-responses");
 
@@ -369,44 +244,17 @@ export default {
     },
     async onClear() {
       try {
-        const responseData =
-          this.responseId &&
-          (await this.deleteResponsesByResponseId(this.responseId));
-
-        await deleteRecordResponsesByUserIdAndResponseId(
-          this.userId,
-          responseData?.data?.id
-        );
-
-        // NOTE - onClear event => the status change to PENDING
-        await updateRecordStatusByRecordId(
-          this.recordId,
-          RECORD_STATUS.PENDING
-        );
-
-        this.clearRecord(this.recordId, RECORD_STATUS.PENDING);
+        await this.clear(this.record);
 
         this.$emit("on-clear-responses");
 
-        if (this.responseId) {
-          this.$nextTick(() => {
-            this.onReset();
-          });
-        } else {
-          this.$nextTick(() => {
-            this.initialInputs = this.feedback.getAnswerWithNoSuggestions();
-            this.inputs = cloneDeep(this.initialInputs);
-            this.isError = false;
-            this.renderForm++;
-          });
-        }
+        this.onReset();
       } catch (err) {
         console.log(err);
       }
     },
     onReset() {
-      this.initialInputs = this.feedback.getAnswer(this.recordId, this.userId);
-      this.inputs = cloneDeep(this.initialInputs);
+      this.originalRecord = cloneDeep(this.record);
       this.isError = false;
       this.renderForm++;
     },
@@ -417,171 +265,6 @@ export default {
         this.isError = false;
       }
     },
-    async deleteResponsesByResponseId(responseId) {
-      return await this.$axios.delete(`/v1/responses/${responseId}`);
-    },
-    async updateResponsesInOrm(responsesFromApi) {
-      const newResponseToUpsertInOrm =
-        this.formatResponsesApiForOrm(responsesFromApi);
-
-      await upsertRecordResponses(newResponseToUpsertInOrm);
-    },
-    async updateResponseValues(responseId, responseByQuestionName) {
-      return await this.$axios.put(
-        `/v1/responses/${responseId}`,
-        JSON.parse(JSON.stringify(responseByQuestionName))
-      );
-    },
-    async createRecordResponses(recordId, responseByQuestionName) {
-      return await this.$axios.post(
-        `/v1/records/${recordId}/responses`,
-        JSON.parse(JSON.stringify(responseByQuestionName))
-      );
-    },
-    formatResponsesApiForOrm(responsesFromApi) {
-      const formattedRecordResponsesForOrm = [];
-      if (responsesFromApi.values) {
-        // TODO - simplify if/else by one loop
-        if (Object.keys(responsesFromApi.values).length === 0) {
-          // IF responses.value  is an empty object, init formatted responses with questions data
-          this.inputs.forEach(
-            ({ question: questionName, options: questionOptions }) => {
-              formattedRecordResponsesForOrm.push({
-                id: responsesFromApi.id,
-                question_name: questionName,
-                options: questionOptions,
-                record_id: responsesFromApi.record_id,
-                user_id: responsesFromApi.user_id ?? null,
-              });
-            }
-          );
-        } else {
-          // ELSE responses.value is not an empty object, init formatted responses with questions data and corresponding responses
-
-          // TODO - remove both loop with only one loop over the form object ( this.inputs)
-          // 1/ push formatted object corresponding to recordResponse which have been remove from api
-          this.currentInputsWithNoResponses.forEach((input) => {
-            formattedRecordResponsesForOrm.push({
-              id: responsesFromApi.id,
-              question_name: input.name,
-              options: input.options,
-              record_id: this.recordId,
-              user_id: this.userId,
-            });
-          });
-
-          // 2/ loop over the responseFromApi
-          Object.entries(responsesFromApi.values).map(
-            ([questionName, newResponse]) => {
-              const componentType =
-                getComponentTypeOfQuestionByDatasetIdAndQuestionName(
-                  this.datasetId,
-                  questionName
-                );
-              let formattedOptions =
-                getOptionsOfQuestionByDatasetIdAndQuestionName(
-                  this.datasetId,
-                  questionName
-                );
-
-              switch (componentType) {
-                case COMPONENT_TYPE.MULTI_LABEL:
-                case COMPONENT_TYPE.SINGLE_LABEL:
-                case COMPONENT_TYPE.RATING:
-                case COMPONENT_TYPE.RANKING:
-                  formattedOptions = formattedOptions.map((option) => {
-                    const currentOptionsFromForm = this.inputs.find(
-                      (input) => input.name === questionName
-                    )?.options;
-                    const currentOption = currentOptionsFromForm.find(
-                      (currentOption) => currentOption.id === option.id
-                    );
-
-                    return {
-                      ...currentOption,
-                    };
-                  });
-                  break;
-                case COMPONENT_TYPE.FREE_TEXT:
-                  formattedOptions = [
-                    {
-                      id: formattedOptions[0].id,
-                      value: newResponse.value,
-                    },
-                  ];
-                  break;
-                default:
-                  console.log(`The component type ${componentType} is unknown`);
-                  return;
-              }
-
-              formattedRecordResponsesForOrm.push({
-                id: responsesFromApi.id,
-                question_name: questionName,
-                user_id: responsesFromApi.user_id,
-                record_id: responsesFromApi.record_id,
-                options: formattedOptions,
-              });
-            }
-          );
-        }
-      }
-      return formattedRecordResponsesForOrm;
-    },
-    factoryInputsToResponseValues() {
-      const responseByQuestionName = {};
-
-      this.inputs.forEach((input) => {
-        switch (input.component_type) {
-          case COMPONENT_TYPE.MULTI_LABEL: {
-            const selectedOptions =
-              input.options?.filter((option) => option.is_selected) ?? false;
-
-            if (selectedOptions?.length) {
-              responseByQuestionName[input.name] = {
-                value: selectedOptions.map((option) => option.value),
-              };
-            }
-            break;
-          }
-          case COMPONENT_TYPE.SINGLE_LABEL:
-          case COMPONENT_TYPE.RATING: {
-            const selectedOption =
-              input.options?.find((option) => option.is_selected) ?? false;
-            if (selectedOption) {
-              responseByQuestionName[input.name] = {
-                value: selectedOption.value,
-              };
-            }
-            break;
-          }
-          case COMPONENT_TYPE.FREE_TEXT: {
-            const text = input.options[0]?.value.trim();
-            if (text) {
-              responseByQuestionName[input.name] = {
-                value: text,
-              };
-            }
-
-            break;
-          }
-          case COMPONENT_TYPE.RANKING: {
-            if (input.options.some((o) => !o.rank)) return;
-
-            responseByQuestionName[input.name] = {
-              value: input.options,
-            };
-
-            break;
-          }
-          default:
-            console.log(
-              `The component type ${input.component_type} is unknown, the response can't be save`
-            );
-        }
-      });
-      return responseByQuestionName;
-    },
     showNotificationComponent(message, typeOfToast) {
       Notification.dispatch("notify", {
         message,
@@ -591,7 +274,7 @@ export default {
     },
     emitIsQuestionsFormUntouched(isFormUntouched) {
       this.$emit("on-question-form-touched", !isFormUntouched);
-      // TODO: Once notifications are centralized in one single point, we can remove this.
+
       this.$root.$emit("are-responses-untouched", isFormUntouched);
     },
   },

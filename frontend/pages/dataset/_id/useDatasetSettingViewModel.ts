@@ -6,9 +6,9 @@ import {
 } from "@nuxtjs/composition-api";
 import { useResolve } from "ts-injecty";
 import { Notification } from "@/models/Notifications";
-import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use.case";
-import { TYPE_OF_FEEDBACK } from "@/v1/infrastructure/DatasetRepository";
-import { useDataset } from "@/v1/infrastructure/DatasetStorage";
+import { GetDatasetByIdUseCase } from "~/v1/domain/usecases/get-dataset-by-id-use-case";
+import { DATASET_API_ERRORS } from "~/v1/infrastructure/repositories/DatasetRepository";
+import { useDataset } from "@/v1/infrastructure/storage/DatasetStorage";
 
 export const useDatasetSettingViewModel = () => {
   const isLoadingDataset = ref(false);
@@ -22,10 +22,10 @@ export const useDatasetSettingViewModel = () => {
   const handleError = (response: string) => {
     let message = "";
     switch (response) {
-      case TYPE_OF_FEEDBACK.ERROR_FETCHING_DATASET_INFO:
+      case DATASET_API_ERRORS.ERROR_FETCHING_DATASET_INFO:
         message = `Can't get dataset info for dataset_id: ${datasetId}`;
         break;
-      case TYPE_OF_FEEDBACK.ERROR_FETCHING_WORKSPACE_INFO:
+      case DATASET_API_ERRORS.ERROR_FETCHING_WORKSPACE_INFO:
         message = `Can't get workspace info for dataset_id: ${datasetId}`;
         break;
       default:

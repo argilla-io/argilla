@@ -1,13 +1,13 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { Store } from "vuex";
-import { Dataset } from "../domain/entities/Dataset";
-import { IDatasetRepository } from "../domain/services/IDatasetRepository";
+import { Dataset } from "@/v1/domain/entities/Dataset";
+import { IDatasetRepository } from "@/v1/domain/services/IDatasetRepository";
 import {
   URL_GET_V1_DATASETS,
   URL_GET_WORKSPACES,
-} from "~/utils/url.properties";
+} from "@/utils/url.properties";
 
-export const TYPE_OF_FEEDBACK = {
+export const DATASET_API_ERRORS = {
   ERROR_FETCHING_FEEDBACK_DATASETS: "ERROR_FETCHING_FEEDBACK_DATASETS",
   ERROR_FETCHING_WORKSPACES: "ERROR_FETCHING_WORKSPACES",
   ERROR_FETCHING_DATASET_INFO: "ERROR_FETCHING_DATASET_INFO",
@@ -83,7 +83,7 @@ export class DatasetRepository implements IDatasetRepository {
       return data;
     } catch (err) {
       throw {
-        response: TYPE_OF_FEEDBACK.ERROR_FETCHING_DATASET_INFO,
+        response: DATASET_API_ERRORS.ERROR_FETCHING_DATASET_INFO,
       };
     }
   }
@@ -99,7 +99,7 @@ export class DatasetRepository implements IDatasetRepository {
       return name;
     } catch (err) {
       throw {
-        response: TYPE_OF_FEEDBACK.ERROR_FETCHING_WORKSPACE_INFO,
+        response: DATASET_API_ERRORS.ERROR_FETCHING_WORKSPACE_INFO,
       };
     }
   }
@@ -112,7 +112,7 @@ export class DatasetRepository implements IDatasetRepository {
       return data;
     } catch (err) {
       throw {
-        response: TYPE_OF_FEEDBACK.ERROR_FETCHING_FEEDBACK_DATASETS,
+        response: DATASET_API_ERRORS.ERROR_FETCHING_FEEDBACK_DATASETS,
       };
     }
   };
@@ -125,7 +125,7 @@ export class DatasetRepository implements IDatasetRepository {
       return data;
     } catch (err) {
       throw {
-        response: TYPE_OF_FEEDBACK.ERROR_FETCHING_WORKSPACES,
+        response: DATASET_API_ERRORS.ERROR_FETCHING_WORKSPACES,
       };
     }
   };

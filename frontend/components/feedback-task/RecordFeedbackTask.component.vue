@@ -2,13 +2,13 @@
   <div class="record">
     <StatusTag class="record__status" :title="recordStatus" />
     <div
-      v-for="{ id, title, field_text, component_type, settings } in fields"
+      v-for="{ id, name, content, isTextType, settings } in fields"
       :key="id"
     >
       <TextFieldComponent
-        v-if="component_type === FIELD_COMPONENT_TYPE.TEXT_FIELD"
-        :title="title"
-        :fieldText="field_text"
+        v-if="isTextType"
+        :title="name"
+        :fieldText="content"
         :useMarkdown="settings.use_markdown"
       />
     </div>
@@ -16,8 +16,6 @@
 </template>
 
 <script>
-import { FIELD_COMPONENT_TYPE } from "./feedbackTask.properties";
-
 export default {
   props: {
     recordStatus: {
@@ -28,9 +26,6 @@ export default {
       type: Array,
       required: true,
     },
-  },
-  created() {
-    this.FIELD_COMPONENT_TYPE = FIELD_COMPONENT_TYPE;
   },
 };
 </script>
