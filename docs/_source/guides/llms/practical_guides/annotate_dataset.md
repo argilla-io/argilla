@@ -23,7 +23,7 @@ Here's a description of the different types of questions you may find:
 
 :::{tab-item} Label
 
-Select a single label from a selection of labels.
+Select a single label from a collection of labels.
 
 ![Label Question](/_static/images/llms/questions/label_question.png)
 :::
