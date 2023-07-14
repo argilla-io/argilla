@@ -32,6 +32,7 @@ from argilla.server.models import (
     ResponseValue,
     Suggestion,
 )
+from argilla.server.models.suggestions import SuggestionCreateWithRecordId
 from argilla.server.schemas.v1.datasets import (
     DatasetCreate,
     FieldCreate,
@@ -79,7 +80,14 @@ async def list_datasets(db: "AsyncSession") -> List[Dataset]:
     return result.scalars().all()
 
 
-async def create_dataset(db: "AsyncSession", dataset_create: DatasetCreate) -> Dataset:
+async def list_datasets_by_workspace_id(db: "AsyncSession", workspace_id: UUID) -> List[Dataset]:
+    result = await db.execute(
+        select(Dataset).where(Dataset.workspace_id == workspace_id).order_by(Dataset.inserted_at.asc())
+    )
+    return result.scalars().all()
+
+
+async def create_dataset(db: "AsyncSession", dataset_create: DatasetCreate):
     return await Dataset.create(
         db,
         name=dataset_create.name,
@@ -480,8 +488,12 @@ async def get_suggestion_by_record_id_and_question_id(
     return result.scalar_one_or_none()
 
 
-async def create_suggestion(
+async def upsert_suggestion(
     db: "AsyncSession", record: Record, question: Question, suggestion_create: "SuggestionCreate"
 ) -> Suggestion:
     question.parsed_settings.check_response(suggestion_create)
-    return await Suggestion.create(db, record_id=record.id, **suggestion_create.dict())
+    return await Suggestion.upsert(
+        db,
+        schema=SuggestionCreateWithRecordId(record_id=record.id, **suggestion_create.dict()),
+        constraints=[Suggestion.record_id, Suggestion.question_id],
+    )

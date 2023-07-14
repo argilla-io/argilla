@@ -33,56 +33,61 @@
         @keydown.shift.arrow-up="updateQuestionAutofocus(autofocusPosition - 1)"
       >
         <TextAreaComponent
-          v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
+          v-if="input.isTextType"
           :title="input.question"
           :placeholder="input.placeholder"
           v-model="input.options[0].value"
           :useMarkdown="input.settings.use_markdown"
           :isRequired="input.is_required"
           :isFocused="checkIfQuestionIsFocused(index)"
+          :hasSuggestion="!isRecordSubmitted && input.matchSuggestion"
           :description="input.description"
           @on-error="onError"
           @on-focus="updateQuestionAutofocus(index)"
         />
 
         <SingleLabelComponent
-          v-if="input.component_type === COMPONENT_TYPE.SINGLE_LABEL"
+          v-if="input.isSingleLabelType"
           :questionId="input.id"
           :title="input.question"
           v-model="input.options"
           :isRequired="input.is_required"
           :isFocused="checkIfQuestionIsFocused(index)"
+          :hasSuggestion="!isRecordSubmitted && input.matchSuggestion"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
           @on-focus="updateQuestionAutofocus(index)"
         />
         <MultiLabelComponent
-          v-if="input.component_type === COMPONENT_TYPE.MULTI_LABEL"
+          v-if="input.isMultiLabelType"
           :questionId="input.id"
           :title="input.question"
           v-model="input.options"
           :isRequired="input.is_required"
           :isFocused="checkIfQuestionIsFocused(index)"
+          :hasSuggestion="!isRecordSubmitted && input.matchSuggestion"
           :description="input.description"
           :visibleOptions="input.settings.visible_options"
           @on-focus="updateQuestionAutofocus(index)"
         />
 
         <RatingComponent
-          v-if="input.component_type === COMPONENT_TYPE.RATING"
+          v-if="input.isRatingType"
           :title="input.question"
           v-model="input.options"
           :isRequired="input.is_required"
           :isFocused="checkIfQuestionIsFocused(index)"
+          :hasSuggestion="!isRecordSubmitted && input.matchSuggestion"
           :description="input.description"
           @on-error="onError"
           @on-focus="updateQuestionAutofocus(index)"
         />
         <RankingComponent
-          v-if="input.component_type === COMPONENT_TYPE.RANKING"
+          v-if="input.isRankingType"
           :title="input.question"
           :isRequired="input.is_required"
           :isFocused="checkIfQuestionIsFocused(index)"
+          :hasSuggestion="!isRecordSubmitted && input.matchSuggestion"
           :description="input.description"
           v-model="input.options"
           @on-focus="updateQuestionAutofocus(index)"
@@ -145,6 +150,7 @@ import {
   upsertRecordResponses,
   deleteRecordResponsesByUserIdAndResponseId,
 } from "@/models/feedback-task-model/record-response/recordResponse.queries";
+import { useQuestionFormViewModel } from "./useQuestionsFormViewModel";
 
 export default {
   name: "QuestionsFormComponent",
@@ -161,18 +167,18 @@ export default {
       type: String,
       required: true,
     },
-    initialInputs: {
-      type: Array,
-      required: true,
-    },
   },
   data() {
     return {
       inputs: [],
+      initialInputs: [],
       renderForm: 0,
       isError: false,
       autofocusPosition: 0,
     };
+  },
+  setup() {
+    return useQuestionFormViewModel();
   },
   computed: {
     userId() {
@@ -194,11 +200,11 @@ export default {
       const requiredQuestionsAreCompletedCorrectly = this.inputs
         .filter((input) => input.is_required)
         .every((input) => {
-          if (input.component_type === COMPONENT_TYPE.FREE_TEXT) {
-            return input.options[0]?.value.trim() != "";
+          if (input.isTextType) {
+            return input.options[0]?.value.trim() !== "";
           }
 
-          if (input.component_type === COMPONENT_TYPE.RANKING) {
+          if (input.isRankingType) {
             return input.options.every((option) => option.rank);
           }
 
@@ -208,7 +214,7 @@ export default {
       const optionalQuestionsCompletedAreCorrectlyEntered = this.inputs
         .filter((input) => !input.is_required)
         .every((input) => {
-          if (input.component_type === COMPONENT_TYPE.RANKING) {
+          if (input.isRankingType) {
             return (
               !input.options.some((option) => option.rank) ||
               input.options.every((option) => option.rank)
@@ -238,18 +244,18 @@ export default {
     currentInputsWithNoResponses() {
       return this.inputs.filter((input) => {
         if (
-          input.component_type === COMPONENT_TYPE.RATING ||
-          input.component_type === COMPONENT_TYPE.SINGLE_LABEL ||
-          input.component_type === COMPONENT_TYPE.MULTI_LABEL
+          input.isRatingType ||
+          input.isSingleLabelType ||
+          input.isMultiLabelType
         ) {
           return input.options.every((option) => !option.is_selected);
         }
 
-        if (input.component_type === COMPONENT_TYPE.RANKING) {
+        if (input.isRankingType) {
           return input.options.every((option) => !option.rank);
         }
 
-        if (input.component_type === COMPONENT_TYPE.FREE_TEXT) {
+        if (input.isTextType) {
           return !input.options[0]?.value.trim();
         }
       });
@@ -307,13 +313,21 @@ export default {
             responseValues
           );
         }
-        const { data: updatedResponses } = responseData;
 
-        if (updatedResponses) {
-          this.updateResponsesInOrm({
-            record_id: this.recordId,
-            ...updatedResponses,
-          });
+        const { data: updatedResponse } = responseData;
+        const answer = {
+          record_id: this.recordId,
+          ...updatedResponse,
+        };
+
+        if (this.responseId) {
+          this.updateResponse(answer);
+        } else {
+          this.addResponse(answer);
+        }
+
+        if (updatedResponse) {
+          this.updateResponsesInOrm(answer);
         }
       } catch (error) {
         console.log(error);
@@ -339,7 +353,6 @@ export default {
 
         this.$emit("on-discard-responses");
 
-        // TODO - reset only when we know that we fetch and computed all the necessary records data
         this.onReset();
       } catch (error) {
         console.log(error);
@@ -367,7 +380,6 @@ export default {
 
         this.$emit("on-submit-responses");
 
-        // TODO - reset only when we know that we fetch and computed all the necessary records data
         this.onReset();
       } catch (error) {
         console.log(error);
@@ -390,13 +402,28 @@ export default {
           RECORD_STATUS.PENDING
         );
 
+        this.clearRecord(this.recordId, RECORD_STATUS.PENDING);
+
         this.$emit("on-clear-responses");
-        this.onReset();
+
+        if (this.responseId) {
+          this.$nextTick(() => {
+            this.onReset();
+          });
+        } else {
+          this.$nextTick(() => {
+            this.initialInputs = this.feedback.getAnswerWithNoSuggestions();
+            this.inputs = cloneDeep(this.initialInputs);
+            this.isError = false;
+            this.renderForm++;
+          });
+        }
       } catch (err) {
         console.log(err);
       }
     },
     onReset() {
+      this.initialInputs = this.feedback.getAnswer(this.recordId, this.userId);
       this.inputs = cloneDeep(this.initialInputs);
       this.isError = false;
       this.renderForm++;
@@ -539,7 +566,6 @@ export default {
           case COMPONENT_TYPE.RATING: {
             const selectedOption =
               input.options?.find((option) => option.is_selected) ?? false;
-
             if (selectedOption) {
               responseByQuestionName[input.name] = {
                 value: selectedOption.value,
@@ -549,7 +575,6 @@ export default {
           }
           case COMPONENT_TYPE.FREE_TEXT: {
             const text = input.options[0]?.value.trim();
-
             if (text) {
               responseByQuestionName[input.name] = {
                 value: text,

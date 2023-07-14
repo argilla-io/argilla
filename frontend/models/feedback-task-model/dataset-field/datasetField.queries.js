@@ -15,6 +15,9 @@ const getFieldsByDatasetId = (
 };
 
 // UPSERT
+/**
+ * @deprecated use V1 store
+ */
 const upsertDatasetFields = (globalFields) => {
   DatasetFieldModel.insertOrUpdate({ data: globalFields });
 };

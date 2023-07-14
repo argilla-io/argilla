@@ -3,6 +3,7 @@
     <QuestionHeaderComponent
       :title="title"
       :isRequired="isRequired"
+      :hasSuggestion="hasSuggestion"
       :tooltipMessage="description"
     />
     <div
@@ -61,6 +62,10 @@ export default {
       default: () => false,
     },
     isFocused: {
+      type: Boolean,
+      default: () => false,
+    },
+    hasSuggestion: {
       type: Boolean,
       default: () => false,
     },

@@ -48,12 +48,22 @@ class FeedbackResponseModel(BaseModel):
     updated_at: datetime
 
 
+class FeedbackSuggestionModel(BaseModel):
+    id: UUID
+    question_id: UUID
+    type: Optional[Literal["human", "model"]] = None
+    score: Optional[float] = None
+    value: Any
+    agent: Optional[str] = None
+
+
 class FeedbackItemModel(BaseModel):
     id: UUID
     fields: Dict[str, Any]
     metadata: Optional[Dict[str, Any]] = None
     external_id: Optional[str] = None
     responses: Optional[List[FeedbackResponseModel]] = []
+    suggestions: Optional[List[FeedbackSuggestionModel]] = []
     inserted_at: datetime
     updated_at: datetime
 
@@ -81,3 +91,12 @@ class FeedbackQuestionModel(BaseModel):
     settings: Dict[str, Any]
     inserted_at: datetime
     updated_at: datetime
+
+
+class FeedbackSuggestionModel(BaseModel):
+    id: UUID
+    question_id: UUID
+    type: Optional[Literal["human", "model"]] = None
+    score: Optional[float] = None
+    value: Any
+    agent: Optional[str] = None

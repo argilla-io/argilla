@@ -1,11 +1,18 @@
 import { DatasetQuestion as DatasetQuestionModel } from "./DatasetQuestion.model";
 
 // UPSERT
+/**
+ * @deprecated use V1 store
+ */
 const upsertDatasetQuestions = (globalQuestions) => {
   DatasetQuestionModel.insertOrUpdate({ data: globalQuestions });
 };
 
 // GET
+
+/**
+ * @deprecated use V1 store
+ */
 const getQuestionsByDatasetId = (
   datasetId,
   orderBy = "order",
@@ -18,6 +25,10 @@ const getQuestionsByDatasetId = (
     .orderBy(orderBy, direction)
     .get();
 };
+
+/**
+ * @deprecated use V1 store
+ */
 const getComponentTypeOfQuestionByDatasetIdAndQuestionName = (
   datasetId,
   questionName
@@ -27,6 +38,9 @@ const getComponentTypeOfQuestionByDatasetIdAndQuestionName = (
     .where("name", questionName)
     .first()?.component_type;
 
+/**
+ * @deprecated use V1 store
+ */
 const getOptionsOfQuestionByDatasetIdAndQuestionName = (
   datasetId,
   questionName
@@ -36,9 +50,16 @@ const getOptionsOfQuestionByDatasetIdAndQuestionName = (
     .where("name", questionName)
     .first()?.options;
 
+const getNameOfQuestionByDatasetIdAndQuestionId = (datasetId, questionId) =>
+  DatasetQuestionModel.query()
+    .where("dataset_id", datasetId)
+    .where("id", questionId)
+    .first()?.name;
+
 export {
   upsertDatasetQuestions,
   getQuestionsByDatasetId,
   getComponentTypeOfQuestionByDatasetIdAndQuestionName,
   getOptionsOfQuestionByDatasetIdAndQuestionName,
+  getNameOfQuestionByDatasetIdAndQuestionId,
 };

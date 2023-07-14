@@ -88,56 +88,166 @@ class ResponseSchema(BaseModel):
         if not v:
             warnings.warn(
                 "`user_id` not provided, so it will be set to `None`. Which is not an"
-                " issue, unless you're planning to log the response in Argilla, as "
+                " issue, unless you're planning to log the response in Argilla, as"
                 " it will be automatically set to the active `user_id`.",
             )
         return v
 
+    class Config:
+        extra = Extra.forbid
 
-class FeedbackRecord(BaseModel):
-    """A feedback record.
+
+class SuggestionSchema(BaseModel):
+    """Schema for the suggestions for the questions related to the record.
 
     Args:
-        fields (Dict[str, str]): The fields of the record.
-        metadata (Optional[Dict[str, Any]]): The metadata of the record. Defaults to None.
-        responses (Optional[Union[ResponseSchema, List[ResponseSchema]]]): The responses of the record. Defaults to None.
-        external_id (Optional[str]): The external id of the record. Defaults to None.
+        question_id: ID of the question in Argilla. Defaults to None, and is automatically
+           fulfilled internally once the question is pushed to Argilla.
+        question_name: name of the question.
+        type: type of the question. Defaults to None. Possible values are `model` or `human`.
+        score: score of the suggestion. Defaults to None.
+        value: value of the suggestion, which should match the type of the question.
+        agent: agent that generated the suggestion. Defaults to None.
 
     Examples:
         >>> import argilla as rg
-        >>> rg.FeedbackRecord(
-        ...     fields={"text": "This is the first record", "label": "positive"},
-        ...     metadata={"first": True, "nested": {"more": "stuff"}},
-        ...     responses=[{"values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}],
-        ...     external_id="entry-1",
+        >>> rg.SuggestionSchema(
+        ...     question_name="question-1",
+        ...     type="model",
+        ...     score=0.9,
+        ...     value="This is the first suggestion",
+        ...     agent="agent-1",
         ... )
-        >>> # or use a ResponseSchema directly
-        >>> rg.FeedbackRecord(
+    """
+
+    question_id: Optional[UUID] = None
+    question_name: str
+    type: Optional[Literal["model", "human"]] = None
+    score: Optional[float] = None
+    value: Any
+    agent: Optional[str] = None
+
+    class Config:
+        extra = Extra.forbid
+
+
+class FeedbackRecord(BaseModel):
+    """Schema for the records of a `FeedbackDataset` in Argilla.
+
+    Args:
+        id: The ID of the record in Argilla. Defaults to None, and is automatically
+            fulfilled internally once the record is pushed to Argilla.
+        fields: Fields that match the `FeedbackDataset` defined fields. So this attribute
+            contains the actual information shown in the UI for each record, being the
+            record itself.
+        metadata: Metadata to be included to enrich the information for a given record.
+            Note that the metadata is not shown in the UI so you'll just be able to see
+            that programatically after pulling the records. Defaults to None.
+        responses: Responses given by either the current user, or one or a collection of
+            users that must exist in Argilla. Each response corresponds to one of the
+            `FeedbackDataset` questions, so the values should match the question type.
+            Defaults to None.
+        external_id: The external ID of the record, which means that the user can
+            specify this ID to identify the record no matter what the Argilla ID is.
+            Defaults to None.
+
+    Examples:
+        >>> from argilla.client.feedback.schemas import FeedbackRecord, ResponseSchema, ValueSchema
+        >>> FeedbackRecord(
         ...     fields={"text": "This is the first record", "label": "positive"},
         ...     metadata={"first": True, "nested": {"more": "stuff"}},
-        ...     responses=[rg.ResponseSchema(values={"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}))],
+        ...     responses=[ # optional
+        ...         ResponseSchema(
+        ...             user_id="user-1",
+        ...             values={
+        ...                 "question-1": ValueSchema(value="This is the first answer"),
+        ...                 "question-2": ValueSchema(value=5),
+        ...             },
+        ...             status="submitted",
+        ...         ),
+        ...     ],
+        ...     suggestions=[ # optional
+        ...         SuggestionSchema(
+        ...            question_name="question-1",
+        ...            type="model",
+        ...            score=0.9,
+        ...            value="This is the first suggestion",
+        ...            agent="agent-1",
+        ...         ),
         ...     external_id="entry-1",
         ... )
 
     """
 
+    id: Optional[UUID] = None
     fields: Dict[str, str]
-    metadata: Optional[Dict[str, Any]] = None
-    responses: Optional[Union[ResponseSchema, List[ResponseSchema]]] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    responses: List[ResponseSchema] = Field(default_factory=list)
+    suggestions: List[SuggestionSchema] = Field(default_factory=list, allow_mutation=True)
     external_id: Optional[str] = None
-    _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default={})
 
-    @validator("responses", always=True)
-    def responses_must_be_a_list(cls, v: Optional[Union[ResponseSchema, List[ResponseSchema]]]) -> List[ResponseSchema]:
-        if not v:
-            return []
-        if isinstance(v, ResponseSchema):
-            return [v]
-        return v
+    _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default_factory=dict)
+    _updated: bool = PrivateAttr(default=False)
+
+    def set_suggestions(
+        self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
+    ) -> None:
+        if isinstance(suggestions, (dict, SuggestionSchema)):
+            suggestions = [suggestions]
+        parsed_suggestions = []
+        for suggestion in suggestions:
+            if not isinstance(suggestion, SuggestionSchema):
+                suggestion = SuggestionSchema(**suggestion)
+            parsed_suggestions.append(suggestion)
+        if not self.id:
+            warnings.warn(
+                "Ignore the following if you are creating a new `FeedbackDataset` with"
+                " `FeedbackRecord`s, or if you are just working with a `FeedbackRecord`."
+                " Otherwise, if the `FeedbackRecord` is already pushed"
+                " to Argilla, note that `suggestions` have been provided, but the `id`"
+                " is not set, which means that the `FeedbackRecord` has been pushed to"
+                " Argilla, but hasn't been fetched, so the `id` is missing. To solve that,"
+                " you can simply call `FeedbackDataset.fetch_records()` to fetch them and"
+                " automatically set the `id`, to call `set_suggestions` on top of that."
+            )
+        for suggestion in parsed_suggestions:
+            for existing_suggestion in self.suggestions:
+                if (
+                    existing_suggestion.question_id == suggestion.question_id
+                    or existing_suggestion.question_name == suggestion.question_name
+                ):
+                    warnings.warn(
+                        f"A suggestion for question `{existing_suggestion.question_name}` has already"
+                        " been provided, so the provided suggestion will overwrite it."
+                    )
+                    self.suggestions.remove(existing_suggestion)
+                    break
+        self.suggestions += parsed_suggestions
+        if self.id and not self._updated:
+            self._updated = True
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        if name == "suggestions" and hasattr(self, name):
+            warnings.warn(
+                "You are trying to set `suggestions` directly, which is not allowed. You"
+                " should use the `set_suggestions` method instead."
+            )
+            if getattr(self, name) != value:
+                warnings.warn(
+                    "You are trying to update the existing `suggestions` with a new value,"
+                    " which is not allowed. You should use the `set_suggestions` method"
+                    " instead, and the existing `suggestions` will be overwritten based"
+                    " on the provided `question_id`s/`question_name`/s for those `suggestions`."
+                )
+        super().__setattr__(name, value)
+
+    def _reset_updated(self) -> None:
+        self._updated = False
 
     class Config:
-        extra = Extra.ignore
-        fields = {"_unified_responses": {"exclude": True}}
+        extra = Extra.forbid
+        validate_assignment = True
+        exclude = {"_unified_responses", "_updated"}
 
 
 FieldTypes = Literal["text"]
@@ -161,6 +271,7 @@ class FieldSchema(BaseModel):
 
     """
 
+    id: Optional[UUID] = None
     name: str
     title: Optional[str] = None
     required: bool = True
@@ -176,7 +287,7 @@ class FieldSchema(BaseModel):
     class Config:
         validate_assignment = True
         extra = Extra.forbid
-        exclude = {"type"}
+        exclude = {"id", "type"}
 
 
 class TextField(FieldSchema):
@@ -232,6 +343,7 @@ class QuestionSchema(BaseModel):
 
     """
 
+    id: Optional[UUID] = None
     name: str
     title: Optional[str] = None
     description: Optional[str] = None
@@ -248,7 +360,7 @@ class QuestionSchema(BaseModel):
     class Config:
         validate_assignment = True
         extra = Extra.forbid
-        exclude = {"type"}
+        exclude = {"id", "type"}
 
 
 # TODO(alvarobartt): add `TextResponse` and `RatingResponse` classes
