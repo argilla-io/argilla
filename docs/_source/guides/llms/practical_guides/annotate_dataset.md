@@ -15,7 +15,7 @@ If you are having issues with the search engine, you may need to reindex the dat
 
 We highly recommend that you read the annotation guidelines before starting the annotation, if there are any. If the guidelines have been specified, you can find them either on the dataset settings page or by clicking the "Read the annotation guidelines" button on the top right of the feedback panel, before starting the annotation.
 
-In the feedback view, you will be able to provide responses/annotations to the given questions. Additionally, if a question has a description, you will find an info icon next to it. You can click it to see additional information about the question itself.
+In the annotation view, you will be able to provide responses/annotations to the given questions. Additionally, if a question has a description, you will find an info icon next to it. You can click it to see additional information about the question itself.
 
 Here's a description of the different types of questions you may find:
 
