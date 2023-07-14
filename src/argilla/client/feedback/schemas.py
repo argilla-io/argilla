@@ -88,7 +88,7 @@ class ResponseSchema(BaseModel):
         if not v:
             warnings.warn(
                 "`user_id` not provided, so it will be set to `None`. Which is not an"
-                " issue, unless you're planning to log the response in Argilla, as "
+                " issue, unless you're planning to log the response in Argilla, as"
                 " it will be automatically set to the active `user_id`.",
             )
         return v
