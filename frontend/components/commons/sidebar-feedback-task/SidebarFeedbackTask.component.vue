@@ -75,8 +75,8 @@ export default {
         buttons: [
           {
             id: "help-shortcut",
-            tooltip: "Help",
-            icon: "support",
+            tooltip: "Shortcuts",
+            icon: "shortcuts",
             action: "show-help",
             type: "expandable",
             component: "HelpShortcut",
