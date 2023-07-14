@@ -58,7 +58,7 @@ Provide a text response inside the text area.
 
 ::::
 
-Some questions may include a suggested response as well. Those questions will be marked with this icon ✨ and you will see the suggestion as a pre-filled response. If you agree with the suggestion, there is nothing you need to do; if you don't do any modifications, the suggestion will be saved as your response once you submit or dicard the response. In case the suggestion is not quite right, you will just need to make the necessary modifications.
+Some questions may include a suggested response as well. Those questions will be marked with this icon ✨ and you will see the suggestion as a pre-filled response. If you agree with the suggestion, there is nothing you need to do; if you don't do any modifications, the suggestion will be saved as your response once you submit the response. In case the suggestion is not quite right, you will just need to make the necessary modifications.
 
 Once all required questions have responses, the `Submit` button will be enabled and you will be able to submit your response for the questions of the given record. If either you decide not to provide the responses for a record, you can move to the next record, or you can discard it using the `Discard` button.
 
