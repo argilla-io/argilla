@@ -48,14 +48,6 @@ export default {
         buttonType: "expandable",
         buttons: [
           {
-            id: "help-shortcut",
-            tooltip: "Help",
-            icon: "support",
-            action: "show-help",
-            type: "expandable",
-            component: "HelpShortcut",
-          },
-          {
             id: "metrics",
             tooltip: "Progress",
             icon: "progress",
@@ -65,7 +57,7 @@ export default {
           },
         ],
       },
-      lastGroup: {
+      secondGroup: {
         buttonType: "default",
         buttons: [
           {
@@ -78,6 +70,19 @@ export default {
           },
         ],
       },
+      lastGroup: {
+        buttonType: "expandable",
+        buttons: [
+          {
+            id: "help-shortcut",
+            tooltip: "Help",
+            icon: "support",
+            action: "show-help",
+            type: "expandable",
+            component: "HelpShortcut",
+          },
+        ],
+      },
     };
   },
   methods: {
@@ -86,8 +91,11 @@ export default {
         case "FIRSTGROUP":
           this.togglePanel(info);
           break;
-        case "LASTGROUP":
+        case "SECONDGROUP":
           this.$emit("refresh");
+          break;
+        case "LASTGROUP":
+          this.togglePanel(info);
           break;
         default:
           console.warn(info);
