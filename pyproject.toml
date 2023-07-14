@@ -40,7 +40,7 @@ dependencies = [
     "backoff",
     "monotonic",
     # for logging, tracebacks, printing, progressbars
-    "rich <= 13.0.1",
+    "rich != 13.1.0",
     # for CLI
     "typer >= 0.6.0, < 0.8.0", # spaCy only supports typer<0.8.0
 ]
