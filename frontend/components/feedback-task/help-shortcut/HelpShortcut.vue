@@ -44,10 +44,12 @@ export default {
 
 <style lang="scss" scoped>
 .help-info__content {
-  width: auto;
+  &.snippet__container {
+    width: auto;
+  }
 }
 :deep(.snippet) {
-  max-height: calc(100vh - 140px);
+  max-height: calc(100vh - 145px);
   overflow: auto;
 }
 :deep(table) {
@@ -55,15 +57,16 @@ export default {
   border-collapse: collapse;
   border-radius: $border-radius;
   border-spacing: 0;
+  background: palette(grey, 800);
   box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.05),
     0 0 0.0625rem rgba(0, 0, 0, 0.1);
   td,
   th {
+    display: block;
     border-bottom: 1px solid $black-4;
     border-left: 1px solid $black-4;
     border-right: 1px solid $black-4;
-    padding: 0 0.25rem;
-    height: $base-space * 5;
+    padding: $base-space;
   }
   th {
     background: $black-4;
@@ -83,6 +86,10 @@ export default {
   td:first-child,
   th:first-child {
     border-left: none;
+    border-bottom: none;
+  }
+  th:last-child {
+    display: none;
   }
   code {
     padding: calc($base-space / 2);
