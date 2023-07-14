@@ -17,6 +17,9 @@
 </template>
 
 <script>
+import "assets/icons/progress";
+import "assets/icons/refresh";
+import "assets/icons/shortcuts";
 import { isDatasetExistsByDatasetIdAndUserId } from "@/models/feedback-task-model/dataset-metric/datasetMetric.queries";
 
 export default {
