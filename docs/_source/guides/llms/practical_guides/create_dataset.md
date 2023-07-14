@@ -137,8 +137,8 @@ The next step is to create records following Argilla's `FeedbackRecord` format. 
 - `fields`: A dictionary with the name (key) and content (value) of each of the fields in the record. These will need to match the fields set up in the dataset configuration (see [Define record fields](#define-record-fields)).
 - `metadata` (optional): A dictionary with the metadata of the record. This can include any information about the record that is not part of the fields. For example, the source of the record or the date it was created. If there is no metadata, this will be `None`.
 - `external_id` (optional): An ID of the record defined by the user. If there is no external ID, this will be `None`.
-- `suggestions`(optional): A list of all suggested responses for a record e.g., model predictions or other helpful hints for the annotators. These will need to follow the same schema as the responses of the type of question answered by the suggestion. If these are added, suggestions will appear in the UI as pre-filled responses.
-- `responses` (optional): A list of all responses to a record. You will only need to add them if your dataset already has some annotated records. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered.
+- `suggestions`(optional): A list of all suggested responses for a record e.g., model predictions or other helpful hints for the annotators. Just one suggestion can be provided for each question, and suggestion values must be compliant with the pre-defined questions e.g. if we have a `RatingQuestion` between 1 and 5, the suggestion should have a valid value within that range. If suggestions are added, they will appear in the UI as pre-filled responses.
+- `responses` (optional): A list of all responses to a record. You will only need to add them if your dataset already has some annotated records. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered. Also make sure to include `user_id`s in case you're planning to add more than one response for the same question, as only one `user_id` can be None, later to be replaced by the current active `user_id`, while the rest will be discarded otherwise.
 
 ```python
 # create a single Feedback Record
@@ -168,7 +168,7 @@ dataset.add_records(records)
 
 ## Add suggestions
 
-Suggestions refer to suggested responses (e.g. model predictions) that you can add to your records to make the annotation process faster. These can be added during the creation of the record or at a later stage. The suggestion should follow the schema of the response of the type of question answered by the suggestion:
+Suggestions refer to suggested responses (e.g. model predictions) that you can add to your records to make the annotation process faster. These can be added during the creation of the record or at a later stage. Only one suggestion can be provided for each question, and suggestion values must be compliant with the pre-defined questions e.g. if we have a `RatingQuestion` between 1 and 5, the suggestion should have a valid value within that range.
 
 ::::{tab-set}
 
@@ -262,20 +262,18 @@ You can also add suggestions to existing records that have been already pushed t
 ```python
 import argilla as rg
 
-rg.init()
+rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
-records = fetch_records(name="my_dataset", workspace="my_workspace")
-# if you need to get the questions and fields as well you can use this line instead:
-# dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_workspace")
-# and in the following lines subsitute `records` for `dataset`
+dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_workspace")
 
-records = [record['suggestions']: [{"question_name": "question", "value": ...}] for record in records]
+for record in dataset.records:
+    record.set_suggestions([{"question_name": "question", "value": ...}])
 
-records.push_to_argilla()
+dataset.push_to_argilla() # No need to provide `name` and `workspace` as has been retrieved via `from_argilla` classmethod
 ```
 
 ## Add responses
-If your dataset includes some annotations, you can add those to the records as you create them. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered.
+If your dataset includes some annotations, you can add those to the records as you create them. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered. Note that just one response with an empty `user_id` can be specified, as the first occurrence of `user_id=None` will be set to the active `user_id`, while the rest of the responses with `user_id=None` will be discarded.
 
 ::::{tab-set}
 
