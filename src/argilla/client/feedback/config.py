@@ -62,11 +62,11 @@ class DeprecatedDatasetConfig(BaseModel):
         return self.json()
 
     @classmethod
-    def from_json(self, json: str) -> "DeprecatedDatasetConfig":
+    def from_json(cls, json: str) -> "DeprecatedDatasetConfig":
         warnings.warn(
             "`DatasetConfig` can just be loaded from YAML, so make sure that you are"
             " loading a YAML file instead of a JSON file. `DatasetConfig` will be dumped"
             " as YAML from now on, instead of JSON.",
             DeprecationWarning,
         )
-        return self.parse_raw(json)
+        return cls.parse_raw(json)
