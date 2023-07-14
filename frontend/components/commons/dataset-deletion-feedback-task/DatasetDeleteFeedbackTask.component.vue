@@ -55,6 +55,7 @@ export default {
     return {
       showDeleteModal: false,
       sectionTitle: "Danger zone",
+      datasetId: this.dataset.id,
       datasetName: this.dataset.name,
       workspace: this.dataset.workspace,
       datasetDeleteTitle: `Delete <strong>${this.dataset.name}</strong>`,
