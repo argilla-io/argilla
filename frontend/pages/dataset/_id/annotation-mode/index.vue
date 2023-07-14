@@ -58,6 +58,8 @@ import {
 import { LABEL_PROPERTIES } from "@/components/feedback-task/feedbackTask.properties";
 import { Notification } from "@/models/Notifications";
 
+import { useAnnotationModeViewModel } from "./useAnnotationModeViewModel";
+
 const TYPE_OF_FEEDBACK = Object.freeze({
   ERROR_FETCHING_DATASET_INFO: "ERROR_FETCHING_DATASET_INFO",
   ERROR_FETCHING_WORKSPACE_INFO: "ERROR_FETCHING_WORKSPACE_INFO",
@@ -255,6 +257,9 @@ export default {
   destroyed() {
     this.$root.$off("are-responses-untouched");
     Notification.dispatch("clear");
+  },
+  setup() {
+    return useAnnotationModeViewModel();
   },
 };
 </script>

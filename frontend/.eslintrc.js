@@ -55,6 +55,7 @@ module.exports = {
         "no-useless-constructor": 0,
         "space-before-function-paren": 0,
         "no-throw-literal": 0,
+        "no-new": 0,
       },
     },
   ],

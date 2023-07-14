@@ -2,11 +2,15 @@ import { Context } from "@nuxt/types";
 import Container, { register } from "ts-injecty";
 import { Registration } from "ts-injecty/types";
 
+import { useEventDispatcher } from "@codescouts/events";
+import { useMetrics } from "../infrastructure/storage/MetricsStorage";
 import {
   DatasetRepository,
   RecordRepository,
   QuestionRepository,
   FieldRepository,
+  MetricsRepository,
+  MetricsRepository,
 } from "@/v1/infrastructure/repositories";
 
 import { useDataset } from "@/v1/infrastructure/storage/DatasetStorage";
@@ -19,6 +23,7 @@ import { GetRecordsForAnnotateUseCase } from "@/v1/domain/usecases/get-records-f
 import { SubmitRecordUseCase } from "@/v1/domain/usecases/submit-record-use-case";
 import { ClearRecordUseCase } from "@/v1/domain/usecases/clear-record-use-case";
 import { DiscardRecordUseCase } from "@/v1/domain/usecases/discard-record-use-case";
+import { GetUserMetricsUseCase } from "@/v1/domain/usecases/get-user-metrics-use-case";
 
 export const loadDependencyContainer = (context: Context) => {
   const useAxios = () => context.$axios;
@@ -29,6 +34,7 @@ export const loadDependencyContainer = (context: Context) => {
     register(RecordRepository).withDependency(useAxios).build(),
     register(QuestionRepository).withDependency(useAxios).build(),
     register(FieldRepository).withDependency(useAxios).build(),
+    register(MetricsRepository).withDependency(useAxios).build(),
 
     register(GetDatasetsUseCase)
       .withDependency(DatasetRepository)
@@ -45,9 +51,23 @@ export const loadDependencyContainer = (context: Context) => {
       .and(useRecords)
       .build(),
 
-    register(DiscardRecordUseCase).withDependency(RecordRepository).build(),
-    register(SubmitRecordUseCase).withDependency(RecordRepository).build(),
-    register(ClearRecordUseCase).withDependency(RecordRepository).build(),
+    register(DiscardRecordUseCase)
+      .withDependency(RecordRepository)
+      .and(useEventDispatcher)
+      .build(),
+    register(SubmitRecordUseCase)
+      .withDependency(RecordRepository)
+      .and(useEventDispatcher)
+      .build(),
+    register(ClearRecordUseCase)
+      .withDependency(RecordRepository)
+      .and(useEventDispatcher)
+      .build(),
+
+    register(GetUserMetricsUseCase)
+      .withDependency(MetricsRepository)
+      .and(useMetrics)
+      .build(),
   ];
 
   Container.register(dependencies);
