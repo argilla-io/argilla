@@ -15,7 +15,7 @@
 from typing import TYPE_CHECKING, List
 
 import pytest
-from argilla.client.feedback.config import DatasetConfig
+from argilla.client.feedback.config import DatasetConfig, DeprecatedDatasetConfig
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import FieldSchema, QuestionSchema
@@ -56,12 +56,12 @@ def test_dataset_config_json_deprecated(
     feedback_dataset_questions: List["QuestionSchema"],
     feedback_dataset_guidelines: str,
 ) -> None:
-    config = DatasetConfig(
+    config = DeprecatedDatasetConfig(
         fields=feedback_dataset_fields,
         questions=feedback_dataset_questions,
         guidelines=feedback_dataset_guidelines,
     )
-    assert isinstance(config, DatasetConfig)
+    assert isinstance(config, DeprecatedDatasetConfig)
     assert config.fields == feedback_dataset_fields
     assert config.questions == feedback_dataset_questions
     assert config.guidelines == feedback_dataset_guidelines
@@ -75,7 +75,7 @@ def test_dataset_config_json_deprecated(
 
     with pytest.warns(DeprecationWarning, match="`DatasetConfig` can just be loaded from YAML"):
         from_json_config = config.from_json(to_json_config)
-    assert isinstance(from_json_config, DatasetConfig)
+    assert isinstance(from_json_config, DeprecatedDatasetConfig)
     assert from_json_config.fields == feedback_dataset_fields
     assert from_json_config.questions == feedback_dataset_questions
     assert from_json_config.guidelines == feedback_dataset_guidelines

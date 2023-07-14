@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING, Any, Optional, Type
 
 from packaging.version import parse as parse_version
 
-from argilla.client.feedback.config import DatasetConfig
+from argilla.client.feedback.config import DatasetConfig, DeprecatedDatasetConfig
 from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas import FeedbackRecord
 from argilla.client.feedback.typing import AllowedQuestionTypes
@@ -307,7 +307,7 @@ class HuggingFaceDatasetMixin:
                 **hub_auth,
             )
             with open(config_path, "r") as f:
-                config = DatasetConfig.from_json(f.read())
+                config = DeprecatedDatasetConfig.from_json(f.read())
         except Exception as e:
             raise FileNotFoundError(
                 "Neither `argilla.yaml` nor `argilla.cfg` files were found in the"
