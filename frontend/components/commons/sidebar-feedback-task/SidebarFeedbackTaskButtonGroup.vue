@@ -79,6 +79,12 @@ export default {
       margin-top: auto;
       margin-bottom: $base-space * 2;
     }
+    .custom-expandable :deep(svg) {
+      fill: palette(purple, 200);
+      border-radius: $border-radius;
+      max-height: 20px;
+      max-width: 20px;
+    }
   }
 }
 </style>

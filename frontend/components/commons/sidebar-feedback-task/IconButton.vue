@@ -103,13 +103,6 @@ export default {
       fill: palette(grey, 100);
     }
   }
-  &.custom-expandable :deep(svg) {
-    fill: palette(purple, 200);
-    border: 1px solid palette(purple, 200);
-    border-radius: $border-radius;
-    max-height: 20px;
-    max-width: 20px;
-  }
   &.non-expandable {
     &:hover {
       .svg-icon {
