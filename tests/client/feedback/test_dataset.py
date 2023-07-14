@@ -554,7 +554,7 @@ async def test_update_dataset_records_in_argilla(
                 },
             ]
         )
-    with pytest.warns(UserWarning, match="You are trying to set `suggestions` directly, which is not allowed"):
+    with pytest.warns(UserWarning, match="if you are trying to set `suggestions` directly"):
         record.suggestions = [
             {
                 "question_name": "question-1",
