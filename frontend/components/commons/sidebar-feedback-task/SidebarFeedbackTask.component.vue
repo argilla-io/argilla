@@ -70,7 +70,7 @@ export default {
           },
         ],
       },
-      lastGroup: {
+      bottomGroup: {
         buttonType: "expandable",
         buttons: [
           {
@@ -78,7 +78,7 @@ export default {
             tooltip: "Shortcuts",
             icon: "shortcuts",
             action: "show-help",
-            type: "expandable",
+            type: "custom-expandable",
             component: "HelpShortcut",
           },
         ],
@@ -94,7 +94,7 @@ export default {
         case "SECONDGROUP":
           this.$emit("refresh");
           break;
-        case "LASTGROUP":
+        case "BOTTOMGROUP":
           this.togglePanel(info);
           break;
         default:

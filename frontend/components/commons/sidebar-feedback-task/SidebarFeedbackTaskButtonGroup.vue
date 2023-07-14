@@ -16,15 +16,16 @@
   -->
 
 <template>
-  <span class="sidebar__info">
+  <span class="sidebar__info" :class="groupName">
     <!-- NOTE: HIDDEN FOR MVP
     <p class="sidebar__info__title" v-text="groupName"></p> -->
     <IconButton
-      v-for="{ id, icon, tooltip } in groupItems"
+      v-for="{ id, icon, tooltip, type } in groupItems"
       :id="id"
       :key="id"
       :icon="icon"
       :tooltip="tooltip"
+      :class="type"
       :button-type="groupButtonType"
       :is-button-active="checkIfButtonIsActive(id)"
       @on-button-action="onAction(id)"
@@ -73,6 +74,10 @@ export default {
       font-weight: 600;
       @include font-size(12px);
       text-transform: capitalize;
+    }
+    &.bottomGroup {
+      margin-top: auto;
+      margin-bottom: $base-space * 2;
     }
   }
 }
