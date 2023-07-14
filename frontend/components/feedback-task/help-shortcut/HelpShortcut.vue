@@ -1,10 +1,12 @@
 <template>
   <div>
+    <p class="shortcuts__title">Shortcuts</p>
     <base-spinner v-if="$fetchState.pending" />
     <documentation-viewer
-      class="help-info__content"
+      class="shortcuts__content"
       v-else
       :content="content"
+      :hidden-tabs="true"
     />
   </div>
 </template>
@@ -43,13 +45,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.help-info__content {
-  &.snippet__container {
-    width: auto;
+.shortcuts {
+  &__title {
+    margin-top: 0;
+    margin-bottom: $base-space * 2;
+    @include font-size(18px);
+    font-weight: 600;
+  }
+  &__content {
+    &.snippet__container {
+      width: auto;
+    }
   }
 }
 :deep(.snippet) {
-  max-height: calc(100vh - 145px);
+  max-height: calc(100vh - 120px);
   overflow: auto;
 }
 :deep(table) {

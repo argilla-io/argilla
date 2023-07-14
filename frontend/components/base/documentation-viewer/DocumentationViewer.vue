@@ -1,7 +1,7 @@
 <template>
   <div class="snippet__container">
     <BaseTabs
-      v-if="content.tabs.length"
+      v-if="visibleTabs"
       class="snippets__tabs"
       :tabs="content.tabs"
       :active-tab="currentTab"
@@ -39,6 +39,11 @@ export default {
       type: Object,
       required: true,
     },
+    //TODO - we can split this component in two, one only for render docs .md and other with the tabs
+    hiddenTabs: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -48,6 +53,11 @@ export default {
   methods: {
     onChangeTab(tabId) {
       this.currentTab = this.content.tabs.find((tab) => tab.id === tabId);
+    },
+  },
+  computed: {
+    visibleTabs() {
+      return this.content.tabs.length && !this.hiddenTabs;
     },
   },
 };
