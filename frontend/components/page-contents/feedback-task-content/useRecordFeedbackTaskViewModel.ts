@@ -14,11 +14,11 @@ export const useRecordFeedbackTaskViewModel = () => {
 
   const loadRecords = async (
     datasetId: string,
-    offset: number,
+    page: number,
     status: string,
     searchText: string
   ) => {
-    return await getRecords.execute(datasetId, offset, status, searchText);
+    return await getRecords.execute(datasetId, page, status, searchText);
   };
 
   return { records, loadMetrics, loadRecords, clearRecords };

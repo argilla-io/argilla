@@ -10,11 +10,12 @@ export class Records {
     return this.records.length;
   }
 
-  exists(datasetId: string, page: number) {
-    const records = this.records.filter(
-      (record) => record.datasetId === datasetId
-    );
+  existsRecordOn(page: number) {
+    return !!this.getRecordOn(page);
+  }
 
-    return !!records[page];
+  getRecordOn(page: number) {
+    const arrayOffset = page - 1;
+    return this.records.find((record) => record.arrayOffset === arrayOffset);
   }
 }

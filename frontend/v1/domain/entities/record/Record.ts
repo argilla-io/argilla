@@ -12,7 +12,8 @@ export class Record {
     public readonly questions: Question[],
     public readonly fields: Field[],
     public answer: RecordAnswer,
-    private readonly suggestions: Suggestion[]
+    private readonly suggestions: Suggestion[],
+    public readonly arrayOffset: number
   ) {
     this.completeQuestion();
   }

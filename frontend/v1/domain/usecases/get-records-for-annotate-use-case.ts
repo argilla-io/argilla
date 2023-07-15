@@ -27,13 +27,15 @@ export class GetRecordsForAnnotateUseCase {
 
   async execute(
     datasetId: string,
-    offset: number,
+    page: number,
     status: string,
     searchText: string
   ): Promise<Records> {
+    const arrayOffset = page - 1;
+
     const getRecords = this.recordRepository.getRecords(
       datasetId,
-      offset,
+      arrayOffset,
       status,
       searchText
     );
@@ -43,56 +45,63 @@ export class GetRecordsForAnnotateUseCase {
     const [recordsFromBackend, questionsFromBackend, fieldsFromBackend] =
       await Promise.all([getRecords, getQuestions, getFields]);
 
-    const recordsToAnnotate = recordsFromBackend.records.map((record) => {
-      const fields = Object.keys(record.fields).map((fieldName) => {
-        const field = fieldsFromBackend.find(
-          (field) => field.name === fieldName
-        );
+    const recordsToAnnotate = recordsFromBackend.records.map(
+      (record, index) => {
+        const fields = Object.keys(record.fields).map((fieldName) => {
+          const field = fieldsFromBackend.find(
+            (field) => field.name === fieldName
+          );
 
-        return new Field(
-          field.id,
-          field.title,
-          record.fields[fieldName],
+          return new Field(
+            field.id,
+            field.title,
+            record.fields[fieldName],
+            datasetId,
+            field.required,
+            field.settings
+          );
+        });
+
+        const questions = questionsFromBackend.map((question) => {
+          return new Question(
+            question.id,
+            question.name,
+            question.description,
+            datasetId,
+            question.title,
+            question.required,
+            question.settings
+          );
+        });
+
+        const userAnswer = record.responses[0];
+        const answer = userAnswer
+          ? new RecordAnswer(
+              userAnswer.id,
+              userAnswer.status,
+              userAnswer.values
+            )
+          : null;
+
+        const suggestions = record.suggestions.map((suggestion) => {
+          return new Suggestion(
+            suggestion.id,
+            suggestion.question_id,
+            suggestion.value
+          );
+        });
+
+        return new Record(
+          record.id,
           datasetId,
-          field.required,
-          field.settings
+          questions,
+          fields,
+          answer,
+          suggestions,
+          index + arrayOffset
         );
-      });
-
-      const questions = questionsFromBackend.map((question) => {
-        return new Question(
-          question.id,
-          question.name,
-          question.description,
-          datasetId,
-          question.title,
-          question.required,
-          question.settings
-        );
-      });
-
-      const userAnswer = record.responses[0];
-      const answer = userAnswer
-        ? new RecordAnswer(userAnswer.id, userAnswer.status, userAnswer.values)
-        : null;
-
-      const suggestions = record.suggestions.map((suggestion) => {
-        return new Suggestion(
-          suggestion.id,
-          suggestion.question_id,
-          suggestion.value
-        );
-      });
-
-      return new Record(
-        record.id,
-        datasetId,
-        questions,
-        fields,
-        answer,
-        suggestions
-      );
-    });
+      }
+    );
 
     const records = new Records(recordsToAnnotate, recordsFromBackend.total);
 

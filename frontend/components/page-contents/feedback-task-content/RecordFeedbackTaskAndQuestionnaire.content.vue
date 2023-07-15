@@ -56,6 +56,7 @@ export default {
       currentPage: null,
       totalRecords: null,
       numberOfFetch: 0,
+      fetching: false,
     };
   },
   computed: {
@@ -65,9 +66,6 @@ export default {
         _page: this.currentPage,
         _status: this.recordStatusToFilterWith,
       };
-    },
-    userId() {
-      return this.$auth.user.id;
     },
     noMoreDataMessage() {
       return `You've reached the end of the data for the ${this.recordStatusToFilterWith} queue.`;
@@ -92,7 +90,7 @@ export default {
       return paramForUrl;
     },
     record() {
-      return this.records.records[this.currentPage - 1];
+      return this.records.getRecordOn(this.currentPage);
     },
     noRecordsMessage() {
       if (
@@ -120,33 +118,35 @@ export default {
     },
   },
   async fetch() {
+    if (this.fetching) return Promise.resolve();
+
+    this.fetching = true;
     this.clearRecords();
 
     await this.loadRecords(
       this.datasetId,
-      this.currentPage - 1,
+      this.currentPage,
       this.recordStatusFilterValueForGetRecords,
       this.searchTextToFilterWith
     );
 
-    const offset = this.currentPage - 1;
-    const isRecordExistForCurrentPage = this.records.exists(
-      this.datasetId,
-      offset
+    const isRecordExistForCurrentPage = this.records.existsRecordOn(
+      this.currentPage
     );
 
     if (!isRecordExistForCurrentPage) {
+      this.currentPage = 1;
+
       await this.loadRecords(
         this.datasetId,
-        0,
+        this.currentPage,
         this.recordStatusFilterValueForGetRecords,
         this.searchTextToFilterWith
       );
-
-      this.currentPage = 1;
     }
 
     this.numberOfFetch++;
+    this.fetching = false;
   },
   watch: {
     async currentPage(newValue) {
@@ -214,8 +214,8 @@ export default {
   },
   methods: {
     async applyStatusFilter(status) {
-      this.recordStatusToFilterWith = status;
       this.currentPage = 1;
+      this.recordStatusToFilterWith = status;
 
       await this.$fetch();
 
@@ -303,18 +303,21 @@ export default {
       this.questionFormTouched = isTouched;
     },
     async setCurrentPage(newPage) {
-      const offset = newPage - 1;
-      let isNextRecordExist = this.records.exists(this.datasetId, offset);
+      if (this.fetching) return Promise.resolve();
+
+      this.fetching = true;
+
+      let isNextRecordExist = this.records.existsRecordOn(newPage);
 
       if (!isNextRecordExist) {
-        const records = await this.loadRecords(
+        await this.loadRecords(
           this.datasetId,
-          this.currentPage - 1,
+          newPage,
           this.recordStatusFilterValueForGetRecords,
           this.searchTextToFilterWith
         );
 
-        isNextRecordExist = records.exists(this.datasetId, offset);
+        isNextRecordExist = this.records.existsRecordOn(newPage);
       }
 
       if (isNextRecordExist) {
@@ -326,8 +329,10 @@ export default {
           type: "info",
         });
       }
+
+      this.fetching = false;
     },
-    async goToNextPageAndRefreshMetrics() {
+    goToNextPageAndRefreshMetrics() {
       this.setCurrentPage(this.currentPage + 1);
     },
     beforeDestroy() {
