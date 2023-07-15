@@ -1,18 +1,20 @@
 import { onBeforeMount } from "vue-demi";
-import { useDatasetSettingViewModel } from "../useDatasetSettingViewModel";
+import { useDatasetViewModel } from "../useDatasetViewModel";
 import {
   UpdateMetricsEventHandler,
   useEvents,
-} from "~/v1/infrastructure/events";
+} from "@/v1/infrastructure/events";
 
 export const useAnnotationModeViewModel = () => {
-  const viewModel = useDatasetSettingViewModel();
+  const datasetViewModel = useDatasetViewModel();
 
   onBeforeMount(() => {
     useEvents(() => {
       new UpdateMetricsEventHandler();
     });
+
+    datasetViewModel.loadDataset();
   });
 
-  return { ...viewModel };
+  return { ...datasetViewModel };
 };
