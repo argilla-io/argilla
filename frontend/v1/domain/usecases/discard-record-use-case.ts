@@ -10,9 +10,11 @@ export class DiscardRecordUseCase {
   ) {}
 
   async execute(record: Record) {
-    record.discard();
+    const answerDiscarded = await this.recordRepository.discardRecordResponse(
+      record
+    );
 
-    await this.recordRepository.discardRecordResponse(record);
+    record.discard(answerDiscarded);
 
     this.eventDispatcher.dispatch(new RecordResponseUpdated(record));
   }

@@ -1,6 +1,5 @@
 import { IEventDispatcher } from "@codescouts/events";
 import { Record } from "../entities/record/Record";
-import { RecordAnswer } from "../entities/record/RecordAnswer";
 import { RecordResponseUpdated } from "../events/RecordResponseUpdated";
 import { RecordRepository } from "@/v1/infrastructure/repositories";
 
@@ -15,10 +14,8 @@ export class SubmitRecordUseCase {
       record
     );
 
-    this.eventDispatcher.dispatch(new RecordResponseUpdated(record));
+    record.submit(response);
 
-    record.submit(
-      new RecordAnswer(response.id, response.status, response.values)
-    );
+    this.eventDispatcher.dispatch(new RecordResponseUpdated(record));
   }
 }

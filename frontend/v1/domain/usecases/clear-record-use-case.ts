@@ -10,9 +10,9 @@ export class ClearRecordUseCase {
   ) {}
 
   async execute(record: Record) {
-    if (record.answer) {
-      await this.recordRepository.deleteRecordResponse(record.answer);
+    await this.recordRepository.deleteRecordResponse(record);
 
+    if (record.answer) {
       this.eventDispatcher.dispatch(new RecordResponseUpdated(record));
     }
 

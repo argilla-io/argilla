@@ -45,9 +45,11 @@ export class RecordRepository {
     );
   }
 
-  async deleteRecordResponse(answer: RecordAnswer) {
+  async deleteRecordResponse(record: Record) {
+    if (!record.answer) return;
+
     try {
-      await this.axios.delete(`/v1/responses/${answer.id}`);
+      await this.axios.delete(`/v1/responses/${record.answer.id}`);
     } catch (error) {
       throw {
         response: RECORD_API_ERRORS.ERROR_DELETING_RECORD_RESPONSE,
@@ -55,11 +57,31 @@ export class RecordRepository {
     }
   }
 
-  async discardRecordResponse(record: Record) {
-    try {
-      const request = this.createRequest("discarded", record.questions);
+  discardRecordResponse(record: Record): Promise<RecordAnswer> {
+    if (record.answer) return this.updateRecordResponse(record, "discarded");
 
-      return await this.axios.put(`/v1/responses/${record.answer.id}`, request);
+    return this.createRecordResponse(record, "discarded");
+  }
+
+  submitNewRecordResponse(record: Record): Promise<RecordAnswer> {
+    if (record.answer) return this.updateRecordResponse(record, "submitted");
+
+    return this.createRecordResponse(record, "submitted");
+  }
+
+  private async updateRecordResponse(
+    record: Record,
+    status: BackendResponseStatus
+  ) {
+    try {
+      const request = this.createRequest(status, record.questions);
+
+      const { data } = await this.axios.put<BackendResponse>(
+        `/v1/responses/${record.answer.id}`,
+        request
+      );
+
+      return new RecordAnswer(data.id, data.status, data.values);
     } catch (error) {
       throw {
         response: RECORD_API_ERRORS.ERROR_UPDATING_RECORD_RESPONSE,
@@ -67,16 +89,19 @@ export class RecordRepository {
     }
   }
 
-  async submitNewRecordResponse(record: Record): Promise<BackendResponse> {
+  private async createRecordResponse(
+    record: Record,
+    status: BackendResponseStatus
+  ) {
     try {
-      const request = this.createRequest("submitted", record.questions);
+      const request = this.createRequest(status, record.questions);
 
-      const response = await this.axios.post<BackendResponse>(
+      const { data } = await this.axios.post<BackendResponse>(
         `/v1/records/${record.id}/responses`,
         request
       );
 
-      return response.data;
+      return new RecordAnswer(data.id, data.status, data.values);
     } catch (error) {
       throw {
         response: RECORD_API_ERRORS.ERROR_CREATING_RECORD_RESPONSE,

@@ -29,8 +29,8 @@ export class Record {
     return this.status === "discarded";
   }
 
-  discard() {
-    this.answer.discard();
+  discard(answer: RecordAnswer) {
+    this.answer = answer;
   }
 
   submit(answer: RecordAnswer) {
