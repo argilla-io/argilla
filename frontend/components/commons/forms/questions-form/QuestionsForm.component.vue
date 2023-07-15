@@ -36,7 +36,6 @@
           :hasSuggestion="!record.isSubmitted && question.hasSuggestion"
           :isRequired="question.isRequired"
           :description="question.description"
-          @on-error="onError"
         />
 
         <SingleLabelComponent
@@ -68,7 +67,6 @@
           :hasSuggestion="!record.isSubmitted && question.hasSuggestion"
           :isRequired="question.isRequired"
           :description="question.description"
-          @on-error="onError"
         />
 
         <RankingComponent
@@ -108,7 +106,7 @@
           name="submitButton"
           value="submitButton"
           class="primary"
-          :disabled="disableSubmitButton"
+          :disabled="isSubmitButtonDisabled"
         >
           <span v-text="'Submit'" />
         </BaseButton>
@@ -120,7 +118,6 @@
 <script>
 import "assets/icons/external-link";
 import { isEqual, cloneDeep } from "lodash";
-import { Notification } from "@/models/Notifications";
 import { useQuestionFormViewModel } from "./useQuestionsFormViewModel";
 
 export default {
@@ -139,7 +136,6 @@ export default {
     return {
       originalRecord: null,
       renderForm: 0,
-      isError: false,
     };
   },
   setup() {
@@ -152,30 +148,11 @@ export default {
     questionAreCompletedCorrectly() {
       return this.record.questionAreCompletedCorrectly();
     },
-    disableSubmitButton() {
+    isSubmitButtonDisabled() {
       if (this.record.isSubmitted)
         return this.isFormUntouched || !this.questionAreCompletedCorrectly;
 
       return !this.questionAreCompletedCorrectly;
-    },
-    currentInputsWithNoResponses() {
-      return this.inputs.filter((input) => {
-        if (
-          input.isRatingType ||
-          input.isSingleLabelType ||
-          input.isMultiLabelType
-        ) {
-          return input.options.every((option) => !option.is_selected);
-        }
-
-        if (input.isRankingType) {
-          return input.options.every((option) => !option.rank);
-        }
-
-        if (input.isTextType) {
-          return !input.options[0]?.value.trim();
-        }
-      });
     },
   },
   watch: {
@@ -227,8 +204,6 @@ export default {
     },
     async onSubmit() {
       if (!this.questionAreCompletedCorrectly) {
-        this.isError = true;
-
         return;
       }
 
@@ -255,22 +230,7 @@ export default {
     },
     onReset() {
       this.originalRecord = cloneDeep(this.record);
-      this.isError = false;
       this.renderForm++;
-    },
-    onError(isError) {
-      if (isError) {
-        this.isError = true;
-      } else {
-        this.isError = false;
-      }
-    },
-    showNotificationComponent(message, typeOfToast) {
-      Notification.dispatch("notify", {
-        message,
-        numberOfChars: message.length,
-        type: typeOfToast,
-      });
     },
     emitIsQuestionsFormUntouched(isFormUntouched) {
       this.$emit("on-question-form-touched", !isFormUntouched);
@@ -337,9 +297,5 @@ export default {
     display: inline-flex;
     gap: $base-space * 2;
   }
-}
-
-.error-message {
-  color: $danger;
 }
 </style>
