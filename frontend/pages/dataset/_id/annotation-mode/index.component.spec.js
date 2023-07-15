@@ -1,6 +1,17 @@
 import { shallowMount } from "@vue/test-utils";
 import AnnotationModePage from "./index";
 import HeaderAndTopAndOneColumn from "@/layouts/HeaderAndTopAndOneColumn";
+import { setActivePinia, createPinia } from "pinia";
+import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use-case";
+import { useResolveMock } from "~/v1/di/__mocks__/useResolveMock";
+import * as useAnnotationModeViewModel from "./useAnnotationModeViewModel";
+
+const pinia = createPinia();
+setActivePinia(pinia);
+
+useResolveMock(GetDatasetByIdUseCase, {
+  execute: jest.fn(),
+});
 
 const $route = {
   path: "/dataset/ccc38de6-4241-4a92-97c1-31929b0575ca/annotation-mode",
@@ -27,13 +38,14 @@ describe("AnnotationModePage", () => {
       stubs: ["BaseModal", "DatasetTrainComponent"],
       mocks: {
         $route,
-        $fetchState: {
-          pending: true,
-          error: null,
-          timestamp: 1686579374810,
-        },
       },
     };
+
+    jest
+      .spyOn(useAnnotationModeViewModel, "useAnnotationModeViewModel")
+      .mockReturnValue({
+        isLoadingDataset: true,
+      });
 
     const wrapper = shallowMount(AnnotationModePage, options);
 
@@ -58,13 +70,14 @@ describe("AnnotationModePage", () => {
       ],
       mocks: {
         $route,
-        $fetchState: {
-          pending: false,
-          error: false,
-          timestamp: 1686579374810,
-        },
       },
     };
+
+    jest
+      .spyOn(useAnnotationModeViewModel, "useAnnotationModeViewModel")
+      .mockReturnValue({
+        isLoadingDataset: false,
+      });
 
     const wrapper = shallowMount(AnnotationModePage, options);
 
