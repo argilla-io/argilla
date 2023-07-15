@@ -50,6 +50,15 @@ class CRUDMixin:
         for key, value in kwargs.items():
             if not hasattr(self, key):
                 raise AttributeError(f"Model `{self.__class__.__name__}` has no attribute `{key}`")
+            # If the value is a dict, set value for each key one by one, as we want to update only the keys that are in
+            # `value` and not override the whole dict.
+            if isinstance(value, dict):
+                dict_col = getattr(self, key)
+                if not dict_col:
+                    dict_col = {}
+                for k, v in value.items():
+                    dict_col[k] = v
+                value = dict_col
             setattr(self, key, value)
         return self
 
