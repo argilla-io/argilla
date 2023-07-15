@@ -21,29 +21,6 @@ jest.mock("@/models/feedback-task-model/record/record.queries", () => ({
   deleteAllRecords: () => {},
 }));
 
-jest.mock(
-  "@/models/feedback-task-model/record-field/recordField.queries",
-  () => ({
-    deleteAllRecordFields: () => {},
-  })
-);
-
-jest.mock(
-  "@/models/feedback-task-model/record-response/recordResponse.queries",
-  () => ({
-    deleteAllRecordResponses: () => {},
-  })
-);
-
-jest.mock(
-  "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries",
-  () => ({
-    upsertFeedbackDataset: () => {},
-    getFeedbackDatasetNameById: () => {},
-    getFeedbackDatasetWorkspaceNameById: () => {},
-  })
-);
-
 describe("AnnotationModePage", () => {
   it("not render the layout while the data are in fetching state", () => {
     const options = {

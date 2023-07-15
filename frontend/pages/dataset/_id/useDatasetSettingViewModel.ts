@@ -60,5 +60,5 @@ export const useDatasetSettingViewModel = () => {
     loadDataset();
   });
 
-  return { dataset, datasetId, isLoadingDataset };
+  return { dataset, datasetId, isLoadingDataset, loadDataset };
 };

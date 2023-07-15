@@ -1,5 +1,5 @@
 <template>
-  <HeaderAndTopAndOneColumn v-if="!$fetchState.pending && !$fetchState.error">
+  <HeaderAndTopAndOneColumn v-if="!isLoadingDataset">
     <template v-slot:header>
       <HeaderFeedbackTaskComponent
         :key="datasetName && workspace"
@@ -44,26 +44,11 @@
 
 <script>
 import HeaderAndTopAndOneColumn from "@/layouts/HeaderAndTopAndOneColumn";
-import {
-  RECORD_STATUS,
-  deleteAllRecords,
-} from "@/models/feedback-task-model/record/record.queries";
-import { deleteAllRecordFields } from "@/models/feedback-task-model/record-field/recordField.queries";
-import { deleteAllRecordResponses } from "@/models/feedback-task-model/record-response/recordResponse.queries";
-import {
-  upsertFeedbackDataset,
-  getFeedbackDatasetNameById,
-  getFeedbackDatasetWorkspaceNameById,
-} from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
+import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
 import { LABEL_PROPERTIES } from "@/components/feedback-task/feedbackTask.properties";
 import { Notification } from "@/models/Notifications";
 
 import { useAnnotationModeViewModel } from "./useAnnotationModeViewModel";
-
-const TYPE_OF_FEEDBACK = Object.freeze({
-  ERROR_FETCHING_DATASET_INFO: "ERROR_FETCHING_DATASET_INFO",
-  ERROR_FETCHING_WORKSPACE_INFO: "ERROR_FETCHING_WORKSPACE_INFO",
-});
 
 export default {
   name: "DatasetPage",
@@ -72,8 +57,8 @@ export default {
   },
   data() {
     return {
-      areResponsesUntouched: true, // NOTE - this flag is used to show or to not show a toast when questionnaire is touched (to prevent loosing current modification)
-      visibleTrainModal: false, // TODO - encapsulate this logic in datasetTrain.component and create new datasetTrain.modal
+      areResponsesUntouched: true,
+      visibleTrainModal: false,
     };
   },
   beforeRouteLeave(to, from, next) {
@@ -92,14 +77,11 @@ export default {
     }
   },
   computed: {
-    datasetId() {
-      return this.$route.params.id;
-    },
     datasetName() {
-      return getFeedbackDatasetNameById(this.datasetId);
+      return this.dataset.name;
     },
     workspace() {
-      return getFeedbackDatasetWorkspaceNameById(this.datasetId);
+      return this.dataset.workspace;
     },
     breadcrumbs() {
       return [
@@ -118,25 +100,8 @@ export default {
       ];
     },
   },
-  async fetch() {
-    try {
-      // 1- fetch dataset info
-      const dataset = await this.getDatasetInfo(this.datasetId);
-
-      // TODO - remove step 2 when workspace name will be include in the getDatasetInfo API call
-      // 2- fetch workspace info
-      const workspace = await this.getWorkspaceInfo(dataset.workspace_id);
-
-      // 3- insert in ORM
-      upsertFeedbackDataset({ ...dataset, workspace_name: workspace });
-
-      // Check if response is untouched
-      this.onBusEventAreResponsesUntouched();
-    } catch (err) {
-      this.manageErrorIfFetchNotWorking(err);
-    }
-  },
   created() {
+    this.onBusEventAreResponsesUntouched();
     this.checkIfUrlHaveRecordStatusOrInitiateQueryParams();
 
     this.toastMessageOnRefresh =
@@ -144,7 +109,6 @@ export default {
     this.toastMessageOnLeavingRoute =
       "Your changes will be lost if you leave the current page";
     this.buttonMessage = LABEL_PROPERTIES.CONTINUE;
-    this.typeOfToast = "warning";
   },
   methods: {
     checkIfUrlHaveRecordStatusOrInitiateQueryParams() {
@@ -158,92 +122,29 @@ export default {
           },
         });
     },
-    async getDatasetInfo(datasetId) {
-      try {
-        const { data } = await this.$axios.get(`/v1/datasets/${datasetId}`);
-
-        return data;
-      } catch (err) {
-        throw {
-          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_DATASET_INFO,
-        };
-      }
-    },
-    async getWorkspaceInfo(workspaceId) {
-      try {
-        const { data: responseWorkspace } = await this.$axios.get(
-          `/v1/workspaces/${workspaceId}`
-        );
-
-        const { name } = responseWorkspace || { name: null };
-
-        return name;
-      } catch (err) {
-        throw {
-          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_WORKSPACE_INFO,
-        };
-      }
-    },
-    manageErrorIfFetchNotWorking({ response }) {
-      this.initErrorNotification(response);
-      this.$router.push("/");
-    },
-    initErrorNotification(response) {
-      let message = "";
-      switch (response) {
-        case TYPE_OF_FEEDBACK.ERROR_FETCHING_DATASET_INFO:
-          message = `Can't get dataset info for dataset_id: ${this.datasetId}`;
-          break;
-        case TYPE_OF_FEEDBACK.ERROR_FETCHING_WORKSPACE_INFO:
-          message = `Can't get workspace info for dataset_id: ${this.datasetId}`;
-          break;
-        default:
-          message = `There was an error on fetching dataset info and workspace info. Please try again`;
-      }
-
-      const paramsForNotitification = {
-        message,
-        numberOfChars: message.length,
-        type: "error",
-      };
-
-      Notification.dispatch("notify", paramsForNotitification);
-    },
-    async onRefresh() {
+    onRefresh() {
       if (this.areResponsesUntouched) {
-        await this.deleteRecordsAndRefreshDataset();
-      } else {
-        this.showNotification({
-          eventToFireOnClick: async () => {
-            await this.deleteRecordsAndRefreshDataset();
-          },
-          message: this.toastMessageOnRefresh,
-          buttonMessage: this.buttonMessage,
-          typeOfToast: "warning",
-        });
+        return this.loadDataset();
       }
+
+      this.showNotification({
+        eventToFireOnClick: async () => {
+          this.loadDataset();
+        },
+        message: this.toastMessageOnRefresh,
+        buttonMessage: this.buttonMessage,
+      });
     },
-    async deleteRecordsAndRefreshDataset() {
-      await deleteAllRecords();
-      await deleteAllRecordFields();
-      await deleteAllRecordResponses();
-      this.$fetch();
-    },
-    async onBusEventAreResponsesUntouched() {
+    onBusEventAreResponsesUntouched() {
       this.$root.$on("are-responses-untouched", (areResponsesUntouched) => {
         this.areResponsesUntouched = areResponsesUntouched;
       });
     },
-    showNotification({
-      eventToFireOnClick,
-      message,
-      buttonMessage,
-      typeOfToast,
-    }) {
+    showNotification({ eventToFireOnClick, message, buttonMessage }) {
       Notification.dispatch("notify", {
         message: message ?? "",
         numberOfChars: 500,
-        type: typeOfToast ?? "warning",
+        type: "warning",
         buttonText: buttonMessage ?? "",
         async onClick() {
           eventToFireOnClick();

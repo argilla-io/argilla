@@ -27,8 +27,8 @@ export class MetricsRepository {
         data.responses.submitted,
         data.responses.discarded
       );
-    } catch (err) {
-      console.log(err); // Manage error!
+    } catch {
+      /* lint:disable:no-empty */
     }
   }
 }
