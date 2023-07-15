@@ -48,6 +48,7 @@ from argilla.server.security.model import User
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
+    from argilla.server.schemas.v1.fields import FieldUpdate
     from argilla.server.schemas.v1.suggestions import SuggestionCreate
 
 LIST_RECORDS_LIMIT = 20
@@ -160,6 +161,11 @@ async def create_field(db: "AsyncSession", dataset: Dataset, field_create: Field
         settings=field_create.settings.dict(),
         dataset_id=dataset.id,
     )
+
+
+async def update_field(db: "AsyncSession", field: Field, field_update: "FieldUpdate") -> Field:
+    params = field_update.dict(exclude_unset=True, exclude_none=True)
+    return await field.update(db, **params)
 
 
 async def delete_field(db: "AsyncSession", field: Field) -> Field:

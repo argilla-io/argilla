@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Optional
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -38,3 +38,12 @@ class Field(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class FieldSettingsUpdate(BaseModel):
+    use_markdown: Optional[bool]
+
+
+class FieldUpdate(BaseModel):
+    title: Optional[str]
+    settings: Optional[FieldSettingsUpdate]

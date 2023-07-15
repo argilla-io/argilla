@@ -20,11 +20,36 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from argilla.server.contexts import datasets
 from argilla.server.database import get_async_db
 from argilla.server.policies import FieldPolicyV1, authorize
-from argilla.server.schemas.v1.fields import Field
+from argilla.server.schemas.v1.fields import Field, FieldUpdate
 from argilla.server.security import auth
 from argilla.server.security.model import User
 
 router = APIRouter(tags=["fields"])
+
+
+async def _get_field(db: "AsyncSession", field_id: UUID) -> Field:
+    field = await datasets.get_field_by_id(db, field_id)
+    if not field:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Field with id `{field_id}` not found",
+        )
+    return field
+
+
+@router.patch("/fields/{field_id}", response_model=Field)
+async def update_field(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    field_id: UUID,
+    field_update: FieldUpdate,
+    current_user: User = Security(auth.get_current_user),
+):
+    field = await _get_field(db, field_id)
+
+    await authorize(current_user, FieldPolicyV1.update(field))
+
+    return await datasets.update_field(db, field, field_update)
 
 
 @router.delete("/fields/{field_id}", response_model=Field)
@@ -34,14 +59,9 @@ async def delete_field(
     field_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    field = await datasets.get_field_by_id(db, field_id)
+    field = await _get_field(db, field_id)
 
     await authorize(current_user, FieldPolicyV1.delete(field))
-    if not field:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Field with id `{field_id}` not found",
-        )
 
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
     # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
