@@ -1,4 +1,3 @@
-import type { NuxtAxiosInstance } from "@nuxtjs/axios";
 import { Field } from "../entities/Field";
 import { Question } from "../entities/question/Question";
 import { Record } from "../entities/record/Record";
@@ -13,17 +12,12 @@ import {
 } from "@/v1/infrastructure/repositories";
 
 export class GetRecordsForAnnotateUseCase {
-  private readonly recordRepository: RecordRepository;
-  private readonly questionRepository: QuestionRepository;
-  private readonly fieldRepository: FieldRepository;
   constructor(
-    axios: NuxtAxiosInstance,
+    private readonly recordRepository: RecordRepository,
+    private readonly questionRepository: QuestionRepository,
+    private readonly fieldRepository: FieldRepository,
     private readonly recordsStorage: IRecordStorage
-  ) {
-    this.recordRepository = new RecordRepository(axios);
-    this.questionRepository = new QuestionRepository(axios);
-    this.fieldRepository = new FieldRepository(axios);
-  }
+  ) {}
 
   async execute(
     datasetId: string,

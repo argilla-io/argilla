@@ -1,9 +1,7 @@
 import { Context } from "@nuxt/types";
 import Container, { register } from "ts-injecty";
-import { Registration } from "ts-injecty/types";
 
 import { useEventDispatcher } from "@codescouts/events";
-import { useMetrics } from "../infrastructure/storage/MetricsStorage";
 import {
   DatasetRepository,
   RecordRepository,
@@ -15,6 +13,7 @@ import {
 import { useDataset } from "@/v1/infrastructure/storage/DatasetStorage";
 import { useRecords } from "@/v1/infrastructure/storage/RecordsStorage";
 import { useDatasets } from "@/v1/infrastructure/storage/DatasetsStorage";
+import { useMetrics } from "@/v1/infrastructure/storage/MetricsStorage";
 
 import { GetDatasetsUseCase } from "@/v1/domain/usecases/get-datasets-use-case";
 import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use-case";
@@ -28,7 +27,7 @@ export const loadDependencyContainer = (context: Context) => {
   const useAxios = () => context.$axios;
   const useStore = () => context.store;
 
-  const dependencies: Registration[] = [
+  const dependencies = [
     register(DatasetRepository).withDependency(useAxios).and(useStore).build(),
     register(RecordRepository).withDependency(useAxios).build(),
     register(QuestionRepository).withDependency(useAxios).build(),
@@ -46,7 +45,9 @@ export const loadDependencyContainer = (context: Context) => {
       .build(),
 
     register(GetRecordsForAnnotateUseCase)
-      .withDependency(useAxios)
+      .withDependency(RecordRepository)
+      .and(QuestionRepository)
+      .and(FieldRepository)
       .and(useRecords)
       .build(),
 
@@ -54,10 +55,12 @@ export const loadDependencyContainer = (context: Context) => {
       .withDependency(RecordRepository)
       .and(useEventDispatcher)
       .build(),
+
     register(SubmitRecordUseCase)
       .withDependency(RecordRepository)
       .and(useEventDispatcher)
       .build(),
+
     register(ClearRecordUseCase)
       .withDependency(RecordRepository)
       .and(useEventDispatcher)
