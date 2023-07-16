@@ -1,5 +1,5 @@
 <template>
-  <BaseLoading v-if="isLoadingRecords" />
+  <BaseLoading v-if="isLoadingDataset" />
   <HeaderAndTopAndOneColumn v-else>
     <template v-slot:header>
       <HeaderFeedbackTaskComponent
