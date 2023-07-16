@@ -1,6 +1,5 @@
 <template>
-  <BaseLoading v-if="$fetchState.pending" />
-  <div v-else-if="!$fetchState.error" class="wrapper">
+  <div v-if="!$fetchState.pending && !$fetchState.error" class="wrapper">
     <template v-if="!!record">
       <RecordFeedbackTaskComponent
         :recordStatus="record.status"
@@ -134,7 +133,7 @@ export default {
       this.currentPage
     );
 
-    if (!isRecordExistForCurrentPage) {
+    if (!isRecordExistForCurrentPage && this.currentPage !== 1) {
       this.currentPage = 1;
 
       await this.loadRecords(
@@ -335,12 +334,12 @@ export default {
     goToNextPageAndRefreshMetrics() {
       this.setCurrentPage(this.currentPage + 1);
     },
-    beforeDestroy() {
-      this.$root.$off("go-to-next-page");
-      this.$root.$off("go-to-prev-page");
-      this.$root.$off("status-filter-changed");
-      this.$root.$off("search-filter-changed");
-    },
+  },
+  beforeDestroy() {
+    this.$root.$off("go-to-next-page");
+    this.$root.$off("go-to-prev-page");
+    this.$root.$off("status-filter-changed");
+    this.$root.$off("search-filter-changed");
   },
   setup() {
     return useRecordFeedbackTaskViewModel();

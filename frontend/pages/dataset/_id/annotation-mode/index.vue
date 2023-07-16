@@ -2,7 +2,7 @@
   <HeaderAndTopAndOneColumn v-if="!isLoadingDataset">
     <template v-slot:header>
       <HeaderFeedbackTaskComponent
-        :key="datasetName && workspace"
+        :key="datasetId"
         :datasetId="datasetId"
         :breadcrumbs="breadcrumbs"
         :showTrainButton="true"
