@@ -3219,22 +3219,12 @@ async def test_publish_dataset_with_nonexistent_dataset_id(
 @pytest.mark.parametrize(
     "payload",
     [
-        {
-            "name": "New Name",
-            "guidelines": "New Guidelines",
-        },
-        {
-            "name": "New Name",
-        },
-        {
-            "guidelines": "New Guidelines",
-        },
+        {"name": "New Name", "guidelines": "New Guidelines"},
+        {"name": "New Name"},
+        {"guidelines": "New Guidelines"},
         {},
-        {
-            "name": None,
-            "guidelines": None,
-        },
-        {"random": "field", "another": "random field"},
+        {"name": None, "guidelines": None},
+        {"status": DatasetStatus.draft, "workspace_id": str(uuid4())},
     ],
 )
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
@@ -3261,6 +3251,19 @@ async def test_update_dataset(client: TestClient, role: UserRole, payload: dict)
         "inserted_at": dataset.inserted_at.isoformat(),
         "updated_at": dataset.updated_at.isoformat(),
     }
+
+
+@pytest.mark.asyncio
+async def test_update_dataset_with_invalid_payload(client: TestClient, owner_auth_header: dict):
+    dataset = await DatasetFactory.create()
+
+    response = client.patch(
+        f"/api/v1/datasets/{dataset.id}",
+        headers=owner_auth_header,
+        json={"name": {"this": {"is": "invalid"}}, "guidelines": {"this": {"is": "invalid"}}},
+    )
+
+    assert response.status_code == 422
 
 
 @pytest.mark.asyncio
