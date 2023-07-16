@@ -49,6 +49,7 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
     from argilla.server.schemas.v1.fields import FieldUpdate
+    from argilla.server.schemas.v1.questions import QuestionUpdate
     from argilla.server.schemas.v1.suggestions import SuggestionCreate
 
 LIST_RECORDS_LIMIT = 20
@@ -198,6 +199,11 @@ async def create_question(db: "AsyncSession", dataset: Dataset, question_create:
         settings=question_create.settings.dict(),
         dataset_id=dataset.id,
     )
+
+
+async def update_question(db: "AsyncSession", question: Question, question_update: "QuestionUpdate") -> Question:
+    params = question_update.dict(exclude_unset=True, exclude_none=True)
+    return await question.update(db, **params)
 
 
 async def delete_question(db: "AsyncSession", question: Question) -> Question:

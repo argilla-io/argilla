@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Literal, Optional, Union
+from typing import Any, Dict, Literal, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Field, conlist
@@ -49,11 +49,13 @@ class ValueTextQuestionSettingsOption(BaseModel):
 class LabelSelectionQuestionSettings(BaseModel):
     type: Literal[QuestionType.label_selection]
     options: conlist(item_type=ValueTextQuestionSettingsOption)
+    visible_options: Optional[int] = None
 
 
 class MultiLabelSelectionQuestionSettings(BaseModel):
     type: Literal[QuestionType.multi_label_selection]
     options: conlist(item_type=ValueTextQuestionSettingsOption)
+    visible_options: Optional[int] = None
 
 
 class RankingQuestionSettings(BaseModel):
@@ -86,3 +88,17 @@ class Question(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class TextQuestionSettingsUpdate(BaseModel):
+    use_markdown: Optional[bool]
+
+
+class LabelSelectionSettingsUpdate(BaseModel):
+    visible_options: Optional[int]
+
+
+class QuestionUpdate(BaseModel):
+    title: Optional[str]
+    description: Optional[str]
+    settings: Optional[Union[Dict[str, Any], TextQuestionSettingsUpdate, LabelSelectionSettingsUpdate]]
