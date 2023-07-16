@@ -27,6 +27,7 @@ from argilla.client.sdk.v1.datasets.api import (
     get_records,
     list_datasets,
     publish_dataset,
+    set_suggestion,
 )
 from argilla.client.sdk.v1.datasets.models import (
     FeedbackDatasetModel,
@@ -34,6 +35,7 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackItemModel,
     FeedbackQuestionModel,
     FeedbackRecordsModel,
+    FeedbackSuggestionModel,
 )
 from argilla.server.models import DatasetStatus, UserRole
 
@@ -93,7 +95,7 @@ async def test_create_dataset(role: UserRole) -> None:
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
-async def test_delete_dataset(role: UserRole):
+async def test_delete_dataset(role: UserRole) -> None:
     dataset = await DatasetFactory.create()
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
@@ -109,7 +111,7 @@ async def test_delete_dataset(role: UserRole):
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
-async def test_publish_dataset(role: UserRole):
+async def test_publish_dataset(role: UserRole) -> None:
     text_field = await TextFieldFactory.create()
     rating_question = await RatingQuestionFactory.create()
     dataset = await DatasetFactory.create(fields=[text_field], questions=[rating_question])
@@ -126,7 +128,7 @@ async def test_publish_dataset(role: UserRole):
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
-async def test_add_field(role: UserRole):
+async def test_add_field(role: UserRole) -> None:
     text_field = await TextFieldFactory.create()
     rating_question = await RatingQuestionFactory.create()
     dataset = await DatasetFactory.create(fields=[text_field], questions=[rating_question])
@@ -144,7 +146,7 @@ async def test_add_field(role: UserRole):
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner, UserRole.annotator])
 @pytest.mark.asyncio
-async def test_get_fields(role: UserRole):
+async def test_get_fields(role: UserRole) -> None:
     text_field = await TextFieldFactory.create()
     rating_question = await RatingQuestionFactory.create()
     dataset = await DatasetFactory.create(fields=[text_field], questions=[rating_question])
@@ -161,7 +163,7 @@ async def test_get_fields(role: UserRole):
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
-async def test_add_question(role: UserRole):
+async def test_add_question(role: UserRole) -> None:
     text_field = await TextFieldFactory.create()
     rating_question = await RatingQuestionFactory.create()
     dataset = await DatasetFactory.create(fields=[text_field], questions=[rating_question])
@@ -184,7 +186,7 @@ async def test_add_question(role: UserRole):
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner, UserRole.annotator])
 @pytest.mark.asyncio
-async def test_get_questions(role: UserRole):
+async def test_get_questions(role: UserRole) -> None:
     text_field = await TextFieldFactory.create()
     rating_question = await RatingQuestionFactory.create()
     dataset = await DatasetFactory.create(fields=[text_field], questions=[rating_question])
@@ -201,7 +203,7 @@ async def test_get_questions(role: UserRole):
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
-async def test_add_records(role: UserRole):
+async def test_add_records(role: UserRole) -> None:
     text_field = await TextFieldFactory.create(name="test_field")
     rating_question = await RatingQuestionFactory.create()
     dataset = await DatasetFactory.create(status=DatasetStatus.ready, fields=[text_field], questions=[rating_question])
@@ -215,7 +217,7 @@ async def test_add_records(role: UserRole):
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
-async def test_get_records(role: UserRole):
+async def test_get_records(role: UserRole) -> None:
     text_field = await TextFieldFactory.create(name="test_field")
     rating_question = await RatingQuestionFactory.create()
     dataset = await DatasetFactory.create(
@@ -233,3 +235,29 @@ async def test_get_records(role: UserRole):
     assert isinstance(response.parsed, FeedbackRecordsModel)
     assert len(response.parsed.items) > 0
     assert FeedbackItemModel(**response.parsed.items[0].dict())
+
+
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+@pytest.mark.asyncio
+async def test_add_suggestion(role: UserRole) -> None:
+    text_field = await TextFieldFactory.create(name="test_field")
+    rating_question = await RatingQuestionFactory.create()
+    records = await RecordFactory.create_batch(size=10)
+    dataset = await DatasetFactory.create(
+        status=DatasetStatus.ready,
+        fields=[text_field],
+        questions=[rating_question],
+        records=records,
+    )
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+    api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
+
+    for record in records:
+        response = set_suggestion(
+            client=api.http_client.httpx, record_id=record.id, question_id=rating_question.id, value=1
+        )
+        assert response.status_code == 201
+        assert isinstance(response.parsed, FeedbackSuggestionModel)
+        assert response.parsed.value == 1
+        assert response.parsed.question_id == rating_question.id

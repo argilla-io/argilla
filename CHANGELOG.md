@@ -19,11 +19,18 @@ These are the section headers that we use:
 ### Added
 
 - Added `GET /api/v1/users/{user_id}/workspaces` endpoint to list the workspaces to which a user belongs ([#3308](https://github.com/argilla-io/argilla/pull/3308) and [#3343](https://github.com/argilla-io/argilla/pull/3343)).
-- Added `HuggingFaceDatasetMixIn` for internal usage, to detach the `FeedbackDataset` integrations from the class itself, and use MixIns instead ([#3326](https://github.com/argilla-io/argilla/pull/3326)).
+- Added `HuggingFaceDatasetMixin` for internal usage, to detach the `FeedbackDataset` integrations from the class itself, and use Mixins instead ([#3326](https://github.com/argilla-io/argilla/pull/3326)).
 - Added `GET /api/v1/records/{record_id}/suggestions` API endpoint to get the list of suggestions for the responses associated to a record ([#3304](https://github.com/argilla-io/argilla/pull/3304)).
 - Added `POST /api/v1/records/{record_id}/suggestions` API endpoint to create a suggestion for a response associated to a record ([#3304](https://github.com/argilla-io/argilla/pull/3304)).
 - Added support for `RankingQuestionStrategy`, `RankingQuestionUnification` and the `.for_text_classification` method for the `TrainingTaskMapping` ([#3364](https://github.com/argilla-io/argilla/pull/3364))
 - Added breaking simutaneously running tests within GitHub package worflows. ([#3354](https://github.com/argilla-io/argilla/pull/3354)).
+- Added `PUT /api/v1/records/{record_id}/suggestions` API endpoint to create or update a suggestion for a response associated to a record ([#3304](https://github.com/argilla-io/argilla/pull/3304) & [3391](https://github.com/argilla-io/argilla/pull/3391)).
+- Added breaking simultaneously running tests within GitHub package workflows. ([#3354](https://github.com/argilla-io/argilla/pull/3354)).
+- Added `suggestions` attribute to `FeedbackRecord`, and allow adding and retrieving suggestions from the Python client ([#3370](https://github.com/argilla-io/argilla/pull/3370))
+- Added `allowed_for_roles` Python decorator to check whether the current user has the required role to access the decorated function/method for `User` and `Workspace` ([#3383](https://github.com/argilla-io/argilla/pull/3383))
+- Added API and Python Client support for workspace deletion (Closes [#3260](https://github.com/argilla-io/argilla/issues/3260))
+- Added `GET /api/v1/me/workspaces` endpoint to list the workspaces of the current active user ([#3390](https://github.com/argilla-io/argilla/pull/3390))
+
 
 ### Changed
 
@@ -35,6 +42,10 @@ These are the section headers that we use:
 - Renamed `FeedbackDatasetConfig` to `DatasetConfig` and export/import from YAML as default instead of JSON (just used internally on `push_to_huggingface` and `from_huggingface` methods of `FeedbackDataset`) ([#3326](https://github.com/argilla-io/argilla/pull/3326)).
 - The protected metadata fields support other than textual info - existing datasets must be reindex. See [docs](https://docs.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html#elasticsearch) for more detail (Closes [#3332](https://github.com/argilla-io/argilla/issues/3332)).
 
+### Removed
+
+- Removed support to non-prefixed environment variables. All valid env vars start with `ARGILLA_` (See [#3392](https://github.com/argilla-io/argilla/pull/3392)).
+
 
 ### Fixed
 
@@ -45,10 +56,19 @@ These are the section headers that we use:
 - Resolved wrong import structure `ArgillaTrainer` `TrainingTaskMapping` (Closes [#3345](https://github.com/argilla-io/argilla/issues/3345))
 - Pin pydantic dependency to version < 2 (Closes [3348](https://github.com/argilla-io/argilla/issues/3348))
 - Big number ids are properly rendered in UI (Closes [#3265](https://github.com/argilla-io/argilla/issues/3265))
+- Fixed `ArgillaDatasetCard` to include the values/labels for all the existing questions ([#3366](https://github.com/argilla-io/argilla/pull/3265))
 
 ### Deprecated
 
 - Integer support for record id in text classification, token classification and text2text datasets.
+
+## [1.12.1](https://github.com/argilla-io/argilla/compare/v1.12.0...v1.12.1)
+
+### Fixed
+
+- Using `rg.init` with default `argilla` user skips setting the default workspace if not available. (Closes [#3340](https://github.com/argilla-io/argilla/issues/3340))
+- Resolved wrong import structure `ArgillaTrainer` `TrainingTaskMapping` (Closes [#3345](https://github.com/argilla-io/argilla/issues/3345))
+- Pin pydantic dependency to version < 2 (Closes [3348](https://github.com/argilla-io/argilla/issues/3348))
 
 ## [1.12.0](https://github.com/argilla-io/argilla/compare/v1.11.0...v1.12.0)
 

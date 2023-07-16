@@ -3,6 +3,7 @@
     <QuestionHeaderComponent
       :title="title"
       :isRequired="isRequired"
+      :hasSuggestion="hasSuggestion"
       :tooltipMessage="description"
     />
 
@@ -52,6 +53,10 @@ export default {
       default: () => "",
     },
     useMarkdown: {
+      type: Boolean,
+      default: () => false,
+    },
+    hasSuggestion: {
       type: Boolean,
       default: () => false,
     },

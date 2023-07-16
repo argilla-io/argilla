@@ -62,27 +62,6 @@ async def create_workspace(
     return Workspace.from_orm(workspace)
 
 
-# TODO: We can't do workspaces deletions right now. Workspaces are associated with datasets and used on
-# ElasticSearch indexes. Once that we have datasets on the database and we can check if the workspace doesn't have
-# any dataset then we can delete them.
-# @router.delete("/workspaces/{workspace_id}", response_model=Workspace, response_model_exclude_none=True)
-async def delete_workspace(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    workspace_id: UUID,
-    current_user: User = Security(auth.get_current_user),
-):
-    workspace = await accounts.get_workspace_by_id(db, workspace_id)
-    if not workspace:
-        raise EntityNotFoundError(name=str(workspace_id), type=Workspace)
-
-    await authorize(current_user, WorkspacePolicy.delete(workspace))
-
-    await accounts.delete_workspace(db, workspace)
-
-    return Workspace.from_orm(workspace)
-
-
 @router.get("/workspaces/{workspace_id}/users", response_model=List[User], response_model_exclude_none=True)
 async def list_workspace_users(
     *,

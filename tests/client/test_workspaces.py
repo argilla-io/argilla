@@ -16,10 +16,17 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
-from argilla.client.api import ArgillaSingleton, init
+from argilla.client.api import ArgillaSingleton
+from argilla.client.sdk.users.models import UserRole
+from argilla.client.sdk.workspaces.models import WorkspaceUserModel
 from argilla.client.workspaces import Workspace
 
-from tests.factories import WorkspaceFactory, WorkspaceUserFactory
+from tests.factories import (
+    DatasetFactory,
+    UserFactory,
+    WorkspaceFactory,
+    WorkspaceUserFactory,
+)
 
 if TYPE_CHECKING:
     from argilla.server.models import User as ServerUser
@@ -85,6 +92,16 @@ def test_workspace_create(owner: "ServerUser") -> None:
     assert any(ws["name"] == "test_workspace" for ws in workspaces)
 
 
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
+@pytest.mark.asyncio
+async def test_workspace_create_not_allowed_role(role: UserRole) -> None:
+    user = await UserFactory.create(role=role)
+    ArgillaSingleton.init(api_key=user.api_key)
+
+    with pytest.raises(PermissionError, match=f"User with role={role} is not allowed to call `create`"):
+        Workspace.create(name="test_workspace")
+
+
 @pytest.mark.asyncio
 async def test_workspace_list(owner: "ServerUser") -> None:
     await WorkspaceFactory.create(name="test_workspace")
@@ -92,6 +109,28 @@ async def test_workspace_list(owner: "ServerUser") -> None:
 
     workspaces = Workspace.list()
     assert any(ws.name == "test_workspace" for ws in workspaces)
+
+
+@pytest.mark.asyncio
+async def test_workspace_users(owner: "ServerUser") -> None:
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+    await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
+    ArgillaSingleton.init(api_key=owner.api_key)
+
+    workspace = Workspace.from_name(name=workspace.name)
+    assert all(isinstance(user, WorkspaceUserModel) for user in workspace.users)
+
+
+@pytest.mark.parametrize("role", [UserRole.annotator])
+@pytest.mark.asyncio
+async def test_workspace_users_not_allowed_role(role: UserRole) -> None:
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+    user = await UserFactory.create(role=role, workspaces=[workspace])
+    ArgillaSingleton.init(api_key=user.api_key)
+
+    workspace = Workspace.from_name(name=workspace.name)
+    with pytest.raises(PermissionError, match=f"User with role={role} is not allowed to call `users`"):
+        workspace.users
 
 
 @pytest.mark.asyncio
@@ -114,6 +153,18 @@ async def test_workspace_add_user(owner: "ServerUser") -> None:
     assert any(user.username == owner.username for user in workspace.users)
 
 
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
+@pytest.mark.asyncio
+async def test_workspace_add_user_not_allowed_role(role: UserRole) -> None:
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+    user = await UserFactory.create(role=role, workspaces=[workspace])
+    ArgillaSingleton.init(api_key=user.api_key)
+
+    workspace = Workspace.from_name(workspace.name)
+    with pytest.raises(PermissionError, match=f"User with role={role} is not allowed to call `add_user`"):
+        workspace.add_user(user.id)
+
+
 @pytest.mark.asyncio
 async def test_workspace_delete_user(owner: "ServerUser", db: "AsyncSession") -> None:
     workspace = await WorkspaceFactory.create(name="test_workspace")
@@ -130,11 +181,22 @@ async def test_workspace_delete_user(owner: "ServerUser", db: "AsyncSession") ->
         workspace.delete_user(owner.id)
 
 
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
+@pytest.mark.asyncio
+async def test_workspace_delete_user_not_allowed_role(role: UserRole) -> None:
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+    user = await UserFactory.create(role=role, workspaces=[workspace])
+    ArgillaSingleton.init(api_key=user.api_key)
+
+    workspace = Workspace.from_name(workspace.name)
+    with pytest.raises(PermissionError, match=f"User with role={role} is not allowed to call `delete_user`"):
+        workspace.delete_user(user.id)
+
+
 @pytest.mark.asyncio
 async def test_print_workspace(owner: "ServerUser"):
     workspace = await WorkspaceFactory.create(name="test_workspace")
-
-    init(api_key=owner.api_key)
+    ArgillaSingleton.init(api_key=owner.api_key)
 
     assert str(Workspace.from_name(workspace.name)) == (
         f"Workspace(id={workspace.id}, name={workspace.name}, "
@@ -143,37 +205,83 @@ async def test_print_workspace(owner: "ServerUser"):
 
 
 def test_set_new_workspace(owner: "ServerUser"):
-    import argilla as rg
+    ArgillaSingleton.init(api_key=owner.api_key)
+    ws = Workspace.create("new-workspace")
 
-    rg.init(api_key=owner.api_key)
-    ws = rg.Workspace.create("new-workspace")
-
-    rg.set_workspace(ws.name)
-    assert rg.get_workspace() == ws.name
+    ArgillaSingleton.get().set_workspace(ws.name)
+    assert ArgillaSingleton.get().get_workspace() == ws.name
 
 
 @pytest.mark.asyncio
 async def test_init_with_workspace(owner: "ServerUser"):
     workspace = await WorkspaceFactory.create(name="test_workspace")
 
-    import argilla as rg
+    ArgillaSingleton.init(api_key=owner.api_key, workspace=workspace.name)
 
-    rg.init(api_key=owner.api_key, workspace=workspace.name)
-
-    assert rg.get_workspace() == workspace.name
+    assert ArgillaSingleton.get().get_workspace() == workspace.name
 
 
 def test_set_workspace_with_missing_workspace(owner: "ServerUser"):
-    import argilla as rg
-
-    rg.init(api_key=owner.api_key)
-
+    ArgillaSingleton.init(api_key=owner.api_key)
     with pytest.raises(ValueError):
-        rg.set_workspace("missing-workspace")
+        ArgillaSingleton.get().set_workspace("missing-workspace")
 
 
 def test_init_with_missing_workspace(owner: "ServerUser"):
-    import argilla as rg
-
     with pytest.raises(ValueError):
-        rg.init(api_key=owner.api_key, workspace="missing-workspace")
+        ArgillaSingleton.init(api_key=owner.api_key, workspace="missing-workspace")
+
+
+@pytest.mark.asyncio
+async def test_delete_workspace(owner: "ServerUser"):
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+
+    ArgillaSingleton.init(api_key=owner.api_key)
+
+    ws = Workspace.from_id(workspace.id)
+    ws.delete()
+
+    with pytest.raises(ValueError, match=rf"Workspace with id=`{ws.id}` doesn't exist in Argilla"):
+        Workspace.from_id(workspace.id)
+
+
+@pytest.mark.asyncio
+async def test_delete_non_existing_workspace(owner: "ServerUser"):
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+
+    ArgillaSingleton.init(api_key=owner.api_key)
+
+    ws = Workspace.from_id(workspace.id)
+    ws.delete()
+
+    with pytest.raises(ValueError, match=rf"Workspace with id {ws.id} doesn't exist in Argilla."):
+        ws.delete()
+
+
+@pytest.mark.asyncio
+async def test_delete_workspace_with_linked_datasets(owner: "ServerUser"):
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+    await DatasetFactory.create(workspace=workspace)
+
+    ArgillaSingleton.init(api_key=owner.api_key)
+
+    ws = Workspace.from_id(workspace.id)
+    with pytest.raises(
+        ValueError,
+        match=rf"Cannot delete workspace with id {ws.id}. Some datasets are still linked to this workspace.",
+    ):
+        ws.delete()
+
+
+@pytest.mark.asyncio
+async def test_delete_workspace_without_permissions():
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+
+    user = await UserFactory.create(workspaces=[workspace])
+
+    ArgillaSingleton.init(api_key=user.api_key)
+
+    ws = Workspace.from_id(workspace.id)
+
+    with pytest.raises(PermissionError, match=rf"User with role={user.role.value} is not allowed to call `delete`"):
+        ws.delete()

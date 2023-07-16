@@ -151,7 +151,7 @@ class Argilla:
             self.set_workspace(workspace or self._user.username)
         else:
             warnings.warn(
-                "No workspace configuration was detected. To work with Argilla "
+                "No workspace configuration was detected. To work with Argilla"
                 " datasets, specify a valid workspace name on `rg.init` or set it"
                 " up through the `rg.set_workspace` function.",
                 category=UserWarning,

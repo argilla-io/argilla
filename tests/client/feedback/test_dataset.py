@@ -171,8 +171,9 @@ def test_add_records(
         "text": "A",
         "label": "B",
     }
-    assert dataset.records[0].metadata is None
+    assert dataset.records[0].metadata == {}
     assert dataset.records[0].responses == []
+    assert dataset.records[0].suggestions == []
 
     dataset.add_records(
         [
@@ -182,16 +183,40 @@ def test_add_records(
                     "label": "D",
                 },
                 metadata={"unit": "test"},
-                responses={
-                    "values": {
-                        "question-1": {"value": "answer"},
-                        "question-2": {"value": 0},
-                        "question-3": {"value": "a"},
-                        "question-4": {"value": ["a", "b"]},
-                        "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
+                responses=[
+                    {
+                        "values": {
+                            "question-1": {"value": "answer"},
+                            "question-2": {"value": 0},
+                            "question-3": {"value": "a"},
+                            "question-4": {"value": ["a", "b"]},
+                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
+                        },
+                        "status": "submitted",
                     },
-                    "status": "submitted",
-                },
+                ],
+                suggestions=[
+                    {
+                        "question_name": "question-1",
+                        "value": "answer",
+                    },
+                    {
+                        "question_name": "question-2",
+                        "value": 0,
+                    },
+                    {
+                        "question_name": "question-3",
+                        "value": "a",
+                    },
+                    {
+                        "question_name": "question-4",
+                        "value": ["a", "b"],
+                    },
+                    {
+                        "question_name": "question-5",
+                        "value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}],
+                    },
+                ],
                 external_id="test-id",
             ),
         ]
@@ -213,6 +238,14 @@ def test_add_records(
             "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
         },
         "status": "submitted",
+    }
+    assert dataset.records[1].suggestions[0].dict() == {
+        "question_id": None,
+        "question_name": "question-1",
+        "value": "answer",
+        "type": None,
+        "score": None,
+        "agent": None,
     }
 
     with pytest.raises(ValueError, match="Expected `records` to be a non-empty list"):
@@ -372,10 +405,6 @@ async def test_push_to_argilla_and_from_argilla(
     assert len(dataset_from_argilla.records) == len(dataset.records)
     assert len(dataset_from_argilla.records[-1].responses) == 1  # Since the second one was discarded as `user_id=None`
 
-    for rg_record, record in zip(dataset_from_argilla.records, dataset.records):
-        assert rg_record.fields == record.fields
-        assert rg_record.metadata == record.metadata
-
 
 @pytest.mark.asyncio
 async def test_copy_dataset_in_argilla(
@@ -408,8 +437,130 @@ async def test_copy_dataset_in_argilla(
 
     same_dataset = FeedbackDataset.from_argilla("copy-dataset")
     assert same_dataset.argilla_id != dataset.argilla_id
-    assert same_dataset.fields == dataset.fields
-    assert same_dataset.questions == dataset.questions
+    assert [field.dict(exclude={"id"}) for field in same_dataset.fields] == [
+        field.dict(exclude={"id"}) for field in dataset.fields
+    ]
+    assert [question.dict(exclude={"id"}) for question in same_dataset.questions] == [
+        question.dict(exclude={"id"}) for question in dataset.questions
+    ]
+
+
+@pytest.mark.asyncio
+async def test_update_dataset_records_in_argilla(
+    mocked_client: "SecuredClient",
+    argilla_user: "ServerUser",
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records: List[FeedbackRecord],
+    db: "AsyncSession",
+) -> None:
+    api.active_api()
+    api.init(api_key=argilla_user.api_key)
+
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records)
+    dataset.push_to_argilla(name="test-dataset")
+    await db.refresh(argilla_user, attribute_names=["datasets"])
+
+    dataset.fetch_records()
+    for record in dataset.records:
+        record.set_suggestions(
+            [
+                {
+                    "question_name": "question-1",
+                    "value": "This is a suggestion to question 1",
+                },
+            ]
+        )
+        assert record._updated is True
+
+    dataset.push_to_argilla()
+    await db.refresh(argilla_user, attribute_names=["datasets"])
+    assert all(record._updated is False for record in dataset.records)
+
+    dataset = FeedbackDataset.from_argilla("test-dataset")
+    for record in dataset.records:
+        record.set_suggestions(
+            [
+                {
+                    "question_name": "question-1",
+                    "value": "This is a suggestion to question 1",
+                },
+            ]
+        )
+        assert record._updated is True
+
+    dataset.push_to_argilla()
+    await db.refresh(argilla_user, attribute_names=["datasets"])
+    assert all(record._updated is False for record in dataset.records)
+
+    for record in dataset.records:
+        record.set_suggestions(
+            [
+                {
+                    "question_name": "question-2",
+                    "value": 1,
+                },
+            ]
+        )
+        assert record._updated is True
+
+    dataset.push_to_argilla("new-test-dataset")
+    await db.refresh(argilla_user, attribute_names=["datasets"])
+    assert all(record._updated is True for record in dataset.records)
+
+    with pytest.warns(UserWarning, match="Ignore the following if you are creating a new `FeedbackDataset` with"):
+        record = FeedbackRecord(
+            fields={"prompt": "text"},
+        )
+        record.set_suggestions(
+            [
+                {
+                    "question_name": "question-1",
+                    "value": "This is a suggestion to question 1",
+                },
+            ]
+        )
+
+    with pytest.warns(UserWarning, match="Ignore this warning if you're already using `set_suggestions` method"):
+        record = FeedbackRecord(
+            fields={"prompt": "text"},
+        )
+        record.set_suggestions(
+            [
+                {
+                    "question_name": "question-1",
+                    "value": "This is a suggestion to question 1",
+                },
+            ]
+        )
+
+    record = dataset.records[0]
+    with pytest.warns(UserWarning, match="A suggestion for question `question-1`"):
+        record.set_suggestions(
+            [
+                {
+                    "question_name": "question-1",
+                    "value": "This is a suggestion to question 1",
+                },
+                {
+                    "question_name": "question-1",
+                    "value": "This is a suggestion to question 1",
+                },
+            ]
+        )
+    with pytest.warns(UserWarning, match="if you are trying to set `suggestions` directly"):
+        record.suggestions = [
+            {
+                "question_name": "question-1",
+                "value": "This is a suggestion to question 1",
+            },
+        ]
 
 
 def test_push_to_huggingface_and_from_huggingface(
@@ -446,13 +597,8 @@ def test_push_to_huggingface_and_from_huggingface(
         )
         config_file = f.name
 
-    monkeypatch.setattr(
-        "argilla.client.feedback.integrations.huggingface.dataset.hf_hub_download", lambda *args, **kwargs: config_file
-    )
-    monkeypatch.setattr(
-        "argilla.client.feedback.integrations.huggingface.dataset.load_dataset",
-        lambda *args, **kwargs: dataset.format_as("datasets"),
-    )
+    monkeypatch.setattr("huggingface_hub.hf_hub_download", lambda *args, **kwargs: config_file)
+    monkeypatch.setattr("datasets.load_dataset", lambda *args, **kwargs: dataset.format_as("datasets"))
 
     dataset_from_huggingface = FeedbackDataset.from_huggingface(repo_id="test-dataset")
     assert isinstance(dataset_from_huggingface, FeedbackDataset)
@@ -470,6 +616,48 @@ def test_push_to_huggingface_and_from_huggingface(
             hf_response.dict() == response.dict()
             for hf_response, response in zip(hf_record.responses, record.responses)
         )
+
+    dataset.add_records(
+        records=[
+            FeedbackRecord(
+                fields={"text": "This is a negative example", "label": "negative"},
+                responses=[
+                    {
+                        "values": {
+                            "question-1": {"value": "This is a response to question 1"},
+                            "question-2": {"value": 0},
+                            "question-3": {"value": "b"},
+                            "question-4": {"value": ["b", "c"]},
+                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
+                        },
+                        "status": "submitted",
+                    },
+                    {
+                        "values": {
+                            "question-1": {"value": "This is a response to question 1"},
+                            "question-2": {"value": 0},
+                            "question-3": {"value": "b"},
+                            "question-4": {"value": ["b", "c"]},
+                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
+                        },
+                        "status": "submitted",
+                    },
+                ],
+            ),
+        ],
+    )
+
+    monkeypatch.setattr("datasets.arrow_dataset.Dataset.push_to_hub", lambda *args, **kwargs: None)
+    monkeypatch.setattr("huggingface_hub.hf_api.HfApi.upload_file", lambda *args, **kwargs: None)
+    monkeypatch.setattr("huggingface_hub.repocard.RepoCard.push_to_hub", lambda *args, **kwargs: None)
+
+    dataset.push_to_huggingface(repo_id="test-dataset", generate_card=True)
+
+    monkeypatch.setattr("huggingface_hub.hf_hub_download", lambda *args, **kwargs: config_file)
+    monkeypatch.setattr("datasets.load_dataset", lambda *args, **kwargs: dataset.format_as("datasets"))
+
+    with pytest.warns(UserWarning, match="Found more than one user without ID"):
+        dataset_from_huggingface = FeedbackDataset.from_huggingface(repo_id="test-dataset")
 
 
 @pytest.mark.parametrize(

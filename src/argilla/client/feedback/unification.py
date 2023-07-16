@@ -426,7 +426,7 @@ class LabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
         return rec
 
     @classmethod
-    def _majority_weighted(self, records: List[FeedbackRecord], question: LabelQuestion):
+    def _majority_weighted(cls, records: List[FeedbackRecord], question: LabelQuestion):
         raise NotImplementedError("'majority_weighted'-strategy not implemented yet")
 
 
@@ -481,7 +481,7 @@ class MultiLabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
         return records
 
     @classmethod
-    def _majority_weighted(self, records: List[FeedbackRecord], question: MultiLabelQuestion):
+    def _majority_weighted(cls, records: List[FeedbackRecord], question: MultiLabelQuestion):
         raise NotImplementedError("'majority_weighted'-strategy not implemented yet")
 
 

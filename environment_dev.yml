@@ -54,6 +54,6 @@ dependencies:
       - openai
       - peft
       - autotrain-advanced==0.5.2
-      - rich==13.0.1
+      - rich!=13.1.0
       # install Argilla in editable mode
       - -e .[server,listeners]
