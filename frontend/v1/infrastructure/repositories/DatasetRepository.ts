@@ -2,10 +2,6 @@ import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { Store } from "vuex";
 import { Dataset } from "@/v1/domain/entities/Dataset";
 import { IDatasetRepository } from "@/v1/domain/services/IDatasetRepository";
-import {
-  URL_GET_V1_DATASETS,
-  URL_GET_WORKSPACES,
-} from "@/utils/url.properties";
 
 export const DATASET_API_ERRORS = {
   ERROR_FETCHING_FEEDBACK_DATASETS: "ERROR_FETCHING_FEEDBACK_DATASETS",
@@ -105,9 +101,8 @@ export class DatasetRepository implements IDatasetRepository {
   }
 
   private fetchFeedbackDatasets = async (axios) => {
-    const url = URL_GET_V1_DATASETS;
     try {
-      const { data } = await axios.get(url);
+      const { data } = await axios.get("/v1/me/datasets");
 
       return data;
     } catch (err) {
@@ -118,9 +113,8 @@ export class DatasetRepository implements IDatasetRepository {
   };
 
   private fetchWorkspaces = async (axios) => {
-    const url = URL_GET_WORKSPACES;
     try {
-      const { data } = await axios.get(url);
+      const { data } = await axios.get("/workspaces");
 
       return data;
     } catch (err) {

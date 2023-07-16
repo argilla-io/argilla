@@ -28,47 +28,43 @@ export const loadDependencyContainer = (context: Context) => {
   const useStore = () => context.store;
 
   const dependencies = [
-    register(DatasetRepository).withDependency(useAxios).and(useStore).build(),
+    register(DatasetRepository).withDependencies(useAxios, useStore).build(),
     register(RecordRepository).withDependency(useAxios).build(),
     register(QuestionRepository).withDependency(useAxios).build(),
     register(FieldRepository).withDependency(useAxios).build(),
     register(MetricsRepository).withDependency(useAxios).build(),
 
     register(GetDatasetsUseCase)
-      .withDependency(DatasetRepository)
-      .and(useDatasets)
+      .withDependencies(DatasetRepository, useDatasets)
       .build(),
 
     register(GetDatasetByIdUseCase)
-      .withDependency(DatasetRepository)
-      .and(useDataset)
+      .withDependencies(DatasetRepository, useDataset)
       .build(),
 
     register(GetRecordsForAnnotateUseCase)
-      .withDependency(RecordRepository)
-      .and(QuestionRepository)
-      .and(FieldRepository)
-      .and(useRecords)
+      .withDependencies(
+        RecordRepository,
+        QuestionRepository,
+        FieldRepository,
+        useRecords
+      )
       .build(),
 
     register(DiscardRecordUseCase)
-      .withDependency(RecordRepository)
-      .and(useEventDispatcher)
+      .withDependencies(RecordRepository, useEventDispatcher)
       .build(),
 
     register(SubmitRecordUseCase)
-      .withDependency(RecordRepository)
-      .and(useEventDispatcher)
+      .withDependencies(RecordRepository, useEventDispatcher)
       .build(),
 
     register(ClearRecordUseCase)
-      .withDependency(RecordRepository)
-      .and(useEventDispatcher)
+      .withDependencies(RecordRepository, useEventDispatcher)
       .build(),
 
     register(GetUserMetricsUseCase)
-      .withDependency(MetricsRepository)
-      .and(useMetrics)
+      .withDependencies(MetricsRepository, useMetrics)
       .build(),
   ];
 
