@@ -23,7 +23,7 @@ from packaging.version import parse as parse_version
 from argilla.client.feedback.config import DatasetConfig, DeprecatedDatasetConfig
 from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas import FeedbackRecord
-from argilla.client.feedback.typing import AllowedQuestionTypes
+from argilla.client.feedback.types import AllowedQuestionTypes
 from argilla.utils.dependency import requires_version
 
 if TYPE_CHECKING:
@@ -313,7 +313,7 @@ class HuggingFaceDatasetMixin:
                 "Neither `argilla.yaml` nor `argilla.cfg` files were found in the"
                 " HuggingFace Hub repository. Please make sure to dump the `DatasetConfig`"
                 " using `FeedbackDataset.push_to_huggingface` to automatically upload"
-                f" the `DatasetConfig` as `argilla.yaml` to the HuggingFace Hub."
+                " the `DatasetConfig` as `argilla.yaml` to the HuggingFace Hub."
             ) from e
 
         hfds = load_dataset(repo_id, use_auth_token=auth, *args, **kwargs)

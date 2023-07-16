@@ -19,6 +19,7 @@ from argilla.client.feedback.schemas import (
     FeedbackRecord,
     LabelQuestion,
     MultiLabelQuestion,
+    RankingQuestion,
     RatingQuestion,
 )
 from argilla.client.feedback.unification import (
@@ -26,6 +27,8 @@ from argilla.client.feedback.unification import (
     LabelQuestionUnification,
     MultiLabelQuestionStrategy,
     MultiLabelQuestionUnification,
+    RankingQuestionStrategy,
+    RankingQuestionUnification,
     RatingQuestionStrategy,
     RatingQuestionUnification,
     UnifiedValueSchema,
@@ -231,6 +234,40 @@ def test_rating_question_strategy(strategy, unified_response):
     unified_response = [UnifiedValueSchema(**resp) for resp in unified_response]
     assert record._unified_responses[question_name] == unified_response
     assert RatingQuestionUnification(question=question, strategy=strategy)
+
+
+@pytest.mark.parametrize(
+    "strategy, unified_response",
+    [
+        ("mean", [{"value": "yes", "strategy": "mean"}]),
+        ("majority", [{"value": "yes", "strategy": "majority"}]),
+        ("max", [{"value": "no", "strategy": "max"}]),
+        ("min", [{"value": "yes", "strategy": "min"}]),
+    ],
+)
+def test_ranking_question_strategy(strategy, unified_response):
+    question_name = "ranking"
+    records_payload = {
+        "fields": {"text": "This is the first record", "label": "positive"},
+        "responses": [
+            {"values": {question_name: {"value": [{"rank": 2, "value": "yes"}, {"rank": 3, "value": "no"}]}}},
+            {"values": {question_name: {"value": [{"rank": 2, "value": "yes"}, {"rank": 1, "value": "no"}]}}},
+            {"values": {question_name: {"value": [{"rank": 2, "value": "yes"}, {"rank": 3, "value": "no"}]}}},
+        ],
+    }
+    record = FeedbackRecord(**records_payload)
+    question_payload = {
+        "name": question_name,
+        "description": question_name,
+        "required": True,
+        "values": ["yes", "no", "maybe"],
+    }
+    question = RankingQuestion(**question_payload)
+    strategy = RankingQuestionStrategy(strategy)
+    strategy.unify_responses([record], question)
+    unified_response = [UnifiedValueSchema(**resp) for resp in unified_response]
+    assert record._unified_responses[question_name] == unified_response
+    assert RankingQuestionUnification(question=question, strategy=strategy)
 
 
 @pytest.mark.parametrize(

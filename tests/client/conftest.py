@@ -28,7 +28,7 @@ from argilla.client.sdk.datasets.models import TaskType
 from datasets import Dataset
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.typing import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
 
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
