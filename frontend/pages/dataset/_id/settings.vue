@@ -1,5 +1,6 @@
 <template>
-  <HeaderAndTopAndTwoColumns v-if="!isLoadingDataset">
+  <BaseLoading v-if="isLoadingDataset" />
+  <HeaderAndTopAndTwoColumns v-else>
     <template v-slot:header>
       <HeaderFeedbackTaskComponent
         :datasetId="datasetId"

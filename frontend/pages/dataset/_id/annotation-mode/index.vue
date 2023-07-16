@@ -1,5 +1,6 @@
 <template>
-  <HeaderAndTopAndOneColumn v-if="!isLoadingDataset">
+  <BaseLoading v-if="isLoadingRecords" />
+  <HeaderAndTopAndOneColumn v-else>
     <template v-slot:header>
       <HeaderFeedbackTaskComponent
         :key="datasetId"
@@ -34,7 +35,7 @@
       <DatasetFiltersComponent :datasetId="datasetId" />
     </template>
     <template v-slot:center>
-      <CenterFeedbackTaskContent :datasetId="datasetId" />
+      <RecordFeedbackTaskAndQuestionnaireContent :datasetId="datasetId" />
     </template>
     <template v-slot:footer>
       <PaginationFeedbackTaskComponent :datasetId="datasetId" />
