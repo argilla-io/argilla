@@ -84,22 +84,6 @@ export default {
     workspace() {
       return this.dataset.workspace;
     },
-    breadcrumbs() {
-      return [
-        { link: { name: "datasets" }, name: "Home" },
-        {
-          link: { path: `/datasets?workspace=${this.workspace}` },
-          name: this.workspace,
-        },
-        {
-          link: {
-            name: null,
-            params: { workspace: this.workspace, dataset: this.datasetName },
-          },
-          name: this.datasetName,
-        },
-      ];
-    },
   },
   created() {
     this.onBusEventAreResponsesUntouched();
