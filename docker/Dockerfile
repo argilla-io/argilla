@@ -1,4 +1,4 @@
-FROM python:3.9.16-slim
+FROM python:3.10.12-slim
 
 # Environment Variables
 ENV ARGILLA_HOME_PATH=/var/lib/argilla
