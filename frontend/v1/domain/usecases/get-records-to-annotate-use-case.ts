@@ -11,7 +11,7 @@ import {
   FieldRepository,
 } from "@/v1/infrastructure/repositories";
 
-export class GetRecordsForAnnotateUseCase {
+export class GetRecordsToAnnotateUseCase {
   constructor(
     private readonly recordRepository: RecordRepository,
     private readonly questionRepository: QuestionRepository,

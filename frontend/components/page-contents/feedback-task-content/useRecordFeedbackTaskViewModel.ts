@@ -1,10 +1,10 @@
 import { useResolve } from "ts-injecty";
-import { GetRecordsForAnnotateUseCase } from "@/v1/domain/usecases/get-records-for-annotate-use-case";
+import { GetRecordsToAnnotateUseCase } from "@/v1/domain/usecases/get-records-to-annotate-use-case";
 import { useRecords } from "@/v1/infrastructure/storage/RecordsStorage";
-import { GetUserMetricsUseCase } from "~/v1/domain/usecases/get-user-metrics-use-case";
+import { GetUserMetricsUseCase } from "@/v1/domain/usecases/get-user-metrics-use-case";
 
 export const useRecordFeedbackTaskViewModel = () => {
-  const getRecords = useResolve(GetRecordsForAnnotateUseCase);
+  const getRecords = useResolve(GetRecordsToAnnotateUseCase);
   const getMetrics = useResolve(GetUserMetricsUseCase);
   const { state: records, clearRecords } = useRecords();
 

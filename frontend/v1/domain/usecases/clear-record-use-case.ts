@@ -1,5 +1,5 @@
 import { IEventDispatcher } from "@codescouts/events";
-import { RecordResponseUpdated } from "../events/RecordResponseUpdated";
+import { RecordResponseUpdatedEvent } from "../events/RecordResponseUpdatedEvent";
 import { Record } from "@/v1/domain/entities/record/Record";
 import { RecordRepository } from "@/v1/infrastructure/repositories";
 
@@ -13,7 +13,7 @@ export class ClearRecordUseCase {
     await this.recordRepository.deleteRecordResponse(record);
 
     if (record.answer) {
-      this.eventDispatcher.dispatch(new RecordResponseUpdated(record));
+      this.eventDispatcher.dispatch(new RecordResponseUpdatedEvent(record));
     }
 
     record.clear();

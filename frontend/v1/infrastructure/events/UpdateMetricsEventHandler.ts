@@ -1,14 +1,14 @@
 import { Handler } from "@codescouts/events";
 import { useResolve } from "ts-injecty";
-import { RecordResponseUpdated } from "@/v1/domain/events/RecordResponseUpdated";
+import { RecordResponseUpdatedEvent } from "~/v1/domain/events/RecordResponseUpdatedEvent";
 import { GetUserMetricsUseCase } from "@/v1/domain/usecases/get-user-metrics-use-case";
 
-export class UpdateMetricsEventHandler extends Handler<RecordResponseUpdated> {
+export class UpdateMetricsEventHandler extends Handler<RecordResponseUpdatedEvent> {
   constructor() {
-    super(RecordResponseUpdated);
+    super(RecordResponseUpdatedEvent);
   }
 
-  protected handle(event: RecordResponseUpdated): void | Promise<any> {
+  protected handle(event: RecordResponseUpdatedEvent): void | Promise<any> {
     const getUserMetrics = useResolve(GetUserMetricsUseCase);
 
     getUserMetrics.execute(event.record.datasetId);
