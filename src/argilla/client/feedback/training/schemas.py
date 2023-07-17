@@ -60,7 +60,8 @@ class TrainingData(ABC):
                     explode_columns.add(pydantic_field_name)
             formatted_data.append(data)
         df = pd.DataFrame(formatted_data)
-        df = df.explode(list(explode_columns))
+        if explode_columns:
+            df = df.explode(list(explode_columns))
         df = df.drop_duplicates()
         df = df.dropna(how="any")
         return df.to_dict(orient="records")
