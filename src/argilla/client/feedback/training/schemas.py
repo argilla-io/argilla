@@ -261,15 +261,15 @@ class TrainingTaskMappingForTextClassification(BaseModel, TrainingData):
         multi_label = isinstance(self.label.question, MultiLabelQuestion)
 
         datasets_dict = {"id": [], "text": [], "label": []}
-        for entry in data:
-            datasets_dict["id"].append("None")
+        for index, entry in enumerate(data):
+            datasets_dict["id"].append(index)
             datasets_dict["text"].append(entry["text"])
             datasets_dict["label"].append(entry["label"])
 
         all_labels = self.label.question.__all_labels__
         class_label = datasets.ClassLabel(names=all_labels)
         feature_dict = {
-            "id": datasets.Value("string"),
+            "id": datasets.Value(dtype="int32"),
             "text": datasets.Value("string"),
             "label": [class_label] if multi_label else class_label,
         }
