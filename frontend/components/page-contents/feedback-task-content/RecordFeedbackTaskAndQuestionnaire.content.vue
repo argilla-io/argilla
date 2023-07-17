@@ -11,8 +11,8 @@
         :class="statusClass"
         :datasetId="datasetId"
         :record="record"
-        @on-submit-responses="goToNextPageAndRefreshMetrics"
-        @on-discard-responses="goToNextPageAndRefreshMetrics"
+        @on-submit-responses="goToNext"
+        @on-discard-responses="goToNext"
         @on-question-form-touched="onQuestionFormTouched"
       />
     </template>
@@ -331,7 +331,7 @@ export default {
 
       this.fetching = false;
     },
-    goToNextPageAndRefreshMetrics() {
+    goToNext() {
       this.setCurrentPage(this.currentPage + 1);
     },
   },

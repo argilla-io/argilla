@@ -221,8 +221,6 @@ export default {
       try {
         await this.clear(this.record);
 
-        this.$emit("on-clear-responses");
-
         this.onReset();
       } catch (err) {
         console.log(err);
