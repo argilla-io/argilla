@@ -6,7 +6,7 @@
       v-optional-field="!isRequired"
       v-prefix-star="{
         show: hasSuggestion,
-        tooltip: 'This question has a suggestion',
+        tooltip: 'This question contains a suggestion',
       }"
     />
     <BaseIconWithBadge
