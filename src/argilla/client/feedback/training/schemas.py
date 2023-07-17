@@ -127,7 +127,7 @@ class TrainingTaskMapping:
 
         Args:
             text (TextField): The TextField to use for training.
-            label (Union[RatingQuestion, LabelQuestion, MultiLabelQuestion, RatingQuestionUnification, LabelQuestionUnification, MultiLabelQuestionUnification]): _description_
+            label (Union[RatingQuestion, LabelQuestion, RankingQuestion, MultiLabelQuestion, RatingQuestionUnification, LabelQuestionUnification, MultiLabelQuestionUnification, RankingQuestionUnification]): _description_
             label_strategy (str, optional): A strategy to unify responses. Defaults to None. This means it will initialize the default strategy for the label type.
 
         Raises:
@@ -139,12 +139,12 @@ class TrainingTaskMapping:
 
         Examples:
             >>> from argilla import LabelQuestion, TrainingTaskMapping
-            >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
-            >>> training_data = TrainingTaskMapping.for_text_classification(
+            >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
+            >>> task_mapping = TrainingTaskMapping.for_text_classification(
             ...     text=dataset.fields[0],
-            ...     label=dataset.questions[0]
+            ...     label=dataset.questions[0],
             ... )
-            >>> dataset.prepare_training_data(training_data=training_data)
+            >>> dataset.prepare_for_training(framework="...", task_mapping=task_mapping)
 
         """
         if isinstance(
@@ -186,17 +186,17 @@ class TrainingTaskMappingForTextClassification(BaseModel, TrainingData):
 
     Args:
         text: TextField
-        label: Union[RatingUnification, LabelUnification, MultiLabelUnification]
+        label: Union[RatingQuestionUnification, LabelQuestionUnification, MultiLabelQuestionUnification, RankingQuestionUnification]
 
     Examples:
         >>> from argilla import LabelQuestion, TrainingTaskMappingForTextClassification
-        >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
+        >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
         >>> label = RatingQuestionUnification(question=dataset.questions[0], strategy="mean")
-        >>> training_data = TrainingTaskMappingForTextClassification(
+        >>> task_mapping = TrainingTaskMappingForTextClassification(
         ...     text=dataset.fields[0],
-        ...     label=label
+        ...     label=label,
         ... )
-        >>> dataset.prepare_training_data(training_data=training_data)
+        >>> dataset.prepare_for_training(framework="...", task_mapping=task_mapping)
 
     """
 
