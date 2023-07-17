@@ -14,7 +14,7 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Union
+from typing import TYPE_CHECKING, List, Tuple, Union
 
 import pandas as pd
 from pydantic import BaseModel
@@ -27,6 +27,7 @@ from argilla.client.feedback.schemas import (
     RankingQuestion,
     RatingQuestion,
     TextField,
+    TextQuestion,
 )
 from argilla.client.feedback.unification import (
     LabelQuestionUnification,
@@ -38,6 +39,10 @@ from argilla.client.models import Framework
 from argilla.utils.dependency import require_version, requires_version
 
 _LOGGER = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    import datasets
+    import spacy
 
 
 class TrainingData(ABC):
@@ -80,29 +85,35 @@ class TrainingData(ABC):
     def _train_test_split(self, data: List[dict], train_size: float, seed: int) -> Tuple[List[dict], List[dict]]:
         """Overwritten by subclasses"""
 
-    @abstractmethod
     def _prepare_for_training_with_transformers(
-        self, data: List[dict], train_size, seed: int
+        self, data: List[dict], train_size, seed: int, framework: Union[str, Framework]
     ) -> Union["datasets.Dataset", "datasets.DatasetDict"]:
-        """Overwritten by subclasses"""
+        raise ValueError(f"{self.__class__.__name__} does not support the {framework} framework.")
 
-    @abstractmethod
     def _prepare_for_training_with_spacy(
         self, data: List[dict], train_size, seed: int, lang: str
     ) -> Union["spacy.token.DocBin", Tuple["spacy.token.DocBin", "spacy.token.DocBin"]]:
-        """Overwritten by subclasses"""
+        raise ValueError(f"{self.__class__.__name__} does not support the spaCy framework.")
 
-    @abstractmethod
     def _prepare_for_training_with_spark_nlp(
         self, data: List[dict], train_size, seed: int
     ) -> Union["pd.DataFrame", Tuple["pd.DataFrame", "pd.DataFrame"]]:
-        """Overwritten by subclasses"""
+        raise ValueError(f"{self.__class__.__name__} does not support the Spark NLP framework.")
 
-    @abstractmethod
     def _prepare_for_training_with_openai(
         self, data: List[dict], train_size, seed: int
     ) -> Union[List[dict], Tuple[List[dict], List[dict]]]:
-        """Overwritten by subclasses"""
+        raise ValueError(f"{self.__class__.__name__} does not support the OpenAI framework.")
+
+    def _prepare_for_training_with_trl(
+        self, data: List[dict], train_size, seed: int
+    ) -> Union[List[dict], Tuple[List[dict], List[dict]]]:
+        raise ValueError(f"{self.__class__.__name__} does not support the TRL framework.")
+
+    def _prepare_for_training_with_trlx(
+        self, data: List[dict], train_size, seed: int
+    ) -> Union[List[dict], Tuple[List[dict], List[dict]]]:
+        raise ValueError(f"{self.__class__.__name__} does not support the TRLX framework.")
 
 
 class TrainingTaskMapping:
@@ -179,6 +190,32 @@ class TrainingTaskMapping:
             label=label,
             label_strategy=label_strategy,
         )
+
+    @classmethod
+    def for_supervised_fine_tuning(
+        cls,
+        text: Union[TextField, TextQuestion],
+    ) -> "TrainingTaskMappingForTextClassification":
+        """
+        Return a task mapping that can be used in `FeedbackDataset.prepare_for_training(framework="...", task_mapping)`
+        to extract data from the Feedback Dataset in an immediately useful format.
+
+        Args:
+            text (Union[TextField, TextQuestion]): The text to use for training.
+
+        Returns:
+            TrainingTaskMappingForSupervisedFinetuning: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
+
+        Examples:
+            >>> from argilla import LabelQuestion, TrainingTaskMapping
+            >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
+            >>> task_mapping = TrainingTaskMapping.for_supervised_fine_tuning(
+            ...     text=dataset.fields[0],
+            ... )
+            >>> dataset.prepare_for_training(framework="...", task_mapping=task_mapping)
+
+        """
+        return TrainingTaskMappingForSupervisedFinetuning(text=text)
 
 
 class TrainingTaskMappingForTextClassification(BaseModel, TrainingData):
@@ -390,3 +427,73 @@ class TrainingTaskMappingForTextClassification(BaseModel, TrainingData):
             return _prepare(train_data), _prepare(test_data)
         else:
             return _prepare(data)
+
+
+class TrainingTaskMappingForSupervisedFinetuning(BaseModel, TrainingData):
+    """Training data for supervised finetuning
+
+    Args:
+        text: TextField
+        label: Union[RatingQuestionUnification, LabelQuestionUnification, MultiLabelQuestionUnification, RankingQuestionUnification]
+
+    Examples:
+        >>> from argilla import LabelQuestion, TrainingTaskMappingForSupervisedFinetuning
+        >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
+        >>> task_mapping = TrainingTaskMappingForSupervisedFinetuning(text=dataset.fields[0])
+        >>> dataset.prepare_for_training(framework="...", task_mapping=task_mapping)
+
+    """
+
+    text: Union[TextField, TextQuestion]
+
+    @property
+    def supported_frameworks(self):
+        names = ["trl", "trlx"]
+        return [Framework(name) for name in names]
+
+    def unify_responses(self, responses: List[FeedbackRecord]):
+        self.label.strategy.unify_responses(responses=responses, field=self.label.question)
+
+    @requires_version("scikit-learn")
+    def _train_test_split(self, data: List[dict], train_size: float, seed: int) -> Tuple[List[dict], List[dict]]:
+        from sklearn.model_selection import train_test_split
+
+        # TODO: Stratify by label
+        # TODO: provide label overview
+        return train_test_split(
+            data,
+            train_size=train_size,
+            shuffle=True,
+            random_state=seed,
+        )
+
+    def __repr__(self) -> str:
+        return (
+            "TrainingTaskMappingForSupervisedFinetuning",
+            f"\n\t text={self.text.name}",
+        )
+
+    @requires_version("datasets>1.17.0")
+    def _prepare_for_training_with_trl(
+        self, data: List[dict], train_size: float, seed: int
+    ) -> Union["datasets.Dataset", "datasets.DatasetDict"]:
+        import datasets
+
+        datasets_dict = {"id": [], "text": []}
+        for index, entry in enumerate(data):
+            datasets_dict["id"].append(index)
+            datasets_dict["text"].append(entry["text"])
+
+        feature_dict = {
+            "id": datasets.Value(dtype="int32"),
+            "text": datasets.Value("string"),
+        }
+
+        ds = datasets.Dataset.from_dict(datasets_dict, features=datasets.Features(feature_dict))
+        if train_size != 1:
+            ds = ds.train_test_split(train_size=train_size, test_size=1 - train_size, seed=seed)
+
+        return ds
+
+    def _prepare_for_training_with_trlx(self, data: List[dict], train_size: float, seed: int):
+        raise NotImplementedError()

@@ -37,6 +37,7 @@ from argilla.client.feedback.schemas import (
     TextQuestion,
 )
 from argilla.client.feedback.training.schemas import (
+    TrainingTaskMappingForSupervisedFinetuning,
     TrainingTaskMappingForTextClassification,
 )
 from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
@@ -915,7 +916,7 @@ class FeedbackDataset(HuggingFaceDatasetMixin):
 
         if isinstance(task_mapping, TrainingTaskMappingForTextClassification):
             self.unify_responses(question=task_mapping.label.question, strategy=task_mapping.label.strategy)
-        else:
+        elif not isinstance(task_mapping, TrainingTaskMappingForSupervisedFinetuning):
             raise ValueError(f"Training data {type(task_mapping)} is not supported yet")
 
         data = task_mapping._format_data(self.records)
@@ -945,6 +946,10 @@ class FeedbackDataset(HuggingFaceDatasetMixin):
             return task_mapping._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
         elif framework is Framework.OPENAI:
             return task_mapping._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
+        elif framework is Framework.TRL:
+            return task_mapping._prepare_for_training_with_trl(data=data, train_size=train_size, seed=seed)
+        elif framework is Framework.TRLX:
+            return task_mapping._prepare_for_training_with_trlx(data=data, train_size=train_size, seed=seed)
         else:
             raise NotImplementedError(
                 f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
