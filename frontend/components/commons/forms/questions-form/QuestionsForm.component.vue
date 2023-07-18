@@ -47,6 +47,7 @@
         />
 
         <SingleLabelComponent
+          ref="singleLabel"
           v-if="input.isSingleLabelType"
           :questionId="input.id"
           :title="input.question"
@@ -59,6 +60,7 @@
           @on-focus="updateQuestionAutofocus(index)"
         />
         <MultiLabelComponent
+          ref="multiLabel"
           v-if="input.isMultiLabelType"
           :questionId="input.id"
           :title="input.question"
@@ -72,6 +74,7 @@
         />
 
         <RatingComponent
+          ref="rating"
           v-if="input.isRatingType"
           :title="input.question"
           v-model="input.options"
@@ -83,6 +86,7 @@
           @on-focus="updateQuestionAutofocus(index)"
         />
         <RankingComponent
+          ref="ranking"
           v-if="input.isRankingType"
           :title="input.question"
           :isRequired="input.is_required"
@@ -272,6 +276,38 @@ export default {
   },
   mounted() {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
+
+    const keyBoardHandler = (parent) => (e) => {
+      const focusable = parent.querySelectorAll(
+        'input[type="checkbox"], [tabindex="0"]'
+      );
+      const firstElement = focusable[0];
+      const lastElement = focusable[focusable.length - 1];
+
+      const isShiftkeyPressed = e.shiftKey;
+      const isTabPressed = e.key === "Tab";
+      const isLastElementActive = document.activeElement === lastElement;
+      const isFirstElementActive = document.activeElement === firstElement;
+
+      if (!isShiftkeyPressed && isTabPressed && isLastElementActive) {
+        e.preventDefault();
+        firstElement.focus();
+      } else if (isShiftkeyPressed && isTabPressed && isFirstElementActive) {
+        e.preventDefault();
+        lastElement.focus();
+      }
+    };
+
+    const initEventListenerFor = (aParent, aTypeOfComponent) => {
+      const parent = this.$refs[aTypeOfComponent][0].$el;
+
+      aParent.addEventListener("keydown", keyBoardHandler(parent));
+    };
+
+    ["singleLabel", "multiLabel", "rating", "ranking"].forEach(
+      (componentType) =>
+        this.$refs[componentType] && initEventListenerFor(parent, componentType)
+    );
   },
   destroyed() {
     this.emitIsQuestionsFormUntouched(true); // NOTE - ensure that on destroy, all parents and siblings have the flag well reinitiate
