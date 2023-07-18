@@ -26,8 +26,6 @@ RUN \
     mkdir /data && \
     # Install Elasticsearch and configure it
     apt-get update && apt-get install -y elasticsearch=8.8.2 && \
-    mkdir /usr/share/elasticsearch/config && \
-    echo "cluster.name: \"docker-cluster\"\nnetwork.host: 0.0.0.0\npath.data: \"/data/elasticsearch\"bootstrap.system_call_filter: false" > /usr/share/elasticsearch/config/elasticsearch.yml && \
     chown -R argilla:argilla /usr/share/elasticsearch /etc/elasticsearch /var/lib/elasticsearch /var/log/elasticsearch && \
     chown argilla:argilla /etc/default/elasticsearch && \
     # Install quickstart image dependencies
@@ -39,6 +37,8 @@ RUN \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /packages
+
+COPY config/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
 
 # echo -e "{  \"deployment\":  \"quickstart\" }" \
 # > /usr/local/lmib/python/dist-packages/argilla/server/static/deployment.json
@@ -63,9 +63,6 @@ ENV ARGILLA_WORKSPACE=$ADMIN_USERNAME
 ENV LOAD_DATASETS=full
 ENV UVICORN_PORT=6900
 
-ENV xpack.security.enabled=false
-ENV cluster.routing.allocation.disk.threshold_enabled=false
-ENV discovery.type=single-node
 ENV ES_JAVA_OPTS=-'Xms512m -Xmx512m'
 
 CMD ["/start_quickstart_argilla.sh"]
