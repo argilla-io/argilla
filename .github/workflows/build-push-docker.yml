@@ -71,7 +71,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: ${{ inputs.build-args }}
-          load: true
+          push: true
       - name: Docker Hub Description
         uses: peter-evans/dockerhub-description@v3
         if: github.event_name == 'release'

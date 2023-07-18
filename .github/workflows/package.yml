@@ -146,7 +146,7 @@ jobs:
     needs: build_server_docker_image
     if: |
       always() &&
-      needs.build_server_docker_image.result != 'failure'
+      needs.build_server_docker_image.result == 'success'
     with:
       download-python-package: false
       image-name: argilla/argilla-quickstart
