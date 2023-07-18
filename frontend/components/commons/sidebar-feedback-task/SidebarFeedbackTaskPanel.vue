@@ -27,7 +27,7 @@
         >
           <svgicon name="chevron-right" width="12" height="12"></svgicon>
         </base-button>
-        <transition name="fade" appear duration="500">
+        <transition name="fade" appear duration="500" mode="out-in">
           <slot></slot>
         </transition>
       </div>
