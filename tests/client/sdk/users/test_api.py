@@ -22,6 +22,7 @@ from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
     BaseClientError,
+    EntityConflictApiError,
     ForbiddenApiError,
     NotFoundApiError,
     UnauthorizedApiError,
@@ -32,7 +33,7 @@ from argilla.client.sdk.users.api import (
     list_users,
     whoami,
 )
-from argilla.client.sdk.users.models import UserModel
+from argilla.client.sdk.users.models import UserModel, UserRole
 
 if TYPE_CHECKING:
     from argilla.server.models import User as ServerUser
@@ -81,11 +82,19 @@ def test_create_user_errors(owner: "ServerUser", annotator: "ServerUser") -> Non
     httpx_client = ArgillaSingleton.init(api_key=annotator.api_key).http_client.httpx
     with pytest.raises(ForbiddenApiError):
         create_user(
-            client=httpx_client, first_name="user", username="user_1", password="user_password", role="annotator"
+            client=httpx_client, first_name="user", username="user_1", password="user_password", role=UserRole.annotator
         )
 
     httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
-    with pytest.raises(AlreadyExistsApiError):
+    with pytest.raises(EntityConflictApiError):
+        create_user(
+            client=httpx_client,
+            first_name="user",
+            username=annotator.username,
+            password="user_password",
+            role=UserRole.annotator,
+        )
+    with pytest.raises(AlreadyExistsApiError):  # Backward compatibility
         create_user(
             client=httpx_client,
             first_name="user",
