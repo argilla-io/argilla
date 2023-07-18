@@ -828,7 +828,7 @@ async def test_create_record_suggestion(client: TestClient, db: "AsyncSession", 
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
     record = await RecordFactory.create(dataset=dataset)
 
-    response = client.post(
+    response = client.put(
         f"/api/v1/records/{record.id}/suggestions",
         headers={API_KEY_HEADER_NAME: user.api_key},
         json={"question_id": str(question.id), **payload},
@@ -837,6 +837,32 @@ async def test_create_record_suggestion(client: TestClient, db: "AsyncSession", 
     response_body = response.json()
     assert response.status_code == 201
     assert response_body == {"id": response_body["id"], "question_id": str(question.id), **payload}
+    assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 1
+
+
+@pytest.mark.asyncio
+async def test_create_record_suggestion_update(client: TestClient, db: "AsyncSession", owner_auth_header: dict):
+    dataset = await DatasetFactory.create()
+    question = await TextQuestionFactory.create(dataset=dataset)
+    record = await RecordFactory.create(dataset=dataset)
+    suggestion = await SuggestionFactory.create(question=question, record=record)
+
+    response = client.put(
+        f"/api/v1/records/{record.id}/suggestions",
+        headers=owner_auth_header,
+        json={"question_id": str(question.id), "value": "Testing updating a suggestion"},
+    )
+
+    response_body = response.json()
+    assert response.status_code == 200
+    assert response_body == {
+        "id": str(suggestion.id),
+        "question_id": str(question.id),
+        "type": None,
+        "score": None,
+        "value": "Testing updating a suggestion",
+        "agent": None,
+    }
     assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 1
 
 
@@ -855,7 +881,7 @@ async def test_create_record_suggestion_not_valid(client: TestClient, owner_auth
     question = await TextQuestionFactory.create(dataset=dataset)
     record = await RecordFactory.create(dataset=dataset)
 
-    response = client.post(
+    response = client.put(
         f"/api/v1/records/{record.id}/suggestions",
         headers=owner_auth_header,
         json={"question_id": str(question.id), **payload},
@@ -865,26 +891,10 @@ async def test_create_record_suggestion_not_valid(client: TestClient, owner_auth
 
 
 @pytest.mark.asyncio
-async def test_create_record_suggestion_already_existing(client: TestClient, owner_auth_header: dict):
-    dataset = await DatasetFactory.create()
-    question = await TextQuestionFactory.create(dataset=dataset)
-    record = await RecordFactory.create()
-    await SuggestionFactory.create(question=question, record=record)
-
-    response = client.post(
-        f"/api/v1/records/{record.id}/suggestions",
-        headers=owner_auth_header,
-        json={"question_id": str(question.id), "value": "This is a unit test suggestion"},
-    )
-
-    assert response.status_code == 409
-
-
-@pytest.mark.asyncio
 async def test_create_record_suggestion_for_non_existent_question(client: TestClient, owner_auth_header: dict):
     record = await RecordFactory.create()
 
-    response = client.post(
+    response = client.put(
         f"/api/v1/records/{record.id}/suggestions",
         headers=owner_auth_header,
         json={"question_id": str(uuid4()), "value": "This is a unit test suggestion"},
@@ -898,7 +908,7 @@ async def test_create_record_suggestion_as_annotator(client: TestClient):
     annotator = await UserFactory.create(role=UserRole.annotator)
     record = await RecordFactory.create()
 
-    response = client.post(
+    response = client.put(
         f"/api/v1/records/{record.id}/suggestions",
         headers={API_KEY_HEADER_NAME: annotator.api_key},
         json={"question_id": str(uuid4()), "value": "This is a unit test suggestion"},

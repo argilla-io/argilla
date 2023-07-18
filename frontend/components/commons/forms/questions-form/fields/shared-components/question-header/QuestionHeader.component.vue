@@ -72,6 +72,7 @@ export default {
 
 span {
   word-break: break-word;
+  line-height: 1.2em;
 }
 
 .icon-info {

@@ -52,6 +52,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["question_id"], ["questions.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["record_id"], ["records.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("record_id", "question_id", name="suggestion_record_id_question_id_uq"),
     )
     op.create_index(op.f("ix_suggestions_question_id"), "suggestions", ["question_id"], unique=False)
     op.create_index(op.f("ix_suggestions_record_id"), "suggestions", ["record_id"], unique=False)
