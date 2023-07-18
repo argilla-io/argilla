@@ -137,7 +137,7 @@ jobs:
       image-name: argilla/argilla-server
       dockerfile: docker/Dockerfile
       readme: README.md
-      platforms: linux/amd64
+      platforms: linux/amd64,linux/arm64
     secrets: inherit
 
   build_quickstart_docker_image:
