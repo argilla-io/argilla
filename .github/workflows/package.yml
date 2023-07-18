@@ -143,6 +143,7 @@ jobs:
             dockerfile: docker/quickstart.Dockerfile
             readme: docker/quickstart.README.md
             platforms: linux/amd64,linux/arm64
+      max-parallel: 1
     defaults:
       run:
         shell: bash -l {0}
