@@ -43,7 +43,7 @@
   <button
     v-else
     :class="buttonClasses"
-    tabindex="0"
+    :tabindex="tabIndex"
     :loading="loading"
     :type="type"
     :disabled="disabled"
@@ -57,6 +57,10 @@
 export default {
   name: "BaseButton",
   props: {
+    tabIndex: {
+      type: Number,
+      default: 0,
+    },
     href: String,
     target: String,
     rel: String,
