@@ -24,7 +24,7 @@ export class GetRecordsToAnnotateUseCase {
     page: number,
     status: string,
     searchText: string
-  ): Promise<Records> {
+  ): Promise<void> {
     const arrayOffset = page - 1;
 
     const getRecords = this.recordRepository.getRecords(
@@ -100,7 +100,5 @@ export class GetRecordsToAnnotateUseCase {
     const records = new Records(recordsToAnnotate, recordsFromBackend.total);
 
     this.recordsStorage.add(records);
-
-    return records;
   }
 }

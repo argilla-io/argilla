@@ -30,6 +30,9 @@ export const loadDependencyContainer = (context: Context) => {
   const dependencies = [
     register(DatasetRepository).withDependencies(useAxios, useStore).build(),
     register(RecordRepository).withDependency(useAxios).build(),
+    register(QuestionRepository).withDependency(useAxios).build(),
+    register(FieldRepository).withDependency(useAxios).build(),
+    register(MetricsRepository).withDependency(useAxios).build(),
 
     register(GetDatasetsUseCase)
       .withDependencies(DatasetRepository, useDatasets)

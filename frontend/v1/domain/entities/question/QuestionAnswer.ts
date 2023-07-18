@@ -14,8 +14,8 @@ export abstract class QuestionAnswer {
 
   abstract complete(answer: Answer);
   abstract clear();
-  abstract get isValid();
-  get hasValidValues() {
+  abstract get isValid(): boolean;
+  get hasValidValues(): boolean {
     return true;
   }
 
@@ -34,7 +34,7 @@ export class TextQuestionAnswer extends QuestionAnswer {
     this.value = "";
   }
 
-  get isValid(): any {
+  get isValid(): boolean {
     return this.value !== "";
   }
 
@@ -77,7 +77,7 @@ export class SingleLabelQuestionAnswer extends QuestionAnswer {
     });
   }
 
-  get isValid(): any {
+  get isValid(): boolean {
     return this.values.some((label) => label.isSelected);
   }
 
@@ -109,9 +109,9 @@ export class MultiLabelQuestionAnswer extends QuestionAnswer {
   }
 
   complete(answer: Answer) {
-    const suggestedAnswers = answer.value as string[];
+    const answerValues = answer.value as string[];
     this.values.forEach((label) => {
-      label.isSelected = suggestedAnswers.includes(label.value);
+      label.isSelected = answerValues.includes(label.value);
     });
   }
 
@@ -121,7 +121,7 @@ export class MultiLabelQuestionAnswer extends QuestionAnswer {
     });
   }
 
-  get isValid(): any {
+  get isValid(): boolean {
     return this.values.some((label) => label.isSelected);
   }
 
@@ -164,7 +164,7 @@ export class RatingLabelQuestionAnswer extends QuestionAnswer {
     });
   }
 
-  get isValid(): any {
+  get isValid(): boolean {
     return this.values.some((value) => value.isSelected);
   }
 
@@ -210,11 +210,11 @@ export class RankingQuestionAnswer extends QuestionAnswer {
     });
   }
 
-  get isValid(): any {
+  get isValid(): boolean {
     return this.values.every((value) => value.rank);
   }
 
-  get hasValidValues() {
+  get hasValidValues(): boolean {
     return (
       !this.values.some((option) => option.rank) ||
       this.values.every((option) => option.rank)
