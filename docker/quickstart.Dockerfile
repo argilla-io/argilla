@@ -20,6 +20,8 @@ COPY quickstart.requirements.txt /packages/requirements.txt
 COPY dist/*.whl /packages/
 
 RUN \
+    # Indicate that this is a quickstart deployment
+    echo -e "{  \"deployment\":  \"quickstart\" }" > /usr/local/lib/python3.10/site-packages/argilla/server/static/deployment.json && \
     # Create an user to run the Argilla server and Elasticsearch
     useradd -ms /bin/bash argilla && \
     # Create a directory where Elasticsearch and Argilla will store their data
@@ -34,6 +36,7 @@ RUN \
     # Give ownership of the data directory to the argilla user
     chown -R argilla:argilla /data && \
     # Clean up
+    apt-get remove -y wget gnupg && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /packages
