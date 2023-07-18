@@ -18,7 +18,6 @@ RUN echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://
 # Copy Argilla distribution files
 COPY scripts/* /
 COPY quickstart.requirements.txt /packages/requirements.txt
-COPY dist/*.whl /packages/
 
 RUN \
     # Indicate that this is a quickstart deployment
