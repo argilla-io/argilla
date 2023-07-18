@@ -92,8 +92,12 @@ class MethodNotAllowedApiError(ArApiResponseError):
     HTTP_STATUS = 405
 
 
-class AlreadyExistsApiError(ArApiResponseError):
+class EntityConflictApiError(ArApiResponseError):
     HTTP_STATUS = 409
+
+
+# backward compatibility
+AlreadyExistsApiError = EntityConflictApiError
 
 
 class ValidationApiError(ArApiResponseError):

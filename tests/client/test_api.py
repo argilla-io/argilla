@@ -54,6 +54,7 @@ from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.api import Response
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
+    EntityConflictApiError,
     ForbiddenApiError,
     GenericApiError,
     HttpResponseError,
@@ -567,7 +568,9 @@ async def test_dataset_copy(role: UserRole):
 
     api.log(record, name=dataset_copy_name)
 
-    with pytest.raises(AlreadyExistsApiError):
+    with pytest.raises(EntityConflictApiError):
+        api.copy(dataset_name, name_of_copy=dataset_copy_name)
+    with pytest.raises(AlreadyExistsApiError):  # Backward compatibility
         api.copy(dataset_name, name_of_copy=dataset_copy_name)
     with pytest.raises(NotFoundApiError, match="other-workspace"):
         api.copy(dataset_name, name_of_copy=dataset_copy_name, workspace="other-workspace")
@@ -602,7 +605,9 @@ async def test_dataset_copy_to_another_workspace(role: UserRole):
     api.set_workspace(workspace_02.name)
     df_copy = api.load(dataset_copy).to_pandas()
     assert df.equals(df_copy)
-    with pytest.raises(AlreadyExistsApiError):
+    with pytest.raises(EntityConflictApiError):
+        api.copy(dataset_copy, name_of_copy=dataset_copy, workspace=workspace_02.name)
+    with pytest.raises(AlreadyExistsApiError):  # Backward compatibility
         api.copy(dataset_copy, name_of_copy=dataset_copy, workspace=workspace_02.name)
 
 
