@@ -144,6 +144,9 @@ jobs:
     name: Build Argilla quickstart docker image
     uses: ./.github/workflows/build-push-docker.yml
     needs: build_server_docker_image
+    if: |
+      always() &&
+      needs.build_server_docker_image.result != 'failure'
     with:
       download-python-package: false
       image-name: argilla/argilla-quickstart
