@@ -189,9 +189,17 @@ class FeedbackRecord(BaseModel):
         if isinstance(suggestions, (dict, SuggestionSchema)):
             suggestions = [suggestions]
         parsed_suggestions = []
+        suggestion_names = set()
         for suggestion in suggestions:
             if not isinstance(suggestion, SuggestionSchema):
                 suggestion = SuggestionSchema(**suggestion)
+            if suggestion.question_name in suggestion_names:
+                warnings.warn(
+                    f"More than one suggestion for `{suggestion.question_name}`"
+                    " has been provided, so just the first one will be kept."
+                )
+                continue
+            suggestion_names.add(suggestion.question_name)
             parsed_suggestions.append(suggestion)
         if not self.id:
             warnings.warn(
