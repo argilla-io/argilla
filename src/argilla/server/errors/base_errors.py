@@ -145,8 +145,8 @@ class MissingInputParamError(BadRequestError):
     pass
 
 
-class EntityConflictError(ServerError):
-    """Error raised when a conflict occurs on a entity operation"""
+class EntityAlreadyExistsError(ServerError):
+    """Error raised when entity was created"""
 
     HTTP_STATUS = status.HTTP_409_CONFLICT
 
@@ -154,9 +154,6 @@ class EntityConflictError(ServerError):
         self.name = name
         self.type = type.__name__
         self.workspace = workspace
-
-
-EntityAlreadyExistsError = EntityConflictError
 
 
 class EntityNotFoundError(ServerError):
