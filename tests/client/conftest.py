@@ -15,7 +15,6 @@
 import datetime
 from typing import TYPE_CHECKING, List
 
-import argilla as rg
 import pytest
 from argilla.client.api import delete, log
 from argilla.client.datasets import read_datasets
@@ -29,7 +28,7 @@ from argilla.client.sdk.datasets.models import TaskType
 from datasets import Dataset
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.typing import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
 
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
@@ -451,6 +450,43 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                     "status": "submitted",
                 }
             ],
+            suggestions=[
+                {
+                    "question_name": "question-1",
+                    "value": "This is a suggestion to question 1",
+                    "type": "human",
+                    "score": 0.0,
+                    "agent": "agent-1",
+                },
+                {
+                    "question_name": "question-2",
+                    "value": 1,
+                    "type": "human",
+                    "score": 0.0,
+                    "agent": "agent-1",
+                },
+                {
+                    "question_name": "question-3",
+                    "value": "a",
+                    "type": "human",
+                    "score": 0.0,
+                    "agent": "agent-1",
+                },
+                {
+                    "question_name": "question-4",
+                    "value": ["a", "b"],
+                    "type": "human",
+                    "score": 0.0,
+                    "agent": "agent-1",
+                },
+                {
+                    "question_name": "question-5",
+                    "value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}],
+                    "type": "human",
+                    "score": 0.0,
+                    "agent": "agent-1",
+                },
+            ],
             external_id="3",
         ),
         FeedbackRecord(
@@ -505,6 +541,16 @@ def feedback_dataset_huggingface() -> Dataset:
                     "status": ["submitted"],
                 }
             ],
+            "question-1-suggestion": ["This is a suggestion to question 1"],
+            "question-1-suggestion-metadata": [{"type": None, "score": None, "agent": None}],
+            "question-2-suggestion": [1],
+            "question-2-suggestion-metadata": [{"type": None, "score": None, "agent": None}],
+            "question-3-suggestion": ["a"],
+            "question-3-suggestion-metadata": [{"type": None, "score": None, "agent": None}],
+            "question-4-suggestion": [["a", "b"]],
+            "question-4-suggestion-metadata": [{"type": None, "score": None, "agent": None}],
+            "question-5-suggestion": [[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]],
+            "question-5-suggestion-metadata": [{"type": None, "score": None, "agent": None}],
             "external_id": ["1"],
         }
     )

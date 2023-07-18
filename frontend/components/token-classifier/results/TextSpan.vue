@@ -161,7 +161,7 @@ export default {
       this.showEntitiesSelector = false;
     },
     visualizeToken(token) {
-      let text = token.highlighted
+      const text = token.highlighted
         ? this.$htmlHighlightText(token.text)
         : this.$htmlText(token.text);
       return `${text}${token.charsBetweenTokens}`;

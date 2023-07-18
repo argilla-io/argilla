@@ -24,7 +24,7 @@
         />
       </NuxtLink>
     </template>
-    <User />
+    <user-avatar-tooltip />
   </BaseTopbarBrand>
 </template>
 

@@ -23,7 +23,7 @@ from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.utils.dependency import require_version
 
 
-class AutoTrainMixIn:
+class AutoTrainMixin:
     def prepare_dataset(self, data_dict: Optional[dict] = {}) -> None:
         """
         This function prepares a dataset for autotrain using a dictionary of data and specific column
@@ -104,7 +104,7 @@ class AutoTrainMixIn:
         return job_params
 
 
-class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainMixIn):
+class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainMixin):
     _logger = logging.getLogger("ArgillaAutoTrainTrainer")
     _logger.setLevel(logging.INFO)
 

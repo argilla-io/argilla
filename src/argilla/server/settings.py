@@ -189,32 +189,6 @@ class Settings(BaseSettings):
 
     class Config:
         env_prefix = "ARGILLA_"
-        fields = {
-            # TODO(@frascuchon): Remove in 0.20.0
-            "elasticsearch": {
-                "env": ["ELASTICSEARCH", f"{env_prefix}ELASTICSEARCH"],
-            },
-            "elasticsearch_ssl_verify": {
-                "env": [
-                    "ELASTICSEARCH_SSL_VERIFY",
-                    f"{env_prefix}ELASTICSEARCH_SSL_VERIFY",
-                ]
-            },
-            "cors_origins": {"env": ["CORS_ORIGINS", f"{env_prefix}CORS_ORIGINS"]},
-            "docs_enabled": {"env": ["DOCS_ENABLED", f"{env_prefix}DOCS_ENABLED"]},
-            "es_records_index_shards": {
-                "env": [
-                    "ES_RECORDS_INDEX_SHARDS",
-                    f"{env_prefix}ES_RECORDS_INDEX_SHARDS",
-                ]
-            },
-            "es_records_index_replicas": {
-                "env": [
-                    "ES_RECORDS_INDEX_REPLICAS",
-                    f"{env_prefix}ES_RECORDS_INDEX_SHARDS",
-                ]
-            },
-        }
 
 
 settings = Settings()

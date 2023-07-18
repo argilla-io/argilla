@@ -125,3 +125,23 @@ for user in users:
 workspace.add_user("<USER_ID>")
 workspace.delete_user("<USER_ID>")
 ```
+
+### Delete a `Workspace`
+
+#### Python client
+
+You can also delete a workspace using the python client.
+
+:::{note}
+To delete a workspace, no dataset can be linked to it. If workspace contains any dataset, deletion will fail.
+:::
+
+```python
+import argilla as rg
+
+rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
+
+workspace = rg.Workspace.from_name("new-workspace")
+
+workspace.delete()
+```

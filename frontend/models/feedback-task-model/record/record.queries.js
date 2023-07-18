@@ -33,7 +33,7 @@ const updateRecordStatusByRecordId = (recordId, recordStatus) => {
 };
 
 // GET
-const getRecordWithFieldsAndResponsesByUserId = (
+const getRecordWithFieldsSuggestionsAndResponsesByUserId = (
   datasetId,
   userId,
   recordIndex = 0
@@ -43,6 +43,7 @@ const getRecordWithFieldsAndResponsesByUserId = (
     .with("record_responses", (query) => {
       query.where("user_id", userId);
     })
+    .with("record_suggestions")
     .where("dataset_id", datasetId)
     .where("record_index", recordIndex)
     .first();
@@ -85,7 +86,7 @@ export {
   RECORD_STATUS_COLOR,
   RESPONSE_STATUS_FOR_API,
   upsertRecords,
-  getRecordWithFieldsAndResponsesByUserId,
+  getRecordWithFieldsSuggestionsAndResponsesByUserId,
   getRecordStatusByDatasetIdAndRecordIndex,
   getRecordIndexByRecordId,
   updateRecordStatusByRecordId,

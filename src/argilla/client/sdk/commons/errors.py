@@ -46,7 +46,7 @@ class ApiCompatibilityError(BaseClientError):
 
 
 class HttpResponseError(BaseClientError):
-    """Used for handle http errros other than defined in Argilla server"""
+    """Used for handle http errors other than defined in Argilla server"""
 
     def __init__(self, response: httpx.Response):
         self.status_code = response.status_code

@@ -18,25 +18,25 @@ import tempfile
 import warnings
 from typing import TYPE_CHECKING, Any, Optional, Type
 
-import huggingface_hub
-from datasets import Dataset, DatasetDict, Features, Sequence, Value, load_dataset
-from huggingface_hub import DatasetCardData, HfApi, hf_hub_download
-from huggingface_hub.utils import EntryNotFoundError
 from packaging.version import parse as parse_version
 
-from argilla.client.feedback.config import DatasetConfig
+from argilla.client.feedback.config import DatasetConfig, DeprecatedDatasetConfig
 from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas import FeedbackRecord
-from argilla.client.feedback.typing import AllowedQuestionTypes
+from argilla.client.feedback.types import AllowedQuestionTypes
+from argilla.utils.dependency import requires_version
 
 if TYPE_CHECKING:
+    from datasets import Dataset
+
     from argilla.client.feedback.dataset import FeedbackDataset
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class HuggingFaceDatasetMixIn:
+class HuggingFaceDatasetMixin:
     @staticmethod
+    @requires_version("datasets")
     def _huggingface_format(dataset: "FeedbackDataset") -> "Dataset":
         """Formats a `FeedbackDataset` as a `datasets.Dataset` object.
 
@@ -52,8 +52,10 @@ class HuggingFaceDatasetMixIn:
             >>> import argilla as rg
             >>> rg.init(...)
             >>> dataset = rg.FeedbackDataset.from_argilla(name="my-dataset")
-            >>> huggingface_dataset = rg.HuggingFaceDatasetMixIn.set_format(dataset)
+            >>> huggingface_dataset = rg.HuggingFaceDatasetMixin.set_format(dataset)
         """
+        from datasets import Dataset, Features, Sequence, Value
+
         hf_dataset, hf_features = {}, {}
 
         for field in dataset.fields:
@@ -93,6 +95,19 @@ class HuggingFaceDatasetMixIn:
             if question.name not in hf_dataset:
                 hf_dataset[question.name] = []
 
+            value.id = "suggestion"
+            hf_features[f"{question.name}-suggestion"] = value
+            if f"{question.name}-suggestion" not in hf_dataset:
+                hf_dataset[f"{question.name}-suggestion"] = []
+
+            hf_features[f"{question.name}-suggestion-metadata"] = {
+                "type": Value(dtype="string", id="suggestion-metadata"),
+                "score": Value(dtype="float32", id="suggestion-metadata"),
+                "agent": Value(dtype="string", id="suggestion-metadata"),
+            }
+            if f"{question.name}-suggestion-metadata" not in hf_dataset:
+                hf_dataset[f"{question.name}-suggestion-metadata"] = []
+
         hf_features["external_id"] = Value(dtype="string", id="external_id")
         hf_dataset["external_id"] = []
 
@@ -104,23 +119,44 @@ class HuggingFaceDatasetMixIn:
             for question in dataset.questions:
                 if not record.responses:
                     hf_dataset[question.name].append(None)
-                    continue
-                responses = []
-                for response in record.responses:
-                    if question.name not in response.values:
-                        responses.append(None)
-                        continue
-                    if question.settings["type"] == "ranking":
-                        responses.append([r.dict() for r in response.values[question.name].value])
-                    else:
-                        responses.append(response.values[question.name].value)
-                hf_dataset[question.name].append(
-                    {
-                        "user_id": [r.user_id for r in record.responses],
-                        "value": responses,
-                        "status": [r.status for r in record.responses],
-                    }
-                )
+                else:
+                    responses = []
+                    for response in record.responses:
+                        if question.name not in response.values:
+                            responses.append(None)
+                            continue
+                        if question.settings["type"] == "ranking":
+                            responses.append([r.dict() for r in response.values[question.name].value])
+                        else:
+                            responses.append(response.values[question.name].value)
+                    hf_dataset[question.name].append(
+                        {
+                            "user_id": [r.user_id for r in record.responses],
+                            "value": responses,
+                            "status": [r.status for r in record.responses],
+                        }
+                    )
+
+                suggestion = next(filter(lambda s: s.question_name == question.name, record.suggestions), None)
+                if not record.suggestions or not suggestion:
+                    hf_dataset[f"{question.name}-suggestion"].append(None)
+                    hf_dataset[f"{question.name}-suggestion-metadata"].append(
+                        {
+                            "type": None,
+                            "score": None,
+                            "agent": None,
+                        }
+                    )
+                else:
+                    hf_dataset[f"{question.name}-suggestion"].append(suggestion.value)
+                    hf_dataset[f"{question.name}-suggestion-metadata"].append(
+                        {
+                            "type": suggestion.type,
+                            "score": suggestion.score,
+                            "agent": suggestion.agent,
+                        }
+                    )
+
             hf_dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else None)
             hf_dataset["external_id"].append(record.external_id or None)
 
@@ -132,8 +168,10 @@ class HuggingFaceDatasetMixIn:
             features=Features(hf_features),
         )
 
-    def _push_to_huggingface(
-        self, dataset: "FeedbackDataset", repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs
+    @requires_version("huggingface_hub")
+    @requires_version("datasets")
+    def push_to_huggingface(
+        self: "FeedbackDataset", repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs
     ) -> None:
         """Pushes the `FeedbackDataset` to the HuggingFace Hub. If the dataset has been previously pushed to the
         HuggingFace Hub, it will be updated instead. Note that some params as `private` have no effect at all
@@ -147,6 +185,9 @@ class HuggingFaceDatasetMixIn:
             *args: the args to pass to `datasets.Dataset.push_to_hub`.
             **kwargs: the kwargs to pass to `datasets.Dataset.push_to_hub`.
         """
+        import huggingface_hub
+        from huggingface_hub import DatasetCardData, HfApi
+
         if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
             _LOGGER.warning(
                 "Recommended `huggingface_hub` version is 0.14.0 or higher, and you have"
@@ -166,9 +207,9 @@ class HuggingFaceDatasetMixIn:
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
             f.write(
                 DatasetConfig(
-                    fields=dataset.fields,
-                    questions=dataset.questions,
-                    guidelines=dataset.guidelines,
+                    fields=self.fields,
+                    questions=self.questions,
+                    guidelines=self.guidelines,
                 ).to_yaml()
             )
             f.flush()
@@ -189,24 +230,25 @@ class HuggingFaceDatasetMixIn:
 
             card = ArgillaDatasetCard.from_template(
                 card_data=DatasetCardData(
-                    size_categories=size_categories_parser(len(dataset.records)),
+                    size_categories=size_categories_parser(len(self.records)),
                     tags=["rlfh", "argilla", "human-feedback"],
                 ),
                 repo_id=repo_id,
-                argilla_fields=dataset.fields,
-                argilla_questions=dataset.questions,
-                argilla_guidelines=dataset.guidelines,
-                argilla_record=json.loads(dataset.records[0].json()),
+                argilla_fields=self.fields,
+                argilla_questions=self.questions,
+                argilla_guidelines=self.guidelines,
+                argilla_record=json.loads(self.records[0].json()),
                 huggingface_record=hfds[0],
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
 
-    @staticmethod
-    def _from_huggingface(cls: Type["FeedbackDataset"], repo_id: str, *args: Any, **kwargs: Any) -> "FeedbackDataset":
+    @classmethod
+    @requires_version("huggingface_hub")
+    @requires_version("datasets")
+    def from_huggingface(cls: Type["FeedbackDataset"], repo_id: str, *args: Any, **kwargs: Any) -> "FeedbackDataset":
         """Loads a `FeedbackDataset` from the HuggingFace Hub.
 
         Args:
-            cls: the class to use to instantiate the `FeedbackDataset`.
             repo_id: the ID of the HuggingFace Hub repo to load the `FeedbackDataset` from.
             *args: the args to pass to `datasets.Dataset.load_from_hub`.
             **kwargs: the kwargs to pass to `datasets.Dataset.load_from_hub`.
@@ -214,6 +256,11 @@ class HuggingFaceDatasetMixIn:
         Returns:
             A `FeedbackDataset` loaded from the HuggingFace Hub.
         """
+        import huggingface_hub
+        from datasets import DatasetDict, load_dataset
+        from huggingface_hub import hf_hub_download
+        from huggingface_hub.utils import EntryNotFoundError
+
         if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
             _LOGGER.warning(
                 "Recommended `huggingface_hub` version is 0.14.0 or higher, and you have"
@@ -260,13 +307,13 @@ class HuggingFaceDatasetMixIn:
                 **hub_auth,
             )
             with open(config_path, "r") as f:
-                config = DatasetConfig.from_json(f.read())
+                config = DeprecatedDatasetConfig.from_json(f.read())
         except Exception as e:
             raise FileNotFoundError(
                 "Neither `argilla.yaml` nor `argilla.cfg` files were found in the"
                 " HuggingFace Hub repository. Please make sure to dump the `DatasetConfig`"
                 " using `FeedbackDataset.push_to_huggingface` to automatically upload"
-                f" the `DatasetConfig` as `argilla.yaml` to the HuggingFace Hub."
+                " the `DatasetConfig` as `argilla.yaml` to the HuggingFace Hub."
             ) from e
 
         hfds = load_dataset(repo_id, use_auth_token=auth, *args, **kwargs)
@@ -281,23 +328,59 @@ class HuggingFaceDatasetMixIn:
         records = []
         for index in range(len(hfds)):
             responses = {}
+            suggestions = []
+            user_without_id = False
             for question in config.questions:
                 if hfds[index][question.name] is None or len(hfds[index][question.name]) < 1:
                     continue
+                if len([None for user_id in hfds[index][question.name]["user_id"] if user_id is None]) > 1:
+                    warnings.warn(
+                        "Found more than one user without ID in the dataset, so just the"
+                        " responses for the first user without ID will be used, the rest"
+                        " will be discarded."
+                    )
+                user_without_id_response = False
+
                 for user_id, value, status in zip(
                     hfds[index][question.name]["user_id"],
                     hfds[index][question.name]["value"],
                     hfds[index][question.name]["status"],
                 ):
-                    if user_id not in responses:
+                    if user_without_id_response:
+                        continue
+                    if user_id is None:
+                        if not user_without_id:
+                            user_without_id = True
+                            responses["user_without_id"] = {
+                                "user_id": user_id,
+                                "status": status,
+                                "values": {},
+                            }
+                            user_without_id_response = True
+                    if user_id is not None and user_id not in responses:
                         responses[user_id] = {
                             "user_id": user_id,
                             "status": status,
                             "values": {},
                         }
-                    if question.settings["type"] == "ranking":
-                        value = [{"rank": r, "value": v} for r, v in zip(value["rank"], value["value"])]
-                    responses[user_id]["values"].update({question.name: {"value": value}})
+                    if value is not None:
+                        if question.settings["type"] == "ranking":
+                            value = [{"rank": r, "value": v} for r, v in zip(value["rank"], value["value"])]
+                        if value is not None:
+                            responses[user_id or "user_without_id"]["values"].update({question.name: {"value": value}})
+
+                # First if-condition is here for backwards compatibility
+                if (
+                    f"{question.name}-suggestion" in hfds[index]
+                    and hfds[index][f"{question.name}-suggestion"] is not None
+                ):
+                    suggestion = {
+                        "question_name": question.name,
+                        "value": hfds[index][f"{question.name}-suggestion"],
+                    }
+                    if hfds[index][f"{question.name}-suggestion-metadata"] is not None:
+                        suggestion.update(hfds[index][f"{question.name}-suggestion-metadata"])
+                    suggestions.append(suggestion)
 
             metadata = None
             if "metadata" in hfds[index] and hfds[index]["metadata"] is not None:
@@ -306,16 +389,17 @@ class HuggingFaceDatasetMixIn:
             records.append(
                 FeedbackRecord(
                     fields={field.name: hfds[index][field.name] for field in config.fields},
-                    metadata=metadata,
-                    responses=list(responses.values()) or None,
+                    metadata=metadata or {},
+                    responses=list(responses.values()) or [],
+                    suggestions=[suggestion for suggestion in suggestions if suggestion["value"] is not None] or [],
                     external_id=hfds[index]["external_id"],
                 )
             )
         del hfds
-        cls = cls(
+        instance = cls(
             fields=config.fields,
             questions=config.questions,
             guidelines=config.guidelines,
         )
-        cls.add_records(records)
-        return cls
+        instance.add_records(records)
+        return instance

@@ -47,7 +47,7 @@ class TextClassificationRecord extends BaseRecord {
     if (!this.prediction) {
       return [];
     }
-    let labels = this.prediction.labels;
+    const labels = this.prediction.labels;
     if (this.multi_label) {
       return labels.filter((l) => l.score > 0.5).map((l) => l.class);
     }
@@ -58,7 +58,7 @@ class TextClassificationRecord extends BaseRecord {
     if (this.annotation === undefined) {
       return [];
     }
-    let labels = this.annotation.labels;
+    const labels = this.annotation.labels;
     if (this.multi_label) {
       return labels.map((l) => l.class);
     }
@@ -376,8 +376,8 @@ class TextClassificationDataset extends ObservationDataset {
       return;
     }
 
-    let rule = this.findRuleByQuery(query, labels);
-    let ruleMetrics = this.getMetricsByRule(rule);
+    const rule = this.findRuleByQuery(query, labels);
+    const ruleMetrics = this.getMetricsByRule(rule);
 
     await TextClassificationDataset.insertOrUpdate({
       data: {
@@ -478,7 +478,7 @@ class TextClassificationDataset extends ObservationDataset {
   }
 
   findRuleByQuery(query, labels = undefined) {
-    for (let rule of this.labelingRules || []) {
+    for (const rule of this.labelingRules || []) {
       const labelsAreEqual = _.isEqual(_.sortBy(rule.labels), _.sortBy(labels));
       if (rule.query === query && (!labels || labelsAreEqual)) {
         return rule;
