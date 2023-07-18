@@ -22,8 +22,8 @@ from pydantic import BaseModel, Field
 
 from argilla.client.apis import AbstractApi, api_compatibility
 from argilla.client.sdk.commons.errors import (
-    AlreadyExistsApiError,
     ApiCompatibilityError,
+    EntityConflictApiError,
     ForbiddenApiError,
     NotFoundApiError,
 )
@@ -155,7 +155,7 @@ class Datasets(AbstractApi):
                 else TaskType.token_classification
             )
             ds = self.create(name=name, task=task, workspace=workspace)
-        except AlreadyExistsApiError:
+        except EntityConflictApiError:
             ds = self.find_by_name(name)
         self._save_settings(dataset=ds, settings=settings)
 

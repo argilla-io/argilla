@@ -17,8 +17,8 @@ from json import JSONDecodeError
 import httpx
 
 from argilla.client.sdk.commons.errors import (
-    AlreadyExistsApiError,
     BadRequestApiError,
+    EntityConflictApiError,
     ForbiddenApiError,
     GenericApiError,
     HttpResponseError,
@@ -45,8 +45,8 @@ def handle_response_error(response: httpx.Response, parse_response: bool = True,
         error_type = BadRequestApiError
     elif response.status_code == UnauthorizedApiError.HTTP_STATUS:
         error_type = UnauthorizedApiError
-    elif response.status_code == AlreadyExistsApiError.HTTP_STATUS:
-        error_type = AlreadyExistsApiError
+    elif response.status_code == EntityConflictApiError.HTTP_STATUS:
+        error_type = EntityConflictApiError
     elif response.status_code == ForbiddenApiError.HTTP_STATUS:
         error_type = ForbiddenApiError
     elif response.status_code == NotFoundApiError.HTTP_STATUS:

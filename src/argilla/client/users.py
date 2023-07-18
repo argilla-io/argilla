@@ -19,8 +19,8 @@ from uuid import UUID
 
 from argilla.client import active_client
 from argilla.client.sdk.commons.errors import (
-    AlreadyExistsApiError,
     BaseClientError,
+    EntityConflictApiError,
     NotFoundApiError,
 )
 from argilla.client.sdk.users import api as users_api
@@ -223,7 +223,7 @@ class User:
                 ).dict(),
             ).parsed
             return cls.__new_instance(client, user)
-        except AlreadyExistsApiError as e:
+        except EntityConflictApiError as e:
             raise ValueError(
                 f"User with username=`{username}` already exists in Argilla, so please"
                 " make sure that the name you provided is a unique one."

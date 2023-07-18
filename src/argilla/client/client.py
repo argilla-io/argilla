@@ -53,7 +53,7 @@ from argilla.client.models import (
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.api import bulk
 from argilla.client.sdk.commons.errors import (
-    AlreadyExistsApiError,
+    EntityConflictApiError,
     InputValueError,
     NotFoundApiError,
 )
@@ -399,7 +399,7 @@ class Argilla:
 
         try:
             self.datasets.create(name=name, task=task, workspace=workspace)
-        except AlreadyExistsApiError:
+        except EntityConflictApiError:
             pass
 
         results = []
@@ -605,7 +605,7 @@ class Argilla:
                     name=dataset,
                     rule=rule,
                 )
-            except AlreadyExistsApiError:
+            except EntityConflictApiError:
                 _LOGGER.warning(f"Rule {rule} already exists. Please, update the rule instead.")
             except Exception as ex:
                 _LOGGER.warning(f"Cannot create rule {rule}: {ex}")

@@ -18,8 +18,8 @@ from uuid import UUID
 
 from argilla.client import active_client
 from argilla.client.sdk.commons.errors import (
-    AlreadyExistsApiError,
     BaseClientError,
+    EntityConflictApiError,
     NotFoundApiError,
     ValidationApiError,
 )
@@ -144,7 +144,7 @@ class Workspace:
                 id=self.id,
                 user_id=user_id,
             )
-        except AlreadyExistsApiError as e:
+        except EntityConflictApiError as e:
             raise ValueError(f"User with id=`{user_id}` already exists in workspace with id=`{self.id}`.") from e
         except BaseClientError as e:
             raise RuntimeError(f"Error while adding user with id=`{user_id}` to workspace with id=`{self.id}`.") from e
@@ -200,8 +200,7 @@ class Workspace:
             workspaces_api_v1.delete_workspace(client=self.__client, id=self.id)
         except NotFoundApiError as e:
             raise ValueError(f"Workspace with id {self.id} doesn't exist in Argilla.") from e
-        except AlreadyExistsApiError as e:
-            # TODO: the already exists is to explicit for this context and should be generalized
+        except EntityConflictApiError as e:
             raise ValueError(
                 f"Cannot delete workspace with id {self.id}. Some datasets are still linked to this workspace."
             ) from e
@@ -249,7 +248,7 @@ class Workspace:
         try:
             ws = workspaces_api.create_workspace(client, name).parsed
             return cls.__new_instance(client, ws)
-        except AlreadyExistsApiError as e:
+        except EntityConflictApiError as e:
             raise ValueError(f"Workspace with name=`{name}` already exists, so please use a different name.") from e
         except (ValidationApiError, BaseClientError) as e:
             raise RuntimeError(f"Error while creating workspace with name=`{name}`.") from e
