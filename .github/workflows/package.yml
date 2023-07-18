@@ -152,6 +152,7 @@ jobs:
       platforms: linux/amd64,linux/arm64
       build-args: |
         ARGILLA_VERSION=${{ needs.build_server_docker_image.outputs.version }}
+    secrets: inherit
 
   # This job will upload a Python Package using Twine when a release is created
   # For more information see:
