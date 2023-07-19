@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" @keydown="keyboardHandler">
     <div class="component-header" v-if="showSearch || showCollapseButton">
       <div class="left-header">
         <SearchLabelComponent
@@ -180,6 +180,15 @@ export default {
     },
   },
   methods: {
+    keyboardHandler($event) {
+      if ($event.key === "Tab" || $event.shiftKey) return;
+
+      const isSearchActive =
+        document.activeElement === this.$refs.searchComponentRef.searchInputRef;
+      if (isSearchActive) return;
+
+      this.$refs.searchComponentRef.focusInSearch();
+    },
     onSelect({ id, is_selected }) {
       if (this.multiple) return;
       else {
