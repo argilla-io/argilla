@@ -72,7 +72,8 @@ const config: NuxtConfig = {
     { src: "~/plugins/custom-directives/optional-field.directive.js" },
     { src: "~/plugins/custom-directives/prefix-star.directive.js" },
     { src: "~/plugins/custom-directives/tooltip.directive.js" },
-    { src: "~plugins/vue-draggable.js" },
+    { src: "~/plugins/vue-draggable.js" },
+    { src: "~/plugins/dependency-injection.ts" },
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
@@ -183,7 +184,7 @@ const config: NuxtConfig = {
   },
 
   router: {
-    middleware: ["auth-guard", "register-dependencies"],
+    middleware: ["auth-guard"],
     base: process.env.BASE_URL ?? "/",
   },
 
