@@ -289,10 +289,12 @@ export default {
       const isLastElementActive = document.activeElement === lastElement;
       const isFirstElementActive = document.activeElement === firstElement;
 
-      if (!isShiftkeyPressed && isTabPressed && isLastElementActive) {
+      if (!isTabPressed) return;
+
+      if (!isShiftkeyPressed && isLastElementActive) {
         e.preventDefault();
         firstElement.focus();
-      } else if (isShiftkeyPressed && isTabPressed && isFirstElementActive) {
+      } else if (isShiftkeyPressed && isFirstElementActive) {
         e.preventDefault();
         lastElement.focus();
       }
