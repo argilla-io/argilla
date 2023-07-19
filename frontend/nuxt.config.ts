@@ -15,11 +15,14 @@
  * limitations under the License.
  */
 
+import { NuxtConfig } from "@nuxt/types";
+import pkg from "./package.json";
+
 const LOCAL_ENVIRONMENT = "http://localhost:6900";
 const BASE_URL = process.env.API_BASE_URL ?? LOCAL_ENVIRONMENT;
 const DIST_FOLDER = process.env.DIST_FOLDER || "dist";
 
-export default {
+const config: NuxtConfig = {
   // Disable server-side rendering (https://go.nuxtjs.dev/ssr-mode)
   ssr: false,
   telemetry: false,
@@ -53,36 +56,19 @@ export default {
 
   // Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
   plugins: [
-    { src: "~/plugins/vuex-orm-axios.js" },
-    { src: "~/plugins/moment.js" },
-    { src: "~/plugins/svgicon.js" },
-    { src: "~/plugins/vue-vega.js" },
-    { src: "~/plugins/click-outside.js" },
-    { src: "~/plugins/virtualScroller.js" },
-    { src: "~/plugins/toast.js" },
-    { src: "~/plugins/highlight-search.js" },
-    { src: "~/plugins/copy-to-clipboard.js" },
-    { src: "~/plugins/filters.js" },
-    { src: "~/plugins/variables.js" },
-    { src: "~/plugins/custom-directives/badge.directive.js" },
-    { src: "~/plugins/custom-directives/circle.directive.js" },
-    { src: "~/plugins/custom-directives/required-field.directive.js" },
-    { src: "~/plugins/custom-directives/optional-field.directive.js" },
-    { src: "~/plugins/custom-directives/prefix-star.directive.js" },
-    { src: "~/plugins/custom-directives/tooltip.directive.js" },
-    { src: "~plugins/vue-draggable.js" },
+    { src: "~/plugins/directives" },
+    { src: "~/plugins/plugins" },
+    { src: "~/plugins/di" },
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
-  components: {
-    dirs: [
-      {
-        path: "~/components",
-        pattern: "**/*.vue",
-        pathPrefix: false,
-      },
-    ],
-  },
+  components: [
+    {
+      path: "~/components",
+      pattern: "**/*.vue",
+      pathPrefix: false,
+    },
+  ],
 
   // Modules for dev and build (recommended) (https://go.nuxtjs.dev/config-modules)
   buildModules: [
@@ -126,7 +112,7 @@ export default {
   build: {
     cssSourceMap: false,
     extend(config) {
-      config.resolve.alias["vue"] = "vue/dist/vue.common";
+      config.resolve.alias.vue = "vue/dist/vue.common";
       config.module.rules.push({
         test: /\.md$/,
         loader: "frontmatter-markdown-loader",
@@ -179,15 +165,16 @@ export default {
       },
     },
     resetOnError: true,
-    redirect: { login: "/login", logout: "/login", home: false },
+    redirect: { login: "/login", logout: "/login" },
   },
 
   router: {
-    middleware: ["auth-guard", "register-dependencies"],
+    middleware: ["auth-guard"],
     base: process.env.BASE_URL ?? "/",
   },
 
   publicRuntimeConfig: {
+    clientVersion: pkg.version,
     slackCommunity:
       "https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g",
     documentationSite: "https://docs.argilla.io/",
@@ -201,3 +188,4 @@ export default {
       "https://docs.argilla.io/en/latest/guides/query_datasets.html",
   },
 };
+export default config;

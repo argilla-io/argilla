@@ -1,5 +1,5 @@
 import { useRouter } from "@nuxtjs/composition-api";
-import { Dataset } from "~/v1/domain/entities/Dataset";
+import { Dataset } from "@/v1/domain/entities/Dataset";
 
 export const useRoutes = () => {
   const router = useRouter();

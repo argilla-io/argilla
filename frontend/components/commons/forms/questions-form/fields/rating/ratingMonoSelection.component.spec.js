@@ -5,11 +5,11 @@ let wrapper = null;
 const options = {
   propsData: {
     options: [
-      { id: "helpfulness_reply_1_1", value: 1, text: 1, is_selected: false },
-      { id: "helpfulness_reply_1_2", value: 2, text: 2, is_selected: false },
-      { id: "helpfulness_reply_1_3", value: 3, text: 3, is_selected: false },
-      { id: "helpfulness_reply_1_4", value: 4, text: 4, is_selected: false },
-      { id: "helpfulness_reply_1_5", value: 5, text: 5, is_selected: false },
+      { id: "helpfulness_reply_1_1", value: 1, text: 1, isSelected: false },
+      { id: "helpfulness_reply_1_2", value: 2, text: 2, isSelected: false },
+      { id: "helpfulness_reply_1_3", value: 3, text: 3, isSelected: false },
+      { id: "helpfulness_reply_1_4", value: 4, text: 4, isSelected: false },
+      { id: "helpfulness_reply_1_5", value: 5, text: 5, isSelected: false },
     ],
   },
 };
@@ -48,7 +48,7 @@ describe("RatingMonoSelectionComponent", () => {
 
     expect(labelsWrapper.length).toBe(5);
   });
-  it("update the flag 'is_selected' of the corresponding checkbox option when user click (no items have been selected)", async () => {
+  it("update the flag 'isSelected' of the corresponding checkbox option when user click (no items have been selected)", async () => {
     const checkbox1 = wrapper.find("#helpfulness_reply_1_1");
     const checkbox2 = wrapper.find("#helpfulness_reply_1_2");
     const checkbox3 = wrapper.find("#helpfulness_reply_1_3");
@@ -56,21 +56,21 @@ describe("RatingMonoSelectionComponent", () => {
     const checkbox5 = wrapper.find("#helpfulness_reply_1_5");
 
     expect(wrapper.vm.options).toStrictEqual([
-      { id: "helpfulness_reply_1_1", value: 1, text: 1, is_selected: false },
-      { id: "helpfulness_reply_1_2", value: 2, text: 2, is_selected: false },
-      { id: "helpfulness_reply_1_3", value: 3, text: 3, is_selected: false },
-      { id: "helpfulness_reply_1_4", value: 4, text: 4, is_selected: false },
-      { id: "helpfulness_reply_1_5", value: 5, text: 5, is_selected: false },
+      { id: "helpfulness_reply_1_1", value: 1, text: 1, isSelected: false },
+      { id: "helpfulness_reply_1_2", value: 2, text: 2, isSelected: false },
+      { id: "helpfulness_reply_1_3", value: 3, text: 3, isSelected: false },
+      { id: "helpfulness_reply_1_4", value: 4, text: 4, isSelected: false },
+      { id: "helpfulness_reply_1_5", value: 5, text: 5, isSelected: false },
     ]);
 
     await checkbox1.setChecked();
 
     expect(wrapper.vm.options).toStrictEqual([
-      { id: "helpfulness_reply_1_1", value: 1, text: 1, is_selected: true },
-      { id: "helpfulness_reply_1_2", value: 2, text: 2, is_selected: false },
-      { id: "helpfulness_reply_1_3", value: 3, text: 3, is_selected: false },
-      { id: "helpfulness_reply_1_4", value: 4, text: 4, is_selected: false },
-      { id: "helpfulness_reply_1_5", value: 5, text: 5, is_selected: false },
+      { id: "helpfulness_reply_1_1", value: 1, text: 1, isSelected: true },
+      { id: "helpfulness_reply_1_2", value: 2, text: 2, isSelected: false },
+      { id: "helpfulness_reply_1_3", value: 3, text: 3, isSelected: false },
+      { id: "helpfulness_reply_1_4", value: 4, text: 4, isSelected: false },
+      { id: "helpfulness_reply_1_5", value: 5, text: 5, isSelected: false },
     ]);
 
     expect(checkbox1.element.checked).toBeTruthy();
@@ -87,7 +87,7 @@ describe("RatingMonoSelectionComponent", () => {
     expect(labelsWrapper.at(4).classes()).not.toContain("label-active");
     expect(labelsWrapper.length).toBe(5);
   });
-  it("update the flag 'is_selected' of the corresponding checkbox which have been selected previously => unselect a select checkbox", async () => {
+  it("update the flag 'isSelected' of the corresponding checkbox which have been selected previously => unselect a select checkbox", async () => {
     const checkbox1 = wrapper.find("#helpfulness_reply_1_1");
     const checkbox2 = wrapper.find("#helpfulness_reply_1_2");
     const checkbox3 = wrapper.find("#helpfulness_reply_1_3");
@@ -111,7 +111,7 @@ describe("RatingMonoSelectionComponent", () => {
     expect(labelsWrapper.at(4).classes()).not.toContain("label-active");
     expect(labelsWrapper.length).toBe(5);
   });
-  it("update the flag 'is_selected' of the corresponding checkbox which have been selected previously => ensure that only one checkbox is checked at a time", async () => {
+  it("update the flag 'isSelected' of the corresponding checkbox which have been selected previously => ensure that only one checkbox is checked at a time", async () => {
     const checkbox1 = wrapper.find("#helpfulness_reply_1_1");
     const checkbox2 = wrapper.find("#helpfulness_reply_1_2");
     const checkbox3 = wrapper.find("#helpfulness_reply_1_3");

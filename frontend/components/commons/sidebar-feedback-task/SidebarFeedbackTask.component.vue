@@ -2,10 +2,7 @@
   <div class="sidebar__container">
     <SidebarFeedbackTaskPanel v-if="isPanelVisible" @close-panel="closePanel">
       <HelpShortcut v-if="currentPanel === 'help-shortcut'" />
-      <FeedbackTaskProgress
-        v-else-if="currentPanel === 'metrics'"
-        :userIdToShowMetrics="userId"
-      />
+      <FeedbackTaskProgress v-else-if="currentPanel === 'metrics'" />
     </SidebarFeedbackTaskPanel>
     <SidebarFeedbackTask
       @on-click-sidebar-action="onClickSidebarAction"
@@ -20,7 +17,6 @@
 import "assets/icons/progress";
 import "assets/icons/refresh";
 import "assets/icons/shortcuts";
-import { isDatasetExistsByDatasetIdAndUserId } from "@/models/feedback-task-model/dataset-metric/datasetMetric.queries";
 
 export default {
   props: {
@@ -34,17 +30,6 @@ export default {
     currentMode: "annotate",
     isPanelVisible: false,
   }),
-  computed: {
-    userId() {
-      return this.$auth.user.id;
-    },
-    datasetExists() {
-      return isDatasetExistsByDatasetIdAndUserId({
-        userId: this.userId,
-        datasetId: this.datasetId,
-      });
-    },
-  },
   created() {
     this.sidebarItems = {
       firstGroup: {
@@ -105,8 +90,6 @@ export default {
       }
     },
     togglePanel(panelContent) {
-      if (!this.datasetExists) return;
-
       this.currentPanel =
         this.currentPanel !== panelContent ? panelContent : null;
 

@@ -48,7 +48,7 @@
           type="checkbox"
           :name="option.text"
           :id="option.id"
-          v-model="option.is_selected"
+          v-model="option.isSelected"
           @change="onSelect(option)"
           @focus="onFocus"
           @keydown.tab="expandLabelsOnTab(index)"
@@ -56,7 +56,7 @@
         <label
           class="label-text cursor-pointer"
           :class="{
-            'label-active': option.is_selected,
+            'label-active': option.isSelected,
             square: multiple,
             round: !multiple,
           }"
@@ -143,7 +143,7 @@ export default {
     remainingVisibleOptions() {
       return this.filteredOptions
         .slice(this.maxOptionsToShowBeforeCollapse)
-        .filter((option) => option.is_selected);
+        .filter((option) => option.isSelected);
     },
     visibleOptions() {
       if (this.maxOptionsToShowBeforeCollapse === -1 || this.isExpanded)
@@ -189,14 +189,14 @@ export default {
 
       this.$refs.searchComponentRef.focusInSearch();
     },
-    onSelect({ id, is_selected }) {
+    onSelect({ id, isSelected }) {
       if (this.multiple) return;
       else {
         this.options.forEach((option) => {
           if (option.id === id) {
-            option.is_selected = is_selected;
+            option.isSelected = isSelected;
           } else {
-            option.is_selected = false;
+            option.isSelected = false;
           }
           return option;
         });
