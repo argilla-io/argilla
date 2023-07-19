@@ -67,7 +67,7 @@ export default {
       time.setMinutes(time.getMinutes() - now.getTimezoneOffset());
 
       const secondsElapsed = time / 1000;
-      for (let key in ranges) {
+      for (const key in ranges) {
         if (ranges[key] < Math.abs(secondsElapsed)) {
           const delta = secondsElapsed / ranges[key];
           return formatter.format(Math.round(delta), key);
