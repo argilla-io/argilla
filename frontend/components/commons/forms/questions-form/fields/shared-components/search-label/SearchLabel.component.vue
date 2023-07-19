@@ -58,12 +58,17 @@ export default {
       default: () => "",
     },
   },
+  computed: {
+    searchInputRef() {
+      return this.$refs[this.searchRef];
+    },
+  },
   methods: {
     looseFocus() {
-      this.$refs[this.searchRef].blur();
+      this.searchInputRef.blur();
     },
     focusInSearch() {
-      this.$refs[this.searchRef].focus();
+      this.searchInputRef.focus();
     },
     resetValue() {
       this.value.length && this.$emit("input", "");
