@@ -68,7 +68,7 @@ export default {
 
       const secondsElapsed = time / 1000;
       for (const key in ranges) {
-        if (ranges[key] < Math.abs(secondsElapsed)) {
+        if (ranges[key] <= Math.abs(secondsElapsed)) {
           const delta = secondsElapsed / ranges[key];
           return formatter.format(Math.round(delta), key);
         }

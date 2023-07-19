@@ -15,6 +15,28 @@ describe("Base Date should", () => {
     expect(baseDate).toMatchSnapshot();
   });
 
+  test("should format day 1 second ago", () => {
+    const baseDate = mount(BaseDateVue, {
+      propsData: {
+        date: new Date("2023-07-18 23:59:59").toString(),
+        format: "date-relative-now",
+      },
+    });
+
+    expect(baseDate).toMatchSnapshot();
+  });
+
+  test("should format day 2 seconds ago", () => {
+    const baseDate = mount(BaseDateVue, {
+      propsData: {
+        date: new Date("2023-07-18 23:59:58").toString(),
+        format: "date-relative-now",
+      },
+    });
+
+    expect(baseDate).toMatchSnapshot();
+  });
+
   test("should format day 2 hours ago", () => {
     const baseDate = mount(BaseDateVue, {
       propsData: {
