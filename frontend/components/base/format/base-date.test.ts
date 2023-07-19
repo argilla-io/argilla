@@ -1,7 +1,18 @@
 import { mount } from "@vue/test-utils";
 import BaseDateVue from "./BaseDate.vue";
 
-jest.useFakeTimers().setSystemTime(new Date("2023-07-19"));
+class DateMocked extends Date {
+  constructor(args) {
+    super(args);
+  }
+
+  getTimezoneOffset(): number {
+    return -120;
+  }
+}
+
+const dateMocked = new DateMocked("2023-07-19");
+jest.useFakeTimers().setSystemTime(dateMocked);
 
 describe("Base Date should", () => {
   test("should format date correctly", () => {

@@ -5,8 +5,7 @@ import nuxtConfig from "./nuxt.config";
 Vue.use(SvgIcon);
 Vue.directive("click-outside", {});
 
-process.env.TZ = "UTC";
-
+// these boolean switches turn off the build for all but the store
 const resetConfig = {
   loading: false,
   loadingIndicator: false,
