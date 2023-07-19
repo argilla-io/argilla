@@ -229,16 +229,10 @@ class FeedbackRecord(BaseModel):
     def __setattr__(self, name: str, value: Any) -> None:
         if name == "suggestions" and hasattr(self, name):
             warnings.warn(
-                "You are trying to set `suggestions` directly, which is not allowed. You"
-                " should use the `set_suggestions` method instead."
+                "Ignore this warning if you're already using `set_suggestions` method."
+                " Otherwise, if you are trying to set `suggestions` directly, which is"
+                " not allowed. You should use the `set_suggestions` method instead."
             )
-            if getattr(self, name) != value:
-                warnings.warn(
-                    "You are trying to update the existing `suggestions` with a new value,"
-                    " which is not allowed. You should use the `set_suggestions` method"
-                    " instead, and the existing `suggestions` will be overwritten based"
-                    " on the provided `question_id`s/`question_name`/s for those `suggestions`."
-                )
         super().__setattr__(name, value)
 
     def _reset_updated(self) -> None:
@@ -597,3 +591,15 @@ class RankingQuestion(QuestionSchema):
         if isinstance(values.get("values"), list):
             values["settings"]["options"] = [{"value": value, "text": value} for value in values.get("values")]
         return values
+
+    @property
+    def __all_labels__(self):
+        return [entry["value"] for entry in self.settings["options"]]
+
+    @property
+    def __label2id__(self):
+        return {label: idx for idx, label in enumerate(self.__all_labels__)}
+
+    @property
+    def __id2label__(self):
+        return {idx: label for idx, label in enumerate(self.__all_labels__)}

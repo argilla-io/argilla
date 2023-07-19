@@ -32,7 +32,7 @@ from argilla.client.feedback.training.schemas import (
 from argilla.client.models import Framework
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.typing import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
     from argilla.server.models import User as ServerUser
     from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -527,6 +527,19 @@ async def test_update_dataset_records_in_argilla(
             ]
         )
 
+    with pytest.warns(UserWarning, match="Ignore this warning if you're already using `set_suggestions` method"):
+        record = FeedbackRecord(
+            fields={"prompt": "text"},
+        )
+        record.set_suggestions(
+            [
+                {
+                    "question_name": "question-1",
+                    "value": "This is a suggestion to question 1",
+                },
+            ]
+        )
+
     record = dataset.records[0]
     with pytest.warns(UserWarning, match="A suggestion for question `question-1`"):
         record.set_suggestions(
@@ -541,18 +554,11 @@ async def test_update_dataset_records_in_argilla(
                 },
             ]
         )
-    with pytest.warns(UserWarning, match="You are trying to set `suggestions` directly, which is not allowed"):
+    with pytest.warns(UserWarning, match="if you are trying to set `suggestions` directly"):
         record.suggestions = [
             {
                 "question_name": "question-1",
                 "value": "This is a suggestion to question 1",
-            },
-        ]
-    with pytest.warns(UserWarning, match="You are trying to update the existing `suggestions` with a new value"):
-        record.suggestions = [
-            {
-                "question_name": "question-1",
-                "value": "This is another suggestion to question 1",
             },
         ]
 

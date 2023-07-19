@@ -20,10 +20,10 @@ from typing import TYPE_CHECKING, Any, Optional, Type
 
 from packaging.version import parse as parse_version
 
-from argilla.client.feedback.config import DatasetConfig
+from argilla.client.feedback.config import DatasetConfig, DeprecatedDatasetConfig
 from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas import FeedbackRecord
-from argilla.client.feedback.typing import AllowedQuestionTypes
+from argilla.client.feedback.types import AllowedQuestionTypes
 from argilla.utils.dependency import requires_version
 
 if TYPE_CHECKING:
@@ -307,13 +307,13 @@ class HuggingFaceDatasetMixin:
                 **hub_auth,
             )
             with open(config_path, "r") as f:
-                config = DatasetConfig.from_json(f.read())
+                config = DeprecatedDatasetConfig.from_json(f.read())
         except Exception as e:
             raise FileNotFoundError(
                 "Neither `argilla.yaml` nor `argilla.cfg` files were found in the"
                 " HuggingFace Hub repository. Please make sure to dump the `DatasetConfig`"
                 " using `FeedbackDataset.push_to_huggingface` to automatically upload"
-                f" the `DatasetConfig` as `argilla.yaml` to the HuggingFace Hub."
+                " the `DatasetConfig` as `argilla.yaml` to the HuggingFace Hub."
             ) from e
 
         hfds = load_dataset(repo_id, use_auth_token=auth, *args, **kwargs)

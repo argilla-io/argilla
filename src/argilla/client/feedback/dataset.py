@@ -39,10 +39,11 @@ from argilla.client.feedback.schemas import (
 from argilla.client.feedback.training.schemas import (
     TrainingTaskMappingForTextClassification,
 )
-from argilla.client.feedback.typing import AllowedFieldTypes, AllowedQuestionTypes
+from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.feedback.unification import (
     LabelQuestionStrategy,
     MultiLabelQuestionStrategy,
+    RankingQuestionStrategy,
     RatingQuestionStrategy,
 )
 from argilla.client.feedback.utils import (
@@ -848,13 +849,36 @@ class FeedbackDataset(HuggingFaceDatasetMixin):
     def unify_responses(
         self,
         question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
-        strategy: Union[str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy],
+        strategy: Union[
+            str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy, RankingQuestionStrategy
+        ],
     ) -> None:
-        """Unify responses for a given question using a given strategy"""
+        """
+        The `unify_responses` function takes a question and a strategy as input and applies the strategy
+        to unify the responses for that question.
+
+        Args:
+            question The `question` parameter can be either a string representing the name of the
+                question, or an instance of one of the question classes (`LabelQuestion`, `MultiLabelQuestion`,
+                `RatingQuestion`, `RankingQuestion`).
+            strategy The `strategy` parameter is used to specify the strategy to be used for unifying
+                responses for a given question. It can be either a string or an instance of a strategy class.
+        """
         if isinstance(question, str):
             question = self.question_by_name(question)
+
         if isinstance(strategy, str):
-            strategy = LabelQuestionStrategy(strategy)
+            if isinstance(question, LabelQuestion):
+                strategy = LabelQuestionStrategy(strategy)
+            elif isinstance(question, MultiLabelQuestion):
+                strategy = MultiLabelQuestionStrategy(strategy)
+            elif isinstance(question, RatingQuestion):
+                strategy = RatingQuestionStrategy(strategy)
+            elif isinstance(question, RankingQuestion):
+                strategy = RankingQuestionStrategy(strategy)
+            else:
+                raise ValueError(f"Question {question} is not supported yet")
+
         strategy.unify_responses(self.records, question)
 
     def prepare_for_training(
