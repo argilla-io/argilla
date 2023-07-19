@@ -24,7 +24,7 @@
       </div>
       <div
         class="form-group"
-        v-for="question in record.questions"
+        v-for="(question, index) in record.questions"
         :key="question.id"
         @keydown.shift.arrow-down="
           updateQuestionAutofocus(autofocusPosition + 1)
@@ -154,7 +154,7 @@ export default {
     return {
       originalRecord: null,
       renderForm: 0,
-      autofocusPosition,
+      autofocusPosition: 0,
     };
   },
   setup() {
@@ -192,17 +192,17 @@ export default {
       const firstElement = focusable[0];
       const lastElement = focusable[focusable.length - 1];
 
-      const isShiftkeyPressed = e.shiftKey;
+      const isShiftKeyPressed = e.shiftKey;
       const isTabPressed = e.key === "Tab";
       const isLastElementActive = document.activeElement === lastElement;
       const isFirstElementActive = document.activeElement === firstElement;
 
       if (!isTabPressed) return;
 
-      if (!isShiftkeyPressed && isLastElementActive) {
+      if (!isShiftKeyPressed && isLastElementActive) {
         e.preventDefault();
         firstElement.focus();
-      } else if (isShiftkeyPressed && isFirstElementActive) {
+      } else if (isShiftKeyPressed && isFirstElementActive) {
         e.preventDefault();
         lastElement.focus();
       }
