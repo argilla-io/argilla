@@ -18,7 +18,7 @@ from uuid import uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.models import DatasetStatus, Question
+from argilla.server.models import DatasetStatus, Question, UserRole
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 
@@ -27,8 +27,10 @@ from tests.factories import (
     DatasetFactory,
     LabelSelectionQuestionFactory,
     MultiLabelSelectionQuestionFactory,
+    RankingQuestionFactory,
     RatingQuestionFactory,
     TextQuestionFactory,
+    UserFactory,
 )
 
 if TYPE_CHECKING:
@@ -38,11 +40,39 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.parametrize(
-    "QuestionFactory, expected_settings",
+    "QuestionFactory, payload, expected_settings",
     [
-        (TextQuestionFactory, {"type": "text", "use_markdown": False}),
+        (
+            TextQuestionFactory,
+            {"title": "New Title", "description": "New Description", "settings": {"use_markdown": True}},
+            {"type": "text", "use_markdown": True},
+        ),
+        (
+            TextQuestionFactory,
+            {"title": "New Title"},
+            {"type": "text", "use_markdown": False},
+        ),
+        (
+            TextQuestionFactory,
+            {},
+            {"type": "text", "use_markdown": False},
+        ),
+        (
+            TextQuestionFactory,
+            {"title": None, "description": None},
+            {"type": "text", "use_markdown": False},
+        ),
+        (
+            TextQuestionFactory,
+            {"name": "New Name", "required": True, "settings": {"type": "unit-test"}, "dataset_id": str(uuid4())},
+            {"type": "text", "use_markdown": False},
+        ),
         (
             RatingQuestionFactory,
+            {
+                "type": "label_selection",
+                "settings": {"options": [{"value": 94}, {"value": 95}, {"value": 96}, {"value": 97}]},
+            },
             {
                 "type": "rating",
                 "options": [
@@ -61,6 +91,7 @@ if TYPE_CHECKING:
         ),
         (
             LabelSelectionQuestionFactory,
+            {"settings": {"type": "ranking", "visible_options": 3}},
             {
                 "type": "label_selection",
                 "options": [
@@ -68,10 +99,12 @@ if TYPE_CHECKING:
                     {"value": "option2", "text": "Option 2", "description": None},
                     {"value": "option3", "text": "Option 3", "description": None},
                 ],
+                "visible_options": 3,
             },
         ),
         (
             MultiLabelSelectionQuestionFactory,
+            {"settings": {"type": "ranking", "visible_options": 3}},
             {
                 "type": "multi_label_selection",
                 "options": [
@@ -79,21 +112,116 @@ if TYPE_CHECKING:
                     {"value": "option2", "text": "Option 2", "description": None},
                     {"value": "option3", "text": "Option 3", "description": None},
                 ],
+                "visible_options": 3,
+            },
+        ),
+        (
+            RankingQuestionFactory,
+            {
+                "settings": {
+                    "options": [
+                        {"value": "response-a", "text": "Response A"},
+                        {"value": "response-b", "text": "Response B"},
+                        {"value": "response-c", "text": "Response C"},
+                    ]
+                }
+            },
+            {
+                "type": "ranking",
+                "options": [
+                    {"value": "completion-a", "text": "Completion A", "description": None},
+                    {"value": "completion-b", "text": "Completion B", "description": None},
+                    {"value": "completion-c", "text": "Completion C", "description": None},
+                ],
             },
         ),
     ],
 )
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
-async def test_delete_question(
+async def test_update_question(
     client: TestClient,
-    db: "AsyncSession",
-    owner_auth_header: dict,
     QuestionFactory: Type["QuestionFactoryType"],
+    payload: dict,
     expected_settings: dict,
+    role: UserRole,
 ):
-    question = await QuestionFactory.create(name="name", title="title", description="description")
+    question = await QuestionFactory.create()
+    user = await UserFactory.create(role=role, workspaces=[question.dataset.workspace])
 
-    response = client.delete(f"/api/v1/questions/{question.id}", headers=owner_auth_header)
+    response = client.patch(
+        f"/api/v1/questions/{question.id}", headers={API_KEY_HEADER_NAME: user.api_key}, json=payload
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": str(question.id),
+        "name": question.name,
+        "title": payload.get("title") or question.title,
+        "description": payload.get("description") or question.description,
+        "required": False,
+        "settings": expected_settings,
+        "dataset_id": str(question.dataset_id),
+        "inserted_at": question.inserted_at.isoformat(),
+        "updated_at": question.updated_at.isoformat(),
+    }
+
+
+@pytest.mark.asyncio
+async def test_update_question_with_invalid_payload(client: TestClient, owner_auth_header: dict):
+    question = await TextQuestionFactory.create()
+
+    response = client.patch(
+        f"/api/v1/questions/{question.id}",
+        headers=owner_auth_header,
+        json={"title": {"this": "is", "not": "valid"}, "settings": {"use_markdown": "no"}},
+    )
+
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_update_question_non_existent(client: TestClient, owner_auth_header: dict):
+    response = client.patch(
+        f"/api/v1/questions/{uuid4()}",
+        headers=owner_auth_header,
+        json={"title": "New Title", "settings": {"use_markdown": True}},
+    )
+
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_update_question_as_admin_from_different_workspace(client: TestClient):
+    question = await TextQuestionFactory.create()
+    user = await UserFactory.create(role=UserRole.admin)
+
+    response = client.patch(
+        f"/api/v1/questions/{question.id}", headers={API_KEY_HEADER_NAME: user.api_key}, json={"title": "New Title"}
+    )
+
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_update_question_as_annotator(client: TestClient):
+    question = await TextQuestionFactory.create()
+    user = await AnnotatorFactory.create(workspaces=[question.dataset.workspace])
+
+    response = client.patch(
+        f"/api/v1/questions/{question.id}", headers={API_KEY_HEADER_NAME: user.api_key}, json={"title": "New Title"}
+    )
+
+    assert response.status_code == 403
+
+
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+@pytest.mark.asyncio
+async def test_delete_question(client: TestClient, db: "AsyncSession", role: UserRole):
+    question = await TextQuestionFactory.create(name="name", title="title", description="description")
+    user = await UserFactory.create(role=role, workspaces=[question.dataset.workspace])
+
+    response = client.delete(f"/api/v1/questions/{question.id}", headers={API_KEY_HEADER_NAME: user.api_key})
 
     assert response.status_code == 200
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
@@ -105,20 +233,21 @@ async def test_delete_question(
         "title": "title",
         "description": "description",
         "required": False,
-        "settings": expected_settings,
+        "settings": {"type": "text", "use_markdown": False},
         "dataset_id": str(question.dataset_id),
-        "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-        "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+        "inserted_at": question.inserted_at.isoformat(),
+        "updated_at": question.updated_at.isoformat(),
     }
 
 
 @pytest.mark.asyncio
-async def test_delete_question_without_authentication(client: TestClient, db: "AsyncSession"):
+async def test_delete_question_as_admin_from_different_workspace(client: TestClient, db: "AsyncSession"):
+    user = await UserFactory.create(role=UserRole.admin)
     question = await TextQuestionFactory.create()
 
-    response = client.delete(f"/api/v1/questions/{question.id}")
+    response = client.delete(f"/api/v1/questions/{question.id}", headers={API_KEY_HEADER_NAME: user.api_key})
 
-    assert response.status_code == 401
+    assert response.status_code == 403
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 1
 
 
@@ -130,6 +259,16 @@ async def test_delete_question_as_annotator(client: TestClient, db: "AsyncSessio
     response = client.delete(f"/api/v1/questions/{question.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
 
     assert response.status_code == 403
+    assert (await db.execute(select(func.count(Question.id)))).scalar() == 1
+
+
+@pytest.mark.asyncio
+async def test_delete_question_without_authentication(client: TestClient, db: "AsyncSession"):
+    question = await TextQuestionFactory.create()
+
+    response = client.delete(f"/api/v1/questions/{question.id}")
+
+    assert response.status_code == 401
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 1
 
 
