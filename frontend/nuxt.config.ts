@@ -16,6 +16,7 @@
  */
 
 import { NuxtConfig } from "@nuxt/types";
+import pkg from "./package.json";
 
 const LOCAL_ENVIRONMENT = "http://localhost:6900";
 const BASE_URL = process.env.API_BASE_URL ?? LOCAL_ENVIRONMENT;
@@ -189,6 +190,7 @@ const config: NuxtConfig = {
   },
 
   publicRuntimeConfig: {
+    clientVersion: pkg.version,
     slackCommunity:
       "https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g",
     documentationSite: "https://docs.argilla.io/",
