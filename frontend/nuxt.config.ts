@@ -56,25 +56,9 @@ const config: NuxtConfig = {
 
   // Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
   plugins: [
-    { src: "~/plugins/vuex-orm-axios.js" },
-    { src: "~/plugins/moment.js" },
-    { src: "~/plugins/svgicon.js" },
-    { src: "~/plugins/vue-vega.js" },
-    { src: "~/plugins/click-outside.js" },
-    { src: "~/plugins/virtualScroller.js" },
-    { src: "~/plugins/toast.js" },
-    { src: "~/plugins/highlight-search.js" },
-    { src: "~/plugins/copy-to-clipboard.js" },
-    { src: "~/plugins/filters.js" },
-    { src: "~/plugins/variables.js" },
-    { src: "~/plugins/custom-directives/badge.directive.js" },
-    { src: "~/plugins/custom-directives/circle.directive.js" },
-    { src: "~/plugins/custom-directives/required-field.directive.js" },
-    { src: "~/plugins/custom-directives/optional-field.directive.js" },
-    { src: "~/plugins/custom-directives/prefix-star.directive.js" },
-    { src: "~/plugins/custom-directives/tooltip.directive.js" },
-    { src: "~/plugins/vue-draggable.js" },
-    { src: "~/plugins/dependency-injection.ts" },
+    { src: "~/plugins/directives" },
+    { src: "~/plugins/plugins" },
+    { src: "~/plugins/di" },
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
