@@ -29,13 +29,13 @@ jest.mock("@/models/feedback-task-model/record/record.queries", () => ({
     DISCARDED: "DISCARDED",
     SUBMITTED: "SUBMITTED",
   },
-  deleteAllRecords: () => {},
+  deleteAllRecords: () => { },
 }));
 
 describe("AnnotationModePage", () => {
   it("not render the layout while the data are in fetching state", () => {
     const options = {
-      stubs: ["BaseModal", "DatasetTrainComponent"],
+      stubs: ["BaseModal", "DatasetTrainComponent", "BaseLoading"],
       mocks: {
         $route,
       },
@@ -62,11 +62,12 @@ describe("AnnotationModePage", () => {
       stubs: [
         "HeaderFeedbackTaskComponent",
         "SidebarFeedbackTaskComponent",
-        "CenterFeedbackTaskContent",
+        "RecordFeedbackTaskAndQuestionnaireContent",
         "DatasetFiltersComponent",
         "PaginationFeedbackTaskComponent",
         "BaseModal",
         "DatasetTrainComponent",
+        "BaseLoading",
       ],
       mocks: {
         $route,
