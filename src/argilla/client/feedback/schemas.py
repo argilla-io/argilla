@@ -192,8 +192,10 @@ class FeedbackRecord(BaseModel):
     _updated: bool = PrivateAttr(default=False)
 
     @validator("suggestions", always=True)
-    def normalize_suggestions(cls, values) -> Tuple:
-        return tuple([v for v in values])
+    def normalize_suggestions(cls, values: Any) -> Tuple:
+        if not isinstance(values, tuple):
+            return tuple([v for v in values])
+        return values
 
     def set_suggestions(
         self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
