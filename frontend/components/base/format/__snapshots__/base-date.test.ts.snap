@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Base Date should should format date correctly 1`] = `<span> 2023-07-19 02:00 </span>`;
+exports[`Base Date should should format date correctly 1`] = `<span> 2023-07-19 00:00 </span>`;
 
 exports[`Base Date should should format day 2 days ago 1`] = `<span> 2 days ago </span>`;
 

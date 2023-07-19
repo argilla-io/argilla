@@ -1,7 +1,7 @@
 import { mount } from "@vue/test-utils";
 import BaseDateVue from "./BaseDate.vue";
 
-const dateMocked = new Date("2023-07-19 02:00:00");
+const dateMocked = new Date("2023-07-19 00:00:00");
 jest.useFakeTimers("modern").setSystemTime(dateMocked);
 
 describe("Base Date should", () => {
