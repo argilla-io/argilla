@@ -170,7 +170,8 @@ def test_create_dataset_with_suggestions(argilla_user: "ServerUser"):
         )
 
 
-def test_update_dataset_records_with_suggestions(argilla_user: "ServerUser"):
+@pytest.mark.asyncio
+async def test_update_dataset_records_with_suggestions(argilla_user: "ServerUser", db: "AsyncSession"):
     api.init(api_key=argilla_user.api_key)
 
     ds = FeedbackDataset(fields=[TextField(name="text")], questions=[TextQuestion(name="text")])
@@ -189,13 +190,19 @@ def test_update_dataset_records_with_suggestions(argilla_user: "ServerUser"):
 
     ds.push_to_argilla()
 
+    await db.refresh(argilla_user, attribute_names=["datasets"])
+    dataset = argilla_user.datasets[0]
+    await db.refresh(dataset, attribute_names=["records"])
+    record = dataset.records[0]
+    await db.refresh(record, attribute_names=["suggestions"])
+
     ds.fetch_records()
     for record in ds.records:
-        assert record.suggestions == [
+        assert record.suggestions == (
             SuggestionSchema(
                 question_id=ds.question_by_name("text").id, question_name="text", value="This is a suggestion"
             ),
-        ]
+        )
 
 
 def test_add_records(
