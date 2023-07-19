@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 from uuid import UUID
 
 from pydantic import (
@@ -183,11 +183,19 @@ class FeedbackRecord(BaseModel):
     fields: Dict[str, str]
     metadata: Dict[str, Any] = Field(default_factory=dict)
     responses: List[ResponseSchema] = Field(default_factory=list)
-    suggestions: List[SuggestionSchema] = Field(default_factory=list, allow_mutation=True)
+    suggestions: Union[Tuple[SuggestionSchema], List[SuggestionSchema]] = Field(
+        default_factory=tuple, allow_mutation=False
+    )
     external_id: Optional[str] = None
 
     _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default_factory=dict)
     _updated: bool = PrivateAttr(default=False)
+
+    @validator("suggestions", always=True)
+    def normalize_suggestions(cls, values: Any) -> Tuple:
+        if not isinstance(values, tuple):
+            return tuple([v for v in values])
+        return values
 
     def set_suggestions(
         self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
@@ -199,41 +207,20 @@ class FeedbackRecord(BaseModel):
             if not isinstance(suggestion, SuggestionSchema):
                 suggestion = SuggestionSchema(**suggestion)
             parsed_suggestions.append(suggestion)
-        if not self.id:
-            warnings.warn(
-                "Ignore the following if you are creating a new `FeedbackDataset` with"
-                " `FeedbackRecord`s, or if you are just working with a `FeedbackRecord`."
-                " Otherwise, if the `FeedbackRecord` is already pushed"
-                " to Argilla, note that `suggestions` have been provided, but the `id`"
-                " is not set, which means that the `FeedbackRecord` has been pushed to"
-                " Argilla, but hasn't been fetched, so the `id` is missing. To solve that,"
-                " you can simply call `FeedbackDataset.fetch_records()` to fetch them and"
-                " automatically set the `id`, to call `set_suggestions` on top of that."
-            )
+
+        suggestions_dict = {suggestion.question_name: suggestion for suggestion in self.suggestions}
         for suggestion in parsed_suggestions:
-            for existing_suggestion in self.suggestions:
-                if (
-                    existing_suggestion.question_id == suggestion.question_id
-                    or existing_suggestion.question_name == suggestion.question_name
-                ):
-                    warnings.warn(
-                        f"A suggestion for question `{existing_suggestion.question_name}` has already"
-                        " been provided, so the provided suggestion will overwrite it."
-                    )
-                    self.suggestions.remove(existing_suggestion)
-                    break
-        self.suggestions += parsed_suggestions
+            if suggestion.question_name in suggestions_dict:
+                warnings.warn(
+                    f"A suggestion for question `{suggestion.question_name}` has already"
+                    " been provided, so the provided suggestion will overwrite it.",
+                    category=UserWarning,
+                )
+            suggestions_dict[suggestion.question_name] = suggestion
+
+        self.__dict__["suggestions"] = tuple(suggestions_dict.values())
         if self.id and not self._updated:
             self._updated = True
-
-    def __setattr__(self, name: str, value: Any) -> None:
-        if name == "suggestions" and hasattr(self, name):
-            warnings.warn(
-                "Ignore this warning if you're already using `set_suggestions` method."
-                " Otherwise, if you are trying to set `suggestions` directly, which is"
-                " not allowed. You should use the `set_suggestions` method instead."
-            )
-        super().__setattr__(name, value)
 
     def _reset_updated(self) -> None:
         self._updated = False
