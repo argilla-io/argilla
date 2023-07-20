@@ -72,6 +72,7 @@ export default {
     { src: "~/plugins/custom-directives/optional-field.directive.js" },
     { src: "~/plugins/custom-directives/prefix-star.directive.js" },
     { src: "~/plugins/custom-directives/tooltip.directive.js" },
+    { src: "~/plugins/custom-directives/copy-code.directive.js" },
     { src: "~plugins/vue-draggable.js" },
   ],
 
