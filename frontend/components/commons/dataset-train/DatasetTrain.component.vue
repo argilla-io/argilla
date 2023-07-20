@@ -35,7 +35,7 @@ export default {
       this.content.tabs.push({
         id: library.attributes.title.trim().toLowerCase(),
         name: library.attributes.title,
-        code: this.parseHTML(library.html),
+        html: this.parseHTML(library.html),
         ...library.attributes,
       });
     }
@@ -46,12 +46,19 @@ export default {
         code,
         "text/html"
       ).documentElement;
+      const preBlocks = docElement.getElementsByTagName("pre");
 
-      const html = docElement.getElementsByTagName("body")[0].innerText;
+      for (let i = 0; i < preBlocks.length; i++) {
+        const code = preBlocks[i].innerText;
+        preBlocks[i].innerHTML = `<base-code code='${code}'></base-code>`;
+      }
 
-      return html
+      const html = docElement.getElementsByTagName("body")[0].innerHTML;
+      const htmlWithVariables = html
         .replace("<my_dataset_name>", this.datasetName)
         .replace("<my_workspace_name>", this.workspaceName);
+
+      return `<div>${htmlWithVariables}</div>`;
     },
     getLibraries() {
       const getCurrentTaskLibraries = (libraries, task) => {

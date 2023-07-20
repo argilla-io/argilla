@@ -59,7 +59,7 @@ export default {
       this.content.tabs.push({
         id: tabName.trim().toLowerCase(),
         name: tabName,
-        code,
+        html: `<base-code code='${code}'></base-code>`,
       });
     }
   },

@@ -16,7 +16,7 @@
         <h2 v-if="currentTab.description" class="snippet__description --body2">
           {{ currentTab.description }}
         </h2>
-        <base-code v-if="currentTab.code" :code="currentTab.code" />
+        <BaseRenderHtml v-if="currentTab.html" :html="currentTab.html" />
         <div class="library__buttons" v-if="currentTab.links">
           <p class="library__section__title">Links</p>
           <base-button
