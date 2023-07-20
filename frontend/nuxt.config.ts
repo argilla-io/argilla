@@ -57,8 +57,20 @@ const config: NuxtConfig = {
   // Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
   plugins: [
     { src: "~/plugins/directives" },
-    { src: "~/plugins/plugins" },
+
     { src: "~/plugins/di" },
+
+    { src: "~/plugins/plugins/vuex-orm-axios.js" },
+    { src: "~/plugins/plugins/svg-icon.js" },
+    { src: "~/plugins/plugins/vue-vega.js" },
+    { src: "~/plugins/plugins/click-outside.js" },
+    { src: "~/plugins/plugins/virtual-scroller.js" },
+    { src: "~/plugins/plugins/toast.js" },
+    { src: "~/plugins/plugins/highlight-search.js" },
+    { src: "~/plugins/plugins/copy-to-clipboard.js" },
+    { src: "~/plugins/plugins/filters.js" },
+    { src: "~/plugins/plugins/variables.js" },
+    { src: "~/plugins/plugins/vue-draggable.js" },
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
