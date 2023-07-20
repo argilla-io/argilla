@@ -187,6 +187,12 @@ export default {
         document.activeElement === this.$refs.searchComponentRef.searchInputRef;
       if (isSearchActive) return;
 
+      if ($event.code == "Space") {
+        $event.preventDefault();
+        document.activeElement.click();
+        return;
+      }
+
       this.$refs.searchComponentRef.focusInSearch();
     },
     onSelect({ id, isSelected }) {
