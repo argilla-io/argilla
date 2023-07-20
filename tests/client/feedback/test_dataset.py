@@ -189,7 +189,7 @@ async def test_update_dataset_records_with_suggestions(argilla_user: "ServerUser
         record.set_suggestions([{"question_name": "text", "value": "This is a suggestion"}])
 
     ds.push_to_argilla()
-# TODO: Review this requirement for tests and explain, try to avoid use or at least, document.
+    # TODO: Review this requirement for tests and explain, try to avoid use or at least, document.
     await db.refresh(argilla_user, attribute_names=["datasets"])
     dataset = argilla_user.datasets[0]
     await db.refresh(dataset, attribute_names=["records"])
