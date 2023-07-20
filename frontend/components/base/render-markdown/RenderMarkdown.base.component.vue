@@ -15,6 +15,7 @@ marked.use(
     },
   })
 );
+
 export default {
   name: "RenderMarkdownBaseComponent",
   props: {

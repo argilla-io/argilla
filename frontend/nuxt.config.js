@@ -19,6 +19,8 @@ const LOCAL_ENVIRONMENT = "http://localhost:6900";
 const BASE_URL = process.env.API_BASE_URL ?? LOCAL_ENVIRONMENT;
 const DIST_FOLDER = process.env.DIST_FOLDER || "dist";
 
+import Mode from "frontmatter-markdown-loader/mode";
+
 export default {
   // Disable server-side rendering (https://go.nuxtjs.dev/ssr-mode)
   ssr: false,
@@ -131,9 +133,7 @@ export default {
         test: /\.md$/,
         loader: "frontmatter-markdown-loader",
         options: {
-          vue: {
-            root: "markdown-body",
-          },
+          mode: [Mode.BODY],
         },
       });
     },
