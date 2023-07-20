@@ -28,7 +28,14 @@ if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
 ALEMBIC_CONFIG_FILE = os.path.normpath(os.path.join(os.path.dirname(argilla.__file__), "alembic.ini"))
-TAGGED_REVISIONS = OrderedDict({"1.7": "1769ee58fbb4", "1.8": "ae5522b4c674", "1.11": "3ff6484f8b37"})
+TAGGED_REVISIONS = OrderedDict(
+    {
+        "1.7": "1769ee58fbb4",
+        "1.8": "ae5522b4c674",
+        "1.11": "3ff6484f8b37",
+        "1.13": "3fc3c0839959",
+    }
+)
 
 
 @event.listens_for(Engine, "connect")
