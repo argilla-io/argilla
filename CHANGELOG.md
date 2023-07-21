@@ -16,6 +16,12 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+## [1.13.1](https://github.com/argilla-io/argilla/compare/v1.13.0...v1.13.1)
+
+### Fixed
+
+- Fix database migration for PostgreSQL (See [#3438](https://github.com/argilla-io/argilla/pull/3438))
+
 ## [1.13.0](https://github.com/argilla-io/argilla/compare/v1.12.1...v1.13.0)
 
 ### Added
