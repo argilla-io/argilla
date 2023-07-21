@@ -66,20 +66,20 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
 
     vectors: Optional[Dict[str, BaseEmbeddingVectorDB]] = Field(
         None,
-        description="Provide the vector info as a list of key - value dictionary."
+        description="Provide the vector info as a list of key - value dictionary. "
         "The dictionary contains the dimension and dimension sized vector float list",
     )
 
     predictions: Optional[Dict[str, AnnotationDB]] = Field(
         None,
-        description="Provide the prediction info as a key-value dictionary."
-        "The key will represent the agent ant the value the prediction."
+        description="Provide the prediction info as a key-value dictionary. "
+        "The key will represent the agent ant the value the prediction. "
         "Using this way you can skip passing the agent inside of the prediction",
     )
     annotations: Optional[Dict[str, AnnotationDB]] = Field(
         None,
-        description="Provide the annotation info as a key-value dictionary."
-        "The key will represent the agent ant the value the annotation."
+        description="Provide the annotation info as a key-value dictionary. "
+        "The key will represent the agent ant the value the annotation. "
         "Using this way you can skip passing the agent inside the annotation",
     )
 
@@ -121,7 +121,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
         if isinstance(v, int):
             message = (
                 f"Integer ids won't be supported in future versions. We recommend to start using strings instead. "
-                "For datasets already containing integer values we recommend migrating them to avoid deprecation issues."
+                "For datasets already containing integer values we recommend migrating them to avoid deprecation issues. "
                 "See https://docs.argilla.io/en/latest/getting_started/installation/configurations"
                 "/database_migrations.html#elasticsearch"
             )

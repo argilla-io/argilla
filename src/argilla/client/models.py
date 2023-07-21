@@ -122,7 +122,7 @@ class _Validators(BaseModel):
         if isinstance(v, int):
             message = (
                 f"Integer ids won't be supported in future versions. We recommend to start using strings instead. "
-                "For datasets already containing integer values we recommend migrating them to avoid deprecation issues."
+                "For datasets already containing integer values we recommend migrating them to avoid deprecation issues. "
                 "See https://docs.argilla.io/en/latest/getting_started/installation/configurations"
                 "/database_migrations.html#elasticsearch"
             )
