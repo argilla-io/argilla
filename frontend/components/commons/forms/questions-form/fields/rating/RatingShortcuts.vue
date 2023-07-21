@@ -8,20 +8,24 @@
 export default {
   methods: {
     keyboardHandlerFor($event) {
-      $event.preventDefault();
+      const currValue = +$event.code.at(-1);
+      const prefix = $event.code.substring(0, 6);
 
-      if (!this.isNumeric($event.key)) return;
+      if (!this.isValidKeyFor({ value: currValue, prefix })) return;
 
       const { options } = this.$slots.default[0].context;
 
-      if ($event.key > options.length) return;
+      if (currValue > options.length) return;
 
-      const targetId = options.find(({ value }) => value == $event.key)?.id;
+      const targetId = options.find(({ value }) => value == currValue)?.id;
 
       targetId && document.getElementById(targetId).click();
     },
-    isNumeric(num) {
-      return !isNaN(num);
+    isValidKeyFor({ value, prefix }) {
+      const keyIsFromNumpad = prefix === "Numpad";
+      const valueIsValid = !isNaN(value);
+
+      return keyIsFromNumpad && valueIsValid;
     },
   },
 };
