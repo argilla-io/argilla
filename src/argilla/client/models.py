@@ -105,7 +105,7 @@ class _Validators(BaseModel):
                 " values will be truncated by keeping only the last"
                 f" {DEFAULT_MAX_KEYWORD_LENGTH} characters. " + _messages.ARGILLA_METADATA_FIELD_WARNING_MESSAGE
             )
-            warnings.warn(message, UserWarning)
+            warnings.warn(message, UserWarning, stacklevel=2)
 
         return metadata
 
@@ -126,7 +126,7 @@ class _Validators(BaseModel):
                 "See https://docs.argilla.io/en/latest/getting_started/installation/configurations"
                 "/database_migrations.html#elasticsearch"
             )
-            warnings.warn(message, DeprecationWarning)
+            warnings.warn(message, DeprecationWarning, stacklevel=2)
             # See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
             if v > _JS_MAX_SAFE_INTEGER:
                 message = (
@@ -135,7 +135,7 @@ class _Validators(BaseModel):
                     "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number"
                     "/MAX_SAFE_INTEGER"
                 )
-                warnings.warn(message, UserWarning)
+                warnings.warn(message, UserWarning, stacklevel=2)
         elif not isinstance(v, str):
             raise TypeError(f"Invalid type for id. Expected {int} or {str}; found:{type(v)}")
         return v

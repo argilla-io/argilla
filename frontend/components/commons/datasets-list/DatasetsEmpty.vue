@@ -42,24 +42,17 @@ export default {
 
     const startPage = await folderContent("./start_page.md");
 
-    const docElement = new DOMParser().parseFromString(
-      startPage.html,
-      "text/html"
-    ).documentElement;
+    const tabs = startPage.body.split(":::{tab-item} ");
+    tabs.shift();
 
-    const codeBlocks = docElement.getElementsByTagName("pre");
-
-    for (const codeBlock of codeBlocks) {
-      const tabName = codeBlock.previousElementSibling.innerText.replace(
-        ":::{tab-item} ",
-        ""
-      );
-      const code = codeBlock.innerText;
+    for (const tab of tabs) {
+      const tabName = tab.split("\n")[0].trim();
+      const code = tab.replace(tabName, "").replace(":::", "").trim();
 
       this.content.tabs.push({
         id: tabName.trim().toLowerCase(),
         name: tabName,
-        html: `<base-code code='${code}'></base-code>`,
+        markdown: code,
       });
     }
   },

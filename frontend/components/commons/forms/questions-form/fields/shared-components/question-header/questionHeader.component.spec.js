@@ -12,7 +12,7 @@ const options = {
       // this directive is used to show a tooltip
     },
     "prefix-star"() {
-      // this directive is used to show a prefix start
+      // this directive is used to show a spark icon
     },
   },
   propsData: {
