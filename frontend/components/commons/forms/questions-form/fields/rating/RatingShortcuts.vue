@@ -1,5 +1,5 @@
 <template>
-  <div @keydown="keyboardHandlerFor" ref="daboudi">
+  <div @keydown="keyboardHandlerFor">
     <slot></slot>
   </div>
 </template>
@@ -8,7 +8,7 @@
 export default {
   methods: {
     keyboardHandlerFor($event) {
-      $event.preventDefault()
+      $event.preventDefault();
 
       if (!this.isNumeric($event.key)) return;
 
