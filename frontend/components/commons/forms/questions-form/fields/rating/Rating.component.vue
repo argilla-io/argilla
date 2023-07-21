@@ -1,18 +1,21 @@
 <template>
-  <div class="wrapper">
-    <QuestionHeaderComponent
-      :title="title"
-      :hasSuggestion="hasSuggestion"
-      :isRequired="isRequired"
-      :tooltipMessage="description"
-    />
+  <RatingShortcuts>
+    <div class="wrapper">
+      <QuestionHeaderComponent
+        :title="title"
+        :hasSuggestion="hasSuggestion"
+        :isRequired="isRequired"
+        :tooltipMessage="description"
+      />
 
-    <RatingMonoSelectionComponent
-      v-model="options"
-      :isFocused="isFocused"
-      @on-focus="onFocus"
-    />
-  </div>
+      <RatingMonoSelectionComponent
+        ref="ratingMonoSelectionRef"
+        v-model="options"
+        :isFocused="isFocused"
+        @on-focus="onFocus"
+      />
+    </div>
+  </RatingShortcuts>
 </template>
 
 <script>
