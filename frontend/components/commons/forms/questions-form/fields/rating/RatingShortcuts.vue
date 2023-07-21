@@ -16,16 +16,7 @@ export default {
 
       if ($event.key > options.length) return;
 
-      let offset = 0;
-
-      const isShiftKeyPressed = !!$event.shiftKey;
-      if (isShiftKeyPressed) {
-        offset = 10;
-      }
-
-      const targetId = options.find(
-        ({ value }) => value == +$event.key + offset
-      )?.id;
+      const targetId = options.find(({ value }) => value == $event.key)?.id;
 
       targetId && document.getElementById(targetId).click();
     },
