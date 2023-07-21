@@ -183,6 +183,8 @@ export default {
     keyboardHandler($event) {
       if ($event.key === "Tab" || $event.shiftKey) return;
 
+      if (!this.$refs.searchComponentRef) return;
+      
       const isSearchActive =
         document.activeElement === this.$refs.searchComponentRef.searchInputRef;
       if (isSearchActive) return;
