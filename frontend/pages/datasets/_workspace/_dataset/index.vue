@@ -100,7 +100,7 @@ export default {
       return [
         { link: { name: "datasets" }, name: "Home" },
         {
-          link: { path: `/datasets?workspace=${this.workspace}` },
+          link: { path: `/datasets?workspaces=${this.workspace}` },
           name: this.workspace,
         },
         {

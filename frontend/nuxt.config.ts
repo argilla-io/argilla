@@ -16,6 +16,7 @@
  */
 
 import { NuxtConfig } from "@nuxt/types";
+import Mode from "frontmatter-markdown-loader/mode";
 import pkg from "./package.json";
 
 const LOCAL_ENVIRONMENT = "http://localhost:6900";
@@ -129,9 +130,7 @@ const config: NuxtConfig = {
         test: /\.md$/,
         loader: "frontmatter-markdown-loader",
         options: {
-          vue: {
-            root: "markdown-body",
-          },
+          mode: [Mode.BODY],
         },
       });
     },
