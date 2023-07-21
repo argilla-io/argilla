@@ -2,9 +2,9 @@
   <div>
     <p class="shortcuts__title">Shortcuts</p>
     <base-spinner v-if="$fetchState.pending" />
-    <documentation-viewer-without-tabs
-      class="shortcuts__content"
+    <documentation-viewer
       v-else
+      class="shortcuts__content"
       :content="content"
     />
   </div>
@@ -34,7 +34,7 @@ export default {
       this.content.tabs.push({
         id: "shortcuts",
         name: "Shortcuts",
-        html: helpContent.html,
+        markdown: helpContent.body,
       });
     } catch (e) {
       console.log(e);

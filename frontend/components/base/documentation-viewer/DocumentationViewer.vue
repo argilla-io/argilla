@@ -1,7 +1,7 @@
 <template>
   <div class="snippet__container">
     <BaseTabs
-      v-if="content.tabs.length"
+      v-if="content.tabs.length > 1"
       class="snippets__tabs"
       :tabs="content.tabs"
       :active-tab="currentTab"
