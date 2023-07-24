@@ -16,6 +16,12 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+## [1.13.2](https://github.com/argilla-io/argilla/compare/v1.13.1...v1.13.2)
+
+### Fixed
+
+- The `suggestion_type_enum` ENUM data type created in PostgreSQL didn't have any value ([#3445](https://github.com/argilla-io/argilla/pull/3445)).
+
 ## [1.13.1](https://github.com/argilla-io/argilla/compare/v1.13.0...v1.13.1)
 
 ### Fixed
