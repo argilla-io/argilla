@@ -36,7 +36,7 @@ class ClientAdapterFactory:
         index_shards: int,
         ssl_verify: bool,
         ca_path: str,
-        retry_on_timeout: bool = False,
+        retry_on_timeout: bool = True,
         max_retries: int = 5,
     ) -> IClientAdapter:
         client_config = dict(

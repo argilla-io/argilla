@@ -296,7 +296,7 @@ async def get_search_engine() -> AsyncGenerator[SearchEngine, None]:
         hosts=settings.elasticsearch,
         verify_certs=settings.elasticsearch_ssl_verify,
         ca_certs=settings.elasticsearch_ca_path,
-        retry_on_timeout=False,
+        retry_on_timeout=True,
         max_retries=5,
         timeout=30,
     )
