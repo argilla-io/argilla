@@ -1,21 +1,42 @@
 <template>
-  <div @keydown="keyboardHandlerFor">
+  <div @keydown="respondToRatingFor">
     <slot></slot>
   </div>
 </template>
 
 <script>
 export default {
+  data() {
+    return {
+      value: "",
+    };
+  },
   methods: {
-    keyboardHandlerFor($event) {
-      const currValue = +$event.code.at(-1);
-      const prefix = $event.code.substring(0, 6);
+    respondToRatingFor($event) {
+      this.value += $event.key;
 
-      if (!this.isValidKeyFor({ value: currValue, prefix })) return;
+      this.debounce($event);
+    },
+    debounce($event, debounceDuration = 500) {
+      if (this.timeoutId !== null) {
+        clearTimeout(this.timeoutId);
+      }
+
+      this.timeoutId = setTimeout(() => {
+        this.keyboardHandlerFor($event, this.value);
+      }, debounceDuration);
+    },
+    keyboardHandlerFor($event, value) {
+      this.value = "";
+
+      const prefix = $event.code?.substring(0, 6);
+      if (!this.isValidKeyFor({ value, prefix })) return;
+
+      const currValue = +value;
 
       const { options } = this.$slots.default[0].context;
 
-      if (currValue > options.length) return;
+      if (!options.some((option) => option.value == currValue)) return;
 
       const targetId = options.find(({ value }) => value == currValue)?.id;
 
