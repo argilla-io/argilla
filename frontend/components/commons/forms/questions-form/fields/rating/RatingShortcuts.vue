@@ -15,20 +15,23 @@ export default {
     respondToRatingFor($event) {
       this.value += $event.key;
 
-      this.debounce($event);
-    },
-    debounce($event, debounceDuration = 500) {
-      if (this.timeoutId !== null) {
-        clearTimeout(this.timeoutId);
-      }
-
-      this.timeoutId = setTimeout(() => {
+      this.debounce(() => {
         this.keyboardHandlerFor($event, this.value);
-      }, debounceDuration);
+
+        this.value = "";
+      })();
+    },
+    debounce(callback, delay = 800) {
+      let timer;
+
+      return () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          callback.apply(this);
+        }, delay);
+      };
     },
     keyboardHandlerFor($event, value) {
-      this.value = "";
-
       const prefix = $event.code?.substring(0, 6);
       if (!this.isValidKeyFor({ value, prefix })) return;
 
