@@ -260,21 +260,6 @@ class FeedbackDataset(ArgillaDatasetMixin, HuggingFaceDatasetMixin):
             raise IndexError(f"This dataset contains {len(self)} records, so index {key} is out of range.")
         return self.records[key]
 
-    def __del__(self) -> None:
-        """When the dataset object is deleted, delete all the records as well to avoid memory leaks."""
-        if hasattr(self, "_records") and self._records is not None:
-            del self._records
-        if hasattr(self, "_new_records") and self._new_records is not None:
-            del self._new_records
-
-    def __enter__(self) -> "FeedbackDataset":
-        """Allows the dataset to be used as a context manager."""
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
-        """When the context manager is exited, delete all the records as well to avoid memory leaks."""
-        self.__del__()
-
     @property
     def guidelines(self) -> str:
         """Returns the guidelines for annotating the dataset."""
