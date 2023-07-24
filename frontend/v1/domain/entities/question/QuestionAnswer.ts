@@ -149,9 +149,10 @@ export class MultiLabelQuestionAnswer extends QuestionAnswer {
   matchSuggestion(suggestion: Suggestion): boolean {
     const valuesSuggested = suggestion.suggestedAnswer as string[];
 
-    const equal = valuesSuggested.every((answered) =>
-      this.valuesAnswered.includes(answered)
-    );
+    const equal =
+      valuesSuggested.every((answered) =>
+        this.valuesAnswered.includes(answered)
+      ) && valuesSuggested.length === this.valuesAnswered.length;
 
     return equal;
   }
