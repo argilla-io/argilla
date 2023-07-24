@@ -58,8 +58,8 @@ export class Question {
     return this.type === "rating";
   }
 
-  public get hasSuggestion(): boolean {
-    return !!this.suggestion;
+  public get matchSuggestion(): boolean {
+    return !!this.suggestion && this.answer.matchSuggestion(this.suggestion);
   }
 
   clearAnswer() {

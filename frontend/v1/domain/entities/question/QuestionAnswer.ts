@@ -1,4 +1,5 @@
 import { Answer, RankingAnswer } from "../IAnswer";
+import { Suggestion } from "./Suggestion";
 
 export type QuestionType =
   | "text"
@@ -20,6 +21,8 @@ export abstract class QuestionAnswer {
   }
 
   abstract get valuesAnswered();
+
+  abstract matchSuggestion(suggestion: Suggestion): boolean;
 }
 export class TextQuestionAnswer extends QuestionAnswer {
   constructor(public readonly type: QuestionType, public value: string) {
@@ -40,6 +43,10 @@ export class TextQuestionAnswer extends QuestionAnswer {
 
   get valuesAnswered() {
     return this.value;
+  }
+
+  matchSuggestion(suggestion: Suggestion): boolean {
+    return this.valuesAnswered === suggestion.suggestedAnswer;
   }
 }
 type SingleLabelValue = {
@@ -72,9 +79,11 @@ export class SingleLabelQuestionAnswer extends QuestionAnswer {
   }
 
   clear() {
-    this.values.forEach((label) => {
-      label.isSelected = false;
-    });
+    this.values
+      .filter((label) => label.isSelected)
+      .forEach((label) => {
+        label.isSelected = false;
+      });
   }
 
   get isValid(): boolean {
@@ -82,7 +91,11 @@ export class SingleLabelQuestionAnswer extends QuestionAnswer {
   }
 
   get valuesAnswered(): string {
-    return this.values.filter((label) => label.isSelected)[0].value;
+    return this.values.filter((label) => label.isSelected)[0]?.value;
+  }
+
+  matchSuggestion(suggestion: Suggestion): boolean {
+    return this.valuesAnswered === suggestion.suggestedAnswer;
   }
 }
 type MultiLabelValue = {
@@ -116,9 +129,11 @@ export class MultiLabelQuestionAnswer extends QuestionAnswer {
   }
 
   clear() {
-    this.values.forEach((label) => {
-      label.isSelected = false;
-    });
+    this.values
+      .filter((label) => label.isSelected)
+      .forEach((label) => {
+        label.isSelected = false;
+      });
   }
 
   get isValid(): boolean {
@@ -129,6 +144,16 @@ export class MultiLabelQuestionAnswer extends QuestionAnswer {
     return this.values
       .filter((label) => label.isSelected)
       .map((label) => label.value);
+  }
+
+  matchSuggestion(suggestion: Suggestion): boolean {
+    const valuesSuggested = suggestion.suggestedAnswer as string[];
+
+    const equal = valuesSuggested.every((answered) =>
+      this.valuesAnswered.includes(answered)
+    );
+
+    return equal;
   }
 }
 type RatingValue = {
@@ -159,9 +184,11 @@ export class RatingLabelQuestionAnswer extends QuestionAnswer {
   }
 
   clear() {
-    this.values.forEach((rating) => {
-      rating.isSelected = false;
-    });
+    this.values
+      .filter((label) => label.isSelected)
+      .forEach((rating) => {
+        rating.isSelected = false;
+      });
   }
 
   get isValid(): boolean {
@@ -169,7 +196,11 @@ export class RatingLabelQuestionAnswer extends QuestionAnswer {
   }
 
   get valuesAnswered(): number {
-    return this.values.filter((rating) => rating.isSelected)[0].value;
+    return this.values.filter((rating) => rating.isSelected)[0]?.value;
+  }
+
+  matchSuggestion(suggestion: Suggestion): boolean {
+    return this.valuesAnswered === suggestion.suggestedAnswer;
   }
 }
 type RankingValue = {
@@ -223,5 +254,14 @@ export class RankingQuestionAnswer extends QuestionAnswer {
 
   get valuesAnswered(): RankingValue[] {
     return this.values;
+  }
+
+  matchSuggestion(suggestion: Suggestion): boolean {
+    const suggestedAnswers = suggestion.suggestedAnswer as RankingAnswer[];
+    return suggestedAnswers.every(
+      (suggested) =>
+        this.values.find((value) => value.value === suggested.value)?.rank ===
+        suggested.rank
+    );
   }
 }
