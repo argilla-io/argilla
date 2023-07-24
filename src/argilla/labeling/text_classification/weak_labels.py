@@ -93,7 +93,7 @@ class WeakLabelsBase:
         self._rules_name2index = {val: key for key, val in self._rules_index2name.items()}
 
         # load records and check compatibility
-        self._records: DatasetForTextClassification = load(dataset, query=query, ids=ids)
+        self._records: DatasetForTextClassification = load(dataset, query=query, ids=ids, include_vectors=False)
         if not self._records:
             raise NoRecordsFoundError(
                 f"No records found in dataset '{dataset}'"
