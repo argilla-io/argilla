@@ -1,6 +1,5 @@
 <template>
   <form
-    :key="renderForm"
     class="questions-form"
     :class="{ '--edited-form': !isFormUntouched }"
     @submit.prevent="onSubmit"
@@ -81,19 +80,13 @@
     </div>
     <div class="footer-form">
       <div class="footer-form__left-footer">
-        <BaseButton
-          type="button"
-          ref="clearButton"
-          class="primary text"
-          @click.prevent="onClear"
-        >
+        <BaseButton type="button" class="primary text" @click.prevent="onClear">
           <span v-text="'Clear'" />
         </BaseButton>
       </div>
       <div class="footer-form__right-area">
         <BaseButton
           type="button"
-          ref="discardButton"
           class="primary outline"
           @on-click="onDiscard"
           :disabled="record.isDiscarded"
@@ -101,10 +94,7 @@
           <span v-text="'Discard'" />
         </BaseButton>
         <BaseButton
-          ref="submitButton"
           type="submit"
-          name="submitButton"
-          value="submitButton"
           class="primary"
           :disabled="isSubmitButtonDisabled"
         >
@@ -135,7 +125,6 @@ export default {
   data() {
     return {
       originalRecord: null,
-      renderForm: 0,
     };
   },
   setup() {
@@ -174,61 +163,46 @@ export default {
     onPressKeyboardShortCut({ code, shiftKey }) {
       switch (code) {
         case "Enter": {
-          const elem = this.$refs.submitButton.$el;
-          elem.click();
+          this.onSubmit();
           break;
         }
         case "Space": {
-          const elem = this.$refs.clearButton.$el;
-          shiftKey && elem.click();
+          if (shiftKey) this.onClear();
           break;
         }
         case "Backspace": {
-          const elem = this.$refs.discardButton.$el;
-          elem.click();
+          this.onDiscard();
           break;
         }
         default:
       }
     },
     async onDiscard() {
-      try {
-        await this.discard(this.record);
+      await this.discard(this.record);
 
-        this.$emit("on-discard-responses");
+      this.$emit("on-discard-responses");
 
-        this.onReset();
-      } catch (error) {
-        console.log(error);
-      }
+      this.onReset();
     },
     async onSubmit() {
       if (!this.questionAreCompletedCorrectly) {
         return;
       }
 
-      try {
-        await this.submit(this.record);
+      await this.submit(this.record);
 
-        this.$emit("on-submit-responses");
+      this.$emit("on-submit-responses");
 
-        this.onReset();
-      } catch (error) {
-        console.log(error);
-      }
+      this.onReset();
     },
     async onClear() {
-      try {
-        await this.clear(this.record);
+      await this.clear(this.record);
 
-        this.onReset();
-      } catch (err) {
-        console.log(err);
-      }
+      this.onReset();
     },
     onReset() {
+      this.record.restore();
       this.originalRecord = cloneDeep(this.record);
-      this.renderForm++;
     },
     emitIsQuestionsFormUntouched(isFormUntouched) {
       this.$emit("on-question-form-touched", !isFormUntouched);
