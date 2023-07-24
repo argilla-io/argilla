@@ -48,6 +48,7 @@ jobs:
 
   run_tests:
     strategy:
+      max-parallel: 1
       matrix:
         include:
         - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
@@ -83,16 +84,16 @@ jobs:
   run_tests_extra:
     name: Run extra tests (training, monitoring and listeners)
     uses: ./.github/workflows/run-python-tests.yml
-    needs: check_repo_files
+    needs: run_tests
     if: needs.check_repo_files.outputs.pythonChanges == 'true'
     # continue-on-error: true
     with:
       coverageReport: coverage-extra
       pytestArgs: |
-        tests/training \
-        tests/client/feedback/training \
+        tests/listeners \
         tests/monitoring \
-        tests/listeners
+        tests/training \
+        tests/client/feedback/training
     secrets: inherit
 
   push_coverage:
