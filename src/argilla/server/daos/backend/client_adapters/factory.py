@@ -45,7 +45,7 @@ class ClientAdapterFactory:
             ca_certs=ca_path,
             retry_on_timeout=retry_on_timeout,
             max_retries=max_retries,
-            timeout=30,
+            timeout=300,
         )
 
         version, distribution = cls._fetch_cluster_version_info(client_config)

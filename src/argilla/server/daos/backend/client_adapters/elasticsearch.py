@@ -40,7 +40,7 @@ class ElasticsearchClient(OpenSearchClient):
     query_builder = EsQueryBuilder()
 
     def __post_init__(self):
-        self.__client__ = Elasticsearch(**self.config_backend)
+        self.__client__ = Elasticsearch(**self.config_backend, request_timeout=self.config_backend.pop("timeout"))
         self.error_handling = BackendErrorHandler(
             WarningIgnore=ElasticsearchWarning,
             RequestError=RequestError,
