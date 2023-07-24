@@ -16,12 +16,6 @@ export class Records {
 
   getRecordOn(page: number) {
     const arrayOffset = page - 1;
-    const record = this.records.find(
-      (record) => record.arrayOffset === arrayOffset
-    );
-
-    if (record) record.restore();
-
-    return record;
+    return this.records.find((record) => record.arrayOffset === arrayOffset);
   }
 }
