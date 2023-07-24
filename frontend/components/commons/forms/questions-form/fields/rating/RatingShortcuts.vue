@@ -32,8 +32,7 @@ export default {
       };
     },
     keyboardHandlerFor($event, value) {
-      const prefix = $event.code?.substring(0, 6);
-      if (!this.isValidKeyFor({ value, prefix })) return;
+      if (!this.isValidKeyFor($event)) return;
 
       const currValue = +value;
 
@@ -45,11 +44,15 @@ export default {
 
       targetId && document.getElementById(targetId).click();
     },
-    isValidKeyFor({ value, prefix }) {
-      const keyIsFromNumpad = prefix === "Numpad";
+    isValidKeyFor({ code }) {
+      const value = code.at(-1);
+      const keyIsFromNumpadOrDigit = ["Numpad", "Digit"].some((prefix) =>
+        code.includes(prefix)
+      );
+
       const valueIsValid = !isNaN(value);
 
-      return keyIsFromNumpad && valueIsValid;
+      return keyIsFromNumpadOrDigit && valueIsValid;
     },
   },
 };
