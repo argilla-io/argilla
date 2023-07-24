@@ -53,7 +53,7 @@ export default {
   },
   methods: {
     goToWorkspace(workspace) {
-      this.$router.push(`/datasets?workspace=${workspace}`);
+      this.$router.push(`/datasets?workspaces=${workspace}`);
     },
   },
 };

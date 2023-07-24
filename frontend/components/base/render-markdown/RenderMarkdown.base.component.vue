@@ -1,5 +1,5 @@
 <template>
-  <div class="markdown-render" v-html="markdownToHtml" />
+  <div class="markdown-render" v-html="markdownToHtml" v-copy-code />
 </template>
 <script>
 import { marked } from "marked";
@@ -15,6 +15,7 @@ marked.use(
     },
   })
 );
+
 export default {
   name: "RenderMarkdownBaseComponent",
   props: {
