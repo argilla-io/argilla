@@ -298,6 +298,7 @@ async def get_search_engine() -> AsyncGenerator[SearchEngine, None]:
         ca_certs=settings.elasticsearch_ca_path,
         retry_on_timeout=False,
         max_retries=5,
+        timeout=30,
     )
     search_engine = SearchEngine(
         config,
