@@ -28,7 +28,7 @@ env:
 jobs:
   run-python-tests:
     name: Argilla python tests
-    runs-on: extended-runner
+    runs-on: ubuntu-latest
     services:
       search_engine:
         image: ${{ inputs.searchEngineDockerImage }}
