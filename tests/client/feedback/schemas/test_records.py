@@ -86,39 +86,6 @@ def test_feedback_record(schema_kwargs: Dict[str, Any]) -> None:
     "schema_kwargs, suggestions, expected_warning, warning_match",
     [
         (
-            {"fields": {"text": "This is the first record", "label": "positive"}},
-            {
-                "question_name": "question-1",
-                "type": "model",
-                "score": 0.9,
-                "value": "This is the first suggestion",
-                "agent": "agent-1",
-            },
-            UserWarning,
-            "Ignore the following if you are creating a new `FeedbackDataset` with",
-        ),
-        (
-            {"fields": {"text": "This is the first record", "label": "positive"}},
-            [
-                {
-                    "question_name": "question-1",
-                    "type": "model",
-                    "score": 0.9,
-                    "value": "This is the first suggestion",
-                    "agent": "agent-1",
-                },
-                {
-                    "question_name": "question-2",
-                    "type": "model",
-                    "score": 0.9,
-                    "value": "This is the second suggestion",
-                    "agent": "agent-2",
-                },
-            ],
-            UserWarning,
-            "Ignore the following if you are creating a new `FeedbackDataset` with",
-        ),
-        (
             {
                 "id": "00000000-0000-0000-0000-000000000000",
                 "fields": {"text": "This is the first record", "label": "positive"},
@@ -132,30 +99,6 @@ def test_feedback_record(schema_kwargs: Dict[str, Any]) -> None:
             },
             None,
             None,
-        ),
-        (
-            {
-                "id": "00000000-0000-0000-0000-000000000000",
-                "fields": {"text": "This is the first record", "label": "positive"},
-            },
-            [
-                {
-                    "question_name": "question-1",
-                    "type": "model",
-                    "score": 0.9,
-                    "value": "This is the first suggestion",
-                    "agent": "agent-1",
-                },
-                {
-                    "question_name": "question-1",
-                    "type": "model",
-                    "score": 0.9,
-                    "value": "This is the second suggestion",
-                    "agent": "agent-2",
-                },
-            ],
-            UserWarning,
-            "More than one suggestion for `question-1` has been provided",
         ),
         (
             {

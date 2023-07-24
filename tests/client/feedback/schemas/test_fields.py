@@ -22,11 +22,11 @@ from argilla.client.feedback.schemas.fields import TextField
     "schema_kwargs, expected_settings",
     [
         (
-            {"name": "a", "description": "a", "required": True, "use_markdown": True},
+            {"name": "a", "title": "a", "required": True, "use_markdown": True},
             {"type": "text", "use_markdown": True},
         ),
         (
-            {"name": "a", "description": "a", "required": True, "use_markdown": False},
+            {"name": "a", "title": "a", "required": True, "use_markdown": False},
             {"type": "text", "use_markdown": False},
         ),
     ],
