@@ -89,10 +89,10 @@ jobs:
     with:
       coverageReport: coverage-extra
       pytestArgs: |
-        tests/listeners \
-        tests/monitoring \
         tests/training \
-        tests/client/feedback/training
+        tests/client/feedback/training \
+        tests/listeners \
+        tests/monitoring
     secrets: inherit
 
   push_coverage:
