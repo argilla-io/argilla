@@ -46,7 +46,7 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
         cursor.close()
 
 
-async_engine = create_async_engine(settings.database_url_async)
+async_engine = create_async_engine(settings.database_url)
 AsyncSessionLocal = async_sessionmaker(autocommit=False, expire_on_commit=False, bind=async_engine)
 
 
