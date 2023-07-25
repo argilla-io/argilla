@@ -21,16 +21,10 @@ from .update import update
 
 app = AsyncTyper(help="Holds CLI commands for user and workspace management.", no_args_is_help=True)
 
-app.async_command(name="create_default", help="Creates default users and workspaces in the Argilla database.")(
-    create_default
-)
-app.async_command(name="create", help="Creates a user and add it to the Argilla database.", no_args_is_help=True)(
-    create
-)
-app.async_command(name="update", help="Updates the user's role into the Argilla database.", no_args_is_help=True)(
-    update
-)
-app.async_command(name="migrate")(migrate)
+app.command(name="create_default", help="Creates default users and workspaces in the Argilla database.")(create_default)
+app.command(name="create", help="Creates a user and add it to the Argilla database.", no_args_is_help=True)(create)
+app.command(name="update", help="Updates the user's role into the Argilla database.", no_args_is_help=True)(update)
+app.command(name="migrate")(migrate)
 
 
 if __name__ == "__main__":

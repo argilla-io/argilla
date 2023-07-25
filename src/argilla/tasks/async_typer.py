@@ -31,21 +31,27 @@ R = TypeVar("R")
 
 # https://github.com/tiangolo/typer/issues/88#issuecomment-1613013597
 class AsyncTyper(typer.Typer):
-    def async_command(
+    def command(
         self, *args: Any, **kwargs: Any
     ) -> Callable[[Callable[P, Coroutine[Any, Any, R]]], Callable[P, Coroutine[Any, Any, R]]]:
-        def decorator(async_func: Callable[P, Coroutine[Any, Any, R]]) -> Callable[P, Coroutine[Any, Any, R]]:
-            @wraps(async_func)
-            def sync_func(*_args: P.args, **_kwargs: P.kwargs) -> R:
-                return asyncio.run(async_func(*_args, **_kwargs))
+        super_command = super().command(*args, **kwargs)
 
-            self.command(*args, **kwargs)(sync_func)
-            return async_func
+        def decorator(func: Callable[P, Coroutine[Any, Any, R]]) -> Callable[P, Coroutine[Any, Any, R]]:
+            @wraps(func)
+            def sync_func(*_args: P.args, **_kwargs: P.kwargs) -> R:
+                return asyncio.run(func(*_args, **_kwargs))
+
+            if asyncio.iscoroutinefunction(func):
+                super_command(sync_func)
+            else:
+                super_command(func)
+
+            return func
 
         return decorator
 
 
 def run(function: Callable[..., Coroutine[Any, Any, Any]]) -> None:
     app = AsyncTyper(add_completion=False)
-    app.async_command()(function)
+    app.command()(function)
     app()
