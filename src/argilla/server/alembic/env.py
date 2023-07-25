@@ -14,6 +14,7 @@
 
 import asyncio
 from logging.config import fileConfig
+from typing import TYPE_CHECKING
 
 from alembic import context
 from argilla.server.models.base import DatabaseModel
@@ -21,6 +22,9 @@ from argilla.server.models.models import *  # noqa
 from argilla.server.settings import settings
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
+
+if TYPE_CHECKING:
+    from sqlalchemy import Connection
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -70,7 +74,7 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def apply_migrations(connection) -> None:
+def apply_migrations(connection: "Connection") -> None:
     context.configure(connection=connection, target_metadata=target_metadata)
 
     with context.begin_transaction():
