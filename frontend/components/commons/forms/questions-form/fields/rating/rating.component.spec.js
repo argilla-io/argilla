@@ -1,5 +1,6 @@
 import { shallowMount } from "@vue/test-utils";
 import RatingComponent from "./Rating.component";
+import RatingShortcuts from "./RatingShortcuts";
 
 const QuestionHeaderComponentStub = {
   name: "QuestionHeaderComponent",
@@ -17,6 +18,7 @@ const options = {
   stubs: {
     QuestionHeaderComponent: QuestionHeaderComponentStub,
     RatingMonoSelectionComponent: RatingMonoSelectionComponentStub,
+    RatingShortcuts: RatingShortcuts,
   },
   propsData: {
     title: "This is the title",
