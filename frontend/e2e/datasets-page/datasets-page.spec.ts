@@ -20,6 +20,8 @@ test.describe("Datasets page with no datasets", () => {
 
     await loginUserAndWaitFor(page, "datasets");
 
+    await page.waitForTimeout(2000);
+
     await expect(page).toHaveScreenshot();
   });
 
@@ -33,9 +35,9 @@ test.describe("Datasets page with no datasets", () => {
 
     await loginUserAndWaitFor(page, "datasets");
 
-    await page.waitForLoadState("domcontentloaded");
-
     await page.getByRole("button", { name: "Other datasets" }).click();
+
+    await page.waitForTimeout(2000);
 
     await expect(page).toHaveScreenshot();
   });

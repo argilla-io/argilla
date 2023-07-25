@@ -5,6 +5,8 @@ test.describe("Login page", () => {
   test("has title", async ({ page }) => {
     await page.goto("/");
 
+    await page.waitForTimeout(2000);
+
     await expect(page).toHaveScreenshot();
   });
 
