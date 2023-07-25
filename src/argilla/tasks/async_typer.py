@@ -13,9 +13,16 @@
 #  limitations under the License.
 
 import asyncio
+import sys
 from collections.abc import Callable, Coroutine
 from functools import wraps
-from typing import Any, ParamSpec, TypeVar
+from typing import Any, TypeVar
+
+if sys.version_info < (3, 10):
+    from typing_extensions import ParamSpec
+else:
+    from typing import ParamSpec
+
 
 import typer
 
