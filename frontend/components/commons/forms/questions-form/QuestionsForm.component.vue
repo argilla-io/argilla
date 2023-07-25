@@ -144,6 +144,7 @@ export default {
   data() {
     return {
       originalRecord: null,
+      autofocusPosition: 0,
     };
   },
   setup() {
