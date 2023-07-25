@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, Union
+from typing import Any, Dict, Type, Union
 
 import pytest
 from argilla.client.feedback.schemas.questions import (
@@ -226,10 +226,25 @@ def test_text_question(schema_kwargs: Dict[str, Any], expected_settings: Dict[st
             ValidationError,
             "ensure this value has at least 2 items",
         ),
+        (
+            {"name": "a", "description": "a", "required": True, "values": list(range(1, 12))},
+            ValidationError,
+            "ensure this value is less than or equal to 10",
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "values": [0, 1, 2]},
+            ValidationError,
+            "ensure this value is greater than or equal to 1",
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "values": [9, 10, 11]},
+            ValidationError,
+            "ensure this value is less than or equal to 10",
+        ),
     ],
 )
 def test_rating_question_errors(
-    schema_kwargs: Dict[str, Any], expected_exception: Exception, expected_exception_message: Union[str, None]
+    schema_kwargs: Dict[str, Any], expected_exception: Type[Exception], expected_exception_message: Union[str, None]
 ) -> None:
     with pytest.raises(expected_exception, match=expected_exception_message):
         RatingQuestion(**schema_kwargs)
@@ -243,8 +258,8 @@ def test_rating_question_errors(
             {"type": "rating", "options": [{"value": 1}, {"value": 2}, {"value": 3}]},
         ),
         (
-            {"name": "a", "description": "a", "required": True, "values": [-1, 0, 1]},
-            {"type": "rating", "options": [{"value": -1}, {"value": 0}, {"value": 1}]},
+            {"name": "a", "description": "a", "required": True, "values": [8, 9, 10]},
+            {"type": "rating", "options": [{"value": 8}, {"value": 9}, {"value": 10}]},
         ),
     ],
 )

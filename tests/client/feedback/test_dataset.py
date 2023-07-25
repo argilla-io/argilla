@@ -129,7 +129,7 @@ def test_init_wrong_questions(
             fields=feedback_dataset_fields,
             questions=[
                 TextQuestion(name="question-1", required=False),
-                RatingQuestion(name="question-2", values=[0, 1], required=False),
+                RatingQuestion(name="question-2", values=[1, 2], required=False),
             ],
         )
     with pytest.raises(ValueError, match="Expected `questions` to have unique names"):

@@ -409,7 +409,7 @@ def feedback_dataset_fields() -> List["AllowedFieldTypes"]:
 def feedback_dataset_questions() -> List["AllowedQuestionTypes"]:
     return [
         TextQuestion(name="question-1", required=True),
-        RatingQuestion(name="question-2", values=[0, 1], required=True),
+        RatingQuestion(name="question-2", values=[1, 2], required=True),
         LabelQuestion(name="question-3", labels=["a", "b", "c"], required=True),
         MultiLabelQuestion(name="question-4", labels=["a", "b", "c"], required=True),
         RankingQuestion(name="question-5", values=["a", "b"], required=True),

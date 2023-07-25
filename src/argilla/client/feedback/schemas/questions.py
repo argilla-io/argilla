@@ -112,7 +112,7 @@ class RatingQuestion(QuestionSchema, LabelMappingMixin):
             modified.
         values: The list of interger values of the rating question. There is not need
             for the values to be sequential, but they must be unique, contain at least two
-            unique integers, and can be negative.
+            unique integers in the range [1, 10].
 
     Examples:
         >>> from argilla.client.feedback.schemas.questions import RatingQuestion
@@ -120,7 +120,7 @@ class RatingQuestion(QuestionSchema, LabelMappingMixin):
     """
 
     type: Literal["rating"] = Field("rating", allow_mutation=False)
-    values: List[int] = Field(unique_items=True, min_items=2)
+    values: List[int] = Field(unique_items=True, min_items=2, ge=1, le=10)
 
     @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
