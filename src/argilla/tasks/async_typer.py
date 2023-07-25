@@ -14,17 +14,16 @@
 
 import asyncio
 import sys
-from collections.abc import Callable, Coroutine
 from functools import wraps
-from typing import Any, TypeVar
+from typing import Any, Callable, Coroutine, TypeVar
+
+import typer
 
 if sys.version_info < (3, 10):
     from typing_extensions import ParamSpec
 else:
     from typing import ParamSpec
 
-
-import typer
 
 P = ParamSpec("P")
 R = TypeVar("R")
@@ -34,7 +33,7 @@ R = TypeVar("R")
 class AsyncTyper(typer.Typer):
     def async_command(
         self, *args: Any, **kwargs: Any
-    ) -> Callable[[Callable[P, Coroutine[Any, Any, R]]], Callable[P, Coroutine[Any, Any, R]],]:
+    ) -> Callable[[Callable[P, Coroutine[Any, Any, R]]], Callable[P, Coroutine[Any, Any, R]]]:
         def decorator(async_func: Callable[P, Coroutine[Any, Any, R]]) -> Callable[P, Coroutine[Any, Any, R]]:
             @wraps(async_func)
             def sync_func(*_args: P.args, **_kwargs: P.kwargs) -> R:
