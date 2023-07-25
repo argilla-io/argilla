@@ -26,7 +26,6 @@ export default {
 
       this.timer = setTimeout(() => {
         this.value = "";
-        this.onUserChange();
       }, delay);
     },
     keyboardHandlerFor($event, value, options) {
@@ -36,9 +35,11 @@ export default {
 
       if (!options.some((option) => option.value == currValue)) return;
 
-      const targetId = options.find(({ value }) => value == currValue)?.id;
+      const target = options.find(({ value }) => value == currValue);
 
-      targetId && document.getElementById(targetId).click();
+      target?.id && document.getElementById(target.id).click();
+
+      target.isSelected && this.$emit("on-user-answer");
     },
     isValidKeyFor({ code }) {
       const value = code.at(-1);
@@ -49,13 +50,6 @@ export default {
       const valueIsValid = !isNaN(value);
 
       return keyIsFromNumpadOrDigit && valueIsValid;
-    },
-    onUserChange() {
-      const { options } = this.$slots.default[0].context;
-
-      const isAnySelectedOption = options.some((option) => option.isSelected);
-
-      if (isAnySelectedOption) this.$emit("on-user-answer");
     },
   },
 };
