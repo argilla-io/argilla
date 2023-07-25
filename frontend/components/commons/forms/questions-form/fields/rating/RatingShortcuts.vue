@@ -1,5 +1,5 @@
 <template>
-  <div @keydown="respondToRatingFor">
+  <div @keydown="answerRatingFor">
     <slot></slot>
   </div>
 </template>
@@ -9,34 +9,30 @@ export default {
   data() {
     return {
       value: "",
+      timer: 0,
     };
   },
   methods: {
-    respondToRatingFor($event) {
+    answerRatingFor($event) {
+      if (this.timer) clearTimeout(this.timer);
+
       this.value += $event.key;
 
-      this.debounce(() => {
-        this.keyboardHandlerFor($event, this.value);
+      const { options } = this.$slots.default[0].context;
 
+      this.keyboardHandlerFor($event, this.value, options);
+
+      const delay = options.length >= 10 ? 800 : 10;
+
+      this.timer = setTimeout(() => {
         this.value = "";
-      })();
+        this.onUserChange();
+      }, delay);
     },
-    debounce(callback, delay = 800) {
-      let timer;
-
-      return () => {
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-          callback.apply(this);
-        }, delay);
-      };
-    },
-    keyboardHandlerFor($event, value) {
+    keyboardHandlerFor($event, value, options) {
       if (!this.isValidKeyFor($event)) return;
 
       const currValue = +value;
-
-      const { options } = this.$slots.default[0].context;
 
       if (!options.some((option) => option.value == currValue)) return;
 
@@ -53,6 +49,13 @@ export default {
       const valueIsValid = !isNaN(value);
 
       return keyIsFromNumpadOrDigit && valueIsValid;
+    },
+    onUserChange() {
+      const { options } = this.$slots.default[0].context;
+
+      const isAnySelectedOption = options.some((option) => option.isSelected);
+
+      if (isAnySelectedOption) this.$emit("on-user-answer");
     },
   },
 };

@@ -1,5 +1,5 @@
 <template>
-  <RatingShortcuts>
+  <RatingShortcuts @on-user-answer="$emit('on-user-answer')">
     <div class="wrapper">
       <QuestionHeaderComponent
         :title="title"

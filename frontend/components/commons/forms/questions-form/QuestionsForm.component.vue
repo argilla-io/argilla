@@ -82,6 +82,7 @@
           :description="question.description"
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"
+          @on-user-answer="updateQuestionAutofocus(index + 1)"
         />
 
         <RankingComponent
