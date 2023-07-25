@@ -15,16 +15,35 @@
 from typing import TYPE_CHECKING
 
 import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
     from sqlalchemy.orm import Session
 
 
+@pytest.fixture
+def async_db_proxy(mocker: "MockerFixture", sync_db: "Session") -> "AsyncSession":
+    """Create a mocked `AsyncSession` that proxies to the sync session. This will allow us to execute the async CLI commands
+    and then in the unit test function use the sync session to assert the changes.
+
+    Args:
+        mocker: pytest-mock fixture.
+        sync_db: Sync session.
+
+    Returns:
+        Mocked `AsyncSession` that proxies to the sync session.
+    """
+    async_session = AsyncSession()
+    async_session.sync_session = sync_db
+    async_session._proxied = sync_db
+    async_session.close = mocker.AsyncMock()
+    return async_session
+
+
 @pytest.fixture(autouse=True)
-def mock_session_local(mocker: "MockerFixture", sync_db: "Session") -> None:
-    sync_db.close = mocker.MagicMock()
-    mocker.patch("argilla.tasks.users.create.SessionLocal", return_value=sync_db)
-    mocker.patch("argilla.tasks.users.update.SessionLocal", return_value=sync_db)
-    mocker.patch("argilla.tasks.users.create_default.SessionLocal", return_value=sync_db)
-    mocker.patch("argilla.tasks.users.migrate.SessionLocal", return_value=sync_db)
+def mock_session_local(mocker: "MockerFixture", async_db_proxy: "AsyncSession") -> None:
+    mocker.patch("argilla.tasks.users.create.AsyncSessionLocal", return_value=async_db_proxy)
+    mocker.patch("argilla.tasks.users.update.AsyncSessionLocal", return_value=async_db_proxy)
+    mocker.patch("argilla.tasks.users.create_default.AsyncSessionLocal", return_value=async_db_proxy)
+    mocker.patch("argilla.tasks.users.migrate.AsyncSessionLocal", return_value=async_db_proxy)
