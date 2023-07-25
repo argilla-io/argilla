@@ -21,6 +21,7 @@
     "test:watch": "jest --colors --watchAll"
   },
   "dependencies": {
+    "@codescouts/events": "^1.0.2",
     "@nuxtjs/auth-next": "5.0.0-1613647907.37b1156",
     "@nuxtjs/axios": "^5.12.5",
     "@nuxtjs/composition-api": "^0.33.1",
@@ -57,7 +58,6 @@
     "@babel/eslint-parser": "^7.15.0",
     "@babel/preset-env": "^7.15.0",
     "@babel/preset-typescript": "^7.22.5",
-    "@codescouts/events": "^1.0.2",
     "@nuxt/types": "^2.15.8",
     "@nuxt/typescript-build": "^2.1.0",
     "@nuxtjs/eslint-config-typescript": "^12.0.0",

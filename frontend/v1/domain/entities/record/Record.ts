@@ -48,6 +48,10 @@ export class Record {
     this.answer = null;
   }
 
+  restore() {
+    this.completeQuestion();
+  }
+
   questionAreCompletedCorrectly() {
     const requiredQuestionsAreCompletedCorrectly = this.questions
       .filter((input) => input.isRequired)
