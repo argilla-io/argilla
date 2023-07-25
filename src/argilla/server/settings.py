@@ -127,12 +127,6 @@ class Settings(BaseSettings):
 
         return base_url
 
-    @validator("database_url", always=True)
-    def set_database_url_default(cls, database_url: str, values: dict) -> str:
-        home_path = values.get("home_path")
-        sqlite_file = os.path.join(home_path, "argilla.db")
-        return database_url or f"sqlite+aiosqlite:///{sqlite_file}?check_same_thread=False"
-
     @validator("database_url", pre=True)
     def set_database_url(cls, database_url: str, values: dict) -> str:
         if not database_url:
