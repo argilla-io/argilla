@@ -16,34 +16,32 @@ import typer
 
 from argilla._constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
 from argilla.server.contexts import accounts
-from argilla.server.database import SessionLocal
+from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import User, UserRole, Workspace
 
 
-def create_default(
+async def create_default(
     api_key: str = typer.Option(default=DEFAULT_API_KEY, help="API key for the user."),
     password: str = typer.Option(default=DEFAULT_PASSWORD, help="Password for the user."),
     quiet: bool = typer.Option(is_flag=True, default=False, help="Run without output."),
 ):
     """Creates a user with default credentials on database suitable to start experimenting with argilla."""
-    with SessionLocal() as session:
-        if accounts.get_user_by_username_sync(session, DEFAULT_USERNAME):
+    async with AsyncSessionLocal() as session:
+        if await accounts.get_user_by_username(session, DEFAULT_USERNAME):
             if not quiet:
                 typer.echo("User with default username already found on database, will not do anything.")
 
             return
 
-        session.add(
-            User(
-                first_name="",
-                username=DEFAULT_USERNAME,
-                role=UserRole.owner,
-                api_key=api_key,
-                password_hash=accounts.hash_password(password),
-                workspaces=[Workspace(name=DEFAULT_USERNAME)],
-            )
+        await User.create(
+            session,
+            first_name="",
+            username=DEFAULT_USERNAME,
+            role=UserRole.owner,
+            api_key=api_key,
+            password_hash=accounts.hash_password(password),
+            workspaces=[Workspace(name=DEFAULT_USERNAME)],
         )
-        session.commit()
 
         if not quiet:
             typer.echo("User with default credentials successfully created:")
