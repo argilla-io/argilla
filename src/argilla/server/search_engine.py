@@ -299,11 +299,17 @@ async def get_search_engine() -> AsyncGenerator[SearchEngine, None]:
         retry_on_timeout=True,
         max_retries=5,
     )
+
+    if settings.elasticsearch_extra_args:
+        # TODO Warning about compatibility limitations
+        pass
+
     search_engine = SearchEngine(
-        config,
+        config={**config, **settings.opensearch_extra_args},
         es_number_of_shards=settings.es_records_index_shards,
         es_number_of_replicas=settings.es_records_index_shards,
     )
+
     try:
         yield search_engine
     finally:

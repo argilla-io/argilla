@@ -33,4 +33,4 @@ async def api_status(
 
 @router.get("/_info", operation_id="api_info", response_model=ApiInfo)
 async def api_info(service: ApiInfoService = Depends(ApiInfoService.get_instance)) -> ApiInfo:
-    return ApiInfo.parse_obj(service.api_status())
+    return ApiInfo(version=str(service.api_version()))

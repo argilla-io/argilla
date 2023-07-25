@@ -93,9 +93,16 @@ class ApiInfoService:
             mem_info=self._api_memory_info(),
         )
 
+    def api_version(self) -> int:
+        """Return the argilla server version"""
+        return version
+
     def _elasticsearch_info(self) -> Dict[str, Any]:
         """Returns the elasticsearch cluster info"""
-        return self.__es__.client.get_cluster_info()
+        try:
+            return self.__es__.client.get_cluster_info()
+        except Exception as e:
+            return {"status": "error", "detail": e}
 
     @staticmethod
     def _api_memory_info() -> Dict[str, Any]:
