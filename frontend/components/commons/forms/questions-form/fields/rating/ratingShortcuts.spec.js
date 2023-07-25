@@ -3,9 +3,41 @@ import RatingShortcutsComponent from "./RatingShortcuts";
 
 let wrapper = null;
 const options = {
-  scopedSlots: {
-    default: function (props) {
-      return this.$createElement("div", [props.myProp]);
+  mocks: {
+    $slots: {
+      default: [
+        {
+          context: {
+            options: [
+              {
+                id: "rating_1",
+                value: 1,
+                isSelected: false,
+              },
+              {
+                id: "rating_2",
+                value: 2,
+                isSelected: false,
+              },
+              {
+                id: "rating_3",
+                value: 3,
+                isSelected: false,
+              },
+              {
+                id: "rating_4",
+                value: 4,
+                isSelected: false,
+              },
+              {
+                id: "rating_5",
+                value: 5,
+                isSelected: false,
+              },
+            ],
+          },
+        },
+      ],
     },
   },
 };
