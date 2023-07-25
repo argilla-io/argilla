@@ -17,6 +17,7 @@ import typer
 from argilla.server.contexts import accounts
 from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import UserRole
+from argilla.tasks import async_typer
 
 
 async def update(
@@ -48,3 +49,7 @@ async def update(
 
         typer.echo(f"User {username!r} successfully updated:")
         typer.echo(f"• role: {old_role.value!r} -> {user.role.value!r}")
+
+
+if __name__ == "__main__":
+    async_typer.run(update)

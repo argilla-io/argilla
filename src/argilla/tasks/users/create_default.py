@@ -18,6 +18,7 @@ from argilla._constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNA
 from argilla.server.contexts import accounts
 from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import User, UserRole, Workspace
+from argilla.tasks import async_typer
 
 
 async def create_default(
@@ -52,4 +53,4 @@ async def create_default(
 
 
 if __name__ == "__main__":
-    typer.run(create_default)
+    async_typer.run(create_default)

@@ -16,7 +16,6 @@ from typing import List, Optional
 
 import typer
 from pydantic import constr
-from typer import Typer
 
 from argilla.server.contexts import accounts
 from argilla.server.database import AsyncSessionLocal
@@ -26,6 +25,7 @@ from argilla.server.security.model import (
     UserCreate,
     WorkspaceCreate,
 )
+from argilla.tasks import async_typer
 from argilla.tasks.users.utils import get_or_new_workspace
 
 USER_API_KEY_MIN_LENGTH = 8
@@ -128,6 +128,4 @@ async def create(
 
 
 if __name__ == "__main__":
-    app = Typer(add_completion=False)
-    app.command(no_args_is_help=True)(create)
-    app()
+    async_typer.run(create)

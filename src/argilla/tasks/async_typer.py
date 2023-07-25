@@ -46,5 +46,7 @@ class AsyncTyper(typer.Typer):
         return decorator
 
 
-async def run():
-    pass
+def run(function: Callable[..., Coroutine[Any, Any, Any]]) -> None:
+    app = AsyncTyper(add_completion=False)
+    app.async_command()(function)
+    app()
