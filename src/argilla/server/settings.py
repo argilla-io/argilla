@@ -18,6 +18,8 @@ Common environment vars / settings
 """
 import logging
 import os
+import re
+import warnings
 from pathlib import Path
 from typing import List, Optional
 from urllib.parse import urlparse
@@ -130,6 +132,35 @@ class Settings(BaseSettings):
         home_path = values.get("home_path")
         sqlite_file = os.path.join(home_path, "argilla.db")
         return database_url or f"sqlite+aiosqlite:///{sqlite_file}?check_same_thread=False"
+
+    @validator("database_url", pre=True)
+    def set_database_url(cls, database_url: str, values: dict) -> str:
+        if not database_url:
+            home_path = values.get("home_path")
+            sqlite_file = os.path.join(home_path, "argilla.db")
+            return f"sqlite+aiosqlite:///{sqlite_file}?check_same_thread=False"
+
+        if "sqlite" in database_url:
+            regex = re.compile(r"sqlite(?!\+aiosqlite)")
+            if regex.match(database_url):
+                warnings.warn(
+                    "From version 1.14.0, Argilla will use `aiosqlite` as default SQLite driver. The protocol in the"
+                    " provided database URL has been automatically replaced from `sqlite` to `sqlite+aiosqlite`."
+                    " Please, update your database URL to use `sqlite+aiosqlite` protocol."
+                )
+                return re.sub(regex, "sqlite+aiosqlite", database_url)
+
+        if "postgresql" in database_url:
+            regex = re.compile(r"postgresql(?!\+asyncpg)(\+psycopg2)?")
+            if regex.match(database_url):
+                warnings.warn(
+                    "From version 1.14.0, Argilla will use `asyncpg` as default PostgreSQL driver. The protocol in the"
+                    " provided database URL has been automatically replaced from `postgresql` to `postgresql+asyncpg`."
+                    " Please, update your database URL to use `postgresql+asyncpg` protocol."
+                )
+                return re.sub(regex, "postgresql+asyncpg", database_url)
+
+        return database_url
 
     @root_validator(skip_on_failure=True)
     def create_home_path(cls, values):
