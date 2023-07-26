@@ -447,7 +447,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                 {
                     "values": {
                         "question-1": {"value": "This is a response to question 1"},
-                        "question-2": {"value": 0},
+                        "question-2": {"value": 1},
                         "question-3": {"value": "b"},
                         "question-4": {"value": ["b", "c"]},
                         "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
@@ -500,7 +500,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                 {
                     "values": {
                         "question-1": {"value": "This is a response to question 1"},
-                        "question-2": {"value": 0},
+                        "question-2": {"value": 1},
                         "question-3": {"value": "c"},
                         "question-4": {"value": ["a", "c"]},
                         "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
