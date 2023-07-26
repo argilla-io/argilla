@@ -126,16 +126,16 @@ class RatingQuestion(QuestionSchema, LabelMappingMixin):
     def check_values(cls, values: List[int]):
         if len(values) > 10:
             warnings.warn(
-                "Values list contains more than 10 elements, which is not supported for newer versions of Argilla. "
-                "Please, review this settings before pushing the dataset and records into Argilla. "
-                "Otherwise, the `push_to_argilla action may fail",
+                "`values` list contains more than 10 elements, which is not supported from Argilla 1.14.0 onwards. "
+                "Please, make sure `values` is a list with more than 1 element and less or equal than 10 before pushing the dataset into Argilla. "
+                "Otherwise, the `push_to_argilla` method will fail",
             )
         for value in values:
             if not 1 <= value <= 10:
                 warnings.warn(
-                    "Value found out of range [1, 10], which is not supported for newer versions of Argilla. "
-                    "Please, review this settings before pushing the dataset and records into Argilla. "
-                    "Otherwise, the `push_to_argilla action may fail. ",
+                    "At least one `value` in `values` is out of range [1, 10], which is not supported from Argilla 1.14.0 onwards. "
+                    "Please, make sure `values` is a list with unique values within the range [1, 10] before pushing the dataset into Argilla. "
+                    "Otherwise, the `push_to_argilla` method will fail. ",
                 )
                 break
         return values
