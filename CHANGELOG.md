@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+### Added
+
+- Added `PATCH /api/v1/fields/{field_id}` endpoint to update the field title and markdown settings (See [#3421](https://github.com/argilla-io/argilla/pull/3421)).
+
 ### Changed
 
 - Improved efficiency of weak labeling when dataset contains vectors ([#3444](https://github.com/argilla-io/argilla/pull/3444)).
