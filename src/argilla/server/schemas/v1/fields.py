@@ -40,10 +40,10 @@ class Field(BaseModel):
         orm_mode = True
 
 
-class FieldSettingsUpdate(BaseModel):
+class TextFieldSettingsUpdate(BaseModel):
     use_markdown: Optional[bool]
 
 
 class FieldUpdate(BaseModel):
     title: Optional[str]
-    settings: Optional[FieldSettingsUpdate]
+    settings: Optional[TextFieldSettingsUpdate]
