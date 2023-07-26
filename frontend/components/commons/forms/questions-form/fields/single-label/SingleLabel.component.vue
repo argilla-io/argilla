@@ -81,6 +81,15 @@ export default {
       this.$emit("on-focus");
     },
   },
+  watch: {
+    options: {
+      deep: true,
+      handler(newOptions) {
+        const hasAnswer = newOptions.some((option) => option.isSelected);
+        hasAnswer && this.$emit("on-user-answer");
+      },
+    },
+  },
 };
 </script>
 

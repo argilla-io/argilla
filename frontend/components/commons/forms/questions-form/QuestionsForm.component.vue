@@ -55,6 +55,7 @@
           :visibleOptions="question.settings.visible_options"
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"
+          @on-user-answer="focusNext(index)"
         />
 
         <MultiLabelComponent
