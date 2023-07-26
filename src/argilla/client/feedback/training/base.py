@@ -28,11 +28,13 @@ os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 if TYPE_CHECKING:
     import spacy
 
+    from argilla.client.feedback.dataset import FeedbackDataset
+
 
 class ArgillaTrainer(ArgillaTrainerV1):
     def __init__(
         self,
-        dataset: "argilla.client.feedback.schemas.FeedbackDataset",
+        dataset: "FeedbackDataset",
         task_mapping: TrainingTaskMappingForTextClassification,
         framework: Framework,
         lang: Optional["spacy.Language"] = None,
@@ -232,7 +234,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
 class ArgillaTrainerSkeleton(ABC):
     def __init__(
         self,
-        feedback_dataset: "argilla.client.feedback.schemas.FeedbackDataset",
+        feedback_dataset: "FeedbackDataset",
         task_mapping: TrainingTaskMappingForTextClassification,
         prepared_data=None,
         model: str = None,
