@@ -23,11 +23,7 @@ from argilla.server.database import get_async_db
 from argilla.server.models import User
 from argilla.server.policies import RecordPolicyV1, authorize
 from argilla.server.schemas.v1.records import Response, ResponseCreate
-from argilla.server.schemas.v1.suggestions import (
-    Suggestion,
-    SuggestionCreate,
-    Suggestions,
-)
+from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate, Suggestions
 from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.security import auth
 
@@ -78,10 +74,7 @@ async def create_record_response(
 
 @router.get("/records/{record_id}/suggestions", status_code=status.HTTP_200_OK, response_model=Suggestions)
 async def get_record_suggestions(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    record_id: UUID,
-    current_user: User = Security(auth.get_current_user),
+    *, db: AsyncSession = Depends(get_async_db), record_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
     record = await _get_record(db, record_id, with_dataset=True, with_suggestions=True)
 

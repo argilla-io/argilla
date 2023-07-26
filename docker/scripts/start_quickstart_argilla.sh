@@ -3,16 +3,16 @@
 set -e
 
 echo "Starting Elasticsearch"
-elasticsearch 1>/dev/null 2>/dev/null &
+/usr/share/elasticsearch/bin/elasticsearch 1>/dev/null 2>/dev/null &
 
 echo "Waiting for elasticsearch to start"
 sleep 30
 
 echo "Running database migrations"
-python3.9 -m argilla database migrate
+python -m argilla database migrate
 
 echo "Creating owner user"
-python3.9 -m argilla users create \
+python -m argilla users create \
   --first-name "Owner" \
   --username "$OWNER_USERNAME" \
   --password "$OWNER_PASSWORD" \
@@ -21,7 +21,7 @@ python3.9 -m argilla users create \
   --workspace "$ARGILLA_WORKSPACE"
 
 echo "Creating admin user"
-python3.9 -m argilla users create \
+python -m argilla users create \
   --first-name "Admin" \
   --username "$ADMIN_USERNAME" \
   --password "$ADMIN_PASSWORD" \
@@ -30,7 +30,7 @@ python3.9 -m argilla users create \
   --workspace "$ARGILLA_WORKSPACE"
 
 echo "Creating annotator user"
-python3.9 -m argilla users create \
+python -m argilla users create \
   --first-name "Annotator" \
   --username "$ANNOTATOR_USERNAME" \
   --password "$ANNOTATOR_PASSWORD" \
@@ -38,7 +38,7 @@ python3.9 -m argilla users create \
   --workspace "$ARGILLA_WORKSPACE"
 
 # Load data
-python3.9 /load_data.py "$OWNER_API_KEY" "$LOAD_DATASETS" &
+python /load_data.py "$OWNER_API_KEY" "$LOAD_DATASETS" &
 
 # Start Argilla
 echo "Starting Argilla"

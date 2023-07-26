@@ -29,13 +29,7 @@ try:
 except ImportError:
     from typing_extensions import Annotated
 
-from argilla.server.models import (
-    DatasetStatus,
-    FieldType,
-    QuestionSettings,
-    QuestionType,
-    ResponseStatus,
-)
+from argilla.server.models import DatasetStatus, FieldType, QuestionSettings, QuestionType, ResponseStatus
 
 DATASET_CREATE_GUIDELINES_MIN_LENGTH = 1
 DATASET_CREATE_GUIDELINES_MAX_LENGTH = 10000

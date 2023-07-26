@@ -13,9 +13,6 @@
 #  limitations under the License.
 
 from argilla.client.feedback.training.base import ArgillaTrainer
-from argilla.client.feedback.training.schemas import (
-    TrainingTaskMapping,
-    TrainingTaskMappingForTextClassification,
-)
+from argilla.client.feedback.training.schemas import TrainingTaskMapping, TrainingTaskMappingForTextClassification
 
 __all__ = ["ArgillaTrainer", "TrainingTaskMapping", "TrainingTaskMappingForTextClassification"]

@@ -321,7 +321,7 @@ class Workspace:
 
         raise ValueError(
             f"Workspace with name=`{name}` doesn't exist in Argilla, so please"
-            "create it via the `Workspace.create` method as follows:"
+            " create it via the `Workspace.create` method as follows:"
             f" `Workspace.create('{name}')`."
         )
 

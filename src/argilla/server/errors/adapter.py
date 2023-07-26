@@ -16,12 +16,7 @@ import logging
 
 import pydantic
 
-from argilla.server.errors.base_errors import (
-    BadRequestError,
-    GenericServerError,
-    ServerError,
-    ValidationError,
-)
+from argilla.server.errors.base_errors import BadRequestError, GenericServerError, ServerError, ValidationError
 
 _LOGGER = logging.getLogger("argilla")
 

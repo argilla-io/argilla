@@ -24,12 +24,7 @@ from argilla.server.database import get_async_db
 from argilla.server.errors import EntityAlreadyExistsError, EntityNotFoundError
 from argilla.server.policies import WorkspacePolicy, WorkspaceUserPolicy, authorize
 from argilla.server.security import auth
-from argilla.server.security.model import (
-    User,
-    Workspace,
-    WorkspaceCreate,
-    WorkspaceUserCreate,
-)
+from argilla.server.security.model import User, Workspace, WorkspaceCreate, WorkspaceUserCreate
 
 router = APIRouter(tags=["workspaces"])
 

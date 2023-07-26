@@ -33,12 +33,7 @@ import httpx
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors import GenericApiError
 from argilla.client.sdk.commons.errors_handler import handle_response_error
-from argilla.client.sdk.commons.models import (
-    BulkResponse,
-    ErrorMessage,
-    HTTPValidationError,
-    Response,
-)
+from argilla.client.sdk.commons.models import BulkResponse, ErrorMessage, HTTPValidationError, Response
 from argilla.client.sdk.text2text.models import Text2TextBulkData
 from argilla.client.sdk.text_classification.models import TextClassificationBulkData
 from argilla.client.sdk.token_classification.models import TokenClassificationBulkData
@@ -108,8 +103,7 @@ def build_data_response(response: httpx.Response, data_type: Type[T]) -> Respons
 
 
 def build_list_response(
-    response: httpx.Response,
-    item_class: Type[T],
+    response: httpx.Response, item_class: Type[T]
 ) -> Response[Union[List[T], HTTPValidationError, ErrorMessage]]:
     parsed_response = response.json()
 

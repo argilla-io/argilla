@@ -16,27 +16,15 @@ import dataclasses
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 from opensearchpy import OpenSearch, helpers
-from opensearchpy.exceptions import (
-    NotFoundError,
-    OpenSearchException,
-    OpenSearchWarning,
-    RequestError,
-)
+from opensearchpy.exceptions import NotFoundError, OpenSearchException, OpenSearchWarning, RequestError
 from opensearchpy.helpers import BulkIndexError
 
 from argilla.server.daos.backend import query_helpers
 from argilla.server.daos.backend.base import BackendErrorHandler, IndexNotFoundError
 from argilla.server.daos.backend.client_adapters.base import IClientAdapter
 from argilla.server.daos.backend.metrics.base import ElasticsearchMetric
-from argilla.server.daos.backend.search.model import (
-    BaseQuery,
-    SortableField,
-    SortConfig,
-)
-from argilla.server.daos.backend.search.query_builder import (
-    HighlightParser,
-    OpenSearchQueryBuilder,
-)
+from argilla.server.daos.backend.search.model import BaseQuery, SortableField, SortConfig
+from argilla.server.daos.backend.search.query_builder import HighlightParser, OpenSearchQueryBuilder
 
 
 @dataclasses.dataclass
