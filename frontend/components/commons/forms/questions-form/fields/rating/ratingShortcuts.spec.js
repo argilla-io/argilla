@@ -48,19 +48,8 @@ afterEach(() => {
 describe("RatingMonoSelectionComponent", () => {
   it("render the component", () => {
     expect(wrapper.is(RatingShortcutsComponent)).toBe(true);
-    expect(wrapper.vm.value).toBe("");
   });
-  it.skip("change data value to 1 on press 1", () => {
+  it.skip("click on target corresponding to value from shortcut", () => {
     wrapper.trigger("keydown", { key: "1" });
-
-    expect(wrapper.vm.value).toBe("1");
-    document.getElementById = jest.fn();
   });
-  it.skip("change data value to 12 on press 1 and then 2", () => {
-    wrapper.trigger("keydown", { key: "1" });
-    wrapper.trigger("keydown", { key: "2" });
-
-    expect(wrapper.vm.value).toBe("12");
-  });
-  it.skip("click on target corresponding to value from shortcut", () => {});
 });

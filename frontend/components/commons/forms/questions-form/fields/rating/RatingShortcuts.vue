@@ -6,32 +6,18 @@
 
 <script>
 export default {
-  data() {
-    return {
-      value: "",
-      timer: 0,
-    };
+  methods: {
+    options() {
+      return this.$slots.default[0].context;
+    },
   },
   methods: {
     answerRatingFor($event) {
-      if (this.timer) clearTimeout(this.timer);
-
-      this.value += $event.key;
+      if (!this.isValidKeyFor($event)) return;
 
       const { options } = this.$slots.default[0].context;
 
-      this.keyboardHandlerFor($event, this.value, options);
-
-      const delay = options.length >= 10 ? 800 : 10;
-
-      this.timer = setTimeout(() => {
-        this.value = "";
-      }, delay);
-    },
-    keyboardHandlerFor($event, value, options) {
-      if (!this.isValidKeyFor($event)) return;
-
-      const currValue = +value;
+      const currValue = $event.key == 0 ? 10 : +$event.key;
 
       if (!options.some((option) => option.value == currValue)) return;
 
