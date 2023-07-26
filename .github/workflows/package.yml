@@ -17,6 +17,7 @@ on:
       - "releases/**"
       - "feature/**"
       - "feat/**"
+      - "fix/**"
 
   pull_request:
     branches:
@@ -25,6 +26,7 @@ on:
       - "releases/**"
       - "feature/**"
       - "feat/**"
+      - "fix/**"
 
 jobs:
 
@@ -103,7 +105,7 @@ jobs:
       - run_tests_extra
     steps:
       - name: Checkout Code 🛎
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
       - name: Copy all reports
         run: find coverage-report*/ -name "*.xml" -exec mv '{}' . \;
@@ -126,12 +128,10 @@ jobs:
       - build_python_package
       - run_tests
       - run_tests_extra
-      - deployable_check
     if: |
-      always() &&
-      needs.deployable_check.outputs.isDeployable == 'true' &&
-      needs.run_tests.result != 'failure' &&
-      needs.run_tests_extra.result != 'failure'
+      !cancelled() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
     with:
       download-python-package: true
       image-name: argilla/argilla-server
@@ -145,7 +145,7 @@ jobs:
     uses: ./.github/workflows/build-push-docker.yml
     needs: build_server_docker_image
     if: |
-      always() &&
+      !cancelled() &&
       needs.build_server_docker_image.result == 'success'
     with:
       download-python-package: false
@@ -171,7 +171,7 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: Checkout Code 🛎
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Download python package
         uses: actions/download-artifact@v2
         with:

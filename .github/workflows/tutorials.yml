@@ -12,7 +12,7 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: Checkout Code 🛎
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Rubrix
         run: |
           sed -i 's/rubrix:latest/rubrix:master/' docker-compose.yaml
@@ -39,7 +39,7 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: Checkout Code 🛎
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Rubrix
         run: |
           sed -i 's/rubrix:latest/rubrix:master/' docker-compose.yaml
@@ -66,7 +66,7 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: Checkout Code 🛎
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Rubrix
         run: |
           sed -i 's/rubrix:latest/rubrix:master/' docker-compose.yaml
@@ -93,7 +93,7 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: Checkout Code 🛎
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Rubrix
         run: |
           sed -i 's/rubrix:latest/rubrix:master/' docker-compose.yaml
@@ -120,7 +120,7 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: Checkout Code 🛎
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Rubrix
         run: |
           sed -i 's/rubrix:latest/rubrix:master/' docker-compose.yaml
@@ -147,7 +147,7 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: Checkout Code 🛎
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Rubrix
         run: |
           sed -i 's/rubrix:latest/rubrix:master/' docker-compose.yaml
