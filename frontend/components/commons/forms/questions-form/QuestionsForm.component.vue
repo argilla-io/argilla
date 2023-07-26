@@ -1,8 +1,9 @@
 <template>
   <form
     class="questions-form"
-    :class="{ '--edited-form': !isFormUntouched }"
+    :class="{ '--focused-form': formHasFocus }"
     @submit.prevent="onSubmit"
+    v-click-outside="onClickOutside"
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
@@ -152,6 +153,10 @@ export default {
     return useQuestionFormViewModel();
   },
   computed: {
+    formHasFocus() {
+      if (this.autofocusPosition || this.autofocusPosition == 0) return true;
+      return false;
+    },
     numberOfQuestions() {
       return this.record.questions.length;
     },
@@ -218,6 +223,9 @@ export default {
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
+    onClickOutside() {
+      this.autofocusPosition = null;
+    },
     focusNext(index) {
       setTimeout(() => {
         this.updateQuestionAutofocus(index + 1);
@@ -324,7 +332,7 @@ export default {
     padding: $base-space * 3;
     overflow: auto;
   }
-  &.--edited-form {
+  &.--focused-form {
     border-color: palette(brown);
   }
 }
