@@ -32,7 +32,7 @@ env:
 jobs:
   run-python-tests:
     name: Argilla python tests
-    runs-on: $ {{ inputs.runsOn }}
+    runs-on: ${{ inputs.runsOn }}
     services:
       search_engine:
         image: ${{ inputs.searchEngineDockerImage }}
