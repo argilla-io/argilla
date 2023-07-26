@@ -57,7 +57,7 @@ Fine-tune basic models with feedback collected from Argilla.
 :hidden:
 
 create_dataset
-set_up_annotation_team
+assign_annotations
 annotate_dataset
 collect_responses
 export_dataset
