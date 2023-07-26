@@ -19,7 +19,7 @@ jobs:
       buildChanges: ${{ steps.path_filter.outputs.buildChanges }}
     steps:
       - name: Checkout Code 🛎
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Check affected files
         uses: dorny/paths-filter@v2
         id: path_filter

@@ -19,9 +19,7 @@ import numpy as np
 
 from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.transformers import ArgillaTransformersTrainer
-from argilla.training.utils import (
-    filter_allowed_args,
-)
+from argilla.training.utils import filter_allowed_args
 from argilla.utils.dependency import require_version
 
 

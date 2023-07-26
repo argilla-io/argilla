@@ -27,9 +27,7 @@ from argilla.client.feedback.schemas import (
     TextField,
     TextQuestion,
 )
-from argilla.client.feedback.training.schemas import (
-    TrainingTaskMapping,
-)
+from argilla.client.feedback.training.schemas import TrainingTaskMapping
 from argilla.client.models import Framework
 
 if TYPE_CHECKING:

@@ -22,11 +22,7 @@ from typer import Typer
 from argilla.server.contexts import accounts
 from argilla.server.database import SessionLocal
 from argilla.server.models import User, UserRole, Workspace
-from argilla.server.security.model import (
-    USER_PASSWORD_MIN_LENGTH,
-    UserCreate,
-    WorkspaceCreate,
-)
+from argilla.server.security.model import USER_PASSWORD_MIN_LENGTH, UserCreate, WorkspaceCreate
 from argilla.tasks.users.utils import get_or_new_workspace
 
 USER_API_KEY_MIN_LENGTH = 8

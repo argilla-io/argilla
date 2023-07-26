@@ -46,7 +46,7 @@ jobs:
       COVERAGE_REPORT: ${{ inputs.coverageReport }}
     steps:
       - name: Checkout Code 🛎
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Conda Env 🐍
         uses: conda-incubator/setup-miniconda@v2
         with:
