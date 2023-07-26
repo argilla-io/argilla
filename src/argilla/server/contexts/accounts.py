@@ -109,7 +109,7 @@ async def list_users(db: "AsyncSession") -> List[User]:
 
 
 async def create_user(db: "AsyncSession", user_create: UserCreate) -> User:
-    try:
+    async with db.begin_nested():
         user = await User.create(
             db,
             first_name=user_create.first_name,
@@ -131,12 +131,8 @@ async def create_user(db: "AsyncSession", user_create: UserCreate) -> User:
                     user_id=user.id,
                     autocommit=False,
                 )
-        await db.commit()
-    except Exception as e:
-        await db.rollback()
-        raise e
 
-    return user
+        return user
 
 
 async def delete_user(db: "AsyncSession", user: User) -> User:
