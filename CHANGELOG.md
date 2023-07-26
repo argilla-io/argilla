@@ -22,10 +22,6 @@ These are the section headers that we use:
 - Added `ArgillaDatasetMixin` to detach the Argilla-related functionality from the `FeedbackDataset` ([#3427](https://github.com/argilla-io/argilla/pull/3427))
 - Moved `FeedbackDataset`-related `pydantic.BaseModel` schemas to `argilla.client.feedback.schemas` instead, to be better structured and more scalable and maintainable ([#3427](https://github.com/argilla-io/argilla/pull/3427))
 
-### Fixed
-
-- `if` conditions in some jobs of `package.yml` workflow made the jobs uncancellable ([#3458](https://github.com/argilla-io/argilla/pull/3458)).
-
 ## [1.13.2](https://github.com/argilla-io/argilla/compare/v1.13.1...v1.13.2)
 
 ### Fixed
