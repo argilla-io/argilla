@@ -105,7 +105,7 @@ jobs:
       - run_tests_extra
     steps:
       - name: Checkout Code 🛎
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
       - name: Copy all reports
         run: find coverage-report*/ -name "*.xml" -exec mv '{}' . \;
@@ -171,7 +171,7 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: Checkout Code 🛎
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Download python package
         uses: actions/download-artifact@v2
         with:
