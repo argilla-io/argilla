@@ -19,11 +19,7 @@ import httpx
 
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors_handler import handle_response_error
-from argilla.client.sdk.commons.models import (
-    ErrorMessage,
-    HTTPValidationError,
-    Response,
-)
+from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
 from argilla.client.sdk.users.models import UserCreateModel, UserModel, UserRole
 
 
@@ -71,9 +67,7 @@ def whoami_httpx(client: httpx.Client) -> Response[Union[UserModel, ErrorMessage
     return handle_response_error(response)
 
 
-def list_users(
-    client: httpx.Client,
-) -> Response[Union[List[UserModel], ErrorMessage, HTTPValidationError]]:
+def list_users(client: httpx.Client) -> Response[Union[List[UserModel], ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/users` endpoint to get the list of users.
 
     Args:
@@ -148,10 +142,7 @@ def create_user(
     return handle_response_error(response)
 
 
-def delete_user(
-    client: httpx.Client,
-    user_id: UUID,
-) -> Response[Union[UserModel, ErrorMessage, HTTPValidationError]]:
+def delete_user(client: httpx.Client, user_id: UUID) -> Response[Union[UserModel, ErrorMessage, HTTPValidationError]]:
     """Sends a DELETE request to `/api/users/{user_id}` endpoint to delete a user.
 
     Args:

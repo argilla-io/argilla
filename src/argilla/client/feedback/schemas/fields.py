@@ -15,13 +15,7 @@
 from typing import Any, Dict, Literal, Optional
 from uuid import UUID
 
-from pydantic import (
-    BaseModel,
-    Extra,
-    Field,
-    root_validator,
-    validator,
-)
+from pydantic import BaseModel, Extra, Field, root_validator, validator
 
 FieldTypes = Literal["text"]
 

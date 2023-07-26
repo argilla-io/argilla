@@ -20,11 +20,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from argilla.server.models import User, Workspace, WorkspaceUser
-from argilla.server.security.model import (
-    UserCreate,
-    WorkspaceCreate,
-    WorkspaceUserCreate,
-)
+from argilla.server.security.model import UserCreate, WorkspaceCreate, WorkspaceUserCreate
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
