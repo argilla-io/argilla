@@ -25,12 +25,8 @@ from argilla.client.sdk.text2text.models import (
     Text2TextQuery,
 )
 from argilla.client.sdk.text2text.models import Text2TextRecord as SdkText2TextRecord
-from argilla.server.apis.v0.models.text2text import (
-    Text2TextBulkRequest as ServerText2TextBulkData,
-)
-from argilla.server.apis.v0.models.text2text import (
-    Text2TextQuery as ServerText2TextQuery,
-)
+from argilla.server.apis.v0.models.text2text import Text2TextBulkRequest as ServerText2TextBulkData
+from argilla.server.apis.v0.models.text2text import Text2TextQuery as ServerText2TextQuery
 
 
 def test_bulk_data_schema(helpers):

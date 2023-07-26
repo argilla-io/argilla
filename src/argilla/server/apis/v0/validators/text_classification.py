@@ -23,9 +23,7 @@ from argilla.server.schemas.datasets import Dataset
 from argilla.server.services.datasets import DatasetsService
 from argilla.server.services.metrics import MetricsService
 from argilla.server.services.tasks.text_classification.metrics import DatasetLabels
-from argilla.server.services.tasks.text_classification.model import (
-    ServiceTextClassificationRecord,
-)
+from argilla.server.services.tasks.text_classification.model import ServiceTextClassificationRecord
 
 
 # TODO(@frascuchon): Move validator and its models to the service layer

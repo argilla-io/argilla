@@ -18,18 +18,11 @@ from uuid import UUID
 import httpx
 
 from argilla.client.sdk.commons.errors_handler import handle_response_error
-from argilla.client.sdk.commons.models import (
-    ErrorMessage,
-    HTTPValidationError,
-    Response,
-)
+from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
 from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 
 
-def get_workspace(
-    client: httpx.Client,
-    id: UUID,
-) -> Response[Union[WorkspaceModel, ErrorMessage, HTTPValidationError]]:
+def get_workspace(client: httpx.Client, id: UUID) -> Response[Union[WorkspaceModel, ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/v1/workspaces/{id}` endpoint to retrieve a workspace.
 
     Args:

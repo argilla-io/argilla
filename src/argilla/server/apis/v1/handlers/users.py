@@ -29,10 +29,7 @@ router = APIRouter(tags=["users"])
 
 @router.get("/users/{user_id}/workspaces", response_model=Workspaces)
 async def list_user_workspaces(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    user_id: UUID,
-    current_user: User = Security(auth.get_current_user),
+    *, db: AsyncSession = Depends(get_async_db), user_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
     await authorize(current_user, UserPolicyV1.list_workspaces)
 

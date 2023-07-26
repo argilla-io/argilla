@@ -21,10 +21,7 @@ from pydantic import ValidationError
 from tqdm import tqdm, trange
 
 from argilla.client.api import ArgillaSingleton
-from argilla.client.feedback.constants import (
-    FETCHING_BATCH_SIZE,
-    PUSHING_BATCH_SIZE,
-)
+from argilla.client.feedback.constants import FETCHING_BATCH_SIZE, PUSHING_BATCH_SIZE
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     LabelQuestion,
@@ -35,10 +32,7 @@ from argilla.client.feedback.schemas import (
     TextQuestion,
 )
 from argilla.client.feedback.types import AllowedQuestionTypes
-from argilla.client.feedback.utils import (
-    feedback_dataset_in_argilla,
-    generate_pydantic_schema,
-)
+from argilla.client.feedback.utils import feedback_dataset_in_argilla, generate_pydantic_schema
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.workspaces import Workspace
 
