@@ -6,22 +6,20 @@
 
 <script>
 export default {
-  methods: {
+  computed: {
     options() {
-      return this.$slots.default[0].context;
+      return this.$slots.default[0].context?.options;
     },
   },
   methods: {
     answerRatingFor($event) {
       if (!this.isValidKeyFor($event)) return;
 
-      const { options } = this.$slots.default[0].context;
-
       const currValue = $event.key == 0 ? 10 : +$event.key;
 
-      if (!options.some((option) => option.value == currValue)) return;
+      if (!this.options.some((option) => option.value == currValue)) return;
 
-      const target = options.find(({ value }) => value == currValue);
+      const target = this.options.find(({ value }) => value == currValue);
 
       target?.id && document.getElementById(target.id).click();
 
