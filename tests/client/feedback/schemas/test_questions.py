@@ -240,15 +240,15 @@ def test_rating_question_errors(
     [
         (
             {"name": "a", "description": "a", "required": True, "values": list(range(1, 12))},
-            r"Values list contains more than 10 elements, which is not supported for newer versions of Argilla"
+            r"Values list contains more than 10 elements, which is not supported for newer versions of Argilla",
         ),
         (
             {"name": "a", "description": "a", "required": True, "values": [0, 1, 2]},
-            r"Value found out of range \[1, 10\], which is not supported for newer versions of Argilla"
+            r"Value found out of range \[1, 10\], which is not supported for newer versions of Argilla",
         ),
         (
             {"name": "a", "description": "a", "required": True, "values": [10, 11]},
-            r"Value found out of range \[1, 10\], which is not supported for newer versions of Argilla"
+            r"Value found out of range \[1, 10\], which is not supported for newer versions of Argilla",
         ),
     ],
 )
