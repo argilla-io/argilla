@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, Union
+from typing import Any, Dict, Type, Union
 
 import pytest
 from argilla.client.feedback.schemas.questions import (
@@ -229,9 +229,33 @@ def test_text_question(schema_kwargs: Dict[str, Any], expected_settings: Dict[st
     ],
 )
 def test_rating_question_errors(
-    schema_kwargs: Dict[str, Any], expected_exception: Exception, expected_exception_message: Union[str, None]
+    schema_kwargs: Dict[str, Any], expected_exception: Type[Exception], expected_exception_message: Union[str, None]
 ) -> None:
     with pytest.raises(expected_exception, match=expected_exception_message):
+        RatingQuestion(**schema_kwargs)
+
+
+@pytest.mark.parametrize(
+    ("schema_kwargs", "expected_warning_message"),
+    [
+        (
+            {"name": "a", "description": "a", "required": True, "values": list(range(1, 12))},
+            r"\`values\` list contains more than 10 elements, which is not supported from Argilla 1.14.0 onwards",
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "values": [0, 1, 2]},
+            r"At least one \`value\` in \`values\` is out of range \[1, 10\], "
+            r"which is not supported from Argilla 1.14.0 onwards",
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "values": [10, 11]},
+            r"At least one \`value\` in \`values\` is out of range \[1, 10\], "
+            r"which is not supported from Argilla 1.14.0 onwards",
+        ),
+    ],
+)
+def test_rating_question_warnings(schema_kwargs: Dict[str, Any], expected_warning_message: str) -> None:
+    with pytest.warns(UserWarning, match=expected_warning_message):
         RatingQuestion(**schema_kwargs)
 
 
@@ -243,8 +267,8 @@ def test_rating_question_errors(
             {"type": "rating", "options": [{"value": 1}, {"value": 2}, {"value": 3}]},
         ),
         (
-            {"name": "a", "description": "a", "required": True, "values": [-1, 0, 1]},
-            {"type": "rating", "options": [{"value": -1}, {"value": 0}, {"value": 1}]},
+            {"name": "a", "description": "a", "required": True, "values": [8, 9, 10]},
+            {"type": "rating", "options": [{"value": 8}, {"value": 9}, {"value": 10}]},
         ),
     ],
 )

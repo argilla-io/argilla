@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import warnings
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
@@ -104,7 +104,7 @@ class RatingQuestion(QuestionSchema, LabelMappingMixin):
             modified.
         values: The list of interger values of the rating question. There is not need
             for the values to be sequential, but they must be unique, contain at least two
-            unique integers, and can be negative.
+            unique integers in the range [1, 10].
 
     Examples:
         >>> from argilla.client.feedback.schemas.questions import RatingQuestion
@@ -113,6 +113,25 @@ class RatingQuestion(QuestionSchema, LabelMappingMixin):
 
     type: Literal["rating"] = Field("rating", allow_mutation=False)
     values: List[int] = Field(unique_items=True, min_items=2)
+
+    @validator("values")
+    def check_values(cls, values: List[int]):
+        if len(values) > 10:
+            warnings.warn(
+                "`values` list contains more than 10 elements, which is not supported from Argilla 1.14.0 onwards. "
+                "Please, make sure `values` is a list with more than 1 element and less or equal than 10 "
+                "before pushing the dataset into Argilla. Otherwise, the `push_to_argilla` method will fail",
+            )
+        for value in values:
+            if not 1 <= value <= 10:
+                warnings.warn(
+                    "At least one `value` in `values` is out of range [1, 10], "
+                    "which is not supported from Argilla 1.14.0 onwards. "
+                    "Please, make sure `values` is a list with unique values within the range [1, 10] "
+                    "before pushing the dataset into Argilla. Otherwise, the `push_to_argilla` method will fail. ",
+                )
+                break
+        return values
 
     @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
