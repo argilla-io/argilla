@@ -10,6 +10,16 @@ test.describe("Datasets page with datasets", () => {
   }) => {
     await loginUserAndWaitFor(page, "datasets");
   });
+
+  test("show datasets table", async ({ page }) => {
+    await mockAllDatasets(page);
+
+    await loginUserAndWaitFor(page, "datasets");
+
+    await page.waitForTimeout(2000);
+
+    await expect(page).toHaveScreenshot();
+  });
 });
 
 test.describe("Datasets page with no datasets", () => {
@@ -29,16 +39,6 @@ test.describe("Datasets page with no datasets", () => {
     await loginUserAndWaitFor(page, "datasets");
 
     await page.getByRole("button", { name: "Other datasets" }).click();
-
-    await page.waitForTimeout(2000);
-
-    await expect(page).toHaveScreenshot();
-  });
-
-  test("show datasets table", async ({ page }) => {
-    await mockAllDatasets(page);
-
-    await loginUserAndWaitFor(page, "datasets");
 
     await page.waitForTimeout(2000);
 

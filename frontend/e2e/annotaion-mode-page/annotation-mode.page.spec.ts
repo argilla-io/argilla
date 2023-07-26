@@ -3,8 +3,8 @@ import {
   loginUserAndWaitFor,
   mockAllDatasets,
   newDatasetsMocked,
+  mockRecord,
 } from "../common";
-import { mockRecord } from "../common/record-api-mock";
 
 const goToAnnotationPage = async (page) => {
   const dataset = newDatasetsMocked[0];
