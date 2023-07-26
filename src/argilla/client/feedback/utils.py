@@ -14,10 +14,7 @@
 
 from typing import TYPE_CHECKING, List, Optional, Union
 
-from pydantic import (
-    BaseModel,
-    create_model,
-)
+from pydantic import BaseModel, create_model
 
 import argilla as rg
 from argilla.client.api import active_client
@@ -72,10 +69,7 @@ def generate_pydantic_schema(fields: List[FieldSchema], name: Optional[str] = "F
 
 
 def feedback_dataset_in_argilla(
-    name: Optional[str] = None,
-    *,
-    workspace: Optional[Union[str, Workspace]] = None,
-    id: Optional[str] = None,
+    name: Optional[str] = None, *, workspace: Optional[Union[str, Workspace]] = None, id: Optional[str] = None
 ) -> Union["FeedbackDatasetModel", None]:
     """Checks whether a `FeedbackDataset` exists in Argilla or not, based on the `name`, `id`, or the combination of
     `name` and `workspace`.

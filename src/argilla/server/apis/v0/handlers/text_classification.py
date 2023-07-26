@@ -17,16 +17,10 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query, Security
 
-from argilla.server.apis.v0.handlers import (
-    metrics,
-    text_classification_dataset_settings,
-)
+from argilla.server.apis.v0.handlers import metrics, text_classification_dataset_settings
 from argilla.server.apis.v0.helpers import deprecate_endpoint
 from argilla.server.apis.v0.models.commons.model import BulkResponse
-from argilla.server.apis.v0.models.commons.params import (
-    CommonTaskHandlerDependencies,
-    RequestPagination,
-)
+from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies, RequestPagination
 from argilla.server.apis.v0.models.text_classification import (
     CreateLabelingRule,
     DatasetLabelingRulesMetricsSummary,

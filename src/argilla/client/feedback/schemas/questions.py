@@ -15,15 +15,7 @@
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import (
-    BaseModel,
-    Extra,
-    Field,
-    conint,
-    conlist,
-    root_validator,
-    validator,
-)
+from pydantic import BaseModel, Extra, Field, conint, conlist, root_validator, validator
 
 from argilla.client.feedback.schemas.utils import LabelMappingMixin
 

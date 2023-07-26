@@ -22,15 +22,8 @@ from argilla.server.commons.models import TaskType
 from argilla.server.daos.backend.base import IndexNotFoundError, InvalidSearchError
 from argilla.server.daos.backend.client_adapters.base import IClientAdapter
 from argilla.server.daos.backend.client_adapters.factory import ClientAdapterFactory
-from argilla.server.daos.backend.mappings.datasets import (
-    DATASETS_INDEX_NAME,
-    datasets_index_mappings,
-)
-from argilla.server.daos.backend.mappings.helpers import (
-    mappings,
-    tasks_common_mappings,
-    tasks_common_settings,
-)
+from argilla.server.daos.backend.mappings.datasets import DATASETS_INDEX_NAME, datasets_index_mappings
+from argilla.server.daos.backend.mappings.helpers import mappings, tasks_common_mappings, tasks_common_settings
 from argilla.server.daos.backend.mappings.text2text import text2text_mappings
 from argilla.server.daos.backend.mappings.text_classification import text_classification_mappings
 from argilla.server.daos.backend.mappings.token_classification import token_classification_mappings
