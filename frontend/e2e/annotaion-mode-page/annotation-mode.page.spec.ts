@@ -156,8 +156,9 @@ test.describe("Annotation page shortcuts", () => {
       await goToAnnotationPage(page);
 
       await page.locator("#sentiment_positive").press("Shift+ArrowDown");
-
-      await page.locator("#sentiment_positive").press("Shift+ArrowUp");
+      await page
+        .locator("#sentiment-multi-label_positive")
+        .press("Shift+ArrowUp");
 
       await expect(page).toHaveScreenshot();
     });
@@ -493,7 +494,6 @@ test.describe("Annotation page shortcuts", () => {
 
     test("reorder ranking question options", async ({ page }) => {
       await goToAnnotationPage(page);
-
       await page.locator("#sentiment_positive").press("Shift+ArrowDown");
       await page
         .locator("#sentiment-multi-label_positive")
