@@ -19,9 +19,7 @@ from pydantic import Field
 from argilla.server.services.metrics import ServiceBaseMetric, ServicePythonMetric
 from argilla.server.services.metrics.models import CommonTasksMetrics
 from argilla.server.services.search.model import ServiceRecordsQuery
-from argilla.server.services.tasks.text_classification.model import (
-    ServiceTextClassificationRecord,
-)
+from argilla.server.services.tasks.text_classification.model import ServiceTextClassificationRecord
 from argilla.utils.dependency import requires_version
 
 

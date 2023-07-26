@@ -16,9 +16,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 from argilla._constants import DEFAULT_API_KEY
-from argilla.server.security.auth_provider.local.provider import (
-    create_local_auth_provider,
-)
+from argilla.server.security.auth_provider.local.provider import create_local_auth_provider
 from fastapi.security import SecurityScopes
 
 if TYPE_CHECKING:

@@ -32,9 +32,7 @@ from argilla.server.services.search.model import (
 from argilla.server.services.search.service import SearchRecordsService
 from argilla.server.services.storage.service import RecordsStorageService
 from argilla.server.services.tasks.commons import BulkResponse
-from argilla.server.services.tasks.text_classification.metrics import (
-    TextClassificationMetrics,
-)
+from argilla.server.services.tasks.text_classification.metrics import TextClassificationMetrics
 from argilla.server.services.tasks.text_classification.model import (
     DatasetLabelingRulesMetricsSummary,
     DatasetLabelingRulesSummary,

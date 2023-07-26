@@ -32,12 +32,8 @@ from argilla.server.daos.backend.mappings.helpers import (
     tasks_common_settings,
 )
 from argilla.server.daos.backend.mappings.text2text import text2text_mappings
-from argilla.server.daos.backend.mappings.text_classification import (
-    text_classification_mappings,
-)
-from argilla.server.daos.backend.mappings.token_classification import (
-    token_classification_mappings,
-)
+from argilla.server.daos.backend.mappings.text_classification import text_classification_mappings
+from argilla.server.daos.backend.mappings.token_classification import token_classification_mappings
 from argilla.server.daos.backend.metrics import ALL_METRICS
 from argilla.server.daos.backend.metrics.base import ElasticsearchMetric
 from argilla.server.daos.backend.search.model import (

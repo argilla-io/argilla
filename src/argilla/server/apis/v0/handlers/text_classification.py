@@ -49,9 +49,7 @@ from argilla.server.schemas.datasets import CreateDatasetRequest
 from argilla.server.security import auth
 from argilla.server.services.datasets import DatasetsService
 from argilla.server.services.tasks.text_classification import TextClassificationService
-from argilla.server.services.tasks.text_classification.metrics import (
-    TextClassificationMetrics,
-)
+from argilla.server.services.tasks.text_classification.metrics import TextClassificationMetrics
 from argilla.server.services.tasks.text_classification.model import (
     ServiceLabelingRule,
     ServiceTextClassificationQuery,

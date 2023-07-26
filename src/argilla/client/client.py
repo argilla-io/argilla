@@ -65,9 +65,7 @@ from argilla.client.sdk.text2text.models import (
     CreationText2TextRecord,
     Text2TextBulkData,
 )
-from argilla.client.sdk.text2text.models import (
-    Text2TextRecord as SdkText2TextRecord,
-)
+from argilla.client.sdk.text2text.models import Text2TextRecord as SdkText2TextRecord
 from argilla.client.sdk.text_classification import api as text_classification_api
 from argilla.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
@@ -75,16 +73,12 @@ from argilla.client.sdk.text_classification.models import (
     LabelingRuleMetricsSummary,
     TextClassificationBulkData,
 )
-from argilla.client.sdk.text_classification.models import (
-    TextClassificationRecord as SdkTextClassificationRecord,
-)
+from argilla.client.sdk.text_classification.models import TextClassificationRecord as SdkTextClassificationRecord
 from argilla.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
 )
-from argilla.client.sdk.token_classification.models import (
-    TokenClassificationRecord as SdkTokenClassificationRecord,
-)
+from argilla.client.sdk.token_classification.models import TokenClassificationRecord as SdkTokenClassificationRecord
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.workspaces import api as workspaces_api
 from argilla.client.sdk.workspaces.models import WorkspaceModel

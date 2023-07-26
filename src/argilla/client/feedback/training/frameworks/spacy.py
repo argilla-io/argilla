@@ -20,12 +20,8 @@ from typing_extensions import Literal
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
 from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.spacy import ArgillaSpaCyTrainer as ArgillaSpaCyTrainerV1
-from argilla.training.spacy import (
-    ArgillaSpaCyTransformersTrainer as ArgillaSpaCyTransformersTrainerV1,
-)
-from argilla.training.spacy import (
-    _ArgillaSpaCyTrainerBase as _ArgillaSpaCyTrainerBaseV1,
-)
+from argilla.training.spacy import ArgillaSpaCyTransformersTrainer as ArgillaSpaCyTransformersTrainerV1
+from argilla.training.spacy import _ArgillaSpaCyTrainerBase as _ArgillaSpaCyTrainerBaseV1
 from argilla.utils.dependency import require_version
 
 
