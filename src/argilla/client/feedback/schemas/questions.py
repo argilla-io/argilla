@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import warnings
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
@@ -120,7 +120,25 @@ class RatingQuestion(QuestionSchema, LabelMappingMixin):
     """
 
     type: Literal["rating"] = Field("rating", allow_mutation=False)
-    values: List[int] = Field(unique_items=True, min_items=2, ge=1, le=10)
+    values: List[int] = Field(unique_items=True, min_items=2)
+
+    @validator("values")
+    def check_values(cls, values: List[int]):
+        if len(values) > 10:
+            warnings.warn(
+                "Values list contains more than 10 elements, which is not supported for newer versions of Argilla. "
+                "Please, review this settings before pushing the dataset and records into Argilla. "
+                "Otherwise, the `push_to_argilla action may fail",
+            )
+        for value in values:
+            if not 1 <= value <= 10:
+                warnings.warn(
+                    "Value found out of range [1, 10], which is not supported for newer versions of Argilla. "
+                    "Please, review this settings before pushing the dataset and records into Argilla. "
+                    "Otherwise, the `push_to_argilla action may fail. ",
+                )
+                break
+        return values
 
     @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:

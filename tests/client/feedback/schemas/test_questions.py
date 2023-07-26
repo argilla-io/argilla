@@ -226,27 +226,34 @@ def test_text_question(schema_kwargs: Dict[str, Any], expected_settings: Dict[st
             ValidationError,
             "ensure this value has at least 2 items",
         ),
-        (
-            {"name": "a", "description": "a", "required": True, "values": list(range(1, 12))},
-            ValidationError,
-            "ensure this value is less than or equal to 10",
-        ),
-        (
-            {"name": "a", "description": "a", "required": True, "values": [0, 1, 2]},
-            ValidationError,
-            "ensure this value is greater than or equal to 1",
-        ),
-        (
-            {"name": "a", "description": "a", "required": True, "values": [9, 10, 11]},
-            ValidationError,
-            "ensure this value is less than or equal to 10",
-        ),
     ],
 )
 def test_rating_question_errors(
     schema_kwargs: Dict[str, Any], expected_exception: Type[Exception], expected_exception_message: Union[str, None]
 ) -> None:
     with pytest.raises(expected_exception, match=expected_exception_message):
+        RatingQuestion(**schema_kwargs)
+
+
+@pytest.mark.parametrize(
+    ("schema_kwargs", "expected_warning_message"),
+    [
+        (
+            {"name": "a", "description": "a", "required": True, "values": list(range(1, 12))},
+            r"Values list contains more than 10 elements, which is not supported for newer versions of Argilla"
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "values": [0, 1, 2]},
+            r"Value found out of range \[1, 10\], which is not supported for newer versions of Argilla"
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "values": [10, 11]},
+            r"Value found out of range \[1, 10\], which is not supported for newer versions of Argilla"
+        ),
+    ],
+)
+def test_rating_question_warnings(schema_kwargs: Dict[str, Any], expected_warning_message: str) -> None:
+    with pytest.warns(UserWarning, match=expected_warning_message):
         RatingQuestion(**schema_kwargs)
 
 
