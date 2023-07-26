@@ -183,6 +183,7 @@ exclude = [
     "node_modules",
     "venv",
 ]
+line-length = 120
 
 [tool.ruff.per-file-ignores]
 # Ignore imported but unused;
