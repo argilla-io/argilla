@@ -18,11 +18,7 @@ from typing import TYPE_CHECKING, Iterator, List, Optional, Union
 from uuid import UUID
 
 from argilla.client import active_client
-from argilla.client.sdk.commons.errors import (
-    AlreadyExistsApiError,
-    BaseClientError,
-    NotFoundApiError,
-)
+from argilla.client.sdk.commons.errors import AlreadyExistsApiError, BaseClientError, NotFoundApiError
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import UserCreateModel, UserModel, UserRole
 from argilla.client.sdk.v1.users import api as users_api_v1

@@ -33,13 +33,7 @@ from argilla.server.models import (
     Suggestion,
 )
 from argilla.server.models.suggestions import SuggestionCreateWithRecordId
-from argilla.server.schemas.v1.datasets import (
-    DatasetCreate,
-    FieldCreate,
-    QuestionCreate,
-    RecordInclude,
-    RecordsCreate,
-)
+from argilla.server.schemas.v1.datasets import DatasetCreate, FieldCreate, QuestionCreate, RecordInclude, RecordsCreate
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
 from argilla.server.search_engine import SearchEngine
@@ -294,10 +288,7 @@ async def count_records_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> i
 
 
 async def create_records(
-    db: "AsyncSession",
-    search_engine: SearchEngine,
-    dataset: Dataset,
-    records_create: RecordsCreate,
+    db: "AsyncSession", search_engine: SearchEngine, dataset: Dataset, records_create: RecordsCreate
 ):
     if not dataset.is_ready:
         raise ValueError("Records cannot be created for a non published dataset")

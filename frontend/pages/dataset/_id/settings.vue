@@ -29,7 +29,7 @@ export default {
       return [
         { link: { name: "datasets" }, name: "Home" },
         {
-          link: { path: `/datasets?workspace=${this.dataset.workspace}` },
+          link: { path: `/datasets?workspaces=${this.dataset.workspace}` },
           name: this.dataset.workspace,
         },
         {

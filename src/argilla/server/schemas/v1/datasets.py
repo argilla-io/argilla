@@ -29,13 +29,7 @@ try:
 except ImportError:
     from typing_extensions import Annotated
 
-from argilla.server.models import (
-    DatasetStatus,
-    FieldType,
-    QuestionSettings,
-    QuestionType,
-    ResponseStatus,
-)
+from argilla.server.models import DatasetStatus, FieldType, QuestionSettings, QuestionType, ResponseStatus
 
 DATASET_CREATE_GUIDELINES_MIN_LENGTH = 1
 DATASET_CREATE_GUIDELINES_MAX_LENGTH = 10000
@@ -55,9 +49,13 @@ QUESTION_CREATE_DESCRIPTION_MIN_LENGTH = 1
 QUESTION_CREATE_DESCRIPTION_MAX_LENGTH = 1000
 
 RATING_OPTIONS_MIN_ITEMS = 2
-RATING_OPTIONS_MAX_ITEMS = 100
+RATING_OPTIONS_MAX_ITEMS = 10
 
-VALUE_TEXT_OPTION_VALUE_MIN_LENGHT = 1
+RATING_LOWER_VALUE_ALLOWED = 1
+RATING_UPPER_VALUE_ALLOWED = 10
+
+
+VALUE_TEXT_OPTION_VALUE_MIN_LENGTH = 1
 VALUE_TEXT_OPTION_VALUE_MAX_LENGTH = 200
 VALUE_TEXT_OPTION_TEXT_MIN_LENGTH = 1
 VALUE_TEXT_OPTION_TEXT_MAX_LENGTH = 500
@@ -187,10 +185,21 @@ class RatingQuestionSettingsCreate(UniqueValuesCheckerMixin):
         max_items=RATING_OPTIONS_MAX_ITEMS,
     )
 
+    @validator("options")
+    def check_option_value_range(cls, value: List[RatingQuestionSettingsOption]):
+        """Validator to control all values are in allowed range 1 <= x <= 10"""
+        for option in value:
+            if not RATING_LOWER_VALUE_ALLOWED <= option.value <= RATING_UPPER_VALUE_ALLOWED:
+                raise ValueError(
+                    f"Option value {option.value!r} out of range "
+                    f"[{RATING_LOWER_VALUE_ALLOWED!r}, {RATING_UPPER_VALUE_ALLOWED!r}]"
+                )
+        return value
+
 
 class ValueTextQuestionSettingsOption(BaseModel):
     value: constr(
-        min_length=VALUE_TEXT_OPTION_VALUE_MIN_LENGHT,
+        min_length=VALUE_TEXT_OPTION_VALUE_MIN_LENGTH,
         max_length=VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
     )
     text: constr(

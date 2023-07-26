@@ -155,9 +155,7 @@ def _check_and_update_kwargs(version: str, record: TextClassificationRecord, sor
             kwargs["return_indices_ranked_by"] = "self_confidence"
 
 
-def _construct_s_and_psx(
-    records: List[TextClassificationRecord],
-) -> Tuple[np.ndarray, np.ndarray]:
+def _construct_s_and_psx(records: List[TextClassificationRecord]) -> Tuple[np.ndarray, np.ndarray]:
     """Helper function to construct the s array and psx matrix.
 
     Args:

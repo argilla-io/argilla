@@ -18,6 +18,7 @@ import spacy
 from argilla import (
     LabelQuestion,
     MultiLabelQuestion,
+    RankingQuestion,
     RatingQuestion,
     TextField,
 )
@@ -25,24 +26,12 @@ from argilla.client.feedback.training.schemas import TrainingTaskMapping
 from argilla.client.feedback.unification import (
     LabelQuestionUnification,
     MultiLabelQuestionUnification,
+    RankingQuestionUnification,
     RatingQuestionUnification,
 )
 from argilla.client.models import Framework
 from datasets import Dataset, DatasetDict
 from spacy.tokens import DocBin
-
-rating_question_payload = {
-    "name": "label",
-    "description": "label",
-    "required": True,
-    "values": ["1", "2"],
-}
-label_question_payload = {
-    "name": "label",
-    "description": "label",
-    "required": True,
-    "labels": ["1", "2"],
-}
 
 
 @pytest.mark.parametrize(
@@ -50,205 +39,292 @@ label_question_payload = {
     [
         (
             Framework("spacy"),
-            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            RatingQuestionUnification,
             0.5,
             None,
             (DocBin, DocBin),
         ),
         (
             Framework("spacy"),
-            LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
+            RankingQuestionUnification,
             0.5,
             None,
             (DocBin, DocBin),
         ),
         (
             Framework("spacy"),
-            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            LabelQuestionUnification,
             0.5,
             None,
             (DocBin, DocBin),
         ),
         (
             Framework("spacy"),
-            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
-            1,
-            42,
-            DocBin,
+            MultiLabelQuestionUnification,
+            0.5,
+            None,
+            (DocBin, DocBin),
         ),
-        (Framework("spacy"), LabelQuestionUnification(question=LabelQuestion(**label_question_payload)), 1, 42, DocBin),
         (
             Framework("spacy"),
-            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            RatingQuestionUnification,
+            1,
+            42,
+            DocBin,
+        ),
+        (
+            Framework("spacy"),
+            RankingQuestionUnification,
+            1,
+            42,
+            DocBin,
+        ),
+        (Framework("spacy"), LabelQuestionUnification, 1, 42, DocBin),
+        (
+            Framework("spacy"),
+            MultiLabelQuestionUnification,
             1,
             42,
             DocBin,
         ),
         (
             Framework("spacy-transformers"),
-            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            RatingQuestionUnification,
             0.5,
             None,
             (DocBin, DocBin),
         ),
         (
             Framework("spacy-transformers"),
-            LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
+            RankingQuestionUnification,
             0.5,
             None,
             (DocBin, DocBin),
         ),
         (
             Framework("spacy-transformers"),
-            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            LabelQuestionUnification,
             0.5,
             None,
             (DocBin, DocBin),
         ),
         (
             Framework("spacy-transformers"),
-            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            MultiLabelQuestionUnification,
+            0.5,
+            None,
+            (DocBin, DocBin),
+        ),
+        (
+            Framework("spacy-transformers"),
+            RatingQuestionUnification,
             1,
             42,
             DocBin,
         ),
         (
             Framework("spacy-transformers"),
-            LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
+            RankingQuestionUnification,
             1,
             42,
             DocBin,
         ),
         (
             Framework("spacy-transformers"),
-            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            LabelQuestionUnification,
+            1,
+            42,
+            DocBin,
+        ),
+        (
+            Framework("spacy-transformers"),
+            MultiLabelQuestionUnification,
             1,
             42,
             DocBin,
         ),
         (
             Framework("openai"),
-            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            RatingQuestionUnification,
             0.5,
             None,
             (list, list),
         ),
         (
             Framework("openai"),
-            LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
+            RankingQuestionUnification,
             0.5,
             None,
             (list, list),
         ),
         (
             Framework("openai"),
-            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            LabelQuestionUnification,
             0.5,
             None,
             (list, list),
         ),
         (
             Framework("openai"),
-            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            MultiLabelQuestionUnification,
+            0.5,
+            None,
+            (list, list),
+        ),
+        (
+            Framework("openai"),
+            RatingQuestionUnification,
             1,
             42,
             list,
         ),
-        (Framework("openai"), LabelQuestionUnification(question=LabelQuestion(**label_question_payload)), 1, 42, list),
         (
             Framework("openai"),
-            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            RankingQuestionUnification,
+            1,
+            42,
+            list,
+        ),
+        (Framework("openai"), LabelQuestionUnification, 1, 42, list),
+        (
+            Framework("openai"),
+            MultiLabelQuestionUnification,
             1,
             42,
             list,
         ),
         (
             Framework("transformers"),
-            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            RatingQuestionUnification,
             0.5,
             None,
             DatasetDict,
         ),
         (
             Framework("transformers"),
-            LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
+            RankingQuestionUnification,
             0.5,
             None,
             DatasetDict,
         ),
         (
             Framework("transformers"),
-            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            LabelQuestionUnification,
             0.5,
             None,
             DatasetDict,
         ),
         (
             Framework("transformers"),
-            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            MultiLabelQuestionUnification,
+            0.5,
+            None,
+            DatasetDict,
+        ),
+        (
+            Framework("transformers"),
+            RatingQuestionUnification,
             1,
             42,
             Dataset,
         ),
         (
             Framework("transformers"),
-            LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
+            RankingQuestionUnification,
             1,
             42,
             Dataset,
         ),
         (
             Framework("transformers"),
-            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            LabelQuestionUnification,
+            1,
+            42,
+            Dataset,
+        ),
+        (
+            Framework("transformers"),
+            MultiLabelQuestionUnification,
             1,
             42,
             Dataset,
         ),
         (
             Framework("spark-nlp"),
-            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            RatingQuestionUnification,
             0.5,
             None,
             (pd.DataFrame, pd.DataFrame),
         ),
         (
             Framework("spark-nlp"),
-            LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
+            RankingQuestionUnification,
             0.5,
             None,
             (pd.DataFrame, pd.DataFrame),
         ),
         (
             Framework("spark-nlp"),
-            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            LabelQuestionUnification,
             0.5,
             None,
             (pd.DataFrame, pd.DataFrame),
         ),
         (
             Framework("spark-nlp"),
-            RatingQuestionUnification(question=RatingQuestion(**rating_question_payload)),
+            MultiLabelQuestionUnification,
+            0.5,
+            None,
+            (pd.DataFrame, pd.DataFrame),
+        ),
+        (
+            Framework("spark-nlp"),
+            RatingQuestionUnification,
             1,
             42,
             pd.DataFrame,
         ),
         (
             Framework("spark-nlp"),
-            LabelQuestionUnification(question=LabelQuestion(**label_question_payload)),
+            RankingQuestionUnification,
             1,
             42,
             pd.DataFrame,
         ),
         (
             Framework("spark-nlp"),
-            MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload)),
+            LabelQuestionUnification,
+            1,
+            42,
+            pd.DataFrame,
+        ),
+        (
+            Framework("spark-nlp"),
+            MultiLabelQuestionUnification,
             1,
             42,
             pd.DataFrame,
         ),
     ],
 )
-def test_task_mapping_for_text_classification(framework, label, train_size, seed, expected):
+def test_task_mapping_for_text_classification(
+    framework,
+    label,
+    train_size,
+    seed,
+    expected,
+    rating_question_payload,
+    ranking_question_payload,
+    label_question_payload,
+):
+    if label == RatingQuestionUnification:
+        label = RatingQuestionUnification(question=RatingQuestion(**rating_question_payload))
+    elif label == RankingQuestionUnification:
+        label = RankingQuestionUnification(question=RankingQuestion(**ranking_question_payload))
+    elif label == LabelQuestionUnification:
+        label = LabelQuestionUnification(question=LabelQuestion(**label_question_payload))
+    elif label == MultiLabelQuestionUnification:
+        label = MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload))
     data = [{"text": "This is a text", "label": "1"}, {"text": "This is a text", "label": "2"}]
     field = TextField(name="text")
     task_mapping = TrainingTaskMapping.for_text_classification(text=field, label=label)

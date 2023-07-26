@@ -20,9 +20,7 @@ from argilla.server.commons.models import TaskType
 from argilla.server.models import UserRole
 from fastapi.testclient import TestClient
 
-from tests.factories import (
-    DatasetFactory,
-)
+from tests.factories import DatasetFactory
 
 
 @contextlib.contextmanager

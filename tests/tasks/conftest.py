@@ -12,16 +12,21 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import TYPE_CHECKING
+
 import pytest
 from argilla.__main__ import app
 from typer.testing import CliRunner
 
+if TYPE_CHECKING:
+    from argilla.tasks.async_typer import AsyncTyper
+
 
 @pytest.fixture(scope="session")
-def cli_runner():
+def cli_runner() -> CliRunner:
     return CliRunner()
 
 
 @pytest.fixture(scope="session")
-def cli():
+def cli() -> "AsyncTyper":
     return app

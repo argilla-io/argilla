@@ -23,14 +23,7 @@ from argilla.server.daos.backend.search.query_builder import EsQueryBuilder
 
 ES_CLIENT_VERSION: str = elasticsearch8.__versionstr__
 
-from elasticsearch8 import (
-    ApiError,
-    Elasticsearch,
-    ElasticsearchWarning,
-    NotFoundError,
-    RequestError,
-    helpers,
-)
+from elasticsearch8 import ApiError, Elasticsearch, ElasticsearchWarning, NotFoundError, RequestError, helpers
 from elasticsearch8.helpers import BulkIndexError
 
 

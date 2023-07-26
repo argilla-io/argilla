@@ -26,21 +26,15 @@ from argilla.client.sdk.text_classification.models import (
     TextClassificationBulkData,
     TextClassificationQuery,
 )
-from argilla.client.sdk.text_classification.models import (
-    TextClassificationRecord as SdkTextClassificationRecord,
-)
-from argilla.server.apis.v0.models.text_classification import (
-    LabelingRule as ServerLabelingRule,
-)
+from argilla.client.sdk.text_classification.models import TextClassificationRecord as SdkTextClassificationRecord
+from argilla.server.apis.v0.models.text_classification import LabelingRule as ServerLabelingRule
 from argilla.server.apis.v0.models.text_classification import (
     LabelingRuleMetricsSummary as ServerLabelingRuleMetricsSummary,
 )
 from argilla.server.apis.v0.models.text_classification import (
     TextClassificationBulkRequest as ServerTextClassificationBulkData,
 )
-from argilla.server.apis.v0.models.text_classification import (
-    TextClassificationQuery as ServerTextClassificationQuery,
-)
+from argilla.server.apis.v0.models.text_classification import TextClassificationQuery as ServerTextClassificationQuery
 
 
 def test_bulk_data_schema(helpers):
