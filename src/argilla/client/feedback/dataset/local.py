@@ -16,7 +16,7 @@ from typing import Any, Dict, Iterator, List, Optional, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
-from argilla.client.feedback.mixin import ArgillaToFromMixin
+from argilla.client.feedback.dataset.mixins import ArgillaToFromMixin
 from argilla.client.feedback.schemas import FeedbackRecord
 from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
 
