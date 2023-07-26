@@ -80,6 +80,7 @@ jobs:
       searchEngineDockerImage: ${{ matrix.searchEngineDockerImage }}
       searchEngineDockerEnv: ${{ matrix.searchEngineDockerEnv }}
       coverageReport: coverage
+      runsOn: ${{ matrix.runsOn }}
       pytestArgs: |
         --ignore=tests/training \
         --ignore=tests/client/feedback/training \
