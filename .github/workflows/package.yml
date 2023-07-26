@@ -5,6 +5,8 @@ concurrency:
   cancel-in-progress: true
 
 on:
+  workflow_dispatch:
+
   release:
     types:
       - "published"
@@ -13,11 +15,7 @@ on:
     branches:
       - "main"
       - "develop"
-      - "integration"
       - "releases/**"
-      - "feature/**"
-      - "feat/**"
-      - "fix/**"
 
   pull_request:
     branches:
