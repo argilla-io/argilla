@@ -10,11 +10,9 @@
         :key="questionFormKey"
         class="question-form"
         :class="statusClass"
-        v-if="questionsWithRecordAnswers && questionsWithRecordAnswers.length"
         :datasetId="datasetId"
         :recordId="recordId"
         :recordStatus="record.record_status"
-        :initialInputs="questionsWithRecordAnswers"
         @on-submit-responses="goToNextPageAndRefreshMetrics"
         @on-discard-responses="goToNextPageAndRefreshMetrics"
         @on-clear-responses="refreshMetrics"
@@ -37,17 +35,15 @@
 import { isNil } from "lodash";
 import { Notification } from "@/models/Notifications";
 import {
-  getQuestionsByDatasetId,
   getComponentTypeOfQuestionByDatasetIdAndQuestionName,
   getOptionsOfQuestionByDatasetIdAndQuestionName,
 } from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
-import { getFieldsByDatasetId } from "@/models/feedback-task-model/dataset-field/datasetField.queries";
 import {
   RECORD_STATUS,
   RESPONSE_STATUS_FOR_API,
   upsertRecords,
   deleteAllRecords,
-  getRecordWithFieldsAndResponsesByUserId,
+  getRecordWithFieldsSuggestionsAndResponsesByUserId,
   isRecordWithRecordIndexByDatasetIdExists,
   isAnyRecordByDatasetId,
 } from "@/models/feedback-task-model/record/record.queries";
@@ -56,10 +52,7 @@ import { deleteRecordResponsesByUserIdAndResponseId } from "@/models/feedback-ta
 import { deleteAllRecordFields } from "@/models/feedback-task-model/record-field/recordField.queries";
 import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
 import { LABEL_PROPERTIES } from "../../feedback-task/feedbackTask.properties";
-
-const TYPE_OF_FEEDBACK = Object.freeze({
-  ERROR_FETCHING_RECORDS: "ERROR_FETCHING_RECORDS",
-});
+import { useRecordFeedbackTaskViewModel } from "./useRecordFeedbackTaskViewModel";
 
 export default {
   name: "RecordFeedbackTaskAndQuestionnaireComponent",
@@ -68,17 +61,9 @@ export default {
       type: String,
       required: true,
     },
-    orderQuestions: {
+    feedback: {
       type: Object,
-      default: () => {
-        return { orderQuestionsBy: "order", ascendent: true };
-      },
-    },
-    orderFields: {
-      type: Object,
-      default: () => {
-        return { orderFieldsBy: "order", ascendent: true };
-      },
+      required: true,
     },
   },
   data() {
@@ -126,7 +111,7 @@ export default {
       return paramForUrl;
     },
     record() {
-      return getRecordWithFieldsAndResponsesByUserId(
+      return getRecordWithFieldsSuggestionsAndResponsesByUserId(
         this.datasetId,
         this.userId,
         this.currentPage - 1
@@ -139,84 +124,13 @@ export default {
       return this.record?.id;
     },
     questions() {
-      return getQuestionsByDatasetId(
-        this.datasetId,
-        this.orderQuestions?.orderQuestionsBy,
-        this.orderQuestions?.ascendent
-      );
+      return this.feedback.questions;
     },
     fields() {
-      return getFieldsByDatasetId(
-        this.datasetId,
-        this.orderFields?.orderFieldsBy,
-        this.orderFields?.ascendent
-      );
-    },
-    recordResponsesFromCurrentUser() {
-      return this.record?.record_responses ?? [];
+      return this.feedback.fields;
     },
     recordFields() {
       return this.record?.record_fields ?? [];
-    },
-    questionsWithRecordAnswers() {
-      // TODO - do this in a hook instead of computed => it's expensive
-      return this.questions?.map((question) => {
-        const correspondingResponseToQuestion =
-          this.recordResponsesFromCurrentUser.find(
-            (recordResponse) => question.name === recordResponse.question_name
-          );
-
-        if (correspondingResponseToQuestion) {
-          let formattedOptions = [];
-
-          // TODO - remove is_selected from object pass to the free_text case and ensure we can submit a form with one text
-          switch (question.component_type) {
-            case COMPONENT_TYPE.RANKING:
-              formattedOptions = correspondingResponseToQuestion.options;
-              break;
-            case COMPONENT_TYPE.FREE_TEXT:
-            case COMPONENT_TYPE.SINGLE_LABEL:
-            case COMPONENT_TYPE.MULTI_LABEL:
-            case COMPONENT_TYPE.RATING:
-              formattedOptions = correspondingResponseToQuestion.options.map(
-                (option) => {
-                  return {
-                    ...option,
-                    is_selected: option.is_selected || false,
-                  };
-                }
-              );
-              break;
-            default:
-              console.log(
-                `The component ${question.component_type} is unknown`
-              );
-          }
-          return {
-            ...question,
-            response_id: correspondingResponseToQuestion.id,
-            options: formattedOptions,
-          };
-        }
-        if (
-          question.component_type === COMPONENT_TYPE.RATING ||
-          question.component_type === COMPONENT_TYPE.SINGLE_LABEL ||
-          question.component_type === COMPONENT_TYPE.MULTI_LABEL
-        ) {
-          const formattedOptions = question.options.map((option) => {
-            return { ...option, is_selected: false };
-          });
-          return { ...question, options: formattedOptions, response_id: null };
-        }
-
-        if (question.component_type === COMPONENT_TYPE.RANKING) {
-          const formattedOptions = question.options.map((option) => {
-            return { ...option, rank: null };
-          });
-          return { ...question, options: formattedOptions, response_id: null };
-        }
-        return { ...question, response_id: null };
-      });
     },
     fieldsWithRecordFieldText() {
       return this.fields?.map((field) => {
@@ -499,24 +413,12 @@ export default {
       status = this.recordStatusFilterValueForGetRecords,
       searchText = this.searchTextToFilterWith
     ) {
-      let records = [];
-      let totalRecords = null;
-
-      if (isNil(searchText) || !searchText.length) {
-        // FETCH records from offset, status + 10 next records
-        ({ items: records } = await this.getRecords(
-          this.datasetId,
-          offset,
-          status
-        ));
-      } else {
-        ({ items: records, totalRecords } = await this.searchRecords(
-          this.datasetId,
-          offset,
-          status,
-          searchText
-        ));
-      }
+      const { records, totalRecords } = await this.getRecordsFromBackend(
+        this.datasetId,
+        offset,
+        status,
+        searchText
+      );
 
       this.totalRecords = isNil(totalRecords) ? null : totalRecords;
 
@@ -525,68 +427,6 @@ export default {
 
       // UPSERT records in ORM
       await upsertRecords(formattedRecords);
-    },
-    async getRecords(
-      datasetId,
-      offset,
-      responseStatus,
-      numberOfRecordsToFetch = 10
-    ) {
-      try {
-        const url = `/v1/me/datasets/${datasetId}/records`;
-        const params = {
-          include: "responses",
-          offset,
-          limit: numberOfRecordsToFetch,
-          response_status: responseStatus,
-        };
-        const { data } = await this.$axios.get(url, { params });
-        return data;
-      } catch (err) {
-        console.warn(err);
-        throw {
-          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_RECORDS,
-        };
-      }
-    },
-    async searchRecords(
-      datasetId,
-      offset,
-      responseStatus,
-      searchText,
-      numberOfRecordsToFetch = 10
-    ) {
-      try {
-        const url = `/v1/me/datasets/${datasetId}/records/search`;
-
-        const body = JSON.parse(
-          JSON.stringify({
-            query: {
-              text: {
-                q: searchText,
-              },
-            },
-          })
-        );
-
-        const params = {
-          include: "responses",
-          response_status: responseStatus,
-          limit: numberOfRecordsToFetch,
-          offset,
-        };
-
-        const { data } = await this.$axios.post(url, body, { params });
-        const { items, total: totalRecords } = data;
-
-        const formattedItems = items.map((item) => item.record);
-        return { items: formattedItems, totalRecords };
-      } catch (err) {
-        console.warn(err);
-        throw {
-          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_RECORDS,
-        };
-      }
     },
     factoryRecordsForOrm(records, offset) {
       return records.map(
@@ -756,6 +596,9 @@ export default {
     this.$root.$off("go-to-prev-page");
     this.$root.$off("status-filter-changed");
     this.$root.$off("search-filter-changed");
+  },
+  setup() {
+    return useRecordFeedbackTaskViewModel();
   },
 };
 </script>

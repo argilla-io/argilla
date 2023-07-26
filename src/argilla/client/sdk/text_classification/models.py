@@ -17,9 +17,7 @@ from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
-from argilla.client.models import (
-    TextClassificationRecord as ClientTextClassificationRecord,
-)
+from argilla.client.models import TextClassificationRecord as ClientTextClassificationRecord
 from argilla.client.models import TokenAttributions as ClientTokenAttributions
 from argilla.client.sdk.commons.models import (
     MACHINE_NAME,

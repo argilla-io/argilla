@@ -20,10 +20,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
 import pandas as pd
 
 from argilla._constants import OPENAI_END_TOKEN, OPENAI_SEPARATOR, OPENAI_WHITESPACE
-from argilla.client.apis.datasets import (
-    TextClassificationSettings,
-    TokenClassificationSettings,
-)
+from argilla.client.apis.datasets import TextClassificationSettings, TokenClassificationSettings
 from argilla.client.models import (
     Framework,
     Record,

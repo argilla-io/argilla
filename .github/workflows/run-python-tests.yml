@@ -3,6 +3,10 @@ name: Run Argilla python tests
 on:
   workflow_call:
     inputs:
+      runsOn:
+        required: false
+        type: string
+        default: extended-runner
       pytestArgs:
         description: "Provide extra args to pytest command line"
         required: true
@@ -28,7 +32,7 @@ env:
 jobs:
   run-python-tests:
     name: Argilla python tests
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runsOn }}
     services:
       search_engine:
         image: ${{ inputs.searchEngineDockerImage }}
@@ -42,7 +46,7 @@ jobs:
       COVERAGE_REPORT: ${{ inputs.coverageReport }}
     steps:
       - name: Checkout Code 🛎
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Conda Env 🐍
         uses: conda-incubator/setup-miniconda@v2
         with:

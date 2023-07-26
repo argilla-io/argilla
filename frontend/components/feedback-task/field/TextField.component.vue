@@ -58,6 +58,7 @@ export default {
   }
   .content-area {
     white-space: pre-wrap;
+    word-break: break-word;
   }
   &__copy-button {
     padding: 0;

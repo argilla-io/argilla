@@ -1,11 +1,13 @@
 import { Context } from "@nuxt/types";
 import Container, { register } from "ts-injecty";
 import { Registration } from "ts-injecty/types";
-import { DatasetRepository } from "../infrastructure/DatasetRepository";
-import { GetDatasetsUseCase } from "../domain/usecases/get-datasets-use-case";
-import { useDatasets } from "../infrastructure/DatasetsStorage";
-import { useDataset } from "../infrastructure/DatasetStorage";
-import { GetDatasetByIdUseCase } from "../domain/usecases/get-dataset-by-id-use.case";
+import { DatasetRepository } from "@/v1/infrastructure/DatasetRepository";
+import { GetDatasetsUseCase } from "@/v1/domain/usecases/get-datasets-use-case";
+import { useDatasets } from "@/v1/infrastructure/DatasetsStorage";
+import { useDataset } from "@/v1/infrastructure/DatasetStorage";
+import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use.case";
+import { FeedbackRepository } from "@/v1/infrastructure/FeedbackRepository";
+import { RecordRepository } from "@/v1/infrastructure/RecordRepository";
 
 export const loadDependencyContainer = (context: Context) => {
   const useAxios = () => context.$axios;
@@ -13,6 +15,8 @@ export const loadDependencyContainer = (context: Context) => {
 
   const dependencies: Registration[] = [
     register(DatasetRepository).withDependency(useAxios).and(useStore).build(),
+    register(FeedbackRepository).withDependency(useAxios).build(),
+    register(RecordRepository).withDependency(useAxios).build(),
 
     register(GetDatasetsUseCase)
       .withDependency(DatasetRepository)

@@ -20,7 +20,7 @@ You can deploy Argilla on Spaces with just a few clicks:
     <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-lg.svg" />
 </a>
 
-You need to define the **Owner** (your personal account or an organization), a **Space name**, and the **Visibility**. To interact with the Argilla app with Python, you need to setup the visibility to `Public`. If you plan to use the Space frequently or handle large datasets for data labeling and feedback collection, upgrading the hardware with a more powerful CPU and increased RAM can enhance performance.
+You need to define the **Owner** (your personal account or an organization), a **Space name**, and the **Visibility**. To interact with the Argilla app with Python, you need to set up the visibility to `Public`. If you plan to use the Space frequently or handle large datasets for data labeling and feedback collection, upgrading the hardware with a more powerful CPU and increased RAM can enhance performance.
 
 <div class="flex justify-center">
 <img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-new-space.png"/>
@@ -51,15 +51,15 @@ Once Argilla is running, you can use the UI with the Direct URL you'll find in t
 
 If everything went well, you are ready to use the Argilla Python client from an IDE such as Colab, Jupyter, or VS Code.
 
-If you want to a quick step-by-step example, keep reading. If you want an end-to-end tutorial, go to this [tutorial and use Colab or Jupyter](https://docs.argilla.io/en/latest/tutorials/notebooks/training-textclassification-setfit-fewshot.html).
+If you want a quick step-by-step example, keep reading. If you want an end-to-end tutorial, go to this [tutorial and use Colab or Jupyter](https://docs.argilla.io/en/latest/tutorials/notebooks/training-textclassification-setfit-fewshot.html).
 
-First we need to pip install `datasets` and `argilla` on Colab or your local machine:
+First, we need to pip install `datasets` and `argilla` on Colab or your local machine:
 
 ```bash
 pip install datasets argilla
 ```
 
-Then, you can read the example dataset using the `datasets` library. This dataset is a CSV file uploaded to the Hub using the drag and drop feature.
+Then, you can read the example dataset using the `datasets` library. This dataset is a CSV file uploaded to the Hub using the drag-and-drop feature.
 
 ```python
 from datasets import load_dataset
@@ -151,7 +151,7 @@ The usernames, passwords, and API keys to upload, read, update, and delete datas
   variable. The API key you choose can be any string of your choice and you can check an online generator if you like.
 - `ADMIN_USERNAME`: The admin username to log in Argilla. The default admin username is `admin`. By setting up
   a custom username you can use your own username to login into the app.
-- `ADMIN_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default
+- `ADMIN_PASSWORD`: This sets a custom password for login into the app with the `admin` username. The default
   password is `12345678`. By setting up a custom password you can use your own password to login into the app.
 - `ADMIN_API_KEY`: Argilla provides a Python library to interact with the app (read, write, and update data, log model
   predictions, etc.). If you don't set this variable, the library and your app will use the default API key

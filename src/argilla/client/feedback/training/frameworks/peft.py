@@ -13,9 +13,7 @@
 #  limitations under the License.
 
 
-from argilla.client.feedback.training.frameworks.transformers import (
-    ArgillaTransformersTrainer,
-)
+from argilla.client.feedback.training.frameworks.transformers import ArgillaTransformersTrainer
 from argilla.training.peft import ArgillaPeftTrainer as ArgillaPeftTrainerV1
 
 

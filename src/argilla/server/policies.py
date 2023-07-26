@@ -20,17 +20,7 @@ from sqlalchemy.ext.asyncio import async_object_session
 from argilla.server.contexts import accounts
 from argilla.server.daos.models.datasets import DatasetDB
 from argilla.server.errors import ForbiddenOperationError
-from argilla.server.models import (
-    Dataset,
-    Field,
-    Question,
-    Record,
-    Response,
-    User,
-    UserRole,
-    Workspace,
-    WorkspaceUser,
-)
+from argilla.server.models import Dataset, Field, Question, Record, Response, User, UserRole, Workspace, WorkspaceUser
 
 PolicyAction = Callable[[User], Awaitable[bool]]
 
@@ -98,6 +88,14 @@ class WorkspacePolicyV1:
             return actor.is_owner or await _exists_workspace_user_by_user_and_workspace_id(actor, workspace_id)
 
         return is_allowed
+
+    @classmethod
+    async def delete(cls, actor: User) -> bool:
+        return actor.is_owner
+
+    @classmethod
+    async def list_workspaces_me(cls, actor: User) -> bool:
+        return True
 
 
 class UserPolicy:

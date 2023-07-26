@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,32 +13,26 @@
 #  limitations under the License.
 
 import warnings
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 import httpx
 
 from argilla.client.sdk.commons.errors_handler import handle_response_error
-from argilla.client.sdk.commons.models import (
-    ErrorMessage,
-    HTTPValidationError,
-    Response,
-)
+from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
 from argilla.client.sdk.v1.datasets.models import (
     FeedbackDatasetModel,
     FeedbackFieldModel,
     FeedbackQuestionModel,
     FeedbackRecordsModel,
+    FeedbackSuggestionModel,
 )
 
 
 def create_dataset(
-    client: httpx.Client,
-    name: str,
-    workspace_id: UUID,
-    guidelines: Optional[str] = None,
+    client: httpx.Client, name: str, workspace_id: UUID, guidelines: Optional[str] = None
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
-    """Sends a POST request to `/api/v1/datasets` endpoint to create a new `FeedbackTask` dataset.
+    """Sends a POST request to `/api/v1/datasets` endpoint to create a new `FeedbackDataset`.
 
     Args:
         client: the authenticated Argilla client to be used to send the request to the API.
@@ -71,10 +64,9 @@ def create_dataset(
 
 
 def get_dataset(
-    client: httpx.Client,
-    id: UUID,
+    client: httpx.Client, id: UUID
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
-    """Sends a GET request to `/api/v1/datasets/{id}` endpoint to retrieve a `FeedbackTask` dataset.
+    """Sends a GET request to `/api/v1/datasets/{id}` endpoint to retrieve a `FeedbackDataset`.
 
     Args:
         client: the authenticated Argilla client to be used to send the request to the API.
@@ -99,11 +91,8 @@ def get_dataset(
     return handle_response_error(response)
 
 
-def delete_dataset(
-    client: httpx.Client,
-    id: UUID,
-) -> Response[Union[ErrorMessage, HTTPValidationError]]:
-    """Sends a DELETE request to `/api/v1/datasets/{id}` endpoint to delete a `FeedbackTask` dataset.
+def delete_dataset(client: httpx.Client, id: UUID) -> Response[Union[ErrorMessage, HTTPValidationError]]:
+    """Sends a DELETE request to `/api/v1/datasets/{id}` endpoint to delete a `FeedbackDataset`.
 
     Args:
         client: the authenticated Argilla client to be used to send the request to the API.
@@ -126,10 +115,9 @@ def delete_dataset(
 
 
 def publish_dataset(
-    client: httpx.Client,
-    id: UUID,
+    client: httpx.Client, id: UUID
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
-    """Sends a PUT request to `/api/v1/datasets/{id}/publish` endpoint to publish a `FeedbackTask` dataset.
+    """Sends a PUT request to `/api/v1/datasets/{id}/publish` endpoint to publish a `FeedbackDataset`.
     Publishing in Argilla means setting the status of the dataset from `draft` to `ready`, so that
     it can be used to add records to it.
 
@@ -184,10 +172,7 @@ def list_datasets(
 
 
 def get_records(
-    client: httpx.Client,
-    id: UUID,
-    offset: int = 0,
-    limit: int = 50,
+    client: httpx.Client, id: UUID, offset: int = 0, limit: int = 50
 ) -> Response[Union[FeedbackRecordsModel, ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/v1/datasets/{id}/records` endpoint to retrieve a list of `FeedbackTask` records.
 
@@ -203,10 +188,9 @@ def get_records(
     """
     url = f"/api/v1/datasets/{id}/records"
 
-    response = client.get(
-        url=url,
-        params={"include": "responses", "offset": offset, "limit": limit},
-    )
+    params = {"include": ["responses", "suggestions"], "offset": offset, "limit": limit}
+
+    response = client.get(url=url, params=params)
 
     if response.status_code == 200:
         parsed_response = FeedbackRecordsModel(**response.json())
@@ -220,9 +204,7 @@ def get_records(
 
 
 def add_records(
-    client: httpx.Client,
-    id: UUID,
-    records: List[Dict[str, Any]],
+    client: httpx.Client, id: UUID, records: List[Dict[str, Any]]
 ) -> Response[Union[ErrorMessage, HTTPValidationError]]:
     """Sends a POST request to `/api/v1/datasets/{id}/records` endpoint to add a list of `FeedbackTask` records.
 
@@ -241,10 +223,8 @@ def add_records(
     for record in records:
         cleaned_responses = []
         response_without_user_id = False
-        if "responses" not in record:
-            continue
-        for response in record["responses"]:
-            if response["user_id"] is None:
+        for response in record.get("responses", []):
+            if response.get("user_id") is None:
                 if response_without_user_id:
                     warnings.warn(
                         f"Multiple responses without `user_id` found in record {record}, so just the first one will be"
@@ -255,11 +235,15 @@ def add_records(
                     if active_user_id is None:
                         active_user_id = client.get("api/me").json()["id"]
                     response["user_id"] = active_user_id
-                    response_without_user_id = True
-            if isinstance(response["user_id"], UUID):
-                response["user_id"] = str(response["user_id"])
+                response_without_user_id = True
+            if isinstance(response.get("user_id"), UUID):
+                response["user_id"] = str(response.get("user_id"))
             cleaned_responses.append(response)
         record["responses"] = cleaned_responses
+
+        for suggestion in record.get("suggestions", []):
+            if isinstance(suggestion.get("question_id"), UUID):
+                suggestion["question_id"] = str(suggestion.get("question_id"))
 
     response = client.post(url=url, json={"items": records})
 
@@ -273,8 +257,7 @@ def add_records(
 
 
 def get_fields(
-    client: httpx.Client,
-    id: UUID,
+    client: httpx.Client, id: UUID
 ) -> Response[Union[List[FeedbackFieldModel], ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/v1/datasets/{id}/fields` endpoint to retrieve a list of `FeedbackTask` fields.
 
@@ -302,10 +285,8 @@ def get_fields(
 
 
 def add_field(
-    client: httpx.Client,
-    id: UUID,
-    field: Dict[str, Any],
-) -> Response[Union[ErrorMessage, HTTPValidationError]]:
+    client: httpx.Client, id: UUID, field: Dict[str, Any]
+) -> Response[Union[FeedbackFieldModel, ErrorMessage, HTTPValidationError]]:
     """Sends a POST request to `/api/v1/datasets/{id}/fields` endpoint to add a `FeedbackTask` field.
 
     Args:
@@ -314,24 +295,26 @@ def add_field(
         field: the field to be added to the dataset.
 
     Returns:
-        A `Response` object with the response itself, and/or the error codes if applicable.
+        A `Response` object containing a `parsed` attribute with the parsed response if the
+        request was successful, which is an instance of `FeedbackFieldModel`.
     """
     url = f"/api/v1/datasets/{id}/fields"
 
     response = client.post(url=url, json=field)
 
     if response.status_code == 201:
+        parsed_response = FeedbackFieldModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
             headers=response.headers,
+            parsed=parsed_response,
         )
     return handle_response_error(response)
 
 
 def get_questions(
-    client: httpx.Client,
-    id: UUID,
+    client: httpx.Client, id: UUID
 ) -> Response[Union[List[FeedbackQuestionModel], ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/v1/datasets/{id}/questions` endpoint to retrieve a
     list of `FeedbackTask` questions.
@@ -360,27 +343,79 @@ def get_questions(
 
 
 def add_question(
-    client: httpx.Client,
-    id: UUID,
-    question: Dict[str, Any],
-) -> Response[Union[ErrorMessage, HTTPValidationError]]:
+    client: httpx.Client, id: UUID, question: Dict[str, Any]
+) -> Response[Union[FeedbackQuestionModel, ErrorMessage, HTTPValidationError]]:
     """Sends a POST request to `/api/v1/datasets/{id}/questions` endpoint to add a
-    question to the `FeedbackTask` dataset.
+    question to the `FeedbackDataset`.
 
     Args:
         client: the authenticated Argilla client to be used to send the request to the API.
 
     Returns:
-        A Response object containing the response itself, and/or the error codes if applicable.
+        A `Response` object containing a `parsed` attribute with the parsed response if the
+        request was successful, which is a `FeedbackQuestionModel`.
     """
     url = f"/api/v1/datasets/{id}/questions"
 
     response = client.post(url=url, json=question)
 
     if response.status_code == 201:
+        parsed_response = FeedbackQuestionModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,
             headers=response.headers,
+            parsed=parsed_response,
+        )
+    return handle_response_error(response)
+
+
+def set_suggestion(
+    client: httpx.Client,
+    record_id: UUID,
+    question_id: UUID,
+    value: Any,
+    type: Optional[Literal["model", "human"]] = None,
+    score: Optional[float] = None,
+    agent: Optional[str] = None,
+) -> Response[Union[FeedbackSuggestionModel, ErrorMessage, HTTPValidationError]]:
+    """Sends a PUT request to `/api/v1/records/{id}/suggestions` endpoint to add or update
+    a suggestion for a question in the `FeedbackDataset`.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        record_id: the id of the record to add the suggestion to.
+        question_id: the id of the question to add the suggestion to.
+        value: the value of the suggestion.
+        type: the type of the suggestion. It can be either `model` or `human`. Defaults to None.
+        score: the score of the suggestion. Defaults to None.
+        agent: the agent used to obtain the suggestion. Defaults to None.
+
+    Returns:
+        A `Response` object containing a `parsed` attribute with the parsed response if the
+        request was successful, which is a `FeedbackSuggestionModel`.
+    """
+    url = f"/api/v1/records/{record_id}/suggestions"
+
+    suggestion = {
+        "question_id": str(question_id),
+        "value": value,
+    }
+    if type is not None:
+        suggestion["type"] = type
+    if score is not None:
+        suggestion["score"] = score
+    if agent is not None:
+        suggestion["agent"] = agent
+
+    response = client.put(url=url, json=suggestion)
+
+    if response.status_code in [200, 201]:
+        parsed_response = FeedbackSuggestionModel(**response.json())
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+            parsed=parsed_response,
         )
     return handle_response_error(response)

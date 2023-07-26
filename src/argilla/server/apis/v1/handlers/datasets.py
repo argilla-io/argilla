@@ -44,11 +44,7 @@ from argilla.server.schemas.v1.datasets import (
     SearchRecordsQuery,
     SearchRecordsResult,
 )
-from argilla.server.search_engine import (
-    SearchEngine,
-    UserResponseStatusFilter,
-    get_search_engine,
-)
+from argilla.server.search_engine import SearchEngine, UserResponseStatusFilter, get_search_engine
 from argilla.server.security import auth
 from argilla.utils.telemetry import TelemetryClient, get_telemetry_client
 
@@ -72,9 +68,7 @@ async def _get_dataset(
 
 @router.get("/me/datasets", response_model=Datasets)
 async def list_current_user_datasets(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    current_user: User = Security(auth.get_current_user),
+    *, db: AsyncSession = Depends(get_async_db), current_user: User = Security(auth.get_current_user)
 ):
     await authorize(current_user, DatasetPolicyV1.list)
 
@@ -88,10 +82,7 @@ async def list_current_user_datasets(
 
 @router.get("/datasets/{dataset_id}/fields", response_model=Fields)
 async def list_dataset_fields(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    dataset_id: UUID,
-    current_user: User = Security(auth.get_current_user),
+    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
     dataset = await _get_dataset(db, dataset_id, with_fields=True)
 
@@ -102,10 +93,7 @@ async def list_dataset_fields(
 
 @router.get("/datasets/{dataset_id}/questions", response_model=Questions)
 async def list_dataset_questions(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    dataset_id: UUID,
-    current_user: User = Security(auth.get_current_user),
+    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
     dataset = await _get_dataset(db, dataset_id, with_questions=True)
 
@@ -157,10 +145,7 @@ async def list_dataset_records(
 
 @router.get("/datasets/{dataset_id}", response_model=Dataset)
 async def get_dataset(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    dataset_id: UUID,
-    current_user: User = Security(auth.get_current_user),
+    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
     dataset = await _get_dataset(db, dataset_id)
 
@@ -171,10 +156,7 @@ async def get_dataset(
 
 @router.get("/me/datasets/{dataset_id}/metrics", response_model=Metrics)
 async def get_current_user_dataset_metrics(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    dataset_id: UUID,
-    current_user: User = Security(auth.get_current_user),
+    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
     dataset = await _get_dataset(db, dataset_id)
 
