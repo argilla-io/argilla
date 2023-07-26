@@ -1,5 +1,5 @@
 <template>
-  <RatingShortcuts @on-user-answer="$emit('on-user-answer')">
+  <RatingShortcuts>
     <div class="wrapper">
       <QuestionHeaderComponent
         :title="title"
@@ -12,7 +12,7 @@
         ref="ratingMonoSelectionRef"
         v-model="options"
         :isFocused="isFocused"
-        @on-focus="onFocus"
+        @on-focus="$emit('on-focus')"
       />
     </div>
   </RatingShortcuts>
@@ -50,9 +50,13 @@ export default {
   model: {
     prop: "options",
   },
-  methods: {
-    onFocus() {
-      this.$emit("on-focus");
+  watch: {
+    options: {
+      deep: true,
+      handler(newOptions) {
+        const hasAnswer = newOptions.some((option) => option.isSelected);
+        hasAnswer && this.$emit("on-user-answer");
+      },
     },
   },
 };

@@ -81,7 +81,7 @@
           :description="question.description"
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"
-          @on-user-answer="updateQuestionAutofocus(index + 1)"
+          @on-user-answer="focusNext(index)"
         />
 
         <RankingComponent
@@ -151,6 +151,9 @@ export default {
     return useQuestionFormViewModel();
   },
   computed: {
+    numberOfQuestions() {
+      return this.record.questions.length;
+    },
     isFormUntouched() {
       return isEqual(this.originalRecord, this.record);
     },
@@ -214,6 +217,11 @@ export default {
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
+    focusNext(index) {
+      setTimeout(() => {
+        this.updateQuestionAutofocus(index + 1);
+      });
+    },
     onPressKeyboardShortCut({ code, shiftKey }) {
       switch (code) {
         case "Enter": {
@@ -267,9 +275,8 @@ export default {
       return this.record.isPending && index === this.autofocusPosition;
     },
     updateQuestionAutofocus(index) {
-      const numberOfQuestions = this.record.questions.length;
       this.autofocusPosition = Math.min(
-        numberOfQuestions - 1,
+        this.numberOfQuestions - 1,
         Math.max(0, index)
       );
     },
