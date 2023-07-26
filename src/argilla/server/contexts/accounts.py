@@ -132,7 +132,7 @@ async def create_user(db: "AsyncSession", user_create: UserCreate) -> User:
                     autocommit=False,
                 )
 
-        return user
+    return user
 
 
 async def delete_user(db: "AsyncSession", user: User) -> User:
