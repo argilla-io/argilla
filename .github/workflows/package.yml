@@ -17,6 +17,7 @@ on:
       - "releases/**"
       - "feature/**"
       - "feat/**"
+      - "fix/**"
 
   pull_request:
     branches:
@@ -25,6 +26,7 @@ on:
       - "releases/**"
       - "feature/**"
       - "feat/**"
+      - "fix/**"
 
 jobs:
 
