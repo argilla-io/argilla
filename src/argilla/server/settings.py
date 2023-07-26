@@ -127,7 +127,7 @@ class Settings(BaseSettings):
 
         return base_url
 
-    @validator("database_url", pre=True)
+    @validator("database_url", pre=True, always=True)
     def set_database_url(cls, database_url: str, values: dict) -> str:
         if not database_url:
             home_path = values.get("home_path")
