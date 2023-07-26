@@ -13,12 +13,11 @@
 #  limitations under the License.
 
 import logging
-from typing import TYPE_CHECKING, Iterator, List, Literal, Optional, Union
-from uuid import UUID
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
-from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
+from pydantic import ValidationError
+
 from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
-from argilla.client.feedback.mixin import ArgillaDatasetMixin
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     FieldSchema,
@@ -37,17 +36,19 @@ from argilla.client.feedback.unification import (
     RankingQuestionStrategy,
     RatingQuestionStrategy,
 )
+from argilla.client.feedback.utils import generate_pydantic_schema
 from argilla.client.models import Framework
 from argilla.utils.dependency import require_version, requires_version
 
 if TYPE_CHECKING:
     from datasets import Dataset
 
+
 _LOGGER = logging.getLogger(__name__)
 
 
-class FeedbackDataset(ArgillaDatasetMixin, HuggingFaceDatasetMixin):
-    """Class to work with `FeedbackDataset`s either locally, or remotely (Argilla or HuggingFace Hub).
+class FeedbackDatasetBase(HuggingFaceDatasetMixin):
+    """Base class with shared functionality for `FeedbackDataset` and `ArgillaFeedbackDataset`.
 
     Args:
         guidelines: contains the guidelines for annotating the dataset.
@@ -58,8 +59,6 @@ class FeedbackDataset(ArgillaDatasetMixin, HuggingFaceDatasetMixin):
         guidelines: contains the guidelines for annotating the dataset.
         fields: contains the fields that will define the schema of the records in the dataset.
         questions: contains the questions that will be used to annotate the dataset.
-        records: contains the records of the dataset if any. Otherwise it is an empty list.
-        argilla_id: contains the id of the dataset in Argilla, if it has been uploaded (via `self.push_to_argilla()`). Otherwise, it is `None`.
 
     Raises:
         TypeError: if `guidelines` is not a string.
@@ -68,62 +67,7 @@ class FeedbackDataset(ArgillaDatasetMixin, HuggingFaceDatasetMixin):
         TypeError: if `questions` is not a list of `TextQuestion`, `RatingQuestion`,
             `LabelQuestion`, and/or `MultiLabelQuestion`.
         ValueError: if `questions` does not contain at least one required question.
-
-    Examples:
-        >>> import argilla as rg
-        >>> rg.init(api_url="...", api_key="...")
-        >>> dataset = rg.FeedbackDataset(
-        ...     fields=[
-        ...         rg.TextField(name="text", required=True),
-        ...         rg.TextField(name="label", required=True),
-        ...     ],
-        ...     questions=[
-        ...         rg.TextQuestion(
-        ...             name="question-1",
-        ...             description="This is the first question",
-        ...             required=True,
-        ...         ),
-        ...         rg.RatingQuestion(
-        ...             name="question-2",
-        ...             description="This is the second question",
-        ...             required=True,
-        ...             values=[1, 2, 3, 4, 5],
-        ...         ),
-        ...         rg.LabelQuestion(
-        ...             name="question-3",
-        ...             description="This is the third question",
-        ...             required=True,
-        ...             labels=["positive", "negative"],
-        ...         ),
-        ...         rg.MultiLabelQuestion(
-        ...             name="question-4",
-        ...             description="This is the fourth question",
-        ...             required=True,
-        ...             labels=["category-1", "category-2", "category-3"],
-        ...         ),
-        ...     ],
-        ...     guidelines="These are the annotation guidelines.",
-        ... )
-        >>> dataset.add_records(
-        ...     [
-        ...         rg.FeedbackRecord(
-        ...             fields={"text": "This is the first record", "label": "positive"},
-        ...             responses=[{"values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}}}],
-        ...             external_id="entry-1",
-        ...         ),
-        ...     ]
-        ... )
-        >>> dataset.records
-        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5), "question-3": ValueSchema(value="positive"), "question-4": ValueSchema(value=["category-1"])})], external_id="entry-1")]
-        >>> dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
-        >>> dataset.argilla_id
-        "..."
-        >>> dataset = rg.FeedbackDataset.from_argilla(argilla_id="...")
-        >>> dataset.records
-        [FeedbackRecord(fields={"text": "This is the first record", "label": "positive"}, responses=[ResponseSchema(user_id=None, values={"question-1": ValueSchema(value="This is the first answer"), "question-2": ValueSchema(value=5), "question-3": ValueSchema(value="positive"), "question-4": ValueSchema(value=["category-1"])})], external_id="entry-1")]
     """
-
-    argilla_id: Optional[UUID] = None
 
     def __init__(
         self,
@@ -234,43 +178,12 @@ class FeedbackDataset(ArgillaDatasetMixin, HuggingFaceDatasetMixin):
                 )
         self.__guidelines = guidelines
 
-        self._records: List[FeedbackRecord] = []
-        self._new_records: List[FeedbackRecord] = []
-
-    def __len__(self) -> int:
-        """Returns the number of records in the dataset."""
-        return len(self.records)
-
-    def __getitem__(self, key: Union[slice, int]) -> Union[FeedbackRecord, List[FeedbackRecord]]:
-        """Returns the record(s) at the given index(es).
-
-        Args:
-            key: the index(es) of the record(s) to return. Can either be a single index or a slice.
-
-        Returns:
-            Either the record of the given index, or a list with the records at the given indexes.
-        """
-        if len(self.records) < 1:
-            raise RuntimeError(
-                "In order to get items from `rg.FeedbackDataset` you need to either add"
-                " them first with `add_records` or fetch them from Argilla or"
-                " HuggingFace with `fetch_records`."
-            )
-        if isinstance(key, int) and len(self.records) < key:
-            raise IndexError(f"This dataset contains {len(self)} records, so index {key} is out of range.")
-        return self.records[key]
+        self.records: List[FeedbackRecord] = []
 
     @property
     def guidelines(self) -> str:
         """Returns the guidelines for annotating the dataset."""
         return self.__guidelines
-
-    @guidelines.setter
-    def guidelines(self, guidelines: str) -> None:
-        """Sets the guidelines for annotating the dataset."""
-        if not isinstance(guidelines, str):
-            raise TypeError(f"Expected `guidelines` to be a string, got {type(guidelines)} instead.")
-        self.__guidelines = guidelines
 
     @property
     def fields(self) -> List[AllowedFieldTypes]:
@@ -300,19 +213,44 @@ class FeedbackDataset(ArgillaDatasetMixin, HuggingFaceDatasetMixin):
             f" {', '.join(q.name for q in self._questions)}"
         )
 
-    @property
-    def records(self) -> List[FeedbackRecord]:
-        """Returns the all the records in the dataset."""
-        return self._records + self._new_records
+    def _validate_records(
+        self, records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]]
+    ) -> List[FeedbackRecord]:
+        if isinstance(records, list):
+            if len(records) == 0:
+                raise ValueError("Expected `records` to be a non-empty list of `dict` or `FeedbackRecord`.")
+            new_records = []
+            for record in records:
+                if isinstance(record, dict):
+                    new_records.append(FeedbackRecord(**record))
+                elif isinstance(record, FeedbackRecord):
+                    new_records.append(record)
+                else:
+                    raise ValueError(
+                        f"Expected `records` to be a list of `dict` or `FeedbackRecord`, got type {type(record)} instead."
+                    )
+            records = new_records
+        elif isinstance(records, dict):
+            records = [FeedbackRecord(**records)]
+        elif isinstance(records, FeedbackRecord):
+            records = [records]
+        else:
+            raise ValueError(
+                f"Expected `records` to be a `dict` or `FeedbackRecord`, got type {type(records)} instead."
+            )
 
-    def iter(self, batch_size: Optional[int] = FETCHING_BATCH_SIZE) -> Iterator[List[FeedbackRecord]]:
-        """Returns an iterator over the records in the dataset.
+        if self._fields_schema is None:
+            self._fields_schema = generate_pydantic_schema(self.fields)
 
-        Args:
-            batch_size: the size of the batches to return. Defaults to 100.
-        """
-        for i in range(0, len(self.records), batch_size):
-            yield self.records[i : i + batch_size]
+        for record in records:
+            try:
+                self._fields_schema.parse_obj(record.fields)
+            except ValidationError as e:
+                raise ValueError(
+                    f"`FeedbackRecord.fields` does not match the expected schema, with exception: {e}"
+                ) from e
+
+        return records
 
     @requires_version("datasets")
     def format_as(self, format: Literal["datasets"]) -> "Dataset":
@@ -338,6 +276,7 @@ class FeedbackDataset(ArgillaDatasetMixin, HuggingFaceDatasetMixin):
             return self._huggingface_format(self)
         raise ValueError(f"Unsupported format '{format}'.")
 
+    # TODO(davidberenstein1957): detatch unification into a mixin
     def unify_responses(
         self,
         question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
@@ -373,6 +312,9 @@ class FeedbackDataset(ArgillaDatasetMixin, HuggingFaceDatasetMixin):
 
         strategy.unify_responses(self.records, question)
 
+    # TODO(alvarobartt,davidberenstein1957): we should consider having something like
+    # `export(..., training=True)` to export the dataset records in any format, replacing
+    # both `format_as` and `prepare_for_training`
     def prepare_for_training(
         self,
         framework: Union[Framework, str],
@@ -380,7 +322,6 @@ class FeedbackDataset(ArgillaDatasetMixin, HuggingFaceDatasetMixin):
         train_size: Optional[float] = 1,
         test_size: Optional[float] = None,
         seed: Optional[int] = None,
-        fetch_records: bool = True,
         lang: Optional[str] = None,
     ):
         if isinstance(framework, str):
@@ -402,8 +343,11 @@ class FeedbackDataset(ArgillaDatasetMixin, HuggingFaceDatasetMixin):
         if test_size == 0:
             test_size = None
 
-        if fetch_records:
-            self.fetch_records()
+        if len(self.records) < 1:
+            raise ValueError(
+                "No records found in the dataset. Either fetch them from Argilla or"
+                " add those via `FeedbackDataset.add_records`."
+            )
 
         if isinstance(task_mapping, TrainingTaskMappingForTextClassification):
             self.unify_responses(question=task_mapping.label.question, strategy=task_mapping.label.strategy)
