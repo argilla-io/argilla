@@ -3269,6 +3269,28 @@ async def test_update_dataset_with_invalid_payload(client: TestClient, owner_aut
 
 
 @pytest.mark.asyncio
+async def test_update_dataset_with_none_values(client: TestClient, owner_auth_header: dict):
+    dataset = await DatasetFactory.create()
+
+    response = client.patch(
+        f"/api/v1/datasets/{dataset.id}",
+        headers=owner_auth_header,
+        json={"name": None, "guidelines": None},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": str(dataset.id),
+        "name": dataset.name,
+        "guidelines": dataset.guidelines,
+        "status": dataset.status,
+        "workspace_id": str(dataset.workspace_id),
+        "inserted_at": dataset.inserted_at.isoformat(),
+        "updated_at": dataset.updated_at.isoformat(),
+    }
+
+
+@pytest.mark.asyncio
 async def test_update_dataset_non_existent(client: TestClient, owner_auth_header: dict):
     response = client.patch(
         f"/api/v1/datasets/{uuid4()}",
