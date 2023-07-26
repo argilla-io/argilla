@@ -129,7 +129,7 @@ jobs:
       - run_tests
       - run_tests_extra
     if: |
-      !cancelled() && (success() || failure()) &&
+      !cancelled() &&
       !contains(needs.*.result, 'failure') &&
       !contains(needs.*.result, 'cancelled')
     with:
@@ -145,7 +145,7 @@ jobs:
     uses: ./.github/workflows/build-push-docker.yml
     needs: build_server_docker_image
     if: |
-      !cancelled() && (success() || failure()) &&
+      !cancelled() &&
       needs.build_server_docker_image.result == 'success'
     with:
       download-python-package: false
