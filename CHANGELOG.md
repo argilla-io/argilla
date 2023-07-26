@@ -18,7 +18,7 @@ These are the section headers that we use:
 
 ### Added
 
-- Added `PATCH /api/v1/datasets/{dataset_id` endpoint to update dataset name and guidelines (See [#3402](https://github.com/argilla-io/argilla/pull/3402)).
+- Added `PATCH /api/v1/datasets/{dataset_id}` endpoint to update dataset name and guidelines (See [#3402](https://github.com/argilla-io/argilla/pull/3402)).
 
 ### Changed
 
