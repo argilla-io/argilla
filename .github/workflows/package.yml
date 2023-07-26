@@ -98,8 +98,8 @@ jobs:
       pytestArgs: |
         tests/training \
         tests/client/feedback/training \
-        tests/monitoring \
-        tests/listeners
+        tests/listeners \
+        tests/monitoring
     secrets: inherit
 
   push_coverage:
