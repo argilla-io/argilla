@@ -128,10 +128,9 @@ jobs:
       - build_python_package
       - run_tests
       - run_tests_extra
-      - deployable_check
     if: |
       ${{ !cancelled() && (success() || failure()) }} &&
-      needs.deployable_check.outputs.isDeployable == 'true' &&
+      needs.build_python_package.result != 'failure' &&
       needs.run_tests.result != 'failure' &&
       needs.run_tests_extra.result != 'failure'
     with:
