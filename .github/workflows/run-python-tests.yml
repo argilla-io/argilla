@@ -3,6 +3,10 @@ name: Run Argilla python tests
 on:
   workflow_call:
     inputs:
+      runsOn:
+        required: false
+        type: string
+        default: extended-runner
       pytestArgs:
         description: "Provide extra args to pytest command line"
         required: true
@@ -28,7 +32,7 @@ env:
 jobs:
   run-python-tests:
     name: Argilla python tests
-    runs-on: extended-runner
+    runs-on: ${{ inputs.runsOn }}
     services:
       search_engine:
         image: ${{ inputs.searchEngineDockerImage }}
