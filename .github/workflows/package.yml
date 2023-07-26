@@ -129,10 +129,9 @@ jobs:
       - run_tests
       - run_tests_extra
     if: |
-      ${{ !cancelled() && (success() || failure()) }} &&
-      needs.build_python_package.result != 'failure' &&
-      needs.run_tests.result != 'failure' &&
-      needs.run_tests_extra.result != 'failure'
+      !cancelled() && (success() || failure()) &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
     with:
       download-python-package: true
       image-name: argilla/argilla-server
@@ -146,7 +145,7 @@ jobs:
     uses: ./.github/workflows/build-push-docker.yml
     needs: build_server_docker_image
     if: |
-      ${{ !cancelled() && (success() || failure()) }} &&
+      !cancelled() && (success() || failure()) &&
       needs.build_server_docker_image.result == 'success'
     with:
       download-python-package: false
