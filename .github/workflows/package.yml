@@ -128,7 +128,7 @@ jobs:
       - run_tests_extra
       - deployable_check
     if: |
-      always() &&
+      ${{ !cancelled() && (success() || failure()) }} &&
       needs.deployable_check.outputs.isDeployable == 'true' &&
       needs.run_tests.result != 'failure' &&
       needs.run_tests_extra.result != 'failure'
@@ -145,7 +145,7 @@ jobs:
     uses: ./.github/workflows/build-push-docker.yml
     needs: build_server_docker_image
     if: |
-      always() &&
+      ${{ !cancelled() && (success() || failure()) }} &&
       needs.build_server_docker_image.result == 'success'
     with:
       download-python-package: false
