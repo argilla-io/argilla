@@ -176,14 +176,14 @@ class FeedbackDatasetBase(HuggingFaceDatasetMixin):
                 raise ValueError(
                     "Expected `guidelines` to be either None (default) or a non-empty string, minimum length is 1."
                 )
-        self.__guidelines = guidelines
+        self._guidelines = guidelines
 
         self.records: List[FeedbackRecord] = []
 
     @property
     def guidelines(self) -> str:
         """Returns the guidelines for annotating the dataset."""
-        return self.__guidelines
+        return self._guidelines
 
     @property
     def fields(self) -> List[AllowedFieldTypes]:
