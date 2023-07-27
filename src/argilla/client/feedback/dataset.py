@@ -886,7 +886,7 @@ class FeedbackDataset(HuggingFaceDatasetMixin):
     def prepare_for_training(
         self,
         framework: Union[Framework, str],
-        task: TrainingTask,
+        task: Union[TrainingTaskForTextClassification, TrainingTaskForSupervisedFinetuning],
         train_size: Optional[float] = 1,
         test_size: Optional[float] = None,
         seed: Optional[int] = None,
