@@ -14,8 +14,18 @@
 
 from argilla.client.feedback.training.base import ArgillaTrainer
 from argilla.client.feedback.training.schemas import (
-    TrainingTaskMapping,
-    TrainingTaskMappingForTextClassification,
+    TrainingTask,
+    TrainingTaskForSupervisedFinetuning,
+    TrainingTaskForTextClassification,
+    TrainingTaskMapping,  # <- Deprecated
+    TrainingTaskMappingForTextClassification,  # <- Deprecated
 )
 
-__all__ = ["ArgillaTrainer", "TrainingTaskMapping", "TrainingTaskMappingForTextClassification"]
+__all__ = [
+    "ArgillaTrainer",
+    "TrainingTask",
+    "TrainingTaskForTextClassification",
+    "TrainingTaskForSupervisedFinetuning",
+    "TrainingTaskMapping",
+    "TrainingTaskMappingForTextClassification",
+]

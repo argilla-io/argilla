@@ -31,8 +31,8 @@ from argilla.client.feedback.schemas import (
 )
 from argilla.client.feedback.training import ArgillaTrainer
 from argilla.client.feedback.training.schemas import (
-    TrainingTaskMapping,
-    TrainingTaskMappingForTextClassification,
+    TrainingTask,
+    TrainingTaskForTextClassification,
 )
 from argilla.client.feedback.unification import LabelQuestionUnification
 from argilla.client.models import Framework
@@ -77,12 +77,12 @@ def test_prepare_for_training_text_classification(
         question for question in dataset.questions if isinstance(question, (LabelQuestion, MultiLabelQuestion))
     ]
     label = LabelQuestionUnification(question=questions[0])
-    task_mapping = TrainingTaskMapping.for_text_classification(text=dataset.fields[0], label=label)
+    task_mapping = TrainingTask.for_text_classification(text=dataset.fields[0], label=label)
 
     if framework == Framework("span_marker"):
         with pytest.raises(
             NotImplementedError,
-            match=f"Framework {framework} is not supported for this {TrainingTaskMappingForTextClassification}.",
+            match=f"Framework {framework} is not supported for this {TrainingTaskForTextClassification}.",
         ):
             trainer = ArgillaTrainer(
                 dataset=dataset, task_mapping=task_mapping, framework=framework, fetch_records=False

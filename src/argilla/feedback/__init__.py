@@ -22,7 +22,8 @@ from argilla.client.feedback import (
     RankingQuestionUnification,
     RatingQuestionStrategy,
     RatingQuestionUnification,
-    TrainingTaskMapping,
+    TrainingTask,
+    TrainingTaskMapping,  # <- Deprecated
 )
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
@@ -47,6 +48,7 @@ __all__ = [
     "MultiLabelQuestionUnification",
     "RatingQuestionUnification",
     "RankingQuestionUnification",
+    "TrainingTask",
     "TrainingTaskMapping",
     "FeedbackDataset",
     "FeedbackRecord",

@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import logging
+import warnings
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Tuple, Union
 
@@ -117,7 +118,7 @@ class TrainingData(ABC):
         raise ValueError(f"{self.__class__.__name__} does not support the TRLX framework.")
 
 
-class TrainingTaskMapping:
+class TrainingTask:
     @classmethod
     def for_text_classification(
         cls,
@@ -133,7 +134,7 @@ class TrainingTaskMapping:
             RankingQuestionUnification,
         ],
         label_strategy: str = None,
-    ) -> "TrainingTaskMappingForTextClassification":
+    ) -> "TrainingTaskForTextClassification":
         """
         _summary_
 
@@ -147,12 +148,12 @@ class TrainingTaskMapping:
             ValueError: if label_strategy is defined and label is alraedy a Unification class.
 
         Returns:
-            TrainingTaskMappingForTextClassification: _description_
+            TrainingTaskForTextClassification: _description_
 
         Examples:
-            >>> from argilla import LabelQuestion, TrainingTaskMapping
+            >>> from argilla import LabelQuestion, TrainingTask
             >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
-            >>> task_mapping = TrainingTaskMapping.for_text_classification(
+            >>> task_mapping = TrainingTask.for_text_classification(
             ...     text=dataset.fields[0],
             ...     label=dataset.questions[0],
             ... )
@@ -186,7 +187,7 @@ class TrainingTaskMapping:
                 label = RankingQuestionUnification(**unification_kwargs)
             else:
                 raise ValueError(f"Label type {type(label)} is not supported.")
-        return TrainingTaskMappingForTextClassification(
+        return TrainingTaskForTextClassification(
             text=text,
             label=label,
             label_strategy=label_strategy,
@@ -196,7 +197,7 @@ class TrainingTaskMapping:
     def for_supervised_fine_tuning(
         cls,
         formatting_func: Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]],
-    ) -> "TrainingTaskMappingForTextClassification":
+    ) -> "TrainingTaskForTextClassification":
         """
         Return a task mapping that can be used in `FeedbackDataset.prepare_for_training(framework="...", task_mapping)`
         to extract data from the Feedback Dataset in an immediately useful format.
@@ -206,23 +207,23 @@ class TrainingTaskMapping:
                 converting a dictionary of records into zero, one or more text strings.
 
         Returns:
-            TrainingTaskMappingForSupervisedFinetuning: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
+            TrainingTaskForSupervisedFinetuning: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
 
         Examples:
-            >>> from argilla import LabelQuestion, TrainingTaskMappingForSupervisedFinetuning
+            >>> from argilla import LabelQuestion, TrainingTaskForSupervisedFinetuning
             >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
             >>> def formatting_func(sample: Dict[str, Any]):
             ...     if sample["good"]["value"] == "Bad":
             ...         return
             ...     return template.format(prompt=sample["prompt"]["value"], response=sample["response"]["value"])
-            >>> task_mapping = TrainingTaskMappingForSupervisedFinetuning(formatting_func=formatting_func)
+            >>> task_mapping = TrainingTaskForSupervisedFinetuning(formatting_func=formatting_func)
             >>> dataset.prepare_for_training(framework="...", task_mapping=task_mapping)
 
         """
-        return TrainingTaskMappingForSupervisedFinetuning(formatting_func=formatting_func)
+        return TrainingTaskForSupervisedFinetuning(formatting_func=formatting_func)
 
 
-class TrainingTaskMappingForTextClassification(BaseModel, TrainingData):
+class TrainingTaskForTextClassification(BaseModel, TrainingData):
     """Training data for text classification
 
     Args:
@@ -230,10 +231,10 @@ class TrainingTaskMappingForTextClassification(BaseModel, TrainingData):
         label: Union[RatingQuestionUnification, LabelQuestionUnification, MultiLabelQuestionUnification, RankingQuestionUnification]
 
     Examples:
-        >>> from argilla import LabelQuestion, TrainingTaskMappingForTextClassification
+        >>> from argilla import LabelQuestion, TrainingTaskForTextClassification
         >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
         >>> label = RatingQuestionUnification(question=dataset.questions[0], strategy="mean")
-        >>> task_mapping = TrainingTaskMappingForTextClassification(
+        >>> task_mapping = TrainingTaskForTextClassification(
         ...     text=dataset.fields[0],
         ...     label=label,
         ... )
@@ -285,7 +286,7 @@ class TrainingTaskMappingForTextClassification(BaseModel, TrainingData):
 
     def __repr__(self) -> str:
         return (
-            "TrainingTaskMappingForTextClassification",
+            "TrainingTaskForTextClassification",
             f"\n\t text={self.text.name}",
             f"\n\t label={self.label.question.name}",
             f"\n\t multi_label={self.__multi_label__}",
@@ -433,7 +434,7 @@ class TrainingTaskMappingForTextClassification(BaseModel, TrainingData):
             return _prepare(data)
 
 
-class TrainingTaskMappingForSupervisedFinetuning(BaseModel, TrainingData):
+class TrainingTaskForSupervisedFinetuning(BaseModel, TrainingData):
     """Training data for supervised finetuning
 
     Args:
@@ -441,13 +442,13 @@ class TrainingTaskMappingForSupervisedFinetuning(BaseModel, TrainingData):
             converting a dictionary of records into zero, one or more text strings.
 
     Examples:
-        >>> from argilla import LabelQuestion, TrainingTaskMappingForSupervisedFinetuning
+        >>> from argilla import LabelQuestion, TrainingTaskForSupervisedFinetuning
         >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
         >>> def formatting_func(sample: Dict[str, Any]):
         ...     if sample["good"]["value"] == "Bad":
         ...         return
         ...     return template.format(prompt=sample["prompt"]["value"], response=sample["response"]["value"])
-        >>> task_mapping = TrainingTaskMappingForSupervisedFinetuning(formatting_func=formatting_func)
+        >>> task_mapping = TrainingTaskForSupervisedFinetuning(formatting_func=formatting_func)
         >>> dataset.prepare_for_training(framework="...", task_mapping=task_mapping)
 
     """
@@ -484,7 +485,7 @@ class TrainingTaskMappingForSupervisedFinetuning(BaseModel, TrainingData):
 
     def __repr__(self) -> str:
         return (
-            "TrainingTaskMappingForSupervisedFinetuning",
+            "TrainingTaskForSupervisedFinetuning",
             f"\n\t formatting_func={self.formatting_func}",
         )
 
@@ -512,3 +513,34 @@ class TrainingTaskMappingForSupervisedFinetuning(BaseModel, TrainingData):
 
     def _prepare_for_training_with_trlx(self, data: List[dict], train_size: float, seed: int):
         raise NotImplementedError()
+
+
+# Old, deprecated variants.
+class RenamedDeprecationMixin:
+    @classmethod
+    def warn(cls) -> None:
+        this_class_name = cls.__name__
+        first_subclass_name = cls.__mro__[1].__name__
+        warnings.warn(
+            (f"`{this_class_name}` has been renamed to `{first_subclass_name}`, please use the latter."),
+            DeprecationWarning,
+            stacklevel=3,
+        )
+
+
+class TrainingTaskMapping(TrainingTask, RenamedDeprecationMixin):
+    @classmethod
+    def for_text_classification(cls, *args, **kwargs) -> TrainingTaskForTextClassification:
+        cls.warn()
+        return super().for_text_classification(*args, **kwargs)
+
+    @classmethod
+    def for_supervised_fine_tuning(cls, *args, **kwargs) -> TrainingTaskForSupervisedFinetuning:
+        cls.warn()
+        return super().for_supervised_fine_tuning(*args, **kwargs)
+
+
+class TrainingTaskMappingForTextClassification(TrainingTaskForTextClassification, RenamedDeprecationMixin):
+    def __init__(self, *args, **kwargs) -> None:
+        self.warn()
+        return super().__init__(*args, **kwargs)

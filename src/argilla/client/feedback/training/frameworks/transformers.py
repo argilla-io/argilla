@@ -17,7 +17,7 @@ from datasets import Dataset, DatasetDict
 
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
 from argilla.client.feedback.training.schemas import (
-    TrainingTaskMappingForTextClassification,
+    TrainingTaskForTextClassification,
 )
 from argilla.training.transformers import (
     ArgillaTransformersTrainer as ArgillaTransformersTrainerV1,
@@ -61,7 +61,7 @@ class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSke
         else:
             raise NotImplementedError(f"We do not support {type(self._dataset)} yet.")
 
-        if isinstance(self._task_mapping, TrainingTaskMappingForTextClassification):
+        if isinstance(self._task_mapping, TrainingTaskForTextClassification):
             self._model_class = AutoModelForSequenceClassification
         else:
             raise NotImplementedError(f"ArgillaTransformersTrainer does not support {type(self._task_mapping)} yet.")

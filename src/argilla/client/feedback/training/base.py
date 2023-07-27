@@ -18,7 +18,8 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from argilla.client.feedback.training.schemas import (
-    TrainingTaskMappingForTextClassification,
+    TrainingTask,
+    TrainingTaskForTextClassification,
 )
 from argilla.client.models import Framework, TextClassificationRecord
 from argilla.training import ArgillaTrainer as ArgillaTrainerV1
@@ -33,7 +34,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
     def __init__(
         self,
         dataset: "argilla.client.feedback.schemas.FeedbackDataset",
-        task_mapping: TrainingTaskMappingForTextClassification,
+        task_mapping: TrainingTask,
         framework: Framework,
         lang: Optional["spacy.Language"] = None,
         model: Optional[str] = None,
@@ -48,7 +49,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
 
         Args:
             dataset (FeedbackDataset): the dataset to be used for training.
-            task_mapping (TrainingTaskMappingForTextClassification): the training data to be used for training.
+            task_mapping (TrainingTask): the training data to be used for training.
             framework (str):
                 the framework to use for training. Currently, only "transformers", "setfit", and "spacy"
                 are supported.
@@ -88,7 +89,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             framework = Framework(framework)
 
         if framework is Framework.SETFIT:
-            if not isinstance(task_mapping, TrainingTaskMappingForTextClassification):
+            if not isinstance(task_mapping, TrainingTaskForTextClassification):
                 raise NotImplementedError(f"{Framework.SETFIT} only supports `TextClassification` tasks.")
             from argilla.client.feedback.training.frameworks.setfit import (
                 ArgillaSetFitTrainer,
@@ -233,7 +234,7 @@ class ArgillaTrainerSkeleton(ABC):
     def __init__(
         self,
         feedback_dataset: "argilla.client.feedback.schemas.FeedbackDataset",
-        task_mapping: TrainingTaskMappingForTextClassification,
+        task_mapping: TrainingTask,
         prepared_data=None,
         model: str = None,
         seed: int = None,
@@ -245,7 +246,7 @@ class ArgillaTrainerSkeleton(ABC):
         self._dataset = prepared_data
         self._model = model
         self._seed = seed
-        if isinstance(self._task_mapping, TrainingTaskMappingForTextClassification):
+        if isinstance(self._task_mapping, TrainingTaskForTextClassification):
             self._multi_label = self._task_mapping.__multi_label__ or False
             self._label_list = self._task_mapping.__all_labels__ or None
             self._label2id = self._task_mapping.__label2id__

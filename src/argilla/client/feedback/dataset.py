@@ -37,8 +37,9 @@ from argilla.client.feedback.schemas import (
     TextQuestion,
 )
 from argilla.client.feedback.training.schemas import (
-    TrainingTaskMappingForSupervisedFinetuning,
-    TrainingTaskMappingForTextClassification,
+    TrainingTask,
+    TrainingTaskForSupervisedFinetuning,
+    TrainingTaskForTextClassification,
 )
 from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.feedback.unification import (
@@ -885,7 +886,7 @@ class FeedbackDataset(HuggingFaceDatasetMixin):
     def prepare_for_training(
         self,
         framework: Union[Framework, str],
-        task_mapping: TrainingTaskMappingForTextClassification,
+        task_mapping: TrainingTask,
         train_size: Optional[float] = 1,
         test_size: Optional[float] = None,
         seed: Optional[int] = None,
@@ -914,9 +915,9 @@ class FeedbackDataset(HuggingFaceDatasetMixin):
         if fetch_records:
             self.fetch_records()
 
-        if isinstance(task_mapping, TrainingTaskMappingForTextClassification):
+        if isinstance(task_mapping, TrainingTaskForTextClassification):
             self.unify_responses(question=task_mapping.label.question, strategy=task_mapping.label.strategy)
-        elif not isinstance(task_mapping, TrainingTaskMappingForSupervisedFinetuning):
+        elif not isinstance(task_mapping, TrainingTaskForSupervisedFinetuning):
             raise ValueError(f"Training data {type(task_mapping)} is not supported yet")
 
         data = task_mapping._format_data(self)
