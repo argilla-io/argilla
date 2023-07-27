@@ -20,13 +20,9 @@ from uuid import UUID
 from tqdm import tqdm, trange
 
 from argilla.client.api import ArgillaSingleton
-from argilla.client.feedback.constants import (
-    FETCHING_BATCH_SIZE,
-    PUSHING_BATCH_SIZE,
-)
+from argilla.client.feedback.constants import PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.remote import ArgillaFeedbackDataset
 from argilla.client.feedback.schemas import (
-    FeedbackRecord,
     LabelQuestion,
     MultiLabelQuestion,
     RankingQuestion,
@@ -47,59 +43,7 @@ if TYPE_CHECKING:
     from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel
 
 
-_LOGGER = logging.getLogger(__name__)
-
-
 class ArgillaToFromMixin:
-    def fetch_records(self: "FeedbackDataset") -> None:
-        """Fetches the records from Argilla and stores them locally.
-
-        If the dataset has not been saved in Argilla, a warning will be
-        raised and the current records will be returned instead.
-        """
-        if not self.argilla_id:
-            _LOGGER.warning(
-                "No records have been logged into Argilla so no records will be fetched."
-                " And the current records will be returned instead."
-            )
-            return self.records
-
-        httpx_client: "httpx.Client" = ArgillaSingleton.get().http_client.httpx
-
-        question_id2name = {question.id: question.name for question in self._questions}
-        self._records = []
-        current_batch = 0
-        # TODO(alvarobartt): use `total` from Argilla Metrics API
-        with tqdm(
-            initial=0,
-            desc="Fetching records from Argilla",
-        ) as pbar:
-            while True:
-                batch = datasets_api_v1.get_records(
-                    client=httpx_client,
-                    id=self.argilla_id,
-                    offset=FETCHING_BATCH_SIZE * current_batch,
-                    limit=FETCHING_BATCH_SIZE,
-                ).parsed
-                for record in batch.items:
-                    record = record.dict(
-                        exclude={
-                            "inserted_at": ...,
-                            "updated_at": ...,
-                            "responses": {"__all__": {"id", "inserted_at", "updated_at"}},
-                            "suggestions": {"__all__": {"id"}},
-                        },
-                        exclude_none=True,
-                    )
-                    for suggestion in record.get("suggestions", []):
-                        suggestion.update({"question_name": question_id2name[suggestion["question_id"]]})
-                    self._records.append(FeedbackRecord(**record))
-                current_batch += 1
-                pbar.update(1)
-
-                if len(batch.items) < FETCHING_BATCH_SIZE:
-                    break
-
     def push_to_argilla(
         self: "FeedbackDataset",
         name: Optional[str] = None,

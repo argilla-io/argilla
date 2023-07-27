@@ -61,6 +61,16 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
         for i in range(0, len(self.records), batch_size):
             yield self.records[i : i + batch_size]
 
+    def fetch_records(self) -> None:
+        warnings.warn(
+            "As the current `FeedbackDataset` is stored locally and is pushed to Argilla,"
+            " the method `fetch_records` won't do anything. If you want to fetch the records"
+            " from Argilla, make sure you're using an `ArgillaFeedbackDataset`, either by"
+            " calling `FeedbackDataset.from_argilla` or by keeping the returned value from"
+            " `FeedbackDataset.push_to_argilla`.",
+            DeprecationWarning,
+        )
+
     def add_records(
         self,
         records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
