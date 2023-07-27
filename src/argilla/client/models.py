@@ -25,22 +25,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 from deprecated import deprecated
-from pydantic import (
-    BaseModel,
-    Field,
-    PrivateAttr,
-    conint,
-    constr,
-    root_validator,
-    validator,
-)
+from pydantic import BaseModel, Field, PrivateAttr, conint, constr, root_validator, validator
 
 from argilla import _messages
-from argilla._constants import (
-    _JS_MAX_SAFE_INTEGER,
-    DEFAULT_MAX_KEYWORD_LENGTH,
-    PROTECTED_METADATA_FIELD_PREFIX,
-)
+from argilla._constants import _JS_MAX_SAFE_INTEGER, DEFAULT_MAX_KEYWORD_LENGTH, PROTECTED_METADATA_FIELD_PREFIX
 from argilla.utils.span_utils import SpanUtils
 
 _LOGGER = logging.getLogger(__name__)
@@ -109,7 +97,7 @@ class _Validators(BaseModel):
                 " values will be truncated by keeping only the last"
                 f" {DEFAULT_MAX_KEYWORD_LENGTH} characters. " + _messages.ARGILLA_METADATA_FIELD_WARNING_MESSAGE
             )
-            warnings.warn(message, UserWarning)
+            warnings.warn(message, UserWarning, stacklevel=2)
 
         return metadata
 
@@ -126,11 +114,11 @@ class _Validators(BaseModel):
         if isinstance(v, int):
             message = (
                 f"Integer ids won't be supported in future versions. We recommend to start using strings instead. "
-                "For datasets already containing integer values we recommend migrating them to avoid deprecation issues."
+                "For datasets already containing integer values we recommend migrating them to avoid deprecation issues. "
                 "See https://docs.argilla.io/en/latest/getting_started/installation/configurations"
                 "/database_migrations.html#elasticsearch"
             )
-            warnings.warn(message, DeprecationWarning)
+            warnings.warn(message, DeprecationWarning, stacklevel=2)
             # See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
             if v > _JS_MAX_SAFE_INTEGER:
                 message = (
@@ -139,7 +127,7 @@ class _Validators(BaseModel):
                     "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number"
                     "/MAX_SAFE_INTEGER"
                 )
-                warnings.warn(message, UserWarning)
+                warnings.warn(message, UserWarning, stacklevel=2)
         elif not isinstance(v, str):
             raise TypeError(f"Invalid type for id. Expected {int} or {str}; found:{type(v)}")
         return v

@@ -409,7 +409,7 @@ def feedback_dataset_fields() -> List["AllowedFieldTypes"]:
 def feedback_dataset_questions() -> List["AllowedQuestionTypes"]:
     return [
         TextQuestion(name="question-1", required=True),
-        RatingQuestion(name="question-2", values=[0, 1], required=True),
+        RatingQuestion(name="question-2", values=[1, 2], required=True),
         LabelQuestion(name="question-3", labels=["a", "b", "c"], required=True),
         MultiLabelQuestion(name="question-4", labels=["a", "b", "c"], required=True),
         RankingQuestion(name="question-5", values=["a", "b"], required=True),
@@ -447,7 +447,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                 {
                     "values": {
                         "question-1": {"value": "This is a response to question 1"},
-                        "question-2": {"value": 0},
+                        "question-2": {"value": 1},
                         "question-3": {"value": "b"},
                         "question-4": {"value": ["b", "c"]},
                         "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
@@ -500,7 +500,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                 {
                     "values": {
                         "question-1": {"value": "This is a response to question 1"},
-                        "question-2": {"value": 0},
+                        "question-2": {"value": 1},
                         "question-3": {"value": "c"},
                         "question-4": {"value": ["a", "c"]},
                         "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},

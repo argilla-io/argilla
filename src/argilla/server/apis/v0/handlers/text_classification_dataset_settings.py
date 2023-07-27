@@ -15,10 +15,7 @@
 from fastapi import APIRouter, Body, Depends, Security
 
 from argilla.server.apis.v0.helpers import deprecate_endpoint
-from argilla.server.apis.v0.models.commons.params import (
-    DATASET_NAME_PATH_PARAM,
-    CommonTaskHandlerDependencies,
-)
+from argilla.server.apis.v0.models.commons.params import DATASET_NAME_PATH_PARAM, CommonTaskHandlerDependencies
 from argilla.server.apis.v0.models.dataset_settings import TextClassificationSettings
 from argilla.server.apis.v0.validators.text_classification import DatasetValidator
 from argilla.server.commons.models import TaskType

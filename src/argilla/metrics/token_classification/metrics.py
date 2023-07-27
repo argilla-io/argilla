@@ -235,10 +235,7 @@ def mention_length(
 
 
 def entity_labels(
-    name: str,
-    query: Optional[str] = None,
-    compute_for: Union[str, ComputeFor] = Predictions,
-    labels: int = 50,
+    name: str, query: Optional[str] = None, compute_for: Union[str, ComputeFor] = Predictions, labels: int = 50
 ) -> MetricSummary:
     """Computes the entity labels distribution
 
@@ -276,10 +273,7 @@ def entity_labels(
 
 
 def entity_density(
-    name: str,
-    query: Optional[str] = None,
-    compute_for: Union[str, ComputeFor] = Predictions,
-    interval: float = 0.005,
+    name: str, query: Optional[str] = None, compute_for: Union[str, ComputeFor] = Predictions, interval: float = 0.005
 ) -> MetricSummary:
     """Computes the entity density distribution. Then entity density is calculated at
     record level for each mention as ``mention_length/tokens_length``
@@ -320,9 +314,7 @@ def entity_density(
 
 
 def entity_capitalness(
-    name: str,
-    query: Optional[str] = None,
-    compute_for: Union[str, ComputeFor] = Predictions,
+    name: str, query: Optional[str] = None, compute_for: Union[str, ComputeFor] = Predictions
 ) -> MetricSummary:
     """Computes the entity capitalness. The entity capitalness splits the entity mention shape in 4 groups:
 

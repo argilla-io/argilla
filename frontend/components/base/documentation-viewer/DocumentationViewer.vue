@@ -16,7 +16,10 @@
         <h2 v-if="currentTab.description" class="snippet__description --body2">
           {{ currentTab.description }}
         </h2>
-        <BaseRenderHtml v-if="currentTab.html" :html="currentTab.html" />
+        <render-markdown-base-component
+          v-if="currentTab.markdown"
+          :markdown="currentTab.markdown"
+        />
         <div class="library__buttons" v-if="currentTab.links">
           <p class="library__section__title">Links</p>
           <base-button
@@ -33,7 +36,9 @@
   </div>
 </template>
 <script>
+import RenderMarkdownBaseComponent from "../render-markdown/RenderMarkdown.base.component.vue";
 export default {
+  components: { RenderMarkdownBaseComponent },
   props: {
     content: {
       type: Object,

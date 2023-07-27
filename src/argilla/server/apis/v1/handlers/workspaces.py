@@ -81,9 +81,7 @@ async def delete_workspace(
 
 @router.get("/me/workspaces", response_model=Workspaces)
 async def list_workspaces_me(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    current_user: User = Security(auth.get_current_user),
+    *, db: AsyncSession = Depends(get_async_db), current_user: User = Security(auth.get_current_user)
 ) -> Workspaces:
     await authorize(current_user, WorkspacePolicyV1.list_workspaces_me)
 

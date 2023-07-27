@@ -89,6 +89,21 @@ task = TrainingTask.for_text_classification(
 ```
 :::
 
+:::{tab-item} RatingQuestion
+```python
+from argilla.feedback import FeedbackDataset, TrainingTaskMapping
+
+dataset = FeedbackDataset.from_huggingface(
+    repo_id="argilla/stackoverflow_feedback_demo"
+)
+task_mapping = TrainingTaskMapping.for_text_classification(
+    text=dataset.field_by_name("title"),
+    label=dataset.question_by_name("answer_quality"), # RatingQuestion
+    label_strategy=None # default to "majority", or use "min", "max", "disagreement"
+)
+```
+:::
+
 ::::
 
 

@@ -23,12 +23,11 @@ from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     RatingQuestion,
+    SuggestionSchema,
     TextField,
     TextQuestion,
 )
-from argilla.client.feedback.training.schemas import (
-    TrainingTask,
-)
+from argilla.client.feedback.training.schemas import TrainingTask
 from argilla.client.models import Framework
 
 if TYPE_CHECKING:
@@ -128,7 +127,7 @@ def test_init_wrong_questions(
             fields=feedback_dataset_fields,
             questions=[
                 TextQuestion(name="question-1", required=False),
-                RatingQuestion(name="question-2", values=[0, 1], required=False),
+                RatingQuestion(name="question-2", values=[1, 2], required=False),
             ],
         )
     with pytest.raises(ValueError, match="Expected `questions` to have unique names"):
@@ -139,6 +138,68 @@ def test_init_wrong_questions(
                 TextQuestion(name="question-1", required=True),
                 TextQuestion(name="question-1", required=True),
             ],
+        )
+
+
+def test_create_dataset_with_suggestions(argilla_user: "ServerUser"):
+    api.init(api_key=argilla_user.api_key)
+
+    ds = FeedbackDataset(fields=[TextField(name="text")], questions=[TextQuestion(name="text")])
+
+    ds.add_records(
+        records=[
+            FeedbackRecord(
+                fields={"text": "this is a text"},
+                suggestions=[{"question_name": "text", "value": "This is a suggestion"}],
+            )
+        ]
+    )
+
+    ds.push_to_argilla(name="new_dataset")
+    ds.fetch_records()
+
+    assert len(ds.records) == 1
+    for record in ds.records:
+        assert record.id is not None
+        assert record.suggestions == (
+            SuggestionSchema(
+                question_id=ds.question_by_name("text").id, question_name="text", value="This is a suggestion"
+            ),
+        )
+
+
+@pytest.mark.asyncio
+async def test_update_dataset_records_with_suggestions(argilla_user: "ServerUser", db: "AsyncSession"):
+    api.init(api_key=argilla_user.api_key)
+
+    ds = FeedbackDataset(fields=[TextField(name="text")], questions=[TextQuestion(name="text")])
+
+    ds.add_records(records=[FeedbackRecord(fields={"text": "this is a text"})])
+
+    ds.push_to_argilla(name="new_dataset", workspace="argilla")
+
+    ds.fetch_records()
+    assert len(ds.records) == 1
+    for record in ds.records:
+        assert record.id is not None
+        assert record.suggestions == ()
+
+        record.set_suggestions([{"question_name": "text", "value": "This is a suggestion"}])
+
+    ds.push_to_argilla()
+    # TODO: Review this requirement for tests and explain, try to avoid use or at least, document.
+    await db.refresh(argilla_user, attribute_names=["datasets"])
+    dataset = argilla_user.datasets[0]
+    await db.refresh(dataset, attribute_names=["records"])
+    record = dataset.records[0]
+    await db.refresh(record, attribute_names=["suggestions"])
+
+    ds.fetch_records()
+    for record in ds.records:
+        assert record.suggestions == (
+            SuggestionSchema(
+                question_id=ds.question_by_name("text").id, question_name="text", value="This is a suggestion"
+            ),
         )
 
 
@@ -171,9 +232,9 @@ def test_add_records(
         "text": "A",
         "label": "B",
     }
-    assert dataset.records[0].metadata == {}
-    assert dataset.records[0].responses == []
-    assert dataset.records[0].suggestions == []
+    assert not dataset.records[0].metadata
+    assert not dataset.records[0].responses
+    assert not dataset.records[0].suggestions
 
     dataset.add_records(
         [
@@ -342,7 +403,7 @@ async def test_push_to_argilla_and_from_argilla(
                         "user_id": argilla_user.id,
                         "values": {
                             "question-1": {"value": "answer"},
-                            "question-2": {"value": 0},
+                            "question-2": {"value": 1},
                             "question-3": {"value": "a"},
                             "question-4": {"value": ["a", "b"]},
                             "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
@@ -372,7 +433,7 @@ async def test_push_to_argilla_and_from_argilla(
                     {
                         "values": {
                             "question-1": {"value": "answer"},
-                            "question-2": {"value": 0},
+                            "question-2": {"value": 1},
                             "question-3": {"value": "a"},
                             "question-4": {"value": ["a", "b"]},
                             "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
@@ -382,7 +443,7 @@ async def test_push_to_argilla_and_from_argilla(
                     {
                         "values": {
                             "question-1": {"value": "answer"},
-                            "question-2": {"value": 0},
+                            "question-2": {"value": 1},
                             "question-3": {"value": "a"},
                             "question-4": {"value": ["a", "b"]},
                             "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
@@ -514,32 +575,6 @@ async def test_update_dataset_records_in_argilla(
     await db.refresh(argilla_user, attribute_names=["datasets"])
     assert all(record._updated is True for record in dataset.records)
 
-    with pytest.warns(UserWarning, match="Ignore the following if you are creating a new `FeedbackDataset` with"):
-        record = FeedbackRecord(
-            fields={"prompt": "text"},
-        )
-        record.set_suggestions(
-            [
-                {
-                    "question_name": "question-1",
-                    "value": "This is a suggestion to question 1",
-                },
-            ]
-        )
-
-    with pytest.warns(UserWarning, match="Ignore this warning if you're already using `set_suggestions` method"):
-        record = FeedbackRecord(
-            fields={"prompt": "text"},
-        )
-        record.set_suggestions(
-            [
-                {
-                    "question_name": "question-1",
-                    "value": "This is a suggestion to question 1",
-                },
-            ]
-        )
-
     record = dataset.records[0]
     with pytest.warns(UserWarning, match="A suggestion for question `question-1`"):
         record.set_suggestions(
@@ -554,7 +589,7 @@ async def test_update_dataset_records_in_argilla(
                 },
             ]
         )
-    with pytest.warns(UserWarning, match="if you are trying to set `suggestions` directly"):
+    with pytest.raises(TypeError, match='"suggestions" has allow_mutation set to False and cannot be assigned'):
         record.suggestions = [
             {
                 "question_name": "question-1",

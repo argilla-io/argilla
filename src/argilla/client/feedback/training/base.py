@@ -29,11 +29,13 @@ os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 if TYPE_CHECKING:
     import spacy
 
+    from argilla.client.feedback.dataset import FeedbackDataset
+
 
 class ArgillaTrainer(ArgillaTrainerV1):
     def __init__(
         self,
-        dataset: "argilla.client.feedback.schemas.FeedbackDataset",
+        dataset: "FeedbackDataset",
         task: Union[TrainingTaskForTextClassification, TrainingTaskForSupervisedFinetuning],
         framework: Framework,
         lang: Optional["spacy.Language"] = None,
@@ -91,9 +93,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
         if framework is Framework.SETFIT:
             if not isinstance(task, TrainingTaskForTextClassification):
                 raise NotImplementedError(f"{Framework.SETFIT} only supports `TextClassification` tasks.")
-            from argilla.client.feedback.training.frameworks.setfit import (
-                ArgillaSetFitTrainer,
-            )
+            from argilla.client.feedback.training.frameworks.setfit import ArgillaSetFitTrainer
 
             self._trainer = ArgillaSetFitTrainer(
                 feedback_dataset=self._dataset,
@@ -103,9 +103,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 model=self._model,
             )
         elif framework is Framework.TRANSFORMERS:
-            from argilla.client.feedback.training.frameworks.transformers import (
-                ArgillaTransformersTrainer,
-            )
+            from argilla.client.feedback.training.frameworks.transformers import ArgillaTransformersTrainer
 
             self._trainer = ArgillaTransformersTrainer(
                 feedback_dataset=self._dataset,
@@ -115,9 +113,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 model=self._model,
             )
         elif framework is Framework.PEFT:
-            from argilla.client.feedback.training.frameworks.peft import (
-                ArgillaPeftTrainer,
-            )
+            from argilla.client.feedback.training.frameworks.peft import ArgillaPeftTrainer
 
             self._trainer = ArgillaPeftTrainer(
                 feedback_dataset=self._dataset,
@@ -127,9 +123,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 model=self._model,
             )
         elif framework is Framework.SPACY:
-            from argilla.client.feedback.training.frameworks.spacy import (
-                ArgillaSpaCyTrainer,
-            )
+            from argilla.client.feedback.training.frameworks.spacy import ArgillaSpaCyTrainer
 
             self._trainer = ArgillaSpaCyTrainer(
                 feedback_dataset=self._dataset,
@@ -141,9 +135,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 framework_kwargs=framework_kwargs,  # freeze_tok2vec
             )
         elif framework is Framework.SPACY_TRANSFORMERS:
-            from argilla.client.feedback.training.frameworks.spacy import (
-                ArgillaSpaCyTransformersTrainer,
-            )
+            from argilla.client.feedback.training.frameworks.spacy import ArgillaSpaCyTransformersTrainer
 
             self._trainer = ArgillaSpaCyTransformersTrainer(
                 feedback_dataset=self._dataset,
@@ -155,9 +147,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 framework_kwargs=framework_kwargs,  # update_transformer
             )
         elif framework is Framework.OPENAI:
-            from argilla.client.feedback.training.frameworks.openai import (
-                ArgillaOpenAITrainer,
-            )
+            from argilla.client.feedback.training.frameworks.openai import ArgillaOpenAITrainer
 
             self._trainer = ArgillaOpenAITrainer(
                 feedback_dataset=self._dataset,
@@ -167,9 +157,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 model=self._model,
             )
         elif framework is Framework.SPAN_MARKER:
-            from argilla.client.feedback.training.frameworks.span_marker import (
-                ArgillaSpanMarkerTrainer,
-            )
+            from argilla.client.feedback.training.frameworks.span_marker import ArgillaSpanMarkerTrainer
 
             self._trainer = ArgillaSpanMarkerTrainer(
                 feedback_dataset=self._dataset,
@@ -233,7 +221,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
 class ArgillaTrainerSkeleton(ABC):
     def __init__(
         self,
-        feedback_dataset: "argilla.client.feedback.schemas.FeedbackDataset",
+        feedback_dataset: "FeedbackDataset",
         task: Union[TrainingTaskForTextClassification, TrainingTaskForSupervisedFinetuning],
         prepared_data=None,
         model: str = None,
