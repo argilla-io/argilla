@@ -26,13 +26,13 @@ Data for the training text classification using our `FeedbackDataset` is defined
 
 1. We need to define a unification strategy `RatingStrategy`, a `LabelStrategy` or a `MultiLabelStrategy`.
 
-2.  For this task, we assume we need a `text-label`-pair for defining a text classification task. We allow mapping for creating a `TrainingTaskMapping.for_text_classification` by mapping `*Field` to a `text`-value and allow for mapping a `RatingStrategy`, `LabelStrategy` or a `MultiLabelStrategy` to a `label`-value.
+2.  For this task, we assume we need a `text-label`-pair for defining a text classification task. We allow mapping for creating a `TrainingTask.for_text_classification` by mapping `*Field` to a `text`-value and allow for mapping a `RatingStrategy`, `LabelStrategy` or a `MultiLabelStrategy` to a `label`-value.
 
 3.  We then define an `ArgillaTrainer` instance with support for "openai", "setfit", "peft", "spacy" and "transformers".
 
 #### Unify responses
 
-Argilla `*Question`s need to be [unified using a strategy](/guides/llms/practical_guides/collect_responses) and so do `RatingQuestions`s, `LabelQuestion`s and `MultiLabelQuestion`s. Therefore, records need to be unified by using a strategy, which takes one of the questions and one of their associated strategies. Luckily this is integrated within the `TrainingTaskMapping`-step underneath, but you can also do this individually as shown [here](/guides/llms/practical_guides/collect_responses).
+Argilla `*Question`s need to be [unified using a strategy](/guides/llms/practical_guides/collect_responses) and so do `RatingQuestions`s, `LabelQuestion`s and `MultiLabelQuestion`s. Therefore, records need to be unified by using a strategy, which takes one of the questions and one of their associated strategies. Luckily this is integrated within the `TrainingTask`-step underneath, but you can also do this individually as shown [here](/guides/llms/practical_guides/collect_responses).
 
 ````{note}
 A brief shortcut that `RatingQuestion`s can be unified using a "majority"-, "min"-, "max"- or "disagreement"-strategy. Both `LabelQuestion`s and `MultiLabelQuestion`s can be resolved using a "majority"-, or "disagreement"-strategy.
@@ -40,18 +40,18 @@ A brief shortcut that `RatingQuestion`s can be unified using a "majority"-, "min
 
 #### Define a task mapping
 
-Now we know which unification strategy to apply, we can now define our `TrainingTaskMapping.for_text_classification`.
+Now we know which unification strategy to apply, we can now define our `TrainingTask.for_text_classification`.
 
 ::::{tab-set}
 
 :::{tab-item} RatingQuestion
 ```python
-from argilla.feedback import FeedbackDataset, TrainingTaskMapping
+from argilla.feedback import FeedbackDataset, TrainingTask
 
 dataset = FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
 )
-task_mapping = TrainingTaskMapping.for_text_classification(
+task_mapping = TrainingTask.for_text_classification(
     text=dataset.field_by_name("title"),
     label=dataset.question_by_name("answer_quality"), # RatingQuestion
     label_strategy=None # default to "majority", or use "min", "max", "disagreement"
@@ -61,12 +61,12 @@ task_mapping = TrainingTaskMapping.for_text_classification(
 
 :::{tab-item} LabelQuestion
 ```python
-from argilla.feedback import FeedbackDataset, TrainingTaskMapping
+from argilla.feedback import FeedbackDataset, TrainingTask
 
 dataset = FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
 )
-task_mapping = TrainingTaskMapping.for_text_classification(
+task_mapping = TrainingTask.for_text_classification(
     text=dataset.field_by_name("title"),
     label=dataset.question_by_name("title_question_fit"), # LabelQuestion
     label_strategy=None # default to "majority", or use "disagreement"
@@ -76,12 +76,12 @@ task_mapping = TrainingTaskMapping.for_text_classification(
 
 :::{tab-item} MultiLabelQuestion
 ```python
-from argilla.feedback import FeedbackDataset, TrainingTaskMapping
+from argilla.feedback import FeedbackDataset, TrainingTask
 
 dataset = FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
 )
-task_mapping = TrainingTaskMapping.for_text_classification(
+task_mapping = TrainingTask.for_text_classification(
     text=dataset.field_by_name("title"),
     label=dataset.question_by_name("tags"), # MultiLabelQuestion
     label_strategy=None # default to "majority", or use "disagreement"
@@ -95,19 +95,19 @@ task_mapping = TrainingTaskMapping.for_text_classification(
 
 #### Use ArgillaTrainer
 
-Next, we can use our `FeedbackDataset` and `TrainingTaskMappingForTextClassification` to initialize our `argilla.ArgillaTrainer`. We support the frameworks "openai", "setfit", "peft", "spacy" and "transformers".
+Next, we can use our `FeedbackDataset` and `TrainingTaskForTextClassification` to initialize our `argilla.ArgillaTrainer`. We support the frameworks "openai", "setfit", "peft", "spacy" and "transformers".
 
 ````{note}
 This is a newer version and can be imported via `from argilla.feedback import ArgillaTrainer`. The old trainer can be imported via `from argilla.training import ArgillaTrainer`. Our docs, contain some [additional information on usage of the ArgillaTrainer](/guides/train_a_model).
 ````
 
 ```python
-from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTaskMapping
+from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
 
 dataset = FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
 )
-task_mapping = TrainingTaskMapping.for_text_classification(
+task_mapping = TrainingTask.for_text_classification(
     text=dataset.field_by_name("title"),
     label=dataset.question_by_name("tags")
 )
@@ -146,7 +146,7 @@ from argilla.feedback import (
     FeedbackRecord,
     LabelQuestion,
     TextField,
-    TrainingTaskMapping,
+    TrainingTask,
 )
 
 dataset = FeedbackDataset(
@@ -188,7 +188,7 @@ dataset.add_records(
     ]
 )
 
-task_mapping = TrainingTaskMapping.for_text_classification(
+task_mapping = TrainingTask.for_text_classification(
     text=dataset.field_by_name("text"),
     label=dataset.question_by_name("relevant")
 )
