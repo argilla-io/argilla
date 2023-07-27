@@ -51,9 +51,6 @@ export default {
     event: "on-change",
   },
   computed: {
-    optionsHasAllResponsesWithRank() {
-      return this.options.every((option) => option.rank);
-    },
     ranking() {
       return adaptQuestionsToSlots({ options: this.options });
     },

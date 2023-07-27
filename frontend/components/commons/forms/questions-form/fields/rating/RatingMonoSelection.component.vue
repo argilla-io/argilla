@@ -62,13 +62,8 @@ export default {
   },
   methods: {
     onSelect({ id, isSelected }) {
-      this.options.map((option) => {
-        if (option.id === id) {
-          option.isSelected = isSelected;
-        } else {
-          option.isSelected = false;
-        }
-        return option;
+      this.options.forEach((option) => {
+        option.isSelected = option.id === id ? isSelected : false;
       });
 
       this.$emit("on-change", this.options);
