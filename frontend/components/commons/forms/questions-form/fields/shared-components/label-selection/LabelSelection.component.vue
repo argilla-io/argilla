@@ -230,7 +230,7 @@ export default {
   max-width: 200px;
   padding-inline: 12px;
   box-shadow: 0;
-  border-radius: 50em;
+  border-radius: $border-radius-rounded;
   background: palette(purple, 800);
   color: palette(purple, 200);
   line-height: 32px;
@@ -245,10 +245,10 @@ export default {
 }
 
 .round {
-  border-radius: 50em;
+  border-radius: $border-radius-rounded;
 }
 .square {
-  border-radius: 5px;
+  border-radius: $border-radius-s;
 }
 
 input[type="checkbox"] {

@@ -56,7 +56,7 @@ export default {
   .inputs-area {
     display: inline-flex;
     gap: $base-space;
-    border-radius: 50em;
+    border-radius: $border-radius-rounded;
     border: 1px solid #cdcdff;
     background: #e0e0ff;
     &:hover {
@@ -69,7 +69,7 @@ export default {
   align-items: center;
   justify-content: center;
   width: 100%;
-  border-radius: 50em;
+  border-radius: $border-radius-rounded;
   height: $base-space * 4;
   min-width: $base-space * 4;
   padding-inline: $base-space;
