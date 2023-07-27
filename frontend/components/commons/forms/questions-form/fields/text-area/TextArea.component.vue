@@ -8,15 +8,14 @@
     />
     <div
       class="container"
-      @focus="onChangeFocus(true)"
-      @blur="onChangeFocus(false)"
+      @focus="onFocus"
       :tabindex="isEditionModeActive ? '-1' : '0'"
     >
       <RenderMarkdownBaseComponent
         v-if="visibleMarkdown"
         class="textarea--markdown"
         :markdown="value"
-        @click.native="onChangeFocus(true)"
+        @click.native="onFocus"
       />
       <ContentEditableFeedbackTask
         v-else
@@ -99,11 +98,17 @@ export default {
         this.$emit("on-error", !isAnyText);
       }
     },
-    onChangeFocus(status) {
-      this.isEditionModeActive = status;
-      if (status) {
+    onChangeFocus(isFocus) {
+      this.isEditionModeActive = isFocus;
+
+      if (isFocus) {
         this.$emit("on-focus");
       }
+    },
+    onFocus(event) {
+      if (event.defaultPrevented) return;
+
+      this.isEditionModeActive = true;
     },
   },
 };
