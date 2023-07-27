@@ -634,6 +634,7 @@ export default {
     gap: $base-space * 4;
     padding: $base-space * 3;
     overflow: auto;
+    scroll-behavior: smooth;
   }
   &.--edited-form {
     border-color: palette(brown);
