@@ -23,7 +23,11 @@ export default {
 
       target?.id && document.getElementById(target.id).click();
 
-      target.isSelected && this.$emit("on-user-answer");
+      if (target.isSelected) {
+        $event.preventDefault();
+
+        this.$emit("on-user-answer");
+      }
     },
     isValidKeyFor({ code }) {
       const value = code.at(-1);

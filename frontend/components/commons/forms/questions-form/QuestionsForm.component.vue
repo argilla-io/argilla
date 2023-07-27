@@ -229,9 +229,7 @@ export default {
       this.autofocusPosition = null;
     },
     focusNext(index) {
-      setTimeout(() => {
-        this.updateQuestionAutofocus(index + 1);
-      });
+      this.updateQuestionAutofocus(index + 1);
     },
     onPressKeyboardShortCut({ code, shiftKey }) {
       switch (code) {

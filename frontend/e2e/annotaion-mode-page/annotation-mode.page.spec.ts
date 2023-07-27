@@ -388,6 +388,21 @@ test.describe("Annotation page shortcuts", () => {
 
       await expect(page).toHaveScreenshot();
     });
+
+    test("when user complete rating with keyboard automatically go to next question", async ({
+      page,
+    }) => {
+      await goToAnnotationPage(page);
+
+      await page.locator("#sentiment_positive").press("Shift+ArrowDown");
+      await page
+        .locator("#sentiment-multi-label_positive")
+        .press("Shift+ArrowDown");
+
+      await page.keyboard.press("4");
+
+      await expect(page).toHaveScreenshot();
+    });
   });
 
   test.describe("Text component", () => {
