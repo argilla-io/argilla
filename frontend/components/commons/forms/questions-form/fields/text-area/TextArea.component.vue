@@ -21,9 +21,7 @@
       <ContentEditableFeedbackTask
         v-else
         class="textarea"
-        :annotationEnabled="true"
-        :annotations="[]"
-        :defaultText="value"
+        :value="value"
         :placeholder="placeholder"
         :isFocused="isFocused"
         @change-text="onChangeTextArea"

@@ -50,14 +50,12 @@ export default {
     prop: "options",
     event: "on-change",
   },
-  data() {
-    return {
-      ranking: adaptQuestionsToSlots({ options: this.options }),
-    };
-  },
   computed: {
     optionsHasAllResponsesWithRank() {
       return this.options.every((option) => option.rank);
+    },
+    ranking() {
+      return adaptQuestionsToSlots({ options: this.options });
     },
   },
   methods: {

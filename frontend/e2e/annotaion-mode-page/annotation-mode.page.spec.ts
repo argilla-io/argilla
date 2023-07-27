@@ -72,6 +72,22 @@ test.describe("Annotate page", () => {
 
     await expect(page).toHaveScreenshot();
   });
+
+  test("clear all questions", async ({ page }) => {
+    await goToAnnotationPage(page);
+
+    await page.getByRole("button", { name: "Clear" }).click();
+
+    await expect(page).toHaveScreenshot();
+
+    await page.getByText("Review Rating (optional)").scrollIntoViewIfNeeded();
+
+    await expect(page).toHaveScreenshot();
+
+    await page.getByText("Ranking (optional)").scrollIntoViewIfNeeded();
+
+    await expect(page).toHaveScreenshot();
+  });
 });
 
 test.describe("Annotation page shortcuts", () => {

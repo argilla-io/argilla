@@ -13,10 +13,10 @@
           id="contentId"
           class="content__text"
           :class="textIsEdited ? '--edited-text' : null"
-          :contenteditable="annotationEnabled"
+          :contenteditable="true"
           :placeholder="placeholder"
           @input="onInputText"
-          v-html="sanitazedEditableText"
+          v-html="sanitizedEditableText"
           @focus="setFocus(true)"
           @blur="setFocus(false)"
           @keydown.shift.enter.exact="looseFocus"
@@ -37,15 +37,7 @@ import * as DOMPurify from "dompurify";
 export default {
   name: "ContentEditableFeedbackTask",
   props: {
-    annotationEnabled: {
-      type: Boolean,
-      required: true,
-    },
-    annotations: {
-      type: Array,
-      required: true,
-    },
-    defaultText: {
+    value: {
       type: String,
       required: true,
     },
@@ -60,17 +52,16 @@ export default {
   },
   data: () => {
     return {
+      defaultText: null,
+      currentValue: null,
       editableText: null,
     };
   },
   computed: {
     textIsEdited() {
-      return (
-        this.defaultText !== this.editableText ||
-        this.defaultText === this.annotations[0]?.text
-      );
+      return this.defaultText !== this.value;
     },
-    sanitazedEditableText() {
+    sanitizedEditableText() {
       return DOMPurify.sanitize(this.editableText);
     },
   },
@@ -83,16 +74,15 @@ export default {
             this.$refs.text.focus();
           });
         }
-      },
+    },
+    value(newValue) {
+      if (newValue !== this.currentValue) this.editableText = newValue;
     },
   },
   mounted() {
     window.addEventListener("paste", this.pastePlainText);
-    if (this.defaultText) {
-      this.editableText = this.defaultText;
-    } else {
-      this.editableText = this.text;
-    }
+
+    this.editableText = this.defaultText = this.value;
 
     this.textAreaWrapper = document.getElementById("contentId");
   },
@@ -104,6 +94,7 @@ export default {
       this.textAreaWrapper.blur();
     },
     onInputText(event) {
+      this.currentValue = event.target.innerText;
       this.$emit("change-text", event.target.innerText);
     },
     setFocus(status) {

@@ -34,8 +34,8 @@
         <TextAreaComponent
           v-if="question.isTextType"
           :title="question.title"
-          :placeholder="question.settings.placeholder"
           v-model="question.answer.value"
+          :placeholder="question.settings.placeholder"
           :useMarkdown="question.settings.use_markdown"
           :hasSuggestion="!record.isSubmitted && question.matchSuggestion"
           :isRequired="question.isRequired"
@@ -90,10 +90,10 @@
           v-if="question.isRankingType"
           ref="ranking"
           :title="question.title"
+          v-model="question.answer.values"
           :hasSuggestion="!record.isSubmitted && question.matchSuggestion"
           :isRequired="question.isRequired"
           :description="question.description"
-          v-model="question.answer.values"
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"
         />
@@ -179,6 +179,8 @@ export default {
     },
   },
   created() {
+    this.record.restore();
+
     this.onReset();
   },
   mounted() {
@@ -272,7 +274,6 @@ export default {
       this.onReset();
     },
     onReset() {
-      this.record.restore();
       this.originalRecord = cloneDeep(this.record);
     },
     emitIsQuestionsFormUntouched(isFormUntouched) {
