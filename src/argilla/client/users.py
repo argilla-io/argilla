@@ -18,7 +18,12 @@ from typing import TYPE_CHECKING, Iterator, List, Optional, Union
 from uuid import UUID
 
 from argilla.client import active_client
-from argilla.client.sdk.commons.errors import AlreadyExistsApiError, BaseClientError, NotFoundApiError
+from argilla.client.sdk.commons.errors import (
+    AlreadyExistsApiError,
+    BaseClientError,
+    NotFoundApiError,
+    ValidationApiError,
+)
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import UserCreateModel, UserModel, UserRole
 from argilla.client.sdk.v1.users import api as users_api_v1
@@ -224,6 +229,12 @@ class User:
             raise ValueError(
                 f"User with username=`{username}` already exists in Argilla, so please"
                 " make sure that the name you provided is a unique one."
+            ) from e
+        except ValidationApiError as e:
+            response = e.ctx["response"]
+            raise ValueError(
+                f"User with username=`{username}` cannot be created in Argilla, as"
+                f" the provided data is not valid. Please, check the following error: {response}"
             ) from e
         except BaseClientError as e:
             raise RuntimeError(f"Error while creating user with username=`{username}` in Argilla.") from e
