@@ -39,6 +39,7 @@ except ImportError:
 
 from argilla.server.models import DatasetStatus, FieldType, QuestionSettings, QuestionType, ResponseStatus
 
+DATASET_NAME_REGEX = r"^(?!-|_)[a-zA-Z0-9-_ ]+$"
 DATASET_NAME_MIN_LENGTH = 1
 DATASET_NAME_MAX_LENGTH = 200
 DATASET_GUIDELINES_MIN_LENGTH = 1
@@ -100,7 +101,7 @@ class Datasets(BaseModel):
 
 
 DatasetName = Annotated[
-    constr(min_length=DATASET_NAME_MIN_LENGTH, max_length=DATASET_NAME_MAX_LENGTH, regex=r"^(?!-|_)[a-zA-Z0-9-_ ]+$"),
+    constr(regex=DATASET_NAME_REGEX, min_length=DATASET_NAME_MIN_LENGTH, max_length=DATASET_NAME_MAX_LENGTH),
     Field(..., description="Dataset name"),
 ]
 
