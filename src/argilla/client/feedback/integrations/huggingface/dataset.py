@@ -187,6 +187,7 @@ class HuggingFaceDatasetMixin:
         import huggingface_hub
         from huggingface_hub import DatasetCardData, HfApi
 
+        # https://github.com/argilla-io/argilla/issues/3468
         from argilla.client.feedback.config import DatasetConfig
 
         if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
@@ -262,6 +263,7 @@ class HuggingFaceDatasetMixin:
         from huggingface_hub import hf_hub_download
         from huggingface_hub.utils import EntryNotFoundError
 
+        # https://github.com/argilla-io/argilla/issues/3468
         from argilla.client.feedback.config import (
             DatasetConfig,
             DeprecatedDatasetConfig,
