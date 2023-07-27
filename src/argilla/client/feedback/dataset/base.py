@@ -48,7 +48,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class FeedbackDatasetBase(HuggingFaceDatasetMixin):
-    """Base class with shared functionality for `FeedbackDataset` and `ArgillaFeedbackDataset`.
+    """Base class with shared functionality for `FeedbackDataset` and `_ArgillaFeedbackDataset`.
 
     Args:
         guidelines: contains the guidelines for annotating the dataset.
