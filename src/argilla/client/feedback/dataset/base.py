@@ -26,9 +26,7 @@ from argilla.client.feedback.schemas import (
     RankingQuestion,
     RatingQuestion,
 )
-from argilla.client.feedback.training.schemas import (
-    TrainingTaskMappingForTextClassification,
-)
+from argilla.client.feedback.training.schemas import TrainingTaskMappingForTextClassification
 from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.feedback.unification import (
     LabelQuestionStrategy,

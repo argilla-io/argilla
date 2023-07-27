@@ -19,18 +19,11 @@ from fastapi import Depends
 
 from argilla.server.commons.config import TasksFactory
 from argilla.server.services.datasets import ServiceDataset
-from argilla.server.services.search.model import (
-    ServiceSearchResults,
-    ServiceSortableField,
-    ServiceSortConfig,
-)
+from argilla.server.services.search.model import ServiceSearchResults, ServiceSortableField, ServiceSortConfig
 from argilla.server.services.search.service import SearchRecordsService
 from argilla.server.services.storage.service import RecordsStorageService
 from argilla.server.services.tasks.commons import BulkResponse
-from argilla.server.services.tasks.text2text.models import (
-    ServiceText2TextQuery,
-    ServiceText2TextRecord,
-)
+from argilla.server.services.tasks.text2text.models import ServiceText2TextQuery, ServiceText2TextRecord
 
 
 class Text2TextService:

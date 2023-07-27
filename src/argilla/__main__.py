@@ -14,11 +14,10 @@
 #  limitations under the License.
 
 
-import typer
+from argilla.tasks import database_app, server_app, training_app, users_app
+from argilla.tasks.async_typer import AsyncTyper
 
-from .tasks import database_app, server_app, training_app, users_app
-
-app = typer.Typer(rich_help_panel=True, help="Argilla CLI", no_args_is_help=True)
+app = AsyncTyper(rich_help_panel=True, help="Argilla CLI", no_args_is_help=True)
 
 app.add_typer(users_app, name="users")
 app.add_typer(database_app, name="database")
