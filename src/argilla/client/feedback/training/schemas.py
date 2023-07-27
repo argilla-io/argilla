@@ -147,7 +147,7 @@ class TrainingTask:
             ValueError: if label_strategy is defined and label is already a Unification class.
 
         Returns:
-            TrainingTaskForTextClassification: _description_
+            TrainingTaskForTextClassification: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
 
         Examples:
             >>> from argilla import LabelQuestion, TrainingTask
@@ -255,6 +255,41 @@ class TrainingTask:
 
         """
         return TrainingTaskForRewardModelling(chosen_rejected_func=chosen_rejected_func)
+
+    @classmethod
+    def for_direct_preference_optimization(
+        cls,
+        prompt_chosen_rejected_func: Callable[
+            [Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]
+        ],
+    ) -> "TrainingTaskForDirectPreferenceOptimization":
+        """
+        Return a task that can be used in `FeedbackDataset.prepare_for_training(framework="...", task)`
+        to extract data from the Feedback Dataset in an immediately useful format.
+
+        Args:
+            prompt_chosen_rejected_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]):
+                A formatting function converting a dictionary of records into zero, one or more prompt-chosen-rejected text tuples.
+
+        Returns:
+            TrainingTaskForDirectPreferenceOptimization: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
+
+        Examples:
+            >>> from argilla import TrainingTask
+            >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
+            >>> def prompt_chosen_rejected_func(sample: Dict[str, Any]):
+            ...     if sample["ranking"]["value"].count("1") >= sample["ranking"]["value"].count("2"):
+            ...         chosen = sample["response-1"]
+            ...         rejected = sample["response-2"]
+            ...     else:
+            ...         chosen = sample["response-2"]
+            ...         rejected = sample["response-1"]
+            ...     return sample["prompt"],chosen, rejected
+            >>> task = TrainingTask.for_direct_preference_optimization(prompt_chosen_rejected_func=prompt_chosen_rejected_func)
+            >>> dataset.prepare_for_training(framework="...", task=task)
+
+        """
+        return TrainingTaskForDirectPreferenceOptimization(prompt_chosen_rejected_func=prompt_chosen_rejected_func)
 
 
 class TrainingTaskForTextClassification(BaseModel, TrainingData):
@@ -581,7 +616,7 @@ class TrainingTaskForRewardModelling(BaseModel, TrainingData):
     def __repr__(self) -> str:
         return (
             f"{self.__class__.__name__}",
-            f"\n\t formatting_func={self.formatting_func}",
+            f"\n\t chosen_rejected_func={self.chosen_rejected_func}",
         )
 
     @requires_version("datasets>1.17.0")
@@ -596,6 +631,82 @@ class TrainingTaskForRewardModelling(BaseModel, TrainingData):
             datasets_dict["rejected"].append(sample["rejected"])
 
         feature_dict = {
+            "rejected": datasets.Value("string"),
+            "chosen": datasets.Value("string"),
+        }
+
+        ds = datasets.Dataset.from_dict(datasets_dict, features=datasets.Features(feature_dict))
+        if train_size != 1:
+            ds = ds.train_test_split(train_size=train_size, test_size=1 - train_size, seed=seed)
+
+        return ds
+
+
+class TrainingTaskForDirectPreferenceOptimization(BaseModel, TrainingData):
+    """Training data for direct preference optimization
+
+    Args:
+        prompt_chosen_rejected_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]):
+            A formatting function converting a dictionary of records into zero, one or more prompt-chosen-rejected text tuples.
+
+    Examples:
+        >>> from argilla import TrainingTaskForDirectPreferenceOptimization
+        >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
+        >>> def prompt_chosen_rejected_func(sample: Dict[str, Any]):
+        ...     if sample["ranking"]["value"].count("1") >= sample["ranking"]["value"].count("2"):
+        ...         chosen = sample["response-1"]
+        ...         rejected = sample["response-2"]
+        ...     else:
+        ...         chosen = sample["response-2"]
+        ...         rejected = sample["response-1"]
+        ...     return sample["prompt"], chosen, rejected
+        >>> task = TrainingTaskForDirectPreferenceOptimization(prompt_chosen_rejected_func=prompt_chosen_rejected_func)
+        >>> dataset.prepare_for_training(framework="...", task=task)
+    """
+
+    prompt_chosen_rejected_func: Callable[
+        [Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]
+    ]
+
+    def _format_data(self, dataset: "FeedbackDataset"):
+        output = []
+        for sample in dataset.format_as("datasets"):
+            prompt_chosen_rejecteds = self.prompt_chosen_rejected_func(sample)
+            if prompt_chosen_rejecteds is None:
+                continue
+
+            if isinstance(prompt_chosen_rejecteds, tuple) and isinstance(prompt_chosen_rejecteds[0], str):
+                prompt_chosen_rejecteds = [prompt_chosen_rejecteds]
+
+            for prompt, chosen, rejected in prompt_chosen_rejecteds:
+                output.append({"prompt": prompt, "chosen": chosen, "rejected": rejected})
+        return output
+
+    @property
+    def supported_frameworks(self):
+        names = ["trl"]
+        return [Framework(name) for name in names]
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}",
+            f"\n\t prompt_chosen_rejected_func={self.prompt_chosen_rejected_func}",
+        )
+
+    @requires_version("datasets>1.17.0")
+    def _prepare_for_training_with_trl(
+        self, data: List[dict], train_size: float, seed: int
+    ) -> Union["datasets.Dataset", "datasets.DatasetDict"]:
+        import datasets
+
+        datasets_dict = {"prompt": [], "chosen": [], "rejected": []}
+        for sample in data:
+            datasets_dict["prompt"].append(sample["prompt"])
+            datasets_dict["chosen"].append(sample["chosen"])
+            datasets_dict["rejected"].append(sample["rejected"])
+
+        feature_dict = {
+            "prompt": datasets.Value("string"),
             "rejected": datasets.Value("string"),
             "chosen": datasets.Value("string"),
         }

@@ -28,6 +28,7 @@ from argilla.client.feedback.schemas import (
     RatingQuestion,
 )
 from argilla.client.feedback.training.schemas import (
+    TrainingTaskForDirectPreferenceOptimization,
     TrainingTaskForRewardModelling,
     TrainingTaskForSupervisedFinetuning,
     TrainingTaskForTextClassification,
@@ -378,7 +379,12 @@ class FeedbackDataset(ArgillaDatasetMixin, HuggingFaceDatasetMixin):
     def prepare_for_training(
         self,
         framework: Union[Framework, str],
-        task: Union[TrainingTaskForTextClassification, TrainingTaskForSupervisedFinetuning],
+        task: Union[
+            TrainingTaskForTextClassification,
+            TrainingTaskForSupervisedFinetuning,
+            TrainingTaskForRewardModelling,
+            TrainingTaskForDirectPreferenceOptimization,
+        ],
         train_size: Optional[float] = 1,
         test_size: Optional[float] = None,
         seed: Optional[int] = None,
@@ -409,7 +415,14 @@ class FeedbackDataset(ArgillaDatasetMixin, HuggingFaceDatasetMixin):
 
         if isinstance(task, TrainingTaskForTextClassification):
             self.unify_responses(question=task.label.question, strategy=task.label.strategy)
-        elif not isinstance(task, (TrainingTaskForSupervisedFinetuning, TrainingTaskForRewardModelling)):
+        elif not isinstance(
+            task,
+            (
+                TrainingTaskForSupervisedFinetuning,
+                TrainingTaskForRewardModelling,
+                TrainingTaskForDirectPreferenceOptimization,
+            ),
+        ):
             raise ValueError(f"Training data {type(task)} is not supported yet")
 
         data = task._format_data(self)
