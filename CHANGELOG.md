@@ -16,6 +16,13 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+## [1.13.3](https://github.com/argilla-io/argilla/compare/v1.13.2...v1.13.3)
+
+### Fixed
+
+- Fixed `ModuleNotFoundError` caused because the `argilla.utils.telemetry` module used in the `ArgillaTrainer` was importing an optional dependency not installed by default ([#3471](https://github.com/argilla-io/argilla/pull/3471)).
+- Fixed `ImportError` caused because the `argilla.client.feedback.config` module was importing `pyyaml` optional dependency not installed by default ([#3471](https://github.com/argilla-io/argilla/pull/3471)).
+
 ## [1.13.2](https://github.com/argilla-io/argilla/compare/v1.13.1...v1.13.2)
 
 ### Fixed
