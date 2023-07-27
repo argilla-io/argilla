@@ -142,12 +142,12 @@ FieldName = Annotated[
     constr(
         regex=FIELD_CREATE_NAME_REGEX, min_length=FIELD_CREATE_NAME_MIN_LENGTH, max_length=FIELD_CREATE_NAME_MAX_LENGTH
     ),
-    Field(..., help="The name of the field"),
+    PydanticField(..., description="The name of the field"),
 ]
 
 FieldTitle = Annotated[
     constr(min_length=FIELD_CREATE_TITLE_MIN_LENGTH, max_length=FIELD_CREATE_TITLE_MAX_LENGTH),
-    Field(..., help="The title of the field"),
+    PydanticField(..., description="The title of the field"),
 ]
 
 
