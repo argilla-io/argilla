@@ -102,12 +102,12 @@ class Datasets(BaseModel):
 
 DatasetName = Annotated[
     constr(regex=DATASET_NAME_REGEX, min_length=DATASET_NAME_MIN_LENGTH, max_length=DATASET_NAME_MAX_LENGTH),
-    Field(..., description="Dataset name"),
+    PydanticField(..., description="Dataset name"),
 ]
 
 DatasetGuidelines = Annotated[
     constr(min_length=DATASET_GUIDELINES_MIN_LENGTH, max_length=DATASET_GUIDELINES_MAX_LENGTH),
-    Field(..., description="Dataset guidelines"),
+    PydanticField(..., description="Dataset guidelines"),
 ]
 
 
