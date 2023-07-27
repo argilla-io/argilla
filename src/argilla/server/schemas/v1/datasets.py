@@ -138,16 +138,22 @@ class Fields(BaseModel):
     items: List[Field]
 
 
+FieldName = Annotated[
+    constr(
+        regex=FIELD_CREATE_NAME_REGEX, min_length=FIELD_CREATE_NAME_MIN_LENGTH, max_length=FIELD_CREATE_NAME_MAX_LENGTH
+    ),
+    Field(..., help="The name of the field"),
+]
+
+FieldTitle = Annotated[
+    constr(min_length=FIELD_CREATE_TITLE_MIN_LENGTH, max_length=FIELD_CREATE_TITLE_MAX_LENGTH),
+    Field(..., help="The title of the field"),
+]
+
+
 class FieldCreate(BaseModel):
-    name: constr(
-        regex=FIELD_CREATE_NAME_REGEX,
-        min_length=FIELD_CREATE_NAME_MIN_LENGTH,
-        max_length=FIELD_CREATE_NAME_MAX_LENGTH,
-    )
-    title: constr(
-        min_length=FIELD_CREATE_TITLE_MIN_LENGTH,
-        max_length=FIELD_CREATE_TITLE_MAX_LENGTH,
-    )
+    name: FieldName
+    title: FieldTitle
     required: Optional[bool]
     settings: TextFieldSettings
 

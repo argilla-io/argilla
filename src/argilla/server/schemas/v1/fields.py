@@ -19,6 +19,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from argilla.server.models import FieldType
+from argilla.server.schemas.v1.datasets import FieldTitle
 
 
 class TextFieldSettings(BaseModel):
@@ -45,5 +46,5 @@ class TextFieldSettingsUpdate(BaseModel):
 
 
 class FieldUpdate(BaseModel):
-    title: Optional[str]
+    title: Optional[FieldTitle]
     settings: Optional[TextFieldSettingsUpdate]
