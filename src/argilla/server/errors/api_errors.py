@@ -46,14 +46,12 @@ class APIErrorHandler:
     @staticmethod
     async def track_error(error: ServerError, request: Request):
         data = {
-           "code": error.code,
-           "user-agent": request.headers.get("user-agent"),
-           "accept-language": request.headers.get("accept-language")
+            "code": error.code,
+            "user-agent": request.headers.get("user-agent"),
+            "accept-language": request.headers.get("accept-language"),
         }
         if isinstance(error, (GenericServerError, EntityNotFoundError, EntityAlreadyExistsError)):
             data["type"] = error.type
-
-        data.update(telemetry._process_request_info(request))
 
         telemetry.get_telemetry_client().track_data(action="ServerErrorFound", data=data)
 
