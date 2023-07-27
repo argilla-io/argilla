@@ -286,6 +286,7 @@ class ArgillaToFromMixin:
             questions.append(question)
 
         return _ArgillaFeedbackDataset(
+            client=httpx_client,
             id=existing_dataset.id,
             name=existing_dataset.name,
             workspace=Workspace.from_id(existing_dataset.workspace_id),
