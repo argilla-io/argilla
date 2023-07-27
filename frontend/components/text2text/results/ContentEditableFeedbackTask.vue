@@ -49,6 +49,7 @@ export default {
   data: () => {
     return {
       defaultText: null,
+      sanitizedEditableText: null,
       currentValue: null,
       editableText: null,
       focus: false,
@@ -58,19 +59,24 @@ export default {
     textIsEdited() {
       return this.defaultText !== this.value;
     },
-    sanitizedEditableText() {
-      return DOMPurify.sanitize(this.editableText);
-    },
   },
   watch: {
     value(newValue) {
-      if (newValue !== this.currentValue) this.editableText = newValue;
+      if (newValue !== this.currentValue) {
+        this.sanitizedEditableText = null;
+        this.editableText = newValue;
+        this.$nextTick(() => {
+          this.sanitizedEditableText = DOMPurify.sanitize(this.editableText);
+        });
+      }
     },
   },
   mounted() {
     window.addEventListener("paste", this.pastePlainText);
 
     this.editableText = this.defaultText = this.value;
+
+    this.sanitizedEditableText = DOMPurify.sanitize(this.editableText);
 
     this.textAreaWrapper = document.getElementById("contentId");
   },
@@ -82,7 +88,7 @@ export default {
       this.textAreaWrapper.blur();
     },
     onInputText(event) {
-      this.currentValue = event.target.innerText;
+      this.editableText = this.currentValue = event.target.innerText;
       this.$emit("change-text", event.target.innerText);
     },
     setFocus(status) {
