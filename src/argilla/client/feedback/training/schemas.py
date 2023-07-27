@@ -83,7 +83,6 @@ class TrainingData(ABC):
         if framework not in self.supported_frameworks:
             raise NotImplementedError(f"Framework {framework} is not supported for this {self.__class__}.")
 
-    @abstractmethod
     def _train_test_split(self, data: List[dict], train_size: float, seed: int) -> Tuple[List[dict], List[dict]]:
         """Overwritten by subclasses"""
 
@@ -145,7 +144,7 @@ class TrainingTask:
 
         Raises:
             ValueError: if label is not a valid type with the question type.
-            ValueError: if label_strategy is defined and label is alraedy a Unification class.
+            ValueError: if label_strategy is defined and label is already a Unification class.
 
         Returns:
             TrainingTaskForTextClassification: _description_
@@ -199,7 +198,7 @@ class TrainingTask:
         formatting_func: Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]],
     ) -> "TrainingTaskForTextClassification":
         """
-        Return a task mapping that can be used in `FeedbackDataset.prepare_for_training(framework="...", task)`
+        Return a task that can be used in `FeedbackDataset.prepare_for_training(framework="...", task)`
         to extract data from the Feedback Dataset in an immediately useful format.
 
         Args:
@@ -210,17 +209,52 @@ class TrainingTask:
             TrainingTaskForSupervisedFinetuning: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
 
         Examples:
-            >>> from argilla import LabelQuestion, TrainingTaskForSupervisedFinetuning
+            >>> from argilla import TrainingTask
             >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
             >>> def formatting_func(sample: Dict[str, Any]):
             ...     if sample["good"]["value"] == "Bad":
             ...         return
             ...     return template.format(prompt=sample["prompt"]["value"], response=sample["response"]["value"])
-            >>> task = TrainingTaskForSupervisedFinetuning(formatting_func=formatting_func)
+            >>> task = TrainingTask.for_supervised_fine_tuning(formatting_func=formatting_func)
             >>> dataset.prepare_for_training(framework="...", task=task)
 
         """
         return TrainingTaskForSupervisedFinetuning(formatting_func=formatting_func)
+
+    @classmethod
+    def for_reward_modelling(
+        cls,
+        chosen_rejected_func: Callable[
+            [Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]
+        ],
+    ) -> "TrainingTaskForRewardModelling":
+        """
+        Return a task that can be used in `FeedbackDataset.prepare_for_training(framework="...", task)`
+        to extract data from the Feedback Dataset in an immediately useful format.
+
+        Args:
+            chosen_rejected_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]]):
+                A formatting function converting a dictionary of records into zero, one or more chosen-rejected text tuples.
+
+        Returns:
+            TrainingTaskForRewardModelling: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
+
+        Examples:
+            >>> from argilla import TrainingTask
+            >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
+            >>> def chosen_rejected_func(sample: Dict[str, Any]):
+            ...     if sample["ranking"]["value"].count("1") >= sample["ranking"]["value"].count("2"):
+            ...         chosen = sample["response-1"]
+            ...         rejected = sample["response-2"]
+            ...     else:
+            ...         chosen = sample["response-2"]
+            ...         rejected = sample["response-1"]
+            ...     return chosen, rejected
+            >>> task = TrainingTask.for_reward_modelling(chosen_rejected_func=chosen_rejected_func)
+            >>> dataset.prepare_for_training(framework="...", task=task)
+
+        """
+        return TrainingTaskForRewardModelling(chosen_rejected_func=chosen_rejected_func)
 
 
 class TrainingTaskForTextClassification(BaseModel, TrainingData):
@@ -286,7 +320,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
 
     def __repr__(self) -> str:
         return (
-            "TrainingTaskForTextClassification",
+            f"{self.__class__.__name__}",
             f"\n\t text={self.text.name}",
             f"\n\t label={self.label.question.name}",
             f"\n\t multi_label={self.__multi_label__}",
@@ -442,7 +476,7 @@ class TrainingTaskForSupervisedFinetuning(BaseModel, TrainingData):
             converting a dictionary of records into zero, one or more text strings.
 
     Examples:
-        >>> from argilla import LabelQuestion, TrainingTaskForSupervisedFinetuning
+        >>> from argilla import TrainingTaskForSupervisedFinetuning
         >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
         >>> def formatting_func(sample: Dict[str, Any]):
         ...     if sample["good"]["value"] == "Bad":
@@ -467,25 +501,12 @@ class TrainingTaskForSupervisedFinetuning(BaseModel, TrainingData):
 
     @property
     def supported_frameworks(self):
-        names = ["trl", "trlx"]
+        names = ["trl"]
         return [Framework(name) for name in names]
-
-    @requires_version("scikit-learn")
-    def _train_test_split(self, data: List[dict], train_size: float, seed: int) -> Tuple[List[dict], List[dict]]:
-        from sklearn.model_selection import train_test_split
-
-        # TODO: Stratify by label
-        # TODO: provide label overview
-        return train_test_split(
-            data,
-            train_size=train_size,
-            shuffle=True,
-            random_state=seed,
-        )
 
     def __repr__(self) -> str:
         return (
-            "TrainingTaskForSupervisedFinetuning",
+            f"{self.__class__.__name__}",
             f"\n\t formatting_func={self.formatting_func}",
         )
 
@@ -511,8 +532,79 @@ class TrainingTaskForSupervisedFinetuning(BaseModel, TrainingData):
 
         return ds
 
-    def _prepare_for_training_with_trlx(self, data: List[dict], train_size: float, seed: int):
-        raise NotImplementedError()
+
+class TrainingTaskForRewardModelling(BaseModel, TrainingData):
+    """Training data for reward modelling
+
+    Args:
+        chosen_rejected_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]]):
+            A formatting function converting a dictionary of records into zero, one or more chosen-rejected text tuples.
+
+    Examples:
+        >>> from argilla import TrainingTaskForRewardModelling
+        >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
+        >>> def chosen_rejected_func(sample: Dict[str, Any]):
+        ...     if sample["ranking"]["value"].count("1") >= sample["ranking"]["value"].count("2"):
+        ...         chosen = sample["response-1"]
+        ...         rejected = sample["response-2"]
+        ...     else:
+        ...         chosen = sample["response-2"]
+        ...         rejected = sample["response-1"]
+        ...     return chosen, rejected
+        >>> task = TrainingTaskForRewardModelling(chosen_rejected_func=chosen_rejected_func)
+        >>> dataset.prepare_for_training(framework="...", task=task)
+    """
+
+    chosen_rejected_func: Callable[
+        [Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]
+    ]
+
+    def _format_data(self, dataset: "FeedbackDataset"):
+        output = []
+        for sample in dataset.format_as("datasets"):
+            chosen_rejecteds = self.chosen_rejected_func(sample)
+            if chosen_rejecteds is None:
+                continue
+
+            if isinstance(chosen_rejecteds, tuple) and isinstance(chosen_rejecteds[0], str):
+                chosen_rejecteds = [chosen_rejecteds]
+
+            for chosen, rejected in chosen_rejecteds:
+                output.append({"chosen": chosen, "rejected": rejected})
+        return output
+
+    @property
+    def supported_frameworks(self):
+        names = ["trl"]
+        return [Framework(name) for name in names]
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}",
+            f"\n\t formatting_func={self.formatting_func}",
+        )
+
+    @requires_version("datasets>1.17.0")
+    def _prepare_for_training_with_trl(
+        self, data: List[dict], train_size: float, seed: int
+    ) -> Union["datasets.Dataset", "datasets.DatasetDict"]:
+        import datasets
+
+        datasets_dict = {"chosen": [], "rejected": []}
+        for sample in data:
+            datasets_dict["chosen"].append(sample["chosen"])
+            datasets_dict["rejected"].append(sample["rejected"])
+
+        feature_dict = {
+            "rejected": datasets.Value("string"),
+            "chosen": datasets.Value("string"),
+        }
+
+        ds = datasets.Dataset.from_dict(datasets_dict, features=datasets.Features(feature_dict))
+        if train_size != 1:
+            ds = ds.train_test_split(train_size=train_size, test_size=1 - train_size, seed=seed)
+
+        return ds
 
 
 # Old, deprecated variants.

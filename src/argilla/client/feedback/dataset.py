@@ -28,6 +28,7 @@ from argilla.client.feedback.schemas import (
     RatingQuestion,
 )
 from argilla.client.feedback.training.schemas import (
+    TrainingTaskForRewardModelling,
     TrainingTaskForSupervisedFinetuning,
     TrainingTaskForTextClassification,
 )
@@ -408,7 +409,7 @@ class FeedbackDataset(ArgillaDatasetMixin, HuggingFaceDatasetMixin):
 
         if isinstance(task, TrainingTaskForTextClassification):
             self.unify_responses(question=task.label.question, strategy=task.label.strategy)
-        elif not isinstance(task, TrainingTaskForSupervisedFinetuning):
+        elif not isinstance(task, (TrainingTaskForSupervisedFinetuning, TrainingTaskForRewardModelling)):
             raise ValueError(f"Training data {type(task)} is not supported yet")
 
         data = task._format_data(self)
