@@ -14,7 +14,7 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Tuple, Union
 
 import pandas as pd
 from pydantic import BaseModel
@@ -27,7 +27,6 @@ from argilla.client.feedback.schemas import (
     RankingQuestion,
     RatingQuestion,
     TextField,
-    TextQuestion,
 )
 from argilla.client.feedback.unification import (
     LabelQuestionUnification,
@@ -44,12 +43,14 @@ if TYPE_CHECKING:
     import datasets
     import spacy
 
+    from argilla.client.feedback.dataset import FeedbackDataset
+
 
 class TrainingData(ABC):
-    def _format_data(self, records):
+    def _format_data(self, dataset: "FeedbackDataset"):
         formatted_data = []
         explode_columns = set()
-        for record in records:
+        for record in dataset.records:
             data = {}
             for pydantic_field in self:
                 pydantic_field_name, pydantic_field_value = pydantic_field
@@ -194,28 +195,31 @@ class TrainingTaskMapping:
     @classmethod
     def for_supervised_fine_tuning(
         cls,
-        text: Union[TextField, TextQuestion],
+        formatting_func: Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]],
     ) -> "TrainingTaskMappingForTextClassification":
         """
         Return a task mapping that can be used in `FeedbackDataset.prepare_for_training(framework="...", task_mapping)`
         to extract data from the Feedback Dataset in an immediately useful format.
 
         Args:
-            text (Union[TextField, TextQuestion]): The text to use for training.
+            formatting_func (Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]): A formatting function
+                converting a dictionary of records into zero, one or more text strings.
 
         Returns:
             TrainingTaskMappingForSupervisedFinetuning: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
 
         Examples:
-            >>> from argilla import LabelQuestion, TrainingTaskMapping
+            >>> from argilla import LabelQuestion, TrainingTaskMappingForSupervisedFinetuning
             >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
-            >>> task_mapping = TrainingTaskMapping.for_supervised_fine_tuning(
-            ...     text=dataset.fields[0],
-            ... )
+            >>> def formatting_func(sample: Dict[str, Any]):
+            ...     if sample["good"]["value"] == "Bad":
+            ...         return
+            ...     return template.format(prompt=sample["prompt"]["value"], response=sample["response"]["value"])
+            >>> task_mapping = TrainingTaskMappingForSupervisedFinetuning(formatting_func=formatting_func)
             >>> dataset.prepare_for_training(framework="...", task_mapping=task_mapping)
 
         """
-        return TrainingTaskMappingForSupervisedFinetuning(text=text)
+        return TrainingTaskMappingForSupervisedFinetuning(formatting_func=formatting_func)
 
 
 class TrainingTaskMappingForTextClassification(BaseModel, TrainingData):
@@ -433,26 +437,37 @@ class TrainingTaskMappingForSupervisedFinetuning(BaseModel, TrainingData):
     """Training data for supervised finetuning
 
     Args:
-        text: TextField
-        label: Union[RatingQuestionUnification, LabelQuestionUnification, MultiLabelQuestionUnification, RankingQuestionUnification]
+        formatting_func (Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]): A formatting function
+            converting a dictionary of records into zero, one or more text strings.
 
     Examples:
         >>> from argilla import LabelQuestion, TrainingTaskMappingForSupervisedFinetuning
         >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
-        >>> task_mapping = TrainingTaskMappingForSupervisedFinetuning(text=dataset.fields[0])
+        >>> def formatting_func(sample: Dict[str, Any]):
+        ...     if sample["good"]["value"] == "Bad":
+        ...         return
+        ...     return template.format(prompt=sample["prompt"]["value"], response=sample["response"]["value"])
+        >>> task_mapping = TrainingTaskMappingForSupervisedFinetuning(formatting_func=formatting_func)
         >>> dataset.prepare_for_training(framework="...", task_mapping=task_mapping)
 
     """
 
-    text: Union[TextField, TextQuestion]
+    formatting_func: Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]
+
+    def _format_data(self, dataset: "FeedbackDataset"):
+        formatted_texts = []
+        for sample in dataset.format_as("datasets"):
+            if texts := self.formatting_func(sample):
+                if isinstance(texts, str):
+                    texts = [texts]
+                for text in texts:
+                    formatted_texts.append({"text": text})
+        return formatted_texts
 
     @property
     def supported_frameworks(self):
         names = ["trl", "trlx"]
         return [Framework(name) for name in names]
-
-    def unify_responses(self, responses: List[FeedbackRecord]):
-        self.label.strategy.unify_responses(responses=responses, field=self.label.question)
 
     @requires_version("scikit-learn")
     def _train_test_split(self, data: List[dict], train_size: float, seed: int) -> Tuple[List[dict], List[dict]]:
@@ -470,7 +485,7 @@ class TrainingTaskMappingForSupervisedFinetuning(BaseModel, TrainingData):
     def __repr__(self) -> str:
         return (
             "TrainingTaskMappingForSupervisedFinetuning",
-            f"\n\t text={self.text.name}",
+            f"\n\t formatting_func={self.formatting_func}",
         )
 
     @requires_version("datasets>1.17.0")
@@ -480,9 +495,9 @@ class TrainingTaskMappingForSupervisedFinetuning(BaseModel, TrainingData):
         import datasets
 
         datasets_dict = {"id": [], "text": []}
-        for index, entry in enumerate(data):
+        for index, sample in enumerate(data):
             datasets_dict["id"].append(index)
-            datasets_dict["text"].append(entry["text"])
+            datasets_dict["text"].append(sample["text"])
 
         feature_dict = {
             "id": datasets.Value(dtype="int32"),

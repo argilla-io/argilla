@@ -919,7 +919,7 @@ class FeedbackDataset(HuggingFaceDatasetMixin):
         elif not isinstance(task_mapping, TrainingTaskMappingForSupervisedFinetuning):
             raise ValueError(f"Training data {type(task_mapping)} is not supported yet")
 
-        data = task_mapping._format_data(self.records)
+        data = task_mapping._format_data(self)
         if framework in [
             Framework.TRANSFORMERS,
             Framework.SETFIT,
