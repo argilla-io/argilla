@@ -176,6 +176,7 @@ class User:
         first_name: Optional[str] = None,
         last_name: Optional[str] = None,
         role: Optional[UserRole] = None,
+        workspaces: Optional[List[str]] = None,
     ) -> "User":
         """Creates a new user in Argilla.
 
@@ -185,6 +186,7 @@ class User:
             first_name: the first name of the user to be created. Defaults to None.
             last_name: the last name of the user to be created. Defaults to None.
             role: the role of the user to be created. Defaults to None.
+            workspaces: a list of workspace names the user to be created is linked to. Defaults to None.
 
         Returns:
             A new `User` instance.
@@ -210,13 +212,12 @@ class User:
         try:
             user = users_api.create_user(
                 client,
-                **UserCreateModel(
-                    username=username,
-                    password=password,
-                    first_name=first_name,
-                    last_name=last_name,
-                    role=role,
-                ).dict(),
+                username=username,
+                password=password,
+                first_name=first_name,
+                last_name=last_name,
+                role=role,
+                workspaces=workspaces,
             ).parsed
             return cls.__new_instance(client, user)
         except AlreadyExistsApiError as e:
