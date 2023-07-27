@@ -18,6 +18,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, conlist
 
+from argilla.server.schemas.base import UpdateSchema
+
 try:
     from typing import Annotated
 except ImportError:
@@ -98,7 +100,9 @@ class LabelSelectionSettingsUpdate(BaseModel):
     visible_options: Optional[int]
 
 
-class QuestionUpdate(BaseModel):
+class QuestionUpdate(UpdateSchema):
     title: Optional[str]
     description: Optional[str]
     settings: Optional[Union[Dict[str, Any], TextQuestionSettingsUpdate, LabelSelectionSettingsUpdate]]
+
+    __non_explicit_none__ = {"title", "description"}
