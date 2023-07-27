@@ -119,7 +119,8 @@ class ArgillaToFromMixin:
                 new_field = datasets_api_v1.add_field(
                     client=httpx_client, id=argilla_id, field=field.dict(exclude={"id"})
                 ).parsed
-                fields.append(new_field)
+                field.id = new_field.id
+                fields.append(field)
             except Exception as e:
                 delete_dataset(dataset_id=argilla_id)
                 raise Exception(
@@ -134,7 +135,8 @@ class ArgillaToFromMixin:
                 new_question = datasets_api_v1.add_question(
                     client=httpx_client, id=argilla_id, question=question.dict(exclude={"id"})
                 ).parsed
-                questions.append(new_question)
+                question.id = new_question.id
+                questions.append(question)
                 question_name2id[new_question.name] = new_question.id
             except Exception as e:
                 delete_dataset(dataset_id=argilla_id)
