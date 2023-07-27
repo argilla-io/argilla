@@ -13,8 +13,10 @@
 #  limitations under the License.
 
 from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel as ClientSchema
+from argilla.client.sdk.v1.datasets.models import FeedbackMetricsModel as ClientMetricsSchema
 from argilla.client.sdk.v1.datasets.models import FeedbackQuestionModel as ClientQuestionSchema
 from argilla.server.schemas.v1.datasets import Dataset as ServerSchema
+from argilla.server.schemas.v1.datasets import Metrics as ServerMetricsSchema
 from argilla.server.schemas.v1.datasets import Question as ServerQuestionSchema
 
 
@@ -33,3 +35,7 @@ def test_feedback_dataset_schema(helpers) -> None:
 
 def test_feedback_questions_schema(helpers) -> None:
     assert helpers.are_compatible_api_schemas(ClientQuestionSchema.schema(), ServerQuestionSchema.schema())
+
+
+def test_feedback_metrics_schema(helpers) -> None:
+    assert helpers.are_compatible_api_schemas(ClientMetricsSchema.schema(), ServerMetricsSchema.schema())
