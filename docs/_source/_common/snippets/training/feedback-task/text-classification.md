@@ -17,13 +17,13 @@ dataset = FeedbackDataset.from_argilla(
     name="<my_dataset_name>",
     workspace="<my_workspace_name>"
 )
-task_mapping = TrainingTask.for_text_classification(
+task = TrainingTask.for_text_classification(
     text=dataset.field_by_name("<my_field>"),
     label=dataset.question_by_name("<my_question>")
 )
 trainer = ArgillaTrainer(
     dataset=dataset,
-    task_mapping=task_mapping,
+    task=task,
     framework="<my_framework>",
 )
 trainer.update_config()

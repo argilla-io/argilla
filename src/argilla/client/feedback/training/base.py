@@ -34,7 +34,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
     def __init__(
         self,
         dataset: "argilla.client.feedback.schemas.FeedbackDataset",
-        task_mapping: TrainingTask,
+        task: TrainingTask,
         framework: Framework,
         lang: Optional["spacy.Language"] = None,
         model: Optional[str] = None,
@@ -49,7 +49,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
 
         Args:
             dataset (FeedbackDataset): the dataset to be used for training.
-            task_mapping (TrainingTask): the training data to be used for training.
+            task (TrainingTask): the training data to be used for training.
             framework (str):
                 the framework to use for training. Currently, only "transformers", "setfit", and "spacy"
                 are supported.
@@ -72,13 +72,13 @@ class ArgillaTrainer(ArgillaTrainerV1):
         """
         self._dataset = dataset
         self._train_size = train_size
-        self._task_mapping = task_mapping
+        self._task = task
         self._seed = seed  # split is used for train-test-split and should therefore be fixed
         self._model = model
 
         self._prepared_data = self._dataset.prepare_for_training(
             framework=framework,
-            task_mapping=task_mapping,
+            task=task,
             fetch_records=fetch_records,
             train_size=train_size,
             seed=seed,
@@ -89,7 +89,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             framework = Framework(framework)
 
         if framework is Framework.SETFIT:
-            if not isinstance(task_mapping, TrainingTaskForTextClassification):
+            if not isinstance(task, TrainingTaskForTextClassification):
                 raise NotImplementedError(f"{Framework.SETFIT} only supports `TextClassification` tasks.")
             from argilla.client.feedback.training.frameworks.setfit import (
                 ArgillaSetFitTrainer,
@@ -97,7 +97,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
 
             self._trainer = ArgillaSetFitTrainer(
                 feedback_dataset=self._dataset,
-                task_mapping=self._task_mapping,
+                task=self._task,
                 prepared_data=self._prepared_data,
                 seed=self._seed,
                 model=self._model,
@@ -109,7 +109,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
 
             self._trainer = ArgillaTransformersTrainer(
                 feedback_dataset=self._dataset,
-                task_mapping=self._task_mapping,
+                task=self._task,
                 prepared_data=self._prepared_data,
                 seed=self._seed,
                 model=self._model,
@@ -121,7 +121,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
 
             self._trainer = ArgillaPeftTrainer(
                 feedback_dataset=self._dataset,
-                task_mapping=self._task_mapping,
+                task=self._task,
                 prepared_data=self._prepared_data,
                 seed=self._seed,
                 model=self._model,
@@ -133,7 +133,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
 
             self._trainer = ArgillaSpaCyTrainer(
                 feedback_dataset=self._dataset,
-                task_mapping=self._task_mapping,
+                task=self._task,
                 prepared_data=self._prepared_data,
                 seed=self._seed,
                 model=self._model,
@@ -147,7 +147,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
 
             self._trainer = ArgillaSpaCyTransformersTrainer(
                 feedback_dataset=self._dataset,
-                task_mapping=self._task_mapping,
+                task=self._task,
                 prepared_data=self._prepared_data,
                 seed=self._seed,
                 model=self._model,
@@ -161,7 +161,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
 
             self._trainer = ArgillaOpenAITrainer(
                 feedback_dataset=self._dataset,
-                task_mapping=self._task_mapping,
+                task=self._task,
                 prepared_data=self._prepared_data,
                 seed=self._seed,
                 model=self._model,
@@ -173,7 +173,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
 
             self._trainer = ArgillaSpanMarkerTrainer(
                 feedback_dataset=self._dataset,
-                task_mapping=self._task_mapping,
+                task=self._task,
                 prepared_data=self._prepared_data,
                 seed=self._seed,
                 model=self._model,
@@ -182,7 +182,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             raise NotImplementedError(f"{framework} is not a valid framework.")
 
         self._logger.info(self)
-        self._track_trainer_usage(framework=framework, task=self._task_mapping.__class__.__name__)
+        self._track_trainer_usage(framework=framework, task=self._task.__class__.__name__)
 
     def __repr__(self) -> str:
         """
@@ -197,7 +197,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             _________________________________________________________________
             These baseline params are fixed:
                 dataset: {self._dataset}
-                task: {self._task_mapping}
+                task: {self._task}
                 train_size: {self._train_size}
                 seed: {self._seed}
 
@@ -234,7 +234,7 @@ class ArgillaTrainerSkeleton(ABC):
     def __init__(
         self,
         feedback_dataset: "argilla.client.feedback.schemas.FeedbackDataset",
-        task_mapping: TrainingTask,
+        task: TrainingTask,
         prepared_data=None,
         model: str = None,
         seed: int = None,
@@ -242,15 +242,15 @@ class ArgillaTrainerSkeleton(ABC):
         **kwargs,
     ):
         self._feedback_dataset = feedback_dataset
-        self._task_mapping = task_mapping
+        self._task = task
         self._dataset = prepared_data
         self._model = model
         self._seed = seed
-        if isinstance(self._task_mapping, TrainingTaskForTextClassification):
-            self._multi_label = self._task_mapping.__multi_label__ or False
-            self._label_list = self._task_mapping.__all_labels__ or None
-            self._label2id = self._task_mapping.__label2id__
-            self._id2label = self._task_mapping.__id2label__
+        if isinstance(self._task, TrainingTaskForTextClassification):
+            self._multi_label = self._task.__multi_label__ or False
+            self._label_list = self._task.__all_labels__ or None
+            self._label2id = self._task.__label2id__
+            self._id2label = self._task.__id2label__
             self._record_class = TextClassificationRecord  # TODO: dirty hack to inherit from original trainers
 
     @abstractmethod

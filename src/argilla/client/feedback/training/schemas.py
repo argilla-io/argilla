@@ -153,11 +153,11 @@ class TrainingTask:
         Examples:
             >>> from argilla import LabelQuestion, TrainingTask
             >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
-            >>> task_mapping = TrainingTask.for_text_classification(
+            >>> task = TrainingTask.for_text_classification(
             ...     text=dataset.fields[0],
             ...     label=dataset.questions[0],
             ... )
-            >>> dataset.prepare_for_training(framework="...", task_mapping=task_mapping)
+            >>> dataset.prepare_for_training(framework="...", task=task)
 
         """
         if isinstance(
@@ -199,7 +199,7 @@ class TrainingTask:
         formatting_func: Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]],
     ) -> "TrainingTaskForTextClassification":
         """
-        Return a task mapping that can be used in `FeedbackDataset.prepare_for_training(framework="...", task_mapping)`
+        Return a task mapping that can be used in `FeedbackDataset.prepare_for_training(framework="...", task)`
         to extract data from the Feedback Dataset in an immediately useful format.
 
         Args:
@@ -216,8 +216,8 @@ class TrainingTask:
             ...     if sample["good"]["value"] == "Bad":
             ...         return
             ...     return template.format(prompt=sample["prompt"]["value"], response=sample["response"]["value"])
-            >>> task_mapping = TrainingTaskForSupervisedFinetuning(formatting_func=formatting_func)
-            >>> dataset.prepare_for_training(framework="...", task_mapping=task_mapping)
+            >>> task = TrainingTaskForSupervisedFinetuning(formatting_func=formatting_func)
+            >>> dataset.prepare_for_training(framework="...", task=task)
 
         """
         return TrainingTaskForSupervisedFinetuning(formatting_func=formatting_func)
@@ -234,11 +234,11 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
         >>> from argilla import LabelQuestion, TrainingTaskForTextClassification
         >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
         >>> label = RatingQuestionUnification(question=dataset.questions[0], strategy="mean")
-        >>> task_mapping = TrainingTaskForTextClassification(
+        >>> task = TrainingTaskForTextClassification(
         ...     text=dataset.fields[0],
         ...     label=label,
         ... )
-        >>> dataset.prepare_for_training(framework="...", task_mapping=task_mapping)
+        >>> dataset.prepare_for_training(framework="...", task=task)
 
     """
 
@@ -448,8 +448,8 @@ class TrainingTaskForSupervisedFinetuning(BaseModel, TrainingData):
         ...     if sample["good"]["value"] == "Bad":
         ...         return
         ...     return template.format(prompt=sample["prompt"]["value"], response=sample["response"]["value"])
-        >>> task_mapping = TrainingTaskForSupervisedFinetuning(formatting_func=formatting_func)
-        >>> dataset.prepare_for_training(framework="...", task_mapping=task_mapping)
+        >>> task = TrainingTaskForSupervisedFinetuning(formatting_func=formatting_func)
+        >>> dataset.prepare_for_training(framework="...", task=task)
 
     """
 

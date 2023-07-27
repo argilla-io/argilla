@@ -886,7 +886,7 @@ class FeedbackDataset(HuggingFaceDatasetMixin):
     def prepare_for_training(
         self,
         framework: Union[Framework, str],
-        task_mapping: TrainingTask,
+        task: TrainingTask,
         train_size: Optional[float] = 1,
         test_size: Optional[float] = None,
         seed: Optional[int] = None,
@@ -915,19 +915,19 @@ class FeedbackDataset(HuggingFaceDatasetMixin):
         if fetch_records:
             self.fetch_records()
 
-        if isinstance(task_mapping, TrainingTaskForTextClassification):
-            self.unify_responses(question=task_mapping.label.question, strategy=task_mapping.label.strategy)
-        elif not isinstance(task_mapping, TrainingTaskForSupervisedFinetuning):
-            raise ValueError(f"Training data {type(task_mapping)} is not supported yet")
+        if isinstance(task, TrainingTaskForTextClassification):
+            self.unify_responses(question=task.label.question, strategy=task.label.strategy)
+        elif not isinstance(task, TrainingTaskForSupervisedFinetuning):
+            raise ValueError(f"Training data {type(task)} is not supported yet")
 
-        data = task_mapping._format_data(self)
+        data = task._format_data(self)
         if framework in [
             Framework.TRANSFORMERS,
             Framework.SETFIT,
             Framework.SPAN_MARKER,
             Framework.PEFT,
         ]:
-            return task_mapping._prepare_for_training_with_transformers(
+            return task._prepare_for_training_with_transformers(
                 data=data, train_size=train_size, seed=seed, framework=framework
             )
         elif framework is Framework.SPACY or framework is Framework.SPACY_TRANSFORMERS:
@@ -942,15 +942,15 @@ class FeedbackDataset(HuggingFaceDatasetMixin):
                     lang = spacy.blank(lang)
                 else:
                     lang = spacy.load(lang)
-            return task_mapping._prepare_for_training_with_spacy(data=data, train_size=train_size, seed=seed, lang=lang)
+            return task._prepare_for_training_with_spacy(data=data, train_size=train_size, seed=seed, lang=lang)
         elif framework is Framework.SPARK_NLP:
-            return task_mapping._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
+            return task._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
         elif framework is Framework.OPENAI:
-            return task_mapping._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
+            return task._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
         elif framework is Framework.TRL:
-            return task_mapping._prepare_for_training_with_trl(data=data, train_size=train_size, seed=seed)
+            return task._prepare_for_training_with_trl(data=data, train_size=train_size, seed=seed)
         elif framework is Framework.TRLX:
-            return task_mapping._prepare_for_training_with_trlx(data=data, train_size=train_size, seed=seed)
+            return task._prepare_for_training_with_trlx(data=data, train_size=train_size, seed=seed)
         else:
             raise NotImplementedError(
                 f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"

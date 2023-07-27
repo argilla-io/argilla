@@ -77,28 +77,22 @@ def test_prepare_for_training_text_classification(
         question for question in dataset.questions if isinstance(question, (LabelQuestion, MultiLabelQuestion))
     ]
     label = LabelQuestionUnification(question=questions[0])
-    task_mapping = TrainingTask.for_text_classification(text=dataset.fields[0], label=label)
+    task = TrainingTask.for_text_classification(text=dataset.fields[0], label=label)
 
     if framework == Framework("span_marker"):
         with pytest.raises(
             NotImplementedError,
             match=f"Framework {framework} is not supported for this {TrainingTaskForTextClassification}.",
         ):
-            trainer = ArgillaTrainer(
-                dataset=dataset, task_mapping=task_mapping, framework=framework, fetch_records=False
-            )
+            trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, fetch_records=False)
     elif framework == Framework("spark-nlp"):
         with pytest.raises(NotImplementedError, match=f"{framework} is not a valid framework."):
-            trainer = ArgillaTrainer(
-                dataset=dataset, task_mapping=task_mapping, framework=framework, fetch_records=False
-            )
+            trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, fetch_records=False)
     else:
         if framework in [Framework("peft")] and sys.version_info < (3, 9):
             pass
         else:
-            trainer = ArgillaTrainer(
-                dataset=dataset, task_mapping=task_mapping, framework=framework, fetch_records=False
-            )
+            trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, fetch_records=False)
             if framework in [Framework("spacy"), Framework("spacy-transformers")]:
                 trainer.update_config(max_steps=1)
             elif framework in [Framework("transformers"), Framework("setfit")]:
