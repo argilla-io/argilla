@@ -23,6 +23,9 @@
 
 <script>
 import "assets/icons/unavailable";
+const TAB_MARKER = ":::{tab-item} ";
+const TAB_ITEM_FINISH_MARKER = ":::";
+const TAB_FINISH_MARKER = "::::";
 
 export default {
   data() {
@@ -42,24 +45,22 @@ export default {
 
     const startPage = await folderContent("./start_page.md");
 
-    const docElement = new DOMParser().parseFromString(
-      startPage.html,
-      "text/html"
-    ).documentElement;
+    const tabs = startPage.body.split(TAB_MARKER);
+    tabs.shift();
 
-    const codeBlocks = docElement.getElementsByTagName("pre");
+    for (const tab of tabs) {
+      const tabName = tab.split("\n")[0].trim();
 
-    for (const codeBlock of codeBlocks) {
-      const tabName = codeBlock.previousElementSibling.innerText.replace(
-        ":::{tab-item} ",
-        ""
-      );
-      const code = codeBlock.innerText;
+      const code = tab
+        .replace(tabName, "")
+        .replace(TAB_ITEM_FINISH_MARKER, "")
+        .replace(TAB_FINISH_MARKER, "")
+        .trim();
 
       this.content.tabs.push({
         id: tabName.trim().toLowerCase(),
         name: tabName,
-        html: `<base-code code='${code}'></base-code>`,
+        markdown: code,
       });
     }
   },

@@ -12,23 +12,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, Union
+from typing import Any, Dict, Type, Union
 
 import pytest
-from argilla.client.feedback.schemas import (
-    FeedbackRecord,
+from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
+    RankingQuestion,
     RatingQuestion,
-)
-from argilla.client.feedback.unification import (
-    LabelQuestionStrategy,
-    LabelQuestionUnification,
-    MultiLabelQuestionStrategy,
-    MultiLabelQuestionUnification,
-    RatingQuestionStrategy,
-    RatingQuestionUnification,
-    UnifiedValueSchema,
+    TextQuestion,
 )
 from pydantic import ValidationError
 
@@ -200,120 +192,134 @@ def test_multi_label_question(schema_kwargs: Dict[str, Any], expected_settings: 
 
 
 @pytest.mark.parametrize(
-    "strategy, unified_response",
+    "schema_kwargs, expected_settings",
     [
-        ("mean", [{"value": str(int(5 / 3)), "strategy": "mean"}]),
-        ("majority", [{"value": "2", "strategy": "majority"}]),
-        ("max", [{"value": "2", "strategy": "max"}]),
-        ("min", [{"value": "1", "strategy": "min"}]),
-    ],
-)
-def test_rating_question_strategy(strategy, unified_response):
-    question_name = "rating"
-    records_payload = {
-        "fields": {"text": "This is the first record", "label": "positive"},
-        "responses": [
-            {"values": {question_name: {"value": "1"}}},
-            {"values": {question_name: {"value": "2"}}},
-            {"values": {question_name: {"value": "2"}}},
-        ],
-    }
-    record = FeedbackRecord(**records_payload)
-    question_payload = {
-        "name": question_name,
-        "description": question_name,
-        "required": True,
-        "values": ["1", "2"],
-    }
-    question = RatingQuestion(**question_payload)
-    strategy = RatingQuestionStrategy(strategy)
-    strategy.unify_responses([record], question)
-    unified_response = [UnifiedValueSchema(**resp) for resp in unified_response]
-    assert record._unified_responses[question_name] == unified_response
-    assert RatingQuestionUnification(question=question, strategy=strategy)
-
-
-@pytest.mark.parametrize(
-    "strategy, unified_response",
-    [
-        ("majority", [{"value": "2", "strategy": "majority"}]),
         (
-            "disagreement",
-            [
-                {"value": "1", "strategy": "disagreement"},
-                {"value": "2", "strategy": "disagreement"},
-                {"value": "2", "strategy": "disagreement"},
-            ],
+            {"name": "a", "description": "a", "required": True, "use_markdown": True},
+            {"type": "text", "use_markdown": True},
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "use_markdown": False},
+            {"type": "text", "use_markdown": False},
         ),
     ],
 )
-def test_label_question_strategy(strategy, unified_response):
-    question_name = "rating"
-    records_payload = {
-        "fields": {"text": "This is the first record", "label": "positive"},
-        "responses": [
-            {"values": {question_name: {"value": "1"}}},
-            {"values": {question_name: {"value": "2"}}},
-            {"values": {question_name: {"value": "2"}}},
-        ],
-    }
-    record = FeedbackRecord(**records_payload)
-    question_payload = {
-        "name": question_name,
-        "description": question_name,
-        "required": True,
-        "labels": ["1", "2"],
-    }
-    question = LabelQuestion(**question_payload)
-    strategy = LabelQuestionStrategy(strategy)
-    strategy.unify_responses([record], question)
-    unified_response = [UnifiedValueSchema(**resp) for resp in unified_response]
-    assert record._unified_responses[question_name] == unified_response
-    assert LabelQuestionUnification(question=question, strategy=strategy)
+def test_text_question(schema_kwargs: Dict[str, Any], expected_settings: Dict[str, Any]) -> None:
+    assert TextQuestion(**schema_kwargs).dict(include={"settings"})["settings"] == expected_settings
 
 
 @pytest.mark.parametrize(
-    "strategy, unified_response",
+    "schema_kwargs, expected_exception, expected_exception_message",
     [
-        ("majority", [{"value": ["1"], "strategy": "majority"}]),
         (
-            "disagreement",
-            [
-                {"value": ["1"], "strategy": "disagreement"},
-                {"value": ["1", "2"], "strategy": "disagreement"},
-                {"value": ["1"], "strategy": "disagreement"},
-            ],
+            {"name": "a", "description": "a", "required": True, "values": ["a", "b"]},
+            ValidationError,
+            "value is not a valid integer",
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "values": [1, 1, 1]},
+            ValidationError,
+            "the list has duplicated items",
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "values": [1]},
+            ValidationError,
+            "ensure this value has at least 2 items",
         ),
     ],
 )
-def test_multi_label_question_strategy(strategy, unified_response):
-    question_name = "rating"
-    records_payload = {
-        "fields": {"text": "This is the first record", "label": "positive"},
-        "responses": [
-            {"values": {question_name: {"value": ["1"]}}},
-            {"values": {question_name: {"value": ["1", "2"]}}},
-            {"values": {question_name: {"value": ["1"]}}},
-        ],
-    }
-    record = FeedbackRecord(**records_payload)
-    question_payload = {
-        "name": question_name,
-        "description": question_name,
-        "required": True,
-        "labels": ["1", "2"],
-    }
-    question = MultiLabelQuestion(**question_payload)
-    strategy = MultiLabelQuestionStrategy(strategy)
-    strategy.unify_responses([record], question)
-    unified_response = [UnifiedValueSchema(**resp) for resp in unified_response]
-    assert record._unified_responses[question_name] == unified_response
-    assert MultiLabelQuestionUnification(question=question, strategy=strategy)
+def test_rating_question_errors(
+    schema_kwargs: Dict[str, Any], expected_exception: Type[Exception], expected_exception_message: Union[str, None]
+) -> None:
+    with pytest.raises(expected_exception, match=expected_exception_message):
+        RatingQuestion(**schema_kwargs)
 
 
-def test_label_question_strategy_not_implemented():
-    with pytest.raises(NotImplementedError, match="'majority_weighted'-strategy not implemented yet"):
-        LabelQuestionStrategy._majority_weighted("mock", "mock")
+@pytest.mark.parametrize(
+    ("schema_kwargs", "expected_warning_message"),
+    [
+        (
+            {"name": "a", "description": "a", "required": True, "values": list(range(1, 12))},
+            r"\`values\` list contains more than 10 elements, which is not supported from Argilla 1.14.0 onwards",
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "values": [0, 1, 2]},
+            r"At least one \`value\` in \`values\` is out of range \[1, 10\], "
+            r"which is not supported from Argilla 1.14.0 onwards",
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "values": [10, 11]},
+            r"At least one \`value\` in \`values\` is out of range \[1, 10\], "
+            r"which is not supported from Argilla 1.14.0 onwards",
+        ),
+    ],
+)
+def test_rating_question_warnings(schema_kwargs: Dict[str, Any], expected_warning_message: str) -> None:
+    with pytest.warns(UserWarning, match=expected_warning_message):
+        RatingQuestion(**schema_kwargs)
 
-    with pytest.raises(NotImplementedError, match="'majority_weighted'-strategy not implemented yet"):
-        MultiLabelQuestionStrategy._majority_weighted("mock", "mock")
+
+@pytest.mark.parametrize(
+    "schema_kwargs, expected_settings",
+    [
+        (
+            {"name": "a", "description": "a", "required": True, "values": [1, 2, 3]},
+            {"type": "rating", "options": [{"value": 1}, {"value": 2}, {"value": 3}]},
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "values": [8, 9, 10]},
+            {"type": "rating", "options": [{"value": 8}, {"value": 9}, {"value": 10}]},
+        ),
+    ],
+)
+def test_rating_question(schema_kwargs: Dict[str, Any], expected_settings: Dict[str, Any]) -> None:
+    assert RatingQuestion(**schema_kwargs).dict(include={"settings"})["settings"] == expected_settings
+
+
+@pytest.mark.parametrize(
+    "schema_kwargs, expected_exception, expected_exception_message",
+    [
+        (
+            {"name": "a", "description": "a", "required": True, "values": [1, 1]},
+            ValidationError,
+            "the list has duplicated items",
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "values": ["a"]},
+            ValidationError,
+            "ensure this value has at least 2 items",
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "values": {"a": "a"}},
+            ValidationError,
+            "ensure this dict has at least 2 items",
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "values": {1: "a", 2: "a"}},
+            ValidationError,
+            "ensure this dict has unique values",
+        ),
+    ],
+)
+def test_ranking_question_errors(
+    schema_kwargs: Dict[str, Any], expected_exception: Exception, expected_exception_message: Union[str, None]
+) -> None:
+    with pytest.raises(expected_exception, match=expected_exception_message):
+        RankingQuestion(**schema_kwargs)
+
+
+@pytest.mark.parametrize(
+    "schema_kwargs, expected_settings",
+    [
+        (
+            {"name": "a", "description": "a", "required": True, "values": ["a", "b"]},
+            {"type": "ranking", "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}]},
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "values": {"a": "A", "b": "B"}},
+            {"type": "ranking", "options": [{"value": "a", "text": "A"}, {"value": "b", "text": "B"}]},
+        ),
+    ],
+)
+def test_ranking_question(schema_kwargs: Dict[str, Any], expected_settings: Dict[str, Any]) -> None:
+    assert RankingQuestion(**schema_kwargs).dict(include={"settings"})["settings"] == expected_settings

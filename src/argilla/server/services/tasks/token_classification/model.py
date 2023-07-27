@@ -19,14 +19,8 @@ from pydantic import BaseModel, Field, validator
 from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.server.commons.models import PredictionStatus, TaskType
 from argilla.server.services.datasets import ServiceBaseDataset
-from argilla.server.services.search.model import (
-    ServiceBaseRecordsQuery,
-    ServiceScoreRange,
-)
-from argilla.server.services.tasks.commons import (
-    ServiceBaseAnnotation,
-    ServiceBaseRecord,
-)
+from argilla.server.services.search.model import ServiceBaseRecordsQuery, ServiceScoreRange
+from argilla.server.services.tasks.commons import ServiceBaseAnnotation, ServiceBaseRecord
 from argilla.utils import SpanUtils
 
 PREDICTED_MENTIONS_ES_FIELD_NAME = "predicted_mentions"

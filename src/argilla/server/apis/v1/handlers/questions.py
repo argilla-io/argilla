@@ -68,10 +68,7 @@ async def update_question(
 
 @router.delete("/questions/{question_id}", response_model=QuestionSchema)
 async def delete_question(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    question_id: UUID,
-    current_user: User = Security(auth.get_current_user),
+    *, db: AsyncSession = Depends(get_async_db), question_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
     question = await _get_question(db, question_id)
 
