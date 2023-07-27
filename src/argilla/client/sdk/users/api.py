@@ -112,6 +112,7 @@ def create_user(
             ^(?!-|_)[a-z0-9-_]+$.
         role: the role of the user. Available roles are: `admin`, and `annotator`.
         password: the password of the user. Must be a string between 8 and 100 characters.
+        workspaces: a list of workspace names to which the user will be linked to.
 
     Returns:
         A `Response` object containing a `parsed` attribute with the parsed response if
