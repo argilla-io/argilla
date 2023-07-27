@@ -20,7 +20,6 @@ from typing import TYPE_CHECKING, Any, Optional, Type
 
 from packaging.version import parse as parse_version
 
-from argilla.client.feedback.config import DatasetConfig, DeprecatedDatasetConfig
 from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas import FeedbackRecord
 from argilla.client.feedback.types import AllowedQuestionTypes
@@ -188,6 +187,8 @@ class HuggingFaceDatasetMixin:
         import huggingface_hub
         from huggingface_hub import DatasetCardData, HfApi
 
+        from argilla.client.feedback.config import DatasetConfig
+
         if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
             _LOGGER.warning(
                 "Recommended `huggingface_hub` version is 0.14.0 or higher, and you have"
@@ -260,6 +261,11 @@ class HuggingFaceDatasetMixin:
         from datasets import DatasetDict, load_dataset
         from huggingface_hub import hf_hub_download
         from huggingface_hub.utils import EntryNotFoundError
+
+        from argilla.client.feedback.config import (
+            DatasetConfig,
+            DeprecatedDatasetConfig,
+        )
 
         if parse_version(huggingface_hub.__version__) < parse_version("0.14.0"):
             _LOGGER.warning(
