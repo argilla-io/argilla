@@ -100,3 +100,19 @@ class FeedbackSuggestionModel(BaseModel):
     score: Optional[float] = None
     value: Any
     agent: Optional[str] = None
+
+
+class FeedbackRecordsMetricsModel(BaseModel):
+    count: int
+
+
+class FeedbackResponsesMetricsModel(BaseModel):
+    count: int
+    submitted: int
+    discarded: int
+    draft: int
+
+
+class FeedbackMetricsModel(BaseModel):
+    records: FeedbackRecordsMetricsModel
+    responses: FeedbackResponsesMetricsModel
