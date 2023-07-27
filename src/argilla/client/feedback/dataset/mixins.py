@@ -12,12 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import logging
 import warnings
 from typing import TYPE_CHECKING, Optional, Type, Union
 from uuid import UUID
 
-from tqdm import tqdm, trange
+from tqdm import trange
 
 from argilla.client.api import ArgillaSingleton
 from argilla.client.feedback.constants import PUSHING_BATCH_SIZE
@@ -41,6 +40,8 @@ if TYPE_CHECKING:
     from argilla.client.client import Argilla as ArgillaClient
     from argilla.client.feedback.dataset.local import FeedbackDataset
     from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel
+
+warnings.simplefilter("always", DeprecationWarning)
 
 
 class ArgillaToFromMixin:
