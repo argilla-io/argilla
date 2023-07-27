@@ -16,13 +16,16 @@ from typing import List, Optional
 
 import typer
 from pydantic import constr
-from sqlalchemy.orm import Session
-from typer import Typer
 
 from argilla.server.contexts import accounts
-from argilla.server.database import SessionLocal
+from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import User, UserRole, Workspace
-from argilla.server.security.model import USER_PASSWORD_MIN_LENGTH, UserCreate, WorkspaceCreate
+from argilla.server.security.model import (
+    USER_PASSWORD_MIN_LENGTH,
+    UserCreate,
+    WorkspaceCreate,
+)
+from argilla.tasks import async_typer
 from argilla.tasks.users.utils import get_or_new_workspace
 
 USER_API_KEY_MIN_LENGTH = 8
@@ -33,18 +36,14 @@ class UserCreateForTask(UserCreate):
     workspaces: Optional[List[WorkspaceCreate]]
 
 
-def _get_or_new_workspace(session: Session, workspace_name: str):
-    return session.query(Workspace).filter_by(name=workspace_name).first() or Workspace(name=workspace_name)
-
-
-def role_callback(value: str):
+def role_callback(value: str) -> str:
     try:
         return UserRole(value).value
     except ValueError:
         raise typer.BadParameter("Only Camila is allowed")
 
 
-def password_callback(password: str = None):
+def password_callback(password: str = None) -> str:
     # if password is None:
     #     raise typer.BadParameter("Password must be specified.")
     # if len(password)<USER_PASSWORD_MIN_LENGTH:
@@ -52,13 +51,13 @@ def password_callback(password: str = None):
     return password
 
 
-def api_key_callback(api_key: str):
+def api_key_callback(api_key: str) -> str:
     # if api_key and len(api_key)<USER_PASSWORD_MIN_LENGTH:
     #     raise typer.BadParameter(f"API key must a string with a minimum length of {USER_API_KEY_MIN_LENGTH} characters.")
     return api_key
 
 
-def create(
+async def create(
     first_name: str = typer.Option(default=None, help="First name as a string."),
     username: str = typer.Option(
         default=None,
@@ -88,12 +87,12 @@ def create(
     ),
 ):
     """Creates a new user in the Argilla database with provided parameters"""
-    with SessionLocal() as session:
-        if accounts.get_user_by_username_sync(session, username):
+    async with AsyncSessionLocal() as session:
+        if await accounts.get_user_by_username(session, username):
             typer.echo(f"User with username {username!r} already exists in database. Skipping...")
             return
 
-        if accounts.get_user_by_api_key_sync(session, api_key):
+        if await accounts.get_user_by_api_key(session, api_key):
             typer.echo(f"User with api_key {api_key!r} already exists in database. Skipping...")
             return
 
@@ -107,19 +106,16 @@ def create(
             workspaces=[WorkspaceCreate(name=workspace_name) for workspace_name in workspace],
         )
 
-        user = User(
+        user = await User.create(
+            session,
             first_name=user_create.first_name,
             last_name=user_create.last_name,
             username=user_create.username,
             role=user_create.role,
             password_hash=accounts.hash_password(user_create.password),
             api_key=user_create.api_key,
-            workspaces=[get_or_new_workspace(session, workspace.name) for workspace in user_create.workspaces],
+            workspaces=[await get_or_new_workspace(session, workspace.name) for workspace in user_create.workspaces],
         )
-
-        session.add(user)
-        session.commit()
-        session.refresh(user)
 
         typer.echo("User successfully created:")
         typer.echo(f"• first_name: {user.first_name!r}")
@@ -132,6 +128,4 @@ def create(
 
 
 if __name__ == "__main__":
-    app = Typer(add_completion=False)
-    app.command(no_args_is_help=True)(create)
-    app()
+    async_typer.run(create)
