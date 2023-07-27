@@ -39,8 +39,10 @@ except ImportError:
 
 from argilla.server.models import DatasetStatus, FieldType, QuestionSettings, QuestionType, ResponseStatus
 
-DATASET_CREATE_GUIDELINES_MIN_LENGTH = 1
-DATASET_CREATE_GUIDELINES_MAX_LENGTH = 10000
+DATASET_NAME_MIN_LENGTH = 1
+DATASET_NAME_MAX_LENGTH = 200
+DATASET_GUIDELINES_MIN_LENGTH = 1
+DATASET_GUIDELINES_MAX_LENGTH = 10000
 
 FIELD_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 FIELD_CREATE_NAME_MIN_LENGTH = 1
@@ -97,24 +99,26 @@ class Datasets(BaseModel):
     items: List[Dataset]
 
 
-Guidelines = Annotated[
-    constr(
-        min_length=DATASET_CREATE_GUIDELINES_MIN_LENGTH,
-        max_length=DATASET_CREATE_GUIDELINES_MAX_LENGTH,
-    ),
+DatasetName = Annotated[
+    constr(min_length=DATASET_NAME_MIN_LENGTH, max_length=DATASET_NAME_MAX_LENGTH, regex=r"^(?!-|_)[a-zA-Z0-9-_ ]+$"),
+    Field(..., description="Dataset name"),
+]
+
+DatasetGuidelines = Annotated[
+    constr(min_length=DATASET_GUIDELINES_MIN_LENGTH, max_length=DATASET_GUIDELINES_MAX_LENGTH),
     Field(..., description="Dataset guidelines"),
 ]
 
 
 class DatasetCreate(BaseModel):
-    name: str
-    guidelines: Optional[Guidelines]
+    name: DatasetName
+    guidelines: Optional[DatasetGuidelines]
     workspace_id: UUID
 
 
 class DatasetUpdate(BaseModel):
-    name: Optional[str]
-    guidelines: Optional[Guidelines]
+    name: Optional[DatasetName]
+    guidelines: Optional[DatasetGuidelines]
 
 
 class RecordMetrics(BaseModel):

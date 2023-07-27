@@ -34,7 +34,7 @@ from argilla.server.models import (
     Workspace,
 )
 from argilla.server.schemas.v1.datasets import (
-    DATASET_CREATE_GUIDELINES_MAX_LENGTH,
+    DATASET_GUIDELINES_MAX_LENGTH,
     FIELD_CREATE_NAME_MAX_LENGTH,
     FIELD_CREATE_TITLE_MAX_LENGTH,
     QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
@@ -1252,7 +1252,7 @@ async def test_create_dataset_with_invalid_length_guidelines(
     workspace = await WorkspaceFactory.create()
     dataset_json = {
         "name": "name",
-        "guidelines": "a" * (DATASET_CREATE_GUIDELINES_MAX_LENGTH + 1),
+        "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1),
         "workspace_id": str(workspace.id),
     }
 
