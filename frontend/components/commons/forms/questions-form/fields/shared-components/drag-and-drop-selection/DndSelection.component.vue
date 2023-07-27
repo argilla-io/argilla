@@ -68,7 +68,7 @@ const validKeyCodes = {
   7: 7,
   8: 8,
   9: 9,
-  "=": 10,
+  0: 10,
   "!": 11,
   '"': 12,
 };
@@ -95,6 +95,7 @@ export default {
   },
   methods: {
     rankWithKeyboard(event, questionToMove) {
+      console.log(event)
       const keyCode = event.key;
 
       const slotTo = this.ranking.slots[validKeyCodes[keyCode] - 1];
