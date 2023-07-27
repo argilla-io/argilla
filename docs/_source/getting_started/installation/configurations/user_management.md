@@ -220,8 +220,13 @@ user = rg.User.create(
     last_name="User",
     password="new-password",
     role="admin",
+    workspaces=["ws1", "ws2"]
 )
 ```
+
+:::{note}
+Please note that the provided workspaces must exist; otherwise, an error will be raised.
+:::
 
 ### Update a `User`
 
