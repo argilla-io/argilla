@@ -74,6 +74,7 @@ export default {
             this.$refs.text.focus();
           });
         }
+      },
     },
     value(newValue) {
       if (newValue !== this.currentValue) this.editableText = newValue;
