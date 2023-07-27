@@ -27,7 +27,7 @@ from argilla.server.apis.v0.models.text_classification import (
 )
 from argilla.server.commons.models import PredictionStatus, TaskType
 from argilla.server.models import User
-from argilla.server.schemas.datasets import Dataset
+from argilla.server.schemas.v0.datasets import Dataset
 
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
 from tests.helpers import SecuredClient

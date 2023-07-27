@@ -23,7 +23,7 @@ from argilla.server.errors import (
     GenericServerError,
     ServerError,
 )
-from argilla.server.schemas.datasets import Dataset
+from argilla.server.schemas.v0.datasets import Dataset
 from argilla.utils import telemetry
 from argilla.utils.telemetry import TelemetryClient, get_telemetry_client
 from fastapi import Request
