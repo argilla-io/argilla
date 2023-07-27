@@ -25,6 +25,7 @@ from argilla.client.sdk.commons.errors import (
     ForbiddenApiError,
     NotFoundApiError,
     UnauthorizedApiError,
+    ValidationApiError,
 )
 from argilla.client.sdk.users.api import create_user, delete_user, list_users, whoami
 from argilla.client.sdk.users.models import UserModel
@@ -97,6 +98,16 @@ def test_create_user_errors(owner: "ServerUser", annotator: "ServerUser") -> Non
             username=annotator.username,
             password="user_password",
             role="annotator",
+        )
+
+    with pytest.raises(ValidationApiError):
+        create_user(
+            client=httpx_client,
+            first_name="another-user",
+            username="another-user",
+            password="user_password",
+            role="annotator",
+            workspaces=["i do not exist"],
         )
 
 

@@ -121,6 +121,13 @@ async def test_user_create(owner: "ServerUser") -> None:
         User.create("test_user", password="test_password")
 
 
+def test_user_create_with_non_existent_workspace(owner: "ServerUser") -> None:
+    ArgillaSingleton.init(api_key=owner.api_key)
+
+    with pytest.raises(ValueError, match="^(.*)Workspace 'non_existent_workspace' does not exist$"):
+        User.create("test_user", password="test_password", workspaces=["non_existent_workspace"])
+
+
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
 @pytest.mark.asyncio
 async def test_user_create_not_allowed_role(role: UserRole) -> None:
