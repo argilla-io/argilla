@@ -13,13 +13,16 @@
 #  limitations under the License.
 
 import warnings
-from typing import Any, Dict, Iterator, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.mixins import ArgillaToFromMixin
-from argilla.client.feedback.schemas import FeedbackRecord
 from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
+
+if TYPE_CHECKING:
+    from argilla.client.feedback.schemas import FeedbackRecord
+
 
 warnings.simplefilter("always", DeprecationWarning)
 
@@ -38,7 +41,7 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
         """Returns the number of records in the dataset."""
         return len(self.records)
 
-    def __getitem__(self, key: Union[slice, int]) -> Union[FeedbackRecord, List[FeedbackRecord]]:
+    def __getitem__(self, key: Union[slice, int]) -> Union["FeedbackRecord", List["FeedbackRecord"]]:
         """Returns the record(s) at the given index(es).
 
         Args:
@@ -55,7 +58,7 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
             raise IndexError(f"This dataset contains {len(self)} records, so index {key} is out of range.")
         return self.records[key]
 
-    def iter(self, batch_size: Optional[int] = FETCHING_BATCH_SIZE) -> Iterator[List[FeedbackRecord]]:
+    def iter(self, batch_size: Optional[int] = FETCHING_BATCH_SIZE) -> Iterator[List["FeedbackRecord"]]:
         """Returns an iterator over the records in the dataset.
 
         Args:
@@ -76,7 +79,7 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
 
     def add_records(
         self,
-        records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
+        records: Union["FeedbackRecord", Dict[str, Any], List[Union["FeedbackRecord", Dict[str, Any]]]],
     ) -> None:
         """Adds the given records to the dataset, and stores them locally. If you're planning to add those
         records either to Argilla or HuggingFace, make sure to call `push_to_argilla` or `push_to_huggingface`,
