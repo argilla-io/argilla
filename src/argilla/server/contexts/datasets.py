@@ -159,7 +159,7 @@ async def create_field(db: "AsyncSession", dataset: Dataset, field_create: Field
 
 
 async def update_field(db: "AsyncSession", field: Field, field_update: "FieldUpdate") -> Field:
-    params = field_update.dict(exclude_unset=True, exclude_none=True)
+    params = field_update.dict(exclude_unset=True)
     return await field.update(db, **params)
 
 
@@ -196,7 +196,7 @@ async def create_question(db: "AsyncSession", dataset: Dataset, question_create:
 
 
 async def update_question(db: "AsyncSession", question: Question, question_update: "QuestionUpdate") -> Question:
-    params = question_update.dict(exclude_unset=True, exclude_none=True)
+    params = question_update.dict(exclude_unset=True)
     return await question.update(db, **params)
 
 

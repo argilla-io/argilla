@@ -30,7 +30,7 @@ class UpdateSchema(BaseModel):
         if cls.__non_explicit_none__ is None:
             return values
 
-        for key in cls.__non_explicit_none:
+        for key in cls.__non_explicit_none__:
             if key in values and values[key] is None:
                 raise ValueError(f"'{key}' cannot be `None`.")
 
