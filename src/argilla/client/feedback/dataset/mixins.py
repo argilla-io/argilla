@@ -176,23 +176,9 @@ class ArgillaToFromMixin:
                     f"Failed while adding the records to the `FeedbackDataset` in Argilla with exception: {e}"
                 ) from e
 
-        # if self.argilla_id is not None:
-        #     _LOGGER.warning(
-        #         "Since the current object is already a `FeedbackDataset` pushed to Argilla, you'll keep on"
-        #         " interacting with the same dataset in Argilla, even though the one you just pushed holds a"
-        #         f" different ID ({argilla_id}). So on, if you want to switch to the newly pushed `FeedbackDataset`"
-        #         f" instead, please use `FeedbackDataset.from_argilla(id='{argilla_id}')`."
-        #     )
-        #     return
-
-        # self.argilla_id = argilla_id
-
-        # for record in self._new_records:
-        #     record._reset_updated()
-        # self._records += self._new_records
-        # self._new_records = []
-
-        return ArgillaFeedbackDataset(
+        self.__class__ = ArgillaFeedbackDataset
+        self.__init__(
+            client=httpx_client,
             id=argilla_id,
             name=name,
             workspace=workspace,
@@ -200,6 +186,7 @@ class ArgillaToFromMixin:
             questions=questions,
             guidelines=self.guidelines,
         )
+        return self
 
     @classmethod
     def from_argilla(
