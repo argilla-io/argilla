@@ -20,6 +20,7 @@ from uuid import UUID
 from pydantic import parse_obj_as
 from sqlalchemy import JSON, ForeignKey, Text, UniqueConstraint, and_
 from sqlalchemy import Enum as SAEnum
+from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from argilla.server.models.base import DatabaseModel
@@ -60,7 +61,7 @@ class Field(DatabaseModel):
     name: Mapped[str] = mapped_column(Text, index=True)
     title: Mapped[str] = mapped_column(Text)
     required: Mapped[bool] = mapped_column(default=False)
-    settings: Mapped[dict] = mapped_column(JSON, default={})
+    settings: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSON), default={})
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
 
     dataset: Mapped["Dataset"] = relationship(back_populates="fields")
