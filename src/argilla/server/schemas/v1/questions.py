@@ -107,4 +107,4 @@ class QuestionUpdate(UpdateSchema):
     description: Optional[str]
     settings: Optional[Union[Dict[str, Any], TextQuestionSettingsUpdate, LabelSelectionSettingsUpdate]]
 
-    __non_explicit_none__ = {"title", "description"}
+    __non_explicit_none__ = {"title", "description", "settings"}

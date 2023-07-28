@@ -50,4 +50,4 @@ class FieldUpdate(UpdateSchema):
     title: Optional[FieldTitle]
     settings: Optional[TextFieldSettingsUpdate]
 
-    __non_explicit_none__ = {"title"}
+    __non_explicit_none__ = {"title", "settings"}
