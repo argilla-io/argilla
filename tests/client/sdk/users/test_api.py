@@ -72,7 +72,12 @@ async def test_create_user(owner: "ServerUser", role: str) -> None:
     httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
 
     response = create_user(
-        client=httpx_client, first_name="user", username="user_1", password="user_password", role=role
+        client=httpx_client,
+        first_name="user",
+        username="user_1",
+        password="user_password",
+        role=role,
+        workspaces=["workspace_1", "workspace_2"],
     )
 
     assert response.status_code == 200
