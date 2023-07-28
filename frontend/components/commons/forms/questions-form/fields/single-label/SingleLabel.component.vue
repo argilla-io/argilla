@@ -72,7 +72,6 @@ export default {
     options: {
       deep: true,
       handler(newOptions) {
-        debugger;
         const hasAnswer = newOptions.some((option) => option.isSelected);
         hasAnswer && this.$emit("on-user-answer");
       },
