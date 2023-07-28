@@ -559,6 +559,82 @@ const questions = [
   },
 ];
 
+
+const rankingQuestionWith12Slots = [{
+  "id": "9f23fcdb-a57a-4568-a9d8-2360315e9fd3",
+  "name": "rating",
+  "title": "Rating",
+  "description": null,
+  "required": true,
+  "settings": {
+    "type": "ranking",
+    "options": [
+      {
+        "value": "1",
+        "text": "1",
+        "description": null
+      },
+      {
+        "value": "2",
+        "text": "2",
+        "description": null
+      },
+      {
+        "value": "3",
+        "text": "3",
+        "description": null
+      },
+      {
+        "value": "4",
+        "text": "4",
+        "description": null
+      },
+      {
+        "value": "5",
+        "text": "5",
+        "description": null
+      },
+      {
+        "value": "6",
+        "text": "6",
+        "description": null
+      },
+      {
+        "value": "7",
+        "text": "7",
+        "description": null
+      },
+      {
+        "value": "8",
+        "text": "8",
+        "description": null
+      },
+      {
+        "value": "9",
+        "text": "9",
+        "description": null
+      },
+      {
+        "value": "10",
+        "text": "10",
+        "description": null
+      },
+      {
+        "value": "11",
+        "text": "11",
+        "description": null
+      },
+      {
+        "value": "12",
+        "text": "12",
+        "description": null
+      }
+    ]
+  },
+  "inserted_at": "2023-07-26T12:15:01",
+  "updated_at": "2023-07-26T12:15:01"
+}];
+
 export const mockQuestion = async (page: Page, datasetId: string) => {
   await page.route(
     `*/**/api/v1/datasets/${datasetId}/questions`,
@@ -566,6 +642,19 @@ export const mockQuestion = async (page: Page, datasetId: string) => {
       await route.fulfill({
         json: {
           items: questions,
+        },
+      });
+    }
+  );
+};
+
+export const mockQuestionWith12Ranking = async (page: Page, datasetId: string) => {
+  await page.route(
+    `*/**/api/v1/datasets/${datasetId}/questions`,
+    async (route) => {
+      await route.fulfill({
+        json: {
+          items: rankingQuestionWith12Slots,
         },
       });
     }

@@ -1,6 +1,6 @@
 import { Page } from "@playwright/test";
 import { DatasetData, mockFeedbackTaskDataset } from "./dataset-api-mock";
-import { mockQuestion } from "./question-api-mock";
+import { mockQuestion, mockQuestionWith12Ranking } from "./question-api-mock";
 import { mockFields } from "./field-api-mock";
 
 const recordOne = {
@@ -73,6 +73,20 @@ const recordOne = {
   inserted_at: "2023-07-18T07:43:38",
   updated_at: "2023-07-18T07:43:38",
 };
+
+const recordFor12ranking = {
+  id: "1da11112-69ac-4cc9-947e-c8293243510a",
+  fields: {
+    text: "blablabla"
+  },
+  metadata: {},
+  external_id: null,
+  responses: [],
+  suggestions: [],
+  inserted_at: "2023-07-26T12:15:02",
+  updated_at: "2023-07-26T12:15:02"
+}
+
 export const mockRecord = async (
   page: Page,
   { datasetId, workspaceId }: DatasetData
@@ -89,6 +103,28 @@ export const mockRecord = async (
       await route.fulfill({
         json: {
           items: [recordOne],
+        },
+      });
+    }
+  );
+};
+
+export const mockRecordWith12Ranking = async (
+  page: Page,
+  { datasetId, workspaceId }: DatasetData
+) => {
+  await mockFeedbackTaskDataset(page, { datasetId, workspaceId });
+
+  await mockQuestionWith12Ranking(page, datasetId);
+
+  await mockFields(page, datasetId);
+
+  await page.route(
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing`,
+    async (route) => {
+      await route.fulfill({
+        json: {
+          items: [recordFor12ranking],
         },
       });
     }

@@ -4,6 +4,7 @@ import {
   mockAllDatasets,
   newDatasetsMocked,
   mockRecord,
+  mockRecordWith12Ranking
 } from "../common";
 
 const goToAnnotationPage = async (page) => {
@@ -11,6 +12,24 @@ const goToAnnotationPage = async (page) => {
 
   await mockAllDatasets(page);
   await mockRecord(page, {
+    datasetId: dataset.id,
+    workspaceId: dataset.workspace_id,
+  });
+
+  await loginUserAndWaitFor(page, "datasets");
+
+  await page.waitForTimeout(2000);
+
+  await page.getByRole("link", { name: dataset.name }).click();
+
+  await page.waitForTimeout(3000);
+};
+
+const goToAnnotationPageWith12Ranking = async (page) => {
+  const dataset = newDatasetsMocked[0];
+
+  await mockAllDatasets(page);
+  await mockRecordWith12Ranking(page, {
     datasetId: dataset.id,
     workspaceId: dataset.workspace_id,
   });
@@ -545,4 +564,22 @@ test.describe("Annotation page shortcuts", () => {
       await expect(page).toHaveScreenshot();
     });
   });
+
+  test.describe("Ranking component with 12 slots", () => {
+    test("go to ranking component with keyboard", async ({ page }) => {
+      await goToAnnotationPageWith12Ranking(page);
+
+      await expect(page).toHaveScreenshot();
+    });
+    test("move to slot 10 by pressing 0", async ({ page }) => {
+      await goToAnnotationPageWith12Ranking(page);
+      await page.keyboard.press("0");
+      await expect(page).toHaveScreenshot();
+    });
+    test("move to slot 1 by pressing 1", async ({ page }) => {
+      await goToAnnotationPageWith12Ranking(page);
+      await page.keyboard.press("1");
+      await expect(page).toHaveScreenshot();
+    });
+  })
 });
