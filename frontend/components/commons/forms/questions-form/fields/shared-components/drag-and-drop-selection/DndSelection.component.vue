@@ -90,7 +90,7 @@ export default {
     isFocused: {
       immediate: true,
       handler(newValue) {
-        !!newValue && this.onAutoFocusFirstItem();
+        !!newValue && this.focusOnFirstQuestion();
       },
     },
   },
