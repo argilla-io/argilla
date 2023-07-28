@@ -57,6 +57,7 @@
 
 <script>
 import "assets/icons/draggable";
+import { isNil } from "lodash";
 
 const validKeyCodes = {
   1: 1,
@@ -95,8 +96,18 @@ export default {
   },
   methods: {
     rankWithKeyboard(event, questionToMove) {
-      console.log(event)
+      if (event.shiftKey) {
+        return;
+      }
+
+      event.stopPropagation();
+
       const keyCode = event.key;
+
+      if (this.onUnrankFor(keyCode, questionToMove)) {
+        this.focusOnFirstQuestion();
+        return;
+      }
 
       const slotTo = this.ranking.slots[validKeyCodes[keyCode] - 1];
 
@@ -106,6 +117,26 @@ export default {
         this.$emit("on-reorder", this.ranking);
         this.onAutoFocusFirstItem();
       }
+    },
+    onUnrankFor(aKeyCode, aQuestion) {
+      const isRanked = !isNil(aQuestion.rank);
+
+      if (aKeyCode == "Backspace" && isRanked) {
+        aQuestion.rank = null;
+
+        return true;
+      }
+
+      return false;
+    },
+    focusOnFirstQuestion() {
+      this.$nextTick(() => {
+        const firstQuestion = this.$refs.question?.find(
+          ({ innerText }) => innerText == this.ranking.questions[0]?.text
+        );
+
+        firstQuestion?.focus();
+      });
     },
     onMoveEnd() {
       this.$emit("on-reorder", this.ranking);
@@ -121,6 +152,9 @@ export default {
           this.$refs.items[0].focus();
         }
       });
+    },
+    looseFocus() {
+      this.questionRefWrapper.blur();
     },
   },
 };
