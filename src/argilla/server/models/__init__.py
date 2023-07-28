@@ -12,5 +12,5 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .questions import *  # noqa: I001
-from .models import *  # noqa: I001
+from .models import *  # noqa: F403
+from .questions import *  # noqa: F403

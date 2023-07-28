@@ -158,6 +158,12 @@ exclude_lines = [
 profile = "black"
 
 [tool.ruff]
+select = [
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # pyflakes
+    "I", # isort
+]
 # Ignore line length violations
 ignore = ["E501"]
 

@@ -133,7 +133,7 @@ class User:
                 client = client.httpx
             return client
         except Exception as e:
-            raise RuntimeError(f"The `rg.active_client()` is not available or not respoding.") from e
+            raise RuntimeError("The `rg.active_client()` is not available or not respoding.") from e
 
     @allowed_for_roles(roles=[UserRole.owner])
     def delete(self) -> None:

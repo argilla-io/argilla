@@ -18,15 +18,13 @@ import logging
 import re
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from argilla.client.models import Record, TextClassificationRecord, TokenClassificationRecord
-from argilla.monitoring.base import BaseMonitor
-from argilla.utils.dependency import require_version
-
-require_version("starlette>=0.13.0")
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response, StreamingResponse
 from starlette.types import Message, Receive
+
+from argilla.client.models import Record, TextClassificationRecord, TokenClassificationRecord
+from argilla.monitoring.base import BaseMonitor
 
 _logger = logging.getLogger(__name__)
 _default_tokenization_pattern = re.compile(r"\W+")

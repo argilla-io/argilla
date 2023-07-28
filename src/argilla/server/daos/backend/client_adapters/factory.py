@@ -14,7 +14,6 @@
 import logging
 from typing import Tuple, Type
 
-import httpx
 from opensearchpy import OpenSearch
 from packaging.version import parse
 

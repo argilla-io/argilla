@@ -26,7 +26,6 @@ from argilla.server.daos.models.datasets import (
     EmbeddingsConfig,
 )
 from argilla.server.daos.records import DatasetRecordsDAO
-from argilla.server.errors import WrongTaskError
 
 
 class DatasetsDAO:

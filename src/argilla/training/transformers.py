@@ -305,11 +305,11 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
                 predictions = np.argmax(predictions, axis=2)
 
                 true_predictions = [
-                    [self._label_list[p] for (p, l) in zip(prediction, label) if l != -100]
+                    [self._label_list[p] for (p, l) in zip(prediction, label) if l != -100]  # noqa: E741
                     for prediction, label in zip(predictions, labels)
                 ]
                 true_labels = [
-                    [self._label_list[l] for (p, l) in zip(prediction, label) if l != -100]
+                    [self._label_list[l] for (p, l) in zip(prediction, label) if l != -100]  # noqa: E741
                     for prediction, label in zip(predictions, labels)
                 ]
 

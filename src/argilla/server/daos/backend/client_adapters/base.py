@@ -14,7 +14,7 @@
 
 import dataclasses
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from argilla.server.daos.backend.metrics.base import ElasticsearchMetric
 from argilla.server.daos.backend.search.model import BaseQuery, SortConfig

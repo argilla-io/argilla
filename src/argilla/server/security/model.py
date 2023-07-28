@@ -12,17 +12,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import re
-import uuid
 from datetime import datetime
 from typing import Any, List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field, constr, root_validator, validator
+from pydantic import BaseModel, Field, constr
 from pydantic.utils import GetterDict
 
 from argilla._constants import ES_INDEX_REGEX_PATTERN
-from argilla.server.errors import BadRequestError, EntityNotFoundError
 from argilla.server.models import UserRole
 
 WORKSPACE_NAME_REGEX = ES_INDEX_REGEX_PATTERN

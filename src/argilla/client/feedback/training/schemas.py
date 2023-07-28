@@ -14,7 +14,7 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Union
+from typing import TYPE_CHECKING, List, Tuple, Union
 
 import pandas as pd
 from pydantic import BaseModel
@@ -36,6 +36,10 @@ from argilla.client.feedback.unification import (
 )
 from argilla.client.models import Framework
 from argilla.utils.dependency import require_version, requires_version
+
+if TYPE_CHECKING:
+    from datasets import Dataset, DatasetDict
+    from spacy.tokens import DocBin
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -82,13 +86,13 @@ class TrainingData(ABC):
     @abstractmethod
     def _prepare_for_training_with_transformers(
         self, data: List[dict], train_size, seed: int
-    ) -> Union["datasets.Dataset", "datasets.DatasetDict"]:
+    ) -> Union["Dataset", "DatasetDict"]:
         """Overwritten by subclasses"""
 
     @abstractmethod
     def _prepare_for_training_with_spacy(
         self, data: List[dict], train_size, seed: int, lang: str
-    ) -> Union["spacy.token.DocBin", Tuple["spacy.token.DocBin", "spacy.token.DocBin"]]:
+    ) -> Union["DocBin", Tuple["DocBin", "DocBin"]]:
         """Overwritten by subclasses"""
 
     @abstractmethod
@@ -253,7 +257,7 @@ class TrainingTaskMappingForTextClassification(BaseModel, TrainingData):
     @requires_version("datasets>1.17.0")
     def _prepare_for_training_with_transformers(
         self, data: List[dict], train_size: float, seed: int, framework: Union[str, Framework]
-    ) -> Union["datasets.Dataset", "datasets.DatasetDict"]:
+    ) -> Union["Dataset", "DatasetDict"]:
         self.test_framework_support(framework)
         import datasets
 
@@ -300,7 +304,7 @@ class TrainingTaskMappingForTextClassification(BaseModel, TrainingData):
     @requires_version("spacy")
     def _prepare_for_training_with_spacy(
         self, data: List[dict], train_size: float, seed: int, lang: str
-    ) -> Union["spacy.token.DocBin", Tuple["spacy.token.DocBin", "spacy.token.DocBin"]]:
+    ) -> Union["DocBin", Tuple["DocBin", "DocBin"]]:
         from spacy.tokens import DocBin
 
         all_labels = self.label.question.__all_labels__

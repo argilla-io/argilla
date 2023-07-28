@@ -133,9 +133,12 @@ class SearchRecordsService:
         """Scan records for a queried"""
         search = DaoRecordsSearch(query=query)
 
-        transform_doc = lambda doc: doc
         if record_type:
             transform_doc = record_type.parse_obj
+        else:
+
+            def transform_doc(doc):
+                return doc
 
         for doc in self.__dao__.scan_dataset(
             dataset,

@@ -230,7 +230,7 @@ class SearchEngine:
     def _dynamic_templates_for_question_responses(self, questions: List[Question]) -> List[dict]:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic-templates.html
         return [
-            {"status_responses": {"path_match": f"responses.*.status", "mapping": {"type": "keyword"}}},
+            {"status_responses": {"path_match": "responses.*.status", "mapping": {"type": "keyword"}}},
             *[
                 {
                     f"{question.name}_responses": {
