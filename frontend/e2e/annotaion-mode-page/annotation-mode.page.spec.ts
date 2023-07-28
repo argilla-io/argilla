@@ -588,5 +588,33 @@ test.describe("Annotation page shortcuts", () => {
       await page.keyboard.press("Backspace");
       await expect(page).toHaveScreenshot();
     });
+    test("clear form answers after unrank", async ({ page }) => {
+      await goToAnnotationPageWith12Ranking(page);
+      await page.keyboard.press("1");
+      await page.keyboard.press("Shift+Tab");
+      await page.keyboard.press("Shift+Space");
+      await expect(page).toHaveScreenshot();
+    });
+    test.skip("discard answers after unrank", async ({ page }) => {
+      await goToAnnotationPageWith12Ranking(page);
+      await page.keyboard.press("1");
+      await page.keyboard.press("1");
+      await page.keyboard.press("1");
+      await page.keyboard.press("1");
+      await page.keyboard.press("1");
+      await page.keyboard.press("1");
+      await page.keyboard.press("1");
+      await page.keyboard.press("1");
+      await page.keyboard.press("1");
+      await page.keyboard.press("1");
+      await page.keyboard.press("1");
+      await page.keyboard.press("1");
+      await page.keyboard.press("Shift+Tab");
+      await page.keyboard.down("Shift");
+      await page.keyboard.press("Enter");
+
+      await page.waitForTimeout(2000)
+      await expect(page).toHaveScreenshot();
+    });
   })
 });
