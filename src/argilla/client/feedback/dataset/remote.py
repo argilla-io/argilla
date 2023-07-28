@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     import httpx
 
     from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.sdk.v1.datasets.models import FeedbackItemModel
     from argilla.client.workspaces import Workspace
 
 
@@ -68,11 +69,68 @@ class _ArgillaFeedbackDataset(FeedbackDatasetBase):
     def workspace(self) -> "Workspace":
         return self._workspace
 
+    def __parse_record(self, record: "FeedbackItemModel") -> FeedbackRecord:
+        record = record.dict(
+            exclude={
+                "inserted_at": ...,
+                "updated_at": ...,
+                "responses": {"__all__": {"id", "inserted_at", "updated_at"}},
+                "suggestions": {"__all__": {"id"}},
+            },
+            exclude_none=True,
+        )
+        for suggestion in record.get("suggestions", []):
+            suggestion.update({"question_name": self.__question_id2name[suggestion["question_id"]]})
+        return FeedbackRecord(**record)
+
     def __len__(self) -> int:
-        pass
+        try:
+            response = datasets_api_v1.get_metrics(client=self.client, id=self.id)
+        except Exception as e:
+            raise Exception(
+                "Failed while getting the metrics from the current `FeedbackDataset`" f" in Argilla with exception: {e}"
+            ) from e
+        return response.parsed.records.count
 
     def __getitem__(self, key: Union[slice, int]) -> Union[FeedbackRecord, List[FeedbackRecord]]:
-        pass
+        offsets = []
+        limit = None
+        if isinstance(key, slice):
+            start, stop, step = key.indices(len(self))
+            if step is not None and step != 1:
+                return [self[i] for i in range(start, stop, step)]
+            if start < 0:
+                start += len(self)
+            if stop < 0:
+                stop += len(self)
+            if start < 0 or stop < 0:
+                raise IndexError("Index out of range")
+            limit = stop - start
+            offsets = [start] if limit < FETCHING_BATCH_SIZE else list(range(start, stop, FETCHING_BATCH_SIZE))
+        elif isinstance(key, int):
+            if key < 0:
+                key += len(self)
+            if key < 0 or key >= len(self):
+                raise IndexError("Index out of range")
+            offsets = [key]
+            limit = 1
+        else:
+            raise TypeError("Invalid argument type")
+
+        records = []
+        for offset in offsets:
+            fetched_records = datasets_api_v1.get_records(
+                client=self.client,
+                id=self.id,
+                offset=offset,
+                limit=limit,
+            ).parsed
+            if len(fetched_records.items) == 1:
+                record = fetched_records.items[0]
+                records.append(self.__parse_record(record))
+            else:
+                records.extend([self.__parse_record(record) for record in fetched_records.items])
+        return records[0] if isinstance(key, int) else records
 
     def __iter__(self) -> Iterator[FeedbackRecord]:
         current_batch = 0
@@ -101,8 +159,8 @@ class _ArgillaFeedbackDataset(FeedbackDatasetBase):
             if len(batch.items) < FETCHING_BATCH_SIZE:
                 break
 
-    def fetch_records(self) -> None:
-        pass
+    def fetch_records(self) -> List[FeedbackRecord]:
+        raise NotImplementedError("This method is not implemented yet")
 
     def add_records(
         self,
