@@ -256,7 +256,7 @@ class QuestionFactory(BaseFactory):
 
 
 class TextQuestionFactory(QuestionFactory):
-    settings = {"type": QuestionType.text.value}
+    settings = {"type": QuestionType.text.value, "use_markdown": False}
 
 
 class RatingQuestionFactory(QuestionFactory):

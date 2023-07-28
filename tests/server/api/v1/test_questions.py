@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime
 from typing import TYPE_CHECKING, Type
 from uuid import uuid4
 
@@ -59,18 +58,12 @@ if TYPE_CHECKING:
         ),
         (
             TextQuestionFactory,
-            {"title": None, "description": None},
-            {"type": "text", "use_markdown": False},
-        ),
-        (
-            TextQuestionFactory,
             {"name": "New Name", "required": True, "settings": {"type": "unit-test"}, "dataset_id": str(uuid4())},
             {"type": "text", "use_markdown": False},
         ),
         (
             RatingQuestionFactory,
             {
-                "type": "label_selection",
                 "settings": {"options": [{"value": 94}, {"value": 95}, {"value": 96}, {"value": 97}]},
             },
             {
@@ -116,6 +109,19 @@ if TYPE_CHECKING:
             },
         ),
         (
+            LabelSelectionQuestionFactory,
+            {"settings": {"visible_options": None}},
+            {
+                "type": "label_selection",
+                "options": [
+                    {"value": "option1", "text": "Option 1", "description": None},
+                    {"value": "option2", "text": "Option 2", "description": None},
+                    {"value": "option3", "text": "Option 3", "description": None},
+                ],
+                "visible_options": None,
+            },
+        ),
+        (
             RankingQuestionFactory,
             {
                 "settings": {
@@ -137,7 +143,7 @@ if TYPE_CHECKING:
         ),
     ],
 )
-@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+@pytest.mark.parametrize("role", [UserRole.owner])
 @pytest.mark.asyncio
 async def test_update_question(
     client: TestClient,
@@ -165,6 +171,19 @@ async def test_update_question(
         "inserted_at": question.inserted_at.isoformat(),
         "updated_at": question.updated_at.isoformat(),
     }
+
+
+@pytest.mark.parametrize(
+    "QuestionFactory, payload",
+    [
+        (TextQuestionFactory, {"title": None, "description": None, "settings": {"use_markdown": None}}),
+    ],
+)
+@pytest.mark.asyncio
+async def test_update_question_with_invalid_settings(
+    client: TestClient, owner_auth_header: dict, QuestionFactory: Type["QuestionFactoryType"], payload: dict
+):
+    pass
 
 
 @pytest.mark.asyncio

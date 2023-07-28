@@ -39,7 +39,6 @@ if TYPE_CHECKING:
         {"title": "New Title", "settings": {"use_markdown": True}},
         {"title": "New Title"},
         {},
-        {"title": None, "settings": None},
         {"name": "New Name", "required": True, "settings": {"type": "unit-test"}, "dataset_id": str(uuid4())},
     ],
 )
@@ -68,6 +67,21 @@ async def test_update_field(client: TestClient, role: UserRole, payload: dict):
         "inserted_at": field.inserted_at.isoformat(),
         "updated_at": field.updated_at.isoformat(),
     }
+
+
+@pytest.mark.parametrize(
+    "field_json",
+    [
+        {"title": None, "settings": None},
+    ],
+)
+@pytest.mark.asyncio
+async def test_update_field_with_invalid_settings(client: TestClient, owner_auth_header: dict, field_json: dict):
+    field = await TextFieldFactory.create()
+
+    response = client.patch(f"/api/v1/fields/{field.id}", headers=owner_auth_header, json=field_json)
+
+    assert response.status_code == 422
 
 
 @pytest.mark.asyncio
