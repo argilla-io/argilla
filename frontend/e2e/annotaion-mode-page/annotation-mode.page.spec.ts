@@ -4,13 +4,14 @@ import {
   mockAllDatasets,
   newDatasetsMocked,
   mockRecord,
+  mockDiscardRecord,
 } from "../common";
 
 const goToAnnotationPage = async (page) => {
   const dataset = newDatasetsMocked[0];
 
   await mockAllDatasets(page);
-  await mockRecord(page, {
+  const record = await mockRecord(page, {
     datasetId: dataset.id,
     workspaceId: dataset.workspace_id,
   });
@@ -22,6 +23,8 @@ const goToAnnotationPage = async (page) => {
   await page.getByRole("link", { name: dataset.name }).click();
 
   await page.waitForTimeout(3000);
+
+  return record;
 };
 
 test.describe("Annotate page", () => {
@@ -85,6 +88,19 @@ test.describe("Annotate page", () => {
     await expect(page).toHaveScreenshot();
 
     await page.getByText("Ranking (optional)").scrollIntoViewIfNeeded();
+
+    await expect(page).toHaveScreenshot();
+  });
+
+  test("clear all questions and discard the record", async ({ page }) => {
+    const record = await goToAnnotationPage(page);
+    await mockDiscardRecord(page, record.id);
+
+    await page.getByRole("button", { name: "Clear" }).click();
+
+    await page.getByRole("button", { name: "Discard" }).click();
+
+    await page.waitForTimeout(2000);
 
     await expect(page).toHaveScreenshot();
   });
