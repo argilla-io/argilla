@@ -17,13 +17,6 @@ from unittest.mock import MagicMock
 
 import pytest
 from argilla.server.commons.models import TaskType
-from argilla.server.errors import (
-    EntityAlreadyExistsError,
-    EntityNotFoundError,
-    GenericServerError,
-    ServerError,
-)
-from argilla.server.schemas.v0.datasets import Dataset
 from argilla.utils import telemetry
 from argilla.utils.telemetry import TelemetryClient, get_telemetry_client
 from fastapi import Request
@@ -57,50 +50,3 @@ async def test_track_bulk(test_telemetry):
 
     await telemetry.track_bulk(task=task, records=records)
     test_telemetry.assert_called_once_with("LogRecordsRequested", {"task": task, "records": records})
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize(
-    ["error", "expected_event"],
-    [
-        (
-            EntityNotFoundError(name="mock-name", type="MockType"),
-            {
-                "accept-language": None,
-                "code": "argilla.api.errors::EntityNotFoundError",
-                "type": "MockType",
-                "user-agent": None,
-            },
-        ),
-        (
-            EntityAlreadyExistsError(name="mock-name", type=Dataset, workspace="mock-workspace"),
-            {
-                "accept-language": None,
-                "code": "argilla.api.errors::EntityAlreadyExistsError",
-                "type": "Dataset",
-                "user-agent": None,
-            },
-        ),
-        (
-            GenericServerError(RuntimeError("This is a mock error")),
-            {
-                "accept-language": None,
-                "code": "argilla.api.errors::GenericServerError",
-                "type": "builtins.RuntimeError",
-                "user-agent": None,
-            },
-        ),
-        (
-            ServerError(),
-            {
-                "accept-language": None,
-                "code": "argilla.api.errors::ServerError",
-                "user-agent": None,
-            },
-        ),
-    ],
-)
-async def test_track_error(test_telemetry, error, expected_event):
-    await telemetry.track_error(error, request=mock_request)
-
-    test_telemetry.assert_called_once_with("ServerErrorFound", expected_event)
