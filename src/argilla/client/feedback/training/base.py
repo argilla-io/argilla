@@ -173,6 +173,16 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 seed=self._seed,
                 model=self._model,
             )
+        elif framework is Framework.TRL:
+            from argilla.client.feedback.training.frameworks.trl import ArgillaTRLTrainer
+
+            self._trainer = ArgillaTRLTrainer(
+                feedback_dataset=self._dataset,
+                task=self._task,
+                prepared_data=self._prepared_data,
+                seed=self._seed,
+                model=self._model,
+            )
         else:
             raise NotImplementedError(f"{framework} is not a valid framework.")
 
