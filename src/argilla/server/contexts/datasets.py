@@ -133,6 +133,11 @@ async def delete_dataset(db: "AsyncSession", search_engine: SearchEngine, datase
     return dataset
 
 
+async def update_dataset(db: "AsyncSession", dataset: Dataset, dataset_update: DatasetCreate) -> Dataset:
+    params = dataset_update.dict(exclude_unset=True, exclude_none=True)
+    return await dataset.update(db, **params)
+
+
 async def get_field_by_id(db: "AsyncSession", field_id: UUID) -> Union[Field, None]:
     result = await db.execute(select(Field).filter_by(id=field_id).options(selectinload(Field.dataset)))
     return result.scalar_one_or_none()
