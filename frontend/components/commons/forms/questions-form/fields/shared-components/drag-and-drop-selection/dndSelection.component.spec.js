@@ -9,6 +9,10 @@ const options = {
   propsData: { ranking: {} },
 };
 
+const eventFor = (key) => {
+  return { stopPropagation: jest.fn(), key };
+};
+
 beforeEach(() => {
   wrapper = shallowMount(DndSelectionComponent, options);
 });
@@ -38,7 +42,7 @@ describe("rankWithKeyboard should", () => {
       propsData: { ranking },
     });
 
-    component.vm.rankWithKeyboard({ key: "5" }, questionOne);
+    component.vm.rankWithKeyboard(eventFor("5"), questionOne);
 
     expect(component.vm.ranking.slots[0].items.length).toBeFalsy();
     expect(component.vm.ranking.slots[1].items.length).toBeFalsy();
@@ -54,7 +58,7 @@ describe("rankWithKeyboard should", () => {
       propsData: { ranking },
     });
 
-    component.vm.rankWithKeyboard({ key: "&" }, questionOne);
+    component.vm.rankWithKeyboard(eventFor("&"), questionOne);
 
     expect(component.vm.ranking.slots[0].items.length).toBeFalsy();
     expect(component.vm.ranking.slots[1].items.length).toBeFalsy();
@@ -70,7 +74,7 @@ describe("rankWithKeyboard should", () => {
       propsData: { ranking },
     });
 
-    component.vm.rankWithKeyboard({ key: "1" }, questionOne);
+    component.vm.rankWithKeyboard(eventFor("1"), questionOne);
 
     expect(component.vm.ranking.slots[0].items[0]).toBe(questionOne);
   });
@@ -82,9 +86,9 @@ describe("rankWithKeyboard should", () => {
       ...options,
       propsData: { ranking },
     });
-    component.vm.rankWithKeyboard({ key: "1" }, questionOne);
+    component.vm.rankWithKeyboard(eventFor("1"), questionOne);
 
-    component.vm.rankWithKeyboard({ key: "1" }, questionOne);
+    component.vm.rankWithKeyboard(eventFor("1"), questionOne);
 
     expect(component.vm.ranking.slots[0].items[0]).toBe(questionOne);
     expect(component.vm.ranking.slots[0].items.length).toBe(1);
@@ -98,9 +102,9 @@ describe("rankWithKeyboard should", () => {
       ...options,
       propsData: { ranking },
     });
-    component.vm.rankWithKeyboard({ key: "1" }, questionOne);
+    component.vm.rankWithKeyboard(eventFor("1"), questionOne);
 
-    component.vm.rankWithKeyboard({ key: "1" }, questionOne);
+    component.vm.rankWithKeyboard(eventFor("1"), questionOne);
 
     expect(component.vm.ranking.slots[0].items[0]).toBe(questionOne);
     expect(component.vm.ranking.slots[0].items.length).toBe(1);
@@ -114,9 +118,9 @@ describe("rankWithKeyboard should", () => {
       ...options,
       propsData: { ranking },
     });
-    component.vm.rankWithKeyboard({ key: "2" }, questionOne);
+    component.vm.rankWithKeyboard(eventFor("2"), questionOne);
 
-    component.vm.rankWithKeyboard({ key: "1" }, questionOne);
+    component.vm.rankWithKeyboard(eventFor("1"), questionOne);
 
     expect(component.vm.ranking.slots[0].items[0]).toBe(questionOne);
     expect(component.vm.ranking.slots[0].items.length).toBe(1);
