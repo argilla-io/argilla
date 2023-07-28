@@ -85,9 +85,8 @@ export default {
   display: flex;
   flex: 0 0 100%;
   &--markdown {
-    display: flex;
+    display: inline;
     flex: 1;
-    flex-direction: column;
     padding: $base-space;
   }
 }
