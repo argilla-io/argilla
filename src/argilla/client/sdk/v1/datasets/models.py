@@ -106,13 +106,5 @@ class FeedbackRecordsMetricsModel(BaseModel):
     count: int
 
 
-class FeedbackResponsesMetricsModel(BaseModel):
-    count: int
-    submitted: int
-    discarded: int
-    draft: int
-
-
 class FeedbackMetricsModel(BaseModel):
     records: FeedbackRecordsMetricsModel
-    responses: FeedbackResponsesMetricsModel
