@@ -23,6 +23,7 @@ from argilla.client.sdk.v1.datasets.api import (
     delete_dataset,
     get_dataset,
     get_fields,
+    get_metrics,
     get_questions,
     get_records,
     list_datasets,
@@ -33,6 +34,7 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackDatasetModel,
     FeedbackFieldModel,
     FeedbackItemModel,
+    FeedbackMetricsModel,
     FeedbackQuestionModel,
     FeedbackRecordsModel,
     FeedbackSuggestionModel,
@@ -261,3 +263,21 @@ async def test_add_suggestion(role: UserRole) -> None:
         assert isinstance(response.parsed, FeedbackSuggestionModel)
         assert response.parsed.value == 1
         assert response.parsed.question_id == rating_question.id
+
+
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner, UserRole.annotator])
+@pytest.mark.asyncio
+async def test_get_metrics(role: UserRole) -> None:
+    records = await RecordFactory.create_batch(size=10)
+    dataset = await DatasetFactory.create(
+        status=DatasetStatus.ready,
+        records=records,
+    )
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+    api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
+
+    response = get_metrics(client=api.http_client.httpx, id=dataset.id)
+    assert response.status_code == 200
+    assert isinstance(response.parsed, FeedbackMetricsModel)
+    assert response.parsed.records.count == 10

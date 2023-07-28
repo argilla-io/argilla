@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+### Added
+
+- Added `get_metrics` function in the SDK to get `FeedbackDataset` metrics calling `GET /api/v1/me/{dataset_id}/metrics` endpoint ([#3469](https://github.com/argilla-io/argilla/pull/3469))
+
 ### Changed
 
 - Improved efficiency of weak labeling when dataset contains vectors ([#3444](https://github.com/argilla-io/argilla/pull/3444)).
