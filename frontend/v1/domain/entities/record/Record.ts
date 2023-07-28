@@ -77,12 +77,14 @@ export class Record {
         return question;
       }
 
-      const suggestion = this.suggestions?.find(
-        (s) => s.questionId === question.id
-      );
+      if (!this.answer) {
+        const suggestion = this.suggestions?.find(
+          (s) => s.questionId === question.id
+        );
 
-      if (suggestion) {
-        question.answerQuestionWithSuggestion(suggestion);
+        if (suggestion) {
+          question.answerQuestionWithSuggestion(suggestion);
+        }
       }
 
       return question;

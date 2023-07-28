@@ -3,7 +3,7 @@ import { DatasetData, mockFeedbackTaskDataset } from "./dataset-api-mock";
 import { mockQuestion } from "./question-api-mock";
 import { mockFields } from "./field-api-mock";
 
-const recordOne = {
+export const recordOne = {
   id: "9cf21756-00a0-479d-aa46-f2ef9dcf89f1",
   fields: {
     text: "Some films that you pick up for a pound turn out to be rather good - 23rd Century films released dozens of obscure Italian and American movie that were great, but although Hardgore released some Fulci films amongst others, the bulk of their output is crap like The Zombie Chronicles.<br /><br />The only positive thing I can say about this film is that it's nowhere near as annoying as the Stink of Flesh. Other than that, its a very clumsy anthology film with the technical competence of a Lego house built by a whelk.<br /><br />It's been noted elsewhere, but you really do have to worry about a film that inserts previews of the action into its credit sequence, so by the time it gets to the zombie attacks, you've seen it all already.<br /><br />Bad movie fans will have a ball watching the 18,000 continuity mistakes and the diabolical acting of the cast (especially the hitchhiker, who was so bad he did make me laugh a bit), and kudos to Hardgore for getting in to the spirit of things by releasing a print so bad it felt like I was watching some beat up home video of a camping trip.<br /><br />Awful, awful stuff. We've all made stuff like this when we've gotten a hold of a camera, but common sense prevails and these films languish in our cupboards somewhere. Avoid.",
@@ -89,6 +89,26 @@ export const mockRecord = async (
       await route.fulfill({
         json: {
           items: [recordOne],
+        },
+      });
+    }
+  );
+
+  return recordOne;
+};
+
+export const mockDiscardRecord = async (page: Page, recordId: string) => {
+  await page.route(
+    `*/**/api/v1/records/${recordId}/responses`,
+    async (route) => {
+      await route.fulfill({
+        json: {
+          id: recordId,
+          values: {},
+          status: "discarded",
+          user_id: "3e760b76-e19a-480a-b436-a85812b98843",
+          inserted_at: "2023-07-28T14:45:37",
+          updated_at: "2023-07-28T14:45:37",
         },
       });
     }
