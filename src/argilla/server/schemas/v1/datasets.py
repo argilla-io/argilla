@@ -17,7 +17,15 @@ from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
+from pydantic import (
+    BaseModel,
+    Field,
+    PositiveInt,
+    conlist,
+    constr,
+    root_validator,
+    validator,
+)
 from pydantic import Field as PydanticField
 from pydantic.utils import GetterDict
 
@@ -31,8 +39,11 @@ except ImportError:
 
 from argilla.server.models import DatasetStatus, FieldType, QuestionSettings, QuestionType, ResponseStatus
 
-DATASET_CREATE_GUIDELINES_MIN_LENGTH = 1
-DATASET_CREATE_GUIDELINES_MAX_LENGTH = 10000
+DATASET_NAME_REGEX = r"^(?!-|_)[a-zA-Z0-9-_ ]+$"
+DATASET_NAME_MIN_LENGTH = 1
+DATASET_NAME_MAX_LENGTH = 200
+DATASET_GUIDELINES_MIN_LENGTH = 1
+DATASET_GUIDELINES_MAX_LENGTH = 10000
 
 FIELD_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 FIELD_CREATE_NAME_MIN_LENGTH = 1
@@ -89,15 +100,26 @@ class Datasets(BaseModel):
     items: List[Dataset]
 
 
+DatasetName = Annotated[
+    constr(regex=DATASET_NAME_REGEX, min_length=DATASET_NAME_MIN_LENGTH, max_length=DATASET_NAME_MAX_LENGTH),
+    PydanticField(..., description="Dataset name"),
+]
+
+DatasetGuidelines = Annotated[
+    constr(min_length=DATASET_GUIDELINES_MIN_LENGTH, max_length=DATASET_GUIDELINES_MAX_LENGTH),
+    PydanticField(..., description="Dataset guidelines"),
+]
+
+
 class DatasetCreate(BaseModel):
-    name: str
-    guidelines: Optional[
-        constr(
-            min_length=DATASET_CREATE_GUIDELINES_MIN_LENGTH,
-            max_length=DATASET_CREATE_GUIDELINES_MAX_LENGTH,
-        )
-    ]
+    name: DatasetName
+    guidelines: Optional[DatasetGuidelines]
     workspace_id: UUID
+
+
+class DatasetUpdate(BaseModel):
+    name: Optional[DatasetName]
+    guidelines: Optional[DatasetGuidelines]
 
 
 class RecordMetrics(BaseModel):
@@ -138,16 +160,22 @@ class Fields(BaseModel):
     items: List[Field]
 
 
+FieldName = Annotated[
+    constr(
+        regex=FIELD_CREATE_NAME_REGEX, min_length=FIELD_CREATE_NAME_MIN_LENGTH, max_length=FIELD_CREATE_NAME_MAX_LENGTH
+    ),
+    PydanticField(..., description="The name of the field"),
+]
+
+FieldTitle = Annotated[
+    constr(min_length=FIELD_CREATE_TITLE_MIN_LENGTH, max_length=FIELD_CREATE_TITLE_MAX_LENGTH),
+    PydanticField(..., description="The title of the field"),
+]
+
+
 class FieldCreate(BaseModel):
-    name: constr(
-        regex=FIELD_CREATE_NAME_REGEX,
-        min_length=FIELD_CREATE_NAME_MIN_LENGTH,
-        max_length=FIELD_CREATE_NAME_MAX_LENGTH,
-    )
-    title: constr(
-        min_length=FIELD_CREATE_TITLE_MIN_LENGTH,
-        max_length=FIELD_CREATE_TITLE_MAX_LENGTH,
-    )
+    name: FieldName
+    title: FieldTitle
     required: Optional[bool]
     settings: TextFieldSettings
 

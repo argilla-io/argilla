@@ -19,6 +19,8 @@ These are the section headers that we use:
 ### Added
 
 - Added `get_metrics` function in the SDK to get `FeedbackDataset` metrics calling `GET /api/v1/me/{dataset_id}/metrics` endpoint ([#3469](https://github.com/argilla-io/argilla/pull/3469))
+- Added `PATCH /api/v1/fields/{field_id}` endpoint to update the field title and markdown settings (See [#3421](https://github.com/argilla-io/argilla/pull/3421)).
+- Added `PATCH /api/v1/datasets/{dataset_id}` endpoint to update dataset name and guidelines (See [#3402](https://github.com/argilla-io/argilla/pull/3402)).
 
 ### Changed
 
@@ -28,6 +30,13 @@ These are the section headers that we use:
 - Update CLI to use database async connection ([#3450](https://github.com/argilla-io/argilla/pull/3450)).
 - Update alembic code to apply migrations to use database async engine ([#3450](https://github.com/argilla-io/argilla/pull/3450)).
 - Limit rating questions values to the positive range [1, 10] (Closes [#3451](https://github.com/argilla-io/argilla/issues/3451)).
+
+## [1.13.3](https://github.com/argilla-io/argilla/compare/v1.13.2...v1.13.3)
+
+### Fixed
+
+- Fixed `ModuleNotFoundError` caused because the `argilla.utils.telemetry` module used in the `ArgillaTrainer` was importing an optional dependency not installed by default ([#3471](https://github.com/argilla-io/argilla/pull/3471)).
+- Fixed `ImportError` caused because the `argilla.client.feedback.config` module was importing `pyyaml` optional dependency not installed by default ([#3471](https://github.com/argilla-io/argilla/pull/3471)).
 
 ## [1.13.2](https://github.com/argilla-io/argilla/compare/v1.13.1...v1.13.2)
 
