@@ -61,7 +61,7 @@ async def update_question(
         elif question.settings["type"] == QuestionType.text:
             question_update.settings = TextQuestionSettingsUpdate(**question_update.settings)
         else:
-            question_update.settings = None
+            question_update.settings = {}
 
     return await datasets.update_question(db, question, question_update)
 

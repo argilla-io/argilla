@@ -31,7 +31,11 @@ class UpdateSchema(BaseModel):
             return values
 
         for key in cls.__non_explicit_none__:
+            invalid_keys = []
             if key in values and values[key] is None:
-                raise ValueError(f"'{key}' cannot be `None`.")
+                invalid_keys.append(key)
+
+        if invalid_keys:
+            raise ValueError(f"Fields {', '.join(invalid_keys)} cannot be updated to `None`.")
 
         return values

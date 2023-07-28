@@ -92,11 +92,13 @@ class Question(BaseModel):
         orm_mode = True
 
 
-class TextQuestionSettingsUpdate(BaseModel):
+class TextQuestionSettingsUpdate(UpdateSchema):
     use_markdown: Optional[bool]
 
+    __non_explicit_none__ = {"use_markdown"}
 
-class LabelSelectionSettingsUpdate(BaseModel):
+
+class LabelSelectionSettingsUpdate(UpdateSchema):
     visible_options: Optional[int]
 
 
