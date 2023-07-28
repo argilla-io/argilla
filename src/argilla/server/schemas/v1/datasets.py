@@ -29,6 +29,7 @@ from pydantic import (
 from pydantic import Field as PydanticField
 from pydantic.utils import GetterDict
 
+from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
 from argilla.server.search_engine import Query
 
@@ -117,9 +118,11 @@ class DatasetCreate(BaseModel):
     workspace_id: UUID
 
 
-class DatasetUpdate(BaseModel):
+class DatasetUpdate(UpdateSchema):
     name: Optional[DatasetName]
     guidelines: Optional[DatasetGuidelines]
+
+    __non_explicit_none__ = {"name", "guidelines"}
 
 
 class RecordMetrics(BaseModel):

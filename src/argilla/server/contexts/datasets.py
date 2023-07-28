@@ -135,7 +135,7 @@ async def delete_dataset(db: "AsyncSession", search_engine: SearchEngine, datase
 
 
 async def update_dataset(db: "AsyncSession", dataset: Dataset, dataset_update: DatasetCreate) -> Dataset:
-    params = dataset_update.dict(exclude_unset=True, exclude_none=True)
+    params = dataset_update.dict(exclude_unset=True)
     return await dataset.update(db, **params)
 
 
