@@ -176,14 +176,23 @@ async def test_update_question(
 @pytest.mark.parametrize(
     "QuestionFactory, payload",
     [
-        (TextQuestionFactory, {"title": None, "description": None, "settings": {"use_markdown": None}}),
+        (TextQuestionFactory, {"title": None, "description": None, "settings": None}),
+        (TextQuestionFactory, {"settings": {"use_markdown": None}}),
     ],
 )
 @pytest.mark.asyncio
 async def test_update_question_with_invalid_settings(
     client: TestClient, owner_auth_header: dict, QuestionFactory: Type["QuestionFactoryType"], payload: dict
 ):
-    pass
+    question = await QuestionFactory.create()
+
+    response = client.patch(
+        f"/api/v1/questions/{question.id}",
+        headers=owner_auth_header,
+        json=payload,
+    )
+
+    assert response.status_code == 422
 
 
 @pytest.mark.asyncio
