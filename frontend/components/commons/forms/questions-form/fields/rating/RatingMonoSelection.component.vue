@@ -4,16 +4,16 @@
       <div class="input-button" v-for="option in options" :key="option.id">
         <input
           type="checkbox"
-          :name="option.text"
+          :name="option.value"
           :id="option.id"
-          v-model="option.is_selected"
+          v-model="option.isSelected"
           @change="onSelect(option)"
         />
         <label
           class="label-text cursor-pointer"
-          :class="{ 'label-active': option.is_selected }"
+          :class="{ 'label-active': option.isSelected }"
           :for="option.id"
-          v-text="option.text"
+          v-text="option.value"
         />
       </div>
     </div>
@@ -34,12 +34,12 @@ export default {
     event: "on-change",
   },
   methods: {
-    onSelect({ id, is_selected }) {
+    onSelect({ id, isSelected }) {
       this.options.map((option) => {
         if (option.id === id) {
-          option.is_selected = is_selected;
+          option.isSelected = isSelected;
         } else {
-          option.is_selected = false;
+          option.isSelected = false;
         }
         return option;
       });

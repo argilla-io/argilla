@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es2018",
-    "module": "esnext",
+    "target": "ES2015",
+    "module": "ES2015",
     "moduleResolution": "node",
     "lib": ["esnext", "esnext.asynciterable", "dom"],
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "allowJs": true,
     "sourceMap": true,
     "strict": false, // Temporal
@@ -14,7 +15,15 @@
       "~/*": ["./*"],
       "@/*": ["./*"]
     },
-    "types": ["@types/node", "@nuxt/types"]
+    "types": [
+      "@types/node",
+      "@nuxt/typescript-build",
+      "@nuxt/types",
+      "@types/jest"
+    ]
+  },
+  "vueCompilerOptions": {
+    "target": 2.7
   },
   "exclude": ["node_modules"]
 }
