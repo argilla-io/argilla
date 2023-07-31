@@ -66,7 +66,7 @@ describe("rankWithKeyboard should", () => {
     expect(component.vm.ranking.slots[3].items.length).toBeFalsy();
   });
 
-  it("move correctly question when user press 1", () => {
+  it("move correctly question when user press 1", async () => {
     const ranking = adaptQuestionsToSlots(settingsFake);
     const questionOne = ranking.questions[0];
     const component = shallowMount(DndSelectionComponent, {
@@ -75,8 +75,9 @@ describe("rankWithKeyboard should", () => {
     });
 
     component.vm.rankWithKeyboard(eventFor("1"), questionOne);
-
-    expect(component.vm.ranking.slots[0].items[0]).toBe(questionOne);
+    await component.vm.$nextTick(() => {
+      expect(component.vm.ranking.slots[0].items[0]).toBe(questionOne);
+    });
   });
 
   it("prevent duplicate question if user try to move twice the same question", () => {
