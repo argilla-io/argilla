@@ -152,6 +152,7 @@ if TYPE_CHECKING:
 @pytest.mark.asyncio
 async def test_update_question(
     client: TestClient,
+    db: "AsyncSession",
     QuestionFactory: Type["QuestionFactoryType"],
     payload: dict,
     expected_settings: dict,
@@ -164,18 +165,26 @@ async def test_update_question(
         f"/api/v1/questions/{question.id}", headers={API_KEY_HEADER_NAME: user.api_key}, json=payload
     )
 
+    title = payload.get("title") or question.title
+    description = payload.get("description") or question.description
+
     assert response.status_code == 200
     assert response.json() == {
         "id": str(question.id),
         "name": question.name,
-        "title": payload.get("title") or question.title,
-        "description": payload.get("description") or question.description,
+        "title": title,
+        "description": description,
         "required": False,
         "settings": expected_settings,
         "dataset_id": str(question.dataset_id),
         "inserted_at": question.inserted_at.isoformat(),
         "updated_at": question.updated_at.isoformat(),
     }
+
+    question = await db.get(Question, question.id)
+    assert question.title == title
+    assert question.description == description
+    assert question.settings == expected_settings
 
 
 @pytest.mark.parametrize(

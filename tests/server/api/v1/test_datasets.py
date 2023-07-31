@@ -3241,7 +3241,7 @@ async def test_publish_dataset_with_nonexistent_dataset_id(
 )
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
-async def test_update_dataset(client: TestClient, role: UserRole, payload: dict):
+async def test_update_dataset(client: TestClient, db: "AsyncSession", role: UserRole, payload: dict):
     dataset = await DatasetFactory.create(
         name="Current Name", guidelines="Current Guidelines", status=DatasetStatus.ready
     )
@@ -3253,6 +3253,7 @@ async def test_update_dataset(client: TestClient, role: UserRole, payload: dict)
         json=payload,
     )
 
+    name = payload.get("name") or dataset.name
     if "guidelines" in payload:
         guidelines = payload["guidelines"]
     else:
@@ -3261,13 +3262,17 @@ async def test_update_dataset(client: TestClient, role: UserRole, payload: dict)
     assert response.status_code == 200
     assert response.json() == {
         "id": str(dataset.id),
-        "name": payload.get("name") or dataset.name,
+        "name": name,
         "guidelines": guidelines,
         "status": "ready",
         "workspace_id": str(dataset.workspace_id),
         "inserted_at": dataset.inserted_at.isoformat(),
         "updated_at": dataset.updated_at.isoformat(),
     }
+
+    dataset = await db.get(Dataset, dataset.id)
+    assert dataset.name == name
+    assert dataset.guidelines == guidelines
 
 
 @pytest.mark.parametrize(

@@ -34,39 +34,50 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.parametrize(
-    "payload",
+    "payload, expected_settings",
     [
-        {"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
-        {"title": "New Title", "settings": {"type": "text"}},
-        {"settings": {"type": "text"}},
-        {"name": "New Name", "required": True, "settings": {"type": "text"}, "dataset_id": str(uuid4())},
+        (
+            {"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
+            {"type": "text", "use_markdown": True},
+        ),
+        ({"title": "New Title", "settings": {"type": "text"}}, {"type": "text", "use_markdown": False}),
+        (
+            {"settings": {"type": "text"}},
+            {"type": "text", "use_markdown": False},
+        ),
+        (
+            {"name": "New Name", "required": True, "settings": {"type": "text"}, "dataset_id": str(uuid4())},
+            {"type": "text", "use_markdown": False},
+        ),
     ],
 )
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
-async def test_update_field(client: TestClient, role: UserRole, payload: dict):
+async def test_update_field(
+    client: TestClient, db: "AsyncSession", role: UserRole, payload: dict, expected_settings: dict
+):
     field = await TextFieldFactory.create()
     user = await UserFactory.create(role=role, workspaces=[field.dataset.workspace])
 
     response = client.patch(f"/api/v1/fields/{field.id}", headers={API_KEY_HEADER_NAME: user.api_key}, json=payload)
 
-    settings = payload.get("settings")
-    if settings is None:
-        use_markdown = field.settings["use_markdown"]
-    else:
-        use_markdown = settings.get("use_markdown") or field.settings["use_markdown"]
+    title = payload.get("title") or field.title
 
     assert response.status_code == 200
     assert response.json() == {
         "id": str(field.id),
         "name": field.name,
-        "title": payload.get("title") or field.title,
+        "title": title,
         "required": field.required,
-        "settings": {"type": field.settings["type"], "use_markdown": use_markdown},
+        "settings": expected_settings,
         "dataset_id": str(field.dataset.id),
         "inserted_at": field.inserted_at.isoformat(),
         "updated_at": field.updated_at.isoformat(),
     }
+
+    field = await db.get(Field, field.id)
+    assert field.title == title
+    assert field.settings == expected_settings
 
 
 @pytest.mark.parametrize(
