@@ -15,8 +15,6 @@
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy import engine_from_config, pool
-
 from argilla.server.database import database_url_sync
 from argilla.server.models import (
     DatabaseModel,
@@ -29,7 +27,8 @@ from argilla.server.models import (
     User,
     Workspace,
     WorkspaceUser,
-)  # noqa
+)
+from sqlalchemy import engine_from_config, pool
 
 __ALL_MODELS__ = (Dataset, Field, Question, Record, Response, Suggestion, User, Workspace, WorkspaceUser)
 
