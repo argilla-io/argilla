@@ -12,18 +12,26 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import asyncio
 from logging.config import fileConfig
-from typing import TYPE_CHECKING
 
 from alembic import context
-from sqlalchemy import engine_from_config, make_url, pool
+from sqlalchemy import engine_from_config, pool
 
-from argilla.server.models.models import *  # noqa
 from argilla.server.database import database_url_sync
+from argilla.server.models import (
+    DatabaseModel,
+    Dataset,
+    Field,
+    Question,
+    Record,
+    Response,
+    Suggestion,
+    User,
+    Workspace,
+    WorkspaceUser,
+)  # noqa
 
-if TYPE_CHECKING:
-    from sqlalchemy import Connection
+__ALL_MODELS__ = (Dataset, Field, Question, Record, Response, Suggestion, User, Workspace, WorkspaceUser)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
