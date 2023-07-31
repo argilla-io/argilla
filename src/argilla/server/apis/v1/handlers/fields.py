@@ -52,7 +52,7 @@ async def update_field(
 ):
     field = await _get_field(db, field_id)
 
-    if field_update.settings.type != field.settings["type"]:
+    if field_update.settings and field_update.settings.type != field.settings["type"]:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Field type cannot be changed. Expected '{field.settings['type']}' but got '{field_update.settings.type}'",

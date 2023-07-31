@@ -44,13 +44,11 @@ class Field(BaseModel):
 
 class TextFieldSettingsUpdate(UpdateSchema):
     type: Literal[FieldType.text]
-    use_markdown: Optional[bool]
-
-    __non_nullable_fields__ = {"use_markdown"}
+    use_markdown: bool
 
 
 class FieldUpdate(UpdateSchema):
     title: Optional[FieldTitle]
-    settings: TextFieldSettingsUpdate
+    settings: Optional[TextFieldSettingsUpdate]
 
-    __non_nullable_fields__ = {"title"}
+    __non_nullable_fields__ = {"title", "settings"}
