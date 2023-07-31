@@ -56,6 +56,7 @@ def bulk(
     return BulkResponse.parse_obj(response)
 
 
+
 T = TypeVar("T")
 
 
