@@ -559,6 +559,59 @@ const questions = [
   },
 ];
 
+const longAndShortQuestions = [
+  {
+    id: "045c18d5-57b6-408a-8db3-bc11b9f54541",
+    name: "sentiment",
+    title: "Sentiment",
+    description: "Sentiment of the text",
+    required: true,
+    settings: {
+      type: "label_selection",
+      options: [
+        {
+          value: "a",
+          text: "A",
+          description: "Texts with a A intent",
+        },
+        {
+          value: "loong-single-label-questions-with-more-than-20",
+          text: "Single Loong single label question with more than 20 letter",
+          description: "Texts with a long intent",
+        },
+      ],
+      visible_options: 10,
+    },
+    inserted_at: "2023-07-18T07:43:35",
+    updated_at: "2023-07-18T07:43:35",
+  },
+  {
+    id: "682dd011-6a8a-452e-8900-483279c6acee",
+    name: "sentiment-multi-label",
+    title: "Sentiment Multi Label",
+    description: "Sentiment of the text",
+    required: true,
+    settings: {
+      type: "multi_label_selection",
+      options: [
+        {
+          value: "a",
+          text: "A",
+          description: "Texts with a A intent",
+        },
+        {
+          value: "loong-single-label-questions-with-more-than-20",
+          text: "Multi Loong single label question with more than 20 letter",
+          description: "Texts with a long intent",
+        },
+      ],
+      visible_options: 10,
+    },
+    inserted_at: "2023-07-18T07:43:35",
+    updated_at: "2023-07-18T07:43:35",
+  },
+];
+
 export const mockQuestion = async (page: Page, datasetId: string) => {
   await page.route(
     `*/**/api/v1/datasets/${datasetId}/questions`,
@@ -566,6 +619,22 @@ export const mockQuestion = async (page: Page, datasetId: string) => {
       await route.fulfill({
         json: {
           items: questions,
+        },
+      });
+    }
+  );
+};
+
+export const mockQuestionLongAndShortQuestions = async (
+  page: Page,
+  datasetId: string
+) => {
+  await page.route(
+    `*/**/api/v1/datasets/${datasetId}/questions`,
+    async (route) => {
+      await route.fulfill({
+        json: {
+          items: longAndShortQuestions,
         },
       });
     }
