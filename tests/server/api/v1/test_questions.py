@@ -20,6 +20,7 @@ from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import DatasetStatus, Question, UserRole
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
+from thinc.api import MultiSoftmax
 
 from tests.factories import (
     AnnotatorFactory,
@@ -52,39 +53,13 @@ if TYPE_CHECKING:
         ),
         (
             TextQuestionFactory,
-            {"title": "New Title", "settings": {"type": "text"}},
+            {"description": None},
             {"type": "text", "use_markdown": False},
         ),
         (
             TextQuestionFactory,
-            {"settings": {"type": "text"}},
+            {"name": "New Name", "required": True, "dataset_id": str(uuid4())},
             {"type": "text", "use_markdown": False},
-        ),
-        (
-            TextQuestionFactory,
-            {"name": "New Name", "required": True, "settings": {"type": "text"}, "dataset_id": str(uuid4())},
-            {"type": "text", "use_markdown": False},
-        ),
-        (
-            RatingQuestionFactory,
-            {
-                "settings": {"type": "rating", "options": [{"value": 94}, {"value": 95}, {"value": 96}, {"value": 97}]},
-            },
-            {
-                "type": "rating",
-                "options": [
-                    {"value": 1},
-                    {"value": 2},
-                    {"value": 3},
-                    {"value": 4},
-                    {"value": 5},
-                    {"value": 6},
-                    {"value": 7},
-                    {"value": 8},
-                    {"value": 9},
-                    {"value": 10},
-                ],
-            },
         ),
         (
             LabelSelectionQuestionFactory,
@@ -123,27 +98,6 @@ if TYPE_CHECKING:
                     {"value": "option3", "text": "Option 3", "description": None},
                 ],
                 "visible_options": None,
-            },
-        ),
-        (
-            RankingQuestionFactory,
-            {
-                "settings": {
-                    "type": "ranking",
-                    "options": [
-                        {"value": "response-a", "text": "Response A"},
-                        {"value": "response-b", "text": "Response B"},
-                        {"value": "response-c", "text": "Response C"},
-                    ],
-                }
-            },
-            {
-                "type": "ranking",
-                "options": [
-                    {"value": "completion-a", "text": "Completion A", "description": None},
-                    {"value": "completion-b", "text": "Completion B", "description": None},
-                    {"value": "completion-c", "text": "Completion C", "description": None},
-                ],
             },
         ),
     ],
@@ -191,7 +145,28 @@ async def test_update_question(
     "QuestionFactory, payload",
     [
         (TextQuestionFactory, {"title": None, "description": None, "settings": None}),
-        (TextQuestionFactory, {"settings": {"use_markdown": None}}),
+        (TextQuestionFactory, {"settings": {"type": "text"}}),
+        (TextQuestionFactory, {"settings": {"type": "text", "use_markdown": None}}),
+        (TextQuestionFactory, {"title": "New Title", "settings": {"type": "label_selection"}}),
+        (
+            RatingQuestionFactory,
+            {"settings": {"type": "rating", "options": [{"value": 94}, {"value": 95}, {"value": 96}]}},
+        ),
+        (LabelSelectionQuestionFactory, {"settings": {"type": "label_selection", "visible_options": -5}}),
+        (MultiLabelSelectionQuestionFactory, {"settings": {"type": "multi_label_selection", "visible_options": -5}}),
+        (
+            RankingQuestionFactory,
+            {
+                "settings": {
+                    "type": "ranking",
+                    "options": [
+                        {"value": "option-a", "text": "Option A", "description": None},
+                        {"value": "option-b", "text": "Option B", "description": None},
+                        {"value": "option-c", "text": "Option C", "description": None},
+                    ],
+                }
+            },
+        ),
     ],
 )
 @pytest.mark.asyncio
@@ -200,11 +175,7 @@ async def test_update_question_with_invalid_settings(
 ):
     question = await QuestionFactory.create()
 
-    response = client.patch(
-        f"/api/v1/questions/{question.id}",
-        headers=owner_auth_header,
-        json=payload,
-    )
+    response = client.patch(f"/api/v1/questions/{question.id}", headers=owner_auth_header, json=payload)
 
     assert response.status_code == 422
 
@@ -241,7 +212,7 @@ async def test_update_question_as_admin_from_different_workspace(client: TestCli
     response = client.patch(
         f"/api/v1/questions/{question.id}",
         headers={API_KEY_HEADER_NAME: user.api_key},
-        json={"title": "New Title", "settings": {"type": "text"}},
+        json={"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
     )
 
     assert response.status_code == 403
@@ -255,7 +226,7 @@ async def test_update_question_as_annotator(client: TestClient):
     response = client.patch(
         f"/api/v1/questions/{question.id}",
         headers={API_KEY_HEADER_NAME: user.api_key},
-        json={"title": "New Title", "settings": {"type": "text"}},
+        json={"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
     )
 
     assert response.status_code == 403
