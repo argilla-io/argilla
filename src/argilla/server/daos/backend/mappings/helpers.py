@@ -108,10 +108,7 @@ class mappings:
         return {"dynamic": True, "type": "object"}
 
 
-def configure_multilingual_stop_analyzer(
-    settings: Dict[str, Any],
-    supported_langs: List[str] = None,
-):
+def configure_multilingual_stop_analyzer(settings: Dict[str, Any], supported_langs: List[str] = None):
     lang2elastic_stop = {
         "en": english.STOPWORDS,
         "es": "_spanish_",

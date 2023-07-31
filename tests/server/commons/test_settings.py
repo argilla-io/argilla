@@ -47,3 +47,23 @@ def test_settings_default_index_replicas_with_shards_defined(monkeypatch):
 
     assert settings.es_records_index_shards == 100
     assert settings.es_records_index_replicas == 0
+
+
+def test_settings_default_database_url():
+    settings = Settings()
+    assert settings.database_url == f"sqlite+aiosqlite:///{settings.home_path}/argilla.db?check_same_thread=False"
+
+
+@pytest.mark.parametrize(
+    "url, expected_url",
+    [
+        ("sqlite:///test.db", "sqlite+aiosqlite:///test.db"),
+        ("sqlite:///:memory:", "sqlite+aiosqlite:///:memory:"),
+        ("postgresql://user:pass@localhost:5432/db", "postgresql+asyncpg://user:pass@localhost:5432/db"),
+        ("postgresql+psycopg2://user:pass@localhost:5432/db", "postgresql+asyncpg://user:pass@localhost:5432/db"),
+    ],
+)
+def test_settings_database_url(url: str, expected_url: str, monkeypatch):
+    monkeypatch.setenv("ARGILLA_DATABASE_URL", url)
+    settings = Settings()
+    assert settings.database_url == expected_url

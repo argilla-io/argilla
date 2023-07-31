@@ -18,14 +18,120 @@ from uuid import uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.models import DatasetStatus, Field
+from argilla.server.models import DatasetStatus, Field, UserRole
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 
-from tests.factories import AnnotatorFactory, DatasetFactory, TextFieldFactory
+from tests.factories import (
+    AnnotatorFactory,
+    DatasetFactory,
+    TextFieldFactory,
+    UserFactory,
+)
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"title": "New Title", "settings": {"use_markdown": True}},
+        {"title": "New Title"},
+        {},
+        {"title": None, "settings": None},
+        {"name": "New Name", "required": True, "settings": {"type": "unit-test"}, "dataset_id": str(uuid4())},
+    ],
+)
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+@pytest.mark.asyncio
+async def test_update_field(client: TestClient, role: UserRole, payload: dict):
+    field = await TextFieldFactory.create()
+    user = await UserFactory.create(role=role, workspaces=[field.dataset.workspace])
+
+    response = client.patch(f"/api/v1/fields/{field.id}", headers={API_KEY_HEADER_NAME: user.api_key}, json=payload)
+
+    settings = payload.get("settings")
+    if settings is None:
+        use_markdown = field.settings["use_markdown"]
+    else:
+        use_markdown = settings.get("use_markdown") or field.settings["use_markdown"]
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": str(field.id),
+        "name": field.name,
+        "title": payload.get("title") or field.title,
+        "required": field.required,
+        "settings": {"type": field.settings["type"], "use_markdown": use_markdown},
+        "dataset_id": str(field.dataset.id),
+        "inserted_at": field.inserted_at.isoformat(),
+        "updated_at": field.updated_at.isoformat(),
+    }
+
+
+@pytest.mark.asyncio
+async def test_update_field_with_invalid_payload(client: TestClient, owner_auth_header: dict):
+    field = await TextFieldFactory.create()
+
+    response = client.patch(
+        f"/api/v1/fields/{field.id}",
+        headers=owner_auth_header,
+        json={"title": {"this": "is", "not": "valid"}, "settings": {"use_markdown": "no"}},
+    )
+
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_update_field_non_existent(client: TestClient, owner_auth_header: dict):
+    response = client.patch(
+        f"/api/v1/fields/{uuid4()}",
+        headers=owner_auth_header,
+        json={"title": "New Title", "settings": {"use_markdown": True}},
+    )
+
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_update_field_as_admin_from_different_workspace(client: TestClient):
+    field = await TextFieldFactory.create()
+    user = await UserFactory.create(role=UserRole.admin)
+
+    response = client.patch(
+        f"/api/v1/fields/{field.id}",
+        headers={API_KEY_HEADER_NAME: user.api_key},
+        json={"title": "New Title", "settings": {"use_markdown": True}},
+    )
+
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_update_field_as_annotator(client: TestClient):
+    field = await TextFieldFactory.create()
+    user = await UserFactory.create(role=UserRole.annotator, workspaces=[field.dataset.workspace])
+
+    response = client.patch(
+        f"/api/v1/fields/{field.id}",
+        headers={API_KEY_HEADER_NAME: user.api_key},
+        json={"title": "New Title", "settings": {"use_markdown": True}},
+    )
+
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_update_field_without_authentication(client: TestClient):
+    field = await TextFieldFactory.create()
+
+    response = client.patch(
+        f"/api/v1/fields/{field.id}",
+        json={"title": "New Title", "settings": {"use_markdown": True}},
+    )
+
+    assert response.status_code == 401
 
 
 @pytest.mark.asyncio

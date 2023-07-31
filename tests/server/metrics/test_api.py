@@ -28,12 +28,8 @@ from argilla.server.apis.v0.models.token_classification import (
 from argilla.server.commons.models import TaskType
 from argilla.server.models import User
 from argilla.server.services.metrics.models import CommonTasksMetrics
-from argilla.server.services.tasks.text_classification.metrics import (
-    TextClassificationMetrics,
-)
-from argilla.server.services.tasks.token_classification.metrics import (
-    TokenClassificationMetrics,
-)
+from argilla.server.services.tasks.text_classification.metrics import TextClassificationMetrics
+from argilla.server.services.tasks.token_classification.metrics import TokenClassificationMetrics
 
 from tests.helpers import SecuredClient
 

@@ -33,13 +33,7 @@ from argilla.server.models import (
     Suggestion,
 )
 from argilla.server.models.suggestions import SuggestionCreateWithRecordId
-from argilla.server.schemas.v1.datasets import (
-    DatasetCreate,
-    FieldCreate,
-    QuestionCreate,
-    RecordInclude,
-    RecordsCreate,
-)
+from argilla.server.schemas.v1.datasets import DatasetCreate, FieldCreate, QuestionCreate, RecordInclude, RecordsCreate
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
 from argilla.server.search_engine import SearchEngine
@@ -48,6 +42,7 @@ from argilla.server.security.model import User
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
+    from argilla.server.schemas.v1.fields import FieldUpdate
     from argilla.server.schemas.v1.suggestions import SuggestionCreate
 
 LIST_RECORDS_LIMIT = 20
@@ -138,6 +133,11 @@ async def delete_dataset(db: "AsyncSession", search_engine: SearchEngine, datase
     return dataset
 
 
+async def update_dataset(db: "AsyncSession", dataset: Dataset, dataset_update: DatasetCreate) -> Dataset:
+    params = dataset_update.dict(exclude_unset=True, exclude_none=True)
+    return await dataset.update(db, **params)
+
+
 async def get_field_by_id(db: "AsyncSession", field_id: UUID) -> Union[Field, None]:
     result = await db.execute(select(Field).filter_by(id=field_id).options(selectinload(Field.dataset)))
     return result.scalar_one_or_none()
@@ -160,6 +160,11 @@ async def create_field(db: "AsyncSession", dataset: Dataset, field_create: Field
         settings=field_create.settings.dict(),
         dataset_id=dataset.id,
     )
+
+
+async def update_field(db: "AsyncSession", field: Field, field_update: "FieldUpdate") -> Field:
+    params = field_update.dict(exclude_unset=True, exclude_none=True)
+    return await field.update(db, **params)
 
 
 async def delete_field(db: "AsyncSession", field: Field) -> Field:
@@ -288,10 +293,7 @@ async def count_records_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> i
 
 
 async def create_records(
-    db: "AsyncSession",
-    search_engine: SearchEngine,
-    dataset: Dataset,
-    records_create: RecordsCreate,
+    db: "AsyncSession", search_engine: SearchEngine, dataset: Dataset, records_create: RecordsCreate
 ):
     if not dataset.is_ready:
         raise ValueError("Records cannot be created for a non published dataset")

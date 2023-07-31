@@ -16,18 +16,13 @@ import dataclasses
 import logging
 import platform
 import uuid
-from typing import Any, Dict, Optional
-
-from fastapi import Request
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from argilla.server.commons.models import TaskType
-from argilla.server.errors.base_errors import (
-    EntityAlreadyExistsError,
-    EntityNotFoundError,
-    GenericServerError,
-    ServerError,
-)
 from argilla.server.settings import settings
+
+if TYPE_CHECKING:
+    from fastapi import Request
 
 try:
     from analytics import Client  # This import works only for version 2.2.0
@@ -89,25 +84,15 @@ class TelemetryClient:
 _CLIENT = TelemetryClient()
 
 
-def _process_request_info(request: Request):
+def _process_request_info(request: "Request"):
     return {header: request.headers.get(header) for header in ["user-agent", "accept-language"]}
-
-
-async def track_error(error: ServerError, request: Request):
-    data = {"code": error.code}
-    if isinstance(error, (GenericServerError, EntityNotFoundError, EntityAlreadyExistsError)):
-        data["type"] = error.type
-
-    data.update(_process_request_info(request))
-
-    _CLIENT.track_data(action="ServerErrorFound", data=data)
 
 
 async def track_bulk(task: TaskType, records: int):
     _CLIENT.track_data(action="LogRecordsRequested", data={"task": task, "records": records})
 
 
-async def track_login(request: Request, username: str):
+async def track_login(request: "Request", username: str):
     _CLIENT.track_data(
         action="UserInfoRequested",
         data={
