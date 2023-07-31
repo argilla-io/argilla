@@ -18,24 +18,24 @@ from pydantic import BaseModel, root_validator
 
 
 class UpdateSchema(BaseModel):
-    """Base schema for update endpoints. `__non_explicit_none__` is a set of fields that cannot be set to `None`
-    explicitly. The list of fields is validated in `validate_non_explicit_none` root validator, which will raise a
+    """Base schema for update endpoints. `__non_nullable_fields__` is a set of fields that cannot be set to `None`
+    explicitly. The list of fields is validated in `validate_non_nullable_fields` root validator, which will raise a
     `ValueError` if any of the fields in the set was set to `None` explicitly.
     """
 
-    __non_explicit_none__: Union[Set[str], None] = None
+    __non_nullable_fields__: Union[Set[str], None] = None
 
     @root_validator(pre=True)
-    def validate_non_explicit_none(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        if cls.__non_explicit_none__ is None:
+    def validate_non_nullable_fields(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        if cls.__non_nullable_fields__ is None:
             return values
 
         invalid_keys = []
-        for key in cls.__non_explicit_none__:
+        for key in cls.__non_nullable_fields__:
             if key in values and values[key] is None:
                 invalid_keys.append(key)
 
         if invalid_keys:
-            raise ValueError(f"Fields {invalid_keys} cannot be updated to `None`.")
+            raise ValueError(f"The following keys must have non-null values: {', '.join(invalid_keys)}")
 
         return values

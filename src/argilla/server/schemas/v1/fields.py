@@ -42,12 +42,15 @@ class Field(BaseModel):
         orm_mode = True
 
 
-class TextFieldSettingsUpdate(BaseModel):
+class TextFieldSettingsUpdate(UpdateSchema):
+    type: Literal[FieldType.text]
     use_markdown: Optional[bool]
+
+    __non_nullable_fields__ = {"use_markdown"}
 
 
 class FieldUpdate(UpdateSchema):
     title: Optional[FieldTitle]
-    settings: Optional[TextFieldSettingsUpdate]
+    settings: TextFieldSettingsUpdate
 
-    __non_explicit_none__ = {"title", "settings"}
+    __non_nullable_fields__ = {"title", "settings"}

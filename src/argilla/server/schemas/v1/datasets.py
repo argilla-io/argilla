@@ -122,7 +122,7 @@ class DatasetUpdate(UpdateSchema):
     name: Optional[DatasetName]
     guidelines: Optional[DatasetGuidelines]
 
-    __non_explicit_none__ = {"name", "guidelines"}
+    __non_nullable_fields__ = {"name"}
 
 
 class RecordMetrics(BaseModel):

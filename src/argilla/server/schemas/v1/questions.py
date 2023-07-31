@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, Literal, Optional, Union
+from typing import Literal, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Field, conlist
@@ -54,10 +54,8 @@ class LabelSelectionQuestionSettings(BaseModel):
     visible_options: Optional[int] = None
 
 
-class MultiLabelSelectionQuestionSettings(BaseModel):
+class MultiLabelSelectionQuestionSettings(LabelSelectionQuestionSettings):
     type: Literal[QuestionType.multi_label_selection]
-    options: conlist(item_type=ValueTextQuestionSettingsOption)
-    visible_options: Optional[int] = None
 
 
 class RankingQuestionSettings(BaseModel):
@@ -93,18 +91,44 @@ class Question(BaseModel):
 
 
 class TextQuestionSettingsUpdate(UpdateSchema):
+    type: Literal[QuestionType.text]
     use_markdown: Optional[bool]
 
-    __non_explicit_none__ = {"use_markdown"}
+    __non_nullable_fields__ = {"use_markdown"}
+
+
+class RatingQuestionSettingsUpdate(UpdateSchema):
+    type: Literal[QuestionType.rating]
 
 
 class LabelSelectionSettingsUpdate(UpdateSchema):
+    type: Literal[QuestionType.label_selection]
     visible_options: Optional[int]
+
+
+class MultiLabelSelectionQuestionSettingsUpdate(LabelSelectionSettingsUpdate):
+    type: Literal[QuestionType.multi_label_selection]
+
+
+class RankingQuestionSettingsUpdate(UpdateSchema):
+    type: Literal[QuestionType.ranking]
+
+
+QuestionSettingsUpdate = Annotated[
+    Union[
+        TextQuestionSettingsUpdate,
+        RatingQuestionSettingsUpdate,
+        LabelSelectionSettingsUpdate,
+        MultiLabelSelectionQuestionSettingsUpdate,
+        RankingQuestionSettingsUpdate,
+    ],
+    Field(..., discriminator="type"),
+]
 
 
 class QuestionUpdate(UpdateSchema):
     title: Optional[str]
     description: Optional[str]
-    settings: Optional[Union[Dict[str, Any], TextQuestionSettingsUpdate, LabelSelectionSettingsUpdate]]
+    settings: QuestionSettingsUpdate
 
-    __non_explicit_none__ = {"title", "description", "settings"}
+    __non_nullable_fields__ = {"title", "settings"}
