@@ -30,17 +30,49 @@ export default {
     },
   },
   computed: {
-    timeDifference() {
-      return new Date().getTimezoneOffset();
-    },
     formattedDate() {
+      const date = new Date(this.date);
+
       if (this.format === "date-relative-now") {
-        return this.$moment(this.date)
-          .locale("utc")
-          .subtract(this.timeDifference, "minutes")
-          .from(Date.now());
+        return this.timeAgo(date);
       }
-      return this.$moment(this.date).locale("utc").format("YYYY-MM-DD HH:mm");
+
+      return date.toLocaleString("sv", {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        hour12: false,
+      });
+    },
+  },
+  methods: {
+    timeAgo(date) {
+      const formatter = new Intl.RelativeTimeFormat("en", {
+        numeric: "auto",
+      });
+      const ranges = {
+        years: 3600 * 24 * 365,
+        months: 3600 * 24 * 30,
+        weeks: 3600 * 24 * 7,
+        days: 3600 * 24,
+        hours: 3600,
+        minutes: 60,
+        seconds: 1,
+      };
+
+      const now = new Date();
+      const time = new Date(date.getTime() - now.getTime());
+      time.setMinutes(time.getMinutes() - now.getTimezoneOffset());
+
+      const secondsElapsed = time / 1000;
+      for (const key in ranges) {
+        if (ranges[key] <= Math.abs(secondsElapsed)) {
+          const delta = secondsElapsed / ranges[key];
+          return formatter.format(Math.round(delta), key);
+        }
+      }
     },
   },
 };

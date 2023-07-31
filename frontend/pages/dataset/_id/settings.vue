@@ -1,5 +1,6 @@
 <template>
-  <HeaderAndTopAndTwoColumns v-if="!isLoadingDataset">
+  <BaseLoading v-if="isLoadingDataset" />
+  <HeaderAndTopAndTwoColumns v-else>
     <template v-slot:header>
       <HeaderFeedbackTaskComponent
         :datasetId="datasetId"
@@ -23,28 +24,6 @@ export default {
   name: "SettingsPage",
   components: {
     HeaderAndTopAndTwoColumns,
-  },
-  computed: {
-    breadcrumbs() {
-      return [
-        { link: { name: "datasets" }, name: "Home" },
-        {
-          link: { path: `/datasets?workspaces=${this.dataset.workspace}` },
-          name: this.dataset.workspace,
-        },
-        {
-          link: {
-            name: "dataset-id-annotation-mode",
-            params: { id: this.datasetId },
-          },
-          name: this.dataset.name,
-        },
-        {
-          link: null,
-          name: "settings",
-        },
-      ];
-    },
   },
   setup() {
     return useDatasetSettingViewModel();
