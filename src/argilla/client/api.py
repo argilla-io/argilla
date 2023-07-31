@@ -25,8 +25,6 @@ from argilla.client.sdk.commons import errors
 from argilla.client.sdk.v1.datasets.api import list_datasets as list_datasets_api_v1
 from argilla.client.sdk.workspaces.api import list_workspaces as list_workspaces_api_v0
 
-_LOGGER = logging.getLogger(__name__)
-
 Api = Argilla  # Backward compatibility
 
 

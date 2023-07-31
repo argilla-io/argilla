@@ -15,6 +15,7 @@
 import logging
 import random
 import uuid
+import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
 
 import pandas as pd
@@ -37,8 +38,6 @@ if TYPE_CHECKING:
     import datasets
     import pandas
     import spacy
-
-_LOGGER = logging.getLogger(__name__)
 
 
 class DatasetBase:
@@ -142,7 +141,7 @@ class DatasetBase:
         except Exception:
             del ds_dict["metadata"]
             dataset = datasets.Dataset.from_dict(ds_dict)
-            _LOGGER.warning(
+            warnings.warn(
                 "The 'metadata' of the records were removed, since it was incompatible with the 'datasets' format."
             )
 
@@ -224,7 +223,7 @@ class DatasetBase:
         ]
 
         if not_supported_columns:
-            _LOGGER.warning(
+            warnings.warn(
                 "Following columns are not supported by the"
                 f" {cls._RECORD_TYPE.__name__} model and are ignored:"
                 f" {not_supported_columns}"
@@ -309,7 +308,7 @@ class DatasetBase:
         """
         not_supported_columns = [col for col in dataframe.columns if col not in cls._record_init_args()]
         if not_supported_columns:
-            _LOGGER.warning(
+            warnings.warn(
                 "Following columns are not supported by the"
                 f" {cls._RECORD_TYPE.__name__} model and are ignored:"
                 f" {not_supported_columns}"
@@ -908,7 +907,7 @@ class DatasetForTextClassification(DatasetBase):
         self._verify_all_labels()  # verify that all labels are strings
 
         if len(self._records) <= len(self._SETTINGS.label_schema) * 100:
-            _LOGGER.warning("OpenAI recommends at least 100 examples per class for training a classification model.")
+            warnings.warn("OpenAI recommends at least 100 examples per class for training a classification model.")
 
         jsonl = []
         for rec in self._records:
@@ -948,8 +947,10 @@ class DatasetForTextClassification(DatasetBase):
         all_labels = list(all_labels)
         all_labels.sort()
 
-        _LOGGER.warning(
-            f"""No label schema provided. Using all_labels: TextClassificationSettings({all_labels}). We recommend providing a `TextClassificationSettings()` or setting `rg.configure_dataset_settings()`/`rg.load_dataset_settings()` to ensure reproducibility."""
+        warnings.warn(
+            f"No label schema provided. Using all_labels: TextClassificationSettings({all_labels}). "
+            "We recommend providing a `TextClassificationSettings()` or setting "
+            "`rg.configure_dataset_settings()`/`rg.load_dataset_settings()` to ensure reproducibility."
         )
         return TextClassificationSettings(all_labels)
 
@@ -1064,7 +1065,7 @@ class DatasetForTokenClassification(DatasetBase):
         for row in dataset:
             # TODO: fails with a KeyError if no tokens column is present and no mapping is indicated
             if not row["tokens"]:
-                _LOGGER.warning("Ignoring row with no tokens.")
+                warnings.warn("Ignoring row with no tokens.")
                 continue
 
             if row.get("tags"):
@@ -1196,7 +1197,7 @@ class DatasetForTokenClassification(DatasetBase):
         self._verify_all_labels()
 
         if len(self._records) <= 500:
-            _LOGGER.warning("OpenAI recommends at least 500 examples for training a conditional generation model.")
+            warnings.warn("OpenAI recommends at least 500 examples for training a conditional generation model.")
 
         jsonl = []
         for rec in self._records:
@@ -1223,8 +1224,10 @@ class DatasetForTokenClassification(DatasetBase):
                     all_labels.add(label)
         all_labels = list(all_labels)
         all_labels.sort()
-        _LOGGER.warning(
-            f"""No label schema provided. Using all_labels: TokenClassificationSettings({all_labels}). We recommend providing a `TokenClassificationSettings()` or setting `rg.configure_dataset_settings()`/`rg.load_dataset_settings()` to ensure reproducibility."""
+        warnings.warn(
+            f"No label schema provided. Using all_labels: TokenClassificationSettings({all_labels}). "
+            "We recommend providing a `TokenClassificationSettings()` or setting "
+            "`rg.configure_dataset_settings()`/`rg.load_dataset_settings()` to ensure reproducibility."
         )
         return TokenClassificationSettings(all_labels)
 
@@ -1481,7 +1484,7 @@ class DatasetForText2Text(DatasetBase):
         end_token = OPENAI_END_TOKEN
         whitespace = OPENAI_WHITESPACE
         if len(self._records) <= 500:
-            _LOGGER.warning("OpenAI recommends at least 500 examples for training a conditional generation model.")
+            warnings.warn("OpenAI recommends at least 500 examples for training a conditional generation model.")
 
         jsonl = []
         for rec in self._records:
