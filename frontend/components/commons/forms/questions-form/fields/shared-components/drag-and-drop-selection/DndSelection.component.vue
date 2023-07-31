@@ -175,10 +175,6 @@ $max-visible-card-items: 12;
         border: 1px dashed $black-10;
       }
     }
-    .--active-slot & {
-      background-color: palette(purple, 800);
-      color: palette(purple, 200);
-    }
     &--ranking {
       @extend .draggable__slot-box;
       max-width: $slot-height;
@@ -188,7 +184,7 @@ $max-visible-card-items: 12;
       font-weight: bold;
       color: $black-54;
       .--active-slot & {
-        border-color: palette(purple, 300);
+        border-color: #cdcdff;
       }
     }
   }
