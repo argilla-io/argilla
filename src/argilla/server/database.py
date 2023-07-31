@@ -62,7 +62,6 @@ def database_url_sync() -> str:
     """
     Returns a "sync" version of the configured database URL. This may be useful in cases we don't need
     an asynchronous connection, like running database migration inside the alembic script.
-
     """
     database_url = make_url(settings.database_url)
     return settings.database_url.replace(f"+{database_url.get_driver_name()}", "")
