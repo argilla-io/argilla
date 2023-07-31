@@ -2,7 +2,7 @@
   <form
     id="formId"
     class="questions-form"
-    :class="{ '--focused-form': formHasFocus }"
+    :class="{ '--focused-form': formHasFocus && interactionCount > 1 }"
     @submit.prevent="onSubmit"
     v-click-outside="onClickOutside"
   >
@@ -148,12 +148,16 @@ export default {
     return {
       originalRecord: null,
       autofocusPosition: 0,
+      interactionCount: 0,
     };
   },
   setup() {
     return useQuestionFormViewModel();
   },
   computed: {
+    showOutline() {
+      return this.formHasFocus && !this.isFormUntouched;
+    },
     formHasFocus() {
       if (this.autofocusPosition || this.autofocusPosition == 0) return true;
       return false;
@@ -325,6 +329,7 @@ export default {
       return this.record.isPending && index === this.autofocusPosition;
     },
     updateQuestionAutofocus(index) {
+      this.interactionCount++;
       this.autofocusPosition = Math.min(
         this.numberOfQuestions - 1,
         Math.max(0, index)
