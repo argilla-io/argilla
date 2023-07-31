@@ -16,13 +16,12 @@ import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 from uuid import UUID
 
+import httpx
 from pydantic import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, conint, validator
 
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 
 if TYPE_CHECKING:
-    import httpx
-
     from argilla.client.feedback.unification import UnifiedValueSchema
 
 
@@ -215,7 +214,7 @@ class FeedbackRecord(BaseModel):
 
 
 class _ArgillaFeedbackRecord(FeedbackRecord):
-    client: "httpx.Client"
+    client: httpx.Client
     name2id: Dict[str, UUID]
 
     def set_suggestions(
@@ -229,5 +228,6 @@ class _ArgillaFeedbackRecord(FeedbackRecord):
             )
 
     class Config:
+        arbitrary_types_allowed = True
         validate_assignment = True
         exclude = {"_unified_responses", "client", "name2id"}
