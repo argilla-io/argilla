@@ -174,7 +174,6 @@ class FeedbackRecord(BaseModel):
     external_id: Optional[str] = None
 
     _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default_factory=dict)
-    _updated: bool = PrivateAttr(default=False)
 
     @validator("suggestions", always=True)
     def normalize_suggestions(cls, values: Any) -> Tuple:
@@ -204,13 +203,8 @@ class FeedbackRecord(BaseModel):
             suggestions_dict[suggestion.question_name] = suggestion
 
         self.__dict__["suggestions"] = tuple(suggestions_dict.values())
-        if self.id and not self._updated:
-            self._updated = True
-
-    def _reset_updated(self) -> None:
-        self._updated = False
 
     class Config:
         extra = Extra.forbid
         validate_assignment = True
-        exclude = {"_unified_responses", "_updated"}
+        exclude = {"_unified_responses"}
