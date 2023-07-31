@@ -17,6 +17,7 @@ import textwrap
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, List, Optional, Union
 
+from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.training.schemas import (
     TrainingTaskForDirectPreferenceOptimization,
     TrainingTaskForRewardModelling,
@@ -262,6 +263,8 @@ class ArgillaTrainerSkeleton(ABC):
             self._label2id = self._task.__label2id__
             self._id2label = self._task.__id2label__
             self._record_class = TextClassificationRecord  # TODO: dirty hack to inherit from original trainers
+        else:
+            self._record_class = FeedbackRecord
 
     @abstractmethod
     def init_training_args(self):
