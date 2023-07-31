@@ -35,77 +35,12 @@ if TYPE_CHECKING:
 warnings.simplefilter("always", DeprecationWarning)
 
 
-class _ArgillaFeedbackDataset(FeedbackDatasetBase):
-    def __init__(
-        self,
-        *,
-        client: "httpx.Client",
-        id: "UUID",
-        name: str,
-        workspace: "Workspace",
-        fields: List["AllowedFieldTypes"],
-        questions: List["AllowedQuestionTypes"],
-        guidelines: Optional[str] = None,
-    ) -> None:
-        super().__init__(fields=fields, questions=questions, guidelines=guidelines)
-
-        self.client = client
-        self._id = id
-        self._name = name
-        self._workspace = workspace
-
-        self.records: _ArgillaFeedbackRecords = _ArgillaFeedbackRecords(client=self.client)
-
-    @property
-    def id(self) -> "UUID":
-        return self._id
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def workspace(self) -> "Workspace":
-        return self._workspace
-
-    def __repr__(self) -> str:
-        return f"<ArgillaFeedbackDataset id={self.id} name={self.name} workspace={self.workspace}>"
-
-    def __len__(self) -> int:
-        return self.records.__len__()
-
-    def __iter__(self) -> Iterator[_ArgillaFeedbackRecord]:
-        return self.records.__iter__()
-
-    def __getitem__(self, key: Union[slice, int]) -> Union[_ArgillaFeedbackRecord, List[_ArgillaFeedbackRecord]]:
-        return self.records.__getitem__(key)
-
-    def fetch_records(self) -> List[_ArgillaFeedbackRecord]:
-        raise NotImplementedError("This method is not implemented yet")
-
-    def push_to_argilla(self, *args, **kwargs) -> None:
-        warnings.warn(
-            "`push_to_argilla` is no longer working for a `FeedbackDataset` pushed to Argilla,"
-            " as the additions, deletions and/or updates over a `FeedbackDataset` in Argilla"
-            " are being tracked automatically, so there's no need to explicitly push them.",
-            DeprecationWarning,
-        )
-
-    def add_records(
-        self,
-        records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
-        show_progress: bool = True,
-    ) -> None:
-        records = self._validate_records(records=records)
-        self.records.add(records=records, show_progress=show_progress)
-
-
 class _ArgillaFeedbackRecords:
-    def __init__(self, client: "httpx.Client", dataset: "_ArgillaFeedbackDataset") -> None:
+    def __init__(self, client: "httpx.Client", id: "UUID", questions: List["AllowedQuestionTypes"]) -> None:
         self.client = client
-        self.id = dataset.id
+        self.id = id
 
-        self.__question_id2name = {question.id: question.name for question in dataset.questions}
+        self.__question_id2name = {question.id: question.name for question in questions}
         self.__question_name2id = {value: key for key, value in self.__question_id2name.items()}
 
     def __repr__(self) -> str:
@@ -216,3 +151,70 @@ class _ArgillaFeedbackRecords:
                 id=self.id,
                 records=records_batch,
             )
+
+
+class _ArgillaFeedbackDataset(FeedbackDatasetBase):
+    def __init__(
+        self,
+        *,
+        client: "httpx.Client",
+        id: "UUID",
+        name: str,
+        workspace: "Workspace",
+        fields: List["AllowedFieldTypes"],
+        questions: List["AllowedQuestionTypes"],
+        guidelines: Optional[str] = None,
+    ) -> None:
+        super().__init__(fields=fields, questions=questions, guidelines=guidelines)
+
+        self.client = client
+        self._id = id
+        self._name = name
+        self._workspace = workspace
+
+        self.records: _ArgillaFeedbackRecords = _ArgillaFeedbackRecords(
+            client=self.client, id=self.id, questions=self.questions
+        )
+
+    @property
+    def id(self) -> "UUID":
+        return self._id
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def workspace(self) -> "Workspace":
+        return self._workspace
+
+    def __repr__(self) -> str:
+        return f"<ArgillaFeedbackDataset id={self.id} name={self.name} workspace={self.workspace}>"
+
+    def __len__(self) -> int:
+        return self.records.__len__()
+
+    def __iter__(self) -> Iterator[_ArgillaFeedbackRecord]:
+        return self.records.__iter__()
+
+    def __getitem__(self, key: Union[slice, int]) -> Union[_ArgillaFeedbackRecord, List[_ArgillaFeedbackRecord]]:
+        return self.records.__getitem__(key)
+
+    def fetch_records(self) -> List[_ArgillaFeedbackRecord]:
+        raise NotImplementedError("This method is not implemented yet")
+
+    def push_to_argilla(self, *args, **kwargs) -> None:
+        warnings.warn(
+            "`push_to_argilla` is no longer working for a `FeedbackDataset` pushed to Argilla,"
+            " as the additions, deletions and/or updates over a `FeedbackDataset` in Argilla"
+            " are being tracked automatically, so there's no need to explicitly push them.",
+            DeprecationWarning,
+        )
+
+    def add_records(
+        self,
+        records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
+        show_progress: bool = True,
+    ) -> None:
+        records = self._validate_records(records=records)
+        self.records.add(records=records, show_progress=show_progress)
