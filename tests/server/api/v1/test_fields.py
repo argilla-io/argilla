@@ -40,13 +40,9 @@ if TYPE_CHECKING:
             {"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
             {"type": "text", "use_markdown": True},
         ),
-        ({"title": "New Title", "settings": {"type": "text"}}, {"type": "text", "use_markdown": False}),
+        ({"title": "New Title"}, {"type": "text", "use_markdown": False}),
         (
-            {"settings": {"type": "text"}},
-            {"type": "text", "use_markdown": False},
-        ),
-        (
-            {"name": "New Name", "required": True, "settings": {"type": "text"}, "dataset_id": str(uuid4())},
+            {"name": "New Name", "required": True, "dataset_id": str(uuid4())},
             {"type": "text", "use_markdown": False},
         ),
     ],
@@ -82,7 +78,12 @@ async def test_update_field(
 
 @pytest.mark.parametrize(
     "field_json",
-    [{"title": None, "settings": None}, {"settings": {"type": "i don't exist"}}],
+    [
+        {"title": None, "settings": None},
+        {"settings": {"type": "text"}},
+        {"settings": {"type": "text", "use_markdown": None}},
+        {"settings": {"type": "i don't exist"}},
+    ],
 )
 @pytest.mark.asyncio
 async def test_update_field_with_invalid_settings(client: TestClient, owner_auth_header: dict, field_json: dict):
