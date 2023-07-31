@@ -1,44 +1,25 @@
-import { isNil } from "lodash";
 import { useResolve } from "ts-injecty";
-import { RecordRepository } from "@/v1/infrastructure/RecordRepository";
-import { useFeedback } from "~/v1/infrastructure/FeedbackStorage";
+import { GetRecordsToAnnotateUseCase } from "@/v1/domain/usecases/get-records-to-annotate-use-case";
+import { useRecords } from "@/v1/infrastructure/storage/RecordsStorage";
+import { GetUserMetricsUseCase } from "@/v1/domain/usecases/get-user-metrics-use-case";
 
 export const useRecordFeedbackTaskViewModel = () => {
-  const recordRepository = useResolve(RecordRepository);
-  const feedbackTask = useFeedback();
+  const getRecords = useResolve(GetRecordsToAnnotateUseCase);
+  const getMetrics = useResolve(GetUserMetricsUseCase);
+  const { state: records, clearRecords } = useRecords();
 
-  const getRecordsFromBackend = async (
+  const loadMetrics = (datasetId: string) => {
+    getMetrics.execute(datasetId);
+  };
+
+  const loadRecords = async (
     datasetId: string,
-    offset: number,
+    page: number,
     status: string,
     searchText: string
   ) => {
-    let records = [];
-    let totalRecords = null;
-
-    if (isNil(searchText) || !searchText.length) {
-      ({ items: records } = await recordRepository.getRecords(
-        datasetId,
-        offset,
-        status
-      ));
-    } else {
-      ({ items: records, totalRecords } = await recordRepository.searchRecords(
-        datasetId,
-        offset,
-        status,
-        searchText
-      ));
-    }
-
-    const feedback = feedbackTask.get();
-
-    feedback.addRecords(records);
-
-    feedbackTask.save(feedback);
-
-    return { records, totalRecords };
+    await getRecords.execute(datasetId, page, status, searchText);
   };
 
-  return { getRecordsFromBackend };
+  return { records, loadMetrics, loadRecords, clearRecords };
 };

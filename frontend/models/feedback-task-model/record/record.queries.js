@@ -32,6 +32,9 @@ const updateRecordStatusByRecordId = (recordId, recordStatus) => {
   });
 };
 
+/**
+ * @deprecated
+ */
 // GET
 const getRecordWithFieldsSuggestionsAndResponsesByUserId = (
   datasetId,
@@ -48,6 +51,9 @@ const getRecordWithFieldsSuggestionsAndResponsesByUserId = (
     .where("record_index", recordIndex)
     .first();
 };
+/**
+ * @deprecated
+ */
 const getRecordIndexByRecordId = (recordId) => {
   return RecordModel.query().whereId(recordId).first()?.record_index;
 };
@@ -74,6 +80,9 @@ const isRecordContainsAnyResponsesByUserId = (userId, recordId) => {
     .exists();
 };
 
+/**
+ * @deprecated
+ */
 const isAnyRecordByDatasetId = (datasetId) => {
   return RecordModel.query().where("dataset_id", datasetId).exists();
 };
