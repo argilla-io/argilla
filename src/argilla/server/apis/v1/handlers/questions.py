@@ -19,16 +19,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla.server.contexts import datasets
 from argilla.server.database import get_async_db
-from argilla.server.models import Question, QuestionType
+from argilla.server.models import Question, User
 from argilla.server.policies import QuestionPolicyV1, authorize
-from argilla.server.schemas.v1.questions import (
-    LabelSelectionSettingsUpdate,
-    QuestionUpdate,
-    TextQuestionSettingsUpdate,
-)
 from argilla.server.schemas.v1.questions import Question as QuestionSchema
+from argilla.server.schemas.v1.questions import (
+    QuestionUpdate,
+)
 from argilla.server.security import auth
-from argilla.server.security.model import User
 
 router = APIRouter(tags=["questions"])
 
@@ -55,13 +52,11 @@ async def update_question(
 
     await authorize(current_user, QuestionPolicyV1.update(question))
 
-    if question_update.settings is not None:
-        if question.settings["type"] in [QuestionType.label_selection, QuestionType.multi_label_selection]:
-            question_update.settings = LabelSelectionSettingsUpdate(**question_update.settings)
-        elif question.settings["type"] == QuestionType.text:
-            question_update.settings = TextQuestionSettingsUpdate(**question_update.settings)
-        else:
-            question_update.settings = {}
+    if question_update.settings.type != question.settings["type"]:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Question type cannot be changed. Expected '{question.settings['type']}' but got '{question_update.settings.type}'",
+        )
 
     return await datasets.update_question(db, question, question_update)
 

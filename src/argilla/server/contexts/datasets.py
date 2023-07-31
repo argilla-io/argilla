@@ -42,6 +42,7 @@ from argilla.server.security.model import User
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
+    from argilla.server.schemas.v1.datasets import DatasetUpdate
     from argilla.server.schemas.v1.fields import FieldUpdate
     from argilla.server.schemas.v1.questions import QuestionUpdate
     from argilla.server.schemas.v1.suggestions import SuggestionCreate
@@ -134,7 +135,7 @@ async def delete_dataset(db: "AsyncSession", search_engine: SearchEngine, datase
     return dataset
 
 
-async def update_dataset(db: "AsyncSession", dataset: Dataset, dataset_update: DatasetCreate) -> Dataset:
+async def update_dataset(db: "AsyncSession", dataset: Dataset, dataset_update: "DatasetUpdate") -> Dataset:
     params = dataset_update.dict(exclude_unset=True)
     return await dataset.update(db, **params)
 
