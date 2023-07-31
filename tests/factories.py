@@ -232,7 +232,7 @@ class FieldFactory(BaseFactory):
 
 
 class TextFieldFactory(FieldFactory):
-    settings = {"type": FieldType.text.value}
+    settings = {"type": FieldType.text.value, "use_markdown": False}
 
 
 class QuestionFactory(BaseFactory):
