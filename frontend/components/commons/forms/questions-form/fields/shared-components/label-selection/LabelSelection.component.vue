@@ -231,7 +231,6 @@ export default {
   max-width: 200px;
   text-align: center;
   padding-inline: 12px;
-  border-radius: $border-radius-rounded;
   background: palette(purple, 800);
   color: palette(purple, 200);
   line-height: 32px;
@@ -240,6 +239,7 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  border-radius: $border-radius-rounded;
   &:not(.label-active):hover {
     background: darken(palette(purple, 800), 8%);
   }
