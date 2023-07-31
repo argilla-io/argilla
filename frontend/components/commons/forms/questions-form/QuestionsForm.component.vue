@@ -1,5 +1,6 @@
 <template>
   <form
+    id="formId"
     class="questions-form"
     :class="{ '--focused-form': formHasFocus }"
     @submit.prevent="onSubmit"
@@ -187,25 +188,42 @@ export default {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
 
     const keyBoardHandler = (parent) => (e) => {
+      const formWrapper = document.getElementById("formId");
+
       const focusable = parent.querySelectorAll(
         'input[type="checkbox"], [tabindex="0"]'
       );
+
       const firstElement = focusable[0];
       const lastElement = focusable[focusable.length - 1];
 
       const isShiftKeyPressed = e.shiftKey;
-      const isTabPressed = e.key === "Tab";
+
+      const isArrowDownPressed = e.key === "ArrowDown";
+      const isArrowUpPressed = e.key === "ArrowUp";
+      const activeElementIsInForm = formWrapper.contains(
+        document.activeElement
+      );
       const isLastElementActive = document.activeElement === lastElement;
       const isFirstElementActive = document.activeElement === firstElement;
 
-      if (!isTabPressed) return;
+      if (!activeElementIsInForm && isShiftKeyPressed && isArrowDownPressed) {
+        this.focusOnFirstQuestionFor(e, formWrapper);
+        return;
+      }
+
+      if (!activeElementIsInForm && isShiftKeyPressed && isArrowUpPressed) {
+        this.focusOnLastQuestionFor(e, formWrapper);
+        return;
+      }
+
+      if (e.key !== "Tab") return;
 
       if (!isShiftKeyPressed && isLastElementActive) {
-        e.preventDefault();
-        firstElement.focus();
-      } else if (isShiftKeyPressed && isFirstElementActive) {
-        e.preventDefault();
-        lastElement.focus();
+        this.focusOn(e, firstElement);
+      }
+      if (isShiftKeyPressed && isFirstElementActive) {
+        this.focusOn(e, lastElement);
       }
     };
 
@@ -225,6 +243,30 @@ export default {
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
+    focusOn($event, node) {
+      $event.preventDefault();
+      node.focus();
+    },
+    focusOnFirstQuestionFor($event, formWrapper) {
+      $event.preventDefault();
+      const firstformGroup = this.getFirstFormGroupNodeFor(formWrapper);
+      firstformGroup[0]?.focus();
+    },
+    focusOnLastQuestionFor($event, formWrapper) {
+      $event.preventDefault();
+      const lastformGroup = this.getLastFormGroupNodeFor(formWrapper);
+      lastformGroup[0]?.focus();
+    },
+    getFirstFormGroupNodeFor(aFormWrapper) {
+      return aFormWrapper?.children[0]?.children[1].querySelectorAll(
+        'input[type="checkbox"], [tabindex="0"]'
+      );
+    },
+    getLastFormGroupNodeFor(aFormWrapper) {
+      return aFormWrapper?.children[0]?.lastChild.querySelectorAll(
+        'input[type="checkbox"], [tabindex="0"]'
+      );
+    },
     onClickOutside() {
       this.autofocusPosition = null;
     },
