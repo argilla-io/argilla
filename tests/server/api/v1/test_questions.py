@@ -43,28 +43,32 @@ if TYPE_CHECKING:
     [
         (
             TextQuestionFactory,
-            {"title": "New Title", "description": "New Description", "settings": {"use_markdown": True}},
+            {
+                "title": "New Title",
+                "description": "New Description",
+                "settings": {"type": "text", "use_markdown": True},
+            },
             {"type": "text", "use_markdown": True},
         ),
         (
             TextQuestionFactory,
-            {"title": "New Title"},
+            {"title": "New Title", "settings": {"type": "text"}},
             {"type": "text", "use_markdown": False},
         ),
         (
             TextQuestionFactory,
-            {},
+            {"settings": {"type": "text"}},
             {"type": "text", "use_markdown": False},
         ),
         (
             TextQuestionFactory,
-            {"name": "New Name", "required": True, "settings": {"type": "unit-test"}, "dataset_id": str(uuid4())},
+            {"name": "New Name", "required": True, "settings": {"type": "text"}, "dataset_id": str(uuid4())},
             {"type": "text", "use_markdown": False},
         ),
         (
             RatingQuestionFactory,
             {
-                "settings": {"options": [{"value": 94}, {"value": 95}, {"value": 96}, {"value": 97}]},
+                "settings": {"type": "rating", "options": [{"value": 94}, {"value": 95}, {"value": 96}, {"value": 97}]},
             },
             {
                 "type": "rating",
@@ -84,7 +88,7 @@ if TYPE_CHECKING:
         ),
         (
             LabelSelectionQuestionFactory,
-            {"settings": {"type": "ranking", "visible_options": 3}},
+            {"settings": {"type": "label_selection", "visible_options": 3}},
             {
                 "type": "label_selection",
                 "options": [
@@ -97,7 +101,7 @@ if TYPE_CHECKING:
         ),
         (
             MultiLabelSelectionQuestionFactory,
-            {"settings": {"type": "ranking", "visible_options": 3}},
+            {"settings": {"type": "multi_label_selection", "visible_options": 3}},
             {
                 "type": "multi_label_selection",
                 "options": [
@@ -110,7 +114,7 @@ if TYPE_CHECKING:
         ),
         (
             LabelSelectionQuestionFactory,
-            {"settings": {"visible_options": None}},
+            {"settings": {"type": "label_selection", "visible_options": None}},
             {
                 "type": "label_selection",
                 "options": [
@@ -125,11 +129,12 @@ if TYPE_CHECKING:
             RankingQuestionFactory,
             {
                 "settings": {
+                    "type": "ranking",
                     "options": [
                         {"value": "response-a", "text": "Response A"},
                         {"value": "response-b", "text": "Response B"},
                         {"value": "response-c", "text": "Response C"},
-                    ]
+                    ],
                 }
             },
             {
@@ -213,7 +218,7 @@ async def test_update_question_non_existent(client: TestClient, owner_auth_heade
     response = client.patch(
         f"/api/v1/questions/{uuid4()}",
         headers=owner_auth_header,
-        json={"title": "New Title", "settings": {"use_markdown": True}},
+        json={"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
     )
 
     assert response.status_code == 404
@@ -225,7 +230,9 @@ async def test_update_question_as_admin_from_different_workspace(client: TestCli
     user = await UserFactory.create(role=UserRole.admin)
 
     response = client.patch(
-        f"/api/v1/questions/{question.id}", headers={API_KEY_HEADER_NAME: user.api_key}, json={"title": "New Title"}
+        f"/api/v1/questions/{question.id}",
+        headers={API_KEY_HEADER_NAME: user.api_key},
+        json={"title": "New Title", "settings": {"type": "text"}},
     )
 
     assert response.status_code == 403
@@ -237,7 +244,9 @@ async def test_update_question_as_annotator(client: TestClient):
     user = await AnnotatorFactory.create(workspaces=[question.dataset.workspace])
 
     response = client.patch(
-        f"/api/v1/questions/{question.id}", headers={API_KEY_HEADER_NAME: user.api_key}, json={"title": "New Title"}
+        f"/api/v1/questions/{question.id}",
+        headers={API_KEY_HEADER_NAME: user.api_key},
+        json={"title": "New Title", "settings": {"type": "text"}},
     )
 
     assert response.status_code == 403

@@ -36,10 +36,10 @@ if TYPE_CHECKING:
 @pytest.mark.parametrize(
     "payload",
     [
-        {"title": "New Title", "settings": {"use_markdown": True}},
-        {"title": "New Title"},
-        {},
-        {"name": "New Name", "required": True, "settings": {"type": "unit-test"}, "dataset_id": str(uuid4())},
+        {"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
+        {"title": "New Title", "settings": {"type": "text"}},
+        {"settings": {"type": "text"}},
+        {"name": "New Name", "required": True, "settings": {"type": "text"}, "dataset_id": str(uuid4())},
     ],
 )
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
@@ -71,9 +71,7 @@ async def test_update_field(client: TestClient, role: UserRole, payload: dict):
 
 @pytest.mark.parametrize(
     "field_json",
-    [
-        {"title": None, "settings": None},
-    ],
+    [{"title": None, "settings": None}, {"settings": {"type": "i don't exist"}}],
 )
 @pytest.mark.asyncio
 async def test_update_field_with_invalid_settings(client: TestClient, owner_auth_header: dict, field_json: dict):
@@ -102,7 +100,7 @@ async def test_update_field_non_existent(client: TestClient, owner_auth_header: 
     response = client.patch(
         f"/api/v1/fields/{uuid4()}",
         headers=owner_auth_header,
-        json={"title": "New Title", "settings": {"use_markdown": True}},
+        json={"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
     )
 
     assert response.status_code == 404
@@ -116,7 +114,7 @@ async def test_update_field_as_admin_from_different_workspace(client: TestClient
     response = client.patch(
         f"/api/v1/fields/{field.id}",
         headers={API_KEY_HEADER_NAME: user.api_key},
-        json={"title": "New Title", "settings": {"use_markdown": True}},
+        json={"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
     )
 
     assert response.status_code == 403
@@ -130,7 +128,7 @@ async def test_update_field_as_annotator(client: TestClient):
     response = client.patch(
         f"/api/v1/fields/{field.id}",
         headers={API_KEY_HEADER_NAME: user.api_key},
-        json={"title": "New Title", "settings": {"use_markdown": True}},
+        json={"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
     )
 
     assert response.status_code == 403

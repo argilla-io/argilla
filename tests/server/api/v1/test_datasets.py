@@ -3234,6 +3234,7 @@ async def test_publish_dataset_with_nonexistent_dataset_id(
         {"name": "New Name", "guidelines": "New Guidelines"},
         {"name": "New Name"},
         {"guidelines": "New Guidelines"},
+        {"guidelines": None},
         {},
         {"status": DatasetStatus.draft, "workspace_id": str(uuid4())},
     ],
@@ -3252,11 +3253,16 @@ async def test_update_dataset(client: TestClient, role: UserRole, payload: dict)
         json=payload,
     )
 
+    if "guidelines" in payload:
+        guidelines = payload["guidelines"]
+    else:
+        guidelines = dataset.guidelines
+
     assert response.status_code == 200
     assert response.json() == {
         "id": str(dataset.id),
         "name": payload.get("name") or dataset.name,
-        "guidelines": payload.get("guidelines") or dataset.guidelines,
+        "guidelines": guidelines,
         "status": "ready",
         "workspace_id": str(dataset.workspace_id),
         "inserted_at": dataset.inserted_at.isoformat(),
@@ -3267,7 +3273,7 @@ async def test_update_dataset(client: TestClient, role: UserRole, payload: dict)
 @pytest.mark.parametrize(
     "dataset_json",
     [
-        {"name": None, "guidelines": None},
+        {"name": None},
         {"name": ""},
         {"name": "123$abc"},
         {"name": "unit@test"},

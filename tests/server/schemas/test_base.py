@@ -23,7 +23,7 @@ def test_update_schema():
         unit: Optional[str]
         test: Optional[bool]
 
-        __non_explicit_none__ = {"unit", "test"}
+        __non_nullable_fields__ = {"unit", "test"}
 
     with pytest.raises(ValueError):
         UnitTestUpdateSchema(unit=None, test=None)
