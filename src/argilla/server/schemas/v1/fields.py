@@ -53,4 +53,4 @@ class FieldUpdate(UpdateSchema):
     title: Optional[FieldTitle]
     settings: TextFieldSettingsUpdate
 
-    __non_nullable_fields__ = {"title", "settings"}
+    __non_nullable_fields__ = {"title"}
