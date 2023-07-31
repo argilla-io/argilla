@@ -19,7 +19,7 @@ from tqdm import trange
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE, PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
-from argilla.client.feedback.schemas.records import FeedbackRecord
+from argilla.client.feedback.schemas.records import FeedbackRecord, _ArgillaFeedbackRecord
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 
 if TYPE_CHECKING:
@@ -69,7 +69,7 @@ class _ArgillaFeedbackDataset(FeedbackDatasetBase):
     def workspace(self) -> "Workspace":
         return self._workspace
 
-    def __parse_record(self, record: "FeedbackItemModel") -> FeedbackRecord:
+    def __parse_record(self, record: "FeedbackItemModel") -> _ArgillaFeedbackRecord:
         record = record.dict(
             exclude={
                 "inserted_at": ...,
@@ -81,14 +81,14 @@ class _ArgillaFeedbackDataset(FeedbackDatasetBase):
         )
         for suggestion in record.get("suggestions", []):
             suggestion.update({"question_name": self.__question_id2name[suggestion["question_id"]]})
-        return FeedbackRecord(**record)
+        return _ArgillaFeedbackRecord(client=self.client, name2id=self.__question_name2id, **record)
 
     def __len__(self) -> int:
         try:
             response = datasets_api_v1.get_metrics(client=self.client, id=self.id)
         except Exception as e:
             raise Exception(
-                "Failed while getting the metrics from the current `FeedbackDataset`" f" in Argilla with exception: {e}"
+                f"Failed while getting the metrics from the current `FeedbackDataset` in Argilla with exception: {e}"
             ) from e
         return response.parsed.records.count
 
@@ -132,7 +132,7 @@ class _ArgillaFeedbackDataset(FeedbackDatasetBase):
                 records.extend([self.__parse_record(record) for record in fetched_records.items])
         return records[0] if isinstance(key, int) else records
 
-    def __iter__(self) -> Iterator[FeedbackRecord]:
+    def __iter__(self) -> Iterator[_ArgillaFeedbackRecord]:
         current_batch = 0
         while True:
             batch = datasets_api_v1.get_records(
@@ -142,24 +142,13 @@ class _ArgillaFeedbackDataset(FeedbackDatasetBase):
                 limit=FETCHING_BATCH_SIZE,
             ).parsed
             for record in batch.items:
-                record = record.dict(
-                    exclude={
-                        "inserted_at": ...,
-                        "updated_at": ...,
-                        "responses": {"__all__": {"id", "inserted_at", "updated_at"}},
-                        "suggestions": {"__all__": {"id"}},
-                    },
-                    exclude_none=True,
-                )
-                for suggestion in record.get("suggestions", []):
-                    suggestion.update({"question_name": self.__question_id2name[suggestion["question_id"]]})
-                yield FeedbackRecord(**record)
+                yield self.__parse_record(record)
             current_batch += 1
 
             if len(batch.items) < FETCHING_BATCH_SIZE:
                 break
 
-    def fetch_records(self) -> List[FeedbackRecord]:
+    def fetch_records(self) -> List[_ArgillaFeedbackRecord]:
         raise NotImplementedError("This method is not implemented yet")
 
     def add_records(

@@ -18,7 +18,11 @@ from uuid import UUID
 
 from pydantic import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, conint, validator
 
+from argilla.client.sdk.v1.datasets import api as datasets_api_v1
+
 if TYPE_CHECKING:
+    import httpx
+
     from argilla.client.feedback.unification import UnifiedValueSchema
 
 
@@ -208,3 +212,22 @@ class FeedbackRecord(BaseModel):
         extra = Extra.forbid
         validate_assignment = True
         exclude = {"_unified_responses"}
+
+
+class _ArgillaFeedbackRecord(FeedbackRecord):
+    client: "httpx.Client"
+    name2id: Dict[str, UUID]
+
+    def set_suggestions(
+        self, suggestions: SuggestionSchema | List[SuggestionSchema] | Dict[str, Any] | List[Dict[str, Any]]
+    ) -> None:
+        super().set_suggestions(suggestions)
+        for suggestion in self.suggestions:
+            suggestion.question_id = self.name2id[suggestion.question_name]
+            datasets_api_v1.set_suggestion(
+                client=self.client, record_id=self.id, **suggestion.dict(exclude_none=True, exclude={"question_name"})
+            )
+
+    class Config:
+        validate_assignment = True
+        exclude = {"_unified_responses", "client", "name2id"}
