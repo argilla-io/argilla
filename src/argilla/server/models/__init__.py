@@ -12,5 +12,54 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .models import *  # noqa: F403
-from .questions import *  # noqa: F403
+from argilla.server.models.models import (
+    Dataset,
+    DatasetStatus,
+    Field,
+    FieldType,
+    Question,
+    Record,
+    Response,
+    ResponseStatus,
+    Suggestion,
+    SuggestionType,
+    User,
+    UserRole,
+    Workspace,
+    WorkspaceUser,
+)
+from argilla.server.models.questions import (
+    LabelSelectionQuestionSettings,
+    MultiLabelSelectionQuestionSettings,
+    QuestionSettings,
+    QuestionType,
+    RankingQuestionSettings,
+    RatingQuestionSettings,
+    ResponseValue,
+    TextQuestionSettings,
+)
+
+__all__ = [
+    "Dataset",
+    "DatasetStatus",
+    "Field",
+    "FieldType",
+    "Question",
+    "Record",
+    "Response",
+    "ResponseStatus",
+    "Suggestion",
+    "SuggestionType",
+    "User",
+    "UserRole",
+    "Workspace",
+    "WorkspaceUser",
+    "LabelSelectionQuestionSettings",
+    "MultiLabelSelectionQuestionSettings",
+    "QuestionSettings",
+    "QuestionType",
+    "RankingQuestionSettings",
+    "RatingQuestionSettings",
+    "ResponseValue",
+    "TextQuestionSettings",
+]
