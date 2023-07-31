@@ -17,7 +17,6 @@ import os
 import sys
 from time import sleep
 
-import argilla as rg
 import datasets
 import pandas as pd
 import pytest

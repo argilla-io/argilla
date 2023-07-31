@@ -14,7 +14,7 @@
 import asyncio
 import contextlib
 import tempfile
-from typing import TYPE_CHECKING, AsyncGenerator, Dict, Generator, Iterator
+from typing import TYPE_CHECKING, AsyncGenerator, Dict, Generator
 
 import httpx
 import pytest
@@ -41,12 +41,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from tests.database import SyncTestSession, TestSession, set_task
-from tests.factories import (
-    AnnotatorFactory,
-    OwnerFactory,
-    UserFactory,
-    WorkspaceFactory,
-)
+from tests.factories import AnnotatorFactory, OwnerFactory, UserFactory, WorkspaceFactory
 from tests.helpers import SecuredClient
 
 if TYPE_CHECKING:

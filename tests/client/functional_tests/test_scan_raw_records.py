@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import argilla as rg
 import pytest
 from argilla.client.api import active_api, load
 from argilla.client.sdk.token_classification.models import TokenClassificationRecord
@@ -23,7 +22,6 @@ from argilla.client.sdk.token_classification.models import TokenClassificationRe
     argvalues=(set(), {"text"}, {"tokens"}),
 )
 def test_scan_records(gutenberg_spacy_ner, fields):
-    import argilla as rg
     import pandas as pd
 
     data = active_api().datasets.scan(

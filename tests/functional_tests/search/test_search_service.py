@@ -25,7 +25,6 @@ from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.backend.search.query_builder import EsQueryBuilder
 from argilla.server.daos.models.datasets import BaseDatasetDB
 from argilla.server.daos.records import DatasetRecordsDAO
-from argilla.server.schemas.datasets import Dataset
 from argilla.server.services.metrics import MetricsService, ServicePythonMetric
 from argilla.server.services.search.model import ServiceSortConfig
 from argilla.server.services.search.service import SearchRecordsService

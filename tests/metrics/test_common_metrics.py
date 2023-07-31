@@ -13,7 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import argilla
-import argilla as rg
 import pytest
 from argilla.client.api import delete, log
 from argilla.client.models import TextClassificationRecord

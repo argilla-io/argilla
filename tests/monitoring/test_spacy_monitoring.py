@@ -15,7 +15,6 @@
 import random
 from time import sleep
 
-import argilla as rg
 from argilla.client.api import delete, load
 from argilla.monitoring.model_monitor import monitor
 

@@ -104,7 +104,7 @@ def test_search_special_characters(mocked_client: SecuredClient, argilla_user: U
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:search",
-        json=TokenClassificationSearchRequest(query=TokenClassificationQuery(query_text="\!")).dict(),
+        json=TokenClassificationSearchRequest(query=TokenClassificationQuery(query_text=r"\!")).dict(),
     )
     assert response.status_code == 200, response.json()
     results = TokenClassificationSearchResults.parse_obj(response.json())
@@ -112,7 +112,7 @@ def test_search_special_characters(mocked_client: SecuredClient, argilla_user: U
 
     response = mocked_client.post(
         f"/api/datasets/{dataset}/TokenClassification:search",
-        json=TokenClassificationSearchRequest(query=TokenClassificationQuery(query_text="text.exact:\!")).dict(),
+        json=TokenClassificationSearchRequest(query=TokenClassificationQuery(query_text=r"text.exact:\!")).dict(),
     )
     assert response.status_code == 200, response.json()
     results = TokenClassificationSearchResults.parse_obj(response.json())

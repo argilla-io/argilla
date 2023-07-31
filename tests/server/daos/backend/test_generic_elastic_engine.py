@@ -18,7 +18,6 @@ import pytest
 from argilla.server.commons.models import TaskType
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.backend.search.model import BaseRecordsQuery
-from argilla.server.errors import InvalidTextSearchError
 
 
 @pytest.fixture(scope="session")

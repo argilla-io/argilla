@@ -25,7 +25,7 @@ from argilla.client.users import User
 if TYPE_CHECKING:
     from argilla.server.models import User as ServerUser
 
-from tests.factories import UserFactory, WorkspaceFactory, WorkspaceUserFactory
+from tests.factories import UserFactory, WorkspaceFactory
 
 
 def test_user_cls_init() -> None:

@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import argilla as rg
 from argilla.client.models import TextClassificationRecord
 from argilla.training import ArgillaTrainer
 

@@ -54,7 +54,7 @@ def test_validate():
 
 def test_validate_not_valid_spans():
     span_utils = SpanUtils("test this.", ["test", "this", "."])
-    with pytest.raises(ValueError, match="Following entity spans are not valid: \[\('mock', 2, 1\)\]\n"):
+    with pytest.raises(ValueError, match="Following entity spans are not valid: \\[\\('mock', 2, 1\\)\\]\n"):
         span_utils.validate([("mock", 2, 1)])
 
 

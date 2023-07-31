@@ -14,7 +14,6 @@
 
 import time
 
-import argilla as rg
 import pytest
 from argilla.client.api import delete, delete_records, load, log
 from argilla.client.client import Argilla
@@ -27,7 +26,6 @@ from tests.factories import AnnotatorFactory, UserFactory, WorkspaceFactory
 
 def test_delete_records_from_dataset(mocked_client):
     dataset = "test_delete_records_from_dataset"
-    import argilla as rg
 
     delete(dataset)
     log(

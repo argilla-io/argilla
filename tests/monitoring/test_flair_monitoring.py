@@ -20,7 +20,6 @@ from argilla.server.models import User
 
 
 def test_flair_monitoring(monkeypatch, argilla_user: User):
-    import argilla as rg
     from flair.data import Sentence
     from flair.models import SequenceTagger
 

@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import argilla as rg
 from argilla.client.api import delete
 from argilla.server.commons.models import TaskType
 

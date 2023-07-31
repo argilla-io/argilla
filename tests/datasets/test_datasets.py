@@ -14,7 +14,6 @@
 
 from typing import TYPE_CHECKING
 
-import argilla as rg
 import pytest
 from argilla.client import api
 from argilla.client.api import delete, get_workspace, init

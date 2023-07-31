@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import argilla
-import argilla as rg
 import pytest
 from argilla.client.api import delete, load, log
 from argilla.client.models import TokenClassificationRecord
@@ -142,7 +141,7 @@ def test_compute_for_as_string(mocked_client):
 
     with pytest.raises(
         ValueError,
-        match="not-found is not a valid ComputeFor, please select one of \['annotations', 'predictions'\]",
+        match=r"not-found is not a valid ComputeFor, please select one of \['annotations', 'predictions'\]",
     ):
         entity_capitalness(dataset, compute_for="not-found")
 

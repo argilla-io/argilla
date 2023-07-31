@@ -14,7 +14,6 @@
 #  limitations under the License.
 import sys
 
-import argilla as rg
 import cleanlab
 import pytest
 from _pytest.logging import LogCaptureFixture

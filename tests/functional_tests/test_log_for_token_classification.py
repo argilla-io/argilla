@@ -14,7 +14,6 @@
 import argilla
 import pytest
 from argilla import TokenClassificationRecord
-from argilla.client import api
 from argilla.client.api import ArgillaSingleton
 from argilla.client.client import Argilla
 from argilla.client.sdk.commons.errors import NotFoundApiError
@@ -22,7 +21,6 @@ from argilla.metrics import __all__ as ALL_METRICS
 from argilla.metrics import entity_consistency
 
 from tests.client.conftest import SUPPORTED_VECTOR_SEARCH
-from tests.helpers import SecuredClient
 
 
 def test_log_with_empty_text(api: Argilla):

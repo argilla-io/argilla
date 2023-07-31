@@ -27,7 +27,6 @@ from tests.factories import (
     OwnerFactory,
     UserFactory,
     WorkspaceFactory,
-    WorkspaceUserFactory,
 )
 
 if TYPE_CHECKING:

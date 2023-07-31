@@ -3386,10 +3386,10 @@ async def test_delete_dataset(
     await TextQuestionFactory.create(dataset=dataset)
 
     other_dataset = await DatasetFactory.create()
-    other_field = await TextFieldFactory.create(dataset=other_dataset)
-    other_question = await TextQuestionFactory.create(dataset=other_dataset)
+    await TextFieldFactory.create(dataset=other_dataset)
+    await TextQuestionFactory.create(dataset=other_dataset)
     other_record = await RecordFactory.create(dataset=other_dataset)
-    other_response = await ResponseFactory.create(record=other_record, user=owner)
+    await ResponseFactory.create(record=other_record, user=owner)
 
     response = client.delete(f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header)
 
@@ -3417,10 +3417,10 @@ async def test_delete_published_dataset(client: TestClient, db: "AsyncSession", 
     await ResponseFactory.create(record=record, user=owner)
 
     other_dataset = await DatasetFactory.create()
-    other_field = await TextFieldFactory.create(dataset=other_dataset)
-    other_question = await TextQuestionFactory.create(dataset=other_dataset)
+    await TextFieldFactory.create(dataset=other_dataset)
+    await TextQuestionFactory.create(dataset=other_dataset)
     other_record = await RecordFactory.create(dataset=other_dataset)
-    other_response = await ResponseFactory.create(record=other_record, user=owner)
+    await ResponseFactory.create(record=other_record, user=owner)
 
     response = client.delete(f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header)
 

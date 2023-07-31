@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import argilla as rg
 from argilla import Text2TextRecord, TextClassificationRecord, TokenClassificationRecord
 from argilla.client.client import Argilla
 from argilla.server.commons.models import TaskType

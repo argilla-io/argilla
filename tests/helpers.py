@@ -14,8 +14,6 @@
 
 from argilla._constants import (
     API_KEY_HEADER_NAME,
-    DEFAULT_API_KEY,
-    DEFAULT_USERNAME,
     WORKSPACE_HEADER_NAME,
 )
 from argilla.server.models import User

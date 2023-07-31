@@ -38,7 +38,7 @@ def test_create_records_for_text_classification_with_multi_label(mocked_client: 
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     assert (
         mocked_client.post(
-            f"/api/datasets",
+            "/api/datasets",
             json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         ).status_code
         == 200
@@ -147,7 +147,7 @@ def test_create_records_for_text_classification(mocked_client: SecuredClient, ar
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     assert (
         mocked_client.post(
-            f"/api/datasets",
+            "/api/datasets",
             json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         ).status_code
         == 200
@@ -223,7 +223,7 @@ def test_create_records_for_text_classification_vector_search(
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     assert (
         mocked_client.post(
-            f"/api/datasets",
+            "/api/datasets",
             json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         ).status_code
         == 200
@@ -336,7 +336,7 @@ def test_partial_record_update(mocked_client: SecuredClient, argilla_user: User)
     assert mocked_client.delete(f"/api/datasets/{name}").status_code == 200
     assert (
         mocked_client.post(
-            f"/api/datasets",
+            "/api/datasets",
             json={"name": name, "task": TaskType.text_classification, "workspace": argilla_user.username},
         ).status_code
         == 200
@@ -423,7 +423,7 @@ def test_sort_by_last_updated(mocked_client: SecuredClient, argilla_user: User):
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     assert (
         mocked_client.post(
-            f"/api/datasets",
+            "/api/datasets",
             json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         ).status_code
         == 200
@@ -457,7 +457,7 @@ def test_sort_by_id_as_default(mocked_client: SecuredClient, argilla_user: User)
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     assert (
         mocked_client.post(
-            f"/api/datasets",
+            "/api/datasets",
             json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         ).status_code
         == 200
@@ -505,7 +505,7 @@ def test_some_sort_by(mocked_client: SecuredClient, argilla_user: User):
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     assert (
         mocked_client.post(
-            f"/api/datasets",
+            "/api/datasets",
             json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         ).status_code
         == 200
@@ -587,7 +587,7 @@ def test_disable_aggregations_when_scroll(mocked_client: SecuredClient, argilla_
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     assert (
         mocked_client.post(
-            f"/api/datasets",
+            "/api/datasets",
             json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         ).status_code
         == 200
@@ -634,7 +634,7 @@ def test_include_event_timestamp(mocked_client: SecuredClient, argilla_user: Use
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     assert (
         mocked_client.post(
-            f"/api/datasets",
+            "/api/datasets",
             json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         ).status_code
         == 200
@@ -682,7 +682,7 @@ def test_words_cloud(mocked_client: SecuredClient, argilla_user: User):
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     assert (
         mocked_client.post(
-            f"/api/datasets",
+            "/api/datasets",
             json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         ).status_code
         == 200
@@ -729,7 +729,7 @@ def test_metadata_with_point_in_field_name(mocked_client: SecuredClient, argilla
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     assert (
         mocked_client.post(
-            f"/api/datasets",
+            "/api/datasets",
             json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         ).status_code
         == 200
@@ -773,7 +773,7 @@ def test_wrong_text_query(mocked_client: SecuredClient, argilla_user: User):
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     assert (
         mocked_client.post(
-            f"/api/datasets",
+            "/api/datasets",
             json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         ).status_code
         == 200
@@ -812,7 +812,7 @@ def test_search_using_text(mocked_client: SecuredClient, argilla_user: User):
     assert mocked_client.delete(f"/api/datasets/{dataset}").status_code == 200
     assert (
         mocked_client.post(
-            f"/api/datasets",
+            "/api/datasets",
             json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         ).status_code
         == 200
