@@ -25,7 +25,7 @@ from argilla.client.sdk.commons.errors import (
     ValidationApiError,
 )
 from argilla.client.sdk.users import api as users_api
-from argilla.client.sdk.users.models import UserCreateModel, UserModel, UserRole
+from argilla.client.sdk.users.models import UserModel, UserRole
 from argilla.client.sdk.v1.users import api as users_api_v1
 from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
 from argilla.client.utils import allowed_for_roles
