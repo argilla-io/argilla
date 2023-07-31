@@ -17,7 +17,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 import pytest
-
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v0.models.commons.model import BulkResponse
 from argilla.server.apis.v0.models.text_classification import (
@@ -31,6 +30,7 @@ from argilla.server.apis.v0.models.text_classification import (
 from argilla.server.commons.models import PredictionStatus, TaskType
 from argilla.server.models import User
 from argilla.server.schemas.datasets import Dataset
+
 from tests import SUPPORTED_VECTOR_SEARCH
 
 if TYPE_CHECKING:
@@ -906,7 +906,7 @@ async def test_search_using_text(async_client: "AsyncClient", argilla_user: User
     response = await async_client.post(
         f"/api/datasets/{dataset}/TextClassification:search",
         json=TextClassificationSearchRequest(query=TextClassificationQuery(query_text="text.exact: texto")).dict(),
-        params=workspace_query_params
+        params=workspace_query_params,
     )
     assert response.status_code == 200
 

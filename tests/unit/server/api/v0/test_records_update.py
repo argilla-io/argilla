@@ -14,20 +14,20 @@
 from typing import TYPE_CHECKING
 
 import pytest
-
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v0.models.text2text import Text2TextBulkRequest, Text2TextRecord, Text2TextRecordInputs
 from argilla.server.apis.v0.models.text_classification import TextClassificationBulkRequest, TextClassificationRecord
 from argilla.server.apis.v0.models.token_classification import TokenClassificationBulkRequest, TokenClassificationRecord
 from argilla.server.commons.models import TaskType
 from argilla.server.models import User, UserRole
+
 from tests.factories import UserFactory, WorkspaceFactory
 
 if TYPE_CHECKING:
     from httpx import AsyncClient
 
 
-async def create_dataset(async_client: "AsyncClient",  workspace_name: str, task: TaskType) -> str:
+async def create_dataset(async_client: "AsyncClient", workspace_name: str, task: TaskType) -> str:
     dataset_name = "test_dataset"
     params = {"workspace": workspace_name}
 
@@ -189,7 +189,6 @@ async def test_update_record_ok(async_client: "AsyncClient", owner: User, task, 
 )
 @pytest.mark.asyncio
 async def test_update_with_not_found(async_client: "AsyncClient", task: TaskType, role: UserRole):
-
     workspace = await WorkspaceFactory.create()
     user = await UserFactory.create(role=role, workspaces=[workspace])
 

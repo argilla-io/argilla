@@ -95,7 +95,9 @@ async def test_create_workspace_without_authentication(async_client: "AsyncClien
 async def test_create_workspace_as_admin(async_client: "AsyncClient", db: "AsyncSession"):
     admin = await AdminFactory.create()
 
-    response = await async_client.post("/api/workspaces", headers={API_KEY_HEADER_NAME: admin.api_key}, json={"name": "workspaces"})
+    response = await async_client.post(
+        "/api/workspaces", headers={API_KEY_HEADER_NAME: admin.api_key}, json={"name": "workspaces"}
+    )
 
     assert response.status_code == 403
     assert (await db.execute(select(func.count(Workspace.id)))).scalar() == 0
@@ -114,7 +116,9 @@ async def test_create_workspace_as_annotator(async_client: "AsyncClient", db: "A
 
 
 @pytest.mark.asyncio
-async def test_create_workspace_with_existent_name(async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
+async def test_create_workspace_with_existent_name(
+    async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+):
     await WorkspaceFactory.create(name="workspace")
 
     response = await async_client.post("/api/workspaces", headers=owner_auth_header, json={"name": "workspace"})
@@ -134,7 +138,9 @@ async def test_create_workspace_with_invalid_min_length_name(
 
 
 @pytest.mark.asyncio
-async def test_create_workspace_with_invalid_name(async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
+async def test_create_workspace_with_invalid_name(
+    async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+):
     response = await async_client.post("/api/workspaces", headers=owner_auth_header, json={"name": "invalid name"})
 
     assert response.status_code == 422
@@ -210,7 +216,9 @@ async def test_list_workspace_users_as_admin(async_client: "AsyncClient", db: "A
     await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=user_b.id)
     await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=user_c.id)
 
-    response = await async_client.get(f"/api/workspaces/{workspace.id}/users", headers={API_KEY_HEADER_NAME: admin.api_key})
+    response = await async_client.get(
+        f"/api/workspaces/{workspace.id}/users", headers={API_KEY_HEADER_NAME: admin.api_key}
+    )
 
     assert response.status_code == 200
     assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 4
@@ -229,13 +237,17 @@ async def test_list_workspace_users_as_annotator(async_client: "AsyncClient"):
     annotator = await AnnotatorFactory.create()
     workspace = await WorkspaceFactory.create()
 
-    response = await async_client.get(f"/api/workspaces/{workspace.id}/users", headers={API_KEY_HEADER_NAME: annotator.api_key})
+    response = await async_client.get(
+        f"/api/workspaces/{workspace.id}/users", headers={API_KEY_HEADER_NAME: annotator.api_key}
+    )
 
     assert response.status_code == 403
 
 
 @pytest.mark.asyncio
-async def test_create_workspace_user(async_client: "AsyncClient", db: "AsyncSession", owner: "User", owner_auth_header: dict):
+async def test_create_workspace_user(
+    async_client: "AsyncClient", db: "AsyncSession", owner: "User", owner_auth_header: dict
+):
     workspace = await WorkspaceFactory.create()
 
     response = await async_client.post(f"/api/workspaces/{workspace.id}/users/{owner.id}", headers=owner_auth_header)
@@ -345,7 +357,9 @@ async def test_delete_workspace_user_without_authentication(async_client: "Async
     user = await UserFactory.create()
     workspace_user = await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=user.id)
 
-    response = await async_client.delete(f"/api/workspaces/{workspace_user.workspace_id}/users/{workspace_user.user_id}")
+    response = await async_client.delete(
+        f"/api/workspaces/{workspace_user.workspace_id}/users/{workspace_user.user_id}"
+    )
 
     assert response.status_code == 401
     assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 1
@@ -399,7 +413,9 @@ async def test_delete_workspace_user_with_nonexistent_workspace_id(
     user = await UserFactory.create()
     workspace_user = await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=user.id)
 
-    response = await async_client.delete(f"/api/workspaces/{uuid4()}/users/{workspace_user.user_id}", headers=owner_auth_header)
+    response = await async_client.delete(
+        f"/api/workspaces/{uuid4()}/users/{workspace_user.user_id}", headers=owner_auth_header
+    )
 
     assert response.status_code == 404
     assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 1

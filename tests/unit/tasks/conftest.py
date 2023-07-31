@@ -11,17 +11,17 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import Generator, TYPE_CHECKING
+from typing import TYPE_CHECKING, Generator
 
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.ext.asyncio import AsyncSession
-from typer.testing import CliRunner
-
 from argilla.__main__ import app
 from argilla.server.database import database_url_sync
 from argilla.server.models import DatabaseModel
 from argilla.tasks.database.migrate import migrate_db
+from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import AsyncSession
+from typer.testing import CliRunner
+
 from tests.database import SyncTestSession
 
 if TYPE_CHECKING:

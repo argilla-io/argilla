@@ -86,7 +86,9 @@ async def test_delete_field_belonging_to_published_dataset(
 
 
 @pytest.mark.asyncio
-async def test_delete_field_with_nonexistent_field_id(async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
+async def test_delete_field_with_nonexistent_field_id(
+    async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+):
     await TextFieldFactory.create()
 
     response = await async_client.delete(f"/api/v1/fields/{uuid4()}", headers=owner_auth_header)

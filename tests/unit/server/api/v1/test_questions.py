@@ -17,10 +17,10 @@ from typing import TYPE_CHECKING, Type
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import func, select
-
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import DatasetStatus, Question
+from sqlalchemy import func, select
+
 from tests.factories import (
     AnnotatorFactory,
     DatasetFactory,
@@ -31,8 +31,8 @@ from tests.factories import (
 )
 
 if TYPE_CHECKING:
-    from sqlalchemy.ext.asyncio import AsyncSession
     from httpx import AsyncClient
+    from sqlalchemy.ext.asyncio import AsyncSession
 
     from tests.factories import QuestionFactory as QuestionFactoryType
 

@@ -14,7 +14,6 @@
 from typing import TYPE_CHECKING
 
 import pytest
-
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.client.api import delete
 from argilla.server.commons.models import TaskType

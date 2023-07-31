@@ -15,7 +15,6 @@
 from typing import TYPE_CHECKING
 
 import pytest
-
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v0.models.text2text import (
     Text2TextBulkRequest,
@@ -34,6 +33,7 @@ from argilla.server.models import User, UserRole
 from argilla.server.services.metrics.models import CommonTasksMetrics
 from argilla.server.services.tasks.text_classification.metrics import TextClassificationMetrics
 from argilla.server.services.tasks.token_classification.metrics import TokenClassificationMetrics
+
 from tests.factories import UserFactory, WorkspaceFactory
 
 if TYPE_CHECKING:

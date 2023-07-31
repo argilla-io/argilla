@@ -221,7 +221,9 @@ async def test_update_response_from_discarded_to_submitted_without_values(
 
 
 @pytest.mark.asyncio
-async def test_update_response_with_wrong_values(async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
+async def test_update_response_with_wrong_values(
+    async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+):
     response = await ResponseFactory.create(status="discarded")
     response_json = {"status": "submitted", "values": {"wrong_question": {"value": "wrong value"}}}
 
@@ -286,7 +288,9 @@ async def test_update_response_as_annotator(async_client: "AsyncClient", db: "As
 
 
 @pytest.mark.asyncio
-async def test_update_response_as_annotator_for_different_user_response(async_client: "AsyncClient", db: "AsyncSession"):
+async def test_update_response_as_annotator_for_different_user_response(
+    async_client: "AsyncClient", db: "AsyncSession"
+):
     annotator = await AnnotatorFactory.create()
     response = await ResponseFactory.create(
         values={
@@ -393,11 +397,15 @@ async def test_delete_response_as_admin_for_different_user_response(async_client
 
 
 @pytest.mark.asyncio
-async def test_delete_response_as_annotator_for_different_user_response(async_client: "AsyncClient", db: "AsyncSession"):
+async def test_delete_response_as_annotator_for_different_user_response(
+    async_client: "AsyncClient", db: "AsyncSession"
+):
     annotator = await AnnotatorFactory.create()
     response = await ResponseFactory.create()
 
-    resp = await async_client.delete(f"/api/v1/responses/{response.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
+    resp = await async_client.delete(
+        f"/api/v1/responses/{response.id}", headers={API_KEY_HEADER_NAME: annotator.api_key}
+    )
 
     assert resp.status_code == 403
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 1

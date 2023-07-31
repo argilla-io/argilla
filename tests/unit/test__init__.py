@@ -20,4 +20,3 @@ from argilla.utils import LazyargillaModule
 
 def test_lazy_module():
     assert isinstance(sys.modules["argilla"], LazyargillaModule)
-

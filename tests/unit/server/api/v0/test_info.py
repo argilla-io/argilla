@@ -15,7 +15,6 @@
 from typing import TYPE_CHECKING
 
 import pytest
-
 from argilla._version import version
 from argilla.server.services.info import ApiInfo, ApiStatus
 

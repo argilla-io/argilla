@@ -18,7 +18,6 @@ from typing import TYPE_CHECKING, Optional
 
 import pytest
 import pytest_asyncio
-
 from argilla.server.models.base import DatabaseModel
 from pydantic import BaseModel
 from sqlalchemy import inspect, select

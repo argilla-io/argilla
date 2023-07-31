@@ -15,7 +15,6 @@
 import logging
 
 import pytest
-
 from argilla.logging import ArgillaHandler, LoggingMixin
 
 

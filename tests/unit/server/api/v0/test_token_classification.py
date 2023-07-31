@@ -15,7 +15,6 @@
 from typing import Callable
 
 import pytest
-
 from argilla import User
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v0.models.commons.model import BulkResponse, SortableField
@@ -27,6 +26,7 @@ from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationSearchResults,
 )
 from argilla.server.commons.models import TaskType
+
 from tests import SUPPORTED_VECTOR_SEARCH
 
 

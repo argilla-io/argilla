@@ -14,8 +14,6 @@
 from typing import Type
 
 import pytest
-from httpx import AsyncClient
-
 from argilla.server.apis.v0.models.commons.model import BaseRecord
 from argilla.server.apis.v0.models.text2text import (
     Text2TextBulkRequest,
@@ -31,6 +29,8 @@ from argilla.server.apis.v0.models.token_classification import (
 )
 from argilla.server.commons.models import TaskType
 from argilla.server.models import User
+from httpx import AsyncClient
+
 from tests.factories import WorkspaceFactory
 
 

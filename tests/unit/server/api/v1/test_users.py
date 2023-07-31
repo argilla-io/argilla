@@ -50,7 +50,9 @@ class TestsUsersV1Endpoints:
         workspaces = await WorkspaceFactory.create_batch(5)
         owner = await UserFactory.create(role=UserRole.owner)
 
-        response = await async_client.get(f"/api/v1/users/{owner.id}/workspaces", headers={API_KEY_HEADER_NAME: owner.api_key})
+        response = await async_client.get(
+            f"/api/v1/users/{owner.id}/workspaces", headers={API_KEY_HEADER_NAME: owner.api_key}
+        )
         assert response.status_code == 200
         assert response.json() == {
             "items": [

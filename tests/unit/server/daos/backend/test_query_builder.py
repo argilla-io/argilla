@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import pytest
-
 from argilla.server.apis.v0.models.commons.model import ScoreRange
 from argilla.server.apis.v0.models.text_classification import TextClassificationQuery
 from argilla.server.daos.backend.search.model import (

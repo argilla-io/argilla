@@ -155,7 +155,9 @@ async def test_create_record_response_with_required_questions(
     record = await RecordFactory.create(dataset=dataset)
 
     response_json = {**responses, "status": response_status}
-    response = await async_client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
+    response = await async_client.post(
+        f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+    )
 
     response_body = response.json()
     assert response.status_code == 201
@@ -187,7 +189,9 @@ async def test_create_submitted_record_response_with_missing_required_questions(
         "status": "submitted",
     }
 
-    response = await async_client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
+    response = await async_client.post(
+        f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+    )
     assert response.status_code == 422
     assert response.json() == {"detail": "Missing required question: 'input_ok'"}
 
@@ -310,7 +314,9 @@ async def test_create_record_response_with_missing_required_questions(
     record = await RecordFactory.create(dataset=dataset)
 
     response_json = {**responses, "status": response_status}
-    response = await async_client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
+    response = await async_client.post(
+        f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+    )
 
     response_body = response.json()
     assert response.status_code == 201
@@ -330,7 +336,9 @@ async def test_create_record_response_with_missing_required_questions(
 
 
 @pytest.mark.asyncio
-async def test_create_record_response_with_extra_question_responses(async_client: "AsyncClient", owner_auth_header: dict):
+async def test_create_record_response_with_extra_question_responses(
+    async_client: "AsyncClient", owner_auth_header: dict
+):
     dataset = await DatasetFactory.create()
     await create_text_questions(dataset)
     record = await RecordFactory.create(dataset=dataset)
@@ -342,7 +350,9 @@ async def test_create_record_response_with_extra_question_responses(async_client
         },
         "status": "submitted",
     }
-    response = await async_client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
+    response = await async_client.post(
+        f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+    )
 
     assert response.status_code == 422
     assert response.json() == {"detail": "Error: found responses for non configured questions: ['unknown_question']"}
@@ -516,7 +526,9 @@ async def test_create_record_response_with_wrong_response_value(
     record = await RecordFactory.create(dataset=dataset)
 
     response_json = {**responses, "status": "submitted"}
-    response = await async_client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
+    response = await async_client.post(
+        f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+    )
 
     assert response.status_code == 422
     assert response.json() == {"detail": expected_error_msg}
@@ -557,7 +569,9 @@ async def test_create_record_response(
         "status": status,
     }
 
-    response = await async_client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
+    response = await async_client.post(
+        f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+    )
 
     assert response.status_code == 201
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
@@ -594,7 +608,9 @@ async def test_create_record_response_without_values(
     record = await RecordFactory.create()
     response_json = {"status": status}
 
-    response = await async_client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
+    response = await async_client.post(
+        f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+    )
 
     assert response.status_code == expected_status_code
     assert (await db.execute(select(func.count(Response.id)))).scalar() == expected_response_count
@@ -620,7 +636,9 @@ async def test_create_record_submitted_response_with_wrong_values(
     record = await RecordFactory.create()
     response_json = {"status": status, "values": {"wrong_question": {"value": "wrong value"}}}
 
-    response = await async_client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
+    response = await async_client.post(
+        f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+    )
 
     assert response.status_code == 422
     assert response.json() == {"detail": "Error: found responses for non configured questions: ['wrong_question']"}
@@ -703,7 +721,9 @@ async def test_create_record_response_already_created(
         "status": "submitted",
     }
 
-    response = await async_client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
+    response = await async_client.post(
+        f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+    )
 
     assert response.status_code == 409
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
@@ -719,7 +739,9 @@ async def test_create_record_response_with_invalid_values(
         "status": "submitted",
     }
 
-    response = await async_client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
+    response = await async_client.post(
+        f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+    )
 
     assert response.status_code == 422
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
@@ -738,7 +760,9 @@ async def test_create_record_response_with_invalid_status(
         "status": "invalid",
     }
 
-    response = await async_client.post(f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json)
+    response = await async_client.post(
+        f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+    )
 
     assert response.status_code == 422
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
@@ -757,7 +781,9 @@ async def test_create_record_response_with_nonexistent_record_id(
         "status": "submitted",
     }
 
-    response = await async_client.post(f"/api/v1/records/{uuid4()}/responses", headers=owner_auth_header, json=response_json)
+    response = await async_client.post(
+        f"/api/v1/records/{uuid4()}/responses", headers=owner_auth_header, json=response_json
+    )
 
     assert response.status_code == 404
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
@@ -778,7 +804,9 @@ async def test_get_record_suggestions(async_client: "AsyncClient", role: UserRol
         question=question_b, record=record, value="This is a another unit test suggestion"
     )
 
-    response = await async_client.get(f"/api/v1/records/{record.id}/suggestions", headers={API_KEY_HEADER_NAME: user.api_key})
+    response = await async_client.get(
+        f"/api/v1/records/{record.id}/suggestions", headers={API_KEY_HEADER_NAME: user.api_key}
+    )
 
     assert response.status_code == 200
     assert response.json() == {
@@ -841,7 +869,9 @@ async def test_create_record_suggestion(async_client: "AsyncClient", db: "AsyncS
 
 
 @pytest.mark.asyncio
-async def test_create_record_suggestion_update(async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
+async def test_create_record_suggestion_update(
+    async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+):
     dataset = await DatasetFactory.create()
     question = await TextQuestionFactory.create(dataset=dataset)
     record = await RecordFactory.create(dataset=dataset)

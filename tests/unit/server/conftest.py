@@ -18,11 +18,6 @@ from typing import AsyncGenerator, Dict, Generator
 
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient
-from opensearchpy import OpenSearch
-from sqlalchemy import NullPool
-from sqlalchemy.ext.asyncio import create_async_engine
-
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.datasets import DatasetsDAO
@@ -36,6 +31,11 @@ from argilla.server.settings import settings
 from argilla.tasks.database.migrate import migrate_db
 from argilla.utils import telemetry
 from argilla.utils.telemetry import TelemetryClient
+from httpx import AsyncClient
+from opensearchpy import OpenSearch
+from sqlalchemy import NullPool
+from sqlalchemy.ext.asyncio import create_async_engine
+
 from tests.database import TestSession, set_task
 from tests.factories import AnnotatorFactory, OwnerFactory, UserFactory
 
