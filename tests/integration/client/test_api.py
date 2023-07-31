@@ -24,8 +24,6 @@ import datasets
 import httpx
 import pandas as pd
 import pytest
-from httpx import ConnectError
-
 from argilla._constants import (
     DEFAULT_API_KEY,
     WORKSPACE_HEADER_NAME,
@@ -75,6 +73,8 @@ from argilla.server.apis.v0.models.text_classification import (
 )
 from argilla.server.commons.models import TaskStatus
 from argilla.server.models import User, UserRole
+from httpx import ConnectError
+
 from tests import SUPPORTED_VECTOR_SEARCH
 from tests.factories import DatasetFactory, UserFactory, WorkspaceFactory
 

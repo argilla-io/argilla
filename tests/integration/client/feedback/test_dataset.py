@@ -36,7 +36,6 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 
-
 def test_init(
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],

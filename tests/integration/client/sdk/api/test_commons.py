@@ -14,7 +14,6 @@
 #  limitations under the License.
 
 import httpx
-
 from argilla.client.sdk.commons.api import bulk
 from argilla.client.sdk.commons.models import (
     BulkResponse,

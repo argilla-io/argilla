@@ -14,16 +14,11 @@
 import asyncio
 import contextlib
 import tempfile
-from typing import AsyncGenerator, Dict, Generator, TYPE_CHECKING
+from typing import TYPE_CHECKING, AsyncGenerator, Dict, Generator
 
 import httpx
 import pytest
 import pytest_asyncio
-from fastapi.testclient import TestClient
-from opensearchpy import OpenSearch
-from sqlalchemy import create_engine
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.client.api import ArgillaSingleton, delete, log
 from argilla.client.apis.datasets import TextClassificationSettings
@@ -41,14 +36,20 @@ from argilla.server.settings import settings
 from argilla.tasks.database.migrate import migrate_db
 from argilla.utils import telemetry
 from argilla.utils.telemetry import TelemetryClient
+from fastapi.testclient import TestClient
+from opensearchpy import OpenSearch
+from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+
 from tests.factories import (
     AnnotatorFactory,
     OwnerFactory,
     UserFactory,
     WorkspaceFactory,
 )
-from .helpers import SecuredClient
+
 from ..database import SyncTestSession, TestSession, set_task
+from .helpers import SecuredClient
 
 if TYPE_CHECKING:
     from unittest.mock import MagicMock

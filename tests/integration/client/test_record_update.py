@@ -19,7 +19,7 @@ from argilla.client.sdk.commons.errors import NotFoundApiError
 from argilla.server.models import User
 
 
-def test_partial_update_with_not_found(argilla_user: User, gutenberg_spacy_ner:str):
+def test_partial_update_with_not_found(argilla_user: User, gutenberg_spacy_ner: str):
     init(api_key=argilla_user.api_key, workspace=argilla_user.username)
     with pytest.raises(NotFoundApiError):
         active_api().datasets.update_record(

@@ -14,7 +14,6 @@
 #  limitations under the License.
 import httpx
 import pytest
-
 from argilla import User
 from argilla.client.api import copy, delete, load
 from argilla.client.models import TextClassificationRecord
@@ -32,6 +31,7 @@ from argilla.labeling.text_classification import (
 )
 from argilla.labeling.text_classification.rule import RuleNotAppliedError
 from argilla.server.errors import EntityNotFoundError
+
 from tests.integration.helpers import SecuredClient
 
 

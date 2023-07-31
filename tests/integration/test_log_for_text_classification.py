@@ -258,7 +258,7 @@ def test_logging_with_metadata_limits_exceeded(argilla_user: "User"):
         log(expected_record, name=dataset)
 
 
-def test_log_with_other_task(argilla_user:"User"):
+def test_log_with_other_task(argilla_user: "User"):
     dataset = "test_log_with_other_task"
 
     init(api_key=argilla_user.api_key, workspace=argilla_user.username)

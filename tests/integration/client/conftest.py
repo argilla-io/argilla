@@ -13,11 +13,9 @@
 #  limitations under the License.
 
 import datetime
-from typing import Generator, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, Generator, List
 
 import pytest
-from datasets import Dataset
-
 from argilla.client.api import delete, init, log
 from argilla.client.datasets import read_datasets
 from argilla.client.models import (
@@ -28,6 +26,7 @@ from argilla.client.models import (
 )
 from argilla.client.sdk.datasets.models import TaskType
 from argilla.server.models import User
+from datasets import Dataset
 
 if TYPE_CHECKING:
     from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
