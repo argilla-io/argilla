@@ -52,7 +52,7 @@ async def update_question(
 
     await authorize(current_user, QuestionPolicyV1.update(question))
 
-    if question_update.settings.type != question.settings["type"]:
+    if question_update.settings and question_update.settings.type != question.settings["type"]:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Question type cannot be changed. Expected '{question.settings['type']}' but got '{question_update.settings.type}'",
