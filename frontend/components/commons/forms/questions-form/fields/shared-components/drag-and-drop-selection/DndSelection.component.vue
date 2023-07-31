@@ -59,21 +59,6 @@
 import "assets/icons/draggable";
 import { isNil } from "lodash";
 
-const validKeyCodes = {
-  1: 1,
-  2: 2,
-  3: 3,
-  4: 4,
-  5: 5,
-  6: 6,
-  7: 7,
-  8: 8,
-  9: 9,
-  0: 10,
-  "!": 11,
-  '"': 12,
-};
-
 export default {
   name: "DndSelectionComponent",
   props: {
@@ -86,6 +71,12 @@ export default {
       default: () => false,
     },
   },
+  data() {
+    return {
+      timer: null,
+      keyCode: "",
+    };
+  },
   watch: {
     isFocused: {
       immediate: true,
@@ -96,26 +87,49 @@ export default {
   },
   methods: {
     rankWithKeyboard(event, questionToMove) {
-      if (event.shiftKey) {
-        return;
-      }
+      if (this.timer) clearTimeout(this.timer);
+      if (event.shiftKey) return;
 
       event.stopPropagation();
 
-      const keyCode = event.key;
+      this.keyCode += event.key;
 
-      if (this.onUnrankFor(keyCode, questionToMove)) {
+      if (this.onUnrankFor(event.key, questionToMove)) {
         this.focusOnFirstQuestion();
+        this.keyCode = "";
         return;
       }
 
-      const slotTo = this.ranking.slots[validKeyCodes[keyCode] - 1];
+      if (
+        isNaN(event.keyCode) ||
+        this.keyCode.length > 2 ||
+        this.keyCode > 12
+      ) {
+        this.keyCode = "";
+        return;
+      }
+
+      const slotTo = this.ranking.slots[this.keyCode - 1];
 
       if (slotTo) {
         this.ranking.moveQuestionToSlot(questionToMove, slotTo);
-
         this.$emit("on-reorder", this.ranking);
-        this.onAutoFocusFirstItem();
+
+        this.$nextTick(() => {
+          const questionRanked = this.$refs.items?.find(
+            ({ innerText }) => innerText == questionToMove?.text
+          );
+
+          questionRanked?.focus();
+        });
+
+        this.timer = setTimeout(() => {
+          this.$nextTick(() => {
+            this.focusOnFirstQuestion();
+            this.keyCode = "";
+            this.timer = null;
+          });
+        }, 300);
       }
     },
     onUnrankFor(aKeyCode, aQuestion) {
@@ -152,9 +166,6 @@ export default {
           this.$refs.items[0].focus();
         }
       });
-    },
-    looseFocus() {
-      this.questionRefWrapper.blur();
     },
   },
 };
