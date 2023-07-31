@@ -1,0 +1,7 @@
+- username: john
+  full_name: John Doe
+  email: john@argilla.io
+  api_key: a14427ea-9197-11ec-b909-0242ac120002
+  hashed_password: $2y$05$xtl7iy3bpqchUwiQMjEHe.tY7OaIjDrg43W3TB4EHQ7izvdjvGtPS
+  workspaces: [argilla, team]
+  disabled: False
