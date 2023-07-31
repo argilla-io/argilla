@@ -280,7 +280,7 @@ export default {
       this.$root.$emit("are-responses-untouched", isFormUntouched);
     },
     checkIfQuestionIsFocused(index) {
-      return this.record.isPending && index === this.autofocusPosition;
+      return index === this.autofocusPosition;
     },
     updateQuestionAutofocus(index) {
       this.autofocusPosition = Math.min(
