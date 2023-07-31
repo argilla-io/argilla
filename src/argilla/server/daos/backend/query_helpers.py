@@ -60,10 +60,11 @@ def parse_aggregations(es_aggregations: Dict[str, Any] = None) -> Optional[Dict[
     def parse_buckets(buckets: List[Dict[str, Any]]) -> Dict[str, Any]:
         parsed = {}
         for bucket in buckets:
-            key, key_as_string, doc_count, _from, _to = (
+            key, key_as_string, doc_count, _, _from, _to = (
                 bucket.pop("key", None),
                 bucket.pop("key_as_string", None),
                 bucket.pop("doc_count", 0),
+                bucket.pop("meta", None),
                 bucket.pop("from", None),
                 bucket.pop("to", None),
             )
