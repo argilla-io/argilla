@@ -280,10 +280,10 @@ export default {
   display: block;
   width: 100%;
   height: 32px;
+  min-width: 50px;
   max-width: 200px;
+  text-align: center;
   padding-inline: 12px;
-  box-shadow: 0;
-  border-radius: 50em;
   background: palette(purple, 800);
   color: palette(purple, 200);
   line-height: 32px;
@@ -292,16 +292,17 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  border-radius: $border-radius-rounded;
   &:not(.label-active):hover {
     background: darken(palette(purple, 800), 8%);
   }
 }
 
 .round {
-  border-radius: 50em;
+  border-radius: $border-radius-rounded;
 }
 .square {
-  border-radius: 5px;
+  border-radius: $border-radius-s;
 }
 
 input[type="checkbox"] {

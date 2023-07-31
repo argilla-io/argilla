@@ -330,6 +330,7 @@ export default {
     gap: $base-space * 4;
     padding: $base-space * 3;
     overflow: auto;
+    scroll-behavior: smooth;
   }
   &.--focused-form {
     border-color: palette(brown);

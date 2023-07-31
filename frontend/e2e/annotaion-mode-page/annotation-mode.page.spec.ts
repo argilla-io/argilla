@@ -5,16 +5,22 @@ import {
   newDatasetsMocked,
   mockRecord,
   mockDiscardRecord,
+  mockRecordForLongAndShortQuestion,
 } from "../common";
 
-const goToAnnotationPage = async (page) => {
+const goToAnnotationPage = async (page, shortAndLongQuestions = false) => {
   const dataset = newDatasetsMocked[0];
 
   await mockAllDatasets(page);
-  const record = await mockRecord(page, {
-    datasetId: dataset.id,
-    workspaceId: dataset.workspace_id,
-  });
+  const record = shortAndLongQuestions
+    ? await mockRecordForLongAndShortQuestion(page, {
+        datasetId: dataset.id,
+        workspaceId: dataset.workspace_id,
+      })
+    : await mockRecord(page, {
+        datasetId: dataset.id,
+        workspaceId: dataset.workspace_id,
+      });
 
   await loginUserAndWaitFor(page, "datasets");
 
@@ -101,6 +107,12 @@ test.describe("Annotate page", () => {
     await page.getByRole("button", { name: "Discard" }).click();
 
     await page.waitForTimeout(2000);
+
+    await expect(page).toHaveScreenshot();
+  });
+
+  test("label with just one character", async ({ page }) => {
+    await goToAnnotationPage(page, true);
 
     await expect(page).toHaveScreenshot();
   });
