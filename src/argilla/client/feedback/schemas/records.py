@@ -219,7 +219,7 @@ class _ArgillaFeedbackRecord(FeedbackRecord):
     name2id: Dict[str, UUID]
 
     def set_suggestions(
-        self, suggestions: SuggestionSchema | List[SuggestionSchema] | Dict[str, Any] | List[Dict[str, Any]]
+        self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
     ) -> None:
         super().set_suggestions(suggestions)
         for suggestion in self.suggestions:
