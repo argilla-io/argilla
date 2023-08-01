@@ -111,25 +111,17 @@ async def publish_dataset(db: "AsyncSession", search_engine: SearchEngine, datas
     if await _count_questions_by_dataset_id(db, dataset.id) == 0:
         raise ValueError("Dataset cannot be published without questions")
 
-    try:
+    async with db.begin_nested():
         dataset = await dataset.update(db, status=DatasetStatus.ready, autocommit=False)
         await search_engine.create_index(dataset)
-        await db.commit()
-    except:
-        await db.rollback()
-        raise
 
     return dataset
 
 
 async def delete_dataset(db: "AsyncSession", search_engine: SearchEngine, dataset: Dataset) -> Dataset:
     dataset = await dataset.delete(db)
-    try:
+    async with db.begin_nested():
         await search_engine.delete_index(dataset)
-        await db.commit()
-    except:
-        await db.rollback()
-        raise
     return dataset
 
 
@@ -346,16 +338,12 @@ async def create_records(
 
         records.append(record)
 
-    try:
+    async with db.begin_nested():
         db.add_all(records)
         await db.flush(records)
         for record in records:
             await record.awaitable_attrs.responses
         await search_engine.add_records(dataset, records)
-        await db.commit()
-    except:
-        await db.rollback()
-        raise
 
 
 async def get_response_by_id(db: "AsyncSession", response_id: UUID) -> Union[Response, None]:
@@ -403,13 +391,9 @@ async def create_response(
         autocommit=False,
     )
 
-    try:
+    async with db.begin_nested():
         await db.flush([response])
         await search_engine.update_record_response(response)
-        await db.commit()
-    except Exception:
-        await db.rollback()
-        raise
 
     return response
 
@@ -423,24 +407,16 @@ async def update_response(
         db, values=jsonable_encoder(response_update.values), status=response_update.status, autocommit=False
     )
 
-    try:
+    async with db.begin_nested():
         await search_engine.update_record_response(response)
-        await db.commit()
-    except Exception:
-        await db.rollback()
-        raise
 
     return response
 
 
 async def delete_response(db: "AsyncSession", search_engine: SearchEngine, response: Response) -> Response:
     response = await response.delete(db)
-    try:
+    async with db.begin_nested():
         await search_engine.delete_record_response(response)
-        await db.commit()
-    except Exception:
-        await db.rollback()
-        raise
     return response
 
 

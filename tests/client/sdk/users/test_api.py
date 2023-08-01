@@ -25,14 +25,12 @@ from argilla.client.sdk.commons.errors import (
     ForbiddenApiError,
     NotFoundApiError,
     UnauthorizedApiError,
+    ValidationApiError,
 )
-from argilla.client.sdk.users.api import (
-    create_user,
-    delete_user,
-    list_users,
-    whoami,
-)
+from argilla.client.sdk.users.api import create_user, delete_user, list_users, whoami
 from argilla.client.sdk.users.models import UserModel
+
+from tests.factories import WorkspaceFactory
 
 if TYPE_CHECKING:
     from argilla.server.models import User as ServerUser
@@ -66,15 +64,28 @@ def test_list_users(owner: "ServerUser") -> None:
 
 
 @pytest.mark.parametrize("role", ["annotator", "admin", "owner"])
-def test_create_user(owner: "ServerUser", role: str) -> None:
+@pytest.mark.asyncio
+async def test_create_user(owner: "ServerUser", role: str) -> None:
+    await WorkspaceFactory.create(name="workspace_1")
+    await WorkspaceFactory.create(name="workspace_2")
+
     httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
 
     response = create_user(
-        client=httpx_client, first_name="user", username="user_1", password="user_password", role=role
+        client=httpx_client,
+        first_name="user",
+        username="user_1",
+        password="user_password",
+        role=role,
+        workspaces=["workspace_1", "workspace_2"],
     )
+
     assert response.status_code == 200
     assert isinstance(response.parsed, UserModel)
+    assert response.parsed.full_name == "user"
+    assert response.parsed.username == "user_1"
     assert response.parsed.role == role
+    assert response.parsed.workspaces == ["workspace_1", "workspace_2"]
 
 
 def test_create_user_errors(owner: "ServerUser", annotator: "ServerUser") -> None:
@@ -92,6 +103,16 @@ def test_create_user_errors(owner: "ServerUser", annotator: "ServerUser") -> Non
             username=annotator.username,
             password="user_password",
             role="annotator",
+        )
+
+    with pytest.raises(ValidationApiError):
+        create_user(
+            client=httpx_client,
+            first_name="another-user",
+            username="another-user",
+            password="user_password",
+            role="annotator",
+            workspaces=["i do not exist"],
         )
 
 

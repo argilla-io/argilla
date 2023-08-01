@@ -20,15 +20,9 @@ from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import User, UserRole
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
+from sqlalchemy.orm import joinedload
 
-from tests.factories import (
-    AdminFactory,
-    AnnotatorFactory,
-    OwnerFactory,
-    UserFactory,
-    WorkspaceFactory,
-    WorkspaceUserFactory,
-)
+from tests.factories import AdminFactory, AnnotatorFactory, OwnerFactory, UserFactory, WorkspaceFactory
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -150,6 +144,54 @@ async def test_create_user(client: TestClient, db: "AsyncSession", owner_auth_he
     assert response_body["username"] == "username"
     assert response_body["api_key"] == db_user.api_key
     assert response_body["role"] == UserRole.annotator.value
+
+
+@pytest.mark.asyncio
+async def test_create_user_with_workspaces(client: TestClient, db: "AsyncSession", owner_auth_header: dict):
+    workspace_a = await WorkspaceFactory.create(name="workspace-a")
+    workspace_b = await WorkspaceFactory.create(name="workspace-b")
+
+    user = {
+        "first_name": "first-name",
+        "username": "username",
+        "password": "12345678",
+        "workspaces": ["workspace-a", "workspace-b"],
+    }
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
+
+    assert response.status_code == 200
+    assert (await db.execute(select(func.count(User.id)))).scalar() == 2
+
+    db_user = (
+        (await db.execute(select(User).where(User.username == "username").options(joinedload(User.workspaces))))
+        .unique()
+        .scalar_one_or_none()
+    )
+    assert db_user
+    assert workspace_a in db_user.workspaces
+    assert workspace_b in db_user.workspaces
+
+    response_body = response.json()
+    assert response_body["username"] == "username"
+    assert response_body["api_key"] == db_user.api_key
+    assert response_body["role"] == UserRole.annotator.value
+    assert response_body["workspaces"] == ["workspace-a", "workspace-b"]
+
+
+@pytest.mark.asyncio
+async def test_create_user_with_non_existent_workspaces(
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict
+):
+    user = {
+        "first_name": "first-name",
+        "username": "username",
+        "password": "12345678",
+        "workspaces": ["i do not exist"],
+    }
+    response = client.post("/api/users", headers=owner_auth_header, json=user)
+
+    assert response.status_code == 422
+    assert (await db.execute(select(func.count(User.id)))).scalar() == 1
 
 
 @pytest.mark.asyncio
