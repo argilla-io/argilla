@@ -919,7 +919,9 @@ async def test_create_record_suggestion_as_annotator(client: TestClient):
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
-async def test_delete_record(client: TestClient, db: "AsyncSession", role: UserRole):
+async def test_delete_record(
+    client: TestClient, db: "AsyncSession", mock_search_engine: "SearchEngine", role: UserRole
+):
     dataset = await DatasetFactory.create()
     record = await RecordFactory.create(dataset=dataset)
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
@@ -936,6 +938,7 @@ async def test_delete_record(client: TestClient, db: "AsyncSession", role: UserR
         "updated_at": record.updated_at.isoformat(),
     }
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
+    mock_search_engine.delete_records.assert_called_once_with(dataset=dataset, records=[record])
 
 
 @pytest.mark.asyncio
