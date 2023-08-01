@@ -18,8 +18,9 @@ These are the section headers that we use:
 
 ### Added
 
-- Added `PATCH /api/v1/fields/{field_id}` endpoint to update the field title and markdown settings (See [#3421](https://github.com/argilla-io/argilla/pull/3421)).
-- Added `PATCH /api/v1/datasets/{dataset_id}` endpoint to update dataset name and guidelines (See [#3402](https://github.com/argilla-io/argilla/pull/3402)).
+- Added `PATCH /api/v1/fields/{field_id}` endpoint to update the field title and markdown settings ([#3421](https://github.com/argilla-io/argilla/pull/3421)).
+- Added `PATCH /api/v1/datasets/{dataset_id}` endpoint to update dataset name and guidelines ([#3402](https://github.com/argilla-io/argilla/pull/3402)).
+- Added `PATCH /api/v1/questions/{question_id}` endpoint to update question title, description and some settings (depending on the type of question) ([#3477](https://github.com/argilla-io/argilla/pull/3477)).
 
 ### Changed
 
