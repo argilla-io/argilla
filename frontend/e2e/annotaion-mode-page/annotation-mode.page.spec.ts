@@ -4,7 +4,8 @@ import {
   mockAllDatasets,
   newDatasetsMocked,
   mockRecord,
-  mockRecordWith12Ranking
+  mockRecordWith12Ranking,
+  mockRecordWithRating
 } from "../common";
 
 const goToAnnotationPage = async (page) => {
@@ -30,6 +31,24 @@ const goToAnnotationPageWith12Ranking = async (page) => {
 
   await mockAllDatasets(page);
   await mockRecordWith12Ranking(page, {
+    datasetId: dataset.id,
+    workspaceId: dataset.workspace_id,
+  });
+
+  await loginUserAndWaitFor(page, "datasets");
+
+  await page.waitForTimeout(2000);
+
+  await page.getByRole("link", { name: dataset.name }).click();
+
+  await page.waitForTimeout(3000);
+};
+
+const goToAnnotationPageWith10Rating = async (page) => {
+  const dataset = newDatasetsMocked[0];
+
+  await mockAllDatasets(page);
+  await mockRecordWithRating(page, {
     datasetId: dataset.id,
     workspaceId: dataset.workspace_id,
   });
@@ -419,6 +438,14 @@ test.describe("Annotation page shortcuts", () => {
         .press("Shift+ArrowDown");
 
       await page.keyboard.press("4");
+
+      await expect(page).toHaveScreenshot();
+    });
+  });
+
+  test.describe("Rating component with 10 options", () => {
+    test("go to rating component with keyboard", async ({ page }) => {
+      await goToAnnotationPageWith10Rating(page);
 
       await expect(page).toHaveScreenshot();
     });

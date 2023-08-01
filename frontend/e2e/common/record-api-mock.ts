@@ -1,6 +1,6 @@
 import { Page } from "@playwright/test";
 import { DatasetData, mockFeedbackTaskDataset } from "./dataset-api-mock";
-import { mockQuestion, mockQuestionWith12Ranking } from "./question-api-mock";
+import { mockQuestion, mockQuestionWith12Ranking, mockQuestionWithRating } from "./question-api-mock";
 import { mockFields } from "./field-api-mock";
 
 const recordOne = {
@@ -87,6 +87,19 @@ const recordFor12ranking = {
   updated_at: "2023-07-26T12:15:02"
 }
 
+const recordForRating = {
+  "id": "0203fc47-e30a-4f97-8f13-12bb816a3059",
+  "fields": {
+    "text": "Rate me"
+  },
+  "metadata": {},
+  "external_id": null,
+  "responses": [],
+  "suggestions": [],
+  "inserted_at": "2023-07-21T09:23:20",
+  "updated_at": "2023-07-21T09:23:20"
+}
+
 export const mockRecord = async (
   page: Page,
   { datasetId, workspaceId }: DatasetData
@@ -125,6 +138,28 @@ export const mockRecordWith12Ranking = async (
       await route.fulfill({
         json: {
           items: [recordFor12ranking],
+        },
+      });
+    }
+  );
+};
+
+export const mockRecordWithRating = async (
+  page: Page,
+  { datasetId, workspaceId }: DatasetData
+) => {
+  await mockFeedbackTaskDataset(page, { datasetId, workspaceId });
+
+  await mockQuestionWithRating(page, datasetId);
+
+  await mockFields(page, datasetId);
+
+  await page.route(
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing`,
+    async (route) => {
+      await route.fulfill({
+        json: {
+          items: [recordForRating],
         },
       });
     }

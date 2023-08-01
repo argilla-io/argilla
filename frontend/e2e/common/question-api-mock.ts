@@ -559,7 +559,6 @@ const questions = [
   },
 ];
 
-
 const rankingQuestionWith12Slots = [{
   "id": "9f23fcdb-a57a-4568-a9d8-2360315e9fd3",
   "name": "rating",
@@ -635,6 +634,51 @@ const rankingQuestionWith12Slots = [{
   "updated_at": "2023-07-26T12:15:01"
 }];
 
+const ratingQuestions = [{
+  "id": "7b711f4b-c901-4e65-bbac-a80a341baf84",
+  "name": "rating",
+  "title": "Rating",
+  "description": null,
+  "required": true,
+  "settings": {
+    "type": "rating",
+    "options": [
+      {
+        "value": 1
+      },
+      {
+        "value": 2
+      },
+      {
+        "value": 3
+      },
+      {
+        "value": 4
+      },
+      {
+        "value": 5
+      },
+      {
+        "value": 6
+      },
+      {
+        "value": 7
+      },
+      {
+        "value": 8
+      },
+      {
+        "value": 9
+      },
+      {
+        "value": 10
+      },
+    ]
+  },
+  "inserted_at": "2023-07-21T09:23:19",
+  "updated_at": "2023-07-21T09:23:19"
+}];
+
 export const mockQuestion = async (page: Page, datasetId: string) => {
   await page.route(
     `*/**/api/v1/datasets/${datasetId}/questions`,
@@ -655,6 +699,19 @@ export const mockQuestionWith12Ranking = async (page: Page, datasetId: string) =
       await route.fulfill({
         json: {
           items: rankingQuestionWith12Slots,
+        },
+      });
+    }
+  );
+};
+
+export const mockQuestionWithRating = async (page: Page, datasetId: string) => {
+  await page.route(
+    `*/**/api/v1/datasets/${datasetId}/questions`,
+    async (route) => {
+      await route.fulfill({
+        json: {
+          items: ratingQuestions,
         },
       });
     }
