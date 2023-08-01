@@ -42,7 +42,9 @@ from argilla.server.security.model import User
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
+    from argilla.server.schemas.v1.datasets import DatasetUpdate
     from argilla.server.schemas.v1.fields import FieldUpdate
+    from argilla.server.schemas.v1.questions import QuestionUpdate
     from argilla.server.schemas.v1.suggestions import SuggestionCreate
 
 LIST_RECORDS_LIMIT = 20
@@ -111,30 +113,22 @@ async def publish_dataset(db: "AsyncSession", search_engine: SearchEngine, datas
     if await _count_questions_by_dataset_id(db, dataset.id) == 0:
         raise ValueError("Dataset cannot be published without questions")
 
-    try:
+    async with db.begin_nested():
         dataset = await dataset.update(db, status=DatasetStatus.ready, autocommit=False)
         await search_engine.create_index(dataset)
-        await db.commit()
-    except:
-        await db.rollback()
-        raise
 
     return dataset
 
 
 async def delete_dataset(db: "AsyncSession", search_engine: SearchEngine, dataset: Dataset) -> Dataset:
     dataset = await dataset.delete(db)
-    try:
+    async with db.begin_nested():
         await search_engine.delete_index(dataset)
-        await db.commit()
-    except:
-        await db.rollback()
-        raise
     return dataset
 
 
-async def update_dataset(db: "AsyncSession", dataset: Dataset, dataset_update: DatasetCreate) -> Dataset:
-    params = dataset_update.dict(exclude_unset=True, exclude_none=True)
+async def update_dataset(db: "AsyncSession", dataset: Dataset, dataset_update: "DatasetUpdate") -> Dataset:
+    params = dataset_update.dict(exclude_unset=True)
     return await dataset.update(db, **params)
 
 
@@ -163,7 +157,7 @@ async def create_field(db: "AsyncSession", dataset: Dataset, field_create: Field
 
 
 async def update_field(db: "AsyncSession", field: Field, field_update: "FieldUpdate") -> Field:
-    params = field_update.dict(exclude_unset=True, exclude_none=True)
+    params = field_update.dict(exclude_unset=True)
     return await field.update(db, **params)
 
 
@@ -197,6 +191,11 @@ async def create_question(db: "AsyncSession", dataset: Dataset, question_create:
         settings=question_create.settings.dict(),
         dataset_id=dataset.id,
     )
+
+
+async def update_question(db: "AsyncSession", question: Question, question_update: "QuestionUpdate") -> Question:
+    params = question_update.dict(exclude_unset=True)
+    return await question.update(db, **params)
 
 
 async def delete_question(db: "AsyncSession", question: Question) -> Question:
@@ -346,16 +345,12 @@ async def create_records(
 
         records.append(record)
 
-    try:
+    async with db.begin_nested():
         db.add_all(records)
         await db.flush(records)
         for record in records:
             await record.awaitable_attrs.responses
         await search_engine.add_records(dataset, records)
-        await db.commit()
-    except:
-        await db.rollback()
-        raise
 
 
 async def get_response_by_id(db: "AsyncSession", response_id: UUID) -> Union[Response, None]:
@@ -403,13 +398,9 @@ async def create_response(
         autocommit=False,
     )
 
-    try:
+    async with db.begin_nested():
         await db.flush([response])
         await search_engine.update_record_response(response)
-        await db.commit()
-    except Exception:
-        await db.rollback()
-        raise
 
     return response
 
@@ -423,24 +414,16 @@ async def update_response(
         db, values=jsonable_encoder(response_update.values), status=response_update.status, autocommit=False
     )
 
-    try:
+    async with db.begin_nested():
         await search_engine.update_record_response(response)
-        await db.commit()
-    except Exception:
-        await db.rollback()
-        raise
 
     return response
 
 
 async def delete_response(db: "AsyncSession", search_engine: SearchEngine, response: Response) -> Response:
     response = await response.delete(db)
-    try:
+    async with db.begin_nested():
         await search_engine.delete_record_response(response)
-        await db.commit()
-    except Exception:
-        await db.rollback()
-        raise
     return response
 
 

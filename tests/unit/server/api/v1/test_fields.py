@@ -35,18 +35,24 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.parametrize(
-    "payload",
+    "payload, expected_settings",
     [
-        {"title": "New Title", "settings": {"use_markdown": True}},
-        {"title": "New Title"},
-        {},
-        {"title": None, "settings": None},
-        {"name": "New Name", "required": True, "settings": {"type": "unit-test"}, "dataset_id": str(uuid4())},
+        (
+            {"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
+            {"type": "text", "use_markdown": True},
+        ),
+        ({"title": "New Title"}, {"type": "text", "use_markdown": False}),
+        (
+            {"name": "New Name", "required": True, "dataset_id": str(uuid4())},
+            {"type": "text", "use_markdown": False},
+        ),
     ],
 )
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
-async def test_update_field(async_client: "AsyncClient", role: UserRole, payload: dict):
+async def test_update_field(
+    async_client: "AsyncClient", db: "AsyncSession", role: UserRole, payload: dict, expected_settings: dict
+):
     field = await TextFieldFactory.create()
     user = await UserFactory.create(role=role, workspaces=[field.dataset.workspace])
 
@@ -54,23 +60,41 @@ async def test_update_field(async_client: "AsyncClient", role: UserRole, payload
         f"/api/v1/fields/{field.id}", headers={API_KEY_HEADER_NAME: user.api_key}, json=payload
     )
 
-    settings = payload.get("settings")
-    if settings is None:
-        use_markdown = field.settings["use_markdown"]
-    else:
-        use_markdown = settings.get("use_markdown") or field.settings["use_markdown"]
+    title = payload.get("title") or field.title
 
     assert response.status_code == 200
     assert response.json() == {
         "id": str(field.id),
         "name": field.name,
-        "title": payload.get("title") or field.title,
+        "title": title,
         "required": field.required,
-        "settings": {"type": field.settings["type"], "use_markdown": use_markdown},
+        "settings": expected_settings,
         "dataset_id": str(field.dataset.id),
         "inserted_at": field.inserted_at.isoformat(),
         "updated_at": field.updated_at.isoformat(),
     }
+
+    field = await db.get(Field, field.id)
+    assert field.title == title
+    assert field.settings == expected_settings
+
+
+@pytest.mark.parametrize(
+    "field_json",
+    [
+        {"title": None, "settings": None},
+        {"settings": {"type": "text"}},
+        {"settings": {"type": "text", "use_markdown": None}},
+        {"settings": {"type": "i don't exist"}},
+    ],
+)
+@pytest.mark.asyncio
+async def test_update_field_with_invalid_settings(async_client: "AsyncClient", owner_auth_header: dict, field_json: dict):
+    field = await TextFieldFactory.create()
+
+    response = await async_client.patch(f"/api/v1/fields/{field.id}", headers=owner_auth_header, json=field_json)
+
+    assert response.status_code == 422
 
 
 @pytest.mark.asyncio
@@ -91,7 +115,7 @@ async def test_update_field_non_existent(async_client: "AsyncClient", owner_auth
     response = await async_client.patch(
         f"/api/v1/fields/{uuid4()}",
         headers=owner_auth_header,
-        json={"title": "New Title", "settings": {"use_markdown": True}},
+        json={"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
     )
 
     assert response.status_code == 404
@@ -105,7 +129,7 @@ async def test_update_field_as_admin_from_different_workspace(async_client: "Asy
     response = await async_client.patch(
         f"/api/v1/fields/{field.id}",
         headers={API_KEY_HEADER_NAME: user.api_key},
-        json={"title": "New Title", "settings": {"use_markdown": True}},
+        json={"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
     )
 
     assert response.status_code == 403
@@ -119,7 +143,7 @@ async def test_update_field_as_annotator(async_client: "AsyncClient"):
     response = await async_client.patch(
         f"/api/v1/fields/{field.id}",
         headers={API_KEY_HEADER_NAME: user.api_key},
-        json={"title": "New Title", "settings": {"use_markdown": True}},
+        json={"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
     )
 
     assert response.status_code == 403

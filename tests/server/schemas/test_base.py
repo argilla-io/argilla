@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,18 +11,19 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+from typing import Optional
+
 import pytest
-from argilla.client.sdk.datasets.models import Dataset, TaskType
-from argilla.server.schemas.v0.datasets import Dataset as ServerDataset
+from argilla.server.schemas.base import UpdateSchema
 
 
-def test_dataset_schema(helpers):
-    client_schema = Dataset.schema()
-    server_schema = helpers.remove_key(ServerDataset.schema(), key="created_by")  # don't care about creator here
+def test_update_schema():
+    class UnitTestUpdateSchema(UpdateSchema):
+        unit: Optional[str]
+        test: Optional[bool]
 
-    assert helpers.are_compatible_api_schemas(client_schema, server_schema)
+        __non_nullable_fields__ = {"unit", "test"}
 
-
-def test_TaskType_enum():
-    with pytest.raises(ValueError, match="mock is not a valid TaskType"):
-        TaskType("mock")
+    with pytest.raises(ValueError):
+        UnitTestUpdateSchema(unit=None, test=None)

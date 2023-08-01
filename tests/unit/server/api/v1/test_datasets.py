@@ -3216,12 +3216,11 @@ class TestSuiteDatasets:
             {"name": "New Name"},
             {"guidelines": "New Guidelines"},
             {},
-            {"name": None, "guidelines": None},
             {"status": DatasetStatus.draft, "workspace_id": str(uuid4())},
         ],
     )
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-    async def test_update_dataset(self, async_client: "AsyncClient", role: UserRole, payload: dict):
+    async def test_update_dataset(self, async_client: "AsyncClient", db: "AsyncSession", role: UserRole, payload: dict):
         dataset = await DatasetFactory.create(
             name="Current Name", guidelines="Current Guidelines", status=DatasetStatus.ready
         )
@@ -3233,20 +3232,31 @@ class TestSuiteDatasets:
             json=payload,
         )
 
+        name = payload.get("name") or dataset.name
+        if "guidelines" in payload:
+            guidelines = payload["guidelines"]
+        else:
+            guidelines = dataset.guidelines
+
         assert response.status_code == 200
         assert response.json() == {
             "id": str(dataset.id),
-            "name": payload.get("name") or dataset.name,
-            "guidelines": payload.get("guidelines") or dataset.guidelines,
+            "name": name,
+            "guidelines": guidelines,
             "status": "ready",
             "workspace_id": str(dataset.workspace_id),
             "inserted_at": dataset.inserted_at.isoformat(),
             "updated_at": dataset.updated_at.isoformat(),
         }
 
+        dataset = await db.get(Dataset, dataset.id)
+        assert dataset.name == name
+        assert dataset.guidelines == guidelines
+
     @pytest.mark.parametrize(
         "dataset_json",
         [
+            {"name": None},
             {"name": ""},
             {"name": "123$abc"},
             {"name": "unit@test"},
@@ -3282,27 +3292,6 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 422
-
-    @pytest.mark.asyncio
-    async def test_update_dataset_with_none_values(self, async_client: "AsyncClient", owner_auth_header: dict):
-        dataset = await DatasetFactory.create()
-
-        response = await async_client.patch(
-            f"/api/v1/datasets/{dataset.id}",
-            headers=owner_auth_header,
-            json={"name": None, "guidelines": None},
-        )
-
-        assert response.status_code == 200
-        assert response.json() == {
-            "id": str(dataset.id),
-            "name": dataset.name,
-            "guidelines": dataset.guidelines,
-            "status": dataset.status,
-            "workspace_id": str(dataset.workspace_id),
-            "inserted_at": dataset.inserted_at.isoformat(),
-            "updated_at": dataset.updated_at.isoformat(),
-        }
 
     @pytest.mark.asyncio
     async def test_update_dataset_non_existent(self, async_client: "AsyncClient", owner_auth_header: dict):

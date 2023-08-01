@@ -18,7 +18,7 @@ import uuid
 import pytest
 from argilla.server.commons.models import TaskType
 from argilla.server.daos.models.datasets import BaseDatasetDB
-from argilla.server.schemas.datasets import CreateDatasetRequest, Dataset
+from argilla.server.schemas.v0.datasets import CreateDatasetRequest, Dataset
 from pydantic import ValidationError
 
 

@@ -20,7 +20,7 @@ from argilla.server.errors.base_errors import (
     GenericServerError,
     ServerError,
 )
-from argilla.server.schemas.datasets import Dataset
+from argilla.server.schemas.v0.datasets import Dataset
 from fastapi import Request
 
 mock_request = Request(scope={"type": "http", "headers": {}})

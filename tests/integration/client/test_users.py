@@ -25,7 +25,7 @@ from argilla.client.users import User
 if TYPE_CHECKING:
     from argilla.server.models import User as ServerUser
 
-from tests.factories import UserFactory, WorkspaceFactory, WorkspaceUserFactory
+from tests.factories import UserFactory, WorkspaceFactory
 
 
 def test_user_cls_init() -> None:
@@ -96,15 +96,36 @@ def test_user_me(owner: "ServerUser") -> None:
     assert user.username == owner.username
 
 
-def test_user_create(owner: "ServerUser") -> None:
+@pytest.mark.asyncio
+async def test_user_create(owner: "ServerUser") -> None:
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+
     ArgillaSingleton.init(api_key=owner.api_key)
 
     with pytest.warns(UserWarning):
-        new_user = User.create("test_user", password="test_password")
+        new_user = User.create("test_user", password="test_password", workspaces=["test_workspace"])
+        assert new_user.first_name == "test_user"
+        assert new_user.last_name is None
+        assert new_user.full_name == "test_user"
         assert new_user.username == "test_user"
+        assert new_user.workspaces == [
+            WorkspaceModelV1(
+                id=workspace.id,
+                name=workspace.name,
+                inserted_at=workspace.inserted_at,
+                updated_at=workspace.updated_at,
+            )
+        ]
 
     with pytest.raises(ValueError, match="already exists in Argilla"):
         User.create("test_user", password="test_password")
+
+
+def test_user_create_with_non_existent_workspace(owner: "ServerUser") -> None:
+    ArgillaSingleton.init(api_key=owner.api_key)
+
+    with pytest.raises(ValueError, match="^(.*)Workspace 'non_existent_workspace' does not exist$"):
+        User.create("test_user", password="test_password", workspaces=["non_existent_workspace"])
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])

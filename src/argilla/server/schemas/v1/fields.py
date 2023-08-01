@@ -19,6 +19,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from argilla.server.models import FieldType
+from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.datasets import FieldTitle
 
 
@@ -41,10 +42,13 @@ class Field(BaseModel):
         orm_mode = True
 
 
-class TextFieldSettingsUpdate(BaseModel):
-    use_markdown: Optional[bool]
+class TextFieldSettingsUpdate(UpdateSchema):
+    type: Literal[FieldType.text]
+    use_markdown: bool
 
 
-class FieldUpdate(BaseModel):
+class FieldUpdate(UpdateSchema):
     title: Optional[FieldTitle]
     settings: Optional[TextFieldSettingsUpdate]
+
+    __non_nullable_fields__ = {"title", "settings"}

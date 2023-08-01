@@ -56,7 +56,7 @@ export default {
   .inputs-area {
     display: inline-flex;
     gap: $base-space;
-    border-radius: 5em;
+    border-radius: $border-radius-rounded;
     border: 1px solid #cdcdff;
     background: #e0e0ff;
     &:hover {
@@ -65,18 +65,19 @@ export default {
   }
 }
 .label-text {
-  display: flex;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
-  border-radius: 50em;
-  height: 32px;
-  background: palette(purple, 800);
+  border-radius: $border-radius-rounded;
+  height: $base-space * 4;
+  min-width: $base-space * 4;
+  padding-inline: $base-space;
   outline: none;
-  padding-inline: 12px;
-  line-height: 32px;
+  background: palette(purple, 800);
+  color: palette(purple, 200);
   font-weight: 500;
   overflow: hidden;
-  color: palette(purple, 200);
-  box-shadow: 0;
   transition: all 0.2s ease-in-out;
   &:not(.label-active):hover {
     background: darken(palette(purple, 800), 8%);
