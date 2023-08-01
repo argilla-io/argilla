@@ -12,24 +12,58 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import os
-
 import pytest
 from argilla.server.settings import Settings
 from pydantic import ValidationError
 
 
 @pytest.mark.parametrize("bad_namespace", ["Badns", "bad-ns", "12-bad-ns", "@bad"])
-def test_wrong_settings_namespace(bad_namespace):
-    os.environ["ARGILLA_NAMESPACE"] = bad_namespace
+def test_wrong_settings_namespace(monkeypatch, bad_namespace):
+    monkeypatch.setenv("ARGILLA_NAMESPACE", bad_namespace)
     with pytest.raises(ValidationError):
         Settings()
 
 
-def test_settings_namespace():
-    os.environ["ARGILLA_NAMESPACE"] = "namespace"
+def test_settings_namespace(monkeypatch):
+    monkeypatch.setenv("ARGILLA_NAMESPACE", "namespace")
     settings = Settings()
 
     assert settings.namespace == "namespace"
     assert settings.dataset_index_name == "namespace.ar.datasets"
     assert settings.dataset_records_index_name == "namespace.ar.dataset.{}"
+
+
+def test_settings_index_replicas_with_shards_defined(monkeypatch):
+    monkeypatch.setenv("ARGILLA_ES_RECORDS_INDEX_SHARDS", "100")
+    monkeypatch.setenv("ARGILLA_ES_RECORDS_INDEX_REPLICAS", "2")
+
+    settings = Settings()
+    assert settings.es_records_index_replicas == 2
+
+
+def test_settings_default_index_replicas_with_shards_defined(monkeypatch):
+    monkeypatch.setenv("ARGILLA_ES_RECORDS_INDEX_SHARDS", "100")
+    settings = Settings()
+
+    assert settings.es_records_index_shards == 100
+    assert settings.es_records_index_replicas == 0
+
+
+def test_settings_default_database_url():
+    settings = Settings()
+    assert settings.database_url == f"sqlite+aiosqlite:///{settings.home_path}/argilla.db?check_same_thread=False"
+
+
+@pytest.mark.parametrize(
+    "url, expected_url",
+    [
+        ("sqlite:///test.db", "sqlite+aiosqlite:///test.db"),
+        ("sqlite:///:memory:", "sqlite+aiosqlite:///:memory:"),
+        ("postgresql://user:pass@localhost:5432/db", "postgresql+asyncpg://user:pass@localhost:5432/db"),
+        ("postgresql+psycopg2://user:pass@localhost:5432/db", "postgresql+asyncpg://user:pass@localhost:5432/db"),
+    ],
+)
+def test_settings_database_url(url: str, expected_url: str, monkeypatch):
+    monkeypatch.setenv("ARGILLA_DATABASE_URL", url)
+    settings = Settings()
+    assert settings.database_url == expected_url

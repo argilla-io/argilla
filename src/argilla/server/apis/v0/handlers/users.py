@@ -16,7 +16,7 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request, Security
+from fastapi import APIRouter, Depends, HTTPException, Request, Security, status
 from pydantic import parse_obj_as
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -95,8 +95,12 @@ async def create_user(
     if user is not None:
         raise EntityAlreadyExistsError(name=user_create.username, type=User)
 
-    user = await accounts.create_user(db, user_create)
+    try:
+        user = await accounts.create_user(db, user_create)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
 
+    await user.awaitable_attrs.workspaces
     return User.from_orm(user)
 
 

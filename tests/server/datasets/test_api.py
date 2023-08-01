@@ -16,12 +16,10 @@ from typing import Any, Dict, List
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.apis.v0.models.text_classification import (
-    TextClassificationBulkRequest,
-)
+from argilla.server.apis.v0.models.text_classification import TextClassificationBulkRequest
 from argilla.server.commons.models import TaskType
 from argilla.server.models import UserRole
-from argilla.server.schemas.datasets import Dataset
+from argilla.server.schemas.v0.datasets import Dataset
 from starlette.testclient import TestClient
 
 from tests.factories import (

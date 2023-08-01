@@ -1,23 +1,5 @@
 ::::{tab-set}
 
-:::{tab-item} RatingQuestion
-
-```python
-from argilla import RatingQuestionStrategy, FeedbackRecord
-
-dataset = FeedbackDataset.from_huggingface(
-    repo_id="argilla/stackoverflow_feedback_demo"
-)
-strategy = RatingQuestionStrategy("majority") # "mean", "max", "min"
-dataset.unify_responses(
-    question=dataset.get_question_by_name("answer_quality")
-    strategy=strategy
-)
-dataset.records[0].unified_responses
-```
-
-:::
-
 :::{tab-item} LabelQuestion
 
 ```python
@@ -48,6 +30,42 @@ dataset = FeedbackDataset.from_huggingface(
 strategy = MultiLabelQuestionStrategy("majority") # "disagreement", "majority_weighted (WIP)"
 dataset.unify_responses(
     question=dataset.get_question_by_name("tags")
+    strategy=strategy
+)
+dataset.records[0].unified_responses
+```
+
+:::
+
+:::{tab-item} RankingQuestion
+
+```python
+from argilla import RankingQuestionStrategy, FeedbackRecord
+
+dataset = FeedbackDataset.from_huggingface(
+    repo_id="argilla/stackoverflow_feedback_demo"
+)
+strategy = RankingQuestionStrategy("majority") # "mean", "max", "min"
+dataset.unify_responses(
+    question=dataset.get_question_by_name("relevance_ranking")
+    strategy=strategy
+)
+dataset.records[0].unified_responses
+```
+
+:::
+
+:::{tab-item} RatingQuestion
+
+```python
+from argilla import RatingQuestionStrategy, FeedbackRecord
+
+dataset = FeedbackDataset.from_huggingface(
+    repo_id="argilla/stackoverflow_feedback_demo"
+)
+strategy = RatingQuestionStrategy("majority") # "mean", "max", "min"
+dataset.unify_responses(
+    question=dataset.get_question_by_name("answer_quality")
     strategy=strategy
 )
 dataset.records[0].unified_responses

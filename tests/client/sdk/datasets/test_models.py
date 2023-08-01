@@ -14,7 +14,7 @@
 #  limitations under the License.
 import pytest
 from argilla.client.sdk.datasets.models import Dataset, TaskType
-from argilla.server.schemas.datasets import Dataset as ServerDataset
+from argilla.server.schemas.v0.datasets import Dataset as ServerDataset
 
 
 def test_dataset_schema(helpers):

@@ -29,7 +29,7 @@ dependencies = [
     # pandas -> For data loading
     "pandas >=1.0.0,<2.0.0",
     # Aligned pydantic version with server fastAPI
-    "pydantic >= 1.10.7",
+    "pydantic >= 1.10.7,< 2.0",
     # monitoring
     "wrapt >= 1.13,< 1.15",
     # weaksupervision
@@ -40,7 +40,7 @@ dependencies = [
     "backoff",
     "monotonic",
     # for logging, tracebacks, printing, progressbars
-    "rich <= 13.0.1",
+    "rich != 13.1.0",
     # for CLI
     "typer >= 0.6.0, < 0.8.0", # spaCy only supports typer<0.8.0
 ]
@@ -86,7 +86,7 @@ postgresql = [
 ]
 listeners = ["schedule ~= 1.1.0", "prodict ~= 0.8.0"]
 integrations = [
-    "PyYAML >= 5.4.1,< 6.1.0", # Required by `argilla.client.feedback.config` just used in `HuggingFaceDatasetMixIn`
+    "PyYAML >= 5.4.1,< 6.1.0", # Required by `argilla.client.feedback.config` just used in `HuggingFaceDatasetMixin`
     "cleanlab ~= 2.0.0",
     # TODO: `push_to_hub` fails up to 2.3.2, check patches when they come out eventually
     "datasets > 1.17.0,!= 2.3.2",
@@ -107,8 +107,7 @@ integrations = [
     "setfit",
     "span_marker",
     "openai",
-    "peft",
-    "autotrain-advanced == 0.5.2",
+    "peft"
 ]
 tests = [
     "pytest",
@@ -184,6 +183,7 @@ exclude = [
     "node_modules",
     "venv",
 ]
+line-length = 120
 
 [tool.ruff.per-file-ignores]
 # Ignore imported but unused;

@@ -23,10 +23,12 @@ from argilla.client.sdk.commons.errors import (
     NotFoundApiError,
     ValidationApiError,
 )
+from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
 from argilla.client.sdk.v1.workspaces.models import WorkspaceModel as WorkspaceModelV1
 from argilla.client.sdk.workspaces import api as workspaces_api
 from argilla.client.sdk.workspaces.models import WorkspaceModel as WorkspaceModelV0
+from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
     import httpx
@@ -104,6 +106,7 @@ class Workspace:
         raise Exception(error_msg)
 
     @property
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def users(self) -> List["WorkspaceUserModel"]:
         """Returns the list of users linked to the workspace.
 
@@ -119,7 +122,8 @@ class Workspace:
             f" inserted_at={self.inserted_at}, updated_at={self.updated_at})"
         )
 
-    def add_user(self, user_id: str) -> None:
+    @allowed_for_roles(roles=[UserRole.owner])
+    def add_user(self, user_id: UUID) -> None:
         """Adds an existing user to the workspace in Argilla.
 
         Args:
@@ -145,7 +149,8 @@ class Workspace:
         except BaseClientError as e:
             raise RuntimeError(f"Error while adding user with id=`{user_id}` to workspace with id=`{self.id}`.") from e
 
-    def delete_user(self, user_id: str) -> None:
+    @allowed_for_roles(roles=[UserRole.owner])
+    def delete_user(self, user_id: UUID) -> None:
         """Deletes an existing user from the workspace in Argilla. Note that the user
         will not be deleted from Argilla, but just from the workspace.
 
@@ -177,6 +182,32 @@ class Workspace:
                 f"Error while deleting user with id=`{user_id}` from workspace with id=`{self.id}`."
             ) from e
 
+    @allowed_for_roles(roles=[UserRole.owner])
+    def delete(self) -> None:
+        """Deletes an existing workspace from Argilla. Note that the workspace
+        cannot have any linked dataset to be removed from Argilla. Otherwise an error will be raised.
+
+        Raises:
+            ValueError: if the workspace does not exists or some datasets are linked to it.
+            RuntimeError: if there was an unexpected error while deleting the user from the workspace.
+
+        Examples:
+            >>> from argilla import rg
+            >>> workspace = rg.Workspace.from_name("my-workspace")
+            >>> workspace.delete()
+        """
+        try:
+            workspaces_api_v1.delete_workspace(client=self.__client, id=self.id)
+        except NotFoundApiError as e:
+            raise ValueError(f"Workspace with id {self.id} doesn't exist in Argilla.") from e
+        except AlreadyExistsApiError as e:
+            # TODO: the already exists is to explicit for this context and should be generalized
+            raise ValueError(
+                f"Cannot delete workspace with id {self.id}. Some datasets are still linked to this workspace."
+            ) from e
+        except BaseClientError as e:
+            raise RuntimeError(f"Error while deleting workspace with id {self.id!r}.") from e
+
     @staticmethod
     def __active_client() -> "httpx.Client":
         """Returns the active Argilla `httpx.Client` instance."""
@@ -197,6 +228,7 @@ class Workspace:
         return instance
 
     @classmethod
+    @allowed_for_roles(roles=[UserRole.owner])
     def create(cls, name: str) -> "Workspace":
         """Creates a new workspace in Argilla.
 
@@ -279,7 +311,7 @@ class Workspace:
         """
         client = cls.__active_client()
         try:
-            workspaces = workspaces_api.list_workspaces(client).parsed
+            workspaces = workspaces_api_v1.list_workspaces_me(client).parsed
         except Exception as e:
             raise RuntimeError("Error while retrieving the list of workspaces from Argilla.") from e
 
@@ -289,7 +321,7 @@ class Workspace:
 
         raise ValueError(
             f"Workspace with name=`{name}` doesn't exist in Argilla, so please"
-            "create it via the `Workspace.create` method as follows:"
+            " create it via the `Workspace.create` method as follows:"
             f" `Workspace.create('{name}')`."
         )
 
@@ -309,7 +341,7 @@ class Workspace:
         """
         client = cls.__active_client()
         try:
-            workspaces = workspaces_api.list_workspaces(client).parsed
+            workspaces = workspaces_api_v1.list_workspaces_me(client).parsed
             for ws in workspaces:
                 yield cls.__new_instance(client, ws)
         except Exception as e:

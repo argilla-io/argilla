@@ -24,12 +24,14 @@ from argilla.client.feedback.schemas import (
     FeedbackRecord,
     LabelQuestion,
     MultiLabelQuestion,
+    RankingQuestion,
     RatingQuestion,
     TextField,
 )
 from argilla.client.feedback.unification import (
     LabelQuestionUnification,
     MultiLabelQuestionUnification,
+    RankingQuestionUnification,
     RatingQuestionUnification,
 )
 from argilla.client.models import Framework
@@ -110,10 +112,12 @@ class TrainingTaskMapping:
         label: Union[
             RatingQuestion,
             LabelQuestion,
+            RankingQuestion,
             MultiLabelQuestion,
             RatingQuestionUnification,
             LabelQuestionUnification,
             MultiLabelQuestionUnification,
+            RankingQuestionUnification,
         ],
         label_strategy: str = None,
     ) -> "TrainingTaskMappingForTextClassification":
@@ -142,7 +146,15 @@ class TrainingTaskMapping:
             >>> dataset.prepare_training_data(training_data=training_data)
 
         """
-        if isinstance(label, (LabelQuestionUnification, MultiLabelQuestionUnification, RatingQuestionUnification)):
+        if isinstance(
+            label,
+            (
+                LabelQuestionUnification,
+                MultiLabelQuestionUnification,
+                RatingQuestionUnification,
+                RankingQuestionUnification,
+            ),
+        ):
             if label_strategy is not None:
                 raise ValueError("label_strategy is already defined via Unification class.")
         else:
@@ -157,6 +169,8 @@ class TrainingTaskMapping:
                 label = MultiLabelQuestionUnification(**unification_kwargs)
             elif isinstance(label, LabelQuestion):
                 label = LabelQuestionUnification(**unification_kwargs)
+            elif isinstance(label, RankingQuestion):
+                label = RankingQuestionUnification(**unification_kwargs)
             else:
                 raise ValueError(f"Label type {type(label)} is not supported.")
         return TrainingTaskMappingForTextClassification(
@@ -186,7 +200,9 @@ class TrainingTaskMappingForTextClassification(BaseModel, TrainingData):
     """
 
     text: TextField
-    label: Union[RatingQuestionUnification, LabelQuestionUnification]
+    label: Union[
+        RatingQuestionUnification, LabelQuestionUnification, MultiLabelQuestionUnification, RankingQuestionUnification
+    ]
 
     @property
     def supported_frameworks(self):

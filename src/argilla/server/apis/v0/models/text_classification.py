@@ -26,21 +26,15 @@ from argilla.server.apis.v0.models.commons.model import (
     SortableField,
 )
 from argilla.server.commons.models import PredictionStatus
-from argilla.server.schemas.datasets import UpdateDatasetRequest
-from argilla.server.services.search.model import (
-    ServiceBaseRecordsQuery,
-    ServiceBaseSearchResultsAggregations,
-)
+from argilla.server.schemas.v0.datasets import UpdateDatasetRequest
+from argilla.server.services.search.model import ServiceBaseRecordsQuery, ServiceBaseSearchResultsAggregations
 from argilla.server.services.tasks.text_classification.model import (
     DatasetLabelingRulesMetricsSummary as _DatasetLabelingRulesMetricsSummary,
 )
 from argilla.server.services.tasks.text_classification.model import (
     LabelingRuleMetricsSummary as _LabelingRuleMetricsSummary,
 )
-from argilla.server.services.tasks.text_classification.model import (
-    ServiceTextClassificationDataset,
-    TokenAttributions,
-)
+from argilla.server.services.tasks.text_classification.model import ServiceTextClassificationDataset, TokenAttributions
 from argilla.server.services.tasks.text_classification.model import (
     TextClassificationAnnotation as _TextClassificationAnnotation,
 )

@@ -15,10 +15,7 @@
 import dataclasses
 from typing import Any, Dict, List, Optional
 
-from argilla.server.daos.backend.metrics.base import (
-    ElasticsearchMetric,
-    TermsAggregation,
-)
+from argilla.server.daos.backend.metrics.base import ElasticsearchMetric, TermsAggregation
 from argilla.server.daos.backend.query_helpers import aggregations, filters
 from argilla.server.helpers import unflatten_dict
 

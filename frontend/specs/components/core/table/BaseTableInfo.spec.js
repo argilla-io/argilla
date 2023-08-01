@@ -1,12 +1,8 @@
 import { mount } from "@vue/test-utils";
 import BaseTableInfo from "@/components/base/table/BaseTableInfo";
 
-const $route = {
-  query: {},
-};
-
-function mountBaseTableInfo() {
-  return mount(BaseTableInfo, {
+const mountBaseTableInfo = () =>
+  mount(BaseTableInfo, {
     stubs: [
       "lazy-table-filtrable-column",
       "base-modal",
@@ -28,13 +24,13 @@ function mountBaseTableInfo() {
       ],
       data: [
         {
-          key: "data1",
+          id: "data1",
           name: "dataset_1",
           workspace: "recognai",
           task: "TokenClassification",
         },
         {
-          key: "data2",
+          id: "data2",
           name: "dataset_2",
           workspace: "recognai",
           task: "TokenClassification",
@@ -59,18 +55,19 @@ function mountBaseTableInfo() {
       visibleModalId: undefined,
     },
     mocks: {
-      $route,
+      $route: {
+        query: {},
+      },
     },
   });
-}
 
 describe("BaseTableInfo", () => {
-  let spy = jest.spyOn(console, "error");
+  const spy = jest.spyOn(console, "error");
   afterEach(() => spy.mockReset());
 
-  it.skip("renders properly", () => {
-    // FIXME
+  test("renders properly", () => {
     const wrapper = mountBaseTableInfo();
+
     expect(wrapper.html()).toMatchSnapshot();
   });
 });

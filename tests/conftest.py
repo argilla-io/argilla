@@ -14,7 +14,7 @@
 import asyncio
 import contextlib
 import tempfile
-from typing import TYPE_CHECKING, AsyncGenerator, Dict, Generator
+from typing import TYPE_CHECKING, AsyncGenerator, Dict, Generator, Iterator
 
 import httpx
 import pytest
@@ -27,8 +27,9 @@ from argilla.client.datasets import read_datasets
 from argilla.client.models import Text2TextRecord, TextClassificationRecord
 from argilla.client.sdk.users import api as users_api
 from argilla.datasets.__init__ import configure_dataset
-from argilla.server.database import Base, get_async_db
+from argilla.server.database import get_async_db
 from argilla.server.models import User, UserRole, Workspace
+from argilla.server.models.base import DatabaseModel
 from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.server import app, argilla_app
 from argilla.server.settings import settings
@@ -37,7 +38,7 @@ from argilla.utils.telemetry import TelemetryClient
 from fastapi.testclient import TestClient
 from opensearchpy import OpenSearch
 from sqlalchemy import create_engine
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from tests.database import SyncTestSession, TestSession, set_task
 from tests.factories import (
@@ -53,7 +54,7 @@ if TYPE_CHECKING:
 
     from pytest_mock import MockerFixture
     from sqlalchemy import Connection
-    from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession
+    from sqlalchemy.ext.asyncio import AsyncConnection
     from sqlalchemy.orm import Session
 
 
@@ -73,11 +74,11 @@ async def connection() -> AsyncGenerator["AsyncConnection", None]:
         engine = create_async_engine(database_url, connect_args={"check_same_thread": False})
         conn = await engine.connect()
         TestSession.configure(bind=conn)
-        await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(DatabaseModel.metadata.create_all)
 
         yield conn
 
-        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(DatabaseModel.metadata.drop_all)
         await conn.close()
         await engine.dispose()
 
@@ -101,11 +102,11 @@ def sync_connection() -> Generator["Connection", None, None]:
         engine = create_engine(database_url, connect_args={"check_same_thread": False})
         conn = engine.connect()
         SyncTestSession.configure(bind=conn)
-        Base.metadata.create_all(engine)
+        DatabaseModel.metadata.create_all(engine)
 
         yield conn
 
-        Base.metadata.drop_all(engine)
+        DatabaseModel.metadata.drop_all(engine)
         conn.close()
         engine.dispose()
 
@@ -119,6 +120,25 @@ def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
     session.close()
     SyncTestSession.remove()
     sync_connection.rollback()
+
+
+@pytest.fixture
+def async_db_proxy(mocker: "MockerFixture", sync_db: "Session") -> "AsyncSession":
+    """Create a mocked `AsyncSession` that proxies to the sync session. This will allow us to execute the async CLI commands
+    and then in the unit test function use the sync session to assert the changes.
+
+    Args:
+        mocker: pytest-mock fixture.
+        sync_db: Sync session.
+
+    Returns:
+        Mocked `AsyncSession` that proxies to the sync session.
+    """
+    async_session = AsyncSession()
+    async_session.sync_session = sync_db
+    async_session._proxied = sync_db
+    async_session.close = mocker.AsyncMock()
+    return async_session
 
 
 @pytest.fixture(scope="function")
@@ -161,8 +181,8 @@ def elasticsearch_config():
     return {"hosts": settings.elasticsearch}
 
 
-@pytest.fixture(scope="session")
-def opensearch(elasticsearch_config):
+@pytest.fixture(scope="session", autouse=True)
+def opensearch(elasticsearch_config) -> Generator[OpenSearch, None, None]:
     client = OpenSearch(**elasticsearch_config)
     yield client
 

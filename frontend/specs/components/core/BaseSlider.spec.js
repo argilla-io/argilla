@@ -12,7 +12,7 @@ function mountBaseSlider() {
 }
 
 describe("BaseSlider", () => {
-  let spy = jest.spyOn(console, "error");
+  const spy = jest.spyOn(console, "error");
   afterEach(() => spy.mockReset());
 
   test("renders properly", () => {

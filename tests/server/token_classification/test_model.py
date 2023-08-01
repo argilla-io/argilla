@@ -86,16 +86,11 @@ def test_model_dict():
         id="1",
         text=text,
         tokens=tokens,
-        prediction=TokenClassificationAnnotation(
-            agent="test",
-            entities=[
-                EntitySpan(start=9, end=24, label="test"),
-            ],
-        ),
+        prediction=TokenClassificationAnnotation(agent="test", entities=[EntitySpan(start=9, end=24, label="test")]),
     )
 
     assert record.dict(exclude_none=True) == {
-        "id": 1,
+        "id": "1",
         "metrics": {},
         "prediction": {
             "agent": "test",

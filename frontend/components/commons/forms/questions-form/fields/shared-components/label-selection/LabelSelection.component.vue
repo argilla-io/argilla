@@ -46,13 +46,13 @@
           type="checkbox"
           :name="option.text"
           :id="option.id"
-          v-model="option.is_selected"
+          v-model="option.isSelected"
           @change="onSelect(option)"
         />
         <label
           class="label-text cursor-pointer"
           :class="{
-            'label-active': option.is_selected,
+            'label-active': option.isSelected,
             square: multiple,
             round: !multiple,
           }"
@@ -118,7 +118,7 @@ export default {
     remainingVisibleOptions() {
       return this.filteredOptions
         .slice(this.maxOptionsToShowBeforeCollapse)
-        .filter((option) => option.is_selected);
+        .filter((option) => option.isSelected);
     },
     visibleOptions() {
       if (this.maxOptionsToShowBeforeCollapse === -1 || this.isExpanded)
@@ -155,14 +155,14 @@ export default {
     },
   },
   methods: {
-    onSelect({ id, is_selected }) {
+    onSelect({ id, isSelected }) {
       if (this.multiple) return;
       else {
         this.options.forEach((option) => {
           if (option.id === id) {
-            option.is_selected = is_selected;
+            option.isSelected = isSelected;
           } else {
-            option.is_selected = false;
+            option.isSelected = false;
           }
           return option;
         });
@@ -227,10 +227,10 @@ export default {
   display: block;
   width: 100%;
   height: 32px;
+  min-width: 50px;
   max-width: 200px;
+  text-align: center;
   padding-inline: 12px;
-  box-shadow: 0;
-  border-radius: 50em;
   background: palette(purple, 800);
   color: palette(purple, 200);
   line-height: 32px;
@@ -239,16 +239,17 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  border-radius: $border-radius-rounded;
   &:not(.label-active):hover {
     background: darken(palette(purple, 800), 8%);
   }
 }
 
 .round {
-  border-radius: 50em;
+  border-radius: $border-radius-rounded;
 }
 .square {
-  border-radius: 5px;
+  border-radius: $border-radius-s;
 }
 
 input[type="checkbox"] {

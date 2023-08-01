@@ -11,12 +11,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import uuid
 from typing import TYPE_CHECKING
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.models import User, UserRole
+from argilla.server.models import UserRole
 
 from tests.factories import UserFactory, WorkspaceFactory
 

@@ -18,14 +18,144 @@ from uuid import uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.models import DatasetStatus, Field
+from argilla.server.models import DatasetStatus, Field, UserRole
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 
-from tests.factories import AnnotatorFactory, DatasetFactory, TextFieldFactory
+from tests.factories import (
+    AnnotatorFactory,
+    DatasetFactory,
+    TextFieldFactory,
+    UserFactory,
+)
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
+
+
+@pytest.mark.parametrize(
+    "payload, expected_settings",
+    [
+        (
+            {"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
+            {"type": "text", "use_markdown": True},
+        ),
+        ({"title": "New Title"}, {"type": "text", "use_markdown": False}),
+        (
+            {"name": "New Name", "required": True, "dataset_id": str(uuid4())},
+            {"type": "text", "use_markdown": False},
+        ),
+    ],
+)
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+@pytest.mark.asyncio
+async def test_update_field(
+    client: TestClient, db: "AsyncSession", role: UserRole, payload: dict, expected_settings: dict
+):
+    field = await TextFieldFactory.create()
+    user = await UserFactory.create(role=role, workspaces=[field.dataset.workspace])
+
+    response = client.patch(f"/api/v1/fields/{field.id}", headers={API_KEY_HEADER_NAME: user.api_key}, json=payload)
+
+    title = payload.get("title") or field.title
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": str(field.id),
+        "name": field.name,
+        "title": title,
+        "required": field.required,
+        "settings": expected_settings,
+        "dataset_id": str(field.dataset.id),
+        "inserted_at": field.inserted_at.isoformat(),
+        "updated_at": field.updated_at.isoformat(),
+    }
+
+    field = await db.get(Field, field.id)
+    assert field.title == title
+    assert field.settings == expected_settings
+
+
+@pytest.mark.parametrize(
+    "field_json",
+    [
+        {"title": None, "settings": None},
+        {"settings": {"type": "text"}},
+        {"settings": {"type": "text", "use_markdown": None}},
+        {"settings": {"type": "i don't exist"}},
+    ],
+)
+@pytest.mark.asyncio
+async def test_update_field_with_invalid_settings(client: TestClient, owner_auth_header: dict, field_json: dict):
+    field = await TextFieldFactory.create()
+
+    response = client.patch(f"/api/v1/fields/{field.id}", headers=owner_auth_header, json=field_json)
+
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_update_field_with_invalid_payload(client: TestClient, owner_auth_header: dict):
+    field = await TextFieldFactory.create()
+
+    response = client.patch(
+        f"/api/v1/fields/{field.id}",
+        headers=owner_auth_header,
+        json={"title": {"this": "is", "not": "valid"}, "settings": {"use_markdown": "no"}},
+    )
+
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_update_field_non_existent(client: TestClient, owner_auth_header: dict):
+    response = client.patch(
+        f"/api/v1/fields/{uuid4()}",
+        headers=owner_auth_header,
+        json={"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
+    )
+
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_update_field_as_admin_from_different_workspace(client: TestClient):
+    field = await TextFieldFactory.create()
+    user = await UserFactory.create(role=UserRole.admin)
+
+    response = client.patch(
+        f"/api/v1/fields/{field.id}",
+        headers={API_KEY_HEADER_NAME: user.api_key},
+        json={"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
+    )
+
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_update_field_as_annotator(client: TestClient):
+    field = await TextFieldFactory.create()
+    user = await UserFactory.create(role=UserRole.annotator, workspaces=[field.dataset.workspace])
+
+    response = client.patch(
+        f"/api/v1/fields/{field.id}",
+        headers={API_KEY_HEADER_NAME: user.api_key},
+        json={"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
+    )
+
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_update_field_without_authentication(client: TestClient):
+    field = await TextFieldFactory.create()
+
+    response = client.patch(
+        f"/api/v1/fields/{field.id}",
+        json={"title": "New Title", "settings": {"use_markdown": True}},
+    )
+
+    assert response.status_code == 401
 
 
 @pytest.mark.asyncio
