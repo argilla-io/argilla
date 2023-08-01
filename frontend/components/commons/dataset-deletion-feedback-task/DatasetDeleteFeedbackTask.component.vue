@@ -4,7 +4,7 @@
       card-type="danger"
       :title="datasetDeleteTitle"
       text="Be careful, this action is not reversible"
-      buttonText="Delete dataset"
+      buttonText="Delete"
       @card-action="toggleDeleteModal(true)"
     />
 
