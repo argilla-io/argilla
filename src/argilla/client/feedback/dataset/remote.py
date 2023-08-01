@@ -210,8 +210,13 @@ class _ArgillaFeedbackDataset(FeedbackDatasetBase):
     def __getitem__(self, key: Union[slice, int]) -> Union[_ArgillaFeedbackRecord, List[_ArgillaFeedbackRecord]]:
         return self.records.__getitem__(key)
 
-    def fetch_records(self) -> List[_ArgillaFeedbackRecord]:
-        raise NotImplementedError("This method is not implemented yet")
+    def fetch_records(self) -> None:
+        warnings.warn(
+            "`fetch_records` method is deprecated, as the records are fetched automatically"
+            " when iterating over a `FeedbackDataset` pushed to Argilla. This method will be"
+            " removed in a future release.",
+            DeprecationWarning,
+        )
 
     def push_to_argilla(self, *args, **kwargs) -> None:
         warnings.warn(
