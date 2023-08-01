@@ -43,7 +43,7 @@ def test_update_with_invalid_role(cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(cli, f"users update username --role {bad_role_str}")
 
     assert result.exit_code == 2
-    assert f"Invalid value for '--role'" in result.output, result.output
+    assert f"{bad_role_str!r} is not one of" in result.output, result.output
 
 
 def test_update_with_missing_username(cli_runner: CliRunner, cli: Typer):
