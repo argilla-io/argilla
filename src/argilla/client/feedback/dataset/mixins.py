@@ -238,7 +238,7 @@ class ArgillaToFromMixin:
                 f"Could not find a `FeedbackDataset` in Argilla with name='{name}'."
                 if name and not workspace
                 else (
-                    "Could not find a `FeedbackDataset` in Argilla with" f" name='{name}' and workspace='{workspace}'."
+                    "Could not find a `FeedbackDataset` in Argilla with name='{name}' and workspace='{workspace}'."
                     if name and workspace
                     else (f"Could not find a `FeedbackDataset` in Argilla with ID='{id}'.")
                 )
