@@ -61,7 +61,6 @@ These are the section headers that we use:
 - Added `HuggingFaceDatasetMixin` for internal usage, to detach the `FeedbackDataset` integrations from the class itself, and use Mixins instead ([#3326](https://github.com/argilla-io/argilla/pull/3326)).
 - Added `GET /api/v1/records/{record_id}/suggestions` API endpoint to get the list of suggestions for the responses associated to a record ([#3304](https://github.com/argilla-io/argilla/pull/3304)).
 - Added `POST /api/v1/records/{record_id}/suggestions` API endpoint to create a suggestion for a response associated to a record ([#3304](https://github.com/argilla-io/argilla/pull/3304)).
-- Added breaking simultaneously running tests within GitHub package worflows. ([#3354](https://github.com/argilla-io/argilla/pull/3354)).
 - Added support for `RankingQuestionStrategy`, `RankingQuestionUnification` and the `.for_text_classification` method for the `TrainingTaskMapping` ([#3364](https://github.com/argilla-io/argilla/pull/3364))
 - Added `PUT /api/v1/records/{record_id}/suggestions` API endpoint to create or update a suggestion for a response associated to a record ([#3304](https://github.com/argilla-io/argilla/pull/3304) & [3391](https://github.com/argilla-io/argilla/pull/3391)).
 - Added `suggestions` attribute to `FeedbackRecord`, and allow adding and retrieving suggestions from the Python client ([#3370](https://github.com/argilla-io/argilla/pull/3370))
