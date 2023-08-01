@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 
     import httpx
 
+    from argilla.client.feedback.dataset.local import FeedbackDataset
     from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackItemModel
     from argilla.client.workspaces import Workspace
@@ -219,6 +220,18 @@ class _ArgillaFeedbackDataset(FeedbackDatasetBase):
             " are being tracked automatically, so there's no need to explicitly push them.",
             DeprecationWarning,
         )
+
+    def pull(self) -> "FeedbackDataset":
+        # Importing here to avoid circular imports
+        from argilla.client.feedback.dataset.local import FeedbackDataset
+
+        instance = FeedbackDataset(
+            fields=self.fields,
+            questions=self.questions,
+            guidelines=self.guidelines,
+        )
+        instance.add_records([record.dict(exclude={"client", "name2id"}) for record in self.records])
+        return instance
 
     def add_records(
         self,
