@@ -129,6 +129,7 @@ async def upsert_suggestion(
 async def delete_record(
     *,
     db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
     record_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -136,4 +137,4 @@ async def delete_record(
 
     await authorize(current_user, RecordPolicyV1.delete(record))
 
-    return await datasets.delete_record(db, record)
+    return await datasets.delete_record(db, search_engine, record)

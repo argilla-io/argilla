@@ -217,8 +217,11 @@ async def get_record_by_id(
     return result.scalar_one_or_none()
 
 
-async def delete_record(db: "AsyncSession", record: Record) -> Record:
-    return await record.delete()
+async def delete_record(db: "AsyncSession", search_engine: "SearchEngine", record: Record) -> Record:
+    async with db.begin_nested():
+        record = await record.delete(db=db, autocommit=False)
+        await search_engine.delete_records(dataset=record.dataset, records=[record])
+    return record
 
 
 async def get_records_by_ids(
