@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Delete dataset</h1>
+    <h2 class="--heading5 --semibold">Delete dataset</h2>
     <DatasetDeleteFeedbackTaskComponent :dataset="settings.dataset" />
   </div>
 </template>

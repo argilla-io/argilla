@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Edit fields</h1>
+    <h2 class="--heading5 --semibold">Edit fields</h2>
     <form @submit.prevent="onSubmit"></form>
   </div>
 </template>

@@ -1,7 +1,7 @@
 <template>
   <div>
+    <h2 class="--heading5 --semibold">Dataset info</h2>
     <div class="settings__area">
-      <h2 class="--heading5 --semibold">Info</h2>
       <div class="settings__row">
         <div class="item">
           <p class="dataset-name" v-html="settings.dataset.name" />
@@ -51,21 +51,24 @@ export default {
 .settings {
   &__area {
     border-bottom: 1px solid $black-10;
-    padding: $base-space * 2 0;
   }
+
   &__row {
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
 }
+
 .item {
   display: flex;
   gap: $base-space * 3;
 }
+
 .dataset-name {
   @include font-size(16px);
 }
+
 .dataset-task {
   color: $black-54;
   border: 1px solid $black-37;

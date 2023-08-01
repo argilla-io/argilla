@@ -17,11 +17,13 @@
         class="settings__tabs"
       />
       <transition name="fade" mode="out-in" appear>
-        <component
-          :is="visibleComponent"
-          :key="visibleComponent"
-          :settings="datasetSetting"
-        />
+        <div class="settings__tabs-content">
+          <component
+            :is="visibleComponent"
+            :key="visibleComponent"
+            :settings="datasetSetting"
+          />
+        </div>
       </transition>
     </div>
   </div>
@@ -85,6 +87,10 @@ export default {
   &__tabs {
     & ~ #{$this}__header {
       border: 1px solid red;
+    }
+
+    &-content {
+      margin-top: $base-space * 3;
     }
   }
 }
