@@ -53,6 +53,6 @@ export default {
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: $base-space;
 }
 </style>

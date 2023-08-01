@@ -21,6 +21,7 @@
           </NuxtLink>
         </p>
       </div>
+
       <QuestionsComponent
         :questions="record.questions"
         :showSuggestion="!record.isSubmitted"
