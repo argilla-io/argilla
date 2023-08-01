@@ -184,7 +184,7 @@ class FeedbackRecord(BaseModel):
             return tuple([v for v in values])
         return values
 
-    def set_suggestions(
+    def update(
         self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
     ) -> None:
         if isinstance(suggestions, (dict, SuggestionSchema)):
@@ -207,6 +207,15 @@ class FeedbackRecord(BaseModel):
 
         self.__dict__["suggestions"] = tuple(suggestions_dict.values())
 
+    def set_suggestions(
+        self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
+    ) -> None:
+        warnings.warn(
+            "`set_suggestions` method will be deprecated in future releases and," " `update` will be used instead.",
+            DeprecationWarning,
+        )
+        self.update(suggestions=suggestions)
+
     class Config:
         extra = Extra.forbid
         validate_assignment = True
@@ -217,15 +226,20 @@ class _ArgillaFeedbackRecord(FeedbackRecord):
     client: httpx.Client
     name2id: Dict[str, UUID]
 
-    def set_suggestions(
+    def update(
         self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
     ) -> None:
-        super().set_suggestions(suggestions)
         for suggestion in self.suggestions:
             suggestion.question_id = self.name2id[suggestion.question_name]
             datasets_api_v1.set_suggestion(
                 client=self.client, record_id=self.id, **suggestion.dict(exclude_none=True, exclude={"question_name"})
             )
+
+    def set_suggestions(
+        self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
+    ) -> None:
+        super().set_suggestions(suggestions)
+        self.update(suggestions=suggestions)
 
     class Config:
         arbitrary_types_allowed = True
