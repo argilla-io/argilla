@@ -98,8 +98,8 @@ export default {
       this.currentValue = event.target.innerText;
       this.$emit("change-text", event.target.innerText);
     },
-    setFocus(status) {
-      this.$emit("on-change-focus", status);
+    setFocus(isFocus) {
+      this.$emit("on-change-focus", isFocus);
     },
     pastePlainText(event) {
       if (event.target.isContentEditable) {

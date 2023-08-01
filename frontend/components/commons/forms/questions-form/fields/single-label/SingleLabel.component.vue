@@ -8,7 +8,7 @@
     />
 
     <LabelSelectionComponent
-      v-model="uniqueOptions"
+      v-model="options"
       :multiple="false"
       :componentId="questionId"
       :isFocused="isFocused"
@@ -57,19 +57,6 @@ export default {
   },
   model: {
     prop: "options",
-  },
-  data() {
-    return {
-      uniqueOptions: [],
-    };
-  },
-  beforeMount() {
-    this.uniqueOptions = this.options.reduce((accumulator, current) => {
-      if (!accumulator.find((item) => item.id === current.id)) {
-        accumulator.push(current);
-      }
-      return accumulator;
-    }, []);
   },
   computed: {
     maxOptionsToShowBeforeCollapse() {

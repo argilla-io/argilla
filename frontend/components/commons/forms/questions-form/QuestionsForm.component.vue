@@ -295,6 +295,8 @@ export default {
       }
     },
     async onDiscard() {
+      if (this.record.isDiscarded) return;
+
       await this.discard(this.record);
 
       this.$emit("on-discard-responses");
@@ -302,9 +304,7 @@ export default {
       this.onReset();
     },
     async onSubmit() {
-      if (!this.questionAreCompletedCorrectly) {
-        return;
-      }
+      if (this.isSubmitButtonDisabled) return;
 
       await this.submit(this.record);
 
