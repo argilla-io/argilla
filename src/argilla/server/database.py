@@ -16,7 +16,7 @@ from collections import OrderedDict
 from sqlite3 import Connection as SQLite3Connection
 from typing import TYPE_CHECKING, Generator
 
-from sqlalchemy import event
+from sqlalchemy import event, make_url
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
@@ -56,3 +56,12 @@ async def get_async_db() -> Generator["AsyncSession", None, None]:
         yield db
     finally:
         await db.close()
+
+
+def database_url_sync() -> str:
+    """
+    Returns a "sync" version of the configured database URL. This may be useful in cases we don't need
+    an asynchronous connection, like running database migration inside the alembic script.
+    """
+    database_url = make_url(settings.database_url)
+    return settings.database_url.replace(f"+{database_url.get_driver_name()}", "")
