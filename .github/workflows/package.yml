@@ -85,7 +85,9 @@ jobs:
   run_integration_tests:
     name: Run integration tests
     uses: ./.github/workflows/run-python-tests.yml
-    needs: check_repo_files
+    needs:
+      - check_repo_files
+      - run_unit_tests
     if: needs.check_repo_files.outputs.pythonChanges == 'true'
     # continue-on-error: true
     with:
@@ -124,7 +126,6 @@ jobs:
     needs:
       - build_python_package
       - run_unit_tests
-      - run_integration_tests
     if: |
       !cancelled() &&
       !contains(needs.*.result, 'failure') &&
@@ -162,6 +163,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'release' }}
     needs:
+      - run_integration_tests
       - build_quickstart_docker_image
     defaults:
       run:
