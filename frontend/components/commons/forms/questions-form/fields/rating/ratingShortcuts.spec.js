@@ -70,6 +70,10 @@ describe("RatingMonoSelectionComponent", () => {
     const code = `KeyQ`;
     expect(spyOnIsValidKeyFor({ code })).toBe(false);
   });
+  it("not validate shortcut when not pressing a number from the numpad", () => {
+    const code = `NumpadAdd`;
+    expect(spyOnIsValidKeyFor({ code })).toBe(false);
+  });
   it.skip("click on target corresponding to value from shortcut", () => {
     wrapper.trigger("keydown", { key: "1" });
   });
