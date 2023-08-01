@@ -307,6 +307,7 @@ class HuggingFaceDatasetMixin:
                 " re-dumping the `DatasetConfig` using Argilla 1.13.0 or higher, or"
                 " manually create the `argilla.yaml` file in the HuggingFace Hub.",
                 UserWarning,
+                stacklevel=2,
             )
             config_path = hf_hub_download(
                 repo_id=repo_id,
@@ -345,7 +346,8 @@ class HuggingFaceDatasetMixin:
                     warnings.warn(
                         "Found more than one user without ID in the dataset, so just the"
                         " responses for the first user without ID will be used, the rest"
-                        " will be discarded."
+                        " will be discarded.",
+                        stacklevel=2,
                     )
                 user_without_id_response = False
 

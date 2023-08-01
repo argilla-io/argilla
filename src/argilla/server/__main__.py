@@ -21,6 +21,7 @@ if __name__ == "__main__":
         "\n'python -m argilla.server' command is deprecated and will be removed in the next major release. "
         "\nPlease use 'python -m argilla' instead",
         category=FutureWarning,
+        stacklevel=2,
     )
 
     uvicorn.run(

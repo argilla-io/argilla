@@ -101,6 +101,7 @@ class LazyargillaModule(ModuleType):
                 f"`argilla.{class_name or module_name}`) is deprecated and will not work in a future version. "
                 f"Make sure you update your code accordingly.",
                 category=FutureWarning,
+                stacklevel=2,
             )
 
         try:

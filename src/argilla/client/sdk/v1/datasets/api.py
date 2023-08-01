@@ -228,7 +228,8 @@ def add_records(
                 if response_without_user_id:
                     warnings.warn(
                         f"Multiple responses without `user_id` found in record {record}, so just the first one will be"
-                        " used while the rest will be ignored."
+                        " used while the rest will be ignored.",
+                        stacklevel=2,
                     )
                     continue
                 else:

@@ -125,7 +125,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
                 "See https://docs.argilla.io/en/latest/getting_started/installation/configurations"
                 "/database_migrations.html#elasticsearch"
             )
-            warnings.warn(message, DeprecationWarning)
+            warnings.warn(message, DeprecationWarning, stacklevel=2)
             # See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
             if v > _JS_MAX_SAFE_INTEGER:
                 message = (
@@ -134,7 +134,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
                     "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number"
                     "/MAX_SAFE_INTEGER"
                 )
-                warnings.warn(message, UserWarning)
+                warnings.warn(message, UserWarning, stacklevel=2)
         return v
 
     @validator("status", always=True)
@@ -175,7 +175,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
                     f" truncated by keeping only the last {settings.metadata_field_length} characters. "
                     + _messages.ARGILLA_METADATA_FIELD_WARNING_MESSAGE
                 )
-                warnings.warn(message, UserWarning)
+                warnings.warn(message, UserWarning, stacklevel=2)
                 metadata = metadata_parsed
         return metadata
 
