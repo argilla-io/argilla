@@ -69,7 +69,7 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
 
     def fetch_records(self) -> None:
         warnings.warn(
-            "As the current `FeedbackDataset` is stored locally and is pushed to Argilla,"
+            "As the current `FeedbackDataset` is stored locally and not pushed to Argilla,"
             " the method `fetch_records` won't do anything. If you want to fetch the records"
             " from Argilla, make sure you're using an `_ArgillaFeedbackDataset`, either by"
             " calling `FeedbackDataset.from_argilla` or by keeping the returned value from"

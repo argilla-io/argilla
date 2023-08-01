@@ -211,7 +211,8 @@ class FeedbackRecord(BaseModel):
         self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
     ) -> None:
         warnings.warn(
-            "`set_suggestions` method will be deprecated in future releases and," " `update` will be used instead.",
+            "`set_suggestions` is deprected in favor of `update` and will be removed in a future"
+            " release. Please use `update` instead.",
             DeprecationWarning,
         )
         self.update(suggestions=suggestions)
@@ -229,6 +230,7 @@ class _ArgillaFeedbackRecord(FeedbackRecord):
     def update(
         self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
     ) -> None:
+        super().update(suggestions)
         for suggestion in self.suggestions:
             suggestion.question_id = self.name2id[suggestion.question_name]
             datasets_api_v1.set_suggestion(
@@ -238,7 +240,11 @@ class _ArgillaFeedbackRecord(FeedbackRecord):
     def set_suggestions(
         self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
     ) -> None:
-        super().set_suggestions(suggestions)
+        warnings.warn(
+            "`set_suggestions` is deprected in favor of `update` and will be removed in a future"
+            " release. Please use `update` instead.",
+            DeprecationWarning,
+        )
         self.update(suggestions=suggestions)
 
     class Config:
