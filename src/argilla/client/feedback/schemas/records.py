@@ -223,7 +223,7 @@ class FeedbackRecord(BaseModel):
         exclude = {"_unified_responses"}
 
 
-class _ArgillaFeedbackRecord(FeedbackRecord):
+class RemoteFeedbackRecord(FeedbackRecord):
     client: httpx.Client
     name2id: Dict[str, UUID]
 

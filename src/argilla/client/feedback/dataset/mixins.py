@@ -20,7 +20,7 @@ from tqdm import trange
 
 from argilla.client.api import ArgillaSingleton
 from argilla.client.feedback.constants import PUSHING_BATCH_SIZE
-from argilla.client.feedback.dataset.remote import _ArgillaFeedbackDataset
+from argilla.client.feedback.dataset.remote import RemoteFeedbackDataset
 from argilla.client.feedback.schemas import (
     LabelQuestion,
     MultiLabelQuestion,
@@ -50,7 +50,7 @@ class ArgillaToFromMixin:
         name: Optional[str] = None,
         workspace: Optional[Union[str, Workspace]] = None,
         show_progress: bool = False,
-    ) -> _ArgillaFeedbackDataset:
+    ) -> RemoteFeedbackDataset:
         """Pushes the `FeedbackDataset` to Argilla. If the dataset has been previously pushed to Argilla, it will be updated
         with the new records.
 
@@ -64,7 +64,7 @@ class ArgillaToFromMixin:
             show_progress: the option to choose to show/hide tqdm progress bar while looping over records.
 
         Returns:
-            The `FeedbackDataset` pushed to Argilla, which is now an instance of `_ArgillaFeedbackDataset`.
+            The `FeedbackDataset` pushed to Argilla, which is now an instance of `RemoteFeedbackDataset`.
         """
         client: "ArgillaClient" = ArgillaSingleton.get()
         httpx_client: "httpx.Client" = client.http_client.httpx
@@ -177,7 +177,7 @@ class ArgillaToFromMixin:
                     f"Failed while adding the records to the `FeedbackDataset` in Argilla with exception: {e}"
                 ) from e
 
-        self.__class__ = _ArgillaFeedbackDataset
+        self.__class__ = RemoteFeedbackDataset
         self.__init__(
             client=httpx_client,
             id=argilla_id,
@@ -197,7 +197,7 @@ class ArgillaToFromMixin:
         workspace: Optional[str] = None,
         id: Optional[str] = None,
         with_records: bool = True,  # TODO(alvarobartt): deprecate `with_records`
-    ) -> _ArgillaFeedbackDataset:
+    ) -> RemoteFeedbackDataset:
         """Retrieves an existing `FeedbackDataset` from Argilla (must have been pushed in advance).
 
         Note that even though no argument is mandatory, you must provide either the `name`,
@@ -211,7 +211,7 @@ class ArgillaToFromMixin:
             with_records: whether to retrieve the records of the `FeedbackDataset` from Argilla. Defaults to `True`.
 
         Returns:
-            The `_ArgillaFeedbackDataset` retrieved from Argilla.
+            The `RemoteFeedbackDataset` retrieved from Argilla.
 
         Raises:
             ValueError: if no `FeedbackDataset` with the provided `name` and `workspace` exists in Argilla.
@@ -227,7 +227,7 @@ class ArgillaToFromMixin:
                 "`with_records` will no longer be used to retrieve the records of a"
                 " `FeedbackDataset` from Argilla, as by default no records will be"
                 " fetched from Argilla. To retrieve the records you will need to explicitly"
-                " fetch those via `fetch_records` from the returned `_ArgillaFeedbackDataset`."
+                " fetch those via `fetch_records` from the returned `RemoteFeedbackDataset`."
             )
         httpx_client: "httpx.Client" = ArgillaSingleton.get().http_client.httpx
 
@@ -285,7 +285,7 @@ class ArgillaToFromMixin:
                 )
             questions.append(question)
 
-        return _ArgillaFeedbackDataset(
+        return RemoteFeedbackDataset(
             client=httpx_client,
             id=existing_dataset.id,
             name=existing_dataset.name,

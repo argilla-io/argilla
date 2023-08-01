@@ -19,7 +19,7 @@ from tqdm import trange
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE, PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
-from argilla.client.feedback.schemas.records import FeedbackRecord, _ArgillaFeedbackRecord
+from argilla.client.feedback.schemas.records import FeedbackRecord, RemoteFeedbackRecord
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 
 if TYPE_CHECKING:
@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 warnings.simplefilter("always", DeprecationWarning)
 
 
-class _ArgillaFeedbackRecords:
+class RemoteFeedbackRecords:
     def __init__(self, client: "httpx.Client", id: "UUID", questions: List["AllowedQuestionTypes"]) -> None:
         self.client = client
         self.id = id
@@ -52,7 +52,7 @@ class _ArgillaFeedbackRecords:
             " fly."
         )
 
-    def __parse_record(self, record: "FeedbackItemModel") -> _ArgillaFeedbackRecord:
+    def __parse_record(self, record: "FeedbackItemModel") -> RemoteFeedbackRecord:
         record = record.dict(
             exclude={
                 "inserted_at": ...,
@@ -64,7 +64,7 @@ class _ArgillaFeedbackRecords:
         )
         for suggestion in record.get("suggestions", []):
             suggestion.update({"question_name": self.__question_id2name[suggestion["question_id"]]})
-        return _ArgillaFeedbackRecord(client=self.client, name2id=self.__question_name2id, **record)
+        return RemoteFeedbackRecord(client=self.client, name2id=self.__question_name2id, **record)
 
     def __len__(self) -> int:
         try:
@@ -75,7 +75,7 @@ class _ArgillaFeedbackRecords:
             ) from e
         return response.parsed.records.count
 
-    def __getitem__(self, key: Union[slice, int]) -> Union[_ArgillaFeedbackRecord, List[_ArgillaFeedbackRecord]]:
+    def __getitem__(self, key: Union[slice, int]) -> Union[RemoteFeedbackRecord, List[RemoteFeedbackRecord]]:
         offsets = []
         limit = None
         if isinstance(key, slice):
@@ -115,7 +115,7 @@ class _ArgillaFeedbackRecords:
                 records.extend([self.__parse_record(record) for record in fetched_records.items])
         return records[0] if isinstance(key, int) else records
 
-    def __iter__(self) -> Iterator[_ArgillaFeedbackRecord]:
+    def __iter__(self) -> Iterator[RemoteFeedbackRecord]:
         current_batch = 0
         while True:
             batch = datasets_api_v1.get_records(
@@ -154,7 +154,7 @@ class _ArgillaFeedbackRecords:
             )
 
 
-class _ArgillaFeedbackDataset(FeedbackDatasetBase):
+class RemoteFeedbackDataset(FeedbackDatasetBase):
     def __init__(
         self,
         *,
@@ -173,7 +173,7 @@ class _ArgillaFeedbackDataset(FeedbackDatasetBase):
         self._name = name
         self._workspace = workspace
 
-        self.records: _ArgillaFeedbackRecords = _ArgillaFeedbackRecords(
+        self.records: RemoteFeedbackRecords = RemoteFeedbackRecords(
             client=self.client, id=self.id, questions=self.questions
         )
 
@@ -204,10 +204,10 @@ class _ArgillaFeedbackDataset(FeedbackDatasetBase):
     def __len__(self) -> int:
         return self.records.__len__()
 
-    def __iter__(self) -> Iterator[_ArgillaFeedbackRecord]:
+    def __iter__(self) -> Iterator[RemoteFeedbackRecord]:
         return self.records.__iter__()
 
-    def __getitem__(self, key: Union[slice, int]) -> Union[_ArgillaFeedbackRecord, List[_ArgillaFeedbackRecord]]:
+    def __getitem__(self, key: Union[slice, int]) -> Union[RemoteFeedbackRecord, List[RemoteFeedbackRecord]]:
         return self.records.__getitem__(key)
 
     def fetch_records(self) -> None:

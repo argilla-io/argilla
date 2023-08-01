@@ -71,7 +71,7 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
         warnings.warn(
             "As the current `FeedbackDataset` is stored locally and not pushed to Argilla,"
             " the method `fetch_records` won't do anything. If you want to fetch the records"
-            " from Argilla, make sure you're using an `_ArgillaFeedbackDataset`, either by"
+            " from Argilla, make sure you're using an `RemoteFeedbackDataset`, either by"
             " calling `FeedbackDataset.from_argilla` or by keeping the returned value from"
             " `FeedbackDataset.push_to_argilla`.",
             DeprecationWarning,
@@ -82,7 +82,7 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
         warnings.warn(
             "As the current `FeedbackDataset` is stored locally, `argilla_id` won't"
             " return anything as it's not pushed to Argilla. If you want to get the id"
-            " of a dataset in Argilla, make sure you're using an `_ArgillaFeedbackDataset`,"
+            " of a dataset in Argilla, make sure you're using an `RemoteFeedbackDataset`,"
             " either by calling `FeedbackDataset.from_argilla` or by keeping the returned"
             " value from `FeedbackDataset.push_to_argilla`.",
         )
