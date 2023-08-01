@@ -56,7 +56,7 @@ export default {
       datasetId: this.dataset.id,
       datasetName: this.dataset.name,
       workspace: this.dataset.workspace,
-      datasetDeleteTitle: `Delete <strong>${this.dataset.name}</strong>`,
+      datasetDeleteTitle: `<strong>${this.dataset.name}</strong>`,
       modalTitle: `Delete confirmation`,
       modalDescription: `You are about to delete: <strong>${this.dataset.name}</strong> from workspace <strong>${this.dataset.workspace}</strong>. This action cannot be undone`,
     };

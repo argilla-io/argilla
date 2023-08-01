@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Danger zone</h1>
+    <h1>Delete dataset</h1>
     <DatasetDeleteFeedbackTaskComponent :dataset="settings.dataset" />
   </div>
 </template>
