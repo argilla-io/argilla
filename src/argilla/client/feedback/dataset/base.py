@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import logging
+import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
 from pydantic import ValidationError
@@ -321,7 +322,16 @@ class FeedbackDatasetBase(HuggingFaceDatasetMixin):
         test_size: Optional[float] = None,
         seed: Optional[int] = None,
         lang: Optional[str] = None,
+        fetch_records: Optional[bool] = None,
     ):
+        if fetch_records is not None:
+            warnings.warn(
+                "`fetch_records` is deprecated and will be removed in a future version."
+                " `records` will be fetched automatically from Argilla, if the dataset"
+                " is not in Argilla, then the local records will be used instead.",
+                DeprecationWarning,
+            )
+
         if isinstance(framework, str):
             framework = Framework(framework)
 
@@ -343,8 +353,8 @@ class FeedbackDatasetBase(HuggingFaceDatasetMixin):
 
         if len(self.records) < 1:
             raise ValueError(
-                "No records found in the dataset. Either fetch them from Argilla or"
-                " add those via `FeedbackDataset.add_records`."
+                "No records found in the dataset. Make sure you add records to the"
+                " dataset via the `FeedbackDataset.add_records` method first."
             )
 
         if isinstance(task_mapping, TrainingTaskMappingForTextClassification):
@@ -352,7 +362,7 @@ class FeedbackDatasetBase(HuggingFaceDatasetMixin):
         else:
             raise ValueError(f"Training data {type(task_mapping)} is not supported yet")
 
-        data = task_mapping._format_data(self.records)
+        data = task_mapping._format_data([record for record in self.records])
         if framework in [
             Framework.TRANSFORMERS,
             Framework.SETFIT,
