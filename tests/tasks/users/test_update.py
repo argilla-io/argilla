@@ -55,7 +55,7 @@ def test_update_with_missing_username(cli_runner: CliRunner, cli: Typer):
 
 
 @pytest.mark.parametrize("role_string", ["owner", "admin", "annotator"])
-def test_update_with_same_user_role(cli_runner: CliRunner, cli: Typer, role_string):
+def test_update_with_same_user_role(cli_runner: CliRunner, cli: Typer, role_string: str):
     username = "username"
     UserSyncFactory.create(username=username, role=UserRole(role_string))
 

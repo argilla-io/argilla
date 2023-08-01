@@ -38,7 +38,7 @@ from argilla.utils.telemetry import TelemetryClient
 from fastapi.testclient import TestClient
 from opensearchpy import OpenSearch
 from sqlalchemy import create_engine
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from tests.database import SyncTestSession, TestSession, set_task
 from tests.factories import (
@@ -54,7 +54,7 @@ if TYPE_CHECKING:
 
     from pytest_mock import MockerFixture
     from sqlalchemy import Connection
-    from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession
+    from sqlalchemy.ext.asyncio import AsyncConnection
     from sqlalchemy.orm import Session
 
 
@@ -120,6 +120,25 @@ def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
     session.close()
     SyncTestSession.remove()
     sync_connection.rollback()
+
+
+@pytest.fixture
+def async_db_proxy(mocker: "MockerFixture", sync_db: "Session") -> "AsyncSession":
+    """Create a mocked `AsyncSession` that proxies to the sync session. This will allow us to execute the async CLI commands
+    and then in the unit test function use the sync session to assert the changes.
+
+    Args:
+        mocker: pytest-mock fixture.
+        sync_db: Sync session.
+
+    Returns:
+        Mocked `AsyncSession` that proxies to the sync session.
+    """
+    async_session = AsyncSession()
+    async_session.sync_session = sync_db
+    async_session._proxied = sync_db
+    async_session.close = mocker.AsyncMock()
+    return async_session
 
 
 @pytest.fixture(scope="function")

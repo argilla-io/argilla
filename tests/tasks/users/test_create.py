@@ -20,7 +20,7 @@ from argilla.server.models import User, UserRole, Workspace
 from click.testing import CliRunner
 from typer import Typer
 
-from tests.factories import UserFactory, WorkspaceFactory
+from tests.factories import UserSyncFactory, WorkspaceSyncFactory
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
@@ -140,7 +140,7 @@ def test_create_with_invalid_username(sync_db: "Session", cli_runner: CliRunner,
 
 
 def test_create_with_existing_username(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    UserFactory.create(username="username")
+    UserSyncFactory.create(username="username")
 
     result = cli_runner.invoke(
         cli, "users create --first-name first-name --username username --role owner --password 12345678"
@@ -193,7 +193,7 @@ def test_create_with_invalid_api_key(sync_db: "Session", cli_runner: CliRunner, 
 
 
 def test_create_with_existing_api_key(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    UserFactory.create(api_key="abcdefgh")
+    UserSyncFactory.create(api_key="abcdefgh")
 
     result = cli_runner.invoke(
         cli,
@@ -223,8 +223,8 @@ def test_create_with_multiple_workspaces(sync_db: "Session", cli_runner: CliRunn
 
 
 def test_create_with_existent_workspaces(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    WorkspaceFactory.create(name="workspace-a")
-    WorkspaceFactory.create(name="workspace-b")
+    WorkspaceSyncFactory.create(name="workspace-a")
+    WorkspaceSyncFactory.create(name="workspace-b")
 
     result = cli_runner.invoke(
         cli,

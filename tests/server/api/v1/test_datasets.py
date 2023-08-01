@@ -1919,7 +1919,9 @@ async def test_create_dataset_question_with_nonexistent_dataset_id(
         {"type": "rating", "options": [{"value": value} for value in range(0, RATING_OPTIONS_MIN_ITEMS - 1)]},
         {"type": "rating", "options": [{"value": value} for value in range(0, RATING_OPTIONS_MAX_ITEMS + 1)]},
         {"type": "rating", "options": "invalid"},
-        {"type": "rating", "options": [{"value": 0}, {"value": 1}, {"value": 1}]},
+        {"type": "rating", "options": [{"value": 1}, {"value": 1}]},
+        {"type": "rating", "options": [{"value": 1}, {"value": 2}, {"value": 13}]},
+        {"type": "rating", "options": [{"value": 1}, {"value": 2}, {"value": -13}]},
         {"type": "label_selection", "options": []},
         {"type": "label_selection", "options": [{"value": "just_one_label", "text": "Just one label"}]},
         {

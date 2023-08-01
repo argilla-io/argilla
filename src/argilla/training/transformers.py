@@ -19,11 +19,7 @@ from datasets import DatasetDict
 
 from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.base import ArgillaTrainerSkeleton
-from argilla.training.utils import (
-    _apply_column_mapping,
-    filter_allowed_args,
-    get_default_args,
-)
+from argilla.training.utils import _apply_column_mapping, filter_allowed_args, get_default_args
 from argilla.utils.dependency import require_version
 
 
