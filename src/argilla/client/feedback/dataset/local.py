@@ -77,6 +77,16 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
             DeprecationWarning,
         )
 
+    @property
+    def argilla_id(self) -> None:
+        warnings.warn(
+            "As the current `FeedbackDataset` is stored locally, `argilla_id` won't"
+            " return anything as it's not pushed to Argilla. If you want to get the id"
+            " of a dataset in Argilla, make sure you're using an `_ArgillaFeedbackDataset`,"
+            " either by calling `FeedbackDataset.from_argilla` or by keeping the returned"
+            " value from `FeedbackDataset.push_to_argilla`.",
+        )
+
     def add_records(
         self,
         records: Union["FeedbackRecord", Dict[str, Any], List[Union["FeedbackRecord", Dict[str, Any]]]],

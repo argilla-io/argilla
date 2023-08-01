@@ -177,6 +177,15 @@ class _ArgillaFeedbackDataset(FeedbackDatasetBase):
         )
 
     @property
+    def argilla_id(self) -> str:
+        warnings.warn(
+            "`argilla_id` is deprected in favor of `id` and will be removed in a future"
+            " release. Please use `id` instead.",
+            DeprecationWarning,
+        )
+        return self.id
+
+    @property
     def id(self) -> "UUID":
         return self._id
 
