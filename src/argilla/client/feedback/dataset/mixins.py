@@ -51,15 +51,13 @@ class ArgillaToFromMixin:
         workspace: Optional[Union[str, Workspace]] = None,
         show_progress: bool = False,
     ) -> RemoteFeedbackDataset:
-        """Pushes the `FeedbackDataset` to Argilla. If the dataset has been previously pushed to Argilla, it will be updated
-        with the new records.
+        """Pushes the `FeedbackDataset` to Argilla.
 
         Note that you may need to `rg.init(...)` with your Argilla credentials before calling this function, otherwise
         the default http://localhost:6900 will be used, which will fail if Argilla is not deployed locally.
 
         Args:
-            name: the name of the dataset to push to Argilla. If not provided, the `argilla_id` will be used if the dataset
-                has been previously pushed to Argilla.
+            name: the name of the dataset to push to Argilla.
             workspace: the workspace where to push the dataset to. If not provided, the active workspace will be used.
             show_progress: the option to choose to show/hide tqdm progress bar while looping over records.
 
@@ -205,17 +203,17 @@ class ArgillaToFromMixin:
 
         Args:
             name: the name of the `FeedbackDataset` to retrieve from Argilla. Defaults to `None`.
-            workspace: the workspace of the `FeedbackDataset` to retrieve from Argilla. If not provided, the active
-                workspace will be used.
+            workspace: the workspace of the `FeedbackDataset` to retrieve from Argilla.
+                If not provided, the active workspace will be used.
             id: the ID of the `FeedbackDataset` to retrieve from Argilla. Defaults to `None`.
-            with_records: whether to retrieve the records of the `FeedbackDataset` from Argilla. Defaults to `True`.
+            with_records: whether to retrieve the records of the `FeedbackDataset` from
+                Argilla. Defaults to `None`.
 
         Returns:
             The `RemoteFeedbackDataset` retrieved from Argilla.
 
         Raises:
-            ValueError: if no `FeedbackDataset` with the provided `name` and `workspace` exists in Argilla.
-            ValueError: if no `FeedbackDataset` with the provided `id` exists in Argilla.
+            ValueError: if no `FeedbackDataset` with the provided `name`, `workspace`, or `id` exists in Argilla.
 
         Examples:
             >>> import argilla as rg
@@ -230,6 +228,7 @@ class ArgillaToFromMixin:
                 " fetch those via `fetch_records` from the returned `RemoteFeedbackDataset`.",
                 DeprecationWarning,
             )
+
         httpx_client: "httpx.Client" = ArgillaSingleton.get().http_client.httpx
 
         existing_dataset = feedback_dataset_in_argilla(name=name, workspace=workspace, id=id)
