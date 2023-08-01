@@ -45,15 +45,6 @@ _TASK_TO_ENDPOINT = {
 }
 
 
-def build_param_dict(id_from: Optional[str], limit: Optional[int]) -> Optional[Dict[str, Union[str, int]]]:
-    params = {}
-    if id_from:
-        params["id_from"] = id_from
-    if limit:
-        params["limit"] = limit
-    return params
-
-
 def bulk(
     client: AuthenticatedClient,
     name: str,
@@ -65,41 +56,7 @@ def bulk(
     return BulkResponse.parse_obj(response)
 
 
-def build_bulk_response(response: httpx.Response, name: str, body: Any) -> Response[BulkResponse]:
-    if 200 <= response.status_code < 400:
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=BulkResponse(**response.json()),
-        )
-
-    return handle_response_error(response, name=name, body=body)
-
-
 T = TypeVar("T")
-
-
-def build_data_response(response: httpx.Response, data_type: Type[T]) -> Response[List[T]]:
-    if 200 <= response.status_code < 400:
-        parsed_responses = []
-        for r in response.iter_lines():
-            parsed_record = json.loads(r)
-            try:
-                parsed_response = data_type(**parsed_record)
-            except Exception as err:  # noqa: F841
-                raise GenericApiError(**parsed_record) from None
-            parsed_responses.append(parsed_response)
-        return Response(
-            status_code=response.status_code,
-            content=b"",
-            headers=response.headers,
-            parsed=parsed_responses,
-        )
-
-    content = next(response.iter_lines())
-    data = json.loads(content)
-    return handle_response_error(response, **data, parse_response=False)
 
 
 def build_list_response(
