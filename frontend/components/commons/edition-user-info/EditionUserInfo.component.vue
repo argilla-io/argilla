@@ -4,7 +4,7 @@
       <span v-circle="{ size: 'MEDIUM' }">
         {{ userInfo.username.slice(0, 2) }}
       </span>
-      <div class="bubble capitalized" v-text="userInfo.role" />
+      <div class="badge --capitalized" v-text="userInfo.role" />
     </div>
 
     <div class="form-group user-first_name">
@@ -31,7 +31,7 @@
       <h2 class="--heading5 --semibold description__title">Workspaces</h2>
       <div class="workspaces" v-if="userInfo.workspaces.length">
         <div
-          class="bubble clickable"
+          class="badge clickable"
           v-for="workspace in userInfo.workspaces"
           v-text="workspace"
           @click="goToWorkspace(workspace)"
@@ -74,18 +74,6 @@ export default {
   width: 90%;
 }
 
-.bubble {
-  width: fit-content;
-  border: 1px solid rgba(0, 0, 0, 0.37);
-  border-radius: 10px;
-  color: rgba(0, 0, 0, 0.6);
-  font-size: 12px;
-  font-size: 0.75rem;
-  line-height: 12px;
-  line-height: 0.75rem;
-  padding: 4px;
-}
-
 .circle-and-role {
   display: flex;
   align-items: center;
@@ -106,10 +94,6 @@ export default {
 
 .user-username {
   @include font-size(16px);
-}
-
-.capitalized {
-  text-transform: capitalize;
 }
 
 .clickable {

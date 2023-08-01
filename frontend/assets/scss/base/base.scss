@@ -296,3 +296,21 @@ a {
 .code pre code.python.hljs.language-python {
   white-space: break-spaces;
 }
+
+.--capitalized {
+  text-transform: capitalize;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  width: fit-content;
+  font-size: 12px;
+  font-size: 0.75rem;
+  line-height: 12px;
+  line-height: 0.75rem;
+  padding: 1em;
+  border: 1px solid rgba(0, 0, 0, 0.37);
+  border-radius: 50px;
+}

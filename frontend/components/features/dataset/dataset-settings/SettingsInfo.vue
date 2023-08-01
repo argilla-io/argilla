@@ -5,7 +5,7 @@
       <div class="settings__row">
         <div class="item">
           <p class="dataset-name" v-html="settings.dataset.name" />
-          <p class="dataset-task" v-html="settings.dataset.task" />
+          <p class="badge" v-html="settings.dataset.task" />
         </div>
         <base-action-tooltip tooltip="Copied">
           <base-button

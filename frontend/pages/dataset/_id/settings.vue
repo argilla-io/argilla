@@ -80,10 +80,12 @@ export default {
     padding: 0 4em;
     height: calc(100vh - $topbarHeight);
   }
+
   &__header.top-content {
     height: auto;
     padding: 2em 0;
   }
+
   &__tabs {
     & ~ #{$this}__header {
       border: 1px solid red;
@@ -91,6 +93,9 @@ export default {
 
     &-content {
       margin-top: $base-space * 3;
+      position: relative;
+      overflow: auto;
+      height: calc(80% - $topbarHeight);
     }
   }
 }

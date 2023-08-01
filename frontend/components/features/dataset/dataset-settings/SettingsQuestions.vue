@@ -10,10 +10,10 @@
           >
             <div class="settings-questions__edition-form-name">
               <h4
-                class="--heading6 --semibold capitalize"
+                class="--heading6 --semibold --capitalized"
                 v-text="question.name"
               />
-              <p class="question-type" v-html="question.type" />
+              <p class="badge --capitalized" v-html="question.type" />
             </div>
             <div class="settings-questions__edition-form-group">
               <label for="question.id">Title</label>
@@ -59,10 +59,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.capitalize {
-  text-transform: capitalize;
-}
-
 .settings-questions {
   &__container {
     display: flex;
@@ -87,17 +83,8 @@ export default {
     &-name {
       display: flex;
       flex-direction: row;
+      align-items: center;
       gap: $base-space * 2;
-
-      & p {
-        display: flex;
-        align-items: center;
-        height: 24px;
-        width: fit-content;
-        padding: 1em;
-        border: 1px solid rgba(0, 0, 0, 0.54);
-        border-radius: 50px;
-      }
     }
 
     &-group {
