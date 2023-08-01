@@ -196,7 +196,7 @@ class ArgillaToFromMixin:
         *,
         workspace: Optional[str] = None,
         id: Optional[str] = None,
-        with_records: bool = True,  # TODO(alvarobartt): deprecate `with_records`
+        with_records: Optional[bool] = None,  # TODO(alvarobartt): deprecate `with_records`
     ) -> RemoteFeedbackDataset:
         """Retrieves an existing `FeedbackDataset` from Argilla (must have been pushed in advance).
 
@@ -222,12 +222,13 @@ class ArgillaToFromMixin:
             >>> rg.init(...)
             >>> dataset = rg.FeedbackDataset.from_argilla(name="my_dataset")
         """
-        if with_records:
+        if with_records is not None:
             warnings.warn(
                 "`with_records` will no longer be used to retrieve the records of a"
                 " `FeedbackDataset` from Argilla, as by default no records will be"
                 " fetched from Argilla. To retrieve the records you will need to explicitly"
-                " fetch those via `fetch_records` from the returned `RemoteFeedbackDataset`."
+                " fetch those via `fetch_records` from the returned `RemoteFeedbackDataset`.",
+                DeprecationWarning,
             )
         httpx_client: "httpx.Client" = ArgillaSingleton.get().http_client.httpx
 
