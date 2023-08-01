@@ -35,7 +35,9 @@ from argilla.server.models import (
     Workspace,
 )
 from argilla.server.schemas.v1.datasets import (
-    DATASET_GUIDELINES_MAX_LENGTH, DATASET_NAME_MAX_LENGTH, FIELD_CREATE_NAME_MAX_LENGTH,
+    DATASET_GUIDELINES_MAX_LENGTH,
+    DATASET_NAME_MAX_LENGTH,
+    FIELD_CREATE_NAME_MAX_LENGTH,
     FIELD_CREATE_TITLE_MAX_LENGTH,
     QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
     QUESTION_CREATE_NAME_MAX_LENGTH,
@@ -1247,7 +1249,6 @@ class TestSuiteDatasets:
             {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},
         ],
     )
-
     async def test_create_dataset_with_invalid_settings(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, dataset_json: dict
     ):
@@ -3208,7 +3209,6 @@ class TestSuiteDatasets:
         assert response.status_code == 404
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
-
     @pytest.mark.parametrize(
         "payload",
         [
@@ -3244,7 +3244,6 @@ class TestSuiteDatasets:
             "updated_at": dataset.updated_at.isoformat(),
         }
 
-
     @pytest.mark.parametrize(
         "dataset_json",
         [
@@ -3266,10 +3265,11 @@ class TestSuiteDatasets:
             name="Current Name", guidelines="Current Guidelines", status=DatasetStatus.ready
         )
 
-        response = await async_client.patch(f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header, json=dataset_json)
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header, json=dataset_json
+        )
 
         assert response.status_code == 422
-
 
     @pytest.mark.asyncio
     async def test_update_dataset_with_invalid_payload(self, async_client: "AsyncClient", owner_auth_header: dict):
@@ -3282,7 +3282,6 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 422
-
 
     @pytest.mark.asyncio
     async def test_update_dataset_with_none_values(self, async_client: "AsyncClient", owner_auth_header: dict):
@@ -3305,7 +3304,6 @@ class TestSuiteDatasets:
             "updated_at": dataset.updated_at.isoformat(),
         }
 
-
     @pytest.mark.asyncio
     async def test_update_dataset_non_existent(self, async_client: "AsyncClient", owner_auth_header: dict):
         response = await async_client.patch(
@@ -3315,7 +3313,6 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 404
-
 
     @pytest.mark.asyncio
     async def test_update_dataset_as_admin_from_different_workspace(self, async_client: "AsyncClient"):
@@ -3330,7 +3327,6 @@ class TestSuiteDatasets:
 
         assert response.status_code == 403
 
-
     @pytest.mark.asyncio
     async def test_update_dataset_as_annotator(self, async_client: "AsyncClient"):
         dataset = await DatasetFactory.create()
@@ -3344,7 +3340,6 @@ class TestSuiteDatasets:
 
         assert response.status_code == 403
 
-
     @pytest.mark.asyncio
     async def test_update_dataset_without_authentication(self, async_client: "AsyncClient"):
         dataset = await DatasetFactory.create()
@@ -3355,7 +3350,6 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 401
-
 
     async def test_delete_dataset(
         self,
