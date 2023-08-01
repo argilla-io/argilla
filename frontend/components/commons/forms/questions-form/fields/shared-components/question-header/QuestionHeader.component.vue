@@ -5,7 +5,8 @@
       v-text="question.title"
       v-optional-field="!question.isRequired"
       v-prefix-star="{
-        show: showPrefixStar,
+        enabled: showSuggestion,
+        show: matchSuggestion,
         tooltip: 'This question contains a suggestion',
       }"
     />
@@ -13,13 +14,17 @@
       class="icon-info"
       v-if="showIcon"
       icon="info"
-      :id="`${question.title}QuestionHeader`"
+      :id="`${question.id}QuestionHeader`"
       :show-badge="false"
       iconColor="#acacac"
       badge-vertical-position="top"
       badge-horizontal-position="right"
       badge-border-color="white"
-      v-tooltip="{ content: question.description, backgroundColor: '#FFF' }"
+      v-tooltip="{
+        content: tooltipMessage,
+        open: openTooltip,
+        backgroundColor: '#FFF',
+      }"
     />
   </div>
 </template>
@@ -40,7 +45,10 @@ export default {
   },
   data() {
     return {
-      showPrefixStar: this.showSuggestion && this.question.matchSuggestion,
+      matchSuggestion: this.question.matchSuggestion,
+      tooltipMessage: this.question.description,
+      openTooltip: false,
+      timer: null,
     };
   },
   computed: {
@@ -50,8 +58,16 @@ export default {
   },
   watch: {
     "question.matchSuggestion"() {
-      this.showPrefixStar =
-        this.showSuggestion && this.question.matchSuggestion;
+      this.matchSuggestion = this.question.matchSuggestion;
+    },
+    "question.description"() {
+      if (this.timer) clearTimeout(this.timer);
+      this.openTooltip = true;
+      this.tooltipMessage = this.question.description;
+
+      this.timer = setTimeout(() => {
+        this.openTooltip = false;
+      }, 2000);
     },
   },
 };

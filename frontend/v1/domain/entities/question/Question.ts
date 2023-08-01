@@ -17,9 +17,9 @@ export class Question {
   constructor(
     public readonly id: string,
     public readonly name: string,
-    public readonly description: string,
+    public description: string,
     public readonly datasetId: string,
-    public readonly title: string,
+    public title: string,
     public readonly isRequired: boolean,
     public readonly settings: any
   ) {

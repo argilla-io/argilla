@@ -70,6 +70,7 @@ Vue.directive("tooltip", {
 
       // NOTE - add the tooltip to the element and add event listenner to the close icon
       element.appendChild(tooltip);
+      element.textWrapper = textWrapper;
       closeIcon = document.getElementById(tooltipCloseIconId);
     }
 
@@ -84,11 +85,13 @@ Vue.directive("tooltip", {
         width
       );
     };
+
     element.clickOnClose = (event) => {
       // NOTE - stop propagation to not fire element.clickOnTooltipElement()
-      event.stopPropagation();
+      event?.stopPropagation();
       tooltip.style.display = "none";
     };
+
     element.clickOutsideEvent = function (event) {
       // NOTE - here we check if the click event is outside the element or it's children
       if (!(element == event.target || element.contains(event.target))) {
@@ -121,6 +124,15 @@ Vue.directive("tooltip", {
   unbind: (element) => {
     destroyEventsListener(element);
   },
+  update(element, binding) {
+    element.textWrapper.innerText = binding?.value.content;
+
+    if (binding?.value.open) {
+      element.clickOnTooltipElementEvent();
+    } else {
+      element.clickOnClose();
+    }
+  },
 });
 const isScrollable = function (element) {
   const hasScrollableContent = element.scrollHeight > element.clientHeight;
@@ -147,11 +159,8 @@ const getElementOrParent = function (element) {
 const initEventsListener = (element, closeIcon) => {
   if (element && closeIcon) {
     closeIcon.addEventListener("click", element.clickOnClose);
-    closeIcon.addEventListener("touchstart", element.clickOnClose);
     element.addEventListener("click", element.clickOnTooltipElementEvent);
-    element.addEventListener("touchstart", element.clickOnTooltipElementEvent);
     document.body.addEventListener("click", element.clickOutsideEvent);
-    document.body.addEventListener("touchstart", element.clickOutsideEvent);
     getScrollableParent(element).addEventListener(
       "scroll",
       element.scrollInParent
