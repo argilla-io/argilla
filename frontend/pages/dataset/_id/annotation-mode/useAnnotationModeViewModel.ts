@@ -1,16 +1,7 @@
-import {
-  computed,
-  onBeforeMount,
-  ref,
-  useRoute,
-  useRouter,
-} from "@nuxtjs/composition-api";
+import { computed, onBeforeMount, useRouter } from "@nuxtjs/composition-api";
 import { useResolve } from "ts-injecty";
-import { createBreadcrumbs } from "../breadcrumbs";
 import { useDatasetViewModel } from "../useDatasetViewModel";
-import { Notification } from "@/models/Notifications";
 import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use-case";
-import { DATASET_API_ERRORS } from "@/v1/infrastructure/repositories/DatasetRepository";
 import { useDataset } from "@/v1/infrastructure/storage/DatasetStorage";
 import {
   useEvents,
