@@ -350,7 +350,7 @@ class Argilla:
             batch_size = chunk_size
 
         if batch_size > self._MAX_BATCH_SIZE:
-            _LOGGER.warning(
+            warnings.warn(
                 "The requested batch size is noticeably large, timeout errors may occur. "
                 f"Consider a batch size smaller than {self._MAX_BATCH_SIZE}",
             )

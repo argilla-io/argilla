@@ -12,7 +12,7 @@
         class="draggable__rank-card--unranked"
         :title="text"
       >
-        <svgicon width="7" name="draggable" />
+        <svgicon width="6" name="draggable" />
         <span class="draggable__rank-card__title" v-text="text" />
       </div>
     </draggable>
@@ -20,6 +20,7 @@
     <div class="draggable__slots-container">
       <div
         class="draggable__slot"
+        :class="{ '--active-slot': items.length }"
         v-for="{ index, rank, items } in ranking.slots"
         :key="index"
       >
@@ -38,7 +39,7 @@
             class="draggable__rank-card--ranked"
             :title="text"
           >
-            <svgicon width="7" name="draggable" />
+            <svgicon width="6" name="draggable" />
             <span class="draggable__rank-card__title" v-text="text" />
           </div>
         </draggable>
@@ -82,12 +83,13 @@ $max-visible-card-items: 12;
   flex-direction: row-reverse;
   gap: $base-space;
   &__questions-container {
-    width: 40%;
-    min-width: 0;
-    max-height: ($card-height + $base-space) * $max-visible-card-items;
     display: flex;
     flex-direction: column;
     gap: $cards-separation;
+    width: 40%;
+    min-width: 0;
+    max-height: ($card-height + $base-space) * $max-visible-card-items;
+    padding: 2px;
     overflow: auto;
   }
 
@@ -105,7 +107,7 @@ $max-visible-card-items: 12;
     flex-direction: row;
     align-items: stretch;
     justify-items: center;
-    gap: calc($base-space / 2);
+    gap: $base-space;
   }
 
   &__rank-card {
@@ -175,12 +177,15 @@ $max-visible-card-items: 12;
     }
     &--ranking {
       @extend .draggable__slot-box;
-      max-width: $base-space * 5;
+      max-width: $slot-height;
       align-items: center;
       justify-content: space-around;
       border-color: $black-10;
       font-weight: bold;
       color: $black-54;
+      .--active-slot & {
+        border-color: #cdcdff;
+      }
     }
   }
 

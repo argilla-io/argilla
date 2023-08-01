@@ -1,6 +1,9 @@
 import { Page } from "@playwright/test";
 import { DatasetData, mockFeedbackTaskDataset } from "./dataset-api-mock";
-import { mockQuestion } from "./question-api-mock";
+import {
+  mockQuestion,
+  mockQuestionLongAndShortQuestions,
+} from "./question-api-mock";
 import { mockFields } from "./field-api-mock";
 
 export const recordOne = {
@@ -73,6 +76,7 @@ export const recordOne = {
   inserted_at: "2023-07-18T07:43:38",
   updated_at: "2023-07-18T07:43:38",
 };
+
 export const mockRecord = async (
   page: Page,
   { datasetId, workspaceId }: DatasetData
@@ -80,6 +84,30 @@ export const mockRecord = async (
   await mockFeedbackTaskDataset(page, { datasetId, workspaceId });
 
   await mockQuestion(page, datasetId);
+
+  await mockFields(page, datasetId);
+
+  await page.route(
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing`,
+    async (route) => {
+      await route.fulfill({
+        json: {
+          items: [recordOne],
+        },
+      });
+    }
+  );
+
+  return recordOne;
+};
+
+export const mockRecordForLongAndShortQuestion = async (
+  page: Page,
+  { datasetId, workspaceId }: DatasetData
+) => {
+  await mockFeedbackTaskDataset(page, { datasetId, workspaceId });
+
+  await mockQuestionLongAndShortQuestions(page, datasetId);
 
   await mockFields(page, datasetId);
 
