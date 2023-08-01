@@ -27,7 +27,7 @@ from argilla.feedback import (
 
 
 @pytest.fixture
-def rating_question_payload():
+def rating_question_payload() -> dict:
     return {
         "name": "label",
         "description": "label",
@@ -37,7 +37,7 @@ def rating_question_payload():
 
 
 @pytest.fixture
-def label_question_payload():
+def label_question_payload() -> dict:
     return {
         "name": "label",
         "description": "label",
@@ -47,7 +47,7 @@ def label_question_payload():
 
 
 @pytest.fixture
-def ranking_question_payload():
+def ranking_question_payload() -> dict:
     return {
         "name": "label",
         "description": "label",
