@@ -94,17 +94,13 @@ export default {
 
       this.keyCode += event.key;
 
-      if (this.onUnrankFor(event.key, questionToMove)) {
+      if (this.onUnRankFor(event.key, questionToMove)) {
         this.focusOnFirstQuestion();
         this.keyCode = "";
         return;
       }
 
-      if (
-        isNaN(event.keyCode) ||
-        this.keyCode.length > 2 ||
-        this.keyCode > 12
-      ) {
+      if (isNaN(this.keyCode)) {
         this.keyCode = "";
         return;
       }
@@ -132,7 +128,7 @@ export default {
         }, 300);
       }
     },
-    onUnrankFor(aKeyCode, aQuestion) {
+    onUnRankFor(aKeyCode, aQuestion) {
       const isRanked = !isNil(aQuestion.rank);
 
       if (aKeyCode == "Backspace" && isRanked) {

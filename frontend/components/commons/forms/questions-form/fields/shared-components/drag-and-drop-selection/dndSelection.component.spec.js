@@ -1,7 +1,10 @@
 import { shallowMount } from "@vue/test-utils";
 import DndSelectionComponent from "./DndSelection.component";
 import { adaptQuestionsToSlots } from "../../ranking/ranking-adapter";
-import { settingsFake } from "../../ranking/ranking-fakes";
+import {
+  settingsFake,
+  settingsFakeWith12Elements,
+} from "../../ranking/ranking-fakes";
 
 let wrapper = null;
 const options = {
@@ -75,9 +78,8 @@ describe("rankWithKeyboard should", () => {
     });
 
     component.vm.rankWithKeyboard(eventFor("1"), questionOne);
-    await component.vm.$nextTick(() => {
-      expect(component.vm.ranking.slots[0].items[0]).toBe(questionOne);
-    });
+
+    expect(component.vm.ranking.slots[0].items[0]).toBe(questionOne);
   });
 
   it("prevent duplicate question if user try to move twice the same question", () => {
@@ -96,23 +98,7 @@ describe("rankWithKeyboard should", () => {
     expect(component.vm.ranking.questions.length).toBe(3);
   });
 
-  it("prevent duplicate question if user try to move twice the same question", () => {
-    const ranking = adaptQuestionsToSlots(settingsFake);
-    const questionOne = ranking.questions[0];
-    const component = shallowMount(DndSelectionComponent, {
-      ...options,
-      propsData: { ranking },
-    });
-    component.vm.rankWithKeyboard(eventFor("1"), questionOne);
-
-    component.vm.rankWithKeyboard(eventFor("1"), questionOne);
-
-    expect(component.vm.ranking.slots[0].items[0]).toBe(questionOne);
-    expect(component.vm.ranking.slots[0].items.length).toBe(1);
-    expect(component.vm.ranking.questions.length).toBe(3);
-  });
-
-  it("move a question from any slot to other one", () => {
+  it("move a question from any slot to other one", async () => {
     const ranking = adaptQuestionsToSlots(settingsFake);
     const questionOne = ranking.questions[0];
     const component = shallowMount(DndSelectionComponent, {
@@ -121,11 +107,33 @@ describe("rankWithKeyboard should", () => {
     });
     component.vm.rankWithKeyboard(eventFor("2"), questionOne);
 
+    await new Promise((res) => {
+      setTimeout(() => {
+        res();
+      }, 400);
+    });
+
     component.vm.rankWithKeyboard(eventFor("1"), questionOne);
 
     expect(component.vm.ranking.slots[0].items[0]).toBe(questionOne);
     expect(component.vm.ranking.slots[0].items.length).toBe(1);
     expect(component.vm.ranking.questions.length).toBe(3);
     expect(component.vm.ranking.slots[1].items.length).toBe(0);
+  });
+
+  it("move a question to slot number 11", async () => {
+    const ranking = adaptQuestionsToSlots(settingsFakeWith12Elements);
+    const questionOne = ranking.questions[0];
+    const component = shallowMount(DndSelectionComponent, {
+      ...options,
+      propsData: { ranking },
+    });
+
+    component.vm.rankWithKeyboard(eventFor("1"), questionOne);
+    component.vm.rankWithKeyboard(eventFor("1"), questionOne);
+
+    expect(component.vm.ranking.slots[10].items.length).toBe(1);
+    expect(component.vm.ranking.slots[10].items[0]).toBe(questionOne);
+    expect(component.vm.ranking.questions.length).toBe(11);
   });
 });
