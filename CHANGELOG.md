@@ -19,8 +19,9 @@ These are the section headers that we use:
 ### Added
 
 - Added `get_metrics` function in the SDK to get `FeedbackDataset` metrics calling `GET /api/v1/me/{dataset_id}/metrics` endpoint ([#3469](https://github.com/argilla-io/argilla/pull/3469))
-- Added `PATCH /api/v1/fields/{field_id}` endpoint to update the field title and markdown settings (See [#3421](https://github.com/argilla-io/argilla/pull/3421)).
-- Added `PATCH /api/v1/datasets/{dataset_id}` endpoint to update dataset name and guidelines (See [#3402](https://github.com/argilla-io/argilla/pull/3402)).
+- Added `PATCH /api/v1/fields/{field_id}` endpoint to update the field title and markdown settings ([#3421](https://github.com/argilla-io/argilla/pull/3421)).
+- Added `PATCH /api/v1/datasets/{dataset_id}` endpoint to update dataset name and guidelines ([#3402](https://github.com/argilla-io/argilla/pull/3402)).
+- Added `PATCH /api/v1/questions/{question_id}` endpoint to update question title, description and some settings (depending on the type of question) ([#3477](https://github.com/argilla-io/argilla/pull/3477)).
 
 ### Changed
 
@@ -30,6 +31,8 @@ These are the section headers that we use:
 - Update CLI to use database async connection ([#3450](https://github.com/argilla-io/argilla/pull/3450)).
 - Update alembic code to apply migrations to use database async engine ([#3450](https://github.com/argilla-io/argilla/pull/3450)).
 - Limit rating questions values to the positive range [1, 10] (Closes [#3451](https://github.com/argilla-io/argilla/issues/3451)).
+- Updated `POST /api/users` endpoint to be able to provide a list of workspace names to which the user should be linked to ([#3462](https://github.com/argilla-io/argilla/pull/3462)).
+- Updated Python client `User.create` method to be able to provide a list of workspace names to which the user should be linked to ([#3462](https://github.com/argilla-io/argilla/pull/3462)).
 
 ## [1.13.3](https://github.com/argilla-io/argilla/compare/v1.13.2...v1.13.3)
 

@@ -81,7 +81,7 @@ export default {
 .label-text {
   outline: none;
   background: palette(purple, 800);
-  border-radius: 50em;
+  border-radius: $border-radius-rounded;
   height: 40px;
   line-height: 40px;
   padding-left: 16px;
