@@ -27,9 +27,7 @@ from argilla.client.feedback.schemas import (
     TextField,
     TextQuestion,
 )
-from argilla.client.feedback.training.schemas import (
-    TrainingTaskMapping,
-)
+from argilla.client.feedback.training.schemas import TrainingTaskMapping
 from argilla.client.models import Framework
 
 if TYPE_CHECKING:
@@ -129,7 +127,7 @@ def test_init_wrong_questions(
             fields=feedback_dataset_fields,
             questions=[
                 TextQuestion(name="question-1", required=False),
-                RatingQuestion(name="question-2", values=[0, 1], required=False),
+                RatingQuestion(name="question-2", values=[1, 2], required=False),
             ],
         )
     with pytest.raises(ValueError, match="Expected `questions` to have unique names"):
@@ -405,7 +403,7 @@ async def test_push_to_argilla_and_from_argilla(
                         "user_id": argilla_user.id,
                         "values": {
                             "question-1": {"value": "answer"},
-                            "question-2": {"value": 0},
+                            "question-2": {"value": 1},
                             "question-3": {"value": "a"},
                             "question-4": {"value": ["a", "b"]},
                             "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
@@ -435,7 +433,7 @@ async def test_push_to_argilla_and_from_argilla(
                     {
                         "values": {
                             "question-1": {"value": "answer"},
-                            "question-2": {"value": 0},
+                            "question-2": {"value": 1},
                             "question-3": {"value": "a"},
                             "question-4": {"value": ["a", "b"]},
                             "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
@@ -445,7 +443,7 @@ async def test_push_to_argilla_and_from_argilla(
                     {
                         "values": {
                             "question-1": {"value": "answer"},
-                            "question-2": {"value": 0},
+                            "question-2": {"value": 1},
                             "question-3": {"value": "a"},
                             "question-4": {"value": ["a", "b"]},
                             "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},

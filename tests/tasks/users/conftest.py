@@ -18,13 +18,12 @@ import pytest
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
-    from sqlalchemy.orm import Session
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.fixture(autouse=True)
-def mock_session_local(mocker: "MockerFixture", sync_db: "Session") -> None:
-    sync_db.close = mocker.MagicMock()
-    mocker.patch("argilla.tasks.users.create.SessionLocal", return_value=sync_db)
-    mocker.patch("argilla.tasks.users.update.SessionLocal", return_value=sync_db)
-    mocker.patch("argilla.tasks.users.create_default.SessionLocal", return_value=sync_db)
-    mocker.patch("argilla.tasks.users.migrate.SessionLocal", return_value=sync_db)
+def mock_session_local(mocker: "MockerFixture", async_db_proxy: "AsyncSession") -> None:
+    mocker.patch("argilla.tasks.users.create.AsyncSessionLocal", return_value=async_db_proxy)
+    mocker.patch("argilla.tasks.users.update.AsyncSessionLocal", return_value=async_db_proxy)
+    mocker.patch("argilla.tasks.users.create_default.AsyncSessionLocal", return_value=async_db_proxy)
+    mocker.patch("argilla.tasks.users.migrate.AsyncSessionLocal", return_value=async_db_proxy)

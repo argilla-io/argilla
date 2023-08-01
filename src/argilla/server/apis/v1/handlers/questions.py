@@ -29,10 +29,7 @@ router = APIRouter(tags=["questions"])
 
 @router.delete("/questions/{question_id}", response_model=Question)
 async def delete_question(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    question_id: UUID,
-    current_user: User = Security(auth.get_current_user),
+    *, db: AsyncSession = Depends(get_async_db), question_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
     question = await datasets.get_question_by_id(db, question_id)
 

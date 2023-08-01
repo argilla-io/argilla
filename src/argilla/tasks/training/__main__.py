@@ -45,7 +45,6 @@ def train(
 ):
     import json
 
-    import argilla as rg
     from argilla.client.api import init
     from argilla.training import ArgillaTrainer
 

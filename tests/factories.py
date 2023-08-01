@@ -155,6 +155,13 @@ class WorkspaceFactory(BaseFactory):
     name = factory.Sequence(lambda n: f"workspace-{n}")
 
 
+class WorkspaceSyncFactory(BaseSyncFactory):
+    class Meta:
+        model = Workspace
+
+    name = factory.Sequence(lambda n: f"workspace-{n}")
+
+
 class UserFactory(BaseFactory):
     class Meta:
         model = User

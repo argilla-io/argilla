@@ -29,10 +29,7 @@ router = APIRouter(tags=["fields"])
 
 @router.delete("/fields/{field_id}", response_model=Field)
 async def delete_field(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    field_id: UUID,
-    current_user: User = Security(auth.get_current_user),
+    *, db: AsyncSession = Depends(get_async_db), field_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
     field = await datasets.get_field_by_id(db, field_id)
 
