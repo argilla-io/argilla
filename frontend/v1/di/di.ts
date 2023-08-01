@@ -2,6 +2,8 @@ import { Context } from "@nuxt/types";
 import Container, { register } from "ts-injecty";
 
 import { useEventDispatcher } from "@codescouts/events";
+import { GetDatasetSettingsUseCase } from "../domain/usecases/get-dataset-settings-use-case";
+import { useDatasetSetting } from "../infrastructure/storage/DatasetSettingStorage";
 import {
   DatasetRepository,
   RecordRepository,
@@ -65,6 +67,15 @@ export const loadDependencyContainer = (context: Context) => {
 
     register(GetUserMetricsUseCase)
       .withDependencies(MetricsRepository, useMetrics)
+      .build(),
+
+    register(GetDatasetSettingsUseCase)
+      .withDependencies(
+        DatasetRepository,
+        QuestionRepository,
+        FieldRepository,
+        useDatasetSetting
+      )
       .build(),
   ];
 

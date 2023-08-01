@@ -2,12 +2,12 @@
   <div class="record">
     <StatusTag class="record__status" :title="recordStatus" />
     <div
-      v-for="{ id, name, content, isTextType, settings } in fields"
+      v-for="{ id, title, content, isTextType, settings } in fields"
       :key="id"
     >
       <TextFieldComponent
         v-if="isTextType"
-        :title="name"
+        :title="title"
         :fieldText="content"
         :useMarkdown="settings.use_markdown"
       />

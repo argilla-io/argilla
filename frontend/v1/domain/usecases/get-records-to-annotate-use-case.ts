@@ -1,5 +1,3 @@
-import { Field } from "../entities/Field";
-import { Question } from "../entities/question/Question";
 import { Record } from "../entities/record/Record";
 import { Suggestion } from "../entities/question/Suggestion";
 import { IRecordStorage } from "../services/IRecordStorage";
@@ -36,36 +34,18 @@ export class GetRecordsToAnnotateUseCase {
     const getQuestions = this.questionRepository.getQuestions(datasetId);
     const getFields = this.fieldRepository.getFields(datasetId);
 
-    const [recordsFromBackend, questionsFromBackend, fieldsFromBackend] =
-      await Promise.all([getRecords, getQuestions, getFields]);
+    const [recordsFromBackend, questions, fields] = await Promise.all([
+      getRecords,
+      getQuestions,
+      getFields,
+    ]);
 
     const recordsToAnnotate = recordsFromBackend.records.map(
       (record, index) => {
-        const fields = Object.keys(record.fields).map((fieldName) => {
-          const field = fieldsFromBackend.find(
-            (field) => field.name === fieldName
-          );
+        Object.keys(record.fields).forEach((fieldName) => {
+          const field = fields.find((field) => field.name === fieldName);
 
-          return new Field(
-            field.id,
-            field.title,
-            record.fields[fieldName],
-            datasetId,
-            field.required,
-            field.settings
-          );
-        });
-
-        const questions = questionsFromBackend.map((question) => {
-          return new Question(
-            question.id,
-            question.name,
-            question.description,
-            datasetId,
-            question.title,
-            question.required,
-            question.settings
-          );
+          field.addContent(record.fields[fieldName]);
         });
 
         const userAnswer = record.responses[0];
