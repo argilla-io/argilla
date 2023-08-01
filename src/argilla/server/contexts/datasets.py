@@ -223,11 +223,6 @@ async def delete_record(db: "AsyncSession", record: Record) -> Record:
     return record
 
 
-async def bulk_delete_records(db: "AsyncSession", dataset: Dataset, records_ids: List[UUID]):
-    await db.execute(delete(Record).where(Record.id.in_(records_ids), Record.dataset_id == dataset.id))
-    await db.commit()
-
-
 async def get_records_by_ids(
     db: "AsyncSession",
     dataset_id: UUID,
