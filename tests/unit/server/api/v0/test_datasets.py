@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
@@ -27,6 +27,9 @@ from tests.factories import (
     UserFactory,
     WorkspaceFactory,
 )
+
+if TYPE_CHECKING:
+    from httpx import AsyncClient
 
 
 @pytest.mark.asyncio

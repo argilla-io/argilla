@@ -15,7 +15,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.client.api import delete
 from argilla.server.commons.models import TaskType
 from argilla.server.models import User
 
@@ -25,7 +24,7 @@ if TYPE_CHECKING:
 
 async def create_dataset(client: "AsyncClient", name: str, workspace_name: str):
     response = await client.post(
-        "/api/datasets", json={"name": name, "workspace": workspace_name, f"task": TaskType.token_classification}
+        "/api/datasets", json={"name": name, "workspace": workspace_name, "task": TaskType.token_classification}
     )
     assert response.status_code == 200
 

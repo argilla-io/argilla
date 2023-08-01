@@ -3353,10 +3353,10 @@ class TestSuiteDatasets:
         await TextQuestionFactory.create(dataset=dataset)
 
         other_dataset = await DatasetFactory.create()
-        other_field = await TextFieldFactory.create(dataset=other_dataset)
-        other_question = await TextQuestionFactory.create(dataset=other_dataset)
+        await TextFieldFactory.create(dataset=other_dataset)
+        await TextQuestionFactory.create(dataset=other_dataset)
         other_record = await RecordFactory.create(dataset=other_dataset)
-        other_response = await ResponseFactory.create(record=other_record, user=owner)
+        await ResponseFactory.create(record=other_record, user=owner)
 
         response = await async_client.delete(f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header)
 
@@ -3384,10 +3384,10 @@ class TestSuiteDatasets:
         await ResponseFactory.create(record=record, user=owner)
 
         other_dataset = await DatasetFactory.create()
-        other_field = await TextFieldFactory.create(dataset=other_dataset)
-        other_question = await TextQuestionFactory.create(dataset=other_dataset)
+        await TextFieldFactory.create(dataset=other_dataset)
+        await TextQuestionFactory.create(dataset=other_dataset)
         other_record = await RecordFactory.create(dataset=other_dataset)
-        other_response = await ResponseFactory.create(record=other_record, user=owner)
+        await ResponseFactory.create(record=other_record, user=owner)
 
         response = await async_client.delete(f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header)
 

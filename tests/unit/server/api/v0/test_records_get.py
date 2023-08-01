@@ -28,7 +28,6 @@ from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationRecord,
 )
 from argilla.server.commons.models import TaskType
-from argilla.server.models import User
 from httpx import AsyncClient
 
 from tests.factories import WorkspaceFactory

@@ -35,7 +35,7 @@ async def create_dataset(async_client: "AsyncClient", workspace_name: str, task:
     assert response.status_code == 200
 
     response = await async_client.post(
-        f"/api/datasets",
+        "/api/datasets",
         json={"name": dataset_name, "task": task, "workspace": workspace_name},
     )
     assert response.status_code == 200

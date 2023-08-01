@@ -14,7 +14,7 @@
 import asyncio
 import contextlib
 import tempfile
-from typing import AsyncGenerator, Dict, Generator
+from typing import TYPE_CHECKING, AsyncGenerator, Dict, Generator
 
 import pytest
 import pytest_asyncio
@@ -38,6 +38,12 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from tests.database import TestSession, set_task
 from tests.factories import AnnotatorFactory, OwnerFactory, UserFactory
+
+if TYPE_CHECKING:
+    from unittest.mock import MagicMock
+
+    from pytest_mock import MockerFixture
+    from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession
 
 
 @pytest.fixture(scope="session")
@@ -98,7 +104,7 @@ def owner_auth_header(owner: User) -> Dict[str, str]:
 async def connection() -> AsyncGenerator["AsyncConnection", None]:
     set_task(asyncio.current_task())
     # Create a temp directory to store a SQLite database used for testing
-    with tempfile.TemporaryDirectory() as tmpdir:
+    with tempfile.TemporaryDirectory():
         database_url = settings.database_url
         engine = create_async_engine(database_url, poolclass=NullPool)
         conn = await engine.connect()
