@@ -758,10 +758,10 @@ def test_load_with_sort(api: Argilla):
         api.load(name=dataset, sort=[("event_timestamp", "ascc")])
 
     ds = api.load(name=dataset, sort=[("event_timestamp", "asc")])
-    assert all([(ds[idx].event_timestamp <= ds[idx + 1].event_timestamp) for idx in range(len(ds) - 1)])
+    assert all((ds[idx].event_timestamp <= ds[idx + 1].event_timestamp) for idx in range(len(ds) - 1))
 
     ds = api.load(name=dataset, sort=[("event_timestamp", "desc")])
-    assert all([(ds[idx].event_timestamp >= ds[idx + 1].event_timestamp) for idx in range(len(ds) - 1)])
+    assert all((ds[idx].event_timestamp >= ds[idx + 1].event_timestamp) for idx in range(len(ds) - 1))
 
 
 def test_load_as_pandas(api: Argilla):

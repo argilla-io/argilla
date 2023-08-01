@@ -14,9 +14,7 @@
 #  limitations under the License.
 import logging
 from datetime import datetime
-from typing import Any, Dict, List
 
-import argilla as rg
 import pytest
 from argilla._constants import DEFAULT_API_KEY
 from argilla.client.models import (

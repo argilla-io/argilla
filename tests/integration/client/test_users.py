@@ -22,10 +22,10 @@ from argilla.client.sdk.v1.workspaces.models import WorkspaceModel as WorkspaceM
 from argilla.client.sdk.workspaces.models import WorkspaceModel as WorkspaceModelV0
 from argilla.client.users import User
 
+from tests.factories import UserFactory, WorkspaceFactory
+
 if TYPE_CHECKING:
     from argilla.server.models import User as ServerUser
-
-from tests.factories import UserFactory, WorkspaceFactory
 
 
 def test_user_cls_init() -> None:

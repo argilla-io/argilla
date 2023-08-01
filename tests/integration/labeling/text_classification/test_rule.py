@@ -296,33 +296,33 @@ def test_copy_dataset_with_rules(mocked_client: SecuredClient, argilla_user: Use
     [
         (
             Rule(query="neg*", label="LALA"),
-            dict(
-                coverage=0.5,
-                annotated_coverage=0.5,
-                correct=0,
-                incorrect=1,
-                precision=0.0,
-            ),
+            {
+                "coverage": 0.5,
+                "annotated_coverage": 0.5,
+                "correct": 0,
+                "incorrect": 1,
+                "precision": 0.0,
+            },
         ),
         (
             Rule(query="neg*", label="negative"),
-            dict(
-                coverage=0.5,
-                annotated_coverage=0.5,
-                correct=1,
-                incorrect=0,
-                precision=1.0,
-            ),
+            {
+                "coverage": 0.5,
+                "annotated_coverage": 0.5,
+                "correct": 1,
+                "incorrect": 0,
+                "precision": 1.0,
+            },
         ),
         (
             Rule(query="bad", label="negative"),
-            dict(
-                coverage=0.0,
-                annotated_coverage=0.0,
-                correct=0,
-                incorrect=0,
-                precision=None,
-            ),
+            {
+                "coverage": 0.0,
+                "annotated_coverage": 0.0,
+                "correct": 0,
+                "incorrect": 0,
+                "precision": None,
+            },
         ),
     ],
 )
@@ -343,33 +343,33 @@ def test_rule_metrics(mocked_client, log_dataset, rule, expected_metrics):
     [
         (
             Rule(query="neg*", label="LALA"),
-            dict(
-                coverage=0.5,
-                annotated_coverage=None,
-                correct=None,
-                incorrect=None,
-                precision=None,
-            ),
+            {
+                "coverage": 0.5,
+                "annotated_coverage": None,
+                "correct": None,
+                "incorrect": None,
+                "precision": None,
+            },
         ),
         (
             Rule(query="neg*", label="negative"),
-            dict(
-                coverage=0.5,
-                annotated_coverage=None,
-                correct=None,
-                incorrect=None,
-                precision=None,
-            ),
+            {
+                "coverage": 0.5,
+                "annotated_coverage": None,
+                "correct": None,
+                "incorrect": None,
+                "precision": None,
+            },
         ),
         (
             Rule(query="bad", label="negative"),
-            dict(
-                coverage=0.0,
-                annotated_coverage=None,
-                correct=None,
-                incorrect=None,
-                precision=None,
-            ),
+            {
+                "coverage": 0.0,
+                "annotated_coverage": None,
+                "correct": None,
+                "incorrect": None,
+                "precision": None,
+            },
         ),
     ],
 )

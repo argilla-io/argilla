@@ -35,6 +35,8 @@ if TYPE_CHECKING:
     from argilla.server.models import User as ServerUser
     from sqlalchemy.ext.asyncio import AsyncSession
 
+    from tests.integration.helpers import SecuredClient
+
 
 def test_init(
     feedback_dataset_guidelines: str,

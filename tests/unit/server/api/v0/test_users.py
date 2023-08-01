@@ -18,7 +18,6 @@ from uuid import uuid4
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import User, UserRole
-from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import joinedload
 
@@ -104,7 +103,7 @@ async def test_list_users(async_client: "AsyncClient", owner_auth_header: dict):
     assert response.status_code == 200
 
     response_body = response.json()
-    assert list(map(lambda user: user["username"], response_body)) == ["owner", "username-a", "username-b"]
+    assert [user["username"] for user in response_body] == ["owner", "username-a", "username-b"]
 
 
 @pytest.mark.asyncio

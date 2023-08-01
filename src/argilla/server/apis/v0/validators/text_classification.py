@@ -54,7 +54,7 @@ class DatasetValidator:
             )
             if results:
                 labels = results.get("labels", [])
-                label_schema = set([label.name for label in settings.label_schema.labels])
+                label_schema = {label.name for label in settings.label_schema.labels}
                 for label in labels:
                     if label not in label_schema:
                         raise BadRequestError(
@@ -73,7 +73,7 @@ class DatasetValidator:
                 user=user, dataset=dataset, class_type=TextClassificationSettings
             )
             if settings and settings.label_schema:
-                label_schema = set([label.name for label in settings.label_schema.labels])
+                label_schema = {label.name for label in settings.label_schema.labels}
                 for r in records:
                     if r.prediction:
                         self.__check_label_classes__(

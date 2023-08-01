@@ -97,7 +97,7 @@ class UsersMigrator:
         return UserRole.annotator
 
     def _user_workspace_names(self, user: dict) -> List[str]:
-        workspace_names = [workspace_name for workspace_name in user.get("workspaces", [])]
+        workspace_names = list(user.get("workspaces", []))
 
         if user["username"] in workspace_names:
             return workspace_names

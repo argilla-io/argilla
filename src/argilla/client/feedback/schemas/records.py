@@ -179,7 +179,7 @@ class FeedbackRecord(BaseModel):
     @validator("suggestions", always=True)
     def normalize_suggestions(cls, values: Any) -> Tuple:
         if not isinstance(values, tuple):
-            return tuple([v for v in values])
+            return tuple(values)
         return values
 
     def set_suggestions(

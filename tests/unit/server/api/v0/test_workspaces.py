@@ -18,7 +18,6 @@ from uuid import UUID, uuid4
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import User, Workspace, WorkspaceUser
-from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 
 from tests.factories import (
@@ -30,6 +29,7 @@ from tests.factories import (
 )
 
 if TYPE_CHECKING:
+    from httpx import AsyncClient
     from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -43,7 +43,7 @@ async def test_list_workspaces(async_client: "AsyncClient", owner_auth_header):
     assert response.status_code == 200
 
     response_body = response.json()
-    assert list(map(lambda ws: ws["name"], response_body)) == ["workspace-a", "workspace-b"]
+    assert [ws["name"] for ws in response_body] == ["workspace-a", "workspace-b"]
 
 
 @pytest.mark.asyncio
@@ -191,7 +191,7 @@ async def test_list_workspace_users(async_client: "AsyncClient", db: "AsyncSessi
     assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 5
 
     response_body = response.json()
-    assert list(map(lambda u: u["username"], response_body)) == ["username-a", "username-b", "username-c"]
+    assert [u["username"] for u in response_body] == ["username-a", "username-b", "username-c"]
 
 
 @pytest.mark.asyncio
@@ -224,7 +224,7 @@ async def test_list_workspace_users_as_admin(async_client: "AsyncClient", db: "A
     assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 4
 
     response_body = response.json()
-    assert list(map(lambda u: u["username"], response_body)) == [
+    assert [u["username"] for u in response_body] == [
         admin.username,
         "username-a",
         "username-b",

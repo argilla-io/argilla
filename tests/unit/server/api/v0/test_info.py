@@ -32,6 +32,15 @@ async def test_api_status(async_client: "AsyncClient"):
     assert "elasticsearch" in output and isinstance(output["elasticsearch"], dict)
     assert "mem_info" in output and isinstance(output["mem_info"], dict)
 
+    info = ApiStatus.parse_obj(response.json())
+    assert info.version == version
+
+    # Checking to not get the error dictionary service.py includes whenever something goes wrong
+    assert "error" not in info.elasticsearch
+
+    # Checking that the first key into mem_info dictionary has a nont-none value
+    assert "rss" in info.mem_info is not None
+
 
 @pytest.mark.asyncio
 async def test_api_info(async_client: "AsyncClient"):
@@ -41,30 +50,5 @@ async def test_api_info(async_client: "AsyncClient"):
     output = response.json()
     assert output["version"] == str(version)
 
-
-@pytest.mark.asyncio
-async def test_api_info(async_client: "AsyncClient"):
-    response = await async_client.get("/api/_info")
-    assert response.status_code == 200
-
-    from argilla import __version__ as argilla_version
-
     info = ApiInfo.parse_obj(response.json())
-    assert info.version == argilla_version
-
-
-@pytest.mark.asyncio
-async def test_api_status(async_client: "AsyncClient"):
-    response = await async_client.get("/api/_status")
-    assert response.status_code == 200
-
-    from argilla import __version__ as argilla_version
-
-    info = ApiStatus.parse_obj(response.json())
-    assert info.version == argilla_version
-
-    # Checking to not get the error dictionary service.py includes whenever something goes wrong
-    assert "error" not in info.elasticsearch
-
-    # Checking that the first key into mem_info dictionary has a nont-none value
-    assert "rss" in info.mem_info is not None
+    assert info.version == version

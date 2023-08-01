@@ -35,8 +35,8 @@ class FlairMonitor(BaseMonitor):
         self,
         data: List[Tuple[Sentence, Dict[str, Any]]],
     ) -> Dict[str, Any]:
-        return dict(
-            records=[
+        return {
+            "records": [
                 TokenClassificationRecord(
                     text=sentence.to_original_text(),
                     tokens=[token.text for token in sentence.tokens],
@@ -57,9 +57,9 @@ class FlairMonitor(BaseMonitor):
                 )
                 for sentence, meta in data
             ],
-            name=self.dataset,
-            tags={**(self.tags or {}), "flair_version": _flair_version},
-        )
+            "name": self.dataset,
+            "tags": {**(self.tags or {}), "flair_version": _flair_version},
+        }
 
     def predict(self, sentences: Union[List[Sentence], Sentence], *args, **kwargs):
         metadata = kwargs.pop("metadata", None)

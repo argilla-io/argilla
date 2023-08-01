@@ -810,7 +810,7 @@ class TestWeakMultiLabels:
         # dtype than `weak_multi_labels.summary()` returns.
         assert_frame_equal(weak_multi_labels.summary(), expected_summary, check_dtype=False)
 
-        expected_show_records = pd.DataFrame(map(lambda x: x.dict(), weak_multi_labels.records()))
+        expected_show_records = pd.DataFrame((x.dict() for x in weak_multi_labels.records()))
         assert_frame_equal(weak_multi_labels.show_records(rules=["rule_1"]), expected_show_records)
 
         weak_multi_labels.extend_matrix([1.0, 1.0, 1.0])

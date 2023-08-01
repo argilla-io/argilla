@@ -29,6 +29,8 @@ if TYPE_CHECKING:
     from argilla.server.models import User
     from sqlalchemy.ext.asyncio import AsyncSession
 
+    from tests.integration.helpers import SecuredClient
+
 
 @pytest.mark.parametrize(
     ("settings_", "wrong_settings"),

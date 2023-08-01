@@ -73,7 +73,7 @@ class CachedJsonRequest(Request):
         if body is not None:
 
             async def cached_receive() -> Message:
-                return dict(type="http.request", body=body)
+                return {"type": "http.request", "body": body}
 
             return cached_receive
         return self._receive
@@ -99,13 +99,13 @@ class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
         self._endpoint = api_endpoint
         self._dataset = dataset
         self._records_mapper = records_mapper
-        self._monitor_cfg = dict(
-            dataset=dataset,
-            sample_rate=sample_rate,
-            log_interval=log_interval,
-            agent=agent,
-            tags=tags,
-        )
+        self._monitor_cfg = {
+            "dataset": dataset,
+            "sample_rate": sample_rate,
+            "log_interval": log_interval,
+            "agent": agent,
+            "tags": tags,
+        }
         self._monitor: Optional[BaseMonitor] = None
 
     def init(self):
@@ -171,7 +171,7 @@ class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
             new_response = StreamingResponse(
                 content=(chunk for chunk in [body]),
                 status_code=response.status_code,
-                headers={k: v for k, v in response.headers.items()},
+                headers=dict(response.headers.items()),
                 media_type=response.media_type,
                 background=response.background,
             )
@@ -195,8 +195,8 @@ class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
             if self._monitor.agent is not None and not record.prediction_agent:
                 record.prediction_agent = self._monitor.agent
 
-        return dict(
-            records=records or [],
-            name=self._dataset,
-            tags=tags,
-        )
+        return {
+            "records": records or [],
+            "name": self._dataset,
+            "tags": tags,
+        }

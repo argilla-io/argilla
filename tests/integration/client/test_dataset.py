@@ -13,7 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import copy
-import logging
 import os
 import sys
 from time import sleep
@@ -114,7 +113,7 @@ class TestDatasetBase:
         with pytest.raises(ValueError, match="datasets.DatasetDict` are not supported"):
             DatasetBase._prepare_dataset_and_column_mapping(ds_dict, None)
 
-        col_mapping = dict(id="ID", inputs=["inputs_a", "inputs_b"], metadata="metadata")
+        col_mapping = {"id": "ID", "inputs": ["inputs_a", "inputs_b"], "metadata": "metadata"}
 
         with pytest.warns(
             UserWarning,
@@ -384,7 +383,7 @@ class TestDatasetForTextClassification:
         assert len(docs) == 2
 
         if records[0].multi_label:
-            assert set(list(docs[0].cats.keys())) == set(["a", "b"])
+            assert set(docs[0].cats.keys()) == {"a", "b"}
         else:
             assert isinstance(docs[0].cats, dict)
 
@@ -724,7 +723,7 @@ class TestDatasetForTokenClassification:
             r.annotation = [(label, start, end) for label, start, end, _ in r.prediction]
 
         train = rb_dataset.prepare_for_training()
-        assert (set(train.column_names)) == set(["id", "tokens", "ner_tags"])
+        assert (set(train.column_names)) == {"id", "tokens", "ner_tags"}
 
         assert isinstance(train, datasets.DatasetD.Dataset) or isinstance(train, datasets.Dataset)
         assert "ner_tags" in train.column_names
@@ -887,7 +886,7 @@ class TestDatasetForText2Text:
         train = ds.prepare_for_training(train_size=1, seed=42)
 
         assert isinstance(train, datasets.Dataset)
-        assert set(train.column_names) == set(["id", "text", "target"])
+        assert set(train.column_names) == {"id", "text", "target"}
         assert len(train) == 10
         assert train[1]["text"] == "mock"
         assert train[1]["target"] == "mock"
@@ -898,7 +897,7 @@ class TestDatasetForText2Text:
         assert len(train_test["train"]) == 5
         assert len(train_test["test"]) == 5
         for split in ["train", "test"]:
-            assert set(train_test[split].column_names) == set(["id", "text", "target"])
+            assert set(train_test[split].column_names) == {"id", "text", "target"}
 
     def test_prepare_for_training_with_spacy(self):
         ds = DatasetForText2Text([Text2TextRecord(text="mock", annotation="mock"), Text2TextRecord(text="mock")] * 10)

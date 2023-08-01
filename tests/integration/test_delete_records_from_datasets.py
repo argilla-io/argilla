@@ -31,7 +31,7 @@ def test_delete_records_from_dataset(argilla_user: "User"):
     delete(dataset)
     log(
         name=dataset,
-        records=[TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)],
+        records=[TextClassificationRecord(id=i, text="This is the text", metadata={"idx": i}) for i in range(0, 50)],
     )
 
     matched, processed = delete_records(name=dataset, ids=[10], discard_only=True)
@@ -59,7 +59,7 @@ async def test_delete_records_without_permission(owner: User, role: UserRole):
     client = Argilla(api_key=owner.api_key, workspace=workspace.name)
 
     client.delete(dataset)
-    records = [TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)]
+    records = [TextClassificationRecord(id=i, text="This is the text", metadata={"idx": i}) for i in range(0, 50)]
     client.log(name=dataset, records=records)
 
     user = await UserFactory.create(role=role, workspaces=[workspace])
@@ -86,7 +86,7 @@ def test_delete_records_with_unmatched_records(api):
     api.delete(dataset)
     api.log(
         name=dataset,
-        records=[TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)],
+        records=[TextClassificationRecord(id=i, text="This is the text", metadata={"idx": i}) for i in range(0, 50)],
     )
 
     matched, processed = api.delete_records(dataset, ids=["you-wont-find-me-here"])

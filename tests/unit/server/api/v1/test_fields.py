@@ -19,7 +19,6 @@ from uuid import uuid4
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import DatasetStatus, Field, UserRole
-from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 
 from tests.factories import (

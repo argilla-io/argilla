@@ -58,7 +58,7 @@ def test_migrate(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Ty
     assert user.role == UserRole.annotator
     assert user.api_key == "a8168929-8668-494c-b7a5-98cd35740d9b"
     assert user.password_hash == "$2y$05$l83IhUs4ZDaxsgZ/P12FO.RFTi2wKQ2AxMK2vYtLx//yKramuCcZG"
-    assert set([ws.name for ws in user.workspaces]) == {"daisy", "argilla", "team", "latam"}
+    assert {ws.name for ws in user.workspaces} == {"daisy", "argilla", "team", "latam"}
 
     user = sync_db.query(User).filter_by(username="macleod").first()
     assert user.first_name == ""

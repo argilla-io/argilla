@@ -201,13 +201,11 @@ def test_search_keywords(argilla_user: "User"):
     df = ds.to_pandas()
     assert not df.empty
     assert "search_keywords" in df.columns
-    top_keywords = set(
-        [
-            keyword
-            for keywords in df.search_keywords.value_counts(sort=True, ascending=False).index[:3].tolist()
-            for keyword in keywords
-        ]
-    )
+    top_keywords = {
+        keyword
+        for keywords in df.search_keywords.value_counts(sort=True, ascending=False).index[:3].tolist()
+        for keyword in keywords
+    }
     assert top_keywords == {"limits", "limited", "limit"}, top_keywords
 
 

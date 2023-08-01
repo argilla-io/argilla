@@ -299,7 +299,7 @@ class TextClassificationRecord(_Validators):
             )
 
         if values.get("inputs") is not None and not isinstance(values["inputs"], dict):
-            values["inputs"] = dict(text=values["inputs"])
+            values["inputs"] = {"text": values["inputs"]}
 
         if (values.get("text") is None and values.get("inputs") is None) or (
             values.get("text") is not None
@@ -309,7 +309,7 @@ class TextClassificationRecord(_Validators):
             raise ValueError("For a TextClassificationRecord you must provide either 'text' or 'inputs'")
 
         if values.get("text") is not None:
-            values["inputs"] = dict(text=values["text"])
+            values["inputs"] = {"text": values["text"]}
         elif len(values["inputs"]) == 1 and "text" in values["inputs"]:
             values["text"] = values["inputs"]["text"]
 

@@ -32,7 +32,7 @@ def test_scan_records(gutenberg_spacy_ner, fields):
     df = pd.DataFrame(data=data).set_index("id", drop=True)
     ds = load(gutenberg_spacy_ner)
     assert len(df) == len(ds)
-    assert set([c for c in df.columns]) == fields
+    assert set(df.columns) == fields
     print(df)
 
 

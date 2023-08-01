@@ -83,7 +83,7 @@ class DatasetsDAO:
 
         query = BaseDatasetsQuery(
             workspaces=workspaces,
-            tasks=[task for task in task2dataset_map] if task2dataset_map else None,
+            tasks=list(task2dataset_map) if task2dataset_map else None,
             name=name,
         )
 

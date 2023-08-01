@@ -207,19 +207,18 @@ class RankingQuestionStrategy(Enum):
 
     def _aggregate(self, records: List[FeedbackRecord], question: str):
         """
-        The function `_aggregate` takes a list of `FeedbackRecord` objects and a question, and
-        aggregates the responses for that question based on a specified aggregation method.
+        The function `_aggregate` takes a list of `FeedbackRecord` objects and a question, and aggregates the responses
+        for that question based on a specified aggregation method.
 
         Args:
-        - records The `records` parameter is a list of `FeedbackRecord` objects. Each
-        `FeedbackRecord` object represents a feedback record and contains information about the
-        responses given for a particular feedback.
-        - question The `question` parameter in the `_aggregate` method is a string that represents
-        the question for which the responses are being aggregated.
+            records: the `records` parameter is a list of `FeedbackRecord` objects. Each `FeedbackRecord` object
+                represents a feedback record and contains information about the responses given for a particular
+                feedback.
+            question: the `question` parameter in the `_aggregate` method is a string that represents the question for
+                which the responses are being aggregated.
 
         Returns:
-        the updated list of FeedbackRecord objects after aggregating the responses for the
-        specified question.
+            The updated list of FeedbackRecord objects after aggregating the responses for the specified question.
         """
         for rec in records:
             if not rec.responses:

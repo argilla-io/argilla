@@ -116,7 +116,7 @@ def configure_multilingual_stop_analyzer(settings: Dict[str, Any], supported_lan
         "de": "_german_",
     }
 
-    supported_langs = supported_langs or [lang for lang in lang2elastic_stop]
+    supported_langs = supported_langs or list(lang2elastic_stop)
 
     def get_value_with_defaults(data: dict, key: str, default):
         prop = data.get(key)

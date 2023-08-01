@@ -26,7 +26,7 @@ from argilla.utils.telemetry import get_telemetry_client
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
 if TYPE_CHECKING:
-    import spacy
+    from spacy.language import Language
 
 
 class ArgillaTrainer(object):
@@ -38,8 +38,8 @@ class ArgillaTrainer(object):
         self,
         name: str,
         framework: str,
-        workspace: str = None,
-        lang: Optional["spacy.Language"] = None,
+        workspace: Optional[str] = None,
+        lang: Optional["Language"] = None,
         model: Optional[str] = None,
         train_size: Optional[float] = None,
         seed: Optional[int] = None,

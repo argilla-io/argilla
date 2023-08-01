@@ -122,7 +122,7 @@ class SearchEngine:
         }
 
         index_name = self._index_name_for_dataset(dataset)
-        await self.client.indices.create(index=index_name, body=dict(settings=settings, mappings=mappings))
+        await self.client.indices.create(index=index_name, body={"settings": settings, "mappings": mappings})
 
     async def delete_index(self, dataset: Dataset):
         index_name = self._index_name_for_dataset(dataset)
@@ -292,13 +292,13 @@ class SearchEngine:
 
 
 async def get_search_engine() -> AsyncGenerator[SearchEngine, None]:
-    config = dict(
-        hosts=settings.elasticsearch,
-        verify_certs=settings.elasticsearch_ssl_verify,
-        ca_certs=settings.elasticsearch_ca_path,
-        retry_on_timeout=True,
-        max_retries=5,
-    )
+    config = {
+        "hosts": settings.elasticsearch,
+        "verify_certs": settings.elasticsearch_ssl_verify,
+        "ca_certs": settings.elasticsearch_ca_path,
+        "retry_on_timeout": True,
+        "max_retries": 5,
+    }
     search_engine = SearchEngine(
         config,
         es_number_of_shards=settings.es_records_index_shards,

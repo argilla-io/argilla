@@ -573,10 +573,10 @@ class WeakLabels(WeakLabelsBase):
 
         # polarity (label)
         polarity = [
-            set(
+            {
                 self._int2label[integer]
                 for integer in np.unique(self.matrix()[:, i][self.matrix()[:, i] != self._label2int[None]])
-            )
+            }
             for i in range(len(self._rules))
         ]
         polarity.append(set().union(*polarity))
@@ -703,7 +703,7 @@ class WeakLabels(WeakLabelsBase):
         # apply mask
         filtered_records = np.array(self._records)[idx_by_labels & idx_by_rules]
 
-        return pd.DataFrame(map(lambda x: x.dict(), filtered_records))
+        return pd.DataFrame((x.dict() for x in filtered_records))
 
     def change_mapping(self, label2int: Dict[str, int]):
         """Allows you to change the mapping between labels and integers.
@@ -819,7 +819,7 @@ class WeakMultiLabels(WeakLabelsBase):
 
         annotation_set = {ann for anns in annotations for ann in anns}
         weak_label_set = {wl for wl_record in weak_labels for wl_rule in wl_record for wl in wl_rule}
-        labels = sorted(list(annotation_set.union(weak_label_set) - {None}))
+        labels = sorted(annotation_set.union(weak_label_set) - {None})
 
         # create weak label matrix (3D), annotation matrix
         weak_label_matrix = np.empty((len(self._records), len(self._rules), len(labels)), dtype=np.byte)
@@ -935,16 +935,14 @@ class WeakMultiLabels(WeakLabelsBase):
 
         # polarity (label)
         polarity = [
-            set(
-                [
-                    self._labels[i]
-                    # get indices of votes
-                    for i in np.nonzero(
-                        # remove abstentions
-                        self.matrix()[:, m, :][self.matrix()[:, m, :].sum(1) >= 0]
-                    )[1]
-                ]
-            )
+            {
+                self._labels[i]
+                # get indices of votes
+                for i in np.nonzero(
+                    # remove abstentions
+                    self.matrix()[:, m, :][self.matrix()[:, m, :].sum(1) >= 0]
+                )[1]
+            }
             for m in range(len(self._rules))
         ]
         polarity.append(set().union(*polarity))
@@ -1050,7 +1048,7 @@ class WeakMultiLabels(WeakLabelsBase):
         # apply mask
         filtered_records = np.array(self._records)[idx_by_labels & idx_by_rules]
 
-        return pd.DataFrame(map(lambda x: x.dict(), filtered_records))
+        return pd.DataFrame((x.dict() for x in filtered_records))
 
     @_add_docstr(WeakLabelsBase.extend_matrix.__doc__.format(class_name="WeakMultiLabels"))
     def extend_matrix(

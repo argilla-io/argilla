@@ -173,13 +173,11 @@ def test_search_keywords(api: Argilla):
     df = df.to_pandas()
     assert not df.empty
     assert "search_keywords" in df.columns
-    top_keywords = set(
-        [
-            keyword
-            for keywords in df.search_keywords.value_counts(sort=True, ascending=False).index[:3].tolist()
-            for keyword in keywords
-        ]
-    )
+    top_keywords = {
+        keyword
+        for keywords in df.search_keywords.value_counts(sort=True, ascending=False).index[:3].tolist()
+        for keyword in keywords
+    }
     assert {"listened", "listen"} == top_keywords, top_keywords
 
 
@@ -237,7 +235,7 @@ def test_log_data_with_vectors_and_partial_update_ok(api: Argilla):
 
     ds = api.load(dataset)
     assert len(ds) == expected_n_records
-    assert all(map(lambda r: "test-vector" in r.vectors, ds))
+    assert all(("test-vector" in r.vectors for r in ds))
 
     # Fetch minimal record info and add a metadata field
     records_for_update = [
@@ -248,9 +246,9 @@ def test_log_data_with_vectors_and_partial_update_ok(api: Argilla):
 
     ds = api.load(dataset)
     assert len(ds) == expected_n_records
-    assert all(map(lambda r: r.annotation_agent is None, ds))
-    assert all(map(lambda r: "test-vector" in r.vectors, ds))
-    assert all(map(lambda r: r.metadata == {"a": "value"}, ds))
+    assert all((r.annotation_agent is None for r in ds))
+    assert all(("test-vector" in r.vectors for r in ds))
+    assert all((r.metadata == {"a": "value"} for r in ds))
 
     # Remove the metadata info and add some mock annotations
     for record in records_for_update:
@@ -261,9 +259,9 @@ def test_log_data_with_vectors_and_partial_update_ok(api: Argilla):
 
     ds = api.load(dataset)
     assert len(ds) == expected_n_records
-    assert all(map(lambda r: r.annotation_agent == "mock_test", ds))
-    assert all(map(lambda r: "test-vector" in r.vectors, ds))
-    assert all(map(lambda r: r.metadata == {"a": "value"}, ds))
+    assert all((r.annotation_agent == "mock_test" for r in ds))
+    assert all(("test-vector" in r.vectors for r in ds))
+    assert all((r.metadata == {"a": "value"} for r in ds))
 
 
 def test_logging_data_with_concurrency(api: Argilla):

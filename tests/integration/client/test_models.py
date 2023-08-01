@@ -52,12 +52,12 @@ def test_text_classification_input_string():
     event_timestamp = datetime.datetime.now()
     assert TextClassificationRecord(
         id=record_id, text="A text", event_timestamp=event_timestamp
-    ) == TextClassificationRecord(id=record_id, inputs=dict(text="A text"), event_timestamp=event_timestamp)
+    ) == TextClassificationRecord(id=record_id, inputs={"text": "A text"}, event_timestamp=event_timestamp)
 
     assert TextClassificationRecord(
         id=record_id, inputs=["A text", "another text"], event_timestamp=event_timestamp
     ) == TextClassificationRecord(
-        id=record_id, inputs=dict(text=["A text", "another text"]), event_timestamp=event_timestamp
+        id=record_id, inputs={"text": ["A text", "another text"]}, event_timestamp=event_timestamp
     )
 
 
@@ -188,7 +188,7 @@ def test_token_classification_prediction_validator(prediction, expected):
 def test_text_classification_record_none_inputs():
     """Test validation error for None in inputs"""
     with pytest.raises(ValidationError):
-        TextClassificationRecord.parse_obj(dict(inputs={"text": None}))
+        TextClassificationRecord.parse_obj({"inputs": {"text": None}})
 
 
 def test_metadata_values_length():

@@ -12,11 +12,16 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import TYPE_CHECKING
+
 import argilla
 import pytest
 from argilla.client.api import delete, log
 from argilla.client.models import TextClassificationRecord
 from argilla.metrics.commons import keywords, records_status, text_length
+
+if TYPE_CHECKING:
+    from argilla.server.models import User
 
 
 @pytest.fixture

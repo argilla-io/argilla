@@ -272,16 +272,6 @@ async def test_delete_question_as_admin_from_different_workspace(async_client: "
 
 
 @pytest.mark.asyncio
-async def test_delete_question_without_authentication(async_client: "AsyncClient", db: "AsyncSession"):
-    question = await TextQuestionFactory.create()
-
-    response = await async_client.delete(f"/api/v1/questions/{question.id}")
-
-    assert response.status_code == 403
-    assert (await db.execute(select(func.count(Question.id)))).scalar() == 1
-
-
-@pytest.mark.asyncio
 async def test_delete_question_as_annotator(async_client: "AsyncClient", db: "AsyncSession"):
     annotator = await AnnotatorFactory.create()
     question = await TextQuestionFactory.create()

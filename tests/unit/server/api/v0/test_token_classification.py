@@ -112,7 +112,7 @@ async def test_search_special_characters(async_client: "AsyncClient", argilla_us
 
     response = await async_client.post(
         f"/api/datasets/{dataset}/TokenClassification:search",
-        json=TokenClassificationSearchRequest(query=TokenClassificationQuery(query_text="\!")).dict(),
+        json=TokenClassificationSearchRequest(query=TokenClassificationQuery(query_text=r"\!")).dict(),
         params=workspace_query_params,
     )
     assert response.status_code == 200, response.json()
@@ -122,7 +122,7 @@ async def test_search_special_characters(async_client: "AsyncClient", argilla_us
 
     response = await async_client.post(
         f"/api/datasets/{dataset}/TokenClassification:search",
-        json=TokenClassificationSearchRequest(query=TokenClassificationQuery(query_text="text.exact:\!")).dict(),
+        json=TokenClassificationSearchRequest(query=TokenClassificationQuery(query_text=r"text.exact:\!")).dict(),
         params=workspace_query_params,
     )
     assert response.status_code == 200, response.json()

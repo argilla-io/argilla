@@ -137,7 +137,7 @@ def limit_value_length(data: Any, max_length: int) -> Any:
     if isinstance(data, dict):
         return {k: limit_value_length(v, max_length=max_length) for k, v in data.items()}
     if isinstance(data, (list, tuple, set)):
-        new_values = map(lambda x: limit_value_length(x, max_length=max_length), data)
+        new_values = (limit_value_length(x, max_length=max_length) for x in data)
         return type(data)(new_values)
     return data
 

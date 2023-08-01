@@ -60,7 +60,7 @@ def test_classifier_monitoring(mocked_client, classifier_monitor, classifier_dat
     ds = argilla.load(classifier_dataset)
     df = ds.to_pandas()
     assert len(df) == 2
-    assert set([r["text"] for r in df.inputs.values.tolist()]) == set(texts)
+    assert {r["text"] for r in df.inputs.values.tolist()} == set(texts)
 
     argilla.delete(classifier_dataset)
     classifier_monitor(expected_text, metadata={"some": "metadata"})

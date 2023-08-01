@@ -62,15 +62,15 @@ class SpacyNERMonitor(BaseMonitor):
         )
 
     def _prepare_log_data(self, docs_info: Tuple[Doc, Optional[Dict[str, Any]]]) -> Dict[str, Any]:
-        return dict(
-            records=[
+        return {
+            "records": [
                 self.doc2token_classification(doc, agent=self.__wrapped__.path.name, metadata=metadata)
                 for doc, metadata in docs_info
             ],
-            name=self.dataset,
-            tags={k: v for k, v in self.__model__.meta.items() if isinstance(v, str)},
-            metadata=self.__model__.meta,
-        )
+            "name": self.dataset,
+            "tags": {k: v for k, v in self.__model__.meta.items() if isinstance(v, str)},
+            "metadata": self.__model__.meta,
+        }
 
     def pipe(self, *args, **kwargs):
         as_tuples = kwargs.get("as_tuples")

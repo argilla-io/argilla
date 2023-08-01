@@ -193,7 +193,7 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
             return "LOWER"
         if value[0].isupper():
             return "FIRST"
-        if any([c.isupper() for c in value[1:]]):
+        if any(c.isupper() for c in value[1:]):
             return "MIDDLE"
         return None
 
@@ -202,14 +202,12 @@ class TokenClassificationMetrics(CommonTasksMetrics[ServiceTokenClassificationRe
         def mention_tokens_length(entity: EntitySpan) -> int:
             """Compute mention tokens length"""
             return len(
-                set(
-                    [
-                        token_idx
-                        for i in range(entity.start, entity.end)
-                        for token_idx in [record.span_utils.char_to_token_idx.get(i)]
-                        if token_idx is not None
-                    ]
-                )
+                {
+                    token_idx
+                    for i in range(entity.start, entity.end)
+                    for token_idx in [record.span_utils.char_to_token_idx.get(i)]
+                    if token_idx is not None
+                }
             )
 
         return [

@@ -20,7 +20,6 @@ import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import DatasetStatus, Response, ResponseStatus, UserRole
 from argilla.server.search_engine import SearchEngine
-from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 
 from tests.factories import (
@@ -35,6 +34,7 @@ from tests.factories import (
 )
 
 if TYPE_CHECKING:
+    from httpx import AsyncClient
     from sqlalchemy.ext.asyncio import AsyncSession
 
 

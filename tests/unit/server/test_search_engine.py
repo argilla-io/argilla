@@ -344,7 +344,7 @@ class TestSuiteElasticSearchEngine:
         assert result.total == expected_items
 
         scores = [item.score > 0 for item in result.items]
-        assert all(map(lambda s: s > 0, scores))
+        assert all((s > 0 for s in scores))
 
         sorted_scores = scores.copy()
         sorted_scores.sort(reverse=True)

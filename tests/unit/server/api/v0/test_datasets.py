@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
@@ -27,6 +27,9 @@ from tests.factories import (
     UserFactory,
     WorkspaceFactory,
 )
+
+if TYPE_CHECKING:
+    from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
@@ -112,12 +115,12 @@ class TestSuiteDatasetApi:
 
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-        request = dict(
-            name=dataset.name,
-            task=TaskType.text_classification,
-            tags={"env": "test", "class": "text classification"},
-            metadata={"config": {"the": "config"}},
-        )
+        request = {
+            "name": dataset.name,
+            "task": TaskType.text_classification,
+            "tags": {"env": "test", "class": "text classification"},
+            "metadata": {"config": {"the": "config"}},
+        }
 
         response = await async_client.post(
             f"/api/datasets?workspace={workspace_name}", json=request, headers={API_KEY_HEADER_NAME: user.api_key}
@@ -179,7 +182,7 @@ class TestSuiteDatasetApi:
                 async_client, dataset_name=dataset_name, workspace=other_workspace.name, headers=user_auth_headers
             )
 
-            request = dict(name=dataset_name, task=TaskType.text_classification)
+            request = {"name": dataset_name, "task": TaskType.text_classification}
             response = await async_client.post(
                 f"/api/datasets?workspace={workspace.name}", json=request, headers=user_auth_headers
             )

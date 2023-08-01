@@ -971,11 +971,9 @@ class TestSuiteDatasets:
         assert len(response_json["items"]) == num_responses_per_status
 
         if response_status_filter == "missing":
-            assert all([len(record["responses"]) == 0 for record in response_json["items"]])
+            assert all(len(record["responses"]) == 0 for record in response_json["items"])
         else:
-            assert all(
-                [record["responses"][0]["status"] == response_status_filter for record in response_json["items"]]
-            )
+            assert all(record["responses"][0]["status"] == response_status_filter for record in response_json["items"])
 
     async def test_list_current_user_dataset_records_without_authentication(self, async_client: "AsyncClient"):
         dataset = await DatasetFactory.create()
@@ -3353,10 +3351,10 @@ class TestSuiteDatasets:
         await TextQuestionFactory.create(dataset=dataset)
 
         other_dataset = await DatasetFactory.create()
-        other_field = await TextFieldFactory.create(dataset=other_dataset)
-        other_question = await TextQuestionFactory.create(dataset=other_dataset)
+        await TextFieldFactory.create(dataset=other_dataset)
+        await TextQuestionFactory.create(dataset=other_dataset)
         other_record = await RecordFactory.create(dataset=other_dataset)
-        other_response = await ResponseFactory.create(record=other_record, user=owner)
+        await ResponseFactory.create(record=other_record, user=owner)
 
         response = await async_client.delete(f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header)
 
@@ -3384,10 +3382,10 @@ class TestSuiteDatasets:
         await ResponseFactory.create(record=record, user=owner)
 
         other_dataset = await DatasetFactory.create()
-        other_field = await TextFieldFactory.create(dataset=other_dataset)
-        other_question = await TextQuestionFactory.create(dataset=other_dataset)
+        await TextFieldFactory.create(dataset=other_dataset)
+        await TextQuestionFactory.create(dataset=other_dataset)
         other_record = await RecordFactory.create(dataset=other_dataset)
-        other_response = await ResponseFactory.create(record=other_record, user=owner)
+        await ResponseFactory.create(record=other_record, user=owner)
 
         response = await async_client.delete(f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header)
 

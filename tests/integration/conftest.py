@@ -29,7 +29,6 @@ from argilla.client.sdk.users import api as users_api
 from argilla.datasets.__init__ import configure_dataset
 from argilla.server.database import get_async_db
 from argilla.server.models import User, UserRole, Workspace
-from argilla.server.models.base import DatabaseModel
 from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.server import app, argilla_app
 from argilla.server.settings import settings
@@ -37,7 +36,6 @@ from argilla.tasks.database.migrate import migrate_db
 from argilla.utils import telemetry
 from argilla.utils.telemetry import TelemetryClient
 from fastapi.testclient import TestClient
-from opensearchpy import OpenSearch
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
@@ -308,7 +306,7 @@ def dataset_text_classification(mocked_client: SecuredClient) -> str:
         split="train[:100]",
     )
     dataset_rb = [TextClassificationRecord(text=rec["text"], annotation=rec["label"]) for rec in dataset_ds]
-    labels = set([rec.annotation for rec in dataset_rb])
+    labels = {rec.annotation for rec in dataset_rb}
     configure_dataset(dataset, settings=TextClassificationSettings(label_schema=labels))
 
     delete(dataset)

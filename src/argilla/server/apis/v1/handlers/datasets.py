@@ -367,7 +367,7 @@ async def publish_dataset(
 
         telemetry_client.track_data(
             action="PublishedDataset",
-            data={"questions": list(set([question.settings["type"] for question in dataset.questions]))},
+            data={"questions": list({question.settings["type"] for question in dataset.questions})},
         )
 
         return dataset

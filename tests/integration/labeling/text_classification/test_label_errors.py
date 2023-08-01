@@ -165,8 +165,8 @@ def test_construct_s_and_psx(records):
     if records[0].multi_label:
         s_expected = np.array(
             [
-                list([0]),
-                list([0, 1]),
+                [0],
+                [0, 1],
             ],
             dtype=object,
         )

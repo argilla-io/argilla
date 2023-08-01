@@ -487,7 +487,7 @@ class ArgillaDatasetMixin:
             elif question.settings["type"] == "text":
                 question = TextQuestion(**question_dict, use_markdown=question.settings["use_markdown"])
             elif question.settings["type"] in ["label_selection", "multi_label_selection", "ranking"]:
-                if all([label["value"] == label["text"] for label in question.settings["options"]]):
+                if all(label["value"] == label["text"] for label in question.settings["options"]):
                     labels = [label["value"] for label in question.settings["options"]]
                 else:
                     labels = {label["value"]: label["text"] for label in question.settings["options"]}

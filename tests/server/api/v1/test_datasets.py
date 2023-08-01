@@ -971,9 +971,9 @@ async def test_list_current_user_dataset_records_with_response_status_filter(
     assert len(response_json["items"]) == num_responses_per_status
 
     if response_status_filter == "missing":
-        assert all([len(record["responses"]) == 0 for record in response_json["items"]])
+        assert all(len(record["responses"]) == 0 for record in response_json["items"])
     else:
-        assert all([record["responses"][0]["status"] == response_status_filter for record in response_json["items"]])
+        assert all(record["responses"][0]["status"] == response_status_filter for record in response_json["items"])
 
 
 @pytest.mark.asyncio

@@ -45,7 +45,7 @@ class AsyncSQLAlchemyModelFactory(factory.alchemy.SQLAlchemyModelFactory):
             raise factory.errors.FactoryError(
                 "Cannot generate instances of abstract factory %(f)s; "
                 "Ensure %(f)s.Meta.model is set and %(f)s.Meta.abstract "
-                "is either not set or False." % dict(f=cls.__name__)
+                "is either not set or False." % {"f": cls.__name__}
             )
 
         step = AsyncStepBuilder(cls._meta, params, strategy)

@@ -34,13 +34,13 @@ class ClientAdapterFactory:
         retry_on_timeout: bool = True,
         max_retries: int = 5,
     ) -> IClientAdapter:
-        client_config = dict(
-            hosts=hosts,
-            verify_certs=ssl_verify,
-            ca_certs=ca_path,
-            retry_on_timeout=retry_on_timeout,
-            max_retries=max_retries,
-        )
+        client_config = {
+            "hosts": hosts,
+            "verify_certs": ssl_verify,
+            "ca_certs": ca_path,
+            "retry_on_timeout": retry_on_timeout,
+            "max_retries": max_retries,
+        }
 
         version, distribution = cls._fetch_cluster_version_info(client_config)
 

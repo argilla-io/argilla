@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import asyncio
-from copy import copy
 from typing import TYPE_CHECKING, Optional
 
 import pytest
@@ -24,7 +23,7 @@ from sqlalchemy import inspect, select
 from sqlalchemy.orm import Mapped, mapped_column
 
 if TYPE_CHECKING:
-    from sqlalchemy.ext.asyncio import AsyncSession
+    from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession
 
 
 class Model(DatabaseModel):

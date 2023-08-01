@@ -16,7 +16,6 @@ from typing import TYPE_CHECKING, Generator
 import pytest
 from argilla.__main__ import app
 from argilla.server.database import database_url_sync
-from argilla.server.models import DatabaseModel
 from argilla.tasks.database.migrate import migrate_db
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,6 +25,9 @@ from tests.database import SyncTestSession
 
 if TYPE_CHECKING:
     from argilla.tasks.async_typer import AsyncTyper
+    from pytest_mock import MockerFixture
+    from sqlalchemy.engine import Connection
+    from sqlalchemy.orm import Session
 
 
 @pytest.fixture(scope="session")

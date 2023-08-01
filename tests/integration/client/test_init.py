@@ -26,10 +26,10 @@ def test_resource_leaking_with_several_init(argilla_user: User):
     api.delete(dataset)
 
     # TODO: review performance in Windows. See https://github.com/recognai/argilla/pull/1702
-    for i in range(0, 20):
+    for _i in range(0, 20):
         api.init(api_key=argilla_user.api_key)
 
-    for i in range(0, 10):
+    for _i in range(0, 10):
         api.init(api_key=argilla_user.api_key)
         api.log(TextClassificationRecord(text="The text"), name=dataset, verbose=False)
 
