@@ -53,7 +53,7 @@ async def update_field(
     field = await _get_field(db, field_id)
 
     await authorize(current_user, FieldPolicyV1.update(field))
-    
+
     if field_update.settings and field_update.settings.type != field.settings["type"]:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
