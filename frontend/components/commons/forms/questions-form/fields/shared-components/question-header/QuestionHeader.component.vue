@@ -2,10 +2,10 @@
   <div class="title-area --body1">
     <span
       class="suggestion-info"
-      v-text="title"
-      v-optional-field="!isRequired"
+      v-text="question.title"
+      v-optional-field="!question.isRequired"
       v-prefix-star="{
-        show: hasSuggestion,
+        show: showPrefixStar,
         tooltip: 'This question contains a suggestion',
       }"
     />
@@ -13,13 +13,13 @@
       class="icon-info"
       v-if="showIcon"
       icon="info"
-      :id="`${title}QuestionHeader`"
+      :id="`${question.title}QuestionHeader`"
       :show-badge="false"
       iconColor="#acacac"
       badge-vertical-position="top"
       badge-horizontal-position="right"
       badge-border-color="white"
-      v-tooltip="{ content: tooltipMessage, backgroundColor: '#FFF' }"
+      v-tooltip="{ content: question.description, backgroundColor: '#FFF' }"
     />
   </div>
 </template>
@@ -29,27 +29,29 @@ import "assets/icons/info";
 export default {
   name: "QuestionHeader",
   props: {
-    title: {
-      type: String,
+    question: {
+      type: Object,
       required: true,
     },
-    tooltipMessage: {
-      type: String,
-      default: () => "",
-    },
-    isRequired: {
-      type: Boolean,
-      default: () => false,
-    },
-    hasSuggestion: {
+    showSuggestion: {
       type: Boolean,
       default: () => false,
     },
   },
+  data() {
+    return {
+      showPrefixStar: this.showSuggestion && this.question.matchSuggestion,
+    };
+  },
   computed: {
     showIcon() {
-      // TODO - move this to the template to after reviewing the jest.config
-      return this.tooltipMessage?.length ? true : false;
+      return !!this.question.description?.length;
+    },
+  },
+  watch: {
+    "question.matchSuggestion"() {
+      this.showPrefixStar =
+        this.showSuggestion && this.question.matchSuggestion;
     },
   },
 };

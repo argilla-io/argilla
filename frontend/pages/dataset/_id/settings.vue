@@ -11,7 +11,11 @@
       <TopDatasetSettingsFeedbackTaskContent :datasetId="datasetId" />
     </template>
     <template v-slot:left>
-      <LeftDatasetSettingsFeedbackTaskContent :dataset="dataset" />
+      <LeftDatasetSettingsFeedbackTaskContent
+        :dataset="datasetSetting.dataset"
+      />
+
+      <QuestionsComponent :questions="datasetSetting.questions" />
     </template>
   </HeaderAndTopAndTwoColumns>
 </template>

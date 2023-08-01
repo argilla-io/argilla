@@ -157,16 +157,10 @@ export default {
   methods: {
     onSelect({ id, isSelected }) {
       if (this.multiple) return;
-      else {
-        this.options.forEach((option) => {
-          if (option.id === id) {
-            option.isSelected = isSelected;
-          } else {
-            option.isSelected = false;
-          }
-          return option;
-        });
-      }
+
+      this.options.forEach((option) => {
+        option.isSelected = option.id === id ? isSelected : false;
+      });
     },
     toggleShowLess() {
       this.isExpanded = !this.isExpanded;

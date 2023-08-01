@@ -1,24 +1,22 @@
 <template>
   <div class="wrapper">
     <QuestionHeaderComponent
-      :title="title"
-      :isRequired="isRequired"
-      :hasSuggestion="hasSuggestion"
-      :tooltipMessage="description"
+      :question="question"
+      :showSuggestion="showSuggestion"
     />
 
     <div class="container" :class="isFocused ? '--focused' : null">
       <RenderMarkdownBaseComponent
-        v-if="useMarkdown && !isFocused"
+        v-if="question.settings.use_markdown && !isFocused"
         class="textarea--markdown"
-        :markdown="value"
+        :markdown="question.answer.value"
         @click.native="setFocus(true)"
       />
       <ContentEditableFeedbackTask
         v-else
         class="textarea"
-        :value="value"
-        :placeholder="placeholder"
+        :value="question.answer.value"
+        :placeholder="question.settings.placeholder"
         @change-text="onChangeTextArea"
         @on-change-focus="setFocus"
       />
@@ -30,31 +28,11 @@
 export default {
   name: "TextAreaComponent",
   props: {
-    title: {
-      type: String,
+    question: {
+      type: Object,
       required: true,
     },
-    value: {
-      type: String,
-      default: () => "",
-    },
-    placeholder: {
-      type: String,
-      default: () => "",
-    },
-    isRequired: {
-      type: Boolean,
-      default: () => false,
-    },
-    description: {
-      type: String,
-      default: () => "",
-    },
-    useMarkdown: {
-      type: Boolean,
-      default: () => false,
-    },
-    hasSuggestion: {
+    showSuggestion: {
       type: Boolean,
       default: () => false,
     },
@@ -64,16 +42,13 @@ export default {
       isFocused: false,
     };
   },
-  model: {
-    prop: "value",
-    event: "on-change-value",
-  },
   methods: {
     onChangeTextArea(newText) {
       const isAnyText = newText?.length;
-      this.$emit("on-change-value", isAnyText ? newText : "");
 
-      if (this.isRequired) {
+      this.question.answer.value = isAnyText ? newText : "";
+
+      if (this.question.isRequired) {
         this.$emit("on-error", !isAnyText);
       }
     },

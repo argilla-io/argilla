@@ -16,7 +16,6 @@ export class GetDatasetSettingsUseCase {
 
   async execute(datasetId: string): Promise<void> {
     const getDataset = this.datasetRepository.getById(datasetId);
-
     const getQuestions = this.questionRepository.getQuestions(datasetId);
     const getFields = this.fieldRepository.getFields(datasetId);
 
