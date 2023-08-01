@@ -6,6 +6,12 @@
 
 <script>
 export default {
+  data() {
+    return {
+      timer: null,
+      keyCode: "",
+    };
+  },
   computed: {
     options() {
       return this.$slots.default[0].context?.options;
@@ -14,20 +20,30 @@ export default {
   methods: {
     answerRatingFor($event) {
       if (!this.isValidKeyFor($event)) return;
+      if (this.timer) clearTimeout(this.timer);
 
-      const currValue = $event.key == 0 ? 10 : +$event.key;
+      this.keyCode += +$event.key;
 
-      if (!this.options.some((option) => option.value == currValue)) return;
+      if (this.keyCode.length > 2 || this.keyCode > 10) {
+        this.keyCode = "";
+        return;
+      }
 
-      const target = this.options.find(({ value }) => value == currValue);
+      if (!this.options.some((option) => option.value == this.keyCode)) return;
+
+      const target = this.options.find(({ value }) => value == this.keyCode);
 
       target?.id && document.getElementById(target.id).click();
-
       if (target.isSelected) {
         $event.preventDefault();
 
         this.$emit("on-user-answer");
       }
+
+      this.timer = setTimeout(() => {
+        this.keyCode = "";
+        this.timer = null;
+      }, 300);
     },
     isValidKeyFor({ code }) {
       const value = code.at(-1);
