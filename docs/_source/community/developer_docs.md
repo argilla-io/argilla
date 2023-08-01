@@ -97,7 +97,7 @@ pytest tests/unit
 For unit tests, you can also setup a PostgreSQL database to check database changes using other than
 the default sqlite backend:
 ```sh
-ARGILLA_DATABASE_URL=postgresql://postgres:postgres@localhost:5432 pytest tests/unit 
+ARGILLA_DATABASE_URL=postgresql://postgres:postgres@localhost:5432 pytest tests/unit
 ```
 
 For running more heavy integration tests you can just run pytest with the `tests/integration` folder
