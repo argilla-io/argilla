@@ -493,6 +493,52 @@ test.describe("Annotation page shortcuts", () => {
       await page.keyboard.press("0");
       await expect(page).toHaveScreenshot();
     });
+    test("user can not rating with invalid key", async ({ page }) => {
+      await goToAnnotationPageWith10Rating(page);
+
+      await page.keyboard.press("?");
+
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("rating with non existing number", async ({ page }) => {
+      await goToAnnotationPageWith10Rating(page);
+
+      await page.keyboard.press("2");
+      await page.keyboard.press("2");
+
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("un rate question if the user press twice the same key", async ({
+      page,
+    }) => {
+      await goToAnnotationPageWith10Rating(page);
+
+      await page.keyboard.press("2");
+
+      await page.waitForTimeout(400);
+
+      await page.keyboard.press("2");
+
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("user can not rating if press any non digit key", async ({ page }) => {
+      await goToAnnotationPageWith10Rating(page);
+
+      await page.keyboard.press("u");
+
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("user can not rating with value zero", async ({ page }) => {
+      await goToAnnotationPageWith10Rating(page);
+
+      await page.keyboard.press("0");
+
+      await expect(page).toHaveScreenshot();
+    });
   });
 
   test.describe("Text component", () => {
