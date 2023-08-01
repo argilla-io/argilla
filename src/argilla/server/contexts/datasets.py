@@ -218,9 +218,7 @@ async def get_record_by_id(
 
 
 async def delete_record(db: "AsyncSession", record: Record) -> Record:
-    await db.delete(record)
-    await db.commit()
-    return record
+    return await record.delete()
 
 
 async def get_records_by_ids(
