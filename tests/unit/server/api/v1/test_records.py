@@ -40,6 +40,7 @@ from tests.factories import (
 
 if TYPE_CHECKING:
     from argilla.server.models import Dataset
+    from httpx import AsyncClient
     from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -950,13 +951,13 @@ async def test_create_record_suggestion_as_annotator(async_client: "AsyncClient"
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
 async def test_delete_record(
-    client: TestClient, db: "AsyncSession", mock_search_engine: "SearchEngine", role: UserRole
+    async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: "SearchEngine", role: UserRole
 ):
     dataset = await DatasetFactory.create()
     record = await RecordFactory.create(dataset=dataset)
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-    response = client.delete(f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: user.api_key})
+    response = await async_client.delete(f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: user.api_key})
 
     assert response.status_code == 200
     assert response.json() == {
@@ -972,28 +973,30 @@ async def test_delete_record(
 
 
 @pytest.mark.asyncio
-async def test_delete_record_as_admin_from_another_workspace(client: TestClient, db: "AsyncSession"):
+async def test_delete_record_as_admin_from_another_workspace(async_client: "AsyncClient", db: "AsyncSession"):
     dataset = await DatasetFactory.create()
     record = await RecordFactory.create(dataset=dataset)
     user = await UserFactory.create(role=UserRole.admin)
 
-    response = client.delete(f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: user.api_key})
+    response = await async_client.delete(f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: user.api_key})
 
     assert response.status_code == 403
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 1
 
 
 @pytest.mark.asyncio
-async def test_delete_record_as_annotator(client: TestClient):
+async def test_delete_record_as_annotator(async_client: "AsyncClient"):
     annotator = await UserFactory.create(role=UserRole.annotator)
     record = await RecordFactory.create()
 
-    response = client.delete(f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
+    response = await async_client.delete(
+        f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: annotator.api_key}
+    )
 
     assert response.status_code == 403
 
 
 @pytest.mark.asyncio
-async def test_delete_record_non_existent(client: TestClient, owner_auth_header: dict):
-    response = client.delete(f"/api/v1/records/{uuid4()}", headers=owner_auth_header)
+async def test_delete_record_non_existent(async_client: "AsyncClient", owner_auth_header: dict):
+    response = await async_client.delete(f"/api/v1/records/{uuid4()}", headers=owner_auth_header)
     assert response.status_code == 404
