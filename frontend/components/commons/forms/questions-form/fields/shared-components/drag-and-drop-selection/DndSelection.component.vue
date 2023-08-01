@@ -228,6 +228,9 @@ $max-visible-card-items: 12;
       background: $card-ghost-color;
       color: $card-primary-color;
       box-shadow: $shadow-500;
+      &:focus {
+        outline: none;
+      }
     }
     &.ghost-ticket {
       background: $card-empty-color;
@@ -250,7 +253,7 @@ $max-visible-card-items: 12;
       &:focus {
         outline: 2px solid $card-primary-color;
       }
-      &:not(:firt-of-type):focus:not(:focus-visible) {
+      &:focus:not(:focus-visible) {
         outline: none;
       }
       &:hover {
@@ -265,7 +268,7 @@ $max-visible-card-items: 12;
       &:focus {
         outline: 2px solid palette(apricot);
       }
-      &:not(:firt-of-type):focus:not(:focus-visible) {
+      &:focus:not(:focus-visible) {
         outline: none;
       }
     }
