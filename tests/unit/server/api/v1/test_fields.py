@@ -89,7 +89,9 @@ async def test_update_field(
     ],
 )
 @pytest.mark.asyncio
-async def test_update_field_with_invalid_settings(async_client: "AsyncClient", owner_auth_header: dict, field_json: dict):
+async def test_update_field_with_invalid_settings(
+    async_client: "AsyncClient", owner_auth_header: dict, field_json: dict
+):
     field = await TextFieldFactory.create()
 
     response = await async_client.patch(f"/api/v1/fields/{field.id}", headers=owner_auth_header, json=field_json)
