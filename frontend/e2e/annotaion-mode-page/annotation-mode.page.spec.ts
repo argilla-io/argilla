@@ -614,9 +614,22 @@ test.describe("Annotation page shortcuts", () => {
 
       await expect(page).toHaveScreenshot();
     });
-    test("move to slot 10 by pressing 0", async ({ page }) => {
+    test("move to slot 10 by pressing 10", async ({ page }) => {
       await goToAnnotationPageWith12Ranking(page);
+      await page.keyboard.press("1");
       await page.keyboard.press("0");
+      await expect(page).toHaveScreenshot();
+    });
+    test("move to slot 11 by pressing 11", async ({ page }) => {
+      await goToAnnotationPageWith12Ranking(page);
+      await page.keyboard.press("1");
+      await page.keyboard.press("1");
+      await expect(page).toHaveScreenshot();
+    });
+    test("move to slot 12 by pressing 12", async ({ page }) => {
+      await goToAnnotationPageWith12Ranking(page);
+      await page.keyboard.press("1");
+      await page.keyboard.press("2");
       await expect(page).toHaveScreenshot();
     });
     test("move to slot 1 by pressing 1", async ({ page }) => {
