@@ -7,16 +7,22 @@ import {
   mockRecordWith12Ranking,
   mockRecordWithRating,
   mockDiscardRecord,
+  mockRecordForLongAndShortQuestion,
 } from "../common";
 
-const goToAnnotationPage = async (page) => {
+const goToAnnotationPage = async (page, shortAndLongQuestions = false) => {
   const dataset = newDatasetsMocked[0];
 
   await mockAllDatasets(page);
-  const record = await mockRecord(page, {
-    datasetId: dataset.id,
-    workspaceId: dataset.workspace_id,
-  });
+  const record = shortAndLongQuestions
+    ? await mockRecordForLongAndShortQuestion(page, {
+        datasetId: dataset.id,
+        workspaceId: dataset.workspace_id,
+      })
+    : await mockRecord(page, {
+        datasetId: dataset.id,
+        workspaceId: dataset.workspace_id,
+      });
 
   await loginUserAndWaitFor(page, "datasets");
 
@@ -139,6 +145,12 @@ test.describe("Annotate page", () => {
     await page.getByRole("button", { name: "Discard" }).click();
 
     await page.waitForTimeout(2000);
+
+    await expect(page).toHaveScreenshot();
+  });
+
+  test("label with just one character", async ({ page }) => {
+    await goToAnnotationPage(page, true);
 
     await expect(page).toHaveScreenshot();
   });
@@ -630,63 +642,63 @@ test.describe("Annotation page shortcuts", () => {
 
       await expect(page).toHaveScreenshot();
     });
+
     test("move to slot 10 by pressing 10", async ({ page }) => {
       await goToAnnotationPageWith12Ranking(page);
       await page.keyboard.press("1");
       await page.keyboard.press("0");
       await expect(page).toHaveScreenshot();
     });
+
     test("move to slot 11 by pressing 11", async ({ page }) => {
       await goToAnnotationPageWith12Ranking(page);
       await page.keyboard.press("1");
       await page.keyboard.press("1");
       await expect(page).toHaveScreenshot();
     });
+
     test("move to slot 12 by pressing 12", async ({ page }) => {
       await goToAnnotationPageWith12Ranking(page);
       await page.keyboard.press("1");
       await page.keyboard.press("2");
       await expect(page).toHaveScreenshot();
     });
+
     test("move to slot 1 by pressing 1", async ({ page }) => {
       await goToAnnotationPageWith12Ranking(page);
       await page.keyboard.press("1");
       await expect(page).toHaveScreenshot();
     });
+
     test("unrank a question by pressing Backspace", async ({ page }) => {
       await goToAnnotationPageWith12Ranking(page);
       await page.keyboard.press("1");
+
+      await page.waitForTimeout(300);
+
+      await expect(page).toHaveScreenshot();
+
+      await page.waitForTimeout(500);
+
       await page.keyboard.press("Shift+Tab");
       await page.keyboard.press("Backspace");
+
       await expect(page).toHaveScreenshot();
     });
+
     test("clear form answers after unrank", async ({ page }) => {
       await goToAnnotationPageWith12Ranking(page);
       await page.keyboard.press("1");
+
+      await page.waitForTimeout(500);
+
+      await expect(page).toHaveScreenshot();
+
+      await page.waitForTimeout(500);
+
       await page.keyboard.press("Shift+Tab");
       await page.keyboard.press("Shift+Space");
       await expect(page).toHaveScreenshot();
     });
-    test.skip("discard answers after unrank", async ({ page }) => {
-      await goToAnnotationPageWith12Ranking(page);
-      await page.keyboard.press("1");
-      await page.keyboard.press("1");
-      await page.keyboard.press("1");
-      await page.keyboard.press("1");
-      await page.keyboard.press("1");
-      await page.keyboard.press("1");
-      await page.keyboard.press("1");
-      await page.keyboard.press("1");
-      await page.keyboard.press("1");
-      await page.keyboard.press("1");
-      await page.keyboard.press("1");
-      await page.keyboard.press("1");
-      await page.keyboard.press("Shift+Tab");
-      await page.keyboard.down("Shift");
-      await page.keyboard.press("Enter");
-
-      await page.waitForTimeout(2000)
-      await expect(page).toHaveScreenshot();
-    });
-  })
+  });
 });

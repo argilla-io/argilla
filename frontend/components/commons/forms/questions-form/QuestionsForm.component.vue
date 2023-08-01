@@ -326,7 +326,7 @@ export default {
       this.$root.$emit("are-responses-untouched", isFormUntouched);
     },
     checkIfQuestionIsFocused(index) {
-      return this.record.isPending && index === this.autofocusPosition;
+      return index === this.autofocusPosition;
     },
     updateQuestionAutofocus(index) {
       this.interactionCount++;
@@ -377,6 +377,7 @@ export default {
     gap: $base-space * 4;
     padding: $base-space * 3;
     overflow: auto;
+    scroll-behavior: smooth;
   }
   &.--focused-form {
     border-color: palette(brown);

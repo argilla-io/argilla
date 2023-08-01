@@ -559,125 +559,182 @@ const questions = [
   },
 ];
 
-const rankingQuestionWith12Slots = [{
-  "id": "9f23fcdb-a57a-4568-a9d8-2360315e9fd3",
-  "name": "rating",
-  "title": "Rating",
-  "description": null,
-  "required": true,
-  "settings": {
-    "type": "ranking",
-    "options": [
-      {
-        "value": "1",
-        "text": "1",
-        "description": null
-      },
-      {
-        "value": "2",
-        "text": "2",
-        "description": null
-      },
-      {
-        "value": "3",
-        "text": "3",
-        "description": null
-      },
-      {
-        "value": "4",
-        "text": "4",
-        "description": null
-      },
-      {
-        "value": "5",
-        "text": "5",
-        "description": null
-      },
-      {
-        "value": "6",
-        "text": "6",
-        "description": null
-      },
-      {
-        "value": "7",
-        "text": "7",
-        "description": null
-      },
-      {
-        "value": "8",
-        "text": "8",
-        "description": null
-      },
-      {
-        "value": "9",
-        "text": "9",
-        "description": null
-      },
-      {
-        "value": "10",
-        "text": "10",
-        "description": null
-      },
-      {
-        "value": "11",
-        "text": "11",
-        "description": null
-      },
-      {
-        "value": "12",
-        "text": "12",
-        "description": null
-      }
-    ]
+const rankingQuestionWith12Slots = [
+  {
+    id: "9f23fcdb-a57a-4568-a9d8-2360315e9fd3",
+    name: "rating",
+    title: "Rating",
+    description: null,
+    required: true,
+    settings: {
+      type: "ranking",
+      options: [
+        {
+          value: "1",
+          text: "1",
+          description: null,
+        },
+        {
+          value: "2",
+          text: "2",
+          description: null,
+        },
+        {
+          value: "3",
+          text: "3",
+          description: null,
+        },
+        {
+          value: "4",
+          text: "4",
+          description: null,
+        },
+        {
+          value: "5",
+          text: "5",
+          description: null,
+        },
+        {
+          value: "6",
+          text: "6",
+          description: null,
+        },
+        {
+          value: "7",
+          text: "7",
+          description: null,
+        },
+        {
+          value: "8",
+          text: "8",
+          description: null,
+        },
+        {
+          value: "9",
+          text: "9",
+          description: null,
+        },
+        {
+          value: "10",
+          text: "10",
+          description: null,
+        },
+        {
+          value: "11",
+          text: "11",
+          description: null,
+        },
+        {
+          value: "12",
+          text: "12",
+          description: null,
+        },
+      ],
+    },
+    inserted_at: "2023-07-26T12:15:01",
+    updated_at: "2023-07-26T12:15:01",
   },
-  "inserted_at": "2023-07-26T12:15:01",
-  "updated_at": "2023-07-26T12:15:01"
-}];
+];
 
-const ratingQuestions = [{
-  "id": "7b711f4b-c901-4e65-bbac-a80a341baf84",
-  "name": "rating",
-  "title": "Rating",
-  "description": null,
-  "required": true,
-  "settings": {
-    "type": "rating",
-    "options": [
-      {
-        "value": 1
-      },
-      {
-        "value": 2
-      },
-      {
-        "value": 3
-      },
-      {
-        "value": 4
-      },
-      {
-        "value": 5
-      },
-      {
-        "value": 6
-      },
-      {
-        "value": 7
-      },
-      {
-        "value": 8
-      },
-      {
-        "value": 9
-      },
-      {
-        "value": 10
-      },
-    ]
+const ratingQuestions = [
+  {
+    id: "7b711f4b-c901-4e65-bbac-a80a341baf84",
+    name: "rating",
+    title: "Rating",
+    description: null,
+    required: true,
+    settings: {
+      type: "rating",
+      options: [
+        {
+          value: 1,
+        },
+        {
+          value: 2,
+        },
+        {
+          value: 3,
+        },
+        {
+          value: 4,
+        },
+        {
+          value: 5,
+        },
+        {
+          value: 6,
+        },
+        {
+          value: 7,
+        },
+        {
+          value: 8,
+        },
+        {
+          value: 9,
+        },
+        {
+          value: 10,
+        },
+      ],
+    },
+    inserted_at: "2023-07-21T09:23:19",
+    updated_at: "2023-07-21T09:23:19",
   },
-  "inserted_at": "2023-07-21T09:23:19",
-  "updated_at": "2023-07-21T09:23:19"
-}];
+];
+
+const longAndShortQuestions = [
+  {
+    id: "045c18d5-57b6-408a-8db3-bc11b9f54541",
+    name: "sentiment",
+    title: "Sentiment",
+    description: "Sentiment of the text",
+    required: true,
+    settings: {
+      type: "label_selection",
+      options: [
+        {
+          value: "a",
+          text: "A",
+          description: "Texts with a A intent",
+        },
+        {
+          value: "loong-single-label-questions-with-more-than-20",
+          text: "Single Loong single label question with more than 20 letter",
+          description: "Texts with a long intent",
+        },
+      ],
+      visible_options: 10,
+    },
+    inserted_at: "2023-07-18T07:43:35",
+    updated_at: "2023-07-18T07:43:35",
+  },
+  {
+    id: "682dd011-6a8a-452e-8900-483279c6acee",
+    name: "sentiment-multi-label",
+    title: "Sentiment Multi Label",
+    description: "Sentiment of the text",
+    required: true,
+    settings: {
+      type: "multi_label_selection",
+      options: [
+        {
+          value: "a",
+          text: "A",
+          description: "Texts with a A intent",
+        },
+        {
+          value: "loong-single-label-questions-with-more-than-20",
+          text: "Multi Loong single label question with more than 20 letter",
+          description: "Texts with a long intent",
+        },
+      ],
+      visible_options: 10,
+    },
+    inserted_at: "2023-07-18T07:43:35",
+    updated_at: "2023-07-18T07:43:35",
+  },
+];
 
 export const mockQuestion = async (page: Page, datasetId: string) => {
   await page.route(
@@ -692,7 +749,10 @@ export const mockQuestion = async (page: Page, datasetId: string) => {
   );
 };
 
-export const mockQuestionWith12Ranking = async (page: Page, datasetId: string) => {
+export const mockQuestionWith12Ranking = async (
+  page: Page,
+  datasetId: string
+) => {
   await page.route(
     `*/**/api/v1/datasets/${datasetId}/questions`,
     async (route) => {
@@ -712,6 +772,22 @@ export const mockQuestionWithRating = async (page: Page, datasetId: string) => {
       await route.fulfill({
         json: {
           items: ratingQuestions,
+        },
+      });
+    }
+  );
+};
+
+export const mockQuestionLongAndShortQuestions = async (
+  page: Page,
+  datasetId: string
+) => {
+  await page.route(
+    `*/**/api/v1/datasets/${datasetId}/questions`,
+    async (route) => {
+      await route.fulfill({
+        json: {
+          items: longAndShortQuestions,
         },
       });
     }
