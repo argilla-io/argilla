@@ -449,6 +449,22 @@ test.describe("Annotation page shortcuts", () => {
 
       await expect(page).toHaveScreenshot();
     });
+    test("rating value 1 by pressing 1", async ({ page }) => {
+      await goToAnnotationPageWith10Rating(page);
+      await page.keyboard.press("1");
+      await expect(page).toHaveScreenshot();
+    });
+    test("rating value 5 by pressing 5", async ({ page }) => {
+      await goToAnnotationPageWith10Rating(page);
+      await page.keyboard.press("5");
+      await expect(page).toHaveScreenshot();
+    });
+    test("rating value 10 by pressing 10", async ({ page }) => {
+      await goToAnnotationPageWith10Rating(page);
+      await page.keyboard.press("1");
+      await page.keyboard.press("0");
+      await expect(page).toHaveScreenshot();
+    });
   });
 
   test.describe("Text component", () => {
