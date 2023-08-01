@@ -1,6 +1,5 @@
 <template>
   <div class="dataset-delete">
-    <h2 class="--heading5 --semibold" v-text="sectionTitle" />
     <BaseCard
       card-type="danger"
       :title="datasetDeleteTitle"
@@ -54,7 +53,6 @@ export default {
   data() {
     return {
       showDeleteModal: false,
-      sectionTitle: "Danger zone",
       datasetId: this.dataset.id,
       datasetName: this.dataset.name,
       workspace: this.dataset.workspace,

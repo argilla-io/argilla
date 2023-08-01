@@ -25,33 +25,6 @@
       </transition>
     </div>
   </div>
-  <!-- <HeaderAndTopAndTwoColumns v-else>
-    <template v-slot:header>
-      <HeaderFeedbackTaskComponent
-        :datasetId="datasetId"
-        :breadcrumbs="breadcrumbs"
-      />
-    </template>
-    <template v-slot:top>
-      <TopDatasetSettingsFeedbackTaskContent :datasetId="datasetId" />
-    </template>
-    <template v-slot:left>
-      <BaseTabs
-        :tabs="settingTabs"
-        :active-tab="visibleTab"
-        @change-tab="getSelectedTab"
-      />
-      <transition name="fade" mode="out-in" appear>
-        <component
-          :is="visibleComponent"
-          :key="visibleComponent"
-          :settings="datasetSetting"
-        />
-      </transition>
-
-      <QuestionsComponent :questions="datasetSetting.questions" />
-    </template>
-  </HeaderAndTopAndTwoColumns> -->
 </template>
 
 <script>
