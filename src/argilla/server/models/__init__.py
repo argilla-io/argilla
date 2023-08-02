@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from argilla.server.models.base import DatabaseModel
 from argilla.server.models.models import (
     Dataset,
     DatasetStatus,
@@ -40,6 +41,7 @@ from argilla.server.models.questions import (
 )
 
 __all__ = [
+    "DatabaseModel",
     "Dataset",
     "DatasetStatus",
     "Field",
