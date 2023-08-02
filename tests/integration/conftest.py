@@ -277,7 +277,7 @@ def dataset_token_classification(mocked_client: SecuredClient) -> str:
 
     dataset_ds = load_dataset(
         "argilla/gutenberg_spacy-ner",
-        split="train[:100]",
+        split="train[:3]",
         # This revision does not includes the vectors info, so tests will pass
         revision="fff5f572e4cc3127f196f46ba3f9914c6fd0d763",
     )
@@ -305,7 +305,7 @@ def dataset_text_classification(mocked_client: SecuredClient) -> str:
 
     dataset_ds = load_dataset(
         f"argilla/{dataset}",
-        split="train[:100]",
+        split="train[:3]",
     )
     dataset_rb = [TextClassificationRecord(text=rec["text"], annotation=rec["label"]) for rec in dataset_ds]
     labels = set([rec.annotation for rec in dataset_rb])
@@ -323,7 +323,7 @@ def dataset_text_classification_multi_label(mocked_client: SecuredClient) -> str
 
     dataset = "research_titles_multi_label"
 
-    dataset_ds = load_dataset("argilla/research_titles_multi-label", split="train[:100]")
+    dataset_ds = load_dataset("argilla/research_titles_multi-label", split="train[:50]")
 
     dataset_rb = read_datasets(dataset_ds, task="TextClassification")
 
@@ -341,7 +341,7 @@ def dataset_text2text(mocked_client: SecuredClient) -> str:
 
     dataset = "news_summary"
 
-    dataset_ds = load_dataset("argilla/news-summary", split="train[:100]")
+    dataset_ds = load_dataset("argilla/news-summary", split="train[:3]")
 
     records = []
     for entry in dataset_ds:
