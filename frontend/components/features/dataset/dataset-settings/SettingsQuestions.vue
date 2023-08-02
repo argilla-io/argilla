@@ -26,6 +26,18 @@
             v-model="question.settings.use_markdown"
             >Use Markdown</BaseSwitch
           >
+          <div
+            class="settings-questions__edition-form-group"
+            v-if="question.settings.visible_options"
+          >
+            <label for="question.id">Visible options</label>
+            <input
+              type="range"
+              :min="3"
+              :max="question.settings.options.length"
+              v-model.number="question.settings.visible_options"
+            />
+          </div>
 
           <div class="settings-questions__edition-form-footer">
             <BaseButton type="button" class="secondary light small">
