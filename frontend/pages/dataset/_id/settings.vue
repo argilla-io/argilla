@@ -1,70 +1,41 @@
 <template>
   <BaseLoading v-if="isLoadingDataset" />
-  <div v-else>
-    <HeaderFeedbackTaskComponent
-      :datasetId="datasetId"
-      :breadcrumbs="breadcrumbs"
-    />
-    <div class="settings__content">
-      <TopDatasetSettingsFeedbackTaskContent
+  <HeaderAndOneColumn v-else>
+    <template v-slot:header>
+      <HeaderFeedbackTaskComponent
         :datasetId="datasetId"
-        class="settings__header"
+        :breadcrumbs="breadcrumbs"
       />
-      <BaseTabs
-        :tabs="settingTabs"
-        :active-tab="visibleTab"
-        @change-tab="getSelectedTab"
-        class="settings__tabs"
-      />
-      <transition name="fade" mode="out-in" appear>
-        <div class="settings__tabs-content">
-          <component
-            :is="visibleComponent"
-            :key="visibleComponent"
-            :settings="datasetSetting"
-          />
-        </div>
-      </transition>
-    </div>
-  </div>
+    </template>
+    <template v-slot:center>
+      <div class="settings__content">
+        <TopDatasetSettingsFeedbackTaskContent
+          :datasetId="datasetId"
+          class="settings__header"
+          :class="{ '--separator': !isAdminOrOwnerRole }"
+        />
+        <BaseTabsAndContent :tabs="tabs" class="settings__tabs-content">
+          <template v-slot="{ currentComponent }">
+            <component
+              :is="currentComponent"
+              :key="currentComponent"
+              :settings="datasetSetting"
+            />
+          </template>
+        </BaseTabsAndContent>
+      </div>
+    </template>
+  </HeaderAndOneColumn>
 </template>
 
 <script>
-import HeaderAndTopAndTwoColumns from "@/layouts/HeaderAndTopAndTwoColumns";
+import HeaderAndOneColumn from "@/layouts/HeaderAndOneColumn";
 import { useDatasetSettingViewModel } from "./useDatasetSettingViewModel";
 
 export default {
-  name: "SettingsPage",
+  name: "SettingPage",
   components: {
-    HeaderAndTopAndTwoColumns,
-  },
-  data() {
-    return {
-      settingTabs: [
-        { id: "info", name: "Info", component: "settingsInfo" },
-        { id: "fields", name: "Fields", component: "settingsFields" },
-        { id: "questions", name: "Questions", component: "settingsQuestions" },
-        {
-          id: "danger-zone",
-          name: "Danger zone",
-          component: "settingsDangerZone",
-        },
-      ],
-      selectedComponent: null,
-    };
-  },
-  computed: {
-    visibleTab() {
-      return this.selectedComponent || this.settingTabs[0];
-    },
-    visibleComponent() {
-      return this.visibleTab.component;
-    },
-  },
-  methods: {
-    getSelectedTab(id) {
-      this.selectedComponent = this.settingTabs.find((tab) => tab.id === id);
-    },
+    HeaderAndOneColumn,
   },
   setup() {
     return useDatasetSettingViewModel();
@@ -76,26 +47,23 @@ export default {
 .settings {
   $this: &;
   &__content {
-    margin: 0 auto;
-    padding: 0 4em;
-    height: calc(100vh - $topbarHeight);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
-
   &__header.top-content {
-    height: auto;
-    padding: 2em 0;
+    padding-top: 2em;
+    border-bottom: none;
+    flex: 1;
+    &.--separator {
+      border-bottom: 1px solid $black-10;
+      padding-bottom: 2em;
+    }
   }
 
   &__tabs {
-    & ~ #{$this}__header {
-      border: 1px solid red;
-    }
-
     &-content {
-      margin-top: $base-space * 3;
-      position: relative;
-      overflow: auto;
-      height: calc(80% - $topbarHeight);
+      height: calc(100% - $topbarHeight);
     }
   }
 }
