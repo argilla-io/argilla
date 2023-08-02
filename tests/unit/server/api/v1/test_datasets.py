@@ -3009,7 +3009,7 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=Query(text=TextQuery(q="Hello", field="input")),
-            user_response_status_filter=UserResponseStatusFilter(user=owner, status=ResponseStatusFilter.submitted),
+            user_response_status_filter=UserResponseStatusFilter(user=owner, statuses=[ResponseStatusFilter.submitted]),
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
         )
