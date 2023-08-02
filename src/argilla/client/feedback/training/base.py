@@ -40,7 +40,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
         train_size: Optional[float] = None,
         seed: Optional[int] = None,
         gpu_id: Optional[int] = -1,
-        framework_kwargs: Optional[dict] = {},
+        framework_kwargs: Optional[dict] = None,
         fetch_records: bool = True,
     ) -> None:
         """
@@ -83,6 +83,9 @@ class ArgillaTrainer(ArgillaTrainerV1):
             seed=seed,
             lang=lang,
         )
+
+        if framework_kwargs is None:
+            framework_kwargs = {}
 
         if isinstance(framework, str):
             framework = Framework(framework)

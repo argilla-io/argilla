@@ -228,9 +228,11 @@ async def get_records_by_ids(
     db: "AsyncSession",
     dataset_id: UUID,
     record_ids: List[UUID],
-    include: List[RecordInclude] = [],
+    include: Optional[List[RecordInclude]] = None,
     user_id: Optional[UUID] = None,
 ) -> List[Record]:
+    if include is None:
+        include = []
     query = select(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(record_ids))
     if RecordInclude.responses in include:
         if user_id:
@@ -248,10 +250,12 @@ async def get_records_by_ids(
 async def list_records_by_dataset_id(
     db: "AsyncSession",
     dataset_id: UUID,
-    include: List[RecordInclude] = [],
+    include: Optional[List[RecordInclude]] = None,
     offset: int = 0,
     limit: int = LIST_RECORDS_LIMIT,
 ) -> List[Record]:
+    if include is None:
+        include = []
     query = select(Record).filter(Record.dataset_id == dataset_id)
     if RecordInclude.responses in include:
         query = query.options(joinedload(Record.responses))
@@ -266,11 +270,17 @@ async def list_records_by_dataset_id_and_user_id(
     db: "AsyncSession",
     dataset_id: UUID,
     user_id: UUID,
-    include: List[RecordInclude] = [],
-    response_statuses: List[ResponseStatusFilter] = [],
+    include: Optional[List[RecordInclude]] = None,
+    response_statuses: Optional[List[ResponseStatusFilter]] = None,
     offset: int = 0,
     limit: int = LIST_RECORDS_LIMIT,
 ) -> List[Record]:
+    if include is None:
+        include = []
+
+    if response_statuses is None:
+        response_statuses = []
+
     response_statuses_ = [
         ResponseStatus(response_status)
         for response_status in response_statuses
