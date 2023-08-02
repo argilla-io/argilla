@@ -22,7 +22,6 @@
       :active-tab="currentTab"
       :tab-size="tabSize"
       @change-tab="getSelectedTab"
-      class="settings__tabs"
     />
     <transition name="fade" mode="out-in" appear>
       <slot :current-component="currentComponent" />

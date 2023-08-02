@@ -59,6 +59,7 @@ export default {
 .tabs {
   position: relative;
   display: flex;
+  flex-shrink: 0;
   padding: 0;
   list-style: none;
   overflow-y: auto;
