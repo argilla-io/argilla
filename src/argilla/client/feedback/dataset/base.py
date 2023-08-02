@@ -14,6 +14,7 @@
 
 import logging
 import warnings
+from abc import ABC, abstractproperty
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
 from pydantic import ValidationError
@@ -46,7 +47,7 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 
-class FeedbackDatasetBase(HuggingFaceDatasetMixin):
+class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
     """Base class with shared functionality for `FeedbackDataset` and `RemoteFeedbackDataset`.
 
     Args:
@@ -177,7 +178,11 @@ class FeedbackDatasetBase(HuggingFaceDatasetMixin):
                 )
         self._guidelines = guidelines
 
-        self.records: List[FeedbackRecord] = []
+    @property
+    @abstractproperty
+    def records(self) -> Any:
+        """Returns the records of the dataset."""
+        pass
 
     @property
     def guidelines(self) -> str:

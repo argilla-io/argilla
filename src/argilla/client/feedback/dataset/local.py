@@ -37,9 +37,16 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
     ) -> None:
         super().__init__(fields=fields, questions=questions, guidelines=guidelines)
 
+        self._records = []
+
+    @property
+    def records(self) -> List[FeedbackRecord]:
+        """Returns the records in the dataset."""
+        return self._records
+
     def __len__(self) -> int:
         """Returns the number of records in the dataset."""
-        return len(self.records)
+        return len(self._records)
 
     def __getitem__(self, key: Union[slice, int]) -> Union["FeedbackRecord", List["FeedbackRecord"]]:
         """Returns the record(s) at the given index(es).
@@ -50,13 +57,13 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
         Returns:
             Either the record of the given index, or a list with the records at the given indexes.
         """
-        if len(self.records) < 1:
+        if len(self._records) < 1:
             raise RuntimeError(
                 "In order to get items from `FeedbackDataset` you need to add them first" " with `add_records`."
             )
-        if isinstance(key, int) and len(self.records) < key:
+        if isinstance(key, int) and len(self._records) < key:
             raise IndexError(f"This dataset contains {len(self)} records, so index {key} is out of range.")
-        return self.records[key]
+        return self._records[key]
 
     def iter(self, batch_size: Optional[int] = FETCHING_BATCH_SIZE) -> Iterator[List["FeedbackRecord"]]:
         """Returns an iterator over the records in the dataset.
@@ -64,8 +71,8 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
         Args:
             batch_size: the size of the batches to return. Defaults to 100.
         """
-        for i in range(0, len(self.records), batch_size):
-            yield self.records[i : i + batch_size]
+        for i in range(0, len(self._records), batch_size):
+            yield self._records[i : i + batch_size]
 
     def fetch_records(self) -> None:
         warnings.warn(
@@ -108,7 +115,7 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
         records = self._parse_records(records)
         self._validate_records(records)
 
-        if len(self.records) > 0:
-            self.records += records
+        if len(self._records) > 0:
+            self._records += records
         else:
-            self.records = records
+            self._records = records

@@ -173,9 +173,13 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         self._name = name
         self._workspace = workspace
 
-        self.records: RemoteFeedbackRecords = RemoteFeedbackRecords(
+        self._records: RemoteFeedbackRecords = RemoteFeedbackRecords(
             client=self.client, id=self.id, questions=self.questions
         )
+
+    @property
+    def records(self) -> RemoteFeedbackRecords:
+        return self._records
 
     @property
     def argilla_id(self) -> str:
@@ -202,13 +206,13 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         return f"<ArgillaFeedbackDataset id={self.id} name={self.name} workspace={self.workspace}>"
 
     def __len__(self) -> int:
-        return self.records.__len__()
+        return self._records.__len__()
 
     def __iter__(self) -> Iterator[RemoteFeedbackRecord]:
-        yield from self.records
+        yield from self._records
 
     def __getitem__(self, key: Union[slice, int]) -> Union[RemoteFeedbackRecord, List[RemoteFeedbackRecord]]:
-        return self.records.__getitem__(key)
+        return self._records.__getitem__(key)
 
     def fetch_records(self) -> None:
         warnings.warn(
@@ -235,7 +239,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
             questions=self.questions,
             guidelines=self.guidelines,
         )
-        instance.add_records([record.dict(exclude={"client", "name2id"}) for record in self.records])
+        instance.add_records([record.dict(exclude={"client", "name2id"}) for record in self._records])
         return instance
 
     def add_records(
@@ -246,4 +250,4 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         records = self._parse_records(records)
         self._validate_records(records)
 
-        self.records.add(records=records, show_progress=show_progress)
+        self._records.add(records=records, show_progress=show_progress)
