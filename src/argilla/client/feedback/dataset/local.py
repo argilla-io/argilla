@@ -40,7 +40,7 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
         self._records = []
 
     @property
-    def records(self) -> List[FeedbackRecord]:
+    def records(self) -> List["FeedbackRecord"]:
         """Returns the records in the dataset."""
         return self._records
 

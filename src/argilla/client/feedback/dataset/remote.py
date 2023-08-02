@@ -182,7 +182,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         return self._records
 
     @property
-    def argilla_id(self) -> UUID:
+    def argilla_id(self) -> "UUID":
         warnings.warn(
             "`argilla_id` is deprected in favor of `id` and will be removed in a future"
             " release. Please use `id` instead.",
