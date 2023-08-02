@@ -87,6 +87,10 @@ export default {
     },
   },
   methods: {
+    reset() {
+      this.keyCode = "";
+      this.timer = null;
+    },
     rankWithKeyboard(event, questionToMove) {
       if (this.timer) clearTimeout(this.timer);
       if (event.shiftKey) return;
@@ -97,16 +101,20 @@ export default {
 
       if (this.onUnRankFor(event.key, questionToMove)) {
         this.focusOnFirstQuestionOrItem();
-        this.keyCode = "";
+        this.reset();
         return;
       }
 
       if (isNaN(this.keyCode)) {
-        this.keyCode = "";
+        this.reset();
         return;
       }
 
       const slotTo = this.ranking.slots[this.keyCode - 1];
+
+      if (!slotTo) {
+        this.reset();
+      }
 
       if (slotTo) {
         this.ranking.moveQuestionToSlot(questionToMove, slotTo);
@@ -123,8 +131,7 @@ export default {
         this.timer = setTimeout(() => {
           this.$nextTick(() => {
             this.focusOnFirstQuestionOrItem();
-            this.keyCode = "";
-            this.timer = null;
+            this.reset();
           });
         }, 300);
       }
