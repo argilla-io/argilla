@@ -742,6 +742,14 @@ test.describe("Annotation page shortcuts", () => {
       await goToAnnotationPageWith12Ranking(page);
       await page.keyboard.press("1");
       await page.keyboard.press("0");
+
+      await page.waitForTimeout(200);
+      await page.getByText("12").nth(1).scrollIntoViewIfNeeded();
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByTitle("2", { exact: true }).scrollIntoViewIfNeeded();
+
       await expect(page).toHaveScreenshot();
     });
 
@@ -749,6 +757,14 @@ test.describe("Annotation page shortcuts", () => {
       await goToAnnotationPageWith12Ranking(page);
       await page.keyboard.press("1");
       await page.keyboard.press("1");
+
+      await page.waitForTimeout(400);
+      await page.getByText("12").nth(1).scrollIntoViewIfNeeded();
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByTitle("2", { exact: true }).scrollIntoViewIfNeeded();
+
       await expect(page).toHaveScreenshot();
     });
 
@@ -756,6 +772,14 @@ test.describe("Annotation page shortcuts", () => {
       await goToAnnotationPageWith12Ranking(page);
       await page.keyboard.press("1");
       await page.keyboard.press("2");
+
+      await page.waitForTimeout(200);
+      await page.getByText("12").nth(1).scrollIntoViewIfNeeded();
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByTitle("2", { exact: true }).scrollIntoViewIfNeeded();
+
       await expect(page).toHaveScreenshot();
     });
 
