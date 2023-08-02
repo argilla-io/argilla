@@ -90,7 +90,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
         annotations = values.get(field_to_update) or {}
 
         if annotations:
-            for key, value in annotations.items():
+            for value in annotations.values():
                 value.agent = None  # Maybe we want key and agents with different values
 
         if annotation:
