@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
+### Fixed
+
+- Dataset settings (text and token classification) are properly parsed to strings for clients and for the backend endpoint (Closes [3495](https://github.com/argilla-io/argilla/issues/3495)).
+
 ### Added
 
 - Added `PATCH /api/v1/fields/{field_id}` endpoint to update the field title and markdown settings ([#3421](https://github.com/argilla-io/argilla/pull/3421)).
