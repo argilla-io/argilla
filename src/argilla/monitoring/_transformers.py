@@ -135,9 +135,11 @@ class ZeroShotMonitor(HuggingFaceMonitor):
             ]
             if filtered_data:
                 self.send_records(filtered_data, multi_label=multi_label)
+        except Exception:
+            # TODO: warning?
+            pass
 
-        finally:
-            return batch_predictions
+        return batch_predictions
 
 
 class TextClassificationMonitor(HuggingFaceMonitor):
@@ -167,9 +169,11 @@ class TextClassificationMonitor(HuggingFaceMonitor):
             ]
             if filtered_data:
                 self.send_records(filtered_data)
+        except Exception:
+            # TODO: warning?
+            pass
 
-        finally:
-            return batch_predictions
+        return batch_predictions
 
 
 def huggingface_monitor(

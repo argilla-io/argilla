@@ -64,7 +64,7 @@ class LabelsSchemaSettings(_AbstractSettings):
             raise ValueError(
                 f"`label_schema` is of type={type(self.label_schema)}, but type=set is preferred, and also both type=list and type=tuple are allowed."
             )
-        self.label_schema = set([str(label) for label in self.label_schema])
+        self.label_schema = {str(label) for label in self.label_schema}
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "LabelsSchemaSettings":
@@ -314,9 +314,7 @@ class Datasets(AbstractApi):
                 f"The provided settings type {type(settings)} cannot be applied to dataset. Task type mismatch"
             )
 
-        settings_ = self._SettingsApiModel.parse_obj(
-            {"label_schema": {"labels": [label for label in settings.label_schema]}}
-        )
+        settings_ = self._SettingsApiModel.parse_obj({"label_schema": {"labels": list(settings.label_schema)}})
 
         try:
             with api_compatibility(self, min_version="1.4"):

@@ -95,8 +95,10 @@ class SpacyNERMonitor(BaseMonitor):
         try:
             if self.is_record_accepted():
                 self.send_records([(doc, metadata)])
-        finally:
-            return doc
+        except Exception:
+            # TODO: warning?
+            pass
+        return doc
 
 
 def ner_monitor(nlp: Language, api: Api, dataset: str, sample_rate: float, log_interval: float) -> Language:
