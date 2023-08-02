@@ -84,9 +84,9 @@ class BackendErrorHandler(ABC):
                     detail = detail.get("root_cause", [])[0].get("reason")
                     if ex.error == "search_phase_execution_exception":
                         detail = detail or ex.info["error"]
-                        raise InvalidTextSearchError(detail)
+                        raise InvalidTextSearchError(detail) from ex
                     elif ex.error == "index_closed_exception":
-                        raise ClosedIndexError(index)
+                        raise ClosedIndexError(index) from ex
                     raise InvalidSearchError(ex) from exception_value
                 except bulk_error as ex:
                     errors = [
@@ -98,10 +98,10 @@ class BackendErrorHandler(ABC):
                         for action_error in error.values()
                         if action_error.get("error")
                     ]
-                    raise WrongLogDataError(errors=errors)
+                    raise WrongLogDataError(errors=errors) from ex
                 except not_found_error as ex:
-                    raise IndexNotFoundError(ex)
+                    raise IndexNotFoundError(ex) from ex
                 except generic_api_error as ex:
-                    raise GenericSearchError(ex)
+                    raise GenericSearchError(ex) from ex
 
         return _InnerContext()

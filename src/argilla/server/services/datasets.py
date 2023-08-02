@@ -62,8 +62,8 @@ class DatasetsService:
         try:
             await self.find_by_name(user=user, name=dataset.name, task=dataset.task, workspace=dataset.workspace)
             raise EntityAlreadyExistsError(name=dataset.name, type=ServiceDataset, workspace=dataset.workspace)
-        except WrongTaskError:  # Found a dataset with same name but different task
-            raise EntityAlreadyExistsError(name=dataset.name, type=ServiceDataset, workspace=dataset.workspace)
+        except WrongTaskError as e:
+            raise EntityAlreadyExistsError(name=dataset.name, type=ServiceDataset, workspace=dataset.workspace) from e
         except EntityNotFoundError:
             # The dataset does not exist -> create it !
             date_now = datetime.utcnow()

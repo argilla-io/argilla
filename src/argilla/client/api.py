@@ -331,7 +331,7 @@ def load(
             raise ValueError(
                 f"The dataset '{name}' exists but it is a `FeedbackDataset`. Use `rg.FeedbackDataset.from_argilla`"
                 " instead to load it."
-            )
+            ) from e
         raise e
 
 

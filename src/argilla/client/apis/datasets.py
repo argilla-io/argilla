@@ -207,8 +207,8 @@ class Datasets(AbstractApi):
                     assert all((isinstance(item, tuple)) and (item[-1] in ["asc", "desc"]) for item in sort)
                 else:
                     raise Exception()
-            except Exception:
-                raise ValueError("sort must be a dict formatted as List[Tuple[<field_name>, 'asc|desc']]")
+            except Exception as e:
+                raise ValueError("sort must be a dict formatted as List[Tuple[<field_name>, 'asc|desc']]") from e
             request["sort_by"] = [{"id": item[0], "order": item[-1]} for item in sort]
 
         elif id_from:

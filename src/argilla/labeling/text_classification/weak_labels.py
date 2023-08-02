@@ -298,11 +298,11 @@ class WeakLabelsBase:
         """Helper method to extend the weak labels."""
         try:
             import faiss
-        except ModuleNotFoundError:
+        except ModuleNotFoundError as e:
             raise ModuleNotFoundError(
                 "'faiss' must be installed to extend a weak label matrix! "
                 "You can install 'faiss' with the commands: `pip install faiss-cpu` or `pip install faiss-gpu`"
-            )
+            ) from e
         faiss.normalize_L2(embeddings)
         embeddings_length = embeddings.shape[1]
 

@@ -22,8 +22,10 @@ app = typer.Typer(no_args_is_help=True)
 def framework_callback(value: str):
     try:
         return Framework(value.lower())
-    except ValueError:
-        raise typer.BadParameter(f"Invalid framework {value}. Choose from {', '.join([f.value for f in Framework])}")
+    except ValueError as e:
+        raise typer.BadParameter(
+            f"Invalid framework {value}. Choose from {', '.join([f.value for f in Framework])}"
+        ) from e
 
 
 # using callback to ensure it is used as sole command

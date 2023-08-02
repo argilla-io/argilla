@@ -230,7 +230,7 @@ async def create_dataset_field(
         field = await datasets.create_field(db, dataset, field_create)
         return field
     except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err)) from err
 
 
 @router.post("/datasets/{dataset_id}/questions", status_code=status.HTTP_201_CREATED, response_model=Question)
@@ -257,7 +257,7 @@ async def create_dataset_question(
         question = await datasets.create_question(db, dataset, question_create)
         return question
     except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err)) from err
 
 
 @router.post("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
@@ -280,7 +280,7 @@ async def create_dataset_records(
         await datasets.create_records(db, search_engine, dataset=dataset, records_create=records_create)
         telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": len(records_create.items)})
     except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err)) from err
 
 
 @router.post(
@@ -372,7 +372,7 @@ async def publish_dataset(
 
         return dataset
     except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err)) from err
 
 
 @router.delete("/datasets/{dataset_id}", response_model=Dataset)

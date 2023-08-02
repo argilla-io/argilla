@@ -74,6 +74,6 @@ async def delete_question(
     try:
         await datasets.delete_question(db, question)
     except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err)) from err
 
     return question

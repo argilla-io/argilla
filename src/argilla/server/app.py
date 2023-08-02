@@ -23,6 +23,6 @@ except ModuleNotFoundError as ex:
             f"Cannot start argilla server. Some dependencies were not found:[{_module_name}].\n"
             "Please, install missing modules or reinstall argilla with server extra deps:\n"
             "pip install argilla[server]"
-        )
+        ) from ex
 
     app = fallback_app

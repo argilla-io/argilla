@@ -70,7 +70,7 @@ async def create_record_response(
     try:
         return await datasets.create_response(db, search_engine, record, current_user, response_create)
     except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err)) from err
 
 
 @router.get("/records/{record_id}/suggestions", status_code=status.HTTP_200_OK, response_model=Suggestions)
@@ -122,7 +122,7 @@ async def upsert_suggestion(
     try:
         return await datasets.upsert_suggestion(db, record, question, suggestion_create)
     except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err)) from err
 
 
 @router.delete("/records/{record_id}", response_model=RecordSchema, response_model_exclude_unset=True)

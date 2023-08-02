@@ -165,10 +165,10 @@ class DatasetRecordsDAO:
                 total=total,
                 records=records,
             )
-        except ClosedIndexError:
-            raise ClosedDatasetError(dataset.name)
-        except IndexNotFoundError:
-            raise MissingDatasetRecordsError(f"No records index found for dataset {dataset.name}")
+        except ClosedIndexError as e:
+            raise ClosedDatasetError(dataset.name) from e
+        except IndexNotFoundError as e:
+            raise MissingDatasetRecordsError(f"No records index found for dataset {dataset.name}") from e
 
     def scan_dataset(
         self,

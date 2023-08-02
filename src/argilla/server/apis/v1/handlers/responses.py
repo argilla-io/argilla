@@ -56,7 +56,7 @@ async def update_response(
     try:
         return await datasets.update_response(db, search_engine, response, response_update)
     except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err)) from err
 
 
 @router.delete("/responses/{response_id}", response_model=Response)

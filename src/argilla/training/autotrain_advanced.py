@@ -111,8 +111,8 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainMixin):
     try:
         AUTOTRAIN_USERNAME = os.environ["AUTOTRAIN_USERNAME"]
         HF_TOKEN = os.environ["HF_AUTH_TOKEN"]
-    except KeyError:
-        raise KeyError("Please set the `AUTOTRAIN_USERNAME` and `HF_AUTH_TOKEN` environment variables.")
+    except KeyError as e:
+        raise KeyError("Please set the `AUTOTRAIN_USERNAME` and `HF_AUTH_TOKEN` environment variables.") from e
 
     require_version("autotrain-advanced")
     require_version("datasets")

@@ -76,6 +76,6 @@ async def delete_field(
     try:
         await datasets.delete_field(db, field)
     except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err)) from err
 
     return field

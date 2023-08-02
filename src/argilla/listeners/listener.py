@@ -78,7 +78,7 @@ class RGDatasetListener:
             if query:
                 self._LOGGER.debug(f"Initial listener query {query}")
         except KeyError as kex:
-            raise KeyError("Missing query parameter:", kex)
+            raise KeyError("Missing query parameter:", kex) from kex
 
     def is_running(self):
         """True if listener is running"""

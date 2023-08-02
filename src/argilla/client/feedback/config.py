@@ -24,11 +24,11 @@ from pydantic import BaseModel, Field
 
 try:
     from yaml import SafeLoader, dump, load
-except ImportError:
+except ImportError as e:
     raise ImportError(
         "Please make sure to install `PyYAML` in order to use `DatasetConfig`. To do"
         " so you can run `pip install pyyaml`."
-    )
+    ) from e
 
 from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
 

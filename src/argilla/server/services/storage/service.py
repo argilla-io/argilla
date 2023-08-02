@@ -76,7 +76,7 @@ class RecordsStorageService:
             raise BulkDataError(
                 detail=f"Cannot log data in dataset {dataset.id}",
                 errors=ex.errors,
-            )
+            ) from ex
 
     async def delete_records(
         self,

@@ -114,11 +114,11 @@ def require_version(requirement: str, func_name: Optional[str] = None) -> None:
     # check if any version is installed
     try:
         got_version = importlib_metadata.version(package)
-    except importlib_metadata.PackageNotFoundError:
+    except importlib_metadata.PackageNotFoundError as e:
         raise ModuleNotFoundError(
             f"'{package}' must be installed{f' to use `{func_name}`' if func_name else ''}! You can"
             f" install '{package}' with this command: `pip install {requirement}`"
-        )
+        ) from e
 
     # check that the right version is installed if version number or a range was provided
     if want_version is not None:

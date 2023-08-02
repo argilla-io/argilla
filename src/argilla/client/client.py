@@ -367,8 +367,8 @@ class Argilla:
 
         try:
             record_type = type(records[0])
-        except IndexError:
-            raise InputValueError("Empty record list has been passed as argument.")
+        except IndexError as e:
+            raise InputValueError("Empty record list has been passed as argument.") from e
 
         if record_type is TextClassificationRecord:
             bulk_class = TextClassificationBulkData
@@ -664,11 +664,11 @@ class Argilla:
 
         try:
             sdk_record_class, dataset_class = task_config[task]
-        except KeyError:
+        except KeyError as e:
             raise ValueError(
                 f"Load method not supported for the '{task}' task. Supported Tasks: "
                 f"{[TaskType.text_classification, TaskType.token_classification, TaskType.text2text]}"
-            )
+            ) from e
 
         if vector:
             if sort is not None:

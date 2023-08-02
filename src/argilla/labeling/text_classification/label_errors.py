@@ -181,7 +181,9 @@ def _construct_s_and_psx(records: List[TextClassificationRecord]) -> Tuple[np.nd
         try:
             psx[i] = [pred[label] for label in labels_mapping]
         except KeyError as error:
-            raise MissingPredictionError(f"It seems a prediction for {error} is missing in the following record: {rec}")
+            raise MissingPredictionError(
+                f"It seems a prediction for {error} is missing in the following record: {rec}"
+            ) from error
 
         try:
             s[i] = (
@@ -190,7 +192,7 @@ def _construct_s_and_psx(records: List[TextClassificationRecord]) -> Tuple[np.nd
                 else labels_mapping[rec.annotation]
             )
         except KeyError as error:
-            raise MissingPredictionError(f"It seems predictions are missing for the label {error}!")
+            raise MissingPredictionError(f"It seems predictions are missing for the label {error}!") from error
 
     return s, psx
 

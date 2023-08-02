@@ -87,4 +87,4 @@ class ClientAdapterFactory:
 
             return version, distribution
         except Exception as error:
-            raise GenericSearchError(error)
+            raise GenericSearchError(error) from error

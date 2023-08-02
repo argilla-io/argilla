@@ -39,8 +39,8 @@ class UserCreateForTask(UserCreate):
 def role_callback(value: str) -> str:
     try:
         return UserRole(value).value
-    except ValueError:
-        raise typer.BadParameter("Only Camila is allowed")
+    except ValueError as e:
+        raise typer.BadParameter("Only Camila is allowed") from e
 
 
 def password_callback(password: str = None) -> str:
