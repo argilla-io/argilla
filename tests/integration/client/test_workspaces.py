@@ -130,7 +130,7 @@ async def test_workspace_users_not_allowed_role(role: UserRole) -> None:
 
     workspace = Workspace.from_name(name=workspace.name)
     with pytest.raises(PermissionError, match=f"User with role={role} is not allowed to call `users`"):
-        workspace.users
+        workspace.users  # noqa: B018
 
 
 @pytest.mark.asyncio

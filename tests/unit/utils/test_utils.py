@@ -41,7 +41,7 @@ def test_lazy_argilla_module(monkeypatch):
         assert lazy_module.upper() == ".dep_mock_module".upper()
 
     with pytest.raises(AttributeError):
-        lazy_module.not_available_mock
+        lazy_module.not_available_mock  # noqa: B018
 
     assert lazy_module.__reduce__()
 
@@ -59,4 +59,4 @@ def test_lazy_argilla_module_import_error(monkeypatch):
     )
 
     with pytest.raises(RuntimeError, match="Failed to import rb_mock.mock_module"):
-        lazy_module.mock_module
+        lazy_module.mock_module  # noqa: B018
