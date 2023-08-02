@@ -82,7 +82,6 @@ postgresql = [
     # If we're on macOS, then install `psycopg2-binary` instead
     "psycopg2-binary ~= 2.9.5; sys_platform == 'darwin'",
     # Async PostgreSQL
-    "asyncpg >=0.27.0"
 ]
 listeners = ["schedule ~= 1.1.0", "prodict ~= 0.8.0"]
 integrations = [
@@ -107,7 +106,7 @@ integrations = [
     "setfit",
     "span_marker",
     "openai",
-    "peft"
+    "peft",
 ]
 tests = [
     "pytest",
@@ -129,7 +128,9 @@ where = ["src"]
 version = { attr = "argilla.__version__" }
 
 [tool.setuptools.package-data]
-"argilla.client.feedback.integrations.huggingface.card" = ["argilla_template.md"]
+"argilla.client.feedback.integrations.huggingface.card" = [
+    "argilla_template.md",
+]
 
 [tool.pytest.ini_options]
 log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
@@ -163,9 +164,14 @@ select = [
     "W", # pycodestyle warnings
     "F", # pyflakes
     "I", # isort
+    "C", # flake8-comprehensions
+    "B", # flake8-bugbear
 ]
-# Ignore line length violations
-ignore = ["E501"]
+ignore = [
+    "B008", # function calls in argument defaults
+    "C901", # function is too complex
+    "E501", # line too long
+]
 
 # Exclude a variety of commonly ignored directories.
 exclude = [
