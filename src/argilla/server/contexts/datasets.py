@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import and_, delete, func, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
@@ -267,20 +267,35 @@ async def list_records_by_dataset_id_and_user_id(
     dataset_id: UUID,
     user_id: UUID,
     include: List[RecordInclude] = [],
-    response_status: Optional[ResponseStatusFilter] = None,
+    response_statuses: List[ResponseStatusFilter] = [],
     offset: int = 0,
     limit: int = LIST_RECORDS_LIMIT,
 ) -> List[Record]:
+    response_statuses_ = [
+        ResponseStatus(response_status)
+        for response_status in response_statuses
+        if response_status != ResponseStatusFilter.missing
+    ]
+
+    response_status_filter_expressions = []
+
+    if response_statuses_:
+        response_status_filter_expressions.append(Response.status.in_(response_statuses_))
+
+    if ResponseStatusFilter.missing in response_statuses:
+        response_status_filter_expressions.append(Response.status.is_(None))
+
     query = (
         select(Record)
         .filter(Record.dataset_id == dataset_id)
-        .outerjoin(Response, and_(Response.record_id == Record.id, Response.user_id == user_id))
+        .outerjoin(
+            Response,
+            and_(Response.record_id == Record.id, Response.user_id == user_id),
+        )
     )
 
-    if response_status == ResponseStatusFilter.missing:
-        query = query.filter(Response.status == None)  # noqa: E711
-    elif response_status is not None:
-        query = query.filter(Response.status == ResponseStatus(response_status))
+    if response_status_filter_expressions:
+        query = query.filter(or_(*response_status_filter_expressions))
 
     if RecordInclude.responses in include:
         query = query.options(contains_eager(Record.responses))

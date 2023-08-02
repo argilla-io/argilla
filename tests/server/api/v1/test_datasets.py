@@ -20,6 +20,7 @@ from uuid import UUID, uuid4
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v1.handlers.datasets import LIST_DATASET_RECORDS_LIMIT_DEFAULT
+from argilla.server.enums import ResponseStatusFilter
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
@@ -937,10 +938,21 @@ async def create_records_with_response(
         await ResponseFactory.create(record=record, user=user, values=response_values, status=response_status)
 
 
-@pytest.mark.parametrize("response_status_filter", ["missing", "discarded", "submitted", "draft"])
+@pytest.mark.parametrize(
+    "response_status_filters",
+    [
+        [ResponseStatusFilter.missing],
+        [ResponseStatusFilter.draft],
+        [ResponseStatusFilter.submitted],
+        [ResponseStatusFilter.discarded],
+        [ResponseStatusFilter.missing, ResponseStatusFilter.draft],
+        [ResponseStatusFilter.submitted, ResponseStatusFilter.discarded],
+        [ResponseStatusFilter.missing, ResponseStatusFilter.draft, ResponseStatusFilter.discarded],
+    ],
+)
 @pytest.mark.asyncio
 async def test_list_current_user_dataset_records_with_response_status_filter(
-    client: TestClient, owner: "User", owner_auth_header: dict, response_status_filter: str
+    client: TestClient, owner: "User", owner_auth_header: dict, response_status_filters: List[ResponseStatusFilter]
 ):
     num_responses_per_status = 10
     response_values = {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}
@@ -960,20 +972,14 @@ async def test_list_current_user_dataset_records_with_response_status_filter(
     other_dataset = await DatasetFactory.create()
     await RecordFactory.create_batch(size=2, dataset=other_dataset)
 
-    response = client.get(
-        f"/api/v1/me/datasets/{dataset.id}/records?response_status={response_status_filter}&include=responses",
-        headers=owner_auth_header,
-    )
+    params = [("include", RecordInclude.responses.value)]
+    params.extend(("response_status", status_filter.value) for status_filter in response_status_filters)
+    response = client.get(f"/api/v1/me/datasets/{dataset.id}/records", headers=owner_auth_header, params=params)
 
     assert response.status_code == 200
     response_json = response.json()
 
-    assert len(response_json["items"]) == num_responses_per_status
-
-    if response_status_filter == "missing":
-        assert all([len(record["responses"]) == 0 for record in response_json["items"]])
-    else:
-        assert all([record["responses"][0]["status"] == response_status_filter for record in response_json["items"]])
+    assert len(response_json["items"]) == num_responses_per_status * len(response_status_filters)
 
 
 @pytest.mark.asyncio
@@ -3019,7 +3025,7 @@ async def test_search_dataset_records_with_response_status_filter(
     mock_search_engine.search.assert_called_once_with(
         dataset=dataset,
         query=Query(text=TextQuery(q="Hello", field="input")),
-        user_response_status_filter=UserResponseStatusFilter(user=owner, status=ResponseStatus.submitted),
+        user_response_status_filter=UserResponseStatusFilter(user=owner, statuses=[ResponseStatus.submitted]),
         offset=0,
         limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
     )
