@@ -334,6 +334,8 @@ test.describe("Annotation page shortcuts", () => {
       await page.getByText("Negative").nth(1).click();
       await page.getByText("Neutral").nth(1).click();
 
+      await page.getByText("Hurt").scrollIntoViewIfNeeded();
+
       await expect(page).toHaveScreenshot();
     });
 
@@ -604,10 +606,16 @@ test.describe("Annotation page shortcuts", () => {
       await page
         .locator("#sentiment-multi-label_positive")
         .press("Shift+ArrowDown");
+
       await page.getByLabel("1").press("Shift+ArrowDown");
+
       await page
         .getByText("This is a review of the review")
         .press("Shift+ArrowDown");
+
+      await page
+        .locator(".draggable__questions-container")
+        .scrollIntoViewIfNeeded();
 
       await expect(page).toHaveScreenshot();
     });
@@ -631,6 +639,11 @@ test.describe("Annotation page shortcuts", () => {
       await page
         .getByText("This is a review of the review")
         .press("Meta+Shift+ArrowRight");
+
+      await page
+        .getByText("This is a review of the review")
+        .scrollIntoViewIfNeeded();
+
       await page.getByText("This is a review of the review").fill("TEST");
 
       await expect(page).toHaveScreenshot();
@@ -649,6 +662,10 @@ test.describe("Annotation page shortcuts", () => {
         .press("Shift+ArrowDown");
 
       await page.getByTitle("Option A").press("2");
+
+      await page
+        .locator(".draggable__questions-container")
+        .scrollIntoViewIfNeeded();
 
       await expect(page).toHaveScreenshot();
     });
@@ -697,11 +714,18 @@ test.describe("Annotation page shortcuts", () => {
 
       await page.getByTitle("Option A").press("2");
 
+      await page.waitForTimeout(300);
+
       await page.getByTitle("Option B").press("1");
 
+      await page.waitForTimeout(300);
+
       await page.getByTitle("Option C").press("4");
+      await page.waitForTimeout(300);
 
       await page.getByTitle("Option D").press("3");
+
+      await page.waitForTimeout(300);
 
       await expect(page).toHaveScreenshot();
     });
