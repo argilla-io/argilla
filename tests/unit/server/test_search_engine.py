@@ -426,6 +426,41 @@ class TestSuiteElasticSearchEngine:
         es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
         assert es_docs == [{"id": str(record.id), "fields": record.fields, "responses": {}} for record in records]
 
+    async def test_delete_records(self, elastic_search_engine: SearchEngine, opensearch: OpenSearch):
+        text_fields = await TextFieldFactory.create_batch(5)
+        dataset = await DatasetFactory.create(fields=text_fields, questions=[])
+        records = await RecordFactory.create_batch(
+            size=10,
+            dataset=dataset,
+            fields={field.name: f"This is the value for {field.name}" for field in text_fields},
+            responses=[],
+        )
+
+        await elastic_search_engine.create_index(dataset)
+        await elastic_search_engine.add_records(dataset, records)
+
+        records_to_delete, records_to_keep = records[:5], records[5:]
+        await elastic_search_engine.delete_records(dataset, records_to_delete)
+
+        index_name = f"rg.{dataset.id}"
+        opensearch.indices.refresh(index=index_name)
+
+        deleted_docs = [
+            hit["_source"]
+            for hit in opensearch.search(
+                index=index_name, body={"query": {"ids": {"values": [str(record.id) for record in records_to_delete]}}}
+            )["hits"]["hits"]
+        ]
+        assert len(deleted_docs) == 0
+
+        es_docs = [
+            hit["_source"]
+            for hit in opensearch.search(
+                index=index_name, body={"query": {"ids": {"values": [str(record.id) for record in records_to_keep]}}}
+            )["hits"]["hits"]
+        ]
+        assert len(records_to_keep) == 5
+
     async def test_update_record_response(
         self,
         elastic_search_engine: SearchEngine,
