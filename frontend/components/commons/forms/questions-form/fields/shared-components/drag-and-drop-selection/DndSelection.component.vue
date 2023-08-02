@@ -12,7 +12,7 @@
         class="draggable__rank-card--unranked"
         :title="item.text"
         tabindex="0"
-        ref="question"
+        ref="questions"
         @keydown="rankWithKeyboard($event, item)"
         @focus="onFocus"
       >
@@ -142,7 +142,7 @@ export default {
     },
     focusOnFirstQuestionOrItem() {
       this.$nextTick(() => {
-        const firstQuestion = this.$refs.question?.find(
+        const firstQuestion = this.$refs.questions?.find(
           ({ innerText }) => innerText == this.ranking.questions[0]?.text
         );
 
@@ -163,8 +163,8 @@ export default {
     },
     onAutoFocusFirstItem() {
       this.$nextTick(() => {
-        if (this.$refs.question && this.$refs.question[0]) {
-          this.$refs.question[0].focus();
+        if (this.$refs.questions && this.$refs.questions[0]) {
+          this.$refs.questions[0].focus();
         } else {
           this.$refs.items[0].focus();
         }
