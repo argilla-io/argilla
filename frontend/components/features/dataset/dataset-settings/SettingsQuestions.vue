@@ -1,46 +1,44 @@
 <template>
-  <div>
-    <h2 class="--heading5 --semibold">Edit questions</h2>
-    <div class="settings-questions__container">
-      <div class="settings-questions__edition-form">
-        <div v-for="question in settings.questions" :key="question.id">
-          <form
-            @submit.prevent="onSubmit"
-            class="settings-questions__edition-form-questions"
-          >
-            <div class="settings-questions__edition-form-name">
-              <h4
-                class="--heading6 --semibold --capitalized"
-                v-text="question.name"
-              />
-              <p class="badge --capitalized" v-html="question.type" />
-            </div>
-            <div class="settings-questions__edition-form-group">
-              <label for="question.id">Title</label>
-              <input type="type" id="question.id" v-model="question.title" />
-            </div>
+  <div class="settings-questions__container">
+    <div class="settings-questions__edition-form">
+      <h2 class="--heading5 --semibold">Edit questions</h2>
+      <div v-for="question in settings.questions" :key="question.id">
+        <form
+          @submit.prevent="onSubmit"
+          class="settings-questions__edition-form-questions"
+        >
+          <div class="settings-questions__edition-form-name">
+            <h4
+              class="--heading6 --semibold --capitalized"
+              v-text="question.name"
+            />
+            <p class="badge --capitalized" v-html="question.type" />
+          </div>
+          <div class="settings-questions__edition-form-group">
+            <label for="question.id">Title</label>
+            <input type="type" id="question.id" v-model="question.title" />
+          </div>
 
-            <div class="settings-questions__edition-form-group">
-              <label for="question.id">Description</label>
-              <input type="text" v-model="question.description" />
-            </div>
+          <div class="settings-questions__edition-form-group">
+            <label for="question.id">Description</label>
+            <input type="text" v-model="question.description" />
+          </div>
 
-            <div class="settings-questions__edition-form-footer">
-              <BaseButton type="button" class="primary outline">
-                <span v-text="'Cancel'" />
-              </BaseButton>
-              <BaseButton type="submit" class="primary">
-                <span v-text="'Update'" />
-              </BaseButton>
-            </div>
-          </form>
-        </div>
+          <div class="settings-questions__edition-form-footer">
+            <BaseButton type="button" class="secondary light small">
+              <span v-text="'Cancel'" />
+            </BaseButton>
+            <BaseButton type="submit" class="primary small">
+              <span v-text="'Update'" />
+            </BaseButton>
+          </div>
+        </form>
       </div>
-      <QuestionsComponent
-        class="settings-questions__preview"
-        :questions="settings.questions"
-      />
     </div>
+    <QuestionsComponent
+      class="settings-questions__preview"
+      :questions="settings.questions"
+    />
   </div>
 </template>
 
@@ -62,9 +60,11 @@ export default {
 .settings-questions {
   &__container {
     display: flex;
-    gap: $base-space * 2;
+    gap: $base-space * 4;
     height: 100%;
     width: 100%;
+    flex-wrap: wrap;
+    min-height: 0;
   }
 
   &__edition-form {
@@ -73,6 +73,8 @@ export default {
     flex-direction: column;
     gap: $base-space * 2;
     height: 100%;
+    overflow: auto;
+    padding-right: $base-space * 2;
 
     &-questions {
       display: flex;
@@ -121,7 +123,7 @@ export default {
       padding: $base-space * 2 0;
       border-bottom: 1px solid $black-10;
       display: inline-flex;
-      gap: $base-space * 2;
+      gap: $base-space;
     }
   }
 
