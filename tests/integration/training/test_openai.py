@@ -31,7 +31,7 @@ def test_update_config(dataset_text_classification):
     assert trainer._trainer.model_kwargs["prompt_loss_weight"] == 1
 
 
-def test_setfit_train(dataset_text_classification):
+def test_openai_train(dataset_text_classification):
     ArgillaTrainer(name=dataset_text_classification, model=MODEL, framework=FRAMEWORK)
 
 
