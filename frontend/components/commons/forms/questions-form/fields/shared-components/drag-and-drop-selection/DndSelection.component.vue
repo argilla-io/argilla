@@ -82,7 +82,19 @@ export default {
     isFocused: {
       immediate: true,
       handler(newValue) {
-        !!newValue && this.focusOnFirstQuestionOrItem();
+         const questionsWrapper = this.$refs.questions;
+         const itemsWrapper = this.$refs.items;
+
+         const activeElementIsAQuestion = questionsWrapper?.includes(
+           document.activeElement
+         );
+         const activeElementIsAnItem = itemsWrapper?.includes(
+           document.activeElement
+         );
+
+         if (newValue && !activeElementIsAQuestion && !activeElementIsAnItem) {
+           this.focusOnFirstQuestionOrItem();
+         }
       },
     },
   },
