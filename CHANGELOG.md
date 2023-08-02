@@ -18,7 +18,7 @@ These are the section headers that we use:
 
 ### Fixed
 
-- Dataset settings (text and token classification) are properly parsed to strings for clients and for the backend endpoint (Closes [3495](https://github.com/argilla-io/argilla/issues/3495)).
+  - `TextClassificationSettings` and `TokenClassificationSettings` labels are properly parsed to strings both in the Python client and in the backend endpoint (Closes [#3495](https://github.com/argilla-io/argilla/issues/3495)).
 
 ### Added
 
