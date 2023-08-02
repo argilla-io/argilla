@@ -8,10 +8,7 @@
           class="settings-fields__edition-form-fields"
         >
           <div class="settings-fields__edition-form-name">
-            <h4
-              class="--heading6 --semibold --capitalized"
-              v-text="field.name"
-            />
+            <h4 class="--body1 --medium --capitalized" v-text="field.name" />
           </div>
           <div class="settings-fields__edition-form-group">
             <label for="field.id">Title</label>
@@ -56,7 +53,7 @@ export default {
     display: flex;
     gap: $base-space * 4;
     height: 100%;
-    width: 100%;
+    max-width: 1000px;
     flex-wrap: wrap;
     min-height: 0;
   }
@@ -81,6 +78,9 @@ export default {
       flex-direction: row;
       align-items: center;
       gap: $base-space * 2;
+      h4 {
+        margin: 0;
+      }
     }
 
     &-group {

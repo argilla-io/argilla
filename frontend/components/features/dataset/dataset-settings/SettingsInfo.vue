@@ -50,6 +50,8 @@ export default {
 <styles lang="scss" scoped>
 .settings {
   &__area {
+    max-width: 1000px;
+    padding-bottom: $base-space * 3;
     border-bottom: 1px solid $black-10;
   }
 

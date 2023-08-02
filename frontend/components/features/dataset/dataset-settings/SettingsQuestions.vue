@@ -8,10 +8,7 @@
           class="settings-questions__edition-form-questions"
         >
           <div class="settings-questions__edition-form-name">
-            <h4
-              class="--heading6 --semibold --capitalized"
-              v-text="question.name"
-            />
+            <h4 class="--body1 --medium --capitalized" v-text="question.name" />
             <p class="badge --capitalized" v-html="question.type" />
           </div>
           <div class="settings-questions__edition-form-group">
@@ -68,7 +65,6 @@ export default {
     display: flex;
     gap: $base-space * 4;
     height: 100%;
-    width: 100%;
     flex-wrap: wrap;
     min-height: 0;
   }
@@ -93,6 +89,9 @@ export default {
       flex-direction: row;
       align-items: center;
       gap: $base-space * 2;
+      h4 {
+        margin: 0;
+      }
     }
 
     &-group {
