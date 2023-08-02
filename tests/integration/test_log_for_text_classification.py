@@ -59,7 +59,7 @@ def test_log_records_with_multi_and_single_label_task(api: Argilla):
         )
 
     api.log(records[0], name=dataset)
-    with pytest.raises(Exception):
+    with pytest.raises(BadRequestApiError):
         api.log(records[1], name=dataset)
 
 

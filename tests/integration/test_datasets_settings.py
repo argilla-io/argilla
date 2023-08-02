@@ -64,7 +64,7 @@ def test_settings_workflow(
     datasets_api = current_api.datasets
 
     found_settings = datasets_api.load_settings(dataset)
-    assert {label for label in found_settings.label_schema} == {str(label) for label in settings_.label_schema}
+    assert set(found_settings.label_schema) == {str(label) for label in settings_.label_schema}
 
     settings_.label_schema = {"LALALA"}
     configure_dataset(dataset, settings_, workspace=workspace)

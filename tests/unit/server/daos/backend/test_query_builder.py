@@ -79,7 +79,7 @@ def test_build_sort_with_wrong_field_name():
         }
     }
 
-    with pytest.raises(Exception):
+    with pytest.raises(AssertionError):
         builder.map_2_es_sort_configuration(schema=index_schema, sort=SortConfig(sort_by=[SortableField(id="wat?!")]))
 
 

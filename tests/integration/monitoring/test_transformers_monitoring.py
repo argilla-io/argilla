@@ -17,6 +17,7 @@ from typing import List, Union
 import argilla
 import pytest
 from argilla.client.models import TextClassificationRecord
+from argilla.client.sdk.commons.errors import NotFoundApiError
 
 
 def test_classifier_monitoring_with_all_scores(
@@ -276,7 +277,7 @@ def test_monitor_zero_shot_with_multilabel(
         multi_label=True,
     )
 
-    with pytest.raises(Exception):
+    with pytest.raises(NotFoundApiError):
         argilla.load(dataset)
 
     check_zero_shot_results(

@@ -32,7 +32,7 @@ def test_wrong_hostname_values(
     raises_error: bool,
 ):
     if raises_error:
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             Client(base_url=url)
     else:
         client = Client(base_url=url)

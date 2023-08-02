@@ -488,7 +488,7 @@ class TestSuiteElasticSearchEngine:
         ]
         assert len(deleted_docs) == 0
 
-        es_docs = [
+        [
             hit["_source"]
             for hit in opensearch.search(
                 index=index_name, body={"query": {"ids": {"values": [str(record.id) for record in records_to_keep]}}}
