@@ -16,9 +16,10 @@ import dataclasses
 import datetime
 import functools
 import json
+import sys
 import uuid
 from json import JSONEncoder
-from typing import Dict, Optional, TypeVar
+from typing import Any, Callable, Dict, Optional, TypeVar
 from urllib.parse import urlparse
 
 import httpx
@@ -26,6 +27,11 @@ import httpx
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.client.sdk._helpers import build_raw_response
 from argilla.client.sdk.commons.errors import BaseClientError
+
+if sys.version_info >= (3, 10):
+    from typing import Concatenate, ParamSpec
+else:
+    from typing_extensions import Concatenate, ParamSpec
 
 
 @dataclasses.dataclass
@@ -89,6 +95,23 @@ class _EnhancedJSONEncoder(JSONEncoder):
         return super().default(o)
 
 
+_P = ParamSpec("_P")
+_R = TypeVar("_R")
+
+
+def with_httpx_error_handler(func: Callable[Concatenate[Any, _P], _R]) -> Callable[Concatenate[Any, _P], _R]:
+    @functools.wraps(func)
+    def inner(self, *args: _P.args, **kwargs: _P.kwargs) -> _R:
+        try:
+            result = func(self, *args, **kwargs)
+            return result
+        except httpx.ConnectError as e:
+            err_str = f"Your Api endpoint at {self.base_url} is not available or not responding."
+            raise BaseClientError(err_str) from e
+
+    return inner
+
+
 @dataclasses.dataclass
 class Client(_ClientCommonDefaults, _Client):
     def __post_init__(self):
@@ -112,21 +135,6 @@ class Client(_ClientCommonDefaults, _Client):
 
     def __hash__(self):
         return hash(self.base_url)
-
-    def with_httpx_error_handler(func):
-        def wrap_error(base_url: str):
-            err_str = f"Your Api endpoint at {base_url} is not available or not responding."
-            raise BaseClientError(err_str) from None
-
-        @functools.wraps(func)
-        def inner(self, *args, **kwargs):
-            try:
-                result = func(self, *args, **kwargs)
-                return result
-            except httpx.ConnectError as err:  # noqa: F841
-                return wrap_error(self.base_url)
-
-        return inner
 
     @with_httpx_error_handler
     def get(self, path: str, *args, **kwargs):
