@@ -21,6 +21,7 @@ These are the section headers that we use:
 - Added `PATCH /api/v1/fields/{field_id}` endpoint to update the field title and markdown settings ([#3421](https://github.com/argilla-io/argilla/pull/3421)).
 - Added `PATCH /api/v1/datasets/{dataset_id}` endpoint to update dataset name and guidelines ([#3402](https://github.com/argilla-io/argilla/pull/3402)).
 - Added `PATCH /api/v1/questions/{question_id}` endpoint to update question title, description and some settings (depending on the type of question) ([#3477](https://github.com/argilla-io/argilla/pull/3477)).
+- Added `DELETE /api/v1/records/{record_id}` endpoint to remove a record given its ID ([#3337](https://github.com/argilla-io/argilla/pull/3337)).
 
 ### Changed
 
