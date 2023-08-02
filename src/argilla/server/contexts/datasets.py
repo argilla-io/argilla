@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import and_, delete, func, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts

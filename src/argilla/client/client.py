@@ -127,6 +127,7 @@ class Argilla:
                 " want to setup another workspace, use the `rg.set_workspace` function"
                 " or provide a different one on `rg.init`",
                 category=UserWarning,
+                stacklevel=1,
             )
             workspace = DEFAULT_USERNAME
         if workspace:
@@ -137,6 +138,7 @@ class Argilla:
                 " datasets, specify a valid workspace name on `rg.init` or set it"
                 " up through the `rg.set_workspace` function.",
                 category=UserWarning,
+                stacklevel=1,
             )
 
         self._check_argilla_versions()
@@ -156,6 +158,7 @@ class Argilla:
                 "To ensure a seamless and optimized connection, we highly recommend "
                 "aligning your client version with the server version.",
                 category=UserWarning,
+                stacklevel=1,
             )
 
     def __del__(self):
@@ -168,6 +171,7 @@ class Argilla:
         warnings.warn(
             message="This prop will be removed in next release. Please use the http_client prop instead.",
             category=UserWarning,
+            stacklevel=1,
         )
         return self._client
 
@@ -346,6 +350,7 @@ class Argilla:
                 "The argument `chunk_size` is deprecated and will be removed in a future"
                 " version. Please use `batch_size` instead.",
                 FutureWarning,
+                stacklevel=1,
             )
             batch_size = chunk_size
 
@@ -353,6 +358,7 @@ class Argilla:
             warnings.warn(
                 "The requested batch size is noticeably large, timeout errors may occur. "
                 f"Consider a batch size smaller than {self._MAX_BATCH_SIZE}",
+                stacklevel=1,
             )
 
         if isinstance(records, Record.__args__):
@@ -520,6 +526,7 @@ class Argilla:
                 "The argument `as_pandas` is deprecated and will be removed in a future"
                 " version. Please adapt your code accordingly. ",
                 FutureWarning,
+                stacklevel=1,
             )
         elif as_pandas is True:
             raise ValueError(

@@ -58,6 +58,7 @@ class DeprecatedDatasetConfig(BaseModel):
             " dumping to a YAML file instead of a JSON file. `DatasetConfig` will come"
             " in YAML format from now on, instead of JSON format.",
             DeprecationWarning,
+            stacklevel=1,
         )
         return self.json()
 
@@ -68,5 +69,6 @@ class DeprecatedDatasetConfig(BaseModel):
             " loading a YAML file instead of a JSON file. `DatasetConfig` will be dumped"
             " as YAML from now on, instead of JSON.",
             DeprecationWarning,
+            stacklevel=1,
         )
         return cls.parse_raw(json)

@@ -124,7 +124,8 @@ def _check_and_update_kwargs(version: str, record: TextClassificationRecord, sor
     if "multi_label" in kwargs:
         warnings.warn(
             "You provided the kwarg 'multi_label', but it is determined automatically. "
-            f"We will set it to '{record.multi_label}'."
+            f"We will set it to '{record.multi_label}'.",
+            stacklevel=1,
         )
     kwargs["multi_label"] = record.multi_label
 
@@ -148,7 +149,8 @@ def _check_and_update_kwargs(version: str, record: TextClassificationRecord, sor
         elif kwargs["multi_label"]:
             warnings.warn(
                 "With cleanlab v2 and multi-label records there is an issue sorting records by 'likelihood' "
-                "(https://github.com/cleanlab/cleanlab/issues/243). We will sort by 'prediction' instead."
+                "(https://github.com/cleanlab/cleanlab/issues/243). We will sort by 'prediction' instead.",
+                stacklevel=1,
             )
             kwargs["return_indices_ranked_by"] = "self_confidence"
 

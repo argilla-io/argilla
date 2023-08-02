@@ -45,7 +45,7 @@ def tokens_length(name: str, query: Optional[str] = None, interval: int = 1) -> 
         >>> summary.visualize() # will plot a histogram with results
         >>> summary.data # the raw histogram data with bins of size 5
     """
-    warnings.warn(message=_UNUSED_METRIC_WARNING_MESSAGE, category=DeprecationWarning)
+    warnings.warn(message=_UNUSED_METRIC_WARNING_MESSAGE, category=DeprecationWarning, stacklevel=1)
 
     metric = api.active_api().compute_metric(name, metric="tokens_length", query=query, interval=interval)
 
@@ -105,7 +105,7 @@ def token_length(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> summary.visualize() # will plot a histogram with results
         >>> summary.data # The token length distribution
     """
-    warnings.warn(message=_UNUSED_METRIC_WARNING_MESSAGE, category=DeprecationWarning)
+    warnings.warn(message=_UNUSED_METRIC_WARNING_MESSAGE, category=DeprecationWarning, stacklevel=1)
 
     metric = api.active_api().compute_metric(name, metric="token_length", query=query)
 
@@ -211,7 +211,7 @@ def mention_length(
         >>> summary.visualize() # will plot a histogram chart with results
         >>> summary.data # the raw histogram data with bins of size 2
     """
-    warnings.warn(message=_UNUSED_METRIC_WARNING_MESSAGE, category=DeprecationWarning)
+    warnings.warn(message=_UNUSED_METRIC_WARNING_MESSAGE, category=DeprecationWarning, stacklevel=1)
 
     level = (level or "token").lower().strip()
     accepted_levels = ["token", "char"]
@@ -295,7 +295,7 @@ def entity_density(
         >>> summary.visualize()
     """
 
-    warnings.warn(message=_UNUSED_METRIC_WARNING_MESSAGE, category=DeprecationWarning)
+    warnings.warn(message=_UNUSED_METRIC_WARNING_MESSAGE, category=DeprecationWarning, stacklevel=1)
 
     metric = api.active_api().compute_metric(
         name,
@@ -358,10 +358,7 @@ def entity_capitalness(
 @deprecated.deprecated(reason="Use `top_k_mentions` instead")
 def entity_consistency(*args, **kwargs):
     message = "This function is not used anymore.\nYou should use the top_k_mentions function instead"
-    warnings.warn(
-        message=message,
-        category=DeprecationWarning,
-    )
+    warnings.warn(message=message, category=DeprecationWarning, stacklevel=1)
     return MetricSummary.new_summary(
         data={},
         visualization=lambda: helpers.empty_visualization(),
