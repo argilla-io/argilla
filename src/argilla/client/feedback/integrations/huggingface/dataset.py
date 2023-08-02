@@ -325,7 +325,7 @@ class HuggingFaceDatasetMixin:
                 " the `DatasetConfig` as `argilla.yaml` to the HuggingFace Hub."
             ) from e
 
-        hfds = load_dataset(repo_id, use_auth_token=auth, *args, **kwargs)
+        hfds = load_dataset(repo_id, *args, use_auth_token=auth, **kwargs)
         if isinstance(hfds, DatasetDict) and "split" not in kwargs:
             if len(hfds.keys()) > 1:
                 raise ValueError(

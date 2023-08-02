@@ -132,9 +132,9 @@ class Client(_ClientCommonDefaults, _Client):
     def get(self, path: str, *args, **kwargs):
         path = self._normalize_path(path)
         response = self.__httpx__.get(
+            *args,
             url=path,
             headers=self.get_headers(),
-            *args,
             **kwargs,
         )
         return build_raw_response(response).parsed
@@ -150,10 +150,10 @@ class Client(_ClientCommonDefaults, _Client):
         path = self._normalize_path(path)
         body = self._normalize_body(json)
         response = self.__httpx__.patch(
+            *args,
             url=path,
             headers=self.get_headers(),
             json=body,
-            *args,
             **kwargs,
         )
         return build_raw_response(response).parsed
@@ -169,10 +169,10 @@ class Client(_ClientCommonDefaults, _Client):
         path = self._normalize_path(path)
         body = self._normalize_body(json)
         response = self.__httpx__.post(
+            *args,
             url=path,
             headers=self.get_headers(),
             json=body,
-            *args,
             **kwargs,
         )
         return build_raw_response(response).parsed
@@ -188,10 +188,10 @@ class Client(_ClientCommonDefaults, _Client):
         path = self._normalize_path(path)
         body = self._normalize_body(json)
         response = self.__httpx__.put(
+            *args,
             url=path,
             headers=self.get_headers(),
             json=body,
-            *args,
             **kwargs,
         )
         return build_raw_response(response).parsed
@@ -207,11 +207,11 @@ class Client(_ClientCommonDefaults, _Client):
         path = self._normalize_path(path)
         body = self._normalize_body(json)
         response = self.__httpx__.request(
+            *args,
             method="DELETE",
             url=path,
             headers=self.get_headers(),
             json=body,
-            *args,
             **kwargs,
         )
         return build_raw_response(response).parsed
