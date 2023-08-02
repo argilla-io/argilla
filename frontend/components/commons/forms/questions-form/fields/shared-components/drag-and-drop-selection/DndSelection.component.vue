@@ -82,7 +82,7 @@ export default {
     isFocused: {
       immediate: true,
       handler(newValue) {
-        !!newValue && this.focusOnFirstQuestion();
+        !!newValue && this.focusOnFirstQuestionOrItem();
       },
     },
   },
@@ -96,7 +96,7 @@ export default {
       this.keyCode += event.key;
 
       if (this.onUnRankFor(event.key, questionToMove)) {
-        this.focusOnFirstQuestion();
+        this.focusOnFirstQuestionOrItem();
         this.keyCode = "";
         return;
       }
@@ -122,7 +122,7 @@ export default {
 
         this.timer = setTimeout(() => {
           this.$nextTick(() => {
-            this.focusOnFirstQuestion();
+            this.focusOnFirstQuestionOrItem();
             this.keyCode = "";
             this.timer = null;
           });
@@ -140,7 +140,7 @@ export default {
 
       return false;
     },
-    focusOnFirstQuestion() {
+    focusOnFirstQuestionOrItem() {
       this.$nextTick(() => {
         const firstQuestion = this.$refs.question?.find(
           ({ innerText }) => innerText == this.ranking.questions[0]?.text
