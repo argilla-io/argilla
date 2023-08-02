@@ -12,7 +12,7 @@
       <div class="left">
         <slot name="left">here is the left content</slot>
       </div>
-      <div class="right">
+      <div class="right" v-if="!!this.$slots.right">
         <slot name="right">here is the right content</slot>
       </div>
     </main>

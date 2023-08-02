@@ -20,7 +20,7 @@ dependencies:
   # we need this to ensure syntax highlighting in the notebook code cells for the docs
   - ipython<8.0.0
   # for building the frontend
-  - nodejs~=14.17.0
+  - nodejs~=18.16.0
   - pip:
       # docs
       - sphinx==4.5.0
@@ -54,6 +54,6 @@ dependencies:
       - openai
       - peft
       - autotrain-advanced==0.5.2
-      - rich==13.0.1
+      - rich!=13.1.0
       # install Argilla in editable mode
       - -e .[server,listeners]

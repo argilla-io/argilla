@@ -50,7 +50,7 @@ You can define your questions using the Python SDK and set up the following conf
 
 The following arguments apply to specific question types:
 
-- `values`: In the `RatingQuestion` this will be any list of unique integers that represent the options that annotators can choose from. It doesn't matter whether these are positive, negative, sequential or not. In the `RankingQuestion`, values will be a list of strings with the options they will need to rank. If you'd like the text of the options to be different in the UI and internally, you can pass a dictionary instead where the key is the internal name and the value the text to display in the UI.
+- `values`: In the `RatingQuestion` this will be any list of unique integers that represent the options that annotators can choose from. These values must be defined in the range [1, 10]. In the `RankingQuestion`, values will be a list of strings with the options they will need to rank. If you'd like the text of the options to be different in the UI and internally, you can pass a dictionary instead where the key is the internal name and the value the text to display in the UI.
 - `labels`: In `LabelQuestion` and `MultiLabelQuestion` this is a list of strings with the options for these questions. If you'd like the text of the labels to be different in the UI and internally, you can pass a dictionary instead where the key is the internal name and the value the text to display in the UI.
 - `visible_labels` (optional): In `LabelQuestion` and `MultiLabelQuestion` this is the number of labels that will be visible in the UI. By default, the UI will show 20 labels and collapse the rest. Set your preferred number to change this limit or set `visible_labels=None` to show all options.
 - `use_markdown` (optional): In `TextQuestion` define whether the field should render markdown text. Defaults to `False`.
@@ -137,7 +137,8 @@ The next step is to create records following Argilla's `FeedbackRecord` format. 
 - `fields`: A dictionary with the name (key) and content (value) of each of the fields in the record. These will need to match the fields set up in the dataset configuration (see [Define record fields](#define-record-fields)).
 - `metadata` (optional): A dictionary with the metadata of the record. This can include any information about the record that is not part of the fields. For example, the source of the record or the date it was created. If there is no metadata, this will be `None`.
 - `external_id` (optional): An ID of the record defined by the user. If there is no external ID, this will be `None`.
-- `responses` (optional): A list of all responses to a record. There is no need to configure this when creating a record, it will be filled automatically with the responses collected from the Argilla UI.
+- `suggestions`(optional): A list of all suggested responses for a record e.g., model predictions or other helpful hints for the annotators. Just one suggestion can be provided for each question, and suggestion values must be compliant with the pre-defined questions e.g. if we have a `RatingQuestion` between 1 and 5, the suggestion should have a valid value within that range. If suggestions are added, they will appear in the UI as pre-filled responses.
+- `responses` (optional): A list of all responses to a record. You will only need to add them if your dataset already has some annotated records. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered. Also make sure to include `user_id`s in case you're planning to add more than one response for the same question, as only one `user_id` can be None, later to be replaced by the current active `user_id`, while the rest will be discarded otherwise.
 
 ```python
 # create a single Feedback Record
@@ -157,12 +158,224 @@ As an example, here is how you can transform a whole dataset into records at onc
 records = [rg.FeedbackRecord(fields={"question": record["instruction"], "answer": record["response"]}) for record in hf_dataset if record["category"]=="open_qa"]
 ```
 
+
 Now, we simply add our records to the dataset we configured [above](#configure-the-dataset):
 
 ```python
 #add records to the dataset
 dataset.add_records(records)
 ```
+
+## Add suggestions
+
+Suggestions refer to suggested responses (e.g. model predictions) that you can add to your records to make the annotation process faster. These can be added during the creation of the record or at a later stage. Only one suggestion can be provided for each question, and suggestion values must be compliant with the pre-defined questions e.g. if we have a `RatingQuestion` between 1 and 5, the suggestion should have a valid value within that range.
+
+::::{tab-set}
+
+:::{tab-item} Label
+
+```python
+record = rg.FeedbackRecord(
+    fields=...,
+    suggestions = [
+        {
+            "question_name": "relevant",
+            "value": "YES",
+        }
+    ]
+)
+```
+:::
+
+:::{tab-item} Multi-label
+
+```python
+record = rg.FeedbackRecord(
+    fields=...,
+    suggestions = [
+        {
+            "question_name": "content_class",
+            "value": ["hate", "violent"]
+        }
+    ]
+)
+```
+
+:::
+
+:::{tab-item} Ranking
+
+```python
+record = rg.FeedbackRecord(
+    fields=...,
+    suggestions = [
+        {
+            "question_name": "preference",
+            "value":[
+                {"rank": 1, "value": "reply-2"},
+                {"rank": 2, "value": "reply-1"},
+                {"rank": 3, "value": "reply-3"},
+            ],
+        }
+    ]
+)
+```
+
+:::
+
+:::{tab-item} Rating
+
+```python
+record = rg.FeedbackRecord(
+    fields=...,
+    suggestions = [
+        {
+            "question_name": "quality",
+            "value": 5,
+        }
+    ]
+)
+```
+
+:::
+
+:::{tab-item} Text
+
+```python
+record = rg.FeedbackRecord(
+    fields=...,
+    suggestions = [
+        {
+            "question_name": "corrected-text",
+            "value": "This is a *suggestion*.",
+        }
+    ]
+)
+```
+
+:::
+
+::::
+
+You can also add suggestions to existing records that have been already pushed to Argilla:
+
+```python
+import argilla as rg
+
+rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
+
+dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_workspace")
+
+for record in dataset.records:
+    record.set_suggestions([{"question_name": "question", "value": ...}])
+
+dataset.push_to_argilla() # No need to provide `name` and `workspace` as has been retrieved via `from_argilla` classmethod
+```
+
+## Add responses
+If your dataset includes some annotations, you can add those to the records as you create them. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered. Note that just one response with an empty `user_id` can be specified, as the first occurrence of `user_id=None` will be set to the active `user_id`, while the rest of the responses with `user_id=None` will be discarded.
+
+::::{tab-set}
+
+:::{tab-item} Label
+
+```python
+record = rg.FeedbackRecord(
+    fields=...,
+    responses = [
+        {
+            "values":{
+                "relevant":{
+                    "value": "YES"
+                }
+            }
+        }
+    ]
+)
+```
+:::
+
+:::{tab-item} Multi-label
+
+```python
+record = rg.FeedbackRecord(
+    fields=...,
+    responses = [
+        {
+            "values":{
+                "content_class":{
+                    "value": ["hate", "violent"]
+                }
+            }
+        }
+    ]
+)
+```
+
+:::
+
+:::{tab-item} Ranking
+
+```python
+record = rg.FeedbackRecord(
+    fields=...,
+    responses = [
+        {
+            "values":{
+                "preference":{
+                    "value":[
+                        {"rank": 1, "value": "reply-2"},
+                        {"rank": 2, "value": "reply-1"},
+                        {"rank": 3, "value": "reply-3"},
+                    ],
+                }
+            }
+        }
+    ]
+)
+```
+
+:::
+
+:::{tab-item} Rating
+
+```python
+record = rg.FeedbackRecord(
+    fields=...,
+    responses = [
+        {
+            "values":{
+                "quality":{
+                    "value": 5
+                }
+            }
+        }
+    ]
+)
+```
+
+:::
+
+:::{tab-item} Text
+
+```python
+record = rg.FeedbackRecord(
+    fields=...,
+    responses = [
+        {
+            "values":{
+                "corrected-text":{
+                    "value": "This is a *response*."
+                }
+            }
+        }
+    ]
+)
+```
+
+:::
+
+::::
 
 ## Push to Argilla
 

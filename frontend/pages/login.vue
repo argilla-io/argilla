@@ -101,6 +101,7 @@ export default {
   async mounted() {
     try {
       const response = await fetch("deployment.json");
+
       const { deployment } = await response.json();
 
       this.deployment = deployment;
@@ -125,6 +126,7 @@ export default {
       });
     },
     async loginUser(authData) {
+      await this.$auth.logout();
       await this.$store.dispatch("entities/deleteAll");
       await this.$auth.loginWith("authProvider", {
         data: this.encodedLoginData(authData),

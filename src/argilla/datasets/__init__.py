@@ -15,11 +15,7 @@ import logging
 from typing import Optional
 
 from argilla.client import api
-from argilla.client.apis.datasets import (
-    Settings,
-    TextClassificationSettings,
-    TokenClassificationSettings,
-)
+from argilla.client.apis.datasets import Settings, TextClassificationSettings, TokenClassificationSettings
 
 __all__ = [TextClassificationSettings, TokenClassificationSettings, Settings]
 

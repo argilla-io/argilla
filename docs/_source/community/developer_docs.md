@@ -88,6 +88,24 @@ To make sure there are no breaking changes, you should run all the tests as foll
 ```sh
 pytest tests
 ```
+
+You can also run only the unit tests by providing the proper path:
+```sh
+pytest tests/unit
+```
+
+For the unit tests, you can also set up a PostgreSQL database instead of the default sqlite backend:
+```sh
+ARGILLA_DATABASE_URL=postgresql://postgres:postgres@localhost:5432 pytest tests/unit
+```
+
+For running more heavy integration tests you can just run pytest with the `tests/integration` folder:
+```sh
+pytest tests/integration
+```
+
+Note: For now, integration tests are mocking the connection to the Argilla server. In the future, this may change and tests will be launched using an up and running Argilla server instance.
+
 ### Code formatting tools
 
 To keep a consistent code format, we use [pre-commit](https://pre-commit.com) hooks. So on, you first need to install

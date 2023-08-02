@@ -15,7 +15,6 @@
 import inspect
 
 import factory
-from argilla.server.database import Base
 from argilla.server.models import (
     Dataset,
     Field,
@@ -30,6 +29,7 @@ from argilla.server.models import (
     Workspace,
     WorkspaceUser,
 )
+from argilla.server.models.base import DatabaseModel
 from factory.alchemy import SESSION_PERSISTENCE_COMMIT, SESSION_PERSISTENCE_FLUSH
 from factory.builder import BuildStep, StepBuilder, parse_declarations
 from sqlalchemy.ext.asyncio import async_object_session
@@ -56,7 +56,7 @@ class AsyncSQLAlchemyModelFactory(factory.alchemy.SQLAlchemyModelFactory):
         for key, value in kwargs.items():
             if inspect.isawaitable(value):
                 kwargs[key] = await value
-            if isinstance(value, Base):
+            if isinstance(value, DatabaseModel):
                 old_session = async_object_session(value)
                 session = cls._meta.sqlalchemy_session.registry().sync_session
                 if old_session.sync_session.hash_key != session.hash_key:
@@ -155,6 +155,13 @@ class WorkspaceFactory(BaseFactory):
     name = factory.Sequence(lambda n: f"workspace-{n}")
 
 
+class WorkspaceSyncFactory(BaseSyncFactory):
+    class Meta:
+        model = Workspace
+
+    name = factory.Sequence(lambda n: f"workspace-{n}")
+
+
 class UserFactory(BaseFactory):
     class Meta:
         model = User
@@ -225,7 +232,7 @@ class FieldFactory(BaseFactory):
 
 
 class TextFieldFactory(FieldFactory):
-    settings = {"type": FieldType.text.value}
+    settings = {"type": FieldType.text.value, "use_markdown": False}
 
 
 class QuestionFactory(BaseFactory):
@@ -249,7 +256,7 @@ class QuestionFactory(BaseFactory):
 
 
 class TextQuestionFactory(QuestionFactory):
-    settings = {"type": QuestionType.text.value}
+    settings = {"type": QuestionType.text.value, "use_markdown": False}
 
 
 class RatingQuestionFactory(QuestionFactory):
@@ -274,9 +281,9 @@ class LabelSelectionQuestionFactory(QuestionFactory):
     settings = {
         "type": QuestionType.label_selection.value,
         "options": [
-            {"value": "option1", "text": "Option 1"},
-            {"value": "option2", "text": "Option 2"},
-            {"value": "option3", "text": "Option 3"},
+            {"value": "option1", "text": "Option 1", "description": None},
+            {"value": "option2", "text": "Option 2", "description": None},
+            {"value": "option3", "text": "Option 3", "description": None},
         ],
     }
 
@@ -285,9 +292,9 @@ class MultiLabelSelectionQuestionFactory(QuestionFactory):
     settings = {
         "type": QuestionType.multi_label_selection.value,
         "options": [
-            {"value": "option1", "text": "Option 1"},
-            {"value": "option2", "text": "Option 2"},
-            {"value": "option3", "text": "Option 3"},
+            {"value": "option1", "text": "Option 1", "description": None},
+            {"value": "option2", "text": "Option 2", "description": None},
+            {"value": "option3", "text": "Option 3", "description": None},
         ],
     }
 
@@ -296,9 +303,9 @@ class RankingQuestionFactory(QuestionFactory):
     settings = {
         "type": QuestionType.ranking.value,
         "options": [
-            {"value": "completion-a", "text": "Completion A"},
-            {"value": "completion-b", "text": "Completion B"},
-            {"value": "completion-c", "text": "Completion C"},
+            {"value": "completion-a", "text": "Completion A", "description": None},
+            {"value": "completion-b", "text": "Completion B", "description": None},
+            {"value": "completion-c", "text": "Completion C", "description": None},
         ],
     }
 

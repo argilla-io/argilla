@@ -141,9 +141,14 @@ class SearchEngine:
             for record in records
         ]
 
-        _, errors = await helpers.async_bulk(client=self.client, actions=bulk_actions, raise_on_error=False)
-        if errors:
-            raise RuntimeError(errors)
+        await self._bulk_op(bulk_actions)
+
+    async def delete_records(self, dataset: Dataset, records: Iterable[Record]):
+        index_name = await self._get_index_or_raise(dataset)
+
+        bulk_actions = [{"_op_type": "delete", "_id": record.id, "_index": index_name} for record in records]
+
+        await self._bulk_op(bulk_actions)
 
     async def update_record_response(self, response: Response):
         record = response.record
@@ -277,7 +282,6 @@ class SearchEngine:
         return f"rg.{dataset.id}"
 
     def _response_status_filter_builder(self, status_filter: UserResponseStatusFilter) -> Optional[Dict[str, Any]]:
-
         if not status_filter.statuses:
             return None
 
@@ -297,6 +301,11 @@ class SearchEngine:
             filters.append({"terms": {f"{user_response_field}.status": statuses}})
 
         return {"bool": {"should": filters, "minimum_should_match": 1}}
+
+    async def _bulk_op(self, actions: List[Dict[str, Any]]):
+        _, errors = await helpers.async_bulk(client=self.client, actions=actions, raise_on_error=False)
+        if errors:
+            raise RuntimeError(errors)
 
 
 async def get_search_engine() -> AsyncGenerator[SearchEngine, None]:

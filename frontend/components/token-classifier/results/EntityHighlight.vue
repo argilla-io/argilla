@@ -106,7 +106,7 @@ export default {
       }
     },
     visualizeToken(token, i) {
-      let text = token.highlighted
+      const text = token.highlighted
         ? this.$htmlHighlightText(token.text)
         : this.$htmlText(token.text);
       return `${text}${
