@@ -500,7 +500,6 @@ test.describe("Annotation page shortcuts", () => {
 
       await expect(page).toHaveScreenshot();
     });
-
     test("rating with non existing number", async ({ page }) => {
       await goToAnnotationPageWith10Rating(page);
 
@@ -509,7 +508,6 @@ test.describe("Annotation page shortcuts", () => {
 
       await expect(page).toHaveScreenshot();
     });
-
     test("un rate question if the user press twice the same key", async ({
       page,
     }) => {
@@ -523,7 +521,6 @@ test.describe("Annotation page shortcuts", () => {
 
       await expect(page).toHaveScreenshot();
     });
-
     test("user can not rating if press any non digit key", async ({ page }) => {
       await goToAnnotationPageWith10Rating(page);
 
@@ -531,10 +528,38 @@ test.describe("Annotation page shortcuts", () => {
 
       await expect(page).toHaveScreenshot();
     });
-
     test("user can not rating with value zero", async ({ page }) => {
       await goToAnnotationPageWith10Rating(page);
 
+      await page.keyboard.press("0");
+
+      await expect(page).toHaveScreenshot();
+    });
+    test("rating a question too fast key press", async ({ page }) => {
+      await goToAnnotationPageWith10Rating(page);
+
+      await page.keyboard.press("1");
+      await page.keyboard.press("2");
+      await page.keyboard.press("1");
+      await page.keyboard.press("0");
+
+      await page.waitForTimeout(200);
+
+      await expect(page).toHaveScreenshot();
+
+      await page.keyboard.press("2");
+
+      await page.waitForTimeout(200);
+
+      await expect(page).toHaveScreenshot();
+
+      await page.keyboard.press("8");
+
+      await page.waitForTimeout(200);
+
+      await expect(page).toHaveScreenshot();
+
+      await page.keyboard.press("1");
       await page.keyboard.press("0");
 
       await expect(page).toHaveScreenshot();

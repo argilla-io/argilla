@@ -18,27 +18,35 @@ export default {
     },
   },
   methods: {
+    reset() {
+      this.keyCode = "";
+      this.timer = null;
+    },
     answerRatingFor($event) {
       if (this.timer) clearTimeout(this.timer);
 
       this.keyCode += $event.key;
 
       if (isNaN(this.keyCode)) {
-        this.keyCode = "";
+        this.reset();
 
         return;
       }
 
       const target = this.options.find(({ value }) => value == this.keyCode);
 
-      if (!target) return;
+      if (!target) {
+        this.reset();
+
+        return;
+      }
+
       $event.preventDefault();
 
       document.getElementById(target.id).click();
 
       this.timer = setTimeout(() => {
-        this.keyCode = "";
-        this.timer = null;
+        this.reset();
       }, 300);
     },
   },
