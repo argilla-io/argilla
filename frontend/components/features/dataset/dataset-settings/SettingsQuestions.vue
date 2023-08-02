@@ -24,6 +24,12 @@
             <input type="text" v-model="question.description" />
           </div>
 
+          <BaseSwitch
+            v-if="question.type === 'text'"
+            v-model="question.settings.use_markdown"
+            >Use Markdown</BaseSwitch
+          >
+
           <div class="settings-questions__edition-form-footer">
             <BaseButton type="button" class="secondary light small">
               <span v-text="'Cancel'" />
@@ -98,7 +104,7 @@ export default {
       & label {
         width: fit-content;
         height: 14px;
-        color: #545d84;
+        color: $black-54;
       }
 
       & input {
