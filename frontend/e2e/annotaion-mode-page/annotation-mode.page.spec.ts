@@ -71,6 +71,10 @@ const goToAnnotationPageWith10Rating = async (page) => {
   await page.waitForTimeout(3000);
 };
 
+test.use({
+  viewport: { width: 1600, height: 1400 },
+});
+
 test.describe("Annotate page", () => {
   test("go to annotation mode page", async ({ page }) => {
     await goToAnnotationPage(page);
@@ -124,14 +128,6 @@ test.describe("Annotate page", () => {
     await goToAnnotationPage(page);
 
     await page.getByRole("button", { name: "Clear" }).click();
-
-    await expect(page).toHaveScreenshot();
-
-    await page.getByText("Review Rating (optional)").scrollIntoViewIfNeeded();
-
-    await expect(page).toHaveScreenshot();
-
-    await page.getByText("Ranking (optional)").scrollIntoViewIfNeeded();
 
     await expect(page).toHaveScreenshot();
   });
@@ -334,8 +330,6 @@ test.describe("Annotation page shortcuts", () => {
       await page.getByText("Negative").nth(1).click();
       await page.getByText("Neutral").nth(1).click();
 
-      await page.getByText("Hurt").scrollIntoViewIfNeeded();
-
       await expect(page).toHaveScreenshot();
     });
 
@@ -452,6 +446,7 @@ test.describe("Annotation page shortcuts", () => {
       await page
         .getByText("This is a review of the review")
         .press("Meta+Shift+ArrowRight");
+
       await page.getByText("This is a review of the review").fill("TEST");
 
       await expect(page).toHaveScreenshot();
@@ -613,10 +608,6 @@ test.describe("Annotation page shortcuts", () => {
         .getByText("This is a review of the review")
         .press("Shift+ArrowDown");
 
-      await page
-        .locator(".draggable__questions-container")
-        .scrollIntoViewIfNeeded();
-
       await expect(page).toHaveScreenshot();
     });
 
@@ -640,10 +631,6 @@ test.describe("Annotation page shortcuts", () => {
         .getByText("This is a review of the review")
         .press("Meta+Shift+ArrowRight");
 
-      await page
-        .getByText("This is a review of the review")
-        .scrollIntoViewIfNeeded();
-
       await page.getByText("This is a review of the review").fill("TEST");
 
       await expect(page).toHaveScreenshot();
@@ -662,10 +649,6 @@ test.describe("Annotation page shortcuts", () => {
         .press("Shift+ArrowDown");
 
       await page.getByTitle("Option A").press("2");
-
-      await page
-        .locator(".draggable__questions-container")
-        .scrollIntoViewIfNeeded();
 
       await expect(page).toHaveScreenshot();
     });
@@ -743,13 +726,6 @@ test.describe("Annotation page shortcuts", () => {
       await page.keyboard.press("1");
       await page.keyboard.press("0");
 
-      await page.waitForTimeout(200);
-      await page.getByText("12").nth(1).scrollIntoViewIfNeeded();
-
-      await expect(page).toHaveScreenshot();
-
-      await page.getByTitle("2", { exact: true }).scrollIntoViewIfNeeded();
-
       await expect(page).toHaveScreenshot();
     });
 
@@ -758,13 +734,6 @@ test.describe("Annotation page shortcuts", () => {
       await page.keyboard.press("1");
       await page.keyboard.press("1");
 
-      await page.waitForTimeout(400);
-      await page.getByText("12").nth(1).scrollIntoViewIfNeeded();
-
-      await expect(page).toHaveScreenshot();
-
-      await page.getByTitle("2", { exact: true }).scrollIntoViewIfNeeded();
-
       await expect(page).toHaveScreenshot();
     });
 
@@ -772,13 +741,6 @@ test.describe("Annotation page shortcuts", () => {
       await goToAnnotationPageWith12Ranking(page);
       await page.keyboard.press("1");
       await page.keyboard.press("2");
-
-      await page.waitForTimeout(200);
-      await page.getByText("12").nth(1).scrollIntoViewIfNeeded();
-
-      await expect(page).toHaveScreenshot();
-
-      await page.getByTitle("2", { exact: true }).scrollIntoViewIfNeeded();
 
       await expect(page).toHaveScreenshot();
     });
