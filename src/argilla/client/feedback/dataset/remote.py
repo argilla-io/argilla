@@ -133,7 +133,7 @@ class RemoteFeedbackRecords:
 
     def add(
         self,
-        records: Union[FeedbackRecord, List[FeedbackRecord]],
+        records: List[FeedbackRecord],
         show_progress: bool = True,
     ) -> None:
         for i in trange(
@@ -205,7 +205,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         return self.records.__len__()
 
     def __iter__(self) -> Iterator[RemoteFeedbackRecord]:
-        return self.records.__iter__()
+        yield from self.records
 
     def __getitem__(self, key: Union[slice, int]) -> Union[RemoteFeedbackRecord, List[RemoteFeedbackRecord]]:
         return self.records.__getitem__(key)
@@ -243,5 +243,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
         show_progress: bool = True,
     ) -> None:
-        records = self._validate_records(records=records)
+        records = self._parse_records(records)
+        self._validate_records(records)
+
         self.records.add(records=records, show_progress=show_progress)

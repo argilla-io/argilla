@@ -212,7 +212,7 @@ class FeedbackDatasetBase(HuggingFaceDatasetMixin):
             f" {', '.join(q.name for q in self._questions)}"
         )
 
-    def _validate_records(
+    def _parse_records(
         self, records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]]
     ) -> List[FeedbackRecord]:
         if isinstance(records, list):
@@ -226,7 +226,8 @@ class FeedbackDatasetBase(HuggingFaceDatasetMixin):
                     new_records.append(record)
                 else:
                     raise ValueError(
-                        f"Expected `records` to be a list of `dict` or `FeedbackRecord`, got type {type(record)} instead."
+                        "Expected `records` to be a list of `dict` or `FeedbackRecord`,"
+                        f" got type `{type(record)}` instead."
                     )
             records = new_records
         elif isinstance(records, dict):
@@ -235,9 +236,11 @@ class FeedbackDatasetBase(HuggingFaceDatasetMixin):
             records = [records]
         else:
             raise ValueError(
-                f"Expected `records` to be a `dict` or `FeedbackRecord`, got type {type(records)} instead."
+                "Expected `records` to be a `dict` or `FeedbackRecord`, got type" f" `{type(records)}` instead."
             )
+        return records
 
+    def _validate_records(self, records: List[FeedbackRecord]) -> None:
         if self._fields_schema is None:
             self._fields_schema = generate_pydantic_schema(self.fields)
 
@@ -248,8 +251,6 @@ class FeedbackDatasetBase(HuggingFaceDatasetMixin):
                 raise ValueError(
                     f"`FeedbackRecord.fields` does not match the expected schema, with exception: {e}"
                 ) from e
-
-        return records
 
     @requires_version("datasets")
     def format_as(self, format: Literal["datasets"]) -> "Dataset":

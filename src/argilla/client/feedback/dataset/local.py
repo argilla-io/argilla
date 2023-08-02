@@ -105,7 +105,8 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
                 list of dictionaries as a record or dictionary as a record.
             ValueError: if the given records do not match the expected schema.
         """
-        records = self._validate_records(records)
+        records = self._parse_records(records)
+        self._validate_records(records)
 
         if len(self.records) > 0:
             self.records += records
