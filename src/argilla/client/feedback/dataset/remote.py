@@ -202,6 +202,10 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
     def workspace(self) -> "Workspace":
         return self._workspace
 
+    @property
+    def url(self) -> str:
+        return f"{self.client.base_url}/dataset/{self.id}"
+
     def __repr__(self) -> str:
         return f"<ArgillaFeedbackDataset id={self.id} name={self.name} workspace={self.workspace}>"
 
