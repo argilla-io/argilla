@@ -139,7 +139,12 @@ class Record(DatabaseModel):
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
 
     dataset: Mapped["Dataset"] = relationship(back_populates="records")
-    responses: Mapped[List["Response"]] = relationship(back_populates="record", order_by=Response.inserted_at.asc())
+    responses: Mapped[List["Response"]] = relationship(
+        back_populates="record",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Response.inserted_at.asc(),
+    )
     suggestions: Mapped[List["Suggestion"]] = relationship(
         back_populates="record",
         cascade="all, delete-orphan",

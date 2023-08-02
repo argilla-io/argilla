@@ -13,12 +13,12 @@
 #  limitations under the License.
 
 import random
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 import pytest
 import pytest_asyncio
 from argilla.server.enums import ResponseStatusFilter
-from argilla.server.models import Dataset
+from argilla.server.models import Dataset, User
 from argilla.server.search_engine import Query as SearchQuery
 from argilla.server.search_engine import (
     SearchEngine,
@@ -109,32 +109,8 @@ async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine) ->
             ),
             await RecordFactory.create(
                 dataset=dataset,
-                fields={"textId": "00002", "text": "Why was I charged for getting cash?", "label": "neutral"},
-                responses=[],
-            ),
-            await RecordFactory.create(
-                dataset=dataset,
                 fields={
-                    "textId": "00003",
-                    "text": "I deposited cash into my account a week ago and it is still not available,"
-                    " please tell me why? I need the cash back now.",
-                    "label": "negative",
-                },
-                responses=[],
-            ),
-            await RecordFactory.create(
-                dataset=dataset,
-                fields={
-                    "textId": "00004",
-                    "text": "Why was I charged for getting cash?",
-                    "label": "neutral",
-                },
-                responses=[],
-            ),
-            await RecordFactory.create(
-                dataset=dataset,
-                fields={
-                    "textId": "00005",
+                    "textId": "00002",
                     "text": "I tried to make a payment with my card and it was declined.",
                     "label": "negative",
                 },
@@ -143,8 +119,50 @@ async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine) ->
             await RecordFactory.create(
                 dataset=dataset,
                 fields={
-                    "textId": "00006",
+                    "textId": "00003",
                     "text": "My credit card was declined when I tried to make a payment.",
+                    "label": "negative",
+                },
+                responses=[],
+            ),
+            await RecordFactory.create(
+                dataset=dataset,
+                fields={
+                    "textId": "00004",
+                    "text": "I made a successful payment towards my mortgage loan earlier today.",
+                    "label": "positive",
+                },
+                responses=[],
+            ),
+            await RecordFactory.create(
+                dataset=dataset,
+                fields={
+                    "textId": "00005",
+                    "text": "Please confirm the receipt of my payment for the credit card bill due on the 15th.",
+                    "label": "neutral",
+                },
+                responses=[],
+            ),
+            await RecordFactory.create(
+                dataset=dataset,
+                fields={
+                    "textId": "00006",
+                    "text": "Why was I charged for getting cash?",
+                    "label": "neutral",
+                },
+                responses=[],
+            ),
+            await RecordFactory.create(
+                dataset=dataset,
+                fields={"textId": "00007", "text": "Why was I charged for getting cash?", "label": "neutral"},
+                responses=[],
+            ),
+            await RecordFactory.create(
+                dataset=dataset,
+                fields={
+                    "textId": "00008",
+                    "text": "I deposited cash into my account a week ago and it is still not available,"
+                    " please tell me why? I need the cash back now.",
                     "label": "negative",
                 },
                 responses=[],
@@ -309,23 +327,23 @@ class TestSuiteElasticSearchEngine:
     @pytest.mark.parametrize(
         ("query", "expected_items"),
         [
-            ("card", 4),
+            ("card", 5),
             ("account", 1),
-            ("payment", 4),
+            ("payment", 6),
             ("cash", 3),
             ("negative", 4),
             ("00000", 1),
-            ("card payment", 4),
+            ("card payment", 5),
             ("nothing", 0),
-            (SearchQuery(text=TextQuery(q="card")), 4),
+            (SearchQuery(text=TextQuery(q="card")), 5),
             (SearchQuery(text=TextQuery(q="account")), 1),
-            (SearchQuery(text=TextQuery(q="payment")), 4),
+            (SearchQuery(text=TextQuery(q="payment")), 6),
             (SearchQuery(text=TextQuery(q="cash")), 3),
-            (SearchQuery(text=TextQuery(q="card payment")), 4),
+            (SearchQuery(text=TextQuery(q="card payment")), 5),
             (SearchQuery(text=TextQuery(q="nothing")), 0),
             (SearchQuery(text=TextQuery(q="negative", field="label")), 4),
             (SearchQuery(text=TextQuery(q="00000", field="textId")), 1),
-            (SearchQuery(text=TextQuery(q="card payment", field="text")), 4),
+            (SearchQuery(text=TextQuery(q="card payment", field="text")), 5),
         ],
     )
     async def test_search_with_query_string(
@@ -352,12 +370,16 @@ class TestSuiteElasticSearchEngine:
         assert scores == sorted_scores
 
     @pytest.mark.parametrize(
-        "status",
+        "statuses, expected_items",
         [
-            ResponseStatusFilter.discarded,
-            ResponseStatusFilter.submitted,
-            ResponseStatusFilter.draft,
-            ResponseStatusFilter.missing,
+            ([], 6),
+            ([ResponseStatusFilter.missing], 6),
+            ([ResponseStatusFilter.draft], 2),
+            ([ResponseStatusFilter.submitted], 2),
+            ([ResponseStatusFilter.discarded], 2),
+            ([ResponseStatusFilter.missing, ResponseStatusFilter.draft], 6),
+            ([ResponseStatusFilter.submitted, ResponseStatusFilter.discarded], 4),
+            ([ResponseStatusFilter.missing, ResponseStatusFilter.draft, ResponseStatusFilter.discarded], 6),
         ],
     )
     async def test_search_with_response_status_filter(
@@ -365,28 +387,41 @@ class TestSuiteElasticSearchEngine:
         elastic_search_engine: SearchEngine,
         opensearch: OpenSearch,
         test_banking_sentiment_dataset: Dataset,
-        status: ResponseStatusFilter,
+        statuses: List[ResponseStatusFilter],
+        expected_items: int,
     ):
-        index_name = f"rg.{test_banking_sentiment_dataset.id}"
         user = await UserFactory.create()
-        another_user = await UserFactory.create()
 
-        if status != ResponseStatusFilter.missing:
-            for record in test_banking_sentiment_dataset.records:
-                users_responses = {
-                    f"{user.username}.status": status.value,
-                    f"{another_user.username}.status": status.value,
-                }
-                opensearch.update(index_name, id=record.id, body={"doc": {"responses": users_responses}})
+        await self._configure_record_responses(opensearch, test_banking_sentiment_dataset, statuses, user)
 
-        opensearch.indices.refresh(index=index_name)
         result = await elastic_search_engine.search(
             test_banking_sentiment_dataset,
             query=SearchQuery(text=TextQuery(q="payment")),
-            user_response_status_filter=UserResponseStatusFilter(user=user, status=status),
+            user_response_status_filter=UserResponseStatusFilter(user=user, statuses=statuses),
         )
-        assert len(result.items) == 4
-        assert result.total == 4
+        assert len(result.items) == expected_items
+        assert result.total == expected_items
+
+    async def test_search_with_response_status_filter_does_not_affect_the_result_scores(
+        self, elastic_search_engine: SearchEngine, opensearch: OpenSearch, test_banking_sentiment_dataset: Dataset
+    ):
+        user = await UserFactory.create()
+
+        all_statuses = [ResponseStatusFilter.missing, ResponseStatusFilter.draft, ResponseStatusFilter.discarded]
+        await self._configure_record_responses(opensearch, test_banking_sentiment_dataset, all_statuses, user)
+
+        no_filter_results = await elastic_search_engine.search(
+            test_banking_sentiment_dataset,
+            query=SearchQuery(text=TextQuery(q="payment")),
+        )
+        results = await elastic_search_engine.search(
+            test_banking_sentiment_dataset,
+            query=SearchQuery(text=TextQuery(q="payment")),
+            user_response_status_filter=UserResponseStatusFilter(user=user, statuses=all_statuses),
+        )
+        assert len(no_filter_results.items) == len(results.items)
+        assert no_filter_results.total == results.total
+        assert [item.score for item in no_filter_results.items] == [item.score for item in results.items]
 
     @pytest.mark.parametrize(("offset", "limit"), [(0, 50), (10, 5), (0, 0), (90, 100)])
     async def test_search_with_pagination(
@@ -425,6 +460,41 @@ class TestSuiteElasticSearchEngine:
 
         es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
         assert es_docs == [{"id": str(record.id), "fields": record.fields, "responses": {}} for record in records]
+
+    async def test_delete_records(self, elastic_search_engine: SearchEngine, opensearch: OpenSearch):
+        text_fields = await TextFieldFactory.create_batch(5)
+        dataset = await DatasetFactory.create(fields=text_fields, questions=[])
+        records = await RecordFactory.create_batch(
+            size=10,
+            dataset=dataset,
+            fields={field.name: f"This is the value for {field.name}" for field in text_fields},
+            responses=[],
+        )
+
+        await elastic_search_engine.create_index(dataset)
+        await elastic_search_engine.add_records(dataset, records)
+
+        records_to_delete, records_to_keep = records[:5], records[5:]
+        await elastic_search_engine.delete_records(dataset, records_to_delete)
+
+        index_name = f"rg.{dataset.id}"
+        opensearch.indices.refresh(index=index_name)
+
+        deleted_docs = [
+            hit["_source"]
+            for hit in opensearch.search(
+                index=index_name, body={"query": {"ids": {"values": [str(record.id) for record in records_to_delete]}}}
+            )["hits"]["hits"]
+        ]
+        assert len(deleted_docs) == 0
+
+        es_docs = [
+            hit["_source"]
+            for hit in opensearch.search(
+                index=index_name, body={"query": {"ids": {"values": [str(record.id) for record in records_to_keep]}}}
+            )["hits"]["hits"]
+        ]
+        assert len(records_to_keep) == 5
 
     async def test_update_record_response(
         self,
@@ -498,3 +568,22 @@ class TestSuiteElasticSearchEngine:
 
         results = opensearch.get(index=index_name, id=record.id)
         assert results["_source"]["responses"] == {}
+
+    async def _configure_record_responses(
+        self, opensearch: OpenSearch, dataset: Dataset, response_status: List[ResponseStatusFilter], user: User
+    ):
+        index_name = f"rg.{dataset.id}"
+        another_user = await UserFactory.create()
+
+        # Create two responses with the same status (one in each record)
+        for i, status in enumerate(response_status):
+            if status == ResponseStatusFilter.missing:
+                continue
+            offset = i * 2
+            for record in dataset.records[offset : offset + 2]:
+                users_responses = {
+                    f"{user.username}.status": status.value,
+                    f"{another_user.username}.status": status.value,
+                }
+                opensearch.update(index_name, id=record.id, body={"doc": {"responses": users_responses}})
+        opensearch.indices.refresh(index=index_name)
