@@ -146,7 +146,13 @@ export default {
           ({ innerText }) => innerText == this.ranking.questions[0]?.text
         );
 
-        firstQuestion?.focus();
+        if (firstQuestion) {
+          firstQuestion.focus();
+        }
+        if (!firstQuestion) {
+          const firstItem = this.$refs.items[0];
+          firstItem.focus();
+        }
       });
     },
     onMoveEnd() {
