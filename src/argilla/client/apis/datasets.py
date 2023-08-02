@@ -61,7 +61,9 @@ class LabelsSchemaSettings(_AbstractSettings):
 
     def __post_init__(self):
         if not isinstance(self.label_schema, (set, list, tuple)):
-            raise ValueError(f"`label_schema` is of type={type(self.label_schema)}, but type=set is preferred, and also both type=list and type=tuple are allowed.")
+            raise ValueError(
+                f"`label_schema` is of type={type(self.label_schema)}, but type=set is preferred, and also both type=list and type=tuple are allowed."
+            )
         self.label_schema = set([str(label) for label in self.label_schema])
 
     @classmethod
