@@ -14,7 +14,11 @@
           class="settings__header"
           :class="{ '--separator': !isAdminOrOwnerRole }"
         />
-        <BaseTabsAndContent :tabs="tabs" class="settings__tabs-content">
+        <BaseTabsAndContent
+          :tabs="tabs"
+          tab-size="large"
+          class="settings__tabs-content"
+        >
           <template v-slot="{ currentComponent }">
             <component
               :is="currentComponent"
@@ -45,7 +49,6 @@ export default {
 
 <styles lang="scss" scoped>
 .settings {
-  $this: &;
   &__content {
     display: flex;
     flex-direction: column;
@@ -61,7 +64,6 @@ export default {
       padding-bottom: 2em;
     }
   }
-
   &__tabs {
     &-content {
       display: flex;

@@ -20,6 +20,7 @@
     <BaseTabs
       :tabs="tabs"
       :active-tab="currentTab"
+      :tab-size="tabSize"
       @change-tab="getSelectedTab"
       class="settings__tabs"
     />
@@ -34,6 +35,9 @@ export default {
     tabs: {
       type: Array,
       required: true,
+    },
+    tabSize: {
+      type: String,
     },
   },
   data() {

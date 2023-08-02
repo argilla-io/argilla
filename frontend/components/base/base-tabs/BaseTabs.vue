@@ -17,11 +17,9 @@
 
 <template>
   <ul class="tabs">
-    <li class="tab">
+    <li v-for="{ id, name } in tabs" :key="id" class="tab">
       <button
-        v-for="{ id, name } in tabs"
-        :key="id"
-        :class="['tab__button', getTabClass(id)]"
+        :class="['tab__button', `--${tabSize}`, getTabClass(id)]"
         @click="changeTab(id)"
       >
         <span>{{ name }}</span>
@@ -39,6 +37,10 @@ export default {
     activeTab: {
       type: Object,
       required: true,
+    },
+    tabSize: {
+      type: String,
+      default: "small",
     },
   },
   methods: {
@@ -77,7 +79,13 @@ export default {
     outline: 0;
     white-space: nowrap;
     cursor: pointer;
-    @include font-size(13px);
+    &.--small {
+      @include font-size(13px);
+    }
+    &.--large {
+      @include font-size(16px);
+      padding: $base-space $base-space * 2;
+    }
     &.--active {
       border-color: $primary-color;
       transition: border-color 0.3s ease-in-out;
