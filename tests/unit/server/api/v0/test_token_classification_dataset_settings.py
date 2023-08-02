@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
@@ -35,10 +35,10 @@ async def delete_dataset(client: "AsyncClient", name: str, workspace_name: str):
     assert response.status_code == 200
 
 
-async def create_settings(async_client: "AsyncClient", name: str, workspace_name: str):
+async def create_settings(async_client: "AsyncClient", name: str, workspace_name: str, labels: Optional[list] = None):
     response = await async_client.put(
         f"/api/datasets/{TaskType.token_classification}/{name}/settings",
-        json={"label_schema": {"labels": ["Label1", "Label2"]}},
+        json={"label_schema": {"labels": labels or ["Label1", "Label2"]}},
         params={"workspace": workspace_name},
     )
     return response
@@ -81,8 +81,9 @@ async def log_some_data(async_client: "AsyncClient", name: str, workspace_name: 
     return response
 
 
+@pytest.mark.parametrize("labels", [["Label1", "Label2"], ["1", "2", "3"], [1, 2, 3, 4]])
 @pytest.mark.asyncio
-async def test_create_dataset_settings(async_client: "AsyncClient", argilla_user: User):
+async def test_create_dataset_settings(async_client: "AsyncClient", argilla_user: User, labels: list):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_name = argilla_user.username
 
@@ -90,7 +91,7 @@ async def test_create_dataset_settings(async_client: "AsyncClient", argilla_user
     await delete_dataset(async_client, name, workspace_name=workspace_name)
     await create_dataset(async_client, name, workspace_name=workspace_name)
 
-    response = await create_settings(async_client, name, workspace_name=workspace_name)
+    response = await create_settings(async_client, name, workspace_name=workspace_name, labels=labels)
     assert response.status_code == 200
 
     created = response.json()
