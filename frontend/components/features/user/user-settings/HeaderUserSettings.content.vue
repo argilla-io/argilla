@@ -16,7 +16,7 @@ export default {
     this.breadcrumbs = [
       { link: { name: "datasets" }, name: "Home" },
       {
-        link: null,
+        link: {},
         name: "my settings",
       },
     ];
