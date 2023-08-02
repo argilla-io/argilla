@@ -75,7 +75,6 @@ class ResponseSchema(BaseModel):
                 "`user_id` not provided, so it will be set to `None`. Which is not an"
                 " issue, unless you're planning to log the response in Argilla, as"
                 " it will be automatically set to the active `user_id`.",
-                stacklevel=2,
             )
         return v
 
@@ -201,7 +200,6 @@ class FeedbackRecord(BaseModel):
                     f"A suggestion for question `{suggestion.question_name}` has already"
                     " been provided, so the provided suggestion will overwrite it.",
                     category=UserWarning,
-                    stacklevel=2,
                 )
             suggestions_dict[suggestion.question_name] = suggestion
 

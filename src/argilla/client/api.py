@@ -215,7 +215,6 @@ async def log_async(
             "Please, use `log` with `background=True` instead"
         ),
         DeprecationWarning,
-        stacklevel=2,
     )
 
     future = ArgillaSingleton.get().log(

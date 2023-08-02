@@ -260,16 +260,14 @@ class ArgillaDatasetMixin:
                                 warnings.warn(
                                     "A record is already pushed to Argilla but no record id found, which means"
                                     " that the `FeedbackRecord` has been pushed to  Argilla, but hasn't been fetched,"
-                                    " so the `id` is missing. Record update will be skipped for this record",
-                                    stacklevel=2,
+                                    " so the `id` is missing. Record update will be skipped for this record"
                                 )
                                 if record.suggestions:
                                     warnings.warn(
                                         "The `suggestions` have been provided, but the `id`"
                                         " is not set. To solve that, you can simply call"
                                         " `FeedbackDataset.fetch_records()` to fetch them and"
-                                        " automatically set the `id`, to call `set_suggestions` on top of that.",
-                                        stacklevel=2,
+                                        " automatically set the `id`, to call `set_suggestions` on top of that."
                                     )
                                 continue
                             for suggestion in record.suggestions:

@@ -78,7 +78,6 @@ def monitor(
         return model_monitor
 
     warnings.warn(
-        "The provided task model is not supported by monitoring module. Predictions won't be logged into argilla.",
-        stacklevel=2,
+        "The provided task model is not supported by monitoring module. Predictions won't be logged into argilla."
     )
     return task_model

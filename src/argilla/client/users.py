@@ -206,12 +206,11 @@ class User:
         """
         if not first_name:
             warnings.warn(
-                "Since the `first_name` hasn't been provided, it will be set to the same value as the `username`.",
-                stacklevel=2,
+                "Since the `first_name` hasn't been provided, it will be set to the same value as the `username`."
             )
             first_name = username
         if not role:
-            warnings.warn("Since the `role` hasn't been provided, it will be set to `annotator`.", stacklevel=2)
+            warnings.warn("Since the `role` hasn't been provided, it will be set to `annotator`.")
             role = UserRole.annotator
 
         client = cls.__active_client()

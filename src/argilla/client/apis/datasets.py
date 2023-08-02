@@ -290,7 +290,8 @@ class Datasets(AbstractApi):
             except ForbiddenApiError as faer:
                 if discard_when_forbidden:
                     warnings.warn(
-                        message=f"{faer}. Records will be discarded instead", category=UserWarning, stacklevel=2
+                        message=f"{faer}. Records will be discarded instead",
+                        category=UserWarning,
                     )
                     return self.delete_records(
                         name=name,

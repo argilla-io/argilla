@@ -535,7 +535,6 @@ class WeakLabels(WeakLabelsBase):
                 "'exclude_missing_annotations' is deprecated and will be removed in the next major release. "
                 "Please use the 'include_missing' argument.",
                 category=FutureWarning,
-                stacklevel=2,
             )
             include_missing = not exclude_missing_annotations
 

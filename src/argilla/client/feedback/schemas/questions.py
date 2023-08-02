@@ -121,7 +121,6 @@ class RatingQuestion(QuestionSchema, LabelMappingMixin):
                 "`values` list contains more than 10 elements, which is not supported from Argilla 1.14.0 onwards. "
                 "Please, make sure `values` is a list with more than 1 element and less or equal than 10 "
                 "before pushing the dataset into Argilla. Otherwise, the `push_to_argilla` method will fail",
-                stacklevel=2,
             )
         for value in values:
             if not 1 <= value <= 10:
@@ -130,7 +129,6 @@ class RatingQuestion(QuestionSchema, LabelMappingMixin):
                     "which is not supported from Argilla 1.14.0 onwards. "
                     "Please, make sure `values` is a list with unique values within the range [1, 10] "
                     "before pushing the dataset into Argilla. Otherwise, the `push_to_argilla` method will fail. ",
-                    stacklevel=2,
                 )
                 break
         return values

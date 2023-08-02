@@ -140,8 +140,7 @@ class Settings(BaseSettings):
                 warnings.warn(
                     "From version 1.14.0, Argilla will use `aiosqlite` as default SQLite driver. The protocol in the"
                     " provided database URL has been automatically replaced from `sqlite` to `sqlite+aiosqlite`."
-                    " Please, update your database URL to use `sqlite+aiosqlite` protocol.",
-                    stacklevel=2,
+                    " Please, update your database URL to use `sqlite+aiosqlite` protocol."
                 )
                 return re.sub(regex, "sqlite+aiosqlite", database_url)
 
@@ -151,8 +150,7 @@ class Settings(BaseSettings):
                 warnings.warn(
                     "From version 1.14.0, Argilla will use `asyncpg` as default PostgreSQL driver. The protocol in the"
                     " provided database URL has been automatically replaced from `postgresql` to `postgresql+asyncpg`."
-                    " Please, update your database URL to use `postgresql+asyncpg` protocol.",
-                    stacklevel=2,
+                    " Please, update your database URL to use `postgresql+asyncpg` protocol."
                 )
                 return re.sub(regex, "postgresql+asyncpg", database_url)
 
