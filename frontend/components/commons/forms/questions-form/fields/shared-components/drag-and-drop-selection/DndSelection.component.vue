@@ -114,33 +114,32 @@ export default {
 
       if (!slotTo) {
         this.reset();
+        return;
       }
 
-      if (slotTo) {
-        this.ranking.moveQuestionToSlot(questionToMove, slotTo);
-        this.$emit("on-reorder", this.ranking);
+      this.ranking.moveQuestionToSlot(questionToMove, slotTo);
+      this.onMoveEnd();
 
+      this.$nextTick(() => {
+        const questionRanked = this.$refs.items?.find(
+          ({ title }) => title == questionToMove?.text
+        );
+
+        questionRanked?.focus();
+      });
+
+      this.timer = setTimeout(() => {
         this.$nextTick(() => {
-          const questionRanked = this.$refs.items?.find(
-            ({ innerText }) => innerText == questionToMove?.text
-          );
-
-          questionRanked?.focus();
+          this.focusOnFirstQuestionOrItem();
+          this.reset();
         });
-
-        this.timer = setTimeout(() => {
-          this.$nextTick(() => {
-            this.focusOnFirstQuestionOrItem();
-            this.reset();
-          });
-        }, 300);
-      }
+      }, 300);
     },
-    onUnRankFor(aKeyCode, aQuestion) {
-      const isRanked = !isNil(aQuestion.rank);
+    onUnRankFor(key, question) {
+      const isRanked = !isNil(question.rank);
 
-      if (aKeyCode == "Backspace" && isRanked) {
-        aQuestion.rank = null;
+      if (key == "Backspace" && isRanked) {
+        question.rank = null;
 
         return true;
       }
@@ -150,16 +149,18 @@ export default {
     focusOnFirstQuestionOrItem() {
       this.$nextTick(() => {
         const firstQuestion = this.$refs.questions?.find(
-          ({ innerText }) => innerText == this.ranking.questions[0]?.text
+          ({ title }) => title == this.ranking.questions[0]?.text
         );
 
-        if (firstQuestion) {
-          firstQuestion.focus();
-        }
         if (!firstQuestion) {
           const firstItem = this.$refs.items[0];
-          firstItem.focus();
+
+          firstItem?.focus();
+
+          return;
         }
+
+        firstQuestion.focus();
       });
     },
     onMoveEnd() {
@@ -167,15 +168,6 @@ export default {
     },
     onFocus() {
       this.$emit("on-focus");
-    },
-    onAutoFocusFirstItem() {
-      this.$nextTick(() => {
-        if (this.$refs.questions && this.$refs.questions[0]) {
-          this.$refs.questions[0].focus();
-        } else {
-          this.$refs.items[0].focus();
-        }
-      });
     },
   },
 };
@@ -234,6 +226,7 @@ $max-visible-card-items: 12;
     padding: $base-space;
     border-radius: $border-radius;
     cursor: move;
+
     &[draggable="true"] {
       background: $card-ghost-color;
       color: $card-primary-color;
@@ -259,9 +252,10 @@ $max-visible-card-items: 12;
       @extend .draggable__rank-card;
       background-color: $card-secondary-color;
       color: $card-primary-color;
-      transition: box-shadow 0.2s ease-out;
+      transition: box-shadow 0.2s ease-out !important;
+
       &:focus {
-        outline: 2px solid $card-primary-color;
+        outline: 2px solid $card-primary-color !important;
       }
       &:focus:not(:focus-visible) {
         outline: none;
