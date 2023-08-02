@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, List
 import pytest
 import pytest_asyncio
 from argilla.server.enums import ResponseStatusFilter
-from argilla.server.models import Dataset
+from argilla.server.models import Dataset, User
 from argilla.server.search_engine import Query as SearchQuery
 from argilla.server.search_engine import (
     SearchEngine,
@@ -372,6 +372,7 @@ class TestSuiteElasticSearchEngine:
     @pytest.mark.parametrize(
         "statuses, expected_items",
         [
+            ([], 6),
             ([ResponseStatusFilter.missing], 6),
             ([ResponseStatusFilter.draft], 2),
             ([ResponseStatusFilter.submitted], 2),
@@ -389,23 +390,10 @@ class TestSuiteElasticSearchEngine:
         statuses: List[ResponseStatusFilter],
         expected_items: int,
     ):
-        index_name = f"rg.{test_banking_sentiment_dataset.id}"
         user = await UserFactory.create()
-        another_user = await UserFactory.create()
 
-        # Create two responses with the same status (one in each record)
-        for i, status in enumerate(statuses):
-            if status == ResponseStatusFilter.missing:
-                continue
-            offset = i * 2
-            for record in test_banking_sentiment_dataset.records[offset : offset + 2]:
-                users_responses = {
-                    f"{user.username}.status": status.value,
-                    f"{another_user.username}.status": status.value,
-                }
-                opensearch.update(index_name, id=record.id, body={"doc": {"responses": users_responses}})
+        await self._configure_record_responses(opensearch, test_banking_sentiment_dataset, statuses, user)
 
-        opensearch.indices.refresh(index=index_name)
         result = await elastic_search_engine.search(
             test_banking_sentiment_dataset,
             query=SearchQuery(text=TextQuery(q="payment")),
@@ -413,6 +401,27 @@ class TestSuiteElasticSearchEngine:
         )
         assert len(result.items) == expected_items
         assert result.total == expected_items
+
+    async def test_search_with_response_status_filter_does_not_affect_the_result_scores(
+        self, elastic_search_engine: SearchEngine, opensearch: OpenSearch, test_banking_sentiment_dataset: Dataset
+    ):
+        user = await UserFactory.create()
+
+        all_statuses = [ResponseStatusFilter.missing, ResponseStatusFilter.draft, ResponseStatusFilter.discarded]
+        await self._configure_record_responses(opensearch, test_banking_sentiment_dataset, all_statuses, user)
+
+        no_filter_results = await elastic_search_engine.search(
+            test_banking_sentiment_dataset,
+            query=SearchQuery(text=TextQuery(q="payment")),
+        )
+        results = await elastic_search_engine.search(
+            test_banking_sentiment_dataset,
+            query=SearchQuery(text=TextQuery(q="payment")),
+            user_response_status_filter=UserResponseStatusFilter(user=user, statuses=all_statuses),
+        )
+        assert len(no_filter_results.items) == len(results.items)
+        assert no_filter_results.total == results.total
+        assert [item.score for item in no_filter_results.items] == [item.score for item in results.items]
 
     @pytest.mark.parametrize(("offset", "limit"), [(0, 50), (10, 5), (0, 0), (90, 100)])
     async def test_search_with_pagination(
@@ -524,3 +533,22 @@ class TestSuiteElasticSearchEngine:
 
         results = opensearch.get(index=index_name, id=record.id)
         assert results["_source"]["responses"] == {}
+
+    async def _configure_record_responses(
+        self, opensearch: OpenSearch, dataset: Dataset, response_status: List[ResponseStatusFilter], user: User
+    ):
+        index_name = f"rg.{dataset.id}"
+        another_user = await UserFactory.create()
+
+        # Create two responses with the same status (one in each record)
+        for i, status in enumerate(response_status):
+            if status == ResponseStatusFilter.missing:
+                continue
+            offset = i * 2
+            for record in dataset.records[offset : offset + 2]:
+                users_responses = {
+                    f"{user.username}.status": status.value,
+                    f"{another_user.username}.status": status.value,
+                }
+                opensearch.update(index_name, id=record.id, body={"doc": {"responses": users_responses}})
+        opensearch.indices.refresh(index=index_name)

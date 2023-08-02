@@ -187,8 +187,7 @@ class SearchEngine:
 
         bool_query = {"must": [text_query]}
         if user_response_status_filter:
-            bool_query["should"] = self._response_status_filter_builder(user_response_status_filter)
-            bool_query["minimum_should_match"] = 1
+            bool_query["filter"] = self._response_status_filter_builder(user_response_status_filter)
 
         body = {"_source": False, "query": {"bool": bool_query}}
 
@@ -277,7 +276,11 @@ class SearchEngine:
     def _index_name_for_dataset(dataset: Dataset):
         return f"rg.{dataset.id}"
 
-    def _response_status_filter_builder(self, status_filter: UserResponseStatusFilter) -> List[Dict[str, Any]]:
+    def _response_status_filter_builder(self, status_filter: UserResponseStatusFilter) -> Optional[Dict[str, Any]]:
+
+        if not status_filter.statuses:
+            return None
+
         user_response_field = f"responses.{status_filter.user.username}"
 
         statuses = [
@@ -293,7 +296,7 @@ class SearchEngine:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html
             filters.append({"terms": {f"{user_response_field}.status": statuses}})
 
-        return filters
+        return {"bool": {"should": filters, "minimum_should_match": 1}}
 
 
 async def get_search_engine() -> AsyncGenerator[SearchEngine, None]:
