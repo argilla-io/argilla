@@ -38,6 +38,12 @@ jobs:
   build:
     name: Build Docker image
     runs-on: ubuntu-latest
+
+    # Grant permissions to `GITHUB_TOKEN` for Google Cloud Workload Identity Provider
+    permissions:
+      contents: read
+      id-token: write
+
     outputs:
       version: ${{ steps.meta.outputs.version }}
     steps:
@@ -60,14 +66,14 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          # Default tags + custom tag for uploading Docker image to GCP Artifact Registry
+          # Default tags + custom tag for uploading Docker image to Google Cloud Artifact Registry
           # Defaults tags described here: https://github.com/docker/metadata-action#tags-input
           tags: |
             type=schedule
             type=ref,event=branch
             type=ref,event=tag
             type=ref,event=pr
-            type=raw,value=europe-docker.pkg.dev/argilla-ci/argilla-ci/argilla-server:${{ github.ref_name }}
+            type=raw,prefix=,suffix=,value=europe-docker.pkg.dev/argilla-ci/${{ inputs.image-name }}:${{ github.ref_name }}
           images: ${{ inputs.image-name }}
 
       # print tags from previous step
@@ -79,6 +85,13 @@ jobs:
         with:
           username: ${{ secrets.AR_DOCKER_USERNAME }}
           password: ${{ secrets.AR_DOCKER_PASSWORD }}
+
+      # Authenticate in GCP using Workload Identity Federation, so we can push the Docker image to the Google Cloud Artifact Registry
+      - name: Authenticate to Google Cloud
+        uses: 'google-github-actions/auth@v1'
+        with:
+          workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WIP }}
+          service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
 
       - name: Build and push
         uses: docker/build-push-action@v4
