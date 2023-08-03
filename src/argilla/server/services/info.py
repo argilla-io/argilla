@@ -36,8 +36,8 @@ def size(bytes):
 
     factor, suffix = None, None
     for f, s in system:
-        if bytes >= f:
-            factor, suffix = f, s
+        factor, suffix = f, s
+        if bytes >= factor:
             break
 
     amount = int(bytes / factor)
