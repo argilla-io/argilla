@@ -118,7 +118,7 @@ export default {
       },
     },
     additionalInfo: {
-      inmediate: true,
+      immediate: true,
       handler(newValue) {
         this.localAdditionalInfo = newValue;
       },

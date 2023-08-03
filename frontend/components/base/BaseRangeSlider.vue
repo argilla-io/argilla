@@ -2,16 +2,14 @@
   <div class="range__wrapper">
     <span class="range__legend" v-text="min" />
     <div class="range">
-      <span class="range__progress-value" ref="progress" v-text="modelValue" />
+      <span class="range__progress-value" ref="progress" v-text="range" />
       <input
         ref="slider"
         class="range__slider"
         type="range"
         :min="min"
         :max="max"
-        v-model.number="modelValue"
-        @mousemove="styleRange"
-        @change="styleRange"
+        v-model.number="range"
       />
     </div>
     <span class="range__legend" v-text="max" />
@@ -34,17 +32,27 @@ export default {
       required: true,
     },
   },
-  computed: {
-    modelValue: {
-      get() {
-        return this.value;
-      },
-      set(val) {
-        this.$emit("input", val);
-      },
+  data() {
+    return {
+      range: this.value,
+    };
+  },
+  model: {
+    prop: "value",
+    event: "change",
+  },
+  watch: {
+    range() {
+      this.$emit("change", this.range);
+      this.styleRange();
     },
+    value() {
+      this.range = this.value;
+    },
+  },
+  computed: {
     progress() {
-      return ((this.modelValue - this.min) * 100) / (this.max - this.min);
+      return ((this.range - this.min) * 100) / (this.max - this.min);
     },
   },
   methods: {
