@@ -68,11 +68,11 @@ def test_scan_fail_negative_limit(
     mocked_client,
     gutenberg_spacy_ner,
 ):
+    data = active_api().datasets.scan(
+        name=gutenberg_spacy_ner,
+        limit=-20,
+    )
     with pytest.raises(ValueError, match="limit.*negative"):
-        data = active_api().datasets.scan(
-            name=gutenberg_spacy_ner,
-            limit=-20,
-        )
         # Actually load the generator its data
         data = list(data)
 

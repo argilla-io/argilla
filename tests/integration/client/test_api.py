@@ -446,10 +446,8 @@ def test_log_background_with_error(monkeypatch, argilla_user: User):
 
     future = log(TextClassificationRecord(text=sample_text), name=dataset_name, background=True)
     with pytest.raises(ConnectError):
-        try:
-            future.result()
-        finally:
-            future.cancel()
+        future.result()
+    future.cancel()
 
 
 @pytest.mark.parametrize(
@@ -473,8 +471,9 @@ def test_delete_with_errors(monkeypatch, argilla_user: User, status, error_type)
 
         return inner
 
+    monkeypatch.setattr(httpx, "delete", send_mock_response_with_http_status(status))
+
     with pytest.raises(error_type):
-        monkeypatch.setattr(httpx, "delete", send_mock_response_with_http_status(status))
         delete("dataset")
 
 

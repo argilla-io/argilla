@@ -265,8 +265,8 @@ class TestWeakLabelsBase:
 
         monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
         monkeypatch.setitem(sys.modules, "faiss", None)
+        weak_labels = WeakLabelsBase(rules=[lambda x: "mock"] * 2, dataset="mock")
         with pytest.raises(ModuleNotFoundError, match="pip install faiss-cpu"):
-            weak_labels = WeakLabelsBase(rules=[lambda x: "mock"] * 2, dataset="mock")
             weak_labels._find_dists_and_nearest(None, None, None, None)
 
 
