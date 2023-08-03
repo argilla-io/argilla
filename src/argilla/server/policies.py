@@ -313,6 +313,16 @@ class FieldPolicyV1:
 
 class QuestionPolicyV1:
     @classmethod
+    def update(cls, question: Question) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (
+                actor.is_admin
+                and await _exists_workspace_user_by_user_and_workspace_id(actor, question.dataset.workspace_id)
+            )
+
+        return is_allowed
+
+    @classmethod
     def delete(cls, question: Question) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
             return actor.is_owner or (
@@ -324,6 +334,16 @@ class QuestionPolicyV1:
 
 
 class RecordPolicyV1:
+    @classmethod
+    def delete(cls, record: Record) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (
+                actor.is_admin
+                and await _exists_workspace_user_by_user_and_workspace_id(actor, record.dataset.workspace_id)
+            )
+
+        return is_allowed
+
     @classmethod
     def create_response(cls, record: Record) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:

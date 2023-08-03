@@ -14,7 +14,7 @@
 import logging
 import re
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from luqum.elasticsearch import ElasticsearchQueryBuilder, SchemaAnalyzer
 from luqum.parser import parser
@@ -168,7 +168,7 @@ class EsQueryBuilder:
 
     def map_2_es_query(
         self,
-        schema: Dict[str, Any],
+        schema: Union[Dict[str, Any], None],
         query: BackendQuery,
         sort: SortConfig = SortConfig(),
         exclude_fields: Optional[List[str]] = None,

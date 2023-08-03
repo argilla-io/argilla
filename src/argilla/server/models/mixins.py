@@ -103,8 +103,9 @@ class CRUDMixin:
 
         # On conflict, update the columns that are upsertable (defined in `Model.__upsertable_columns__`)
         columns_to_update = {column: getattr(insert_stmt.excluded, column) for column in cls.__upsertable_columns__}
+        # onupdate for `updated_at` is not working. We need to force a new value on update
         if hasattr(cls, "updated_at"):
-            columns_to_update["updated_at"] = func.now()
+            columns_to_update["updated_at"] = datetime.utcnow()
         upsert_stmt = (
             insert_stmt.on_conflict_do_update(index_elements=constraints, set_=columns_to_update)
             .returning(cls)

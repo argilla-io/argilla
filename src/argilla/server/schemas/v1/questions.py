@@ -16,7 +16,9 @@ from datetime import datetime
 from typing import Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Field, conlist
+from pydantic import BaseModel, Field, PositiveInt, conlist
+
+from argilla.server.schemas.base import UpdateSchema
 
 try:
     from typing import Annotated
@@ -49,11 +51,11 @@ class ValueTextQuestionSettingsOption(BaseModel):
 class LabelSelectionQuestionSettings(BaseModel):
     type: Literal[QuestionType.label_selection]
     options: conlist(item_type=ValueTextQuestionSettingsOption)
+    visible_options: Optional[int] = None
 
 
-class MultiLabelSelectionQuestionSettings(BaseModel):
+class MultiLabelSelectionQuestionSettings(LabelSelectionQuestionSettings):
     type: Literal[QuestionType.multi_label_selection]
-    options: conlist(item_type=ValueTextQuestionSettingsOption)
 
 
 class RankingQuestionSettings(BaseModel):
@@ -86,3 +88,35 @@ class Question(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class TextQuestionSettingsUpdate(UpdateSchema):
+    type: Literal[QuestionType.text]
+    use_markdown: bool
+
+
+class LabelSelectionSettingsUpdate(UpdateSchema):
+    type: Literal[QuestionType.label_selection]
+    visible_options: Optional[PositiveInt]
+
+
+class MultiLabelSelectionQuestionSettingsUpdate(LabelSelectionSettingsUpdate):
+    type: Literal[QuestionType.multi_label_selection]
+
+
+QuestionSettingsUpdate = Annotated[
+    Union[
+        TextQuestionSettingsUpdate,
+        LabelSelectionSettingsUpdate,
+        MultiLabelSelectionQuestionSettingsUpdate,
+    ],
+    Field(..., discriminator="type"),
+]
+
+
+class QuestionUpdate(UpdateSchema):
+    title: Optional[str]
+    description: Optional[str]
+    settings: Optional[QuestionSettingsUpdate]
+
+    __non_nullable_fields__ = {"title", "settings"}
