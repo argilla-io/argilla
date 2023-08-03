@@ -47,6 +47,7 @@
       </div>
     </div>
     <QuestionsComponent
+      legend="Ui preview"
       class="settings-questions__preview"
       :questions="settings.questions"
     />
@@ -146,7 +147,7 @@ export default {
     height: 100%;
     padding: $base-space * 3;
     box-shadow: $shadow;
-    background: palette(white);
+    background: palette(grey, 800);
     border-radius: $border-radius-m;
     overflow: auto;
   }
