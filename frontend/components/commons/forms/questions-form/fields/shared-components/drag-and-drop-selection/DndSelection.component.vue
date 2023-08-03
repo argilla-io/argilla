@@ -263,10 +263,10 @@ $max-visible-card-items: 12;
       @extend .draggable__rank-card;
       background-color: $card-secondary-color;
       color: $card-primary-color;
-      transition: box-shadow 0.2s ease-out !important;
+      transition: box-shadow 0.2s ease-out;
 
       &:focus {
-        outline: 2px solid $card-primary-color !important;
+        outline: 2px solid $card-primary-color;
       }
       &:focus:not(:focus-visible) {
         outline: none;
