@@ -3,7 +3,6 @@ import Container, { register } from "ts-injecty";
 
 import { useEventDispatcher } from "@codescouts/events";
 
-import { Field } from "../domain/entities/Field";
 import {
   DatasetRepository,
   RecordRepository,

@@ -48,8 +48,8 @@ export class QuestionRepository {
     const { options, ...rest } = settings;
 
     return {
-      title,
-      description,
+      title: title.trim(),
+      description: description.trim(),
       settings: {
         ...rest,
       },

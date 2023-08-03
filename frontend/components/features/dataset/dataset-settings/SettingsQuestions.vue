@@ -36,10 +36,19 @@
           </div>
 
           <div class="settings-questions__edition-form-footer">
-            <BaseButton type="button" class="secondary light small">
+            <BaseButton
+              type="button"
+              class="secondary light small"
+              @on-click="restore(question)"
+              :disabled="!question.isModified"
+            >
               <span v-text="'Cancel'" />
             </BaseButton>
-            <BaseButton type="submit" class="primary small">
+            <BaseButton
+              type="submit"
+              class="primary small"
+              :disabled="!question.isModified"
+            >
               <span v-text="'Update'" />
             </BaseButton>
           </div>
@@ -55,6 +64,8 @@
 </template>
 
 <script>
+import { useSettingsQuestionsViewModel } from "./useSettingsQuestionsViewModel";
+
 export default {
   name: "SettingsQuestions",
   props: {
@@ -64,7 +75,12 @@ export default {
     },
   },
   methods: {
-    async onSubmit(question) {},
+    onSubmit(question) {
+      this.update(question);
+    },
+  },
+  setup() {
+    return useSettingsQuestionsViewModel();
   },
 };
 </script>

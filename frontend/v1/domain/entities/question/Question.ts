@@ -10,9 +10,16 @@ import {
 } from "./QuestionAnswer";
 import { Suggestion } from "./Suggestion";
 
+interface OriginalQuestion {
+  title: string;
+  description: string;
+  settings: any;
+}
+
 export class Question {
-  private suggestion: Suggestion;
   public answer: QuestionAnswer;
+  private suggestion: Suggestion;
+  private original: OriginalQuestion;
 
   constructor(
     public readonly id: string,
@@ -21,9 +28,16 @@ export class Question {
     public readonly datasetId: string,
     public title: string,
     public readonly isRequired: boolean,
-    public readonly settings: any
+    public settings: any
   ) {
     this.answer = this.createEmptyAnswers();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { options, ...rest } = settings;
+    this.original = {
+      title,
+      description,
+      settings: rest,
+    };
   }
 
   public get isAnswered(): boolean {
@@ -64,6 +78,24 @@ export class Question {
 
   clearAnswer() {
     this.answer.clear();
+  }
+
+  public get isModified(): boolean {
+    return (
+      this.title.trim() !== this.original.title ||
+      this.description.trim() !== this.original.description ||
+      this.settings.use_markdown !== this.original.settings.use_markdown ||
+      this.settings.visible_options !== this.original.settings.visible_options
+    );
+  }
+
+  restore() {
+    this.title = this.original.title;
+    this.description = this.original.description;
+    this.settings = {
+      ...this.settings,
+      ...this.original.settings,
+    };
   }
 
   answerQuestionWithResponse(answer: RecordAnswer) {
