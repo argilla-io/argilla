@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import re
 import warnings
 from typing import List, Optional
 
@@ -43,6 +44,7 @@ class DatasetConfig(BaseModel):
 
     @classmethod
     def from_yaml(cls, yaml: str) -> "DatasetConfig":
+        yaml = re.sub(r"(\n\s*|)id: !!python/object:uuid\.UUID\s+int: \d+", "", yaml)
         return cls(**load(yaml, Loader=SafeLoader))
 
 
