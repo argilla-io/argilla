@@ -118,19 +118,29 @@ class RemoteFeedbackRecords:
                     f"Index {start if start < 0 else stop} is out of range, dataset has {num_records} records."
                 )
             limit = stop - start
-            offsets = [start] if limit < FETCHING_BATCH_SIZE else list(range(start, stop, FETCHING_BATCH_SIZE))
+            if limit < 0:
+                raise ValueError("Negative slice bounds are not supported.")
+            elif limit < FETCHING_BATCH_SIZE:
+                offsets = [start]
+                limits = [limit]
+            else:
+                offsets = list(range(start, stop, FETCHING_BATCH_SIZE))
+                limits = [FETCHING_BATCH_SIZE] * len(offsets)
+                if stop % FETCHING_BATCH_SIZE != 0:
+                    offsets[-1] = stop - (stop % FETCHING_BATCH_SIZE) + 1
+                    limits[-1] = (stop % FETCHING_BATCH_SIZE) - 1
         elif isinstance(key, int):
             if key < 0:
                 key += num_records
             if key < 0 or key >= num_records:
                 raise IndexError(f"Index {key} is out of range, dataset has {num_records} records.")
             offsets = [key]
-            limit = 1
+            limits = [1]
         else:
             raise TypeError("Only `int` and `slice` are supported as index.")
 
         records = []
-        for offset in offsets:
+        for offset, limit in zip(offsets, limits):
             fetched_records = datasets_api_v1.get_records(
                 client=self._dataset._client,
                 id=self._dataset._id,
