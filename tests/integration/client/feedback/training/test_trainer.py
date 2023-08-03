@@ -33,6 +33,8 @@ from argilla.client.feedback.training import ArgillaTrainer
 from argilla.client.feedback.training.schemas import (
     TrainingTask,
     TrainingTaskForTextClassification,
+    TrainingTaskMapping,
+    TrainingTaskMappingForTextClassification,
 )
 from argilla.client.feedback.unification import LabelQuestionUnification
 from argilla.client.models import Framework
@@ -101,3 +103,33 @@ def test_prepare_for_training_text_classification(
 
     if Path(__OUTPUT_DIR__).exists():
         shutil.rmtree(__OUTPUT_DIR__)
+
+
+@pytest.mark.parametrize(
+    "callable",
+    (
+        lambda: TrainingTaskMapping.for_text_classification(None, None),
+        lambda: TrainingTaskMapping.for_direct_preference_optimization(None),
+        lambda: TrainingTaskMapping.for_reward_modelling(None),
+        lambda: TrainingTaskMapping.for_supervised_fine_tuning(None),
+    ),
+)
+def test_deprecations(callable) -> None:
+    with pytest.warns(DeprecationWarning, match="`TrainingTaskMapping` has been renamed to `TrainingTask`"):
+        # This'll crash because we're passing None, but we only test the warning
+        try:
+            callable()
+        except:
+            pass
+
+
+def test_deprecations_for_text_classification():
+    with pytest.warns(
+        DeprecationWarning,
+        match="`TrainingTaskMappingForTextClassification` has been renamed to `TrainingTaskForTextClassification`",
+    ):
+        # This'll crash because we're passing None, but we only test the warning
+        try:
+            TrainingTaskMappingForTextClassification(None)
+        except:
+            pass
