@@ -40,7 +40,7 @@ class DatasetConfig(BaseModel):
     guidelines: Optional[str] = None
 
     def to_yaml(self) -> str:
-        return dump(self.dict({"fields": {"__all__": {"id"}}, "questions": {"__all__": {"id"}}}))
+        return dump(self.dict(exclude={"fields": {"__all__": {"id"}}, "questions": {"__all__": {"id"}}}))
 
     @classmethod
     def from_yaml(cls, yaml: str) -> "DatasetConfig":
