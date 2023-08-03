@@ -614,10 +614,11 @@ test.describe("Annotation page shortcuts", () => {
   });
 
   test.describe("Ranking component", () => {
-    test("go to ranking component with keyboard", async ({ page }) => {
+    const goToRankingComponent = async (page: Page) => {
       await goToAnnotationPage(page);
 
       await page.locator("#sentiment_positive").press("Shift+ArrowDown");
+
       await page
         .locator("#sentiment-multi-label_positive")
         .press("Shift+ArrowDown");
@@ -627,6 +628,10 @@ test.describe("Annotation page shortcuts", () => {
       await page
         .getByText("This is a review of the review")
         .press("Shift+ArrowDown");
+    };
+
+    test("go to ranking component with keyboard", async ({ page }) => {
+      await goToRankingComponent(page);
 
       await expect(page).toHaveScreenshot();
     });
@@ -634,16 +639,7 @@ test.describe("Annotation page shortcuts", () => {
     test("go to previous question if the user is in ranking component with keyboard", async ({
       page,
     }) => {
-      await goToAnnotationPage(page);
-
-      await page.locator("#sentiment_positive").press("Shift+ArrowDown");
-      await page
-        .locator("#sentiment-multi-label_positive")
-        .press("Shift+ArrowDown");
-      await page.getByLabel("1").press("Shift+ArrowDown");
-      await page
-        .getByText("This is a review of the review")
-        .press("Shift+ArrowDown");
+      await goToRankingComponent(page);
 
       await page.getByTitle("Option A").press("Shift+ArrowUp");
 
@@ -657,16 +653,7 @@ test.describe("Annotation page shortcuts", () => {
     });
 
     test("order ranking question options", async ({ page }) => {
-      await goToAnnotationPage(page);
-
-      await page.locator("#sentiment_positive").press("Shift+ArrowDown");
-      await page
-        .locator("#sentiment-multi-label_positive")
-        .press("Shift+ArrowDown");
-      await page.getByLabel("1").press("Shift+ArrowDown");
-      await page
-        .getByText("This is a review of the review")
-        .press("Shift+ArrowDown");
+      await goToRankingComponent(page);
 
       await page.getByTitle("Option A").press("2");
 
@@ -674,16 +661,7 @@ test.describe("Annotation page shortcuts", () => {
     });
 
     test("reset order ranking question options", async ({ page }) => {
-      await goToAnnotationPage(page);
-
-      await page.locator("#sentiment_positive").press("Shift+ArrowDown");
-      await page
-        .locator("#sentiment-multi-label_positive")
-        .press("Shift+ArrowDown");
-      await page.getByLabel("1").press("Shift+ArrowDown");
-      await page
-        .getByText("This is a review of the review")
-        .press("Shift+ArrowDown");
+      await goToRankingComponent(page);
 
       await page
         .getByTitle("Option A")
@@ -705,15 +683,7 @@ test.describe("Annotation page shortcuts", () => {
     });
 
     test("reorder ranking question options", async ({ page }) => {
-      await goToAnnotationPage(page);
-      await page.locator("#sentiment_positive").press("Shift+ArrowDown");
-      await page
-        .locator("#sentiment-multi-label_positive")
-        .press("Shift+ArrowDown");
-      await page.getByLabel("1").press("Shift+ArrowDown");
-      await page
-        .getByText("This is a review of the review")
-        .press("Shift+ArrowDown");
+      await goToRankingComponent(page);
 
       await page.getByTitle("Option A").press("2");
 
@@ -730,6 +700,47 @@ test.describe("Annotation page shortcuts", () => {
 
       await page.waitForTimeout(300);
 
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("move as a loop in ranking component", async ({ page }) => {
+      await goToRankingComponent(page);
+
+      await page.getByText("✨ Ranking (optional)").press("Tab");
+      await expect(page).toHaveScreenshot();
+
+      await page.getByText("✨ Ranking (optional)").press("Tab");
+      await page.getByText("✨ Ranking (optional)").press("Tab");
+      await expect(page).toHaveScreenshot();
+
+      await page.getByText("✨ Ranking (optional)").press("Tab");
+      await page.getByText("✨ Ranking (optional)").press("Tab");
+      await page.getByText("✨ Ranking (optional)").press("Tab");
+      await expect(page).toHaveScreenshot();
+
+      await page.getByText("✨ Ranking (optional)").press("Shift+Tab");
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("move as a loop in ranking component with some ranked and other unranked", async ({
+      page,
+    }) => {
+      await goToRankingComponent(page);
+
+      await page.getByText("✨ Ranking (optional)").press("Tab");
+      await expect(page).toHaveScreenshot();
+
+      await page.getByText("✨ Ranking (optional)").press("Backspace");
+      await page.getByText("Ranking (optional)").press("Tab");
+      await page.getByText("Ranking (optional)").press("Backspace");
+      await expect(page).toHaveScreenshot();
+
+      await page.getByText("Ranking (optional)").press("Tab");
+      await page.getByText("Ranking (optional)").press("Tab");
+      await page.getByText("Ranking (optional)").press("Tab");
+      await expect(page).toHaveScreenshot();
+
+      await page.getByText("Ranking (optional)").press("Shift+Tab");
       await expect(page).toHaveScreenshot();
     });
   });
