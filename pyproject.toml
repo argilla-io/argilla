@@ -93,7 +93,7 @@ integrations = [
     # TODO: some backward comp. problems introduced in 0.5.0. 0.13 does not match with setfit
     "huggingface_hub >= 0.5.0,< 0.13",
     # Version 0.12 fixes a known installation issue related to `sentencepiece` and `tokenizers`, more at https://github.com/flairNLP/flair/issues/3129
-    "flair >= 0.12.2", # Version 0.12.2 relaxes the `huggingface_hub` dependency
+    "flair >= 0.12.2",               # Version 0.12.2 relaxes the `huggingface_hub` dependency
     "faiss-cpu",
     "flyingsquid",
     "pgmpy",
@@ -161,12 +161,13 @@ profile = "black"
 
 [tool.ruff]
 select = [
-    "E", # pycodestyle errors
-    "W", # pycodestyle warnings
-    "F", # pyflakes
-    "I", # isort
-    "C", # flake8-comprehensions
-    "B", # flake8-bugbear
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+    "PT", # flake8-pytest-style
 ]
 ignore = [
     "B008", # function calls in argument defaults
