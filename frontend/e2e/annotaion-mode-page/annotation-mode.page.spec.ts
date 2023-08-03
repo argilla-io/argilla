@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, Page } from "@playwright/test";
 import {
   loginUserAndWaitFor,
   mockAllDatasets,
@@ -35,7 +35,7 @@ const goToAnnotationPage = async (page, shortAndLongQuestions = false) => {
   return record;
 };
 
-const goToAnnotationPageWith12Ranking = async (page) => {
+const goToAnnotationPageWith12Ranking = async (page: Page) => {
   const dataset = newDatasetsMocked[0];
 
   await mockAllDatasets(page);
@@ -46,11 +46,11 @@ const goToAnnotationPageWith12Ranking = async (page) => {
 
   await loginUserAndWaitFor(page, "datasets");
 
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(1000);
 
   await page.getByRole("link", { name: dataset.name }).click();
 
-  await page.waitForTimeout(3000);
+  await page.waitForTimeout(1000);
 };
 
 const goToAnnotationPageWith10Rating = async (page) => {
@@ -120,6 +120,26 @@ test.describe("Annotate page", () => {
     await page
       .getByTitle("Option A")
       .dragTo(page.locator(".draggable__questions-container"));
+
+    await expect(page).toHaveScreenshot();
+  });
+
+  test("can drag and drop ranking question", async ({ page }) => {
+    await goToAnnotationPage(page);
+
+    await page.getByTitle("Option A").click();
+
+    await page.mouse.down();
+
+    await expect(page).toHaveScreenshot();
+
+    await page.mouse.up();
+
+    await page.getByRole("button", { name: "Clear" }).click();
+
+    await page.getByTitle("Option A").click();
+
+    await page.mouse.down();
 
     await expect(page).toHaveScreenshot();
   });

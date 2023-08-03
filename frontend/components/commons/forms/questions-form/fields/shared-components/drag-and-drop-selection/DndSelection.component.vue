@@ -244,7 +244,7 @@ $max-visible-card-items: 12;
       color: $card-primary-color;
       box-shadow: $shadow-500;
       &:focus {
-        outline: none;
+        outline: none !important;
       }
     }
     &.ghost-ticket {
@@ -264,10 +264,10 @@ $max-visible-card-items: 12;
       @extend .draggable__rank-card;
       background-color: $card-secondary-color;
       color: $card-primary-color;
-      transition: box-shadow 0.2s ease-out;
+      transition: box-shadow 0.2s ease-out !important;
 
       &:focus {
-        outline: 2px solid $card-primary-color;
+        outline: 2px solid $card-primary-color !important;
       }
       &:focus:not(:focus-visible) {
         outline: none;
