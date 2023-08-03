@@ -66,14 +66,6 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          # Default tags + custom tag for uploading Docker image to Google Cloud Artifact Registry
-          # Defaults tags described here: https://github.com/docker/metadata-action#tags-input
-          tags: |
-            type=schedule
-            type=ref,event=branch
-            type=ref,event=tag
-            type=ref,event=pr
-            type=raw,prefix=,suffix=,value=europe-docker.pkg.dev/argilla-ci/${{ inputs.image-name }}:${{ github.ref_name }}
           images: ${{ inputs.image-name }}
 
       # print tags from previous step
@@ -99,7 +91,9 @@ jobs:
           context: docker
           file: ${{ inputs.dockerfile }}
           platforms: ${{ inputs.platforms }}
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            ${{ steps.meta.outputs.tags }}
+            europe-docker.pkg.dev/argilla-ci/${{ inputs.image-name}}:${{ github.ref_name }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: ${{ inputs.build-args }}
           push: true
