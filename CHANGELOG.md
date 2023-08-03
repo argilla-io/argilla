@@ -44,6 +44,7 @@ These are the section headers that we use:
 ### Fixed
 
 - Fixed issue with `bool` values and `default` from Jinja2 while generating the HuggingFace `DatasetCard` from `argilla_template.md` ([#3499](https://github.com/argilla-io/argilla/pull/3499)).
+- Fixed `DatasetConfig.from_yaml` which was failing when calling `FeedbackDataset.from_huggingface` as the UUIDs cannot be deserialized automatically by `PyYAML`, so UUIDs are neither dumped nor loaded anymore ([#3502](https://github.com/argilla-io/argilla/pull/3502)).
 
 ## [1.13.3](https://github.com/argilla-io/argilla/compare/v1.13.2...v1.13.3)
 
