@@ -170,9 +170,10 @@ select = [
     "PT", # flake8-pytest-style
 ]
 ignore = [
-    "B008", # function calls in argument defaults
-    "C901", # function is too complex
-    "E501", # line too long
+    "B008",  # function calls in argument defaults
+    "C901",  # function is too complex
+    "E501",  # line too long
+    "PT004", # pytest fixture not returning without leading underscore
 ]
 
 # Exclude a variety of commonly ignored directories.
