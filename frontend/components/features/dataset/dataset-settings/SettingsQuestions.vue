@@ -26,16 +26,12 @@
             v-model="question.settings.use_markdown"
             >Use Markdown</BaseSwitch
           >
-          <div
-            class="settings-questions__edition-form-group"
-            v-if="question.settings.visible_options"
-          >
+          <div v-if="question.settings.visible_options">
             <label for="question.id">Visible options</label>
-            <input
-              type="range"
+            <BaseRangeSlider
               :min="3"
               :max="question.settings.options.length"
-              v-model.number="question.settings.visible_options"
+              v-model="question.settings.visible_options"
             />
           </div>
 
