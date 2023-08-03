@@ -57,6 +57,7 @@ class UserCreate(BaseModel):
     username: constr(regex=USER_USERNAME_REGEX, min_length=1)
     role: Optional[UserRole]
     password: constr(min_length=USER_PASSWORD_MIN_LENGTH, max_length=USER_PASSWORD_MAX_LENGTH)
+    workspaces: Optional[List[str]]
 
 
 class UserGetter(GetterDict):

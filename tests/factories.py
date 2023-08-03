@@ -232,7 +232,7 @@ class FieldFactory(BaseFactory):
 
 
 class TextFieldFactory(FieldFactory):
-    settings = {"type": FieldType.text.value}
+    settings = {"type": FieldType.text.value, "use_markdown": False}
 
 
 class QuestionFactory(BaseFactory):
@@ -256,7 +256,7 @@ class QuestionFactory(BaseFactory):
 
 
 class TextQuestionFactory(QuestionFactory):
-    settings = {"type": QuestionType.text.value}
+    settings = {"type": QuestionType.text.value, "use_markdown": False}
 
 
 class RatingQuestionFactory(QuestionFactory):
@@ -281,9 +281,9 @@ class LabelSelectionQuestionFactory(QuestionFactory):
     settings = {
         "type": QuestionType.label_selection.value,
         "options": [
-            {"value": "option1", "text": "Option 1"},
-            {"value": "option2", "text": "Option 2"},
-            {"value": "option3", "text": "Option 3"},
+            {"value": "option1", "text": "Option 1", "description": None},
+            {"value": "option2", "text": "Option 2", "description": None},
+            {"value": "option3", "text": "Option 3", "description": None},
         ],
     }
 
@@ -292,9 +292,9 @@ class MultiLabelSelectionQuestionFactory(QuestionFactory):
     settings = {
         "type": QuestionType.multi_label_selection.value,
         "options": [
-            {"value": "option1", "text": "Option 1"},
-            {"value": "option2", "text": "Option 2"},
-            {"value": "option3", "text": "Option 3"},
+            {"value": "option1", "text": "Option 1", "description": None},
+            {"value": "option2", "text": "Option 2", "description": None},
+            {"value": "option3", "text": "Option 3", "description": None},
         ],
     }
 
@@ -303,9 +303,9 @@ class RankingQuestionFactory(QuestionFactory):
     settings = {
         "type": QuestionType.ranking.value,
         "options": [
-            {"value": "completion-a", "text": "Completion A"},
-            {"value": "completion-b", "text": "Completion B"},
-            {"value": "completion-c", "text": "Completion C"},
+            {"value": "completion-a", "text": "Completion A", "description": None},
+            {"value": "completion-b", "text": "Completion B", "description": None},
+            {"value": "completion-c", "text": "Completion C", "description": None},
         ],
     }
 

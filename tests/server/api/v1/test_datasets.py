@@ -20,6 +20,7 @@ from uuid import UUID, uuid4
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v1.handlers.datasets import LIST_DATASET_RECORDS_LIMIT_DEFAULT
+from argilla.server.enums import ResponseStatusFilter
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
@@ -34,7 +35,8 @@ from argilla.server.models import (
     Workspace,
 )
 from argilla.server.schemas.v1.datasets import (
-    DATASET_CREATE_GUIDELINES_MAX_LENGTH,
+    DATASET_GUIDELINES_MAX_LENGTH,
+    DATASET_NAME_MAX_LENGTH,
     FIELD_CREATE_NAME_MAX_LENGTH,
     FIELD_CREATE_TITLE_MAX_LENGTH,
     QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
@@ -936,10 +938,21 @@ async def create_records_with_response(
         await ResponseFactory.create(record=record, user=user, values=response_values, status=response_status)
 
 
-@pytest.mark.parametrize("response_status_filter", ["missing", "discarded", "submitted", "draft"])
+@pytest.mark.parametrize(
+    "response_status_filters",
+    [
+        [ResponseStatusFilter.missing],
+        [ResponseStatusFilter.draft],
+        [ResponseStatusFilter.submitted],
+        [ResponseStatusFilter.discarded],
+        [ResponseStatusFilter.missing, ResponseStatusFilter.draft],
+        [ResponseStatusFilter.submitted, ResponseStatusFilter.discarded],
+        [ResponseStatusFilter.missing, ResponseStatusFilter.draft, ResponseStatusFilter.discarded],
+    ],
+)
 @pytest.mark.asyncio
 async def test_list_current_user_dataset_records_with_response_status_filter(
-    client: TestClient, owner: "User", owner_auth_header: dict, response_status_filter: str
+    client: TestClient, owner: "User", owner_auth_header: dict, response_status_filters: List[ResponseStatusFilter]
 ):
     num_responses_per_status = 10
     response_values = {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}
@@ -959,20 +972,14 @@ async def test_list_current_user_dataset_records_with_response_status_filter(
     other_dataset = await DatasetFactory.create()
     await RecordFactory.create_batch(size=2, dataset=other_dataset)
 
-    response = client.get(
-        f"/api/v1/me/datasets/{dataset.id}/records?response_status={response_status_filter}&include=responses",
-        headers=owner_auth_header,
-    )
+    params = [("include", RecordInclude.responses.value)]
+    params.extend(("response_status", status_filter.value) for status_filter in response_status_filters)
+    response = client.get(f"/api/v1/me/datasets/{dataset.id}/records", headers=owner_auth_header, params=params)
 
     assert response.status_code == 200
     response_json = response.json()
 
-    assert len(response_json["items"]) == num_responses_per_status
-
-    if response_status_filter == "missing":
-        assert all([len(record["responses"]) == 0 for record in response_json["items"]])
-    else:
-        assert all([record["responses"][0]["status"] == response_status_filter for record in response_json["items"]])
+    assert len(response_json["items"]) == num_responses_per_status * len(response_status_filters)
 
 
 @pytest.mark.asyncio
@@ -1245,16 +1252,25 @@ async def test_create_dataset(client: TestClient, db: "AsyncSession", owner_auth
     }
 
 
+@pytest.mark.parametrize(
+    "dataset_json",
+    [
+        {"name": ""},
+        {"name": "123$abc"},
+        {"name": "unit@test"},
+        {"name": "-test-dataset"},
+        {"name": "_test-dataset"},
+        {"name": "a" * (DATASET_NAME_MAX_LENGTH + 1)},
+        {"name": "test-dataset", "guidelines": ""},
+        {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},
+    ],
+)
 @pytest.mark.asyncio
-async def test_create_dataset_with_invalid_length_guidelines(
-    client: TestClient, db: "AsyncSession", owner_auth_header: dict
+async def test_create_dataset_with_invalid_settings(
+    client: TestClient, db: "AsyncSession", owner_auth_header: dict, dataset_json: dict
 ):
     workspace = await WorkspaceFactory.create()
-    dataset_json = {
-        "name": "name",
-        "guidelines": "a" * (DATASET_CREATE_GUIDELINES_MAX_LENGTH + 1),
-        "workspace_id": str(workspace.id),
-    }
+    dataset_json.update({"workspace_id": str(workspace.id)})
 
     response = client.post("/api/v1/datasets", headers=owner_auth_header, json=dataset_json)
 
@@ -3009,7 +3025,7 @@ async def test_search_dataset_records_with_response_status_filter(
     mock_search_engine.search.assert_called_once_with(
         dataset=dataset,
         query=Query(text=TextQuery(q="Hello", field="input")),
-        user_response_status_filter=UserResponseStatusFilter(user=owner, status=ResponseStatus.submitted),
+        user_response_status_filter=UserResponseStatusFilter(user=owner, statuses=[ResponseStatus.submitted]),
         offset=0,
         limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
     )
@@ -3216,6 +3232,142 @@ async def test_publish_dataset_with_nonexistent_dataset_id(
 
     assert response.status_code == 404
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"name": "New Name", "guidelines": "New Guidelines"},
+        {"name": "New Name"},
+        {"guidelines": "New Guidelines"},
+        {"guidelines": None},
+        {},
+        {"status": DatasetStatus.draft, "workspace_id": str(uuid4())},
+    ],
+)
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+@pytest.mark.asyncio
+async def test_update_dataset(client: TestClient, db: "AsyncSession", role: UserRole, payload: dict):
+    dataset = await DatasetFactory.create(
+        name="Current Name", guidelines="Current Guidelines", status=DatasetStatus.ready
+    )
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+    response = client.patch(
+        f"/api/v1/datasets/{dataset.id}",
+        headers={API_KEY_HEADER_NAME: user.api_key},
+        json=payload,
+    )
+
+    name = payload.get("name") or dataset.name
+    if "guidelines" in payload:
+        guidelines = payload["guidelines"]
+    else:
+        guidelines = dataset.guidelines
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": str(dataset.id),
+        "name": name,
+        "guidelines": guidelines,
+        "status": "ready",
+        "workspace_id": str(dataset.workspace_id),
+        "inserted_at": dataset.inserted_at.isoformat(),
+        "updated_at": dataset.updated_at.isoformat(),
+    }
+
+    dataset = await db.get(Dataset, dataset.id)
+    assert dataset.name == name
+    assert dataset.guidelines == guidelines
+
+
+@pytest.mark.parametrize(
+    "dataset_json",
+    [
+        {"name": None},
+        {"name": ""},
+        {"name": "123$abc"},
+        {"name": "unit@test"},
+        {"name": "-test-dataset"},
+        {"name": "_test-dataset"},
+        {"name": "a" * (DATASET_NAME_MAX_LENGTH + 1)},
+        {"name": "test-dataset", "guidelines": ""},
+        {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},
+    ],
+)
+@pytest.mark.asyncio
+async def test_update_dataset_with_invalid_settings(client: TestClient, owner_auth_header: dict, dataset_json: dict):
+    dataset = await DatasetFactory.create(
+        name="Current Name", guidelines="Current Guidelines", status=DatasetStatus.ready
+    )
+
+    response = client.patch(f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header, json=dataset_json)
+
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_update_dataset_with_invalid_payload(client: TestClient, owner_auth_header: dict):
+    dataset = await DatasetFactory.create()
+
+    response = client.patch(
+        f"/api/v1/datasets/{dataset.id}",
+        headers=owner_auth_header,
+        json={"name": {"this": {"is": "invalid"}}, "guidelines": {"this": {"is": "invalid"}}},
+    )
+
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_update_dataset_non_existent(client: TestClient, owner_auth_header: dict):
+    response = client.patch(
+        f"/api/v1/datasets/{uuid4()}",
+        headers=owner_auth_header,
+        json={"name": "New Name", "guidelines": "New Guidelines"},
+    )
+
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_update_dataset_as_admin_from_different_workspace(client: TestClient):
+    dataset = await DatasetFactory.create()
+    user = await UserFactory.create(role=UserRole.admin)
+
+    response = client.patch(
+        f"/api/v1/datasets/{dataset.id}",
+        headers={API_KEY_HEADER_NAME: user.api_key},
+        json={"name": "New Name", "guidelines": "New Guidelines"},
+    )
+
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_update_dataset_as_annotator(client: TestClient):
+    dataset = await DatasetFactory.create()
+    user = await UserFactory.create(role=UserRole.annotator, workspaces=[dataset.workspace])
+
+    response = client.patch(
+        f"/api/v1/datasets/{dataset.id}",
+        headers={API_KEY_HEADER_NAME: user.api_key},
+        json={"name": "New Name", "guidelines": "New Guidelines"},
+    )
+
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_update_dataset_without_authentication(client: TestClient):
+    dataset = await DatasetFactory.create()
+
+    response = client.patch(
+        f"/api/v1/datasets/{dataset.id}",
+        json={"name": "New Name", "guidelines": "New Guidelines"},
+    )
+
+    assert response.status_code == 401
 
 
 @pytest.mark.asyncio

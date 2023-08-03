@@ -11,8 +11,8 @@
 <script>
 import { isNil } from "lodash";
 import { Notification } from "@/models/Notifications";
-import { isAnyRecordByDatasetId } from "@/models/feedback-task-model/record/record.queries";
 import { LABEL_PROPERTIES } from "@/components/feedback-task/feedbackTask.properties";
+import { usePaginationFeedbackTaskViewModel } from "./usePaginationFeedbackTaskViewModel";
 
 export default {
   name: "PaginationFeedbackTaskComponent",
@@ -43,7 +43,7 @@ export default {
       }
     },
     hasRecords() {
-      return isAnyRecordByDatasetId(this.datasetId);
+      return this.records.hasRecordsToAnnotate;
     },
   },
   methods: {
@@ -87,6 +87,9 @@ export default {
   destroyed() {
     this.$root.$off("are-responses-untouched");
     this.$root.$off("go-to-page");
+  },
+  setup() {
+    return usePaginationFeedbackTaskViewModel();
   },
 };
 </script>
