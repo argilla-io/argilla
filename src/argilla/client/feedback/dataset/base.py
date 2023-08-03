@@ -192,30 +192,24 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         Raises:
             ValueError: if `records` is not a `FeedbackRecord` or `dict` or a list of `FeedbackRecord` or `dict`.
         """
-        if isinstance(records, list):
-            if len(records) == 0:
-                raise ValueError("Expected `records` to be a non-empty list of `dict` or `FeedbackRecord`.")
-            new_records = []
-            for record in records:
-                if isinstance(record, dict):
-                    new_records.append(FeedbackRecord(**record))
-                elif isinstance(record, FeedbackRecord):
-                    new_records.append(record)
-                else:
-                    raise ValueError(
-                        "Expected `records` to be a list of `dict` or `FeedbackRecord`,"
-                        f" got type `{type(record)}` instead."
-                    )
-            records = new_records
-        elif isinstance(records, dict):
-            records = [FeedbackRecord(**records)]
-        elif isinstance(records, FeedbackRecord):
+        if isinstance(records, (dict, FeedbackRecord)):
             records = [records]
-        else:
-            raise ValueError(
-                "Expected `records` to be a `dict` or `FeedbackRecord`, got type" f" `{type(records)}` instead."
-            )
-        return records
+
+        if len(records) == 0:
+            raise ValueError("Expected `records` to be a non-empty list of `dict` or `FeedbackRecord`.")
+            
+        new_records = []
+        for record in records:
+            if isinstance(record, dict):
+                new_records.append(FeedbackRecord(**record))
+            elif isinstance(record, FeedbackRecord):
+                new_records.append(record)
+            else:
+                raise ValueError(
+                    "Expected `record` to be a list of `dict` or `FeedbackRecord`,"
+                    f" got type `{type(record)}` instead."
+                )
+        return new_records
 
     def _validate_records(self, records: List[FeedbackRecord]) -> None:
         """Validates the records against the schema defined by the `fields`.
