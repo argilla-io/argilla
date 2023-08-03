@@ -12,28 +12,38 @@
             <p class="badge --capitalized" v-html="question.type" />
           </div>
           <div class="settings-questions__edition-form-group">
-            <label for="question.id">Title</label>
-            <input type="type" id="question.id" v-model="question.title" />
+            <label :for="`title-${question.id}`">Title</label>
+            <input
+              type="type"
+              :id="`title-${question.id}`"
+              v-model="question.title"
+            />
           </div>
 
           <div class="settings-questions__edition-form-group">
-            <label for="question.id">Description</label>
-            <input type="text" v-model="question.description" />
+            <label :for="`description-${question.id}`">Description</label>
+            <input
+              type="text"
+              :id="`description-${question.id}`"
+              v-model="question.description"
+            />
           </div>
 
           <BaseSwitch
+            :id="`use-markdown-${question.id}`"
             v-if="question.isTextType"
             v-model="question.settings.use_markdown"
             >Use Markdown</BaseSwitch
           >
-          <div v-if="question.settings.visible_options">
-            <label for="question.id">Visible options</label>
-            <BaseRangeSlider
-              :min="3"
-              :max="question.settings.options.length"
-              v-model="question.settings.visible_options"
-            />
-          </div>
+
+          <BaseRangeSlider
+            v-if="question.settings.visible_options"
+            :id="`visible_options-${question.id}`"
+            :min="3"
+            :max="question.settings.options.length"
+            v-model="question.settings.visible_options"
+            >Visible options</BaseRangeSlider
+          >
 
           <div class="settings-questions__edition-form-footer">
             <BaseButton

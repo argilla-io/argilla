@@ -1,24 +1,29 @@
 <template>
-  <div class="range__wrapper">
-    <span class="range__legend" v-text="min" />
-    <div class="range">
-      <span class="range__progress-value" ref="progress" v-text="range" />
-      <input
-        ref="slider"
-        class="range__slider"
-        type="range"
-        :min="min"
-        :max="max"
-        v-model.number="range"
-      />
+  <div>
+    <label :for="id"><slot /></label>
+    <div class="range__wrapper">
+      <span class="range__legend" v-text="min" />
+      <div class="range">
+        <span class="range__progress-value" ref="progress" v-text="range" />
+        <input
+          :id="id"
+          ref="slider"
+          class="range__slider"
+          type="range"
+          :min="min"
+          :max="max"
+          v-model.number="range"
+        />
+      </div>
+      <span class="range__legend" v-text="max" />
     </div>
-    <span class="range__legend" v-text="max" />
   </div>
 </template>
 
 <script>
 export default {
   props: {
+    id: String,
     min: {
       type: Number,
       default: 0,
@@ -71,6 +76,12 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+label {
+  width: fit-content;
+  height: 14px;
+  color: $black-54;
+}
+
 .range {
   position: relative;
   max-width: 30%;

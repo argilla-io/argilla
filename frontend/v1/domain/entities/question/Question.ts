@@ -82,8 +82,8 @@ export class Question {
 
   public get isModified(): boolean {
     return (
-      this.title.trim() !== this.original.title ||
-      this.description.trim() !== this.original.description ||
+      this.title?.trim() !== this.original.title ||
+      this.description?.trim() !== this.original.description ||
       this.settings.use_markdown !== this.original.settings.use_markdown ||
       this.settings.visible_options !== this.original.settings.visible_options
     );
