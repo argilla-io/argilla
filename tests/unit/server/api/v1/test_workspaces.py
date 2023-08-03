@@ -11,7 +11,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import contextlib
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import pytest
@@ -20,6 +22,9 @@ from argilla.server.commons.models import TaskType
 from argilla.server.models import UserRole
 
 from tests.factories import AnnotatorFactory, DatasetFactory, UserFactory, WorkspaceFactory
+
+if TYPE_CHECKING:
+    from httpx import AsyncClient
 
 
 @contextlib.asynccontextmanager
@@ -36,7 +41,7 @@ async def create_old_argilla_dataset(async_client: "AsyncClient", name: str, wor
         assert response.status_code == 200
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 class TestSuiteWorkspaces:
     async def test_get_workspace(self, async_client: "AsyncClient", owner_auth_header: dict):
         workspace = await WorkspaceFactory.create(name="workspace")

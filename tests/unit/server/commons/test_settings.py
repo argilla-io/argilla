@@ -57,7 +57,7 @@ def test_settings_default_database_url(monkeypatch):
 
 
 @pytest.mark.parametrize(
-    "url, expected_url",
+    ("url", "expected_url"),
     [
         ("sqlite:///test.db", "sqlite+aiosqlite:///test.db"),
         ("sqlite:///:memory:", "sqlite+aiosqlite:///:memory:"),

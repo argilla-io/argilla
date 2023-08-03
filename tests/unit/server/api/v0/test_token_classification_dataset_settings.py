@@ -15,7 +15,6 @@ from typing import TYPE_CHECKING, Optional
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.client.api import delete
 from argilla.server.commons.models import TaskType
 from argilla.server.models import User
 
@@ -25,7 +24,7 @@ if TYPE_CHECKING:
 
 async def create_dataset(client: "AsyncClient", name: str, workspace_name: str):
     response = await client.post(
-        "/api/datasets", json={"name": name, "workspace": workspace_name, f"task": TaskType.token_classification}
+        "/api/datasets", json={"name": name, "workspace": workspace_name, "task": TaskType.token_classification}
     )
     assert response.status_code == 200
 
@@ -82,7 +81,7 @@ async def log_some_data(async_client: "AsyncClient", name: str, workspace_name: 
 
 
 @pytest.mark.parametrize("labels", [["Label1", "Label2"], ["1", "2", "3"], [1, 2, 3, 4]])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_settings(async_client: "AsyncClient", argilla_user: User, labels: list):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_name = argilla_user.username
@@ -99,7 +98,7 @@ async def test_create_dataset_settings(async_client: "AsyncClient", argilla_user
     assert response.json() == created
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_dataset_settings_not_found(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_name = argilla_user.username
@@ -112,7 +111,7 @@ async def test_get_dataset_settings_not_found(async_client: "AsyncClient", argil
     assert response.status_code == 404
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_settings(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_name = argilla_user.username
@@ -130,7 +129,7 @@ async def test_delete_settings(async_client: "AsyncClient", argilla_user: User):
     assert response.status_code == 404
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_validate_settings_when_logging_data(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_name = argilla_user.username
@@ -158,7 +157,7 @@ async def test_validate_settings_when_logging_data(async_client: "AsyncClient", 
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_validate_settings_after_logging(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_name = argilla_user.username

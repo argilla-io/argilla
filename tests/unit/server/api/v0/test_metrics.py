@@ -43,7 +43,7 @@ COMMON_METRICS_LENGTH = len(CommonTasksMetrics.metrics)
 CLASSIFICATION_METRICS_LENGTH = len(TextClassificationMetrics.metrics)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_wrong_dataset_metrics(async_client: "AsyncClient"):
     workspace = await WorkspaceFactory.create()
     user = await UserFactory.create(role=UserRole.owner, workspaces=[workspace])
@@ -96,7 +96,7 @@ async def test_wrong_dataset_metrics(async_client: "AsyncClient"):
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_dataset_for_text2text(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -130,7 +130,7 @@ async def test_dataset_for_text2text(async_client: "AsyncClient", argilla_user: 
     assert len(metrics) == COMMON_METRICS_LENGTH
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_dataset_for_token_classification(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -190,7 +190,7 @@ async def test_dataset_for_token_classification(async_client: "AsyncClient", arg
             assert summary, (metric_id, summary)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_dataset_metrics(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -286,7 +286,7 @@ async def create_some_classification_data(
     assert response.status_code == 200
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_labeling_rule_metric(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -313,7 +313,7 @@ async def test_labeling_rule_metric(async_client: "AsyncClient", argilla_user: U
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_dataset_labels_for_text_classification(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}

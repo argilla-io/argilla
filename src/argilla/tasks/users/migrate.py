@@ -57,10 +57,10 @@ class UsersMigrator:
                 for user in self._users:
                     await self._migrate_user(session, user)
                 await session.commit()
-            except Exception:
+            except Exception as e:
                 await session.rollback()
                 typer.echo("Users migration process failed...")
-                raise typer.Exit(code=1)
+                raise typer.Exit(code=1) from e
 
             typer.echo("Users migration process successfully finished")
 
@@ -97,7 +97,7 @@ class UsersMigrator:
         return UserRole.annotator
 
     def _user_workspace_names(self, user: dict) -> List[str]:
-        workspace_names = [workspace_name for workspace_name in user.get("workspaces", [])]
+        workspace_names = list(user.get("workspaces", []))
 
         if user["username"] in workspace_names:
             return workspace_names

@@ -20,7 +20,6 @@ import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import Record, Response, Suggestion, User, UserRole
 from argilla.server.search_engine import SearchEngine
-from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -73,7 +72,7 @@ async def create_ranking_question(dataset: "Dataset") -> None:
 
 @pytest.mark.parametrize("response_status", ["submitted", "discarded", "draft"])
 @pytest.mark.parametrize(
-    "create_questions_func, responses",
+    ("create_questions_func", "responses"),
     [
         (
             create_text_questions,
@@ -140,7 +139,7 @@ async def create_ranking_question(dataset: "Dataset") -> None:
         ),
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_record_response_with_required_questions(
     async_client: "AsyncClient",
     db: "AsyncSession",
@@ -177,7 +176,7 @@ async def test_create_record_response_with_required_questions(
     mock_search_engine.update_record_response.assert_called_once_with(response)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_submitted_record_response_with_missing_required_questions(
     async_client: "AsyncClient", owner_auth_header: dict
 ):
@@ -199,7 +198,7 @@ async def test_create_submitted_record_response_with_missing_required_questions(
 
 @pytest.mark.parametrize("response_status", ["discarded", "draft"])
 @pytest.mark.parametrize(
-    "create_questions_func, responses",
+    ("create_questions_func", "responses"),
     [
         (
             create_text_questions,
@@ -299,7 +298,7 @@ async def test_create_submitted_record_response_with_missing_required_questions(
         ),
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_record_response_with_missing_required_questions(
     async_client: "AsyncClient",
     db: "AsyncSession",
@@ -336,7 +335,7 @@ async def test_create_record_response_with_missing_required_questions(
     mock_search_engine.update_record_response.assert_called_once_with(response)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_record_response_with_extra_question_responses(
     async_client: "AsyncClient", owner_auth_header: dict
 ):
@@ -360,7 +359,7 @@ async def test_create_record_response_with_extra_question_responses(
 
 
 @pytest.mark.parametrize(
-    "create_questions_func, responses, expected_error_msg",
+    ("create_questions_func", "responses", "expected_error_msg"),
     [
         (
             create_text_questions,
@@ -514,7 +513,7 @@ async def test_create_record_response_with_extra_question_responses(
         ),
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_record_response_with_wrong_response_value(
     async_client: "AsyncClient",
     owner_auth_header: dict,
@@ -535,7 +534,7 @@ async def test_create_record_response_with_wrong_response_value(
     assert response.json() == {"detail": expected_error_msg}
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_record_response_without_authentication(async_client: "AsyncClient", db: "AsyncSession"):
     record = await RecordFactory.create()
     response_json = {
@@ -553,7 +552,7 @@ async def test_create_record_response_without_authentication(async_client: "Asyn
 
 
 @pytest.mark.parametrize("status", ["submitted", "discarded", "draft"])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_record_response(
     async_client: "AsyncClient", db: "AsyncSession", owner: User, owner_auth_header: dict, status: str
 ):
@@ -593,10 +592,10 @@ async def test_create_record_response(
 
 
 @pytest.mark.parametrize(
-    "status, expected_status_code, expected_response_count",
+    ("status", "expected_status_code", "expected_response_count"),
     [("submitted", 422, 0), ("discarded", 201, 1), ("draft", 422, 0)],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_record_response_without_values(
     async_client: "AsyncClient",
     db: "AsyncSession",
@@ -630,7 +629,7 @@ async def test_create_record_response_without_values(
 
 
 @pytest.mark.parametrize("status", ["submitted", "discarded", "draft"])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_record_submitted_response_with_wrong_values(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, status: str
 ):
@@ -647,7 +646,7 @@ async def test_create_record_submitted_response_with_wrong_values(
 
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_record_response_for_user_role(async_client: "AsyncClient", db: Session, role: UserRole):
     dataset = await DatasetFactory.create()
     await TextQuestionFactory.create(name="input_ok", dataset=dataset)
@@ -685,7 +684,7 @@ async def test_create_record_response_for_user_role(async_client: "AsyncClient",
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_record_response_as_restricted_user_from_different_workspace(
     async_client: "AsyncClient", db: Session, role: UserRole
 ):
@@ -708,7 +707,7 @@ async def test_create_record_response_as_restricted_user_from_different_workspac
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_record_response_already_created(
     async_client: "AsyncClient", db: "AsyncSession", owner: User, owner_auth_header: dict
 ):
@@ -730,7 +729,7 @@ async def test_create_record_response_already_created(
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_record_response_with_invalid_values(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -748,7 +747,7 @@ async def test_create_record_response_with_invalid_values(
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_record_response_with_invalid_status(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -769,7 +768,7 @@ async def test_create_record_response_with_invalid_status(
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_record_response_with_nonexistent_record_id(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -791,7 +790,7 @@ async def test_create_record_response_with_nonexistent_record_id(
 
 
 @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin, UserRole.owner])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_record_suggestions(async_client: "AsyncClient", role: UserRole):
     dataset = await DatasetFactory.create()
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
@@ -850,7 +849,7 @@ async def test_get_record_suggestions(async_client: "AsyncClient", role: UserRol
     ],
 )
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_record_suggestion(async_client: "AsyncClient", db: "AsyncSession", role: UserRole, payload: dict):
     dataset = await DatasetFactory.create()
     question = await TextQuestionFactory.create(dataset=dataset)
@@ -869,7 +868,7 @@ async def test_create_record_suggestion(async_client: "AsyncClient", db: "AsyncS
     assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_record_suggestion_update(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -906,7 +905,7 @@ async def test_create_record_suggestion_update(
         },
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_record_suggestion_not_valid(async_client: "AsyncClient", owner_auth_header: dict, payload: dict):
     dataset = await DatasetFactory.create()
     question = await TextQuestionFactory.create(dataset=dataset)
@@ -921,7 +920,7 @@ async def test_create_record_suggestion_not_valid(async_client: "AsyncClient", o
     assert response.status_code == 422
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_record_suggestion_for_non_existent_question(async_client: "AsyncClient", owner_auth_header: dict):
     record = await RecordFactory.create()
 
@@ -934,7 +933,7 @@ async def test_create_record_suggestion_for_non_existent_question(async_client: 
     assert response.status_code == 422
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_record_suggestion_as_annotator(async_client: "AsyncClient"):
     annotator = await UserFactory.create(role=UserRole.annotator)
     record = await RecordFactory.create()
@@ -949,7 +948,7 @@ async def test_create_record_suggestion_as_annotator(async_client: "AsyncClient"
 
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_record(
     async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: "SearchEngine", role: UserRole
 ):
@@ -972,7 +971,7 @@ async def test_delete_record(
     mock_search_engine.delete_records.assert_called_once_with(dataset=dataset, records=[record])
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_record_as_admin_from_another_workspace(async_client: "AsyncClient", db: "AsyncSession"):
     dataset = await DatasetFactory.create()
     record = await RecordFactory.create(dataset=dataset)
@@ -984,7 +983,7 @@ async def test_delete_record_as_admin_from_another_workspace(async_client: "Asyn
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_record_as_annotator(async_client: "AsyncClient"):
     annotator = await UserFactory.create(role=UserRole.annotator)
     record = await RecordFactory.create()
@@ -996,7 +995,7 @@ async def test_delete_record_as_annotator(async_client: "AsyncClient"):
     assert response.status_code == 403
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_record_non_existent(async_client: "AsyncClient", owner_auth_header: dict):
     response = await async_client.delete(f"/api/v1/records/{uuid4()}", headers=owner_auth_header)
     assert response.status_code == 404

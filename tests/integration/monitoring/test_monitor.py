@@ -30,11 +30,9 @@ def test_monitor_with_non_supported_model(argilla_user: User):
         assert model == maybe_monitored
 
         assert any(
-            [
-                warning.message.args[0] == "The provided task model is not supported by monitoring module. "
-                "Predictions won't be logged into argilla."
-                for warning in warning_list
-            ]
+            warning.message.args[0] == "The provided task model is not supported by monitoring module. "
+            "Predictions won't be logged into argilla."
+            for warning in warning_list
         )
 
 
@@ -53,9 +51,7 @@ def test_monitor_non_supported_huggingface_model(argilla_user: User):
         maybe_monitored = argilla.monitor(nlp, dataset="ds")
         assert nlp == maybe_monitored
         assert any(
-            [
-                warning.message.args[0] == "The provided task model is not supported by monitoring module. "
-                "Predictions won't be logged into argilla."
-                for warning in warning_list
-            ]
+            warning.message.args[0] == "The provided task model is not supported by monitoring module. "
+            "Predictions won't be logged into argilla."
+            for warning in warning_list
         )

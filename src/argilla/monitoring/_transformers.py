@@ -75,18 +75,18 @@ class HuggingFaceMonitor(BaseMonitor):
         if multi_label:
             dataset_name += "_multi"
 
-        return dict(
-            records=records,
-            name=dataset_name,
-            tags={
+        return {
+            "records": records,
+            "name": dataset_name,
+            "tags": {
                 "name": self.model_config.name_or_path,
                 "transformers_version": self.fetch_transformers_version(self.model_config),
                 "model_type": self.model_config.model_type,
                 "task": self.__model__.task,
             },
-            metadata=self.model_config.to_dict(),
-            verbose=False,
-        )
+            "metadata": self.model_config.to_dict(),
+            "verbose": False,
+        }
 
 
 class ZeroShotMonitor(HuggingFaceMonitor):
@@ -135,9 +135,11 @@ class ZeroShotMonitor(HuggingFaceMonitor):
             ]
             if filtered_data:
                 self.send_records(filtered_data, multi_label=multi_label)
+        except Exception:
+            # TODO: warning?
+            pass
 
-        finally:
-            return batch_predictions
+        return batch_predictions
 
 
 class TextClassificationMonitor(HuggingFaceMonitor):
@@ -167,9 +169,11 @@ class TextClassificationMonitor(HuggingFaceMonitor):
             ]
             if filtered_data:
                 self.send_records(filtered_data)
+        except Exception:
+            # TODO: warning?
+            pass
 
-        finally:
-            return batch_predictions
+        return batch_predictions
 
 
 def huggingface_monitor(

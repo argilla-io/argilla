@@ -133,9 +133,9 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         self._transformers_tokenizer = AutoTokenizer.from_pretrained(
             self.model_kwargs.get("pretrained_model_name_or_path"), padding_side=padding_side, add_prefix_space=True
         )
-        if getattr(self._transformers_tokenizer, "pad_token_id") is None:
+        if self._transformers_tokenizer.pad_token_id is None:
             self._transformers_tokenizer.pad_token_id = self._transformers_tokenizer.eos_token_id
-        if getattr(self._transformers_tokenizer, "model_max_length") is None:
+        if self._transformers_tokenizer.model_max_length is None:
             self._transformers_tokenizer.model_max_length = 512
 
         if new:
@@ -305,11 +305,11 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
                 predictions = np.argmax(predictions, axis=2)
 
                 true_predictions = [
-                    [self._label_list[p] for (p, l) in zip(prediction, label) if l != -100]
+                    [self._label_list[p] for (p, l) in zip(prediction, label) if l != -100]  # noqa: E741
                     for prediction, label in zip(predictions, labels)
                 ]
                 true_labels = [
-                    [self._label_list[l] for (p, l) in zip(prediction, label) if l != -100]
+                    [self._label_list[l] for (p, l) in zip(prediction, label) if l != -100]  # noqa: E741
                     for prediction, label in zip(predictions, labels)
                 ]
 

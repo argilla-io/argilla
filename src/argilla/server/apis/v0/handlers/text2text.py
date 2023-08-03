@@ -29,9 +29,7 @@ from argilla.server.apis.v0.models.text2text import (
 )
 from argilla.server.commons.config import TasksFactory
 from argilla.server.commons.models import TaskType
-from argilla.server.errors import EntityNotFoundError
 from argilla.server.models import User
-from argilla.server.schemas.v0.datasets import CreateDatasetRequest
 from argilla.server.security import auth
 from argilla.server.services.datasets import DatasetsService
 from argilla.server.services.tasks.text2text import Text2TextService

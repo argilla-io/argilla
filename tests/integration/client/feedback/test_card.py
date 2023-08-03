@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.parametrize(
-    "size,expected",
+    ("size", "expected"),
     [
         (1, "n<1K"),
         (999, "n<1K"),

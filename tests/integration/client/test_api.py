@@ -134,7 +134,7 @@ def create_some_data_for_text_classification(client: AuthenticatedClient, name: 
     return data
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_init_ok(monkeypatch):
     """Creating of mock_get method from the class, and monkeypatch application.
 
@@ -177,7 +177,7 @@ def mock_init_ok(monkeypatch):
     monkeypatch.setattr(workspaces_api, "list_workspaces", mock_list_workspaces)
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_response_500(monkeypatch):
     """Creating of mock_get method from the class, and monkeypatch application.
 
@@ -190,7 +190,7 @@ def mock_response_500(monkeypatch):
     monkeypatch.setattr(users_api, "whoami", mock_get)
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_response_token_401(monkeypatch):
     """Creating of mock_get method from the class, and monkeypatch application.
 
@@ -272,7 +272,7 @@ def test_init_environment_url(mock_init_ok, monkeypatch):
     )
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_init_with_workspace(owner: User) -> None:
     workspace = await WorkspaceFactory.create(name="test_workspace")
 
@@ -282,12 +282,12 @@ async def test_init_with_workspace(owner: User) -> None:
 
 def test_set_workspace_with_missing_workspace(owner: User) -> None:
     init(api_key=owner.api_key)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Wrong provided workspace.*"):
         set_workspace("missing-workspace")
 
 
 def test_init_with_missing_workspace(owner: User) -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Wrong provided workspace.*"):
         init(api_key=owner.api_key, workspace="missing-workspace")
 
 
@@ -344,7 +344,7 @@ def test_load_limits(argilla_user: User):
     assert len(ds) == limit_data_to
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_load_with_feedback_dataset(mocked_client, argilla_user: User) -> None:
     workspace = argilla_user.workspaces[0]
     dataset = await DatasetFactory.create(name="dataset-a", workspace=workspace)
@@ -446,14 +446,12 @@ def test_log_background_with_error(monkeypatch, argilla_user: User):
 
     future = log(TextClassificationRecord(text=sample_text), name=dataset_name, background=True)
     with pytest.raises(ConnectError):
-        try:
-            future.result()
-        finally:
-            future.cancel()
+        future.result()
+    future.cancel()
 
 
 @pytest.mark.parametrize(
-    "status,error_type",
+    ("status", "error_type"),
     [
         (401, UnauthorizedApiError),
         (403, ForbiddenApiError),
@@ -473,13 +471,14 @@ def test_delete_with_errors(monkeypatch, argilla_user: User, status, error_type)
 
         return inner
 
+    monkeypatch.setattr(httpx, "delete", send_mock_response_with_http_status(status))
+
     with pytest.raises(error_type):
-        monkeypatch.setattr(httpx, "delete", send_mock_response_with_http_status(status))
         delete("dataset")
 
 
 @pytest.mark.parametrize(
-    "records, dataset_class",
+    ("records", "dataset_class"),
     [
         ("singlelabel_textclassification_records", DatasetForTextClassification),
         ("multilabel_textclassification_records", DatasetForTextClassification),
@@ -525,7 +524,7 @@ def test_general_log_load(argilla_user: User, request, records, dataset_class):
 
 
 @pytest.mark.parametrize(
-    "records, dataset_class",
+    ("records", "dataset_class"),
     [("singlelabel_textclassification_records", DatasetForTextClassification)],
 )
 def test_log_load_with_workspace(argilla_user: User, request, records, dataset_class):
@@ -603,7 +602,7 @@ def test_log_with_wrong_name(argilla_user: User):
 
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_dataset_copy(role: UserRole):
     dataset_name = "test_dataset_copy"
     dataset_copy_name = "test_dataset_copy_new"
@@ -634,7 +633,7 @@ async def test_dataset_copy(role: UserRole):
 
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_dataset_copy_to_another_workspace(role: UserRole):
     dataset_name = "test_dataset_copy_to_another_workspace"
     dataset_copy = "new_dataset"
@@ -758,10 +757,10 @@ def test_load_with_sort(api: Argilla):
         api.load(name=dataset, sort=[("event_timestamp", "ascc")])
 
     ds = api.load(name=dataset, sort=[("event_timestamp", "asc")])
-    assert all([(ds[idx].event_timestamp <= ds[idx + 1].event_timestamp) for idx in range(len(ds) - 1)])
+    assert all((ds[idx].event_timestamp <= ds[idx + 1].event_timestamp) for idx in range(len(ds) - 1))
 
     ds = api.load(name=dataset, sort=[("event_timestamp", "desc")])
-    assert all([(ds[idx].event_timestamp >= ds[idx + 1].event_timestamp) for idx in range(len(ds) - 1)])
+    assert all((ds[idx].event_timestamp >= ds[idx + 1].event_timestamp) for idx in range(len(ds) - 1))
 
 
 def test_load_as_pandas(api: Argilla):
@@ -788,7 +787,7 @@ def test_load_as_pandas(api: Argilla):
 
 
 @pytest.mark.parametrize(
-    "span,valid",
+    ("span", "valid"),
     [
         ((1, 2), False),
         ((0, 4), True),

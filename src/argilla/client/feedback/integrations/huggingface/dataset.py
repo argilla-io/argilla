@@ -307,6 +307,7 @@ class HuggingFaceDatasetMixin:
                 " re-dumping the `DatasetConfig` using Argilla 1.13.0 or higher, or"
                 " manually create the `argilla.yaml` file in the HuggingFace Hub.",
                 UserWarning,
+                stacklevel=1,
             )
             config_path = hf_hub_download(
                 repo_id=repo_id,
@@ -324,7 +325,7 @@ class HuggingFaceDatasetMixin:
                 " the `DatasetConfig` as `argilla.yaml` to the HuggingFace Hub."
             ) from e
 
-        hfds = load_dataset(repo_id, use_auth_token=auth, *args, **kwargs)
+        hfds = load_dataset(repo_id, *args, use_auth_token=auth, **kwargs)
         if isinstance(hfds, DatasetDict) and "split" not in kwargs:
             if len(hfds.keys()) > 1:
                 raise ValueError(
@@ -345,7 +346,8 @@ class HuggingFaceDatasetMixin:
                     warnings.warn(
                         "Found more than one user without ID in the dataset, so just the"
                         " responses for the first user without ID will be used, the rest"
-                        " will be discarded."
+                        " will be discarded.",
+                        stacklevel=1,
                     )
                 user_without_id_response = False
 

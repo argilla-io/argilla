@@ -25,13 +25,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import json
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union
+from typing import List, Type, TypeVar, Union
 
 import httpx
 
 from argilla.client.sdk.client import AuthenticatedClient
-from argilla.client.sdk.commons.errors import GenericApiError
 from argilla.client.sdk.commons.errors_handler import handle_response_error
 from argilla.client.sdk.commons.models import BulkResponse, ErrorMessage, HTTPValidationError, Response
 from argilla.client.sdk.text2text.models import Text2TextBulkData

@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import argilla as rg
 import pytest
 from argilla.client.api import active_api, load
 from argilla.client.sdk.token_classification.models import TokenClassificationRecord
@@ -23,7 +22,6 @@ from argilla.client.sdk.token_classification.models import TokenClassificationRe
     argvalues=(set(), {"text"}, {"tokens"}),
 )
 def test_scan_records(gutenberg_spacy_ner, fields):
-    import argilla as rg
     import pandas as pd
 
     data = active_api().datasets.scan(
@@ -34,7 +32,7 @@ def test_scan_records(gutenberg_spacy_ner, fields):
     df = pd.DataFrame(data=data).set_index("id", drop=True)
     ds = load(gutenberg_spacy_ner)
     assert len(df) == len(ds)
-    assert set([c for c in df.columns]) == fields
+    assert set(df.columns) == fields
     print(df)
 
 
@@ -70,11 +68,11 @@ def test_scan_fail_negative_limit(
     mocked_client,
     gutenberg_spacy_ner,
 ):
+    data = active_api().datasets.scan(
+        name=gutenberg_spacy_ner,
+        limit=-20,
+    )
     with pytest.raises(ValueError, match="limit.*negative"):
-        data = active_api().datasets.scan(
-            name=gutenberg_spacy_ner,
-            limit=-20,
-        )
         # Actually load the generator its data
         data = list(data)
 

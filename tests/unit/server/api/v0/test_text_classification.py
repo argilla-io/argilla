@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from httpx import AsyncClient
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_records_for_text_classification_with_multi_label(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -48,7 +48,7 @@ async def test_create_records_for_text_classification_with_multi_label(async_cli
     assert response.status_code == 200
 
     response = await async_client.post(
-        f"/api/datasets",
+        "/api/datasets",
         json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         params=workspace_query_params,
     )
@@ -150,7 +150,7 @@ async def test_create_records_for_text_classification_with_multi_label(async_cli
     assert results.aggregations.predicted_by == {"testA": 1}
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_records_for_text_classification(async_client: "AsyncClient", argilla_user: User, test_telemetry):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -161,7 +161,7 @@ async def test_create_records_for_text_classification(async_client: "AsyncClient
     assert response.status_code == 200
 
     response = await async_client.post(
-        f"/api/datasets",
+        "/api/datasets",
         json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         params=workspace_query_params,
     )
@@ -230,7 +230,7 @@ async def test_create_records_for_text_classification(async_client: "AsyncClient
 
 
 @pytest.mark.skipif(condition=not SUPPORTED_VECTOR_SEARCH, reason="Vector search not supported")
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_records_for_text_classification_vector_search(
     async_client: "AsyncClient", argilla_user: User, test_telemetry
 ):
@@ -242,7 +242,7 @@ async def test_create_records_for_text_classification_vector_search(
     assert response.status_code == 200
 
     response = await async_client.post(
-        f"/api/datasets",
+        "/api/datasets",
         json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         params=workspace_query_params,
     )
@@ -354,7 +354,7 @@ async def test_create_records_for_text_classification_vector_search(
     assert [record.id for record in results.records] == [1, 2, 0]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_partial_record_update(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -364,7 +364,7 @@ async def test_partial_record_update(async_client: "AsyncClient", argilla_user: 
     assert response.status_code == 200
 
     response = await async_client.post(
-        f"/api/datasets",
+        "/api/datasets",
         json={"name": name, "task": TaskType.text_classification, "workspace": argilla_user.username},
         params=workspace_query_params,
     )
@@ -441,7 +441,7 @@ async def test_partial_record_update(async_client: "AsyncClient", argilla_user: 
     )
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_sort_by_last_updated(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -451,7 +451,7 @@ async def test_sort_by_last_updated(async_client: "AsyncClient", argilla_user: U
     assert response.status_code == 200
 
     response = await async_client.post(
-        f"/api/datasets",
+        "/api/datasets",
         json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         params=workspace_query_params,
     )
@@ -484,7 +484,7 @@ async def test_sort_by_last_updated(async_client: "AsyncClient", argilla_user: U
     assert [r["id"] for r in response.json()["records"]] == list(range(0, 10))
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_sort_by_id_as_default(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -494,7 +494,7 @@ async def test_sort_by_id_as_default(async_client: "AsyncClient", argilla_user: 
     assert response.status_code == 200
 
     response = await async_client.post(
-        f"/api/datasets",
+        "/api/datasets",
         json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         params=workspace_query_params,
     )
@@ -525,10 +525,10 @@ async def test_sort_by_id_as_default(async_client: "AsyncClient", argilla_user: 
 
     results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == 100
-    assert list(map(lambda r: r.id, results.records)) == [0, 1, 10, 11, 12, 13, 14, 15, 16, 17]
+    assert [r.id for r in results.records] == [0, 1, 10, 11, 12, 13, 14, 15, 16, 17]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_some_sort_by(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -540,7 +540,7 @@ async def test_some_sort_by(async_client: "AsyncClient", argilla_user: User):
     assert response.status_code == 200
 
     response = await async_client.post(
-        f"/api/datasets",
+        "/api/datasets",
         json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         params=workspace_query_params,
     )
@@ -609,10 +609,10 @@ async def test_some_sort_by(async_client: "AsyncClient", argilla_user: User):
 
     results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == expected_records_length
-    assert list(map(lambda r: r.id, results.records)) == [14, 19, 24, 29, 34, 39, 4, 44, 49, 9]
+    assert [r.id for r in results.records] == [14, 19, 24, 29, 34, 39, 4, 44, 49, 9]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_disable_aggregations_when_scroll(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -623,7 +623,7 @@ async def test_disable_aggregations_when_scroll(async_client: "AsyncClient", arg
     assert response.status_code == 200
 
     response = await async_client.post(
-        f"/api/datasets",
+        "/api/datasets",
         json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         params=workspace_query_params,
     )
@@ -670,7 +670,7 @@ async def test_disable_aggregations_when_scroll(async_client: "AsyncClient", arg
     assert results.aggregations is None
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_include_event_timestamp(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -680,7 +680,7 @@ async def test_include_event_timestamp(async_client: "AsyncClient", argilla_user
     assert response.status_code == 200
 
     response = await async_client.post(
-        f"/api/datasets",
+        "/api/datasets",
         json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         params=workspace_query_params,
     )
@@ -721,10 +721,10 @@ async def test_include_event_timestamp(async_client: "AsyncClient", argilla_user
 
     results = TextClassificationSearchResults.parse_obj(response.json())
     assert results.total == 100
-    assert all(map(lambda record: record.event_timestamp is not None, results.records))
+    assert all((record.event_timestamp is not None for record in results.records))
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_words_cloud(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -734,7 +734,7 @@ async def test_words_cloud(async_client: "AsyncClient", argilla_user: User):
 
     assert response.status_code == 200
     response = await async_client.post(
-        f"/api/datasets",
+        "/api/datasets",
         json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         params=workspace_query_params,
     )
@@ -763,7 +763,7 @@ async def test_words_cloud(async_client: "AsyncClient", argilla_user: User):
     assert results.aggregations.words is not None
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_metadata_with_point_in_field_name(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -773,7 +773,7 @@ async def test_metadata_with_point_in_field_name(async_client: "AsyncClient", ar
     assert response.status_code == 200
 
     response = await async_client.post(
-        f"/api/datasets",
+        "/api/datasets",
         json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         params=workspace_query_params,
     )
@@ -814,7 +814,7 @@ async def test_metadata_with_point_in_field_name(async_client: "AsyncClient", ar
     assert results.aggregations.metadata.get("field.two", {})["2"] == 2
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_wrong_text_query(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -824,7 +824,7 @@ async def test_wrong_text_query(async_client: "AsyncClient", argilla_user: User)
     assert response.status_code == 200
 
     response = await async_client.post(
-        f"/api/datasets",
+        "/api/datasets",
         json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         params=workspace_query_params,
     )
@@ -861,7 +861,7 @@ async def test_wrong_text_query(async_client: "AsyncClient", argilla_user: User)
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_search_using_text(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -871,7 +871,7 @@ async def test_search_using_text(async_client: "AsyncClient", argilla_user: User
     assert response.status_code == 200
 
     response = await async_client.post(
-        f"/api/datasets",
+        "/api/datasets",
         json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
         params=workspace_query_params,
     )

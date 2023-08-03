@@ -59,7 +59,7 @@ def test_log_records_with_multi_and_single_label_task(api: Argilla):
         )
 
     api.log(records[0], name=dataset)
-    with pytest.raises(Exception):
+    with pytest.raises(BadRequestApiError):
         api.log(records[1], name=dataset)
 
 
@@ -156,7 +156,7 @@ def test_log_data_with_vectors_and_update_ko(argilla_user: "User"):
         log(TextClassificationRecord(id=0, text=text, vectors=updated_vectors), name=dataset)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_log_data_in_several_workspaces(owner: "User"):
     dataset_name = "test_log_data_in_several_workspaces"
     text = "This is a text"
@@ -201,13 +201,11 @@ def test_search_keywords(argilla_user: "User"):
     df = ds.to_pandas()
     assert not df.empty
     assert "search_keywords" in df.columns
-    top_keywords = set(
-        [
-            keyword
-            for keywords in df.search_keywords.value_counts(sort=True, ascending=False).index[:3].tolist()
-            for keyword in keywords
-        ]
-    )
+    top_keywords = {
+        keyword
+        for keywords in df.search_keywords.value_counts(sort=True, ascending=False).index[:3].tolist()
+        for keyword in keywords
+    }
     assert top_keywords == {"limits", "limited", "limit"}, top_keywords
 
 
@@ -286,7 +284,7 @@ def test_log_with_bulk_error(argilla_user: "User"):
     init(api_key=argilla_user.api_key, workspace=argilla_user.username)
 
     delete(dataset)
-    try:
+    with pytest.raises(BadRequestApiError) as excinfo:
         log(
             [
                 TextClassificationRecord(id=0, text="This is an special text", metadata={"key": 1}),
@@ -294,10 +292,10 @@ def test_log_with_bulk_error(argilla_user: "User"):
             ],
             name=dataset,
         )
-    except BadRequestApiError as error:
-        assert error.ctx["code"] == "argilla.api.errors::BulkDataError"
-        assert error.ctx["params"]["message"] == "Cannot log data in dataset argilla.test_log_with_bulk_error"
-        assert error.ctx["params"]["errors"][0]["caused_by"] == {
-            "type": "illegal_argument_exception",
-            "reason": 'For input string: "wrong-value"',
-        }
+    error = excinfo.value
+    assert error.ctx["code"] == "argilla.api.errors::BulkDataError"
+    assert error.ctx["params"]["message"] == "Cannot log data in dataset argilla.test_log_with_bulk_error"
+    assert error.ctx["params"]["errors"][0]["caused_by"] == {
+        "type": "illegal_argument_exception",
+        "reason": 'For input string: "wrong-value"',
+    }

@@ -28,7 +28,7 @@ security_Scopes = SecurityScopes
 
 
 # Tests for function get_user via token and api key
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_user_via_token(db: "AsyncSession", argilla_user: "User"):
     access_token = localAuth._create_access_token(username=argilla_user.username)
 
@@ -36,14 +36,14 @@ async def test_get_user_via_token(db: "AsyncSession", argilla_user: "User"):
     assert user.username == "argilla"
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_user_via_api_key(db: "AsyncSession", argilla_user: "User"):
     user = await localAuth.get_current_user(security_scopes=security_Scopes, db=db, api_key=DEFAULT_API_KEY, token=None)
     assert user.username == "argilla"
 
 
 # Test for function fetch token
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_fetch_token_user(db: "AsyncSession", argilla_user: "User"):
     access_token = localAuth._create_access_token(username=argilla_user.username)
     user = await localAuth.fetch_token_user(db=db, token=access_token)

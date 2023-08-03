@@ -26,7 +26,6 @@ from argilla.server.daos.models.datasets import (
     EmbeddingsConfig,
 )
 from argilla.server.daos.records import DatasetRecordsDAO
-from argilla.server.errors import WrongTaskError
 
 
 class DatasetsDAO:
@@ -84,7 +83,7 @@ class DatasetsDAO:
 
         query = BaseDatasetsQuery(
             workspaces=workspaces,
-            tasks=[task for task in task2dataset_map] if task2dataset_map else None,
+            tasks=list(task2dataset_map) if task2dataset_map else None,
             name=name,
         )
 

@@ -13,7 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import asyncio
-import logging
 import warnings
 from asyncio import Future
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
@@ -216,6 +215,7 @@ async def log_async(
             "Please, use `log` with `background=True` instead"
         ),
         DeprecationWarning,
+        stacklevel=1,
     )
 
     future = ArgillaSingleton.get().log(
@@ -331,7 +331,7 @@ def load(
             raise ValueError(
                 f"The dataset '{name}' exists but it is a `FeedbackDataset`. Use `rg.FeedbackDataset.from_argilla`"
                 " instead to load it."
-            )
+            ) from e
         raise e
 
 

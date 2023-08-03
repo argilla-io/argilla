@@ -16,7 +16,6 @@ from typing import TYPE_CHECKING, List, Optional, Union
 
 from pydantic import BaseModel, create_model
 
-import argilla as rg
 from argilla.client.api import active_client
 from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas import FieldSchema
@@ -112,7 +111,7 @@ def feedback_dataset_in_argilla(
         try:
             datasets = datasets_api_v1.list_datasets(client=httpx_client).parsed
         except Exception as e:
-            raise Exception(f"Failed while listing the `FeedbackTask` datasets from Argilla with exception: {e}")
+            raise Exception(f"Failed while listing the `FeedbackTask` datasets from Argilla with exception: {e}") from e
 
         for dataset in datasets:
             if dataset.name == name and dataset.workspace_id == workspace.id:

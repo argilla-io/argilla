@@ -35,15 +35,15 @@ def deprecate_endpoint(
         old_router_method_ = old_router_method or router_method
 
         old_router_method_(
-            path=path,
             *args,
+            path=path,
             deprecated=True,
             operation_id=operation_id_old,
             **kwargs,
         )(func)
         router_method(
-            path=new_path,
             *args,
+            path=new_path,
             deprecated=False,
             operation_id=operation_id,
             **kwargs,

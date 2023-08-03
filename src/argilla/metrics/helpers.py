@@ -84,7 +84,7 @@ def tree_map(labels, parents, values, title: str = "Tree"):
             values=values,
         )
     )
-    fig.update_layout(title=title, margin=dict(t=50, l=0, r=0, b=0))
+    fig.update_layout(title=title, margin={"t": 50, "l": 0, "r": 0, "b": 0})
 
     return fig
 
@@ -99,7 +99,7 @@ def multilevel_pie(labels, parents, values, title: str = "Pie"):
             values=values,
         )
     )
-    fig.update_layout(title=title, margin=dict(t=50, l=0, r=0, b=0))
+    fig.update_layout(title=title, margin={"t": 50, "l": 0, "r": 0, "b": 0})
 
     return fig
 

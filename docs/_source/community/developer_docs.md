@@ -106,10 +106,12 @@ pytest tests/integration
 
 Note: For now, integration tests are mocking the connection to the Argilla server. In the future, this may change and tests will be launched using an up and running Argilla server instance.
 
-### Code formatting tools
+### Code formatting and linting tools
 
-To keep a consistent code format, we use [pre-commit](https://pre-commit.com) hooks. So on, you first need to install
-`pre-commit` if not installed already, via pip as follows:
+Argilla uses [black](https://github.com/psf/black) for formatting the code and [ruff](https://github.com/astral-sh/ruff) for linting the code.
+The configuration used for `ruff` will warn about `pycodestyle`, `pyflakes`, `isort` and some `flake8` rules, while for `black` the default configuration is being used with and updated `line-length` of 120.
+
+In order to run the tools mentioned above automatically before creating a commit we use [pre-commit](https://pre-commit.com) hooks. So on, you first need to install `pre-commit` if not installed already, via pip as follows:
 
 ```sh
 pip install pre-commit
@@ -120,6 +122,8 @@ Then, you can proceed with the `pre-commit` hooks installation by simply running
 ```sh
 pre-commit install
 ```
+
+Once installed, `pre-commit` will execute the configured tools in the `.pre-commit-config.yaml` before creating a commit.
 
 ### Running Frontend
 

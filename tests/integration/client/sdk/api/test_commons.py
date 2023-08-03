@@ -27,7 +27,7 @@ def test_text2text_bulk(sdk_client, mocked_client, bulk_text2text_data, monkeypa
     dataset_name = "test_dataset"
 
     mocked_client.delete(f"/api/datasets/{dataset_name}")
-    mocked_client.post(f"/api/datasets", json={"name": dataset_name, "task": TaskType.text2text})
+    mocked_client.post("/api/datasets", json={"name": dataset_name, "task": TaskType.text2text})
 
     response = bulk(sdk_client, name=dataset_name, json_body=bulk_text2text_data)
     assert isinstance(response, BulkResponse)
@@ -38,7 +38,7 @@ def test_textclass_bulk(sdk_client, mocked_client, bulk_textclass_data, monkeypa
 
     dataset_name = "test_dataset"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
-    mocked_client.post(f"/api/datasets", json={"name": dataset_name, "task": TaskType.text_classification})
+    mocked_client.post("/api/datasets", json={"name": dataset_name, "task": TaskType.text_classification})
 
     response = bulk(sdk_client, name=dataset_name, json_body=bulk_textclass_data)
     assert isinstance(response, BulkResponse)
@@ -49,7 +49,7 @@ def test_tokenclass_bulk(sdk_client, mocked_client, bulk_tokenclass_data, monkey
 
     dataset_name = "test_dataset"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
-    mocked_client.post(f"/api/datasets", json={"name": dataset_name, "task": TaskType.token_classification})
+    mocked_client.post("/api/datasets", json={"name": dataset_name, "task": TaskType.token_classification})
 
     response = bulk(sdk_client, name=dataset_name, json_body=bulk_tokenclass_data)
     assert isinstance(response, BulkResponse)

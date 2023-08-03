@@ -35,7 +35,7 @@ from spacy.tokens import DocBin
 
 
 @pytest.mark.parametrize(
-    "framework, label, train_size, seed, expected",
+    ("framework", "label", "train_size", "seed", "expected"),
     [
         (
             Framework("spacy"),

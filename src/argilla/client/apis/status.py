@@ -74,7 +74,7 @@ class _ApiCompatibilityContextManager(ContextManager):
         pass
 
 
-def api_compatibility(api: AbstractApi, min_version: str):
+def api_compatibility(api: AbstractApi, min_version: str) -> _ApiCompatibilityContextManager:
     """
     Handles problems related to server API compatibility.
 

@@ -90,7 +90,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
         annotations = values.get(field_to_update) or {}
 
         if annotations:
-            for key, value in annotations.items():
+            for value in annotations.values():
                 value.agent = None  # Maybe we want key and agents with different values
 
         if annotation:
@@ -120,12 +120,12 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
             return str(uuid.uuid4())
         if isinstance(v, int):
             message = (
-                f"Integer ids won't be supported in future versions. We recommend to start using strings instead. "
+                "Integer ids won't be supported in future versions. We recommend to start using strings instead. "
                 "For datasets already containing integer values we recommend migrating them to avoid deprecation issues. "
                 "See https://docs.argilla.io/en/latest/getting_started/installation/configurations"
                 "/database_migrations.html#elasticsearch"
             )
-            warnings.warn(message, DeprecationWarning)
+            warnings.warn(message, DeprecationWarning, stacklevel=1)
             # See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
             if v > _JS_MAX_SAFE_INTEGER:
                 message = (
@@ -134,7 +134,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
                     "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number"
                     "/MAX_SAFE_INTEGER"
                 )
-                warnings.warn(message, UserWarning)
+                warnings.warn(message, UserWarning, stacklevel=1)
         return v
 
     @validator("status", always=True)
@@ -175,7 +175,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
                     f" truncated by keeping only the last {settings.metadata_field_length} characters. "
                     + _messages.ARGILLA_METADATA_FIELD_WARNING_MESSAGE
                 )
-                warnings.warn(message, UserWarning)
+                warnings.warn(message, UserWarning, stacklevel=1)
                 metadata = metadata_parsed
         return metadata
 

@@ -14,7 +14,6 @@
 
 from typing import TYPE_CHECKING
 
-import argilla as rg
 import pytest
 from argilla.client import api
 from argilla.client.api import delete, get_workspace, init
@@ -29,6 +28,8 @@ if TYPE_CHECKING:
     from argilla.client.apis.datasets import LabelsSchemaSettings
     from argilla.server.models import User
     from sqlalchemy.ext.asyncio import AsyncSession
+
+    from tests.integration.helpers import SecuredClient
 
 
 @pytest.mark.parametrize(
@@ -63,7 +64,7 @@ def test_settings_workflow(
     datasets_api = current_api.datasets
 
     found_settings = datasets_api.load_settings(dataset)
-    assert {label for label in found_settings.label_schema} == {str(label) for label in settings_.label_schema}
+    assert set(found_settings.label_schema) == {str(label) for label in settings_.label_schema}
 
     settings_.label_schema = {"LALALA"}
     configure_dataset(dataset, settings_, workspace=workspace)
@@ -85,7 +86,7 @@ def test_list_dataset(mocked_client: "SecuredClient"):
         assert ds["owner"] == ds["workspace"]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_dataset_by_non_creator(
     mocked_client: "SecuredClient", mock_user: "User", argilla_user: "User", db: "AsyncSession"
 ):

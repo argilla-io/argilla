@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
@@ -107,8 +107,8 @@ async def list_current_user_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     dataset_id: UUID,
-    include: List[RecordInclude] = Query([], description="Relationships to include in the response"),
-    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
+    include: Optional[List[RecordInclude]] = Query(None, description="Relationships to include in the response"),
+    response_statuses: Optional[List[ResponseStatusFilter]] = Query(None, alias="response_status"),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
@@ -135,7 +135,7 @@ async def list_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     dataset_id: UUID,
-    include: List[RecordInclude] = Query([], description="Relationships to include in the response"),
+    include: Optional[List[RecordInclude]] = Query(None, description="Relationships to include in the response"),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
@@ -236,7 +236,7 @@ async def create_dataset_field(
         field = await datasets.create_field(db, dataset, field_create)
         return field
     except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err)) from err
 
 
 @router.post("/datasets/{dataset_id}/questions", status_code=status.HTTP_201_CREATED, response_model=Question)
@@ -263,7 +263,7 @@ async def create_dataset_question(
         question = await datasets.create_question(db, dataset, question_create)
         return question
     except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err)) from err
 
 
 @router.post("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
@@ -286,7 +286,7 @@ async def create_dataset_records(
         await datasets.create_records(db, search_engine, dataset=dataset, records_create=records_create)
         telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": len(records_create.items)})
     except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err)) from err
 
 
 @router.post(
@@ -302,8 +302,8 @@ async def search_dataset_records(
     telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     query: SearchRecordsQuery,
-    include: List[RecordInclude] = Query([]),
-    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
+    include: Optional[List[RecordInclude]] = Query(None),
+    response_statuses: Optional[List[ResponseStatusFilter]] = Query(None, alias="response_status"),
     offset: int = Query(0, ge=0),
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
@@ -373,12 +373,12 @@ async def publish_dataset(
 
         telemetry_client.track_data(
             action="PublishedDataset",
-            data={"questions": list(set([question.settings["type"] for question in dataset.questions]))},
+            data={"questions": list({question.settings["type"] for question in dataset.questions})},
         )
 
         return dataset
     except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err)) from err
 
 
 @router.delete("/datasets/{dataset_id}", response_model=Dataset)

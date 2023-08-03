@@ -35,7 +35,8 @@ def size(bytes):
     ]
 
     factor, suffix = None, None
-    for factor, suffix in system:
+    for f, s in system:
+        factor, suffix = f, s
         if bytes >= factor:
             break
 

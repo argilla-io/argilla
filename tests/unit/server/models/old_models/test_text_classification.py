@@ -184,10 +184,10 @@ def test_score_integrity():
         },
     }
 
-    try:
+    with pytest.raises(ValidationError) as excinfo:
         ServiceTextClassificationRecord.parse_obj(data)
-    except ValidationError as e:
-        assert "Wrong score distributions" in e.json()
+
+    assert "Wrong score distributions" in excinfo.value.json()
 
     data["multi_label"] = True
     record = ServiceTextClassificationRecord.parse_obj(data)

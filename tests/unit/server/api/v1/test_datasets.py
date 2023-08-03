@@ -84,7 +84,7 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 class TestSuiteDatasets:
     async def test_list_current_user_datasets(self, async_client: "AsyncClient", owner_auth_header: dict):
         dataset_a = await DatasetFactory.create(name="dataset-a")
@@ -294,7 +294,7 @@ class TestSuiteDatasets:
         }
 
     @pytest.mark.parametrize(
-        "QuestionFactory, settings",
+        ("QuestionFactory", "settings"),
         [
             (RatingQuestionFactory, {"options": [{"value": 1}, {"value": 2}, {"value": 2}]}),
             (
@@ -971,11 +971,9 @@ class TestSuiteDatasets:
         assert len(response_json["items"]) == num_responses_per_status
 
         if response_status_filter == "missing":
-            assert all([len(record["responses"]) == 0 for record in response_json["items"]])
+            assert all(len(record["responses"]) == 0 for record in response_json["items"])
         else:
-            assert all(
-                [record["responses"][0]["status"] == response_status_filter for record in response_json["items"]]
-            )
+            assert all(record["responses"][0]["status"] == response_status_filter for record in response_json["items"])
 
     async def test_list_current_user_dataset_records_without_authentication(self, async_client: "AsyncClient"):
         dataset = await DatasetFactory.create()
@@ -3267,7 +3265,7 @@ class TestSuiteDatasets:
             {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},
         ],
     )
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_update_dataset_with_invalid_settings(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, dataset_json: dict
     ):
@@ -3281,7 +3279,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_update_dataset_with_invalid_payload(self, async_client: "AsyncClient", owner_auth_header: dict):
         dataset = await DatasetFactory.create()
 
@@ -3293,7 +3291,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_update_dataset_non_existent(self, async_client: "AsyncClient", owner_auth_header: dict):
         response = await async_client.patch(
             f"/api/v1/datasets/{uuid4()}",
@@ -3303,7 +3301,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 404
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_update_dataset_as_admin_from_different_workspace(self, async_client: "AsyncClient"):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(role=UserRole.admin)
@@ -3316,7 +3314,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 403
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_update_dataset_as_annotator(self, async_client: "AsyncClient"):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(role=UserRole.annotator, workspaces=[dataset.workspace])
@@ -3329,7 +3327,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 403
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_update_dataset_without_authentication(self, async_client: "AsyncClient"):
         dataset = await DatasetFactory.create()
 
@@ -3353,10 +3351,10 @@ class TestSuiteDatasets:
         await TextQuestionFactory.create(dataset=dataset)
 
         other_dataset = await DatasetFactory.create()
-        other_field = await TextFieldFactory.create(dataset=other_dataset)
-        other_question = await TextQuestionFactory.create(dataset=other_dataset)
+        await TextFieldFactory.create(dataset=other_dataset)
+        await TextQuestionFactory.create(dataset=other_dataset)
         other_record = await RecordFactory.create(dataset=other_dataset)
-        other_response = await ResponseFactory.create(record=other_record, user=owner)
+        await ResponseFactory.create(record=other_record, user=owner)
 
         response = await async_client.delete(f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header)
 
@@ -3384,10 +3382,10 @@ class TestSuiteDatasets:
         await ResponseFactory.create(record=record, user=owner)
 
         other_dataset = await DatasetFactory.create()
-        other_field = await TextFieldFactory.create(dataset=other_dataset)
-        other_question = await TextQuestionFactory.create(dataset=other_dataset)
+        await TextFieldFactory.create(dataset=other_dataset)
+        await TextQuestionFactory.create(dataset=other_dataset)
         other_record = await RecordFactory.create(dataset=other_dataset)
-        other_response = await ResponseFactory.create(record=other_record, user=owner)
+        await ResponseFactory.create(record=other_record, user=owner)
 
         response = await async_client.delete(f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header)
 

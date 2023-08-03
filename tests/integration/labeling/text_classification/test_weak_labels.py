@@ -39,7 +39,7 @@ from pandas.testing import assert_frame_equal
 from tests.integration.helpers import SecuredClient
 
 
-@pytest.fixture
+@pytest.fixture()
 def log_dataset(mocked_client: SecuredClient) -> str:
     dataset_name = "test_dataset_for_applier"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
@@ -78,7 +78,7 @@ def log_dataset(mocked_client: SecuredClient) -> str:
     return dataset_name
 
 
-@pytest.fixture
+@pytest.fixture()
 def rules(monkeypatch) -> List[Callable]:
     def first_rule(record: TextClassificationRecord) -> Optional[Union[str, List[str]]]:
         if "negative" in record.text:
@@ -100,7 +100,7 @@ def rules(monkeypatch) -> List[Callable]:
     return [first_rule, rule2, argilla_rule]
 
 
-@pytest.fixture
+@pytest.fixture()
 def log_multilabel_dataset(mocked_client: SecuredClient) -> str:
     dataset_name = "test_dataset_for_multilabel_applier"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
@@ -140,7 +140,7 @@ def log_multilabel_dataset(mocked_client: SecuredClient) -> str:
     return dataset_name
 
 
-@pytest.fixture
+@pytest.fixture()
 def multilabel_rules(monkeypatch) -> List[Callable]:
     def first_rule(record: TextClassificationRecord) -> Optional[Union[str, List[str]]]:
         if "negative" in record.text:
@@ -265,8 +265,8 @@ class TestWeakLabelsBase:
 
         monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
         monkeypatch.setitem(sys.modules, "faiss", None)
+        weak_labels = WeakLabelsBase(rules=[lambda x: "mock"] * 2, dataset="mock")
         with pytest.raises(ModuleNotFoundError, match="pip install faiss-cpu"):
-            weak_labels = WeakLabelsBase(rules=[lambda x: "mock"] * 2, dataset="mock")
             weak_labels._find_dists_and_nearest(None, None, None, None)
 
 
@@ -281,7 +281,7 @@ class TestWeakLabels:
             WeakLabels(rules=[lambda x: None], dataset="mock")
 
     @pytest.mark.parametrize(
-        "label2int, expected_label2int, expected_matrix, expected_annotation_array",
+        ("label2int", "expected_label2int", "expected_matrix", "expected_annotation_array"),
         [
             (
                 None,
@@ -525,7 +525,7 @@ class TestWeakLabels:
 
         assert (weak_labels.matrix() == old_wlm).all()
 
-    @pytest.fixture
+    @pytest.fixture()
     def weak_labels(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
             return [TextClassificationRecord(text="test", id=i) for i in range(3)]
@@ -751,7 +751,7 @@ class TestWeakMultiLabels:
         ]
         assert weak_labels.show_records(labels=["positive"], rules=["argilla_rule"]).empty
 
-    @pytest.fixture
+    @pytest.fixture()
     def weak_multi_labels(self, monkeypatch, rules):
         def mock_load(*args, **kwargs):
             return [TextClassificationRecord(text="test", id=i, multi_label=True) for i in range(3)]
@@ -810,7 +810,7 @@ class TestWeakMultiLabels:
         # dtype than `weak_multi_labels.summary()` returns.
         assert_frame_equal(weak_multi_labels.summary(), expected_summary, check_dtype=False)
 
-        expected_show_records = pd.DataFrame(map(lambda x: x.dict(), weak_multi_labels.records()))
+        expected_show_records = pd.DataFrame((x.dict() for x in weak_multi_labels.records()))
         assert_frame_equal(weak_multi_labels.show_records(rules=["rule_1"]), expected_show_records)
 
         weak_multi_labels.extend_matrix([1.0, 1.0, 1.0])

@@ -34,7 +34,7 @@ class TaskConfig(BaseModel):
 
 
 class TasksFactory:
-    __REGISTERED_TASKS__ = dict()
+    __REGISTERED_TASKS__ = {}
 
     @classmethod
     def register_task(
@@ -55,7 +55,7 @@ class TasksFactory:
 
     @classmethod
     def get_all_configs(cls) -> List[TaskConfig]:
-        return [cfg for cfg in cls.__REGISTERED_TASKS__.values()]
+        return list(cls.__REGISTERED_TASKS__.values())
 
     @classmethod
     def get_task_by_task_type(cls, task_type: TaskType) -> Optional[TaskConfig]:

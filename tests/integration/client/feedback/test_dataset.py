@@ -35,6 +35,8 @@ if TYPE_CHECKING:
     from argilla.server.models import User as ServerUser
     from sqlalchemy.ext.asyncio import AsyncSession
 
+    from tests.integration.helpers import SecuredClient
+
 
 def test_init(
     feedback_dataset_guidelines: str,
@@ -166,7 +168,7 @@ def test_create_dataset_with_suggestions(argilla_user: "ServerUser"):
         )
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_dataset_records_with_suggestions(argilla_user: "ServerUser", db: "AsyncSession"):
     api.init(api_key=argilla_user.api_key)
 
@@ -340,7 +342,7 @@ def test_add_records(
     assert len(dataset) == len(dataset.records)
 
 
-@pytest.mark.parametrize("format_as,expected_output", [("datasets", datasets.Dataset)])
+@pytest.mark.parametrize(("format_as", "expected_output"), [("datasets", datasets.Dataset)])
 def test_format_as(
     mocked_client: "SecuredClient",
     format_as: str,
@@ -364,7 +366,7 @@ def test_format_as(
     assert isinstance(ds, expected_output)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_push_to_argilla_and_from_argilla(
     mocked_client: "SecuredClient",
     argilla_user: "ServerUser",
@@ -465,7 +467,7 @@ async def test_push_to_argilla_and_from_argilla(
     assert len(dataset_from_argilla.records[-1].responses) == 1  # Since the second one was discarded as `user_id=None`
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_copy_dataset_in_argilla(
     mocked_client: "SecuredClient",
     argilla_user: "ServerUser",
@@ -504,7 +506,7 @@ async def test_copy_dataset_in_argilla(
     ]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_dataset_records_in_argilla(
     mocked_client: "SecuredClient",
     argilla_user: "ServerUser",

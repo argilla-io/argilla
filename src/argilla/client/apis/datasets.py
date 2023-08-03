@@ -64,7 +64,7 @@ class LabelsSchemaSettings(_AbstractSettings):
             raise ValueError(
                 f"`label_schema` is of type={type(self.label_schema)}, but type=set is preferred, and also both type=list and type=tuple are allowed."
             )
-        self.label_schema = set([str(label) for label in self.label_schema])
+        self.label_schema = {str(label) for label in self.label_schema}
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "LabelsSchemaSettings":
@@ -78,7 +78,7 @@ class LabelsSchemaSettings(_AbstractSettings):
 
     @property
     def id2label(self) -> Dict[int, str]:
-        return {i: label for i, label in enumerate(self.label_schema)}
+        return dict(enumerate(self.label_schema))
 
 
 @dataclass
@@ -211,11 +211,11 @@ class Datasets(AbstractApi):
         if sort is not None:
             try:
                 if isinstance(sort, list):
-                    assert all([(isinstance(item, tuple)) and (item[-1] in ["asc", "desc"]) for item in sort])
+                    assert all((isinstance(item, tuple)) and (item[-1] in ["asc", "desc"]) for item in sort)
                 else:
                     raise Exception()
-            except Exception:
-                raise ValueError("sort must be a dict formatted as List[Tuple[<field_name>, 'asc|desc']]")
+            except Exception as e:
+                raise ValueError("sort must be a dict formatted as List[Tuple[<field_name>, 'asc|desc']]") from e
             request["sort_by"] = [{"id": item[0], "order": item[-1]} for item in sort]
 
         elif id_from:
@@ -297,8 +297,7 @@ class Datasets(AbstractApi):
             except ForbiddenApiError as faer:
                 if discard_when_forbidden:
                     warnings.warn(
-                        message=f"{faer}. Records will be discarded instead",
-                        category=UserWarning,
+                        message=f"{faer}. Records will be discarded instead", category=UserWarning, stacklevel=1
                     )
                     return self.delete_records(
                         name=name,
@@ -315,9 +314,7 @@ class Datasets(AbstractApi):
                 f"The provided settings type {type(settings)} cannot be applied to dataset. Task type mismatch"
             )
 
-        settings_ = self._SettingsApiModel.parse_obj(
-            {"label_schema": {"labels": [label for label in settings.label_schema]}}
-        )
+        settings_ = self._SettingsApiModel.parse_obj({"label_schema": {"labels": list(settings.label_schema)}})
 
         try:
             with api_compatibility(self, min_version="1.4"):

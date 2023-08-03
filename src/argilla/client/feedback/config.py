@@ -24,11 +24,11 @@ from pydantic import BaseModel, Field
 
 try:
     from yaml import SafeLoader, dump, load
-except ImportError:
+except ImportError as e:
     raise ImportError(
         "Please make sure to install `PyYAML` in order to use `DatasetConfig`. To do"
         " so you can run `pip install pyyaml`."
-    )
+    ) from e
 
 from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
 
@@ -58,6 +58,7 @@ class DeprecatedDatasetConfig(BaseModel):
             " dumping to a YAML file instead of a JSON file. `DatasetConfig` will come"
             " in YAML format from now on, instead of JSON format.",
             DeprecationWarning,
+            stacklevel=1,
         )
         return self.json()
 
@@ -68,5 +69,6 @@ class DeprecatedDatasetConfig(BaseModel):
             " loading a YAML file instead of a JSON file. `DatasetConfig` will be dumped"
             " as YAML from now on, instead of JSON.",
             DeprecationWarning,
+            stacklevel=1,
         )
         return cls.parse_raw(json)

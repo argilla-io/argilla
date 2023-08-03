@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_response(
     async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict
 ):
@@ -76,7 +76,7 @@ async def test_update_response(
     mock_search_engine.update_record_response.assert_called_once_with(response)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_response_without_authentication(async_client: "AsyncClient", db: "AsyncSession"):
     response = await ResponseFactory.create(
         values={
@@ -102,7 +102,7 @@ async def test_update_response_without_authentication(async_client: "AsyncClient
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_response_from_submitted_to_discarded(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -153,7 +153,7 @@ async def test_update_response_from_submitted_to_discarded(
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_response_from_submitted_to_discarded_without_values(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -188,7 +188,7 @@ async def test_update_response_from_submitted_to_discarded_without_values(
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_response_from_discarded_to_submitted(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -202,7 +202,7 @@ async def test_update_response_from_discarded_to_submitted(
     assert resp.status_code == 422
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_response_from_discarded_to_submitted_without_values(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -220,7 +220,7 @@ async def test_update_response_from_discarded_to_submitted_without_values(
     assert response.status == ResponseStatus.discarded
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_response_with_wrong_values(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -237,7 +237,7 @@ async def test_update_response_with_wrong_values(
     assert response.status == ResponseStatus.discarded
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_response_as_annotator(async_client: "AsyncClient", db: "AsyncSession"):
     dataset = await DatasetFactory.create(status=DatasetStatus.ready)
     await TextQuestionFactory.create(name="input_ok", dataset=dataset)
@@ -287,7 +287,7 @@ async def test_update_response_as_annotator(async_client: "AsyncClient", db: "As
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_response_as_annotator_for_different_user_response(
     async_client: "AsyncClient", db: "AsyncSession"
 ):
@@ -318,7 +318,7 @@ async def test_update_response_as_annotator_for_different_user_response(
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_response_with_nonexistent_response_id(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -346,7 +346,7 @@ async def test_update_response_with_nonexistent_response_id(
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_response(
     async_client: "AsyncClient", mock_search_engine: SearchEngine, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -360,7 +360,7 @@ async def test_delete_response(
     mock_search_engine.delete_record_response.assert_called_once_with(response)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_response_without_authentication(async_client: "AsyncClient", db: "AsyncSession"):
     response = await ResponseFactory.create()
 
@@ -371,7 +371,7 @@ async def test_delete_response_without_authentication(async_client: "AsyncClient
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_response_as_restricted_user(async_client: "AsyncClient", db: "AsyncSession", role: UserRole):
     user = await UserFactory.create(role=role)
     response = await ResponseFactory.create(user=user)
@@ -382,7 +382,7 @@ async def test_delete_response_as_restricted_user(async_client: "AsyncClient", d
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_response_as_admin_for_different_user_response(async_client: "AsyncClient", db: "AsyncSession"):
     workspace = await WorkspaceFactory.create()
     admin = await AdminFactory.create(workspaces=[workspace])
@@ -396,7 +396,7 @@ async def test_delete_response_as_admin_for_different_user_response(async_client
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_response_as_annotator_for_different_user_response(
     async_client: "AsyncClient", db: "AsyncSession"
 ):
@@ -411,7 +411,7 @@ async def test_delete_response_as_annotator_for_different_user_response(
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_response_with_nonexistent_response_id(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):

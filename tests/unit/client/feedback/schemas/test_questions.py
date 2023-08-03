@@ -26,7 +26,7 @@ from pydantic import ValidationError
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, expected_exception, expected_exception_message",
+    ("schema_kwargs", "expected_exception", "expected_exception_message"),
     [
         (
             {"name": "a", "description": "a", "required": True, "labels": ["a"]},
@@ -68,7 +68,7 @@ def test_label_question_errors(
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, expected_settings",
+    ("schema_kwargs", "expected_settings"),
     [
         (
             {"name": "a", "description": "a", "required": True, "labels": ["a", "b"]},
@@ -109,7 +109,7 @@ def test_label_question(schema_kwargs: Dict[str, Any], expected_settings: Dict[s
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, expected_exception, expected_exception_message",
+    ("schema_kwargs", "expected_exception", "expected_exception_message"),
     [
         (
             {"name": "a", "description": "a", "required": True, "labels": ["a"]},
@@ -151,7 +151,7 @@ def test_multi_label_question_errors(
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, expected_settings",
+    ("schema_kwargs", "expected_settings"),
     [
         (
             {"name": "a", "description": "a", "required": True, "labels": ["a", "b"]},
@@ -192,7 +192,7 @@ def test_multi_label_question(schema_kwargs: Dict[str, Any], expected_settings: 
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, expected_settings",
+    ("schema_kwargs", "expected_settings"),
     [
         (
             {"name": "a", "description": "a", "required": True, "use_markdown": True},
@@ -209,7 +209,7 @@ def test_text_question(schema_kwargs: Dict[str, Any], expected_settings: Dict[st
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, expected_exception, expected_exception_message",
+    ("schema_kwargs", "expected_exception", "expected_exception_message"),
     [
         (
             {"name": "a", "description": "a", "required": True, "values": ["a", "b"]},
@@ -260,7 +260,7 @@ def test_rating_question_warnings(schema_kwargs: Dict[str, Any], expected_warnin
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, expected_settings",
+    ("schema_kwargs", "expected_settings"),
     [
         (
             {"name": "a", "description": "a", "required": True, "values": [1, 2, 3]},
@@ -277,7 +277,7 @@ def test_rating_question(schema_kwargs: Dict[str, Any], expected_settings: Dict[
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, expected_exception, expected_exception_message",
+    ("schema_kwargs", "expected_exception", "expected_exception_message"),
     [
         (
             {"name": "a", "description": "a", "required": True, "values": [1, 1]},
@@ -309,7 +309,7 @@ def test_ranking_question_errors(
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, expected_settings",
+    ("schema_kwargs", "expected_settings"),
     [
         (
             {"name": "a", "description": "a", "required": True, "values": ["a", "b"]},

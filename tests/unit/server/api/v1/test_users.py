@@ -22,10 +22,10 @@ from argilla.server.models import UserRole
 from tests.factories import UserFactory, WorkspaceFactory
 
 if TYPE_CHECKING:
-    from fastapi.testclient import TestClient
+    from httpx import AsyncClient
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 class TestsUsersV1Endpoints:
     async def test_list_user_workspaces(self, async_client: "AsyncClient", owner_auth_header: dict):
         workspaces = await WorkspaceFactory.create_batch(3)

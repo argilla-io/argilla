@@ -84,7 +84,7 @@ class LabelSelectionQuestionSettings(ValidOptionCheckerMixin[str]):
 
 
 def _are_all_elements_in_list(elements: List[T], list_: List[T]) -> List[T]:
-    return sorted(list(set(elements) - set(list_)))
+    return sorted(set(elements) - set(list_))
 
 
 class MultiLabelSelectionQuestionSettings(LabelSelectionQuestionSettings):

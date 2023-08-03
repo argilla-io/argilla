@@ -26,7 +26,7 @@ from argilla.utils.telemetry import get_telemetry_client
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
 if TYPE_CHECKING:
-    import spacy
+    from spacy.language import Language
 
 
 class ArgillaTrainer(object):
@@ -38,13 +38,13 @@ class ArgillaTrainer(object):
         self,
         name: str,
         framework: str,
-        workspace: str = None,
-        lang: Optional["spacy.Language"] = None,
+        workspace: Optional[str] = None,
+        lang: Optional["Language"] = None,
         model: Optional[str] = None,
         train_size: Optional[float] = None,
         seed: Optional[int] = None,
         gpu_id: Optional[int] = -1,
-        framework_kwargs: Optional[dict] = {},
+        framework_kwargs: Optional[dict] = None,
         **load_kwargs: Optional[dict],
     ) -> None:
         """
@@ -104,6 +104,9 @@ class ArgillaTrainer(object):
         if self._rg_dataset_type in [DatasetForTextClassification, DatasetForTokenClassification]:
             if self._settings is None:
                 self._settings = self.dataset_full._infer_settings_from_records()
+
+        if framework_kwargs is None:
+            framework_kwargs = {}
 
         framework = Framework(framework)
         if framework in [Framework.SPACY, Framework.SPACY_TRANSFORMERS]:

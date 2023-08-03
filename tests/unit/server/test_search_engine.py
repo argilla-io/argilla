@@ -74,7 +74,7 @@ async def dataset_for_pagination(opensearch: OpenSearch):
 
 
 @pytest_asyncio.fixture(scope="function")
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine) -> Dataset:
     text_question = await TextQuestionFactory()
     rating_question = await RatingQuestionFactory()
@@ -174,7 +174,7 @@ async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine) ->
     return dataset
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 class TestSuiteElasticSearchEngine:
     async def test_get_index_or_raise(self, elastic_search_engine: SearchEngine):
         dataset = await DatasetFactory.create()
@@ -362,7 +362,7 @@ class TestSuiteElasticSearchEngine:
         assert result.total == expected_items
 
         scores = [item.score > 0 for item in result.items]
-        assert all(map(lambda s: s > 0, scores))
+        assert all((s > 0 for s in scores))
 
         sorted_scores = scores.copy()
         sorted_scores.sort(reverse=True)
@@ -370,7 +370,7 @@ class TestSuiteElasticSearchEngine:
         assert scores == sorted_scores
 
     @pytest.mark.parametrize(
-        "statuses, expected_items",
+        ("statuses", "expected_items"),
         [
             ([], 6),
             ([ResponseStatusFilter.missing], 6),
@@ -488,7 +488,7 @@ class TestSuiteElasticSearchEngine:
         ]
         assert len(deleted_docs) == 0
 
-        es_docs = [
+        [
             hit["_source"]
             for hit in opensearch.search(
                 index=index_name, body={"query": {"ids": {"values": [str(record.id) for record in records_to_keep]}}}

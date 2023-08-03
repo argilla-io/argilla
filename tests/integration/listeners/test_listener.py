@@ -15,7 +15,6 @@
 import time
 from typing import List
 
-import argilla as rg
 import pytest
 from argilla import RGListenerContext, listener
 from argilla.client.api import delete, log
@@ -24,7 +23,8 @@ from argilla.client.models import Record, TextClassificationRecord
 
 def condition_check_params(search):
     if search:
-        assert "param" in search.query_params and search.query_params["param"] == 100
+        assert "param" in search.query_params
+        assert search.query_params["param"] == 100
     return True
 
 
@@ -81,7 +81,7 @@ def test_listener_with_parameters(mocked_client, dataset, query, metrics, condit
     assert test.action.is_running()
     log(TextClassificationRecord(text="This is a text"), name=dataset)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"Listener is already running"):
         test.action.start()
 
     time.sleep(1.5)
@@ -89,7 +89,7 @@ def test_listener_with_parameters(mocked_client, dataset, query, metrics, condit
     test.action.stop()
     assert not test.action.is_running()
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"Listener is not running"):
         test.action.stop()
 
     if condition:

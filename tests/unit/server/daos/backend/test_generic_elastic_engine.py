@@ -18,7 +18,6 @@ import pytest
 from argilla.server.commons.models import TaskType
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.backend.search.model import BaseRecordsQuery
-from argilla.server.errors import InvalidTextSearchError
 
 
 @pytest.fixture(scope="session")
@@ -26,7 +25,7 @@ def engine():
     return GenericElasticEngineBackend.get_instance()
 
 
-@pytest.fixture
+@pytest.fixture()
 def dataset_id(engine: GenericElasticEngineBackend):
     dataset_id = str(uuid.uuid4())
 

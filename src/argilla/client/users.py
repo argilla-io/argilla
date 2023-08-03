@@ -138,7 +138,7 @@ class User:
                 client = client.httpx
             return client
         except Exception as e:
-            raise RuntimeError(f"The `rg.active_client()` is not available or not respoding.") from e
+            raise RuntimeError("The `rg.active_client()` is not available or not respoding.") from e
 
     @allowed_for_roles(roles=[UserRole.owner])
     def delete(self) -> None:
@@ -206,11 +206,12 @@ class User:
         """
         if not first_name:
             warnings.warn(
-                "Since the `first_name` hasn't been provided, it will be set to the same value as the `username`."
+                "Since the `first_name` hasn't been provided, it will be set to the same value as the `username`.",
+                stacklevel=1,
             )
             first_name = username
         if not role:
-            warnings.warn("Since the `role` hasn't been provided, it will be set to `annotator`.")
+            warnings.warn("Since the `role` hasn't been provided, it will be set to `annotator`.", stacklevel=1)
             role = UserRole.annotator
 
         client = cls.__active_client()

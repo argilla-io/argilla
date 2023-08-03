@@ -31,4 +31,4 @@ class LabelMappingMixin:
 
     @property
     def __id2label__(self) -> Dict[int, str]:
-        return {idx: label for idx, label in enumerate(self.__all_labels__)}
+        return dict(enumerate(self.__all_labels__))

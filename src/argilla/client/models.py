@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 from deprecated import deprecated
-from pydantic import BaseModel, Field, PrivateAttr, conint, constr, root_validator, validator
+from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
 
 from argilla import _messages
 from argilla._constants import _JS_MAX_SAFE_INTEGER, DEFAULT_MAX_KEYWORD_LENGTH, PROTECTED_METADATA_FIELD_PREFIX
@@ -109,7 +109,7 @@ class _Validators(BaseModel):
             return str(uuid.uuid4())
         if isinstance(v, int):
             message = (
-                f"Integer ids won't be supported in future versions. We recommend to start using strings instead. "
+                "Integer ids won't be supported in future versions. We recommend to start using strings instead. "
                 "For datasets already containing integer values we recommend migrating them to avoid deprecation issues. "
                 "See https://docs.argilla.io/en/latest/getting_started/installation/configurations"
                 "/database_migrations.html#elasticsearch"
@@ -134,7 +134,8 @@ class _Validators(BaseModel):
         if v and values["prediction"] is None:
             warnings.warn(
                 "You provided an `prediction_agent`, but no `prediction`. "
-                "The `prediction_agent` will not be logged to the server."
+                "The `prediction_agent` will not be logged to the server.",
+                stacklevel=1,
             )
         return v
 
@@ -144,7 +145,8 @@ class _Validators(BaseModel):
         if v and values["annotation"] is None:
             warnings.warn(
                 "You provided an `annotation_agent`, but no `annotation`. "
-                "The `annotation_agent` will not be logged to the server."
+                "The `annotation_agent` will not be logged to the server.",
+                stacklevel=1,
             )
         return v
 
@@ -296,10 +298,11 @@ class TextClassificationRecord(_Validators):
                 " will not accept strings. Please use the `text` argument in that case."
                 " Make sure to adapt your code accordingly.",
                 category=FutureWarning,
+                stacklevel=1,
             )
 
         if values.get("inputs") is not None and not isinstance(values["inputs"], dict):
-            values["inputs"] = dict(text=values["inputs"])
+            values["inputs"] = {"text": values["inputs"]}
 
         if (values.get("text") is None and values.get("inputs") is None) or (
             values.get("text") is not None
@@ -309,7 +312,7 @@ class TextClassificationRecord(_Validators):
             raise ValueError("For a TextClassificationRecord you must provide either 'text' or 'inputs'")
 
         if values.get("text") is not None:
-            values["inputs"] = dict(text=values["text"])
+            values["inputs"] = {"text": values["text"]}
         elif len(values["inputs"]) == 1 and "text" in values["inputs"]:
             values["text"] = values["inputs"]["text"]
 
@@ -482,6 +485,7 @@ class TokenClassificationRecord(_Validators):
             " `argilla.utils.span_utils.SpanUtils.char_to_token_idx` attribute"
             " instead.",
             FutureWarning,
+            stacklevel=1,
         )
         return self._span_utils.char_to_token_idx
 
@@ -494,6 +498,7 @@ class TokenClassificationRecord(_Validators):
             " `argilla.utils.span_utils.SpanUtils.token_to_char_idx` attribute"
             " instead.",
             FutureWarning,
+            stacklevel=1,
         )
         return self._span_utils.token_to_char_idx
 
@@ -504,6 +509,7 @@ class TokenClassificationRecord(_Validators):
             " future version. Please use the"
             " `argilla.utils.span_utils.SpanUtils.char_to_token_idx` dict instead.",
             FutureWarning,
+            stacklevel=1,
         )
         return self._span_utils.char_to_token_idx.get(char_idx)
 
@@ -514,6 +520,7 @@ class TokenClassificationRecord(_Validators):
             " version. Please use the"
             " `argilla.utils.span_utils.SpanUtils.token_to_char_idx` dict instead.",
             FutureWarning,
+            stacklevel=1,
         )
         if token_idx not in self._span_utils.token_to_char_idx:
             raise IndexError(f"Token id {token_idx} out of bounds")
@@ -526,6 +533,7 @@ class TokenClassificationRecord(_Validators):
             " use the `argilla.utils.SpanUtils.to_tags()` method instead, and adapt"
             " your code accordingly.",
             FutureWarning,
+            stacklevel=1,
         )
 
         if spans is None:

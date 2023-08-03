@@ -19,7 +19,7 @@ from argilla.client.feedback.schemas.fields import TextField
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, expected_settings",
+    ("schema_kwargs", "expected_settings"),
     [
         (
             {"name": "a", "title": "a", "required": True, "use_markdown": True},

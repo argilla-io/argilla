@@ -34,7 +34,7 @@ from argilla.client.feedback.unification import (
 
 
 @pytest.mark.parametrize(
-    "strategy, unified_response",
+    ("strategy", "unified_response"),
     [
         ("mean", [{"value": str(int(5 / 3)), "strategy": "mean"}]),
         ("majority", [{"value": "2", "strategy": "majority"}]),
@@ -68,7 +68,7 @@ def test_rating_question_strategy(strategy, unified_response):
 
 
 @pytest.mark.parametrize(
-    "strategy, unified_response",
+    ("strategy", "unified_response"),
     [
         ("mean", [{"value": "yes", "strategy": "mean"}]),
         ("majority", [{"value": "yes", "strategy": "majority"}]),
@@ -102,7 +102,7 @@ def test_ranking_question_strategy(strategy, unified_response):
 
 
 @pytest.mark.parametrize(
-    "strategy, unified_response",
+    ("strategy", "unified_response"),
     [
         ("majority", [{"value": "2", "strategy": "majority"}]),
         (
@@ -141,7 +141,7 @@ def test_label_question_strategy(strategy, unified_response):
 
 
 @pytest.mark.parametrize(
-    "strategy, unified_response",
+    ("strategy", "unified_response"),
     [
         ("majority", [{"value": ["1"], "strategy": "majority"}]),
         (

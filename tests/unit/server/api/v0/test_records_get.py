@@ -28,7 +28,6 @@ from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationRecord,
 )
 from argilla.server.commons.models import TaskType
-from argilla.server.models import User
 from httpx import AsyncClient
 
 from tests.factories import WorkspaceFactory
@@ -107,7 +106,7 @@ async def create_dataset(async_client: "AsyncClient", task: TaskType, workspace_
         (TaskType.text2text, Text2TextRecord),
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_record_by_id(
     async_client: "AsyncClient",
     owner_auth_header: dict,
@@ -132,7 +131,7 @@ async def test_get_record_by_id(
     "task",
     [TaskType.token_classification, TaskType.text_classification, TaskType.text2text],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_record_by_id_not_found(async_client: "AsyncClient", owner_auth_header: dict, task: TaskType):
     async_client.headers.update(owner_auth_header)
     workspace = await WorkspaceFactory.create()

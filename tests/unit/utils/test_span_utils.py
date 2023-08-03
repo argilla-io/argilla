@@ -54,7 +54,7 @@ def test_validate():
 
 def test_validate_not_valid_spans():
     span_utils = SpanUtils("test this.", ["test", "this", "."])
-    with pytest.raises(ValueError, match="Following entity spans are not valid: \[\('mock', 2, 1\)\]\n"):
+    with pytest.raises(ValueError, match="Following entity spans are not valid: \\[\\('mock', 2, 1\\)\\]\n"):
         span_utils.validate([("mock", 2, 1)])
 
 
@@ -82,7 +82,7 @@ def test_validate_not_valid_and_misaligned_spans():
 
 
 @pytest.mark.parametrize(
-    "spans, expected",
+    ("spans", "expected"),
     [
         ([("mock", -1, 4), ("mock", 20, 22)], [("mock", 0, 4), ("mock", 20, 21)]),
         ([("mock", 0, 5), ("mock", 4, 9)], [("mock", 0, 4), ("mock", 5, 9)]),
@@ -125,7 +125,7 @@ def test_from_tags_not_valid_format():
 
 
 @pytest.mark.parametrize(
-    "tags,expected",
+    ("tags", "expected"),
     [
         (["B-mock", "O", "O"], [("mock", 0, 4)]),
         (["I-mock", "O", "O"], [("mock", 0, 4)]),

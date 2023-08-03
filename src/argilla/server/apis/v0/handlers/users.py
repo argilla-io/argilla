@@ -98,7 +98,7 @@ async def create_user(
     try:
         user = await accounts.create_user(db, user_create)
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)) from e
 
     await user.awaitable_attrs.workspaces
     return User.from_orm(user)

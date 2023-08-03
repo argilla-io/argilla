@@ -16,7 +16,7 @@ import asyncio
 from typing import Union
 
 from sqlalchemy import orm
-from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session, async_sessionmaker
+from sqlalchemy.ext.asyncio import async_scoped_session, async_sessionmaker
 
 task: Union[asyncio.Task, None] = None
 

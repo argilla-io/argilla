@@ -46,11 +46,11 @@ def check_response(response: httpx.Response, **kwargs) -> Any:
     if 200 <= response.status_code < 300:
         try:
             return response.json()
-        except JSONDecodeError:
+        except JSONDecodeError as e:
             raise WrongResponseError(
                 message="Cannot parse json data from response",
                 response=response.content,
-            )
+            ) from e
     if 300 <= response.status_code < 400:
         message = (
             f"Unexpected response {response.status_code} status. "

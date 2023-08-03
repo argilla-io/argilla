@@ -12,7 +12,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import argilla as rg
 from argilla.client import api
 from argilla.client.api import log
 from argilla.client.models import TextClassificationRecord
@@ -41,7 +40,8 @@ def test_metrics_for_text_classification(mocked_client):
     )
 
     results = f1(dataset)
-    assert results and results.data == {
+    assert results
+    assert results.data == {
         "f1_macro": 1.0,
         "f1_micro": 1.0,
         "ham_f1": 1.0,
@@ -60,7 +60,8 @@ def test_metrics_for_text_classification(mocked_client):
     results.visualize()
 
     results = f1_multilabel(dataset)
-    assert results and results.data == {
+    assert results
+    assert results.data == {
         "f1_macro": 1.0,
         "f1_micro": 1.0,
         "ham_f1": 1.0,

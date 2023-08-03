@@ -54,7 +54,7 @@ from argilla.client.sdk.token_classification.models import (
 )
 
 
-@pytest.fixture
+@pytest.fixture()
 def gutenberg_spacy_ner(argilla_user: User) -> Generator[str, None, None]:
     from datasets import load_dataset
 
@@ -129,7 +129,7 @@ def singlelabel_textclassification_records(
     ]
 
 
-@pytest.fixture
+@pytest.fixture()
 def log_singlelabel_textclassification_records(
     mocked_client,
     singlelabel_textclassification_records,
@@ -208,7 +208,7 @@ def multilabel_textclassification_records(request) -> List[TextClassificationRec
     ]
 
 
-@pytest.fixture
+@pytest.fixture()
 def log_multilabel_textclassification_records(
     mocked_client,
     multilabel_textclassification_records,
@@ -285,7 +285,7 @@ def tokenclassification_records(request) -> List[TokenClassificationRecord]:
     ]
 
 
-@pytest.fixture
+@pytest.fixture()
 def log_tokenclassification_records(
     mocked_client,
     tokenclassification_records,
@@ -356,7 +356,7 @@ def text2text_records(request) -> List[Text2TextRecord]:
     ]
 
 
-@pytest.fixture
+@pytest.fixture()
 def log_text2text_records(
     mocked_client,
     text2text_records,
@@ -378,12 +378,12 @@ def log_text2text_records(
     return dataset_name
 
 
-@pytest.fixture
+@pytest.fixture()
 def feedback_dataset_guidelines() -> str:
     return "These are the annotation guidelines."
 
 
-@pytest.fixture
+@pytest.fixture()
 def feedback_dataset_fields() -> List["AllowedFieldTypes"]:
     return [
         TextField(name="text", required=True),
@@ -391,7 +391,7 @@ def feedback_dataset_fields() -> List["AllowedFieldTypes"]:
     ]
 
 
-@pytest.fixture
+@pytest.fixture()
 def feedback_dataset_questions() -> List["AllowedQuestionTypes"]:
     return [
         TextQuestion(name="question-1", required=True),
@@ -402,7 +402,7 @@ def feedback_dataset_questions() -> List["AllowedQuestionTypes"]:
     ]
 
 
-@pytest.fixture
+@pytest.fixture()
 def feedback_dataset_records() -> List[FeedbackRecord]:
     return [
         FeedbackRecord(
@@ -515,7 +515,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
     ]
 
 
-@pytest.fixture
+@pytest.fixture()
 def feedback_dataset_huggingface() -> Dataset:
     return Dataset.from_dict(
         {

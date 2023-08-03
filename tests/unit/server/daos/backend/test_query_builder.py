@@ -24,7 +24,7 @@ from argilla.server.daos.backend.search.query_builder import EsQueryBuilder
 
 
 @pytest.mark.parametrize(
-    ["index_schema", "sort_cfg", "expected_sort"],
+    ("index_schema", "sort_cfg", "expected_sort"),
     [
         (
             {
@@ -79,7 +79,7 @@ def test_build_sort_with_wrong_field_name():
         }
     }
 
-    with pytest.raises(Exception):
+    with pytest.raises(AssertionError):
         builder.map_2_es_sort_configuration(schema=index_schema, sort=SortConfig(sort_by=[SortableField(id="wat?!")]))
 
 

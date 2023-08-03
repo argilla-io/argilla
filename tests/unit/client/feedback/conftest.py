@@ -12,21 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List
 
 import pytest
-from argilla.feedback import (
-    FeedbackRecord,
-    LabelQuestion,
-    MultiLabelQuestion,
-    RankingQuestion,
-    RatingQuestion,
-    TextField,
-    TextQuestion,
-)
 
 
-@pytest.fixture
+@pytest.fixture()
 def rating_question_payload() -> dict:
     return {
         "name": "label",
@@ -36,7 +26,7 @@ def rating_question_payload() -> dict:
     }
 
 
-@pytest.fixture
+@pytest.fixture()
 def label_question_payload() -> dict:
     return {
         "name": "label",
@@ -46,7 +36,7 @@ def label_question_payload() -> dict:
     }
 
 
-@pytest.fixture
+@pytest.fixture()
 def ranking_question_payload() -> dict:
     return {
         "name": "label",

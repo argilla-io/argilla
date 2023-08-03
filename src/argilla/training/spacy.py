@@ -248,7 +248,7 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
                         "prediction": entities,
                     }
                     pred = self._record_class(**pred)
-                elif any([p in self._pipeline for p in ["textcat", "textcat_multilabel"]]):
+                elif any(p in self._pipeline for p in ["textcat", "textcat_multilabel"]):
                     pred = {
                         "text": doc.text,
                         "prediction": [(k, v) for k, v in doc.cats.items()],

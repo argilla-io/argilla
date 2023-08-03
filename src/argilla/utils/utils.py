@@ -15,7 +15,6 @@
 import asyncio
 import importlib
 import os
-import sys
 import threading
 import warnings
 from itertools import chain
@@ -102,6 +101,7 @@ class LazyargillaModule(ModuleType):
                 f"`argilla.{class_name or module_name}`) is deprecated and will not work in a future version. "
                 f"Make sure you update your code accordingly.",
                 category=FutureWarning,
+                stacklevel=1,
             )
 
         try:
@@ -138,7 +138,7 @@ def limit_value_length(data: Any, max_length: int) -> Any:
     if isinstance(data, dict):
         return {k: limit_value_length(v, max_length=max_length) for k, v in data.items()}
     if isinstance(data, (list, tuple, set)):
-        new_values = map(lambda x: limit_value_length(x, max_length=max_length), data)
+        new_values = (limit_value_length(x, max_length=max_length) for x in data)
         return type(data)(new_values)
     return data
 

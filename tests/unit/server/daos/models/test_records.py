@@ -31,17 +31,17 @@ def test_metadata_limit():
     short_value = "a" * (settings.metadata_field_length - 1)
 
     with pytest.warns(expected_warning=UserWarning):
-        BaseRecordInDB(metadata=dict(a=long_value))
+        BaseRecordInDB(metadata={"a": long_value})
 
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        BaseRecordInDB(metadata=dict(a=short_value))
+        BaseRecordInDB(metadata={"a": short_value})
 
 
 def test_protected_metadata_without_truncation():
     long_value = "a" * (settings.metadata_field_length + 1)
 
-    record = BaseRecordInDB(metadata=dict(a=long_value, _protected=long_value))
+    record = BaseRecordInDB(metadata={"a": long_value, "_protected": long_value})
     assert record.metadata["a"] == long_value[: settings.metadata_field_length]
     assert record.metadata["_protected"] == long_value
 

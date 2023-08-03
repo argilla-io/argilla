@@ -60,7 +60,7 @@ def parse_aggregations(es_aggregations: Dict[str, Any] = None) -> Optional[Dict[
     def parse_buckets(buckets: List[Dict[str, Any]]) -> Dict[str, Any]:
         parsed = {}
         for bucket in buckets:
-            key, key_as_string, doc_count, meta, _from, _to = (
+            key, key_as_string, doc_count, _, _from, _to = (
                 bucket.pop("key", None),
                 bucket.pop("key_as_string", None),
                 bucket.pop("doc_count", 0),
@@ -69,7 +69,7 @@ def parse_aggregations(es_aggregations: Dict[str, Any] = None) -> Optional[Dict[
                 bucket.pop("to", None),
             )
             if len(bucket) == 1 and not (_from or _to):
-                k = [k for k in bucket][0]
+                k = list(bucket)[0]
                 parsed.update({key or k: parse_buckets(bucket[k].get("buckets", []))})
             elif len(bucket) > 1:
                 key_metrics = {}

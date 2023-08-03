@@ -12,7 +12,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import logging
 import warnings
 from enum import Enum
 from typing import Dict, List, Optional, Tuple, Union
@@ -125,7 +124,8 @@ def _check_and_update_kwargs(version: str, record: TextClassificationRecord, sor
     if "multi_label" in kwargs:
         warnings.warn(
             "You provided the kwarg 'multi_label', but it is determined automatically. "
-            f"We will set it to '{record.multi_label}'."
+            f"We will set it to '{record.multi_label}'.",
+            stacklevel=1,
         )
     kwargs["multi_label"] = record.multi_label
 
@@ -149,7 +149,8 @@ def _check_and_update_kwargs(version: str, record: TextClassificationRecord, sor
         elif kwargs["multi_label"]:
             warnings.warn(
                 "With cleanlab v2 and multi-label records there is an issue sorting records by 'likelihood' "
-                "(https://github.com/cleanlab/cleanlab/issues/243). We will sort by 'prediction' instead."
+                "(https://github.com/cleanlab/cleanlab/issues/243). We will sort by 'prediction' instead.",
+                stacklevel=1,
             )
             kwargs["return_indices_ranked_by"] = "self_confidence"
 
@@ -180,7 +181,9 @@ def _construct_s_and_psx(records: List[TextClassificationRecord]) -> Tuple[np.nd
         try:
             psx[i] = [pred[label] for label in labels_mapping]
         except KeyError as error:
-            raise MissingPredictionError(f"It seems a prediction for {error} is missing in the following record: {rec}")
+            raise MissingPredictionError(
+                f"It seems a prediction for {error} is missing in the following record: {rec}"
+            ) from error
 
         try:
             s[i] = (
@@ -189,7 +192,7 @@ def _construct_s_and_psx(records: List[TextClassificationRecord]) -> Tuple[np.nd
                 else labels_mapping[rec.annotation]
             )
         except KeyError as error:
-            raise MissingPredictionError(f"It seems predictions are missing for the label {error}!")
+            raise MissingPredictionError(f"It seems predictions are missing for the label {error}!") from error
 
     return s, psx
 

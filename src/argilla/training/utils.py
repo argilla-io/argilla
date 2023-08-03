@@ -13,7 +13,11 @@
 #  limitations under the License.
 
 import inspect
-from typing import Dict
+from typing import TYPE_CHECKING, Dict
+
+if TYPE_CHECKING:
+    from datasets import Dataset
+
 
 args_to_remove = ["self", "cls", "model_args", "args", "kwargs", "model_kwargs"]
 
@@ -23,10 +27,10 @@ def get_default_args(fn) -> dict:
     It takes a function and returns a dictionary of the default arguments
 
     Args:
-      func: The function you want to get the default arguments from.
+        func: The function you want to get the default arguments from.
 
     Returns:
-      A dictionary of the default arguments for the function.
+        A dictionary of the default arguments for the function.
     """
     arg_spec = inspect.getfullargspec(fn)
     # `arg_spec` contains the default values for the optional arguments, starting on the first optional, so there

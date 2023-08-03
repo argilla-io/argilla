@@ -15,7 +15,7 @@
 import pytest
 
 
-@pytest.fixture
+@pytest.fixture()
 def rating_question_payload():
     return {
         "name": "label",
@@ -25,7 +25,7 @@ def rating_question_payload():
     }
 
 
-@pytest.fixture
+@pytest.fixture()
 def label_question_payload():
     return {
         "name": "label",
@@ -35,7 +35,7 @@ def label_question_payload():
     }
 
 
-@pytest.fixture
+@pytest.fixture()
 def ranking_question_payload():
     return {
         "name": "label",

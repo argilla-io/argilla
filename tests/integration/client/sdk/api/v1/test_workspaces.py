@@ -21,7 +21,7 @@ from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 from tests.factories import UserFactory, WorkspaceFactory
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 async def test_get_workspace(role: UserRole) -> None:
     workspace = await WorkspaceFactory.create()
@@ -35,7 +35,7 @@ async def test_get_workspace(role: UserRole) -> None:
     assert response.parsed.id == workspace.id
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
 async def test_list_workspaces_me(role: UserRole) -> None:
     workspaces = await WorkspaceFactory.create_batch(size=5)

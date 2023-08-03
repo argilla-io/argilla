@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from httpx import AsyncClient
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_docs_redirect(async_client: "AsyncClient"):
     response = await async_client.get("/docs", follow_redirects=False)
     assert response.status_code == 307

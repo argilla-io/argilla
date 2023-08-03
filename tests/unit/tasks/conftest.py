@@ -16,7 +16,6 @@ from typing import TYPE_CHECKING, Generator
 import pytest
 from argilla.__main__ import app
 from argilla.server.database import database_url_sync
-from argilla.server.models import DatabaseModel
 from argilla.tasks.database.migrate import migrate_db
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,6 +25,9 @@ from tests.database import SyncTestSession
 
 if TYPE_CHECKING:
     from argilla.tasks.async_typer import AsyncTyper
+    from pytest_mock import MockerFixture
+    from sqlalchemy.engine import Connection
+    from sqlalchemy.orm import Session
 
 
 @pytest.fixture(scope="session")
@@ -52,7 +54,7 @@ def sync_connection() -> Generator["Connection", None, None]:
     engine.dispose()
 
 
-@pytest.fixture
+@pytest.fixture()
 def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
     sync_connection.begin_nested()
     session = SyncTestSession()
@@ -64,7 +66,7 @@ def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
     sync_connection.rollback()
 
 
-@pytest.fixture
+@pytest.fixture()
 def async_db_proxy(mocker: "MockerFixture", sync_db: "Session") -> "AsyncSession":
     """Create a mocked `AsyncSession` that proxies to the sync session. This will allow us to execute the async CLI commands
     and then in the unit test function use the sync session to assert the changes.

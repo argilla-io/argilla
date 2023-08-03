@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from httpx import AsyncClient
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_search_records(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -120,7 +120,7 @@ async def search_data(
     condition=not SUPPORTED_VECTOR_SEARCH,
     reason="Vector search not supported",
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_search_with_vectors(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -182,7 +182,7 @@ async def test_search_with_vectors(async_client: "AsyncClient", argilla_user: Us
     )
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_api_with_new_predictions_data_model(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}

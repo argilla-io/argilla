@@ -260,14 +260,16 @@ class ArgillaDatasetMixin:
                                 warnings.warn(
                                     "A record is already pushed to Argilla but no record id found, which means"
                                     " that the `FeedbackRecord` has been pushed to  Argilla, but hasn't been fetched,"
-                                    " so the `id` is missing. Record update will be skipped for this record"
+                                    " so the `id` is missing. Record update will be skipped for this record",
+                                    stacklevel=1,
                                 )
                                 if record.suggestions:
                                     warnings.warn(
                                         "The `suggestions` have been provided, but the `id`"
                                         " is not set. To solve that, you can simply call"
                                         " `FeedbackDataset.fetch_records()` to fetch them and"
-                                        " automatically set the `id`, to call `set_suggestions` on top of that."
+                                        " automatically set the `id`, to call `set_suggestions` on top of that.",
+                                        stacklevel=1,
                                     )
                                 continue
                             for suggestion in record.suggestions:
@@ -487,7 +489,7 @@ class ArgillaDatasetMixin:
             elif question.settings["type"] == "text":
                 question = TextQuestion(**question_dict, use_markdown=question.settings["use_markdown"])
             elif question.settings["type"] in ["label_selection", "multi_label_selection", "ranking"]:
-                if all([label["value"] == label["text"] for label in question.settings["options"]]):
+                if all(label["value"] == label["text"] for label in question.settings["options"]):
                     labels = [label["value"] for label in question.settings["options"]]
                 else:
                     labels = {label["value"]: label["text"] for label in question.settings["options"]}

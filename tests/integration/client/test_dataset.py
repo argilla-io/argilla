@@ -13,12 +13,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import copy
-import logging
 import os
 import sys
 from time import sleep
 
-import argilla as rg
 import datasets
 import pandas as pd
 import pytest
@@ -115,7 +113,7 @@ class TestDatasetBase:
         with pytest.raises(ValueError, match="datasets.DatasetDict` are not supported"):
             DatasetBase._prepare_dataset_and_column_mapping(ds_dict, None)
 
-        col_mapping = dict(id="ID", inputs=["inputs_a", "inputs_b"], metadata="metadata")
+        col_mapping = {"id": "ID", "inputs": ["inputs_a", "inputs_b"], "metadata": "metadata"}
 
         with pytest.warns(
             UserWarning,
@@ -375,7 +373,7 @@ class TestDatasetForTextClassification:
         records = request.getfixturevalue(records)
 
         ds = DatasetForTextClassification(records)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Please provide a `spaCy` language model to prepare the dataset.*"):
             train = ds.prepare_for_training(framework="spacy", seed=42)
         nlp = spacy.blank("en")
         doc_bin = ds.prepare_for_training(framework="spacy", lang=nlp, seed=42)
@@ -385,7 +383,7 @@ class TestDatasetForTextClassification:
         assert len(docs) == 2
 
         if records[0].multi_label:
-            assert set(list(docs[0].cats.keys())) == set(["a", "b"])
+            assert set(docs[0].cats.keys()) == {"a", "b"}
         else:
             assert isinstance(docs[0].cats, dict)
 
@@ -411,7 +409,9 @@ class TestDatasetForTextClassification:
 
         assert isinstance(jsonl, list)
         assert isinstance(jsonl[0], dict)
-        assert "prompt" in jsonl[0] and "completion" in jsonl[0] and "id" in jsonl[0]
+        assert "prompt" in jsonl[0]
+        assert "completion" in jsonl[0]
+        assert "id" in jsonl[0]
 
     @pytest.mark.parametrize(
         "records",
@@ -581,7 +581,8 @@ class TestDatasetForTokenClassification:
 
         missing_optional_cols = datasets.Dataset.from_dict({"text": ["mock"], "tokens": [["mock"]]})
         rec = DatasetForTokenClassification.from_datasets(missing_optional_cols)[0]
-        assert rec.text == "mock" and rec.tokens == ["mock"]
+        assert rec.text == "mock"
+        assert rec.tokens == ["mock"]
 
     def test_from_to_datasets_id(self):
         record = TokenClassificationRecord(text="mock", tokens=["mock"])
@@ -649,7 +650,7 @@ class TestDatasetForTokenClassification:
         for r in rb_dataset:
             r.annotation = [(label, start, end) for label, start, end, _ in r.prediction]
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Please provide a `spaCy` language model to prepare the dataset.*"):
             train = rb_dataset.prepare_for_training(framework="spacy", seed=42)
 
         train = rb_dataset.prepare_for_training(framework="spacy", lang=spacy.blank("en"), seed=42)
@@ -684,7 +685,9 @@ class TestDatasetForTokenClassification:
 
         assert isinstance(jsonl, list)
         assert isinstance(jsonl[0], dict)
-        assert "prompt" in jsonl[0] and "completion" in jsonl[0] and "id" in jsonl[0]
+        assert "prompt" in jsonl[0]
+        assert "completion" in jsonl[0]
+        assert "id" in jsonl[0]
 
     @pytest.mark.skipif(
         _HF_HUB_ACCESS_TOKEN is None,
@@ -725,7 +728,7 @@ class TestDatasetForTokenClassification:
             r.annotation = [(label, start, end) for label, start, end, _ in r.prediction]
 
         train = rb_dataset.prepare_for_training()
-        assert (set(train.column_names)) == set(["id", "tokens", "ner_tags"])
+        assert (set(train.column_names)) == {"id", "tokens", "ner_tags"}
 
         assert isinstance(train, datasets.DatasetD.Dataset) or isinstance(train, datasets.Dataset)
         assert "ner_tags" in train.column_names
@@ -888,7 +891,7 @@ class TestDatasetForText2Text:
         train = ds.prepare_for_training(train_size=1, seed=42)
 
         assert isinstance(train, datasets.Dataset)
-        assert set(train.column_names) == set(["id", "text", "target"])
+        assert set(train.column_names) == {"id", "text", "target"}
         assert len(train) == 10
         assert train[1]["text"] == "mock"
         assert train[1]["target"] == "mock"
@@ -899,7 +902,7 @@ class TestDatasetForText2Text:
         assert len(train_test["train"]) == 5
         assert len(train_test["test"]) == 5
         for split in ["train", "test"]:
-            assert set(train_test[split].column_names) == set(["id", "text", "target"])
+            assert set(train_test[split].column_names) == {"id", "text", "target"}
 
     def test_prepare_for_training_with_spacy(self):
         ds = DatasetForText2Text([Text2TextRecord(text="mock", annotation="mock"), Text2TextRecord(text="mock")] * 10)
@@ -919,7 +922,9 @@ class TestDatasetForText2Text:
 
         assert isinstance(jsonl, list)
         assert isinstance(jsonl[0], dict)
-        assert "prompt" in jsonl[0] and "completion" in jsonl[0] and "id" in jsonl[0]
+        assert "prompt" in jsonl[0]
+        assert "completion" in jsonl[0]
+        assert "id" in jsonl[0]
         assert jsonl[0]["prompt"] == "Michael is a professor at Harvard but"
 
     def test_prepare_for_training_with_spark_nlp(self):
@@ -986,7 +991,7 @@ def _compare_datasets(dataset, expected_dataset):
 
 
 @pytest.mark.parametrize(
-    "task,dataset_class",
+    ("task", "dataset_class"),
     [
         ("TextClassification", "DatasetForTextClassification"),
         ("TokenClassification", "DatasetForTokenClassification"),
@@ -1003,7 +1008,7 @@ def test_read_pandas(monkeypatch, task, dataset_class):
 
 
 @pytest.mark.parametrize(
-    "task,dataset_class",
+    ("task", "dataset_class"),
     [
         ("TextClassification", "DatasetForTextClassification"),
         ("TokenClassification", "DatasetForTokenClassification"),
