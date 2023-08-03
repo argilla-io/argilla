@@ -742,6 +742,16 @@ class TrainingTaskMapping(TrainingTask, RenamedDeprecationMixin):
         cls.warn()
         return super().for_supervised_fine_tuning(*args, **kwargs)
 
+    @classmethod
+    def for_reward_modelling(cls, *args, **kwargs) -> TrainingTaskForRewardModelling:
+        cls.warn()
+        return super().for_reward_modelling(*args, **kwargs)
+
+    @classmethod
+    def for_direct_preference_optimization(cls, *args, **kwargs) -> TrainingTaskForDirectPreferenceOptimization:
+        cls.warn()
+        return super().for_direct_preference_optimization(*args, **kwargs)
+
 
 class TrainingTaskMappingForTextClassification(TrainingTaskForTextClassification, RenamedDeprecationMixin):
     def __init__(self, *args, **kwargs) -> None:
