@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import importlib
+import re
 import sys
 
 import pytest
@@ -86,15 +87,18 @@ class TestDependencyRequirements:
 
     def test_require_version_failures(self):
         # This operation is not supported
-        with pytest.raises(ValueError):
+        with pytest.raises(
+            ValueError,
+            match=re.escape(r"datasets~=1.0.0: need one of ['<', '<=', '==', '!=', '>=', '>'], but got '='."),
+        ):
             require_version("datasets~=1.0.0")
 
         # Add some unsupported tokens, e.g. " "
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"requirement needs to be in the pip package format.*"):
             require_version(" datasets")
 
         # Add unsupported operation in second requirement version
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"requirement needs to be in the pip package format.*"):
             require_version("datasets>1.0.0,~1.17.0")
 
     def test_special_python_case(self):

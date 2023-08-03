@@ -25,5 +25,5 @@ def test_update_schema():
 
         __non_nullable_fields__ = {"unit", "test"}
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"The following keys must have non-null values.*"):
         UnitTestUpdateSchema(unit=None, test=None)

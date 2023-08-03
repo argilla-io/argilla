@@ -223,12 +223,12 @@ async def test_init_with_workspace(owner: "ServerUser"):
 
 def test_set_workspace_with_missing_workspace(owner: "ServerUser"):
     ArgillaSingleton.init(api_key=owner.api_key)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"Wrong provided workspace.*"):
         ArgillaSingleton.get().set_workspace("missing-workspace")
 
 
 def test_init_with_missing_workspace(owner: "ServerUser"):
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"Wrong provided workspace.*"):
         ArgillaSingleton.init(api_key=owner.api_key, workspace="missing-workspace")
 
 

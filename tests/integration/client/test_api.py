@@ -282,12 +282,12 @@ async def test_init_with_workspace(owner: User) -> None:
 
 def test_set_workspace_with_missing_workspace(owner: User) -> None:
     init(api_key=owner.api_key)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Wrong provided workspace.*"):
         set_workspace("missing-workspace")
 
 
 def test_init_with_missing_workspace(owner: User) -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Wrong provided workspace.*"):
         init(api_key=owner.api_key, workspace="missing-workspace")
 
 

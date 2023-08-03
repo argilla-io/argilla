@@ -373,7 +373,7 @@ class TestDatasetForTextClassification:
         records = request.getfixturevalue(records)
 
         ds = DatasetForTextClassification(records)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Please provide a `spaCy` language model to prepare the dataset.*"):
             train = ds.prepare_for_training(framework="spacy", seed=42)
         nlp = spacy.blank("en")
         doc_bin = ds.prepare_for_training(framework="spacy", lang=nlp, seed=42)
@@ -650,7 +650,7 @@ class TestDatasetForTokenClassification:
         for r in rb_dataset:
             r.annotation = [(label, start, end) for label, start, end, _ in r.prediction]
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Please provide a `spaCy` language model to prepare the dataset.*"):
             train = rb_dataset.prepare_for_training(framework="spacy", seed=42)
 
         train = rb_dataset.prepare_for_training(framework="spacy", lang=spacy.blank("en"), seed=42)
