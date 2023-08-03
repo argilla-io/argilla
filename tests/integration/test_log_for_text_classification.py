@@ -156,7 +156,7 @@ def test_log_data_with_vectors_and_update_ko(argilla_user: "User"):
         log(TextClassificationRecord(id=0, text=text, vectors=updated_vectors), name=dataset)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_log_data_in_several_workspaces(owner: "User"):
     dataset_name = "test_log_data_in_several_workspaces"
     text = "This is a text"

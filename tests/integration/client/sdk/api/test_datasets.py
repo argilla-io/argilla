@@ -29,7 +29,7 @@ from tests.factories import UserFactory, WorkspaceFactory
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_dataset(role: UserRole):
     # create test dataset
     bulk_data = TextClassificationBulkData(records=[])
@@ -58,7 +58,7 @@ async def test_get_dataset(role: UserRole):
 
 
 @pytest.mark.parametrize(
-    "status_code, expected",
+    ("status_code", "expected"),
     [
         (404, NotFoundApiError),
         (500, GenericApiError),

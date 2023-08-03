@@ -65,7 +65,7 @@ async def log_some_records(
     assert response.status_code == 200, response.json()
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_dataset_without_rules(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -80,7 +80,7 @@ async def test_dataset_without_rules(async_client: "AsyncClient", argilla_user: 
     assert len(response.json()) == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_dataset_update_rule(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -141,7 +141,7 @@ async def test_dataset_update_rule(async_client: "AsyncClient", argilla_user: Us
         CreateLabelingRule(query="another query", description="Description", labels=["A", "B", "C"]),
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_dataset_with_rules(async_client: "AsyncClient", argilla_user: User, rule: CreateLabelingRule):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -178,7 +178,7 @@ async def test_dataset_with_rules(async_client: "AsyncClient", argilla_user: Use
         CreateLabelingRule(query="another query", description="Description", labels=["A", "B", "C"]),
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_dataset_rule(async_client: "AsyncClient", argilla_user: User, rule: CreateLabelingRule):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -205,7 +205,7 @@ async def test_get_dataset_rule(async_client: "AsyncClient", argilla_user: User,
     assert found_rule.description == rule.description
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_dataset_rules(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -233,7 +233,7 @@ async def test_delete_dataset_rules(async_client: "AsyncClient", argilla_user: U
     assert len(response.json()) == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_duplicated_dataset_rules(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -261,7 +261,7 @@ async def test_duplicated_dataset_rules(async_client: "AsyncClient", argilla_use
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_rules_with_multi_label_dataset(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -282,7 +282,7 @@ async def test_rules_with_multi_label_dataset(async_client: "AsyncClient", argil
     assert found_rule.description == rule.description
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_rule_metrics_with_missing_label(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -393,7 +393,7 @@ async def test_rule_metrics_with_missing_label(async_client: "AsyncClient", argi
         ),
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_rule_metrics_with_missing_label_for_stored_rule(
     async_client: "AsyncClient", argilla_user: User, rule, expected_metrics
 ):
@@ -415,7 +415,7 @@ async def test_rule_metrics_with_missing_label_for_stored_rule(
     assert response.json() == expected_metrics
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_rules_and_then_log(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -495,7 +495,7 @@ async def test_create_rules_and_then_log(async_client: "AsyncClient", argilla_us
         ),
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_dataset_rules_metrics(
     async_client: "AsyncClient", argilla_user: User, rules, expected_metrics, annotation
 ):
@@ -521,7 +521,7 @@ async def test_dataset_rules_metrics(
     assert response.json() == expected_metrics
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_rule_metric(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -580,7 +580,7 @@ async def test_rule_metric(async_client: "AsyncClient", argilla_user: User):
     assert metrics.precision is None
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_rule_metric_with_multiple_labels(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -605,7 +605,7 @@ async def test_rule_metric_with_multiple_labels(async_client: "AsyncClient", arg
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_search_records_with_uncovered_rules(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}

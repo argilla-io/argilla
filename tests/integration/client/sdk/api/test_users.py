@@ -50,7 +50,7 @@ def test_whoami_errors() -> None:
         whoami(AuthenticatedClient(base_url="http://localhost:6900", token="wrong-apikey"))
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_users(owner: "ServerUser") -> None:
     await UserFactory.create(username="user_1")
     await UserFactory.create(username="user_2")
@@ -65,7 +65,7 @@ async def test_list_users(owner: "ServerUser") -> None:
 
 
 @pytest.mark.parametrize("role", ["annotator", "admin", "owner"])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_user(owner: "ServerUser", role: str) -> None:
     await WorkspaceFactory.create(name="workspace_1")
     await WorkspaceFactory.create(name="workspace_2")
@@ -117,7 +117,7 @@ def test_create_user_errors(owner: "ServerUser", annotator: "ServerUser") -> Non
         )
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_user(owner: "ServerUser") -> None:
     user = await UserFactory.create(username="user_1")
     httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx

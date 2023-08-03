@@ -33,7 +33,7 @@ from argilla.labeling.text_classification.label_models import (
 )
 
 
-@pytest.fixture
+@pytest.fixture()
 def weak_labels(monkeypatch):
     def mock_load(*args, **kwargs):
         return [
@@ -59,7 +59,7 @@ def weak_labels(monkeypatch):
     return WeakLabels(rules=[lambda: None] * 3, dataset="mock")
 
 
-@pytest.fixture
+@pytest.fixture()
 def weak_labels_from_guide(monkeypatch, resources):
     matrix_and_annotation = np.load(str(resources / "weak-supervision-guide-matrix.npy"))
     matrix, annotation = matrix_and_annotation[:, :-1], matrix_and_annotation[:, -1]
@@ -77,7 +77,7 @@ def weak_labels_from_guide(monkeypatch, resources):
     return WeakLabels(rules=[lambda x: "mock"] * matrix.shape[1], dataset="mock")
 
 
-@pytest.fixture
+@pytest.fixture()
 def weak_multi_labels(monkeypatch):
     def mock_load(*args, **kwargs):
         return [
@@ -137,7 +137,7 @@ class TestMajorityVoter:
             mj.fit()
 
     @pytest.mark.parametrize(
-        "wls, include_annotated_records, expected",
+        ("wls", "include_annotated_records", "expected"),
         [
             ("weak_labels", True, 4),
             ("weak_labels", False, 1),
@@ -179,7 +179,7 @@ class TestMajorityVoter:
         assert np.allclose(probs, expected)
 
     @pytest.mark.parametrize(
-        "include_abstentions,tie_break_policy,expected",
+        ("include_abstentions", "tie_break_policy", "expected"),
         [
             (True, TieBreakPolicy.ABSTAIN, 4),
             (False, TieBreakPolicy.ABSTAIN, 1),
@@ -242,7 +242,7 @@ class TestMajorityVoter:
         assert np.allclose(probabilities, expected, equal_nan=True)
 
     @pytest.mark.parametrize(
-        "include_abstentions,expected",
+        ("include_abstentions", "expected"),
         [
             (True, 4),
             (False, 3),
@@ -277,7 +277,7 @@ class TestMajorityVoter:
             mj.score()
 
     @pytest.mark.parametrize(
-        "wls, output_str",
+        ("wls", "output_str"),
         [
             ("weak_labels", True),
             ("weak_multi_labels", False),
@@ -306,11 +306,12 @@ class TestMajorityVoter:
             assert isinstance(score, str)
         else:
             assert isinstance(score, dict)
-            assert "sad" in score and "happy" in score
+            assert "sad" in score
+            assert "happy" in score
         assert hasattr(compute_probs, "called")
 
     @pytest.mark.parametrize(
-        "tie_break_policy, expected",
+        ("tie_break_policy", "expected"),
         [
             (TieBreakPolicy.ABSTAIN, (np.array([2]), np.array([2]))),
             (TieBreakPolicy.RANDOM, (np.array([0, 1, 2]), np.array([0, 2, 2]))),
@@ -368,7 +369,7 @@ class TestSnorkel:
         assert label_model._model.cardinality == 3
 
     @pytest.mark.parametrize(
-        "wrong_mapping,expected",
+        ("wrong_mapping", "expected"),
         [
             (
                 {None: -10, "negative": 0, "positive": 1, "neutral": 2},
@@ -413,7 +414,7 @@ class TestSnorkel:
             label_model.fit(L_train=None)
 
     @pytest.mark.parametrize(
-        "policy,include_annotated_records,include_abstentions,expected",
+        ("policy", "include_annotated_records", "include_abstentions", "expected"),
         [
             ("abstain", True, False, (2, ["positive", "negative"], [0.8, 0.9])),
             (
@@ -482,7 +483,7 @@ class TestSnorkel:
         assert [rec.prediction[0][1] if rec.prediction else None for rec in records] == expected[2]
         assert records[0].prediction_agent == "mock_agent"
 
-    @pytest.mark.parametrize("policy,expected", [("abstain", 0.5), ("random", 2.0 / 3)])
+    @pytest.mark.parametrize(("policy", "expected"), [("abstain", 0.5), ("random", 2.0 / 3)])
     def test_score(self, monkeypatch, weak_labels, policy, expected):
         def mock_predict(self, L, return_probs, tie_break_policy):
             assert (L == weak_labels.matrix(has_annotation=True)).all()
@@ -554,7 +555,7 @@ class TestFlyingSquid:
         with pytest.raises(TooFewRulesError, match="at least three"):
             FlyingSquid(weak_labels)
 
-    @pytest.mark.parametrize("include_annotated,expected", [(False, 1), (True, 4)])
+    @pytest.mark.parametrize(("include_annotated", "expected"), [(False, 1), (True, 4)])
     def test_fit(self, monkeypatch, weak_labels, include_annotated, expected):
         def mock_fit(*args, **kwargs):
             if not include_annotated:
@@ -589,7 +590,7 @@ class TestFlyingSquid:
         label_model.fit(mock="mock_fit_kwargs")
 
     @pytest.mark.parametrize(
-        "policy,include_annotated_records,include_abstentions,verbose,expected",
+        ("policy", "include_annotated_records", "include_abstentions", "verbose", "expected"),
         [
             (
                 "abstain",
@@ -745,7 +746,7 @@ class TestFlyingSquid:
 
         assert isinstance(label_model.score(output_str=True), str)
 
-    @pytest.mark.parametrize("tbp,vrb,expected", [("abstain", False, 1.0), ("random", True, 2 / 3.0)])
+    @pytest.mark.parametrize(("tbp", "vrb", "expected"), [("abstain", False, 1.0), ("random", True, 2 / 3.0)])
     def test_score_tbp(self, monkeypatch, weak_labels, tbp, vrb, expected):
         def mock_predict(weak_label_matrix, verbose):
             assert verbose is vrb

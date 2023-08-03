@@ -74,7 +74,7 @@ async def dataset_for_pagination(opensearch: OpenSearch):
 
 
 @pytest_asyncio.fixture(scope="function")
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine) -> Dataset:
     text_question = await TextQuestionFactory()
     rating_question = await RatingQuestionFactory()
@@ -174,7 +174,7 @@ async def test_banking_sentiment_dataset(elastic_search_engine: SearchEngine) ->
     return dataset
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 class TestSuiteElasticSearchEngine:
     async def test_get_index_or_raise(self, elastic_search_engine: SearchEngine):
         dataset = await DatasetFactory.create()
@@ -370,7 +370,7 @@ class TestSuiteElasticSearchEngine:
         assert scores == sorted_scores
 
     @pytest.mark.parametrize(
-        "statuses, expected_items",
+        ("statuses", "expected_items"),
         [
             ([], 6),
             ([ResponseStatusFilter.missing], 6),

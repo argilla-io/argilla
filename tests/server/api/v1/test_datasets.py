@@ -84,7 +84,7 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_current_user_datasets(client: TestClient, owner_auth_header: dict):
     dataset_a = await DatasetFactory.create(name="dataset-a")
     dataset_b = await DatasetFactory.create(name="dataset-b", guidelines="guidelines")
@@ -133,7 +133,7 @@ def test_list_current_user_datasets_without_authentication(client: TestClient):
 
 
 @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_current_user_datasets_as_restricted_user_role(client: TestClient, role: UserRole):
     workspace = await WorkspaceFactory.create()
     user = await UserFactory.create(workspaces=[workspace], role=role)
@@ -150,7 +150,7 @@ async def test_list_current_user_datasets_as_restricted_user_role(client: TestCl
     assert [dataset["name"] for dataset in response_body["items"]] == ["dataset-a", "dataset-b"]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_dataset_fields(client: TestClient, owner_auth_header: dict):
     dataset = await DatasetFactory.create()
     text_field_a = await TextFieldFactory.create(
@@ -188,7 +188,7 @@ async def test_list_dataset_fields(client: TestClient, owner_auth_header: dict):
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_dataset_fields_without_authentication(client: TestClient):
     dataset = await DatasetFactory.create()
 
@@ -198,7 +198,7 @@ async def test_list_dataset_fields_without_authentication(client: TestClient):
 
 
 @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_dataset_fields_as_restricted_user_role(client: TestClient, role: UserRole):
     dataset = await DatasetFactory.create()
     user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
@@ -217,7 +217,7 @@ async def test_list_dataset_fields_as_restricted_user_role(client: TestClient, r
 
 
 @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_dataset_fields_as_restricted_user_from_different_workspace(client: TestClient, role: UserRole):
     dataset = await DatasetFactory.create()
     workspace = await WorkspaceFactory.create()
@@ -228,7 +228,7 @@ async def test_list_dataset_fields_as_restricted_user_from_different_workspace(c
     assert response.status_code == 403
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_dataset_fields_with_nonexistent_dataset_id(client: TestClient, owner_auth_header: dict):
     await DatasetFactory.create()
 
@@ -237,7 +237,7 @@ async def test_list_dataset_fields_with_nonexistent_dataset_id(client: TestClien
     assert response.status_code == 404
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_dataset_questions(client: TestClient, owner_auth_header: dict):
     dataset = await DatasetFactory.create()
     text_question = await TextQuestionFactory.create(
@@ -299,7 +299,7 @@ async def test_list_dataset_questions(client: TestClient, owner_auth_header: dic
 
 
 @pytest.mark.parametrize(
-    "QuestionFactory, settings",
+    ("QuestionFactory", "settings"),
     [
         (RatingQuestionFactory, {"options": [{"value": 1}, {"value": 2}, {"value": 2}]}),
         (
@@ -326,7 +326,7 @@ async def test_list_dataset_questions(client: TestClient, owner_auth_header: dic
         ),
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_dataset_questions_with_duplicate_values(
     client: TestClient, owner_auth_header: dict, QuestionFactory: Type[QuestionFactory], settings: dict
 ):
@@ -351,7 +351,7 @@ async def test_list_dataset_questions_with_duplicate_values(
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_dataset_questions_without_authentication(client: TestClient):
     dataset = await DatasetFactory.create()
 
@@ -361,7 +361,7 @@ async def test_list_dataset_questions_without_authentication(client: TestClient)
 
 
 @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_dataset_questions_as_restricted_user(client: TestClient, role: UserRole):
     dataset = await DatasetFactory.create()
     user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
@@ -379,7 +379,7 @@ async def test_list_dataset_questions_as_restricted_user(client: TestClient, rol
 
 
 @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_dataset_questions_as_restricted_user_from_different_workspace(client: TestClient, role: UserRole):
     dataset = await DatasetFactory.create()
     workspace = await WorkspaceFactory.create()
@@ -390,7 +390,7 @@ async def test_list_dataset_questions_as_restricted_user_from_different_workspac
     assert response.status_code == 403
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_dataset_questions_with_nonexistent_dataset_id(client: TestClient, owner_auth_header: dict):
     await DatasetFactory.create()
 
@@ -399,7 +399,7 @@ async def test_list_dataset_questions_with_nonexistent_dataset_id(client: TestCl
     assert response.status_code == 404
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_dataset_records(client: TestClient, owner_auth_header: dict):
     dataset = await DatasetFactory.create()
     record_a = await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
@@ -446,7 +446,7 @@ async def test_list_dataset_records(client: TestClient, owner_auth_header: dict)
     "includes",
     [[RecordInclude.responses], [RecordInclude.suggestions], [RecordInclude.responses, RecordInclude.suggestions]],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_dataset_records_with_include(
     client: TestClient, owner: User, owner_auth_header: dict, includes: List[RecordInclude]
 ):
@@ -546,7 +546,7 @@ async def test_list_dataset_records_with_include(
     assert response.status_code == 200
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_dataset_records_with_offset(client: TestClient, owner_auth_header: dict):
     dataset = await DatasetFactory.create()
     await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
@@ -564,7 +564,7 @@ async def test_list_dataset_records_with_offset(client: TestClient, owner_auth_h
     assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_dataset_records_with_limit(client: TestClient, owner_auth_header: dict):
     dataset = await DatasetFactory.create()
     record_a = await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
@@ -582,7 +582,7 @@ async def test_list_dataset_records_with_limit(client: TestClient, owner_auth_he
     assert [item["id"] for item in response_body["items"]] == [str(record_a.id)]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_dataset_records_with_offset_and_limit(client: TestClient, owner_auth_header: dict):
     dataset = await DatasetFactory.create()
     await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
@@ -602,7 +602,7 @@ async def test_list_dataset_records_with_offset_and_limit(client: TestClient, ow
     assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_dataset_records_without_authentication(client: TestClient):
     dataset = await DatasetFactory.create()
 
@@ -611,7 +611,7 @@ async def test_list_dataset_records_without_authentication(client: TestClient):
     assert response.status_code == 401
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_dataset_records_as_admin(client: TestClient):
     workspace = await WorkspaceFactory.create()
     admin = await AdminFactory.create(workspaces=[workspace])
@@ -628,7 +628,7 @@ async def test_list_dataset_records_as_admin(client: TestClient):
     assert response.status_code == 200
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_dataset_records_as_annotator(client: TestClient):
     workspace = await WorkspaceFactory.create()
     annotator = await AnnotatorFactory.create(workspaces=[workspace])
@@ -723,7 +723,7 @@ async def create_dataset_with_user_responses(
     return dataset, questions, records, responses, suggestions
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_current_user_dataset_records(client: TestClient, owner: User, owner_auth_header: dict):
     workspace = await WorkspaceFactory.create()
     dataset, _, records, _, _ = await create_dataset_with_user_responses(owner, workspace)
@@ -770,7 +770,7 @@ async def test_list_current_user_dataset_records(client: TestClient, owner: User
     "includes",
     [[RecordInclude.responses], [RecordInclude.suggestions], [RecordInclude.responses, RecordInclude.suggestions]],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_current_user_dataset_records_with_include(
     client: TestClient, role: UserRole, includes: List[RecordInclude]
 ):
@@ -871,7 +871,7 @@ async def test_list_current_user_dataset_records_with_include(
     assert response.json() == expected
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_current_user_dataset_records_with_offset(client: TestClient, owner_auth_header: dict):
     dataset = await DatasetFactory.create()
     await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
@@ -889,7 +889,7 @@ async def test_list_current_user_dataset_records_with_offset(client: TestClient,
     assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_current_user_dataset_records_with_limit(client: TestClient, owner_auth_header: dict):
     dataset = await DatasetFactory.create()
     record_a = await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
@@ -907,7 +907,7 @@ async def test_list_current_user_dataset_records_with_limit(client: TestClient, 
     assert [item["id"] for item in response_body["items"]] == [str(record_a.id)]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_current_user_dataset_records_with_offset_and_limit(client: TestClient, owner_auth_header: dict):
     dataset = await DatasetFactory.create()
     await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
@@ -950,7 +950,7 @@ async def create_records_with_response(
         [ResponseStatusFilter.missing, ResponseStatusFilter.draft, ResponseStatusFilter.discarded],
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_current_user_dataset_records_with_response_status_filter(
     client: TestClient, owner: "User", owner_auth_header: dict, response_status_filters: List[ResponseStatusFilter]
 ):
@@ -982,7 +982,7 @@ async def test_list_current_user_dataset_records_with_response_status_filter(
     assert len(response_json["items"]) == num_responses_per_status * len(response_status_filters)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_current_user_dataset_records_without_authentication(client: TestClient):
     dataset = await DatasetFactory.create()
 
@@ -992,7 +992,7 @@ async def test_list_current_user_dataset_records_without_authentication(client: 
 
 
 @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_current_user_dataset_records_as_restricted_user(client: TestClient, role: UserRole):
     workspace = await WorkspaceFactory.create()
     user = await UserFactory.create(workspaces=[workspace], role=role)
@@ -1038,7 +1038,7 @@ async def test_list_current_user_dataset_records_as_restricted_user(client: Test
 
 
 @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_current_user_dataset_records_as_restricted_user_from_different_workspace(
     client: TestClient, role: UserRole
 ):
@@ -1051,7 +1051,7 @@ async def test_list_current_user_dataset_records_as_restricted_user_from_differe
     assert response.status_code == 403
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_current_user_dataset_records_with_nonexistent_dataset_id(
     client: TestClient, owner_auth_header: dict
 ):
@@ -1062,7 +1062,7 @@ async def test_list_current_user_dataset_records_with_nonexistent_dataset_id(
     assert response.status_code == 404
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_dataset(client: TestClient, owner_auth_header: dict):
     dataset = await DatasetFactory.create(name="dataset")
 
@@ -1080,7 +1080,7 @@ async def test_get_dataset(client: TestClient, owner_auth_header: dict):
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_dataset_without_authentication(client: TestClient):
     dataset = await DatasetFactory.create()
 
@@ -1090,7 +1090,7 @@ async def test_get_dataset_without_authentication(client: TestClient):
 
 
 @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_dataset_as_restricted_user(client: TestClient, role: UserRole):
     dataset = await DatasetFactory.create(name="dataset")
     user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
@@ -1102,7 +1102,7 @@ async def test_get_dataset_as_restricted_user(client: TestClient, role: UserRole
 
 
 @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_dataset_as_restricted_user_from_different_workspace(client: TestClient, role: UserRole):
     dataset = await DatasetFactory.create()
     workspace = await WorkspaceFactory.create()
@@ -1113,7 +1113,7 @@ async def test_get_dataset_as_restricted_user_from_different_workspace(client: T
     assert response.status_code == 403
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_dataset_with_nonexistent_dataset_id(client: TestClient, owner_auth_header: dict):
     await DatasetFactory.create()
 
@@ -1122,7 +1122,7 @@ async def test_get_dataset_with_nonexistent_dataset_id(client: TestClient, owner
     assert response.status_code == 404
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_current_user_dataset_metrics(client: TestClient, owner: User, owner_auth_header: dict):
     dataset = await DatasetFactory.create()
     record_a = await RecordFactory.create(dataset=dataset)
@@ -1160,7 +1160,7 @@ async def test_get_current_user_dataset_metrics(client: TestClient, owner: User,
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_current_user_dataset_metrics_without_authentication(client: TestClient):
     dataset = await DatasetFactory.create()
 
@@ -1170,7 +1170,7 @@ async def test_get_current_user_dataset_metrics_without_authentication(client: T
 
 
 @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_current_user_dataset_metrics_as_annotator(client: TestClient, role: UserRole):
     dataset = await DatasetFactory.create()
     user = await AnnotatorFactory.create(workspaces=[dataset.workspace], role=role)
@@ -1203,7 +1203,7 @@ async def test_get_current_user_dataset_metrics_as_annotator(client: TestClient,
 
 
 @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_current_user_dataset_metrics_restricted_user_from_different_workspace(
     client: TestClient, role: UserRole
 ):
@@ -1216,7 +1216,7 @@ async def test_get_current_user_dataset_metrics_restricted_user_from_different_w
     assert response.status_code == 403
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_current_user_dataset_metrics_with_nonexistent_dataset_id(
     client: TestClient, owner_auth_header: dict
 ):
@@ -1227,7 +1227,7 @@ async def test_get_current_user_dataset_metrics_with_nonexistent_dataset_id(
     assert response.status_code == 404
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset(client: TestClient, db: "AsyncSession", owner_auth_header: dict):
     workspace = await WorkspaceFactory.create()
     dataset_json = {"name": "name", "guidelines": "guidelines", "workspace_id": str(workspace.id)}
@@ -1265,7 +1265,7 @@ async def test_create_dataset(client: TestClient, db: "AsyncSession", owner_auth
         {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_with_invalid_settings(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict, dataset_json: dict
 ):
@@ -1278,7 +1278,7 @@ async def test_create_dataset_with_invalid_settings(
     assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_without_authentication(client: TestClient, db: "AsyncSession"):
     workspace = await WorkspaceFactory.create()
     dataset_json = {"name": "name", "workspace_id": str(workspace.id)}
@@ -1289,7 +1289,7 @@ async def test_create_dataset_without_authentication(client: TestClient, db: "As
     assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_as_admin(client: TestClient, db: "AsyncSession"):
     workspace = await WorkspaceFactory.create()
     admin = await AdminFactory.create(workspaces=[workspace])
@@ -1301,7 +1301,7 @@ async def test_create_dataset_as_admin(client: TestClient, db: "AsyncSession"):
     assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_as_annotator(client: TestClient, db: "AsyncSession"):
     annotator = await AnnotatorFactory.create()
     workspace = await WorkspaceFactory.create()
@@ -1313,7 +1313,7 @@ async def test_create_dataset_as_annotator(client: TestClient, db: "AsyncSession
     assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_with_existent_name(client: TestClient, db: "AsyncSession", owner_auth_header: dict):
     dataset = await DatasetFactory.create(name="name")
     dataset_json = {"name": "name", "workspace_id": str(dataset.workspace_id)}
@@ -1324,7 +1324,7 @@ async def test_create_dataset_with_existent_name(client: TestClient, db: "AsyncS
     assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_with_nonexistent_workspace_id(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -1344,7 +1344,7 @@ async def test_create_dataset_with_nonexistent_workspace_id(
         ({"type": "text", "use_markdown": False}, {"type": "text", "use_markdown": False}),
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_field(
     client: TestClient,
     db: "AsyncSession",
@@ -1373,7 +1373,7 @@ async def test_create_dataset_field(
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_field_without_authentication(client: TestClient, db: "AsyncSession"):
     dataset = await DatasetFactory.create()
     field_json = {
@@ -1388,7 +1388,7 @@ async def test_create_dataset_field_without_authentication(client: TestClient, d
     assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_field_as_admin(client: TestClient, db: "AsyncSession"):
     workspace = await WorkspaceFactory.create()
     admin = await AdminFactory.create(workspaces=[workspace])
@@ -1409,7 +1409,7 @@ async def test_create_dataset_field_as_admin(client: TestClient, db: "AsyncSessi
     assert (await db.execute(select(func.count(Field.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_field_as_annotator(client: TestClient, db: "AsyncSession"):
     annotator = await AnnotatorFactory.create()
     dataset = await DatasetFactory.create()
@@ -1430,7 +1430,7 @@ async def test_create_dataset_field_as_annotator(client: TestClient, db: "AsyncS
 
 
 @pytest.mark.parametrize("invalid_name", ["", " ", "  ", "-", "--", "_", "__", "A", "AA", "invalid_nAmE"])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_field_with_invalid_name(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict, invalid_name: str
 ):
@@ -1447,7 +1447,7 @@ async def test_create_dataset_field_with_invalid_name(
     assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_field_with_invalid_max_length_name(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -1465,7 +1465,7 @@ async def test_create_dataset_field_with_invalid_max_length_name(
     assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_field_with_invalid_max_length_title(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -1493,7 +1493,7 @@ async def test_create_dataset_field_with_invalid_max_length_title(
         {"type": "rating", "options": []},
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_field_with_invalid_settings(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict, settings: dict
 ):
@@ -1510,7 +1510,7 @@ async def test_create_dataset_field_with_invalid_settings(
     assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_field_with_existent_name(client: TestClient, db: "AsyncSession", owner_auth_header: dict):
     field = await FieldFactory.create(name="name")
     field_json = {
@@ -1525,7 +1525,7 @@ async def test_create_dataset_field_with_existent_name(client: TestClient, db: "
     assert (await db.execute(select(func.count(Field.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_field_with_published_dataset(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -1543,7 +1543,7 @@ async def test_create_dataset_field_with_published_dataset(
     assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_field_with_nonexistent_dataset_id(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -1657,7 +1657,7 @@ async def test_create_dataset_field_with_nonexistent_dataset_id(
         ),
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_question(
     client: TestClient,
     db: "AsyncSession",
@@ -1691,7 +1691,7 @@ async def test_create_dataset_question(
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_question_with_description(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -1713,7 +1713,7 @@ async def test_create_dataset_question_with_description(
     assert response_body["description"] == "description"
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_question_without_authentication(client: TestClient, db: "AsyncSession"):
     dataset = await DatasetFactory.create()
     question_json = {
@@ -1728,7 +1728,7 @@ async def test_create_dataset_question_without_authentication(client: TestClient
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_question_as_admin(client: TestClient, db: "AsyncSession"):
     workspace = await WorkspaceFactory.create()
     admin = await AdminFactory.create(workspaces=[workspace])
@@ -1749,7 +1749,7 @@ async def test_create_dataset_question_as_admin(client: TestClient, db: "AsyncSe
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_question_as_admin_for_different_workspace(client: TestClient, db: "AsyncSession"):
     workspace = await WorkspaceFactory.create()
     admin = await AdminFactory.create(workspaces=[workspace])
@@ -1771,7 +1771,7 @@ async def test_create_dataset_question_as_admin_for_different_workspace(client: 
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_question_as_annotator(client: TestClient, db: "AsyncSession"):
     annotator = await AnnotatorFactory.create()
     dataset = await DatasetFactory.create()
@@ -1792,7 +1792,7 @@ async def test_create_dataset_question_as_annotator(client: TestClient, db: "Asy
 
 
 @pytest.mark.parametrize("invalid_name", ["", " ", "  ", "-", "--", "_", "__", "A", "AA", "invalid_nAmE"])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_question_with_invalid_name(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict, invalid_name: str
 ):
@@ -1809,7 +1809,7 @@ async def test_create_dataset_question_with_invalid_name(
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_question_with_invalid_max_length_name(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -1826,7 +1826,7 @@ async def test_create_dataset_question_with_invalid_max_length_name(
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_question_with_invalid_max_length_title(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -1843,7 +1843,7 @@ async def test_create_dataset_question_with_invalid_max_length_title(
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_question_with_invalid_max_length_description(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -1861,7 +1861,7 @@ async def test_create_dataset_question_with_invalid_max_length_description(
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_question_with_existent_name(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -1880,7 +1880,7 @@ async def test_create_dataset_question_with_existent_name(
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_question_with_published_dataset(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -1898,7 +1898,7 @@ async def test_create_dataset_question_with_published_dataset(
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_question_with_nonexistent_dataset_id(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -2022,7 +2022,7 @@ async def test_create_dataset_question_with_nonexistent_dataset_id(
         },
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_question_with_invalid_settings(
     client: TestClient,
     db: "AsyncSession",
@@ -2038,7 +2038,7 @@ async def test_create_dataset_question_with_invalid_settings(
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records(
     client: TestClient,
     mock_search_engine: SearchEngine,
@@ -2130,7 +2130,7 @@ async def test_create_dataset_records(
     test_telemetry.assert_called_once_with(action="DatasetRecordsCreated", data={"records": len(records_json["items"])})
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_with_response_for_multiple_users(
     client: TestClient, mock_search_engine: SearchEngine, db: "AsyncSession", owner: "User", owner_auth_header: dict
 ):
@@ -2189,7 +2189,7 @@ async def test_create_dataset_records_with_response_for_multiple_users(
     mock_search_engine.add_records.assert_called_once_with(dataset, records)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_with_response_for_unknown_user(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -2222,7 +2222,7 @@ async def test_create_dataset_records_with_response_for_unknown_user(
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_with_duplicated_response_for_an_user(
     client: TestClient, db: "AsyncSession", owner: "User", owner_auth_header: dict
 ):
@@ -2283,7 +2283,7 @@ async def test_create_dataset_records_with_duplicated_response_for_an_user(
         {"value": {"this": "is not a valid response for a TextQuestion"}},
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_with_not_valid_suggestion(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict, payload: dict
 ):
@@ -2301,7 +2301,7 @@ async def test_create_dataset_records_with_not_valid_suggestion(
     assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_with_missing_required_fields(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -2333,7 +2333,7 @@ async def test_create_dataset_records_with_missing_required_fields(
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_with_wrong_value_field(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -2365,7 +2365,7 @@ async def test_create_dataset_records_with_wrong_value_field(
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_with_extra_fields(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -2396,7 +2396,7 @@ async def test_create_dataset_records_with_extra_fields(
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_with_index_error(
     client: TestClient, mock_search_engine: SearchEngine, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -2418,7 +2418,7 @@ async def test_create_dataset_records_with_index_error(
     assert not mock_search_engine.create_index.called
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_without_authentication(client: TestClient, db: "AsyncSession"):
     dataset = await DatasetFactory.create(status=DatasetStatus.ready)
     records_json = {
@@ -2441,7 +2441,7 @@ async def test_create_dataset_records_without_authentication(client: TestClient,
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_as_admin(
     client: TestClient, mock_search_engine: "SearchEngine", db: "AsyncSession", test_telemetry: MagicMock
 ):
@@ -2517,7 +2517,7 @@ async def test_create_dataset_records_as_admin(
     test_telemetry.assert_called_once_with(action="DatasetRecordsCreated", data={"records": len(records_json["items"])})
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_as_annotator(client: TestClient, db: "AsyncSession"):
     annotator = await AnnotatorFactory.create()
     dataset = await DatasetFactory.create(status=DatasetStatus.ready)
@@ -2546,7 +2546,7 @@ async def test_create_dataset_records_as_annotator(client: TestClient, db: "Asyn
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_with_submitted_response(
     client: TestClient, db: "AsyncSession", owner: User, owner_auth_header: dict
 ):
@@ -2579,7 +2579,7 @@ async def test_create_dataset_records_with_submitted_response(
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_with_submitted_response_without_values(
     client: TestClient,
     db: "AsyncSession",
@@ -2609,7 +2609,7 @@ async def test_create_dataset_records_with_submitted_response_without_values(
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_with_discarded_response(
     client: TestClient,
     db: "AsyncSession",
@@ -2647,7 +2647,7 @@ async def test_create_dataset_records_with_discarded_response(
     ).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_with_invalid_response_status(
     client: TestClient,
     db: "AsyncSession",
@@ -2677,7 +2677,7 @@ async def test_create_dataset_records_with_invalid_response_status(
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_with_discarded_response_without_values(
     client: TestClient,
     db: "AsyncSession",
@@ -2712,7 +2712,7 @@ async def test_create_dataset_records_with_discarded_response_without_values(
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_with_non_published_dataset(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -2731,7 +2731,7 @@ async def test_create_dataset_records_with_non_published_dataset(
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_with_less_items_than_allowed(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -2753,7 +2753,7 @@ async def test_create_dataset_records_with_less_items_than_allowed(
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_with_more_items_than_allowed(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -2775,7 +2775,7 @@ async def test_create_dataset_records_with_more_items_than_allowed(
     assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_with_invalid_records(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -2795,7 +2795,7 @@ async def test_create_dataset_records_with_invalid_records(
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_records_with_nonexistent_dataset_id(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -2814,7 +2814,7 @@ async def test_create_dataset_records_with_nonexistent_dataset_id(
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_search_dataset_records(
     client: TestClient, mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
 ):
@@ -2881,7 +2881,7 @@ async def test_search_dataset_records(
     "includes",
     [[RecordInclude.responses], [RecordInclude.suggestions], [RecordInclude.responses, RecordInclude.suggestions]],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_search_dataset_records_with_include(
     client: TestClient, mock_search_engine: SearchEngine, role: UserRole, includes: List[RecordInclude]
 ):
@@ -3006,7 +3006,7 @@ async def test_search_dataset_records_with_include(
     assert response.json() == expected
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_search_dataset_records_with_response_status_filter(
     client: TestClient, mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
 ):
@@ -3032,7 +3032,7 @@ async def test_search_dataset_records_with_response_status_filter(
     assert response.status_code == 200
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_search_dataset_records_with_offset_and_limit(
     client: TestClient, mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
 ):
@@ -3069,7 +3069,7 @@ async def test_search_dataset_records_with_offset_and_limit(
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_search_dataset_records_as_restricted_user_from_different_workspace(client: TestClient, role: UserRole):
     workspace_a = await WorkspaceFactory.create()
     workspace_b = await WorkspaceFactory.create()
@@ -3086,7 +3086,7 @@ async def test_search_dataset_records_as_restricted_user_from_different_workspac
     assert response.status_code == 403
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_search_dataset_records_with_non_existent_field(client: TestClient, owner: User, owner_auth_header: dict):
     workspace = await WorkspaceFactory.create()
     dataset, _, _, _, _ = await create_dataset_with_user_responses(owner, workspace)
@@ -3106,7 +3106,7 @@ def test_search_dataset_with_non_existent_dataset(client: TestClient, owner_auth
     assert response.status_code == 404
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_publish_dataset(
     client: TestClient,
     db: "AsyncSession",
@@ -3130,7 +3130,7 @@ async def test_publish_dataset(
     mock_search_engine.create_index.assert_called_once_with(dataset)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_publish_dataset_with_error_on_index_creation(
     client: TestClient, db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict
 ):
@@ -3146,7 +3146,7 @@ async def test_publish_dataset_with_error_on_index_creation(
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_publish_dataset_without_authentication(client: TestClient, db: "AsyncSession"):
     dataset = await DatasetFactory.create()
     await QuestionFactory.create(dataset=dataset)
@@ -3157,7 +3157,7 @@ async def test_publish_dataset_without_authentication(client: TestClient, db: "A
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_publish_dataset_as_admin(client: TestClient, db: "AsyncSession"):
     dataset = await DatasetFactory.create()
     await TextFieldFactory.create(dataset=dataset)
@@ -3173,7 +3173,7 @@ async def test_publish_dataset_as_admin(client: TestClient, db: "AsyncSession"):
     assert response_body["status"] == "ready"
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_publish_dataset_as_annotator(client: TestClient, db: "AsyncSession"):
     dataset = await DatasetFactory.create()
     await QuestionFactory.create(dataset=dataset)
@@ -3185,7 +3185,7 @@ async def test_publish_dataset_as_annotator(client: TestClient, db: "AsyncSessio
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_publish_dataset_already_published(client: TestClient, db: "AsyncSession", owner_auth_header: dict):
     dataset = await DatasetFactory.create(status=DatasetStatus.ready)
     await QuestionFactory.create(dataset=dataset)
@@ -3197,7 +3197,7 @@ async def test_publish_dataset_already_published(client: TestClient, db: "AsyncS
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_publish_dataset_without_fields(client: TestClient, db: "AsyncSession", owner_auth_header: dict):
     dataset = await DatasetFactory.create()
     await RatingQuestionFactory.create(dataset=dataset)
@@ -3209,7 +3209,7 @@ async def test_publish_dataset_without_fields(client: TestClient, db: "AsyncSess
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_publish_dataset_without_questions(client: TestClient, db: "AsyncSession", owner_auth_header: dict):
     dataset = await DatasetFactory.create()
     await TextFieldFactory.create(dataset=dataset)
@@ -3221,7 +3221,7 @@ async def test_publish_dataset_without_questions(client: TestClient, db: "AsyncS
     assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_publish_dataset_with_nonexistent_dataset_id(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):
@@ -3246,7 +3246,7 @@ async def test_publish_dataset_with_nonexistent_dataset_id(
     ],
 )
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_dataset(client: TestClient, db: "AsyncSession", role: UserRole, payload: dict):
     dataset = await DatasetFactory.create(
         name="Current Name", guidelines="Current Guidelines", status=DatasetStatus.ready
@@ -3295,7 +3295,7 @@ async def test_update_dataset(client: TestClient, db: "AsyncSession", role: User
         {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_dataset_with_invalid_settings(client: TestClient, owner_auth_header: dict, dataset_json: dict):
     dataset = await DatasetFactory.create(
         name="Current Name", guidelines="Current Guidelines", status=DatasetStatus.ready
@@ -3306,7 +3306,7 @@ async def test_update_dataset_with_invalid_settings(client: TestClient, owner_au
     assert response.status_code == 422
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_dataset_with_invalid_payload(client: TestClient, owner_auth_header: dict):
     dataset = await DatasetFactory.create()
 
@@ -3319,7 +3319,7 @@ async def test_update_dataset_with_invalid_payload(client: TestClient, owner_aut
     assert response.status_code == 422
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_dataset_non_existent(client: TestClient, owner_auth_header: dict):
     response = client.patch(
         f"/api/v1/datasets/{uuid4()}",
@@ -3330,7 +3330,7 @@ async def test_update_dataset_non_existent(client: TestClient, owner_auth_header
     assert response.status_code == 404
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_dataset_as_admin_from_different_workspace(client: TestClient):
     dataset = await DatasetFactory.create()
     user = await UserFactory.create(role=UserRole.admin)
@@ -3344,7 +3344,7 @@ async def test_update_dataset_as_admin_from_different_workspace(client: TestClie
     assert response.status_code == 403
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_dataset_as_annotator(client: TestClient):
     dataset = await DatasetFactory.create()
     user = await UserFactory.create(role=UserRole.annotator, workspaces=[dataset.workspace])
@@ -3358,7 +3358,7 @@ async def test_update_dataset_as_annotator(client: TestClient):
     assert response.status_code == 403
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_dataset_without_authentication(client: TestClient):
     dataset = await DatasetFactory.create()
 
@@ -3370,7 +3370,7 @@ async def test_update_dataset_without_authentication(client: TestClient):
     assert response.status_code == 401
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_dataset(
     client: TestClient, db: "AsyncSession", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
 ):
@@ -3401,7 +3401,7 @@ async def test_delete_dataset(
     mock_search_engine.delete_index.assert_called_once_with(dataset)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_published_dataset(client: TestClient, db: "AsyncSession", owner: User, owner_auth_header: dict):
     dataset = await DatasetFactory.create()
     await TextFieldFactory.create(dataset=dataset)
@@ -3429,7 +3429,7 @@ async def test_delete_published_dataset(client: TestClient, db: "AsyncSession", 
     # ]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_dataset_without_authentication(
     client: TestClient, db: "AsyncSession", mock_search_engine: SearchEngine
 ):
@@ -3443,7 +3443,7 @@ async def test_delete_dataset_without_authentication(
     assert not mock_search_engine.delete_index.called
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_dataset_as_admin(client: TestClient, db: "AsyncSession"):
     dataset = await DatasetFactory.create()
     admin = await AdminFactory.create(workspaces=[dataset.workspace])
@@ -3454,7 +3454,7 @@ async def test_delete_dataset_as_admin(client: TestClient, db: "AsyncSession"):
     assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_dataset_as_annotator(client: TestClient, db: "AsyncSession"):
     annotator = await AnnotatorFactory.create()
     dataset = await DatasetFactory.create()
@@ -3465,7 +3465,7 @@ async def test_delete_dataset_as_annotator(client: TestClient, db: "AsyncSession
     assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_dataset_with_nonexistent_dataset_id(
     client: TestClient, db: "AsyncSession", owner_auth_header: dict
 ):

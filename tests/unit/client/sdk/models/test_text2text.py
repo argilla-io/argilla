@@ -43,7 +43,7 @@ def test_query_schema(helpers):
 
 
 @pytest.mark.parametrize(
-    "prediction,expected",
+    ("prediction", "expected"),
     [
         (["texto de prueba para text2text", "texto de test para text2text"], 1.0),
         ([("texto de prueba para text2text", 0.5)], 0.5),
@@ -65,7 +65,7 @@ def test_from_client_prediction(prediction, expected):
 
 
 @pytest.mark.parametrize(
-    "pred_agent,annot_agent,pred_expected,annot_expected",
+    ("pred_agent", "annot_agent", "pred_expected", "annot_expected"),
     [
         (None, None, socket.gethostname(), socket.gethostname()),
         ("pred_agent", "annot_agent", "pred_agent", "annot_agent"),

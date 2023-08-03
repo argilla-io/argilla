@@ -27,7 +27,7 @@ from argilla.server.models import User
 from tests.factories import WorkspaceFactory, WorkspaceUserFactory
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_workspaces(owner: User) -> None:
     await WorkspaceFactory.create(name="test_workspace")
     httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
@@ -48,7 +48,7 @@ def test_create_workspace(owner: User) -> None:
     assert response.parsed.name == "test_workspace"
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_workspace_users(owner: User) -> None:
     workspace = await WorkspaceFactory.create(name="test_workspace")
     await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
@@ -61,7 +61,7 @@ async def test_list_workspace_users(owner: User) -> None:
     assert isinstance(response.parsed[0], WorkspaceUserModel)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_workspace_user(owner: User) -> None:
     workspace = await WorkspaceFactory.create(name="test_workspace")
     httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
@@ -73,7 +73,7 @@ async def test_create_workspace_user(owner: User) -> None:
     assert response.parsed.workspaces[0] == workspace.name
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_workspace_user(owner: User) -> None:
     workspace = await WorkspaceFactory.create(name="test_workspace")
     await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)

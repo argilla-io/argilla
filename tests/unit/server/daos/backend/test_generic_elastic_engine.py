@@ -25,7 +25,7 @@ def engine():
     return GenericElasticEngineBackend.get_instance()
 
 
-@pytest.fixture
+@pytest.fixture()
 def dataset_id(engine: GenericElasticEngineBackend):
     dataset_id = str(uuid.uuid4())
 

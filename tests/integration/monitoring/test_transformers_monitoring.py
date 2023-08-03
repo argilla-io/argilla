@@ -73,12 +73,12 @@ def test_classifier_monitoring(mocked_client, classifier_monitor, classifier_dat
     assert df.metadata.values.tolist()[0] == {"some": "metadata"}
 
 
-@pytest.fixture
+@pytest.fixture()
 def classifier_dataset():
     return "classifier_dataset"
 
 
-@pytest.fixture
+@pytest.fixture()
 def classifier_monitor_all_scores(
     sentiment_classifier_all_scores,
     classifier_dataset,
@@ -94,7 +94,7 @@ def classifier_monitor_all_scores(
     return monitor
 
 
-@pytest.fixture
+@pytest.fixture()
 def classifier_monitor(
     sentiment_classifier,
     classifier_dataset,
@@ -156,7 +156,7 @@ def dataset():
     return "zero_shot_dataset"
 
 
-@pytest.fixture
+@pytest.fixture()
 def mocked_monitor(dataset, monkeypatch, zero_shot_classifier):
     monitor = argilla.monitor(
         zero_shot_classifier,

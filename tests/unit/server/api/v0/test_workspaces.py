@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_workspaces(async_client: "AsyncClient", owner_auth_header):
     await WorkspaceFactory.create(name="workspace-a")
     await WorkspaceFactory.create(name="workspace-b")
@@ -46,14 +46,14 @@ async def test_list_workspaces(async_client: "AsyncClient", owner_auth_header):
     assert [ws["name"] for ws in response_body] == ["workspace-a", "workspace-b"]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_workspaces_without_authentication(async_client: "AsyncClient"):
     response = await async_client.get("/api/workspaces")
 
     assert response.status_code == 401
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_workspaces_as_admin(async_client: "AsyncClient"):
     admin = await AdminFactory.create()
 
@@ -62,7 +62,7 @@ async def test_list_workspaces_as_admin(async_client: "AsyncClient"):
     assert response.status_code == 200
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_workspaces_as_annotator(async_client: "AsyncClient"):
     annotator = await AnnotatorFactory.create()
 
@@ -71,7 +71,7 @@ async def test_list_workspaces_as_annotator(async_client: "AsyncClient"):
     assert response.status_code == 200
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_workspace(async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
     response = await async_client.post("/api/workspaces", headers=owner_auth_header, json={"name": "workspace"})
 
@@ -83,7 +83,7 @@ async def test_create_workspace(async_client: "AsyncClient", db: "AsyncSession",
     assert await db.get(Workspace, UUID(response_body["id"]))
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_workspace_without_authentication(async_client: "AsyncClient", db: "AsyncSession"):
     response = await async_client.post("/api/workspaces", json={"name": "workspace"})
 
@@ -91,7 +91,7 @@ async def test_create_workspace_without_authentication(async_client: "AsyncClien
     assert (await db.execute(select(func.count(Workspace.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_workspace_as_admin(async_client: "AsyncClient", db: "AsyncSession"):
     admin = await AdminFactory.create()
 
@@ -103,7 +103,7 @@ async def test_create_workspace_as_admin(async_client: "AsyncClient", db: "Async
     assert (await db.execute(select(func.count(Workspace.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_workspace_as_annotator(async_client: "AsyncClient", db: "AsyncSession"):
     annotator = await AnnotatorFactory.create()
 
@@ -115,7 +115,7 @@ async def test_create_workspace_as_annotator(async_client: "AsyncClient", db: "A
     assert (await db.execute(select(func.count(Workspace.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_workspace_with_existent_name(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -127,7 +127,7 @@ async def test_create_workspace_with_existent_name(
     assert (await db.execute(select(func.count(Workspace.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_workspace_with_invalid_min_length_name(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -137,7 +137,7 @@ async def test_create_workspace_with_invalid_min_length_name(
     assert (await db.execute(select(func.count(Workspace.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_workspace_with_invalid_name(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -148,30 +148,30 @@ async def test_create_workspace_with_invalid_name(
 
 
 @pytest.mark.skip(reason="we are not allowing deletion of workspaces right now")
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_workspace():
     pass
 
 
 @pytest.mark.skip(reason="we are not allowing deletion of workspaces right now")
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_workspace_without_authentication():
     pass
 
 
 @pytest.mark.skip(reason="we are not allowing deletion of workspaces right now")
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_workspace_as_annotator():
     pass
 
 
 @pytest.mark.skip(reason="we are not allowing deletion of workspaces right now")
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_workspace_with_nonexistent_workspace_id():
     pass
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_workspace_users(async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
     workspace_a = await WorkspaceFactory.create()
     user_a = await UserFactory.create(username="username-a")
@@ -194,7 +194,7 @@ async def test_list_workspace_users(async_client: "AsyncClient", db: "AsyncSessi
     assert [u["username"] for u in response_body] == ["username-a", "username-b", "username-c"]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_workspace_users_without_authentication(async_client: "AsyncClient"):
     workspace = await WorkspaceFactory.create()
 
@@ -203,7 +203,7 @@ async def test_list_workspace_users_without_authentication(async_client: "AsyncC
     assert response.status_code == 401
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_workspace_users_as_admin(async_client: "AsyncClient", db: "AsyncSession"):
     admin = await AdminFactory.create()
     workspace = await WorkspaceFactory.create()
@@ -232,7 +232,7 @@ async def test_list_workspace_users_as_admin(async_client: "AsyncClient", db: "A
     ]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_workspace_users_as_annotator(async_client: "AsyncClient"):
     annotator = await AnnotatorFactory.create()
     workspace = await WorkspaceFactory.create()
@@ -244,7 +244,7 @@ async def test_list_workspace_users_as_annotator(async_client: "AsyncClient"):
     assert response.status_code == 403
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_workspace_user(
     async_client: "AsyncClient", db: "AsyncSession", owner: "User", owner_auth_header: dict
 ):
@@ -261,7 +261,7 @@ async def test_create_workspace_user(
     assert workspace.name in response_body["workspaces"]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_workspace_user_without_authentication(async_client: "AsyncClient", db: "AsyncSession", owner):
     workspace = await WorkspaceFactory.create()
 
@@ -271,7 +271,7 @@ async def test_create_workspace_user_without_authentication(async_client: "Async
     assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_workspace_user_as_admin(async_client: "AsyncClient", db: "AsyncSession"):
     admin = await AdminFactory.create()
     workspace = await WorkspaceFactory.create()
@@ -285,7 +285,7 @@ async def test_create_workspace_user_as_admin(async_client: "AsyncClient", db: "
     assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_workspace_user_as_annotator(async_client: "AsyncClient", db: "AsyncSession"):
     annotator = await AnnotatorFactory.create()
     workspace = await WorkspaceFactory.create()
@@ -299,7 +299,7 @@ async def test_create_workspace_user_as_annotator(async_client: "AsyncClient", d
     assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_workspace_user_with_nonexistent_workspace_id(
     async_client: "AsyncClient", db: "AsyncSession", owner: "User", owner_auth_header: dict
 ):
@@ -309,7 +309,7 @@ async def test_create_workspace_user_with_nonexistent_workspace_id(
     assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_workspace_user_with_nonexistent_user_id(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -321,7 +321,7 @@ async def test_create_workspace_user_with_nonexistent_user_id(
     assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_workspace_user_with_existent_workspace_id_and_user_id(
     async_client: "AsyncClient", db: "AsyncSession", owner: "User", owner_auth_header: dict
 ):
@@ -334,7 +334,7 @@ async def test_create_workspace_user_with_existent_workspace_id_and_user_id(
     assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_workspace_user(async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
     workspace = await WorkspaceFactory.create()
     user = await UserFactory.create()
@@ -351,7 +351,7 @@ async def test_delete_workspace_user(async_client: "AsyncClient", db: "AsyncSess
     assert response_body["id"] == str(workspace_user.user_id)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_workspace_user_without_authentication(async_client: "AsyncClient", db: "AsyncSession"):
     workspace = await WorkspaceFactory.create()
     user = await UserFactory.create()
@@ -365,7 +365,7 @@ async def test_delete_workspace_user_without_authentication(async_client: "Async
     assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_workspace_user_as_admin(async_client: "AsyncClient", db: "AsyncSession"):
     admin = await AdminFactory.create()
     workspace = await WorkspaceFactory.create()
@@ -386,7 +386,7 @@ async def test_delete_workspace_user_as_admin(async_client: "AsyncClient", db: "
     assert response_body["id"] == str(workspace_user.user_id)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_workspace_user_as_annotator(async_client: "AsyncClient", db: "AsyncSession"):
     annotator = await AnnotatorFactory.create()
     workspace = await WorkspaceFactory.create()
@@ -405,7 +405,7 @@ async def test_delete_workspace_user_as_annotator(async_client: "AsyncClient", d
     assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_workspace_user_with_nonexistent_workspace_id(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -421,7 +421,7 @@ async def test_delete_workspace_user_with_nonexistent_workspace_id(
     assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_workspace_user_with_nonexistent_user_id(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):

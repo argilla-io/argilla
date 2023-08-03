@@ -42,7 +42,7 @@ def test_user_cls_init() -> None:
         User(id="00000000-0000-0000-0000-000000000000")
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_user_from_name(owner: "ServerUser") -> None:
     new_user = await UserFactory.create(username="test_user")
     ArgillaSingleton.init(api_key=owner.api_key)
@@ -56,7 +56,7 @@ async def test_user_from_name(owner: "ServerUser") -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_user_from_name_not_allowed_role(role: UserRole) -> None:
     user = await UserFactory.create(role=role)
     ArgillaSingleton.init(api_key=user.api_key)
@@ -65,7 +65,7 @@ async def test_user_from_name_not_allowed_role(role: UserRole) -> None:
         User.from_name(name=user.username)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_user_from_id(owner: "ServerUser") -> None:
     new_user = await UserFactory.create(username="test_user")
     ArgillaSingleton.init(api_key=owner.api_key)
@@ -79,7 +79,7 @@ async def test_user_from_id(owner: "ServerUser") -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_user_from_id_not_allowed_role(role: UserRole) -> None:
     user = await UserFactory.create(role=role)
     ArgillaSingleton.init(api_key=user.api_key)
@@ -96,7 +96,7 @@ def test_user_me(owner: "ServerUser") -> None:
     assert user.username == owner.username
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_user_create(owner: "ServerUser") -> None:
     workspace = await WorkspaceFactory.create(name="test_workspace")
 
@@ -129,7 +129,7 @@ def test_user_create_with_non_existent_workspace(owner: "ServerUser") -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_user_create_not_allowed_role(role: UserRole) -> None:
     user = await UserFactory.create(role=role)
     ArgillaSingleton.init(api_key=user.api_key)
@@ -138,7 +138,7 @@ async def test_user_create_not_allowed_role(role: UserRole) -> None:
         User.create("test_user", password="test_password", role=role)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_user_list(owner: "ServerUser") -> None:
     await UserFactory.create(username="user_1")
     await UserFactory.create(username="user_2")
@@ -149,7 +149,7 @@ async def test_user_list(owner: "ServerUser") -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_user_list_not_allowed_role(role: UserRole) -> None:
     user = await UserFactory.create(role=role)
     ArgillaSingleton.init(api_key=user.api_key)
@@ -158,7 +158,7 @@ async def test_user_list_not_allowed_role(role: UserRole) -> None:
         User.list()
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_user_delete_user(owner: "ServerUser") -> None:
     new_user = await UserFactory.create(username="test_user")
     ArgillaSingleton.init(api_key=owner.api_key)
@@ -172,7 +172,7 @@ async def test_user_delete_user(owner: "ServerUser") -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_user_delete_not_allowed_role(role: UserRole) -> None:
     user = await UserFactory.create(role=role)
     ArgillaSingleton.init(api_key=user.api_key)
@@ -183,7 +183,7 @@ async def test_user_delete_not_allowed_role(role: UserRole) -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_user_repr(role: UserRole) -> None:
     user = await UserFactory.create(role=role)
     ArgillaSingleton.init(api_key=user.api_key)
@@ -197,7 +197,7 @@ async def test_user_repr(role: UserRole) -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_user_workspaces(role: UserRole) -> None:
     workspaces = await WorkspaceFactory.create_batch(3)
     user = await UserFactory.create(role=role, workspaces=workspaces)
@@ -211,7 +211,7 @@ async def test_user_workspaces(role: UserRole) -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_user_workspaces_from_owner_to_any(owner: "ServerUser", role: UserRole) -> None:
     workspaces = await WorkspaceFactory.create_batch(3)
     user = await UserFactory.create(role=role, workspaces=workspaces)

@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from httpx import AsyncClient
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 class TestSuiteDatasetApi:
     async def delete_dataset(
         self, async_client: "AsyncClient", dataset_name: str, workspace: str, headers: Dict[str, Any]

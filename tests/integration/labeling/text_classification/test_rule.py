@@ -35,7 +35,7 @@ from argilla.server.errors import EntityNotFoundError
 from tests.integration.helpers import SecuredClient
 
 
-@pytest.fixture
+@pytest.fixture()
 def log_dataset_without_annotations(mocked_client: SecuredClient) -> str:
     dataset_name = "test_dataset_for_rule"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
@@ -64,7 +64,7 @@ def log_dataset_without_annotations(mocked_client: SecuredClient) -> str:
     return dataset_name
 
 
-@pytest.fixture
+@pytest.fixture()
 def log_dataset(mocked_client) -> str:
     dataset_name = "test_dataset_for_rule"
     mocked_client.delete(f"/api/datasets/{dataset_name}")
@@ -97,7 +97,7 @@ def log_dataset(mocked_client) -> str:
     return dataset_name
 
 
-@pytest.mark.parametrize("name,expected", [(None, "query_string"), ("test_name", "test_name")])
+@pytest.mark.parametrize(("name", "expected"), [(None, "query_string"), ("test_name", "test_name")])
 def test_name(name, expected):
     rule = Rule(query="query_string", label="mock", name=name)
     assert rule.name == expected
@@ -172,7 +172,8 @@ def test_add_duplicated_rule(
     add_rules(log_dataset, rules)
     new_rules = load_rules(log_dataset)
     assert len(new_rules) == 1, new_rules
-    assert new_rules[0].label == "DD" and new_rules[0].query == "lab"
+    assert new_rules[0].label == "DD"
+    assert new_rules[0].query == "lab"
 
 
 def test_create_rules_with_update(
@@ -292,7 +293,7 @@ def test_copy_dataset_with_rules(mocked_client: SecuredClient, argilla_user: Use
 
 
 @pytest.mark.parametrize(
-    ["rule", "expected_metrics"],
+    ("rule", "expected_metrics"),
     [
         (
             Rule(query="neg*", label="LALA"),
@@ -339,7 +340,7 @@ def test_rule_metrics(mocked_client, log_dataset, rule, expected_metrics):
 
 
 @pytest.mark.parametrize(
-    ["rule", "expected_metrics"],
+    ("rule", "expected_metrics"),
     [
         (
             Rule(query="neg*", label="LALA"),

@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from argilla.server.models import User
 
 
-@pytest.fixture
+@pytest.fixture()
 def gutenberg_spacy_ner(mocked_client):
     from datasets import load_dataset
 

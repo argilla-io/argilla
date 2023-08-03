@@ -55,7 +55,7 @@ async def configure_model_table(connection: "AsyncConnection"):
         pass
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 class TestDatabaseModel:
     async def test_database_model_create(self, db: "AsyncSession"):
         model = await Model.create(db, str_col="unit-test", int_col=1, autocommit=True)

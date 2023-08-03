@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from httpx import AsyncClient
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 class TestsUsersV1Endpoints:
     async def test_list_user_workspaces(self, async_client: "AsyncClient", owner_auth_header: dict):
         workspaces = await WorkspaceFactory.create_batch(3)

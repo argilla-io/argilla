@@ -26,11 +26,11 @@ from fastapi import Request
 mock_request = Request(scope={"type": "http", "headers": {}})
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 class TestAPIErrorHandler:
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     @pytest.mark.parametrize(
-        ["error", "expected_event"],
+        ("error", "expected_event"),
         [
             (
                 EntityNotFoundError(name="mock-name", type="MockType"),

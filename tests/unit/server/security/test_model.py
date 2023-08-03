@@ -33,21 +33,21 @@ def test_user_create_invalid_username(invalid_username: str):
         UserCreate(first_name="first-name", username=invalid_username, password="12345678")
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_user_first_name():
     user = await UserFactory.create(first_name="first-name", workspaces=[])
 
     assert User.from_orm(user).first_name == "first-name"
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_user_last_name():
     user = await UserFactory.create(last_name="last-name", workspaces=[])
 
     assert User.from_orm(user).last_name == "last-name"
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_user_full_name():
     user = await UserFactory.create(first_name="first-name", last_name="last-name", workspaces=[])
 
@@ -55,14 +55,14 @@ async def test_user_full_name():
 
 
 @pytest.mark.parametrize("last_name", [None, ""])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_user_full_name_without_last_name(last_name: Union[str, None]):
     user = await UserFactory.create(first_name="first-name", last_name=last_name, workspaces=[])
 
     assert User.from_orm(user).full_name == "first-name"
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_user_workspaces():
     workspace_a = await WorkspaceFactory.create(name="workspace-a")
     workspace_b = await WorkspaceFactory.create(name="workspace-b")

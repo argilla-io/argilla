@@ -80,7 +80,7 @@ def test_from_client_explanation():
     assert sdk_record.explanation["text"] == token_attributions
 
 
-@pytest.mark.parametrize("annotation,expected", [("label1", 1), (["label1", "label2"], 2)])
+@pytest.mark.parametrize(("annotation", "expected"), [("label1", 1), (["label1", "label2"], 2)])
 def test_from_client_annotation(annotation, expected):
     record = TextClassificationRecord(
         inputs={"text": "test"},
@@ -93,7 +93,7 @@ def test_from_client_annotation(annotation, expected):
 
 
 @pytest.mark.parametrize(
-    "pred_agent,annot_agent,pred_expected,annot_expected",
+    ("pred_agent", "annot_agent", "pred_expected", "annot_expected"),
     [
         (None, None, socket.gethostname(), socket.gethostname()),
         ("pred_agent", "annot_agent", "pred_agent", "annot_agent"),
@@ -115,7 +115,7 @@ def test_from_client_agent(pred_agent, annot_agent, pred_expected, annot_expecte
     assert sdk_record.metrics == {}
 
 
-@pytest.mark.parametrize("multi_label,expected", [(False, "annot_label"), (True, ["annot_label"])])
+@pytest.mark.parametrize(("multi_label", "expected"), [(False, "annot_label"), (True, ["annot_label"])])
 def test_to_client(multi_label, expected):
     annotation = TextClassificationAnnotation(labels=[ClassPrediction(**{"class": "annot_label"})], agent="annot_agent")
     prediction = TextClassificationAnnotation(

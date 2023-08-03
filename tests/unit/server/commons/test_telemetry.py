@@ -30,7 +30,7 @@ def test_disable_telemetry():
     assert telemetry_client.client is None
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_track_login(test_telemetry: MagicMock):
     await telemetry.track_login(request=mock_request, username="argilla")
 
@@ -44,7 +44,7 @@ async def test_track_login(test_telemetry: MagicMock):
     test_telemetry.assert_called_once_with("UserInfoRequested", expected_event_data)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_track_bulk(test_telemetry):
     task, records = TaskType.token_classification, 100
 

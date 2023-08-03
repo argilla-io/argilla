@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.parametrize(
-    "QuestionFactory, payload, expected_settings",
+    ("QuestionFactory", "payload", "expected_settings"),
     [
         (
             TextQuestionFactory,
@@ -102,7 +102,7 @@ if TYPE_CHECKING:
     ],
 )
 @pytest.mark.parametrize("role", [UserRole.owner])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_question(
     async_client: "AsyncClient",
     db: "AsyncSession",
@@ -141,7 +141,7 @@ async def test_update_question(
 
 
 @pytest.mark.parametrize(
-    "QuestionFactory, payload",
+    ("QuestionFactory", "payload"),
     [
         (TextQuestionFactory, {"title": None, "description": None, "settings": None}),
         (TextQuestionFactory, {"settings": {"type": "text"}}),
@@ -168,7 +168,7 @@ async def test_update_question(
         ),
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_question_with_invalid_settings(
     async_client: "AsyncClient", owner_auth_header: dict, QuestionFactory: Type["QuestionFactoryType"], payload: dict
 ):
@@ -179,7 +179,7 @@ async def test_update_question_with_invalid_settings(
     assert response.status_code == 422
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_question_with_invalid_payload(async_client: "AsyncClient", owner_auth_header: dict):
     question = await TextQuestionFactory.create()
 
@@ -192,7 +192,7 @@ async def test_update_question_with_invalid_payload(async_client: "AsyncClient",
     assert response.status_code == 422
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_question_non_existent(async_client: "AsyncClient", owner_auth_header: dict):
     response = await async_client.patch(
         f"/api/v1/questions/{uuid4()}",
@@ -203,7 +203,7 @@ async def test_update_question_non_existent(async_client: "AsyncClient", owner_a
     assert response.status_code == 404
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_question_as_admin_from_different_workspace(async_client: "AsyncClient"):
     question = await TextQuestionFactory.create()
     user = await UserFactory.create(role=UserRole.admin)
@@ -217,7 +217,7 @@ async def test_update_question_as_admin_from_different_workspace(async_client: "
     assert response.status_code == 403
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_question_as_annotator(async_client: "AsyncClient"):
     question = await TextQuestionFactory.create()
     user = await AnnotatorFactory.create(workspaces=[question.dataset.workspace])
@@ -232,7 +232,7 @@ async def test_update_question_as_annotator(async_client: "AsyncClient"):
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_question(async_client: "AsyncClient", db: "AsyncSession", role: UserRole):
     question = await TextQuestionFactory.create(name="name", title="title", description="description")
     user = await UserFactory.create(role=role, workspaces=[question.dataset.workspace])
@@ -258,7 +258,7 @@ async def test_delete_question(async_client: "AsyncClient", db: "AsyncSession", 
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_question_as_admin_from_different_workspace(async_client: "AsyncClient", db: "AsyncSession"):
     user = await UserFactory.create(role=UserRole.admin)
     question = await TextQuestionFactory.create()
@@ -271,7 +271,7 @@ async def test_delete_question_as_admin_from_different_workspace(async_client: "
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_question_as_annotator(async_client: "AsyncClient", db: "AsyncSession"):
     annotator = await AnnotatorFactory.create()
     question = await TextQuestionFactory.create()
@@ -284,7 +284,7 @@ async def test_delete_question_as_annotator(async_client: "AsyncClient", db: "As
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_question_without_authentication(async_client: "AsyncClient", db: "AsyncSession"):
     question = await TextQuestionFactory.create()
 
@@ -294,7 +294,7 @@ async def test_delete_question_without_authentication(async_client: "AsyncClient
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_question_belonging_to_published_dataset(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -308,7 +308,7 @@ async def test_delete_question_belonging_to_published_dataset(
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_question_with_nonexistent_question_id(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):

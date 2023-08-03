@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     from httpx import AsyncClient
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_load_as_different_task(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -78,7 +78,7 @@ async def test_load_as_different_task(async_client: "AsyncClient", argilla_user:
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_search_special_characters(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -131,7 +131,7 @@ async def test_search_special_characters(async_client: "AsyncClient", argilla_us
     assert results.total == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_some_sort(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -192,7 +192,7 @@ async def test_some_sort(async_client: "AsyncClient", argilla_user: User):
         (None, lambda r: len(r.metrics) == 0),
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_records_for_token_classification(
     async_client: "AsyncClient", argilla_user: User, include_metrics: bool, metrics_validator: Callable
 ):
@@ -277,7 +277,7 @@ async def test_create_records_for_token_classification(
         (None, lambda r: len(r.metrics) == 0),
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_records_for_token_classification_vector_search(
     async_client: "AsyncClient", argilla_user: User, include_metrics: bool, metrics_validator: Callable
 ):
@@ -381,7 +381,7 @@ async def test_create_records_for_token_classification_vector_search(
         assert hasattr(record, "vectors")
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_multiple_mentions_in_same_record(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -452,7 +452,7 @@ async def test_multiple_mentions_in_same_record(async_client: "AsyncClient", arg
     assert results.aggregations.predicted_mentions[entity_b]["is"] == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_show_not_aggregable_metadata_fields(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}
@@ -510,7 +510,7 @@ async def test_show_not_aggregable_metadata_fields(async_client: "AsyncClient", 
     assert "argilla:stats" in results.aggregations.metadata["field_one"]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_search_with_raw_query(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_query_params = {"workspace": argilla_user.username}

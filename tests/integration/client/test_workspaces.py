@@ -47,7 +47,7 @@ def test_workspace_cls_init() -> None:
         Workspace(id="00000000-0000-0000-0000-000000000000")
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_workspace_from_name(owner: "ServerUser"):
     workspace = await WorkspaceFactory.create(name="test_workspace")
     await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
@@ -61,7 +61,7 @@ async def test_workspace_from_name(owner: "ServerUser"):
         Workspace.from_name("non-existing-workspace")
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_workspace_from_id(owner: "ServerUser"):
     workspace = await WorkspaceFactory.create(name="test_workspace")
     ArgillaSingleton.init(api_key=owner.api_key)
@@ -93,7 +93,7 @@ def test_workspace_create(owner: "ServerUser") -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_workspace_create_not_allowed_role(role: UserRole) -> None:
     user = await UserFactory.create(role=role)
     ArgillaSingleton.init(api_key=user.api_key)
@@ -102,7 +102,7 @@ async def test_workspace_create_not_allowed_role(role: UserRole) -> None:
         Workspace.create(name="test_workspace")
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_workspace_list(owner: "ServerUser") -> None:
     await WorkspaceFactory.create(name="test_workspace")
     ArgillaSingleton.init(api_key=owner.api_key)
@@ -111,7 +111,7 @@ async def test_workspace_list(owner: "ServerUser") -> None:
     assert any(ws.name == "test_workspace" for ws in workspaces)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_workspace_users(owner: "ServerUser") -> None:
     workspace = await WorkspaceFactory.create(name="test_workspace")
     await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
@@ -122,7 +122,7 @@ async def test_workspace_users(owner: "ServerUser") -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_workspace_users_not_allowed_role(role: UserRole) -> None:
     workspace = await WorkspaceFactory.create(name="test_workspace")
     user = await UserFactory.create(role=role, workspaces=[workspace])
@@ -133,7 +133,7 @@ async def test_workspace_users_not_allowed_role(role: UserRole) -> None:
         workspace.users  # noqa: B018
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_workspace_add_user(owner: "ServerUser") -> None:
     workspace = await WorkspaceFactory.create(name="test_workspace")
     ArgillaSingleton.init(api_key=owner.api_key)
@@ -154,7 +154,7 @@ async def test_workspace_add_user(owner: "ServerUser") -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_workspace_add_user_not_allowed_role(role: UserRole) -> None:
     workspace = await WorkspaceFactory.create(name="test_workspace")
     user = await UserFactory.create(role=role, workspaces=[workspace])
@@ -165,7 +165,7 @@ async def test_workspace_add_user_not_allowed_role(role: UserRole) -> None:
         workspace.add_user(user.id)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_workspace_delete_user(owner: "ServerUser", db: "AsyncSession") -> None:
     workspace = await WorkspaceFactory.create(name="test_workspace")
     await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=owner.id)
@@ -182,7 +182,7 @@ async def test_workspace_delete_user(owner: "ServerUser", db: "AsyncSession") ->
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_workspace_delete_user_not_allowed_role(role: UserRole) -> None:
     workspace = await WorkspaceFactory.create(name="test_workspace")
     user = await UserFactory.create(role=role, workspaces=[workspace])
@@ -193,7 +193,7 @@ async def test_workspace_delete_user_not_allowed_role(role: UserRole) -> None:
         workspace.delete_user(user.id)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_print_workspace(owner: "ServerUser"):
     workspace = await WorkspaceFactory.create(name="test_workspace")
     ArgillaSingleton.init(api_key=owner.api_key)
@@ -212,7 +212,7 @@ def test_set_new_workspace(owner: "ServerUser"):
     assert ArgillaSingleton.get().get_workspace() == ws.name
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_init_with_workspace(owner: "ServerUser"):
     workspace = await WorkspaceFactory.create(name="test_workspace")
 
@@ -232,7 +232,7 @@ def test_init_with_missing_workspace(owner: "ServerUser"):
         ArgillaSingleton.init(api_key=owner.api_key, workspace="missing-workspace")
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_workspace(owner: "ServerUser"):
     workspace = await WorkspaceFactory.create(name="test_workspace")
 
@@ -245,7 +245,7 @@ async def test_delete_workspace(owner: "ServerUser"):
         Workspace.from_id(workspace.id)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_non_existing_workspace(owner: "ServerUser"):
     workspace = await WorkspaceFactory.create(name="test_workspace")
 
@@ -258,7 +258,7 @@ async def test_delete_non_existing_workspace(owner: "ServerUser"):
         ws.delete()
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_workspace_with_linked_datasets(owner: "ServerUser"):
     workspace = await WorkspaceFactory.create(name="test_workspace")
     await DatasetFactory.create(workspace=workspace)
@@ -273,7 +273,7 @@ async def test_delete_workspace_with_linked_datasets(owner: "ServerUser"):
         ws.delete()
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_workspace_without_permissions():
     workspace = await WorkspaceFactory.create(name="test_workspace")
 

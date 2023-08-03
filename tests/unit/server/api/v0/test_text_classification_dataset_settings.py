@@ -75,7 +75,7 @@ async def log_some_data(async_client: "AsyncClient", name: str, workspace_name: 
 
 
 @pytest.mark.parametrize("labels", [["Label1", "Label2"], ["1", "2", "3"], [1, 2, 3, 4]])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset_settings(async_client: "AsyncClient", argilla_user: User, labels: list):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     workspace_name = argilla_user.username
@@ -93,7 +93,7 @@ async def test_create_dataset_settings(async_client: "AsyncClient", argilla_user
     assert response.json() == created
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_dataset_settings_not_found(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     name = "test_get_dataset_settings"
@@ -106,7 +106,7 @@ async def test_get_dataset_settings_not_found(async_client: "AsyncClient", argil
     assert response.status_code == 404
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_settings(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     name = "test_delete_settings"
@@ -127,7 +127,7 @@ async def test_delete_settings(async_client: "AsyncClient", argilla_user: User):
     assert response.status_code == 404
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_validate_settings_when_logging_data(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     name = "test_validate_settings_when_logging_data"
@@ -155,7 +155,7 @@ async def test_validate_settings_when_logging_data(async_client: "AsyncClient", 
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_validate_settings_after_logging(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
     name = "test_validate_settings_after_logging"
@@ -186,7 +186,7 @@ async def test_validate_settings_after_logging(async_client: "AsyncClient", argi
 # TODO: These tests are the same for token an text classification. We will move them to a common test_dataset_settings
 #  module where settings will be tested in a per-task fashion.
 @pytest.mark.parametrize("task", [TaskType.text_classification, TaskType.token_classification])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_save_settings_as_annotator(async_client: "AsyncClient", owner_auth_header: dict, task: TaskType):
     dataset_name = "test_save_settings_as_annotator"
     workspace_name = "workspace-a"
@@ -220,7 +220,7 @@ async def test_save_settings_as_annotator(async_client: "AsyncClient", owner_aut
 
 
 @pytest.mark.parametrize("task", [TaskType.text_classification, TaskType.token_classification])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_settings_as_annotator(async_client: "AsyncClient", owner_auth_header: dict, task: TaskType):
     dataset_name = "test_delete_settings_as_annotator"
     workspace_name = "workspace-a"
@@ -251,7 +251,7 @@ async def test_delete_settings_as_annotator(async_client: "AsyncClient", owner_a
 
 
 @pytest.mark.parametrize("task", [TaskType.text_classification, TaskType.token_classification])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_settings_as_annotator(async_client: "AsyncClient", owner_auth_header: dict, task: TaskType):
     dataset_name = "test_get_settings_as_annotator"
     workspace_name = "workspace-a"

@@ -50,7 +50,7 @@ def test_delete_records_from_dataset(argilla_user: "User"):
 
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_records_without_permission(owner: User, role: UserRole):
     dataset = "test_delete_records_without_permission"
 

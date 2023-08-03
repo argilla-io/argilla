@@ -50,7 +50,7 @@ from tests.factories import (
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner, UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_datasets(role: UserRole) -> None:
     dataset = await DatasetFactory.create()
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
@@ -65,7 +65,7 @@ async def test_list_datasets(role: UserRole) -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner, UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_datasets(role: UserRole) -> None:
     dataset = await DatasetFactory.create()
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
@@ -79,7 +79,7 @@ async def test_get_datasets(role: UserRole) -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_dataset(role: UserRole) -> None:
     workspace = await WorkspaceFactory.create()
 
@@ -94,7 +94,7 @@ async def test_create_dataset(role: UserRole) -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_dataset(role: UserRole) -> None:
     dataset = await DatasetFactory.create()
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
@@ -110,7 +110,7 @@ async def test_delete_dataset(role: UserRole) -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_publish_dataset(role: UserRole) -> None:
     text_field = await TextFieldFactory.create()
     rating_question = await RatingQuestionFactory.create()
@@ -127,7 +127,7 @@ async def test_publish_dataset(role: UserRole) -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_add_field(role: UserRole) -> None:
     text_field = await TextFieldFactory.create()
     rating_question = await RatingQuestionFactory.create()
@@ -145,7 +145,7 @@ async def test_add_field(role: UserRole) -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner, UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_fields(role: UserRole) -> None:
     text_field = await TextFieldFactory.create()
     rating_question = await RatingQuestionFactory.create()
@@ -162,7 +162,7 @@ async def test_get_fields(role: UserRole) -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_add_question(role: UserRole) -> None:
     text_field = await TextFieldFactory.create()
     rating_question = await RatingQuestionFactory.create()
@@ -185,7 +185,7 @@ async def test_add_question(role: UserRole) -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner, UserRole.annotator])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_questions(role: UserRole) -> None:
     text_field = await TextFieldFactory.create()
     rating_question = await RatingQuestionFactory.create()
@@ -202,7 +202,7 @@ async def test_get_questions(role: UserRole) -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_add_records(role: UserRole) -> None:
     text_field = await TextFieldFactory.create(name="test_field")
     rating_question = await RatingQuestionFactory.create()
@@ -216,7 +216,7 @@ async def test_add_records(role: UserRole) -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_get_records(role: UserRole) -> None:
     text_field = await TextFieldFactory.create(name="test_field")
     rating_question = await RatingQuestionFactory.create()
@@ -238,7 +238,7 @@ async def test_get_records(role: UserRole) -> None:
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_add_suggestion(role: UserRole) -> None:
     text_field = await TextFieldFactory.create(name="test_field")
     rating_question = await RatingQuestionFactory.create()

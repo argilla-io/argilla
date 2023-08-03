@@ -81,7 +81,7 @@ def test_multi_label_warning():
 
 
 @pytest.mark.parametrize(
-    "sort_by,expected",
+    ("sort_by", "expected"),
     [
         ("likelihood", ("normalized_margin", "normalized_margin")),
         ("prediction", ("prob_given_label", "self_confidence")),
@@ -205,7 +205,7 @@ def test_missing_predictions():
         _construct_s_and_psx(records)
 
 
-@pytest.fixture
+@pytest.fixture()
 def dataset(argilla_user: User, records):
     dataset = "dataset_for_label_errors"
 

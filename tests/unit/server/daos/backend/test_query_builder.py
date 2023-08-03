@@ -24,7 +24,7 @@ from argilla.server.daos.backend.search.query_builder import EsQueryBuilder
 
 
 @pytest.mark.parametrize(
-    ["index_schema", "sort_cfg", "expected_sort"],
+    ("index_schema", "sort_cfg", "expected_sort"),
     [
         (
             {

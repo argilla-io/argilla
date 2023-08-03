@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_me(async_client: "AsyncClient", owner: User, owner_auth_header: dict):
     response = await async_client.get("/api/me", headers=owner_auth_header)
 
@@ -38,14 +38,14 @@ async def test_me(async_client: "AsyncClient", owner: User, owner_auth_header: d
     assert response_body["id"] == str(owner.id)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_me_without_authentication(async_client: "AsyncClient"):
     response = await async_client.get("/api/me")
 
     assert response.status_code == 401
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_me_as_owner(async_client: "AsyncClient"):
     workspace_a = await WorkspaceFactory.create(name="workspace-a")
     workspace_b = await WorkspaceFactory.create(name="workspace-b")
@@ -61,7 +61,7 @@ async def test_me_as_owner(async_client: "AsyncClient"):
     assert response_body["workspaces"] == ["workspace-a", "workspace-b", "workspace-c"]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_me_as_admin(async_client: "AsyncClient"):
     workspace_a = await WorkspaceFactory.create(name="workspace-a")
     workspace_b = await WorkspaceFactory.create(name="workspace-b")
@@ -77,7 +77,7 @@ async def test_me_as_admin(async_client: "AsyncClient"):
     assert response_body["workspaces"] == ["workspace-a", "workspace-b"]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_me_as_annotator(async_client: "AsyncClient", db: "AsyncSession"):
     workspace_a = await WorkspaceFactory.create(name="workspace-a")
     workspace_b = await WorkspaceFactory.create(name="workspace-b")
@@ -93,7 +93,7 @@ async def test_me_as_annotator(async_client: "AsyncClient", db: "AsyncSession"):
     assert response_body["workspaces"] == ["workspace-a", "workspace-b"]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_users(async_client: "AsyncClient", owner_auth_header: dict):
     await UserFactory.create(username="username-a")
     await UserFactory.create(username="username-b")
@@ -106,14 +106,14 @@ async def test_list_users(async_client: "AsyncClient", owner_auth_header: dict):
     assert [user["username"] for user in response_body] == ["owner", "username-a", "username-b"]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_users_without_authentication(async_client: "AsyncClient"):
     response = await async_client.get("/api/users")
 
     assert response.status_code == 401
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_users_as_admin(async_client: "AsyncClient", db: "AsyncSession"):
     admin = await AdminFactory.create()
 
@@ -122,7 +122,7 @@ async def test_list_users_as_admin(async_client: "AsyncClient", db: "AsyncSessio
     assert response.status_code == 403
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_users_as_annotator(async_client: "AsyncClient", db: "AsyncSession"):
     annotator = await AnnotatorFactory.create()
 
@@ -131,7 +131,7 @@ async def test_list_users_as_annotator(async_client: "AsyncClient", db: "AsyncSe
     assert response.status_code == 403
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_user(async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
     user = {"first_name": "first-name", "username": "username", "password": "12345678"}
 
@@ -149,7 +149,7 @@ async def test_create_user(async_client: "AsyncClient", db: "AsyncSession", owne
     assert response_body["role"] == UserRole.annotator.value
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_user_with_workspaces(async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
     workspace_a = await WorkspaceFactory.create(name="workspace-a")
     workspace_b = await WorkspaceFactory.create(name="workspace-b")
@@ -181,7 +181,7 @@ async def test_create_user_with_workspaces(async_client: "AsyncClient", db: "Asy
     assert response_body["workspaces"] == ["workspace-a", "workspace-b"]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_user_with_non_existent_workspaces(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -197,7 +197,7 @@ async def test_create_user_with_non_existent_workspaces(
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_user_with_non_default_role(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -216,7 +216,7 @@ async def test_create_user_with_non_default_role(
     assert response_body["role"] == UserRole.owner.value
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_user_without_authentication(async_client: "AsyncClient", db: "AsyncSession"):
     user = {"first_name": "first-name", "username": "username", "password": "12345678"}
 
@@ -226,7 +226,7 @@ async def test_create_user_without_authentication(async_client: "AsyncClient", d
     assert (await db.execute(select(func.count(User.id)))).scalar() == 0
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_user_as_admin(async_client: "AsyncClient", db: "AsyncSession"):
     admin = await AdminFactory.create()
     user = {"first_name": "first-name", "username": "username", "password": "12345678"}
@@ -237,7 +237,7 @@ async def test_create_user_as_admin(async_client: "AsyncClient", db: "AsyncSessi
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_user_as_annotator(async_client: "AsyncClient", db: "AsyncSession"):
     annotator = await AnnotatorFactory.create()
     user = {"first_name": "first-name", "username": "username", "password": "12345678"}
@@ -248,7 +248,7 @@ async def test_create_user_as_annotator(async_client: "AsyncClient", db: "AsyncS
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_user_with_existent_username(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -261,7 +261,7 @@ async def test_create_user_with_existent_username(
     assert (await db.execute(select(func.count(User.id)))).scalar() == 2
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_user_with_invalid_min_length_first_name(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -273,7 +273,7 @@ async def test_create_user_with_invalid_min_length_first_name(
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_user_with_invalid_min_length_last_name(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header
 ):
@@ -285,7 +285,7 @@ async def test_create_user_with_invalid_min_length_last_name(
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_user_with_invalid_username(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -297,7 +297,7 @@ async def test_create_user_with_invalid_username(
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_user_with_invalid_role(async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
     user = {"first_name": "first-name", "username": "username", "password": "12345678", "role": "invalid role"}
 
@@ -307,7 +307,7 @@ async def test_create_user_with_invalid_role(async_client: "AsyncClient", db: "A
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_user_with_invalid_min_password_length(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -319,7 +319,7 @@ async def test_create_user_with_invalid_min_password_length(
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_user_with_invalid_max_password_length(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -331,7 +331,7 @@ async def test_create_user_with_invalid_max_password_length(
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_user(async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
     user = await UserFactory.create()
 
@@ -344,7 +344,7 @@ async def test_delete_user(async_client: "AsyncClient", db: "AsyncSession", owne
     assert response_body["id"] == str(user.id)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_user_without_authentication(async_client: "AsyncClient", db: "AsyncSession"):
     user = await UserFactory.create()
 
@@ -354,7 +354,7 @@ async def test_delete_user_without_authentication(async_client: "AsyncClient", d
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_user_as_admin(async_client: "AsyncClient", db: "AsyncSession"):
     admin = await AdminFactory.create()
     user = await UserFactory.create()
@@ -365,7 +365,7 @@ async def test_delete_user_as_admin(async_client: "AsyncClient", db: "AsyncSessi
     assert (await db.execute(select(func.count(User.id)))).scalar() == 2
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_user_as_annotator(async_client: "AsyncClient", db: "AsyncSession"):
     annotator = await AnnotatorFactory.create()
     user = await UserFactory.create()
@@ -376,7 +376,7 @@ async def test_delete_user_as_annotator(async_client: "AsyncClient", db: "AsyncS
     assert (await db.execute(select(func.count(User.id)))).scalar() == 2
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_user_with_nonexistent_user_id(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):

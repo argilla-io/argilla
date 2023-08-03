@@ -101,7 +101,7 @@ async def db(connection: "AsyncConnection") -> AsyncGenerator["AsyncSession", No
     await connection.rollback()
 
 
-@pytest.fixture
+@pytest.fixture()
 def sync_connection(database_url_for_tests: str) -> Generator["Connection", None, None]:
     engine = create_engine(database_url_for_tests)
     conn = engine.connect()
@@ -115,7 +115,7 @@ def sync_connection(database_url_for_tests: str) -> Generator["Connection", None
     engine.dispose()
 
 
-@pytest.fixture
+@pytest.fixture()
 def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
     session = SyncTestSession()
 
@@ -126,12 +126,12 @@ def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
     sync_connection.rollback()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def mock_search_engine(mocker) -> Generator["SearchEngine", None, None]:
     return mocker.AsyncMock(SearchEngine)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def client(request, mock_search_engine: SearchEngine, mocker: "MockerFixture") -> Generator[TestClient, None, None]:
     async def override_get_async_db():
         session = TestSession()
@@ -180,7 +180,7 @@ async def mock_user() -> User:
     )
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def owner_auth_header(owner: User) -> Dict[str, str]:
     return {API_KEY_HEADER_NAME: owner.api_key}
 
@@ -199,7 +199,7 @@ async def argilla_user() -> Generator[User, None, None]:
     ArgillaSingleton.clear()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def argilla_auth_header(argilla_user: User) -> Dict[str, str]:
     return {API_KEY_HEADER_NAME: argilla_user.api_key}
 
@@ -234,12 +234,12 @@ def using_test_client_from_argilla_python_client(monkeypatch, test_telemetry: "M
     monkeypatch.setattr(httpx, "stream", client.stream)
 
 
-@pytest.fixture
+@pytest.fixture()
 def api(argilla_user: User) -> Argilla:
     return Argilla(api_key=argilla_user.api_key, workspace=argilla_user.username)
 
 
-@pytest.fixture
+@pytest.fixture()
 def mocked_client(
     monkeypatch, using_test_client_from_argilla_python_client, argilla_user: User, client: "TestClient"
 ) -> SecuredClient:
@@ -267,7 +267,7 @@ def mocked_client(
     return client_
 
 
-@pytest.fixture
+@pytest.fixture()
 def dataset_token_classification(mocked_client: SecuredClient) -> str:
     from datasets import load_dataset
 
@@ -295,7 +295,7 @@ def dataset_token_classification(mocked_client: SecuredClient) -> str:
     return dataset
 
 
-@pytest.fixture
+@pytest.fixture()
 def dataset_text_classification(mocked_client: SecuredClient) -> str:
     from datasets import load_dataset
 
@@ -315,7 +315,7 @@ def dataset_text_classification(mocked_client: SecuredClient) -> str:
     return dataset
 
 
-@pytest.fixture
+@pytest.fixture()
 def dataset_text_classification_multi_label(mocked_client: SecuredClient) -> str:
     from datasets import load_dataset
 
@@ -333,7 +333,7 @@ def dataset_text_classification_multi_label(mocked_client: SecuredClient) -> str
     return dataset
 
 
-@pytest.fixture
+@pytest.fixture()
 def dataset_text2text(mocked_client: SecuredClient) -> str:
     from datasets import load_dataset
 

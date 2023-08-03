@@ -83,7 +83,7 @@ def test_feedback_record(schema_kwargs: Dict[str, Any]) -> None:
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, suggestions, expected_warning, warning_match",
+    ("schema_kwargs", "suggestions", "expected_warning", "warning_match"),
     [
         (
             {
@@ -152,7 +152,7 @@ def test_ranking_value_schema(schema_kwargs: Dict[str, Any]) -> None:
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, expected_exception, expected_exception_message",
+    ("schema_kwargs", "expected_exception", "expected_exception_message"),
     [
         (
             {"value": 1, "rank": 1},

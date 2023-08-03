@@ -143,7 +143,7 @@ async def create_dataset(async_client: "AsyncClient", workspace_name: str, task:
         (TaskType.text2text, Text2TextRecord),
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_record_ok(async_client: "AsyncClient", owner: User, task, expected_record_class, role: UserRole):
     async_client.headers.update({API_KEY_HEADER_NAME: owner.api_key})
 
@@ -187,7 +187,7 @@ async def test_update_record_ok(async_client: "AsyncClient", owner: User, task, 
         (TaskType.text2text),
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_with_not_found(async_client: "AsyncClient", task: TaskType, role: UserRole):
     workspace = await WorkspaceFactory.create()
     user = await UserFactory.create(role=role, workspaces=[workspace])
@@ -216,7 +216,7 @@ async def test_update_with_not_found(async_client: "AsyncClient", task: TaskType
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_with_wrong_values(async_client: "AsyncClient", owner: User):
     async_client.headers.update({API_KEY_HEADER_NAME: owner.api_key})
     workspace = await WorkspaceFactory.create()

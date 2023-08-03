@@ -80,7 +80,7 @@ def event_loop() -> Generator["asyncio.AbstractEventLoop", None, None]:
     loop.close()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def mock_search_engine(mocker) -> Generator["SearchEngine", None, None]:
     return mocker.AsyncMock(SearchEngine)
 
@@ -95,7 +95,7 @@ async def annotator() -> User:
     return await AnnotatorFactory.create(first_name="Annotator", username="annotator", api_key="annotator.apikey")
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def owner_auth_header(owner: User) -> Dict[str, str]:
     return {API_KEY_HEADER_NAME: owner.api_key}
 

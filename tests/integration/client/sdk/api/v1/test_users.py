@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 from tests.factories import WorkspaceFactory, WorkspaceUserFactory
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_list_user_workspaces(owner: "ServerUser") -> None:
     httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
 

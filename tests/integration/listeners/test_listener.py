@@ -23,7 +23,8 @@ from argilla.client.models import Record, TextClassificationRecord
 
 def condition_check_params(search):
     if search:
-        assert "param" in search.query_params and search.query_params["param"] == 100
+        assert "param" in search.query_params
+        assert search.query_params["param"] == 100
     return True
 
 

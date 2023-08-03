@@ -409,7 +409,9 @@ class TestDatasetForTextClassification:
 
         assert isinstance(jsonl, list)
         assert isinstance(jsonl[0], dict)
-        assert "prompt" in jsonl[0] and "completion" in jsonl[0] and "id" in jsonl[0]
+        assert "prompt" in jsonl[0]
+        assert "completion" in jsonl[0]
+        assert "id" in jsonl[0]
 
     @pytest.mark.parametrize(
         "records",
@@ -579,7 +581,8 @@ class TestDatasetForTokenClassification:
 
         missing_optional_cols = datasets.Dataset.from_dict({"text": ["mock"], "tokens": [["mock"]]})
         rec = DatasetForTokenClassification.from_datasets(missing_optional_cols)[0]
-        assert rec.text == "mock" and rec.tokens == ["mock"]
+        assert rec.text == "mock"
+        assert rec.tokens == ["mock"]
 
     def test_from_to_datasets_id(self):
         record = TokenClassificationRecord(text="mock", tokens=["mock"])
@@ -682,7 +685,9 @@ class TestDatasetForTokenClassification:
 
         assert isinstance(jsonl, list)
         assert isinstance(jsonl[0], dict)
-        assert "prompt" in jsonl[0] and "completion" in jsonl[0] and "id" in jsonl[0]
+        assert "prompt" in jsonl[0]
+        assert "completion" in jsonl[0]
+        assert "id" in jsonl[0]
 
     @pytest.mark.skipif(
         _HF_HUB_ACCESS_TOKEN is None,
@@ -917,7 +922,9 @@ class TestDatasetForText2Text:
 
         assert isinstance(jsonl, list)
         assert isinstance(jsonl[0], dict)
-        assert "prompt" in jsonl[0] and "completion" in jsonl[0] and "id" in jsonl[0]
+        assert "prompt" in jsonl[0]
+        assert "completion" in jsonl[0]
+        assert "id" in jsonl[0]
         assert jsonl[0]["prompt"] == "Michael is a professor at Harvard but"
 
     def test_prepare_for_training_with_spark_nlp(self):
@@ -984,7 +991,7 @@ def _compare_datasets(dataset, expected_dataset):
 
 
 @pytest.mark.parametrize(
-    "task,dataset_class",
+    ("task", "dataset_class"),
     [
         ("TextClassification", "DatasetForTextClassification"),
         ("TokenClassification", "DatasetForTokenClassification"),
@@ -1001,7 +1008,7 @@ def test_read_pandas(monkeypatch, task, dataset_class):
 
 
 @pytest.mark.parametrize(
-    "task,dataset_class",
+    ("task", "dataset_class"),
     [
         ("TextClassification", "DatasetForTextClassification"),
         ("TokenClassification", "DatasetForTokenClassification"),

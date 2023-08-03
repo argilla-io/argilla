@@ -41,7 +41,7 @@ async def create_old_argilla_dataset(async_client: "AsyncClient", name: str, wor
         assert response.status_code == 200
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 class TestSuiteWorkspaces:
     async def test_get_workspace(self, async_client: "AsyncClient", owner_auth_header: dict):
         workspace = await WorkspaceFactory.create(name="workspace")

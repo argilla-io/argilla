@@ -17,6 +17,6 @@ from pathlib import Path
 import pytest
 
 
-@pytest.fixture
+@pytest.fixture()
 def resources() -> Path:
     return Path(__file__).parent / "resources"

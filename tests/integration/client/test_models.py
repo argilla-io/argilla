@@ -168,7 +168,7 @@ def test_token_classification_with_mutation():
 
 
 @pytest.mark.parametrize(
-    "prediction,expected",
+    ("prediction", "expected"),
     [
         (None, None),
         ([("mock", 0, 4)], [("mock", 0, 4, 0.0)]),
@@ -264,7 +264,7 @@ def test_nat_to_none_to_datetime():
 
 
 @pytest.mark.parametrize(
-    "prediction,expected",
+    ("prediction", "expected"),
     [
         (None, None),
         (["mock"], [("mock", 1.0)]),

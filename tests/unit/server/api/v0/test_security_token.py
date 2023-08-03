@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from httpx import AsyncClient
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_security_token(async_client: "AsyncClient", owner):
     response = await async_client.post("/api/security/token", data={"username": owner.username, "password": "1234"})
 
@@ -30,28 +30,28 @@ async def test_create_security_token(async_client: "AsyncClient", owner):
     assert response_body["token_type"] == "bearer"
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_security_token_with_empty_username(async_client: "AsyncClient"):
     response = await async_client.post("/api/security/token", data={"username": "", "password": "1234"})
 
     assert response.status_code == 422
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_security_token_with_empty_password(async_client: "AsyncClient", owner):
     response = await async_client.post("/api/security/token", data={"username": owner.username, "password": ""})
 
     assert response.status_code == 422
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_security_token_with_invalid_username(async_client: "AsyncClient"):
     response = await async_client.post("/api/security/token", data={"username": "invalid", "password": "1234"})
 
     assert response.status_code == 401
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_create_security_token_with_invalid_password(async_client: "AsyncClient", owner):
     response = await async_client.post("/api/security/token", data={"username": owner.username, "password": "invalid"})
 

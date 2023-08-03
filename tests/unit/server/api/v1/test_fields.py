@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.parametrize(
-    "payload, expected_settings",
+    ("payload", "expected_settings"),
     [
         (
             {"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
@@ -48,7 +48,7 @@ if TYPE_CHECKING:
     ],
 )
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_field(
     async_client: "AsyncClient", db: "AsyncSession", role: UserRole, payload: dict, expected_settings: dict
 ):
@@ -87,7 +87,7 @@ async def test_update_field(
         {"settings": {"type": "i don't exist"}},
     ],
 )
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_field_with_invalid_settings(
     async_client: "AsyncClient", owner_auth_header: dict, field_json: dict
 ):
@@ -98,7 +98,7 @@ async def test_update_field_with_invalid_settings(
     assert response.status_code == 422
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_field_with_invalid_payload(async_client: "AsyncClient", owner_auth_header: dict):
     field = await TextFieldFactory.create()
 
@@ -111,7 +111,7 @@ async def test_update_field_with_invalid_payload(async_client: "AsyncClient", ow
     assert response.status_code == 422
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_field_non_existent(async_client: "AsyncClient", owner_auth_header: dict):
     response = await async_client.patch(
         f"/api/v1/fields/{uuid4()}",
@@ -122,7 +122,7 @@ async def test_update_field_non_existent(async_client: "AsyncClient", owner_auth
     assert response.status_code == 404
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_field_as_admin_from_different_workspace(async_client: "AsyncClient"):
     field = await TextFieldFactory.create()
     user = await UserFactory.create(role=UserRole.admin)
@@ -136,7 +136,7 @@ async def test_update_field_as_admin_from_different_workspace(async_client: "Asy
     assert response.status_code == 403
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_field_as_annotator(async_client: "AsyncClient"):
     field = await TextFieldFactory.create()
     user = await UserFactory.create(role=UserRole.annotator, workspaces=[field.dataset.workspace])
@@ -150,7 +150,7 @@ async def test_update_field_as_annotator(async_client: "AsyncClient"):
     assert response.status_code == 403
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_update_field_without_authentication(async_client: "AsyncClient"):
     field = await TextFieldFactory.create()
 
@@ -162,7 +162,7 @@ async def test_update_field_without_authentication(async_client: "AsyncClient"):
     assert response.status_code == 401
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_field(async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
     field = await TextFieldFactory.create(name="name", title="title")
 
@@ -184,7 +184,7 @@ async def test_delete_field(async_client: "AsyncClient", db: "AsyncSession", own
     }
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_field_without_authentication(async_client: "AsyncClient", db: "AsyncSession"):
     field = await TextFieldFactory.create()
 
@@ -194,7 +194,7 @@ async def test_delete_field_without_authentication(async_client: "AsyncClient", 
     assert (await db.execute(select(func.count(Field.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_field_as_annotator(async_client: "AsyncClient", db: "AsyncSession"):
     annotator = await AnnotatorFactory.create()
     field = await TextFieldFactory.create()
@@ -205,7 +205,7 @@ async def test_delete_field_as_annotator(async_client: "AsyncClient", db: "Async
     assert (await db.execute(select(func.count(Field.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_field_belonging_to_published_dataset(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
@@ -219,7 +219,7 @@ async def test_delete_field_belonging_to_published_dataset(
     assert (await db.execute(select(func.count(Field.id)))).scalar() == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_field_with_nonexistent_field_id(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):

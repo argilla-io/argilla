@@ -40,14 +40,14 @@ from argilla.client.sdk.token_classification.models import (
 LOGGER = logging.getLogger(__name__)
 
 
-@pytest.fixture
+@pytest.fixture()
 def sdk_client(mocked_client, monkeypatch):
     client = AuthenticatedClient(base_url="http://localhost:6900", token=DEFAULT_API_KEY)
     monkeypatch.setattr(client, "__httpx__", mocked_client)
     return client
 
 
-@pytest.fixture
+@pytest.fixture()
 def bulk_textclass_data():
     explanation = {"text": [TokenAttributions(token="test", attributions={"test": 0.5})]}
     records = [
@@ -74,7 +74,7 @@ def bulk_textclass_data():
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def bulk_text2text_data():
     records = [
         Text2TextRecord(
@@ -98,7 +98,7 @@ def bulk_text2text_data():
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def bulk_tokenclass_data():
     records = [
         TokenClassificationRecord(

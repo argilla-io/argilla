@@ -54,7 +54,7 @@ def sync_connection() -> Generator["Connection", None, None]:
     engine.dispose()
 
 
-@pytest.fixture
+@pytest.fixture()
 def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
     sync_connection.begin_nested()
     session = SyncTestSession()
@@ -66,7 +66,7 @@ def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
     sync_connection.rollback()
 
 
-@pytest.fixture
+@pytest.fixture()
 def async_db_proxy(mocker: "MockerFixture", sync_db: "Session") -> "AsyncSession":
     """Create a mocked `AsyncSession` that proxies to the sync session. This will allow us to execute the async CLI commands
     and then in the unit test function use the sync session to assert the changes.

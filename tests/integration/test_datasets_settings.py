@@ -86,7 +86,7 @@ def test_list_dataset(mocked_client: "SecuredClient"):
         assert ds["owner"] == ds["workspace"]
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_delete_dataset_by_non_creator(
     mocked_client: "SecuredClient", mock_user: "User", argilla_user: "User", db: "AsyncSession"
 ):
