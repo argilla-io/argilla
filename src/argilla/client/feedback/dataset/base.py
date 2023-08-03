@@ -197,7 +197,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
 
         if len(records) == 0:
             raise ValueError("Expected `records` to be a non-empty list of `dict` or `FeedbackRecord`.")
-            
+
         new_records = []
         for record in records:
             if isinstance(record, dict):
