@@ -112,12 +112,17 @@ class HuggingFaceDatasetMixin:
 
         hf_dataset["metadata"] = []
 
+        empty = {
+            "user_id": [],
+            "value": [],
+            "status": [],
+        }
         for record in dataset.records:
             for field in dataset.fields:
                 hf_dataset[field.name].append(record.fields[field.name])
             for question in dataset.questions:
                 if not record.responses:
-                    hf_dataset[question.name].append(None)
+                    hf_dataset[question.name].append(empty)
                 else:
                     responses = []
                     for response in record.responses:
