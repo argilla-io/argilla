@@ -237,6 +237,15 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                     f"`FeedbackRecord.fields` does not match the expected schema, with exception: {e}"
                 ) from e
 
+    def _parse_and_validate_records(
+        self,
+        records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
+    ) -> List[FeedbackRecord]:
+        """Convenient method for calling `_parse_records` and `_validate_records` in sequence."""
+        records = self._parse_records(records)
+        self._validate_records(records)
+        return records
+
     @requires_version("datasets")
     def format_as(self, format: Literal["datasets"]) -> "Dataset":
         """Formats the `FeedbackDataset` as a `datasets.Dataset` object.
