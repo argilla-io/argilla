@@ -212,8 +212,10 @@ class FeedbackRecord(BaseModel):
     ) -> None:
         warnings.warn(
             "`set_suggestions` is deprected in favor of `update` and will be removed in a future"
-            " release. Please use `update` instead.",
+            " release.\n`set_suggestions` will be deprecated in Argilla v1.15.0, please"
+            " use `update` instead.",
             DeprecationWarning,
+            stacklevel=1,
         )
         self.update(suggestions=suggestions)
 
@@ -242,8 +244,10 @@ class RemoteFeedbackRecord(FeedbackRecord):
     ) -> None:
         warnings.warn(
             "`set_suggestions` is deprected in favor of `update` and will be removed in a future"
-            " release. Please use `update` instead.",
+            " release.\n`set_suggestions` will be deprecated in Argilla v1.15.0, please"
+            " use `update` instead.",
             DeprecationWarning,
+            stacklevel=1,
         )
         self.update(suggestions=suggestions)
 

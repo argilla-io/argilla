@@ -136,8 +136,10 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
             " the method `fetch_records` won't do anything. If you want to fetch the records"
             " from Argilla, make sure you're using an `RemoteFeedbackDataset`, either by"
             " calling `FeedbackDataset.from_argilla` or by keeping the returned value from"
-            " `FeedbackDataset.push_to_argilla`.",
+            " `FeedbackDataset.push_to_argilla`.\n`fetch_records` will be deprecated in"
+            " Argilla v1.15.0.",
             DeprecationWarning,
+            stacklevel=1,
         )
 
     @property
@@ -147,7 +149,10 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
             " return anything as it's not pushed to Argilla. If you want to get the id"
             " of a dataset in Argilla, make sure you're using an `RemoteFeedbackDataset`,"
             " either by calling `FeedbackDataset.from_argilla` or by keeping the returned"
-            " value from `FeedbackDataset.push_to_argilla`.",
+            " value from `FeedbackDataset.push_to_argilla`.\n`argilla_id` will be deprecated in"
+            " Argilla v1.15.0.",
+            DeprecationWarning,
+            stacklevel=1,
         )
 
     def add_records(

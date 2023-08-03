@@ -315,8 +315,10 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             warnings.warn(
                 "`fetch_records` is deprecated and will be removed in a future version."
                 " `records` will be fetched automatically from Argilla, if the dataset"
-                " is not in Argilla, then the local records will be used instead.",
+                " is not in Argilla, then the local records will be used instead.\n`fetch_records`"
+                " will be deprecated in Argilla v1.15.0.",
                 DeprecationWarning,
+                stacklevel=1,
             )
 
         if isinstance(framework, str):

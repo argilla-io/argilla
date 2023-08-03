@@ -153,8 +153,10 @@ class ArgillaToFromMixin:
                 " Argilla, you will need to either keep the returned dataset from the"
                 " `push_to_argilla` call and the functions will automatically call Argilla"
                 " or just call this function and then `from_argilla` to retrieve the"
-                " `FeedbackDataset` from Argilla.",
+                " `FeedbackDataset` from Argilla.\n`push_to_argilla` with no arguments will"
+                " be deprecated in Argilla v1.15.0.",
                 DeprecationWarning,
+                stacklevel=1,
             )
             return
 
@@ -289,7 +291,9 @@ class ArgillaToFromMixin:
                 " `FeedbackDataset` from Argilla, as by default no records will be"
                 " fetched from Argilla. To retrieve the records you will need to explicitly"
                 " fetch those via `fetch_records` from the returned `RemoteFeedbackDataset`.",
+                "\n`with_records` will be deprecated in Argilla v1.15.0.",
                 DeprecationWarning,
+                stacklevel=1,
             )
 
         httpx_client: "httpx.Client" = ArgillaSingleton.get().http_client.httpx

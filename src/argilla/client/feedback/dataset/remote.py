@@ -250,8 +250,10 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
     def argilla_id(self) -> "UUID":
         warnings.warn(
             "`argilla_id` is deprected in favor of `id` and will be removed in a future"
-            " release. Please use `id` instead.",
+            " release. Please use `id` instead.\n`argilla_id` will be deprecated in"
+            " Argilla v1.15.0.",
             DeprecationWarning,
+            stacklevel=1,
         )
         return self.id
 
@@ -305,17 +307,20 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
     def fetch_records(self) -> None:
         warnings.warn(
             "`fetch_records` method is deprecated, as the records are fetched automatically"
-            " when iterating over a `FeedbackDataset` pushed to Argilla. This method will be"
-            " removed in a future release.",
+            " when iterating over a `FeedbackDataset` pushed to Argilla.\n`fetch_records`"
+            " will be deprecated in Argilla v1.15.0.",
             DeprecationWarning,
+            stacklevel=1,
         )
 
     def push_to_argilla(self, *args, **kwargs) -> None:
         warnings.warn(
             "`push_to_argilla` is no longer working for a `FeedbackDataset` pushed to Argilla,"
             " as the additions, deletions and/or updates over a `FeedbackDataset` in Argilla"
-            " are being tracked automatically, so there's no need to explicitly push them.",
+            " are being tracked automatically, so there's no need to explicitly push them."
+            "\n`push_to_argilla` will be deprecated in Argilla v1.15.0.",
             DeprecationWarning,
+            stacklevel=1,
         )
 
     def pull(self) -> "FeedbackDataset":
