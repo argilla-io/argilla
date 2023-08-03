@@ -1,5 +1,12 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { BackendField, Response } from "../types/";
+import { QUESTION_API_ERRORS } from "./QuestionRepository";
+import { Field } from "~/v1/domain/entities/Field";
+
+export const enum FIELD_API_ERRORS {
+  GET_QUESTIONS = "ERROR_FETCHING_FIELDS",
+  UPDATE = "ERROR_PATCHING_FIELDS",
+}
 
 export class FieldRepository {
   constructor(private readonly axios: NuxtAxiosInstance) {}
@@ -13,8 +20,30 @@ export class FieldRepository {
       return data.items;
     } catch (err) {
       throw {
-        response: "ERROR_FETCHING_FIELDS",
+        response: FIELD_API_ERRORS.GET_QUESTIONS,
       };
     }
+  }
+
+  async update(field: Field): Promise<BackendField> {
+    try {
+      const { data } = await this.axios.patch<BackendField>(
+        `/v1/fields/${field.id}`,
+        this.createRequest(field)
+      );
+
+      return data;
+    } catch (err) {
+      throw {
+        response: FIELD_API_ERRORS.UPDATE,
+      };
+    }
+  }
+
+  private createRequest({ title, settings }: Field): Partial<BackendField> {
+    return {
+      title,
+      settings,
+    };
   }
 }

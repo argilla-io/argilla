@@ -1,8 +1,8 @@
-import { DatasetSetting } from "../entities/DatasetSetting";
-import { Field } from "../entities/Field";
-import { Question } from "../entities/question/Question";
-import { IDatasetRepository } from "../services/IDatasetRepository";
-import { IDatasetSettingStorage } from "../services/IDatasetSettingStorage";
+import { DatasetSetting } from "../../entities/DatasetSetting";
+import { Field } from "../../entities/Field";
+import { Question } from "../../entities/question/Question";
+import { IDatasetRepository } from "../../services/IDatasetRepository";
+import { IDatasetSettingStorage } from "../../services/IDatasetSettingStorage";
 import {
   FieldRepository,
   QuestionRepository,

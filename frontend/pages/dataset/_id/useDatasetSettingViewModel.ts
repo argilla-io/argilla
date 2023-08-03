@@ -2,7 +2,7 @@ import { computed, onBeforeMount } from "vue-demi";
 import { useResolve } from "ts-injecty";
 import { useRouter, useContext } from "@nuxtjs/composition-api";
 import { useDatasetViewModel } from "./useDatasetViewModel";
-import { GetDatasetSettingsUseCase } from "~/v1/domain/usecases/get-dataset-settings-use-case";
+import { GetDatasetSettingsUseCase } from "~/v1/domain/usecases/dataset-setting/get-dataset-settings-use-case";
 import { useDatasetSetting } from "~/v1/infrastructure/storage/DatasetSettingStorage";
 
 export const useDatasetSettingViewModel = () => {

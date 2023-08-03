@@ -4,7 +4,7 @@
       <h2 class="--heading5 --semibold">Edit questions</h2>
       <div v-for="question in settings.questions" :key="question.id">
         <form
-          @submit.prevent="onSubmit"
+          @submit.prevent="onSubmit(question)"
           class="settings-questions__edition-form-questions"
         >
           <div class="settings-questions__edition-form-name">
@@ -67,7 +67,7 @@ export default {
     },
   },
   methods: {
-    onSubmit() {},
+    async onSubmit(question) {},
   },
 };
 </script>
