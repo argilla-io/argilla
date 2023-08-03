@@ -53,9 +53,7 @@ def test_init_base(
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
 ) -> None:
-    with pytest.raises(
-        Exception, match="Can't instantiate abstract class FeedbackDatasetBase with abstract method records"
-    ):
+    with pytest.raises(Exception, match="Can't instantiate abstract class FeedbackDatasetBase"):
         FeedbackDatasetBase(
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
