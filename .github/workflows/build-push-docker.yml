@@ -73,7 +73,7 @@ jobs:
         uses: ./.github/actions/docker-image-tag-from-ref
 
       - name: echo output from custom action
-        run: echo "${{ steps.docker-image-tag-from-ref.output.docker-image-tag }}"
+        run: echo "${{ steps.docker-image-tag-from-ref.outputs.docker-image-tag }}"
 
       - name: Login to Docker Hub
         uses: docker/login-action@v2
@@ -96,7 +96,7 @@ jobs:
           platforms: ${{ inputs.platforms }}
           tags: |
             ${{ steps.meta.outputs.tags }}
-            europe-docker.pkg.dev/argilla-ci/${{ inputs.image-name}}:${{ github.ref_name }}
+            europe-docker.pkg.dev/argilla-ci/${{ inputs.image-name}}:${{ steps.docker-image-tag-from-ref.outputs.docker-image-tag }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: ${{ inputs.build-args }}
           push: true

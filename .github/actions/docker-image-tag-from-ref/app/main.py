@@ -55,7 +55,8 @@ def get_docker_image_tag_from_reg() -> str:
 
 def set_github_output(key: str, value: str) -> None:
     logging.info(f"Settings GitHub output: {key}={value}")
-    print(f"::set-output name={key}::{value}")
+    with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+        print(f"{key}={value}", file=fh)
 
 
 if __name__ == "__main__":
