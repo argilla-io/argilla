@@ -18,8 +18,11 @@ from typing import TYPE_CHECKING, Any, Dict, Iterator, List
 import pytest
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.records import FeedbackRecord
+from argilla.client.feedback.training.base import ArgillaTrainer
 from argilla.client.feedback.training.schemas import TrainingTask
 from datasets import Dataset, DatasetDict
+
+from tests.integration.training.helpers import train_with_cleanup
 
 if TYPE_CHECKING:
     from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
@@ -70,6 +73,19 @@ def test_prepare_for_training_sft(
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
     assert len(train_dataset_dict["train"]) == 3
 
+    trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2", fetch_records=False)
+    trainer.update_config(max_steps=3)
+    assert trainer._trainer.training_args_kwargs["max_steps"] == 3
+    trainer.update_config(max_steps=1)
+    assert trainer._trainer.training_args_kwargs["max_steps"] == 1
+    train_with_cleanup(trainer, "tmp_trl_dir")
+
+    eval_trainer = ArgillaTrainer(
+        dataset, task, framework="trl", model="sshleifer/tiny-gpt2", fetch_records=False, train_size=0.5
+    )
+    eval_trainer.update_config(max_steps=1)
+    train_with_cleanup(eval_trainer, "tmp_trl_dir")
+
 
 @pytest.mark.usefixtures(
     "feedback_dataset_guidelines",
@@ -114,6 +130,19 @@ def test_prepare_for_training_rm(
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
     assert len(train_dataset_dict["train"]) == 3
+
+    trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2", fetch_records=False)
+    trainer.update_config(max_steps=3)
+    assert trainer._trainer.training_args_kwargs["max_steps"] == 3
+    trainer.update_config(max_steps=1)
+    assert trainer._trainer.training_args_kwargs["max_steps"] == 1
+    train_with_cleanup(trainer, "tmp_trl_dir")
+
+    eval_trainer = ArgillaTrainer(
+        dataset, task, framework="trl", model="sshleifer/tiny-gpt2", fetch_records=False, train_size=0.5
+    )
+    eval_trainer.update_config(max_steps=1)
+    train_with_cleanup(eval_trainer, "tmp_trl_dir")
 
 
 @pytest.mark.usefixtures(
@@ -162,3 +191,16 @@ def test_prepare_for_training_dpo(
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
     assert len(train_dataset_dict["train"]) == 3
+
+    trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2", fetch_records=False)
+    trainer.update_config(max_steps=3)
+    assert trainer._trainer.training_args_kwargs["max_steps"] == 3
+    trainer.update_config(max_steps=1)
+    assert trainer._trainer.training_args_kwargs["max_steps"] == 1
+    train_with_cleanup(trainer, "tmp_trl_dir")
+
+    eval_trainer = ArgillaTrainer(
+        dataset, task, framework="trl", model="sshleifer/tiny-gpt2", fetch_records=False, train_size=0.5
+    )
+    eval_trainer.update_config(max_steps=1)
+    train_with_cleanup(eval_trainer, "tmp_trl_dir")
