@@ -8,9 +8,22 @@ jobs:
   deploy:
     name: Deploy Argilla to Cloud Run
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
+      # Authenticate in GCP using Workload Identity Federation
       - name: Authenticate to Google Cloud
         uses: 'google-github-actions/auth@v1'
         with:
           workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WIP }}
           service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
+
+      # TODO:
+      - name: Deploy in Cloud Run
+        uses: 'google-github-actions/deploy-cloudrun@v1'
+        with:
+          service: argilla
+          image: 'gcr.io/cloudrun/hello'
