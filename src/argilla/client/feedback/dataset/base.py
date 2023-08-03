@@ -48,26 +48,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
-    """Base class with shared functionality for `FeedbackDataset` and `RemoteFeedbackDataset`.
-
-    Args:
-        guidelines: contains the guidelines for annotating the dataset.
-        fields: contains the fields that will define the schema of the records in the dataset.
-        questions: contains the questions that will be used to annotate the dataset.
-
-    Attributes:
-        guidelines: contains the guidelines for annotating the dataset.
-        fields: contains the fields that will define the schema of the records in the dataset.
-        questions: contains the questions that will be used to annotate the dataset.
-
-    Raises:
-        TypeError: if `guidelines` is not a string.
-        TypeError: if `fields` is not a list of `FieldSchema`.
-        ValueError: if `fields` does not contain at least one required field.
-        TypeError: if `questions` is not a list of `TextQuestion`, `RatingQuestion`,
-            `LabelQuestion`, and/or `MultiLabelQuestion`.
-        ValueError: if `questions` does not contain at least one required question.
-    """
+    """Base class with shared functionality for `FeedbackDataset` and `RemoteFeedbackDataset`."""
 
     def __init__(
         self,
@@ -76,7 +57,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         questions: List[AllowedQuestionTypes],
         guidelines: Optional[str] = None,
     ) -> None:
-        """Initializes a `FeedbackDataset` instance locally.
+        """Initializes a `FeedbackDatasetBase` instance locally.
 
         Args:
             fields: contains the fields that will define the schema of the records in the dataset.
@@ -91,42 +72,6 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             ValueError: if `questions` does not contain at least one required question.
             TypeError: if `guidelines` is not None and not a string.
             ValueError: if `guidelines` is an empty string.
-
-        Examples:
-            >>> import argilla as rg
-            >>> rg.init(api_url="...", api_key="...")
-            >>> dataset = rg.FeedbackDataset(
-            ...     fields=[
-            ...         rg.TextField(name="text", required=True),
-            ...         rg.TextField(name="label", required=True),
-            ...     ],
-            ...     questions=[
-            ...         rg.TextQuestion(
-            ...             name="question-1",
-            ...             description="This is the first question",
-            ...             required=True,
-            ...         ),
-            ...         rg.RatingQuestion(
-            ...             name="question-2",
-            ...             description="This is the second question",
-            ...             required=True,
-            ...             values=[1, 2, 3, 4, 5],
-            ...         ),
-            ...         rg.LabelQuestion(
-            ...             name="question-3",
-            ...             description="This is the third question",
-            ...             required=True,
-            ...             labels=["positive", "negative"],
-            ...         ),
-            ...         rg.MultiLabelQuestion(
-            ...             name="question-4",
-            ...             description="This is the fourth question",
-            ...             required=True,
-            ...             labels=["category-1", "category-2", "category-3"],
-            ...         ),
-            ...     ],
-            ...     guidelines="These are the annotation guidelines.",
-            ... )
         """
         if not isinstance(fields, list):
             raise TypeError(f"Expected `fields` to be a list, got {type(fields)} instead.")
@@ -195,6 +140,14 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         return self._fields
 
     def field_by_name(self, name: str) -> AllowedFieldTypes:
+        """Returns the field by name if it exists. Othewise a `ValueError` is raised.
+
+        Args:
+            name: the name of the field to return.
+
+        Raises:
+            ValueError: if the field with the given name does not exist.
+        """
         for field in self._fields:
             if field.name == name:
                 return field
@@ -209,6 +162,14 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         return self._questions
 
     def question_by_name(self, name: str) -> AllowedQuestionTypes:
+        """Returns the question by name if it exists. Othewise a `ValueError` is raised.
+
+        Args:
+            name: the name of the question to return.
+
+        Raises:
+            ValueError: if the question with the given name does not exist.
+        """
         for question in self._questions:
             if question.name == name:
                 return question
@@ -220,6 +181,17 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
     def _parse_records(
         self, records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]]
     ) -> List[FeedbackRecord]:
+        """Parses the records into a list of `FeedbackRecord` objects.
+
+        Args:
+            records: either a single `FeedbackRecord` or `dict` or a list of `FeedbackRecord` or `dict`.
+
+        Returns:
+            A list of `FeedbackRecord` objects.
+
+        Raises:
+            ValueError: if `records` is not a `FeedbackRecord` or `dict` or a list of `FeedbackRecord` or `dict`.
+        """
         if isinstance(records, list):
             if len(records) == 0:
                 raise ValueError("Expected `records` to be a non-empty list of `dict` or `FeedbackRecord`.")
@@ -246,6 +218,14 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         return records
 
     def _validate_records(self, records: List[FeedbackRecord]) -> None:
+        """Validates the records against the schema defined by the `fields`.
+
+        Args:
+            records: a list of `FeedbackRecord` objects to validate.
+
+        Raises:
+            ValueError: if the `fields` schema does not match the `FeedbackRecord.fields` schema.
+        """
         if self._fields_schema is None:
             self._fields_schema = generate_pydantic_schema(self.fields)
 
@@ -330,6 +310,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         lang: Optional[str] = None,
         fetch_records: Optional[bool] = None,
     ):
+        # TODO(davidberenstein1957): add missing docstrings and type annotations
         if fetch_records is not None:
             warnings.warn(
                 "`fetch_records` is deprecated and will be removed in a future version."

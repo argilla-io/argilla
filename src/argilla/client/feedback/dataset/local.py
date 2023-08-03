@@ -35,6 +35,58 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
         questions: List[AllowedQuestionTypes],
         guidelines: Optional[str] = None,
     ) -> None:
+        """Initializes a `FeedbackDataset` instance locally.
+
+        Args:
+            fields: contains the fields that will define the schema of the records in the dataset.
+            questions: contains the questions that will be used to annotate the dataset.
+            guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
+
+        Raises:
+            TypeError: if `fields` is not a list of `FieldSchema`.
+            ValueError: if `fields` does not contain at least one required field.
+            TypeError: if `questions` is not a list of `TextQuestion`, `RatingQuestion`,
+                `LabelQuestion`, and/or `MultiLabelQuestion`.
+            ValueError: if `questions` does not contain at least one required question.
+            TypeError: if `guidelines` is not None and not a string.
+            ValueError: if `guidelines` is an empty string.
+
+        Examples:
+            >>> import argilla as rg
+            >>> rg.init(api_url="...", api_key="...")
+            >>> dataset = rg.FeedbackDataset(
+            ...     fields=[
+            ...         rg.TextField(name="text", required=True),
+            ...         rg.TextField(name="label", required=True),
+            ...     ],
+            ...     questions=[
+            ...         rg.TextQuestion(
+            ...             name="question-1",
+            ...             description="This is the first question",
+            ...             required=True,
+            ...         ),
+            ...         rg.RatingQuestion(
+            ...             name="question-2",
+            ...             description="This is the second question",
+            ...             required=True,
+            ...             values=[1, 2, 3, 4, 5],
+            ...         ),
+            ...         rg.LabelQuestion(
+            ...             name="question-3",
+            ...             description="This is the third question",
+            ...             required=True,
+            ...             labels=["positive", "negative"],
+            ...         ),
+            ...         rg.MultiLabelQuestion(
+            ...             name="question-4",
+            ...             description="This is the fourth question",
+            ...             required=True,
+            ...             labels=["category-1", "category-2", "category-3"],
+            ...         ),
+            ...     ],
+            ...     guidelines="These are the annotation guidelines.",
+            ... )
+        """
         super().__init__(fields=fields, questions=questions, guidelines=guidelines)
 
         self._records = []
@@ -43,6 +95,10 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
     def records(self) -> List["FeedbackRecord"]:
         """Returns the records in the dataset."""
         return self._records
+
+    def __repr__(self) -> str:
+        """Returns a string representation of the dataset."""
+        return f"<FeedbackDataset fields={self.fields} questions={self.questions} guidelines={self.guidelines}>"
 
     def __len__(self) -> int:
         """Returns the number of records in the dataset."""
@@ -98,13 +154,15 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
         self,
         records: Union["FeedbackRecord", Dict[str, Any], List[Union["FeedbackRecord", Dict[str, Any]]]],
     ) -> None:
-        """Adds the given records to the dataset, and stores them locally. If you're planning to add those
-        records either to Argilla or HuggingFace, make sure to call `push_to_argilla` or `push_to_huggingface`,
-        respectively, after adding the records.
+        """Adds the given records to the dataset, and stores them locally. If you are
+        planning to push those to Argilla, you will need to call `push_to_argilla` afterwards,
+        to both create the dataset in Argilla and push the records to it. Then, from a
+        `FeedbackDataset` pushed to Argilla, you'll just need to call `add_records` and
+        those will be automatically uploaded to Argilla.
 
         Args:
-            records: the records to add to the dataset. Can be a single record, a list of records or a dictionary
-                with the fields of the record.
+            records: the records to add to the dataset. Can be a single record, a list
+                of records or a dictionary with the fields of the record.
 
         Raises:
             ValueError: if the given records are an empty list.

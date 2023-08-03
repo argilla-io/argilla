@@ -38,6 +38,21 @@ warnings.simplefilter("always", DeprecationWarning)
 
 class RemoteFeedbackRecords:
     def __init__(self, client: "httpx.Client", id: "UUID", questions: List["AllowedQuestionTypes"]) -> None:
+        """Initializes a `RemoteFeedbackRecords` instance to access a `FeedbackDataset`
+        records in Argilla. This class is used to get records from Argilla, iterate over
+        them, and push new records to Argilla.
+
+        Note:
+            This class is not intended to be initiallised directly. Instead, use
+            `FeedbackDataset.from_argilla` to get an instance of `RemoteFeedbackDataset`,
+            and then just call `records` on it.
+
+        Args:
+            client: contains the `httpx.Client` instance that will be used to send requests to Argilla.
+            id: contains the UUID of the dataset in Argilla.
+            questions: contains the questions of the existing dataset in Argilla. It's
+                used internally to map the question names to their IDs.
+        """
         self.client = client
         self.id = id
 
@@ -45,6 +60,7 @@ class RemoteFeedbackRecords:
         self.__question_name2id = {value: key for key, value in self.__question_id2name.items()}
 
     def __repr__(self) -> str:
+        """Returns a string representation of the `RemoteFeedbackRecords`."""
         return (
             "The `records` of a `FeedbackDataset` in Argilla are being lazily"
             " fetched, and never stored locally. You can either loop over `records`"
@@ -53,6 +69,7 @@ class RemoteFeedbackRecords:
         )
 
     def __parse_record(self, record: "FeedbackItemModel") -> RemoteFeedbackRecord:
+        """Parses a `FeedbackItemModel` into a `RemoteFeedbackRecord`."""
         record = record.dict(
             exclude={
                 "inserted_at": ...,
@@ -67,6 +84,7 @@ class RemoteFeedbackRecords:
         return RemoteFeedbackRecord(client=self.client, name2id=self.__question_name2id, **record)
 
     def __len__(self) -> int:
+        """Returns the number of records in the current `FeedbackDataset` in Argilla."""
         try:
             response = datasets_api_v1.get_metrics(client=self.client, id=self.id)
         except Exception as e:
@@ -76,6 +94,14 @@ class RemoteFeedbackRecords:
         return response.parsed.records.count
 
     def __getitem__(self, key: Union[slice, int]) -> Union[RemoteFeedbackRecord, List[RemoteFeedbackRecord]]:
+        """Returns the record(s) at the given index(es) from Argilla.
+
+        Args:
+            key: the index(es) of the record(s) to return. Can either be a single index or a slice.
+
+        Returns:
+            Either the record of the given index, or a list with the records at the given indexes.
+        """
         offsets = []
         limit = None
         if isinstance(key, slice):
@@ -116,6 +142,7 @@ class RemoteFeedbackRecords:
         return records[0] if isinstance(key, int) else records
 
     def __iter__(self) -> Iterator[RemoteFeedbackRecord]:
+        """Iterates over the `FeedbackRecord`s of the current `FeedbackDataset` in Argilla."""
         current_batch = 0
         while True:
             batch = datasets_api_v1.get_records(
@@ -136,6 +163,15 @@ class RemoteFeedbackRecords:
         records: List[FeedbackRecord],
         show_progress: bool = True,
     ) -> None:
+        """Pushes a list of `FeedbackRecord`s to Argilla.
+
+        Args:
+            records: A list of `FeedbackRecord`s to push to Argilla.
+            show_progress: Whether to show a `tqdm` progress bar while pushing the records.
+
+        Raises:
+            Exception: If the pushing of the records to Argilla fails.
+        """
         for i in trange(
             0, len(records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=not show_progress
         ):
@@ -166,6 +202,30 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         questions: List["AllowedQuestionTypes"],
         guidelines: Optional[str] = None,
     ) -> None:
+        """Initializes a `RemoteFeedbackDataset` instance in Argilla.
+
+        Note:
+            This class is not intended to be initiallised directly. Instead, use
+            `FeedbackDataset.from_argilla` to get an instance of this class.
+
+        Args:
+            client: contains the `httpx.Client` instance that will be used to send requests to Argilla.
+            id: contains the UUID of the dataset in Argilla.
+            name: contains the name of the dataset in Argilla.
+            workspace: contains the `Workspace` instance that the dataset belongs to in Argilla.
+            fields: contains the fields that will define the schema of the records in the dataset.
+            questions: contains the questions that will be used to annotate the dataset.
+            guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
+
+        Raises:
+            TypeError: if `fields` is not a list of `FieldSchema`.
+            ValueError: if `fields` does not contain at least one required field.
+            TypeError: if `questions` is not a list of `TextQuestion`, `RatingQuestion`,
+                `LabelQuestion`, and/or `MultiLabelQuestion`.
+            ValueError: if `questions` does not contain at least one required question.
+            TypeError: if `guidelines` is not None and not a string.
+            ValueError: if `guidelines` is an empty string.
+        """
         super().__init__(fields=fields, questions=questions, guidelines=guidelines)
 
         self.client = client
@@ -179,6 +239,11 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
 
     @property
     def records(self) -> RemoteFeedbackRecords:
+        """Returns an instance of `RemoteFeedbackRecords` that allows you to iterate over
+        the records in the dataset. The records are fetched from Argilla on the fly and
+        not stored in memory. You can also iterate over the records directly from the
+        dataset instance.
+        """
         return self._records
 
     @property
@@ -192,30 +257,49 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
 
     @property
     def id(self) -> "UUID":
+        """Returns the ID of the dataset in Argilla."""
         return self._id
 
     @property
     def name(self) -> str:
+        """Returns the name of the dataset in Argilla."""
         return self._name
 
     @property
     def workspace(self) -> "Workspace":
+        """Returns the workspace the dataset belongs to in Argilla."""
         return self._workspace
 
     @property
     def url(self) -> str:
+        """Returns the URL of the dataset in Argilla."""
         return f"{self.client.base_url}/dataset/{self.id}"
 
     def __repr__(self) -> str:
-        return f"<ArgillaFeedbackDataset id={self.id} name={self.name} workspace={self.workspace}>"
+        """Returns a string representation of the dataset."""
+        return (
+            f"<FeedbackDataset id={self.id} name={self.name} workspace={self.workspace}"
+            f" url={self.url} fields={self.fields} questions={self.questions}"
+            f" guidelines={self.guidelines}>"
+        )
 
     def __len__(self) -> int:
+        """Returns the number of records in the dataset."""
         return self._records.__len__()
 
     def __iter__(self) -> Iterator[RemoteFeedbackRecord]:
+        """Returns an iterator over the records in the dataset."""
         yield from self._records
 
     def __getitem__(self, key: Union[slice, int]) -> Union[RemoteFeedbackRecord, List[RemoteFeedbackRecord]]:
+        """Returns the record(s) at the given index(es).
+
+        Args:
+            key: The index or slice to retrieve.
+
+        Returns:
+            The record(s) at the given index(es).
+        """
         return self._records.__getitem__(key)
 
     def fetch_records(self) -> None:
@@ -235,6 +319,11 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         )
 
     def pull(self) -> "FeedbackDataset":
+        """Pulls the dataset from Argilla and returns a local instance of it.
+
+        Returns:
+            A local instance of the dataset which is a `FeedbackDataset` object.
+        """
         # Importing here to avoid circular imports
         from argilla.client.feedback.dataset.local import FeedbackDataset
 
@@ -251,6 +340,18 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
         show_progress: bool = True,
     ) -> None:
+        """Adds the given records to the dataset and pushes those to Argilla.
+
+        Args:
+            records: the records to add to the dataset. Can be a single record, a list
+                of records or a dictionary with the fields of the record.
+
+        Raises:
+            ValueError: if the given records are an empty list.
+            ValueError: if the given records are neither: `FeedbackRecord`, list of `FeedbackRecord`,
+                list of dictionaries as a record or dictionary as a record.
+            ValueError: if the given records do not match the expected schema.
+        """
         records = self._parse_records(records)
         self._validate_records(records)
 
