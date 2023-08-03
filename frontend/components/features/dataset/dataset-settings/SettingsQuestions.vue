@@ -22,7 +22,7 @@
           </div>
 
           <BaseSwitch
-            v-if="question.type === 'text'"
+            v-if="question.isTextType"
             v-model="question.settings.use_markdown"
             >Use Markdown</BaseSwitch
           >
