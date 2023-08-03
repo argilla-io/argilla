@@ -43,7 +43,6 @@ def test_dataset_config_yaml(
     assert all(f"name: {question.name}" in to_yaml_config for question in feedback_dataset_questions)
     assert f"guidelines: {feedback_dataset_guidelines}" in to_yaml_config
 
-    assert "id" not in to_yaml_config
     assert "!!python/object:uuid.UUID" not in to_yaml_config
 
     from_yaml_config = DatasetConfig.from_yaml(to_yaml_config)
