@@ -1,5 +1,5 @@
 <template>
-  <div class="settings-questions__container">
+  <SynchronizeScroll class="settings-questions__container">
     <div class="settings-questions__edition-form">
       <h2 class="--heading5 --semibold">Edit questions</h2>
       <div v-for="question in settings.questions" :key="question.id">
@@ -54,7 +54,7 @@
       class="settings-questions__preview"
       :questions="settings.questions"
     />
-  </div>
+  </SynchronizeScroll>
 </template>
 
 <script>
