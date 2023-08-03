@@ -37,7 +37,7 @@ warnings.simplefilter("always", DeprecationWarning)
 
 
 class RemoteFeedbackRecords:
-    def __init__(self, client: "httpx.Client", id: "UUID", questions: List["AllowedQuestionTypes"]) -> None:
+    def __init__(self, client: "httpx.Client", dataset_id: "UUID", questions: List["AllowedQuestionTypes"]) -> None:
         """Initializes a `RemoteFeedbackRecords` instance to access a `FeedbackDataset`
         records in Argilla. This class is used to get records from Argilla, iterate over
         them, and push new records to Argilla.
@@ -53,20 +53,23 @@ class RemoteFeedbackRecords:
             questions: contains the questions of the existing dataset in Argilla. It's
                 used internally to map the question names to their IDs.
         """
-        self.client = client
-        self.id = id
+        self.__client = client
+        self.__dataset_id = dataset_id
 
         self.__question_id2name = {question.id: question.name for question in questions}
         self.__question_name2id = {value: key for key, value in self.__question_id2name.items()}
 
     def __repr__(self) -> str:
-        """Returns a string representation of the `RemoteFeedbackRecords`."""
-        return (
+        """Doesn't return anything, but prints a warning, since the `records` of a
+        `FeedbackDataset` in Argilla are being lazily fetched, and never stored
+        locally."""
+        warnings.warn(
             "The `records` of a `FeedbackDataset` in Argilla are being lazily"
             " fetched, and never stored locally. You can either loop over `records`"
             " or access them by index, and those will be fetched from Argilla on the"
-            " fly."
+            " fly.",
         )
+        return f"[{','.join([str(record) for record in self][:2])}, ...]"
 
     def __parse_record(self, record: "FeedbackItemModel") -> RemoteFeedbackRecord:
         """Parses a `FeedbackItemModel` into a `RemoteFeedbackRecord`."""
@@ -81,12 +84,12 @@ class RemoteFeedbackRecords:
         )
         for suggestion in record.get("suggestions", []):
             suggestion.update({"question_name": self.__question_id2name[suggestion["question_id"]]})
-        return RemoteFeedbackRecord(client=self.client, name2id=self.__question_name2id, **record)
+        return RemoteFeedbackRecord(client=self.__client, name2id=self.__question_name2id, **record)
 
     def __len__(self) -> int:
         """Returns the number of records in the current `FeedbackDataset` in Argilla."""
         try:
-            response = datasets_api_v1.get_metrics(client=self.client, id=self.id)
+            response = datasets_api_v1.get_metrics(client=self.__client, id=self.__dataset_id)
         except Exception as e:
             raise Exception(
                 f"Failed while getting the metrics from the current `FeedbackDataset` in Argilla with exception: {e}"
@@ -104,41 +107,38 @@ class RemoteFeedbackRecords:
         """
         offsets = []
         limit = None
+        num_records = len(self)
         if isinstance(key, slice):
-            start, stop, step = key.indices(len(self))
+            start, stop, step = key.indices(num_records)
             if step is not None and step != 1:
-                return [self[i] for i in range(start, stop, step)]
+                raise ValueError("When providing a `slice` just `step=None` or `step=1` are allowed.")
             if start < 0:
-                start += len(self)
+                start += num_records
             if stop < 0:
-                stop += len(self)
+                stop += num_records
             if start < 0 or stop < 0:
-                raise IndexError("Index out of range")
+                raise IndexError(f"Index {start < 0 or stop < 0} is out of range, dataset has {num_records} records.")
             limit = stop - start
             offsets = [start] if limit < FETCHING_BATCH_SIZE else list(range(start, stop, FETCHING_BATCH_SIZE))
         elif isinstance(key, int):
             if key < 0:
-                key += len(self)
-            if key < 0 or key >= len(self):
-                raise IndexError("Index out of range")
+                key += num_records
+            if key < 0 or key >= num_records:
+                raise IndexError(f"Index {key} is out of range, dataset has {num_records} records.")
             offsets = [key]
             limit = 1
         else:
-            raise TypeError("Invalid argument type")
+            raise TypeError("Only `int` and `slice` are supported as index.")
 
         records = []
         for offset in offsets:
             fetched_records = datasets_api_v1.get_records(
-                client=self.client,
-                id=self.id,
+                client=self.__client,
+                id=self.__dataset_id,
                 offset=offset,
                 limit=limit,
             ).parsed
-            if len(fetched_records.items) == 1:
-                record = fetched_records.items[0]
-                records.append(self.__parse_record(record))
-            else:
-                records.extend([self.__parse_record(record) for record in fetched_records.items])
+            records.extend([self.__parse_record(record) for record in fetched_records.items])
         return records[0] if isinstance(key, int) else records
 
     def __iter__(self) -> Iterator[RemoteFeedbackRecord]:
@@ -146,8 +146,8 @@ class RemoteFeedbackRecords:
         current_batch = 0
         while True:
             batch = datasets_api_v1.get_records(
-                client=self.client,
-                id=self.id,
+                client=self.__client,
+                id=self.__dataset_id,
                 offset=FETCHING_BATCH_SIZE * current_batch,
                 limit=FETCHING_BATCH_SIZE,
             ).parsed
@@ -184,8 +184,8 @@ class RemoteFeedbackRecords:
                     record.dict(exclude={"id": ..., "suggestions": {"__all__": {"question_name"}}}, exclude_none=True)
                 )
             datasets_api_v1.add_records(
-                client=self.client,
-                id=self.id,
+                client=self.__client,
+                id=self.__dataset_id,
                 records=records_batch,
             )
 
@@ -234,7 +234,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         self._workspace = workspace
 
         self._records: RemoteFeedbackRecords = RemoteFeedbackRecords(
-            client=self.client, id=self.id, questions=self.questions
+            client=self.client, dataset_id=self.id, questions=self.questions
         )
 
     @property
