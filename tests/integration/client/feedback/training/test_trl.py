@@ -19,6 +19,7 @@ import pytest
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.training.schemas import TrainingTask
+from datasets import Dataset, DatasetDict
 
 if TYPE_CHECKING:
     from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
@@ -41,7 +42,7 @@ def test_prepare_for_training_sft(
         fields=feedback_dataset_fields,
         questions=feedback_dataset_questions,
     )
-    dataset.add_records(records=feedback_dataset_records * 5)
+    dataset.add_records(records=feedback_dataset_records * 2)
 
     def formatting_func(sample: Dict[str, Any]) -> Iterator[str]:
         # For example, the sample must be most frequently rated as "1" in question-2 and
@@ -62,7 +63,12 @@ def test_prepare_for_training_sft(
 
     task = TrainingTask.for_supervised_fine_tuning(formatting_func)
     train_dataset = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False)
-    assert len(train_dataset) == 15
+    assert isinstance(train_dataset, Dataset)
+    assert len(train_dataset) == 6
+    train_dataset_dict = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False, train_size=0.5)
+    assert isinstance(train_dataset_dict, DatasetDict)
+    assert tuple(train_dataset_dict.keys()) == ("train", "test")
+    assert len(train_dataset_dict["train"]) == 3
 
 
 @pytest.mark.usefixtures(
@@ -98,7 +104,12 @@ def test_prepare_for_training_rm(
 
     task = TrainingTask.for_reward_modelling(chosen_rejected_func)
     train_dataset = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False)
+    assert isinstance(train_dataset, Dataset)
     assert len(train_dataset) == 14
+    train_dataset_dict = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False, train_size=0.5)
+    assert isinstance(train_dataset_dict, DatasetDict)
+    assert tuple(train_dataset_dict.keys()) == ("train", "test")
+    assert len(train_dataset_dict["train"]) == 7
 
 
 @pytest.mark.usefixtures(
@@ -134,4 +145,9 @@ def test_prepare_for_training_dpo(
 
     task = TrainingTask.for_direct_preference_optimization(prompt_chosen_rejected_func)
     train_dataset = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False)
+    assert isinstance(train_dataset, Dataset)
     assert len(train_dataset) == 14
+    train_dataset_dict = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False, train_size=0.5)
+    assert isinstance(train_dataset_dict, DatasetDict)
+    assert tuple(train_dataset_dict.keys()) == ("train", "test")
+    assert len(train_dataset_dict["train"]) == 7
