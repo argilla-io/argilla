@@ -147,6 +147,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         """
         Predicts the label of the text.
         """
+        raise NotImplementedError("Models trained with TRL cannot be used for label predictions.")
 
     def train(self, output_dir: str) -> None:
         """
