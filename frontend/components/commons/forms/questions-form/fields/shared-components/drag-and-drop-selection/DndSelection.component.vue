@@ -82,19 +82,19 @@ export default {
     isFocused: {
       immediate: true,
       handler(newValue) {
-         const questionsWrapper = this.$refs.questions;
-         const itemsWrapper = this.$refs.items;
+        const questionsWrapper = this.$refs.questions;
+        const itemsWrapper = this.$refs.items;
 
-         const activeElementIsAQuestion = questionsWrapper?.includes(
-           document.activeElement
-         );
-         const activeElementIsAnItem = itemsWrapper?.includes(
-           document.activeElement
-         );
+        const activeElementIsAQuestion = questionsWrapper?.includes(
+          document.activeElement
+        );
+        const activeElementIsAnItem = itemsWrapper?.includes(
+          document.activeElement
+        );
 
-         if (newValue && !activeElementIsAQuestion && !activeElementIsAnItem) {
-           this.focusOnFirstQuestionOrItem();
-         }
+        if (newValue && !activeElementIsAQuestion && !activeElementIsAnItem) {
+          this.focusOnFirstQuestionOrItem();
+        }
       },
     },
   },
@@ -264,10 +264,10 @@ $max-visible-card-items: 12;
       @extend .draggable__rank-card;
       background-color: $card-secondary-color;
       color: $card-primary-color;
-      transition: box-shadow 0.2s ease-out !important;
+      transition: box-shadow 0.2s ease-out;
 
       &:focus {
-        outline: 2px solid $card-primary-color !important;
+        outline: 2px solid $card-primary-color;
       }
       &:focus:not(:focus-visible) {
         outline: none;
