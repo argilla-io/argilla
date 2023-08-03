@@ -92,24 +92,28 @@ def test_prepare_for_training_rm(
 
     def chosen_rejected_func(sample: Dict[str, Any]):
         # The FeedbackDataset isn't really set up for RM, so we'll just use an arbitrary example here
-        # where we give 1 chosen-rejected pair if "question-3" is "a", 2 if "b" and 3 if "c"
         labels = [
             label
             for label, status in zip(sample["question-3"]["value"], sample["question-3"]["status"])
             if status == "submitted" and label is not None
         ]
         if labels:
-            for _ in range(ord(labels[0]) - 96):
-                yield sample["text"], sample["text"][:5]
+            # Three cases for the tests: None, one tuple and yielding multiple tuples
+            if labels[0] == "a":
+                return None
+            elif labels[0] == "b":
+                return sample["text"], sample["text"][:5]
+            elif labels[0] == "c":
+                return [(sample["text"], sample["text"][:5]), (sample["text"], sample["text"][:5])]
 
     task = TrainingTask.for_reward_modelling(chosen_rejected_func)
     train_dataset = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False)
     assert isinstance(train_dataset, Dataset)
-    assert len(train_dataset) == 14
+    assert len(train_dataset) == 6
     train_dataset_dict = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False, train_size=0.5)
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
-    assert len(train_dataset_dict["train"]) == 7
+    assert len(train_dataset_dict["train"]) == 3
 
 
 @pytest.mark.usefixtures(
@@ -133,21 +137,28 @@ def test_prepare_for_training_dpo(
 
     def prompt_chosen_rejected_func(sample: Dict[str, Any]):
         # The FeedbackDataset isn't really set up for DPO, so we'll just use an arbitrary example here
-        # where we give 1 chosen-rejected pair if "question-3" is "a", 2 if "b" and 3 if "c"
         labels = [
             label
             for label, status in zip(sample["question-3"]["value"], sample["question-3"]["status"])
             if status == "submitted" and label is not None
         ]
         if labels:
-            for _ in range(ord(labels[0]) - 96):
-                yield sample["text"][::-1], sample["text"], sample["text"][:5]
+            # Three cases for the tests: None, one tuple and yielding multiple tuples
+            if labels[0] == "a":
+                return None
+            elif labels[0] == "b":
+                return sample["text"][::-1], sample["text"], sample["text"][:5]
+            elif labels[0] == "c":
+                return [
+                    (sample["text"][::-1], sample["text"], sample["text"][:5]),
+                    (sample["text"][::-1], sample["text"], sample["text"][:5]),
+                ]
 
     task = TrainingTask.for_direct_preference_optimization(prompt_chosen_rejected_func)
     train_dataset = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False)
     assert isinstance(train_dataset, Dataset)
-    assert len(train_dataset) == 14
+    assert len(train_dataset) == 6
     train_dataset_dict = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False, train_size=0.5)
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
-    assert len(train_dataset_dict["train"]) == 7
+    assert len(train_dataset_dict["train"]) == 3
