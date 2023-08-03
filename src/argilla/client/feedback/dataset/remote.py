@@ -114,7 +114,9 @@ class RemoteFeedbackRecords:
             if stop < 0:
                 stop += num_records
             if start < 0 or stop < 0:
-                raise IndexError(f"Index {start < 0 or stop < 0} is out of range, dataset has {num_records} records.")
+                raise IndexError(
+                    f"Index {start if start < 0 else stop} is out of range, dataset has {num_records} records."
+                )
             limit = stop - start
             offsets = [start] if limit < FETCHING_BATCH_SIZE else list(range(start, stop, FETCHING_BATCH_SIZE))
         elif isinstance(key, int):
