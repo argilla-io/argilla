@@ -65,7 +65,7 @@ class RemoteFeedbackRecords:
             " fetched, and never stored locally. You can either loop over `records`"
             " or access them by index, and those will be fetched from Argilla on the"
             " fly.",
-            stacklevel=1
+            stacklevel=1,
         )
         return f"[{','.join([str(record) for record in self][:2])}, ...]"
 
