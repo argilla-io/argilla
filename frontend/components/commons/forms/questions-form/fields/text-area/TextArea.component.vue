@@ -72,6 +72,7 @@ export default {
   border: 1px solid $black-20;
   border-radius: $border-radius-s;
   min-height: 10em;
+  background: palette(white);
   &.--focused {
     border-color: $primary-color;
   }

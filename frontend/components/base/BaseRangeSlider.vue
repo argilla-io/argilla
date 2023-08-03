@@ -79,9 +79,12 @@ export default {
   }
   &__progress-value {
     position: absolute;
-    top: $base-space * 4;
+    top: $base-space * 3;
+    margin-left: -20px;
+    width: 40px;
+    text-align: center;
     color: $black-54;
-    margin-left: -10px;
+    @include font-size(12px);
   }
   &__slider {
     -webkit-appearance: none;
