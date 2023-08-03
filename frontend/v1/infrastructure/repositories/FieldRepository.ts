@@ -1,6 +1,5 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { BackendField, Response } from "../types/";
-import { QUESTION_API_ERRORS } from "./QuestionRepository";
 import { Field } from "~/v1/domain/entities/Field";
 
 export const enum FIELD_API_ERRORS {
