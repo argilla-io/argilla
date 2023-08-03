@@ -206,7 +206,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                 new_records.append(record)
             else:
                 raise ValueError(
-                    "Expected `record` to be a list of `dict` or `FeedbackRecord`,"
+                    "Expected `records` to be a list of `dict` or `FeedbackRecord`,"
                     f" got type `{type(record)}` instead."
                 )
         return new_records
