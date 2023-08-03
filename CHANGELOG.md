@@ -41,6 +41,10 @@ These are the section headers that we use:
 - Updated `POST /api/v1/me/datasets/{dataset_id}/records` endpoint to allow searching records matching one of the response statuses provided via query param.([#3359](https://github.com/argilla-io/argilla/pull/3359)).
 - Updated `SearchEngine.search` method to allow searching records matching one of the response statuses provided ([#3359](https://github.com/argilla-io/argilla/pull/3359)).
 
+### Fixed
+
+- Fixed issue with `bool` values and `default` from Jinja2 while generating the HuggingFace `DatasetCard` from `argilla_template.md` ([#3499](https://github.com/argilla-io/argilla/pull/3499)).
+
 ## [1.13.3](https://github.com/argilla-io/argilla/compare/v1.13.2...v1.13.3)
 
 ### Fixed

@@ -57,7 +57,7 @@ def test_evaluate_train_test(dataset_token_classification) -> None:
 
 
 def test_train_no_model(dataset_token_classification) -> None:
-    trainer = ArgillaTrainer(name=dataset_token_classification, framework=FRAMEWORK)
+    trainer = ArgillaTrainer(name=dataset_token_classification, model=MODEL, framework=FRAMEWORK)
     trainer.update_config(max_steps=1, num_train_epochs=1)
     record = trainer.predict("This is a text", as_argilla_records=True)
     assert isinstance(record, TokenClassificationRecord)

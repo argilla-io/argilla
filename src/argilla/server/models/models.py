@@ -82,7 +82,7 @@ ResponseStatusEnum = SAEnum(ResponseStatus, name="response_status_enum")
 class Response(DatabaseModel):
     __tablename__ = "responses"
 
-    values: Mapped[Optional[dict]] = mapped_column(JSON)
+    values: Mapped[Optional[dict]] = mapped_column(MutableDict.as_mutable(JSON))
     status: Mapped[ResponseStatus] = mapped_column(ResponseStatusEnum, default=ResponseStatus.submitted, index=True)
     record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id", ondelete="CASCADE"), index=True)
     user_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), index=True)

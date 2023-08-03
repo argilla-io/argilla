@@ -121,8 +121,8 @@ async def publish_dataset(db: "AsyncSession", search_engine: SearchEngine, datas
 
 
 async def delete_dataset(db: "AsyncSession", search_engine: SearchEngine, dataset: Dataset) -> Dataset:
-    dataset = await dataset.delete(db)
     async with db.begin_nested():
+        dataset = await dataset.delete(db, autocommit=False)
         await search_engine.delete_index(dataset)
     return dataset
 
@@ -421,16 +421,15 @@ async def create_response(
 ) -> Response:
     validate_response_values(record.dataset, values=response_create.values, status=response_create.status)
 
-    response = await Response.create(
-        db,
-        values=jsonable_encoder(response_create.values),
-        status=response_create.status,
-        record_id=record.id,
-        user_id=user.id,
-        autocommit=False,
-    )
-
     async with db.begin_nested():
+        response = await Response.create(
+            db,
+            values=jsonable_encoder(response_create.values),
+            status=response_create.status,
+            record_id=record.id,
+            user_id=user.id,
+            autocommit=False,
+        )
         await db.flush([response])
         await search_engine.update_record_response(response)
 
@@ -442,19 +441,18 @@ async def update_response(
 ):
     validate_response_values(response.record.dataset, values=response_update.values, status=response_update.status)
 
-    response = await response.update(
-        db, values=jsonable_encoder(response_update.values), status=response_update.status, autocommit=False
-    )
-
     async with db.begin_nested():
+        response = await response.update(
+            db, values=jsonable_encoder(response_update.values), status=response_update.status, autocommit=False
+        )
         await search_engine.update_record_response(response)
 
     return response
 
 
 async def delete_response(db: "AsyncSession", search_engine: SearchEngine, response: Response) -> Response:
-    response = await response.delete(db)
     async with db.begin_nested():
+        response = await response.delete(db, autocommit=False)
         await search_engine.delete_record_response(response)
     return response
 
