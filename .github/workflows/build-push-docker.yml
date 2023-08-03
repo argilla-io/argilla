@@ -68,9 +68,12 @@ jobs:
         with:
           images: ${{ inputs.image-name }}
 
-      # print tags from previous step
-      - name: print tags
-        run: echo "${{ steps.meta.outputs.tags }}"
+      - name: Get Docker image tag from GITHUB_REF
+        id: docker-image-tag-from-ref
+        uses: ./.github/actions/docker-image-tag-from-ref
+
+      - name: echo output from custom action
+        run: echo "${{ steps.docker-image-tag-from-ref.output.docker-image-tag }}"
 
       - name: Login to Docker Hub
         uses: docker/login-action@v2
