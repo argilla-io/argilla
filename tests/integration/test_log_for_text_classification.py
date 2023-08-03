@@ -284,7 +284,7 @@ def test_log_with_bulk_error(argilla_user: "User"):
     init(api_key=argilla_user.api_key, workspace=argilla_user.username)
 
     delete(dataset)
-    try:
+    with pytest.raises(BadRequestApiError) as excinfo:
         log(
             [
                 TextClassificationRecord(id=0, text="This is an special text", metadata={"key": 1}),
@@ -292,10 +292,10 @@ def test_log_with_bulk_error(argilla_user: "User"):
             ],
             name=dataset,
         )
-    except BadRequestApiError as error:
-        assert error.ctx["code"] == "argilla.api.errors::BulkDataError"
-        assert error.ctx["params"]["message"] == "Cannot log data in dataset argilla.test_log_with_bulk_error"
-        assert error.ctx["params"]["errors"][0]["caused_by"] == {
-            "type": "illegal_argument_exception",
-            "reason": 'For input string: "wrong-value"',
-        }
+    error = excinfo.value
+    assert error.ctx["code"] == "argilla.api.errors::BulkDataError"
+    assert error.ctx["params"]["message"] == "Cannot log data in dataset argilla.test_log_with_bulk_error"
+    assert error.ctx["params"]["errors"][0]["caused_by"] == {
+        "type": "illegal_argument_exception",
+        "reason": 'For input string: "wrong-value"',
+    }
