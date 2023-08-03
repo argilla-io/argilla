@@ -21,6 +21,7 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForRewardModelling,
     TrainingTaskForSupervisedFinetuning,
 )
+from argilla.training.utils import filter_allowed_args
 from argilla.utils.dependency import require_version
 
 if TYPE_CHECKING:
@@ -31,7 +32,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaTRLTrainer")
     _logger.setLevel(logging.INFO)
 
-    require_version("trl")
+    require_version("trl>=0.5.0")
 
     def __init__(
         self,
@@ -74,10 +75,6 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
             self._train_dataset = self._dataset
             self._eval_dataset = None
 
-        # TODO: Do we need something like this?
-        # if self._record_class is not FeedbackRecord:
-        #     raise NotImplementedError("TRL only supports `FeedbackRecord` records.")
-
         if not isinstance(
             self._task,
             (
@@ -88,17 +85,28 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         ):
             raise NotImplementedError(f"Task {self._task} not supported in TRL.")
 
+        from trl import DPOTrainer, RewardTrainer, SFTTrainer
+
+        self.trainer_mapping = {
+            TrainingTaskForSupervisedFinetuning: SFTTrainer,
+            TrainingTaskForRewardModelling: RewardTrainer,
+            TrainingTaskForDirectPreferenceOptimization: DPOTrainer,
+        }
+        self.trainer_cls = self.trainer_mapping[type(self._task)]
+
         self.init_training_args()
 
     def init_training_args(self):
         """
         Initializes the training arguments.
         """
+        self.training_args_kwargs = {}
+        self.training_args_kwargs["evaluation_strategy"] = "no" if self._eval_dataset is None else "epoch"
+        self.training_args_kwargs["logging_steps"] = 30
+        self.training_args_kwargs["logging_steps"] = 1
+        self.training_args_kwargs["num_train_epochs"] = 1
+
         self.trainer_kwargs = {}
-        self.trainer_kwargs["evaluation_strategy"] = "no" if self._eval_dataset is None else "epoch"
-        self.trainer_kwargs["logging_steps"] = 30
-        self.trainer_kwargs["logging_steps"] = 1
-        self.trainer_kwargs["num_train_epochs"] = 1
 
     def init_model(self, new: bool = False):
         """
@@ -130,6 +138,10 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         """
         Updates the configuration of the trainer, but the parameters depend on the trainer.subclass.
         """
+        from transformers import TrainingArguments
+
+        self.training_args_kwargs.update(filter_allowed_args(TrainingArguments.__init__, **kwargs))
+        self.trainer_kwargs.update(filter_allowed_args(self.trainer_cls.__init__, **kwargs))
 
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
         """
@@ -143,25 +155,23 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         from transformers import TrainingArguments
 
         # check required path argument
-        self.trainer_kwargs["output_dir"] = output_dir
+        self.training_args_kwargs["output_dir"] = output_dir
 
         self.init_model(new=True)
 
         if isinstance(self._task, TrainingTaskForSupervisedFinetuning):
-            from trl import SFTTrainer
-
-            self._training_args = TrainingArguments(**self.trainer_kwargs)
-            self._trainer = SFTTrainer(
+            self._training_args = TrainingArguments(**self.training_args_kwargs)
+            self._trainer = self.trainer_cls(
                 self._transformers_model,
                 args=self._training_args,
                 train_dataset=self._train_dataset,
                 eval_dataset=self._eval_dataset,
                 dataset_text_field="text",
                 tokenizer=self._transformers_tokenizer,
+                **self.trainer_kwargs,
             )
 
         elif isinstance(self._task, TrainingTaskForRewardModelling):
-            from trl import RewardTrainer
 
             def preprocess_function(examples):
                 new_examples = {
@@ -181,33 +191,31 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
 
                 return new_examples
 
-            self._training_args = TrainingArguments(**self.trainer_kwargs)
+            self._training_args = TrainingArguments(**self.training_args_kwargs)
             train_dataset = self._train_dataset.map(preprocess_function, batched=True)
             eval_dataset = None
             if self._eval_dataset:
                 eval_dataset = self._eval_dataset.map(preprocess_function, batched=True)
 
-            self._trainer = RewardTrainer(
+            self._trainer = self.trainer_cls(
                 self._transformers_model,
                 args=self._training_args,
                 train_dataset=train_dataset,
                 eval_dataset=eval_dataset,
                 tokenizer=self._transformers_tokenizer,
+                **self.trainer_kwargs,
             )
 
         elif isinstance(self._task, TrainingTaskForDirectPreferenceOptimization):
-            # TODO: DPO hasn't been released yet
-            # requires_version("trl>...")
-            from trl import DPOTrainer
-
-            self._training_args = TrainingArguments(**self.trainer_kwargs)
-            self._trainer = DPOTrainer(
+            self._training_args = TrainingArguments(**self.training_args_kwargs)
+            self._trainer = self.trainer_cls(
                 model=self._transformers_model,
                 ref_model=self._transformers_ref_model,
                 args=self._training_args,
                 train_dataset=self._train_dataset,
                 eval_dataset=self._eval_dataset,
                 tokenizer=self._transformers_tokenizer,
+                **self.trainer_kwargs,
             )
 
         #  train
@@ -226,3 +234,15 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         """
         self._transformers_model.save_pretrained(output_dir)
         self._transformers_tokenizer.save_pretrained(output_dir)
+
+    def __repr__(self):
+        formatted_string = []
+        arg_dict = {
+            repr(self.trainer_cls.__name__): self.trainer_kwargs,
+            "'TrainingArguments'": self.training_args_kwargs,
+        }
+        for arg_dict_key, arg_dict_single in arg_dict.items():
+            formatted_string.append(arg_dict_key)
+            for key, val in arg_dict_single.items():
+                formatted_string.append(f"{key}: {val}")
+        return "\n".join(formatted_string)
