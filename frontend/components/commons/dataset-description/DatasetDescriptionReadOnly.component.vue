@@ -32,9 +32,7 @@ export default {
   &__text {
     white-space: pre-wrap;
     color: $black-87;
-    &:first-letter {
-      text-transform: capitalize;
-    }
+
     &.--light {
       color: $black-37;
     }

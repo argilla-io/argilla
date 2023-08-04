@@ -1,5 +1,5 @@
 export class Dataset {
-  private originalGuidelines: string;
+  private readonly originalGuidelines: string;
   constructor(
     public readonly id: string,
     public readonly name: string,
@@ -19,7 +19,7 @@ export class Dataset {
     return this.workspaceName;
   }
 
-  public get areGuidelinesModified(): boolean {
+  public get isModified(): boolean {
     return this.guidelines !== this.originalGuidelines;
   }
   restoreGuidelines() {
