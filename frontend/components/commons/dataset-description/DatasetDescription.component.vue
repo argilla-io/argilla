@@ -4,11 +4,18 @@
       class="--heading5 --semibold description__title"
       v-text="'Annotation guidelines'"
     />
-    <RenderMarkdownBaseComponent
-      class="--body1 description__text"
-      :class="{ '--light': isColorLight }"
-      :markdown="datasetDescription"
-    />
+    <BaseCardWithTabs :tabs="tabs">
+      <template v-slot="{ currentComponent }">
+        <component
+          class="description__content"
+          :markdown="datasetDescription"
+          :value="datasetDescription"
+          :is="currentComponent"
+          :key="currentComponent"
+          @change-text="onChangeTextArea"
+        />
+      </template>
+    </BaseCardWithTabs>
   </div>
 </template>
 
@@ -19,9 +26,22 @@ export default {
       type: String,
       required: true,
     },
-    isColorLight: {
-      type: Boolean,
-      default: false,
+  },
+  model: {
+    prop: "datasetDescription",
+    event: "input",
+  },
+  data() {
+    return {
+      tabs: [
+        { name: "Raw", component: "ContentEditableFeedbackTask" },
+        { name: "Preview", component: "RenderMarkdownBaseComponent" },
+      ],
+    };
+  },
+  methods: {
+    onChangeTextArea(newText) {
+      this.$emit("input", newText);
     },
   },
 };
@@ -36,9 +56,15 @@ export default {
     &:first-letter {
       text-transform: capitalize;
     }
-
-    &.--light {
-      color: $black-37;
+  }
+  &__content {
+    display: block;
+    background: palette(white);
+    padding: $base-space * 2;
+    border-radius: $border-radius;
+    border: 1px solid $black-10;
+    &:focus-within {
+      border-color: $primary-color;
     }
   }
 }

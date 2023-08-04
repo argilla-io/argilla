@@ -19,32 +19,10 @@
       </div>
     </div>
     <div class="settings__area">
-      <form
-        @submit.prevent="onSubmit()"
-        class="settings-info__edition-form-fields"
-      >
-        <DatasetDescriptionComponent
-          v-model="settings.dataset.guidelines"
-          :datasetDescription="guidelines"
-        />
-        <div class="settings-info__edition-form-footer">
-          <BaseButton
-            type="button"
-            class="secondary light small"
-            @on-click="restore(guidelines)"
-            :disabled="!settings.dataset.areGuidelinesModified"
-          >
-            <span v-text="'Cancel'" />
-          </BaseButton>
-          <BaseButton
-            type="submit"
-            class="primary small"
-            :disabled="!settings.dataset.areGuidelinesModified"
-          >
-            <span v-text="'Update'" />
-          </BaseButton>
-        </div>
-      </form>
+      <DatasetDescriptionReadOnlyComponent
+        :datasetDescription="guidelines"
+        :isColorLight="!guidelines"
+      />
     </div>
   </div>
 </template>
@@ -66,11 +44,6 @@ export default {
       );
     },
   },
-  methods: {
-    onSubmit() {
-      this.update(this.guidelines);
-    },
-  },
 };
 </script>
 
@@ -86,20 +59,6 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-  }
-  &-info {
-    &__edition-form {
-      &-footer {
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-end;
-        align-items: center;
-        padding-top: $base-space * 3;
-        display: inline-flex;
-        gap: $base-space;
-      }
-    }
   }
 }
 
