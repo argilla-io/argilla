@@ -83,10 +83,18 @@ jobs:
 
       # Authenticate in GCP using Workload Identity Federation, so we can push the Docker image to the Google Cloud Artifact Registry
       - name: Authenticate to Google Cloud
+        id: google-auth
         uses: 'google-github-actions/auth@v1'
         with:
           workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WIP }}
           service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
+
+      - name: Login to Google Artifact Registry
+        uses: docker/login-action@v1
+        with:
+          registry: europe-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.google-auth.outputs.access_token }}
 
       - name: Build and push
         uses: docker/build-push-action@v4
