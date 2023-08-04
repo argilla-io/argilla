@@ -6,38 +6,48 @@
 
 <script>
 export default {
+  data() {
+    return {
+      timer: null,
+      keyCode: "",
+    };
+  },
   computed: {
     options() {
       return this.$slots.default[0].context?.options;
     },
   },
   methods: {
-    answerRatingFor($event) {
-      if (!this.isValidKeyFor($event)) return;
-
-      const currValue = $event.key == 0 ? 10 : +$event.key;
-
-      if (!this.options.some((option) => option.value == currValue)) return;
-
-      const target = this.options.find(({ value }) => value == currValue);
-
-      target?.id && document.getElementById(target.id).click();
-
-      if (target.isSelected) {
-        $event.preventDefault();
-
-        this.$emit("on-user-answer");
-      }
+    reset() {
+      this.keyCode = "";
+      this.timer = null;
     },
-    isValidKeyFor({ code }) {
-      const value = code.at(-1);
-      const keyIsFromNumpadOrDigit = ["Numpad", "Digit"].some((prefix) =>
-        code.includes(prefix)
-      );
+    answerRatingFor($event) {
+      if (this.timer) clearTimeout(this.timer);
 
-      const valueIsValid = !isNaN(value);
+      this.keyCode += $event.key;
 
-      return keyIsFromNumpadOrDigit && valueIsValid;
+      if (isNaN(this.keyCode)) {
+        this.reset();
+
+        return;
+      }
+
+      const target = this.options.find(({ value }) => value == this.keyCode);
+
+      if (!target) {
+        this.reset();
+
+        return;
+      }
+
+      $event.preventDefault();
+
+      document.getElementById(target.id).click();
+
+      this.timer = setTimeout(() => {
+        this.reset();
+      }, 300);
     },
   },
 };

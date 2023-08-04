@@ -12,7 +12,7 @@
         class="draggable__rank-card--unranked"
         :title="item.text"
         tabindex="0"
-        ref="question"
+        ref="questions"
         @keydown="rankWithKeyboard($event, item)"
         @focus="onFocus"
       >
@@ -58,21 +58,7 @@
 
 <script>
 import "assets/icons/draggable";
-
-const validKeyCodes = {
-  1: 1,
-  2: 2,
-  3: 3,
-  4: 4,
-  5: 5,
-  6: 6,
-  7: 7,
-  8: 8,
-  9: 9,
-  "=": 10,
-  "!": 11,
-  '"': 12,
-};
+import { isNil } from "lodash";
 
 export default {
   name: "DndSelectionComponent",
@@ -86,41 +72,113 @@ export default {
       default: () => false,
     },
   },
+  data() {
+    return {
+      timer: null,
+      keyCode: "",
+    };
+  },
   watch: {
     isFocused: {
       immediate: true,
       handler(newValue) {
-        !!newValue && this.onAutoFocusFirstItem();
+        const questionsAndItems = [
+          ...(this.$refs.questions || []),
+          ...(this.$refs.items || []),
+        ];
+
+        const componentContainsActiveElement = questionsAndItems?.includes(
+          document.activeElement
+        );
+
+        if (newValue && !componentContainsActiveElement) {
+          this.focusOnFirstQuestionOrItem();
+        }
       },
     },
   },
   methods: {
+    reset() {
+      this.keyCode = "";
+      this.timer = null;
+    },
     rankWithKeyboard(event, questionToMove) {
-      const keyCode = event.key;
+      if (this.timer) clearTimeout(this.timer);
+      if (event.shiftKey || event.key == "Tab") return;
 
-      const slotTo = this.ranking.slots[validKeyCodes[keyCode] - 1];
+      event.stopPropagation();
 
-      if (slotTo) {
-        this.ranking.moveQuestionToSlot(questionToMove, slotTo);
+      this.keyCode += event.key;
 
-        this.$emit("on-reorder", this.ranking);
-        this.onAutoFocusFirstItem();
+      if (this.onUnRankFor(event.key, questionToMove)) {
+        this.focusOnFirstQuestionOrItem();
+        this.reset();
+        return;
       }
+
+      if (isNaN(this.keyCode)) {
+        this.reset();
+        return;
+      }
+
+      const slotTo = this.ranking.slots[this.keyCode - 1];
+
+      if (!slotTo) {
+        this.reset();
+        return;
+      }
+
+      this.ranking.moveQuestionToSlot(questionToMove, slotTo);
+      this.onMoveEnd();
+
+      this.$nextTick(() => {
+        const questionRanked = this.$refs.items?.find(
+          ({ title }) => title == questionToMove?.text
+        );
+
+        questionRanked?.focus();
+      });
+
+      this.timer = setTimeout(() => {
+        this.$nextTick(() => {
+          this.focusOnFirstQuestionOrItem();
+          this.reset();
+        });
+      }, 300);
+    },
+    onUnRankFor(key, question) {
+      const isRanked = !isNil(question.rank);
+
+      if (key == "Backspace" && isRanked) {
+        question.rank = null;
+
+        return true;
+      }
+
+      return false;
+    },
+    focusOnFirstQuestionOrItem() {
+      this.$nextTick(() => {
+        const firstQuestion = this.$refs.questions?.find(
+          ({ title }) => title == this.ranking.questions[0]?.text
+        );
+
+        if (!firstQuestion) {
+          const firstItem = this.$refs.items[0];
+
+          firstItem?.focus();
+
+          return;
+        }
+
+        firstQuestion.focus();
+      });
     },
     onMoveEnd() {
       this.$emit("on-reorder", this.ranking);
     },
     onFocus() {
       this.$emit("on-focus");
-    },
-    onAutoFocusFirstItem() {
-      this.$nextTick(() => {
-        if (this.$refs.question && this.$refs.question[0]) {
-          this.$refs.question[0].focus();
-        } else {
-          this.$refs.items[0].focus();
-        }
-      });
     },
   },
 };
@@ -179,10 +237,14 @@ $max-visible-card-items: 12;
     padding: $base-space;
     border-radius: $border-radius;
     cursor: move;
+
     &[draggable="true"] {
       background: $card-ghost-color;
       color: $card-primary-color;
       box-shadow: $shadow-500;
+      &:focus {
+        outline: none !important;
+      }
     }
     &.ghost-ticket {
       background: $card-empty-color;
@@ -201,11 +263,12 @@ $max-visible-card-items: 12;
       @extend .draggable__rank-card;
       background-color: $card-secondary-color;
       color: $card-primary-color;
-      transition: box-shadow 0.2s ease-out;
+      transition: box-shadow 0.2s ease-out !important;
+
       &:focus {
-        outline: 2px solid $card-primary-color;
+        outline: 2px solid $card-primary-color !important;
       }
-      &:not(:firt-of-type):focus:not(:focus-visible) {
+      &:focus:not(:focus-visible) {
         outline: none;
       }
       &:hover {
@@ -220,7 +283,7 @@ $max-visible-card-items: 12;
       &:focus {
         outline: 2px solid palette(apricot);
       }
-      &:not(:firt-of-type):focus:not(:focus-visible) {
+      &:focus:not(:focus-visible) {
         outline: none;
       }
     }
