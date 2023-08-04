@@ -418,7 +418,11 @@ async def test_push_to_argilla_and_from_argilla(
         ]
     )
 
-    remote_dataset = dataset.push_to_argilla(name="my-dataset")
+    with pytest.warns(
+        DeprecationWarning, match="Calling `push_to_argilla` no longer implies that the `FeedbackDataset`"
+    ):
+        remote_dataset = dataset.push_to_argilla(name="my-dataset")
+
     with pytest.warns(UserWarning, match="Multiple responses without `user_id`"):
         dataset.push_to_argilla(name="test-dataset")
 
