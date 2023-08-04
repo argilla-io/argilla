@@ -22,13 +22,14 @@ jobs:
       pull-requests: write
 
     steps:
+      - uses: actions/checkout@v3
+
       # Authenticate in GCP using Workload Identity Federation
       - name: Authenticate to Google Cloud
         uses: 'google-github-actions/auth@v1'
         with:
           workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WIP }}
           service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
-          flags: --no-cpu-throttling
 
       - name: Deploy in Cloud Run
         id: deploy
@@ -47,6 +48,6 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         with:
           message: |
-            The URL of the deployed environment for this PR is '${{ steps.deploy.outputs.url }}'
+            The URL of the deployed environment for this PR is ${{ steps.deploy.outputs.url }}
           comment_tag: cloud_run_url
           reactions: rocket
