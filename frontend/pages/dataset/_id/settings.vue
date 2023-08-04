@@ -14,7 +14,12 @@
           class="settings__header"
           :class="{ '--separator': !isAdminOrOwnerRole }"
         />
+        <SettingsInfoReadOnly
+          v-if="!isAdminOrOwnerRole"
+          :settings="datasetSetting"
+        />
         <BaseTabsAndContent
+          v-else
           :tabs="tabs"
           tab-size="large"
           class="settings__tabs-content"
