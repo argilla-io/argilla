@@ -1,10 +1,11 @@
 <template>
   <form
-    id="formId"
+    ref="formRef"
     class="questions-form"
     :class="{ '--focused-form': formHasFocus && interactionCount > 1 }"
     @submit.prevent="onSubmit"
     v-click-outside="onClickOutside"
+    @click="onClickForm"
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
@@ -33,6 +34,7 @@
         @keydown.shift.arrow-up="updateQuestionAutofocus(autofocusPosition - 1)"
       >
         <TextAreaComponent
+          ref="textArea"
           v-if="question.isTextType"
           :title="question.title"
           v-model="question.answer.value"
@@ -177,6 +179,9 @@ export default {
 
       return !this.questionAreCompletedCorrectly;
     },
+    formWrapper() {
+      return this.$refs.formRef;
+    },
   },
   watch: {
     isFormUntouched(isFormUntouched) {
@@ -192,8 +197,6 @@ export default {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
 
     const keyBoardHandler = (parent) => (e) => {
-      const formWrapper = document.getElementById("formId");
-
       const focusable = parent.querySelectorAll(
         'input[type="checkbox"], [tabindex="0"]'
       );
@@ -205,19 +208,19 @@ export default {
 
       const isArrowDownPressed = e.key === "ArrowDown";
       const isArrowUpPressed = e.key === "ArrowUp";
-      const activeElementIsInForm = formWrapper.contains(
+      const activeElementIsInForm = this.formWrapper?.contains(
         document.activeElement
       );
       const isLastElementActive = document.activeElement === lastElement;
       const isFirstElementActive = document.activeElement === firstElement;
 
       if (!activeElementIsInForm && isShiftKeyPressed && isArrowDownPressed) {
-        this.focusOnFirstQuestionFor(e, formWrapper);
+        this.focusOnFirstQuestion(e);
         return;
       }
 
       if (!activeElementIsInForm && isShiftKeyPressed && isArrowUpPressed) {
-        this.focusOnLastQuestionFor(e, formWrapper);
+        this.focusOnLastQuestion(e);
         return;
       }
 
@@ -247,27 +250,50 @@ export default {
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
+    onClickForm($event) {
+      const questionRefs = [
+        "textArea",
+        "singleLabel",
+        "multiLabel",
+        "rating",
+        "ranking",
+      ];
+
+      let targetIsQuestion = false;
+
+      for (const questionRef of questionRefs) {
+        const questionWrapper = this.$refs[questionRef][0].$el;
+        if (questionWrapper.contains($event.target)) {
+          targetIsQuestion = true;
+          break;
+        }
+      }
+
+      if (!targetIsQuestion) {
+        this.focusOnFirstQuestion($event);
+      }
+    },
     focusOn($event, node) {
       $event.preventDefault();
       node.focus();
     },
-    focusOnFirstQuestionFor($event, formWrapper) {
+    focusOnFirstQuestion($event) {
       $event.preventDefault();
-      const firstformGroup = this.getFirstFormGroupNodeFor(formWrapper);
+      const firstformGroup = this.getFirstFormGroupNode();
       firstformGroup[0]?.focus();
     },
-    focusOnLastQuestionFor($event, formWrapper) {
+    focusOnLastQuestion($event) {
       $event.preventDefault();
-      const lastformGroup = this.getLastFormGroupNodeFor(formWrapper);
+      const lastformGroup = this.getLastFormGroupNode();
       lastformGroup[0]?.focus();
     },
-    getFirstFormGroupNodeFor(aFormWrapper) {
-      return aFormWrapper?.children[0]?.children[1].querySelectorAll(
+    getFirstFormGroupNode() {
+      return this.formWrapper?.children[0]?.children[1].querySelectorAll(
         'input[type="checkbox"], [tabindex="0"]'
       );
     },
-    getLastFormGroupNodeFor(aFormWrapper) {
-      return aFormWrapper?.children[0]?.lastChild.querySelectorAll(
+    getLastFormGroupNode() {
+      return this.formWrapper?.children[0]?.lastChild.querySelectorAll(
         'input[type="checkbox"], [tabindex="0"]'
       );
     },
