@@ -34,11 +34,23 @@ def get_branch_name() -> Union[str, None]:
     return None
 
 
+def get_tag_name() -> Union[str, None]:
+    match = re.match(r"refs/tags/(.+)", GITHUB_REF)
+    if match:
+        return match.group(1)
+    return None
+
+
 def clean_branch_name(branch_name: str) -> str:
     return re.sub(r"[^A-Za-z0-9]", "-", branch_name)
 
 
 def get_docker_image_tag_from_reg() -> str:
+    tag_name = get_tag_name()
+    if tag_name:
+        logging.info(f"`GITHUB_REF` refers to tag `{tag_name}`")
+        return tag_name
+
     pr_number = get_pull_request_number()
     if pr_number:
         logging.info(f"`GITHUB_REF` refers to pull request #{pr_number}")
