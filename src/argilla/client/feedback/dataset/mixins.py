@@ -196,7 +196,7 @@ class ArgillaToFromMixin:
             "Calling `push_to_argilla` no longer implies that the `FeedbackDataset` can"
             " be updated in Argilla. If you want to push a `FeedbackDataset` and then"
             " update it in Argilla, you need to catch the returned object and use it"
-            " instead as `remote_ds = ds.push_to_argilla(...)`. Otherwise, you can just"
+            " instead: `remote_ds = ds.push_to_argilla(...)`. Otherwise, you can just"
             " call `push_to_argilla` and then `from_argilla` to retrieve the"
             " `FeedbackDataset` from Argilla, so the current `FeedbackDataset` can be"
             f" retrieved as `FeedbackDataset.from_argilla(id='{argilla_id}')`.",
