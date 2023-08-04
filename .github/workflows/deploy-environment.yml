@@ -35,7 +35,7 @@ jobs:
         uses: 'google-github-actions/deploy-cloudrun@v1'
         with:
           service: argilla-quickstart-${{ inputs.image-version }}
-          image: europe-docker.pkg.dev/argilla-ci/${{ inputs.image-name}}:${{ inputs.version }}
+          image: europe-docker.pkg.dev/argilla-ci/${{ inputs.image-name}}:${{ inputs.image-version }}
           region: europe-southwest1
           flags: '--no-cpu-throttling --min-instances 1 --max-instances 1'
 
