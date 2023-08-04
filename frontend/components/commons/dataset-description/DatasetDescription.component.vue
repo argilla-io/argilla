@@ -49,14 +49,6 @@ export default {
 
 <style lang="scss" scoped>
 .description {
-  &__text {
-    white-space: pre-wrap;
-    color: $black-87;
-
-    &:first-letter {
-      text-transform: capitalize;
-    }
-  }
   &__content {
     display: block;
     background: palette(white);
