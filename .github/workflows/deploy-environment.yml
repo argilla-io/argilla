@@ -30,12 +30,18 @@ jobs:
           service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
           flags: --no-cpu-throttling
 
+      - name: echo inputs
+        run: |
+          echo "service-name: ${{ inputs.service-name }}"
+          echo "docker-image: ${{ inputs.docker-image }}"
+
       - name: Deploy in Cloud Run
         id: deploy
         uses: 'google-github-actions/deploy-cloudrun@v1'
         with:
           service: ${{ inputs.service-name }}
           image: ${{ inputs.docker-image }}
+          region: europe-southwest1
 
       - name: Display Cloud Run URL
         run: 'echo "URL: ${{ steps.deploy.outputs.url }}"'

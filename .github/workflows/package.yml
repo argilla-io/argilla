@@ -162,7 +162,7 @@ jobs:
       !cancelled() &&
       needs.build_quickstart_docker_image.result == 'success'
     with:
-      service-name: test-argilla
+      service-name: ${{ needs.build_quickstart_docker_image.outputs.version }}
       docker-image: ${{ needs.build_quickstart_docker_image.outputs.google-docker-image }}
     secrets: inherit
 
