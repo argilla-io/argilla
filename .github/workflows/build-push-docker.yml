@@ -33,6 +33,9 @@ on:
       version:
         description: "Version of the Docker image"
         value: ${{ jobs.build.outputs.version }}
+      google-docker-image:
+        description: The name of the Docker image uploaded to Google Artifact Registry.
+        value: ${{ jobs.build.outputs.google-docker-image }}
 
 jobs:
   build:
@@ -46,6 +49,7 @@ jobs:
 
     outputs:
       version: ${{ steps.meta.outputs.version }}
+      google-docker-image: europe-docker.pkg.dev/argilla-ci/${{ inputs.image-name}}:${{ steps.docker-image-tag-from-ref.outputs.docker-image-tag }}
     steps:
       - uses: actions/checkout@v3
 
