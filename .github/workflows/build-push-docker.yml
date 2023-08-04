@@ -102,7 +102,7 @@ jobs:
           file: ${{ inputs.dockerfile }}
           platforms: ${{ inputs.platforms }}
           tags: |
-            ${{ inputs.image-name }}:${{ steps.docker-image-tag-from-reg.outputs.docker-image-tag }}
+            ${{ inputs.image-name }}:${{ steps.docker-image-tag-from-ref.outputs.docker-image-tag }}
             europe-docker.pkg.dev/argilla-ci/${{ inputs.image-name}}:${{ steps.docker-image-tag-from-ref.outputs.docker-image-tag }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: ${{ inputs.build-args }}
