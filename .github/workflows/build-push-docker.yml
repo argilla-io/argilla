@@ -48,7 +48,7 @@ jobs:
       id-token: write
 
     outputs:
-      version: ${{ steps.meta.outputs.version }}
+      version: ${{ steps.docker-image-tag-from-ref.outputs.docker-image-tag }}
       google-docker-image: europe-docker.pkg.dev/argilla-ci/${{ inputs.image-name}}:${{ steps.docker-image-tag-from-ref.outputs.docker-image-tag }}
     steps:
       - uses: actions/checkout@v3
