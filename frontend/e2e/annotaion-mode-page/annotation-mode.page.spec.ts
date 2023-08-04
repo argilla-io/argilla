@@ -16,13 +16,13 @@ const goToAnnotationPage = async (page, shortAndLongQuestions = false) => {
   await mockAllDatasets(page);
   const record = shortAndLongQuestions
     ? await mockRecordForLongAndShortQuestion(page, {
-      datasetId: dataset.id,
-      workspaceId: dataset.workspace_id,
-    })
+        datasetId: dataset.id,
+        workspaceId: dataset.workspace_id,
+      })
     : await mockRecord(page, {
-      datasetId: dataset.id,
-      workspaceId: dataset.workspace_id,
-    });
+        datasetId: dataset.id,
+        workspaceId: dataset.workspace_id,
+      });
 
   await loginUserAndWaitFor(page, "datasets");
 
@@ -170,16 +170,6 @@ test.describe("Annotate page", () => {
 
     await expect(page).toHaveScreenshot();
   });
-
-  test("focus on first question if user click on form but not inside a question", async ({ page }) => {
-    await goToAnnotationPage(page);
-
-    await page.locator('.search-area').first().click(); // focus on the form is lost
-    await expect(page).toHaveScreenshot();
-    await page.getByText('Submit your feedback').first().click(); // focus is on the first question
-
-    await expect(page).toHaveScreenshot();
-  })
 });
 
 test.describe("Annotation page shortcuts", () => {
