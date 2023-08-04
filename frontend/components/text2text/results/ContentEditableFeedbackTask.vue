@@ -16,7 +16,7 @@
           :contenteditable="true"
           :placeholder="placeholder"
           @input="onInputText"
-          v-html="sanitizedEditableText"
+          v-html="sanitizedCurrentValue"
           @focus="setFocus(true)"
           @blur="setFocus(false)"
           @keydown.shift.enter.exact="looseFocus"
@@ -48,35 +48,32 @@ export default {
   },
   data: () => {
     return {
-      defaultText: null,
-      sanitizedEditableText: null,
+      originalValue: null,
+      sanitizedCurrentValue: null,
       currentValue: null,
-      editableText: null,
       focus: false,
     };
   },
   computed: {
     textIsEdited() {
-      return this.defaultText !== this.value;
+      return this.originalValue !== this.value;
     },
   },
   watch: {
-    value(newValue) {
-      if (newValue !== this.currentValue) {
-        this.sanitizedEditableText = null;
-        this.editableText = newValue;
-        this.$nextTick(() => {
-          this.sanitizedEditableText = DOMPurify.sanitize(this.editableText);
-        });
+    value() {
+      if (this.value !== this.currentValue) {
+        this.currentValue = this.value;
+
+        this.updateSanitizedEditableText();
       }
     },
   },
   mounted() {
     window.addEventListener("paste", this.pastePlainText);
 
-    this.editableText = this.defaultText = this.value;
+    this.currentValue = this.originalValue = this.value;
 
-    this.sanitizedEditableText = DOMPurify.sanitize(this.editableText);
+    this.updateSanitizedEditableText();
 
     this.textAreaWrapper = document.getElementById("contentId");
   },
@@ -84,16 +81,22 @@ export default {
     window.removeEventListener("paste", this.pastePlainText);
   },
   methods: {
+    updateSanitizedEditableText() {
+      this.sanitizedCurrentValue = " ";
+      this.$nextTick(() => {
+        this.sanitizedCurrentValue = DOMPurify.sanitize(this.currentValue);
+      });
+    },
     looseFocus() {
       this.textAreaWrapper.blur();
     },
     onInputText(event) {
-      this.editableText = this.currentValue = event.target.innerText;
-      this.$emit("change-text", event.target.innerText);
+      this.currentValue = event.target.innerText;
+      this.$emit("change-text", this.currentValue);
     },
     setFocus(status) {
       this.focus = status;
-      this.$emit("on-change-focus", status);
+      this.$emit("on-change-focus", this.focus);
     },
     pastePlainText(event) {
       if (this.focus && event.target.isContentEditable) {
