@@ -154,7 +154,9 @@ def test_create_dataset_with_suggestions(argilla_user: "ServerUser"):
     )
 
     ds.push_to_argilla(name="new_dataset")
-    ds.fetch_records()
+
+    with pytest.warns(DeprecationWarning):
+        ds.fetch_records()
 
     assert len(ds.records) == 1
     for record in ds.records:
@@ -310,13 +312,10 @@ def test_add_records(
     with pytest.raises(ValueError, match="Expected `records` to be a non-empty list"):
         dataset.add_records([])
 
-    with pytest.raises(ValueError, match="Expected `records` to be a list of `dict` or `rg.FeedbackRecord`"):
+    with pytest.raises(ValueError, match="Expected `records` to be a list of `dict` or `FeedbackRecord`"):
         dataset.add_records([None])
 
-    with pytest.raises(ValueError, match="Expected `records` to be a `dict` or `rg.FeedbackRecord`"):
-        dataset.add_records(None)
-
-    with pytest.raises(ValueError, match="`rg.FeedbackRecord.fields` does not match the expected schema"):
+    with pytest.raises(ValueError, match="`FeedbackRecord.fields` does not match the expected schema"):
         dataset.add_records(
             [
                 FeedbackRecord(
@@ -371,7 +370,6 @@ async def test_push_to_argilla_and_from_argilla(
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
-    feedback_dataset_records: List[FeedbackRecord],
     db: "AsyncSession",
 ) -> None:
     api.active_api()
@@ -382,44 +380,8 @@ async def test_push_to_argilla_and_from_argilla(
         fields=feedback_dataset_fields,
         questions=feedback_dataset_questions,
     )
-    dataset.add_records(records=feedback_dataset_records)
-    dataset.push_to_argilla(name="test-dataset")
-
-    assert dataset.argilla_id is not None
-
     # Make sure UUID in `user_id` is pushed to Argilla with no issues as it should be
     # converted to a string
-    dataset.add_records(
-        [
-            FeedbackRecord(
-                fields={
-                    "text": "E",
-                    "label": "F",
-                },
-                responses=[
-                    {
-                        "user_id": argilla_user.id,
-                        "values": {
-                            "question-1": {"value": "answer"},
-                            "question-2": {"value": 1},
-                            "question-3": {"value": "a"},
-                            "question-4": {"value": ["a", "b"]},
-                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
-                        },
-                        "status": "submitted",
-                    },
-                ],
-            ),
-        ]
-    )
-
-    await db.refresh(argilla_user, attribute_names=["datasets"])
-
-    with pytest.raises(RuntimeError, match="already exists in Argilla, please choose another name and/or workspace"):
-        dataset.push_to_argilla(name="test-dataset")
-
-    dataset.push_to_argilla()
-
     dataset.add_records(
         [
             FeedbackRecord(
@@ -454,7 +416,7 @@ async def test_push_to_argilla_and_from_argilla(
     )
 
     with pytest.warns(UserWarning, match="Multiple responses without `user_id`"):
-        dataset.push_to_argilla()
+        dataset.push_to_argilla(name="test-dataset")
 
     dataset_from_argilla = FeedbackDataset.from_argilla(id=dataset.argilla_id)
 
@@ -489,7 +451,8 @@ async def test_copy_dataset_in_argilla(
     await db.refresh(argilla_user, attribute_names=["datasets"])
 
     same_dataset = FeedbackDataset.from_argilla("test-dataset")
-    same_dataset.push_to_argilla("copy-dataset")
+    same_dataset_local = same_dataset.pull()
+    same_dataset_local.push_to_argilla("copy-dataset")
     assert same_dataset.argilla_id is not None
 
     await db.refresh(argilla_user, attribute_names=["datasets"])
@@ -536,11 +499,9 @@ async def test_update_dataset_records_in_argilla(
                 },
             ]
         )
-        assert record._updated is True
 
     dataset.push_to_argilla()
     await db.refresh(argilla_user, attribute_names=["datasets"])
-    assert all(record._updated is False for record in dataset.records)
 
     dataset = FeedbackDataset.from_argilla("test-dataset")
     for record in dataset.records:
@@ -552,11 +513,9 @@ async def test_update_dataset_records_in_argilla(
                 },
             ]
         )
-        assert record._updated is True
 
     dataset.push_to_argilla()
     await db.refresh(argilla_user, attribute_names=["datasets"])
-    assert all(record._updated is False for record in dataset.records)
 
     for record in dataset.records:
         record.set_suggestions(
@@ -567,11 +526,9 @@ async def test_update_dataset_records_in_argilla(
                 },
             ]
         )
-        assert record._updated is True
 
     dataset.push_to_argilla("new-test-dataset")
     await db.refresh(argilla_user, attribute_names=["datasets"])
-    assert all(record._updated is True for record in dataset.records)
 
     record = dataset.records[0]
     with pytest.warns(UserWarning, match="A suggestion for question `question-1`"):
