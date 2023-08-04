@@ -19,6 +19,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      pull-requests: write
 
     steps:
       # Authenticate in GCP using Workload Identity Federation
@@ -36,5 +37,14 @@ jobs:
           service: ${{ inputs.service-name }}
           image: ${{ inputs.docker-image }}
 
-      - name: echo url
-        run: 'echo "${{ steps.deploy.outputs.url }}"'
+      - name: Display Cloud Run URL
+        run: 'echo "URL: ${{ steps.deploy.outputs.url }}"'
+
+      - name: Comment PR with Cloud Run URL
+        uses: thollander/actions-comment-pull-request@v2
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          message: |
+            The URL of the deployed environment for this PR is '${{ steps.deploy.outputs.url }}'
+          comment_tag: cloud_run_url
+          reactions: rocket
