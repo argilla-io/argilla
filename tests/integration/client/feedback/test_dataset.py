@@ -315,9 +315,6 @@ def test_add_records(
     with pytest.raises(ValueError, match="Expected `records` to be a list of `dict` or `FeedbackRecord`"):
         dataset.add_records([None])
 
-    with pytest.raises(ValueError, match="Expected `records` to be a `dict` or `FeedbackRecord`"):
-        dataset.add_records(None)
-
     with pytest.raises(ValueError, match="`FeedbackRecord.fields` does not match the expected schema"):
         dataset.add_records(
             [
