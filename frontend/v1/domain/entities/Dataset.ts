@@ -19,7 +19,7 @@ export class Dataset {
     return this.workspaceName;
   }
 
-  public get areGuidelinesModified(): boolean {
+  public get isModified(): boolean {
     return this.guidelines !== this.originalGuidelines;
   }
 }

@@ -32,14 +32,14 @@
             type="button"
             class="secondary light small"
             @on-click="restore(guidelines)"
-            :disabled="!settings.dataset.areGuidelinesModified"
+            :disabled="!settings.dataset.isModified"
           >
             <span v-text="'Cancel'" />
           </BaseButton>
           <BaseButton
             type="submit"
             class="primary small"
-            :disabled="!settings.dataset.areGuidelinesModified"
+            :disabled="!settings.dataset.isModified"
           >
             <span v-text="'Update'" />
           </BaseButton>
