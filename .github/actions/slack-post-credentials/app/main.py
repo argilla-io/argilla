@@ -26,6 +26,10 @@ GITHUB_REF = os.environ["GITHUB_REF"]
 
 # Inputs
 SLACK_CHANNEL_NAME = os.environ.get("INPUT_SLACK_CHANNEL_NAME")
+URL = os.environ.get("INPUT_URL")
+OWNER = os.environ.get("INPUT_OWNER")
+ADMIN = os.environ.get("INPUT_ADMIN")
+ANNOTATOR = os.environ.get("INPUT_ANNOTATOR")
 
 
 def get_pull_request_number() -> Union[int, None]:
@@ -116,14 +120,10 @@ def bot_already_replied(client: WebClient, channel_id: str, thread_ts: str) -> b
     return False
 
 
-def reply_thread_with_credentials(client: WebClient, channel_id: str, thread_ts: str, credentials: Dict[str, Any]):
-    owner = credentials["owner"]
-    admin = credentials["admin"]
-    annotator = credentials["annotator"]
-
+def reply_thread_with_credentials(client: WebClient, channel_id: str, thread_ts: str) -> None:
     client.chat_postMessage(
         channel=channel_id,
-        text=f"Credentials for PR deployed environment (use as password and API key):\n- owner: '{owner}'\n- admin: '{admin}'\n- annotator: '{annotator}'",
+        text=f"Credentials for PR deployed environment (use as password and API key):\n- URL: {URL}\n- owner: '{OWNER}'\n- admin: '{ADMIN}'\n- annotator: '{ANNOTATOR}'",
         thread_ts=thread_ts,
     ).validate()
 
@@ -132,8 +132,24 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     if SLACK_CHANNEL_NAME is None:
-        logging.error("`SLACK_CHANNEL_NAME` input is not set!")
-        raise KeyError("`SLACK_CHANNEL_NAME` input is not set")
+        logging.error("`slack-channel-name` input is not set!")
+        raise KeyError("`slack-channel-name` input is not set")
+
+    if URL is None:
+        logging.error("`url` input is not set!")
+        raise KeyError("`url` input is not set")
+
+    if OWNER is None:
+        logging.error("`owner` input is not set!")
+        raise KeyError("`owner` input is not set")
+
+    if ADMIN is None:
+        logging.error("`admin` input is not set!")
+        raise KeyError("`admin` input is not set")
+
+    if ANNOTATOR is None:
+        logging.error("`annotator` input is not set!")
+        raise KeyError("`annotator` input is not set")
 
     pr_number = get_pull_request_number()
     if pr_number is None:
@@ -157,5 +173,4 @@ if __name__ == "__main__":
     if bot_already_replied(client, channel_id, thread_ts):
         logging.info(f"Bot already replied to thread of PR {pr_number}")
     else:
-        credentials = generate_credentials()
-        reply_thread_with_credentials(client, channel_id, thread_ts, credentials)
+        reply_thread_with_credentials(client, channel_id, thread_ts)

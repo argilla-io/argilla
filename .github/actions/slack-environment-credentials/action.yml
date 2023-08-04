@@ -1,9 +1,0 @@
-name: Argilla Environment Credentials
-description: Generates credentials for the default owner, admin and annotator users of an Argilla server.
-author: Argilla <contact@argilla.io>
-inputs:
-  slack-channel-name:
-    description: The name of the Slack channel where the credentials will be posted.
-runs:
-  using: docker
-  image: Dockerfile
