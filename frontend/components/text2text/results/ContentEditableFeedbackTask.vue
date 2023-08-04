@@ -104,7 +104,6 @@ export default {
 </script>
 <style lang="scss" scoped>
 [contenteditable="true"] {
-  padding: 0.6em;
   outline: none;
   &:focus + span {
     display: block;
