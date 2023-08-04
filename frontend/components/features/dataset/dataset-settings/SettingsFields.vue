@@ -4,7 +4,7 @@
       <h2 class="--heading5 --semibold">Edit fields</h2>
       <div v-for="field in settings.fields" :key="field.id">
         <form
-          @submit.prevent="onSubmit"
+          @submit.prevent="onSubmit(field)"
           class="settings-fields__edition-form-fields"
         >
           <div class="settings-fields__edition-form-name">
@@ -20,10 +20,19 @@
           >
 
           <div class="settings-fields__edition-form-footer">
-            <BaseButton type="button" class="secondary light small">
+            <BaseButton
+              type="button"
+              class="secondary light small"
+              @on-click="restore(field)"
+              :disabled="!field.isModified"
+            >
               <span v-text="'Cancel'" />
             </BaseButton>
-            <BaseButton type="submit" class="primary small">
+            <BaseButton
+              type="submit"
+              class="primary small"
+              :disabled="!field.isModified"
+            >
               <span v-text="'Update'" />
             </BaseButton>
           </div>
@@ -34,6 +43,8 @@
 </template>
 
 <script>
+import { useSettingsFieldsViewModel } from "./useSettingsFieldsViewModel";
+
 export default {
   name: "SettingsFields",
   props: {
@@ -43,7 +54,12 @@ export default {
     },
   },
   methods: {
-    onSubmit() {},
+    onSubmit(field) {
+      this.update(field);
+    },
+  },
+  setup() {
+    return useSettingsFieldsViewModel();
   },
 };
 </script>

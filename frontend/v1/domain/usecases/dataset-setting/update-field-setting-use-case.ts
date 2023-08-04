@@ -1,4 +1,4 @@
-import { Field } from "../../entities/Field";
+import { Field } from "../../entities/field/Field";
 import { FieldRepository } from "~/v1/infrastructure/repositories";
 
 export class UpdateFieldSettingUseCase {

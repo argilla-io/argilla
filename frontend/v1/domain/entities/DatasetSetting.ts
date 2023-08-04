@@ -1,5 +1,5 @@
 import { Dataset } from "./Dataset";
-import { Field } from "./Field";
+import { Field } from "./field/Field";
 import { Question } from "./question/Question";
 
 export class DatasetSetting {
