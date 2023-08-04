@@ -16,7 +16,7 @@
       </base-action-tooltip>
     </div>
     <div class="dataset-description-component left-content-item">
-      <DatasetDescriptionComponent
+      <DatasetDescriptionComponentReadOnly
         :datasetDescription="settingsDescriptionText"
         :isColorLight="!settingsDescription"
       />
