@@ -68,14 +68,14 @@ The **fields** are the dataset records themselves, for the moment just text fiel
 
 | Field Name | Title | Type | Required | Markdown |
 | ---------- | ----- | ---- | -------- | -------- |
-{% for field in argilla_fields %}| {{ field.name }} | {{ field.title }} | {{ field.__class__.__name__ }} | {{ field.required | default(true, true) }} | {{ field.settings.use_markdown | default(false, true) }} |
+{% for field in argilla_fields %}| {{ field.name }} | {{ field.title }} | {{ field.__class__.__name__ }} | {{ field.required }} | {{ field.settings.use_markdown }} |
 {% endfor %}
 
 The **questions** are the questions that will be asked to the annotators. They can be of different types, such as rating, text, single choice, or multiple choice.
 
 | Question Name | Title | Type | Required | Description | Values/Labels |
 | ------------- | ----- | ---- | -------- | ----------- | ------------- |
-{% for question in argilla_questions %}| {{ question.name }} | {{ question.title }} | {{ question.__class__.__name__  }} | {{ question.required | default(true, true) }} | {{ question.description | default("N/A", true) }} | {% if question.settings.type in ["rating", "label_selection", "multi_label_selection", "ranking"] %}{{ question.settings.options | map(attribute="value") | list }}{% else %}N/A{% endif %} |
+{% for question in argilla_questions %}| {{ question.name }} | {{ question.title }} | {{ question.__class__.__name__  }} | {{ question.required }} | {{ question.description | default("N/A", true) }} | {% if question.settings.type in ["rating", "label_selection", "multi_label_selection", "ranking"] %}{{ question.settings.options | map(attribute="value") | list }}{% else %}N/A{% endif %} |
 {% endfor %}
 
 **✨ NEW** Additionally, we also have **suggestions**, which are linked to the existing questions, and so on, named appending "-suggestion" and "-suggestion-metadata" to those, containing the value/s of the suggestion and its metadata, respectively. So on, the possible values are the same as in the table above.

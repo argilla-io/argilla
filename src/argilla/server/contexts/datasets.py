@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import and_, func, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
@@ -42,7 +42,9 @@ from argilla.server.security.model import User
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
+    from argilla.server.schemas.v1.datasets import DatasetUpdate
     from argilla.server.schemas.v1.fields import FieldUpdate
+    from argilla.server.schemas.v1.questions import QuestionUpdate
     from argilla.server.schemas.v1.suggestions import SuggestionCreate
 
 LIST_RECORDS_LIMIT = 20
@@ -111,30 +113,22 @@ async def publish_dataset(db: "AsyncSession", search_engine: SearchEngine, datas
     if await _count_questions_by_dataset_id(db, dataset.id) == 0:
         raise ValueError("Dataset cannot be published without questions")
 
-    try:
+    async with db.begin_nested():
         dataset = await dataset.update(db, status=DatasetStatus.ready, autocommit=False)
         await search_engine.create_index(dataset)
-        await db.commit()
-    except:
-        await db.rollback()
-        raise
 
     return dataset
 
 
 async def delete_dataset(db: "AsyncSession", search_engine: SearchEngine, dataset: Dataset) -> Dataset:
-    dataset = await dataset.delete(db)
-    try:
+    async with db.begin_nested():
+        dataset = await dataset.delete(db, autocommit=False)
         await search_engine.delete_index(dataset)
-        await db.commit()
-    except:
-        await db.rollback()
-        raise
     return dataset
 
 
-async def update_dataset(db: "AsyncSession", dataset: Dataset, dataset_update: DatasetCreate) -> Dataset:
-    params = dataset_update.dict(exclude_unset=True, exclude_none=True)
+async def update_dataset(db: "AsyncSession", dataset: Dataset, dataset_update: "DatasetUpdate") -> Dataset:
+    params = dataset_update.dict(exclude_unset=True)
     return await dataset.update(db, **params)
 
 
@@ -163,7 +157,7 @@ async def create_field(db: "AsyncSession", dataset: Dataset, field_create: Field
 
 
 async def update_field(db: "AsyncSession", field: Field, field_update: "FieldUpdate") -> Field:
-    params = field_update.dict(exclude_unset=True, exclude_none=True)
+    params = field_update.dict(exclude_unset=True)
     return await field.update(db, **params)
 
 
@@ -199,6 +193,11 @@ async def create_question(db: "AsyncSession", dataset: Dataset, question_create:
     )
 
 
+async def update_question(db: "AsyncSession", question: Question, question_update: "QuestionUpdate") -> Question:
+    params = question_update.dict(exclude_unset=True)
+    return await question.update(db, **params)
+
+
 async def delete_question(db: "AsyncSession", question: Question) -> Question:
     if question.dataset.is_ready:
         raise ValueError("Questions cannot be deleted for a published dataset")
@@ -216,6 +215,13 @@ async def get_record_by_id(
         query = query.options(selectinload(Record.suggestions))
     result = await db.execute(query)
     return result.scalar_one_or_none()
+
+
+async def delete_record(db: "AsyncSession", search_engine: "SearchEngine", record: Record) -> Record:
+    async with db.begin_nested():
+        record = await record.delete(db=db, autocommit=False)
+        await search_engine.delete_records(dataset=record.dataset, records=[record])
+    return record
 
 
 async def get_records_by_ids(
@@ -261,20 +267,35 @@ async def list_records_by_dataset_id_and_user_id(
     dataset_id: UUID,
     user_id: UUID,
     include: List[RecordInclude] = [],
-    response_status: Optional[ResponseStatusFilter] = None,
+    response_statuses: List[ResponseStatusFilter] = [],
     offset: int = 0,
     limit: int = LIST_RECORDS_LIMIT,
 ) -> List[Record]:
+    response_statuses_ = [
+        ResponseStatus(response_status)
+        for response_status in response_statuses
+        if response_status != ResponseStatusFilter.missing
+    ]
+
+    response_status_filter_expressions = []
+
+    if response_statuses_:
+        response_status_filter_expressions.append(Response.status.in_(response_statuses_))
+
+    if ResponseStatusFilter.missing in response_statuses:
+        response_status_filter_expressions.append(Response.status.is_(None))
+
     query = (
         select(Record)
         .filter(Record.dataset_id == dataset_id)
-        .outerjoin(Response, and_(Response.record_id == Record.id, Response.user_id == user_id))
+        .outerjoin(
+            Response,
+            and_(Response.record_id == Record.id, Response.user_id == user_id),
+        )
     )
 
-    if response_status == ResponseStatusFilter.missing:
-        query = query.filter(Response.status == None)  # noqa: E711
-    elif response_status is not None:
-        query = query.filter(Response.status == ResponseStatus(response_status))
+    if response_status_filter_expressions:
+        query = query.filter(or_(*response_status_filter_expressions))
 
     if RecordInclude.responses in include:
         query = query.options(contains_eager(Record.responses))
@@ -346,16 +367,12 @@ async def create_records(
 
         records.append(record)
 
-    try:
+    async with db.begin_nested():
         db.add_all(records)
         await db.flush(records)
         for record in records:
             await record.awaitable_attrs.responses
         await search_engine.add_records(dataset, records)
-        await db.commit()
-    except:
-        await db.rollback()
-        raise
 
 
 async def get_response_by_id(db: "AsyncSession", response_id: UUID) -> Union[Response, None]:
@@ -394,22 +411,17 @@ async def create_response(
 ) -> Response:
     validate_response_values(record.dataset, values=response_create.values, status=response_create.status)
 
-    response = await Response.create(
-        db,
-        values=jsonable_encoder(response_create.values),
-        status=response_create.status,
-        record_id=record.id,
-        user_id=user.id,
-        autocommit=False,
-    )
-
-    try:
+    async with db.begin_nested():
+        response = await Response.create(
+            db,
+            values=jsonable_encoder(response_create.values),
+            status=response_create.status,
+            record_id=record.id,
+            user_id=user.id,
+            autocommit=False,
+        )
         await db.flush([response])
         await search_engine.update_record_response(response)
-        await db.commit()
-    except Exception:
-        await db.rollback()
-        raise
 
     return response
 
@@ -419,28 +431,19 @@ async def update_response(
 ):
     validate_response_values(response.record.dataset, values=response_update.values, status=response_update.status)
 
-    response = await response.update(
-        db, values=jsonable_encoder(response_update.values), status=response_update.status, autocommit=False
-    )
-
-    try:
+    async with db.begin_nested():
+        response = await response.update(
+            db, values=jsonable_encoder(response_update.values), status=response_update.status, autocommit=False
+        )
         await search_engine.update_record_response(response)
-        await db.commit()
-    except Exception:
-        await db.rollback()
-        raise
 
     return response
 
 
 async def delete_response(db: "AsyncSession", search_engine: SearchEngine, response: Response) -> Response:
-    response = await response.delete(db)
-    try:
+    async with db.begin_nested():
+        response = await response.delete(db, autocommit=False)
         await search_engine.delete_record_response(response)
-        await db.commit()
-    except Exception:
-        await db.rollback()
-        raise
     return response
 
 
