@@ -86,11 +86,12 @@ jobs:
         id: google-auth
         uses: 'google-github-actions/auth@v1'
         with:
+          token_format: access_token
           workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WIP }}
           service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
 
       - name: Login to Google Artifact Registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: europe-docker.pkg.dev
           username: oauth2accesstoken
