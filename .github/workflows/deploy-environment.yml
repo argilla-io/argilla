@@ -45,7 +45,6 @@ jobs:
 
       - name: Comment PR with Cloud Run URL
         uses: thollander/actions-comment-pull-request@v2
-        if: ${{ github.event_name == 'pull_request' }}
         with:
           message: |
             The URL of the deployed environment for this PR is ${{ steps.deploy.outputs.url }}
