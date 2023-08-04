@@ -1,5 +1,5 @@
 import { shallowMount } from "@vue/test-utils";
-import DatasetDescription from "./DatasetDescription.component";
+import DatasetDescriptionReadOnly from "./DatasetDescriptionReadOnly.component";
 
 let wrapper = null;
 const options = {
@@ -9,7 +9,7 @@ const options = {
   },
 };
 beforeEach(() => {
-  wrapper = shallowMount(DatasetDescription, options);
+  wrapper = shallowMount(DatasetDescriptionReadOnly, options);
 });
 
 afterEach(() => {
@@ -18,6 +18,6 @@ afterEach(() => {
 
 describe("DatasetDescriptionComponent", () => {
   it("render the component", () => {
-    expect(wrapper.is(DatasetDescription)).toBe(true);
+    expect(wrapper.is(DatasetDescriptionReadOnly)).toBe(true);
   });
 });
