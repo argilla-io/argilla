@@ -31,6 +31,10 @@ jobs:
           workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WIP }}
           service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
 
+      - name: Generate credentials
+        id: credentials
+        uses: ./.github/actions/generate-credentials
+
       - name: Deploy in Cloud Run
         id: deploy
         uses: 'google-github-actions/deploy-cloudrun@v1'
@@ -39,9 +43,23 @@ jobs:
           image: europe-docker.pkg.dev/argilla-ci/${{ inputs.image-name}}:${{ inputs.image-version }}
           region: europe-southwest1
           flags: '--min-instances=1 --max-instances=1 --port=6900 --cpu=2000m --memory=2048Mi --no-cpu-throttling --allow-unauthenticated'
+          secrets: |
+            OWNER_PASSWORD=${{ steps.credentials.outputs.owner }}
+            OWNER_API_KEY=${{ steps.credentials.outputs.owner }}
+            ADMIN_PASSWORD=${{ steps.credentials.outputs.admin }}
+            ADMIN_API_KEY=${{ steps.credentials.outputs.admin }}
+            ANNOTATOR_PASSWORD=${{ steps.credentials.outputs.annotator }}
+            ANNOTATOR_API_KEY=${{ steps.credentials.outputs.annotator }}
 
-      - name: Display Cloud Run URL
-        run: 'echo "URL: ${{ steps.deploy.outputs.url }}"'
+      - name: Post credentials in Slack
+        id: credentials
+        uses: ./.github/actions/slack-post-credentials
+        with:
+          slack-channel-name: argilla-github
+          url: ${{ steps.deploy.outputs.url }}
+          owner: ${{ steps.credentials.outputs.owner }}
+          admin: ${{ steps.credentials.outputs.admin }}
+          annotator: ${{ steps.credentials.outputs.annotator }}
 
       - name: Comment PR with Cloud Run URL
         uses: thollander/actions-comment-pull-request@v2
