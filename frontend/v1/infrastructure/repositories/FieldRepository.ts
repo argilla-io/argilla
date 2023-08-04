@@ -1,6 +1,6 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { BackendField, Response } from "../types/";
-import { Field } from "~/v1/domain/entities/Field";
+import { Field } from "~/v1/domain/entities/field/Field";
 
 export const enum FIELD_API_ERRORS {
   GET_QUESTIONS = "ERROR_FETCHING_FIELDS",
