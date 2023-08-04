@@ -3,11 +3,11 @@ name: Deploy Argilla environment
 on:
   workflow_call:
     inputs:
-      service-name:
-        description: The name of the service deployed in Cloud Run
-        type: string
-      docker-image:
+      image-name:
         description: The name of the Docker image to deploy.
+        type: string
+      image-version:
+        description: The version of the Docker image to deploy.
         type: string
 
 jobs:
@@ -30,18 +30,14 @@ jobs:
           service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
           flags: --no-cpu-throttling
 
-      - name: echo inputs
-        run: |
-          echo "service-name: ${{ inputs.service-name }}"
-          echo "docker-image: ${{ inputs.docker-image }}"
-
       - name: Deploy in Cloud Run
         id: deploy
         uses: 'google-github-actions/deploy-cloudrun@v1'
         with:
-          service: ${{ inputs.service-name }}
-          image: ${{ inputs.docker-image }}
+          service: argilla-quickstart-${{ inputs.image-version }}
+          image: europe-docker.pkg.dev/argilla-ci/${{ inputs.image-name}}:${{ inputs.version }}
           region: europe-southwest1
+          flags: '--no-cpu-throttling --min-instances 1 --max-instances 1'
 
       - name: Display Cloud Run URL
         run: 'echo "URL: ${{ steps.deploy.outputs.url }}"'
