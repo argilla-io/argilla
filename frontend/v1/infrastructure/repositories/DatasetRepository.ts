@@ -8,6 +8,7 @@ export const DATASET_API_ERRORS = {
   ERROR_FETCHING_WORKSPACES: "ERROR_FETCHING_WORKSPACES",
   ERROR_FETCHING_DATASET_INFO: "ERROR_FETCHING_DATASET_INFO",
   ERROR_FETCHING_WORKSPACE_INFO: "ERROR_FETCHING_WORKSPACE_INFO",
+  ERROR_PATCHING_DATASET_GUIDELINES: "ERROR_PATCHING_DATASET_GUIDELINES",
 };
 
 export class DatasetRepository implements IDatasetRepository {
@@ -71,6 +72,27 @@ export class DatasetRepository implements IDatasetRepository {
 
     return [...otherDatasets, ...feedbackDatasets];
   }
+
+  public updateGuidelines = async (
+    datasetId: string,
+    newGuidelines: string
+  ) => {
+    try {
+      const url = `/v1/me/datasets/${datasetId}`;
+
+      const params = { guidelines: newGuidelines };
+
+      const { data } = await this.axios.patch(url, {
+        params,
+      });
+
+      return data;
+    } catch (err) {
+      throw {
+        response: DATASET_API_ERRORS.ERROR_PATCHING_DATASET_GUIDELINES,
+      };
+    }
+  };
 
   private async getDatasetById(datasetId: string) {
     try {
