@@ -44,12 +44,12 @@ jobs:
           region: europe-southwest1
           flags: '--min-instances=1 --max-instances=1 --port=6900 --cpu=2000m --memory=2048Mi --no-cpu-throttling --allow-unauthenticated'
           secrets: |
-            OWNER_PASSWORD=${{ steps.credentials.outputs.owner }}
-            OWNER_API_KEY=${{ steps.credentials.outputs.owner }}
-            ADMIN_PASSWORD=${{ steps.credentials.outputs.admin }}
-            ADMIN_API_KEY=${{ steps.credentials.outputs.admin }}
-            ANNOTATOR_PASSWORD=${{ steps.credentials.outputs.annotator }}
-            ANNOTATOR_API_KEY=${{ steps.credentials.outputs.annotator }}
+            OWNER_PASSWORD=${{ steps.credentials.outputs.owner }}:1
+            OWNER_API_KEY=${{ steps.credentials.outputs.owner }}:1
+            ADMIN_PASSWORD=${{ steps.credentials.outputs.admin }}:1
+            ADMIN_API_KEY=${{ steps.credentials.outputs.admin }}:1
+            ANNOTATOR_PASSWORD=${{ steps.credentials.outputs.annotator }}:1
+            ANNOTATOR_API_KEY=${{ steps.credentials.outputs.annotator }}:1
 
       - name: Post credentials in Slack
         uses: ./.github/actions/slack-post-credentials
