@@ -27,7 +27,6 @@ on:
       - "fix/**"
 
 jobs:
-
   check_repo_files:
     name: Check source changes
     uses: ./.github/workflows/check-repo-files.yml
@@ -155,13 +154,16 @@ jobs:
         ARGILLA_VERSION=${{ needs.build_server_docker_image.outputs.version }}
     secrets: inherit
 
-  deploy_branch_environment:
+  deploy_environment:
     name: Deploy branch environment
     uses: ./.github/workflows/deploy-environment.yml
     needs: build_server_docker_image
     if: |
       !cancelled() &&
-      needs.build_server_docker_image.result == 'success'
+      needs.build_quickstart_docker_image.result == 'success'
+    with:
+      service-name: test-argilla
+      docker-image: ${{ needs.build_quickstart_docker_image.outputs.google-docker-image }}
     secrets: inherit
 
   # This job will upload a Python Package using Twine when a release is created

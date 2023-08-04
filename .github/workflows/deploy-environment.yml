@@ -2,13 +2,20 @@ name: Deploy Argilla environment
 
 on:
   workflow_call:
-
+    inputs:
+      service-name:
+        description: The name of the service deployed in Cloud Run
+        type: string
+      docker-image:
+        description: The name of the Docker image to deploy.
+        type: string
 
 jobs:
   deploy:
     name: Deploy Argilla to Cloud Run
     runs-on: ubuntu-latest
 
+    # Grant permissions to `GITHUB_TOKEN` for Google Cloud Workload Identity Provider
     permissions:
       contents: read
       id-token: write
@@ -20,10 +27,14 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WIP }}
           service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
+          flags: --no-cpu-throttling
 
-      # TODO:
       - name: Deploy in Cloud Run
+        id: deploy
         uses: 'google-github-actions/deploy-cloudrun@v1'
         with:
-          service: argilla
-          image: 'gcr.io/cloudrun/hello'
+          service: ${{ inputs.service-name }}
+          image: ${{ inputs.docker-image }}
+
+      - name: echo url
+        run: 'echo "${{ steps.deploy.outputs.url }}"'
