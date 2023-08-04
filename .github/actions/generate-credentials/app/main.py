@@ -40,6 +40,6 @@ if __name__ == "__main__":
     credentials = generate_credentials()
 
     with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
-        for key, value in credentials:
+        for key, value in credentials.items():
             print(f"::add-mask::{value}")
             print(f"{key}={value}", file=fh)
