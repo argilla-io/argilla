@@ -3,7 +3,7 @@ import { Answer, AnswerCombinations } from "../IAnswer";
 export class RecordAnswer implements Answer {
   constructor(
     public readonly id: string,
-    public status: "submitted" | "pending" | "discarded",
+    public status: "submitted" | "pending" | "discarded" | "draft",
     public readonly value: AnswerCombinations
   ) {}
 

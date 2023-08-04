@@ -69,6 +69,12 @@ export class RecordRepository {
     return this.createRecordResponse(record, "submitted");
   }
 
+  saveDraft(record: Record): Promise<RecordAnswer> {
+    if (record.answer) return this.updateRecordResponse(record, "draft");
+
+    return this.createRecordResponse(record, "draft");
+  }
+
   private async updateRecordResponse(
     record: Record,
     status: BackendResponseStatus

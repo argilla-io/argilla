@@ -5,6 +5,7 @@
         :recordStatus="record.status"
         :fields="record.fields"
       />
+
       <QuestionsFormComponent
         :key="questionFormKey"
         class="question-form"

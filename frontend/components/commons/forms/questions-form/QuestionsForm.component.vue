@@ -85,6 +85,7 @@
         </BaseButton>
       </div>
       <div class="footer-form__right-area">
+        {{ savingDraft }}
         <BaseButton
           type="button"
           class="primary outline"
@@ -147,6 +148,12 @@ export default {
   watch: {
     isFormUntouched(isFormUntouched) {
       this.emitIsQuestionsFormUntouched(isFormUntouched);
+
+      setTimeout(() => {
+        if (!isFormUntouched) {
+          this.saveDraft(this.record);
+        }
+      }, 2000);
     },
   },
   created() {

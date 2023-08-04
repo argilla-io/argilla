@@ -11,7 +11,11 @@ interface BackendSuggestion {
   question_id: string;
   value: BackendAnswerCombinations;
 }
-export type BackendResponseStatus = "submitted" | "pending" | "discarded";
+export type BackendResponseStatus =
+  | "submitted"
+  | "pending"
+  | "discarded"
+  | "draft";
 
 export interface BackendResponse {
   id: string;

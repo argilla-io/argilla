@@ -24,36 +24,43 @@ export default {
   computed: {
     getStatusInfo() {
       let statusInfo = null;
-      switch (this.title.toUpperCase()) {
-        case "PENDING":
+      switch (this.title) {
+        case "draft":
+          statusInfo = {
+            name: "Draft",
+            icon: null,
+            class: "--edited",
+          };
+          break;
+        case "pending":
           statusInfo = {
             name: "Pending",
             icon: null,
             class: "--pending",
           };
           break;
-        case "EDITED":
+        case "edited":
           statusInfo = {
             name: "Pending",
             icon: "time",
             class: "--edited",
           };
           break;
-        case "DISCARDED":
+        case "discarded":
           statusInfo = {
             name: "Discarded",
             icon: "discard",
             class: "--discarded",
           };
           break;
-        case "VALIDATED":
+        case "validated":
           statusInfo = {
             name: "Validate",
             icon: "validate",
             class: "--validated",
           };
           break;
-        case "SUBMITTED":
+        case "submitted":
           statusInfo = {
             name: "Submitted",
             icon: "validate",
