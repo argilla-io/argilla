@@ -157,7 +157,7 @@ jobs:
   deploy_environment:
     name: Deploy branch environment
     uses: ./.github/workflows/deploy-environment.yml
-    needs: build_server_docker_image
+    needs: build_quickstart_docker_image
     if: |
       !cancelled() &&
       needs.build_quickstart_docker_image.result == 'success'
