@@ -45,4 +45,17 @@ describe("Field", () => {
       expect(field.isModified).toBeTruthy();
     });
   });
+
+  describe("update should", () => {
+    test("isModified is false when the field was updated", () => {
+      const field = createTextFieldMock("1");
+      field.title = "NEW TITLE";
+
+      expect(field.isModified).toBeTruthy();
+
+      field.update();
+
+      expect(field.isModified).toBeFalsy();
+    });
+  });
 });

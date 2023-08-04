@@ -86,4 +86,17 @@ describe("Question", () => {
       expect(question.isModified).toBeTruthy();
     });
   });
+
+  describe("update should", () => {
+    test("isModified is false when the question was updated", () => {
+      const question = createTextQuestionMocked();
+      question.title = "NEW TITLE";
+
+      expect(question.isModified).toBeTruthy();
+
+      question.update();
+
+      expect(question.isModified).toBeFalsy();
+    });
+  });
 });

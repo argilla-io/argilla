@@ -6,5 +6,7 @@ export class UpdateFieldSettingUseCase {
 
   async execute(field: Field) {
     await this.fieldRepository.update(field);
+
+    field.update();
   }
 }

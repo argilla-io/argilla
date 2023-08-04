@@ -62,18 +62,14 @@ export default {
   watch: {
     value() {
       if (this.value !== this.currentValue) {
-        this.currentValue = this.value;
-
-        this.updateSanitizedEditableText();
+        this.reset();
       }
     },
   },
   mounted() {
     window.addEventListener("paste", this.pastePlainText);
 
-    this.currentValue = this.originalValue = this.value;
-
-    this.updateSanitizedEditableText();
+    this.reset();
 
     this.textAreaWrapper = document.getElementById("contentId");
   },
@@ -81,7 +77,8 @@ export default {
     window.removeEventListener("paste", this.pastePlainText);
   },
   methods: {
-    updateSanitizedEditableText() {
+    reset() {
+      this.currentValue = this.originalValue = this.value;
       this.sanitizedCurrentValue = " ";
       this.$nextTick(() => {
         this.sanitizedCurrentValue = DOMPurify.sanitize(this.currentValue);

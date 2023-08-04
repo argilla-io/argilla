@@ -30,14 +30,9 @@ export class Question {
     public readonly isRequired: boolean,
     public settings: any
   ) {
+    this.initializeOriginal();
+
     this.answer = this.createEmptyAnswers();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { options, ...rest } = settings;
-    this.original = {
-      title,
-      description,
-      settings: rest,
-    };
   }
 
   public get isAnswered(): boolean {
@@ -76,10 +71,6 @@ export class Question {
     return !!this.suggestion && this.answer.matchSuggestion(this.suggestion);
   }
 
-  clearAnswer() {
-    this.answer.clear();
-  }
-
   public get isModified(): boolean {
     return (
       this.title?.trim() !== this.original.title ||
@@ -89,6 +80,10 @@ export class Question {
     );
   }
 
+  clearAnswer() {
+    this.answer.clear();
+  }
+
   restore() {
     this.title = this.original.title;
     this.description = this.original.description;
@@ -96,6 +91,10 @@ export class Question {
       ...this.settings,
       ...this.original.settings,
     };
+  }
+
+  update() {
+    this.initializeOriginal();
   }
 
   answerQuestionWithResponse(answer: RecordAnswer) {
@@ -143,5 +142,15 @@ export class Question {
         this.settings.options
       );
     }
+  }
+
+  private initializeOriginal() {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { options, ...rest } = this.settings;
+    this.original = {
+      title: this.title,
+      description: this.description,
+      settings: rest,
+    };
   }
 }

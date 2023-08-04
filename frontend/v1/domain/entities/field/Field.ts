@@ -13,10 +13,7 @@ export class Field {
     public readonly required: boolean,
     public settings: any
   ) {
-    this.original = {
-      title,
-      settings: { ...settings },
-    };
+    this.initializeOriginal();
   }
 
   public get isTextType() {
@@ -39,6 +36,19 @@ export class Field {
     this.settings = {
       ...this.settings,
       ...this.original.settings,
+    };
+  }
+
+  update() {
+    this.initializeOriginal();
+  }
+
+  private initializeOriginal() {
+    this.original = {
+      title: this.title,
+      settings: {
+        ...this.settings,
+      },
     };
   }
 }

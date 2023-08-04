@@ -1,5 +1,5 @@
 export class Dataset {
-  private readonly originalGuidelines: string;
+  private originalGuidelines: string;
   constructor(
     public readonly id: string,
     public readonly name: string,
@@ -10,7 +10,7 @@ export class Dataset {
     public readonly workspaceName: string,
     public readonly tags: unknown,
     public readonly createdAt: string,
-    public readonly updatedAt: string
+    public updatedAt: string
   ) {
     this.originalGuidelines = guidelines;
   }
@@ -25,5 +25,10 @@ export class Dataset {
 
   restore() {
     this.guidelines = this.originalGuidelines;
+  }
+
+  update(when: string) {
+    this.originalGuidelines = this.guidelines;
+    this.updatedAt = when;
   }
 }

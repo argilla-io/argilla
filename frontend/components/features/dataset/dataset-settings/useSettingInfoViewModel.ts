@@ -1,19 +1,17 @@
 import { useResolve } from "ts-injecty";
-import { UpdateGuidelinesSettingUseCase } from "~/v1/domain/usecases/dataset-setting/update-guidelines-setting-use-case";
+import { UpdateDatasetSettingUseCase } from "~/v1/domain/usecases/dataset-setting/update-dataset-setting-use-case";
 import { Dataset } from "~/v1/domain/entities/Dataset";
 
 export const useSettingInfoViewModel = () => {
-  const updateGuidelinesSettingsUseCase = useResolve(
-    UpdateGuidelinesSettingUseCase
-  );
+  const updateDatasetSettingUseCase = useResolve(UpdateDatasetSettingUseCase);
 
   const restore = (dataset: Dataset) => {
     dataset.restore();
   };
 
-  const updateGuidelines = async (dataset: Dataset) => {
+  const update = async (dataset: Dataset) => {
     try {
-      await updateGuidelinesSettingsUseCase.execute(dataset);
+      await updateDatasetSettingUseCase.execute(dataset);
     } catch (error) {
       // TODO
     }
@@ -21,6 +19,6 @@ export const useSettingInfoViewModel = () => {
 
   return {
     restore,
-    updateGuidelines,
+    update,
   };
 };

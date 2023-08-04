@@ -24,8 +24,8 @@
         class="settings-info__edition-form-fields"
       >
         <DatasetDescriptionComponent
+          :key="settings.dataset.updatedAt"
           v-model="settings.dataset.guidelines"
-          :datasetDescription="guidelines"
         />
         <div class="settings-info__edition-form-footer">
           <BaseButton
@@ -59,17 +59,9 @@ export default {
       required: true,
     },
   },
-  computed: {
-    guidelines() {
-      return (
-        this.settings.dataset.guidelines ||
-        "This dataset has no annotation guidelines"
-      );
-    },
-  },
   methods: {
     onSubmit() {
-      this.update(this.settings.dataset.guidelines);
+      this.update(this.settings.dataset);
     },
   },
   setup() {

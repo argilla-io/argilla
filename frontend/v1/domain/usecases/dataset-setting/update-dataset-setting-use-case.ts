@@ -1,10 +1,12 @@
 import { Dataset } from "../../entities/Dataset";
 import { DatasetRepository } from "~/v1/infrastructure/repositories";
 
-export class UpdateGuidelinesSettingUseCase {
+export class UpdateDatasetSettingUseCase {
   constructor(private readonly datasetRepository: DatasetRepository) {}
 
   async execute(dataset: Dataset) {
-    await this.datasetRepository.update(dataset);
+    const response = await this.datasetRepository.update(dataset);
+
+    dataset.update(response.when);
   }
 }

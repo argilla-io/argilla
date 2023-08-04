@@ -6,5 +6,7 @@ export class UpdateQuestionSettingUseCase {
 
   async execute(question: Question) {
     await this.questionRepository.update(question);
+
+    question.update();
   }
 }
