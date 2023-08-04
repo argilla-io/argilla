@@ -1,6 +1,5 @@
 <template>
   <form
-    id="formId"
     ref="formRef"
     class="questions-form"
     :class="{ '--focused-form': formHasFocus && interactionCount > 1 }"
@@ -180,6 +179,9 @@ export default {
 
       return !this.questionAreCompletedCorrectly;
     },
+    formWrapper() {
+      return this.$refs.formRef;
+    },
   },
   watch: {
     isFormUntouched(isFormUntouched) {
@@ -195,8 +197,6 @@ export default {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
 
     const keyBoardHandler = (parent) => (e) => {
-      const formWrapper = document.getElementById("formId");
-
       const focusable = parent.querySelectorAll(
         'input[type="checkbox"], [tabindex="0"]'
       );
@@ -208,19 +208,19 @@ export default {
 
       const isArrowDownPressed = e.key === "ArrowDown";
       const isArrowUpPressed = e.key === "ArrowUp";
-      const activeElementIsInForm = formWrapper.contains(
+      const activeElementIsInForm = this.formWrapper.contains(
         document.activeElement
       );
       const isLastElementActive = document.activeElement === lastElement;
       const isFirstElementActive = document.activeElement === firstElement;
 
       if (!activeElementIsInForm && isShiftKeyPressed && isArrowDownPressed) {
-        this.focusOnFirstQuestionFor(e, formWrapper);
+        this.focusOnFirstQuestionFor(e);
         return;
       }
 
       if (!activeElementIsInForm && isShiftKeyPressed && isArrowUpPressed) {
-        this.focusOnLastQuestionFor(e, formWrapper);
+        this.focusOnLastQuestionFor(e);
         return;
       }
 
@@ -251,8 +251,6 @@ export default {
   },
   methods: {
     onClickForm($event) {
-      const formWrapper = this.$refs.formRef;
-
       const questionRefs = [
         "textArea",
         "singleLabel",
@@ -272,21 +270,21 @@ export default {
       }
 
       if (!targetIsQuestion) {
-        this.focusOnFirstQuestionFor($event, formWrapper);
+        this.focusOnFirstQuestionFor($event);
       }
     },
     focusOn($event, node) {
       $event.preventDefault();
       node.focus();
     },
-    focusOnFirstQuestionFor($event, formWrapper) {
+    focusOnFirstQuestionFor($event) {
       $event.preventDefault();
-      const firstformGroup = this.getFirstFormGroupNodeFor(formWrapper);
+      const firstformGroup = this.getFirstFormGroupNodeFor(this.formWrapper);
       firstformGroup[0]?.focus();
     },
-    focusOnLastQuestionFor($event, formWrapper) {
+    focusOnLastQuestionFor($event) {
       $event.preventDefault();
-      const lastformGroup = this.getLastFormGroupNodeFor(formWrapper);
+      const lastformGroup = this.getLastFormGroupNodeFor(this.formWrapper);
       lastformGroup[0]?.focus();
     },
     getFirstFormGroupNodeFor(aFormWrapper) {
