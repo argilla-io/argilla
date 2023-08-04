@@ -1,10 +1,12 @@
 <template>
   <form
     id="formId"
+    ref="formRef"
     class="questions-form"
     :class="{ '--focused-form': formHasFocus && interactionCount > 1 }"
     @submit.prevent="onSubmit"
     v-click-outside="onClickOutside"
+    @click="onClickForm"
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
@@ -33,6 +35,7 @@
         @keydown.shift.arrow-up="updateQuestionAutofocus(autofocusPosition - 1)"
       >
         <TextAreaComponent
+          ref="textArea"
           v-if="question.isTextType"
           :title="question.title"
           v-model="question.answer.value"
@@ -247,6 +250,31 @@ export default {
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
+    onClickForm($event) {
+      const formWrapper = this.$refs.formRef;
+
+      const questionRefs = [
+        "textArea",
+        "singleLabel",
+        "multiLabel",
+        "rating",
+        "ranking",
+      ];
+
+      let targetIsQuestion = false;
+
+      for (const questionRef of questionRefs) {
+        const questionWrapper = this.$refs[questionRef][0].$el;
+        if (questionWrapper.contains($event.target)) {
+          targetIsQuestion = true;
+          break;
+        }
+      }
+
+      if (!targetIsQuestion) {
+        this.focusOnFirstQuestionFor($event, formWrapper);
+      }
+    },
     focusOn($event, node) {
       $event.preventDefault();
       node.focus();
