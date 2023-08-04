@@ -52,7 +52,6 @@ jobs:
             ANNOTATOR_API_KEY=${{ steps.credentials.outputs.annotator }}
 
       - name: Post credentials in Slack
-        id: credentials
         uses: ./.github/actions/slack-post-credentials
         with:
           slack-channel-name: argilla-github
