@@ -66,12 +66,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ inputs.image-name }}
-
       - name: Get Docker image tag from GITHUB_REF
         id: docker-image-tag-from-ref
         uses: ./.github/actions/docker-image-tag-from-ref
@@ -108,7 +102,7 @@ jobs:
           file: ${{ inputs.dockerfile }}
           platforms: ${{ inputs.platforms }}
           tags: |
-            ${{ steps.meta.outputs.tags }}
+            ${{ inputs.image-name }}:${{ steps.docker-image-tag-from-reg.outputs.docker-image-tag }}
             europe-docker.pkg.dev/argilla-ci/${{ inputs.image-name}}:${{ steps.docker-image-tag-from-ref.outputs.docker-image-tag }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: ${{ inputs.build-args }}
