@@ -73,17 +73,10 @@ export class DatasetRepository implements IDatasetRepository {
     return [...otherDatasets, ...feedbackDatasets];
   }
 
-  public updateGuidelines = async (
-    datasetId: string,
-    newGuidelines: string
-  ) => {
+  public update = async (dataset: Dataset) => {
     try {
-      const url = `/v1/me/datasets/${datasetId}`;
-
-      const params = { guidelines: newGuidelines };
-
-      const { data } = await this.axios.patch(url, {
-        params,
+      const { data } = await this.axios.patch(`/v1/me/datasets/${dataset.id}`, {
+        guidelines: dataset.guidelines,
       });
 
       return data;

@@ -22,7 +22,8 @@ export class Dataset {
   public get isModified(): boolean {
     return this.guidelines !== this.originalGuidelines;
   }
-  restoreGuidelines() {
+
+  restore() {
     this.guidelines = this.originalGuidelines;
   }
 }

@@ -31,7 +31,7 @@
           <BaseButton
             type="button"
             class="secondary light small"
-            @on-click="restoreGuidelines(settings.dataset)"
+            @on-click="restore(settings.dataset)"
             :disabled="!settings.dataset.isModified"
           >
             <span v-text="'Cancel'" />
@@ -50,7 +50,7 @@
 </template>
 
 <script>
-import { useSettingsGuidelinesViewModel } from "./useSettingsGuidelinesViewModel";
+import { useSettingInfoViewModel } from "./useSettingInfoViewModel";
 export default {
   name: "SettingsInfo",
   props: {
@@ -69,11 +69,11 @@ export default {
   },
   methods: {
     onSubmit() {
-      this.updateGuidelines(this.settings.dataset.id, this.guidelines);
+      this.update(this.settings.dataset.guidelines);
     },
   },
   setup() {
-    return useSettingsGuidelinesViewModel();
+    return useSettingInfoViewModel();
   },
 };
 </script>
@@ -126,3 +126,4 @@ export default {
   @include line-height(12px);
 }
 </styles>
+./useSettingInfoViewModel
