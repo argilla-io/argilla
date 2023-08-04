@@ -208,19 +208,19 @@ export default {
 
       const isArrowDownPressed = e.key === "ArrowDown";
       const isArrowUpPressed = e.key === "ArrowUp";
-      const activeElementIsInForm = this.formWrapper?.contains(
+      const activeElementIsInForm = this.formWrapper.contains(
         document.activeElement
       );
       const isLastElementActive = document.activeElement === lastElement;
       const isFirstElementActive = document.activeElement === firstElement;
 
       if (!activeElementIsInForm && isShiftKeyPressed && isArrowDownPressed) {
-        this.focusOnFirstQuestion(e);
+        this.focusOnFirstQuestionFor(e);
         return;
       }
 
       if (!activeElementIsInForm && isShiftKeyPressed && isArrowUpPressed) {
-        this.focusOnLastQuestion(e);
+        this.focusOnLastQuestionFor(e);
         return;
       }
 
@@ -270,30 +270,30 @@ export default {
       }
 
       if (!targetIsQuestion) {
-        this.focusOnFirstQuestion($event);
+        this.focusOnFirstQuestionFor($event);
       }
     },
     focusOn($event, node) {
       $event.preventDefault();
       node.focus();
     },
-    focusOnFirstQuestion($event) {
+    focusOnFirstQuestionFor($event) {
       $event.preventDefault();
-      const firstformGroup = this.getFirstFormGroupNode();
+      const firstformGroup = this.getFirstFormGroupNodeFor(this.formWrapper);
       firstformGroup[0]?.focus();
     },
-    focusOnLastQuestion($event) {
+    focusOnLastQuestionFor($event) {
       $event.preventDefault();
-      const lastformGroup = this.getLastFormGroupNode();
+      const lastformGroup = this.getLastFormGroupNodeFor(this.formWrapper);
       lastformGroup[0]?.focus();
     },
-    getFirstFormGroupNode() {
-      return this.formWrapper?.children[0]?.children[1].querySelectorAll(
+    getFirstFormGroupNodeFor(aFormWrapper) {
+      return aFormWrapper?.children[0]?.children[1].querySelectorAll(
         'input[type="checkbox"], [tabindex="0"]'
       );
     },
-    getLastFormGroupNode() {
-      return this.formWrapper?.children[0]?.lastChild.querySelectorAll(
+    getLastFormGroupNodeFor(aFormWrapper) {
+      return aFormWrapper?.children[0]?.lastChild.querySelectorAll(
         'input[type="checkbox"], [tabindex="0"]'
       );
     },
