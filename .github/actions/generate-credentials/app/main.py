@@ -41,6 +41,10 @@ def generate_credentials() -> Dict[str, Any]:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
+    if not SECRET:
+        logging.error("`ENVIRONMENT_CREDENTIALS_SECRET` secret is not set!")
+        raise KeyError("`ENVIRONMENT_CREDENTIALS_SECRET` secret is not set")
+
     credentials = generate_credentials()
 
     with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
