@@ -19,6 +19,7 @@ These are the section headers that we use:
 ### Fixed
 
 - `TextClassificationSettings` and `TokenClassificationSettings` labels are properly parsed to strings both in the Python client and in the backend endpoint (Closes [#3495](https://github.com/argilla-io/argilla/issues/3495)).
+- Fix `PUT /api/v1/datasets/{dataset_id}/publish` to check whether at leat one field and question has `required=True` ([#3511](https://github.com/argilla-io/argilla/pull/3511)).
 
 ### Added
 
