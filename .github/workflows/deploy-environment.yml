@@ -34,6 +34,8 @@ jobs:
       - name: Generate credentials
         id: credentials
         uses: ./.github/actions/generate-credentials
+        env:
+          ENVIRONMENT_CREDENTIALS_SECRET: ${{ secrets.ENVIRONMENT_CREDENTIALS_SECRET }}
 
       - name: Deploy in Cloud Run
         id: deploy
@@ -59,6 +61,8 @@ jobs:
           owner: ${{ steps.credentials.outputs.owner }}
           admin: ${{ steps.credentials.outputs.admin }}
           annotator: ${{ steps.credentials.outputs.annotator }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Comment PR with Cloud Run URL
         uses: thollander/actions-comment-pull-request@v2
