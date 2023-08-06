@@ -35,4 +35,3 @@ jobs:
           else
             echo "Service $service_name does not exist."
           fi
-    secrets: inherit
