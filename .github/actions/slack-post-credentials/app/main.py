@@ -111,7 +111,6 @@ def bot_already_replied(client: WebClient, channel_id: str, thread_ts: str) -> b
     response.validate()
 
     slack_bot_id = get_bot_id(client)
-    print(slack_bot_id)
 
     for message in response["messages"]:
         if "bot_id" in message and message["bot_id"] == slack_bot_id:
