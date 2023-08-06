@@ -25,7 +25,7 @@ SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 GITHUB_REF = os.environ["GITHUB_REF"]
 
 # Inputs
-SLACK_CHANNEL_NAME = os.environ.get("INPUT_SLACK_CHANNEL_NAME")
+SLACK_CHANNEL_NAME = os.environ.get("INPUT_SLACK-CHANNEL-NAME")
 URL = os.environ.get("INPUT_URL")
 OWNER = os.environ.get("INPUT_OWNER")
 ADMIN = os.environ.get("INPUT_ADMIN")
