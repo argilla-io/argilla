@@ -161,7 +161,7 @@ jobs:
     if: |
       !cancelled() &&
       needs.build_quickstart_docker_image.result == 'success' &&
-      github.event_name == 'pull_request'
+      github.event_name == 'pull_request' && github.event.pull_request.draft == false
     with:
       image-name: argilla/argilla-quickstart
       image-version: ${{ needs.build_quickstart_docker_image.outputs.version }}
