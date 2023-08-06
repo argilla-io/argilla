@@ -29,6 +29,9 @@ from argilla.client.feedback.schemas import (
 )
 from argilla.client.feedback.training.schemas import TrainingTaskMapping
 from argilla.client.models import Framework
+from argilla.client.sdk.users.models import UserRole
+
+from tests.factories import DatasetFactory, TextFieldFactory, TextQuestionFactory, UserFactory
 
 if TYPE_CHECKING:
     from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
@@ -688,3 +691,34 @@ def test_prepare_for_training_text_classification(
     task_mapping = TrainingTaskMapping.for_text_classification(text=dataset.fields[0], label=label)
 
     dataset.prepare_for_training(framework=framework, task_mapping=task_mapping, fetch_records=False)
+
+
+@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+@pytest.mark.asyncio
+async def test_delete(role: UserRole) -> None:
+    text_field = await TextFieldFactory.create(required=True)
+    rating_question = await TextQuestionFactory.create(required=True)
+    dataset = await DatasetFactory.create(fields=[text_field], questions=[rating_question])
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+    api.init(api_key=user.api_key)
+    remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
+    remote_dataset.delete()
+
+    datasets = api.active_api().http_client.get("/api/v1/me/datasets")["items"]
+    assert not any(ds["name"] == remote_dataset.name for ds in datasets)
+
+
+@pytest.mark.parametrize("role", [UserRole.annotator])
+@pytest.mark.asyncio
+async def test_delete_not_allowed_role(role: UserRole) -> None:
+    text_field = await TextFieldFactory.create(required=True)
+    rating_question = await TextQuestionFactory.create(required=True)
+    dataset = await DatasetFactory.create(fields=[text_field], questions=[rating_question])
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+    api.init(api_key=user.api_key)
+    remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
+
+    with pytest.raises(PermissionError, match=f"User with role={role} is not allowed to call `delete`"):
+        remote_dataset.delete()
