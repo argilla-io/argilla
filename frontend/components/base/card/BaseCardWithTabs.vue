@@ -13,9 +13,7 @@
       </li>
     </ul>
     <div class="card-with-tabs__content">
-      <transition name="fade" mode="out-in" appear>
-        <slot :current-component="currentComponent" />
-      </transition>
+      <slot :current-component="currentComponent" />
     </div>
   </div>
 </template>
