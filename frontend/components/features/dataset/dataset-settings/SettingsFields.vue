@@ -7,7 +7,10 @@
           @submit.prevent="onSubmit(field)"
           class="settings-fields__edition-form-fields"
         >
-          <div class="settings-fields__edition-form-name">
+          <div
+            class="settings-fields__edition-form-name"
+            v-optional-field="!field.required"
+          >
             <h4 class="--body1 --medium --capitalized" v-text="field.name" />
           </div>
           <div class="settings-fields__edition-form-group">
@@ -93,9 +96,13 @@ export default {
       display: flex;
       flex-direction: row;
       align-items: center;
+      justify-content: space-between;
       gap: $base-space * 2;
       h4 {
         margin: 0;
+      }
+      p {
+        color: $black-54;
       }
     }
 

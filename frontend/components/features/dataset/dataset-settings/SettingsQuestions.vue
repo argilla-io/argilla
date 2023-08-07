@@ -7,7 +7,10 @@
           @submit.prevent="onSubmit(question)"
           class="settings-questions__edition-form-questions"
         >
-          <div class="settings-questions__edition-form-name">
+          <div
+            class="settings-questions__edition-form-name"
+            v-optional-field="!question.isRequired"
+          >
             <h4 class="--body1 --medium --capitalized" v-text="question.name" />
             <p class="badge --capitalized" v-html="question.type" />
           </div>
@@ -123,9 +126,13 @@ export default {
       display: flex;
       flex-direction: row;
       align-items: center;
+      justify-content: space-between;
       gap: $base-space * 2;
       h4 {
         margin: 0;
+      }
+      .badge {
+        margin-inline: 0 auto;
       }
     }
 
