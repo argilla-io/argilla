@@ -3174,12 +3174,11 @@ class TestSuiteDatasets:
         assert response.json() == {"detail": "Dataset is already published"}
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
-    @pytest.mark.parametrize("required", [True, False])
     async def test_publish_dataset_without_fields(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, required: bool
+        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
-        await TextFieldFactory.create(dataset=dataset, required=required)
+        await TextFieldFactory.create(dataset=dataset, required=False)
         await TextQuestionFactory.create(dataset=dataset, required=True)
 
         response = await async_client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=owner_auth_header)
@@ -3188,13 +3187,12 @@ class TestSuiteDatasets:
         assert response.json() == {"detail": "Dataset cannot be published without required fields"}
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
-    @pytest.mark.parametrize("required", [True, False])
     async def test_publish_dataset_without_questions(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, required: bool
+        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
         await TextFieldFactory.create(dataset=dataset, required=True)
-        await TextQuestionFactory.create(dataset=dataset, required=required)
+        await TextQuestionFactory.create(dataset=dataset, required=False)
 
         response = await async_client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=owner_auth_header)
 
