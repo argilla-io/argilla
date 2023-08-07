@@ -20,7 +20,9 @@ from tqdm import trange
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE, PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.schemas.records import FeedbackRecord, RemoteFeedbackRecord
+from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
+from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -367,3 +369,17 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
             ValueError: if the given records do not match the expected schema.
         """
         self._records.add(records=records, show_progress=show_progress)
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def delete(self) -> None:
+        """Deletes the current `FeedbackDataset` from Argilla. This method is just working
+        if the user has either `owner` or `admin` role.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+            RuntimeError: if the `FeedbackDataset` cannot be deleted from Argilla.
+        """
+        try:
+            datasets_api_v1.delete_dataset(client=self._client, id=self.id)
+        except Exception as e:
+            raise RuntimeError(f"Failed while deleting the `FeedbackDataset` from Argilla with exception: {e}") from e
