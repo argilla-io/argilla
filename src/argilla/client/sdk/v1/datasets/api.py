@@ -23,6 +23,7 @@ from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError,
 from argilla.client.sdk.v1.datasets.models import (
     FeedbackDatasetModel,
     FeedbackFieldModel,
+    FeedbackMetricsModel,
     FeedbackQuestionModel,
     FeedbackRecordsModel,
     FeedbackSuggestionModel,
@@ -412,6 +413,36 @@ def set_suggestion(
 
     if response.status_code in [200, 201]:
         parsed_response = FeedbackSuggestionModel(**response.json())
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+            parsed=parsed_response,
+        )
+    return handle_response_error(response)
+
+
+def get_metrics(
+    client: httpx.Client,
+    id: UUID,
+) -> Response[Union[FeedbackMetricsModel, ErrorMessage, HTTPValidationError]]:
+    """Sends a GET request to `/api/v1/datasets/{id}/metrics` endpoint to retrieve the metrics
+    of a `FeedbackDataset`.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to retrieve the metrics from.
+
+    Returns:
+        A `Response` object containing a `parsed` attribute with the parsed response if the
+        request was successful, which is a `FeedbackMetricsModel`.
+    """
+    url = f"/api/v1/me/datasets/{id}/metrics"
+
+    response = client.get(url=url)
+
+    if response.status_code == 200:
+        parsed_response = FeedbackMetricsModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,

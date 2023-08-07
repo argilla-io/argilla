@@ -36,7 +36,7 @@ class TieBreakPolicy(Enum):
     @classmethod
     def _missing_(cls, value):
         raise ValueError(
-            f"{value} is not a valid {cls.__name__}, please select one of" f" {list(cls._value2member_map_.keys())}"
+            f"{value} is not a valid {cls.__name__}, please select one of {list(cls._value2member_map_.keys())}"
         )
 
 
