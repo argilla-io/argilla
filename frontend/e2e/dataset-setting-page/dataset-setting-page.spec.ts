@@ -37,10 +37,46 @@ const goToDatasetSettingPage = async (page: Page) => {
 };
 
 test.describe("Dataset setting page", () => {
-  test("information tab", async ({ page }) => {
-    await goToDatasetSettingPage(page);
+  test.describe("information tab", () => {
+    test("update guidelines", async ({ page }) => {
+      await goToDatasetSettingPage(page);
 
-    await expect(page).toHaveScreenshot();
+      await expect(page).toHaveScreenshot();
+
+      await page.locator("#contentId").fill('```js\nconsole.log("Hi 👋")\n```');
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByRole("button", { name: "Preview" }).click();
+
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("cancel updated guidelines from Write tab", async ({ page }) => {
+      await goToDatasetSettingPage(page);
+
+      await page.locator("#contentId").fill('```js\nconsole.log("Hi 👋")\n```');
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByRole("button", { name: "Cancel" }).click();
+
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("cancel updated guidelines from Preview tab", async ({ page }) => {
+      await goToDatasetSettingPage(page);
+
+      await page.locator("#contentId").fill('```js\nconsole.log("Hi 👋")\n```');
+
+      await page.getByRole("button", { name: "Preview" }).click();
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByRole("button", { name: "Cancel" }).click();
+
+      await expect(page).toHaveScreenshot();
+    });
   });
 
   test("fields tab", async ({ page }) => {
