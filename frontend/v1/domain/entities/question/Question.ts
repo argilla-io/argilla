@@ -80,6 +80,41 @@ export class Question {
     );
   }
 
+  private MAX_DESCRIPTION_LENGTH = 500;
+  private MAX_TITLE_LENGTH = 200;
+  public validate(): Record<"title" | "description", string[]> {
+    const validations: Record<"title" | "description", string[]> = {
+      title: [],
+      description: [],
+    };
+
+    if (!this.title) validations.title.push("This field is required.");
+
+    if (this.title.length > this.MAX_TITLE_LENGTH)
+      validations.title.push(
+        `This must be less than ${this.MAX_TITLE_LENGTH}.`
+      );
+
+    if (this.description.length > this.MAX_DESCRIPTION_LENGTH)
+      validations.description.push(
+        `This must be less than ${this.MAX_DESCRIPTION_LENGTH}.`
+      );
+
+    return validations;
+  }
+
+  public get isTitleValid(): boolean {
+    return this.validate().title.length === 0;
+  }
+
+  public get isDescriptionValid(): boolean {
+    return this.validate().description.length === 0;
+  }
+
+  public get isQuestionValid(): boolean {
+    return this.isTitleValid && this.isDescriptionValid;
+  }
+
   clearAnswer() {
     this.answer.clear();
   }

@@ -7,10 +7,7 @@
           @submit.prevent="onSubmit(question)"
           class="settings-questions__edition-form-questions"
         >
-          <div
-            class="settings-questions__edition-form-name"
-            v-optional-field="!question.isRequired"
-          >
+          <div class="settings-questions__edition-form-name">
             <h4 class="--body1 --medium --capitalized" v-text="question.name" />
             <p class="badge --capitalized" v-html="question.type" />
           </div>
@@ -21,6 +18,12 @@
               :id="`title-${question.id}`"
               v-model="question.title"
             />
+            <span
+              class="--validation"
+              v-if="!question.isTitleValid"
+              v-for="validation in question.validate().title"
+              v-html="validation"
+            />
           </div>
 
           <div class="settings-questions__edition-form-group">
@@ -29,6 +32,12 @@
               type="text"
               :id="`description-${question.id}`"
               v-model="question.description"
+            />
+            <span
+              class="--validation"
+              v-if="!question.isDescriptionValid"
+              v-for="validation in question.validate().description"
+              v-html="validation"
             />
           </div>
 
@@ -60,7 +69,7 @@
             <BaseButton
               type="submit"
               class="primary small"
-              :disabled="!question.isModified"
+              :disabled="!question.isModified || !question.isQuestionValid"
             >
               <span v-text="'Update'" />
             </BaseButton>
@@ -184,5 +193,8 @@ export default {
     border-radius: $border-radius-m;
     overflow: auto;
   }
+}
+.--validation {
+  color: red;
 }
 </style>
