@@ -377,9 +377,9 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
 
         Raises:
             PermissionError: if the user does not have either `owner` or `admin` role.
-            Exception: if the `FeedbackDataset` cannot be deleted from Argilla.
+            RuntimeError: if the `FeedbackDataset` cannot be deleted from Argilla.
         """
         try:
             datasets_api_v1.delete_dataset(client=self._client, id=self.id)
         except Exception as e:
-            raise Exception(f"Failed while deleting the `FeedbackDataaset` from Argilla with exception: {e}") from e
+            raise RuntimeError(f"Failed while deleting the `FeedbackDataset` from Argilla with exception: {e}") from e
