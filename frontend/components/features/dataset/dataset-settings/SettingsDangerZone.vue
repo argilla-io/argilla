@@ -1,6 +1,6 @@
 <template>
   <div class="dataset-settings__danger-zone">
-    <h2 class="--heading5 --semibold">Delete dataset</h2>
+    <h2 class="--heading5 --medium">Delete dataset</h2>
     <DatasetDeleteFeedbackTaskComponent :dataset="settings.dataset" />
   </div>
 </template>

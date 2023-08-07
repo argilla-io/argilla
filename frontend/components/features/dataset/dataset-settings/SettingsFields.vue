@@ -1,7 +1,7 @@
 <template>
   <div class="settings-fields__container">
     <div class="settings-fields__edition-form">
-      <h2 class="--heading5 --semibold">Edit fields</h2>
+      <h2 class="--heading5 --medium">Edit fields</h2>
       <div v-for="field in settings.fields" :key="field.id">
         <form
           @submit.prevent="onSubmit(field)"

@@ -1,6 +1,6 @@
 <template>
   <div class="description">
-    <h2 class="--heading5 --semibold description__title" v-text="title" />
+    <h2 class="--heading5 --medium description__title" v-text="title" />
     <RenderMarkdownBaseComponent
       class="--body1 description__text"
       :class="{ '--light': isColorLight }"

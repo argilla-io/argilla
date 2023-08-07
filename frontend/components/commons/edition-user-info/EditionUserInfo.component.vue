@@ -8,17 +8,17 @@
     </div>
 
     <div class="form-group user-first_name">
-      <h2 class="--heading5 --semibold description__title">Username</h2>
+      <h2 class="--heading5 --medium description__title">Username</h2>
       <p class="--body1 description__text" v-text="userInfo.username" />
     </div>
 
     <div class="form-group user-first_name">
-      <h2 class="--heading5 --semibold description__title">Name</h2>
+      <h2 class="--heading5 --medium description__title">Name</h2>
       <p class="--body1 description__text" v-text="userInfo.first_name" />
     </div>
 
     <div class="form-group user-last_name">
-      <h2 class="--heading5 --semibold description__title">Surname</h2>
+      <h2 class="--heading5 --medium description__title">Surname</h2>
       <p
         class="--body1 description__text"
         v-if="userInfo.last_name"
@@ -28,7 +28,7 @@
     </div>
 
     <div class="form-group">
-      <h2 class="--heading5 --semibold description__title">Workspaces</h2>
+      <h2 class="--heading5 --medium description__title">Workspaces</h2>
       <div class="workspaces" v-if="userInfo.workspaces.length">
         <div
           class="badge clickable"

@@ -1,7 +1,7 @@
 <template>
   <SynchronizeScroll class="settings-questions__container">
     <div class="settings-questions__edition-form">
-      <h2 class="--heading5 --semibold">Edit questions</h2>
+      <h2 class="--heading5 --medium">Edit questions</h2>
       <div v-for="question in settings.questions" :key="question.id">
         <form
           @submit.prevent="onSubmit(question)"

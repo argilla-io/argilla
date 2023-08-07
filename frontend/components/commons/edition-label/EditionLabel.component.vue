@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
     <div class="header">
-      <h2 class="--heading5 --semibold description__title" v-html="title" />
+      <h2 class="--heading5 --medium description__title" v-html="title" />
     </div>
     <div class="content">
       <BaseSpinner v-if="isLoading" />

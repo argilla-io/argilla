@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class="--heading5 --semibold">Dataset info</h2>
+    <h2 class="--heading5 --medium">Dataset info</h2>
     <div class="settings__area">
       <div class="settings__row">
         <div class="item">
