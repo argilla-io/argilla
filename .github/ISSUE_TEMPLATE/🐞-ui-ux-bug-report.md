@@ -1,5 +1,5 @@
 ---
-name: "\U0001F41E UI/UX Bug report"
+name: "\U0001F41E UI/UX Bug report "
 about: UI or UX bugs and unexpected behavior
 title: "[BUG]"
 labels: "bug \U0001FAB2, ui, ux"
