@@ -1,20 +1,20 @@
 <template>
   <div class="top-content">
-    <h1 v-text="title" />
-    <BaseButton :to="goToDatasetsPage" class="secondary text">
+    <h1>My settings</h1>
+    <BaseButton :to="datasetsURL" class="secondary text">
       <svgicon name="chevron-left" width="10" height="10" color="#4C4EA3" />
-      {{ nameOfDatasetsPage }}
+      Home
     </BaseButton>
   </div>
 </template>
 
 <script>
+import { ROUTES } from "@/v1/infrastructure/services";
+
 export default {
   name: "TopUserSettingsContent",
   created() {
-    this.nameOfDatasetsPage = "Home";
-    this.title = "My settings";
-    this.goToDatasetsPage = { name: "datasets" };
+    this.datasetsURL = ROUTES.datasets;
   },
 };
 </script>
