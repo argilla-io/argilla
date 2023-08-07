@@ -16,13 +16,13 @@ const goToAnnotationPage = async (page, shortAndLongQuestions = false) => {
   await mockAllDatasets(page);
   const record = shortAndLongQuestions
     ? await mockRecordForLongAndShortQuestion(page, {
-        datasetId: dataset.id,
-        workspaceId: dataset.workspace_id,
-      })
+      datasetId: dataset.id,
+      workspaceId: dataset.workspace_id,
+    })
     : await mockRecord(page, {
-        datasetId: dataset.id,
-        workspaceId: dataset.workspace_id,
-      });
+      datasetId: dataset.id,
+      workspaceId: dataset.workspace_id,
+    });
 
   await loginUserAndWaitFor(page, "datasets");
 
@@ -170,6 +170,19 @@ test.describe("Annotate page", () => {
 
     await expect(page).toHaveScreenshot();
   });
+
+  test("focus on first question when click on form (where there is no in question)", async ({ page }) => {
+    await goToAnnotationPage(page);
+    const formBox = await page.getByText('Submit your feedback').boundingBox();
+
+    await page.mouse.click(formBox.x - 25, formBox.y - 25); // click outside form to loose focus
+    await expect(page).toHaveScreenshot();
+
+    await page.mouse.click(formBox.x + 5, formBox.y + 5);
+    await page.waitForTimeout(400);
+    
+    await expect(page).toHaveScreenshot();
+  })
 });
 
 test.describe("Annotation page shortcuts", () => {
