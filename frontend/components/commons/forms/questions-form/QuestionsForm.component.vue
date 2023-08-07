@@ -250,7 +250,6 @@ export default {
   },
   methods: {
     onClickForm($event) {
-      debugger;
       if (!this.userComesFromOutside) return;
       if ($event.srcElement.id || $event.srcElement.getAttribute("for")) return;
 
