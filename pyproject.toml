@@ -27,7 +27,7 @@ dependencies = [
     "deprecated ~= 1.2.0",
     "packaging >= 20.0",
     # pandas -> For data loading
-    "pandas >=1.0.0,<2.0.0",
+    "pandas >=1.0.0,<3.0.0",
     # Aligned pydantic version with server fastAPI
     "pydantic >= 1.10.7,< 2.0",
     # monitoring
