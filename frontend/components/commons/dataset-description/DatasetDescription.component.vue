@@ -34,7 +34,7 @@ export default {
   data() {
     return {
       tabs: [
-        { name: "Raw", component: "ContentEditableFeedbackTask" },
+        { name: "Write", component: "ContentEditableFeedbackTask" },
         { name: "Preview", component: "RenderMarkdownBaseComponent" },
       ],
     };
