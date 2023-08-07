@@ -65,6 +65,32 @@ test.describe("Dataset setting page", () => {
         await expect(page).toHaveScreenshot();
       });
 
+      test("show required error when the title is empty", async ({ page }) => {
+        await goToDatasetSettingPage(page);
+
+        await page.getByRole("button", { name: "Questions" }).click();
+
+        await page
+          .locator("#title-045c18d5-57b6-408a-8db3-bc11b9f54541")
+          .fill("");
+
+        await expect(page).toHaveScreenshot();
+      });
+
+      test("show error when the title is bigger than 200 characters", async ({
+        page,
+      }) => {
+        await goToDatasetSettingPage(page);
+
+        await page.getByRole("button", { name: "Questions" }).click();
+
+        await page
+          .locator("#title-045c18d5-57b6-408a-8db3-bc11b9f54541")
+          .fill(Array(201).fill("X").join(""));
+
+        await expect(page).toHaveScreenshot();
+      });
+
       test("change question description", async ({ page }) => {
         await goToDatasetSettingPage(page);
 
@@ -73,6 +99,20 @@ test.describe("Dataset setting page", () => {
         await page
           .locator("#description-045c18d5-57b6-408a-8db3-bc11b9f54541")
           .fill("Changed description");
+
+        await expect(page).toHaveScreenshot();
+      });
+
+      test("show error when the description is bigger than 500 characters", async ({
+        page,
+      }) => {
+        await goToDatasetSettingPage(page);
+
+        await page.getByRole("button", { name: "Questions" }).click();
+
+        await page
+          .locator("#description-045c18d5-57b6-408a-8db3-bc11b9f54541")
+          .fill(Array(501).fill("X").join(""));
 
         await expect(page).toHaveScreenshot();
       });
