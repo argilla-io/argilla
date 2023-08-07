@@ -1,12 +1,3 @@
----
-name: "\U0001F41E Fix a Bug report"
-about: UI/UX or Python/Development bugs and unexpected behavior
-title: "[BUG]"
-labels: "bug \U0001FAB2"
-assignees: ''
-reviewers: ''
-
----
 <!-- Thanks for your contribution! As part of our Community Growers initiative 🌱, we're donating Justdiggit bunds in your name to reforest sub-Saharan Africa. To claim your Community Growers certificate, please contact David Berenstein in our Slack community or fill in this form https://tally.so/r/n9XrxK once your PR has been merged. -->
 
 # Description

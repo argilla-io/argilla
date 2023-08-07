@@ -1,12 +1,3 @@
----
-name: "\U0001F4DA Fix a documentation issue"
-about: Have you fixed a typo or mistake in our docs?
-title: "[DOCS]"
-labels: documentation
-assignees: ''
-reviewers: ''
-
----
 <!-- Thanks for your contribution! As part of our Community Growers initiative 🌱, we're donating Justdiggit bunds in your name to reforest sub-Saharan Africa. To claim your Community Growers certificate, please contact David Berenstein in our Slack community or fill in this form https://tally.so/r/n9XrxK once your PR has been merged. -->
 
 # Description
