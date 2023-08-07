@@ -99,4 +99,92 @@ describe("Question", () => {
       expect(question.isModified).toBeFalsy();
     });
   });
+
+  describe("question validation should", () => {
+    const invalidLargeDescription =
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum rhoncus mauris sit amet turpis euismod lobortis. Donec sit amet justo non tellus viverra pharetra. Vestibulum vitae aliquet dui. Etiam nec diam cursus, aliquam ligula vitae, volutpat lorem. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Sed et placerat enim. Aenean ut ante dapibus enim tincidunt tempor sed sit amet velit. Quisque vehicula risus quis velit blandit auctor. Maecenas eget accumsan erat.";
+    const invalidLargeTitle =
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum rhoncus mauris sit amet turpis euismod lobortis. Donec sit amet justo non tellus viverra pharetra. Vestibulum vitae aliquet dui. Etia.";
+    describe("is title valid", () => {
+      test("return false if question has empty title", () => {
+        const question = createTextQuestionMocked();
+        question.title = "";
+        expect(question.isTitleValid).toBeFalsy();
+      });
+      test("return false if question has a invalid title", () => {
+        const question = createTextQuestionMocked();
+        question.title = invalidLargeTitle;
+        expect(question.isTitleValid).toBeFalsy();
+      });
+      test("return true if question has a valid title", () => {
+        const question = createTextQuestionMocked();
+        question.title = "TITLE";
+        expect(question.isTitleValid).toBeTruthy();
+      });
+    });
+    describe("is description valid", () => {
+      test("return false if question has a invalid description", () => {
+        const question = createTextQuestionMocked();
+        question.description = invalidLargeDescription;
+        expect(question.isDescriptionValid).toBeFalsy();
+      });
+      test("return true if question has a valid description", () => {
+        const question = createTextQuestionMocked();
+        question.description = "DESCRIPTION";
+        expect(question.isDescriptionValid).toBeTruthy();
+      });
+      test("return true if a question has an empty description", () => {
+        const question = createTextQuestionMocked();
+        question.description = "";
+        expect(question.isDescriptionValid).toBeTruthy();
+      });
+    });
+    describe("validate should", () => {
+      test("return 'This field is required.' error if question title is empty", () => {
+        const question = createTextQuestionMocked();
+        question.title = "";
+        expect(question.validate().title).toStrictEqual([
+          "This field is required.",
+        ]);
+      });
+      test("return 'This must be less than 200.' error if question title has more 200 characters", () => {
+        const question = createTextQuestionMocked();
+        question.title = invalidLargeTitle;
+        expect(question.validate().title).toStrictEqual([
+          "This must be less than 200.",
+        ]);
+      });
+      test("return 'This must be less than 500.' error if question description has more 200 characters", () => {
+        const question = createTextQuestionMocked();
+        question.description = invalidLargeDescription;
+        expect(question.validate().description).toStrictEqual([
+          "This must be less than 500.",
+        ]);
+      });
+      test("don't return error if question has title", () => {
+        const question = createTextQuestionMocked();
+        question.title = "TITLE";
+        expect(question.validate().title).toStrictEqual([]);
+      });
+      test("don't return error if question has description", () => {
+        const question = createTextQuestionMocked();
+        question.description = "DESCRIPTION";
+        expect(question.validate().description).toStrictEqual([]);
+      });
+    });
+    describe("is question valid", () => {
+      test("return true when title and description are valid", () => {
+        const question = createTextQuestionMocked();
+        question.title = "DESCRIPTION";
+        question.description = "DESCRIPTION";
+        expect(question.isQuestionValid).toBeTruthy();
+      });
+      test("return false when title is invalid or description is invalid", () => {
+        const question = createTextQuestionMocked();
+        question.title = "";
+        question.description = invalidLargeDescription;
+        expect(question.isQuestionValid).toBeFalsy();
+      });
+    });
+  });
 });
