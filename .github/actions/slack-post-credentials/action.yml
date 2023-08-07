@@ -1,0 +1,17 @@
+name: Argilla Environment Post Credentials
+description: Post the user credentials for the PR environment in Slack channel
+author: Argilla <contact@argilla.io>
+inputs:
+  slack-channel-name:
+    description: The name of the Slack channel where the credentials will be posted.
+  url:
+    description: The URL of the deployed environment.
+  owner:
+    description: The password and API Key for the 'owner' user
+  admin:
+    description: The password and API Key for the 'owner' user
+  annotator:
+    description: The password and API Key for the 'owner' user
+runs:
+  using: docker
+  image: Dockerfile
