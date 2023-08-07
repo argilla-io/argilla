@@ -163,6 +163,8 @@ test.describe("Dataset setting page", () => {
 
         await page.getByRole("button", { name: "Questions" }).click();
 
+        await page.waitForTimeout(200);
+
         await page
           .locator("#contentId")
           .fill('```js\nconsole.log("Hi 👋")\n```');
