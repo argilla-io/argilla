@@ -5,6 +5,7 @@
     :class="{ '--focused-form': formHasFocus && interactionCount > 1 }"
     @submit.prevent="onSubmit"
     v-click-outside="onClickOutside"
+    @click="onClickForm"
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
@@ -149,6 +150,7 @@ export default {
       originalRecord: null,
       autofocusPosition: 0,
       interactionCount: 0,
+      userComesFromOutside: false,
     };
   },
   setup() {
@@ -247,19 +249,29 @@ export default {
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
+    onClickForm($event) {
+      debugger;
+      if (!this.userComesFromOutside) return;
+      if ($event.srcElement.id || $event.srcElement.getAttribute("for")) return;
+
+      this.userComesFromOutside = false;
+
+      const formWrapper = document.getElementById("formId");
+      this.focusOnFirstQuestionFor($event, formWrapper);
+    },
     focusOn($event, node) {
       $event.preventDefault();
       node.focus();
     },
     focusOnFirstQuestionFor($event, formWrapper) {
       $event.preventDefault();
-      const firstformGroup = this.getFirstFormGroupNodeFor(formWrapper);
-      firstformGroup[0]?.focus();
+      const firstFormGroup = this.getFirstFormGroupNodeFor(formWrapper);
+      firstFormGroup[0]?.focus();
     },
     focusOnLastQuestionFor($event, formWrapper) {
       $event.preventDefault();
-      const lastformGroup = this.getLastFormGroupNodeFor(formWrapper);
-      lastformGroup[0]?.focus();
+      const lastFormGroup = this.getLastFormGroupNodeFor(formWrapper);
+      lastFormGroup[0]?.focus();
     },
     getFirstFormGroupNodeFor(aFormWrapper) {
       return aFormWrapper?.children[0]?.children[1].querySelectorAll(
@@ -273,6 +285,7 @@ export default {
     },
     onClickOutside() {
       this.autofocusPosition = null;
+      this.userComesFromOutside = true;
     },
     focusNext(index) {
       this.updateQuestionAutofocus(index + 1);

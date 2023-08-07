@@ -13,6 +13,7 @@
       aria-hidden="true"
     />
     <input
+      id="searchLabel"
       class="search-input"
       type="text"
       :value="value"

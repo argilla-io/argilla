@@ -8,6 +8,7 @@
     >
       <div
         v-for="item in ranking.questions"
+        :id="item.value"
         :key="item.value"
         class="draggable__rank-card--unranked"
         :title="item.text"
@@ -16,8 +17,12 @@
         @keydown="rankWithKeyboard($event, item)"
         @focus="onFocus"
       >
-        <svgicon width="6" name="draggable" />
-        <span class="draggable__rank-card__title" v-text="item.text" />
+        <svgicon width="6" name="draggable" :id="`${item.value}-icon`" />
+        <span
+          class="draggable__rank-card__title"
+          v-text="item.text"
+          :id="`${item.value}-span`"
+        />
       </div>
     </draggable>
 
@@ -39,6 +44,7 @@
         >
           <div
             v-for="item in items"
+            :id="item.value"
             :key="item.value"
             class="draggable__rank-card--ranked"
             :title="item.text"
@@ -47,8 +53,12 @@
             @keydown="rankWithKeyboard($event, item)"
             @focus="onFocus"
           >
-            <svgicon width="6" name="draggable" />
-            <span class="draggable__rank-card__title" v-text="item.text" />
+            <svgicon width="6" name="draggable" :id="`${item.value}-icon`" />
+            <span
+              class="draggable__rank-card__title"
+              v-text="item.text"
+              :id="`${item.value}-span`"
+            />
           </div>
         </draggable>
       </div>
