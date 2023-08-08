@@ -368,7 +368,9 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
             questions=self.questions,
             guidelines=self.guidelines,
         )
-        instance.add_records([record.dict(exclude={"client", "name2id"}) for record in self._records])
+        instance.add_records(
+            [record.dict(exclude={"client", "name2id", "id"}, exclude_none=True) for record in self._records]
+        )
         return instance
 
     def add_records(
