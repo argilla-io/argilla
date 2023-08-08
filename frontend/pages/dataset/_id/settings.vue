@@ -12,7 +12,7 @@
         <TopDatasetSettingsFeedbackTaskContent
           :datasetId="datasetId"
           class="settings__header"
-          :class="{ '--separator': !isAdminOrOwnerRole }"
+          :separator="!isAdminOrOwnerRole"
         />
         <SettingsInfoReadOnly
           v-if="!isAdminOrOwnerRole"
@@ -59,15 +59,6 @@ export default {
     flex-direction: column;
     height: 100%;
     padding-bottom: $base-space;
-  }
-  &__header.top-content {
-    padding-top: 2em;
-    border-bottom: none;
-    height: auto;
-    &.--separator {
-      border-bottom: 1px solid $black-10;
-      padding-bottom: 2em;
-    }
   }
   &__tabs {
     &-content {
