@@ -72,21 +72,50 @@ from datasets import Dataset
 
 
 feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly-15k-curated-en")
+```
 
-data = {"instruction": [], "context": [], "response": []}
-for entry in feedback_dataset:
-    if entry.responses:
-        res = entry.responses[0].values
-        data["instruction"].append(res["new-instruction"].value)
-        data["context"].append(res["new-context"].value)
-        data["response"].append(res["new-response"].value)
+We can specify the training task that we're aiming to do, which is supervised fine-tuning (SFT). To do so, a formatting function must be provided.
 
-dataset = Dataset.from_dict(data)
-dataset
-# Dataset({
-#     features: ['instruction', 'context', 'response'],
-#     num_rows: 15000
-# })
+```python
+from argilla.feedback import TrainingTask
+from typing import Dict, Any
+
+template = """\
+### Instruction: {instruction}\n
+### Context: {context}\n
+### Response: {response}"""
+
+def formatting_func(sample: Dict[str, Any]):
+    return template.format(
+        instruction=sample["new-instruction"]["value"][0],
+        context=sample["new-context"]["value"][0],
+        response=sample["new-response"]["value"][0],
+    )
+
+task = TrainingTask.for_supervised_fine_tuning(
+    formatting_func=formatting_func
+)
+```
+
+You can observe the resulting dataset by calling :meth:`FeedbackDataset.prepare_for_training`. We can use `"trl"` as the framework for example:
+```python
+dataset = feedback_dataset.prepare_for_training(
+    framework="trl",
+    task=task
+)
+"""
+>>> dataset
+Dataset({
+    features: ['id', 'text'],
+    num_rows: 15015
+})
+>>> dataset[0]["text"]
+### Instruction: When did Virgin Australia start operating?
+
+### Context: Virgin Australia, the trading name of Virgin Australia Airlines Pty Ltd, is an Australian-based airline. It is the largest airline by fleet size to use the Virgin brand. It commenced services on 31 August 2000 as Virgin Blue, with two aircraft on a single route. It suddenly found itself as a major airline in Australia's domestic market after the collapse of Ansett Australia in September 2001. The airline has since grown to directly serve 32 cities in Australia, from hubs in Brisbane, Melbourne and Sydney.
+
+### Response: Virgin Australia commenced services on 31 August 2000 as Virgin Blue, with two aircraft on a single route.
+"""
 ```
 
 ####  TRL
@@ -94,30 +123,18 @@ dataset
 The [Transformer Reinforcement Learning (TRL)](https://huggingface.co/docs/trl) package provides a flexible and customizable framework for fine-tuning models. It allows users to have fine-grained control over the training process, enabling them to define their functions and to further specify the desired behavior of the model. This approach requires a deeper understanding of reinforcement learning concepts and techniques, as well as more careful experimentation. It is best suited for users who have experience in reinforcement learning and want fine-grained control over the training process. Additionally, it directly integrates with [Performance Efficient Fine Tuning](https://huggingface.co/docs/peft/index) (PEFT) decreasing the computational complexity of this step of training an LLM.
 
 ```python
-from transformers import AutoModelForCausalLM
-from datasets import load_dataset
-from trl import SFTTrainer
+from argilla.feedback import ArgillaTrainer
 
-dataset = ...
-
-model = AutoModelForCausalLM.from_pretrained("facebook/opt-350m")
-
-def formatting_prompts_func(example):
-    text = (
-        f"### Instruction: {example['instruction']}\n" +
-        f"### Context: {example['context']}\n" +
-        f"### Response: {example['response']}"
-    )
-    return text
-
-trainer = SFTTrainer(
-    model,
-    train_dataset=dataset,
-    packing=True,
-    formatting_func=formatting_prompts_func,
-    # peft_config=LoraConfig() # from peft import LoraConfig
+trainer = ArgillaTrainer(
+    dataset=feedback_dataset,
+    task=task,
+    framework="trl",
+    fetch_records=False,
+    train_size=0.8
 )
-
+# e.g. using LoRA:
+# from peft import LoraConfig
+# trainer.update_config(peft_config=LoraConfig())
 trainer.train()
 ```
 
@@ -128,7 +145,15 @@ The other package is [Transformer Reinforcement Learning X (TRLX)](https://githu
 ```python
 import trlx
 
-# dataset = ...
+# Let's create a Dataset for convenience
+data = {"instruction": [], "context": [], "response": []}
+for entry in feedback_dataset:
+    if entry.responses:
+        res = entry.responses[0].values
+        data["instruction"].append(res["new-instruction"].value)
+        data["context"].append(res["new-context"].value)
+        data["response"].append(res["new-response"].value)
+dataset = Dataset.from_dict(data)
 
 samples = [
     [
@@ -146,8 +171,6 @@ AutoTrain offers an option for users who prefer a simpler and more automated app
 
 First, export the data.
 ```python
-dataset = ...
-
 dataset.to_csv("databricks-dolly-15k-curated-en.csv", index=False)
 ```
 Second, start the UI for training.
