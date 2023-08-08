@@ -26,12 +26,12 @@ export default {
   },
   methods: {
     cleanMarkdown(markdown) {
-      return markdown.replace(/[^\S\r\n]+$/gm, "");
+      return markdown?.replace(/[^\S\r\n]+$/gm, "");
     },
   },
   computed: {
     markdownToHtml() {
-      const cleanedMarkdown = this.cleanMarkdown(this.markdown);
+      const cleanedMarkdown = this.cleanMarkdown(this.markdown) || "";
       const parsed = marked.parse(cleanedMarkdown, {
         headerIds: false,
         mangle: false,
