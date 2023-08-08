@@ -95,7 +95,7 @@ export class Question {
         `This must be less than ${this.MAX_TITLE_LENGTH}.`
       );
 
-    if (this.description.length > this.MAX_DESCRIPTION_LENGTH)
+    if (this.description?.length > this.MAX_DESCRIPTION_LENGTH)
       validations.description.push(
         `This must be less than ${this.MAX_DESCRIPTION_LENGTH}.`
       );
