@@ -120,11 +120,9 @@ class SuggestionSchema(BaseModel):
 
 
 class FeedbackRecord(BaseModel):
-    """Schema for the records of a `FeedbackDataset` in Argilla.
+    """Schema for the records of a `FeedbackDataset` locally.
 
     Args:
-        id: The ID of the record in Argilla. Defaults to None, and is automatically
-            fulfilled internally once the record is pushed to Argilla.
         fields: Fields that match the `FeedbackDataset` defined fields. So this attribute
             contains the actual information shown in the UI for each record, being the
             record itself.
@@ -167,7 +165,6 @@ class FeedbackRecord(BaseModel):
 
     """
 
-    id: Optional[UUID] = None
     fields: Dict[str, str]
     metadata: Dict[str, Any] = Field(default_factory=dict)
     responses: List[ResponseSchema] = Field(default_factory=list)
