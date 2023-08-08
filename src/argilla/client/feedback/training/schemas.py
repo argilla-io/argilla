@@ -709,6 +709,14 @@ class TrainingTaskForDirectPreferenceOptimization(BaseModel, TrainingData):
         return ds
 
 
+TrainingTaskTypes = Union[
+    TrainingTaskForTextClassification,
+    TrainingTaskForSupervisedFinetuning,
+    TrainingTaskForRewardModelling,
+    TrainingTaskForDirectPreferenceOptimization,
+]
+
+
 # Old, deprecated variants.
 class RenamedDeprecationMixin:
     @classmethod

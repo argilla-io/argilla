@@ -33,6 +33,7 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForRewardModelling,
     TrainingTaskForSupervisedFinetuning,
     TrainingTaskForTextClassification,
+    TrainingTaskTypes,
 )
 from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.feedback.unification import (
@@ -311,12 +312,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
     def prepare_for_training(
         self,
         framework: Union[Framework, str],
-        task: Union[
-            TrainingTaskForTextClassification,
-            TrainingTaskForSupervisedFinetuning,
-            TrainingTaskForRewardModelling,
-            TrainingTaskForDirectPreferenceOptimization,
-        ],
+        task: TrainingTaskTypes,
         train_size: Optional[float] = 1,
         test_size: Optional[float] = None,
         seed: Optional[int] = None,

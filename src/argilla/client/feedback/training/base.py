@@ -18,12 +18,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from argilla.client.feedback.schemas.records import FeedbackRecord
-from argilla.client.feedback.training.schemas import (
-    TrainingTaskForDirectPreferenceOptimization,
-    TrainingTaskForRewardModelling,
-    TrainingTaskForSupervisedFinetuning,
-    TrainingTaskForTextClassification,
-)
+from argilla.client.feedback.training.schemas import TrainingTaskForTextClassification, TrainingTaskTypes
 from argilla.client.models import Framework, TextClassificationRecord
 from argilla.training import ArgillaTrainer as ArgillaTrainerV1
 
@@ -39,12 +34,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
     def __init__(
         self,
         dataset: "FeedbackDataset",
-        task: Union[
-            TrainingTaskForTextClassification,
-            TrainingTaskForSupervisedFinetuning,
-            TrainingTaskForRewardModelling,
-            TrainingTaskForDirectPreferenceOptimization,
-        ],
+        task: TrainingTaskTypes,
         framework: Framework,
         lang: Optional["spacy.Language"] = None,
         model: Optional[str] = None,
@@ -240,12 +230,7 @@ class ArgillaTrainerSkeleton(ABC):
     def __init__(
         self,
         feedback_dataset: "FeedbackDataset",
-        task: Union[
-            TrainingTaskForTextClassification,
-            TrainingTaskForSupervisedFinetuning,
-            TrainingTaskForRewardModelling,
-            TrainingTaskForDirectPreferenceOptimization,
-        ],
+        task: TrainingTaskTypes,
         prepared_data=None,
         model: str = None,
         seed: int = None,
