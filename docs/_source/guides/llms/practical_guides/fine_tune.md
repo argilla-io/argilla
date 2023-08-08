@@ -97,7 +97,7 @@ task = TrainingTask.for_supervised_fine_tuning(
 )
 ```
 
-You can observe the resulting dataset by calling :meth:`FeedbackDataset.prepare_for_training`. We can use `"trl"` as the framework for example:
+You can observe the resulting dataset by calling `FeedbackDataset.prepare_for_training`. We can use `"trl"` as the framework for example:
 ```python
 dataset = feedback_dataset.prepare_for_training(
     framework="trl",
