@@ -392,6 +392,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         """
         self._records.add(records=records, show_progress=show_progress)
 
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def delete_records(self, records: Union["RemoteFeedbackRecord", List["RemoteFeedbackRecord"]]) -> None:
         """Deletes the given records from the dataset in Argilla.
 
