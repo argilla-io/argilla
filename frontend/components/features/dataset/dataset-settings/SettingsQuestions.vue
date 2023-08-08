@@ -11,39 +11,32 @@
             <h4 class="--body1 --medium --capitalized" v-text="question.name" />
             <p class="badge --capitalized" v-html="question.type" />
           </div>
-          <div class="settings-questions__edition-form-group">
+
+          <Validation
+            :validations="question.validate().title"
+            class="settings-questions__edition-form-group"
+          >
             <label :for="`title-${question.id}`">Title</label>
             <input
+              :class="!question.isTitleValid ? '--has-error' : null"
               type="type"
               :id="`title-${question.id}`"
               v-model="question.title"
             />
-            <template v-if="!question.isTitleValid">
-              <span
-                class="--validation"
-                v-for="validation in question.validate().title"
-                :key="validation"
-                v-html="validation"
-              />
-            </template>
-          </div>
+          </Validation>
 
-          <div class="settings-questions__edition-form-group">
+          <Validation
+            :validations="question.validate().description"
+            class="settings-questions__edition-form-group"
+          >
             <label :for="`description-${question.id}`">Description</label>
             <input
+              :class="!question.isDescriptionValid ? '--has-error' : null"
               type="text"
               :id="`description-${question.id}`"
               v-model="question.description"
             />
-            <template v-if="!question.isDescriptionValid">
-              <span
-                class="--validation"
-                v-for="validation in question.validate().description"
-                :key="validation"
-                v-html="validation"
-              />
-            </template>
-          </div>
+          </Validation>
 
           <BaseSwitch
             :id="`use-markdown-${question.id}`"
@@ -166,11 +159,22 @@ export default {
         display: flex;
         flex-direction: row;
         align-items: center;
+        width: 100%;
         height: 24px;
         padding: 16px;
-        background: #ffffff;
-        border: 1px solid rgba(0, 0, 0, 0.2);
-        border-radius: 5px;
+        background: palette(white);
+        border: 1px solid $black-20;
+        border-radius: $border-radius;
+        outline: 0;
+        &:focus {
+          border: 1px solid $primary-color;
+          &.--has-error {
+            border-color: palette(orange-red-crayola);
+          }
+        }
+        &.--has-error {
+          border: 1px solid palette(orange-red-crayola);
+        }
       }
     }
 

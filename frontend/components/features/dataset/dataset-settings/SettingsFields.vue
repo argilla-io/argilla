@@ -13,18 +13,19 @@
           >
             <h4 class="--body1 --medium --capitalized" v-text="field.name" />
           </div>
-          <div class="settings-fields__edition-form-group">
+
+          <Validation
+            :validations="field.validate().title"
+            class="settings-fields__edition-form-group"
+          >
             <label for="field.id">Title</label>
-            <input type="type" id="field.id" v-model="field.title" />
-            <template v-if="!field.isTitleValid">
-              <span
-                class="--validation"
-                v-for="validation in field.validate().title"
-                :key="validation"
-                v-html="validation"
-              />
-            </template>
-          </div>
+            <input
+              :class="!field.isTitleValid ? '--has-error' : null"
+              type="type"
+              id="field.id"
+              v-model="field.title"
+            />
+          </Validation>
 
           <BaseSwitch v-model="field.settings.use_markdown"
             >Use Markdown</BaseSwitch
@@ -131,11 +132,22 @@ export default {
         display: flex;
         flex-direction: row;
         align-items: center;
+        width: 100%;
         height: 24px;
         padding: 16px;
-        background: #ffffff;
-        border: 1px solid rgba(0, 0, 0, 0.2);
-        border-radius: 5px;
+        background: palette(white);
+        border: 1px solid $black-20;
+        border-radius: $border-radius;
+        outline: 0;
+        &:focus {
+          border: 1px solid $primary-color;
+          &.--has-error {
+            border-color: palette(orange-red-crayola);
+          }
+        }
+        &.--has-error {
+          border: 1px solid palette(orange-red-crayola);
+        }
       }
     }
 
