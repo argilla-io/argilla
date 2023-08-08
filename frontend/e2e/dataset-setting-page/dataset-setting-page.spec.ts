@@ -4,6 +4,7 @@ import {
   loginUserAndWaitFor,
   newDatasetsMocked,
   mockRecord,
+  mockDatasetDeletion,
 } from "../common";
 
 test.use({
@@ -33,7 +34,7 @@ const goToDatasetSettingPage = async (page: Page) => {
 
   await page.waitForTimeout(1000);
 
-  return record;
+  return { record, dataset };
 };
 
 test.describe("Dataset setting page", () => {
@@ -219,6 +220,64 @@ test.describe("Dataset setting page", () => {
 
         await expect(page).toHaveScreenshot();
       });
+    });
+  });
+
+  test.describe("danger zone tab", () => {
+    test("delete dataset but cancel deletion", async ({ page }) => {
+      await goToDatasetSettingPage(page);
+
+      await page.getByRole("button", { name: "Danger zone" }).click();
+
+      await page.waitForTimeout(300);
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByRole("button", { name: "Delete" }).click();
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByRole("button", { name: "Cancel" }).click();
+
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("delete dataset correctly", async ({ page }) => {
+      const { dataset } = await goToDatasetSettingPage(page);
+      await mockDatasetDeletion(page, dataset.id, 200);
+
+      await page.getByRole("button", { name: "Danger zone" }).click();
+
+      await page.waitForTimeout(300);
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByRole("button", { name: "Delete" }).click();
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByRole("button", { name: "Yes, delete" }).click();
+
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("delete dataset with error", async ({ page }) => {
+      const { dataset } = await goToDatasetSettingPage(page);
+      await mockDatasetDeletion(page, dataset.id, 500);
+
+      await page.getByRole("button", { name: "Danger zone" }).click();
+
+      await page.waitForTimeout(300);
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByRole("button", { name: "Delete" }).click();
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByRole("button", { name: "Yes, delete" }).click();
+
+      await expect(page).toHaveScreenshot();
     });
   });
 });

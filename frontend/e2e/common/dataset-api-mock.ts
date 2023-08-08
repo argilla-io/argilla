@@ -140,3 +140,18 @@ export const mockFeedbackTaskDataset = async (
     }
   );
 };
+
+export const mockDatasetDeletion = async (
+  page: Page,
+  datasetId: string,
+  status: number
+) => {
+  await page.route(`*/**/api/v1/datasets/${datasetId}`, async (route) => {
+    await route.fulfill({
+      status,
+      json: {
+        detail: "MOCKED_DELETION_RESPONSE",
+      },
+    });
+  });
+};

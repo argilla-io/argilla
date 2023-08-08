@@ -106,7 +106,9 @@ export class DatasetRepository implements IDatasetRepository {
 
   async delete(datasetId: string) {
     try {
-      await this.axios.delete(`/v1/datasets/${datasetId}`);
+      await this.axios.delete(`/v1/datasets/${datasetId}`, {
+        validateStatus: (status) => status === 200,
+      });
     } catch (err) {
       throw {
         response: DATASET_API_ERRORS.ERROR_DELETING_DATASET,

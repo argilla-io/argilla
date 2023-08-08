@@ -25,6 +25,8 @@ export const useDeleteDatasetViewModel = () => {
 
       routes.goToDatasetsList();
     } catch {
+      toggleDeleteModal(false);
+
       Notification.dispatch("notify", {
         message: `It is not possible to delete ${dataset.name}`,
         type: "error",
