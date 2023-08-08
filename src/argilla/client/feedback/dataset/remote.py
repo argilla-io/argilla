@@ -22,6 +22,7 @@ from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.schemas.records import FeedbackRecord, RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
+from argilla.client.sdk.v1.records import api as records_api_v1
 from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
@@ -203,6 +204,24 @@ class RemoteFeedbackRecords:
                 records=records_batch,
             )
 
+    def delete(
+        self,
+        records: List[RemoteFeedbackRecord],
+    ) -> None:
+        """Deletes a list of `RemoteFeedbackRecord`s from Argilla.
+
+        Args:
+            records: A list of `RemoteFeedbackRecord`s to delete from Argilla.
+
+        Raises:
+            RuntimeError: If the deletion of the records from Argilla fails.
+        """
+        for record in records:
+            try:
+                records_api_v1.delete_record(client=self._dataset._client, id=record.id)
+            except Exception as e:
+                raise RuntimeError(f"Failed to delete record with id {record.id} from Argilla.") from e
+
 
 class RemoteFeedbackDataset(FeedbackDatasetBase):
     def __init__(
@@ -370,6 +389,19 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
             ValueError: if the given records do not match the expected schema.
         """
         self._records.add(records=records, show_progress=show_progress)
+
+    def delete_records(self, records: Union["RemoteFeedbackRecord", List["RemoteFeedbackRecord"]]) -> None:
+        """Deletes the given records from the dataset in Argilla.
+
+        Args:
+            records: the records to delete from the dataset. Can be a single record or a list
+                of records. But those need to be previously pushed to Argilla, otherwise
+                they won't be deleted.
+
+        Raises:
+            RuntimeError: If the deletion of the records from Argilla fails.
+        """
+        self._records.delete(records=records[0] if not isinstance(records, list) else records)
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def delete(self) -> None:
