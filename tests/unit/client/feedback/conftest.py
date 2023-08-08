@@ -15,15 +15,9 @@
 from typing import List
 
 import pytest
-from argilla.feedback import (
-    FeedbackRecord,
-    LabelQuestion,
-    MultiLabelQuestion,
-    RankingQuestion,
-    RatingQuestion,
-    TextField,
-    TextQuestion,
-)
+from argilla.client.feedback.schemas.fields import TextField
+from argilla.client.feedback.schemas.questions import TextQuestion
+from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
 
 
 @pytest.fixture
@@ -54,3 +48,22 @@ def ranking_question_payload() -> dict:
         "required": True,
         "values": ["1", "2"],
     }
+
+
+@pytest.fixture
+def feedback_dataset_guidelines() -> str:
+    return "guidelines"
+
+
+@pytest.fixture
+def feedback_dataset_fields() -> List[AllowedFieldTypes]:
+    return [
+        TextField(name="text-field", required=True),
+    ]
+
+
+@pytest.fixture
+def feedback_dataset_questions() -> List[AllowedQuestionTypes]:
+    return [
+        TextQuestion(name="text-question", description="text", required=True),
+    ]

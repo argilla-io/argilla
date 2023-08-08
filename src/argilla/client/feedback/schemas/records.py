@@ -16,7 +16,10 @@ import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 from uuid import UUID
 
+import httpx
 from pydantic import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, conint, validator
+
+from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 
 if TYPE_CHECKING:
     from argilla.client.feedback.unification import UnifiedValueSchema
@@ -174,7 +177,6 @@ class FeedbackRecord(BaseModel):
     external_id: Optional[str] = None
 
     _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default_factory=dict)
-    _updated: bool = PrivateAttr(default=False)
 
     @validator("suggestions", always=True)
     def normalize_suggestions(cls, values: Any) -> Tuple:
@@ -182,7 +184,7 @@ class FeedbackRecord(BaseModel):
             return tuple([v for v in values])
         return values
 
-    def set_suggestions(
+    def update(
         self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
     ) -> None:
         if isinstance(suggestions, (dict, SuggestionSchema)):
@@ -204,13 +206,52 @@ class FeedbackRecord(BaseModel):
             suggestions_dict[suggestion.question_name] = suggestion
 
         self.__dict__["suggestions"] = tuple(suggestions_dict.values())
-        if self.id and not self._updated:
-            self._updated = True
 
-    def _reset_updated(self) -> None:
-        self._updated = False
+    def set_suggestions(
+        self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
+    ) -> None:
+        warnings.warn(
+            "`set_suggestions` is deprected in favor of `update` and will be removed in a future"
+            " release.\n`set_suggestions` will be deprecated in Argilla v1.15.0, please"
+            " use `update` instead.",
+            DeprecationWarning,
+            stacklevel=1,
+        )
+        self.update(suggestions=suggestions)
 
     class Config:
         extra = Extra.forbid
         validate_assignment = True
-        exclude = {"_unified_responses", "_updated"}
+        exclude = {"_unified_responses"}
+
+
+class RemoteFeedbackRecord(FeedbackRecord):
+    client: httpx.Client
+    name2id: Dict[str, UUID]
+
+    def update(
+        self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
+    ) -> None:
+        super().update(suggestions)
+        for suggestion in self.suggestions:
+            suggestion.question_id = self.name2id[suggestion.question_name]
+            datasets_api_v1.set_suggestion(
+                client=self.client, record_id=self.id, **suggestion.dict(exclude_none=True, exclude={"question_name"})
+            )
+
+    def set_suggestions(
+        self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
+    ) -> None:
+        warnings.warn(
+            "`set_suggestions` is deprected in favor of `update` and will be removed in a future"
+            " release.\n`set_suggestions` will be deprecated in Argilla v1.15.0, please"
+            " use `update` instead.",
+            DeprecationWarning,
+            stacklevel=1,
+        )
+        self.update(suggestions=suggestions)
+
+    class Config:
+        arbitrary_types_allowed = True
+        validate_assignment = True
+        exclude = {"_unified_responses", "client", "name2id"}

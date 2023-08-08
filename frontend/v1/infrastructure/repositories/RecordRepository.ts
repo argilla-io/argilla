@@ -159,13 +159,13 @@ export class RecordRepository {
 
       const { data } = await this.axios.post(url, body, { params });
 
-      const { items, total: totalRecords } = data;
+      const { items, total } = data;
 
       const records = items.map((item) => item.record);
 
       return {
         records,
-        total: totalRecords,
+        total,
       };
     } catch (err) {
       throw {

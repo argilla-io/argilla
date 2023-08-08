@@ -10,11 +10,12 @@
 </template>
 
 <script>
+import { ROUTES } from "@/v1/infrastructure/services";
 export default {
   name: "HeaderUserSettingsComponent",
   created() {
     this.breadcrumbs = [
-      { link: { name: "datasets" }, name: "Home" },
+      { link: { name: ROUTES.datasets }, name: "Home" },
       {
         link: {},
         name: "my settings",
