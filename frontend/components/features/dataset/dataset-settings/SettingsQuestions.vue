@@ -18,12 +18,14 @@
               :id="`title-${question.id}`"
               v-model="question.title"
             />
-            <span
-              class="--validation"
-              v-if="!question.isTitleValid"
-              v-for="validation in question.validate().title"
-              v-html="validation"
-            />
+            <template v-if="!question.isTitleValid">
+              <span
+                class="--validation"
+                v-for="validation in question.validate().title"
+                :key="validation"
+                v-html="validation"
+              />
+            </template>
           </div>
 
           <div class="settings-questions__edition-form-group">
@@ -33,12 +35,14 @@
               :id="`description-${question.id}`"
               v-model="question.description"
             />
-            <span
-              class="--validation"
-              v-if="!question.isDescriptionValid"
-              v-for="validation in question.validate().description"
-              v-html="validation"
-            />
+            <template v-if="!question.isDescriptionValid">
+              <span
+                class="--validation"
+                v-for="validation in question.validate().description"
+                :key="validation"
+                v-html="validation"
+              />
+            </template>
           </div>
 
           <BaseSwitch
