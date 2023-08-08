@@ -37,7 +37,10 @@ async def test_delete_records(role: UserRole) -> None:
     remote_records = [record for record in remote_dataset.records]
     assert all(record.id for record in remote_records)
 
-    remote_dataset.delete_records(remote_records)
+    remote_dataset.delete_records(remote_records[0])
+    assert len(remote_dataset.records) == len(remote_records) - 1
+
+    remote_dataset.delete_records(remote_records[1:])
     assert len(remote_dataset.records) == 0
 
 
