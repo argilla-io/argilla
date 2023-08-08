@@ -36,7 +36,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
 
     def __init__(
         self,
-        feedback_dataset: "FeedbackDataset",
+        dataset: "FeedbackDataset",
         task: Union[
             TrainingTaskForSupervisedFinetuning,
             TrainingTaskForRewardModelling,
@@ -46,9 +46,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         model: str = None,
         seed: int = None,
     ):
-        super().__init__(
-            feedback_dataset=feedback_dataset, task=task, prepared_data=prepared_data, model=model, seed=seed
-        )
+        super().__init__(dataset=dataset, task=task, prepared_data=prepared_data, model=model, seed=seed)
         import torch
         from datasets import DatasetDict
         from transformers import set_seed

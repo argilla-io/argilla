@@ -94,7 +94,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             from argilla.client.feedback.training.frameworks.setfit import ArgillaSetFitTrainer
 
             self._trainer = ArgillaSetFitTrainer(
-                feedback_dataset=self._dataset,
+                dataset=self._dataset,
                 task=self._task,
                 prepared_data=self._prepared_data,
                 seed=self._seed,
@@ -104,7 +104,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             from argilla.client.feedback.training.frameworks.transformers import ArgillaTransformersTrainer
 
             self._trainer = ArgillaTransformersTrainer(
-                feedback_dataset=self._dataset,
+                dataset=self._dataset,
                 task=self._task,
                 prepared_data=self._prepared_data,
                 seed=self._seed,
@@ -114,7 +114,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             from argilla.client.feedback.training.frameworks.peft import ArgillaPeftTrainer
 
             self._trainer = ArgillaPeftTrainer(
-                feedback_dataset=self._dataset,
+                dataset=self._dataset,
                 task=self._task,
                 prepared_data=self._prepared_data,
                 seed=self._seed,
@@ -124,7 +124,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             from argilla.client.feedback.training.frameworks.spacy import ArgillaSpaCyTrainer
 
             self._trainer = ArgillaSpaCyTrainer(
-                feedback_dataset=self._dataset,
+                dataset=self._dataset,
                 task=self._task,
                 prepared_data=self._prepared_data,
                 seed=self._seed,
@@ -136,7 +136,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             from argilla.client.feedback.training.frameworks.spacy import ArgillaSpaCyTransformersTrainer
 
             self._trainer = ArgillaSpaCyTransformersTrainer(
-                feedback_dataset=self._dataset,
+                dataset=self._dataset,
                 task=self._task,
                 prepared_data=self._prepared_data,
                 seed=self._seed,
@@ -148,7 +148,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             from argilla.client.feedback.training.frameworks.openai import ArgillaOpenAITrainer
 
             self._trainer = ArgillaOpenAITrainer(
-                feedback_dataset=self._dataset,
+                dataset=self._dataset,
                 task=self._task,
                 prepared_data=self._prepared_data,
                 seed=self._seed,
@@ -158,7 +158,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             from argilla.client.feedback.training.frameworks.span_marker import ArgillaSpanMarkerTrainer
 
             self._trainer = ArgillaSpanMarkerTrainer(
-                feedback_dataset=self._dataset,
+                dataset=self._dataset,
                 task=self._task,
                 prepared_data=self._prepared_data,
                 seed=self._seed,
@@ -168,7 +168,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             from argilla.client.feedback.training.frameworks.trl import ArgillaTRLTrainer
 
             self._trainer = ArgillaTRLTrainer(
-                feedback_dataset=self._dataset,
+                dataset=self._dataset,
                 task=self._task,
                 prepared_data=self._prepared_data,
                 seed=self._seed,
@@ -229,7 +229,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
 class ArgillaTrainerSkeleton(ABC):
     def __init__(
         self,
-        feedback_dataset: "FeedbackDataset",
+        dataset: "FeedbackDataset",
         task: TrainingTaskTypes,
         prepared_data=None,
         model: str = None,
@@ -237,7 +237,7 @@ class ArgillaTrainerSkeleton(ABC):
         *arg,
         **kwargs,
     ):
-        self._feedback_dataset = feedback_dataset
+        self._dataset = dataset
         self._task = task
         self._dataset = prepared_data
         self._model = model
