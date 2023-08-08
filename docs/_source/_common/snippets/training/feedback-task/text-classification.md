@@ -1,6 +1,6 @@
 ---
 title: Text classification
-description: When a RatingQuestion, LabelQuestion or MultiLabelQuestion is present in the datasets, we can define a TrainingTaskForTextClassification to use our ArgillaTrainer integration for fine-tuning with openai”, “setfit”, “peft”, “spacy” and “transformers”.
+description: When a RatingQuestion, LabelQuestion or MultiLabelQuestion is present in the datasets, we can define a TrainingTaskForTextClassification to use our ArgillaTrainer integration for fine-tuning with "openai", "setfit", "peft", "spacy" and "transformers".
 links:
   - linkText: Argilla unification docs
     linkLink: https://docs.argilla.io/en/latest/guides/llms/practical_guides/collect_responses.html#solve-disagreements
