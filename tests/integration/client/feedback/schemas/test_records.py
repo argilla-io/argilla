@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import TYPE_CHECKING
+
 import pytest
 from argilla.client import api
 from argilla.client.feedback.dataset import FeedbackDataset
@@ -20,16 +22,20 @@ from argilla.client.sdk.users.models import UserRole
 
 from tests.factories import DatasetFactory, RecordFactory, TextFieldFactory, TextQuestionFactory, UserFactory
 
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
 async def test_delete(role: UserRole) -> None:
     text_field = await TextFieldFactory.create(required=True)
-    rating_question = await TextQuestionFactory.create(required=True)
+    text_question = await TextQuestionFactory.create(required=True)
+    records = await RecordFactory.create_batch(size=10)
     dataset = await DatasetFactory.create(
         fields=[text_field],
-        questions=[rating_question],
-        records=RecordFactory.create_batch(size=10),
+        questions=[text_question],
+        records=records,
     )
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
@@ -47,13 +53,14 @@ async def test_delete(role: UserRole) -> None:
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
-async def test_update(role: UserRole) -> None:
+async def test_update(role: UserRole, db: "AsyncSession") -> None:
     text_field = await TextFieldFactory.create(required=True)
     text_question = await TextQuestionFactory.create(required=True)
+    records = await RecordFactory.create_batch(size=10)
     dataset = await DatasetFactory.create(
         fields=[text_field],
         questions=[text_question],
-        records=RecordFactory.create_batch(size=10),
+        records=records,
     )
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
@@ -68,20 +75,22 @@ async def test_update(role: UserRole) -> None:
         question_name=text_question.name,
         value="suggestion",
     )
-    for record in remote_records:
-        record.update(suggestions=[suggestion])
-    assert all(record.suggestions == (suggestion) for record in remote_dataset.records)
+    for remote_record, factory_record in zip(remote_records, records):
+        remote_record.update(suggestions=[suggestion])
+        await db.refresh(factory_record, attribute_names=["suggestions"])
+    assert all(record.suggestions == (suggestion,) for record in remote_dataset.records)
 
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
-async def test_set_suggestions_deprecated(role: UserRole) -> None:
+async def test_set_suggestions_deprecated(role: UserRole, db: "AsyncSession") -> None:
     text_field = await TextFieldFactory.create(required=True)
     text_question = await TextQuestionFactory.create(required=True)
+    records = await RecordFactory.create_batch(size=10)
     dataset = await DatasetFactory.create(
         fields=[text_field],
         questions=[text_question],
-        records=RecordFactory.create_batch(size=10),
+        records=records,
     )
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
@@ -97,6 +106,7 @@ async def test_set_suggestions_deprecated(role: UserRole) -> None:
         value="suggestion",
     )
     with pytest.warns(DeprecationWarning, match="`set_suggestions` is deprected in favor of `update`"):
-        for record in remote_records:
-            record.set_suggestions(suggestions=[suggestion])
-    assert all(record.suggestions == (suggestion) for record in remote_dataset.records)
+        for remote_record, factory_record in zip(remote_records, records):
+            remote_record.set_suggestions(suggestions=[suggestion])
+            await db.refresh(factory_record, attribute_names=["suggestions"])
+    assert all(record.suggestions == (suggestion,) for record in remote_dataset.records)
