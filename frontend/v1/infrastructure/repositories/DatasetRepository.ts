@@ -9,6 +9,7 @@ export const DATASET_API_ERRORS = {
   ERROR_FETCHING_DATASET_INFO: "ERROR_FETCHING_DATASET_INFO",
   ERROR_FETCHING_WORKSPACE_INFO: "ERROR_FETCHING_WORKSPACE_INFO",
   ERROR_PATCHING_DATASET_GUIDELINES: "ERROR_PATCHING_DATASET_GUIDELINES",
+  ERROR_DELETING_DATASET: "ERROR_DELETING_DATASET",
 };
 
 interface BackendDatasetFeedbackTaskResponse {
@@ -83,7 +84,7 @@ export class DatasetRepository implements IDatasetRepository {
     return [...otherDatasets, ...feedbackDatasets];
   }
 
-  public update = async (dataset: Dataset) => {
+  async update(dataset: Dataset) {
     try {
       const { data } =
         await this.axios.patch<BackendDatasetFeedbackTaskResponse>(
@@ -101,7 +102,17 @@ export class DatasetRepository implements IDatasetRepository {
         response: DATASET_API_ERRORS.ERROR_PATCHING_DATASET_GUIDELINES,
       };
     }
-  };
+  }
+
+  async delete(datasetId: string) {
+    try {
+      await this.axios.delete(`/v1/datasets/${datasetId}`);
+    } catch (err) {
+      throw {
+        response: DATASET_API_ERRORS.ERROR_DELETING_DATASET,
+      };
+    }
+  }
 
   private async getDatasetById(datasetId: string) {
     try {

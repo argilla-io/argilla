@@ -19,6 +19,7 @@ import { useDatasetSetting } from "@/v1/infrastructure/storage/DatasetSettingSto
 
 import { GetDatasetsUseCase } from "@/v1/domain/usecases/get-datasets-use-case";
 import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use-case";
+import { DeleteDatasetUseCase } from "@/v1/domain/usecases/delete-dataset-use-case";
 import { GetRecordsToAnnotateUseCase } from "~/v1/domain/usecases/get-records-to-annotate-use-case";
 import { SubmitRecordUseCase } from "@/v1/domain/usecases/submit-record-use-case";
 import { ClearRecordUseCase } from "@/v1/domain/usecases/clear-record-use-case";
@@ -39,6 +40,8 @@ export const loadDependencyContainer = (context: Context) => {
     register(QuestionRepository).withDependency(useAxios).build(),
     register(FieldRepository).withDependency(useAxios).build(),
     register(MetricsRepository).withDependency(useAxios).build(),
+
+    register(DeleteDatasetUseCase).withDependency(DatasetRepository).build(),
 
     register(GetDatasetsUseCase)
       .withDependencies(DatasetRepository, useDatasets)
