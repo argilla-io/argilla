@@ -88,7 +88,7 @@ def get_pr_url(pr_number: int) -> str:
 
 
 def get_thread_ts_pr_message(client: WebClient, channel_id: str, pr_number: int) -> Union[str, None]:
-    response = client.conversations_history(channel=channel_id, limit=500)
+    response = client.conversations_history(channel=channel_id, limit=1000)
     response.validate()
 
     pr_url = get_pr_url(pr_number)
