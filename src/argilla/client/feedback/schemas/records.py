@@ -269,7 +269,7 @@ class RemoteFeedbackRecord(FeedbackRecord):
             response = records_api_v1.delete_record(client=self.client, id=self.id)
         except Exception as e:
             raise RuntimeError(f"Failed to delete record with ID `{self.id}` from Argilla.") from e
-        return FeedbackRecord(**response.parsed.dict(exclude={"id", "inserted_at", "updated_at"}))
+        return FeedbackRecord(**response.parsed.dict(exclude={"id", "inserted_at", "updated_at"}, exclude_none=True))
 
     class Config:
         arbitrary_types_allowed = True
