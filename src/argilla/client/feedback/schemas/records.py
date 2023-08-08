@@ -223,8 +223,23 @@ class FeedbackRecord(BaseModel):
 
 
 class RemoteFeedbackRecord(FeedbackRecord):
+    """Schema for the records of a `FeedbackDataset` remotely (in Argilla).
+
+    Note this schema shouldn't be instantiated directly, but just internally by the
+    `RemoteFeedbackDataset` class when fetching records from Argilla.
+
+    Args:
+        id: The ID of the record in Argilla. Defaults to None, and is automatically
+            fulfilled internally once the record is pushed to Argilla.
+        client: The Argilla client to use to push the record to Argilla. Is shared with
+            the `RemoteFeedbackDataset` that created this record.
+        name2id: A dictionary that maps the question names to their corresponding IDs.
+    """
+
     client: httpx.Client
     name2id: Dict[str, UUID]
+
+    id: UUID
 
     def update(
         self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
