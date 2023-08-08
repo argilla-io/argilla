@@ -35,6 +35,7 @@
       >
         <TextAreaComponent
           v-if="question.isTextType"
+          ref="text"
           :title="question.title"
           v-model="question.answer.value"
           :placeholder="question.settings.placeholder"
@@ -157,12 +158,8 @@ export default {
     return useQuestionFormViewModel();
   },
   computed: {
-    showOutline() {
-      return this.formHasFocus && !this.isFormUntouched;
-    },
     formHasFocus() {
-      if (this.autofocusPosition || this.autofocusPosition == 0) return true;
-      return false;
+      return this.autofocusPosition || this.autofocusPosition == 0;
     },
     numberOfQuestions() {
       return this.record.questions.length;
@@ -225,7 +222,8 @@ export default {
       }
 
       if (e.key !== "Tab") return;
-
+      // TODO: Move to Single and Multi label component
+      // Is for manage the loop focus.
       if (!isShiftKeyPressed && isLastElementActive) {
         this.focusOn(e, firstElement);
       }
@@ -240,7 +238,7 @@ export default {
       aParent.addEventListener("keydown", keyBoardHandler(parent));
     };
 
-    ["singleLabel", "multiLabel", "rating", "ranking"].forEach(
+    ["text", "singleLabel", "multiLabel", "rating", "ranking"].forEach(
       (componentType) =>
         this.$refs[componentType] && initEventListenerFor(parent, componentType)
     );
@@ -250,44 +248,31 @@ export default {
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
-    onClickForm($event) {
+    onClickForm(e) {
       if (!this.userComesFromOutside) return;
-      if ($event.srcElement.id || $event.srcElement.getAttribute("for")) return;
+      if (e.srcElement.id || e.srcElement.getAttribute("for")) return;
 
       this.userComesFromOutside = false;
-
-      this.focusOnFirstQuestion($event);
+      this.focusOnFirstQuestion(e);
     },
     focusOn($event, node) {
       $event.preventDefault();
       node.focus();
     },
-    focusOnFirstQuestion($event) {
-      $event.preventDefault();
-      const firstFormGroup = this.getFirstFormGroupNode();
-      firstFormGroup[0]?.focus();
+    focusOnFirstQuestion(e) {
+      e.preventDefault();
+      this.updateQuestionAutofocus(0);
     },
-    focusOnLastQuestion($event) {
-      $event.preventDefault();
-      const lastFormGroup = this.getLastFormGroupNode();
-      lastFormGroup[0]?.focus();
+    focusOnLastQuestion(e) {
+      e.preventDefault();
+      this.updateQuestionAutofocus(this.numberOfQuestions);
     },
-    getFirstFormGroupNode() {
-      return this.formWrapper?.children[0]?.children[1].querySelectorAll(
-        'input[type="checkbox"], [tabindex="0"]'
-      );
-    },
-    getLastFormGroupNode() {
-      return this.formWrapper?.children[0]?.lastChild.querySelectorAll(
-        'input[type="checkbox"], [tabindex="0"]'
-      );
+    focusNext(index) {
+      this.updateQuestionAutofocus(index + 1);
     },
     onClickOutside() {
       this.autofocusPosition = null;
       this.userComesFromOutside = true;
-    },
-    focusNext(index) {
-      this.updateQuestionAutofocus(index + 1);
     },
     onPressKeyboardShortCut({ code, shiftKey }) {
       switch (code) {
