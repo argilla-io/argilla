@@ -166,8 +166,9 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaToFromMixin):
         those will be automatically uploaded to Argilla.
 
         Args:
-            records: the records to add to the dataset. Can be a single record, a list
-                of records or a dictionary with the fields of the record.
+            records: can be a single `FeedbackRecord`, a list of `FeedbackRecord`,
+                a single dictionary, or a list of dictionaries. If a dictionary is provided,
+                it will be converted to a `FeedbackRecord` internally.
 
         Raises:
             ValueError: if the given records are an empty list.
