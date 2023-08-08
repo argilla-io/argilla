@@ -17,7 +17,7 @@
 
 <template>
   <div v-if="options.length">
-    <BaseDropdown :visible="dropdownIsvisible" @visibility="onVisibility">
+    <BaseDropdown :visible="dropdownIsVisible" @visibility="onVisibility">
       <span slot="dropdown-header">
         <BaseButton class="selected-option" :class="currentOptionId">
           {{ currentOptionName }}
@@ -69,7 +69,7 @@ export default {
   },
   data() {
     return {
-      dropdownIsvisible: false,
+      dropdownIsVisible: false,
     };
   },
   model: {
@@ -89,11 +89,11 @@ export default {
   },
   methods: {
     onVisibility(value) {
-      this.dropdownIsvisible = value;
+      this.dropdownIsVisible = value;
     },
     changeOption(id) {
       this.$emit("change", id);
-      this.dropdownIsvisible = false;
+      this.dropdownIsVisible = false;
     },
     getRadioColor(status) {
       switch (status) {
