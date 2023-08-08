@@ -5,6 +5,9 @@ export class UpdateFieldSettingUseCase {
   constructor(private readonly fieldRepository: FieldRepository) {}
 
   async execute(field: Field) {
+    if (!field.isFieldValid) {
+      throw new Error("Field is not valid for update");
+    }
     await this.fieldRepository.update(field);
 
     field.update();

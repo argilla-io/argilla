@@ -16,6 +16,14 @@
           <div class="settings-fields__edition-form-group">
             <label for="field.id">Title</label>
             <input type="type" id="field.id" v-model="field.title" />
+            <template v-if="!field.isTitleValid">
+              <span
+                class="--validation"
+                v-for="validation in field.validate().title"
+                :key="validation"
+                v-html="validation"
+              />
+            </template>
           </div>
 
           <BaseSwitch v-model="field.settings.use_markdown"
@@ -34,7 +42,7 @@
             <BaseButton
               type="submit"
               class="primary small"
-              :disabled="!field.isModified"
+              :disabled="!field.isModified || !field.isFieldValid"
             >
               <span v-text="'Update'" />
             </BaseButton>
@@ -143,5 +151,8 @@ export default {
       gap: $base-space;
     }
   }
+}
+.--validation {
+  color: red;
 }
 </style>

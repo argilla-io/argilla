@@ -31,6 +31,28 @@ export class Field {
     );
   }
 
+  private MAX_TITLE_LENGTH = 500;
+  public validate(): Record<"title", string[]> {
+    const validations: Record<"title", string[]> = {
+      title: [],
+    };
+
+    if (this.title?.length > this.MAX_TITLE_LENGTH)
+      validations.title.push(
+        `This must be less than ${this.MAX_TITLE_LENGTH}.`
+      );
+
+    return validations;
+  }
+
+  public get isTitleValid(): boolean {
+    return this.validate().title.length === 0;
+  }
+
+  public get isFieldValid(): boolean {
+    return this.isTitleValid;
+  }
+
   restore() {
     this.title = this.original.title;
     this.settings = {
