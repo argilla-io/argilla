@@ -20,6 +20,7 @@ import httpx
 from pydantic import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, conint, validator
 
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
+from argilla.client.sdk.v1.records import api as records_api_v1
 
 if TYPE_CHECKING:
     from argilla.client.feedback.unification import UnifiedValueSchema
@@ -262,6 +263,13 @@ class RemoteFeedbackRecord(FeedbackRecord):
             stacklevel=1,
         )
         self.update(suggestions=suggestions)
+
+    def delete(self) -> FeedbackRecord:
+        try:
+            response = records_api_v1.delete_record(client=self.client, id=self.id)
+        except Exception as e:
+            raise RuntimeError(f"Failed to delete record with ID `{self.id}` from Argilla.") from e
+        return FeedbackRecord(**response.parsed.dict(exclude={"id", "inserted_at", "updated_at"}))
 
     class Config:
         arbitrary_types_allowed = True
