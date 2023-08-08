@@ -355,11 +355,11 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
 
     def __repr__(self) -> str:
         return (
-            f"{self.__class__.__name__}",
-            f"\n\t text={self.text.name}",
-            f"\n\t label={self.label.question.name}",
-            f"\n\t multi_label={self.__multi_label__}",
-            f"\n\t all_labels={self.__all_labels__}",
+            f"{self.__class__.__name__}"
+            f"\n\t text={self.text.name}"
+            f"\n\t label={self.label.question.name}"
+            f"\n\t multi_label={self.__multi_label__}"
+            f"\n\t all_labels={self.__all_labels__}"
         )
 
     @requires_version("datasets>1.17.0")
@@ -540,10 +540,7 @@ class TrainingTaskForSupervisedFinetuning(BaseModel, TrainingData):
         return [Framework(name) for name in names]
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}",
-            f"\n\t formatting_func={self.formatting_func}",
-        )
+        return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
 
     @requires_version("datasets>1.17.0")
     def _prepare_for_training_with_trl(
@@ -614,10 +611,7 @@ class TrainingTaskForRewardModelling(BaseModel, TrainingData):
         return [Framework(name) for name in names]
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}",
-            f"\n\t chosen_rejected_func={self.chosen_rejected_func}",
-        )
+        return f"{self.__class__.__name__}\n\t chosen_rejected_func={self.chosen_rejected_func}"
 
     @requires_version("datasets>1.17.0")
     def _prepare_for_training_with_trl(
@@ -688,10 +682,7 @@ class TrainingTaskForDirectPreferenceOptimization(BaseModel, TrainingData):
         return [Framework(name) for name in names]
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}",
-            f"\n\t prompt_chosen_rejected_func={self.prompt_chosen_rejected_func}",
-        )
+        return f"{self.__class__.__name__}\n\t prompt_chosen_rejected_func={self.prompt_chosen_rejected_func}"
 
     @requires_version("datasets>1.17.0")
     def _prepare_for_training_with_trl(
