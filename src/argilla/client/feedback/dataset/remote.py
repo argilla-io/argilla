@@ -172,13 +172,14 @@ class RemoteFeedbackRecords:
 
     def add(
         self,
-        records: List[FeedbackRecord],
+        records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
         show_progress: bool = True,
     ) -> None:
         """Pushes a list of `FeedbackRecord`s to Argilla.
 
         Args:
-            records: A list of `FeedbackRecord`s to push to Argilla.
+            records: the records to add to the dataset. Can be a single record, a list
+                of records or a dictionary with the fields of the record.
             show_progress: Whether to show a `tqdm` progress bar while pushing the records.
 
         Raises:
