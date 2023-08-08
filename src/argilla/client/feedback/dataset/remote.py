@@ -403,7 +403,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         Raises:
             RuntimeError: If the deletion of the records from Argilla fails.
         """
-        self._records.delete(records=records[0] if not isinstance(records, list) else records)
+        self._records.delete(records=[records] if not isinstance(records, list) else records)
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def delete(self) -> None:
