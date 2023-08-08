@@ -60,6 +60,8 @@ class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSke
         if isinstance(self._task, TrainingTaskForTextClassification):
             self._model_class = AutoModelForSequenceClassification
         else:
-            raise NotImplementedError(f"ArgillaTransformersTrainer does not support {type(self._task)} yet.")
+            raise NotImplementedError(
+                f"ArgillaTransformersTrainer does not support {self._task.__class__.__name__} yet."
+            )
 
         self.init_training_args()
