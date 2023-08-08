@@ -180,7 +180,7 @@ test.describe("Annotate page", () => {
 
     await page.mouse.click(formBox.x + 5, formBox.y + 5);
     await page.waitForTimeout(400);
-    
+
     await expect(page).toHaveScreenshot();
   })
 });
