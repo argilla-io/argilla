@@ -121,7 +121,7 @@ class SuggestionSchema(BaseModel):
 
 
 class FeedbackRecord(BaseModel):
-    """Schema for the records of a `FeedbackDataset` locally.
+    """Schema for the records of a `FeedbackDataset`.
 
     Args:
         fields: Fields that match the `FeedbackDataset` defined fields. So this attribute
@@ -224,7 +224,7 @@ class FeedbackRecord(BaseModel):
 
 
 class RemoteFeedbackRecord(FeedbackRecord):
-    """Schema for the records of a `FeedbackDataset` remotely (in Argilla).
+    """Schema for the records of a `RemoteFeedbackDataset`.
 
     Note this schema shouldn't be instantiated directly, but just internally by the
     `RemoteFeedbackDataset` class when fetching records from Argilla.
@@ -245,6 +245,15 @@ class RemoteFeedbackRecord(FeedbackRecord):
     def update(
         self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
     ) -> None:
+        """Update a `RemoteFeedbackRecord`. Currently just `suggestions` are supported.
+
+        Note that this method will update the record in Argilla directly.
+
+        Args:
+            suggestions: can be a single `SuggestionSchema`, a list of `SuggestionSchema`,
+                a single dictionary, or a list of dictionaries. If a dictionary is provided,
+                it will be converted to a `SuggestionSchema` internally.
+        """
         super().update(suggestions)
         for suggestion in self.suggestions:
             suggestion.question_id = self.name2id[suggestion.question_name]
@@ -255,6 +264,7 @@ class RemoteFeedbackRecord(FeedbackRecord):
     def set_suggestions(
         self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
     ) -> None:
+        """Deprecated, use `update` instead."""
         warnings.warn(
             "`set_suggestions` is deprected in favor of `update` and will be removed in a future"
             " release.\n`set_suggestions` will be deprecated in Argilla v1.15.0, please"
@@ -265,6 +275,11 @@ class RemoteFeedbackRecord(FeedbackRecord):
         self.update(suggestions=suggestions)
 
     def delete(self) -> FeedbackRecord:
+        """Deletes the `RemoteFeedbackRecord` from Argilla.
+
+        Returns:
+            The deleted record formatted as a `FeedbackRecord`.
+        """
         try:
             response = records_api_v1.delete_record(client=self.client, id=self.id)
         except Exception as e:
