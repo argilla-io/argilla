@@ -106,7 +106,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
 
         self.trainer_kwargs = {}
 
-    def init_model(self) -> None:
+    def init_model(self, new: bool = False) -> None:
         """
         Initializes a model.
         """
@@ -129,7 +129,8 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
 
         if isinstance(self._task, TrainingTaskForDPO):
             self._transformers_ref_model: PreTrainedModel = auto_model_class.from_pretrained(self._model)
-        self._transformers_model.to(self.device)
+        if new:
+            self._transformers_model.to(self.device)
 
     def update_config(self, **kwargs) -> None:
         """
