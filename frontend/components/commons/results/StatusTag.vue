@@ -25,25 +25,12 @@ export default {
     getStatusInfo() {
       let statusInfo = null;
       switch (this.title) {
-        case "draft":
-          statusInfo = {
-            name: "Draft",
-            icon: null,
-            class: "--edited",
-          };
-          break;
         case "pending":
+        case "draft":
           statusInfo = {
             name: "Pending",
             icon: null,
             class: "--pending",
-          };
-          break;
-        case "edited":
-          statusInfo = {
-            name: "Pending",
-            icon: "time",
-            class: "--edited",
           };
           break;
         case "discarded":
@@ -53,13 +40,6 @@ export default {
             class: "--discarded",
           };
           break;
-        case "validated":
-          statusInfo = {
-            name: "Validate",
-            icon: "validate",
-            class: "--validated",
-          };
-          break;
         case "submitted":
           statusInfo = {
             name: "Submitted",
@@ -67,8 +47,6 @@ export default {
             class: "--submitted",
           };
           break;
-        default:
-          console.log(`wrong status: ${this.title}`);
       }
       return statusInfo;
     },
@@ -86,14 +64,7 @@ export default {
   @include font-size(13px);
   border-radius: 50px;
   font-weight: 600;
-  &.--validated {
-    background: palette(green);
-    border: 1px solid palette(green);
-  }
-  &.--edited {
-    background: #bb720a;
-    border: 1px solid #bb720a;
-  }
+
   &.--discarded {
     background: #a7a7a7;
     border: 1px solid #a7a7a7;
@@ -107,6 +78,7 @@ export default {
     border: 1px solid #b6b9ff;
     color: #4c4ea3;
   }
+
   .svg-icon {
     margin-right: 0.5em;
   }

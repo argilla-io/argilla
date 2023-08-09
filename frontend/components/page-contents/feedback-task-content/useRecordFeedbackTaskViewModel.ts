@@ -1,10 +1,7 @@
 import { useResolve } from "ts-injecty";
-import { ref } from "vue-demi";
 import { GetRecordsToAnnotateUseCase } from "@/v1/domain/usecases/get-records-to-annotate-use-case";
 import { useRecords } from "@/v1/infrastructure/storage/RecordsStorage";
 import { GetUserMetricsUseCase } from "@/v1/domain/usecases/get-user-metrics-use-case";
-import { SaveDraftRecord } from "~/v1/domain/usecases/submit-record-use-case";
-import { Record } from "~/v1/domain/entities/record/Record";
 
 export const useRecordFeedbackTaskViewModel = () => {
   const getRecords = useResolve(GetRecordsToAnnotateUseCase);

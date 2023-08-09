@@ -18,10 +18,8 @@ import { useMetrics } from "@/v1/infrastructure/storage/MetricsStorage";
 import { GetDatasetsUseCase } from "@/v1/domain/usecases/get-datasets-use-case";
 import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use-case";
 import { GetRecordsToAnnotateUseCase } from "~/v1/domain/usecases/get-records-to-annotate-use-case";
-import {
-  SaveDraftRecord,
-  SubmitRecordUseCase,
-} from "@/v1/domain/usecases/submit-record-use-case";
+import { SubmitRecordUseCase } from "@/v1/domain/usecases/submit-record-use-case";
+import { SaveDraftRecord } from "@/v1/domain/usecases/save-draft-use-case";
 import { ClearRecordUseCase } from "@/v1/domain/usecases/clear-record-use-case";
 import { DiscardRecordUseCase } from "@/v1/domain/usecases/discard-record-use-case";
 import { GetUserMetricsUseCase } from "@/v1/domain/usecases/get-user-metrics-use-case";

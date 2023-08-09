@@ -15,7 +15,11 @@
 </template>
 
 <script>
-import { SIDEBAR_GROUP } from "@/models/feedback-task-model/dataset-filter/datasetFilter.queries";
+const SIDEBAR_GROUP = Object.freeze({
+  METRICS: "METRICS",
+  MODE: "MODE",
+  REFRESH: "REFRESH",
+});
 
 export default {
   props: {

@@ -85,7 +85,6 @@
         </BaseButton>
       </div>
       <div class="footer-form__right-area">
-        {{ savingDraft }}
         <BaseButton
           type="button"
           class="primary outline"
@@ -108,7 +107,7 @@
 
 <script>
 import "assets/icons/external-link";
-import { isEqual, cloneDeep } from "lodash";
+
 import { useQuestionFormViewModel } from "./useQuestionsFormViewModel";
 
 export default {
@@ -133,7 +132,7 @@ export default {
   },
   computed: {
     isFormUntouched() {
-      return isEqual(this.originalRecord, this.record);
+      return this.record.isModified;
     },
     questionAreCompletedCorrectly() {
       return this.record.questionAreCompletedCorrectly();
@@ -148,18 +147,20 @@ export default {
   watch: {
     isFormUntouched(isFormUntouched) {
       this.emitIsQuestionsFormUntouched(isFormUntouched);
+    },
+    record: {
+      deep: true,
+      immediate: true,
+      handler() {
+        if (this.record.isModified)
+          this.$root.$emit("on-record-modified", this.record);
 
-      setTimeout(() => {
-        if (!isFormUntouched) {
-          this.saveDraft(this.record);
-        }
-      }, 2000);
+        this.$root.$emit("record-changed", this.record);
+      },
     },
   },
   created() {
     this.record.restore();
-
-    this.onReset();
   },
   mounted() {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
@@ -190,8 +191,6 @@ export default {
       await this.discard(this.record);
 
       this.$emit("on-discard-responses");
-
-      this.onReset();
     },
     async onSubmit() {
       if (!this.questionAreCompletedCorrectly) {
@@ -201,16 +200,9 @@ export default {
       await this.submit(this.record);
 
       this.$emit("on-submit-responses");
-
-      this.onReset();
     },
     async onClear() {
       await this.clear(this.record);
-
-      this.onReset();
-    },
-    onReset() {
-      this.originalRecord = cloneDeep(this.record);
     },
     emitIsQuestionsFormUntouched(isFormUntouched) {
       this.$emit("on-question-form-touched", !isFormUntouched);

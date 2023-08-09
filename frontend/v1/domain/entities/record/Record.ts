@@ -1,3 +1,4 @@
+import { isEqual, cloneDeep } from "lodash";
 import { Field } from "../Field";
 import { Question } from "../question/Question";
 import { Suggestion } from "../question/Suggestion";
@@ -6,6 +7,8 @@ import { RecordAnswer } from "./RecordAnswer";
 const DEFAULT_STATUS = "pending";
 
 export class Record {
+  private originalQuestions: Question[];
+
   constructor(
     public readonly id: string,
     public readonly datasetId: string,
@@ -13,6 +16,7 @@ export class Record {
     public readonly fields: Field[],
     public answer: RecordAnswer,
     private readonly suggestions: Suggestion[],
+    public updatedAt: string,
     public readonly arrayOffset: number
   ) {
     this.completeQuestion();
@@ -30,12 +34,32 @@ export class Record {
     return this.status === "discarded";
   }
 
+  get isSavedDraft() {
+    return this.status === "draft";
+  }
+
+  get isModified() {
+    return (
+      this.originalQuestions && !isEqual(this.originalQuestions, this.questions)
+    );
+  }
+
   discard(answer: RecordAnswer) {
+    this.originalQuestions = null;
     this.answer = answer;
+
+    this.updatedAt = answer.updatedAt;
+
+    this.restore();
   }
 
   submit(answer: RecordAnswer) {
+    this.originalQuestions = null;
     this.answer = answer;
+
+    this.updatedAt = answer.updatedAt;
+
+    this.restore();
   }
 
   clear() {
@@ -46,6 +70,12 @@ export class Record {
 
   restore() {
     this.completeQuestion();
+
+    this.originalQuestions = cloneDeep(this.questions);
+  }
+
+  get hasAnyQuestionAnswered() {
+    return this.questions.some((question) => question.answer.isValid);
   }
 
   questionAreCompletedCorrectly() {

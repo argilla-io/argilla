@@ -21,7 +21,6 @@ import { FeedbackDataset } from "@/models/feedback-task-model/feedback-dataset/F
 import { DatasetQuestion } from "@/models/feedback-task-model/dataset-question/DatasetQuestion.model";
 import { DatasetMetric } from "@/models/feedback-task-model/dataset-metric/DatasetMetric.model";
 import { DatasetField } from "@/models/feedback-task-model/dataset-field/DatasetField.model";
-import { DatasetFilter } from "@/models/feedback-task-model/dataset-filter/DatasetFilter.model";
 import { Record } from "@/models/feedback-task-model/record/Record.model";
 import { RecordField } from "@/models/feedback-task-model/record-field/RecordField.model";
 import { RecordResponse } from "@/models/feedback-task-model/record-response/RecordResponse.model";
@@ -49,7 +48,6 @@ database.register(FeedbackDataset);
 database.register(DatasetQuestion);
 database.register(DatasetMetric);
 database.register(DatasetField);
-database.register(DatasetFilter);
 database.register(Record);
 database.register(RecordField);
 database.register(RecordResponse);

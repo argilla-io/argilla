@@ -32,10 +32,7 @@
 <script>
 import { isNil } from "lodash";
 import { Notification } from "@/models/Notifications";
-import {
-  RECORD_STATUS,
-  RESPONSE_STATUS_FOR_API,
-} from "@/models/feedback-task-model/record/record.queries";
+import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
 import { LABEL_PROPERTIES } from "../../feedback-task/feedbackTask.properties";
 import { useRecordFeedbackTaskViewModel } from "./useRecordFeedbackTaskViewModel";
 
@@ -69,25 +66,6 @@ export default {
     },
     noMoreDataMessage() {
       return `You've reached the end of the data for the ${this.recordStatusToFilterWith} queue.`;
-    },
-    recordStatusFilterValueForGetRecords() {
-      // NOTE - this is only used to fetch record, this is why the return value is in lowercase
-      let paramForUrl = null;
-      switch (this.recordStatusToFilterWith.toUpperCase()) {
-        case RECORD_STATUS.PENDING:
-          paramForUrl = RESPONSE_STATUS_FOR_API.MISSING;
-          break;
-        case RECORD_STATUS.SUBMITTED:
-          paramForUrl = RESPONSE_STATUS_FOR_API.SUBMITTED;
-          break;
-        case RECORD_STATUS.DISCARDED:
-          paramForUrl = RESPONSE_STATUS_FOR_API.DISCARDED;
-          break;
-        default:
-          // NOTE - by default, records with missing responses are fetched
-          paramForUrl = RESPONSE_STATUS_FOR_API.MISSING;
-      }
-      return paramForUrl;
     },
     record() {
       return this.records.getRecordOn(this.currentPage);
@@ -126,7 +104,7 @@ export default {
     await this.loadRecords(
       this.datasetId,
       this.currentPage,
-      this.recordStatusFilterValueForGetRecords,
+      this.recordStatusToFilterWith,
       this.searchTextToFilterWith
     );
 
@@ -140,7 +118,7 @@ export default {
       await this.loadRecords(
         this.datasetId,
         this.currentPage,
-        this.recordStatusFilterValueForGetRecords,
+        this.recordStatusToFilterWith,
         this.searchTextToFilterWith
       );
     }
@@ -313,7 +291,7 @@ export default {
         await this.loadRecords(
           this.datasetId,
           newPage,
-          this.recordStatusFilterValueForGetRecords,
+          this.recordStatusToFilterWith,
           this.searchTextToFilterWith
         );
 

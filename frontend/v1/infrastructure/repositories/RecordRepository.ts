@@ -4,10 +4,13 @@ import {
   BackedRecords,
   BackendAnswerCombinations,
   BackendResponse,
-  BackendResponseStatus,
+  BackendRecordStatus,
   Response,
 } from "../types";
-import { RecordAnswer } from "@/v1/domain/entities/record/RecordAnswer";
+import {
+  RecordAnswer,
+  RecordStatus,
+} from "@/v1/domain/entities/record/RecordAnswer";
 import { Record } from "@/v1/domain/entities/record/Record";
 import { Question } from "@/v1/domain/entities/question/Question";
 
@@ -77,7 +80,7 @@ export class RecordRepository {
 
   private async updateRecordResponse(
     record: Record,
-    status: BackendResponseStatus
+    status: BackendRecordStatus
   ) {
     try {
       const request = this.createRequest(status, record.questions);
@@ -87,7 +90,12 @@ export class RecordRepository {
         request
       );
 
-      return new RecordAnswer(data.id, data.status, data.values);
+      return new RecordAnswer(
+        data.id,
+        this.frontendStatusFrom(data.status),
+        data.values,
+        data.updated_at
+      );
     } catch (error) {
       throw {
         response: RECORD_API_ERRORS.ERROR_UPDATING_RECORD_RESPONSE,
@@ -97,7 +105,7 @@ export class RecordRepository {
 
   private async createRecordResponse(
     record: Record,
-    status: BackendResponseStatus
+    status: BackendRecordStatus
   ) {
     try {
       const request = this.createRequest(status, record.questions);
@@ -107,7 +115,12 @@ export class RecordRepository {
         request
       );
 
-      return new RecordAnswer(data.id, data.status, data.values);
+      return new RecordAnswer(
+        data.id,
+        this.frontendStatusFrom(data.status),
+        data.values,
+        data.updated_at
+      );
     } catch (error) {
       throw {
         response: RECORD_API_ERRORS.ERROR_CREATING_RECORD_RESPONSE,
@@ -181,9 +194,9 @@ export class RecordRepository {
   }
 
   private createRequest(
-    status: BackendResponseStatus,
+    status: BackendRecordStatus,
     questions: Question[]
-  ): Omit<BackendResponse, "id"> {
+  ): Omit<BackendResponse, "id" | "updated_at"> {
     const values = {} as BackendAnswerCombinations;
 
     questions.forEach((question) => {
@@ -203,12 +216,41 @@ export class RecordRepository {
     status: string
   ) {
     const params = new URLSearchParams();
+
     params.append("include", "responses");
     params.append("include", "suggestions");
     params.append("offset", offset.toString());
     params.append("limit", numberOfRecordsToFetch.toString());
-    params.append("response_status", status);
+    params.append("response_status", this.backendStatusFrom(status));
+
+    if (status === "pending") params.append("response_status", "draft");
 
     return params;
+  }
+
+  private backendStatusFrom(status: string): BackendRecordStatus {
+    switch (status as RecordStatus) {
+      case "pending":
+        return "missing";
+      case "discarded":
+      case "draft":
+      case "submitted":
+        return status as BackendRecordStatus;
+
+      default:
+        return "missing";
+    }
+  }
+
+  private frontendStatusFrom(status: BackendRecordStatus): RecordStatus {
+    switch (status as BackendRecordStatus) {
+      case "discarded":
+      case "draft":
+      case "submitted":
+        return status as RecordStatus;
+
+      default:
+        return "pending";
+    }
   }
 }

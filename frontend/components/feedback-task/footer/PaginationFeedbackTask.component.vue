@@ -1,7 +1,6 @@
 <template>
   <PaginationComponent
     v-if="hasRecords"
-    :key="hasRecords"
     :currentPage="currentPage"
     @on-click-next="onPaginate(goToNextPage)"
     @on-click-prev="onPaginate(goToPrevPage)"

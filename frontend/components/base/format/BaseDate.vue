@@ -24,20 +24,50 @@ export default {
   props: {
     date: {
       type: String,
+      required: true,
     },
     format: {
       type: String,
     },
+    updateEverySecond: {
+      type: Number,
+    },
   },
-  computed: {
-    formattedDate() {
+  data() {
+    return {
+      formattedDate: null,
+      timer: null,
+    };
+  },
+  mounted() {
+    this.formatDate();
+
+    const self = this;
+    const reRender = () => {
+      if (this.timer) clearTimeout(this.timer);
+      this.timer = setTimeout(() => {
+        self.formatDate();
+        reRender();
+      }, this.updateEverySecond * 1000);
+    };
+
+    if (this.updateEverySecond) {
+      reRender();
+    }
+  },
+  destroyed() {
+    if (this.timer) clearTimeout(this.timer);
+  },
+  methods: {
+    formatDate() {
       const date = new Date(this.date);
 
       if (this.format === "date-relative-now") {
-        return this.timeAgo(date);
+        this.formattedDate = this.timeAgo(date);
+        return;
       }
 
-      return date.toLocaleString("sv", {
+      this.formattedDate = date.toLocaleString("sv", {
         year: "numeric",
         month: "numeric",
         day: "numeric",
@@ -46,8 +76,6 @@ export default {
         hour12: false,
       });
     },
-  },
-  methods: {
     timeAgo(date) {
       const formatter = new Intl.RelativeTimeFormat("en", {
         numeric: "auto",

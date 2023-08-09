@@ -19,13 +19,3 @@ export class SubmitRecordUseCase {
     this.eventDispatcher.dispatch(new RecordResponseUpdatedEvent(record));
   }
 }
-
-export class SaveDraftRecord {
-  constructor(private readonly recordRepository: RecordRepository) {}
-
-  async execute(record: Record) {
-    const response = await this.recordRepository.saveDraft(record);
-
-    record.submit(response);
-  }
-}
