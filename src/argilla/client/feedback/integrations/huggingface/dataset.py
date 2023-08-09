@@ -110,6 +110,7 @@ class HuggingFaceDatasetMixin:
         hf_features["external_id"] = Value(dtype="string", id="external_id")
         hf_dataset["external_id"] = []
 
+        hf_features["metadata"] = Value(dtype="string", id="metadata")
         hf_dataset["metadata"] = []
 
         empty = {
