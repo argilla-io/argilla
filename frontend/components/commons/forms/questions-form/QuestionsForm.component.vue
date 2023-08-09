@@ -276,7 +276,7 @@ export default {
     },
     onPressKeyboardShortCut({ code, shiftKey }) {
       if (!shiftKey) return;
-      
+
       switch (code) {
         case "Enter": {
           this.onSubmit();
