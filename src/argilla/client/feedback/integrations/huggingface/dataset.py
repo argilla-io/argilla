@@ -354,7 +354,7 @@ class HuggingFaceDatasetMixin:
                             hfds[index][question.name]["value"],
                             hfds[index][question.name]["status"],
                         ):
-                            responses.append({"user_id": user_id, "value": value, "status": status})
+                            original_responses.append({"user_id": user_id, "value": value, "status": status})
 
                     responses = {}
                     for response in original_responses:
