@@ -227,7 +227,7 @@ class HuggingFaceDatasetMixin:
                 argilla_fields=self.fields,
                 argilla_questions=self.questions,
                 argilla_guidelines=self.guidelines,
-                argilla_record=json.loads(self.records[0].json()),
+                argilla_record=json.loads(self.records[0].json(exclude={"client", "id", "name2id"}, exclude_none=True)),
                 huggingface_record=hfds[0],
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
