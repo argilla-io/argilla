@@ -48,26 +48,21 @@ class ArgillaTrainer(ArgillaTrainerV1):
         Initialize an Argilla Trainer.
 
         Args:
-            dataset (FeedbackDataset): the dataset to be used for training.
-            task (TrainingTask): the training data to be used for training.
-            framework (str):
-                the framework to use for training. Currently, only "transformers", "setfit", and "spacy"
-                are supported.
-            lang (spacy.Language):
-                the spaCy language model to use for training, just required when `framework="spacy"`.
+            dataset: the dataset to be used for training.
+            task: the training data to be used for training.
+            framework: the framework to use for training. Currently, "transformers", "setfit", "spacy", "peft",
+                "openai", "span_marker" and "trl" are supported.
+            lang: the spaCy language model to use for training, just required when `framework="spacy"`.
                 Defaults to None, but it will be set to `spacy.blank("en")` if not specified.
-            model (str):
-                name or path to the baseline model to be used. If not specified will set to a good default
+            model: name or path to the baseline model to be used. If not specified will set to a good default
                 per framework, if applicable. Defaults to None.
-            train_size (float):
-                the size of the training set. If not specified, the entire dataset will be used for training,
+            train_size: the size of the training set. If not specified, the entire dataset will be used for training,
                 which may be an issue if `framework="spacy"` as it requires a validation set. Defaults to None.
-            seed (int): the random seed to ensure reproducibility. Defaults to None.
-            gpu_id (int):
-                the GPU ID to use when training a SpaCy model. Defaults to -1, which means that the CPU
+            seed: the random seed to ensure reproducibility. Defaults to None.
+            gpu_id: the GPU ID to use when training a SpaCy model. Defaults to -1, which means that the CPU
                 will be used by default. GPU IDs start in 0, which stands for the default GPU in the system,
                 if available.
-            framework_kwargs (dict): arguments for the framework's trainer.
+            framework_kwargs: arguments for the framework's trainer.
             **load_kwargs: arguments for the rg.load() function.
         """
         self._dataset = dataset
