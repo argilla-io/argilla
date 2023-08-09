@@ -22,13 +22,12 @@
 <script>
 export default {
   props: {
-    datasetDescription: {
+    guidelines: {
       type: String,
-      required: true,
     },
   },
   model: {
-    prop: "datasetDescription",
+    prop: "guidelines",
     event: "input",
   },
   data() {
@@ -38,6 +37,11 @@ export default {
         { name: "Preview", component: "RenderMarkdownBaseComponent" },
       ],
     };
+  },
+  computed: {
+    datasetDescription() {
+      return this.guidelines ?? "";
+    },
   },
   methods: {
     onChangeTextArea(newText) {
