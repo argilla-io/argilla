@@ -69,13 +69,13 @@ class HuggingFaceDatasetMixin:
 
         for question in dataset.questions:
             if question.settings["type"] in ["text", "label_selection"]:
-                value = Value(dtype="string")
+                value = Value(dtype="string", id="question")
             elif question.settings["type"] == "rating":
-                value = Value(dtype="int32")
+                value = Value(dtype="int32", id="question")
             elif question.settings["type"] == "ranking":
-                value = Sequence({"rank": Value(dtype="uint8"), "value": Value(dtype="string")})
+                value = Sequence({"rank": Value(dtype="uint8"), "value": Value(dtype="string")}, id="question")
             elif question.settings["type"] in "multi_label_selection":
-                value = Sequence(Value(dtype="string"))
+                value = Sequence(Value(dtype="string"), id="question")
             else:
                 raise ValueError(
                     f"Question {question.name} is of type `{type(question).__name__}`,"
