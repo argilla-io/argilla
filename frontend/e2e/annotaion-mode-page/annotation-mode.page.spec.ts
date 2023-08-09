@@ -6,7 +6,7 @@ import {
   mockRecord,
   mockRecordWith12Ranking,
   mockRecordWithRating,
-  mockDiscardRecord,
+  mockRecordResponses,
   mockRecordForLongAndShortQuestion,
 } from "../common";
 
@@ -16,13 +16,13 @@ const goToAnnotationPage = async (page, shortAndLongQuestions = false) => {
   await mockAllDatasets(page);
   const record = shortAndLongQuestions
     ? await mockRecordForLongAndShortQuestion(page, {
-        datasetId: dataset.id,
-        workspaceId: dataset.workspace_id,
-      })
+      datasetId: dataset.id,
+      workspaceId: dataset.workspace_id,
+    })
     : await mockRecord(page, {
-        datasetId: dataset.id,
-        workspaceId: dataset.workspace_id,
-      });
+      datasetId: dataset.id,
+      workspaceId: dataset.workspace_id,
+    });
 
   await loginUserAndWaitFor(page, "datasets");
 
@@ -154,7 +154,7 @@ test.describe("Annotate page", () => {
 
   test("clear all questions and discard the record", async ({ page }) => {
     const record = await goToAnnotationPage(page);
-    await mockDiscardRecord(page, record.id);
+    await mockRecordResponses(page, record.id, "discarded");
 
     await page.getByRole("button", { name: "Clear" }).click();
 
@@ -210,6 +210,91 @@ test.describe("Annotation page shortcuts", () => {
       await goToAnnotationPage(page);
 
       await page.getByPlaceholder("Search labels").first().fill("v");
+
+      await expect(page).toHaveScreenshot();
+    });
+    test("user press just letter V and go automatically to search bar and can update this text", async ({
+      page,
+    }) => {
+      await goToAnnotationPage(page);
+
+      await page.getByPlaceholder("Search labels").first().fill("v");
+      await expect(page).toHaveScreenshot();
+      await page.getByPlaceholder('Search labels').first().press("Backspace");
+      await expect(page).toHaveScreenshot();
+      await page.getByPlaceholder("Search labels").first().fill("Pos");
+      await expect(page).toHaveScreenshot();
+    });
+    test("user can delete the search with backspace, write another search query and submit with shift+enter, ", async ({
+      page,
+    }) => {
+      const record = await goToAnnotationPage(page);
+      await mockRecordResponses(page, record.id, "submitted");
+
+      await page.getByPlaceholder("Search labels").first().fill("v");
+      await expect(page).toHaveScreenshot();
+      await page.getByPlaceholder('Search labels').first().press("Backspace");
+      await expect(page).toHaveScreenshot();
+      await page.getByPlaceholder("Search labels").first().fill("Pos");
+      await expect(page).toHaveScreenshot();
+
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Space");
+
+      await page.getByText('Very Positive').first().press("Shift+Enter");
+
+      await expect(page).toHaveScreenshot();
+    });
+
+    test.skip("user can delete the search with backspace, write another search query and clear with shift+space, ", async ({
+      page,
+    }) => {
+      await goToAnnotationPage(page);
+
+      await page.getByPlaceholder("Search labels").first().fill("v");
+      await expect(page).toHaveScreenshot();
+      await page.getByPlaceholder('Search labels').first().press("Backspace");
+      await expect(page).toHaveScreenshot();
+      await page.getByPlaceholder("Search labels").first().fill("Pos");
+      await expect(page).toHaveScreenshot();
+
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Space");
+
+      // TODO: find way to simulate Spacebar
+      await page.keyboard.down("Shift");
+      await page.getByText('Very Positive').first().press("Space");
+      await page.keyboard.up("Shift");
+      await page.waitForTimeout(200);
+
+      await expect(page).toHaveScreenshot();
+    });
+    test("user can delete the search with backspace, write another search query and discard with shift+backspace, ", async ({
+      page,
+    }) => {
+      const record = await goToAnnotationPage(page);
+      await mockRecordResponses(page, record.id, "discarded");
+
+      await page.getByPlaceholder("Search labels").first().fill("v");
+      await expect(page).toHaveScreenshot();
+      await page.getByPlaceholder('Search labels').first().press("Backspace");
+      await expect(page).toHaveScreenshot();
+      await page.getByPlaceholder("Search labels").first().fill("Pos");
+      await expect(page).toHaveScreenshot();
+
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Space");
+
+      await page.getByText('Very Positive').first().press("Shift+Backspace");
 
       await expect(page).toHaveScreenshot();
     });

@@ -153,15 +153,15 @@ export const mockRecordForLongAndShortQuestion = async (
   return recordOne;
 };
 
-export const mockDiscardRecord = async (page: Page, recordId: string) => {
+export const mockRecordResponses = async (page: Page, recordId: string, status: "submitted" | "discarded") => {
   await page.route(
     `*/**/api/v1/records/${recordId}/responses`,
-    async (route) => {
+    async (route, request) => {
       await route.fulfill({
         json: {
           id: recordId,
-          values: {},
-          status: "discarded",
+          values: request.postDataJSON().values,
+          status,
           user_id: "3e760b76-e19a-480a-b436-a85812b98843",
           inserted_at: "2023-07-28T14:45:37",
           updated_at: "2023-07-28T14:45:37",
