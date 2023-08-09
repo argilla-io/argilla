@@ -1,20 +1,26 @@
 <template>
   <div v-if="!$fetchState.pending && !$fetchState.error" class="wrapper">
     <template v-if="!!record">
-      <RecordFeedbackTaskComponent
-        :recordStatus="record.status"
-        :fields="record.fields"
-      />
-      <QuestionsFormComponent
-        :key="record.id"
-        class="question-form"
-        :class="statusClass"
-        :datasetId="datasetId"
-        :record="record"
-        @on-submit-responses="goToNext"
-        @on-discard-responses="goToNext"
-        @on-question-form-touched="onQuestionFormTouched"
-      />
+      <Resizable>
+        <template #left>
+          <RecordFeedbackTaskComponent
+            :recordStatus="record.status"
+            :fields="record.fields"
+          />
+        </template>
+        <template #right>
+          <QuestionsFormComponent
+            :key="record.id"
+            class="question-form"
+            :class="statusClass"
+            :datasetId="datasetId"
+            :record="record"
+            @on-submit-responses="goToNext"
+            @on-discard-responses="goToNext"
+            @on-question-form-touched="onQuestionFormTouched"
+          />
+        </template>
+      </Resizable>
     </template>
 
     <div v-else class="wrapper--empty">
