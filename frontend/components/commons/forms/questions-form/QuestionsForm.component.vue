@@ -275,13 +275,15 @@ export default {
       this.userComesFromOutside = true;
     },
     onPressKeyboardShortCut({ code, shiftKey }) {
+      if (!shiftKey) return;
+      
       switch (code) {
         case "Enter": {
           this.onSubmit();
           break;
         }
         case "Space": {
-          if (shiftKey) this.onClear();
+          this.onClear();
           break;
         }
         case "Backspace": {
