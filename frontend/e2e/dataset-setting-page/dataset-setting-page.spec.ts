@@ -34,7 +34,7 @@ const goToDatasetSettingPage = async (page: Page) => {
 
   await page.waitForTimeout(1000);
 
-  return { record, dataset };
+  return dataset;
 };
 
 test.describe("Dataset setting page", () => {
@@ -243,7 +243,7 @@ test.describe("Dataset setting page", () => {
     });
 
     test("delete dataset correctly", async ({ page }) => {
-      const { dataset } = await goToDatasetSettingPage(page);
+      const dataset = await goToDatasetSettingPage(page);
       await mockDatasetDeletion(page, dataset.id, 200);
 
       await page.getByRole("button", { name: "Danger zone" }).click();
@@ -262,7 +262,7 @@ test.describe("Dataset setting page", () => {
     });
 
     test("delete dataset with error", async ({ page }) => {
-      const { dataset } = await goToDatasetSettingPage(page);
+      const dataset = await goToDatasetSettingPage(page);
       await mockDatasetDeletion(page, dataset.id, 500);
 
       await page.getByRole("button", { name: "Danger zone" }).click();
