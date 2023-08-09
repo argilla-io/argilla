@@ -54,6 +54,7 @@ export default {
 <style lang="scss" scoped>
 .description {
   &__content {
+    min-height: 65px;
     display: block;
     background: palette(white);
     padding: $base-space * 2;

@@ -7,27 +7,25 @@
         handler: onClickOutside,
       }"
     >
-      <transition appear name="fade">
-        <p
-          ref="text"
-          id="contentId"
-          class="content__text"
-          :class="textIsEdited ? '--edited-text' : null"
-          :contenteditable="true"
-          :placeholder="placeholder"
-          @input="onInputText"
-          v-html="sanitizedCurrentValue"
-          @focus="setFocus(true)"
-          @blur="setFocus(false)"
-          @keydown.shift.enter.exact="looseFocus"
-          @keydown.shift.backspace.exact="looseFocus"
-          @keydown.shift.space.exact="looseFocus"
-          @keydown.arrow-right.stop=""
-          @keydown.arrow-left.stop=""
-          @keydown.delete.exact.stop=""
-          @keydown.enter.exact.stop=""
-        />
-      </transition>
+      <p
+        ref="text"
+        id="contentId"
+        class="content__text"
+        :class="textIsEdited ? '--edited-text' : null"
+        :contenteditable="true"
+        :placeholder="placeholder"
+        @input="onInputText"
+        v-html="sanitizedCurrentValue"
+        @focus="setFocus(true)"
+        @blur="setFocus(false)"
+        @keydown.shift.enter.exact="looseFocus"
+        @keydown.shift.backspace.exact="looseFocus"
+        @keydown.shift.space.exact="looseFocus"
+        @keydown.arrow-right.stop=""
+        @keydown.arrow-left.stop=""
+        @keydown.delete.exact.stop=""
+        @keydown.enter.exact.stop=""
+      />
     </div>
   </span>
 </template>
