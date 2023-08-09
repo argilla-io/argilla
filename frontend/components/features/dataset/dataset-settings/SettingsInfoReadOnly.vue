@@ -3,8 +3,11 @@
     <h2 class="--heading5 --medium">Dataset info</h2>
     <div class="settings__area">
       <div class="settings__row">
-        <div class="item">
-          <p class="dataset-name" v-html="settings.dataset.name" />
+        <div class="settings__item">
+          <p
+            class="setting__dataset-name --body1"
+            v-html="settings.dataset.name"
+          />
           <p class="badge" v-html="settings.dataset.task" />
         </div>
         <base-action-tooltip tooltip="Copied">
@@ -60,24 +63,15 @@ export default {
     align-items: center;
     justify-content: space-between;
   }
-}
 
-.item {
-  display: flex;
-  align-items: center;
-  gap: $base-space * 3;
-}
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: $base-space * 3;
+  }
 
-.dataset-name {
-  @include font-size(16px);
-}
-
-.dataset-task {
-  color: $black-54;
-  border: 1px solid $black-37;
-  border-radius: $border-radius-m;
-  padding: calc($base-space / 2);
-  @include font-size(12px);
-  @include line-height(12px);
+  &__dataset-name {
+    margin: 0;
+  }
 }
 </styles>

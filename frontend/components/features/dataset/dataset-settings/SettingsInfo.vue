@@ -3,8 +3,11 @@
     <h2 class="--heading5 --medium">Dataset info</h2>
     <div class="settings__area">
       <div class="settings__row">
-        <div class="item">
-          <p class="dataset-name" v-html="settings.dataset.name" />
+        <div class="settings__item">
+          <p
+            class="settings__dataset-name --body1"
+            v-html="settings.dataset.name"
+          />
           <p class="badge" v-html="settings.dataset.task" />
         </div>
         <base-action-tooltip tooltip="Copied">
@@ -19,15 +22,12 @@
       </div>
     </div>
     <div class="settings__area">
-      <form
-        @submit.prevent="onSubmit()"
-        class="settings-info__edition-form-fields"
-      >
+      <form @submit.prevent="onSubmit()" class="settings__edition-form-fields">
         <DatasetDescriptionComponent
           :key="settings.dataset.updatedAt"
           v-model="settings.dataset.guidelines"
         />
-        <div class="settings-info__edition-form-footer">
+        <div class="settings__edition-form__footer">
           <BaseButton
             type="button"
             class="secondary light small"
@@ -83,39 +83,28 @@ export default {
     align-items: center;
     justify-content: space-between;
   }
-  &-info {
-    &__edition-form {
-      &-footer {
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-end;
-        align-items: center;
-        padding-top: $base-space * 3;
-        display: inline-flex;
-        gap: $base-space;
-      }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: $base-space * 3;
+  }
+
+  &__dataset-name {
+    margin: 0;
+  }
+
+  &__edition-form {
+    &__footer {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      align-items: center;
+      padding-top: $base-space * 3;
+      gap: $base-space;
     }
   }
-}
-
-.item {
-  display: flex;
-  align-items: center;
-  gap: $base-space * 3;
-}
-
-.dataset-name {
-  @include font-size(16px);
-}
-
-.dataset-task {
-  color: $black-54;
-  border: 1px solid $black-37;
-  border-radius: $border-radius-m;
-  padding: calc($base-space / 2);
-  @include font-size(12px);
-  @include line-height(12px);
 }
 </styles>
 ./useSettingInfoViewModel
