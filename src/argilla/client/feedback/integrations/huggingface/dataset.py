@@ -83,14 +83,13 @@ class HuggingFaceDatasetMixin:
                     f" `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}`."
                 )
 
-            hf_features[question.name] = Sequence(
+            hf_features[question.name] = [
                 {
-                    "user_id": Value(dtype="string"),
+                    "user_id": Value(dtype="string", id="question"),
                     "value": value,
-                    "status": Value(dtype="string"),
-                },
-                id="question",
-            )
+                    "status": Value(dtype="string", id="question"),
+                }
+            ]
             if question.name not in hf_dataset:
                 hf_dataset[question.name] = []
 
@@ -113,60 +112,43 @@ class HuggingFaceDatasetMixin:
         hf_features["metadata"] = Value(dtype="string", id="metadata")
         hf_dataset["metadata"] = []
 
-        empty = {
-            "user_id": [],
-            "value": [],
-            "status": [],
-        }
         for record in dataset.records:
             for field in dataset.fields:
                 hf_dataset[field.name].append(record.fields[field.name])
             for question in dataset.questions:
                 if not record.responses:
-                    hf_dataset[question.name].append(empty)
+                    hf_dataset[question.name].append([])
                 else:
                     responses = []
                     for response in record.responses:
                         if question.name not in response.values:
-                            responses.append(None)
                             continue
+                        formatted_response = {"user_id": response.user_id, "value": None, "status": response.status}
                         if question.settings["type"] == "ranking":
-                            responses.append([r.dict() for r in response.values[question.name].value])
+                            value = [r.dict() for r in response.values[question.name].value]
                         else:
-                            responses.append(response.values[question.name].value)
-                    hf_dataset[question.name].append(
-                        {
-                            "user_id": [r.user_id for r in record.responses],
-                            "value": responses,
-                            "status": [r.status for r in record.responses],
-                        }
-                    )
+                            value = response.values[question.name].value
+                        formatted_response["value"] = value
+                        responses.append(formatted_response)
+                    hf_dataset[question.name].append(responses)
 
-                suggestion = next(filter(lambda s: s.question_name == question.name, record.suggestions), None)
-                if not record.suggestions or not suggestion:
-                    hf_dataset[f"{question.name}-suggestion"].append(None)
-                    hf_dataset[f"{question.name}-suggestion-metadata"].append(
-                        {
-                            "type": None,
-                            "score": None,
-                            "agent": None,
-                        }
-                    )
-                else:
-                    hf_dataset[f"{question.name}-suggestion"].append(suggestion.value)
-                    hf_dataset[f"{question.name}-suggestion-metadata"].append(
-                        {
+                suggestion_value, suggestion_metadata = None, {"type": None, "score": None, "agent": None}
+                if record.suggestions:
+                    for suggestion in record.suggestions:
+                        if question.name != suggestion.question_name:
+                            continue
+                        suggestion_value = suggestion.value
+                        suggestion_metadata = {
                             "type": suggestion.type,
                             "score": suggestion.score,
                             "agent": suggestion.agent,
                         }
-                    )
+                        break
+                hf_dataset[f"{question.name}-suggestion"].append(suggestion_value)
+                hf_dataset[f"{question.name}-suggestion-metadata"].append(suggestion_metadata)
 
-            hf_dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else None)
+            hf_dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else {})
             hf_dataset["external_id"].append(record.external_id or None)
-
-        if hf_dataset.get("metadata", None) is not None:
-            hf_features["metadata"] = Value(dtype="string")
 
         return Dataset.from_dict(
             hf_dataset,
