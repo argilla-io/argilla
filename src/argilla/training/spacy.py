@@ -270,7 +270,7 @@ class ArgillaSpaCyTrainer(_ArgillaSpaCyTrainerBase):
         Initialize the ArgillaSpaCyTrainer class.
 
         Args:
-            freeze_tok2vec (bool, optional): A flag indicating whether to freeze the tok2vec weights
+            freeze_tok2vec: A flag indicating whether to freeze the tok2vec weights
                 during training. Defaults to False.
             **kwargs: Additional arguments for ArgillaSpaCyTrainerBase.
 
