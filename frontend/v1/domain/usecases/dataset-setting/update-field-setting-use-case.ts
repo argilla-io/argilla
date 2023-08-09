@@ -8,6 +8,7 @@ export class UpdateFieldSettingUseCase {
     if (!field.isFieldValid) {
       throw new Error("Field is not valid for update");
     }
+
     await this.fieldRepository.update(field);
 
     field.update();

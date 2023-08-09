@@ -18,7 +18,6 @@
           >
             <label :for="`title-${question.id}`">Title</label>
             <input
-              :class="!question.isTitleValid ? '--has-error' : null"
               type="type"
               :id="`title-${question.id}`"
               v-model="question.title"

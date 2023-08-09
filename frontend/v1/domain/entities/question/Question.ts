@@ -103,16 +103,11 @@ export class Question {
     return validations;
   }
 
-  public get isTitleValid(): boolean {
-    return this.validate().title.length === 0;
-  }
-
-  public get isDescriptionValid(): boolean {
-    return this.validate().description.length === 0;
-  }
-
   public get isQuestionValid(): boolean {
-    return this.isTitleValid && this.isDescriptionValid;
+    return (
+      this.validate().title.length === 0 &&
+      this.validate().description.length === 0
+    );
   }
 
   clearAnswer() {

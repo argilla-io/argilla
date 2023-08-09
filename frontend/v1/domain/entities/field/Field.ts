@@ -45,12 +45,8 @@ export class Field {
     return validations;
   }
 
-  public get isTitleValid(): boolean {
-    return this.validate().title.length === 0;
-  }
-
   public get isFieldValid(): boolean {
-    return this.isTitleValid;
+    return this.validate().title.length === 0;
   }
 
   restore() {

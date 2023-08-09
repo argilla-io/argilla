@@ -62,18 +62,7 @@ describe("Field", () => {
   describe("field validation should", () => {
     const invalidLargeTitle =
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum rhoncus mauris sit amet turpis euismod lobortis. Donec sit amet justo non tellus viverra pharetra. Vestibulum vitae aliquet dui. Etiam nec diam cursus, aliquam ligula vitae, volutpat lorem. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Sed et placerat enim. Aenean ut ante dapibus enim tincidunt tempor sed sit amet velit. Quisque vehicula risus quis velit blandit auctor. Maecenas eget accumsan erat.";
-    describe("is title valid", () => {
-      test("return false if field has a invalid title", () => {
-        const field = createTextFieldMock("1");
-        field.title = invalidLargeTitle;
-        expect(field.isTitleValid).toBeFalsy();
-      });
-      test("return true if field has a valid title", () => {
-        const field = createTextFieldMock("1");
-        field.title = "TITLE";
-        expect(field.isTitleValid).toBeTruthy();
-      });
-    });
+
     describe("validate should", () => {
       test("return 'This must be less than 500.' error if field title has more 500 characters", () => {
         const field = createTextFieldMock("1");
@@ -88,6 +77,7 @@ describe("Field", () => {
         expect(field.validate().title).toStrictEqual([]);
       });
     });
+
     describe("is field valid", () => {
       test("return true when title is valid", () => {
         const field = createTextFieldMock("1");
