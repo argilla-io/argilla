@@ -112,9 +112,25 @@ rg.log(ds, new_dataset)
 
 If you are using new feedback datasets and you want to update the search engine info, you should copy your dataset:
 
+::::{tab-set}
+
+:::{tab-item} Argilla 1.14.0 or higher
+```python
+import argilla as rg
+
+dataset = rg.FeedbackDataset.from_argilla(name="feedback-dataset")
+dataset = dataset.pull()
+dataset.push_to_argilla(name=f"{dataset.name}_copy")
+```
+:::
+
+:::{tab-item} Lower than Argilla 1.14.0
 ```python
 import argilla as rg
 
 dataset = rg.FeedbackDataset.from_argilla(name="feedback-dataset")
 dataset.push_to_argilla(name=f"{dataset.name}_copy")
 ```
+:::
+
+::::

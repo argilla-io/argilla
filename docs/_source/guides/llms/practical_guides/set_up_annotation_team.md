@@ -10,6 +10,7 @@ You will need to decide the level of overlap before creating or pushing a datase
 The Feedback Task supports having multiple annotations for your records by default. This means that all users with access to the dataset can give responses to all the records in the dataset. To have this full overlap just push the dataset (as detailed in [Create a Feedback Dataset](create_dataset.md#push-to-argilla)) in a workspace where all team members have access. Learn more about managing user access to workspaces [here](../../../getting_started/installation/configurations/user_management.md#assign-a-user-to-a-workspace).
 
 ## Zero overlap
+
 If you only want one annotation per record, we recommend that you split your records into chunks and assign each of them to a single annotator. Then, you can create several datasets, one in each annotator's personal workspace with the records assigned to them.
 
 ```{note}
@@ -72,7 +73,7 @@ for chunk in chunked_records:
 3. Loop through the dictionary of assignments to create one dataset per user:
 
 ```{note}
-If you haven't done so already, decide on the settings of the project (the `fields`, `questions` and `guidelines`) as detailed in the [Create a Feedback Dataset guide](create_dataset.ipynb) and set them as variables.
+If you haven't done so already, decide on the settings of the project (the `fields`, `questions` and `guidelines`) as detailed in the [Create a Feedback Dataset guide](./create_dataset.html) and set those as variables.
 ```
 
 ```python
@@ -92,14 +93,31 @@ for username, records in assignments.items():
     # create a dataset with their assingment and push to their workspace
     ds = rg.FeedbackDataset(fields=fields, questions=questions, guidelines=guidelines)
     ds.add_records(records)
-    ds.push_to_argilla(name="my_dataset", workspace=workspace.name)
 ```
+
+Then push the `FeedbackDataset` with the records to Argilla:
+
+::::{tab-set}
+
+:::{tab-item} Argilla 1.14.0 or higher
+```python
+remote_dataset = dataset.push_to_argilla(name="my_dataset", workspace=workspace.name)
+```
+:::
+
+:::{tab-item} Lower than Argilla 1.14.0
+```python
+dataset.push_to_argilla(name="my_dataset", workspace=workspace.name)
+```
+:::
+::::
 
 ```{note}
 The `Workspace` class was introduced in Argilla's Python SDK in version 1.11.0. To manage and create workspaces in earlier versions of Argilla check our [User Management Guide](../../../getting_started/installation/configurations/user_management.md)
 ```
 
 ## Controlled overlap
+
 Sometimes you prefer to have more control over the annotation overlap and decide on a limited number of responses you want for each record. You may opt for this option because you want your team to be more efficient or perhaps to calculate the agreement between pairs of annotators. In this case, you also need to create several datasets and push them to the annotators' personal workspaces with the difference that each record will appear in multiple datasets.
 
 For this method, follow the same steps as in the [zero overlap](#zero-overlap) solution, substituting the second step with the following code:
