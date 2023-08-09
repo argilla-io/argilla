@@ -87,9 +87,9 @@ template = """\
 
 def formatting_func(sample: Dict[str, Any]):
     return template.format(
-        instruction=sample["new-instruction"]["value"][0],
-        context=sample["new-context"]["value"][0],
-        response=sample["new-response"]["value"][0],
+        instruction=sample["new-instruction"][0]["value"],
+        context=sample["new-context"][0]["value"],
+        response=sample["new-response"][0]["value"],
     )
 
 task = TrainingTask.for_supervised_fine_tuning(

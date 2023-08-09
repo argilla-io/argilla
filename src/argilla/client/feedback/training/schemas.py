@@ -212,9 +212,10 @@ class TrainingTask:
             >>> from argilla import TrainingTask
             >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
             >>> def formatting_func(sample: Dict[str, Any]):
-            ...     if sample["good"]["value"] == "Bad":
+            ...     annotations = sample["good]
+            ...     if annotations and annotations[0]["value"] == "Bad":
             ...         return
-            ...     return template.format(prompt=sample["prompt"]["value"], response=sample["response"]["value"])
+            ...     return template.format(prompt=sample["prompt"][0]["value"], response=sample["response"][0]["value"])
             >>> task = TrainingTask.for_supervised_fine_tuning(formatting_func=formatting_func)
             >>> dataset.prepare_for_training(framework="...", task=task)
 
@@ -243,7 +244,8 @@ class TrainingTask:
             >>> from argilla import TrainingTask
             >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
             >>> def chosen_rejected_func(sample: Dict[str, Any]):
-            ...     if sample["ranking"]["value"].count("1") >= sample["ranking"]["value"].count("2"):
+            ...     values = [annotation["value"] for annotation in sample["ranking"]]
+            ...     if values.count("1") >= values.count("2"):
             ...         chosen = sample["response-1"]
             ...         rejected = sample["response-2"]
             ...     else:
@@ -278,13 +280,14 @@ class TrainingTask:
             >>> from argilla import TrainingTask
             >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
             >>> def prompt_chosen_rejected_func(sample: Dict[str, Any]):
-            ...     if sample["ranking"]["value"].count("1") >= sample["ranking"]["value"].count("2"):
+            ...     values = [annotation["value"] for annotation in sample["ranking"]]
+            ...     if values.count("1") >= values.count("2"):
             ...         chosen = sample["response-1"]
             ...         rejected = sample["response-2"]
             ...     else:
             ...         chosen = sample["response-2"]
             ...         rejected = sample["response-1"]
-            ...     return sample["prompt"],chosen, rejected
+            ...     return sample["prompt"], chosen, rejected
             >>> task = TrainingTask.for_direct_preference_optimization(prompt_chosen_rejected_func=prompt_chosen_rejected_func)
             >>> dataset.prepare_for_training(framework="...", task=task)
 
@@ -514,9 +517,10 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
         >>> from argilla import TrainingTaskForSFT
         >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
         >>> def formatting_func(sample: Dict[str, Any]):
-        ...     if sample["good"]["value"] == "Bad":
+        ...     annotations = sample["good]
+        ...     if annotations and annotations[0]["value"] == "Bad":
         ...         return
-        ...     return template.format(prompt=sample["prompt"]["value"], response=sample["response"]["value"])
+        ...     return template.format(prompt=sample["prompt"][0]["value"], response=sample["response"][0]["value"])
         >>> task = TrainingTaskForSFT(formatting_func=formatting_func)
         >>> dataset.prepare_for_training(framework="...", task=task)
 
@@ -576,7 +580,8 @@ class TrainingTaskForRM(BaseModel, TrainingData):
         >>> from argilla import TrainingTaskForRM
         >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
         >>> def chosen_rejected_func(sample: Dict[str, Any]):
-        ...     if sample["ranking"]["value"].count("1") >= sample["ranking"]["value"].count("2"):
+        ...     values = [annotation["value"] for annotation in sample["ranking"]]
+        ...     if values.count("1") >= values.count("2"):
         ...         chosen = sample["response-1"]
         ...         rejected = sample["response-2"]
         ...     else:
@@ -647,7 +652,8 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
         >>> from argilla import TrainingTaskForDPO
         >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
         >>> def prompt_chosen_rejected_func(sample: Dict[str, Any]):
-        ...     if sample["ranking"]["value"].count("1") >= sample["ranking"]["value"].count("2"):
+        ...     values = [annotation["value"] for annotation in sample["ranking"]]
+        ...     if values.count("1") >= values.count("2"):
         ...         chosen = sample["response-1"]
         ...         rejected = sample["response-2"]
         ...     else:

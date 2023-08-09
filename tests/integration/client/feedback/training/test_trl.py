@@ -51,14 +51,14 @@ def test_prepare_for_training_sft(
         # For example, the sample must be most frequently rated as "1" in question-2 and
         # label "b" from "question-3" must have not been set by any annotator
         ratings = [
-            rating
-            for rating, status in zip(sample["question-2"]["value"], sample["question-2"]["status"])
-            if status == "submitted" and rating is not None
+            annotation["value"]
+            for annotation in sample["question-2"]
+            if annotation["status"] == "submitted" and annotation["value"] is not None
         ]
         labels = [
-            label
-            for label, status in zip(sample["question-3"]["value"], sample["question-3"]["status"])
-            if status == "submitted" and label is not None
+            annotation["value"]
+            for annotation in sample["question-3"]
+            if annotation["status"] == "submitted" and annotation["value"] is not None
         ]
         if ratings and Counter(ratings).most_common(1)[0][0] == 1 and "b" not in labels:
             return f"### Text\n{sample['text']}"
@@ -109,9 +109,9 @@ def test_prepare_for_training_rm(
     def chosen_rejected_func(sample: Dict[str, Any]):
         # The FeedbackDataset isn't really set up for RM, so we'll just use an arbitrary example here
         labels = [
-            label
-            for label, status in zip(sample["question-3"]["value"], sample["question-3"]["status"])
-            if status == "submitted" and label is not None
+            annotation["value"]
+            for annotation in sample["question-3"]
+            if annotation["status"] == "submitted" and annotation["value"] is not None
         ]
         if labels:
             # Three cases for the tests: None, one tuple and yielding multiple tuples
@@ -167,9 +167,9 @@ def test_prepare_for_training_dpo(
     def prompt_chosen_rejected_func(sample: Dict[str, Any]):
         # The FeedbackDataset isn't really set up for DPO, so we'll just use an arbitrary example here
         labels = [
-            label
-            for label, status in zip(sample["question-3"]["value"], sample["question-3"]["status"])
-            if status == "submitted" and label is not None
+            annotation["value"]
+            for annotation in sample["question-3"]
+            if annotation["status"] == "submitted" and annotation["value"] is not None
         ]
         if labels:
             # Three cases for the tests: None, one tuple and yielding multiple tuples
