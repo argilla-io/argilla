@@ -31,7 +31,6 @@
           >
             <label :for="`description-${question.id}`">Description</label>
             <input
-              :class="!question.isDescriptionValid ? '--has-error' : null"
               type="text"
               :id="`description-${question.id}`"
               v-model="question.description"
@@ -168,12 +167,6 @@ export default {
         outline: 0;
         &:focus {
           border: 1px solid $primary-color;
-          &.--has-error {
-            border-color: palette(orange-red-crayola);
-          }
-        }
-        &.--has-error {
-          border: 1px solid palette(orange-red-crayola);
         }
       }
     }
@@ -201,8 +194,5 @@ export default {
     border-radius: $border-radius-m;
     overflow: auto;
   }
-}
-.--validation {
-  color: red;
 }
 </style>

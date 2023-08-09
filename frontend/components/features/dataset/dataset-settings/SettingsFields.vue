@@ -19,12 +19,7 @@
             class="settings-fields__edition-form-group"
           >
             <label for="field.id">Title</label>
-            <input
-              :class="!field.isTitleValid ? '--has-error' : null"
-              type="type"
-              id="field.id"
-              v-model="field.title"
-            />
+            <input type="type" id="field.id" v-model="field.title" />
           </Validation>
 
           <BaseSwitch v-model="field.settings.use_markdown"
@@ -141,12 +136,6 @@ export default {
         outline: 0;
         &:focus {
           border: 1px solid $primary-color;
-          &.--has-error {
-            border-color: palette(orange-red-crayola);
-          }
-        }
-        &.--has-error {
-          border: 1px solid palette(orange-red-crayola);
         }
       }
     }
@@ -163,8 +152,5 @@ export default {
       gap: $base-space;
     }
   }
-}
-.--validation {
-  color: red;
 }
 </style>
