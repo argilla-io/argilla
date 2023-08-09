@@ -247,19 +247,19 @@ class ArgillaTrainerSkeleton(ABC):
             self._record_class = FeedbackRecord
 
     @abstractmethod
-    def init_training_args(self):
+    def init_training_args(self) -> None:
         """
         Initializes the training arguments.
         """
 
     @abstractmethod
-    def init_model(self):
+    def init_model(self) -> None:
         """
         Initializes a model.
         """
 
     @abstractmethod
-    def update_config(self, *args, **kwargs):
+    def update_config(self, *args, **kwargs) -> None:
         """
         Updates the configuration of the trainer, but the parameters depend on the trainer.subclass.
         """
@@ -271,13 +271,13 @@ class ArgillaTrainerSkeleton(ABC):
         """
 
     @abstractmethod
-    def train(self, output_dir: str = None):
+    def train(self, output_dir: str = None) -> None:
         """
         Trains the model.
         """
 
     @abstractmethod
-    def save(self, output_dir: str):
+    def save(self, output_dir: str) -> None:
         """
         Saves the model to the specified path.
         """

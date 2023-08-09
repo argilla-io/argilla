@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import logging
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, Dict, List, Union
 
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
 from argilla.client.feedback.training.schemas import (
@@ -94,7 +94,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
 
         self.init_training_args()
 
-    def init_training_args(self):
+    def init_training_args(self) -> None:
         """
         Initializes the training arguments.
         """
@@ -106,7 +106,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
 
         self.trainer_kwargs = {}
 
-    def init_model(self, new: bool = False):
+    def init_model(self) -> None:
         """
         Initializes a model.
         """
@@ -129,10 +129,9 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
 
         if isinstance(self._task, TrainingTaskForDPO):
             self._transformers_ref_model: PreTrainedModel = auto_model_class.from_pretrained(self._model)
-        # if new:
         self._transformers_model.to(self.device)
 
-    def update_config(self, *args, **kwargs):
+    def update_config(self, **kwargs) -> None:
         """
         Updates the configuration of the trainer, but the parameters depend on the trainer.subclass.
         """
@@ -141,7 +140,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         self.training_args_kwargs.update(filter_allowed_args(TrainingArguments.__init__, **kwargs))
         self.trainer_kwargs.update(filter_allowed_args(self.trainer_cls.__init__, **kwargs))
 
-    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
+    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs) -> None:
         """
         Predicts the label of the text.
         """
@@ -172,7 +171,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
 
         elif isinstance(self._task, TrainingTaskForRM):
 
-            def preprocess_function(examples):
+            def preprocess_function(examples) -> Dict[str, List]:
                 new_examples = {
                     "input_ids_chosen": [],
                     "attention_mask_chosen": [],
@@ -227,14 +226,14 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
 
         self.save(output_dir)
 
-    def save(self, output_dir: str):
+    def save(self, output_dir: str) -> None:
         """
         Saves the model to the specified path.
         """
         self._transformers_model.save_pretrained(output_dir)
         self._transformers_tokenizer.save_pretrained(output_dir)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         formatted_string = []
         arg_dict = {
             repr(self.trainer_cls.__name__): self.trainer_kwargs,
