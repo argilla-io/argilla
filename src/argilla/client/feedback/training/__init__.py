@@ -15,9 +15,9 @@
 from argilla.client.feedback.training.base import ArgillaTrainer
 from argilla.client.feedback.training.schemas import (
     TrainingTask,
-    TrainingTaskForDirectPreferenceOptimization,
-    TrainingTaskForRewardModelling,
-    TrainingTaskForSupervisedFinetuning,
+    TrainingTaskForDPO,
+    TrainingTaskForRM,
+    TrainingTaskForSFT,
     TrainingTaskForTextClassification,
     TrainingTaskMapping,  # <- Deprecated
     TrainingTaskMappingForTextClassification,  # <- Deprecated
@@ -27,9 +27,9 @@ __all__ = [
     "ArgillaTrainer",
     "TrainingTask",
     "TrainingTaskForTextClassification",
-    "TrainingTaskForSupervisedFinetuning",
-    "TrainingTaskForRewardModelling",
-    "TrainingTaskForDirectPreferenceOptimization",
+    "TrainingTaskForSFT",
+    "TrainingTaskForRM",
+    "TrainingTaskForDPO",
     "TrainingTaskMapping",
     "TrainingTaskMappingForTextClassification",
 ]

@@ -206,7 +206,7 @@ class TrainingTask:
                 converting a dictionary of records into zero, one or more text strings.
 
         Returns:
-            TrainingTaskForSupervisedFinetuning: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
+            TrainingTaskForSFT: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
 
         Examples:
             >>> from argilla import TrainingTask
@@ -219,7 +219,7 @@ class TrainingTask:
             >>> dataset.prepare_for_training(framework="...", task=task)
 
         """
-        return TrainingTaskForSupervisedFinetuning(formatting_func=formatting_func)
+        return TrainingTaskForSFT(formatting_func=formatting_func)
 
     @classmethod
     def for_reward_modelling(
@@ -227,7 +227,7 @@ class TrainingTask:
         chosen_rejected_func: Callable[
             [Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]
         ],
-    ) -> "TrainingTaskForRewardModelling":
+    ) -> "TrainingTaskForRM":
         """
         Return a task that can be used in `FeedbackDataset.prepare_for_training(framework="...", task)`
         to extract data from the Feedback Dataset in an immediately useful format.
@@ -237,7 +237,7 @@ class TrainingTask:
                 A formatting function converting a dictionary of records into zero, one or more chosen-rejected text tuples.
 
         Returns:
-            TrainingTaskForRewardModelling: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
+            TrainingTaskForRM: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
 
         Examples:
             >>> from argilla import TrainingTask
@@ -254,7 +254,7 @@ class TrainingTask:
             >>> dataset.prepare_for_training(framework="...", task=task)
 
         """
-        return TrainingTaskForRewardModelling(chosen_rejected_func=chosen_rejected_func)
+        return TrainingTaskForRM(chosen_rejected_func=chosen_rejected_func)
 
     @classmethod
     def for_direct_preference_optimization(
@@ -262,7 +262,7 @@ class TrainingTask:
         prompt_chosen_rejected_func: Callable[
             [Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]
         ],
-    ) -> "TrainingTaskForDirectPreferenceOptimization":
+    ) -> "TrainingTaskForDPO":
         """
         Return a task that can be used in `FeedbackDataset.prepare_for_training(framework="...", task)`
         to extract data from the Feedback Dataset in an immediately useful format.
@@ -272,7 +272,7 @@ class TrainingTask:
                 A formatting function converting a dictionary of records into zero, one or more prompt-chosen-rejected text tuples.
 
         Returns:
-            TrainingTaskForDirectPreferenceOptimization: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
+            TrainingTaskForDPO: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
 
         Examples:
             >>> from argilla import TrainingTask
@@ -289,7 +289,7 @@ class TrainingTask:
             >>> dataset.prepare_for_training(framework="...", task=task)
 
         """
-        return TrainingTaskForDirectPreferenceOptimization(prompt_chosen_rejected_func=prompt_chosen_rejected_func)
+        return TrainingTaskForDPO(prompt_chosen_rejected_func=prompt_chosen_rejected_func)
 
 
 class TrainingTaskForTextClassification(BaseModel, TrainingData):
@@ -503,7 +503,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
             return _prepare(data)
 
 
-class TrainingTaskForSupervisedFinetuning(BaseModel, TrainingData):
+class TrainingTaskForSFT(BaseModel, TrainingData):
     """Training data for supervised finetuning
 
     Args:
@@ -511,13 +511,13 @@ class TrainingTaskForSupervisedFinetuning(BaseModel, TrainingData):
             converting a dictionary of records into zero, one or more text strings.
 
     Examples:
-        >>> from argilla import TrainingTaskForSupervisedFinetuning
+        >>> from argilla import TrainingTaskForSFT
         >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
         >>> def formatting_func(sample: Dict[str, Any]):
         ...     if sample["good"]["value"] == "Bad":
         ...         return
         ...     return template.format(prompt=sample["prompt"]["value"], response=sample["response"]["value"])
-        >>> task = TrainingTaskForSupervisedFinetuning(formatting_func=formatting_func)
+        >>> task = TrainingTaskForSFT(formatting_func=formatting_func)
         >>> dataset.prepare_for_training(framework="...", task=task)
 
     """
@@ -565,7 +565,7 @@ class TrainingTaskForSupervisedFinetuning(BaseModel, TrainingData):
         return ds
 
 
-class TrainingTaskForRewardModelling(BaseModel, TrainingData):
+class TrainingTaskForRM(BaseModel, TrainingData):
     """Training data for reward modelling
 
     Args:
@@ -573,7 +573,7 @@ class TrainingTaskForRewardModelling(BaseModel, TrainingData):
             A formatting function converting a dictionary of records into zero, one or more chosen-rejected text tuples.
 
     Examples:
-        >>> from argilla import TrainingTaskForRewardModelling
+        >>> from argilla import TrainingTaskForRM
         >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
         >>> def chosen_rejected_func(sample: Dict[str, Any]):
         ...     if sample["ranking"]["value"].count("1") >= sample["ranking"]["value"].count("2"):
@@ -583,7 +583,7 @@ class TrainingTaskForRewardModelling(BaseModel, TrainingData):
         ...         chosen = sample["response-2"]
         ...         rejected = sample["response-1"]
         ...     return chosen, rejected
-        >>> task = TrainingTaskForRewardModelling(chosen_rejected_func=chosen_rejected_func)
+        >>> task = TrainingTaskForRM(chosen_rejected_func=chosen_rejected_func)
         >>> dataset.prepare_for_training(framework="...", task=task)
     """
 
@@ -636,7 +636,7 @@ class TrainingTaskForRewardModelling(BaseModel, TrainingData):
         return ds
 
 
-class TrainingTaskForDirectPreferenceOptimization(BaseModel, TrainingData):
+class TrainingTaskForDPO(BaseModel, TrainingData):
     """Training data for direct preference optimization
 
     Args:
@@ -644,7 +644,7 @@ class TrainingTaskForDirectPreferenceOptimization(BaseModel, TrainingData):
             A formatting function converting a dictionary of records into zero, one or more prompt-chosen-rejected text tuples.
 
     Examples:
-        >>> from argilla import TrainingTaskForDirectPreferenceOptimization
+        >>> from argilla import TrainingTaskForDPO
         >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
         >>> def prompt_chosen_rejected_func(sample: Dict[str, Any]):
         ...     if sample["ranking"]["value"].count("1") >= sample["ranking"]["value"].count("2"):
@@ -654,7 +654,7 @@ class TrainingTaskForDirectPreferenceOptimization(BaseModel, TrainingData):
         ...         chosen = sample["response-2"]
         ...         rejected = sample["response-1"]
         ...     return sample["prompt"], chosen, rejected
-        >>> task = TrainingTaskForDirectPreferenceOptimization(prompt_chosen_rejected_func=prompt_chosen_rejected_func)
+        >>> task = TrainingTaskForDPO(prompt_chosen_rejected_func=prompt_chosen_rejected_func)
         >>> dataset.prepare_for_training(framework="...", task=task)
     """
 
@@ -711,9 +711,9 @@ class TrainingTaskForDirectPreferenceOptimization(BaseModel, TrainingData):
 
 TrainingTaskTypes = Union[
     TrainingTaskForTextClassification,
-    TrainingTaskForSupervisedFinetuning,
-    TrainingTaskForRewardModelling,
-    TrainingTaskForDirectPreferenceOptimization,
+    TrainingTaskForSFT,
+    TrainingTaskForRM,
+    TrainingTaskForDPO,
 ]
 
 
@@ -737,17 +737,17 @@ class TrainingTaskMapping(TrainingTask, RenamedDeprecationMixin):
         return super().for_text_classification(*args, **kwargs)
 
     @classmethod
-    def for_supervised_fine_tuning(cls, *args, **kwargs) -> TrainingTaskForSupervisedFinetuning:
+    def for_supervised_fine_tuning(cls, *args, **kwargs) -> TrainingTaskForSFT:
         cls.warn()
         return super().for_supervised_fine_tuning(*args, **kwargs)
 
     @classmethod
-    def for_reward_modelling(cls, *args, **kwargs) -> TrainingTaskForRewardModelling:
+    def for_reward_modelling(cls, *args, **kwargs) -> TrainingTaskForRM:
         cls.warn()
         return super().for_reward_modelling(*args, **kwargs)
 
     @classmethod
-    def for_direct_preference_optimization(cls, *args, **kwargs) -> TrainingTaskForDirectPreferenceOptimization:
+    def for_direct_preference_optimization(cls, *args, **kwargs) -> TrainingTaskForDPO:
         cls.warn()
         return super().for_direct_preference_optimization(*args, **kwargs)
 

@@ -17,9 +17,9 @@ from typing import TYPE_CHECKING, List, Union
 
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
 from argilla.client.feedback.training.schemas import (
-    TrainingTaskForDirectPreferenceOptimization,
-    TrainingTaskForRewardModelling,
-    TrainingTaskForSupervisedFinetuning,
+    TrainingTaskForDPO,
+    TrainingTaskForRM,
+    TrainingTaskForSFT,
 )
 from argilla.training.utils import filter_allowed_args
 from argilla.utils.dependency import require_version
@@ -38,9 +38,9 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         self,
         dataset: "FeedbackDataset",
         task: Union[
-            TrainingTaskForSupervisedFinetuning,
-            TrainingTaskForRewardModelling,
-            TrainingTaskForDirectPreferenceOptimization,
+            TrainingTaskForSFT,
+            TrainingTaskForRM,
+            TrainingTaskForDPO,
         ],
         prepared_data=None,
         model: str = None,
@@ -76,9 +76,9 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         if not isinstance(
             self._task,
             (
-                TrainingTaskForSupervisedFinetuning,
-                TrainingTaskForRewardModelling,
-                TrainingTaskForDirectPreferenceOptimization,
+                TrainingTaskForSFT,
+                TrainingTaskForRM,
+                TrainingTaskForDPO,
             ),
         ):
             raise NotImplementedError(f"Task {self._task} not supported in TRL.")
@@ -86,9 +86,9 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         from trl import DPOTrainer, RewardTrainer, SFTTrainer
 
         self.trainer_mapping = {
-            TrainingTaskForSupervisedFinetuning: SFTTrainer,
-            TrainingTaskForRewardModelling: RewardTrainer,
-            TrainingTaskForDirectPreferenceOptimization: DPOTrainer,
+            TrainingTaskForSFT: SFTTrainer,
+            TrainingTaskForRM: RewardTrainer,
+            TrainingTaskForDPO: DPOTrainer,
         }
         self.trainer_cls = self.trainer_mapping[type(self._task)]
 
@@ -118,16 +118,16 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
             PreTrainedTokenizer,
         )
 
-        if isinstance(self._task, (TrainingTaskForSupervisedFinetuning, TrainingTaskForDirectPreferenceOptimization)):
+        if isinstance(self._task, (TrainingTaskForSFT, TrainingTaskForDPO)):
             auto_model_class = AutoModelForCausalLM
-        elif isinstance(self._task, TrainingTaskForRewardModelling):
+        elif isinstance(self._task, TrainingTaskForRM):
             auto_model_class = AutoModelForSequenceClassification
         self._transformers_model: PreTrainedModel = auto_model_class.from_pretrained(self._model)
         self._transformers_tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(self._model)
         self._transformers_tokenizer.pad_token = self._transformers_tokenizer.eos_token
         self._transformers_model.config.pad_token_id = self._transformers_tokenizer.pad_token_id
 
-        if isinstance(self._task, TrainingTaskForDirectPreferenceOptimization):
+        if isinstance(self._task, TrainingTaskForDPO):
             self._transformers_ref_model: PreTrainedModel = auto_model_class.from_pretrained(self._model)
         # if new:
         self._transformers_model.to(self.device)
@@ -158,7 +158,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
 
         self.init_model(new=True)
 
-        if isinstance(self._task, TrainingTaskForSupervisedFinetuning):
+        if isinstance(self._task, TrainingTaskForSFT):
             self._training_args = TrainingArguments(**self.training_args_kwargs)
             self._trainer = self.trainer_cls(
                 self._transformers_model,
@@ -170,7 +170,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
                 **self.trainer_kwargs,
             )
 
-        elif isinstance(self._task, TrainingTaskForRewardModelling):
+        elif isinstance(self._task, TrainingTaskForRM):
 
             def preprocess_function(examples):
                 new_examples = {
@@ -205,7 +205,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
                 **self.trainer_kwargs,
             )
 
-        elif isinstance(self._task, TrainingTaskForDirectPreferenceOptimization):
+        elif isinstance(self._task, TrainingTaskForDPO):
             self._training_args = TrainingArguments(**self.training_args_kwargs)
             self._trainer = self.trainer_cls(
                 model=self._transformers_model,

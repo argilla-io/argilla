@@ -29,9 +29,9 @@ from argilla.client.feedback.schemas import (
     RatingQuestion,
 )
 from argilla.client.feedback.training.schemas import (
-    TrainingTaskForDirectPreferenceOptimization,
-    TrainingTaskForRewardModelling,
-    TrainingTaskForSupervisedFinetuning,
+    TrainingTaskForDPO,
+    TrainingTaskForRM,
+    TrainingTaskForSFT,
     TrainingTaskForTextClassification,
     TrainingTaskTypes,
 )
@@ -360,9 +360,9 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         elif not isinstance(
             task,
             (
-                TrainingTaskForSupervisedFinetuning,
-                TrainingTaskForRewardModelling,
-                TrainingTaskForDirectPreferenceOptimization,
+                TrainingTaskForSFT,
+                TrainingTaskForRM,
+                TrainingTaskForDPO,
             ),
         ):
             raise ValueError(f"Training data {type(task)} is not supported yet")
