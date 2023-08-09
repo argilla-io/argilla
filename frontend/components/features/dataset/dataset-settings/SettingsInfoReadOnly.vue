@@ -23,7 +23,7 @@
     </div>
     <div class="settings__area">
       <DatasetDescriptionReadOnlyComponent
-        :datasetDescription="guidelines"
+        :guidelines="guidelines"
         :isColorLight="!guidelines"
       />
     </div>

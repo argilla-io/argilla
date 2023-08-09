@@ -8,8 +8,8 @@
       <template v-slot="{ currentComponent }">
         <component
           class="description__content"
-          :markdown="datasetDescription"
-          :value="datasetDescription"
+          :markdown="sanitizedDescription"
+          :value="sanitizedDescription"
           :is="currentComponent"
           :key="currentComponent"
           @change-text="onChangeTextArea"
@@ -39,7 +39,7 @@ export default {
     };
   },
   computed: {
-    datasetDescription() {
+    sanitizedDescription() {
       return this.guidelines ?? "";
     },
   },

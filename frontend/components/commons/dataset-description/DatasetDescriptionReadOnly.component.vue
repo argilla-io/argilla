@@ -1,10 +1,13 @@
 <template>
   <div class="description">
-    <h2 class="--heading5 --medium description__title" v-text="title" />
+    <h2
+      class="--heading5 --medium description__title"
+      v-text="'Annotation guidelines'"
+    />
     <RenderMarkdownBaseComponent
       class="--body1 description__text"
       :class="{ '--light': isColorLight }"
-      :markdown="datasetDescription"
+      :markdown="sanitizedDescription"
     />
   </div>
 </template>
@@ -12,7 +15,7 @@
 <script>
 export default {
   props: {
-    datasetDescription: {
+    guidelines: {
       type: String,
       required: true,
     },
@@ -21,8 +24,10 @@ export default {
       default: false,
     },
   },
-  created() {
-    this.title = "Annotation guidelines";
+  computed: {
+    sanitizedDescription() {
+      return this.guidelines ?? "";
+    },
   },
 };
 </script>
