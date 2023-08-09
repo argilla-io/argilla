@@ -121,6 +121,9 @@ export default {
     viewSettings() {
       return DatasetViewSettings.query().whereId(this.datasetName).first();
     },
+    /**
+     * @deprecated Replace with useRole
+     */
     isAdminOrOwnerRole() {
       const role = this.$auth.user.role;
       return role === "admin" || role === "owner";

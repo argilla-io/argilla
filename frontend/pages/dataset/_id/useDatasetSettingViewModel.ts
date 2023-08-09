@@ -1,13 +1,14 @@
 import { computed, onBeforeMount } from "vue-demi";
 import { useResolve } from "ts-injecty";
-import { useRouter, useContext } from "@nuxtjs/composition-api";
+import { useRouter } from "@nuxtjs/composition-api";
 import { useDatasetViewModel } from "./useDatasetViewModel";
 import { GetDatasetSettingsUseCase } from "~/v1/domain/usecases/dataset-setting/get-dataset-settings-use-case";
 import { useDatasetSetting } from "~/v1/infrastructure/storage/DatasetSettingStorage";
+import { useRole } from "@/v1/infrastructure/services";
 
 export const useDatasetSettingViewModel = () => {
   const router = useRouter();
-  const { $auth } = useContext();
+  const { isAdminOrOwnerRole } = useRole();
   const { state: datasetSetting } = useDatasetSetting();
   const getDatasetSetting = useResolve(GetDatasetSettingsUseCase);
 
@@ -47,11 +48,6 @@ export const useDatasetSettingViewModel = () => {
         name: "settings",
       },
     ];
-  });
-
-  const isAdminOrOwnerRole = computed(() => {
-    const role = $auth.user.role;
-    return role === "admin" || role === "owner";
   });
 
   onBeforeMount(() => {
