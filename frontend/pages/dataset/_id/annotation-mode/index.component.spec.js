@@ -29,7 +29,6 @@ jest.mock("@/models/feedback-task-model/record/record.queries", () => ({
     DISCARDED: "DISCARDED",
     SUBMITTED: "SUBMITTED",
   },
-  deleteAllRecords: () => {},
 }));
 
 describe("AnnotationModePage", () => {
