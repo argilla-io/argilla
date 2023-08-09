@@ -1,37 +1,36 @@
 <template>
-  <div class="settings-fields__container">
-    <div class="settings-fields__edition-form">
+  <div class="settings__container">
+    <div class="settings__edition-form">
       <h2 class="--heading5 --medium">Edit fields</h2>
       <div v-for="field in settings.fields" :key="field.id">
         <form
           @submit.prevent="onSubmit(field)"
-          class="settings-fields__edition-form-fields"
+          class="settings__edition-form__fields"
         >
           <div
-            class="settings-fields__edition-form-name"
+            class="settings__edition-form__name"
             v-optional-field="!field.required"
           >
-            <h4 class="--body1 --medium --capitalized" v-text="field.name" />
+            <h4
+              v-optional-field="!field.required"
+              class="--body1 --medium --capitalized"
+              v-text="field.name"
+            />
           </div>
 
           <Validation
             :validations="field.validate().title"
-            class="settings-fields__edition-form-group"
+            class="settings__edition-form__group"
           >
             <label for="field.id">Title</label>
-            <input
-              :class="!field.isTitleValid ? '--has-error' : null"
-              type="type"
-              id="field.id"
-              v-model="field.title"
-            />
+            <input type="type" id="field.id" v-model="field.title" />
           </Validation>
 
           <BaseSwitch v-model="field.settings.use_markdown"
             >Use Markdown</BaseSwitch
           >
 
-          <div class="settings-fields__edition-form-footer">
+          <div class="settings__edition-form__footer">
             <BaseButton
               type="button"
               class="secondary light small"
@@ -76,7 +75,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.settings-fields {
+.settings {
   &__container {
     display: flex;
     gap: $base-space * 4;
@@ -95,13 +94,13 @@ export default {
     overflow: auto;
     padding-right: $base-space * 2;
 
-    &-fields {
+    &__fields {
       display: flex;
       flex-direction: column;
       gap: $base-space * 2;
     }
 
-    &-name {
+    &__name {
       display: flex;
       flex-direction: row;
       align-items: center;
@@ -115,7 +114,7 @@ export default {
       }
     }
 
-    &-group {
+    &__group {
       display: flex;
       flex-direction: column;
       width: 100%;
@@ -128,7 +127,6 @@ export default {
       }
 
       & input {
-        box-sizing: border-box;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -141,17 +139,11 @@ export default {
         outline: 0;
         &:focus {
           border: 1px solid $primary-color;
-          &.--has-error {
-            border-color: palette(orange-red-crayola);
-          }
-        }
-        &.--has-error {
-          border: 1px solid palette(orange-red-crayola);
         }
       }
     }
 
-    &-footer {
+    &__footer {
       width: 100%;
       display: flex;
       flex-direction: row;
@@ -163,8 +155,5 @@ export default {
       gap: $base-space;
     }
   }
-}
-.--validation {
-  color: red;
 }
 </style>

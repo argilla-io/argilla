@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="validations.length ? '--has-error' : null">
     <slot></slot>
     <template v-if="validations.length">
       <span
@@ -24,8 +24,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$color-error: palette(orange-red-crayola);
 .--error-message {
   @include font-size(12px);
-  color: palette(orange-red-crayola);
+  color: $color-error;
+}
+.--has-error {
+  input,
+  textarea {
+    border: 1px solid $color-error;
+    &:focus {
+      border-color: $color-error;
+    }
+  }
 }
 </style>

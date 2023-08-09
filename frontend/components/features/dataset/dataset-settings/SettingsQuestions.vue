@@ -1,20 +1,20 @@
 <template>
-  <SynchronizeScroll class="settings-questions__container">
-    <div class="settings-questions__edition-form">
+  <SynchronizeScroll class="settings__container">
+    <div class="settings__edition-form">
       <h2 class="--heading5 --medium">Edit questions</h2>
       <div v-for="question in settings.questions" :key="question.id">
         <form
           @submit.prevent="onSubmit(question)"
-          class="settings-questions__edition-form-questions"
+          class="settings__edition-form__questions"
         >
-          <div class="settings-questions__edition-form-name">
+          <div class="settings__edition-form__name">
             <h4 class="--body1 --medium --capitalized" v-text="question.name" />
             <p class="badge --capitalized" v-html="question.type" />
           </div>
 
           <Validation
             :validations="question.validate().title"
-            class="settings-questions__edition-form-group"
+            class="settings__edition-form__group"
           >
             <label :for="`title-${question.id}`">Title</label>
             <input
@@ -27,11 +27,10 @@
 
           <Validation
             :validations="question.validate().description"
-            class="settings-questions__edition-form-group"
+            class="settings__edition-form__group"
           >
             <label :for="`description-${question.id}`">Description</label>
             <input
-              :class="!question.isDescriptionValid ? '--has-error' : null"
               type="text"
               :id="`description-${question.id}`"
               v-model="question.description"
@@ -54,7 +53,7 @@
             >Visible options</BaseRangeSlider
           >
 
-          <div class="settings-questions__edition-form-footer">
+          <div class="settings__edition-form__footer">
             <BaseButton
               type="button"
               class="secondary light small"
@@ -76,7 +75,7 @@
     </div>
     <QuestionsComponent
       legend="Ui preview"
-      class="settings-questions__preview"
+      class="settings__preview"
       :questions="settings.questions"
     />
   </SynchronizeScroll>
@@ -104,7 +103,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.settings-questions {
+.settings {
   &__container {
     display: flex;
     gap: $base-space * 4;
@@ -122,13 +121,13 @@ export default {
     overflow: auto;
     padding-right: $base-space * 2;
 
-    &-questions {
+    &__questions {
       display: flex;
       flex-direction: column;
       gap: $base-space * 2;
     }
 
-    &-name {
+    &__name {
       display: flex;
       flex-direction: row;
       align-items: center;
@@ -142,7 +141,7 @@ export default {
       }
     }
 
-    &-group {
+    &__group {
       display: flex;
       flex-direction: column;
       width: 100%;
@@ -155,7 +154,6 @@ export default {
       }
 
       & input {
-        box-sizing: border-box;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -168,17 +166,11 @@ export default {
         outline: 0;
         &:focus {
           border: 1px solid $primary-color;
-          &.--has-error {
-            border-color: palette(orange-red-crayola);
-          }
-        }
-        &.--has-error {
-          border: 1px solid palette(orange-red-crayola);
         }
       }
     }
 
-    &-footer {
+    &__footer {
       width: 100%;
       display: flex;
       flex-direction: row;
@@ -201,8 +193,5 @@ export default {
     border-radius: $border-radius-m;
     overflow: auto;
   }
-}
-.--validation {
-  color: red;
 }
 </style>
