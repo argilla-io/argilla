@@ -2,12 +2,10 @@
   <div class="resizable">
     <div class="resizable__left"><slot name="left" /></div>
 
-    <!-- The resizer -->
     <div class="resizable__bar" id="resizableBar">
       <span class="resizable__bar-button">:::</span>
     </div>
 
-    <!-- Right element -->
     <div class="resizable__right"><slot name="right" /></div>
   </div>
 </template>
@@ -25,7 +23,6 @@ export default {
     this.limitElements(rightSide);
 
     let x = 0;
-    let y = 0;
     let leftWidth = 0;
 
     const mouseMoveHandler = (e) => {
@@ -44,7 +41,6 @@ export default {
 
     const mouseDownHandler = (e) => {
       x = e.clientX;
-      y = e.clientY;
       leftWidth = leftSide.getBoundingClientRect().width;
 
       document.addEventListener("mousemove", mouseMoveHandler);
@@ -61,7 +57,6 @@ export default {
       element.style["min-width"] = `${maxWith * 0.3}px`;
     },
   },
-  destroyed() {},
 };
 </script>
 
