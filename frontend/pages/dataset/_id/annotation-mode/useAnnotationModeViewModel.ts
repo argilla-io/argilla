@@ -1,4 +1,4 @@
-import { getCurrentInstance, onBeforeMount, ref } from "vue-demi";
+import { getCurrentInstance, onBeforeMount } from "vue-demi";
 import { useResolve } from "ts-injecty";
 import { useDatasetViewModel } from "../useDatasetViewModel";
 import {

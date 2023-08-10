@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <span v-text="formattedDate" />
+  <span> {{ formattedDate }} </span>
 </template>
 
 <script>
@@ -39,9 +39,10 @@ export default {
       timer: null,
     };
   },
-  mounted() {
+  beforeMount() {
     this.formatDate();
-
+  },
+  mounted() {
     const self = this;
     const reRender = () => {
       if (this.timer) clearTimeout(this.timer);
