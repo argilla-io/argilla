@@ -10,7 +10,7 @@ rg.init(
 )
 ```
 
-## Adding more records
+## Add more records
 
 To add a (list of) Feedback record(s) to an existing dataset you will only need to load the dataset using the Python client and use the `add_records` method as explained below:
 
@@ -63,7 +63,7 @@ dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_works
 dataset.delete_records([record for record in dataset.records[:5]])
 ```
 
-## Adding suggestions to existing records
+## Add suggestions to existing records
 
 You can also add suggestions to records that have been already pushed to Argilla:
 
