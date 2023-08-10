@@ -110,6 +110,7 @@ class HuggingFaceDatasetMixin:
         hf_features["external_id"] = Value(dtype="string", id="external_id")
         hf_dataset["external_id"] = []
 
+        hf_features["metadata"] = Value(dtype="string", id="metadata")
         hf_dataset["metadata"] = []
 
         for record in dataset.records:
@@ -156,11 +157,8 @@ class HuggingFaceDatasetMixin:
                         }
                     )
 
-            hf_dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else None)
+            hf_dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else {})
             hf_dataset["external_id"].append(record.external_id or None)
-
-        if hf_dataset.get("metadata", None) is not None:
-            hf_features["metadata"] = Value(dtype="string")
 
         return Dataset.from_dict(
             hf_dataset,
