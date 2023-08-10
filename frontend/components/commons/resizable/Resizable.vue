@@ -13,41 +13,24 @@
 <script>
 export default {
   name: "Resizable",
+  data() {
+    return {
+      prevClientX: 0,
+      prevLeftWith: 0,
+      resizer: null,
+      leftSide: null,
+      rightSide: null,
+    };
+  },
   mounted() {
-    const resizer = document.getElementById("resizableBar");
+    this.resizer = document.getElementById("resizableBar");
+    this.leftSide = this.resizer.previousElementSibling;
+    this.rightSide = this.resizer.nextElementSibling;
 
-    const leftSide = resizer.previousElementSibling;
-    const rightSide = resizer.nextElementSibling;
+    this.limitElements(this.leftSide);
+    this.limitElements(this.rightSide);
 
-    this.limitElements(leftSide);
-    this.limitElements(rightSide);
-
-    let x = 0;
-    let leftWidth = 0;
-
-    const mouseMoveHandler = (e) => {
-      const dx = e.clientX - x;
-
-      const newLeftWidth =
-        ((leftWidth + dx) * 100) /
-        resizer.parentNode.getBoundingClientRect().width;
-
-      leftSide.style.width = `${newLeftWidth}%`;
-    };
-
-    const mouseUpHandler = () => {
-      document.removeEventListener("mousemove", mouseMoveHandler);
-    };
-
-    const mouseDownHandler = (e) => {
-      x = e.clientX;
-      leftWidth = leftSide.getBoundingClientRect().width;
-
-      document.addEventListener("mousemove", mouseMoveHandler);
-      document.addEventListener("mouseup", mouseUpHandler);
-    };
-
-    resizer.addEventListener("mousedown", mouseDownHandler);
+    this.resizer.addEventListener("mousedown", this.mouseDownHandler);
   },
   methods: {
     limitElements(element) {
@@ -56,6 +39,29 @@ export default {
       element.style["max-width"] = `${maxWith * 0.7}px`;
       element.style["min-width"] = `${maxWith * 0.3}px`;
     },
+    mouseMoveHandler(e) {
+      const dX = e.clientX - this.prevClientX;
+
+      const newLeftWidth =
+        ((this.prevLeftWith + dX) * 100) /
+        this.resizer.parentNode.getBoundingClientRect().width;
+
+      this.leftSide.style.width = `${newLeftWidth}%`;
+    },
+    mouseUpHandler() {
+      document.removeEventListener("mousemove", this.mouseMoveHandler);
+      document.removeEventListener("mouseup", this.mouseUpHandler);
+    },
+    mouseDownHandler(e) {
+      this.prevClientX = e.clientX;
+      this.prevLeftWith = this.leftSide.getBoundingClientRect().width;
+
+      document.addEventListener("mousemove", this.mouseMoveHandler);
+      document.addEventListener("mouseup", this.mouseUpHandler);
+    },
+  },
+  destroyed() {
+    this.resizer.removeEventListener("mousedown", this.mouseDownHandler);
   },
 };
 </script>
