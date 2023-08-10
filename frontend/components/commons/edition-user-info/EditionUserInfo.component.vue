@@ -4,7 +4,7 @@
       <span v-circle="{ size: 'MEDIUM' }">
         {{ userInfo.username.slice(0, 2) }}
       </span>
-      <div class="badge --capitalized" v-text="userInfo.role" />
+      <BaseBadge class="--capitalized" :text="userInfo.role" />
     </div>
 
     <div class="form-group user-first_name">
@@ -30,11 +30,11 @@
     <div class="form-group">
       <h2 class="--heading5 --medium description__title">Workspaces</h2>
       <div class="workspaces" v-if="userInfo.workspaces.length">
-        <div
-          class="badge clickable"
+        <BaseBadge
           v-for="workspace in userInfo.workspaces"
-          v-text="workspace"
-          @click="goToWorkspace(workspace)"
+          :key="workspace"
+          :text="workspace"
+          @on-click="goToWorkspace(workspace)"
         />
       </div>
       <p v-else class="--body1 description__text">-</p>
@@ -94,15 +94,6 @@ export default {
 
 .user-username {
   @include font-size(16px);
-}
-
-.clickable {
-  cursor: pointer;
-  background-color: $black-4;
-  border: unset;
-  &:hover {
-    background-color: $black-10;
-  }
 }
 
 .description {

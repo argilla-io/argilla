@@ -9,7 +9,7 @@
         >
           <div class="settings__edition-form__name">
             <h4 class="--body1 --medium --capitalized" v-text="question.name" />
-            <p class="badge --capitalized" v-html="question.type" />
+            <BaseBadge class="--capitalized" :text="question.type" />
           </div>
 
           <Validation

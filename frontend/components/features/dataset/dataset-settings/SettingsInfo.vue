@@ -8,7 +8,7 @@
             class="settings__dataset-name --body1"
             v-html="settings.dataset.name"
           />
-          <p class="badge" v-html="settings.dataset.task" />
+          <BaseBadge :text="settings.dataset.task" />
         </div>
         <base-action-tooltip tooltip="Copied">
           <base-button
