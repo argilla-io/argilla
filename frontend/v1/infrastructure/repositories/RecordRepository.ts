@@ -7,10 +7,7 @@ import {
   BackendRecordStatus,
   Response,
 } from "../types";
-import {
-  RecordAnswer,
-  RecordStatus,
-} from "@/v1/domain/entities/record/RecordAnswer";
+import { RecordAnswer } from "@/v1/domain/entities/record/RecordAnswer";
 import { Record } from "@/v1/domain/entities/record/Record";
 import { Question } from "@/v1/domain/entities/question/Question";
 
@@ -90,12 +87,7 @@ export class RecordRepository {
         request
       );
 
-      return new RecordAnswer(
-        data.id,
-        this.frontendStatusFrom(data.status),
-        data.values,
-        data.updated_at
-      );
+      return new RecordAnswer(data.id, status, data.values, data.updated_at);
     } catch (error) {
       throw {
         response: RECORD_API_ERRORS.ERROR_UPDATING_RECORD_RESPONSE,
@@ -117,7 +109,7 @@ export class RecordRepository {
 
       return new RecordAnswer(
         data.id,
-        this.frontendStatusFrom(data.status),
+        data.status,
         data.values,
         data.updated_at
       );
@@ -178,13 +170,13 @@ export class RecordRepository {
 
       const { data } = await this.axios.post(url, body, { params });
 
-      const { items, total: totalRecords } = data;
+      const { items, total } = data;
 
       const records = items.map((item) => item.record);
 
       return {
         records,
-        total: totalRecords,
+        total,
       };
     } catch (err) {
       throw {
@@ -215,42 +207,17 @@ export class RecordRepository {
     numberOfRecordsToFetch: number,
     status: string
   ) {
+    const backendStatus = status === "pending" ? "missing" : status;
     const params = new URLSearchParams();
 
     params.append("include", "responses");
     params.append("include", "suggestions");
     params.append("offset", offset.toString());
     params.append("limit", numberOfRecordsToFetch.toString());
-    params.append("response_status", this.backendStatusFrom(status));
+    params.append("response_status", backendStatus);
 
-    if (status === "pending") params.append("response_status", "draft");
+    if (backendStatus === "missing") params.append("response_status", "draft");
 
     return params;
-  }
-
-  private backendStatusFrom(status: string): BackendRecordStatus {
-    switch (status as RecordStatus) {
-      case "pending":
-        return "missing";
-      case "discarded":
-      case "draft":
-      case "submitted":
-        return status as BackendRecordStatus;
-
-      default:
-        return "missing";
-    }
-  }
-
-  private frontendStatusFrom(status: BackendRecordStatus): RecordStatus {
-    switch (status as BackendRecordStatus) {
-      case "discarded":
-      case "draft":
-      case "submitted":
-        return status as RecordStatus;
-
-      default:
-        return "pending";
-    }
   }
 }

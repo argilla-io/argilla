@@ -17,38 +17,49 @@ import "assets/icons/time";
 import "assets/icons/discard";
 export default {
   props: {
-    title: {
+    recordStatus: {
       type: String,
     },
   },
   computed: {
     getStatusInfo() {
-      let statusInfo = null;
-      switch (this.title) {
+      switch (this.recordStatus) {
+        case "validated":
+          return {
+            name: "Validate",
+            icon: "validate",
+            class: "--validated",
+          };
+
+        case "edited":
+          return {
+            name: "Pending",
+            icon: "time",
+            class: "--edited",
+          };
+
         case "pending":
         case "draft":
-          statusInfo = {
+          return {
             name: "Pending",
             icon: null,
             class: "--pending",
           };
-          break;
+
         case "discarded":
-          statusInfo = {
+          return {
             name: "Discarded",
             icon: "discard",
             class: "--discarded",
           };
-          break;
+
         case "submitted":
-          statusInfo = {
+          return {
             name: "Submitted",
             icon: "validate",
             class: "--submitted",
           };
-          break;
       }
-      return statusInfo;
     },
   },
 };
@@ -64,6 +75,15 @@ export default {
   @include font-size(13px);
   border-radius: 50px;
   font-weight: 600;
+
+  &.--validated {
+    background: palette(green);
+    border: 1px solid palette(green);
+  }
+  &.--edited {
+    background: #bb720a;
+    border: 1px solid #bb720a;
+  }
 
   &.--discarded {
     background: #a7a7a7;

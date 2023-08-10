@@ -79,7 +79,7 @@ export default {
       return `You have no ${this.recordStatusToFilterWith} records matching the search input`;
     },
     statusClass() {
-      return `--${this.record.status.toLowerCase()}`;
+      return `--${this.record.status}`;
     },
     questionFormKey() {
       return `${this.currentPage}-${this.reRenderQuestionForm}`;

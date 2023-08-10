@@ -31,7 +31,7 @@
               </base-checkbox>
               <status-tag
                 v-if="record.status !== 'Default'"
-                :title="record.status"
+                :recordStatus="record.status"
               />
             </div>
           </template>

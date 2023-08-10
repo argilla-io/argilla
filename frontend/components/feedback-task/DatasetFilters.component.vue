@@ -27,8 +27,6 @@
 </template>
 
 <script>
-import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
-
 export default {
   name: "DatasetFiltersComponent",
   props: {
@@ -48,7 +46,7 @@ export default {
     };
   },
   beforeMount() {
-    this.selectedStatus = this.selectedStatus || this.statusFromRoute;
+    this.selectedStatus = this.selectedStatus ?? this.statusFromRoute;
     this.searchInput = this.searchInput ?? this.searchFromRoute;
 
     this.$root.$on("reset-status-filter", () => {
@@ -57,14 +55,12 @@ export default {
     this.$root.$on("reset-search-filter", () => {
       this.searchInput = this.searchFromRoute;
     });
-    this.$root.$on("total-records", (newTotalRecords) => {
-      this.totalRecords = newTotalRecords;
+    this.$root.$on("total-records", (totalRecords) => {
+      this.totalRecords = totalRecords;
     });
     this.$root.$on("record-changed", (record) => {
-      this.$nextTick(() => {
-        this.updatedAt = record.updatedAt;
-        this.isSavedDraft = record.isSavedDraft;
-      });
+      this.updatedAt = record.updatedAt;
+      this.isSavedDraft = record.isSavedDraft;
     });
     this.$root.$on("record-saving", (draftSaving) => {
       this.draftSaving = draftSaving;
@@ -107,9 +103,6 @@ export default {
         name: "Discarded",
       },
     ];
-
-    this.selectedStatus =
-      this.$route.query?._status ?? RECORD_STATUS.PENDING.toLowerCase();
   },
   beforeDestroy() {
     this.$root.$off("reset-status-filter");
