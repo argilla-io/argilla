@@ -2,7 +2,7 @@
   <div class="resizable">
     <div class="resizable__left"><slot name="left" /></div>
 
-    <div class="resizable__bar" id="resizableBar">
+    <div class="resizable__bar" ref="resizableBar">
       <span class="resizable__bar-button">:::</span>
     </div>
 
@@ -11,57 +11,72 @@
 </template>
 
 <script>
+const EVENT = {
+  MOUSE_EVENT: "mousemove",
+  MOUSE_UP: "mouseup",
+  MOUSE_DOWN: "mousedown",
+};
+
 export default {
   name: "Resizable",
   data() {
     return {
-      prevClientX: 0,
-      prevLeftWith: 0,
+      leftSidePrevPosition: {
+        clientX: 0,
+        width: 0,
+      },
       resizer: null,
       leftSide: null,
       rightSide: null,
     };
   },
   mounted() {
-    this.resizer = document.getElementById("resizableBar");
+    this.resizer = this.$refs.resizableBar;
     this.leftSide = this.resizer.previousElementSibling;
     this.rightSide = this.resizer.nextElementSibling;
 
-    this.limitElements(this.leftSide);
-    this.limitElements(this.rightSide);
+    this.limitElementWidth(this.leftSide);
+    this.limitElementWidth(this.rightSide);
 
-    this.resizer.addEventListener("mousedown", this.mouseDownHandler);
+    this.resizer.addEventListener(EVENT.MOUSE_DOWN, this.mouseDownHandler);
   },
   methods: {
-    limitElements(element) {
-      const maxWith = this.$el.getBoundingClientRect().width;
-
-      element.style["max-width"] = `${maxWith * 0.7}px`;
-      element.style["min-width"] = `${maxWith * 0.3}px`;
+    limitElementWidth(element) {
+      element.style["max-width"] = "70%";
+      element.style["min-width"] = "30%";
     },
-    mouseMoveHandler(e) {
-      const dX = e.clientX - this.prevClientX;
+    savePositionOnStartResizing(e) {
+      this.leftSidePrevPosition = {
+        clientX: e.clientX,
+        width: this.leftSide.getBoundingClientRect().width,
+      };
+    },
+    resize(e) {
+      const dX = e.clientX - this.leftSidePrevPosition.clientX;
+      const proportionalWidth = (this.leftSidePrevPosition.width + dX) * 100;
+      const parentWidth = this.resizer.parentNode.getBoundingClientRect().width;
 
-      const newLeftWidth =
-        ((this.prevLeftWith + dX) * 100) /
-        this.resizer.parentNode.getBoundingClientRect().width;
+      const newLeftWidth = proportionalWidth / parentWidth;
 
       this.leftSide.style.width = `${newLeftWidth}%`;
     },
+
+    mouseMoveHandler(e) {
+      this.resize(e);
+    },
     mouseUpHandler() {
-      document.removeEventListener("mousemove", this.mouseMoveHandler);
-      document.removeEventListener("mouseup", this.mouseUpHandler);
+      document.removeEventListener(EVENT.MOUSE_EVENT, this.mouseMoveHandler);
+      document.removeEventListener(EVENT.MOUSE_UP, this.mouseUpHandler);
     },
     mouseDownHandler(e) {
-      this.prevClientX = e.clientX;
-      this.prevLeftWith = this.leftSide.getBoundingClientRect().width;
+      this.savePositionOnStartResizing(e);
 
-      document.addEventListener("mousemove", this.mouseMoveHandler);
-      document.addEventListener("mouseup", this.mouseUpHandler);
+      document.addEventListener(EVENT.MOUSE_EVENT, this.mouseMoveHandler);
+      document.addEventListener(EVENT.MOUSE_UP, this.mouseUpHandler);
     },
   },
   destroyed() {
-    this.resizer.removeEventListener("mousedown", this.mouseDownHandler);
+    this.resizer.removeEventListener(EVENT.MOUSE_DOWN, this.mouseDownHandler);
   },
 };
 </script>
