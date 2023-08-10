@@ -80,9 +80,10 @@ export default {
     display: flex;
     gap: $base-space * 4;
     height: 100%;
-    max-width: 1000px;
     flex-wrap: wrap;
     min-height: 0;
+    padding-top: $base-space;
+    overflow: auto;
   }
 
   &__edition-form {
@@ -90,8 +91,7 @@ export default {
     flex: 1;
     flex-direction: column;
     gap: $base-space * 2;
-    height: 100%;
-    overflow: auto;
+    max-width: 1000px;
     padding-right: $base-space * 2;
 
     &__fields {

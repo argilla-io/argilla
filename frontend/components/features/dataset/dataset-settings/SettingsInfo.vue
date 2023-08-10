@@ -1,50 +1,55 @@
 <template>
-  <div>
-    <h2 class="--heading5 --medium">Dataset info</h2>
-    <div class="settings__area">
-      <div class="settings__row">
-        <div class="settings__item">
-          <p
-            class="settings__dataset-name --body1"
-            v-html="settings.dataset.name"
-          />
-          <BaseBadge :text="settings.dataset.task" />
+  <div class="settings__container">
+    <div class="settings__content">
+      <h2 class="--heading5 --medium">Dataset info</h2>
+      <div class="settings__area">
+        <div class="settings__row">
+          <div class="settings__item">
+            <p
+              class="settings__dataset-name --body1"
+              v-html="settings.dataset.name"
+            />
+            <BaseBadge :text="settings.dataset.task" />
+          </div>
+          <base-action-tooltip tooltip="Copied">
+            <base-button
+              title="Copy to clipboard"
+              class="secondary small"
+              @click.prevent="$copyToClipboard(datasetSettingsUrl)"
+            >
+              Copy link
+            </base-button>
+          </base-action-tooltip>
         </div>
-        <base-action-tooltip tooltip="Copied">
-          <base-button
-            title="Copy to clipboard"
-            class="secondary small"
-            @click.prevent="$copyToClipboard(datasetSettingsUrl)"
-          >
-            Copy link
-          </base-button>
-        </base-action-tooltip>
       </div>
-    </div>
-    <div class="settings__area">
-      <form @submit.prevent="onSubmit()" class="settings__edition-form-fields">
-        <DatasetDescriptionComponent
-          :key="settings.dataset.updatedAt"
-          v-model="settings.dataset.guidelines"
-        />
-        <div class="settings__edition-form__footer">
-          <BaseButton
-            type="button"
-            class="secondary light small"
-            @on-click="restore(settings.dataset)"
-            :disabled="!settings.dataset.isModified"
-          >
-            <span v-text="'Cancel'" />
-          </BaseButton>
-          <BaseButton
-            type="submit"
-            class="primary small"
-            :disabled="!settings.dataset.isModified"
-          >
-            <span v-text="'Update'" />
-          </BaseButton>
-        </div>
-      </form>
+      <div class="settings__area">
+        <form
+          @submit.prevent="onSubmit()"
+          class="settings__edition-form-fields"
+        >
+          <DatasetDescriptionComponent
+            :key="settings.dataset.updatedAt"
+            v-model="settings.dataset.guidelines"
+          />
+          <div class="settings__edition-form__footer">
+            <BaseButton
+              type="button"
+              class="secondary light small"
+              @on-click="restore(settings.dataset)"
+              :disabled="!settings.dataset.isModified"
+            >
+              <span v-text="'Cancel'" />
+            </BaseButton>
+            <BaseButton
+              type="submit"
+              class="primary small"
+              :disabled="!settings.dataset.isModified"
+            >
+              <span v-text="'Update'" />
+            </BaseButton>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -72,6 +77,20 @@ export default {
 
 <styles lang="scss" scoped>
 .settings {
+  &__container {
+    display: flex;
+    gap: $base-space * 4;
+    height: 100%;
+    flex-wrap: wrap;
+    min-height: 0;
+    padding-top: $base-space;
+    overflow: auto;
+  }
+
+  &__content {
+    flex: 1;
+    max-width: 1000px;
+  }
   &__area {
     max-width: 1000px;
     padding-bottom: $base-space * 3;

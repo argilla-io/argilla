@@ -8,7 +8,7 @@
       />
     </template>
     <template v-slot:center>
-      <div class="settings__content">
+      <div class="settings__wrapper">
         <TopDatasetSettingsFeedbackTaskContent
           :datasetId="datasetId"
           class="settings__header"
@@ -54,11 +54,10 @@ export default {
 
 <styles lang="scss" scoped>
 .settings {
-  &__content {
+  &__wrapper {
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding-bottom: $base-space;
   }
   &__tabs {
     &-content {
