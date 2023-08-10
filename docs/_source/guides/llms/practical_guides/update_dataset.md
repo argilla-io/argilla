@@ -73,7 +73,7 @@ You can also add suggestions to records that have been already pushed to Argilla
 ```python
 # load the dataset
 dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_workspace")
-
+# loop through the records and add suggestions
 for record in dataset.records:
     record.update(suggestions=[...])
 ```
@@ -83,7 +83,7 @@ for record in dataset.records:
 ```python
 # load the dataset
 dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_workspace")
-
+# loop through the records and add suggestions
 for record in dataset.records:
     record.set_suggestions([...])
 ```
@@ -99,7 +99,7 @@ Existing suggestions can also be modified and updated from Argilla `v1.14.0` usi
 ```python
 # load the dataset
 dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_workspace")
-
+# loop through the records and update the suggestions
 for record in dataset.records:
     record.update(suggestions=[...])
 ```
