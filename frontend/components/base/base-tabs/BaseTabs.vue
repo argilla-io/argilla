@@ -61,6 +61,7 @@ export default {
   display: flex;
   flex-shrink: 0;
   padding: 0;
+  margin-bottom: 0;
   list-style: none;
   overflow-y: auto;
   border-bottom: 1px solid $black-10;
