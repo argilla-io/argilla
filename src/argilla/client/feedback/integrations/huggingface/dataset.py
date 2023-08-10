@@ -338,7 +338,6 @@ class HuggingFaceDatasetMixin:
                             " responses for the first user without ID will be used, the rest"
                             " will be discarded."
                         )
-                    user_without_id_response = False
 
                     # Here for backwards compatibility
                     original_responses = []
@@ -352,7 +351,7 @@ class HuggingFaceDatasetMixin:
                         ):
                             original_responses.append({"user_id": user_id, "value": value, "status": status})
 
-                    responses = {}
+                    user_without_id_response = False
                     for response in original_responses:
                         if user_without_id_response:
                             continue
