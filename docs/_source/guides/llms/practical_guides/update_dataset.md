@@ -94,7 +94,7 @@ To learn about the schema that these suggestions should follow check [this page]
 
 ## Update suggestions in existing records
 
-Existing suggestions can also be modified and updated Argilla `v1.14.0` using the same method as the one in the section above. This will overwrite any existing suggestions.
+Existing suggestions can also be modified and updated from Argilla `v1.14.0` using the same method as the one in the section above. This will overwrite any existing suggestions.
 
 ```python
 # load the dataset
