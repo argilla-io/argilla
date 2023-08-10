@@ -101,7 +101,7 @@ def get_thread_ts_pr_message(client: WebClient, channel_id: str, pr_number: int)
             if not title or not callback_id:
                 continue
             if pr_url in title and callback_id == "pr-opened-interaction":
-                return message["thread_ts"]
+                return message["ts"]
 
     return None
 
