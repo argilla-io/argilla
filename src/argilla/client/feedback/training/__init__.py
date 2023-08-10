@@ -16,6 +16,7 @@ from argilla.client.feedback.training.base import ArgillaTrainer
 from argilla.client.feedback.training.schemas import (
     TrainingTask,
     TrainingTaskForDPO,
+    TrainingTaskForPPO,
     TrainingTaskForRM,
     TrainingTaskForSFT,
     TrainingTaskForTextClassification,
@@ -29,6 +30,7 @@ __all__ = [
     "TrainingTaskForTextClassification",
     "TrainingTaskForSFT",
     "TrainingTaskForRM",
+    "TrainingTaskForPPO",
     "TrainingTaskForDPO",
     "TrainingTaskMapping",
     "TrainingTaskMappingForTextClassification",

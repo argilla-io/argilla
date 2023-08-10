@@ -14,7 +14,7 @@
 
 import logging
 import warnings
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Tuple, Union
 
 import pandas as pd
@@ -259,6 +259,20 @@ class TrainingTask:
         return TrainingTaskForRM(chosen_rejected_func=chosen_rejected_func)
 
     @classmethod
+    def for_proximal_policy_optimization(cls, text: TextField) -> "TrainingTaskForPPO":
+        """
+        Return a task that can be used in `FeedbackDataset.prepare_for_training(text: TextField)`
+        to extract data from the Feedback Dataset in an immediately useful format.
+
+        Args:
+            text (TextField): The text field to be used as input.
+
+        Returns:
+            TrainingTaskForPPO: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
+        """
+        return TrainingTaskForPPO(text=text)
+
+    @classmethod
     def for_direct_preference_optimization(
         cls,
         prompt_chosen_rejected_func: Callable[
@@ -266,7 +280,7 @@ class TrainingTask:
         ],
     ) -> "TrainingTaskForDPO":
         """
-        Return a task that can be used in `FeedbackDataset.prepare_for_training(framework="...", task)`
+        Return a task that can be used in `FeedbackDataset.prepare_for_training(prompt_chosen_rejected_func: Callable)`
         to extract data from the Feedback Dataset in an immediately useful format.
 
         Args:
@@ -641,6 +655,53 @@ class TrainingTaskForRM(BaseModel, TrainingData):
         return ds
 
 
+class TrainingTaskForPPO(BaseModel, TrainingData):
+    """Training data for proximal policy optimization
+
+    Args:
+        text (TextField): The TextField to use for training.
+
+    Examples:
+        >>> from argilla import TrainingTaskForPPO
+        >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
+        >>> task = TrainingTaskForPPO(text=dataset.fields[0],)
+        >>> dataset.prepare_for_training(framework="...", task=task)
+    """
+
+    text: TextField
+
+    @property
+    def supported_frameworks(self):
+        names = ["trl"]
+        return [Framework(name) for name in names]
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}\n\t text_field={self.text}"
+
+    @requires_version("datasets>1.17.0")
+    def _prepare_for_training_with_trl(
+        self, data: List[dict], train_size: float, seed: int
+    ) -> Union["datasets.Dataset", "datasets.DatasetDict"]:
+        import datasets
+
+        datasets_dict = {"id": [], "text": []}
+        for index, entry in enumerate(data):
+            datasets_dict["id"].append(index)
+            datasets_dict["text"].append(entry["text"])
+
+        feature_dict = {
+            "id": datasets.Value(dtype="int32"),
+            "text": datasets.Value("string"),
+        }
+
+        ds = datasets.Dataset.from_dict(datasets_dict, features=datasets.Features(feature_dict))
+
+        if train_size != 1:
+            ds = ds.train_test_split(train_size=train_size, test_size=1 - train_size, seed=seed)
+
+        return ds
+
+
 class TrainingTaskForDPO(BaseModel, TrainingData):
     """Training data for direct preference optimization
 
@@ -719,6 +780,7 @@ TrainingTaskTypes = Union[
     TrainingTaskForTextClassification,
     TrainingTaskForSFT,
     TrainingTaskForRM,
+    TrainingTaskForPPO,
     TrainingTaskForDPO,
 ]
 
@@ -751,6 +813,10 @@ class TrainingTaskMapping(TrainingTask, RenamedDeprecationMixin):
     def for_reward_modelling(cls, *args, **kwargs) -> TrainingTaskForRM:
         cls.warn()
         return super().for_reward_modelling(*args, **kwargs)
+
+    @classmethod
+    def for_proximal_policy_optimization(cls, *args, **kwargs) -> TrainingTaskForPPO:
+        return super().for_proximal_policy_optimization(cls, *arg, **kwargs)
 
     @classmethod
     def for_direct_preference_optimization(cls, *args, **kwargs) -> TrainingTaskForDPO:

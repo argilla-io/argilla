@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Dict, List, Union
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
 from argilla.client.feedback.training.schemas import (
     TrainingTaskForDPO,
+    TrainingTaskForPPO,
     TrainingTaskForRM,
     TrainingTaskForSFT,
 )
@@ -26,6 +27,41 @@ from argilla.utils.dependency import require_version
 
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
+
+
+class PPOArgs:
+    def __init__(
+        self,
+        config: "PPOConfig",
+        reward_model: Union[str, "transformers.pipeline"],
+        length_sampler_kwargs: dict,
+        generation_kwargs: dict,
+    ) -> None:
+        """
+        Additional arguments for PPO training process.
+
+        Args:
+            reward_model (Union[str, "transformers.pipeline"]): Reward model to use for creating PPO rewards for training.
+            length_sampler_kwargs (dict): Arguments for the length sampler.
+                min_value: Minimum length for the generated samples.
+                max_value: Maximum length for the generated samples.
+            generation_kwargs (dict): Arguments for the generation process.
+                min_length: Minimum length for the generated samples.
+                max_length: Maximum length for the generated samples.
+                num_beams: Number of beams to use for the generation process.
+                num_return_sequences: Number of sequences to generate.
+                temperature: Temperature for the generation process.
+                top_k: Top k for the generation process.
+                top_p: Top p for the generation process.
+        """
+        if isinstance(reward_model, str):
+            from transformers import pipeline
+
+            reward_model = pipeline("text-classifcation", model=reward_model)
+        self.config = config
+        self.reward_model = reward_model
+        self.length_sampler_kwargs = length_sampler_kwargs
+        self.generation_kwargs = generation_kwargs
 
 
 class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
@@ -40,6 +76,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         task: Union[
             TrainingTaskForSFT,
             TrainingTaskForRM,
+            TrainingTaskForPPO,
             TrainingTaskForDPO,
         ],
         prepared_data=None,
@@ -78,33 +115,56 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
             (
                 TrainingTaskForSFT,
                 TrainingTaskForRM,
+                TrainingTaskForPPO,
                 TrainingTaskForDPO,
             ),
         ):
             raise NotImplementedError(f"Task {self._task} not supported in TRL.")
 
-        from trl import DPOTrainer, RewardTrainer, SFTTrainer
+        from trl import DPOTrainer, PPOTrainer, RewardTrainer, SFTTrainer
 
         self.trainer_mapping = {
             TrainingTaskForSFT: SFTTrainer,
             TrainingTaskForRM: RewardTrainer,
+            TrainingTaskForPPO: PPOTrainer,
             TrainingTaskForDPO: DPOTrainer,
         }
         self.trainer_cls = self.trainer_mapping[type(self._task)]
 
         self.init_training_args()
 
+        if isinstance(self._task, TrainingTaskForPPO):
+            self._logger.warning(
+                "The PPOTrainer must be initialized by passing `reward_model`, `length_sampler_kwargs`, `generation_kwargs` as kwargs to the `update_config()`-method."
+            )
+
     def init_training_args(self) -> None:
         """
         Initializes the training arguments.
         """
         self.training_args_kwargs = {}
-        self.training_args_kwargs["evaluation_strategy"] = "no" if self._eval_dataset is None else "epoch"
-        self.training_args_kwargs["logging_steps"] = 30
-        self.training_args_kwargs["logging_steps"] = 1
-        self.training_args_kwargs["num_train_epochs"] = 1
-
         self.trainer_kwargs = {}
+
+        if isinstance(self._task, TrainingTaskForPPO):
+            from trl import PPOConfig
+
+            self._logger.warning(
+                "The PPOTrainer must be initialized by passing `reward_model`, `length_sampler_kwargs`, `generation_kwargs` as kwargs to the `update_config()`-method."
+            )
+            self.trainer_kwargs["config"] = PPOConfig()
+            self.training_args_kwargs["reward_model"] = None
+            self.training_args_kwargs["length_sampler_kwargs"] = {"min_value": 1, "max_value": 10}
+            self.training_args_kwargs["generation_kwargs"] = {
+                "min_length": -1,
+                "top_k": 0.0,
+                "top_p": 1.0,
+                "do_sample": True,
+            }
+        else:
+            self.training_args_kwargs["evaluation_strategy"] = "no" if self._eval_dataset is None else "epoch"
+            self.training_args_kwargs["logging_steps"] = 30
+            self.training_args_kwargs["logging_steps"] = 1
+            self.training_args_kwargs["num_train_epochs"] = 1
 
     def init_model(self, new: bool = False) -> None:
         """
@@ -117,18 +177,22 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
             PreTrainedModel,
             PreTrainedTokenizer,
         )
+        from trl import AutoModelForCausalLMWithValueHead, create_reference_model
 
         if isinstance(self._task, (TrainingTaskForSFT, TrainingTaskForDPO)):
             auto_model_class = AutoModelForCausalLM
+        elif isinstance(self._task, TrainingTaskForPPO):
+            auto_model_class = AutoModelForCausalLMWithValueHead
         elif isinstance(self._task, TrainingTaskForRM):
             auto_model_class = AutoModelForSequenceClassification
+
         self._transformers_model: PreTrainedModel = auto_model_class.from_pretrained(self._model)
         self._transformers_tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(self._model)
         self._transformers_tokenizer.pad_token = self._transformers_tokenizer.eos_token
         self._transformers_model.config.pad_token_id = self._transformers_tokenizer.pad_token_id
 
-        if isinstance(self._task, TrainingTaskForDPO):
-            self._transformers_ref_model: PreTrainedModel = auto_model_class.from_pretrained(self._model)
+        if isinstance(self._task, (TrainingTaskForPPO, TrainingTaskForDPO)):
+            self._transformers_ref_model: PreTrainedModel = create_reference_model(self._transformers_model)
         if new:
             self._transformers_model.to(self.device)
 
@@ -139,6 +203,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         from transformers import TrainingArguments
 
         self.training_args_kwargs.update(filter_allowed_args(TrainingArguments.__init__, **kwargs))
+        self.training_args_kwargs.update(filter_allowed_args(PPOArgs.__init__, **kwargs))
         self.trainer_kwargs.update(filter_allowed_args(self.trainer_cls.__init__, **kwargs))
 
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs) -> None:
@@ -151,6 +216,20 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         """
         Trains the model.
         """
+        if isinstance(self._task, TrainingTaskForPPO):
+            if not all(
+                lambda x: x in self.training_args_kwargs
+                for x in ["length_sampler_kwargs", "generation_kwargs", "reward_model", "config"]
+            ):
+                raise ValueError(
+                    "To train a PPO model, you need to specify the following arguments: length_sampler_kwargs, generation_kwargs, reward_model."
+                )
+            else:
+                if self.training_args_kwargs["reward_model"] is None:
+                    raise ValueError(
+                        "To train a PPO model, you need to specify a reward model as text-classification pipeline."
+                    )
+
         from transformers import TrainingArguments
 
         # check required path argument
@@ -204,7 +283,29 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
                 tokenizer=self._transformers_tokenizer,
                 **self.trainer_kwargs,
             )
+        elif isinstance(self._task, TrainingTaskForPPO):
+            from datasets import concatenate_datasets
 
+            dataset = concatenate_datasets([x for x in [self._train_dataset, self._eval_dataset] if x is not None])
+
+            def tokenize(sample):
+                sample["input_ids"] = self._transformers_tokenizer.encode(sample["text"])
+                sample["query"] = self._transformers_tokenizer.decode(sample["input_ids"])
+                return sample
+
+            def data_collator(data):
+                return dict((key, [d[key] for d in data]) for key in data[0])
+
+            dataset = dataset.map(tokenize, batched=False)
+            dataset.set_format(type="torch")
+            self._trainer = self.trainer_cls(
+                model=self._transformers_model,
+                ref_model=self._transformers_ref_model,
+                tokenizer=self._transformers_tokenizer,
+                dataset=dataset,
+                data_collator=data_collator,
+                **self.trainer_kwargs,
+            )
         elif isinstance(self._task, TrainingTaskForDPO):
             self._training_args = TrainingArguments(**self.training_args_kwargs)
             self._trainer = self.trainer_cls(
@@ -218,12 +319,43 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
             )
 
         #  train
-        self._trainer.train()
-        if self._trainer.eval_dataset:
-            self._metrics = self._trainer.evaluate()
-            self._logger.info(self._metrics)
+        if isinstance(self._task, TrainingTaskForPPO):
+            import torch
+            from tqdm import tqdm
+            from trl.core import LengthSampler
+
+            output_length_sampler = LengthSampler(**self.training_args_kwargs["length_sampler_kwargs"])
+            generation_kwargs = self.training_args_kwargs["generation_kwargs"]
+            generation_kwargs["pad_token_id"] = self._transformers_tokenizer.eos_token_id
+            reward_model = self.training_args_kwargs["reward_model"]
+
+            for _, batch in tqdm(enumerate(self._trainer.dataloader)):
+                query_tensors = batch["input_ids"]
+
+                #### Get response from SFT
+                response_tensors = []
+                for query in query_tensors:
+                    gen_len = output_length_sampler()
+                    generation_kwargs["max_new_tokens"] = gen_len
+                    response = self._trainer.generate(query, **generation_kwargs)
+                    response_tensors.append(response.squeeze()[-gen_len:])
+                batch["response"] = [self._transformers_tokenizer.decode(r.squeeze()) for r in response_tensors]
+
+                #### Compute rewards scores
+                texts = [q + r for q, r in zip(batch["query"], batch["response"])]
+                pipe_outputs = reward_model(texts, return_all_scores=True)
+                rewards = [torch.tensor(output[-1]["score"] * len(output)) for output in pipe_outputs]
+
+                #### Run PPO step
+                stats = self._trainer.step(query_tensors, response_tensors, rewards)
+                self._trainer.log_stats(stats, batch, rewards)
         else:
-            self._metrics = None
+            self._trainer.train()
+            if self._trainer.eval_dataset:
+                self._metrics = self._trainer.evaluate()
+                self._logger.info(self._metrics)
+            else:
+                self._metrics = None
 
         self.save(output_dir)
 

@@ -151,6 +151,53 @@ def test_prepare_for_training_rm(
     "feedback_dataset_questions",
     "feedback_dataset_records",
 )
+def test_prepare_for_training_ppo(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records: List[FeedbackRecord],
+) -> None:
+    from transformers import pipeline
+    from trl import PPOConfig
+
+    reward_model = pipeline("sentiment-analysis", model="lvwerra/distilbert-imdb")
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records * 2)
+
+    task = TrainingTask.for_proximal_policy_optimization(text=dataset.fields[0])
+    train_dataset = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False)
+    assert isinstance(train_dataset, Dataset)
+    assert len(train_dataset) == 6
+    train_dataset_dict = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False, train_size=0.5)
+    assert isinstance(train_dataset_dict, DatasetDict)
+    assert tuple(train_dataset_dict.keys()) == ("train", "test")
+    assert len(train_dataset_dict["train"]) == 3
+
+    trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2", fetch_records=False)
+    trainer.update_config(policy=PPOConfig(batch_size=1, ppo_epochs=1), reward_model=reward_model)
+    assert trainer._trainer.trainer_kwargs["policy"].batch_size == 1
+    trainer.update_config(generation_kwargs={"min_length": 10, "top_k": 0.0, "top_p": 1.0, "do_sample": True})
+    assert trainer._trainer.training_args_kwargs["generation_kwargs"]["min_length"] == 10
+    train_with_cleanup(trainer, "tmp_trl_dir")
+
+    eval_trainer = ArgillaTrainer(
+        dataset, task, framework="trl", model="sshleifer/tiny-gpt2", fetch_records=False, train_size=0.5
+    )
+    trainer.update_config(policy=PPOConfig(batch_size=1, ppo_epochs=1), reward_model=reward_model)
+    eval_trainer.update_config(max_steps=1)
+    train_with_cleanup(eval_trainer, "tmp_trl_dir")
+
+
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records",
+)
 def test_prepare_for_training_dpo(
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
