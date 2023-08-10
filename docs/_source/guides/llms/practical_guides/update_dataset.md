@@ -63,13 +63,20 @@ dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_works
 dataset.delete_records([record for record in dataset.records[:5]])
 ```
 
-## Add suggestions to existing records
+## Add or update suggestions in existing records
 
-You can also add suggestions to records that have been already pushed to Argilla:
+You can also add suggestions to records that have been already pushed to Argilla and from `v1.14.0` update existing ones.
 
 ::::{tab-set}
 
 :::{tab-item} Argilla 1.14.0 or higher
+
+You can add or update existing suggestions from Argilla `v1.14.0` using this method.
+
+```{note}
+If you include in this method a suggestion for a question that already has one, this will overwrite the previous suggestion.
+```
+
 ```python
 # load the dataset
 dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_workspace")
@@ -80,6 +87,9 @@ for record in dataset.records:
 :::
 
 :::{tab-item} Lower than Argilla 1.14.0
+
+This method will only add suggestions to records that don't have them. To update suggestions, upgrade to `v1.14.0` or higher and follow the snippet in the other tab.
+
 ```python
 # load the dataset
 dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_workspace")
@@ -87,21 +97,8 @@ dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_works
 for record in dataset.records:
     record.set_suggestions([...])
 dataset.push_to_argilla()
+```
 :::
 ::::
-
-To learn about the schema that these suggestions should follow check [this page](create_dataset.md#add-suggestions).
-
-## Update suggestions in existing records
-
-Existing suggestions can also be modified and updated from Argilla `v1.14.0` using the same method as the one in the section above. This will overwrite any existing suggestions.
-
-```python
-# load the dataset
-dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_workspace")
-# loop through the records and update the suggestions
-for record in dataset.records:
-    record.update(suggestions=[...])
-```
 
 To learn about the schema that these suggestions should follow check [this page](create_dataset.md#add-suggestions).
