@@ -1,6 +1,15 @@
 # Update a Feedback dataset
 Oftentimes datasets that we have created previously need modifications or updates. In this section, we will explore some of the most common workflows to change an existing Feedback dataset in Argilla.
 
+Remember that you will need to connect to Argilla to perform any of the actions below.
+
+```python
+rg.init(
+    api_url="<ARGILLA_API_URL>",
+    api_key="<ARGILLA_API_KEY>
+)
+```
+
 ## Adding more records
 
 To add a (list of) Feedback record(s) to an existing dataset you will only need to load the dataset using the Python client and use the `add_records` method as explained below:
@@ -81,7 +90,7 @@ for record in dataset.records:
 :::
 ::::
 
-To learn about the schema that these suggestion should follow check [this page](create_dataset.md#add-suggestions).
+To learn about the schema that these suggestions should follow check [this page](create_dataset.md#add-suggestions).
 
 ## Update suggestions in existing records
 
@@ -95,4 +104,4 @@ for record in dataset.records:
     record.update(suggestions=[...])
 ```
 
-To learn about the schema that these suggestion should follow check [this page](create_dataset.md#add-suggestions).
+To learn about the schema that these suggestions should follow check [this page](create_dataset.md#add-suggestions).
