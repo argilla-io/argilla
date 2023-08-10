@@ -76,6 +76,9 @@ for chunk in chunked_records:
 If you haven't done so already, decide on the settings of the project (the `fields`, `questions` and `guidelines`) as detailed in the [Create a Feedback Dataset guide](./create_dataset.html) and set those as variables.
 ```
 
+::::{tab-set}
+
+:::{tab-item} Argilla 1.14.0 or higher
 ```python
 fields = [...]
 questions = [...]
@@ -91,23 +94,31 @@ for username, records in assignments.items():
         workspace.add_user(user.id)
 
     # create a dataset with their assingment and push to their workspace
-    ds = rg.FeedbackDataset(fields=fields, questions=questions, guidelines=guidelines)
-    ds.add_records(records)
-```
-
-Then push the `FeedbackDataset` with the records to Argilla:
-
-::::{tab-set}
-
-:::{tab-item} Argilla 1.14.0 or higher
-```python
-remote_dataset = dataset.push_to_argilla(name="my_dataset", workspace=workspace.name)
+    dataset = rg.FeedbackDataset(fields=fields, questions=questions, guidelines=guidelines)
+    dataset.add_records(records)
+    remote_dataset = dataset.push_to_argilla(name="my_dataset", workspace=workspace.name)
 ```
 :::
 
 :::{tab-item} Lower than Argilla 1.14.0
 ```python
-dataset.push_to_argilla(name="my_dataset", workspace=workspace.name)
+fields = [...]
+questions = [...]
+guidelines = "..."
+
+for username, records in assignments.items():
+    # check that the user has a personal workspace and create it if not
+    try:
+        workspace = rg.Workspace.from_name(username)
+    except:
+        workspace = rg.Workspace.create(username)
+        user = rg.User.from_name(username)
+        workspace.add_user(user.id)
+
+    # create a dataset with their assingment and push to their workspace
+    dataset = rg.FeedbackDataset(fields=fields, questions=questions, guidelines=guidelines)
+    dataset.add_records(records)
+    dataset.push_to_argilla(name="my_dataset", workspace=workspace.name)
 ```
 :::
 ::::

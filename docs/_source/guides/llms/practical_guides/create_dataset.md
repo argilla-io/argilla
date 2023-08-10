@@ -286,6 +286,7 @@ dataset.push_to_argilla() # No need to provide `name` and `workspace` as has bee
 ::::
 
 ## Add responses
+
 If your dataset includes some annotations, you can add those to the records as you create them. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered. Note that just one response with an empty `user_id` can be specified, as the first occurrence of `user_id=None` will be set to the active `user_id`, while the rest of the responses with `user_id=None` will be discarded.
 
 ::::{tab-set}

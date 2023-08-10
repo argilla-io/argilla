@@ -373,8 +373,7 @@ trainer = trlx.train(
 
 :::{tab-item} reward-labeled dataset
 
-In this case, TRLX relies on reward-labeled data to infer the alignment with human preference. This is a good approach but it is not recommended to only collect these labels via human feedback because this is likely too costly to scale. Therefore, we recommend using an automated reward function or creating a reward-labeled dataset using our [roberta-base-reward-model-falcon-dolly model](https://huggingface.co/argilla/roberta-base-reward-model-falcon-dolly). For demo purposes, we now infer the rewards from the corrected response, but we can also set up [specific ranking](guides/llms/conceptual_guides/rm) datasets](guides/llms/conceptual_guides/rm) using the Argilla UI.
-```
+In this case, TRLX relies on reward-labeled data to infer the alignment with human preference. This is a good approach but it is not recommended to only collect these labels via human feedback because this is likely too costly to scale. Therefore, we recommend using an automated reward function or creating a reward-labeled dataset using our [roberta-base-reward-model-falcon-dolly model](https://huggingface.co/argilla/roberta-base-reward-model-falcon-dolly). For demo purposes, we now infer the rewards from the corrected response, but we can also set up [specific ranking](../conceptual_guides/rm.html) using the Argilla UI.
 
 ```python
 import trlx
@@ -421,18 +420,21 @@ import argilla as rg
 dataset = rg.FeedbackDataset(
     guidelines="Please, complete the following prompt fields with a brief text answer.",
     fields=[
-        rg.TextField(name="content"),
+        rg.TextField(name="prompt"),
     ],
+    questions=[
+        rg.TextQuestion(name="completion", title="Add a brief text answer."),
+    ]
 )
 
 # create a Feedback Records
 record = rg.FeedbackRecord(
     fields={
-        "content": "The base ingredient of paella is rice."
+        "prompt": "The base ingredient of paella is rice."
     }
 )
 
-rg.add_records([record])
+dataset.add_records([record])
 ```
 
 Then push it to Argilla via `push_to_argilla`.
@@ -458,12 +460,12 @@ And, finally, load the `FeedbackDataset` from Argilla.
 import argilla as rg
 from datasets import Dataset
 
-feedback = rg.FeedbackDataset.from_argilla("pre-training")
-content = {"content": [rec.get("fields").get("content") for rec in feedback]}
-dataset = Dataset.from_dict(content)
+dataset = rg.FeedbackDataset.from_argilla("pre-training")
+prompts = {"prompt": [record.fields.get("prompt") for record in dataset.records]}
+dataset = Dataset.from_dict(prompts)
 dataset
 # Dataset({
-#     features: ['content'],
+#     features: ['prompt'],
 #     num_rows: 1
 # })
 ```
