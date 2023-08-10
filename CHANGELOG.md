@@ -19,7 +19,8 @@ These are the section headers that we use:
 ### Fixed
 
 - `TextClassificationSettings` and `TokenClassificationSettings` labels are properly parsed to strings both in the Python client and in the backend endpoint (Closes [#3495](https://github.com/argilla-io/argilla/issues/3495)).
-- Fix `PUT /api/v1/datasets/{dataset_id}/publish` to check whether at leat one field and question has `required=True` ([#3511](https://github.com/argilla-io/argilla/pull/3511)).
+- Fixed `PUT /api/v1/datasets/{dataset_id}/publish` to check whether at leat one field and question has `required=True` ([#3511](https://github.com/argilla-io/argilla/pull/3511)).
+- Fixed `FeedbackDataset.from_huggingface` as `suggestions` were being lost when there were no `responses` ([#3539](https://github.com/argilla-io/argilla/pull/3539)).
 
 ### Added
 
@@ -45,6 +46,7 @@ These are the section headers that we use:
 - Updated `POST /api/v1/me/datasets/{dataset_id}/records` endpoint to allow searching records matching one of the response statuses provided via query param.([#3359](https://github.com/argilla-io/argilla/pull/3359)).
 - Updated `SearchEngine.search` method to allow searching records matching one of the response statuses provided ([#3359](https://github.com/argilla-io/argilla/pull/3359)).
 - After calling `FeedbackDataset.push_to_argilla`, the methods `FeedbackDataset.add_records` and `FeedbackRecord.set_suggestions` will automatically call Argilla with no need of calling `push_to_argilla` explicitly ([#3465](https://github.com/argilla-io/argilla/pull/3465)).
+- Now calling `FeedbackDataset.push_to_huggingface` dumps the `responses` as a `List[Dict[str, Any]]` instead of `Sequence` to make it more readable via 🤗`datasets` ([#3539](https://github.com/argilla-io/argilla/pull/3539)).
 
 ### Deprecated
 
