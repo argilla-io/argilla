@@ -86,7 +86,7 @@ dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_works
 # loop through the records and add suggestions
 for record in dataset.records:
     record.set_suggestions([...])
-```
+dataset.push_to_argilla()
 :::
 ::::
 
