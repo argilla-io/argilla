@@ -126,14 +126,14 @@ dataset.add_records(records)
 
 :::{tab-item} Argilla 1.14.0 or higher
 ```python
-# This publishes the dataset with the records into Argilla and returns the dataset in Argilla
+# This publishes the dataset with its records to Argilla and returns the dataset in Argilla
 remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 ```
 :::
 
 :::{tab-item} Lower than Argilla 1.14.0
 ```python
-# This publishes the dataset with the records into Argilla and turns the dataset objetct into a dataset in Argilla
+# This publishes the dataset with its records to Argilla and turns the dataset object into a dataset in Argilla
 dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 ```
 :::
