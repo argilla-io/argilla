@@ -4,8 +4,7 @@ import Vue from "vue";
 //  v-tooltip="{ content: tooltipMessage, backgroundColor: '#FFF', borderColor: '#FFF', tooltipPosition: 'bottom' }"
 //    => content (String) the message to show in the tooltip
 //    => backgroundColor (String) the background color of the tooltip
-//    => borderColor (String) the border color of the tooltip
-//    => tooltipPosition (String) the positin of the tooltip (bottom, top, right, left) =>
+//    => borderColor (String) the border colon of the tooltip (bottom, top, right, left) =>
 // TODO - implement the other tooltip direction top/right/left
 
 Vue.directive("tooltip", {
@@ -120,6 +119,8 @@ Vue.directive("tooltip", {
 
     // NOTE - init all eventListeners
     initEventsListener(element, closeIcon);
+
+    if (binding?.value.open) element.clickOnTooltipElementEvent();
   },
   unbind: (element) => {
     destroyEventsListener(element);
@@ -243,12 +244,10 @@ const initTooltipPosition = (
   const margin = 8;
   switch (tooltipPosition.toUpperCase()) {
     case TOOLTIP_DIRECTION.BOTTOM:
-      tooltip.style.top = `${
-        elementOffset.y + elementOffset.height + margin
-      }px`;
-      tooltip.style.left = `${
-        elementOffset.left - width / 2 + elementOffset.width / 2
-      }px`;
+      tooltip.style.top = `${elementOffset.y + elementOffset.height + margin
+        }px`;
+      tooltip.style.left = `${elementOffset.left - width / 2 + elementOffset.width / 2
+        }px`;
       break;
     default:
     // tooltip direction is unknown

@@ -153,6 +153,11 @@ describe("Question", () => {
         question.description = invalidLargeDescription;
         expect(question.isQuestionValid).toBeFalsy();
       });
+      test("is true when the user set description as a null", () => {
+        const question = createTextQuestionMocked();
+        question.description = null;
+        expect(question.isQuestionValid).toBeTruthy();
+      });
     });
   });
 });

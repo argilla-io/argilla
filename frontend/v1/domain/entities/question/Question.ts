@@ -24,15 +24,35 @@ export class Question {
   constructor(
     public readonly id: string,
     public readonly name: string,
-    public description: string,
+    description: string,
     public readonly datasetId: string,
-    public title: string,
+    title: string,
     public readonly isRequired: boolean,
     public settings: any
   ) {
-    this.initializeOriginal();
-
     this.answer = this.createEmptyAnswers();
+    this.description = description;
+    this.title = title;
+
+    this.initializeOriginal();
+  }
+
+  private _description: string;
+  public get description(): string {
+    return this._description;
+  }
+
+  public set description(newDescription: string) {
+    this._description = newDescription?.trim() ?? "";
+  }
+
+  private _title: string;
+  public get title(): string {
+    return this._title;
+  }
+
+  public set title(newTitle: string) {
+    this._title = newTitle?.trim() ?? "";
   }
 
   public get isAnswered(): boolean {
@@ -73,8 +93,8 @@ export class Question {
 
   public get isModified(): boolean {
     return (
-      this.title?.trim() !== this.original.title ||
-      this.description?.trim() !== this.original.description ||
+      this.title !== this.original.title ||
+      this.description !== this.original.description ||
       this.settings.use_markdown !== this.original.settings.use_markdown ||
       this.settings.visible_options !== this.original.settings.visible_options
     );
@@ -95,7 +115,7 @@ export class Question {
         `This must be less than ${this.MAX_TITLE_LENGTH}.`
       );
 
-    if (this.description?.length > this.MAX_DESCRIPTION_LENGTH)
+    if (this.description.length > this.MAX_DESCRIPTION_LENGTH)
       validations.description.push(
         `This must be less than ${this.MAX_DESCRIPTION_LENGTH}.`
       );
