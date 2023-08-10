@@ -150,10 +150,7 @@ class HuggingFaceDatasetMixin:
             hf_dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else {})
             hf_dataset["external_id"].append(record.external_id or None)
 
-        return Dataset.from_dict(
-            hf_dataset,
-            features=Features(hf_features),
-        )
+        return Dataset.from_dict(hf_dataset, features=Features(hf_features))
 
     @requires_version("huggingface_hub")
     @requires_version("datasets")
