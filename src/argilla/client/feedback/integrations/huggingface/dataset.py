@@ -135,15 +135,14 @@ class HuggingFaceDatasetMixin:
                 suggestion_value, suggestion_metadata = None, {"type": None, "score": None, "agent": None}
                 if record.suggestions:
                     for suggestion in record.suggestions:
-                        if question.name != suggestion.question_name:
-                            continue
-                        suggestion_value = suggestion.value
-                        suggestion_metadata = {
-                            "type": suggestion.type,
-                            "score": suggestion.score,
-                            "agent": suggestion.agent,
-                        }
-                        break
+                        if question.name == suggestion.question_name:
+                            suggestion_value = suggestion.value
+                            suggestion_metadata = {
+                                "type": suggestion.type,
+                                "score": suggestion.score,
+                                "agent": suggestion.agent,
+                            }
+                            break
                 hf_dataset[f"{question.name}-suggestion"].append(suggestion_value)
                 hf_dataset[f"{question.name}-suggestion-metadata"].append(suggestion_metadata)
 
