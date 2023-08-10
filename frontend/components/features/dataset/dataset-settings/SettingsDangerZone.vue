@@ -1,5 +1,5 @@
 <template>
-  <div class="dataset-settings__danger-zone">
+  <div class="settings__container">
     <h2 class="--heading5 --medium">Delete dataset</h2>
     <DatasetDeleteFeedbackTask :dataset="settings.dataset" />
   </div>
@@ -18,8 +18,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dataset-settings {
-  &__danger-zone {
+.settings {
+  &__container {
     max-width: 1000px;
   }
 }
