@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <span> {{ formattedDate }} </span>
+  <span v-text="formattedDate" />
 </template>
 
 <script>
@@ -46,7 +46,7 @@ export default {
     const reRender = () => {
       if (this.timer) clearTimeout(this.timer);
       this.timer = setTimeout(() => {
-        self.formatDate();
+        this.$nextTick(() => self.formatDate());
         reRender();
       }, this.updateEverySecond * 1000);
     };
@@ -101,6 +101,8 @@ export default {
           return formatter.format(Math.round(delta), key);
         }
       }
+
+      return formatter.format(0, "seconds");
     },
   },
 };

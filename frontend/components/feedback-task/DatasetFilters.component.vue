@@ -16,7 +16,6 @@
       <p v-if="!draftSaving && isSavedDraft">
         Saved
         <BaseDate
-          :key="updatedAt"
           :date="updatedAt"
           :format="'date-relative-now'"
           :updateEverySecond="10"
