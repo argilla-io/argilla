@@ -95,6 +95,10 @@ class TextQuestionSettingsUpdate(UpdateSchema):
     use_markdown: bool
 
 
+class RatingQuestionSettingsUpdate(UpdateSchema):
+    type: Literal[QuestionType.rating]
+
+
 class LabelSelectionSettingsUpdate(UpdateSchema):
     type: Literal[QuestionType.label_selection]
     visible_options: Optional[PositiveInt]
@@ -104,11 +108,17 @@ class MultiLabelSelectionQuestionSettingsUpdate(LabelSelectionSettingsUpdate):
     type: Literal[QuestionType.multi_label_selection]
 
 
+class RankingQuestionSettingsUpdate(UpdateSchema):
+    type: Literal[QuestionType.ranking]
+
+
 QuestionSettingsUpdate = Annotated[
     Union[
         TextQuestionSettingsUpdate,
+        RatingQuestionSettingsUpdate,
         LabelSelectionSettingsUpdate,
         MultiLabelSelectionQuestionSettingsUpdate,
+        RankingQuestionSettingsUpdate,
     ],
     Field(..., discriminator="type"),
 ]
