@@ -223,7 +223,7 @@ tagger.predict(sentence)
 
 ### Using ASGI middleware
 
-For using the ASGI middleware, see this [tutorial](/tutorials/notebooks/deploying-texttokenclassification-fastapi.html).
+For using the ASGI middleware, see this [tutorial](/tutorials/notebooks/deploying-texttokenclassification-fastapi.ipynb).
 
 ## Load Data
 
