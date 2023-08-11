@@ -28,16 +28,16 @@
       @dblclick="removeEntity"
       v-html="visualizeToken(token, i)"
     ></span
-    ><span class="whitespace">{{ charsBetweenTokens }}</span>
-    <svgicon
+    ><span class="whitespace">{{ charsBetweenTokens }}</span
+    ><svgicon
       class="remove-button"
       @click="removeEntity"
       v-if="annotationEnabled && span.origin === 'annotation'"
       width="11"
       height="11"
       name="close"
-    ></svgicon>
-    <lazy-text-span-tooltip v-if="showTooltip" :span="span" />
+    ></svgicon
+    ><lazy-text-span-tooltip v-if="showTooltip" :span="span" />
   </span>
 </template>
 

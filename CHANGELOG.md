@@ -377,6 +377,7 @@ These are the section headers that we use:
 ### Fixes
 
 - Allow URL to be clickable in Jupyter notebook again. Closes [#2527](https://github.com/argilla-io/argilla/issues/2527)
+- Align token-underline and text in Token Classifier Closes [#2620](https://github.com/argilla-io/argilla/pull/2620)
 
 ### Removed
 
