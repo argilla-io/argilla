@@ -26,8 +26,6 @@
 </template>
 
 <script>
-import isArray from "~/components/base/utils/isArray";
-
 export default {
   props: {
     reInline: Boolean,
@@ -51,7 +49,7 @@ export default {
   },
   computed: {
     hasValue() {
-      if (isArray(this.value)) {
+      if (Array.isArray(this.value)) {
         return this.value.length > 0;
       }
 
