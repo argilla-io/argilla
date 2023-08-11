@@ -60,6 +60,7 @@ class TestDependencyRequirements:
             requires_version("datasets>1.17.0"),
             requires_version("spacy"),
             requires_version("scikit-learn"),
+            requires_version(["datasets>1.17.0", "spacy", "scikit-learn"]),
         ],
     )
     def test_installed_dependency_decorator(self, decorator):
@@ -105,3 +106,6 @@ class TestDependencyRequirements:
         require_version("datasets>1.0.0,>1.8.0,>1.17.0")
         # A more common example (designed not to break eventually):
         require_version("datasets>1.17.0,<1000.0.0")
+
+    def test_list_of_dependencies(self):
+        require_version(["datasets>1.17.0", "spacy", "scikit-learn"])
