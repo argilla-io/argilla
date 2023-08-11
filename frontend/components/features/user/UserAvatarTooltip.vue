@@ -1,6 +1,6 @@
 <template>
   <div v-if="$auth.loggedIn" v-click-outside="close" class="user">
-    <a class="user__button" href="#" @click.prevent="showSelector">
+    <a class="user__button" @click.prevent="showSelector">
       {{ firstChar(user.username) }}
     </a>
     <div v-if="visibleSelector && user" class="user__content">
@@ -27,24 +27,19 @@
           target="_blank"
           v-text="'View docs'"
         />
-        <a
-          class="user__link"
-          href="#"
-          @click.prevent="logout"
-          v-text="'Log out'"
-        />
+        <a class="user__link" @click.prevent="logout" v-text="'Log out'" />
       </div>
       <span class="copyright"
-        >© {{ currentYear }} Argilla ({{ appVersion }})</span
+        >© {{ currentYear }} Argilla ({{ $config.clientVersion }})</span
       >
     </div>
   </div>
 </template>
 
 <script>
-import { mapActions } from "vuex";
 import "assets/icons/external";
 import "assets/icons/log-out";
+
 export default {
   data: () => {
     return {
@@ -63,13 +58,7 @@ export default {
       return new Date();
     },
   },
-  async fetch() {
-    this.appVersion = await this.getAppVersion();
-  },
   methods: {
-    ...mapActions({
-      getAppVersion: "entities/rubrix-info/getAppVersion",
-    }),
     firstChar(name) {
       return name.slice(0, 2);
     },
@@ -119,6 +108,8 @@ $buttonSize: 34px;
   position: relative;
   z-index: 3;
   &__button {
+    user-select: none;
+    cursor: pointer;
     @extend %circle;
     background: palette(orange-red-crayola);
     transform: scale3d(1, 1, 1) translateZ(0);
@@ -155,6 +146,8 @@ $buttonSize: 34px;
     }
   }
   &__link {
+    user-select: none;
+    cursor: pointer;
     display: flex;
     flex-direction: column;
     padding: $base-space * 2 $base-space * 2 $base-space * 2 $base-space * 2;

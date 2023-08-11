@@ -26,12 +26,7 @@ import httpx
 from rich import print as rprint
 from rich.progress import Progress
 
-from argilla._constants import (
-    DEFAULT_API_KEY,
-    DEFAULT_USERNAME,
-    ES_INDEX_REGEX_PATTERN,
-    WORKSPACE_HEADER_NAME,
-)
+from argilla._constants import DEFAULT_API_KEY, DEFAULT_USERNAME, ES_INDEX_REGEX_PATTERN, WORKSPACE_HEADER_NAME
 from argilla.client.apis.datasets import Datasets
 from argilla.client.apis.metrics import MetricsAPI
 from argilla.client.apis.search import Search, VectorSearch
@@ -52,22 +47,13 @@ from argilla.client.models import (
 )
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.api import bulk
-from argilla.client.sdk.commons.errors import (
-    AlreadyExistsApiError,
-    InputValueError,
-    NotFoundApiError,
-)
+from argilla.client.sdk.commons.errors import AlreadyExistsApiError, InputValueError, NotFoundApiError
 from argilla.client.sdk.datasets import api as datasets_api
 from argilla.client.sdk.datasets.models import CopyDatasetRequest, TaskType
 from argilla.client.sdk.metrics import api as metrics_api
 from argilla.client.sdk.metrics.models import MetricInfo
-from argilla.client.sdk.text2text.models import (
-    CreationText2TextRecord,
-    Text2TextBulkData,
-)
-from argilla.client.sdk.text2text.models import (
-    Text2TextRecord as SdkText2TextRecord,
-)
+from argilla.client.sdk.text2text.models import CreationText2TextRecord, Text2TextBulkData
+from argilla.client.sdk.text2text.models import Text2TextRecord as SdkText2TextRecord
 from argilla.client.sdk.text_classification import api as text_classification_api
 from argilla.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
@@ -75,16 +61,12 @@ from argilla.client.sdk.text_classification.models import (
     LabelingRuleMetricsSummary,
     TextClassificationBulkData,
 )
-from argilla.client.sdk.text_classification.models import (
-    TextClassificationRecord as SdkTextClassificationRecord,
-)
+from argilla.client.sdk.text_classification.models import TextClassificationRecord as SdkTextClassificationRecord
 from argilla.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
 )
-from argilla.client.sdk.token_classification.models import (
-    TokenClassificationRecord as SdkTokenClassificationRecord,
-)
+from argilla.client.sdk.token_classification.models import TokenClassificationRecord as SdkTokenClassificationRecord
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.workspaces import api as workspaces_api
 from argilla.client.sdk.workspaces.models import WorkspaceModel
@@ -368,7 +350,7 @@ class Argilla:
             batch_size = chunk_size
 
         if batch_size > self._MAX_BATCH_SIZE:
-            _LOGGER.warning(
+            warnings.warn(
                 "The requested batch size is noticeably large, timeout errors may occur. "
                 f"Consider a batch size smaller than {self._MAX_BATCH_SIZE}",
             )

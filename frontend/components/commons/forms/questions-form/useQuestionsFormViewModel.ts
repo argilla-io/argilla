@@ -1,36 +1,25 @@
-import { useFeedback } from "~/v1/infrastructure/FeedbackStorage";
+import { useResolve } from "ts-injecty";
+import { Record } from "~/v1/domain/entities/record/Record";
+import { ClearRecordUseCase } from "~/v1/domain/usecases/clear-record-use-case";
+import { DiscardRecordUseCase } from "~/v1/domain/usecases/discard-record-use-case";
+import { SubmitRecordUseCase } from "~/v1/domain/usecases/submit-record-use-case";
 
 export const useQuestionFormViewModel = () => {
-  const feedbackTask = useFeedback();
+  const discardUseCase = useResolve(DiscardRecordUseCase);
+  const submitUseCase = useResolve(SubmitRecordUseCase);
+  const clearUseCase = useResolve(ClearRecordUseCase);
 
-  const updateResponse = (response) => {
-    const feedback = feedbackTask.get();
-
-    feedback.updateResponse(response);
-
-    feedbackTask.save(feedback);
+  const discard = async (record: Record) => {
+    await discardUseCase.execute(record);
   };
 
-  const addResponse = (response) => {
-    const feedback = feedbackTask.get();
-
-    feedback.addResponse(response);
-
-    feedbackTask.save(feedback);
+  const submit = async (record: Record) => {
+    await submitUseCase.execute(record);
   };
 
-  const clearRecord = (recordId: string, status: string) => {
-    const feedback = feedbackTask.get();
-
-    feedback.clearRecord(recordId, status);
-
-    feedbackTask.save(feedback);
+  const clear = async (record: Record) => {
+    await clearUseCase.execute(record);
   };
 
-  return {
-    feedback: feedbackTask.state,
-    updateResponse,
-    addResponse,
-    clearRecord,
-  };
+  return { clear, submit, discard };
 };

@@ -22,9 +22,10 @@ from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
     BaseClientError,
     NotFoundApiError,
+    ValidationApiError,
 )
 from argilla.client.sdk.users import api as users_api
-from argilla.client.sdk.users.models import UserCreateModel, UserModel, UserRole
+from argilla.client.sdk.users.models import UserModel, UserRole
 from argilla.client.sdk.v1.users import api as users_api_v1
 from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
 from argilla.client.utils import allowed_for_roles
@@ -180,6 +181,7 @@ class User:
         first_name: Optional[str] = None,
         last_name: Optional[str] = None,
         role: Optional[UserRole] = None,
+        workspaces: Optional[List[str]] = None,
     ) -> "User":
         """Creates a new user in Argilla.
 
@@ -189,6 +191,7 @@ class User:
             first_name: the first name of the user to be created. Defaults to None.
             last_name: the last name of the user to be created. Defaults to None.
             role: the role of the user to be created. Defaults to None.
+            workspaces: a list of workspace names the user to be created is linked to. Defaults to None.
 
         Returns:
             A new `User` instance.
@@ -214,19 +217,24 @@ class User:
         try:
             user = users_api.create_user(
                 client,
-                **UserCreateModel(
-                    username=username,
-                    password=password,
-                    first_name=first_name,
-                    last_name=last_name,
-                    role=role,
-                ).dict(),
+                username=username,
+                password=password,
+                first_name=first_name,
+                last_name=last_name,
+                role=role,
+                workspaces=workspaces,
             ).parsed
             return cls.__new_instance(client, user)
         except AlreadyExistsApiError as e:
             raise ValueError(
                 f"User with username=`{username}` already exists in Argilla, so please"
                 " make sure that the name you provided is a unique one."
+            ) from e
+        except ValidationApiError as e:
+            response = e.ctx["response"]
+            raise ValueError(
+                f"User with username=`{username}` cannot be created in Argilla, as"
+                f" the provided data is not valid. Please, check the following error: {response}"
             ) from e
         except BaseClientError as e:
             raise RuntimeError(f"Error while creating user with username=`{username}` in Argilla.") from e

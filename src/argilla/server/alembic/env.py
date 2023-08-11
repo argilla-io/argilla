@@ -15,17 +15,29 @@
 from logging.config import fileConfig
 
 from alembic import context
-from argilla.server.models.base import DatabaseModel
-from argilla.server.models.models import *  # noqa
-from argilla.server.settings import settings
+from argilla.server.database import database_url_sync
+from argilla.server.models import (
+    DatabaseModel,
+    Dataset,
+    Field,
+    Question,
+    Record,
+    Response,
+    Suggestion,
+    User,
+    Workspace,
+    WorkspaceUser,
+)
 from sqlalchemy import engine_from_config, pool
+
+__ALL_MODELS__ = (Dataset, Field, Question, Record, Response, Suggestion, User, Workspace, WorkspaceUser)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
 # Overwrites the SQLAlchemy URL getting it from argilla database_url settings
-config.set_main_option("sqlalchemy.url", settings.database_url)
+config.set_main_option("sqlalchemy.url", database_url_sync())
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

@@ -20,11 +20,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from argilla.server.models import User, Workspace, WorkspaceUser
-from argilla.server.security.model import (
-    UserCreate,
-    WorkspaceCreate,
-    WorkspaceUserCreate,
-)
+from argilla.server.security.model import UserCreate, WorkspaceCreate, WorkspaceUserCreate
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -113,14 +109,30 @@ async def list_users(db: "AsyncSession") -> List[User]:
 
 
 async def create_user(db: "AsyncSession", user_create: UserCreate) -> User:
-    return await User.create(
-        db,
-        first_name=user_create.first_name,
-        last_name=user_create.last_name,
-        username=user_create.username,
-        role=user_create.role,
-        password_hash=hash_password(user_create.password),
-    )
+    async with db.begin_nested():
+        user = await User.create(
+            db,
+            first_name=user_create.first_name,
+            last_name=user_create.last_name,
+            username=user_create.username,
+            role=user_create.role,
+            password_hash=hash_password(user_create.password),
+            autocommit=False,
+        )
+
+        if user_create.workspaces:
+            for workspace_name in user_create.workspaces:
+                workspace = await get_workspace_by_name(db, workspace_name)
+                if not workspace:
+                    raise ValueError(f"Workspace '{workspace_name}' does not exist")
+                await WorkspaceUser.create(
+                    db,
+                    workspace_id=workspace.id,
+                    user_id=user.id,
+                    autocommit=False,
+                )
+
+    return user
 
 
 async def delete_user(db: "AsyncSession", user: User) -> User:

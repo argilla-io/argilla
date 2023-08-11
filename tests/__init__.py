@@ -18,9 +18,24 @@
 # For more info, please visit https://gist.github.com/EricCousineau-TRI/8a2d1550f5fa4be4fed87d55a522dbf2
 import os
 
+from argilla.server.daos.backend.client_adapters.factory import ClientAdapterFactory
+from argilla.server.settings import settings
+
 os.environ.update(
     OMP_NUM_THREADS="1",
     OPENBLAS_NUM_THREADS="1",
     NUMEXPR_NUM_THREADS="1",
     MKL_NUM_THREADS="1",
 )
+
+try:
+    client = ClientAdapterFactory.get(
+        hosts=settings.elasticsearch,
+        index_shards=settings.es_records_index_shards,
+        ssl_verify=settings.elasticsearch_ssl_verify,
+        ca_path=settings.elasticsearch_ca_path,
+    )
+
+    SUPPORTED_VECTOR_SEARCH = client.vector_search_supported
+except Exception:
+    SUPPORTED_VECTOR_SEARCH = False

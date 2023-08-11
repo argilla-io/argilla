@@ -1,64 +1,21 @@
-import {
-  onBeforeMount,
-  ref,
-  useRoute,
-  useRouter,
-} from "@nuxtjs/composition-api";
-import { useResolve } from "ts-injecty";
-import { Notification } from "@/models/Notifications";
-import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use.case";
-import { TYPE_OF_FEEDBACK } from "@/v1/infrastructure/DatasetRepository";
-import { useDataset } from "@/v1/infrastructure/DatasetStorage";
+import { computed, onBeforeMount } from "vue-demi";
+import { useDatasetViewModel } from "./useDatasetViewModel";
 
 export const useDatasetSettingViewModel = () => {
-  const isLoadingDataset = ref(false);
-  const router = useRouter();
-  const route = useRoute();
-  const datasetId = route.value.params.id;
-
-  const { state: dataset } = useDataset();
-  const getDatasetUseCase = useResolve(GetDatasetByIdUseCase);
-
-  const handleError = (response: string) => {
-    let message = "";
-    switch (response) {
-      case TYPE_OF_FEEDBACK.ERROR_FETCHING_DATASET_INFO:
-        message = `Can't get dataset info for dataset_id: ${datasetId}`;
-        break;
-      case TYPE_OF_FEEDBACK.ERROR_FETCHING_WORKSPACE_INFO:
-        message = `Can't get workspace info for dataset_id: ${datasetId}`;
-        break;
-      default:
-        message =
-          "There was an error on fetching dataset info and workspace info. Please try again";
-    }
-
-    const paramsForNotification = {
-      message,
-      numberOfChars: message.length,
-      type: "error",
-    };
-
-    Notification.dispatch("notify", paramsForNotification);
-  };
-
-  const loadDataset = async () => {
-    try {
-      isLoadingDataset.value = true;
-
-      await getDatasetUseCase.execute(datasetId);
-    } catch (error) {
-      handleError(error.response);
-
-      router.push("/");
-    } finally {
-      isLoadingDataset.value = false;
-    }
-  };
-
-  onBeforeMount(() => {
-    loadDataset();
+  const datasetViewModel = useDatasetViewModel();
+  const breadcrumbs = computed(() => {
+    return [
+      ...datasetViewModel.breadcrumbs.value,
+      {
+        link: null,
+        name: "settings",
+      },
+    ];
   });
 
-  return { dataset, datasetId, isLoadingDataset };
+  onBeforeMount(() => {
+    datasetViewModel.loadDataset();
+  });
+
+  return { ...datasetViewModel, breadcrumbs };
 };

@@ -25,22 +25,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 from deprecated import deprecated
-from pydantic import (
-    BaseModel,
-    Field,
-    PrivateAttr,
-    conint,
-    constr,
-    root_validator,
-    validator,
-)
+from pydantic import BaseModel, Field, PrivateAttr, conint, constr, root_validator, validator
 
 from argilla import _messages
-from argilla._constants import (
-    _JS_MAX_SAFE_INTEGER,
-    DEFAULT_MAX_KEYWORD_LENGTH,
-    PROTECTED_METADATA_FIELD_PREFIX,
-)
+from argilla._constants import _JS_MAX_SAFE_INTEGER, DEFAULT_MAX_KEYWORD_LENGTH, PROTECTED_METADATA_FIELD_PREFIX
 from argilla.utils.span_utils import SpanUtils
 
 _LOGGER = logging.getLogger(__name__)
@@ -122,7 +110,7 @@ class _Validators(BaseModel):
         if isinstance(v, int):
             message = (
                 f"Integer ids won't be supported in future versions. We recommend to start using strings instead. "
-                "For datasets already containing integer values we recommend migrating them to avoid deprecation issues."
+                "For datasets already containing integer values we recommend migrating them to avoid deprecation issues. "
                 "See https://docs.argilla.io/en/latest/getting_started/installation/configurations"
                 "/database_migrations.html#elasticsearch"
             )
