@@ -16,7 +16,7 @@ import functools
 import operator
 import re
 import sys
-from typing import Callable, Optional, TypeVar, Union, List
+from typing import Callable, List, Optional, TypeVar, Union
 
 if sys.version_info >= (3, 10):
     from typing import ParamSpec
