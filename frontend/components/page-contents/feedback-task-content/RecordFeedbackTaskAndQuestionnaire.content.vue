@@ -7,7 +7,7 @@
       />
 
       <QuestionsFormComponent
-        :key="questionFormKey"
+        :key="record.id"
         class="question-form"
         :class="statusClass"
         :datasetId="datasetId"
@@ -46,7 +46,6 @@ export default {
   },
   data() {
     return {
-      reRenderQuestionForm: 1,
       questionFormTouched: false,
       recordStatusToFilterWith: null,
       searchTextToFilterWith: null,
@@ -80,9 +79,6 @@ export default {
     },
     statusClass() {
       return `--${this.record.status}`;
-    },
-    questionFormKey() {
-      return `${this.currentPage}-${this.reRenderQuestionForm}`;
     },
     statusFilterFromQuery() {
       return this.$route.query?._status ?? RECORD_STATUS.PENDING.toLowerCase();
@@ -162,16 +158,6 @@ export default {
         },
       });
     },
-    numberOfFetch(newValue) {
-      const isFetchCalledForTheFirstTime = newValue === 1;
-
-      if (isFetchCalledForTheFirstTime) {
-        this.checkAndEmitTotalRecords({
-          searchFilter: this.searchTextToFilterWith,
-          value: this.totalRecords,
-        });
-      }
-    },
   },
   created() {
     this.recordStatusToFilterWith = this.statusFilterFromQuery;
@@ -199,10 +185,8 @@ export default {
 
       this.checkAndEmitTotalRecords({
         searchFilter: this.searchTextToFilterWith,
-        value: this.totalRecords,
+        value: this.records.total,
       });
-
-      this.reRenderQuestionForm++;
     },
     async applySearchFilter(searchFilter) {
       this.currentPage = 1;
@@ -210,9 +194,10 @@ export default {
 
       await this.$fetch();
 
-      this.checkAndEmitTotalRecords({ searchFilter, value: this.totalRecords });
-
-      this.reRenderQuestionForm++;
+      this.checkAndEmitTotalRecords({
+        searchFilter,
+        value: this.records.total,
+      });
     },
     emitResetStatusFilter() {
       this.$root.$emit("reset-status-filter");

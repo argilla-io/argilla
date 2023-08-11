@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-<!--  Ask David for help you to contribute https://calendly.com/alvarobartt-argilla or feel free to submit a pull request straight away: https://github.com/argilla-io/argilla/pulls or  -->
+<!--  Ask David for help you to contribute https://calendly.com/argilla-office-hours/30min or feel free to submit a pull request straight away: https://github.com/argilla-io/argilla/pulls or  -->
 
 ## Which page or section is this issue related to?
 <!-- Please include the URL and/or source. -->

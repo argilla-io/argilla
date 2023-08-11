@@ -165,6 +165,7 @@ These are the section headers that we use:
 - Modified styling of error code outputs in notebooks ([#3270](https://github.com/argilla-io/argilla/pull/3270)).
 - Added ElasticSearch and OpenSearch versions ([#3280](https://github.com/argilla-io/argilla/pull/3280)).
 - Removed template notebook from table of contents ([#3271](https://github.com/argilla-io/argilla/pull/3271)).
+- Fixed tutorials with `pip install argilla` to not use older versions of the package ([#3282](https://github.com/argilla-io/argilla/pull/3282)).
 
 ### Added
 
