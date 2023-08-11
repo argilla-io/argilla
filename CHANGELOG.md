@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Fixed
+
+- Fixed `settings` could not be provided when updating a `rating`  or `ranking` question ([#3552](https://github.com/argilla-io/argilla/pull/3552)).
+
 ## [1.14.0](https://github.com/argilla-io/argilla/compare/v1.13.3...v1.14.0)
 
 ### Added

@@ -92,7 +92,13 @@ class Question(BaseModel):
 
 class TextQuestionSettingsUpdate(UpdateSchema):
     type: Literal[QuestionType.text]
-    use_markdown: bool
+    use_markdown: Optional[bool]
+
+    __non_nullable_fields__ = {"use_markdown"}
+
+
+class RatingQuestionSettingsUpdate(UpdateSchema):
+    type: Literal[QuestionType.rating]
 
 
 class LabelSelectionSettingsUpdate(UpdateSchema):
@@ -104,11 +110,17 @@ class MultiLabelSelectionQuestionSettingsUpdate(LabelSelectionSettingsUpdate):
     type: Literal[QuestionType.multi_label_selection]
 
 
+class RankingQuestionSettingsUpdate(UpdateSchema):
+    type: Literal[QuestionType.ranking]
+
+
 QuestionSettingsUpdate = Annotated[
     Union[
         TextQuestionSettingsUpdate,
+        RatingQuestionSettingsUpdate,
         LabelSelectionSettingsUpdate,
         MultiLabelSelectionQuestionSettingsUpdate,
+        RankingQuestionSettingsUpdate,
     ],
     Field(..., discriminator="type"),
 ]
@@ -117,6 +129,6 @@ QuestionSettingsUpdate = Annotated[
 class QuestionUpdate(UpdateSchema):
     title: Optional[str]
     description: Optional[str]
-    settings: Optional[QuestionSettingsUpdate]
+    settings: QuestionSettingsUpdate
 
-    __non_nullable_fields__ = {"title", "settings"}
+    __non_nullable_fields__ = {"title"}
