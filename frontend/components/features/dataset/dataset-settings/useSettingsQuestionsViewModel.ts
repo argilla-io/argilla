@@ -19,8 +19,23 @@ export const useSettingsQuestionsViewModel = () => {
     }
   };
 
+  const getDisplayTextType = (question: Question) => {
+    if (question.isTextType) {
+      return "Text";
+    } else if (question.isRankingType) {
+      return "Ranking";
+    } else if (question.isRatingType) {
+      return "Rating";
+    } else if (question.isSingleLabelType) {
+      return "Label";
+    } else if (question.isMultiLabelType) {
+      return "Multi-label";
+    }
+  };
+
   return {
     restore,
     update,
+    getDisplayTextType,
   };
 };
