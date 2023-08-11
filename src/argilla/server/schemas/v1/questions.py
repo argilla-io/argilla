@@ -92,7 +92,9 @@ class Question(BaseModel):
 
 class TextQuestionSettingsUpdate(UpdateSchema):
     type: Literal[QuestionType.text]
-    use_markdown: bool
+    use_markdown: Optional[bool]
+
+    __non_nullable_fields__ = {"use_markdown"}
 
 
 class RatingQuestionSettingsUpdate(UpdateSchema):
