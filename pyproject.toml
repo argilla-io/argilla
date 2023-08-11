@@ -136,6 +136,7 @@ log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 log_cli = "True"
 testpaths = ["tests"]
+env = ["ARGILLA_DATABASE_URL=sqlite+aiosqlite://$HOME/.argilla/test.db"]
 
 
 [tool.coverage.run]
