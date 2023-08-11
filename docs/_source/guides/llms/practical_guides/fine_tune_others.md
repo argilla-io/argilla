@@ -1,6 +1,6 @@
 # Fine-tune other models
 
-After [collecting the responses](/guides/llms/practical_guides/collect_responses) from our `FeedbackDataset` we can start fine-tuning our basic models. Due to the customizability of the `FeedbackDataset`, this might require setting up a custom post-processing workflow but we will provide some good toy examples for the text classification task. We will add additional support for other tasks in the future.
+After [collecting the responses](./collect_responses.html) from our `FeedbackDataset` we can start fine-tuning our basic models. Due to the customizability of the `FeedbackDataset`, this might require setting up a custom post-processing workflow but we will provide some good toy examples for the text classification task. We will add additional support for other tasks in the future.
 
 Generally, this is as easy as one-two-three but does slightly differ per task.
 
@@ -15,9 +15,11 @@ Generally, this is as easy as one-two-three but does slightly differ per task.
 Text classification is a widely used NLP task where labels are assigned to text. Major companies rely on it for various applications. Sentiment analysis, a popular form of text classification, assigns labels like 🙂 positive, 🙁 negative, or 😐 neutral to text. Additionally, we distinguish between single- and multi-label text classification.
 
 #### Single-label
+
 Single-label text classification refers to the task of assigning a single category or label to a given text sample. Each text is associated with only one predefined class or category. For example, in sentiment analysis, a single-label text classification task would involve assigning labels such as "positive," "negative," or "neutral" to individual texts based on their sentiment.
 
 #### Multi-label
+
 Multi-label text classification is generally more complex than single-label classification due to the challenge of determining and predicting multiple relevant labels for each text. It finds applications in various domains, including document tagging, topic labeling, and content recommendation systems.
 
 ### Training
@@ -91,14 +93,12 @@ task_mapping = TrainingTaskMapping.for_text_classification(
 
 ::::
 
-
-
 #### Use ArgillaTrainer
 
 Next, we can use our `FeedbackDataset` and `TrainingTaskMappingForTextClassification` to initialize our `argilla.ArgillaTrainer`. We support the frameworks "openai", "setfit", "peft", "spacy" and "transformers".
 
 ````{note}
-This is a newer version and can be imported via `from argilla.feedback import ArgillaTrainer`. The old trainer can be imported via `from argilla.training import ArgillaTrainer`. Our docs, contain some [additional information on usage of the ArgillaTrainer](/guides/train_a_model).
+This is a newer version and can be imported via `from argilla.feedback import ArgillaTrainer`. The old trainer can be imported via `from argilla.training import ArgillaTrainer`. Our docs, contain some [additional information on usage of the ArgillaTrainer](../../train_a_model.html).
 ````
 
 ```python
@@ -122,7 +122,7 @@ trainer.train(output_dir="my_awesone_model")
 ```
 
 ````{note}
-The `FeedbackDataset` also allows for custom workflows via the `prepare_for_training()`-method.
+The `FeedbackDataset` also allows for custom workflows via the `prepare_for_training()` method.
 ```python
 task_mapping = ...
 dataset = rg.FeedbackDataset.from_huggingface(
@@ -137,7 +137,7 @@ dataset.prepare_for_training(
 
 ### An end-to-end example
 
-Underneath, you can also find an end-to-end example of how to use the `ArgillaTrainer`.
+Below you can also find an end-to-end example of how to use the `ArgillaTrainer`.
 
 ```python
 from argilla.feedback import (
@@ -202,5 +202,3 @@ trainer = ArgillaTrainer(
 trainer.update_config(num_train_epochs=2)
 trainer.train(output_dir="my_awesone_model")
 ```
-
-

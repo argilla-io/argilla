@@ -362,7 +362,7 @@ async def publish_dataset(
     telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
-):
+) -> DatasetModel:
     dataset = await _get_dataset(db, dataset_id, with_fields=True, with_questions=True)
 
     await authorize(current_user, DatasetPolicyV1.publish(dataset))

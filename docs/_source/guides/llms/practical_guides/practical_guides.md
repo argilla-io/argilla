@@ -16,6 +16,12 @@ Methods to configure a Feedback Dataset and push it to Argilla.
 
 Workflows to organize your annotation team.
 ```
+```{grid-item-card} Update a Feedback Dataset
+:link: update_dataset.html
+
+Make changes to an existing Feedback Dataset.
+
+```
 ```{grid-item-card} Annotate a Feedback Dataset
 :link: annotate_dataset.html
 
@@ -58,6 +64,7 @@ Fine-tune basic models with feedback collected from Argilla.
 
 create_dataset
 set_up_annotation_team
+update_dataset
 annotate_dataset
 collect_responses
 export_dataset

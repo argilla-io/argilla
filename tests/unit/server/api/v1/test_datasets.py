@@ -3095,10 +3095,10 @@ class TestSuiteDatasets:
         mock_search_engine: SearchEngine,
         test_telemetry: MagicMock,
         owner_auth_header,
-    ):
+    ) -> None:
         dataset = await DatasetFactory.create()
-        await TextFieldFactory.create(dataset=dataset)
-        await RatingQuestionFactory.create(dataset=dataset)
+        await TextFieldFactory.create(dataset=dataset, required=True)
+        await RatingQuestionFactory.create(dataset=dataset, required=True)
 
         response = await async_client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=owner_auth_header)
 
@@ -3117,8 +3117,8 @@ class TestSuiteDatasets:
         mock_search_engine.create_index.side_effect = ValueError("Error creating index")
 
         dataset = await DatasetFactory.create()
-        await TextFieldFactory.create(dataset=dataset)
-        await QuestionFactory.create(settings={"type": "invalid"}, dataset=dataset)
+        await TextFieldFactory.create(dataset=dataset, required=True)
+        await QuestionFactory.create(settings={"type": "invalid"}, dataset=dataset, required=True)
 
         response = await async_client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=owner_auth_header)
 
@@ -3136,8 +3136,8 @@ class TestSuiteDatasets:
 
     async def test_publish_dataset_as_admin(self, async_client: "AsyncClient", db: "AsyncSession"):
         dataset = await DatasetFactory.create()
-        await TextFieldFactory.create(dataset=dataset)
-        await RatingQuestionFactory.create(dataset=dataset)
+        await TextFieldFactory.create(dataset=dataset, required=True)
+        await RatingQuestionFactory.create(dataset=dataset, required=True)
         admin = await AdminFactory.create(workspaces=[dataset.workspace])
 
         response = await async_client.put(
@@ -3152,7 +3152,7 @@ class TestSuiteDatasets:
 
     async def test_publish_dataset_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
         dataset = await DatasetFactory.create()
-        await QuestionFactory.create(dataset=dataset)
+        await QuestionFactory.create(dataset=dataset, required=True)
         annotator = await AnnotatorFactory.create(workspaces=[dataset.workspace])
 
         response = await async_client.put(
@@ -3178,24 +3178,26 @@ class TestSuiteDatasets:
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
-        await RatingQuestionFactory.create(dataset=dataset)
+        await TextFieldFactory.create(dataset=dataset, required=False)
+        await TextQuestionFactory.create(dataset=dataset, required=True)
 
         response = await async_client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=owner_auth_header)
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Dataset cannot be published without fields"}
+        assert response.json() == {"detail": "Dataset cannot be published without required fields"}
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     async def test_publish_dataset_without_questions(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
-        await TextFieldFactory.create(dataset=dataset)
+        await TextFieldFactory.create(dataset=dataset, required=True)
+        await TextQuestionFactory.create(dataset=dataset, required=False)
 
         response = await async_client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=owner_auth_header)
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Dataset cannot be published without questions"}
+        assert response.json() == {"detail": "Dataset cannot be published without required questions"}
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     async def test_publish_dataset_with_nonexistent_dataset_id(

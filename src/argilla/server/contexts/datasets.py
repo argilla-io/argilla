@@ -93,13 +93,13 @@ async def create_dataset(db: "AsyncSession", dataset_create: DatasetCreate):
     )
 
 
-async def _count_fields_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
-    result = await db.execute(select(func.count(Field.id)).filter_by(dataset_id=dataset_id))
+async def _count_required_fields_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
+    result = await db.execute(select(func.count(Field.id)).filter_by(dataset_id=dataset_id, required=True))
     return result.scalar()
 
 
-async def _count_questions_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
-    result = await db.execute(select(func.count(Question.id)).filter_by(dataset_id=dataset_id))
+async def _count_required_questions_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
+    result = await db.execute(select(func.count(Question.id)).filter_by(dataset_id=dataset_id, required=True))
     return result.scalar()
 
 
@@ -107,11 +107,11 @@ async def publish_dataset(db: "AsyncSession", search_engine: SearchEngine, datas
     if dataset.is_ready:
         raise ValueError("Dataset is already published")
 
-    if await _count_fields_by_dataset_id(db, dataset.id) == 0:
-        raise ValueError("Dataset cannot be published without fields")
+    if await _count_required_fields_by_dataset_id(db, dataset.id) == 0:
+        raise ValueError("Dataset cannot be published without required fields")
 
-    if await _count_questions_by_dataset_id(db, dataset.id) == 0:
-        raise ValueError("Dataset cannot be published without questions")
+    if await _count_required_questions_by_dataset_id(db, dataset.id) == 0:
+        raise ValueError("Dataset cannot be published without required questions")
 
     async with db.begin_nested():
         dataset = await dataset.update(db, status=DatasetStatus.ready, autocommit=False)

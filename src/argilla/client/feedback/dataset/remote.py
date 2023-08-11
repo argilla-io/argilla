@@ -20,7 +20,10 @@ from tqdm import trange
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE, PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.schemas.records import FeedbackRecord, RemoteFeedbackRecord
+from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
+from argilla.client.sdk.v1.records import api as records_api_v1
+from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -170,13 +173,15 @@ class RemoteFeedbackRecords:
 
     def add(
         self,
-        records: List[FeedbackRecord],
+        records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
         show_progress: bool = True,
     ) -> None:
         """Pushes a list of `FeedbackRecord`s to Argilla.
 
         Args:
-            records: A list of `FeedbackRecord`s to push to Argilla.
+            records: can be a single `FeedbackRecord`, a list of `FeedbackRecord`,
+                a single dictionary, or a list of dictionaries. If a dictionary is provided,
+                it will be converted to a `FeedbackRecord` internally.
             show_progress: Whether to show a `tqdm` progress bar while pushing the records.
 
         Raises:
@@ -199,6 +204,24 @@ class RemoteFeedbackRecords:
                 id=self._dataset._id,
                 records=records_batch,
             )
+
+    def delete(
+        self,
+        records: List[RemoteFeedbackRecord],
+    ) -> None:
+        """Deletes a list of `RemoteFeedbackRecord`s from Argilla.
+
+        Args:
+            records: A list of `RemoteFeedbackRecord`s to delete from Argilla.
+
+        Raises:
+            RuntimeError: If the deletion of the records from Argilla fails.
+        """
+        for record in records:
+            try:
+                records_api_v1.delete_record(client=self._dataset._client, id=record.id)
+            except Exception as e:
+                raise RuntimeError(f"Failed to delete record with id {record.id} from Argilla.") from e
 
 
 class RemoteFeedbackDataset(FeedbackDatasetBase):
@@ -346,7 +369,9 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
             questions=self.questions,
             guidelines=self.guidelines,
         )
-        instance.add_records([record.dict(exclude={"client", "name2id"}) for record in self._records])
+        instance.add_records(
+            [record.dict(exclude={"client", "name2id", "id"}, exclude_none=True) for record in self._records]
+        )
         return instance
 
     def add_records(
@@ -357,8 +382,9 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         """Adds the given records to the dataset and pushes those to Argilla.
 
         Args:
-            records: the records to add to the dataset. Can be a single record, a list
-                of records or a dictionary with the fields of the record.
+            records: can be a single `FeedbackRecord`, a list of `FeedbackRecord`,
+                a single dictionary, or a list of dictionaries. If a dictionary is provided,
+                it will be converted to a `FeedbackRecord` internally.
 
         Raises:
             ValueError: if the given records are an empty list.
@@ -367,3 +393,31 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
             ValueError: if the given records do not match the expected schema.
         """
         self._records.add(records=records, show_progress=show_progress)
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def delete_records(self, records: Union["RemoteFeedbackRecord", List["RemoteFeedbackRecord"]]) -> None:
+        """Deletes the given records from the dataset in Argilla.
+
+        Args:
+            records: the records to delete from the dataset. Can be a single record or a list
+                of records. But those need to be previously pushed to Argilla, otherwise
+                they won't be deleted.
+
+        Raises:
+            RuntimeError: If the deletion of the records from Argilla fails.
+        """
+        self._records.delete(records=[records] if not isinstance(records, list) else records)
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def delete(self) -> None:
+        """Deletes the current `FeedbackDataset` from Argilla. This method is just working
+        if the user has either `owner` or `admin` role.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+            RuntimeError: if the `FeedbackDataset` cannot be deleted from Argilla.
+        """
+        try:
+            datasets_api_v1.delete_dataset(client=self._client, id=self.id)
+        except Exception as e:
+            raise RuntimeError(f"Failed while deleting the `FeedbackDataset` from Argilla with exception: {e}") from e
