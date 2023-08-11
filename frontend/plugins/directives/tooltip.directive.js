@@ -244,10 +244,12 @@ const initTooltipPosition = (
   const margin = 8;
   switch (tooltipPosition.toUpperCase()) {
     case TOOLTIP_DIRECTION.BOTTOM:
-      tooltip.style.top = `${elementOffset.y + elementOffset.height + margin
-        }px`;
-      tooltip.style.left = `${elementOffset.left - width / 2 + elementOffset.width / 2
-        }px`;
+      tooltip.style.top = `${
+        elementOffset.y + elementOffset.height + margin
+      }px`;
+      tooltip.style.left = `${
+        elementOffset.left - width / 2 + elementOffset.width / 2
+      }px`;
       break;
     default:
     // tooltip direction is unknown
