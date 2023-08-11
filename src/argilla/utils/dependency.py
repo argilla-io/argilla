@@ -16,7 +16,7 @@ import functools
 import operator
 import re
 import sys
-from typing import Callable, Optional, TypeVar
+from typing import Callable, Optional, TypeVar, Union, List
 
 if sys.version_info >= (3, 10):
     from typing import ParamSpec
@@ -63,21 +63,28 @@ def _compare_versions(
         )
 
 
-def require_version(requirement: str, func_name: Optional[str] = None) -> None:
+def require_version(requirement: Union[str, List[str]], func_name: Optional[str] = None) -> None:
     """
     Perform a runtime check of the dependency versions, using the exact same syntax used by pip.
     The installed module version comes from the *site-packages* dir via *importlib_metadata*.
 
     Args:
-        requirement (`str`): pip style definition, e.g.,  "tokenizers==0.9.4", "tqdm>=4.27", "numpy"
+        requirement (`str` or `List[str]`): pip style definition, e.g.,  "tokenizers==0.9.4", "tqdm>=4.27", "numpy"
         func_name (`str`, *optional*): what suggestion to print in case of requirements not being met
 
     Example:
     ```python
     require_version("pandas>1.1.2")
     require_version("datasets>1.17.0", "from_datasets")
+    require_version(["pandas>1.1.2", "datasets>1.17.0"])
     ```
     """
+
+    if isinstance(requirement, list):
+        if len(requirement) == 0:
+            return
+        require_version(requirement[0], func_name=func_name)
+        return require_version(requirement[1:], func_name=func_name)
 
     # non-versioned check
     if re.match(r"^[\w_\-\d]+$", requirement):
@@ -130,7 +137,7 @@ _P = ParamSpec("_P")
 _R = TypeVar("_R")
 
 
-def requires_version(requirement: str) -> Callable[[Callable[_P, _R]], Callable[_P, _R]]:
+def requires_version(requirement: Union[str, List[str]]) -> Callable[[Callable[_P, _R]], Callable[_P, _R]]:
     """Decorator variant of `require_version`.
     Perform a runtime check of the dependency versions, using the exact same syntax used by pip.
     The installed module version comes from the *site-packages* dir via *importlib_metadata*.
