@@ -16,8 +16,6 @@ These are the section headers that we use:
 
 ## [Unreleased]
 
-### Fixed
-
 ### Added
 
 - Added `PATCH /api/v1/fields/{field_id}` endpoint to update the field title and markdown settings ([#3421](https://github.com/argilla-io/argilla/pull/3421)).
