@@ -127,6 +127,6 @@ QuestionSettingsUpdate = Annotated[
 class QuestionUpdate(UpdateSchema):
     title: Optional[str]
     description: Optional[str]
-    settings: Optional[QuestionSettingsUpdate]
+    settings: QuestionSettingsUpdate
 
-    __non_nullable_fields__ = {"title", "settings"}
+    __non_nullable_fields__ = {"title"}
