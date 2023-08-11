@@ -11,3 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+from typing import Any, Dict, Optional
+
+
+def title_must_have_value(cls, v: Optional[str], values: Dict[str, Any]) -> str:
+    if not v:
+        # If `name` doesn't pass the regex validation, then `values` won't have it
+        name = values.get("name")
+        if name:
+            return name.capitalize()
+    return v

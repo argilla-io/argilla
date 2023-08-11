@@ -114,8 +114,8 @@ async def test_delete_dataset(role: UserRole) -> None:
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
 async def test_publish_dataset(role: UserRole) -> None:
-    text_field = await TextFieldFactory.create()
-    rating_question = await RatingQuestionFactory.create()
+    text_field = await TextFieldFactory.create(required=True)
+    rating_question = await RatingQuestionFactory.create(required=True)
     dataset = await DatasetFactory.create(fields=[text_field], questions=[rating_question])
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 

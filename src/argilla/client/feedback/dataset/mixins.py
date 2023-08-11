@@ -192,8 +192,19 @@ class ArgillaToFromMixin:
             client=httpx_client, id=argilla_id, show_progress=show_progress, question_mapping=question_name2id
         )
 
-        self.__class__ = RemoteFeedbackDataset
-        self.__init__(
+        warnings.warn(
+            "Calling `push_to_argilla` no longer implies that the `FeedbackDataset` can"
+            " be updated in Argilla. If you want to push a `FeedbackDataset` and then"
+            " update it in Argilla, you need to catch the returned object and use it"
+            " instead: `remote_ds = ds.push_to_argilla(...)`. Otherwise, you can just"
+            " call `push_to_argilla` and then `from_argilla` to retrieve the"
+            " `FeedbackDataset` from Argilla, so the current `FeedbackDataset` can be"
+            f" retrieved as `FeedbackDataset.from_argilla(id='{argilla_id}')`.",
+            DeprecationWarning,
+            stacklevel=1,
+        )
+
+        return RemoteFeedbackDataset(
             client=httpx_client,
             id=argilla_id,
             name=name,
@@ -202,7 +213,6 @@ class ArgillaToFromMixin:
             questions=questions,
             guidelines=self.guidelines,
         )
-        return self
 
     @staticmethod
     def __get_fields(client: "httpx.Client", id: UUID) -> List["AllowedFieldTypes"]:
