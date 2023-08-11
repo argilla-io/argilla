@@ -26,5 +26,4 @@ python:
        extra_requirements:
        - server
        - postgresql
-       - integrations
        - listeners
