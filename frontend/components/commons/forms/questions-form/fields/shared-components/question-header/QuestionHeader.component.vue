@@ -99,7 +99,6 @@ span {
   height: 20px;
   margin: 0;
   padding: 0;
-  overflow: inherit;
   vertical-align: middle;
   &[data-title] {
     position: relative;
