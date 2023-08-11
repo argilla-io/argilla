@@ -14,7 +14,9 @@ These are the section headers that we use:
 * "Security" in case of vulnerabilities.
 -->
 
-## [Unreleased]
+## [Unreleased]()
+
+## [1.14.0](https://github.com/argilla-io/argilla/compare/v1.13.3...v1.14.0)
 
 ### Added
 
@@ -32,12 +34,11 @@ These are the section headers that we use:
 - Added `ArgillaDatasetMixin` to detach the Argilla-related functionality from the `FeedbackDataset` ([#3427](https://github.com/argilla-io/argilla/pull/3427))
 - Moved `FeedbackDataset`-related `pydantic.BaseModel` schemas to `argilla.client.feedback.schemas` instead, to be better structured and more scalable and maintainable ([#3427](https://github.com/argilla-io/argilla/pull/3427))
 - Update CLI to use database async connection ([#3450](https://github.com/argilla-io/argilla/pull/3450)).
-- Update alembic code to apply migrations to use database async engine ([#3450](https://github.com/argilla-io/argilla/pull/3450)).
-- Limit rating questions values to the positive range [1, 10] (Closes [#3451](https://github.com/argilla-io/argilla/issues/3451)).
+- Limit rating questions values to the positive range [1, 10] ([#3451](https://github.com/argilla-io/argilla/issues/3451)).
 - Updated `POST /api/users` endpoint to be able to provide a list of workspace names to which the user should be linked to ([#3462](https://github.com/argilla-io/argilla/pull/3462)).
 - Updated Python client `User.create` method to be able to provide a list of workspace names to which the user should be linked to ([#3462](https://github.com/argilla-io/argilla/pull/3462)).
-- Updated `GET /api/v1/me/datasets/{dataset_id}/records` endpoint to allow getting records matching one of the response statuses provided via query param.([#3359](https://github.com/argilla-io/argilla/pull/3359)).
-- Updated `POST /api/v1/me/datasets/{dataset_id}/records` endpoint to allow searching records matching one of the response statuses provided via query param.([#3359](https://github.com/argilla-io/argilla/pull/3359)).
+- Updated `GET /api/v1/me/datasets/{dataset_id}/records` endpoint to allow getting records matching one of the response statuses provided via query param ([#3359](https://github.com/argilla-io/argilla/pull/3359)).
+- Updated `POST /api/v1/me/datasets/{dataset_id}/records` endpoint to allow searching records matching one of the response statuses provided via query param ([#3359](https://github.com/argilla-io/argilla/pull/3359)).
 - Updated `SearchEngine.search` method to allow searching records matching one of the response statuses provided ([#3359](https://github.com/argilla-io/argilla/pull/3359)).
 - After calling `FeedbackDataset.push_to_argilla`, the methods `FeedbackDataset.add_records` and `FeedbackRecord.set_suggestions` will automatically call Argilla with no need of calling `push_to_argilla` explicitly ([#3465](https://github.com/argilla-io/argilla/pull/3465)).
 - Now calling `FeedbackDataset.push_to_huggingface` dumps the `responses` as a `List[Dict[str, Any]]` instead of `Sequence` to make it more readable via 🤗`datasets` ([#3539](https://github.com/argilla-io/argilla/pull/3539)).
@@ -47,8 +48,8 @@ These are the section headers that we use:
 - Fixed issue with `bool` values and `default` from Jinja2 while generating the HuggingFace `DatasetCard` from `argilla_template.md` ([#3499](https://github.com/argilla-io/argilla/pull/3499)).
 - Fixed `DatasetConfig.from_yaml` which was failing when calling `FeedbackDataset.from_huggingface` as the UUIDs cannot be deserialized automatically by `PyYAML`, so UUIDs are neither dumped nor loaded anymore ([#3502](https://github.com/argilla-io/argilla/pull/3502)).
 - Fixed an issue that didn't allow the Argilla server to work behind a proxy ([#3543](https://github.com/argilla-io/argilla/pull/3543)).
-- `TextClassificationSettings` and `TokenClassificationSettings` labels are properly parsed to strings both in the Python client and in the backend endpoint (Closes [#3495](https://github.com/argilla-io/argilla/issues/3495)).
-- Fixed `PUT /api/v1/datasets/{dataset_id}/publish` to check whether at leat one field and question has `required=True` ([#3511](https://github.com/argilla-io/argilla/pull/3511)).
+- `TextClassificationSettings` and `TokenClassificationSettings` labels are properly parsed to strings both in the Python client and in the backend endpoint ([#3495](https://github.com/argilla-io/argilla/issues/3495)).
+- Fixed `PUT /api/v1/datasets/{dataset_id}/publish` to check whether at least one field and question has `required=True` ([#3511](https://github.com/argilla-io/argilla/pull/3511)).
 - Fixed `FeedbackDataset.from_huggingface` as `suggestions` were being lost when there were no `responses` ([#3539](https://github.com/argilla-io/argilla/pull/3539)).
 - Fixed `QuestionSchema` and `FieldSchema` not validating `name` attribute ([#3550](https://github.com/argilla-io/argilla/pull/3550)).
 
