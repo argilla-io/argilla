@@ -9,10 +9,7 @@
         >
           <div class="settings__edition-form__name">
             <h4 class="--body1 --medium --capitalized" v-text="question.name" />
-            <BaseBadge
-              class="--capitalized"
-              :text="getDisplayTextType(question)"
-            />
+            <BaseBadge class="--capitalized" :text="`${$t(question.type)}`" />
           </div>
 
           <Validation
