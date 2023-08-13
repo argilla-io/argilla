@@ -49,7 +49,7 @@ def _compare_versions(
     want_version: Optional[str],
     requirement: str,
     package: str,
-    func_name: Optional[str],
+    fn_name: Optional[str],
 ):
     if got_version is None or want_version is None:
         raise ValueError(
@@ -58,12 +58,12 @@ def _compare_versions(
         )
     if not ops[op](version.parse(got_version), version.parse(want_version)):
         raise ImportError(
-            f"{requirement} must be installed{f' to use `{func_name}`' if func_name else ''}, but found {package}=={got_version}."
+            f"{requirement} must be installed{f' to use `{fn_name}`' if fn_name else ''}, but found {package}=={got_version}."
             f" You can install a supported version of '{package}' with this command: `pip install -U {requirement}`"
         )
 
 
-def require_dependencies(requirements: Union[str, List[str]], func_name: Optional[str] = None) -> None:
+def require_dependencies(requirements: Union[str, List[str]], fn_name: Optional[str] = None) -> None:
     """
     Perform a runtime check of the dependency versions, using the exact same syntax used by pip.
     The installed module version comes from the *site-packages* dir via *importlib_metadata*.
@@ -83,8 +83,8 @@ def require_dependencies(requirements: Union[str, List[str]], func_name: Optiona
     if isinstance(requirements, list):
         if len(requirements) == 0:
             return
-        require_dependencies(requirements[0], func_name=func_name)
-        return require_dependencies(requirements[1:], func_name=func_name)
+        require_dependencies(requirements[0], func_name=fn_name)
+        return require_dependencies(requirements[1:], func_name=fn_name)
 
     # non-versioned check
     if re.match(r"^[\w_\-\d]+$", requirements):
@@ -115,7 +115,7 @@ def require_dependencies(requirements: Union[str, List[str]], func_name: Optiona
     if package == "python":
         got_version = ".".join([str(x) for x in sys.version_info[:3]])
         for op, want_version in wanted.items():
-            _compare_versions(op, got_version, want_version, requirements, package, func_name=func_name)
+            _compare_versions(op, got_version, want_version, requirements, package, fn_name=fn_name)
         return
 
     # check if any version is installed
@@ -123,14 +123,14 @@ def require_dependencies(requirements: Union[str, List[str]], func_name: Optiona
         got_version = importlib_metadata.version(package)
     except importlib_metadata.PackageNotFoundError:
         raise ModuleNotFoundError(
-            f"'{package}' must be installed{f' to use `{func_name}`' if func_name else ''}! You can"
+            f"'{package}' must be installed{f' to use `{fn_name}`' if fn_name else ''}! You can"
             f" install '{package}' with this command: `pip install {requirements}`"
         )
 
     # check that the right version is installed if version number or a range was provided
     if want_version is not None:
         for op, want_version in wanted.items():
-            _compare_versions(op, got_version, want_version, requirements, package, func_name=func_name)
+            _compare_versions(op, got_version, want_version, requirements, package, fn_name=fn_name)
 
 
 _P = ParamSpec("_P")
