@@ -16,7 +16,7 @@ import functools
 import operator
 import re
 import sys
-from typing import Callable, Optional, TypeVar, Union, List
+from typing import Callable, List, Optional, TypeVar, Union
 
 if sys.version_info >= (3, 10):
     from typing import ParamSpec
@@ -69,7 +69,7 @@ def require_dependencies(requirements: Union[str, List[str]], fn_name: Optional[
     The installed module version comes from the *site-packages* dir via *importlib_metadata*.
 
     Args:
-        requirements (`str` or `List[str]`): pip style definition, e.g.,  "tokenizers==0.9.4", "tqdm>=4.27", "numpy"
+        requirements: pip style definition of dependencies, e.g. "tokenizers==0.9.4", "tqdm>=4.27", "numpy". Can either be a single dependency or a list of dependencies.
         func_name (`str`, *optional*): what suggestion to print in case of requirements not being met
 
     Example:
