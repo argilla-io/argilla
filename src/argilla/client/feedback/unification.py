@@ -49,7 +49,9 @@ class UnifiedValueSchema(ValueSchema):
 
 
 class RatingQuestionStrategyMixin:
-    def unify_responses(self, records: List[FeedbackRecord], question: Union["RatingQuestionStrategy", "RankingQuestionStrategy"]):
+    def unify_responses(
+        self, records: List[FeedbackRecord], question: Union["RatingQuestionStrategy", "RankingQuestionStrategy"]
+    ):
         """
         The function `unify_responses` takes a list of feedback records and a rating question, and
         returns a unified value based on the specified unification method.
