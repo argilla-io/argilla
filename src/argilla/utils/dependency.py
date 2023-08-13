@@ -63,7 +63,7 @@ def _compare_versions(
         )
 
 
-def require_version(requirement: Union[str, List[str]], func_name: Optional[str] = None) -> None:
+def require_dependencies(requirement: Union[str, List[str]], func_name: Optional[str] = None) -> None:
     """
     Perform a runtime check of the dependency versions, using the exact same syntax used by pip.
     The installed module version comes from the *site-packages* dir via *importlib_metadata*.
@@ -74,17 +74,17 @@ def require_version(requirement: Union[str, List[str]], func_name: Optional[str]
 
     Example:
     ```python
-    require_version("pandas>1.1.2")
-    require_version("datasets>1.17.0", "from_datasets")
-    require_version(["pandas>1.1.2", "datasets>1.17.0"])
+    require_dependencies("pandas>1.1.2")
+    require_dependencies("datasets>1.17.0", "from_datasets")
+    require_dependencies(["pandas>1.1.2", "datasets>1.17.0"])
     ```
     """
 
     if isinstance(requirement, list):
         if len(requirement) == 0:
             return
-        require_version(requirement[0], func_name=func_name)
-        return require_version(requirement[1:], func_name=func_name)
+        require_dependencies(requirement[0], func_name=func_name)
+        return require_dependencies(requirement[1:], func_name=func_name)
 
     # non-versioned check
     if re.match(r"^[\w_\-\d]+$", requirement):
