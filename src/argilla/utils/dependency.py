@@ -69,7 +69,7 @@ def require_version(requirement: Union[str, List[str]], func_name: Optional[str]
     The installed module version comes from the *site-packages* dir via *importlib_metadata*.
 
     Args:
-        requirement (`str` or `List[str]`): pip style definition, e.g.,  "tokenizers==0.9.4", "tqdm>=4.27", "numpy"
+        requirements: pip style definition of dependencies, e.g. "tokenizers==0.9.4", "tqdm>=4.27", "numpy". Can either be a single dependency or a list of dependencies.
         func_name (`str`, *optional*): what suggestion to print in case of requirements not being met
 
     Example:
