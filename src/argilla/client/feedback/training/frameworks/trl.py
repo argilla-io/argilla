@@ -227,11 +227,10 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
                 raise ValueError(
                     "To train a PPO model, you need to specify the following arguments: length_sampler_kwargs, generation_kwargs, reward_model."
                 )
-            else:
-                if self.training_args_kwargs["reward_model"] is None:
-                    raise ValueError(
-                        "To train a PPO model, you need to specify a reward model as text-classification pipeline."
-                    )
+            elif self.training_args_kwargs["reward_model"] is None:
+                raise ValueError(
+                    'To train a PPO model, you need to specify a reward model as text-classification pipeline via `trainer.update_config(reward_model="...")`'
+                )
 
         from transformers import TrainingArguments
 
@@ -332,7 +331,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
             generation_kwargs["pad_token_id"] = self._transformers_tokenizer.eos_token_id
             reward_model = self.training_args_kwargs["reward_model"]
 
-            for _, batch in tqdm(enumerate(self._trainer.dataloader)):
+            for batch in tqdm(self._trainer.dataloader):
                 query_tensors = batch["input_ids"]
 
                 #### Get response from SFT
