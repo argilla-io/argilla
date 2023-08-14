@@ -171,11 +171,12 @@ def test_prepare_for_training_ppo(
     task = TrainingTask.for_proximal_policy_optimization(text=dataset.fields[0])
     train_dataset = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False)
     assert isinstance(train_dataset, Dataset)
-    assert len(train_dataset) == 6
+    # 2 because duplicates are dropped. Otherwise it would be 10
+    assert len(train_dataset) == 2
     train_dataset_dict = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False, train_size=0.5)
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
-    assert len(train_dataset_dict["train"]) == 3
+    assert len(train_dataset_dict["train"]) == 1
 
     trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2", fetch_records=False)
     trainer.update_config(policy=PPOConfig(batch_size=1, ppo_epochs=1), reward_model=reward_model)
