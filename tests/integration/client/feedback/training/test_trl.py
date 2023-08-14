@@ -179,16 +179,16 @@ def test_prepare_for_training_ppo(
     assert len(train_dataset_dict["train"]) == 1
 
     trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2", fetch_records=False)
-    trainer.update_config(policy=PPOConfig(batch_size=1, ppo_epochs=1), reward_model=reward_model)
-    assert trainer._trainer.trainer_kwargs["policy"].batch_size == 1
-    trainer.update_config(generation_kwargs={"min_length": 10, "top_k": 0.0, "top_p": 1.0, "do_sample": True})
-    assert trainer._trainer.training_args_kwargs["generation_kwargs"]["min_length"] == 10
+    trainer.update_config(config=PPOConfig(batch_size=1, ppo_epochs=1), reward_model=reward_model)
+    assert trainer._trainer.trainer_kwargs["config"].batch_size == 1
+    trainer.update_config(generation_kwargs={"top_k": 0.0, "top_p": 1.0, "do_sample": True})
+    assert trainer._trainer.training_args_kwargs["generation_kwargs"]["top_p"] == 1.0
     train_with_cleanup(trainer, "tmp_trl_dir")
 
     eval_trainer = ArgillaTrainer(
         dataset, task, framework="trl", model="sshleifer/tiny-gpt2", fetch_records=False, train_size=0.5
     )
-    trainer.update_config(policy=PPOConfig(batch_size=1, ppo_epochs=1), reward_model=reward_model)
+    eval_trainer.update_config(config=PPOConfig(batch_size=1, ppo_epochs=1), reward_model=reward_model)
     eval_trainer.update_config(max_steps=1)
     train_with_cleanup(eval_trainer, "tmp_trl_dir")
 
