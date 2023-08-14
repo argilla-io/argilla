@@ -817,7 +817,8 @@ class TrainingTaskMapping(TrainingTask, RenamedDeprecationMixin):
 
     @classmethod
     def for_proximal_policy_optimization(cls, *args, **kwargs) -> TrainingTaskForPPO:
-        return super().for_proximal_policy_optimization(cls, *arg, **kwargs)
+        cls.warn()
+        return super().for_proximal_policy_optimization(cls, *args, **kwargs)
 
     @classmethod
     def for_direct_preference_optimization(cls, *args, **kwargs) -> TrainingTaskForDPO:
