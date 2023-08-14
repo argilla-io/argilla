@@ -26,6 +26,9 @@ from argilla.training.utils import filter_allowed_args
 from argilla.utils.dependency import require_version
 
 if TYPE_CHECKING:
+    import transformers
+    from trl import PPOConfig
+
     from argilla.client.feedback.dataset import FeedbackDataset
 
 
