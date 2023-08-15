@@ -216,8 +216,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         """
         if isinstance(self._task, TrainingTaskForPPO):
             if not all(
-                x in self.training_args_kwargs
-                for x in ["length_sampler_kwargs", "generation_kwargs", "reward_model", "config"]
+                x in self.training_args_kwargs for x in ["length_sampler_kwargs", "generation_kwargs", "reward_model"]
             ):
                 raise ValueError(
                     "To train a PPO model, you need to specify the following arguments via `trainer.update_config`: length_sampler_kwargs, generation_kwargs, reward_model."
