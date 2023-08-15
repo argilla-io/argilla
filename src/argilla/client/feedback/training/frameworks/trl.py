@@ -216,7 +216,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         """
         if isinstance(self._task, TrainingTaskForPPO):
             if not all(
-                lambda x: x in self.training_args_kwargs
+                x in self.training_args_kwargs
                 for x in ["length_sampler_kwargs", "generation_kwargs", "reward_model", "config"]
             ):
                 raise ValueError(
