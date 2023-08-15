@@ -136,11 +136,6 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
 
         self.init_training_args()
 
-        if isinstance(self._task, TrainingTaskForPPO):
-            self._logger.warning(
-                "The PPOTrainer must be initialized by passing `reward_model`, `length_sampler_kwargs`, `generation_kwargs` as kwargs to the `update_config()`-method."
-            )
-
     def init_training_args(self) -> None:
         """
         Initializes the training arguments.
