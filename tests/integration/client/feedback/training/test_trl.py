@@ -106,7 +106,7 @@ def test_prepare_for_training_rm(
     )
     dataset.add_records(records=feedback_dataset_records * 2)
 
-    def chosen_rejected_func(sample: Dict[str, Any]):
+    def formatting_func(sample: Dict[str, Any]):
         # The FeedbackDataset isn't really set up for RM, so we'll just use an arbitrary example here
         labels = [
             annotation["value"]
@@ -122,7 +122,7 @@ def test_prepare_for_training_rm(
             elif labels[0] == "c":
                 return [(sample["text"], sample["text"][:5]), (sample["text"], sample["text"][:5])]
 
-    task = TrainingTask.for_reward_modelling(chosen_rejected_func)
+    task = TrainingTask.for_reward_modelling(formatting_func)
     train_dataset = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False)
     assert isinstance(train_dataset, Dataset)
     assert len(train_dataset) == 6
@@ -212,7 +212,7 @@ def test_prepare_for_training_dpo(
     )
     dataset.add_records(records=feedback_dataset_records * 2)
 
-    def prompt_chosen_rejected_func(sample: Dict[str, Any]):
+    def formatting_func(sample: Dict[str, Any]):
         # The FeedbackDataset isn't really set up for DPO, so we'll just use an arbitrary example here
         labels = [
             annotation["value"]
@@ -231,7 +231,7 @@ def test_prepare_for_training_dpo(
                     (sample["text"][::-1], sample["text"], sample["text"][:5]),
                 ]
 
-    task = TrainingTask.for_direct_preference_optimization(prompt_chosen_rejected_func)
+    task = TrainingTask.for_direct_preference_optimization(formatting_func)
     train_dataset = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False)
     assert isinstance(train_dataset, Dataset)
     assert len(train_dataset) == 6
