@@ -243,11 +243,11 @@ class TrainingTaskMappingForTextClassification(BaseModel, TrainingData):
 
     def __repr__(self) -> str:
         return (
-            "TrainingTaskMappingForTextClassification",
-            f"\n\t text={self.text.name}",
-            f"\n\t label={self.label.question.name}",
-            f"\n\t multi_label={self.__multi_label__}",
-            f"\n\t all_labels={self.__all_labels__}",
+            "TrainingTaskMappingForTextClassification"
+            f"\n\t text={self.text.name}"
+            f"\n\t label={self.label.question.name}"
+            f"\n\t multi_label={self.__multi_label__}"
+            f"\n\t all_labels={self.__all_labels__}"
         )
 
     @requires_version("datasets>1.17.0")
