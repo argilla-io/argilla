@@ -23,6 +23,9 @@
 
 <script>
 import "assets/icons/unavailable";
+const TAB_MARKER = ":::{tab-item} ";
+const TAB_ITEM_FINISH_MARKER = ":::";
+const TAB_FINISH_MARKER = "::::";
 
 export default {
   data() {
@@ -42,12 +45,17 @@ export default {
 
     const startPage = await folderContent("./start_page.md");
 
-    const tabs = startPage.body.split(":::{tab-item} ");
+    const tabs = startPage.body.split(TAB_MARKER);
     tabs.shift();
 
     for (const tab of tabs) {
       const tabName = tab.split("\n")[0].trim();
-      const code = tab.replace(tabName, "").replace(":::", "").trim();
+
+      const code = tab
+        .replace(tabName, "")
+        .replace(TAB_ITEM_FINISH_MARKER, "")
+        .replace(TAB_FINISH_MARKER, "")
+        .trim();
 
       this.content.tabs.push({
         id: tabName.trim().toLowerCase(),

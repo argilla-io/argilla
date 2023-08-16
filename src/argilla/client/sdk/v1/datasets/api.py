@@ -19,14 +19,11 @@ from uuid import UUID
 import httpx
 
 from argilla.client.sdk.commons.errors_handler import handle_response_error
-from argilla.client.sdk.commons.models import (
-    ErrorMessage,
-    HTTPValidationError,
-    Response,
-)
+from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
 from argilla.client.sdk.v1.datasets.models import (
     FeedbackDatasetModel,
     FeedbackFieldModel,
+    FeedbackMetricsModel,
     FeedbackQuestionModel,
     FeedbackRecordsModel,
     FeedbackSuggestionModel,
@@ -34,10 +31,7 @@ from argilla.client.sdk.v1.datasets.models import (
 
 
 def create_dataset(
-    client: httpx.Client,
-    name: str,
-    workspace_id: UUID,
-    guidelines: Optional[str] = None,
+    client: httpx.Client, name: str, workspace_id: UUID, guidelines: Optional[str] = None
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
     """Sends a POST request to `/api/v1/datasets` endpoint to create a new `FeedbackDataset`.
 
@@ -71,8 +65,7 @@ def create_dataset(
 
 
 def get_dataset(
-    client: httpx.Client,
-    id: UUID,
+    client: httpx.Client, id: UUID
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/v1/datasets/{id}` endpoint to retrieve a `FeedbackDataset`.
 
@@ -99,10 +92,7 @@ def get_dataset(
     return handle_response_error(response)
 
 
-def delete_dataset(
-    client: httpx.Client,
-    id: UUID,
-) -> Response[Union[ErrorMessage, HTTPValidationError]]:
+def delete_dataset(client: httpx.Client, id: UUID) -> Response[Union[ErrorMessage, HTTPValidationError]]:
     """Sends a DELETE request to `/api/v1/datasets/{id}` endpoint to delete a `FeedbackDataset`.
 
     Args:
@@ -126,8 +116,7 @@ def delete_dataset(
 
 
 def publish_dataset(
-    client: httpx.Client,
-    id: UUID,
+    client: httpx.Client, id: UUID
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
     """Sends a PUT request to `/api/v1/datasets/{id}/publish` endpoint to publish a `FeedbackDataset`.
     Publishing in Argilla means setting the status of the dataset from `draft` to `ready`, so that
@@ -184,10 +173,7 @@ def list_datasets(
 
 
 def get_records(
-    client: httpx.Client,
-    id: UUID,
-    offset: int = 0,
-    limit: int = 50,
+    client: httpx.Client, id: UUID, offset: int = 0, limit: int = 50
 ) -> Response[Union[FeedbackRecordsModel, ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/v1/datasets/{id}/records` endpoint to retrieve a list of `FeedbackTask` records.
 
@@ -219,9 +205,7 @@ def get_records(
 
 
 def add_records(
-    client: httpx.Client,
-    id: UUID,
-    records: List[Dict[str, Any]],
+    client: httpx.Client, id: UUID, records: List[Dict[str, Any]]
 ) -> Response[Union[ErrorMessage, HTTPValidationError]]:
     """Sends a POST request to `/api/v1/datasets/{id}/records` endpoint to add a list of `FeedbackTask` records.
 
@@ -274,8 +258,7 @@ def add_records(
 
 
 def get_fields(
-    client: httpx.Client,
-    id: UUID,
+    client: httpx.Client, id: UUID
 ) -> Response[Union[List[FeedbackFieldModel], ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/v1/datasets/{id}/fields` endpoint to retrieve a list of `FeedbackTask` fields.
 
@@ -303,9 +286,7 @@ def get_fields(
 
 
 def add_field(
-    client: httpx.Client,
-    id: UUID,
-    field: Dict[str, Any],
+    client: httpx.Client, id: UUID, field: Dict[str, Any]
 ) -> Response[Union[FeedbackFieldModel, ErrorMessage, HTTPValidationError]]:
     """Sends a POST request to `/api/v1/datasets/{id}/fields` endpoint to add a `FeedbackTask` field.
 
@@ -334,8 +315,7 @@ def add_field(
 
 
 def get_questions(
-    client: httpx.Client,
-    id: UUID,
+    client: httpx.Client, id: UUID
 ) -> Response[Union[List[FeedbackQuestionModel], ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/v1/datasets/{id}/questions` endpoint to retrieve a
     list of `FeedbackTask` questions.
@@ -364,9 +344,7 @@ def get_questions(
 
 
 def add_question(
-    client: httpx.Client,
-    id: UUID,
-    question: Dict[str, Any],
+    client: httpx.Client, id: UUID, question: Dict[str, Any]
 ) -> Response[Union[FeedbackQuestionModel, ErrorMessage, HTTPValidationError]]:
     """Sends a POST request to `/api/v1/datasets/{id}/questions` endpoint to add a
     question to the `FeedbackDataset`.
@@ -435,6 +413,36 @@ def set_suggestion(
 
     if response.status_code in [200, 201]:
         parsed_response = FeedbackSuggestionModel(**response.json())
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+            parsed=parsed_response,
+        )
+    return handle_response_error(response)
+
+
+def get_metrics(
+    client: httpx.Client,
+    id: UUID,
+) -> Response[Union[FeedbackMetricsModel, ErrorMessage, HTTPValidationError]]:
+    """Sends a GET request to `/api/v1/datasets/{id}/metrics` endpoint to retrieve the metrics
+    of a `FeedbackDataset`.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to retrieve the metrics from.
+
+    Returns:
+        A `Response` object containing a `parsed` attribute with the parsed response if the
+        request was successful, which is a `FeedbackMetricsModel`.
+    """
+    url = f"/api/v1/me/datasets/{id}/metrics"
+
+    response = client.get(url=url)
+
+    if response.status_code == 200:
+        parsed_response = FeedbackMetricsModel(**response.json())
         return Response(
             status_code=response.status_code,
             content=response.content,

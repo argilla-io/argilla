@@ -19,11 +19,7 @@ import httpx
 
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors_handler import handle_response_error
-from argilla.client.sdk.commons.models import (
-    ErrorMessage,
-    HTTPValidationError,
-    Response,
-)
+from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
 from argilla.client.sdk.users.models import UserCreateModel, UserModel, UserRole
 
 
@@ -71,9 +67,7 @@ def whoami_httpx(client: httpx.Client) -> Response[Union[UserModel, ErrorMessage
     return handle_response_error(response)
 
 
-def list_users(
-    client: httpx.Client,
-) -> Response[Union[List[UserModel], ErrorMessage, HTTPValidationError]]:
+def list_users(client: httpx.Client) -> Response[Union[List[UserModel], ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/users` endpoint to get the list of users.
 
     Args:
@@ -105,6 +99,7 @@ def create_user(
     password: str,
     last_name: Optional[str] = None,
     role: UserRole = UserRole.annotator,
+    workspaces: Optional[List[str]] = None,
 ) -> Response[Union[UserModel, ErrorMessage, HTTPValidationError]]:
     """Sends a POST request to `/api/users` endpoint to create a new user.
 
@@ -117,6 +112,7 @@ def create_user(
             ^(?!-|_)[a-z0-9-_]+$.
         role: the role of the user. Available roles are: `admin`, and `annotator`.
         password: the password of the user. Must be a string between 8 and 100 characters.
+        workspaces: a list of workspace names to which the user will be linked to.
 
     Returns:
         A `Response` object containing a `parsed` attribute with the parsed response if
@@ -130,6 +126,7 @@ def create_user(
         username=username,
         role=role,
         password=password,
+        workspaces=workspaces,
     )
 
     response = client.post(
@@ -148,10 +145,7 @@ def create_user(
     return handle_response_error(response)
 
 
-def delete_user(
-    client: httpx.Client,
-    user_id: UUID,
-) -> Response[Union[UserModel, ErrorMessage, HTTPValidationError]]:
+def delete_user(client: httpx.Client, user_id: UUID) -> Response[Union[UserModel, ErrorMessage, HTTPValidationError]]:
     """Sends a DELETE request to `/api/users/{user_id}` endpoint to delete a user.
 
     Args:

@@ -16,16 +16,16 @@ from collections import OrderedDict
 from sqlite3 import Connection as SQLite3Connection
 from typing import TYPE_CHECKING, Generator
 
-from sqlalchemy import create_engine, event
+from sqlalchemy import event, make_url
 from sqlalchemy.engine import Engine
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 import argilla
 from argilla.server.settings import settings
 
 if TYPE_CHECKING:
-    from sqlalchemy.orm import Session
+    from sqlalchemy.ext.asyncio import AsyncSession
+
 
 ALEMBIC_CONFIG_FILE = os.path.normpath(os.path.join(os.path.dirname(argilla.__file__), "alembic.ini"))
 TAGGED_REVISIONS = OrderedDict(
@@ -46,19 +46,8 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
         cursor.close()
 
 
-engine = create_engine(settings.database_url)
-SessionLocal = sessionmaker(autocommit=False, bind=engine)
-
-async_engine = create_async_engine(settings.database_url_async)
+async_engine = create_async_engine(settings.database_url)
 AsyncSessionLocal = async_sessionmaker(autocommit=False, expire_on_commit=False, bind=async_engine)
-
-
-def get_db() -> Generator["Session", None, None]:
-    try:
-        db = SessionLocal()
-        yield db
-    finally:
-        db.close()
 
 
 async def get_async_db() -> Generator["AsyncSession", None, None]:
@@ -67,3 +56,12 @@ async def get_async_db() -> Generator["AsyncSession", None, None]:
         yield db
     finally:
         await db.close()
+
+
+def database_url_sync() -> str:
+    """
+    Returns a "sync" version of the configured database URL. This may be useful in cases we don't need
+    an asynchronous connection, like running database migration inside the alembic script.
+    """
+    database_url = make_url(settings.database_url)
+    return settings.database_url.replace(f"+{database_url.get_driver_name()}", "")

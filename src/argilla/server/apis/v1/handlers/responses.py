@@ -16,13 +16,13 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 
 from argilla.server.contexts import datasets
-from argilla.server.database import get_async_db, get_db
-from argilla.server.models import User
+from argilla.server.database import get_async_db
+from argilla.server.models import Response, User
 from argilla.server.policies import ResponsePolicyV1, authorize
-from argilla.server.schemas.v1.responses import Response, ResponseUpdate
+from argilla.server.schemas.v1.responses import Response as ResponseSchema
+from argilla.server.schemas.v1.responses import ResponseUpdate
 from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.security import auth
 
@@ -39,7 +39,7 @@ async def _get_response(db: AsyncSession, response_id: UUID) -> Response:
     return response
 
 
-@router.put("/responses/{response_id}", response_model=Response)
+@router.put("/responses/{response_id}", response_model=ResponseSchema)
 async def update_response(
     *,
     db: AsyncSession = Depends(get_async_db),
@@ -60,7 +60,7 @@ async def update_response(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
 
-@router.delete("/responses/{response_id}", response_model=Response)
+@router.delete("/responses/{response_id}", response_model=ResponseSchema)
 async def delete_response(
     *,
     db: AsyncSession = Depends(get_async_db),

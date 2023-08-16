@@ -50,6 +50,12 @@ class CRUDMixin:
         for key, value in kwargs.items():
             if not hasattr(self, key):
                 raise AttributeError(f"Model `{self.__class__.__name__}` has no attribute `{key}`")
+            # If the value is a dict, set value for each key one by one, as we want to update only the keys that are in
+            # `value` and not override the whole dict.
+            if isinstance(value, dict):
+                dict_col = getattr(self, key) or {}
+                dict_col.update(value)
+                value = dict_col
             setattr(self, key, value)
         return self
 
@@ -97,8 +103,9 @@ class CRUDMixin:
 
         # On conflict, update the columns that are upsertable (defined in `Model.__upsertable_columns__`)
         columns_to_update = {column: getattr(insert_stmt.excluded, column) for column in cls.__upsertable_columns__}
+        # onupdate for `updated_at` is not working. We need to force a new value on update
         if hasattr(cls, "updated_at"):
-            columns_to_update["updated_at"] = func.now()
+            columns_to_update["updated_at"] = datetime.utcnow()
         upsert_stmt = (
             insert_stmt.on_conflict_do_update(index_elements=constraints, set_=columns_to_update)
             .returning(cls)

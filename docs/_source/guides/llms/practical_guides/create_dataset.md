@@ -50,7 +50,7 @@ You can define your questions using the Python SDK and set up the following conf
 
 The following arguments apply to specific question types:
 
-- `values`: In the `RatingQuestion` this will be any list of unique integers that represent the options that annotators can choose from. It doesn't matter whether these are positive, negative, sequential or not. In the `RankingQuestion`, values will be a list of strings with the options they will need to rank. If you'd like the text of the options to be different in the UI and internally, you can pass a dictionary instead where the key is the internal name and the value the text to display in the UI.
+- `values`: In the `RatingQuestion` this will be any list of unique integers that represent the options that annotators can choose from. These values must be defined in the range [1, 10]. In the `RankingQuestion`, values will be a list of strings with the options they will need to rank. If you'd like the text of the options to be different in the UI and internally, you can pass a dictionary instead where the key is the internal name and the value the text to display in the UI.
 - `labels`: In `LabelQuestion` and `MultiLabelQuestion` this is a list of strings with the options for these questions. If you'd like the text of the labels to be different in the UI and internally, you can pass a dictionary instead where the key is the internal name and the value the text to display in the UI.
 - `visible_labels` (optional): In `LabelQuestion` and `MultiLabelQuestion` this is the number of labels that will be visible in the UI. By default, the UI will show 20 labels and collapse the rest. Set your preferred number to change this limit or set `visible_labels=None` to show all options.
 - `use_markdown` (optional): In `TextQuestion` define whether the field should render markdown text. Defaults to `False`.
@@ -265,14 +265,28 @@ import argilla as rg
 rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
 dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_workspace")
-
-for record in dataset.records:
-    record.set_suggestions([{"question_name": "question", "value": ...}])
-
-dataset.push_to_argilla() # No need to provide `name` and `workspace` as has been retrieved via `from_argilla` classmethod
 ```
 
+::::{tab-set}
+
+:::{tab-item} Argilla 1.14.0 or higher
+```python
+for record in dataset.records:
+    record.update(suggestions=[{"question_name": "question", "value": ...}]) # Directly pushes the update to Argilla
+```
+:::
+
+:::{tab-item} Lower than Argilla 1.14.0
+```python
+for record in dataset.records:
+    record.set_suggestions([{"question_name": "question", "value": ...}])
+dataset.push_to_argilla() # No need to provide `name` and `workspace` as has been retrieved via `from_argilla` classmethod
+```
+:::
+::::
+
 ## Add responses
+
 If your dataset includes some annotations, you can add those to the records as you create them. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered. Note that just one response with an empty `user_id` can be specified, as the first occurrence of `user_id=None` will be set to the active `user_id`, while the rest of the responses with `user_id=None` will be discarded.
 
 ::::{tab-set}
@@ -381,8 +395,19 @@ record = rg.FeedbackRecord(
 
 To import the dataset to your Argilla instance with the `FeedbackDataset.push_to_argilla()` method. Once pushed, you will be able to see your dataset in the UI.
 
+::::{tab-set}
+
+:::{tab-item} Argilla 1.14.0 or higher
+```python
+remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
+```
+:::
+
+:::{tab-item} Lower than Argilla 1.14.0
 ```python
 dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 ```
+:::
+::::
 
 Now you're ready to start [the annotation process](annotate_dataset.ipynb).

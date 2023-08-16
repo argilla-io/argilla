@@ -1,10 +1,10 @@
 # Fine-tune an LLM
 
-After [collecting the responses](/guides/llms/practical_guides/collect_responses) from our `FeedbackDataset` we can start fine-tuning our LLM. Due to the customizability of the task, this might require setting up a custom post-processing workflow but we will provide some good toy examples for the [classic LLM approaches](/guides/llms/conceptual_guides/rlhf): pre-training, supervised fine-tuning, reward modeling, and reinforcement learning.
+After [collecting the responses](./collect_responses.html) from our `FeedbackDataset` we can start fine-tuning our LLM. Due to the customizability of the task, this might require setting up a custom post-processing workflow but we will provide some good toy examples for the [classic LLM approaches](../conceptual_guides/rlhf.html): pre-training, supervised fine-tuning, reward modeling, and reinforcement learning.
 
 ## Supervised finetuning
 
-The goal of Supervised Fine Tuning (SFT) is to optimize this pre-trained model to generate the responses that users are looking for. After pre-training a causal language model, it can generate feasible human text, but it will not be able to have proper `answers` to `question` phrases posed by the user in a conversational or instruction set. Therefore, we need to collect and curate data tailored to this use case to teach the model to mimic this data. We have a section in our docs about [collecting data for this task](/guides/llms/conceptual_guides/sft.html) and there are many good [pre-trained causal language models](https://huggingface.co/models?pipeline_tag=text-generation&sort=downloads) available on Hugging Face.
+The goal of Supervised Fine Tuning (SFT) is to optimize this pre-trained model to generate the responses that users are looking for. After pre-training a causal language model, it can generate feasible human text, but it will not be able to have proper `answers` to `question` phrases posed by the user in a conversational or instruction set. Therefore, we need to collect and curate data tailored to this use case to teach the model to mimic this data. We have a section in our docs about [collecting data for this task](../conceptual_guides/sft.html) and there are many good [pre-trained causal language models](https://huggingface.co/models?pipeline_tag=text-generation&sort=downloads) available on Hugging Face.
 
 ### Data
 
@@ -69,7 +69,6 @@ This dataset only contains a single annotator response per record. We gave some 
 ```python
 import argilla as rg
 from datasets import Dataset
-
 
 feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly-15k-curated-en")
 
@@ -144,13 +143,16 @@ trainer = trlx.train('gpt2', samples=samples)
 
 AutoTrain offers an option for users who prefer a simpler and more automated approach. It offers a no-code solution for fine-tuning models wrapped and enabled by a nice [streamlit UI](https://huggingface.co/spaces/autotrain-projects/autotrain-advanced), or by a low-code option with the [AutoTrain Advanced package](https://github.com/huggingface/autotrain-advanced). This tool leverages techniques to automatically optimize the model's performance without requiring users to have extensive knowledge of reinforcement learning or coding skills. It streamlines the fine-tuning process by automatically adjusting the model's parameters and optimizing its performance based on user-provided feedback.
 
-First, export the data.
+First, export the data into CSV or any other supported format.
+
 ```python
 dataset = ...
 
 dataset.to_csv("databricks-dolly-15k-curated-en.csv", index=False)
 ```
-Second, start the UI for training.
+
+Then, go to the AutoTrain UI for training.
+
 <iframe width="100%" height="600" src="https://www.youtube.com/embed/T_Lq8Zq-pwQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
 ## RLHF
@@ -193,7 +195,6 @@ dataset
 ### Training
 
 Fine-tuning using a Reward Model can be done in different ways. We can either get the annotator to rate output completely manually, we can use a simple heuristic or we can use a stochastic preference model. Both TRL and TRLX provide decent options for incorporating rewards. The [DeepSpeed library of Microsoft](https://github.com/microsoft/DeepSpeed/tree/master/blogs/deepspeed-chat) is a worthy mention too but will not be covered in our docs.
-
 
 #### TRL
 
@@ -332,7 +333,6 @@ for epoch, batch in enumerate(ppo_trainer.dataloader):
 
 ::::
 
-
 #### TRLX
 
 [TRLX](https://github.com/CarperAI/trlx) gives the option to use a `reward function` or a `reward-labeled` dataset in combination with Proximal Policy Optimization (PPO) for the reinforcement learning step, which can be used by defining a PPO policy configuration. During this step, we infer rewards to mimic the human evaluation of generated texts. Additionally, [Hugging Face Accelerate](https://huggingface.co/docs/accelerate/index) can be used to speed up training or [Ray Tune](https://docs.ray.io/en/latest/tune/index.html) to optimize hyperparameter tuning.
@@ -344,7 +344,6 @@ config = default_ppo_config()
 config.model.model_path = 'gpt2'
 config.train.batch_size = 16
 ```
-
 
 ::::{tab-set}
 
@@ -372,11 +371,9 @@ trainer = trlx.train(
 
 :::
 
-
 :::{tab-item} reward-labeled dataset
 
-In this case, TRLX relies on reward-labeled data to infer the alignment with human preference. This is a good approach but it is not recommended to only collect these labels via human feedback because this is likely too costly to scale. Therefore, we recommend using an automated reward function or creating a reward-labeled dataset using our [roberta-base-reward-model-falcon-dolly model](https://huggingface.co/argilla/roberta-base-reward-model-falcon-dolly). For demo purposes, we now infer the rewards from the corrected response, but we can also set up [specific ranking](guides/llms/conceptual_guides/rm) datasets](guides/llms/conceptual_guides/rm) using the Argilla UI.
-```
+In this case, TRLX relies on reward-labeled data to infer the alignment with human preference. This is a good approach but it is not recommended to only collect these labels via human feedback because this is likely too costly to scale. Therefore, we recommend using an automated reward function or creating a reward-labeled dataset using our [roberta-base-reward-model-falcon-dolly model](https://huggingface.co/argilla/roberta-base-reward-model-falcon-dolly). For demo purposes, we now infer the rewards from the corrected response, but we can also set up [specific ranking](../conceptual_guides/rm.html) using the Argilla UI.
 
 ```python
 import trlx
@@ -414,7 +411,8 @@ Many training datasets for this task can be found online (e.g., [Hugging Face](h
 When it comes to pre-training an LLM, we generally do not need data of highest quality, but it is always smart to use domain-specfic data and to avoid data that might lead to undecired effect like hallucination and bias.
 ```
 
-First, create a dataset.
+First, create a `FeedbackDataset` with records.
+
 ```python
 import argilla as rg
 
@@ -422,33 +420,52 @@ import argilla as rg
 dataset = rg.FeedbackDataset(
     guidelines="Please, complete the following prompt fields with a brief text answer.",
     fields=[
-        rg.TextField(name="content"),
+        rg.TextField(name="prompt"),
     ],
+    questions=[
+        rg.TextQuestion(name="completion", title="Add a brief text answer."),
+    ]
 )
 
 # create a Feedback Records
 record = rg.FeedbackRecord(
     fields={
-        "content": "The base ingredient of paella is rice."
+        "prompt": "The base ingredient of paella is rice."
     }
 )
 
-rg.add_records([record])
-dataset.push_to_argilla(name="pre-training")
+dataset.add_records([record])
 ```
 
-Second, load the dataset from Argilla.
+Then push it to Argilla via `push_to_argilla`.
+
+::::{tab-set}
+
+:::{tab-item} Argilla 1.14.0 or higher
+```python
+remote_dataset = dataset.push_to_argilla(name="pre-training")
+```
+:::
+
+:::{tab-item} Lower than Argilla 1.14.0
+```python
+dataset.push_to_argilla(name="pre-training")
+```
+:::
+::::
+
+And, finally, load the `FeedbackDataset` from Argilla.
 
 ```python
 import argilla as rg
 from datasets import Dataset
 
-feedback = rg.FeedbackDataset.from_argilla("pre-training")
-content = {"content": [rec.get("fields").get("content") for rec in feedback]}
-dataset = Dataset.from_dict(content)
+dataset = rg.FeedbackDataset.from_argilla("pre-training")
+prompts = {"prompt": [record.fields.get("prompt") for record in dataset.records]}
+dataset = Dataset.from_dict(prompts)
 dataset
 # Dataset({
-#     features: ['content'],
+#     features: ['prompt'],
 #     num_rows: 1
 # })
 ```
@@ -456,4 +473,3 @@ dataset
 ### Training
 
 There are many ways and great packages to deal with this `pre-training` phase, but generally, NLP training frameworks like [KerasNLP](https://keras.io/keras_nlp/) and [Hugging Face](https://huggingface.co/) offer great out-of-the-box methods for training a causal language model. In our guide, we will refer to the great docs off using Hugging Face `transformers` and `datasets` library and prepare our training data in the format they require for [training a causal language model](https://huggingface.co/learn/nlp-course/chapter7/6#training-a-causal-language-model-from-scratch).
-

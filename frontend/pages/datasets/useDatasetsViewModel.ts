@@ -1,7 +1,7 @@
 import { useResolve } from "ts-injecty";
 import { ref, useFetch } from "@nuxtjs/composition-api";
 import { GetDatasetsUseCase } from "@/v1/domain/usecases/get-datasets-use-case";
-import { useDatasets } from "@/v1/infrastructure/DatasetsStorage";
+import { useDatasets } from "~/v1/infrastructure/storage/DatasetsStorage";
 
 export const useDatasetsViewModel = () => {
   const isLoadingDatasets = ref(false);

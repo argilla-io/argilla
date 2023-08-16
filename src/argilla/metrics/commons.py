@@ -71,11 +71,7 @@ def records_status(name: str, query: Optional[str] = None) -> MetricSummary:
     )
 
 
-def keywords(
-    name: str,
-    query: Optional[str] = None,
-    size: int = 20,
-) -> MetricSummary:
+def keywords(name: str, query: Optional[str] = None, size: int = 20) -> MetricSummary:
     """Computes the keywords occurrence distribution in dataset
 
     Args:
