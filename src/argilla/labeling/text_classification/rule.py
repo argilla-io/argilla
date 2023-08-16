@@ -107,7 +107,7 @@ class Rule:
         Args:
             dataset: The name of the dataset.
         """
-        records = load(name=dataset, query=self._query)
+        records = load(name=dataset, query=self._query, include_vectors=False)
 
         self._matching_ids = {record.id: None for record in records}
 

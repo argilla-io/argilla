@@ -315,7 +315,7 @@ export default {
     const appliedFilters = this.activeFilters.filter(
       (filter) => filter.values.length
     );
-    (appliedFilters || []).forEach(({ column, values }) => {
+    appliedFilters?.forEach(({ column, values }) => {
       this.$set(this.filters, column, values);
     });
   },

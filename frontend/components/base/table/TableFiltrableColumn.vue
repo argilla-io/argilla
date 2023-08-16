@@ -48,8 +48,15 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      if (this.filters[this.column.field]) {
-        this.selectedOptions = this.filters[this.column.field];
+      const filter = this.filters[this.column.field];
+      if (filter) {
+        if (filter.every(this.isObject)) {
+          this.selectedOptions = this.options.filter((option) =>
+            filter.some((f) => f.key === option.key && f.value === option.value)
+          );
+        } else {
+          this.selectedOptions = filter;
+        }
       }
     });
   },
@@ -83,7 +90,7 @@ export default {
       this.$emit("applyFilters", this.column, this.selectedOptions);
     },
     filters(val) {
-      if (!Object.keys(val).length) {
+      if (!Object.keys(val).length && this.selectedOptions.length) {
         this.selectedOptions = [];
       }
     },

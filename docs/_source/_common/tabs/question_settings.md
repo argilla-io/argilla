@@ -35,7 +35,7 @@ rg.MultiLabelQuestion(
 
 ```python
 rg.RankingQuestion(
-    name="ranking",
+    name="preference",
     title="Order replies based on your preference",
     description="1 = best, 3 = worst. Ties are allowed.",
     required=True,
@@ -50,7 +50,7 @@ rg.RankingQuestion(
 
 ```python
 rg.RatingQuestion(
-    name="rating",
+    name="quality",
     title="Rate the quality of the response:",
     description="1 = very bad - 5= very good",
     required=True,

@@ -19,11 +19,7 @@ from datasets import DatasetDict
 
 from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.base import ArgillaTrainerSkeleton
-from argilla.training.utils import (
-    _apply_column_mapping,
-    filter_allowed_args,
-    get_default_args,
-)
+from argilla.training.utils import _apply_column_mapping, filter_allowed_args, get_default_args
 from argilla.utils.dependency import require_version
 
 
@@ -31,13 +27,12 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaTransformersTrainer")
     _logger.setLevel(logging.INFO)
 
-    require_version("torch")
-    require_version("datasets")
-    require_version("transformers")
-    require_version("evaluate")
-    require_version("seqeval")
-
     def __init__(self, *args, **kwargs):
+        require_version("torch")
+        require_version("datasets")
+        require_version("transformers")
+        require_version("evaluate")
+        require_version("seqeval")
         super().__init__(*args, **kwargs)
 
         import torch

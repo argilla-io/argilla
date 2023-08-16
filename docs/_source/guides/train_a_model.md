@@ -89,6 +89,7 @@ Options:
 
 ```python
 import argilla as rg
+from argilla.training import ArgillaTrainer
 from datasets import load_dataset
 
 dataset_rg = rg.DatasetForTokenClassification.from_datasets(
@@ -126,18 +127,18 @@ It is possible to directly include train-test splits to the `prepare_for_trainin
 *TextClassification*
 
 For text classification tasks, it flattens the inputs into separate columns of the returned dataset and converts the annotations of your records into integers and writes them in a label column:
-By passing the `framework` variable as `setfit`, `transformers`, `spark-nlp` or `spacy`. This task requires a `DatastForTextClassification`.
+By passing the `framework` variable as `setfit`, `transformers`, `spark-nlp` or `spacy`. This task requires a `DatasetForTextClassification`.
 
 
 *TokenClassification*
 
 For token classification tasks, it converts the annotations of a record into integers representing BIO tags and writes them in a `ner_tags` column:
-By passing the `framework` variable as `transformers`, `spark-nlp` or `spacy`.  This task requires a `DatastForTokenClassification`.
+By passing the `framework` variable as `transformers`, `spark-nlp` or `spacy`.  This task requires a `DatasetForTokenClassification`.
 
 *Text2Text*
 
 For text generation tasks like `summarization` and translation tasks, it converts the annotations of a record `text` and `target` columns.
-By passing the `framework` variable as `transformers` and `spark-nlp`.  This task requires a `DatastForText2Text`.
+By passing the `framework` variable as `transformers` and `spark-nlp`.  This task requires a `DatasetForText2Text`.
 
 *Feedback*
 For feedback-oriented datasets, we currently rely on a fully customizable workflow, which means automation is limited and yet to be thought out.

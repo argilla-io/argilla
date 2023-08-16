@@ -1,7 +1,14 @@
 <template>
   <div class="title-area --body1">
-    <span v-text="title" v-optional-field="!isRequired" />
-
+    <span
+      class="suggestion-info"
+      v-text="title"
+      v-optional-field="!isRequired"
+      v-prefix-star="{
+        show: hasSuggestion,
+        tooltip: 'This question contains a suggestion',
+      }"
+    />
     <BaseIconWithBadge
       class="icon-info"
       v-if="showIcon"
@@ -34,6 +41,10 @@ export default {
       type: Boolean,
       default: () => false,
     },
+    hasSuggestion: {
+      type: Boolean,
+      default: () => false,
+    },
   },
   computed: {
     showIcon() {
@@ -61,6 +72,7 @@ export default {
 
 span {
   word-break: break-word;
+  line-height: 1.2em;
 }
 
 .icon-info {
@@ -78,6 +90,16 @@ span {
     &:after {
       margin-top: 0;
     }
+  }
+}
+:deep([data-title]):hover {
+  position: relative;
+  cursor: pointer;
+  @extend %has-tooltip--top;
+  &:after {
+    transform: none;
+    right: auto;
+    left: -1.5em;
   }
 }
 </style>

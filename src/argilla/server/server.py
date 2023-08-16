@@ -45,12 +45,15 @@ from argilla.server.daos.records import DatasetRecordsDAO
 from argilla.server.database import get_async_db
 from argilla.server.errors import (
     APIErrorHandler,
+    BadRequestError,
     ClosedDatasetError,
     EntityAlreadyExistsError,
     EntityNotFoundError,
     ForbiddenOperationError,
+    InvalidTextSearchError,
     MissingInputParamError,
     UnauthorizedError,
+    WrongTaskError,
 )
 from argilla.server.models import User
 from argilla.server.routes import api_router
@@ -84,8 +87,12 @@ def configure_api_exceptions(api: FastAPI):
     api.exception_handler(EntityAlreadyExistsError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(ClosedDatasetError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(ValidationError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(AssertionError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(WrongTaskError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(MissingInputParamError)(APIErrorHandler.common_exception_handler)
     api.exception_handler(RequestValidationError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(InvalidTextSearchError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(BadRequestError)(APIErrorHandler.common_exception_handler)
 
 
 def configure_api_router(app: FastAPI):
@@ -256,7 +263,7 @@ async def redirect_api():
 
 
 app = FastAPI(docs_url=None)
-app.mount(settings.base_url, argilla_app)
+app.mount("/", argilla_app)
 
 configure_app_logging(app)
 configure_database(app)

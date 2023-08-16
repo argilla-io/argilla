@@ -1,0 +1,13 @@
+name: Generate credentials
+description: Generate credentials for the default users of the PR environment
+author: Argilla <contact@argilla.io>
+outputs:
+  owner:
+    description: The password and API Key for the 'owner' user
+  admin:
+    description: The password and API Key for the 'admin' user
+  annotator:
+    description: The password and API Key for the 'annotator' user
+runs:
+  using: docker
+  image: Dockerfile
