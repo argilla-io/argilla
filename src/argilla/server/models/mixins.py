@@ -26,6 +26,7 @@ from typing_extensions import Self
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
     from sqlalchemy.orm import InstrumentedAttribute
+    from sqlalchemy.sql.elements import BinaryExpression
 
 Schema = TypeVar("Schema", bound=BaseModel)
 
@@ -134,6 +135,16 @@ class CRUDMixin:
         if autocommit:
             await db.commit()
         return self
+
+    @classmethod
+    async def delete_many(
+        cls, db: "AsyncSession", params: List["BinaryExpression"], autocommit: bool = True
+    ) -> List[Self]:
+        delete_stmt = sql.delete(cls).filter(*params).returning(cls)
+        result = await db.execute(delete_stmt)
+        if autocommit:
+            await db.commit()
+        return result.scalars().all()
 
     async def save(self, db: "AsyncSession", autocommit: bool = True) -> Self:
         db.add(self)
