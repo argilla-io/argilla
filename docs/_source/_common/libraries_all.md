@@ -61,6 +61,9 @@
 ```{grid-item-card} OpenAI
 :link: ./libraries/openai.html
 ```
+```{grid-item-card} LangChain
+:link: ./libraries/langchain.html
+```
 ```{grid-item-card} Unstructured
 :link: ./libraries/unstructured.html
 ```
