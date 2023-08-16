@@ -280,7 +280,7 @@ class TrainingTask:
         ],
     ) -> "TrainingTaskForDPO":
         """
-        Provide `TrainingTask.for_direct_preference_optimization(prompt_chosen_rejected_func: Callable)
+        Provide `TrainingTask.for_direct_preference_optimization(prompt_chosen_rejected_func: Callable)`
         Return a task that can be used in `FeedbackDataset.prepare_for_training(framework="...", task)`
         to extract data from the Feedback Dataset in an immediately useful format.
 
