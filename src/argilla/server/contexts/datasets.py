@@ -240,6 +240,8 @@ async def delete_records(
         records = await Record.delete_many(db=db, params=params, autocommit=False)
         await search_engine.delete_records(dataset=dataset, records=records)
 
+    await db.commit()
+
 
 async def get_records_by_ids(
     db: "AsyncSession",
