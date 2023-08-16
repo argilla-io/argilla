@@ -259,18 +259,21 @@ class TrainingTask:
         return TrainingTaskForRM(formatting_func=formatting_func)
 
     @classmethod
-    def for_proximal_policy_optimization(cls, text: TextField) -> "TrainingTaskForPPO":
+    def for_proximal_policy_optimization(
+        cls, formatting_func: Callable[[Dict[str, Any]], Union[None, str, Iterator[str]]]
+    ) -> "TrainingTaskForPPO":
         """
         Return a task that can be used in `FeedbackDataset.prepare_for_training(text: TextField)`
         to extract data from the Feedback Dataset in an immediately useful format.
 
         Args:
-            text (TextField): The text field to be used as input.
+            formatting_func (Callable[[Dict[str, Any]], Union[None, str, Iterator[str]]]):
+                A formatting function converting a dictionary of records into zero, one or more prompts.
 
         Returns:
             TrainingTaskForPPO: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
         """
-        return TrainingTaskForPPO(text=text)
+        return TrainingTaskForPPO(formatting_func=formatting_func)
 
     @classmethod
     def for_direct_preference_optimization(
@@ -542,14 +545,13 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
     formatting_func: Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]
 
     def _format_data(self, dataset: "FeedbackDataset"):
-        formatted_texts = []
+        formatted_texts = set()
         for sample in dataset.format_as("datasets"):
             if texts := self.formatting_func(sample):
                 if isinstance(texts, str):
-                    texts = [texts]
-                for text in texts:
-                    formatted_texts.append({"text": text})
-        return formatted_texts
+                    texts = {texts}
+                formatted_texts |= set(texts)
+        return [{"text": text} for text in formatted_texts]
 
     @property
     def supported_frameworks(self):
@@ -610,18 +612,17 @@ class TrainingTaskForRM(BaseModel, TrainingData):
     ]
 
     def _format_data(self, dataset: "FeedbackDataset"):
-        output = []
+        output = set()
         for sample in dataset.format_as("datasets"):
             chosen_rejecteds = self.formatting_func(sample)
             if chosen_rejecteds is None:
                 continue
 
             if isinstance(chosen_rejecteds, tuple) and isinstance(chosen_rejecteds[0], str):
-                chosen_rejecteds = [chosen_rejecteds]
+                chosen_rejecteds = {chosen_rejecteds}
 
-            for chosen, rejected in chosen_rejecteds:
-                output.append({"chosen": chosen, "rejected": rejected})
-        return output
+            output |= set(chosen_rejecteds)
+        return [{"chosen": chosen, "rejected": rejected} for chosen, rejected in output]
 
     @property
     def supported_frameworks(self):
@@ -667,7 +668,16 @@ class TrainingTaskForPPO(BaseModel, TrainingData):
         >>> dataset.prepare_for_training(framework="...", task=task)
     """
 
-    text: TextField
+    formatting_func: Callable[[Dict[str, Any]], Union[None, str, Iterator[str]]]
+
+    def _format_data(self, dataset: "FeedbackDataset"):
+        formatted_texts = set()
+        for sample in dataset.format_as("datasets"):
+            if texts := self.formatting_func(sample):
+                if isinstance(texts, str):
+                    texts = {texts}
+                formatted_texts |= set(texts)
+        return [{"query": text} for text in formatted_texts]
 
     @property
     def supported_frameworks(self):
@@ -675,7 +685,7 @@ class TrainingTaskForPPO(BaseModel, TrainingData):
         return [Framework(name) for name in names]
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}\n\t text_field={self.text}"
+        return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
 
     @requires_version("datasets>1.17.0")
     def _prepare_for_training_with_trl(
@@ -683,14 +693,14 @@ class TrainingTaskForPPO(BaseModel, TrainingData):
     ) -> Union["datasets.Dataset", "datasets.DatasetDict"]:
         import datasets
 
-        datasets_dict = {"id": [], "text": []}
+        datasets_dict = {"id": [], "query": []}
         for index, entry in enumerate(data):
             datasets_dict["id"].append(index)
-            datasets_dict["text"].append(entry["text"])
+            datasets_dict["query"].append(entry["query"])
 
         feature_dict = {
             "id": datasets.Value(dtype="int32"),
-            "text": datasets.Value("string"),
+            "query": datasets.Value("string"),
         }
 
         ds = datasets.Dataset.from_dict(datasets_dict, features=datasets.Features(feature_dict))
@@ -727,18 +737,17 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
     formatting_func: Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]
 
     def _format_data(self, dataset: "FeedbackDataset"):
-        output = []
+        output = set()
         for sample in dataset.format_as("datasets"):
             prompt_chosen_rejecteds = self.formatting_func(sample)
             if prompt_chosen_rejecteds is None:
                 continue
 
             if isinstance(prompt_chosen_rejecteds, tuple) and isinstance(prompt_chosen_rejecteds[0], str):
-                prompt_chosen_rejecteds = [prompt_chosen_rejecteds]
+                prompt_chosen_rejecteds = {prompt_chosen_rejecteds}
 
-            for prompt, chosen, rejected in prompt_chosen_rejecteds:
-                output.append({"prompt": prompt, "chosen": chosen, "rejected": rejected})
-        return output
+            output |= set(prompt_chosen_rejecteds)
+        return [{"prompt": prompt, "chosen": chosen, "rejected": rejected} for prompt, chosen, rejected in output]
 
     @property
     def supported_frameworks(self):
