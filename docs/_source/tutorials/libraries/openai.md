@@ -9,4 +9,6 @@ OpenAI is a suite of APIs powered by large language and vision models which perf
 
 ```{include} /_static/tutorials/labelling-textclassification-gpt3-fewshot/modal.md
 ```
+```{include} /_static/tutorials/labelling-feedback-langchain-syntethic/modal.md
+```
 ````
