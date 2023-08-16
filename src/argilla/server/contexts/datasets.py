@@ -126,6 +126,9 @@ async def delete_dataset(db: "AsyncSession", search_engine: SearchEngine, datase
     async with db.begin_nested():
         dataset = await dataset.delete(db, autocommit=False)
         await search_engine.delete_index(dataset)
+
+    await db.commit()
+
     return dataset
 
 
@@ -223,6 +226,9 @@ async def delete_record(db: "AsyncSession", search_engine: "SearchEngine", recor
     async with db.begin_nested():
         record = await record.delete(db=db, autocommit=False)
         await search_engine.delete_records(dataset=record.dataset, records=[record])
+
+    await db.commit()
+
     return record
 
 
@@ -385,6 +391,8 @@ async def create_records(
             await record.awaitable_attrs.responses
         await search_engine.add_records(dataset, records)
 
+    await db.commit()
+
 
 async def get_response_by_id(db: "AsyncSession", response_id: UUID) -> Union[Response, None]:
     result = await db.execute(
@@ -434,6 +442,8 @@ async def create_response(
         await db.flush([response])
         await search_engine.update_record_response(response)
 
+    await db.commit()
+
     return response
 
 
@@ -448,6 +458,8 @@ async def update_response(
         )
         await search_engine.update_record_response(response)
 
+    await db.commit()
+
     return response
 
 
@@ -455,6 +467,9 @@ async def delete_response(db: "AsyncSession", search_engine: SearchEngine, respo
     async with db.begin_nested():
         response = await response.delete(db, autocommit=False)
         await search_engine.delete_record_response(response)
+
+    await db.commit()
+
     return response
 
 
