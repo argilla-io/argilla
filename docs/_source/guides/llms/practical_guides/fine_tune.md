@@ -180,7 +180,7 @@ Then, go to the AutoTrain UI for training.
 
 ## RLHF
 
-The last part of the fine-tuning process is the part that contains doing Reinforcement Learning with Human Feedback (RLHf). This is generally done by creating a reward model (RM) to rate responses in alignment with human preferences and afterward using this reward model to fine-tune the LLM with the associated scores.
+The last part of the fine-tuning process is the part that contains doing Reinforcement Learning with Human Feedback (RLHF). This is generally done by creating a reward model (RM) to rate responses in alignment with human preferences and afterward using this reward model to fine-tune the LLM with the associated scores.
 
 ```{note}
 First, create a reward model or heuristic. Second, use this as automated procedure during reinforcment learning to align with human preferences.
