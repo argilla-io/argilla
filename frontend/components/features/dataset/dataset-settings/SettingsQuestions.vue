@@ -91,7 +91,6 @@ export default {
     },
   },
   methods: {
-    onChangeTextArea(value) {},
     onSubmit(question) {
       this.update(question);
     },
