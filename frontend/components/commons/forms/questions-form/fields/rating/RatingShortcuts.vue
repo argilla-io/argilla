@@ -24,6 +24,7 @@ export default {
     },
     answerRatingFor($event) {
       if (this.timer) clearTimeout(this.timer);
+      $event.preventDefault();
 
       this.keyCode += $event.key;
 
@@ -35,17 +36,9 @@ export default {
 
       const target = this.options.find(({ value }) => value == this.keyCode);
 
-      if (!target) {
-        this.reset();
-
-        return;
-      }
-
-      $event.preventDefault();
-
-      document.getElementById(target.id).click();
-
       this.timer = setTimeout(() => {
+        if (target) document.getElementById(target.id).click();
+
         this.reset();
       }, 300);
     },
