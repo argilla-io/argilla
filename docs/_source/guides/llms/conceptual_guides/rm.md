@@ -80,7 +80,6 @@ The responses can be generated using a pre-trained LLM, fine-tuned on a prior da
 
 Assuming that you have a pre-trained LLM, here's how you can **generate the responses using the instruction-following model Falcon-7B-instruct**:
 
-
 ```python
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import torch
@@ -121,10 +120,24 @@ for record in prompts:
 
 # Add records to the dataset
 dataset.add_records(records)
+```
 
-# This publishes the dataset and pushes the records into Argilla
+::::{tab-set}
+
+:::{tab-item} Argilla 1.14.0 or higher
+```python
+# This publishes the dataset with its records to Argilla and returns the dataset in Argilla
+remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
+```
+:::
+
+:::{tab-item} Lower than Argilla 1.14.0
+```python
+# This publishes the dataset with its records to Argilla and turns the dataset object into a dataset in Argilla
 dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 ```
+:::
+::::
 
 The above code will generate two responses for each prompt and push these records to Argilla. Labelers will see these prompts and responses, and rank the responses according to the instructions provided in the dataset.
 
@@ -133,7 +146,6 @@ Here's an example of a record generated with the above code:
 | Prompt | Response 1 | Response 2 |
 |--------|------------|------------|
 | Write a follow-up for a sales email | Dear [Customer Name],<br/><br/>Thank you for purchasing [Product Name] from us last week. We hope you have been enjoying using it!<br/><br/>If you have any questions or feedback about your purchase, please do not hesitate to let us know. We are always happy to help.<br/><br/>Best regards,<br/>[Sales Team] | Dear [Customer Name],<br/><br/>Thank you for your recent purchase [Product Name]. We hope you"re enjoying your [Product Name] as much as we are here at [Company Name].<br/><br/>If you have any questions or feedback regarding your purchase, please don"t hesitate to let us know. We"d love the chance to make your shopping experience even better.<br/><br/>Thank you again for your purchase,<br/>[Company Name] |
-
 
 :::{note}
 The ranking task can be challenging for labelers if the two responses are very similar. Consider adjusting the parameters of the generation process (e.g., the temperature) to produce more varied responses.
@@ -201,6 +213,7 @@ In addition, each record contains a `fields` attribute, which includes all the f
 Upon resolving conflicts, the aim is to have a list of records each indicating a preference for one response over the other to a prompt. These will be used for training the reward model.
 
 For demonstration purposes, here is a step-by-step code snippet to create a dataset of triplets `(prompt, preferred response, less preferred response)` from a single dataset without overlapping annotations:
+
 ```python
 # Define an empty list to store the triplets
 triplets = []

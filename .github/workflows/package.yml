@@ -127,6 +127,7 @@ jobs:
       - run_unit_tests
     if: |
       !cancelled() &&
+      needs.build_python_package.result == 'success' &&
       !contains(needs.*.result, 'failure') &&
       !contains(needs.*.result, 'cancelled')
     with:
