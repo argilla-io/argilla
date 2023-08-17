@@ -128,7 +128,8 @@ trainer = ArgillaTrainer(
     task=task,
     framework="trl",
     fetch_records=False,
-    train_size=0.8
+    train_size=0.8,
+    model="gpt2",
 )
 # e.g. using LoRA:
 # from peft import LoraConfig
@@ -342,77 +343,87 @@ As expected, the good response has a higher score than the worse response.
 
 :::
 
-:::{tab-item} PPOTrainer
-The [TRL](https://huggingface.co/docs/trl) `PPOTrainer` allows updating while plugging in any arbitrary model or heuristic to assign `rewards` to the generated output. In the example below, we use the  `reward_model` and `reward_tokenizer` to create a transformers text-classification pipeline. This pipeline is then used to create `rewards` which are then passed during the PPO `.step()` to include in the weigh optimization for the next batch. You can choose to use our [roberta-base-reward-model-falcon-dolly reward model](https://huggingface.co/argilla/roberta-base-reward-model-falcon-dolly).
+:::{tab-item} Proximal Policy Optimization
+The [TRL](https://huggingface.co/docs/trl) library also implements the last step of RLHF: Proximal Policy Optimization (PPO). It requires prompts, which are then fed through the model being finetuned. Its results are passed through a reward model. Lastly, the prompts, responses and rewards are used to update the model through reinforcement learning.
+
+This tutorial uses the reward model trained in the last phase, but you can also use our [roberta-base-reward-model-falcon-dolly reward model](https://huggingface.co/argilla/roberta-base-reward-model-falcon-dolly).
+
+As usual, we start with a task with a formatting function. For PPO, the formatting function only returns prompts.
+```python
+from argilla.feedback import TrainingTask
+from typing import Dict, Any, Iterator
+
+def formatting_func(sample: Dict[str, Any]) -> Iterator[str]:
+    for instruction in sample["new-instruction"]:
+        if instruction["status"] == "submitted":
+            yield instruction["value"]
+
+task = TrainingTask.for_proximal_policy_optimization(formatting_func=formatting_func)
+```
+
+Like before, we can observe the resulting dataset:
+```python
+dataset = feedback_dataset.prepare_for_training(framework="trl", task=task)
+"""
+>>> dataset
+Dataset({
+    features: ['id', 'query'],
+    num_rows: 15015
+})
+>>> dataset[0]
+{'id': 0, 'query': 'Is beauty objective or subjective?'}
+"""
+```
+
+Instead of using this dataset, we'll use the task directly with our `FeedbackDataset` in the `ArgillaTrainer`. PPO requires us to specify the `reward_model`, and allows us to specify some other useful values as well:
+* `reward_model`: A sentiment analysis pipeline with the reward model. This produces a reward for a prompt + response.
+* `length_sampler_kwargs`: A dictionary with `min_value` and `max_value` keys, indicating the lower and upper bound on the number of tokens the finetuning model should generate while finetuning.
+* `generation_kwargs`: The keyword arguments passed to the `generate` method of the finetuning model.
+* `config`: A `trl.PPOConfig` instance with many useful parameters such as `learning_rate` and `batch_size`.
 
 ```python
-import torch
-from transformers import AutoTokenizer, pipeline
-from trl import AutoModelForCausalLMWithValueHead, PPOConfig, PPOTrainer
-from trl.core import LengthSampler
+from argilla.feedback import ArgillaTrainer
+from transformers import pipeline
+from trl import PPOConfig
 
-reward_model = ... # "argilla/roberta-base-reward-model-falcon-dolly"
-reward_tokenizer = ... # "argilla/roberta-base-reward-model-falcon-dolly"
+trainer = ArgillaTrainer(
+    dataset=feedback_dataset,
+    task=task,
+    framework="trl",
+    model="gpt2",
+)
+reward_model = pipeline("sentiment-analysis", model="reward_model")
+trainer.update_config(
+    reward_model=reward_model,
+    length_sampler_kwargs={"min_value": 32, "max_value": 256},
+    generation_kwargs={
+        "min_length": -1,
+        "top_k": 0.0,
+        "top_p": 1.0,
+        "do_sample": True,
+    },
+    config=PPOConfig(batch_size=16)
+)
+trainer.train(output_dir="ppo_model")
+```
 
-config = PPOConfig(model_name="gpt2", batch_size=2)
+After training, we can load this model and generate with it!
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
-model = AutoModelForCausalLMWithValueHead.from_pretrained(config.model_name)
-ref_model = AutoModelForCausalLMWithValueHead.from_pretrained(config.model_name)
-tokenizer = AutoTokenizer.from_pretrained(config.model_name)
+model = AutoModelForCausalLM.from_pretrained("ppo_model")
+tokenizer = AutoTokenizer.from_pretrained("ppo_model")
 tokenizer.pad_token = tokenizer.eos_token
-reward_pipe = pipeline(model=reward_model, tokenizer=reward_tokenizer)
 
-def formatting_func(examples):
-    kwargs = {
-        "padding": "max_length", "truncation": True,
-        "max_length": 512, "return_tensors": "pt"
-    }
-    input_size = LengthSampler(min_value=2, max_value=8)
-    input_text = examples["instruction"] + examples["context"] + examples["response"]
-    examples["input_ids"] = tokenizer.encode(input_text, **kwargs)[0][: input_size()]
-    examples["query"] = tokenizer.decode(examples["input_ids"][0])
-    return examples
-
-formatted_dataset = dataset.map(formatting_func, batched=False)
-formatted_dataset.set_format(type="torch")
-
-def collator(data):
-    return dict((key, [d[key] for d in data]) for key in data[0])
-
-ppo_trainer = PPOTrainer(config, model, ref_model, tokenizer, dataset=formatted_dataset, data_collator=collator)
-
-output_min_length = 4
-output_max_length = 16
-output_length_sampler = LengthSampler(output_min_length, output_max_length)
-
-generation_kwargs = {
-    "min_length": -1,
-    "top_k": 0.0,
-    "top_p": 1.0,
-    "do_sample": True,
-    "pad_token_id": tokenizer.eos_token_id,
-}
-
-for epoch, batch in enumerate(ppo_trainer.dataloader):
-    query_tensors = batch["input_ids"]
-
-    #### Get response from gpt2
-    response_tensors = []
-    for query in query_tensors:
-        gen_len = output_length_sampler()
-        generation_kwargs["max_new_tokens"] = gen_len
-        response = ppo_trainer.generate(query, **generation_kwargs)
-        response_tensors.append(response.squeeze()[-gen_len:])
-    batch["response"] = [tokenizer.decode(r.squeeze()) for r in response_tensors]
-
-    #### Compute sentiment score
-    texts = [q + r for q, r in zip(batch["query"], batch["response"])]
-    pipe_outputs = reward_pipe(texts, return_all_scores=True)
-    rewards = [torch.tensor(output[1]["score"]) for output in pipe_outputs]
-
-    #### Run PPO step
-    stats = ppo_trainer.step(query_tensors, response_tensors, rewards)
-    ppo_trainer.log_stats(stats, batch, rewards)
+inputs = template.format(
+    instruction="Is a toad a frog?",
+    context="Both frogs and toads are amphibians in the order Anura, which means \"without a tail.\" Toads are a sub-classification of frogs, meaning that all toads are frogs, but not all frogs are toads.",
+    response=""
+)
+encoding = tokenizer([inputs], return_tensors="pt")
+outputs = model.generate(**encoding, max_new_tokens=30)
+output_text = tokenizer.decode(outputs[0])
+print(output_text)
 ```
 
 :::
