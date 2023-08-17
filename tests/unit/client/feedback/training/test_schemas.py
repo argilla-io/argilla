@@ -347,3 +347,10 @@ def test_task_mapping_for_text_classification(
             assert isinstance(d, e)
     else:
         assert isinstance(data, expected)
+
+
+def test_training_task_repr(label_question_payload):
+    field = TextField(name="text")
+    label = LabelQuestion(**label_question_payload)
+    task_mapping = TrainingTaskMapping.for_text_classification(text=field, label=label)
+    assert isinstance(repr(task_mapping), str)
