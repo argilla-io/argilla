@@ -11,3 +11,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+"""`pydantic.BaseModel`s defined here are shared between `argilla.client.sdk.v1.records`
+and `argilla.client.sdk.v1.datasets` modules, so those should be equal, and defined in
+`argilla.client.sdk.v1.datasets.models` module instead."""
+
+from argilla.client.sdk.v1.datasets.models import FeedbackItemModel  # noqa: F401

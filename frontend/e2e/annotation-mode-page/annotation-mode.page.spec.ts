@@ -1,12 +1,20 @@
+<<<<<<< HEAD
 import { test, expect, Page } from "@playwright/test";
+=======
+import { test, expect } from "@playwright/test";
+>>>>>>> develop
 import {
   loginUserAndWaitFor,
   mockAllDatasets,
   newDatasetsMocked,
   mockRecord,
+<<<<<<< HEAD
   mockRecordWith12Ranking,
   mockRecordWithRating,
   mockRecordResponses,
+=======
+  mockDiscardRecord,
+>>>>>>> develop
   mockRecordForLongAndShortQuestion,
 } from "../common";
 
@@ -16,6 +24,7 @@ const goToAnnotationPage = async (page, shortAndLongQuestions = false) => {
   await mockAllDatasets(page);
   const record = shortAndLongQuestions
     ? await mockRecordForLongAndShortQuestion(page, {
+<<<<<<< HEAD
       datasetId: dataset.id,
       workspaceId: dataset.workspace_id,
     })
@@ -23,6 +32,15 @@ const goToAnnotationPage = async (page, shortAndLongQuestions = false) => {
       datasetId: dataset.id,
       workspaceId: dataset.workspace_id,
     });
+=======
+        datasetId: dataset.id,
+        workspaceId: dataset.workspace_id,
+      })
+    : await mockRecord(page, {
+        datasetId: dataset.id,
+        workspaceId: dataset.workspace_id,
+      });
+>>>>>>> develop
 
   await loginUserAndWaitFor(page, "datasets");
 
@@ -35,6 +53,7 @@ const goToAnnotationPage = async (page, shortAndLongQuestions = false) => {
   return record;
 };
 
+<<<<<<< HEAD
 const goToAnnotationPageWith12Ranking = async (page: Page) => {
   const dataset = newDatasetsMocked[0];
 
@@ -75,6 +94,8 @@ test.use({
   viewport: { width: 1600, height: 1400 },
 });
 
+=======
+>>>>>>> develop
 test.describe("Annotate page", () => {
   test("go to annotation mode page", async ({ page }) => {
     await goToAnnotationPage(page);
@@ -132,6 +153,7 @@ test.describe("Annotate page", () => {
     await expect(page).toHaveScreenshot();
   });
 
+<<<<<<< HEAD
   test("can drag and drop ranking question", async ({ page }) => {
     await goToAnnotationPage(page);
 
@@ -152,17 +174,34 @@ test.describe("Annotate page", () => {
     await expect(page).toHaveScreenshot();
   });
 
+=======
+>>>>>>> develop
   test("clear all questions", async ({ page }) => {
     await goToAnnotationPage(page);
 
     await page.getByRole("button", { name: "Clear" }).click();
 
     await expect(page).toHaveScreenshot();
+<<<<<<< HEAD
+=======
+
+    await page.getByText("Review Rating (optional)").scrollIntoViewIfNeeded();
+
+    await expect(page).toHaveScreenshot();
+
+    await page.getByText("Ranking (optional)").scrollIntoViewIfNeeded();
+
+    await expect(page).toHaveScreenshot();
+>>>>>>> develop
   });
 
   test("clear all questions and discard the record", async ({ page }) => {
     const record = await goToAnnotationPage(page);
+<<<<<<< HEAD
     await mockRecordResponses(page, record.id, "discarded");
+=======
+    await mockDiscardRecord(page, record.id);
+>>>>>>> develop
 
     await page.getByRole("button", { name: "Clear" }).click();
 
@@ -178,6 +217,7 @@ test.describe("Annotate page", () => {
 
     await expect(page).toHaveScreenshot();
   });
+<<<<<<< HEAD
 
   test("focus on first question when click on form (where there is no in question)", async ({
     page,
@@ -936,4 +976,6 @@ test.describe("Annotation page shortcuts", () => {
       await expect(page).toHaveScreenshot();
     });
   });
+=======
+>>>>>>> develop
 });

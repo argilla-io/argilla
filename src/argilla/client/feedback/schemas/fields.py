@@ -17,6 +17,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Extra, Field, root_validator, validator
 
+from argilla.client.feedback.schemas.validators import title_must_have_value
+
 FieldTypes = Literal["text"]
 
 
@@ -45,17 +47,13 @@ class FieldSchema(BaseModel):
     """
 
     id: Optional[UUID] = None
-    name: str
+    name: str = Field(..., regex=r"^(?=.*[a-z0-9])[a-z0-9_-]+$")
     title: Optional[str] = None
     required: bool = True
     type: Optional[FieldTypes] = None
     settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)
 
-    @validator("title", always=True)
-    def title_must_have_value(cls, v: Optional[str], values: Dict[str, Any]) -> str:
-        if not v:
-            return values.get("name").capitalize()
-        return v
+    _title_must_have_value = validator("title", always=True, allow_reuse=True)(title_must_have_value)
 
     class Config:
         validate_assignment = True
