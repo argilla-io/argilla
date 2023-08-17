@@ -14,7 +14,7 @@
 
 import logging
 import warnings
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Tuple, Union
 
 import pandas as pd
@@ -225,7 +225,7 @@ class TrainingTask:
     @classmethod
     def for_reward_modelling(
         cls,
-        chosen_rejected_func: Callable[
+        formatting_func: Callable[
             [Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]
         ],
     ) -> "TrainingTaskForRM":
@@ -234,7 +234,7 @@ class TrainingTask:
         to extract data from the Feedback Dataset in an immediately useful format.
 
         Args:
-            chosen_rejected_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]]):
+            formatting_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]]):
                 A formatting function converting a dictionary of records into zero, one or more chosen-rejected text tuples.
 
         Returns:
@@ -243,7 +243,7 @@ class TrainingTask:
         Examples:
             >>> from argilla import TrainingTask
             >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
-            >>> def chosen_rejected_func(sample: Dict[str, Any]):
+            >>> def formatting_func(sample: Dict[str, Any]):
             ...     values = [annotation["value"] for annotation in sample["ranking"]]
             ...     if values.count("1") >= values.count("2"):
             ...         chosen = sample["response-1"]
@@ -252,25 +252,41 @@ class TrainingTask:
             ...         chosen = sample["response-2"]
             ...         rejected = sample["response-1"]
             ...     return chosen, rejected
-            >>> task = TrainingTask.for_reward_modelling(chosen_rejected_func=chosen_rejected_func)
+            >>> task = TrainingTask.for_reward_modelling(formatting_func=formatting_func)
             >>> dataset.prepare_for_training(framework="...", task=task)
 
         """
-        return TrainingTaskForRM(chosen_rejected_func=chosen_rejected_func)
+        return TrainingTaskForRM(formatting_func=formatting_func)
+
+    @classmethod
+    def for_proximal_policy_optimization(
+        cls, formatting_func: Callable[[Dict[str, Any]], Union[None, str, Iterator[str]]]
+    ) -> "TrainingTaskForPPO":
+        """
+        Return a task that can be used in `FeedbackDataset.prepare_for_training(text: TextField)`
+        to extract data from the Feedback Dataset in an immediately useful format.
+
+        Args:
+            formatting_func (Callable[[Dict[str, Any]], Union[None, str, Iterator[str]]]):
+                A formatting function converting a dictionary of records into zero, one or more prompts.
+
+        Returns:
+            TrainingTaskForPPO: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
+        """
+        return TrainingTaskForPPO(formatting_func=formatting_func)
 
     @classmethod
     def for_direct_preference_optimization(
         cls,
-        prompt_chosen_rejected_func: Callable[
-            [Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]
-        ],
+        formatting_func: Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]],
     ) -> "TrainingTaskForDPO":
         """
+        Provide `TrainingTask.for_direct_preference_optimization(formatting_func: Callable)`
         Return a task that can be used in `FeedbackDataset.prepare_for_training(framework="...", task)`
         to extract data from the Feedback Dataset in an immediately useful format.
 
         Args:
-            prompt_chosen_rejected_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]):
+            formatting_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]):
                 A formatting function converting a dictionary of records into zero, one or more prompt-chosen-rejected text tuples.
 
         Returns:
@@ -279,7 +295,7 @@ class TrainingTask:
         Examples:
             >>> from argilla import TrainingTask
             >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
-            >>> def prompt_chosen_rejected_func(sample: Dict[str, Any]):
+            >>> def formatting_func(sample: Dict[str, Any]):
             ...     values = [annotation["value"] for annotation in sample["ranking"]]
             ...     if values.count("1") >= values.count("2"):
             ...         chosen = sample["response-1"]
@@ -288,11 +304,11 @@ class TrainingTask:
             ...         chosen = sample["response-2"]
             ...         rejected = sample["response-1"]
             ...     return sample["prompt"], chosen, rejected
-            >>> task = TrainingTask.for_direct_preference_optimization(prompt_chosen_rejected_func=prompt_chosen_rejected_func)
+            >>> task = TrainingTask.for_direct_preference_optimization(formatting_func=formatting_func)
             >>> dataset.prepare_for_training(framework="...", task=task)
 
         """
-        return TrainingTaskForDPO(prompt_chosen_rejected_func=prompt_chosen_rejected_func)
+        return TrainingTaskForDPO(formatting_func=formatting_func)
 
 
 class TrainingTaskForTextClassification(BaseModel, TrainingData):
@@ -529,14 +545,13 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
     formatting_func: Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]
 
     def _format_data(self, dataset: "FeedbackDataset"):
-        formatted_texts = []
+        formatted_texts = set()
         for sample in dataset.format_as("datasets"):
             if texts := self.formatting_func(sample):
                 if isinstance(texts, str):
-                    texts = [texts]
-                for text in texts:
-                    formatted_texts.append({"text": text})
-        return formatted_texts
+                    texts = {texts}
+                formatted_texts |= set(texts)
+        return [{"text": text} for text in formatted_texts]
 
     @property
     def supported_frameworks(self):
@@ -573,13 +588,13 @@ class TrainingTaskForRM(BaseModel, TrainingData):
     """Training data for reward modelling
 
     Args:
-        chosen_rejected_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]]):
+        formatting_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]]):
             A formatting function converting a dictionary of records into zero, one or more chosen-rejected text tuples.
 
     Examples:
         >>> from argilla import TrainingTaskForRM
         >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
-        >>> def chosen_rejected_func(sample: Dict[str, Any]):
+        >>> def formatting_func(sample: Dict[str, Any]):
         ...     values = [annotation["value"] for annotation in sample["ranking"]]
         ...     if values.count("1") >= values.count("2"):
         ...         chosen = sample["response-1"]
@@ -588,27 +603,26 @@ class TrainingTaskForRM(BaseModel, TrainingData):
         ...         chosen = sample["response-2"]
         ...         rejected = sample["response-1"]
         ...     return chosen, rejected
-        >>> task = TrainingTaskForRM(chosen_rejected_func=chosen_rejected_func)
+        >>> task = TrainingTaskForRM(formatting_func=formatting_func)
         >>> dataset.prepare_for_training(framework="...", task=task)
     """
 
-    chosen_rejected_func: Callable[
+    formatting_func: Callable[
         [Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]
     ]
 
     def _format_data(self, dataset: "FeedbackDataset"):
-        output = []
+        output = set()
         for sample in dataset.format_as("datasets"):
-            chosen_rejecteds = self.chosen_rejected_func(sample)
+            chosen_rejecteds = self.formatting_func(sample)
             if chosen_rejecteds is None:
                 continue
 
             if isinstance(chosen_rejecteds, tuple) and isinstance(chosen_rejecteds[0], str):
-                chosen_rejecteds = [chosen_rejecteds]
+                chosen_rejecteds = {chosen_rejecteds}
 
-            for chosen, rejected in chosen_rejecteds:
-                output.append({"chosen": chosen, "rejected": rejected})
-        return output
+            output |= set(chosen_rejecteds)
+        return [{"chosen": chosen, "rejected": rejected} for chosen, rejected in output]
 
     @property
     def supported_frameworks(self):
@@ -616,7 +630,7 @@ class TrainingTaskForRM(BaseModel, TrainingData):
         return [Framework(name) for name in names]
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}\n\t chosen_rejected_func={self.chosen_rejected_func}"
+        return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
 
     @requires_version("datasets>1.17.0")
     def _prepare_for_training_with_trl(
@@ -641,17 +655,73 @@ class TrainingTaskForRM(BaseModel, TrainingData):
         return ds
 
 
+class TrainingTaskForPPO(BaseModel, TrainingData):
+    """Training data for proximal policy optimization
+
+    Args:
+        text (TextField): The TextField to use for training.
+
+    Examples:
+        >>> from argilla import TrainingTaskForPPO
+        >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
+        >>> task = TrainingTaskForPPO(text=dataset.fields[0],)
+        >>> dataset.prepare_for_training(framework="...", task=task)
+    """
+
+    formatting_func: Callable[[Dict[str, Any]], Union[None, str, Iterator[str]]]
+
+    def _format_data(self, dataset: "FeedbackDataset"):
+        formatted_texts = set()
+        for sample in dataset.format_as("datasets"):
+            if texts := self.formatting_func(sample):
+                if isinstance(texts, str):
+                    texts = {texts}
+                formatted_texts |= set(texts)
+        return [{"query": text} for text in formatted_texts]
+
+    @property
+    def supported_frameworks(self):
+        names = ["trl"]
+        return [Framework(name) for name in names]
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
+
+    @requires_version("datasets>1.17.0")
+    def _prepare_for_training_with_trl(
+        self, data: List[dict], train_size: float, seed: int
+    ) -> Union["datasets.Dataset", "datasets.DatasetDict"]:
+        import datasets
+
+        datasets_dict = {"id": [], "query": []}
+        for index, entry in enumerate(data):
+            datasets_dict["id"].append(index)
+            datasets_dict["query"].append(entry["query"])
+
+        feature_dict = {
+            "id": datasets.Value(dtype="int32"),
+            "query": datasets.Value("string"),
+        }
+
+        ds = datasets.Dataset.from_dict(datasets_dict, features=datasets.Features(feature_dict))
+
+        if train_size != 1:
+            ds = ds.train_test_split(train_size=train_size, test_size=1 - train_size, seed=seed)
+
+        return ds
+
+
 class TrainingTaskForDPO(BaseModel, TrainingData):
     """Training data for direct preference optimization
 
     Args:
-        prompt_chosen_rejected_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]):
+        formatting_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]):
             A formatting function converting a dictionary of records into zero, one or more prompt-chosen-rejected text tuples.
 
     Examples:
         >>> from argilla import TrainingTaskForDPO
         >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
-        >>> def prompt_chosen_rejected_func(sample: Dict[str, Any]):
+        >>> def formatting_func(sample: Dict[str, Any]):
         ...     values = [annotation["value"] for annotation in sample["ranking"]]
         ...     if values.count("1") >= values.count("2"):
         ...         chosen = sample["response-1"]
@@ -660,27 +730,24 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
         ...         chosen = sample["response-2"]
         ...         rejected = sample["response-1"]
         ...     return sample["prompt"], chosen, rejected
-        >>> task = TrainingTaskForDPO(prompt_chosen_rejected_func=prompt_chosen_rejected_func)
+        >>> task = TrainingTaskForDPO(formatting_func=formatting_func)
         >>> dataset.prepare_for_training(framework="...", task=task)
     """
 
-    prompt_chosen_rejected_func: Callable[
-        [Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]
-    ]
+    formatting_func: Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]
 
     def _format_data(self, dataset: "FeedbackDataset"):
-        output = []
+        output = set()
         for sample in dataset.format_as("datasets"):
-            prompt_chosen_rejecteds = self.prompt_chosen_rejected_func(sample)
+            prompt_chosen_rejecteds = self.formatting_func(sample)
             if prompt_chosen_rejecteds is None:
                 continue
 
             if isinstance(prompt_chosen_rejecteds, tuple) and isinstance(prompt_chosen_rejecteds[0], str):
-                prompt_chosen_rejecteds = [prompt_chosen_rejecteds]
+                prompt_chosen_rejecteds = {prompt_chosen_rejecteds}
 
-            for prompt, chosen, rejected in prompt_chosen_rejecteds:
-                output.append({"prompt": prompt, "chosen": chosen, "rejected": rejected})
-        return output
+            output |= set(prompt_chosen_rejecteds)
+        return [{"prompt": prompt, "chosen": chosen, "rejected": rejected} for prompt, chosen, rejected in output]
 
     @property
     def supported_frameworks(self):
@@ -688,7 +755,7 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
         return [Framework(name) for name in names]
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}\n\t prompt_chosen_rejected_func={self.prompt_chosen_rejected_func}"
+        return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
 
     @requires_version("datasets>1.17.0")
     def _prepare_for_training_with_trl(
@@ -719,6 +786,7 @@ TrainingTaskTypes = Union[
     TrainingTaskForTextClassification,
     TrainingTaskForSFT,
     TrainingTaskForRM,
+    TrainingTaskForPPO,
     TrainingTaskForDPO,
 ]
 
@@ -751,6 +819,11 @@ class TrainingTaskMapping(TrainingTask, RenamedDeprecationMixin):
     def for_reward_modelling(cls, *args, **kwargs) -> TrainingTaskForRM:
         cls.warn()
         return super().for_reward_modelling(*args, **kwargs)
+
+    @classmethod
+    def for_proximal_policy_optimization(cls, *args, **kwargs) -> TrainingTaskForPPO:
+        cls.warn()
+        return super().for_proximal_policy_optimization(cls, *args, **kwargs)
 
     @classmethod
     def for_direct_preference_optimization(cls, *args, **kwargs) -> TrainingTaskForDPO:

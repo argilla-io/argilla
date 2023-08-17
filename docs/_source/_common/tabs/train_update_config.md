@@ -234,7 +234,7 @@ trainer.update_config(
 :::{tab-item} TRL
 
 ```python
-# parameters from `trl.RewardTrainer`, `trl.SFTTrainer` or `trl.DPOTrainer`.
+# parameters from `trl.RewardTrainer`, `trl.SFTTrainer`, `trl.PPOTrainer` or `trl.DPOTrainer`.
 # `transformers.TrainingArguments`
 trainer.update_config(
     per_device_train_batch_size = 8,

@@ -30,6 +30,7 @@ from argilla.client.feedback.schemas import (
 )
 from argilla.client.feedback.training.schemas import (
     TrainingTaskForDPO,
+    TrainingTaskForPPO,
     TrainingTaskForRM,
     TrainingTaskForSFT,
     TrainingTaskForTextClassification,
@@ -319,7 +320,20 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         lang: Optional[str] = None,
         fetch_records: Optional[bool] = None,
     ):
-        # TODO(davidberenstein1957): add missing docstrings and type annotations
+        """
+        Prepares the dataset for training for a specific training framework and NLP task by splitting the dataset into train and test sets.
+
+        Args:
+            framework: the framework to use for training. Currently supported frameworks are: `transformers`, `peft`,
+                `setfit`, `spacy`, `spacy-transformers`, `span_marker`, `spark-nlp`, `openai`, `trl`.
+            task: the NLP task to use for training. Currently supported tasks are: `TrainingTaskForTextClassification`,
+                `TrainingTaskForSFT`, `TrainingTaskForRM`, `TrainingTaskForPPO`, `TrainingTaskForDPO`.
+            train_size: the size of the train set. If `None`, the whole dataset will be used for training.
+            test_size: the size of the test set. If `None`, the whole dataset will be used for testing.
+            seed: the seed to use for splitting the dataset into train and test sets.
+            lang: the spaCy language to use for training. If `None`, the language of the dataset will be used.
+            fetch_records: whether to fetch the records from Argilla or use the local records instead. If `None`, use local.
+        """
         if fetch_records is not None:
             warnings.warn(
                 "`fetch_records` is deprecated and will be removed in a future version."
@@ -362,6 +376,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             (
                 TrainingTaskForSFT,
                 TrainingTaskForRM,
+                TrainingTaskForPPO,
                 TrainingTaskForDPO,
             ),
         ):
@@ -377,7 +392,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             return task._prepare_for_training_with_transformers(
                 data=data, train_size=train_size, seed=seed, framework=framework
             )
-        elif framework is Framework.SPACY or framework is Framework.SPACY_TRANSFORMERS:
+        elif framework in [Framework.SPACY, Framework.SPACY_TRANSFORMERS]:
             require_version("spacy")
             import spacy
 
