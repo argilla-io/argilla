@@ -15,7 +15,7 @@ const goToDatasetSettingPage = async (page: Page) => {
   const dataset = newDatasetsMocked[0];
 
   await mockAllDatasets(page);
-  const record = await mockRecord(page, {
+  await mockRecord(page, {
     datasetId: dataset.id,
     workspaceId: dataset.workspace_id,
   });
