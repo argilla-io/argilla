@@ -16,9 +16,15 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [1.14.1](https://github.com/argilla-io/argilla/compare/v1.14.0...v1.14.1)
+
 ### Fixed
 
-- Fixed `settings` could not be provided when updating a `rating`  or `ranking` question ([#3552](https://github.com/argilla-io/argilla/pull/3552)).
+- Fixed PostgreSQL database not being updated after `begin_nested` because of missing `commit` ([#3567](https://github.com/argilla-io/argilla/pull/3567)).
+
+### Fixed
+
+- Fixed `settings` could not be provided when updating a `rating` or `ranking` question ([#3552](https://github.com/argilla-io/argilla/pull/3552)).
 
 ## [1.14.0](https://github.com/argilla-io/argilla/compare/v1.13.3...v1.14.0)
 
@@ -217,7 +223,6 @@ These are the section headers that we use:
 
 - Resolved typos in the docs ([#3240](https://github.com/argilla-io/argilla/pull/3240)).
 - Fixed mention of master branch ([#3254](https://github.com/argilla-io/argilla/pull/3254)).
-
 
 ## [1.9.0](https://github.com/argilla-io/argilla/compare/v1.8.0...v1.9.0)
 
