@@ -1,4 +1,4 @@
-First things first! You can use a basic `pip install` to install for `pypi` but we also provide some custom extras and more developer-related installment options.
+First things first! You can use a basic `pip install` to install for `pypi`, but we also provide some custom extras and more developer-related installment options.
 
 ::::{tab-set}
 
@@ -24,3 +24,9 @@ pip install -U git+https://github.com/argilla-io/argilla.git
 ```
 :::
 ::::
+
+:::{note}
+Make sure you have the latest version of Argilla (and other packages) installed, so you can use all of the features!
+To check which version you have, use `pip show argilla`. You can also install a specific version of the package
+(by running `pip install argilla==1.11.0`, for example) or simply update to the latest version with `pip install argilla --upgrade`.
+:::

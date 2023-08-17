@@ -135,25 +135,21 @@ class HuggingFaceDatasetMixin:
                 suggestion_value, suggestion_metadata = None, {"type": None, "score": None, "agent": None}
                 if record.suggestions:
                     for suggestion in record.suggestions:
-                        if question.name != suggestion.question_name:
-                            continue
-                        suggestion_value = suggestion.value
-                        suggestion_metadata = {
-                            "type": suggestion.type,
-                            "score": suggestion.score,
-                            "agent": suggestion.agent,
-                        }
-                        break
+                        if question.name == suggestion.question_name:
+                            suggestion_value = suggestion.value
+                            suggestion_metadata = {
+                                "type": suggestion.type,
+                                "score": suggestion.score,
+                                "agent": suggestion.agent,
+                            }
+                            break
                 hf_dataset[f"{question.name}-suggestion"].append(suggestion_value)
                 hf_dataset[f"{question.name}-suggestion-metadata"].append(suggestion_metadata)
 
             hf_dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else {})
             hf_dataset["external_id"].append(record.external_id or None)
 
-        return Dataset.from_dict(
-            hf_dataset,
-            features=Features(hf_features),
-        )
+        return Dataset.from_dict(hf_dataset, features=Features(hf_features))
 
     @requires_version("huggingface_hub")
     @requires_version("datasets")
@@ -327,8 +323,7 @@ class HuggingFaceDatasetMixin:
             suggestions = []
             user_without_id = False
             for question in config.questions:
-                if hfds[index][question.name] is not None or len(hfds[index][question.name]) > 0:
-                    # Here for backwards compatibility
+                if hfds[index][question.name] is not None and len(hfds[index][question.name]) > 0:
                     if (
                         len(
                             [None for response in hfds[index][question.name] if response["user_id"] is None]
@@ -342,12 +337,11 @@ class HuggingFaceDatasetMixin:
                             " responses for the first user without ID will be used, the rest"
                             " will be discarded."
                         )
-                    user_without_id_response = False
 
                     # Here for backwards compatibility
                     original_responses = []
                     if isinstance(hfds[index][question.name], list):
-                        responses = hfds[index][question.name]
+                        original_responses = hfds[index][question.name]
                     else:
                         for user_id, value, status in zip(
                             hfds[index][question.name]["user_id"],
@@ -356,7 +350,7 @@ class HuggingFaceDatasetMixin:
                         ):
                             original_responses.append({"user_id": user_id, "value": value, "status": status})
 
-                    responses = {}
+                    user_without_id_response = False
                     for response in original_responses:
                         if user_without_id_response:
                             continue

@@ -88,7 +88,7 @@ def get_pr_url(pr_number: int) -> str:
 
 
 def get_thread_ts_pr_message(client: WebClient, channel_id: str, pr_number: int) -> Union[str, None]:
-    response = client.conversations_history(channel=channel_id)
+    response = client.conversations_history(channel=channel_id, limit=500)
     response.validate()
 
     pr_url = get_pr_url(pr_number)
@@ -101,7 +101,7 @@ def get_thread_ts_pr_message(client: WebClient, channel_id: str, pr_number: int)
             if not title or not callback_id:
                 continue
             if pr_url in title and callback_id == "pr-opened-interaction":
-                return message["thread_ts"]
+                return message["ts"]
 
     return None
 

@@ -16,6 +16,12 @@ Learn how to set up a project to curate a public dataset that can be used to fin
 Learn how to collect comparison or human preference data and train a reward model with the trl library.
 
 ```
+```{grid-item-card} Add zero-shot suggestions using Setfit
+:link: labelling-feedback-setfit.html
+
+Learn how to add suggestions to your Feedback dataset using Setfit.
+
+```
 ````
 
 ```{toctree}
@@ -23,4 +29,5 @@ Learn how to collect comparison or human preference data and train a reward mode
 
 curating-feedback-instructiondataset
 train-reward-model-rlhf
+labelling-feedback-setfit
 ```

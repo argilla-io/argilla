@@ -56,6 +56,7 @@ except:
     version = ""
     release = ""
 
+
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -126,10 +127,30 @@ nbsphinx_execute = "never"
 getting_started_html = open("./_common/getting_started.html", "r", encoding="utf8").read()
 next_steps_html = open("./_common/next_steps.html", "r", encoding="utf8").read()
 
-# Plotly + Hide input/output prompts (cell counts)
 
-
-autodoc_typehints = "description"
+# -- AUTODOC IMPORT MOCKS ---------------------------------------------------
+autodoc_typehints = "signature"
+autodoc_mock_imports = [
+    "cleanlab",
+    "datasets",
+    "huggingface_hub",
+    "flair",
+    "faiss",
+    "flyingsquid",
+    "pgmpy",
+    "plotly",
+    "snorkel",
+    "spacy",
+    "spacy_transformers",
+    "torch",
+    "transformers",
+    "evaluate",
+    "seqeval",
+    "setfit",
+    "span_marker",
+    "openai",
+    "peft",
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

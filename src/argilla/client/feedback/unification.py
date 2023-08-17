@@ -48,21 +48,10 @@ class UnifiedValueSchema(ValueSchema):
     strategy: Union["RatingQuestionStrategy", "LabelQuestionStrategy", "MultiLabelQuestionStrategy"]
 
 
-class RatingQuestionStrategy(Enum):
-    """
-    Options:
-        - "mean": the mean value of the ratings
-        - "majority": the majority value of the ratings
-        - "max": the max value of the ratings
-        - "min": the min value of the ratings
-    """
-
-    MEAN: str = "mean"
-    MAJORITY: str = "majority"
-    MAX: str = "max"
-    MIN: str = "min"
-
-    def unify_responses(self, records: List[FeedbackRecord], question: RatingQuestion):
+class RatingQuestionStrategyMixin:
+    def unify_responses(
+        self, records: List[FeedbackRecord], question: Union["RatingQuestionStrategy", "RankingQuestionStrategy"]
+    ):
         """
         The function `unify_responses` takes a list of feedback records and a rating question, and
         returns a unified value based on the specified unification method.
@@ -84,15 +73,33 @@ class RatingQuestionStrategy(Enum):
         # check if field is a str or a RatingQuestion
         if isinstance(question, str):
             pass
-        elif isinstance(question, RatingQuestion):
+        elif isinstance(question, (RatingQuestion, RankingQuestion)):
             question = question.name
         else:
-            raise ValueError("Invalid field type. Must be a str or RatingQuestion")
+            raise ValueError(f"Invalid field type. Must be a str or {type(self).__name__}")
         # choose correct unification method
         if self.value == self.MAJORITY.value:
             return self._majority(records, question)
         else:
             return self._aggregate(records, question)
+
+
+class RatingQuestionStrategy(RatingQuestionStrategyMixin, Enum):
+    """
+    Options:
+        - "mean": the mean value of the ratings
+        - "majority": the majority value of the ratings
+        - "max": the max value of the ratings
+        - "min": the min value of the ratings
+    """
+
+    MEAN: str = "mean"
+    MAJORITY: str = "majority"
+    MAX: str = "max"
+    MIN: str = "min"
+
+    def unify_responses(self, records: List[FeedbackRecord], question: RatingQuestion):
+        return super().unify_responses(records, question)
 
     def _aggregate(self, records: List[FeedbackRecord], question: str):
         """
@@ -160,7 +167,7 @@ class RatingQuestionStrategy(Enum):
         return records
 
 
-class RankingQuestionStrategy(Enum):
+class RankingQuestionStrategy(RatingQuestionStrategyMixin, Enum):
     """
     Options:
         - "mean": the mean value of the rankings
@@ -175,35 +182,7 @@ class RankingQuestionStrategy(Enum):
     MIN: str = "min"
 
     def unify_responses(self, records: List[FeedbackRecord], question: RankingQuestion):
-        """
-        The function `unify_responses` takes a list of feedback records and a ranking question, and
-        returns a unified value based on the specified unification method.
-
-        Args:
-
-        - records The `records` parameter is a list of `FeedbackRecord` objects. It is assumed that
-        `FeedbackRecord` is a custom class defined elsewhere in the code.
-        - question The `question` parameter is the question for which you want to unify the
-        responses. It can be either a string or a `RankingQuestion` object. If it is a string, it
-        represents the name of the question. If it is a `RankingQuestion` object, it represents the
-
-        Returns:
-        The method `unify_responses` returns the result of either the `_majority` or
-        `_aggregate` method, depending on the value of `self.value`.
-        """
-        UnifiedValueSchema.update_forward_refs()
-        # check if field is a str or a RankingQuestion
-        if isinstance(question, str):
-            pass
-        elif isinstance(question, RankingQuestion):
-            question = question.name
-        else:
-            raise ValueError("Invalid field type. Must be a str or RankingQuestion")
-        # choose correct unification method
-        if self.value == self.MAJORITY.value:
-            return self._majority(records, question)
-        else:
-            return self._aggregate(records, question)
+        return super().unify_responses(records, question)
 
     def _aggregate(self, records: List[FeedbackRecord], question: str):
         """
