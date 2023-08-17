@@ -352,5 +352,5 @@ def test_task_for_text_classification(
 def test_training_task_repr(label_question_payload):
     field = TextField(name="text")
     label = LabelQuestion(**label_question_payload)
-    task_mapping = TrainingTaskMapping.for_text_classification(text=field, label=label)
+    task_mapping = TrainingTask.for_text_classification(text=field, label=label)
     assert isinstance(repr(task_mapping), str)
