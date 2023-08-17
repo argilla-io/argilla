@@ -29,8 +29,7 @@
             class="settings__edition-form__group"
           >
             <label :for="`description-${question.id}`">Description</label>
-            <input
-              type="text"
+            <textarea
               :id="`description-${question.id}`"
               v-model="question.description"
             />
@@ -92,6 +91,7 @@ export default {
     },
   },
   methods: {
+    onChangeTextArea(value) {},
     onSubmit(question) {
       this.update(question);
     },
@@ -163,6 +163,21 @@ export default {
         border: 1px solid $black-20;
         border-radius: $border-radius;
         outline: 0;
+        &:focus {
+          border: 1px solid $primary-color;
+        }
+      }
+
+      & textarea {
+        resize: vertical;
+        min-height: 100px;
+        max-height: 300px;
+        padding: 16px;
+        background: palette(white);
+        border: 1px solid $black-20;
+        border-radius: $border-radius;
+        outline: 0;
+
         &:focus {
           border: 1px solid $primary-color;
         }
