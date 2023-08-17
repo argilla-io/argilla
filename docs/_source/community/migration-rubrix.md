@@ -31,7 +31,7 @@ python -m rubrix
 All the environment variables have changed from using the prefix `RUBRIX_` to using the prefix `ARGILLA_`.
 
 .. warning::
-  From version `1.13.0`, the support for non-prefixed environment variables was removed. All environment variables must be prefixed with `ARGILLA_`.
+  From version `1.13.0`, the support for non-prefixed environment variables has been removed. All environment variables must be prefixed with `ARGILLA_`.
 
 The best to configure a new Argilla Server from Rubrix is just to duplicate all ENV variables for
 both, Rubrix and Argilla instances. This will simplify a version rollback if needed.
