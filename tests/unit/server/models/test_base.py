@@ -144,3 +144,13 @@ class TestDatabaseModel:
         model = await Model.create(db, str_col="unit-test", int_col=1, autocommit=True)
         model = await model.delete(db)
         assert (await db.execute(select(Model).filter_by(id=model.id))).scalar_one_or_none() is None
+
+    async def test_database_model_delete_many(self, db: "AsyncSession"):
+        for i in range(5):
+            await Model.create(db, str_col=f"unit-test-{i}", int_col=i, external_id=f"external-id-{i}")
+        for i in range(1, 6):
+            await Model.create(db, str_col=f"unit-test-{i}", int_col=i * 10, external_id=f"external-id-{i * 10}")
+
+        removed = await Model.delete_many(db, params=[Model.int_col < 10], autocommit=True)
+
+        assert len(removed) == 5
