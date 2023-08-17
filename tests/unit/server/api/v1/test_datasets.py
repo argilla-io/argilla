@@ -14,7 +14,7 @@
 
 from datetime import datetime
 from typing import TYPE_CHECKING, List, Optional, Tuple, Type
-from unittest.mock import MagicMock
+from unittest.mock import ANY, MagicMock
 from uuid import UUID, uuid4
 
 import pytest
@@ -2798,8 +2798,9 @@ class TestSuiteDatasets:
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    @pytest.mark.asyncio
-    async def test_delete_dataset_records(self, async_client: "AsyncClient", db: "AsyncSession", role: UserRole):
+    async def test_delete_dataset_records(
+        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, role: UserRole
+    ):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
         records = await RecordFactory.create_batch(10, dataset=dataset)
@@ -2817,8 +2818,35 @@ class TestSuiteDatasets:
 
         assert response.status_code == 204, response.json()
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
+        # `delete_records` is called with the records returned by the delete statement, which are different ORM objects
+        # than the ones created by the factory
+        mock_search_engine.delete_records.assert_called_once_with(dataset=dataset, records=ANY)
 
-    @pytest.mark.asyncio
+    async def test_delete_dataset_records_with_no_ids(self, async_client: "AsyncClient", owner_auth_header: dict):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.delete(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            params={"ids": ""},
+        )
+
+        assert response.status_code == 422
+
+    async def test_delete_dataset_records_exceeding_limit(self, async_client: "AsyncClient", owner_auth_header: dict):
+        dataset = await DatasetFactory.create()
+        records = await RecordFactory.create_batch(200, dataset=dataset)
+
+        records_ids = [str(record.id) for record in records]
+
+        response = await async_client.delete(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            params={"ids": ",".join(records_ids)},
+        )
+
+        assert response.status_code == 422
+
     async def test_delete_dataset_records_from_another_dataset(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
@@ -2838,7 +2866,6 @@ class TestSuiteDatasets:
 
         assert response.status_code == 204
 
-    @pytest.mark.asyncio
     async def test_delete_dataset_records_as_admin_from_another_workspace(self, async_client: "AsyncClient"):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(role=UserRole.admin)
@@ -2851,7 +2878,6 @@ class TestSuiteDatasets:
 
         assert response.status_code == 403
 
-    @pytest.mark.asyncio
     async def test_delete_dataset_records_as_annotator(self, async_client: "AsyncClient"):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=UserRole.annotator)
