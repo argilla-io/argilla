@@ -40,6 +40,14 @@ test.describe("Annotate page", () => {
     await expect(page).toHaveScreenshot();
   });
 
+  test("filter by workspaces from annotation page", async ({ page }) => {
+    await goToAnnotationPage(page);
+
+    await page.getByRole("link", { name: "argilla" }).click();
+
+    await expect(page).toHaveScreenshot();
+  });
+
   test("hide spark icon when user change suggested answer", async ({
     page,
   }) => {
