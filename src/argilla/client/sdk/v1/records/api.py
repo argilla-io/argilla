@@ -40,10 +40,7 @@ def delete_record(
     response = client.delete(url=url)
 
     if response.status_code == 200:
-        return Response(
-            parsed=FeedbackItemModel.parse_raw(response.content),
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = FeedbackItemModel.parse_raw(response.content)
+        return response_obj
     return handle_response_error(response)
