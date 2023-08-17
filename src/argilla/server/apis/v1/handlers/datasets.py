@@ -51,6 +51,7 @@ from argilla.utils.telemetry import TelemetryClient, get_telemetry_client
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
 LIST_DATASET_RECORDS_LIMIT_LTE = 1000
+DELETE_DATASET_RECORDS_LIMIT = 100
 
 router = APIRouter(tags=["datasets"])
 
@@ -304,6 +305,17 @@ async def delete_dataset_records(
     await authorize(current_user, DatasetPolicyV1.delete_records(dataset))
 
     record_ids = parse_uuids(ids)
+    num_records = len(record_ids)
+
+    if num_records == 0:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No record IDs provided")
+
+    if num_records > DELETE_DATASET_RECORDS_LIMIT:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Cannot delete more than {DELETE_DATASET_RECORDS_LIMIT} records at once",
+        )
+
     await datasets.delete_records(db, search_engine, dataset, record_ids)
 
 
