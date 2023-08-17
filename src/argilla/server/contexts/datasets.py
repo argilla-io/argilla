@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, delete, func, or_, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
@@ -230,6 +230,17 @@ async def delete_record(db: "AsyncSession", search_engine: "SearchEngine", recor
     await db.commit()
 
     return record
+
+
+async def delete_records(
+    db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, records_ids: List[UUID]
+) -> None:
+    async with db.begin_nested():
+        params = [Record.id.in_(records_ids), Record.dataset_id == dataset.id]
+        records = await Record.delete_many(db=db, params=params, autocommit=False)
+        await search_engine.delete_records(dataset=dataset, records=records)
+
+    await db.commit()
 
 
 async def get_records_by_ids(
