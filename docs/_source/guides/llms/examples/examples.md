@@ -24,7 +24,7 @@ Learn how to add suggestions to your Feedback dataset using Setfit.
 ```{grid-item-card} Create and annotate synthetic data with LLMs
 :link: labelling-feedback-langchain-syntethic.html
 
-Learn how to create synthetic data with OpenAI, LangChain and Outlines.
+Learn how to create synthetic data and annotations with OpenAI, LangChain, Transformers and Outlines.
 ```
 ````
 
