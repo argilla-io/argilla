@@ -42,6 +42,11 @@ class ArgillaCredentials(BaseModel):
         with open(ARGILLA_CREDENTIALS_FILE, "r") as f:
             return cls.parse_raw(f.read())
 
+    @classmethod
+    def remove(cls) -> None:
+        if ARGILLA_CREDENTIALS_FILE.exists():
+            ARGILLA_CREDENTIALS_FILE.unlink()
+
 
 def login(
     api_url: str, api_key: str, workspace: Optional[str] = None, extra_headers: Optional[Dict[str, str]] = None

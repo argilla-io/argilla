@@ -57,6 +57,17 @@ def test_argilla_credentials_load(mocker: "MockFixture"):
     assert credentials.extra_headers == {"X-Unit-Test": "true"}
 
 
+def test_argilla_credentials_remove(mocker: "MockFixture"):
+    path_mock = mocker.patch.object(Path, "exists")
+    path_mock.return_value = True
+    unlink_mock = mocker.patch.object(Path, "unlink")
+
+    ArgillaCredentials.remove()
+
+    path_mock.assert_called_once()
+    unlink_mock.assert_called_once()
+
+
 def test_argilla_credentials_load_raises_error():
     with pytest.raises(FileNotFoundError):
         ArgillaCredentials.load()
