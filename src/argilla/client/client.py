@@ -106,7 +106,12 @@ class Argilla:
         """
         from argilla.client.login import ArgillaCredentials
 
-        if api_url is None and api_key is None:
+        api_url = api_url or os.getenv("ARGILLA_API_URL")
+        api_key = api_key or os.getenv("ARGILLA_API_KEY")
+        workspace = workspace or os.getenv("ARGILLA_WORKSPACE")
+        extra_headers = extra_headers or {}
+
+        if api_url is None and api_key is None and workspace is None:
             try:
                 credentials = ArgillaCredentials.load()
                 api_url = credentials.api_url
@@ -114,10 +119,8 @@ class Argilla:
                 workspace = credentials.workspace
                 extra_headers = credentials.extra_headers
             except FileNotFoundError:
-                api_url = os.getenv("ARGILLA_API_URL", "http://localhost:6900")
-                api_key = os.getenv("ARGILLA_API_KEY", DEFAULT_API_KEY)
-                workspace = os.getenv("ARGILLA_WORKSPACE")
-                extra_headers = {}
+                api_url = "http://localhost:6900"
+                api_key = DEFAULT_API_KEY
 
         # Checking that the api_url does not end in '/'
         api_url = re.sub(r"\/$", "", api_url)
