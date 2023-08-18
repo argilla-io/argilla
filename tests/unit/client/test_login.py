@@ -12,9 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
-from argilla.client import api
+import pytest
 from argilla.client.login import ARGILLA_CREDENTIALS_FILE, ArgillaCredentials, login
 
 if TYPE_CHECKING:
@@ -44,6 +45,8 @@ def test_argilla_credentials_load(mocker: "MockFixture"):
             read_data='{"api_url": "http://unit-test.com:6900", "api_key": "unit.test", "workspace": "unit-tests", "extra_headers": {"X-Unit-Test": "true"}}'
         ),
     )
+    path_mock = mocker.patch.object(Path, "exists")
+    path_mock.return_value = True
 
     credentials = ArgillaCredentials.load()
 
@@ -52,6 +55,11 @@ def test_argilla_credentials_load(mocker: "MockFixture"):
     assert credentials.api_key == "unit.test"
     assert credentials.workspace == "unit-tests"
     assert credentials.extra_headers == {"X-Unit-Test": "true"}
+
+
+def test_argilla_credentials_load_raises_error():
+    with pytest.raises(FileNotFoundError):
+        ArgillaCredentials.load()
 
 
 def test_login(mocker: "MockFixture"):
