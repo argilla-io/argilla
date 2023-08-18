@@ -22,8 +22,6 @@
 </p>
 
 <h2 align="center">Open-source data curation platform for LLMs</h2>
-<h3 align="center">MLOps for NLP: from data labeling to model monitoring</h2>
-
 <br>
 
 
