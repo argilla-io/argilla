@@ -60,11 +60,11 @@ def login(
     """
     # Try to login to the server
     try:
-        init(api_url=api_url, api_key=api_key, workspace=workspace)
+        init(api_url=api_url, api_key=api_key, workspace=workspace, extra_headers=extra_headers)
     except UnauthorizedApiError as e:
         raise ValueError(f"Could not login in '{api_url}' using provided credentials") from e
 
     if not ARGILLA_CACHE_DIR.exists():
         ARGILLA_CACHE_DIR.mkdir(parents=True)
 
-    ArgillaCredentials(api_url=api_url, api_key=api_key, workspace=workspace).save()
+    ArgillaCredentials(api_url=api_url, api_key=api_key, workspace=workspace, extra_headers=extra_headers).save()
