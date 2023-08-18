@@ -104,11 +104,23 @@ class Argilla:
                 the headers of argilla client requests, like additional security restrictions. Default: `None`.
 
         """
-        api_url = api_url or os.getenv("ARGILLA_API_URL", "http://localhost:6900")
+        from argilla.client.login import ArgillaCredentials
+
+        if api_url is None and api_key is None:
+            try:
+                credentials = ArgillaCredentials.load()
+                api_url = credentials.api_url
+                api_key = credentials.api_key
+                workspace = credentials.workspace
+                extra_headers = credentials.extra_headers
+            except FileNotFoundError:
+                api_url = os.getenv("ARGILLA_API_URL", "http://localhost:6900")
+                api_key = os.getenv("ARGILLA_API_KEY", DEFAULT_API_KEY)
+                workspace = os.getenv("ARGILLA_WORKSPACE")
+                extra_headers = {}
+
         # Checking that the api_url does not end in '/'
         api_url = re.sub(r"\/$", "", api_url)
-        api_key = api_key or os.getenv("ARGILLA_API_KEY", DEFAULT_API_KEY)
-        workspace = workspace or os.getenv("ARGILLA_WORKSPACE")
         headers = extra_headers or {}
 
         self._client: AuthenticatedClient = AuthenticatedClient(
