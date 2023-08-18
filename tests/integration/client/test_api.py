@@ -272,6 +272,23 @@ def test_init_environment_url(mock_init_ok, monkeypatch):
     )
 
 
+def test_init_with_stored_credentials(mock_init_ok, mocker):
+    mocker.patch(
+        "builtins.open",
+        mocker.mock_open(
+            read_data='{"api_url": "http://integration-test.com:6900", "api_key": "integration.test", "workspace": "mock_workspace", "extra_headers": {"X-Integration-Test": "true"}}'
+        ),
+    )
+
+    init()
+    assert active_client()._client == AuthenticatedClient(
+        base_url="http://integration-test.com:6900",
+        token="integration.test",
+        timeout=60,
+        headers={WORKSPACE_HEADER_NAME: "mock_workspace", "X-Integration-Test": "true"},
+    )
+
+
 @pytest.mark.asyncio
 async def test_init_with_workspace(owner: User) -> None:
     workspace = await WorkspaceFactory.create(name="test_workspace")
