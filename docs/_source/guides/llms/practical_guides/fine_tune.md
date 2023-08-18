@@ -442,9 +442,13 @@ from argilla.feedback import TrainingTask
 from typing import Dict, Any, Iterator
 
 def formatting_func(sample: Dict[str, Any]) -> Iterator[str]:
-    for instruction in sample["new-instruction"]:
+    for instruction, context in zip(sample["new-instruction"], sample["new-context"]):
         if instruction["status"] == "submitted":
-            yield instruction["value"]
+            yield template.format(
+                instruction=instruction["value"],
+                context=context["value"][:500],
+                response=""
+            ).strip()
 
 task = TrainingTask.for_proximal_policy_optimization(formatting_func=formatting_func)
 ```
@@ -458,8 +462,8 @@ Dataset({
     features: ['id', 'query'],
     num_rows: 15015
 })
->>> dataset[0]
-{'id': 0, 'query': 'Is beauty objective or subjective?'}
+>>> dataset[922]
+{'id': 922, 'query': '### Instruction: Is beauty objective or subjective?\n\n### Context: \n\n### Response:'}
 """
 ```
 
@@ -507,7 +511,7 @@ inputs = template.format(
     instruction="Is a toad a frog?",
     context="Both frogs and toads are amphibians in the order Anura, which means \"without a tail.\" Toads are a sub-classification of frogs, meaning that all toads are frogs, but not all frogs are toads.",
     response=""
-)
+).strip()
 encoding = tokenizer([inputs], return_tensors="pt")
 outputs = model.generate(**encoding, max_new_tokens=30)
 output_text = tokenizer.decode(outputs[0])
