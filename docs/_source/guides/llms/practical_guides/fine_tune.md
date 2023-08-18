@@ -137,6 +137,94 @@ trainer = ArgillaTrainer(
 trainer.train(output_dir="sft_model")
 ```
 
+Let's observe if it worked to train the model to respond within our template. We'll create a quick helper method for this.
+```python
+def generate(model_id: str, instruction: str, context: str = "") -> str:
+    model = GPT2LMHeadModel.from_pretrained(model_id)
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+
+    inputs = template.format(
+        instruction=instruction,
+        context=context,
+        response="",
+    ).strip()
+
+    encoding = tokenizer([inputs], return_tensors="pt")
+    outputs = model.generate(
+        **encoding,
+        generation_config=GenerationConfig(
+            max_new_tokens=32,
+            min_new_tokens=12,
+            pad_token_id=tokenizer.pad_token_id,
+            eos_token_id=tokenizer.eos_token_id,
+        ),
+    )
+    return tokenizer.decode(outputs[0])
+```
+Let's first apply it to the non-finetuned GPT2 model:
+```python
+>>> generate("gpt2", "Is a toad a frog?")
+### Instruction: Is a toad a frog?
+
+### Context:
+
+### Response:
+
+###
+
+###
+
+###
+
+###
+
+###
+
+###
+
+###
+
+###
+
+###
+
+###
+>>> generate("gpt2", "Are dogs brown?")
+### Instruction: Are dogs brown?
+
+### Context:
+
+### Response:
+
+### Response:
+
+### Response:
+
+### Response:
+
+### Response:
+
+### Response:
+
+```
+And on our finetuned model:
+```python
+>>> generate("sft_model", "Is a toad a frog?")
+### Instruction: Is a toad a frog?
+
+### Context:
+
+### Response: A frog is a small, round, black-eyed, frog with a long, black-winged head. It is a member of the family Pter
+>>> generate("sft_model", "Are dogs brown?")
+### Instruction: Are dogs brown?
+
+### Context:
+
+### Response: Dogs are brown. They are not brown. They are not brown. They are not brown. They are not brown. They are not brown. They are not
+```
+Much better! This model follows the template like we want.
+
+
 ####  TRLX
 
 The other package is [Transformer Reinforcement Learning X (TRLX)](https://github.com/CarperAI/trlx), which has been heavily inspired by TRL but with an increased focus on incorporating Human Feedback into the training loop. However, out of the box, it also provides intuitive support for supervised `prompt-completion` fine-tuning using a relatively simple SDK, that takes tuples as `(prompt, completion)`. Take a look at the [RLHF section](#rlhf) for the other more feedback-oriented use cases of this library.
