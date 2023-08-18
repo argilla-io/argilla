@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from pathlib import Path
+from typing import Optional
 
 from pydantic import AnyHttpUrl, BaseModel
 
@@ -26,6 +27,7 @@ ARGILLA_CREDENTIALS_FILE = ARGILLA_CACHE_DIR / "credentials.json"
 class ArgillaCredentials(BaseModel):
     api_url: AnyHttpUrl
     api_key: str
+    workspace: Optional[str] = None
 
     def save(self) -> None:
         with open(ARGILLA_CREDENTIALS_FILE, "w") as f:
@@ -37,24 +39,25 @@ class ArgillaCredentials(BaseModel):
             return cls.parse_raw(f.read())
 
 
-def login(api_url: str, api_key: str) -> None:
+def login(api_url: str, api_key: str, workspace: Optional[str] = None) -> None:
     """Login to an Argilla server using the provided URL and API key. If the login is successful, the credentials will
     be stored in the Argilla cache directory (`~/.cache/argilla/credentials.json`).
 
     Args:
         api_url: The URL of the Argilla server.
         api_key: The API key to use when communicating with the Argilla server.
+        workspace: The default workspace where the datasets will be created.
 
     Raises:
         ValueError: If the login fails.
     """
     # Try to login to the server
     try:
-        init(api_url=api_url, api_key=api_key)
+        init(api_url=api_url, api_key=api_key, workspace=workspace)
     except UnauthorizedApiError as e:
         raise ValueError(f"Could not login in '{api_url}' using provided credentials") from e
 
     if not ARGILLA_CACHE_DIR.exists():
         ARGILLA_CACHE_DIR.mkdir(parents=True)
 
-    ArgillaCredentials(api_url=api_url, api_key=api_key).save()
+    ArgillaCredentials(api_url=api_url, api_key=api_key, workspace=workspace).save()
