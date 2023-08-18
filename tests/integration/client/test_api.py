@@ -16,6 +16,7 @@
 import concurrent.futures
 import datetime
 import re
+from pathlib import Path
 from time import sleep
 from typing import Iterable
 from uuid import uuid4
@@ -279,8 +280,11 @@ def test_init_with_stored_credentials(mock_init_ok, mocker):
             read_data='{"api_url": "http://integration-test.com:6900", "api_key": "integration.test", "workspace": "mock_workspace", "extra_headers": {"X-Integration-Test": "true"}}'
         ),
     )
+    path_mock = mocker.patch.object(Path, "exists")
+    path_mock.return_value = True
 
     init()
+
     assert active_client()._client == AuthenticatedClient(
         base_url="http://integration-test.com:6900",
         token="integration.test",
