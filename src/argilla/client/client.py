@@ -119,8 +119,10 @@ class Argilla:
                 workspace = credentials.workspace
                 extra_headers = credentials.extra_headers
             except FileNotFoundError:
-                api_url = "http://localhost:6900"
-                api_key = DEFAULT_API_KEY
+                pass
+
+        api_url = api_url or "http://localhost:6900"
+        api_key = api_key or DEFAULT_API_KEY
 
         # Checking that the api_url does not end in '/'
         api_url = re.sub(r"\/$", "", api_url)
