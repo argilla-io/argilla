@@ -22,6 +22,14 @@ Learn how to collect comparison or human preference data and train a reward mode
 Learn how to add suggestions to your Feedback dataset using Setfit.
 
 ```
+
+```{grid-item-card} Fine-tune a SetFit model using the ArgillaTrainer
+:link: trainer-feedback-setfit.html
+
+Learn how to use the ArgillaTrainer to fine-tune your Feedback dataset using Setfit.
+
+```
+
 ````
 
 ```{toctree}
@@ -30,4 +38,5 @@ Learn how to add suggestions to your Feedback dataset using Setfit.
 curating-feedback-instructiondataset
 train-reward-model-rlhf
 labelling-feedback-setfit
+trainer-feedback-setfit
 ```
