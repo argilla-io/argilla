@@ -15,11 +15,16 @@
 from typing import List
 from rich.console import Console
 from rich.table import Table
-
+import typer
 from argilla import Workspace
+from argilla.tasks import async_typer
 
 
-def list_workspaces():
+def list_workspaces(
+    api_url: str = typer.Option(default=None, help="The URL of the Argilla server."),
+    api_key: str = typer.Option(default=None, help="The API key to use when communicating with the Argilla server."),
+) -> None:
+    """List the workspaces in Argilla and prints them on the console."""
     # TODO: Add `login`
 
     workspaces = Workspace.list()
@@ -41,3 +46,7 @@ def list_workspaces():
 
     console = Console()
     console.print(table)
+
+
+if __name__ == "__main__":
+    async_typer.run(list_workspaces)

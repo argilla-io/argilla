@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 
-from argilla.tasks import database_app, server_app, training_app, users_app
+from argilla.tasks import database_app, server_app, training_app, users_app, workspaces_app
 from argilla.tasks.async_typer import AsyncTyper
 
 app = AsyncTyper(rich_help_panel=True, help="Argilla CLI", no_args_is_help=True)
@@ -23,6 +23,7 @@ app.add_typer(users_app, name="users")
 app.add_typer(database_app, name="database")
 app.add_typer(training_app, name="train")
 app.add_typer(server_app, name="server")
+app.add_typer(workspaces_app, name="workspaces")
 
 if __name__ == "__main__":
     app()
