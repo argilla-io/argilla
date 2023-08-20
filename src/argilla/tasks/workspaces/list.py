@@ -18,14 +18,24 @@ from rich.table import Table
 import typer
 from argilla import Workspace
 from argilla.tasks import async_typer
+from argilla.client import login
 
 
 def list_workspaces(
-    api_url: str = typer.Option(default=None, help="The URL of the Argilla server."),
-    api_key: str = typer.Option(default=None, help="The API key to use when communicating with the Argilla server."),
+    api_url: str = typer.Option(default="", help="The URL of the Argilla server."),
+    api_key: str = typer.Option(default="", help="The API key to use when communicating with the Argilla server."),
 ) -> None:
     """List the workspaces in Argilla and prints them on the console."""
-    # TODO: Add `login`
+    if api_url == "" and api_key == "":
+        # If the credentials are not provided, try to load them from the file.
+        try:
+            credentials = login.ArgillaCredentials.load()
+            api_url = credentials.api_url
+            api_key = credentials.api_key
+        except FileNotFoundError:
+            raise FileNotFoundError("The credentials file doesn't exist yet, you must pass your credentials.")
+
+    login.login(api_url, api_key)
 
     workspaces = Workspace.list()
     table = Table(title="Workspaces")
