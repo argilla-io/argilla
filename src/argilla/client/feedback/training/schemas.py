@@ -68,6 +68,8 @@ class TrainingData(ABC):
         # dataframe format.
         if df.applymap(lambda x: isinstance(x, list)).all().any():
             df = pd.DataFrame(df.apply(tuple, 1).drop_duplicates().to_list(), columns=df.columns)
+        else:
+            df = df.drop_duplicates()
 
         df = df.dropna(how="any")
         return df.to_dict(orient="records")
