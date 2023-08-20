@@ -11,3 +11,33 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+from typing import List
+from rich.console import Console
+from rich.table import Table
+
+from argilla import Workspace
+
+
+def list_workspaces():
+    # TODO: Add `login`
+
+    workspaces = Workspace.list()
+    table = Table(title="Workspaces")
+
+    columns = ("ID", "Name", "Creation Date", "Update Date")
+    [table.add_column(col, justify="center") for col in columns]
+
+    def grab_fields(workspace: Workspace) -> List[str]:
+        return [
+            str(workspace.id),
+            workspace.name,
+            workspace.inserted_at.isoformat(sep=" "),
+            workspace.updated_at.isoformat(sep=" "),
+        ]
+
+    for ws in workspaces:
+        table.add_row(*grab_fields(ws))
+
+    console = Console()
+    console.print(table)
