@@ -44,8 +44,10 @@ class ArgillaCredentials(BaseModel):
 
     @classmethod
     def remove(cls) -> None:
-        if ARGILLA_CREDENTIALS_FILE.exists():
-            ARGILLA_CREDENTIALS_FILE.unlink()
+        if not ARGILLA_CREDENTIALS_FILE.exists():
+            raise FileNotFoundError(f"'{ARGILLA_CREDENTIALS_FILE}' does not exist.")
+
+        ARGILLA_CREDENTIALS_FILE.unlink()
 
 
 def login(
