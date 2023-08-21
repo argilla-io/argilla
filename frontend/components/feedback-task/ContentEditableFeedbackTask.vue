@@ -26,6 +26,7 @@
           @keydown.arrow-left.stop=""
           @keydown.delete.exact.stop=""
           @keydown.enter.exact.stop=""
+          @paste="pastePlainText"
         />
       </transition>
     </div>
@@ -81,14 +82,9 @@ export default {
     },
   },
   mounted() {
-    window.addEventListener("paste", this.pastePlainText);
-
     this.editableText = this.defaultText = this.value;
 
     this.textAreaWrapper = document.getElementById("contentId");
-  },
-  destroyed() {
-    window.removeEventListener("paste", this.pastePlainText);
   },
   methods: {
     looseFocus() {
