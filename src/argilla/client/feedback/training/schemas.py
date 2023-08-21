@@ -214,7 +214,7 @@ class TrainingTask:
                 if label_strategy is not None:
                     raise ValueError("label_strategy is already defined via Unification class.")
             else:
-                unification_kwargs = {}
+                unification_kwargs = {"question": label}
                 if label_strategy is not None:
                     unification_kwargs["strategy"] = label_strategy
                 else:
