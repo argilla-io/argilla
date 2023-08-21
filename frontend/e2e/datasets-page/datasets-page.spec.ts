@@ -34,7 +34,7 @@ test.describe("Datasets page with datasets", () => {
 
     await page
       .locator("li")
-      .filter({ hasText: "argilla" })
+      .filter({ hasText: "argilla-other" })
       .locator("div")
       .nth(1)
       .click();
