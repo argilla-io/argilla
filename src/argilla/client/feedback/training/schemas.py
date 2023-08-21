@@ -221,7 +221,7 @@ class TrainingTask:
                     _LOGGER.info(f"No label strategy defined. Using default strategy for {type(label)}.")
                 for unification in TASK_STRUCTURE["text_classification"]["unification"]:
                     try:
-                        label = unification(**unification_kwargs).__root__
+                        label = unification(**unification_kwargs)
                         break
                     except ValueError:
                         label = None
