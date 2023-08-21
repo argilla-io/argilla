@@ -1,81 +1,88 @@
 <template>
   <SynchronizeScroll class="settings__container">
     <div class="settings__edition-form">
-      <h2 class="--heading5 --medium">Edit questions</h2>
-      <div v-for="question in settings.questions" :key="question.id">
-        <form
-          @submit.prevent="onSubmit(question)"
-          class="settings__edition-form__questions"
-        >
-          <div class="settings__edition-form__name">
-            <h4 class="--body1 --medium --capitalized" v-text="question.name" />
-            <BaseBadge class="--capitalized" :text="`${$t(question.type)}`" />
-          </div>
-
-          <Validation
-            :validations="question.validate().title"
-            class="settings__edition-form__group"
+      <div class="settings__edition-form__content">
+        <h2 class="--heading5 --medium">Edit questions</h2>
+        <div v-for="question in settings.questions" :key="question.id">
+          <form
+            @submit.prevent="onSubmit(question)"
+            class="settings__edition-form__questions"
           >
-            <label :for="`title-${question.id}`">Title</label>
-            <input
-              type="type"
-              :id="`title-${question.id}`"
-              v-model="question.title"
-            />
-          </Validation>
+            <div class="settings__edition-form__name">
+              <h4
+                class="--body1 --medium --capitalized"
+                v-text="question.name"
+              />
+              <BaseBadge class="--capitalized" :text="`${$t(question.type)}`" />
+            </div>
 
-          <Validation
-            :validations="question.validate().description"
-            class="settings__edition-form__group"
-          >
-            <label :for="`description-${question.id}`">Description</label>
-            <textarea
-              :id="`description-${question.id}`"
-              v-model="question.description"
-            />
-          </Validation>
-
-          <BaseSwitch
-            :id="`use-markdown-${question.id}`"
-            v-if="question.isTextType"
-            v-model="question.settings.use_markdown"
-            >Use Markdown</BaseSwitch
-          >
-
-          <BaseRangeSlider
-            v-if="question.settings.visible_options"
-            :id="`visible_options-${question.id}`"
-            :min="3"
-            :max="question.settings.options.length"
-            v-model="question.settings.visible_options"
-            >Visible options</BaseRangeSlider
-          >
-
-          <div class="settings__edition-form__footer">
-            <BaseButton
-              type="button"
-              class="secondary light small"
-              @on-click="restore(question)"
-              :disabled="!question.isModified"
+            <Validation
+              :validations="question.validate().title"
+              class="settings__edition-form__group"
             >
-              <span v-text="'Cancel'" />
-            </BaseButton>
-            <BaseButton
-              type="submit"
-              class="primary small"
-              :disabled="!question.isModified || !question.isQuestionValid"
+              <label :for="`title-${question.id}`">Title</label>
+              <input
+                type="type"
+                :id="`title-${question.id}`"
+                v-model="question.title"
+              />
+            </Validation>
+
+            <Validation
+              :validations="question.validate().description"
+              class="settings__edition-form__group"
             >
-              <span v-text="'Update'" />
-            </BaseButton>
-          </div>
-        </form>
+              <label :for="`description-${question.id}`">Description</label>
+              <textarea
+                :id="`description-${question.id}`"
+                v-model="question.description"
+              />
+            </Validation>
+
+            <BaseSwitch
+              :id="`use-markdown-${question.id}`"
+              v-if="question.isTextType"
+              v-model="question.settings.use_markdown"
+              >Use Markdown</BaseSwitch
+            >
+
+            <BaseRangeSlider
+              v-if="question.settings.visible_options"
+              :id="`visible_options-${question.id}`"
+              :min="3"
+              :max="question.settings.options.length"
+              v-model="question.settings.visible_options"
+              >Visible options</BaseRangeSlider
+            >
+
+            <div class="settings__edition-form__footer">
+              <BaseButton
+                type="button"
+                class="secondary light small"
+                @on-click="restore(question)"
+                :disabled="!question.isModified"
+              >
+                <span v-text="'Cancel'" />
+              </BaseButton>
+              <BaseButton
+                type="submit"
+                class="primary small"
+                :disabled="!question.isModified || !question.isQuestionValid"
+              >
+                <span v-text="'Update'" />
+              </BaseButton>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-    <QuestionsComponent
-      legend="Ui preview"
-      class="settings__preview"
-      :questions="settings.questions"
-    />
+    <div class="settings__preview">
+      <QuestionsComponent
+        legend="Ui preview"
+        class="settings__preview__content"
+        :questions="settings.questions"
+      />
+    </div>
   </SynchronizeScroll>
 </template>
 
@@ -113,11 +120,17 @@ export default {
   &__edition-form {
     display: flex;
     flex: 1;
-    flex-direction: column;
-    gap: $base-space * 2;
     height: 100%;
     overflow: auto;
     padding-right: $base-space * 2;
+
+    &__content {
+      display: flex;
+      flex-direction: column;
+      gap: $base-space * 2;
+      width: 100%;
+      margin-top: $base-space;
+    }
 
     &__questions {
       display: flex;
@@ -200,11 +213,13 @@ export default {
     flex-basis: 37em;
     flex-direction: column;
     height: 100%;
-    padding: $base-space * 3;
-    box-shadow: $shadow;
-    background: palette(grey, 800);
-    border-radius: $border-radius-m;
     overflow: auto;
+    &__content {
+      padding: $base-space * 3;
+      background: palette(grey, 800);
+      border-radius: $border-radius-m;
+      margin-top: $base-space;
+    }
   }
 }
 </style>

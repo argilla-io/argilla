@@ -27,13 +27,13 @@ export default {
     height: 100%;
     flex-wrap: wrap;
     min-height: 0;
-    padding-top: $base-space;
     overflow: auto;
   }
 
   &__content {
     flex: 1;
     max-width: 1000px;
+    padding-top: $base-space;
   }
 }
 </style>

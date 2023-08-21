@@ -82,7 +82,6 @@ export default {
     height: 100%;
     flex-wrap: wrap;
     min-height: 0;
-    padding-top: $base-space;
     overflow: auto;
   }
 
@@ -92,7 +91,7 @@ export default {
     flex-direction: column;
     gap: $base-space * 2;
     max-width: 1000px;
-    padding-right: $base-space * 2;
+    padding-top: $base-space;
 
     &__fields {
       display: flex;
