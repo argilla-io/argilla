@@ -23,7 +23,7 @@ from huggingface_hub import DatasetCardData
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import FeedbackRecord
-    from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
     from datasets import Dataset
 
 
