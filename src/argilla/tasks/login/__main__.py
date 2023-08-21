@@ -19,15 +19,15 @@ import typer
 app = typer.Typer(invoke_without_command=True)
 
 
-@app.callback(help="Login to an Argilla server")
+@app.callback(help="Login to an Argilla Server")
 def login(
-    api_url: str = typer.Option(..., help="The URL of the Argilla server to login"),
-    api_key: str = typer.Option(..., help="The API key to use to login to the Argilla server", prompt="API Key"),
+    api_url: str = typer.Option(..., help="The URL of the Argilla Server to login in to"),
+    api_key: str = typer.Option(..., help="The API key for logging into the Argilla Server", prompt="API Key"),
     workspace: Optional[str] = typer.Option(
         None, help="The default workspace over which the operations will be performed"
     ),
     extra_headers: Optional[str] = typer.Option(
-        None, help="A JSON string with extra headers to be sent in the requests to the Argilla server"
+        None, help="A JSON string with extra headers to be sent in the requests to the Argilla Server"
     ),
 ):
     import json
