@@ -47,6 +47,25 @@ if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
 
 
+TASK_STRUCTURE = {
+    "text_classification": {
+        "field": (TextField),
+        "question": (
+            LabelQuestion,
+            MultiLabelQuestion,
+            RatingQuestion,
+            RankingQuestion,
+        ),
+        "unification": (
+            LabelQuestionUnification,
+            MultiLabelQuestionUnification,
+            RatingQuestionUnification,
+            RankingQuestionUnification,
+        ),
+    }
+}
+
+
 class TrainingData(ABC):
     def _format_data(self, dataset: "FeedbackDataset"):
         formatted_data = []
@@ -167,6 +186,7 @@ class TrainingTask:
 
             >>> from argilla import LabelQuestion, TrainingTask
             >>> from collections import Counter
+            >>> import random
             >>> def formatting_func(sample: Dict[str, Any]) -> Union[Tuple[str, str], Tuple[str, List[str]]]:
             ...     text = sample["text"]
             ...     values = [annotation["value"] for annotation in sample["label"]]
@@ -190,33 +210,22 @@ class TrainingTask:
                 raise ValueError("`formatting_func` is already defined, so you cannot define `text` and `label`.")
             return TrainingTaskForTextClassification(formatting_func=formatting_func)
         else:
-            if isinstance(
-                label,
-                (
-                    LabelQuestionUnification,
-                    MultiLabelQuestionUnification,
-                    RatingQuestionUnification,
-                    RankingQuestionUnification,
-                ),
-            ):
+            if isinstance(label, TASK_STRUCTURE["text_classification"]["unification"]):
                 if label_strategy is not None:
                     raise ValueError("label_strategy is already defined via Unification class.")
             else:
-                unification_kwargs = {"question": label}
+                unification_kwargs = {}
                 if label_strategy is not None:
                     unification_kwargs["strategy"] = label_strategy
                 else:
                     _LOGGER.info(f"No label strategy defined. Using default strategy for {type(label)}.")
-                if isinstance(label, RatingQuestion):
-                    label = RatingQuestionUnification(**unification_kwargs)
-                elif isinstance(label, MultiLabelQuestion):
-                    label = MultiLabelQuestionUnification(**unification_kwargs)
-                elif isinstance(label, LabelQuestion):
-                    label = LabelQuestionUnification(**unification_kwargs)
-                elif isinstance(label, RankingQuestion):
-                    label = RankingQuestionUnification(**unification_kwargs)
-                else:
-                    raise ValueError(f"Label type {type(label)} is not supported.")
+                for unification in TASK_STRUCTURE["text_classification"]["unification"]:
+                    try:
+                        label = unification(**unification_kwargs).__root__
+                        break
+                    except ValueError:
+                        label = None
+
             return TrainingTaskForTextClassification(text=text, label=label)
 
     @classmethod
@@ -478,7 +487,6 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
 
         datasets_dict = {"id": [], "text": [], "label": []}
         for index, entry in enumerate(data):
-            print(entry)
             datasets_dict["id"].append(index)
             datasets_dict["text"].append(entry["text"])
             datasets_dict["label"].append(entry["label"])
@@ -528,7 +536,6 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
             # Creating the DocBin object as in https://spacy.io/usage/training#training-data
             for entry in data:
                 doc = lang.make_doc(entry["text"])
-                # doc.user_data["id"] = record.id
 
                 cats = dict.fromkeys(all_labels, 0)
                 if isinstance(entry["label"], list):
