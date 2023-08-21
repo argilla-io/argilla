@@ -16,8 +16,8 @@ from pathlib import Path
 from typing import Dict, Optional
 
 from argilla.client.api import init
-from argilla.client.sdk.commons.errors import HttpResponseError, UnauthorizedApiError
 from argilla.client.login import ArgillaCredentials
+from argilla.client.sdk.commons.errors import HttpResponseError, UnauthorizedApiError
 
 ARGILLA_CACHE_DIR = Path.home() / ".cache" / "argilla"
 ARGILLA_CREDENTIALS_FILE = ARGILLA_CACHE_DIR / "credentials.json"
@@ -40,17 +40,13 @@ def logout(
     """
     # Try to logout from the server
     try:
-        init(api_url=api_url, api_key=api_key,
-             workspace=workspace, extra_headers=extra_headers)
-        ArgillaCredentials(api_url=api_url, api_key=api_key,
-                           workspace=workspace, extra_headers=extra_headers).remove()
+        init(api_url=api_url, api_key=api_key, workspace=workspace, extra_headers=extra_headers)
+        ArgillaCredentials(api_url=api_url, api_key=api_key, workspace=workspace, extra_headers=extra_headers).remove()
     except HttpResponseError as e:
         raise ValueError(
             f"Could not reach '{api_url}', make sure that the Argilla Server is running and working as expected"
         ) from e
     except UnauthorizedApiError as e:
-        raise ValueError(
-            f"Could not logout from '{api_url}' using provided credentials") from e
+        raise ValueError(f"Could not logout from '{api_url}' using provided credentials") from e
     except FileNotFoundError as e:
-        raise ValueError(
-            f"User is not logged in on Argilla Server at '{api_url}' ") from e
+        raise ValueError(f"User is not logged in on Argilla Server at '{api_url}' ") from e

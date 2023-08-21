@@ -54,6 +54,7 @@ def test_logout_fails(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixt
         extra_headers={"X-Unit-Test": "true"},
     )
 
+
 def test_logout_with_invalid_extra_headers(cli_runner: "CliRunner", cli: "Typer"):
     result = cli_runner.invoke(
         cli,
