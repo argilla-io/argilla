@@ -218,7 +218,7 @@ export default {
       padding: $base-space * 3;
       background: palette(grey, 800);
       border-radius: $border-radius-m;
-      margin-top: $base-space;
+      margin: $base-space 0;
     }
   }
 }
