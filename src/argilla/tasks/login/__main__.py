@@ -23,7 +23,7 @@ app = typer.Typer(invoke_without_command=True)
 
 @app.callback(help="Login to an Argilla server")
 def login(
-    api_url: str = typer.Argument(..., help="The URL of the Argilla server to login"),
+    api_url: str = typer.Option(..., help="The URL of the Argilla server to login"),
     api_key: str = typer.Option(..., help="The API key to use to login to the Argilla server", prompt="API Key"),
     workspace: Optional[str] = typer.Option(
         None, help="The default workspace over which the operations will be performed"
