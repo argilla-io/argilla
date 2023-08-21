@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added `formatting_func` to `ArgillaTrainer` for customizing the formatting of the data ([#3540](https://github.com/argilla-io/argilla/issues/3540)).
+
 ## [1.14.1](https://github.com/argilla-io/argilla/compare/v1.14.0...v1.14.1)
 
 ### Fixed

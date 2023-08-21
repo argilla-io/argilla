@@ -32,6 +32,7 @@ Data for the training text classification using our `FeedbackDataset` is defined
 
 3.  We then define an `ArgillaTrainer` instance with support for "openai", "setfit", "peft", "spacy" and "transformers".
 
+
 #### Unify responses
 
 Argilla `*Question`s need to be [unified using a strategy](/guides/llms/practical_guides/collect_responses) and so do `RatingQuestions`s, `LabelQuestion`s and `MultiLabelQuestion`s. Therefore, records need to be unified by using a strategy, which takes one of the questions and one of their associated strategies. Luckily this is integrated within the `TrainingTask`-step underneath, but you can also do this individually as shown [here](/guides/llms/practical_guides/collect_responses).
@@ -40,9 +41,11 @@ Argilla `*Question`s need to be [unified using a strategy](/guides/llms/practica
 A brief shortcut that `RatingQuestion`s can be unified using a "majority"-, "min"-, "max"- or "disagreement"-strategy. Both `LabelQuestion`s and `MultiLabelQuestion`s can be resolved using a "majority"-, or "disagreement"-strategy.
 ````
 
-#### Define a task mapping
+#### Define a task
 
-Now we know which unification strategy to apply, we can now define our `TrainingTask.for_text_classification`.
+##### `text-label`-pair
+
+We offer the option to use default unification strategies and formatting based on a `text-label`-pair. Here we infer formatting information based on `*Field` and `*Question` names from the dataset. This is the easiest way to define a `TrainingTask` for text classification.
 
 ::::{tab-set}
 
@@ -93,12 +96,12 @@ task = TrainingTask.for_text_classification(
 
 :::{tab-item} RatingQuestion
 ```python
-from argilla.feedback import FeedbackDataset, TrainingTaskMapping
+from argilla.feedback import FeedbackDataset, TrainingTask
 
 dataset = FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
 )
-task_mapping = TrainingTaskMapping.for_text_classification(
+task = TrainingTask.for_text_classification(
     text=dataset.field_by_name("title"),
     label=dataset.question_by_name("answer_quality"), # RatingQuestion
     label_strategy=None # default to "majority", or use "min", "max", "disagreement"
@@ -108,14 +111,49 @@ task_mapping = TrainingTaskMapping.for_text_classification(
 
 ::::
 
+##### `formatting_func`
+
+We offer the option to provide a `formatting_func` to the `TrainingTask` or `TrainingTask`. This function is applied to each sample in the dataset and can be used for more advanced preprocessing and data formatting. The function should return a tuple of `(text, label)`.
+
+```python
+from argilla.feedback import FeedbackDataset, TrainingTask
+
+dataset = FeedbackDataset.from_huggingface(
+    repo_id="argilla/stackoverflow_feedback_demo"
+)
+
+def formatting_func(sample):
+    text = sample["title"] + " " + sample["question"]
+    values = [resp["value"] for resp in sample["title_question_fit"]]
+    counter = Counter(values)
+    if counter:
+        most_common = counter.most_common()
+        max_frequency = most_common[0][1]
+        most_common_elements = [
+            element for element, frequency in most_common if frequency == max_frequency
+        ]
+        label = random.choice(most_common_elements)
+        return (text, label)
+    else:
+        return None
+
+task = TrainingTask.for_text_classification(
+    formatting_func=formatting_func,
+)
+```
+
 #### Use ArgillaTrainer
 
 Next, we can use our `FeedbackDataset` and `TrainingTaskForTextClassification` to initialize our `argilla.ArgillaTrainer`. We support the frameworks "openai", "setfit", "peft", "spacy" and "transformers".
 
 ````{note}
-This is a newer version and can be imported via `from argilla.feedback import ArgillaTrainer`. The old trainer can be imported via `from argilla.training import ArgillaTrainer`. Our docs, contain some [additional information on usage of the ArgillaTrainer](../../train_a_model.html).
+This is a newer version and can be imported via `from argilla.feedback import ArgillaTrainer`. The old trainer can be imported via `from argilla.training import ArgillaTrainer`. Our docs, contain some [additional information on usage of the ArgillaTrainer](/guides/train_a_model).
 ````
 
+
+::::{tab-set}
+
+:::{tab-item} text-label-pair
 ```python
 from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
 
@@ -135,6 +173,38 @@ trainer = ArgillaTrainer(
 trainer.update_config(num_train_epochs=2)
 trainer.train(output_dir="my_awesone_model")
 ```
+:::
+
+:::{tab-item} formatting_func
+```python
+from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
+
+dataset = FeedbackDataset.from_huggingface(
+    repo_id="argilla/stackoverflow_feedback_demo"
+)
+
+def formatting_func(sample):
+    text = sample["title"] + " " + sample["question"]
+    values = [resp["value"] for resp in sample["title_question_fit"]]
+    counter = Counter(values)
+    if counter:
+        most_common = counter.most_common()
+        max_frequency = most_common[0][1]
+        most_common_elements = [
+            element for element, frequency in most_common if frequency == max_frequency
+        ]
+        label = random.choice(most_common_elements)
+        return (text, label)
+    else:
+        return None
+
+task = TrainingTask.for_text_classification(
+    formatting_func=formatting_func,
+)
+trainer.update_config(num_train_epochs=2)
+trainer.train(output_dir="my_awesone_model")
+:::
+::::
 
 ````{note}
 The `FeedbackDataset` also allows for custom workflows via the `prepare_for_training()` method.
