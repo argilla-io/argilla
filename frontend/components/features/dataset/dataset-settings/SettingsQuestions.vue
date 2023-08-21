@@ -78,7 +78,7 @@
     </div>
     <div class="settings__preview">
       <QuestionsComponent
-        legend="Ui preview"
+        legend="UI preview"
         class="settings__preview__content"
         :questions="settings.questions"
       />
