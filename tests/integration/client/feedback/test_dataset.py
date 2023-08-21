@@ -667,10 +667,7 @@ def test_push_to_huggingface_and_from_huggingface(
 )
 @pytest.mark.parametrize(
     "question",
-    [
-        "question-3",
-        "question-4"
-    ],
+    ["question-3", "question-4"],
 )
 @pytest.mark.usefixtures(
     "feedback_dataset_guidelines",
