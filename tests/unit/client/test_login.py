@@ -68,6 +68,14 @@ def test_argilla_credentials_remove(mocker: "MockFixture"):
     unlink_mock.assert_called_once()
 
 
+def test_argilla_credentials_remove_raises_error(mocker: "MockFixture"):
+    path_mock = mocker.patch.object(Path, "exists")
+    path_mock.return_value = False
+
+    with pytest.raises(FileNotFoundError):
+        ArgillaCredentials.remove()
+
+
 def test_argilla_credentials_load_raises_error():
     with pytest.raises(FileNotFoundError):
         ArgillaCredentials.load()
