@@ -16,8 +16,6 @@ from typing import Optional
 
 import typer
 
-from argilla.client.login import login as login_func
-
 app = typer.Typer(invoke_without_command=True)
 
 
@@ -28,15 +26,29 @@ def login(
     workspace: Optional[str] = typer.Option(
         None, help="The default workspace over which the operations will be performed"
     ),
+    extra_headers: Optional[str] = typer.Option(
+        None, help="A JSON string with extra headers to be sent in the requests to the Argilla server"
+    ),
 ):
+    import json
+
+    from argilla.client.login import login as login_func
+
     try:
-        login_func(api_url=api_url, api_key=api_key, workspace=workspace, extra_headers={})
+        if extra_headers:
+            headers = json.loads(extra_headers)
+        else:
+            headers = {}
+        login_func(api_url=api_url, api_key=api_key, workspace=workspace, extra_headers=headers)
         typer.echo(f"Logged in successfully to '{api_url}' Argilla server!")
-    except ValueError:
+    except json.JSONDecodeError as e:
+        typer.echo("The provided extra headers are not a valid JSON string.")
+        raise typer.Exit(code=1) from e
+    except ValueError as e:
         typer.echo(
             f"Could not login to the '{api_url}' Argilla server. Please check the provided credentials and try again."
         )
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
 
 
 if __name__ == "__main__":
