@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     import httpx
 
     from argilla.client.feedback.dataset.local import FeedbackDataset
-    from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackItemModel
     from argilla.client.workspaces import Workspace
 
