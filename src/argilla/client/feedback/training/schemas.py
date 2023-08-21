@@ -219,13 +219,16 @@ class TrainingTask:
                     unification_kwargs["strategy"] = label_strategy
                 else:
                     _LOGGER.info(f"No label strategy defined. Using default strategy for {type(label)}.")
-                for unification in TASK_STRUCTURE["text_classification"]["unification"]:
-                    try:
-                        label = unification(**unification_kwargs)
-                        break
-                    except ValueError:
-                        label = None
-
+                if isinstance(label, RatingQuestion):
+                    label = RatingQuestionUnification(**unification_kwargs)
+                elif isinstance(label, MultiLabelQuestion):
+                    label = MultiLabelQuestionUnification(**unification_kwargs)
+                elif isinstance(label, LabelQuestion):
+                    label = LabelQuestionUnification(**unification_kwargs)
+                elif isinstance(label, RankingQuestion):
+                    label = RankingQuestionUnification(**unification_kwargs)
+                else:
+                    raise ValueError(f"Label type {type(label)} is not supported.")
             return TrainingTaskForTextClassification(text=text, label=label)
 
     @classmethod
