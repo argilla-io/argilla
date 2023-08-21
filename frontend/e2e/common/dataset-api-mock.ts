@@ -94,7 +94,7 @@ export const workspacesMocked = [
   },
   {
     id: "4e70e21a-7533-41e9-8a25-11d6ee3091bd",
-    name: "other-argilla",
+    name: "argilla-other",
     inserted_at: "2023-04-27T15:44:23.423662",
     updated_at: "2023-04-27T15:44:23.423662",
   },

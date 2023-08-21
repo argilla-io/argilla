@@ -34,14 +34,18 @@ test.describe("Datasets page with datasets", () => {
 
     await page
       .locator("li")
-      .filter({ hasText: "other-argilla" })
+      .filter({ hasText: "argilla" })
       .locator("div")
       .nth(1)
       .click();
 
+    await page.waitForTimeout(300);
+
     await expect(page).toHaveScreenshot();
 
     await page.getByRole("button", { name: "Workspace" }).click();
+
+    await page.waitForTimeout(300);
 
     await expect(page).toHaveScreenshot();
   });
