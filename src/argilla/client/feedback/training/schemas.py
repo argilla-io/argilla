@@ -126,16 +126,18 @@ class TrainingTask:
         cls,
         formatting_func: Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]] = None,
         text: Optional[TextField] = None,
-        label: Optional[Union[
-            RatingQuestion,
-            LabelQuestion,
-            RankingQuestion,
-            MultiLabelQuestion,
-            RatingQuestionUnification,
-            LabelQuestionUnification,
-            MultiLabelQuestionUnification,
-            RankingQuestionUnification,
-        ]] = None,
+        label: Optional[
+            Union[
+                RatingQuestion,
+                LabelQuestion,
+                RankingQuestion,
+                MultiLabelQuestion,
+                RatingQuestionUnification,
+                LabelQuestionUnification,
+                MultiLabelQuestionUnification,
+                RankingQuestionUnification,
+            ]
+        ] = None,
         label_strategy: str = None,
     ) -> "TrainingTaskForTextClassification":
         """
