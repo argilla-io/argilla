@@ -15,7 +15,7 @@
 import logging
 import warnings
 from abc import ABC
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
 
 import pandas as pd
 from pydantic import BaseModel
