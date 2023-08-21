@@ -49,6 +49,10 @@ class ArgillaCredentials(BaseModel):
 
         ARGILLA_CREDENTIALS_FILE.unlink()
 
+    @classmethod
+    def exists(cls) -> bool:
+        return ARGILLA_CREDENTIALS_FILE.exists()
+
 
 def login(
     api_url: str, api_key: str, workspace: Optional[str] = None, extra_headers: Optional[Dict[str, str]] = None
