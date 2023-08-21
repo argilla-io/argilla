@@ -155,7 +155,7 @@ class TrainingTask:
             TrainingTaskForTextClassification: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
 
         Examples:
-            >>> from argilla import LabelQuestion, TrainingTaskForTextClassification
+            >>> from argilla import LabelQuestion, TrainingTask
             >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
             >>> task = TrainingTask.for_text_classification(
             ...     text=dataset.fields[0],
@@ -163,7 +163,7 @@ class TrainingTask:
             ... )
             >>> dataset.prepare_for_training(framework="...", task=task)
 
-            >>> from argilla import LabelQuestion, TrainingTaskForTextClassification
+            >>> from argilla import LabelQuestion, TrainingTask
             >>> from collections import Counter
             >>> def formatting_func(sample: Dict[str, Any]) -> Union[Tuple[str, str], Tuple[str, List[str]]]:
             ...     text = sample["text"]
@@ -350,7 +350,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
         label: Union[RatingQuestionUnification, LabelQuestionUnification, MultiLabelQuestionUnification, RankingQuestionUnification]
 
     Examples:
-        >>> from argilla import LabelQuestion, TrainingTaskForTextClassification
+        >>> from argilla import LabelQuestion, TrainingTask
         >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
         >>> task = TrainingTask.for_text_classification(
         ...     text=dataset.fields[0],
@@ -358,7 +358,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
         ... )
         >>> dataset.prepare_for_training(framework="...", task=task)
 
-        >>> from argilla import LabelQuestion, TrainingTaskForTextClassification
+        >>> from argilla import LabelQuestion, TrainingTask
         >>> from collections import Counter
         >>> def formatting_func(sample: Dict[str, Any]) -> Union[Tuple[str, str], Tuple[str, List[str]]]:
         ...     text = sample["text"]
