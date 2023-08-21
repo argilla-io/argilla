@@ -558,18 +558,6 @@ export default {
       word-break: break-word;
     }
   }
-
-  // .metrics {
-  //   display: block;
-  //   span {
-  //     display: inline-block;
-  //     padding: 0.2em 0.5em;
-  //     margin-top: 1em;
-  //     background: lighten(palette(blue, 300), 44%);
-  //     margin-right: 3px;
-  //     border-radius: 2px;
-  //   }
-  // }
 }
 button[data-title] {
   position: relative;
