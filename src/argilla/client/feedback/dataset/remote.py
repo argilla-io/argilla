@@ -56,9 +56,13 @@ class RemoteFeedbackRecords:
                 and/or attributes.
         """
         self._dataset = dataset
+        self._dataset_id = self._dataset.id
+        self._client = self._dataset._client  # Required to be able to use `allowed_for_roles` decorator
+
         self.__question_id2name = {question.id: question.name for question in self._dataset.questions}
         self.__question_name2id = {value: key for key, value in self.__question_id2name.items()}
 
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def __repr__(self) -> str:
         """Doesn't return anything, but prints a warning, since the `records` of a
         `FeedbackDataset` in Argilla are being lazily fetched, and never stored
@@ -85,18 +89,20 @@ class RemoteFeedbackRecords:
         )
         for suggestion in record.get("suggestions", []):
             suggestion.update({"question_name": self.__question_id2name[suggestion["question_id"]]})
-        return RemoteFeedbackRecord(client=self._dataset._client, name2id=self.__question_name2id, **record)
+        return RemoteFeedbackRecord(client=self._client, name2id=self.__question_name2id, **record)
 
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def __len__(self) -> int:
         """Returns the number of records in the current `FeedbackDataset` in Argilla."""
         try:
-            response = datasets_api_v1.get_metrics(client=self._dataset._client, id=self._dataset._id)
+            response = datasets_api_v1.get_metrics(client=self._client, id=self._dataset_id)
         except Exception as e:
             raise Exception(
                 f"Failed while getting the metrics from the current `FeedbackDataset` in Argilla with exception: {e}"
             ) from e
         return response.parsed.records.count
 
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def __getitem__(self, key: Union[slice, int]) -> Union[RemoteFeedbackRecord, List[RemoteFeedbackRecord]]:
         """Returns the record(s) at the given index(es) from Argilla.
 
@@ -146,21 +152,22 @@ class RemoteFeedbackRecords:
         records = []
         for offset, limit in zip(offsets, limits):
             fetched_records = datasets_api_v1.get_records(
-                client=self._dataset._client,
-                id=self._dataset._id,
+                client=self._client,
+                id=self._dataset_id,
                 offset=offset,
                 limit=limit,
             ).parsed
             records.extend([self.__parse_record(record) for record in fetched_records.items])
         return records[0] if isinstance(key, int) else records
 
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def __iter__(self) -> Iterator[RemoteFeedbackRecord]:
         """Iterates over the `FeedbackRecord`s of the current `FeedbackDataset` in Argilla."""
         current_batch = 0
         while True:
             batch = datasets_api_v1.get_records(
-                client=self._dataset._client,
-                id=self._dataset._id,
+                client=self._client,
+                id=self._dataset_id,
                 offset=FETCHING_BATCH_SIZE * current_batch,
                 limit=FETCHING_BATCH_SIZE,
             ).parsed
@@ -202,16 +209,13 @@ class RemoteFeedbackRecords:
                     record.dict(exclude={"id": ..., "suggestions": {"__all__": {"question_name"}}}, exclude_none=True)
                 )
             datasets_api_v1.add_records(
-                client=self._dataset._client,
-                id=self._dataset._id,
+                client=self._client,
+                id=self._dataset_id,
                 records=records_batch,
             )
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def delete(
-        self,
-        records: List[RemoteFeedbackRecord],
-    ) -> None:
+    def delete(self, records: List[RemoteFeedbackRecord]) -> None:
         """Deletes a list of `RemoteFeedbackRecord`s from Argilla.
 
         Args:
@@ -223,7 +227,7 @@ class RemoteFeedbackRecords:
         """
         for record in records:
             try:
-                records_api_v1.delete_record(client=self._dataset._client, id=record.id)
+                records_api_v1.delete_record(client=self._client, id=record.id)
             except Exception as e:
                 raise RuntimeError(f"Failed to delete record with id {record.id} from Argilla.") from e
 
@@ -266,7 +270,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         """
         super().__init__(fields=fields, questions=questions, guidelines=guidelines)
 
-        self._client = client
+        self._client = client  # Required to be able to use `allowed_for_roles` decorator
         self._id = id
         self._name = name
         self._workspace = workspace
