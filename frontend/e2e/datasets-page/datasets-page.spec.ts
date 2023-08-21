@@ -20,6 +20,31 @@ test.describe("Datasets page with datasets", () => {
 
     await expect(page).toHaveScreenshot();
   });
+
+  test("filter by workspaces", async ({ page }) => {
+    await mockAllDatasets(page);
+
+    await loginUserAndWaitFor(page, "datasets");
+
+    await page.waitForTimeout(1000);
+
+    await expect(page).toHaveScreenshot();
+
+    await page.getByRole("button", { name: "Workspace" }).click();
+
+    await page
+      .locator("li")
+      .filter({ hasText: "other-argilla" })
+      .locator("div")
+      .nth(1)
+      .click();
+
+    await expect(page).toHaveScreenshot();
+
+    await page.getByRole("button", { name: "Workspace" }).click();
+
+    await expect(page).toHaveScreenshot();
+  });
 });
 
 test.describe("Datasets page with no datasets", () => {

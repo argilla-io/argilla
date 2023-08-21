@@ -292,18 +292,20 @@ export default {
               return this.filters[key].find(
                 (filter) => filter.value === item[key][filter.key]
               );
-            } else {
-              return this.filters[key].toString().includes(item[key]);
             }
+
+            return this.filters[key].includes(item[key]);
           });
         }
+
         return true;
       };
       const itemComparator = (a, b) => {
-        let modifier = 1;
-        if (this.sortedOrder === "desc") modifier = -1;
+        const modifier = this.sortedOrder === "desc" ? -1 : 1;
+
         if (a[this.sortedBy] < b[this.sortedBy]) return -1 * modifier;
         if (a[this.sortedBy] > b[this.sortedBy]) return 1 * modifier;
+
         return 0;
       };
       const results = this.data.filter(matchSearch).filter(matchFilters);
@@ -354,33 +356,27 @@ export default {
       this.onAllCheckboxChanged(value);
     },
     onAllCheckboxChanged(value) {
-      this.filteredResults.forEach((r) => {
-        const rec = r;
-        rec.selectedRecord = value;
+      this.filteredResults.forEach((record) => {
+        record.selectedRecord = value;
       });
+
       this.selectedItems = this.filteredResults.filter(
-        (f) => f.selectedRecord === true
+        (filtered) => filtered.selectedRecord === true
       );
     },
     onCheckboxChanged(value, id) {
-      this.filteredResults.forEach((r) => {
-        if (r.id === id) {
-          const rec = r;
-          rec.selectedRecord = value;
+      this.filteredResults.forEach((record) => {
+        if (record.id === id) {
+          record.selectedRecord = value;
         }
       });
-      if (
-        this.filteredResults.some(
-          (f) => f.selectedRecord === false || undefined
-        )
-      ) {
-        this.allRecordsSelected = false;
-      } else {
-        this.allRecordsSelected = true;
-      }
+
       this.selectedItems = this.filteredResults.filter(
-        (f) => f.selectedRecord === true
+        (filtered) => filtered.selectedRecord === true
       );
+
+      this.allRecordsSelected =
+        this.filteredResults.length === this.selectedItems.length;
     },
   },
 };
