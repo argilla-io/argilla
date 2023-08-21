@@ -348,17 +348,4 @@ export default {
     justify-content: center;
   }
 }
-.question-form {
-  border: 1px solid transparent;
-  background: palette(white);
-  &.--pending {
-    border-color: transparent;
-  }
-  &.--discarded {
-    border-color: #c3c3c3;
-  }
-  &.--submitted {
-    border-color: $primary-color;
-  }
-}
 </style>

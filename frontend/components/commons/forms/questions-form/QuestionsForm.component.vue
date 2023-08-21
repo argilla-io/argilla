@@ -347,7 +347,8 @@ export default {
   min-width: 0;
   justify-content: space-between;
   border-radius: $border-radius-m;
-  box-shadow: $shadow;
+  border: 1px solid transparent;
+  background: palette(white);
   &__header {
     align-items: baseline;
   }
@@ -377,6 +378,19 @@ export default {
     padding: $base-space * 3;
     overflow: auto;
     scroll-behavior: smooth;
+  }
+
+  &.--pending {
+    border-color: transparent;
+    &:not(.--focused-form) {
+      box-shadow: $shadow;
+    }
+  }
+  &.--discarded {
+    border-color: #c3c3c3;
+  }
+  &.--submitted {
+    border-color: $primary-color;
   }
   &.--focused-form {
     border-color: palette(brown);
