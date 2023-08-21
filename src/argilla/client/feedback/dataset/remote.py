@@ -17,12 +17,11 @@ from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 from tqdm import trange
 
-from argilla.client.feedback.constants import FETCHING_BATCH_SIZE, PUSHING_BATCH_SIZE
+from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, FETCHING_BATCH_SIZE, PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.schemas.records import FeedbackRecord, RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
-from argilla.client.sdk.v1.records import api as records_api_v1
 from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
@@ -225,11 +224,17 @@ class RemoteFeedbackRecords:
             PermissionError: if the user does not have either `owner` or `admin` role.
             RuntimeError: If the deletion of the records from Argilla fails.
         """
-        for record in records:
+        num_records = len(records)
+        for start in range(0, num_records, DELETE_DATASET_RECORDS_MAX_NUMBER):
+            end = min(start + DELETE_DATASET_RECORDS_MAX_NUMBER, num_records)
             try:
-                records_api_v1.delete_record(client=self._client, id=record.id)
+                datasets_api_v1.delete_records(
+                    client=self._client,
+                    id=self._dataset_id,
+                    record_ids=[record.id for record in records[start:end]],
+                )
             except Exception as e:
-                raise RuntimeError(f"Failed to delete record with id {record.id} from Argilla.") from e
+                raise RuntimeError("Failed to remove records from Argilla") from e
 
 
 class RemoteFeedbackDataset(FeedbackDatasetBase):

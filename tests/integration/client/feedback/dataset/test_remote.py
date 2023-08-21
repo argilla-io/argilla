@@ -28,7 +28,7 @@ async def test_delete_records(role: UserRole) -> None:
     dataset = await DatasetFactory.create(
         fields=[text_field],
         questions=[rating_question],
-        records=await RecordFactory.create_batch(size=10),
+        records=await RecordFactory.create_batch(size=100),
     )
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
