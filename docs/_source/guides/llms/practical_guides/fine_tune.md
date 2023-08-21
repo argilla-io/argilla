@@ -85,15 +85,14 @@ template = """\
 ### Response: {response}"""
 
 def formatting_func(sample: Dict[str, Any]):
+    # What `sample` looks like depends a lot on your FeedbackDataset fields and questions
     return template.format(
         instruction=sample["new-instruction"][0]["value"],
         context=sample["new-context"][0]["value"],
         response=sample["new-response"][0]["value"],
     )
 
-task = TrainingTask.for_supervised_fine_tuning(
-    formatting_func=formatting_func
-)
+task = TrainingTask.for_supervised_fine_tuning(formatting_func=formatting_func)
 ```
 
 You can observe the resulting dataset by calling `FeedbackDataset.prepare_for_training`. We can use `"trl"` as the framework for example:
@@ -117,7 +116,7 @@ Dataset({
 """
 ```
 
-####  TRL
+#### TRL
 
 The [Transformer Reinforcement Learning (TRL)](https://huggingface.co/docs/trl) package provides a flexible and customizable framework for fine-tuning models. It allows users to have fine-grained control over the training process, enabling them to define their functions and to further specify the desired behavior of the model. This approach requires a deeper understanding of reinforcement learning concepts and techniques, as well as more careful experimentation. It is best suited for users who have experience in reinforcement learning and want fine-grained control over the training process. Additionally, it directly integrates with [Performance Efficient Fine Tuning](https://huggingface.co/docs/peft/index) (PEFT) decreasing the computational complexity of this step of training an LLM.
 
@@ -129,13 +128,102 @@ trainer = ArgillaTrainer(
     task=task,
     framework="trl",
     fetch_records=False,
-    train_size=0.8
+    train_size=0.8,
+    model="gpt2",
 )
 # e.g. using LoRA:
 # from peft import LoraConfig
 # trainer.update_config(peft_config=LoraConfig())
-trainer.train()
+trainer.train(output_dir="sft_model")
 ```
+
+Let's observe if it worked to train the model to respond within our template. We'll create a quick helper method for this.
+```python
+def generate(model_id: str, instruction: str, context: str = "") -> str:
+    model = GPT2LMHeadModel.from_pretrained(model_id)
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+
+    inputs = template.format(
+        instruction=instruction,
+        context=context,
+        response="",
+    ).strip()
+
+    encoding = tokenizer([inputs], return_tensors="pt")
+    outputs = model.generate(
+        **encoding,
+        generation_config=GenerationConfig(
+            max_new_tokens=32,
+            min_new_tokens=12,
+            pad_token_id=tokenizer.pad_token_id,
+            eos_token_id=tokenizer.eos_token_id,
+        ),
+    )
+    return tokenizer.decode(outputs[0])
+```
+Let's first apply it to the non-finetuned GPT2 model:
+```python
+>>> generate("gpt2", "Is a toad a frog?")
+### Instruction: Is a toad a frog?
+
+### Context:
+
+### Response:
+
+###
+
+###
+
+###
+
+###
+
+###
+
+###
+
+###
+
+###
+
+###
+
+###
+>>> generate("gpt2", "Are dogs brown?")
+### Instruction: Are dogs brown?
+
+### Context:
+
+### Response:
+
+### Response:
+
+### Response:
+
+### Response:
+
+### Response:
+
+### Response:
+
+```
+And on our finetuned model:
+```python
+>>> generate("sft_model", "Is a toad a frog?")
+### Instruction: Is a toad a frog?
+
+### Context:
+
+### Response: A frog is a small, round, black-eyed, frog with a long, black-winged head. It is a member of the family Pter
+>>> generate("sft_model", "Are dogs brown?")
+### Instruction: Are dogs brown?
+
+### Context:
+
+### Response: Dogs are brown. They are not brown. They are not brown. They are not brown. They are not brown. They are not brown. They are not
+```
+Much better! This model follows the template like we want.
+
 
 ####  TRLX
 
@@ -188,31 +276,12 @@ First, create a reward model or heuristic. Second, use this as automated procedu
 
 ### Data
 
-The data required for these steps need to be used as comparison data to showcase the preference for the generated prompts. Therefore, we need to have a classification dataset with a `better_response` and a `poorer_responses`. These are then used to train a preference classifier. There are several public datasets [available](https://huggingface.co/datasets?search=rlhf) but a good baseline can be found in the one that is the one offered by [Anthropic](https://huggingface.co/datasets/Anthropic/hh-rlhf). We will however showcase how to use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en), where we assumed that updated responses get preference over the older ones.
+The data required for these steps need to be used as comparison data to showcase the preference for the generated prompts. Like before, we will use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en), where we assumed that updated responses get preference over the older ones.
 
 ```python
 import argilla as rg
-from datasets import Dataset
 
-feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly-15k-curated-en", split="train")
-
-data = {"instruction": [], "context": [], "poorer_response": [], "better_response": []}
-for entry in feedback_dataset:
-    if entry.responses:
-        res = entry.responses[0].values
-        original_input = entry.fields["original-response"]
-        if original_input != res["new-response"].value:
-            data["instruction"].append(res["new-instruction"].value)
-            data["context"].append(res["new-context"].value)
-            data["poorer_response"].append(original_input)
-            data["better_response"].append(res["new-response"].value)
-
-dataset = Dataset.from_dict(data)
-dataset
-# Dataset({
-#     features: ['instruction', 'context', 'poorer_response', 'better_response'],
-#     num_rows: 475
-# })
+feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly-15k-curated-en")
 ```
 
 ### Training
@@ -221,130 +290,232 @@ Fine-tuning using a Reward Model can be done in different ways. We can either ge
 
 #### TRL
 
-[TRL](https://huggingface.co/docs/trl) has a direct reward modeling integration via the `RewardTrainer` class. This trains a classifier to mimic the human evaluation of generated texts. Afterward, we can use the `PPOTrainer` class for the reinforcement learning step in combination with the trained `RewardTrainer`.
+[TRL](https://huggingface.co/docs/trl) has a direct reward modeling integration via the `RewardTrainer` class. This trains a classifier to mimic the human evaluation of generated texts. Afterward, we can use the `PPOTrainer` class for the reinforcement learning step in combination with the trained `RewardTrainer`. Conveniently, both of these are fully integrated into the `ArgillaTrainer`, allowing you to easily carry out RLHF.
 
 ::::{tab-set}
 
-:::{tab-item} RewardTrainer
-[TRL](https://huggingface.co/docs/trl) has a direct reward modeling integration via the `RewardTrainer` class. This class functions similarly to the SFTTrainer and TransformersTrainer but requires `rejected-accepted` input pairs as training data. These are then used to fine-tune an `AutoModelForSequenceClassification` which we can use as a reward model during the reinforcement learning phase. The entries within the dataset should be `input_ids_chosen`, `attention_mask_chosen`, `input_ids_rejected` and `attention_mask_rejected` so we should first format them. The [roberta-base-reward-model-falcon-dolly reward model](https://huggingface.co/argilla/roberta-base-reward-model-falcon-dolly) was trained using the code below.
+:::{tab-item} Reward modeling
+[TRL](https://huggingface.co/docs/trl) implements reward modeling, which can be used via the `ArgillaTrainer` class. First of all, we must set up a formatting function that returns a `chosen-rejected` tuple. To determine which response from the FeedbackDataset is superior, we can use the user annotations.
+
+```{note}
+The formatting function can also return `None` or a list of tuples. The may be used if the annotations indicate that the text is low quality or harmful, and the latter could be used if multiple annotators provide additional written responses, resulting in multiple good `chosen-rejected` pairs.
+```
+
+What the parameter to `formatting_func` looks like depends a lot on your FeedbackDataset fields and questions.
+However, fields (i.e. the left side of the Argilla annotation view) are provided as their values, e.g.
+```python
+>>> sample
+{
+    ...
+    'original-response': 'Virgin Australia commenced services on 31 August 2000 '
+                         'as Virgin Blue, with two aircraft on a single route.',
+    ...
+}
+```
+And all questions (i.e. the right side of the Argilla annotation view) are provided like so:
+```python
+>>> sample
+{
+    ...
+    'new-response': [{'status': 'submitted',
+                      'value': 'Virgin Australia commenced services on 31 August '
+                               '2000 as Virgin Blue, with two aircraft on a '
+                               'single route.',
+                      'user-id': ...}],
+    'new-response-suggestion': None,
+    'new-response-suggestion-metadata': {'agent': None,
+                                         'score': None,
+                                         'type': None},
+    ...
+}
+```
 
 ```python
-from datasets import load_dataset
-from transformers import (
-    AutoModelForSequenceClassification,
-    AutoTokenizer,
-    TrainingArguments,
-)
-from trl import RewardTrainer
+from typing import Any, Dict, Iterator, Tuple
+from argilla.feedback import TrainingTask
 
-dataset = load_dataset("argilla/dolly-curated-comparison-falcon-7b-instruct", split="train")
-model_name = "distilroberta-base"
+template = """\
+### Instruction: {instruction}\n
+### Context: {context}\n
+### Response: {response}"""
 
-model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=1)
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-if tokenizer.pad_token is None:
-    tokenizer.pad_token = tokenizer.eos_token
-    model.config.pad_token_id = model.config.eos_token_id
+def formatting_func(sample: Dict[str, Any]) -> Iterator[Tuple[str, str]]:
+    # Our annotators were asked to provide new responses, which we assume are better than the originals
+    og_instruction = sample["original-instruction"]
+    og_context = sample["original-context"]
+    og_response = sample["original-response"]
+    rejected = template.format(instruction=og_instruction, context=og_context, response=og_response)
 
-def formatting_func(examples):
-    kwargs = {"padding": "max_length", "truncation": True, "max_length": 512, "return_tensors": "pt"}
-    # Assuming original human response is preferred to Falcon's
-    chosen_response = examples["original_response"]
-    rejected_response = examples["response-1"]
-    prompt = examples["prompt"]
+    for instruction, context, response in zip(sample["new-instruction"], sample["new-context"], sample["new-response"]):
+        if response["status"] == "submitted":
+            chosen = template.format(
+                instruction=instruction["value"],
+                context=context["value"],
+                response=response["value"],
+            )
+            if chosen != rejected:
+                yield chosen, rejected
 
-    tokens_chosen = tokenizer.encode_plus(prompt, chosen_response, **kwargs)
-    tokens_rejected = tokenizer.encode_plus(prompt, rejected_response, **kwargs)
-    return {
-        "input_ids_chosen": tokens_chosen["input_ids"][0], "attention_mask_chosen": tokens_chosen["attention_mask"][0],
-        "input_ids_rejected": tokens_rejected["input_ids"][0], "attention_mask_rejected": tokens_rejected["attention_mask"][0]
-    }
-
-formatted_dataset = dataset.map(formatting_func)
-
-trainer = RewardTrainer(
-    model=model,
-    args=TrainingArguments("output_dir"),
-    tokenizer=tokenizer,
-    train_dataset=formatted_dataset
-)
-
-trainer.train()
+task = TrainingTask.for_reward_modelling(formatting_func=formatting_func)
 ```
+You can observe the dataset created using this task by using `FeedbackDataset.prepare_for_training`, for example using the "trl" framework:
+```python
+dataset = feedback_dataset.prepare_for_training(framework="trl", task=task)
+"""
+>>> dataset
+Dataset({
+    features: ['chosen', 'rejected'],
+    num_rows: 2872
+})
+>>> dataset[2772]
+{
+    'chosen': '### Instruction: Answer based on the text: Is Leucascidae a sponge\n\n'
+    '### Context: Leucascidae is a family of calcareous sponges in the order Clathrinida.\n\n'
+    '### Response: Yes',
+    'rejected': '### Instruction: Is Leucascidae a sponge\n\n'
+    '### Context: Leucascidae is a family of calcareous sponges in the order Clathrinida.[1]\n\n'
+    '### Response: Leucascidae is a family of calcareous sponges in the order Clathrinida.'}
+"""
+```
+Looks great!
+
+Now let's use the `ArgillaTrainer` to train a reward model with this task.
+```python
+from argilla.feedback import ArgillaTrainer
+
+trainer = ArgillaTrainer(
+    dataset=feedback_dataset,
+    task=task,
+    framework="trl",
+    model="distilroberta-base",
+)
+trainer.train(output_dir="reward_model")
+```
+
+Let's try out the trained model in practice.
+```python
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import torch
+
+model = AutoModelForSequenceClassification.from_pretrained("reward_model")
+tokenizer = AutoTokenizer.from_pretrained("reward_model")
+
+def get_score(model, tokenizer, text):
+    # Tokenize the input sequences
+    inputs = tokenizer(text, truncation=True, padding="max_length", max_length=512, return_tensors="pt")
+
+    # Perform forward pass
+    with torch.no_grad():
+        outputs = model(**inputs)
+
+    # Extract the logits
+    return outputs.logits[0, 0].item()
+
+# Example usage
+prompt = "Is a toad a frog?"
+context = "Both frogs and toads are amphibians in the order Anura, which means \"without a tail.\" Toads are a sub-classification of frogs, meaning that all toads are frogs, but not all frogs are toads."
+good_response = "Yes"
+bad_response = "Both frogs and toads are amphibians in the order Anura, which means \"without a tail.\""
+example_good = template.format(instruction=prompt, context=context, response=good_response)
+example_bad = template.format(instruction=prompt, context=context, response=bad_response)
+
+score = get_score(model, tokenizer, example_good)
+print(score)
+# >> 5.478324890136719
+
+score = get_score(model, tokenizer, example_bad)
+print(score)
+# >> 2.2948970794677734
+```
+As expected, the good response has a higher score than the worse response.
 
 :::
 
-:::{tab-item} PPOTrainer
-The [TRL](https://huggingface.co/docs/trl) `PPOTrainer` allows updating while plugging in any arbitrary model or heuristic to assign `rewards` to the generated output. In the example below, we use the  `reward_model` and `reward_tokenizer` to create a transformers text-classification pipeline. This pipeline is then used to create `rewards` which are then passed during the PPO `.step()` to include in the weigh optimization for the next batch. You can choose to use our [roberta-base-reward-model-falcon-dolly reward model](https://huggingface.co/argilla/roberta-base-reward-model-falcon-dolly).
+:::{tab-item} Proximal Policy Optimization
+The [TRL](https://huggingface.co/docs/trl) library also implements the last step of RLHF: Proximal Policy Optimization (PPO). It requires prompts, which are then fed through the model being finetuned. Its results are passed through a reward model. Lastly, the prompts, responses and rewards are used to update the model through reinforcement learning.
+
+This tutorial uses the reward model trained in the last phase, but you can also use our [roberta-base-reward-model-falcon-dolly reward model](https://huggingface.co/argilla/roberta-base-reward-model-falcon-dolly).
+
+As usual, we start with a task with a formatting function. For PPO, the formatting function only returns prompts.
+```python
+from argilla.feedback import TrainingTask
+from typing import Dict, Any, Iterator
+
+def formatting_func(sample: Dict[str, Any]) -> Iterator[str]:
+    for instruction, context in zip(sample["new-instruction"], sample["new-context"]):
+        if instruction["status"] == "submitted":
+            yield template.format(
+                instruction=instruction["value"],
+                context=context["value"][:500],
+                response=""
+            ).strip()
+
+task = TrainingTask.for_proximal_policy_optimization(formatting_func=formatting_func)
+```
+
+Like before, we can observe the resulting dataset:
+```python
+dataset = feedback_dataset.prepare_for_training(framework="trl", task=task)
+"""
+>>> dataset
+Dataset({
+    features: ['id', 'query'],
+    num_rows: 15015
+})
+>>> dataset[922]
+{'id': 922, 'query': '### Instruction: Is beauty objective or subjective?\n\n### Context: \n\n### Response:'}
+"""
+```
+
+Instead of using this dataset, we'll use the task directly with our `FeedbackDataset` in the `ArgillaTrainer`. PPO requires us to specify the `reward_model`, and allows us to specify some other useful values as well:
+* `reward_model`: A sentiment analysis pipeline with the reward model. This produces a reward for a prompt + response.
+* `length_sampler_kwargs`: A dictionary with `min_value` and `max_value` keys, indicating the lower and upper bound on the number of tokens the finetuning model should generate while finetuning.
+* `generation_kwargs`: The keyword arguments passed to the `generate` method of the finetuning model.
+* `config`: A `trl.PPOConfig` instance with many useful parameters such as `learning_rate` and `batch_size`.
 
 ```python
-import torch
-from transformers import AutoTokenizer, pipeline
-from trl import AutoModelForCausalLMWithValueHead, PPOConfig, PPOTrainer
-from trl.core import LengthSampler
+from argilla.feedback import ArgillaTrainer
+from transformers import pipeline
+from trl import PPOConfig
 
-reward_model = ... # "argilla/roberta-base-reward-model-falcon-dolly"
-reward_tokenizer = ... # "argilla/roberta-base-reward-model-falcon-dolly"
+trainer = ArgillaTrainer(
+    dataset=feedback_dataset,
+    task=task,
+    framework="trl",
+    model="gpt2",
+)
+reward_model = pipeline("sentiment-analysis", model="reward_model")
+trainer.update_config(
+    reward_model=reward_model,
+    length_sampler_kwargs={"min_value": 32, "max_value": 256},
+    generation_kwargs={
+        "min_length": -1,
+        "top_k": 0.0,
+        "top_p": 1.0,
+        "do_sample": True,
+    },
+    config=PPOConfig(batch_size=16)
+)
+trainer.train(output_dir="ppo_model")
+```
 
-config = PPOConfig(model_name="gpt2", batch_size=2)
+After training, we can load this model and generate with it!
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
-model = AutoModelForCausalLMWithValueHead.from_pretrained(config.model_name)
-ref_model = AutoModelForCausalLMWithValueHead.from_pretrained(config.model_name)
-tokenizer = AutoTokenizer.from_pretrained(config.model_name)
+model = AutoModelForCausalLM.from_pretrained("ppo_model")
+tokenizer = AutoTokenizer.from_pretrained("ppo_model")
 tokenizer.pad_token = tokenizer.eos_token
-reward_pipe = pipeline(model=reward_model, tokenizer=reward_tokenizer)
 
-def formatting_func(examples):
-    kwargs = {
-        "padding": "max_length", "truncation": True,
-        "max_length": 512, "return_tensors": "pt"
-    }
-    input_size = LengthSampler(min_value=2, max_value=8)
-    input_text = examples["instruction"] + examples["context"] + examples["response"]
-    examples["input_ids"] = tokenizer.encode(input_text, **kwargs)[0][: input_size()]
-    examples["query"] = tokenizer.decode(examples["input_ids"][0])
-    return examples
-
-formatted_dataset = dataset.map(formatting_func, batched=False)
-formatted_dataset.set_format(type="torch")
-
-def collator(data):
-    return dict((key, [d[key] for d in data]) for key in data[0])
-
-ppo_trainer = PPOTrainer(config, model, ref_model, tokenizer, dataset=formatted_dataset, data_collator=collator)
-
-output_min_length = 4
-output_max_length = 16
-output_length_sampler = LengthSampler(output_min_length, output_max_length)
-
-generation_kwargs = {
-    "min_length": -1,
-    "top_k": 0.0,
-    "top_p": 1.0,
-    "do_sample": True,
-    "pad_token_id": tokenizer.eos_token_id,
-}
-
-for epoch, batch in enumerate(ppo_trainer.dataloader):
-    query_tensors = batch["input_ids"]
-
-    #### Get response from gpt2
-    response_tensors = []
-    for query in query_tensors:
-        gen_len = output_length_sampler()
-        generation_kwargs["max_new_tokens"] = gen_len
-        response = ppo_trainer.generate(query, **generation_kwargs)
-        response_tensors.append(response.squeeze()[-gen_len:])
-    batch["response"] = [tokenizer.decode(r.squeeze()) for r in response_tensors]
-
-    #### Compute sentiment score
-    texts = [q + r for q, r in zip(batch["query"], batch["response"])]
-    pipe_outputs = reward_pipe(texts, return_all_scores=True)
-    rewards = [torch.tensor(output[1]["score"]) for output in pipe_outputs]
-
-    #### Run PPO step
-    stats = ppo_trainer.step(query_tensors, response_tensors, rewards)
-    ppo_trainer.log_stats(stats, batch, rewards)
+inputs = template.format(
+    instruction="Is a toad a frog?",
+    context="Both frogs and toads are amphibians in the order Anura, which means \"without a tail.\" Toads are a sub-classification of frogs, meaning that all toads are frogs, but not all frogs are toads.",
+    response=""
+).strip()
+encoding = tokenizer([inputs], return_tensors="pt")
+outputs = model.generate(**encoding, max_new_tokens=30)
+output_text = tokenizer.decode(outputs[0])
+print(output_text)
 ```
 
 :::

@@ -221,10 +221,6 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
                 raise ValueError(
                     "To train a PPO model, you need to specify the following arguments via `trainer.update_config`: length_sampler_kwargs, generation_kwargs, reward_model."
                 )
-            elif self.training_args_kwargs["reward_model"] is None:
-                raise ValueError(
-                    'To train a PPO model, you need to specify a reward model as text-classification pipeline via `trainer.update_config(reward_model="...")`'
-                )
 
         from transformers import TrainingArguments
 
@@ -328,17 +324,19 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
                 query_tensors = batch["input_ids"]
 
                 #### Get response from SFT
-                response_tensors = []
-                for query in query_tensors:
-                    gen_len = output_length_sampler()
-                    generation_kwargs["max_new_tokens"] = gen_len
-                    response = self._trainer.generate(query, **generation_kwargs)
-                    response_tensors.append(response.squeeze()[-gen_len:])
-                batch["response"] = [self._transformers_tokenizer.decode(r.squeeze()) for r in response_tensors]
+                response_tensors = self._trainer.generate(
+                    query_tensors,
+                    return_prompt=False,
+                    length_sampler=output_length_sampler,
+                    **generation_kwargs,
+                )
+                batch["response"] = self._transformers_tokenizer.batch_decode(
+                    response_tensors, skip_special_tokens=True
+                )
 
                 #### Compute rewards scores
                 texts = [q + r for q, r in zip(batch["query"], batch["response"])]
-                pipe_outputs = reward_model(texts, return_all_scores=True)
+                pipe_outputs = reward_model(texts, top_k=None, truncation=True)
                 rewards = [torch.tensor(output[-1]["score"] * len(output)) for output in pipe_outputs]
 
                 #### Run PPO step
