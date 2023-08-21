@@ -26,7 +26,13 @@ import httpx
 from rich import print as rprint
 from rich.progress import Progress
 
-from argilla._constants import DEFAULT_API_KEY, DEFAULT_USERNAME, ES_INDEX_REGEX_PATTERN, WORKSPACE_HEADER_NAME
+from argilla._constants import (
+    DEFAULT_API_KEY,
+    DEFAULT_API_URL,
+    DEFAULT_USERNAME,
+    ES_INDEX_REGEX_PATTERN,
+    WORKSPACE_HEADER_NAME,
+)
 from argilla.client.apis.datasets import Datasets
 from argilla.client.apis.metrics import MetricsAPI
 from argilla.client.apis.search import Search, VectorSearch
@@ -121,7 +127,7 @@ class Argilla:
             except FileNotFoundError:
                 pass
 
-        api_url = api_url or "http://localhost:6900"
+        api_url = api_url or DEFAULT_API_URL
         api_key = api_key or DEFAULT_API_KEY
 
         # Checking that the api_url does not end in '/'
