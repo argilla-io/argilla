@@ -524,7 +524,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
     ) -> Union["spacy.token.DocBin", Tuple["spacy.token.DocBin", "spacy.token.DocBin"]]:
         from spacy.tokens import DocBin
 
-        all_labels = self.__multi_label__
+        all_labels = self.__all_labels__
 
         def _prepare(data):
             db = DocBin(store_user_data=True)
