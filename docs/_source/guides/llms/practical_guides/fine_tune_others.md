@@ -32,7 +32,6 @@ Data for the training text classification using our `FeedbackDataset` is defined
 
 3.  We then define an `ArgillaTrainer` instance with support for "openai", "setfit", "peft", "spacy" and "transformers".
 
-
 #### Unify responses
 
 Argilla `*Question`s need to be [unified using a strategy](/guides/llms/practical_guides/collect_responses) and so do `RatingQuestions`s, `LabelQuestion`s and `MultiLabelQuestion`s. Therefore, records need to be unified by using a strategy, which takes one of the questions and one of their associated strategies. Luckily this is integrated within the `TrainingTask`-step underneath, but you can also do this individually as shown [here](/guides/llms/practical_guides/collect_responses).
@@ -144,7 +143,7 @@ task = TrainingTask.for_text_classification(
 
 #### Use ArgillaTrainer
 
-Next, we can use our `FeedbackDataset` and `TrainingTaskForTextClassification` to initialize our `argilla.ArgillaTrainer`. We support the frameworks "openai", "setfit", "peft", "spacy" and "transformers".
+Next, we can use our `FeedbackDataset` and `TrainingTaskForTextClassification` to initialize our `argilla.feedback.ArgillaTrainer`. We support the frameworks "openai", "setfit", "peft", "spacy" and "transformers".
 
 ````{note}
 This is a newer version and can be imported via `from argilla.feedback import ArgillaTrainer`. The old trainer can be imported via `from argilla.training import ArgillaTrainer`. Our docs, contain some [additional information on usage of the ArgillaTrainer](/guides/train_a_model).

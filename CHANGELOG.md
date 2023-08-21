@@ -18,7 +18,7 @@ These are the section headers that we use:
 
 ### Added
 
-- Added `formatting_func` to `ArgillaTrainer` for customizing the formatting of the data ([#3540](https://github.com/argilla-io/argilla/issues/3540)).
+- Added `formatting_func` to `ArgillaTrainer` for `FeedbackDataset` datasets add a custom formatting for the data ([#3599](https://github.com/argilla-io/argilla/pull/3599)).
 
 ## [1.14.1](https://github.com/argilla-io/argilla/compare/v1.14.0...v1.14.1)
 

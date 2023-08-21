@@ -125,8 +125,8 @@ class TrainingTask:
     def for_text_classification(
         cls,
         formatting_func: Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]] = None,
-        text: TextField = None,
-        label: Union[
+        text: Optional[TextField] = None,
+        label: Optional[Union[
             RatingQuestion,
             LabelQuestion,
             RankingQuestion,
@@ -135,17 +135,17 @@ class TrainingTask:
             LabelQuestionUnification,
             MultiLabelQuestionUnification,
             RankingQuestionUnification,
-        ] = None,
+        ]] = None,
         label_strategy: str = None,
     ) -> "TrainingTaskForTextClassification":
         """
         Define a task configuration for text classification. It takes default values for `text` and `label` using datasets Fields and Questions or a custom `formatting_func` as Callable. See Examples underneath for more details.
 
         Args:
-            formatting_func (Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]], optional): A formatting function. Defaults to None.
-            text (TextField, optional): The TextField to use for training. Defaults to None.
-            label (Union[RatingQuestion, LabelQuestion, RankingQuestion, MultiLabelQuestion, RatingQuestionUnification, LabelQuestionUnification, MultiLabelQuestionUnification, RankingQuestionUnification], optional): The *Question to use for training. Defaults to None.
-            label_strategy (str, optional): A strategy to unify responses. Defaults to None. This means it will initialize the default strategy for the label type. Defaults to None.
+            formatting_func: A formatting function. Defaults to None.
+            text: The TextField to use for training. Defaults to None.
+            label: The *Question to use for training. Defaults to None.
+            label_strategy: A strategy to unify responses. Defaults to None. This means it will initialize the default strategy for the label type. Defaults to None.
 
         Raises:
             ValueError: if label is not a valid type with the question type.
@@ -180,13 +180,8 @@ class TrainingTask:
             >>> task = TrainingTask.for_text_classification(formatting_func=formatting_func)
             >>> dataset.prepare_for_training(framework="...", task=task)
         """
-        if text or label:
-            if formatting_func is not None:
-                raise ValueError("`formatting_func` is already defined, so you cannot define `text` and `label`.")
-        elif text or label:
-            raise ValueError("You must define both `text` and `label`.")
-        elif not (text or label) and formatting_func is None:
-            raise ValueError("You must define either (`text` and `label`), or a `formatting_func`.")
+        if (text and label) and formatting_func is not None:
+            raise ValueError("You must provide either `text` and `label`, or a `formatting_func`, not both.")
 
         if formatting_func is not None:
             if text or label:
