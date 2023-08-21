@@ -20,6 +20,10 @@ These are the section headers that we use:
 
 - Added `login` function in `argilla.client.login` to login into an Argilla server and store the credentials locally ([#3582](https://github.com/argilla-io/argilla/pull/3582)).
 
+### Changed
+
+- Updated `RemoteFeedbackDataset.delete_records` to use batch delete records endpoint ([#3580](https://github.com/argilla-io/argilla/pull/3580)).
+
 ## [1.14.1](https://github.com/argilla-io/argilla/compare/v1.14.0...v1.14.1)
 
 ### Fixed
