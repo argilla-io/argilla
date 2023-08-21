@@ -20,7 +20,11 @@ Learn how to collect comparison or human preference data and train a reward mode
 :link: labelling-feedback-setfit.html
 
 Learn how to add suggestions to your Feedback dataset using Setfit.
+```
+```{grid-item-card} Create and annotate synthetic data with LLMs
+:link: labelling-feedback-langchain-syntethic.html
 
+Learn how to create synthetic data and annotations with OpenAI, LangChain, Transformers and Outlines.
 ```
 ````
 
@@ -30,4 +34,5 @@ Learn how to add suggestions to your Feedback dataset using Setfit.
 curating-feedback-instructiondataset
 train-reward-model-rlhf
 labelling-feedback-setfit
+labelling-feedback-langchain-syntethic
 ```
