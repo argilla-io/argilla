@@ -117,12 +117,13 @@ class Argilla:
         workspace = workspace or os.getenv("ARGILLA_WORKSPACE")
         extra_headers = extra_headers or {}
 
-        if api_url is None and api_key is None and workspace is None:
+        if api_url is None and api_key is None:
             try:
                 credentials = ArgillaCredentials.load()
                 api_url = credentials.api_url
                 api_key = credentials.api_key
-                workspace = credentials.workspace
+                if not workspace:
+                    workspace = credentials.workspace
                 extra_headers = credentials.extra_headers
             except FileNotFoundError:
                 pass
