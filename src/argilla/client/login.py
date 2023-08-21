@@ -18,7 +18,7 @@ from typing import Dict, Optional
 from pydantic import AnyHttpUrl, BaseModel
 
 from argilla.client.api import init
-from argilla.client.sdk.commons.errors import UnauthorizedApiError
+from argilla.client.sdk.commons.errors import HttpResponseError, UnauthorizedApiError
 
 ARGILLA_CACHE_DIR = Path.home() / ".cache" / "argilla"
 ARGILLA_CREDENTIALS_FILE = ARGILLA_CACHE_DIR / "credentials.json"
@@ -68,6 +68,8 @@ def login(
     # Try to login to the server
     try:
         init(api_url=api_url, api_key=api_key, workspace=workspace, extra_headers=extra_headers)
+    except HttpResponseError as e:
+        raise ValueError(f"Could not reach '{api_url}', make sure that the Argilla Server is running and working as expected") from e
     except UnauthorizedApiError as e:
         raise ValueError(f"Could not login in '{api_url}' using provided credentials") from e
 

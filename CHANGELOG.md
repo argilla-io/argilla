@@ -18,7 +18,7 @@ These are the section headers that we use:
 
 ### Added
 
-- Added `argilla.client.login.login` function to login in an Argilla server and store the credentials locally ([#3582](https://github.com/argilla-io/argilla/pull/3582)).
+- Added `login` function in `argilla.client.login` to login into an Argilla server and store the credentials locally ([#3582](https://github.com/argilla-io/argilla/pull/3582)).
 
 ## [1.14.1](https://github.com/argilla-io/argilla/compare/v1.14.0...v1.14.1)
 
