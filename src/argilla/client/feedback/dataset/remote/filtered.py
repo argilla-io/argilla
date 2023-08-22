@@ -42,11 +42,11 @@ class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase):
         Returns:
             Either the record of the given index, or a list with the records at the given indexes.
         """
-        return super().__get_records(key=key, filters=self._filters)
+        return super()._get_records(key=key, filters=self._filters)
 
     def __iter__(self) -> Iterator[RemoteFeedbackRecord]:
         """Iterates over the `FeedbackRecord`s of the current `FeedbackDataset` in Argilla."""
-        return super().__iter_records(filters=self._filters)
+        return super()._iter_records(filters=self._filters)
 
 
 class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeedbackRecords]):
