@@ -5,8 +5,8 @@ let wrapper = null;
 const options = {
   stubs: ["BaseIconWithBadge"],
   directives: {
-    "optional-field"() {
-      // this directive is used to show '(optional)' at the end of a question optional
+    "required-field"() {
+      // this directive is used to show a red asterisk at the end of a required question
     },
     tooltip() {
       // this directive is used to show a tooltip
