@@ -129,7 +129,7 @@ def test_prepare_for_training_text_classification_with_formatting_func(
 
     def wrong_formatting_func(sample):
         text = sample["text"]
-        values = [resp["value"] for resp in sample["label"]]
+        values = [resp["value"] for resp in sample["question-3"]]
         counter = Counter(values)
         if counter:
             most_common = counter.most_common()
@@ -142,11 +142,14 @@ def test_prepare_for_training_text_classification_with_formatting_func(
 
     def correct_formatting_func(sample):
         data = wrong_formatting_func(sample)
-        return (data["text"], data["label"])
+        if data:
+            return (data["text"], data["label"])
+        else:
+            return None
 
     with pytest.raises(
         ValueError,
-        match="formatting_func must return (text,label) as a Tuple[str, str] or a Tuple[str, List[str]]",
+        match=r"formatting_func must return \(text,label\) as a Tuple\[str, str\] or a Tuple\[str, List\[str\]\]",
     ):
         task = TrainingTask.for_text_classification(wrong_formatting_func)
         trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, fetch_records=False)
