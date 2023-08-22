@@ -24,7 +24,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import "assets/icons/info";
 export default {
   name: "QuestionHeader",
@@ -47,7 +47,7 @@ export default {
     },
   },
   computed: {
-    showIcon(): boolean {
+    showIcon() {
       return !!this.tooltipMessage?.length;
     },
   },
