@@ -17,7 +17,7 @@ from typing import List
 import pytest
 from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.questions import TextQuestion
-from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
+from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 
 @pytest.fixture

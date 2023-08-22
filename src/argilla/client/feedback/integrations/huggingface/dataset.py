@@ -22,7 +22,7 @@ from packaging.version import parse as parse_version
 
 from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas import FeedbackRecord
-from argilla.client.feedback.types import AllowedQuestionTypes
+from argilla.client.feedback.schemas.types import AllowedQuestionTypes
 from argilla.utils.dependency import requires_version
 
 if TYPE_CHECKING:
