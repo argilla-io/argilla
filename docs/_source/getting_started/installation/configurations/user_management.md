@@ -2,6 +2,8 @@
 
 This guide explains how to setup and manage the users in Argilla via the Python client and the CLI.
 
+<img src="/_static/images/installation/user-model.png" alt="User Management" style="display:block;margin-left:auto;margin-right:auto; width:50%">
+
 :::{note}
 The `User` class for user management has been included as of the Argilla 1.11.0 release, and is not available in previous versions. But you will be able to use it with older Argilla instances, from 1.6.0 onwards, the only difference will be that the main role is now `owner` instead of `admin`.
 :::

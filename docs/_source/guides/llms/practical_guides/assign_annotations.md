@@ -1,5 +1,10 @@
 # Assign annotations to your team
+
 Depending on the nature of your project and the size of your annotation team, you may want to have control over annotation overlap i.e., having multiple annotations for a single record. In this section, we will demonstrate 3 different workflows to get the level of overlap you need: full, zero or controlled.
+
+<img src="/_static/images/llms/user-management-overview.png" alt="User Management" style="display:block;margin-left:auto;margin-right:auto; width:50%">
+
+<img src="/_static/images/llms/user-management-dataset.png" alt="Dataset splits" style="display:block;margin-left:auto;margin-right:auto; width:100%">
 
 ```{note}
 You will need to decide the level of overlap before creating or pushing a dataset to Argilla, as this has implications on how your dataset is set up.
@@ -11,6 +16,7 @@ This guide only applies to Feedback datasets. To assign annotations in Text2Text
 ## Full overlap
 
 The Feedback Task supports having multiple annotations for your records by default. This means that all users with access to the dataset can give responses to all the records in the dataset. To have this full overlap just push the dataset (as detailed in [Create a Feedback Dataset](create_dataset.md#push-to-argilla)) in a workspace where all team members have access. Learn more about managing user access to workspaces [here](../../../getting_started/installation/configurations/user_management.md#assign-a-user-to-a-workspace).
+
 
 ## Zero overlap
 

@@ -12,9 +12,20 @@
     <div class="github-stars github-stars--sidebar"></div>
 </div>
 
+::::{tab-set}
+
+:::{tab-item} Diagram
+<img src="/_static/images/llms/argilla-ecosystem.png" alt="LLM fine-tuning stages" style="display:block;margin-left:auto;margin-right:auto; width:100%">
+:::
+
+:::{tab-item} Video
 <div class="video-container">
     <iframe class="video" width="100%" height="450" src="https://www.youtube.com/embed/jP3anvp7Rto" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
+:::
+
+::::
+
 
 ## 📄 About The Docs
 

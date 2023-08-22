@@ -2,6 +2,8 @@
 
 The Feedback Task datasets allow you to combine multiple questions of different kinds, so the first step will be to define the aim of your project and the kind of data and feedback you will need to get there. With this information, you can start configuring a dataset and formatting records using the Python SDK.
 
+<img src="/_static/images/llms/configure-dataset.png" alt="Configure dataset" style="display:block;margin-left:auto;margin-right:auto; width:100%">
+
 This guide will walk you through all the elements you will need to configure to create a `FeedbackDataset` and add records to it.
 
 ```{note}

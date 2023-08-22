@@ -2,6 +2,8 @@
 
 This guide explains how setup and manage the workspaces in Argilla via the Python client.
 
+<img src="/_static/images/installation/workspace-model.png" alt="User Management" style="display:block;margin-left:auto;margin-right:auto; width:100%">
+
 :::{note}
 The `Workspace` class for workspace management has been included as of the Argilla 1.11.0 release, and is not available in previous versions. But you will be able to use it with older Argilla instances, from 1.6.0 onwards, the only difference will be that the main role is now `owner` instead of `admin`.
 :::
