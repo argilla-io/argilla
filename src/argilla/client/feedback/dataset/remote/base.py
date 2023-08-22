@@ -13,13 +13,11 @@
 #  limitations under the License.
 
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Generic, Iterator, List, Optional, Type, TypeVar, Union
 
-from tqdm import trange
-
-from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, FETCHING_BATCH_SIZE, PUSHING_BATCH_SIZE
+from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
-from argilla.client.feedback.schemas.records import FeedbackRecord, RemoteFeedbackRecord
+from argilla.client.feedback.schemas.records import RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.utils import allowed_for_roles
@@ -30,6 +28,8 @@ if TYPE_CHECKING:
     import httpx
 
     from argilla.client.feedback.dataset.local import FeedbackDataset
+    from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+    from argilla.client.feedback.dataset.remote.filtered import FilteredRemoteFeedbackDataset
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackItemModel
     from argilla.client.workspaces import Workspace
@@ -37,9 +37,11 @@ if TYPE_CHECKING:
 
 warnings.simplefilter("always", DeprecationWarning)
 
+T = TypeVar("T")
 
-class RemoteFeedbackRecords:
-    def __init__(self, dataset: "RemoteFeedbackDataset") -> None:
+
+class RemoteFeedbackRecordsBase:
+    def __init__(self, dataset: Union["RemoteFeedbackDataset", "FilteredRemoteFeedbackDataset"]) -> None:
         """Initializes a `RemoteFeedbackRecords` instance to access a `FeedbackDataset`
         records in Argilla. This class is used to get records from Argilla, iterate over
         them, and push new records to Argilla.
@@ -90,6 +92,7 @@ class RemoteFeedbackRecords:
             suggestion.update({"question_name": self.__question_id2name[suggestion["question_id"]]})
         return RemoteFeedbackRecord(client=self._client, name2id=self.__question_name2id, **record)
 
+    # TODO(alvarobartt): use `response_status` filter when it's implemented in the API by @gabrielmbmb
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def __len__(self) -> int:
         """Returns the number of records in the current `FeedbackDataset` in Argilla."""
@@ -102,7 +105,9 @@ class RemoteFeedbackRecords:
         return response.parsed.records.count
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def __getitem__(self, key: Union[slice, int]) -> Union[RemoteFeedbackRecord, List[RemoteFeedbackRecord]]:
+    def _get_records(
+        self, key: Union[slice, int], filters: Dict[str, Any] = {}
+    ) -> Union[RemoteFeedbackRecord, List[RemoteFeedbackRecord]]:
         """Returns the record(s) at the given index(es) from Argilla.
 
         Args:
@@ -155,12 +160,13 @@ class RemoteFeedbackRecords:
                 id=self._dataset_id,
                 offset=offset,
                 limit=limit,
+                **filters,
             ).parsed
             records.extend([self.__parse_record(record) for record in fetched_records.items])
         return records[0] if isinstance(key, int) else records
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def __iter__(self) -> Iterator[RemoteFeedbackRecord]:
+    def _iter_records(self, filters: Dict[str, Any] = {}) -> Iterator[RemoteFeedbackRecord]:
         """Iterates over the `FeedbackRecord`s of the current `FeedbackDataset` in Argilla."""
         current_batch = 0
         while True:
@@ -169,6 +175,7 @@ class RemoteFeedbackRecords:
                 id=self._dataset_id,
                 offset=FETCHING_BATCH_SIZE * current_batch,
                 limit=FETCHING_BATCH_SIZE,
+                **filters,
             ).parsed
             for record in batch.items:
                 yield self.__parse_record(record)
@@ -177,67 +184,10 @@ class RemoteFeedbackRecords:
             if len(batch.items) < FETCHING_BATCH_SIZE:
                 break
 
-    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def add(
-        self,
-        records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
-        show_progress: bool = True,
-    ) -> None:
-        """Pushes a list of `FeedbackRecord`s to Argilla.
 
-        Args:
-            records: can be a single `FeedbackRecord`, a list of `FeedbackRecord`,
-                a single dictionary, or a list of dictionaries. If a dictionary is provided,
-                it will be converted to a `FeedbackRecord` internally.
-            show_progress: Whether to show a `tqdm` progress bar while pushing the records.
+class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
+    records_cls: Type[T] = None
 
-        Raises:
-            PermissionError: if the user does not have either `owner` or `admin` role.
-            Exception: If the pushing of the records to Argilla fails.
-        """
-        records = self._dataset._parse_and_validate_records(records)
-        for i in trange(
-            0, len(records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=not show_progress
-        ):
-            records_batch = []
-            for record in records[i : i + PUSHING_BATCH_SIZE]:
-                if record.suggestions:
-                    for suggestion in record.suggestions:
-                        suggestion.question_id = self.__question_name2id[suggestion.question_name]
-                records_batch.append(
-                    record.dict(exclude={"id": ..., "suggestions": {"__all__": {"question_name"}}}, exclude_none=True)
-                )
-            datasets_api_v1.add_records(
-                client=self._client,
-                id=self._dataset_id,
-                records=records_batch,
-            )
-
-    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def delete(self, records: List[RemoteFeedbackRecord]) -> None:
-        """Deletes a list of `RemoteFeedbackRecord`s from Argilla.
-
-        Args:
-            records: A list of `RemoteFeedbackRecord`s to delete from Argilla.
-
-        Raises:
-            PermissionError: if the user does not have either `owner` or `admin` role.
-            RuntimeError: If the deletion of the records from Argilla fails.
-        """
-        num_records = len(records)
-        for start in range(0, num_records, DELETE_DATASET_RECORDS_MAX_NUMBER):
-            end = min(start + DELETE_DATASET_RECORDS_MAX_NUMBER, num_records)
-            try:
-                datasets_api_v1.delete_records(
-                    client=self._client,
-                    id=self._dataset_id,
-                    record_ids=[record.id for record in records[start:end]],
-                )
-            except Exception as e:
-                raise RuntimeError("Failed to remove records from Argilla") from e
-
-
-class RemoteFeedbackDataset(FeedbackDatasetBase):
     def __init__(
         self,
         *,
@@ -248,6 +198,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         fields: List["AllowedFieldTypes"],
         questions: List["AllowedQuestionTypes"],
         guidelines: Optional[str] = None,
+        filters: Dict[str, Any] = {},
     ) -> None:
         """Initializes a `RemoteFeedbackDataset` instance in Argilla.
 
@@ -280,10 +231,11 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         self._name = name
         self._workspace = workspace
 
-        self._records: RemoteFeedbackRecords = RemoteFeedbackRecords(dataset=self)
+        extra_kwargs = {"filters": filters} if filters else {}
+        self._records = self.records_cls(dataset=self, **extra_kwargs)
 
     @property
-    def records(self) -> RemoteFeedbackRecords:
+    def records(self) -> T:
         """Returns an instance of `RemoteFeedbackRecords` that allows you to iterate over
         the records in the dataset. The records are fetched from Argilla on the fly and
         not stored in memory. You can also iterate over the records directly from the
@@ -386,51 +338,3 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
             [record.dict(exclude={"client", "name2id", "id"}, exclude_none=True) for record in self._records]
         )
         return instance
-
-    def add_records(
-        self,
-        records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
-        show_progress: bool = True,
-    ) -> None:
-        """Adds the given records to the dataset and pushes those to Argilla.
-
-        Args:
-            records: can be a single `FeedbackRecord`, a list of `FeedbackRecord`,
-                a single dictionary, or a list of dictionaries. If a dictionary is provided,
-                it will be converted to a `FeedbackRecord` internally.
-
-        Raises:
-            PermissionError: if the user does not have either `owner` or `admin` role.
-            ValueError: if the given records are neither: `FeedbackRecord`, list of
-                `FeedbackRecord`, list of dictionaries as a record or dictionary as a
-                record; or if the given records do not match the expected schema.
-        """
-        self._records.add(records=records, show_progress=show_progress)
-
-    def delete_records(self, records: Union["RemoteFeedbackRecord", List["RemoteFeedbackRecord"]]) -> None:
-        """Deletes the given records from the dataset in Argilla.
-
-        Args:
-            records: the records to delete from the dataset. Can be a single record or a list
-                of records. But those need to be previously pushed to Argilla, otherwise
-                they won't be deleted.
-
-        Raises:
-            PermissionError: if the user does not have either `owner` or `admin` role.
-            RuntimeError: If the deletion of the records from Argilla fails.
-        """
-        self._records.delete(records=[records] if not isinstance(records, list) else records)
-
-    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def delete(self) -> None:
-        """Deletes the current `FeedbackDataset` from Argilla. This method is just working
-        if the user has either `owner` or `admin` role.
-
-        Raises:
-            PermissionError: if the user does not have either `owner` or `admin` role.
-            RuntimeError: if the `FeedbackDataset` cannot be deleted from Argilla.
-        """
-        try:
-            datasets_api_v1.delete_dataset(client=self._client, id=self.id)
-        except Exception as e:
-            raise RuntimeError(f"Failed while deleting the `FeedbackDataset` from Argilla with exception: {e}") from e

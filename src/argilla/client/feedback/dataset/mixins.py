@@ -20,7 +20,7 @@ from tqdm import trange
 
 from argilla.client.api import ArgillaSingleton
 from argilla.client.feedback.constants import PUSHING_BATCH_SIZE
-from argilla.client.feedback.dataset.remote import RemoteFeedbackDataset
+from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 from argilla.client.feedback.schemas import (
     LabelQuestion,
     MultiLabelQuestion,
