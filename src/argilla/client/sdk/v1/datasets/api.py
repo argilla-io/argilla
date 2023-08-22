@@ -153,7 +153,7 @@ def list_datasets(
 
 
 def get_records(
-    client: httpx.Client, id: UUID, offset: int = 0, limit: int = 50
+    client: httpx.Client, id: UUID, offset: int = 0, limit: int = 50, response_status: Optional[List[str]] = None
 ) -> Response[Union[FeedbackRecordsModel, ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/v1/datasets/{id}/records` endpoint to retrieve a list of `FeedbackTask` records.
 
@@ -162,6 +162,7 @@ def get_records(
         id: the id of the dataset to retrieve the records from.
         offset: the offset to be used in the pagination. Defaults to 0.
         limit: the limit to be used in the pagination. Defaults to 50.
+        response_status: the status of the responses to be retrieved. Defaults to None.
 
     Returns:
         A `Response` object containing a `parsed` attribute with the parsed response if the
@@ -170,6 +171,9 @@ def get_records(
     url = f"/api/v1/datasets/{id}/records"
 
     params = {"include": ["responses", "suggestions"], "offset": offset, "limit": limit}
+
+    if response_status is not None:
+        params["response_status"] = response_status
 
     response = client.get(url=url, params=params)
 
