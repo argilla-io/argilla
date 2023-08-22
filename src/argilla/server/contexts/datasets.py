@@ -268,14 +268,42 @@ async def list_records_by_dataset_id(
     db: "AsyncSession",
     dataset_id: UUID,
     include: List[RecordInclude] = [],
+    response_statuses: List[ResponseStatusFilter] = [],
     offset: int = 0,
     limit: int = LIST_RECORDS_LIMIT,
 ) -> List[Record]:
-    query = select(Record).filter(Record.dataset_id == dataset_id)
+    response_statuses_ = [
+        ResponseStatus(response_status)
+        for response_status in response_statuses
+        if response_status != ResponseStatusFilter.missing
+    ]
+
+    response_status_filter_expressions = []
+
+    if response_statuses_:
+        response_status_filter_expressions.append(Response.status.in_(response_statuses_))
+
+    if ResponseStatusFilter.missing in response_statuses:
+        response_status_filter_expressions.append(Response.status.is_(None))
+
+    query = (
+        select(Record)
+        .filter(Record.dataset_id == dataset_id)
+        .outerjoin(
+            Response,
+            Response.record_id == Record.id,
+        )
+    )
+
+    if response_status_filter_expressions:
+        query = query.filter(or_(*response_status_filter_expressions))
+
     if RecordInclude.responses in include:
-        query = query.options(joinedload(Record.responses))
+        query = query.options(contains_eager(Record.responses))
+
     if RecordInclude.suggestions in include:
         query = query.options(joinedload(Record.suggestions))
+
     query = query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
     result = await db.execute(query)
     return result.unique().scalars().all()
