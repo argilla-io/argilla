@@ -20,7 +20,6 @@ import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import Record, Response, Suggestion, User, UserRole
 from argilla.server.search_engine import SearchEngine
-from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -969,3 +968,104 @@ class TestSuiteRecords:
     async def test_delete_record_non_existent(self, async_client: "AsyncClient", owner_auth_header: dict):
         response = await async_client.delete(f"/api/v1/records/{uuid4()}", headers=owner_auth_header)
         assert response.status_code == 404
+
+    @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+    async def test_delete_record_suggestions(
+        self, async_client: "AsyncClient", db: "AsyncSession", role: UserRole
+    ) -> None:
+        dataset = await DatasetFactory.create()
+        user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
+        record = await RecordFactory.create(dataset=dataset)
+        suggestions = await SuggestionFactory.create_batch(10, record=record)
+        random_uuids = [str(uuid4()) for _ in range(0, 5)]
+
+        suggestions_ids = [str(suggestion.id) for suggestion in suggestions]
+
+        uuids_str = ",".join(suggestions_ids + random_uuids)
+
+        response = await async_client.delete(
+            f"/api/v1/records/{record.id}/suggestions",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            params={"ids": uuids_str},
+        )
+
+        assert response.status_code == 204
+        assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 0
+
+    async def test_delete_record_suggestions_with_no_ids(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ) -> None:
+        record = await RecordFactory.create()
+
+        response = await async_client.delete(
+            f"/api/v1/records/{record.id}/suggestions",
+            headers=owner_auth_header,
+            params={"ids": ""},
+        )
+
+        assert response.status_code == 422
+
+    async def test_delete_record_suggestions_exceeding_limit(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ) -> None:
+        record = await RecordFactory.create()
+        suggestions = await SuggestionFactory.create_batch(200, record=record)
+
+        suggestions_ids = [str(suggestion.id) for suggestion in suggestions]
+
+        response = await async_client.delete(
+            f"/api/v1/records/{record.id}/suggestions",
+            headers=owner_auth_header,
+            params={"ids": ",".join(suggestions_ids)},
+        )
+
+        assert response.status_code == 422
+
+    async def test_delete_record_suggestions_from_another_record(
+        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+    ) -> None:
+        record_a = await RecordFactory.create()
+        record_b = await RecordFactory.create()
+        suggestions_a = await SuggestionFactory.create_batch(10, record=record_a)
+        suggestions_b = await SuggestionFactory.create_batch(10, record=record_b)
+
+        suggestions_a_ids = [str(suggestion.id) for suggestion in suggestions_a]
+        suggestions_b_ids = [str(suggestion.id) for suggestion in suggestions_b]
+
+        uuids_str = ",".join(suggestions_a_ids + suggestions_b_ids)
+
+        response = await async_client.delete(
+            f"/api/v1/records/{record_a.id}/suggestions",
+            headers=owner_auth_header,
+            params={"ids": uuids_str},
+        )
+
+        assert response.status_code == 204
+        assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 10
+
+    async def test_delete_record_suggestions_as_admin_from_another_workspace(self, async_client: "AsyncClient") -> None:
+        record = await RecordFactory.create()
+        suggestions = await SuggestionFactory.create_batch(10, record=record)
+        user = await UserFactory.create(role=UserRole.admin)
+
+        response = await async_client.delete(
+            f"/api/v1/records/{record.id}/suggestions",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            params={"ids": ",".join([str(suggestion.id) for suggestion in suggestions])},
+        )
+
+        assert response.status_code == 403
+
+    async def test_delete_record_suggestions_as_annotator(
+        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+    ) -> None:
+        record = await RecordFactory.create()
+        user = await UserFactory.create(role=UserRole.annotator, workspaces=[record.dataset.workspace])
+
+        response = await async_client.delete(
+            f"/api/v1/records/{record.id}/suggestions",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            params={"ids": ""},
+        )
+
+        assert response.status_code == 403
