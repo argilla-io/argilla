@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import and_, delete, func, or_, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
@@ -535,3 +535,16 @@ async def upsert_suggestion(
 async def delete_suggestions(db: "AsyncSession", record: Record, suggestions_ids: List[UUID]) -> None:
     params = [Suggestion.id.in_(suggestions_ids), Suggestion.record_id == record.id]
     await Suggestion.delete_many(db=db, params=params)
+
+
+async def get_suggestion_by_id(db: "AsyncSession", suggestion_id: "UUID") -> Union[Suggestion, None]:
+    result = await db.execute(
+        select(Suggestion)
+        .filter_by(id=suggestion_id)
+        .options(selectinload(Suggestion.record).selectinload(Record.dataset))
+    )
+    return result.scalar_one_or_none()
+
+
+async def delete_suggestion(db: "AsyncSession", suggestion: Suggestion) -> Suggestion:
+    return await suggestion.delete(db)
