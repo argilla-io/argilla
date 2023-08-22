@@ -530,3 +530,8 @@ async def upsert_suggestion(
         schema=SuggestionCreateWithRecordId(record_id=record.id, **suggestion_create.dict()),
         constraints=[Suggestion.record_id, Suggestion.question_id],
     )
+
+
+async def delete_suggestions(db: "AsyncSession", record: Record, suggestions_ids: List[UUID]) -> None:
+    params = [Suggestion.id.in_(suggestions_ids), Suggestion.record_id == record.id]
+    await Suggestion.delete_many(db=db, params=params)

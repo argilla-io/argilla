@@ -14,7 +14,7 @@
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Security, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from fastapi import Response as HTTPResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -27,9 +27,12 @@ from argilla.server.schemas.v1.records import Response, ResponseCreate
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate, Suggestions
 from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.security import auth
+from argilla.server.utils import parse_uuids
 
 if TYPE_CHECKING:
     from argilla.server.models import Record
+
+DELETE_RECORD_SUGGESTIONS_LIMIT = 100
 
 router = APIRouter(tags=["records"])
 
@@ -123,6 +126,37 @@ async def upsert_suggestion(
         return await datasets.upsert_suggestion(db, record, question, suggestion_create)
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+
+
+@router.delete(
+    "/records/{record_id}/suggestions",
+    summary="Delete suggestions for a record",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_record_suggestions(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    record_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+    ids: str = Query(..., description="A comma separated list with the IDs of the records to be removed"),
+):
+    record = await _get_record(db, record_id)
+
+    await authorize(current_user, RecordPolicyV1.delete_suggestions(record))
+
+    suggestion_ids = parse_uuids(ids)
+    num_suggestions = len(suggestion_ids)
+
+    if num_suggestions == 0:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No suggestions IDs provided")
+
+    if num_suggestions > DELETE_RECORD_SUGGESTIONS_LIMIT:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Cannot delete more than {DELETE_RECORD_SUGGESTIONS_LIMIT} suggestions at once",
+        )
+
+    await datasets.delete_suggestions(db, record, suggestion_ids)
 
 
 @router.delete("/records/{record_id}", response_model=RecordSchema, response_model_exclude_unset=True)
