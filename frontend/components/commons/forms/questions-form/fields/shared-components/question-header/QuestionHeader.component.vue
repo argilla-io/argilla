@@ -3,7 +3,7 @@
     <span
       class="suggestion-info"
       v-text="title"
-      v-required-field="isRequired && { color: 'red'}"
+      v-required-field="isRequired && { color: 'red' }"
       v-prefix-star="{
         show: hasSuggestion,
         tooltip: 'This question contains a suggestion',
