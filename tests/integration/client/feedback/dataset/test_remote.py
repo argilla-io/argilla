@@ -75,7 +75,7 @@ async def test_delete_not_allowed_role(role: UserRole) -> None:
         remote_dataset.delete()
 
 
-@pytest.mark.parametrize("role", [UserRole.owner])
+@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
 @pytest.mark.asyncio
 async def test_list(role: UserRole) -> None:
     dataset = await DatasetFactory.create()
