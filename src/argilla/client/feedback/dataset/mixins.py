@@ -29,7 +29,7 @@ from argilla.client.feedback.schemas import (
     TextField,
     TextQuestion,
 )
-from argilla.client.feedback.types import AllowedQuestionTypes
+from argilla.client.feedback.schemas.types import AllowedQuestionTypes
 from argilla.client.feedback.utils import feedback_dataset_in_argilla
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.workspaces import Workspace
@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 
     from argilla.client.client import Argilla as ArgillaClient
     from argilla.client.feedback.dataset.local import FeedbackDataset
-    from argilla.client.feedback.types import AllowedFieldTypes
+    from argilla.client.feedback.schemas.types import AllowedFieldTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel
 
 warnings.simplefilter("always", DeprecationWarning)

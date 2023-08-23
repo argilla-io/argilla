@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 @pytest.fixture(autouse=True)
 def mock_session_local(mocker: "MockerFixture", async_db_proxy: "AsyncSession") -> None:
-    mocker.patch("argilla.tasks.users.create.AsyncSessionLocal", return_value=async_db_proxy)
-    mocker.patch("argilla.tasks.users.update.AsyncSessionLocal", return_value=async_db_proxy)
-    mocker.patch("argilla.tasks.users.create_default.AsyncSessionLocal", return_value=async_db_proxy)
-    mocker.patch("argilla.tasks.users.migrate.AsyncSessionLocal", return_value=async_db_proxy)
+    mocker.patch("argilla.tasks.database.users.create.AsyncSessionLocal", return_value=async_db_proxy)
+    mocker.patch("argilla.tasks.database.users.update.AsyncSessionLocal", return_value=async_db_proxy)
+    mocker.patch("argilla.tasks.database.users.create_default.AsyncSessionLocal", return_value=async_db_proxy)
+    mocker.patch("argilla.tasks.database.users.migrate.AsyncSessionLocal", return_value=async_db_proxy)

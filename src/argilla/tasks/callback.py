@@ -12,7 +12,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .database import app as database_app
-from .login import app as login_app
-from .server import app as server_app
-from .training import app as training_app
+import typer
+
+from argilla.client.api import init
+from argilla.client.login import ArgillaCredentials
+
+
+def init_callback() -> None:
+    if not ArgillaCredentials.exists():
+        typer.echo("You are not logged in. Please run `argilla login` to login to an Argilla server.")
+        raise typer.Exit(code=1)
+
+    init()

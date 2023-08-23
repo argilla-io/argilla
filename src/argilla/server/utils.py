@@ -12,7 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .database import app as database_app
-from .login import app as login_app
-from .server import app as server_app
-from .training import app as training_app
+from typing import List
+from uuid import UUID
+
+from fastapi import HTTPException
+
+
+def parse_uuids(uuids_str: str) -> List[UUID]:
+    try:
+        return [UUID(uuid_str) for uuid_str in uuids_str.split(",")]
+    except ValueError:
+        raise HTTPException(status_code=422, detail="Invalid UUID format")

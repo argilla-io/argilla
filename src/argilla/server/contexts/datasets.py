@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, delete, func, or_, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
@@ -232,6 +232,17 @@ async def delete_record(db: "AsyncSession", search_engine: "SearchEngine", recor
     return record
 
 
+async def delete_records(
+    db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, records_ids: List[UUID]
+) -> None:
+    async with db.begin_nested():
+        params = [Record.id.in_(records_ids), Record.dataset_id == dataset.id]
+        records = await Record.delete_many(db=db, params=params, autocommit=False)
+        await search_engine.delete_records(dataset=dataset, records=records)
+
+    await db.commit()
+
+
 async def get_records_by_ids(
     db: "AsyncSession",
     dataset_id: UUID,
@@ -256,24 +267,7 @@ async def get_records_by_ids(
 async def list_records_by_dataset_id(
     db: "AsyncSession",
     dataset_id: UUID,
-    include: List[RecordInclude] = [],
-    offset: int = 0,
-    limit: int = LIST_RECORDS_LIMIT,
-) -> List[Record]:
-    query = select(Record).filter(Record.dataset_id == dataset_id)
-    if RecordInclude.responses in include:
-        query = query.options(joinedload(Record.responses))
-    if RecordInclude.suggestions in include:
-        query = query.options(joinedload(Record.suggestions))
-    query = query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
-    result = await db.execute(query)
-    return result.unique().scalars().all()
-
-
-async def list_records_by_dataset_id_and_user_id(
-    db: "AsyncSession",
-    dataset_id: UUID,
-    user_id: UUID,
+    user_id: Optional[UUID] = None,
     include: List[RecordInclude] = [],
     response_statuses: List[ResponseStatusFilter] = [],
     offset: int = 0,
@@ -298,7 +292,9 @@ async def list_records_by_dataset_id_and_user_id(
         .filter(Record.dataset_id == dataset_id)
         .outerjoin(
             Response,
-            and_(Response.record_id == Record.id, Response.user_id == user_id),
+            Response.record_id == Record.id
+            if user_id is None
+            else and_(Response.record_id == Record.id, Response.user_id == user_id),
         )
     )
 
