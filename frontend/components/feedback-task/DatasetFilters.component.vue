@@ -10,18 +10,6 @@
     <span class="filters__component">
       <StatusFilter :options="statusOptions" v-model="selectedStatus" />
     </span>
-    <div class="draft">
-      <BaseSpinner v-if="draftSaving" />
-      <p v-if="draftSaving">Saving...</p>
-      <p v-if="!draftSaving && isSavedDraft">
-        Saved
-        <BaseDate
-          :date="updatedAt"
-          :format="'date-relative-now'"
-          :updateEverySecond="10"
-        />
-      </p>
-    </div>
   </div>
 </template>
 
@@ -39,9 +27,6 @@ export default {
       selectedStatus: null,
       searchInput: null,
       totalRecords: null,
-      updatedAt: null,
-      isSavedDraft: false,
-      draftSaving: false,
     };
   },
   beforeMount() {
@@ -56,13 +41,6 @@ export default {
     });
     this.$root.$on("total-records", (totalRecords) => {
       this.totalRecords = totalRecords;
-    });
-    this.$root.$on("record-changed", (record) => {
-      this.updatedAt = record.updatedAt;
-      this.isSavedDraft = record.isSavedDraft;
-    });
-    this.$root.$on("record-saving", (draftSaving) => {
-      this.draftSaving = draftSaving;
     });
   },
   computed: {
@@ -107,8 +85,6 @@ export default {
     this.$root.$off("reset-status-filter");
     this.$root.$off("reset-search-filter");
     this.$root.$off("total-records");
-    this.$root.$off("record-changed");
-    this.$root.$off("record-saving");
   },
 };
 </script>
@@ -123,14 +99,5 @@ export default {
 }
 .search-area {
   width: clamp(300px, 30vw, 800px);
-}
-.draft {
-  display: flex;
-  flex-direction: row;
-  gap: 5px;
-  align-items: center;
-  height: 10px;
-  @include font-size(13px);
-  color: $primary-color;
 }
 </style>
