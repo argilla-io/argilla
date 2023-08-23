@@ -14,12 +14,12 @@
 
 from typing import Union
 
-from argilla.client.feedback.schemas import (
+from argilla.client.feedback.schemas.fields import TextField
+from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
     RankingQuestion,
     RatingQuestion,
-    TextField,
     TextQuestion,
 )
 

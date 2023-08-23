@@ -31,7 +31,7 @@ from argilla.client.feedback.training.schemas import TrainingTask
 from argilla.client.models import Framework
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
     from argilla.server.models import User as ServerUser
     from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -665,6 +665,10 @@ def test_push_to_huggingface_and_from_huggingface(
         Framework("spacy-transformers"),
     ],
 )
+@pytest.mark.parametrize(
+    "question",
+    ["question-3", "question-4"],
+)
 @pytest.mark.usefixtures(
     "feedback_dataset_guidelines",
     "feedback_dataset_fields",
@@ -673,6 +677,7 @@ def test_push_to_huggingface_and_from_huggingface(
 )
 def test_prepare_for_training_text_classification(
     framework: Union[Framework, str],
+    question: str,
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
@@ -684,7 +689,7 @@ def test_prepare_for_training_text_classification(
         questions=feedback_dataset_questions,
     )
     dataset.add_records(feedback_dataset_records)
-    label = dataset.question_by_name("question-3")
+    label = dataset.question_by_name(question)
     task = TrainingTask.for_text_classification(text=dataset.fields[0], label=label)
 
     dataset.prepare_for_training(framework=framework, task=task, fetch_records=False)

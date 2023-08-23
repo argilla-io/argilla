@@ -84,7 +84,7 @@ template = """\
 ### Context: {context}\n
 ### Response: {response}"""
 
-def formatting_func(sample: Dict[str, Any]):
+def formatting_func(sample: Dict[str, Any]) -> str:
     # What `sample` looks like depends a lot on your FeedbackDataset fields and questions
     return template.format(
         instruction=sample["new-instruction"][0]["value"],
@@ -118,7 +118,7 @@ Dataset({
 
 #### TRL
 
-The [Transformer Reinforcement Learning (TRL)](https://huggingface.co/docs/trl) package provides a flexible and customizable framework for fine-tuning models. It allows users to have fine-grained control over the training process, enabling them to define their functions and to further specify the desired behavior of the model. This approach requires a deeper understanding of reinforcement learning concepts and techniques, as well as more careful experimentation. It is best suited for users who have experience in reinforcement learning and want fine-grained control over the training process. Additionally, it directly integrates with [Performance Efficient Fine Tuning](https://huggingface.co/docs/peft/index) (PEFT) decreasing the computational complexity of this step of training an LLM.
+The [Transformer Reinforcement Learning (TRL)](https://huggingface.co/docs/trl) package provides a flexible and customizable framework for fine-tuning models. It allows users to have fine-grained control over the training process, enabling them to define their functions and to further specify the desired behavior of the model. This approach requires a deeper understanding of reinforcement learning concepts and techniques, as well as more careful experimentation. It is best suited for users who have experience in reinforcement learning and want fine-grained control over the training process. Additionally, it directly integrates with [Parameter-Efficient Fine-Tuning](https://huggingface.co/docs/peft/index) (PEFT) decreasing the computational complexity of this step of training an LLM.
 
 ```python
 from argilla.feedback import ArgillaTrainer

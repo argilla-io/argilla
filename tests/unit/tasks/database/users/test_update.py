@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 def test_update(sync_db: "Session", cli_runner: CliRunner, cli: Typer, new_role_string: str):
     user = UserSyncFactory.create(username="username", role=UserRole.annotator)
 
-    result = cli_runner.invoke(cli, f"users update username --role {new_role_string}")
+    result = cli_runner.invoke(cli, f"database users update username --role {new_role_string}")
 
     assert result.exit_code == 0
 
@@ -40,7 +40,7 @@ def test_update(sync_db: "Session", cli_runner: CliRunner, cli: Typer, new_role_
 
 def test_update_with_invalid_role(cli_runner: CliRunner, cli: Typer):
     bad_role_str = "bad-role"
-    result = cli_runner.invoke(cli, f"users update username --role {bad_role_str}")
+    result = cli_runner.invoke(cli, f"database users update username --role {bad_role_str}")
 
     assert result.exit_code == 2
     assert f"{bad_role_str!r} is not one of" in result.output, result.output
@@ -48,7 +48,7 @@ def test_update_with_invalid_role(cli_runner: CliRunner, cli: Typer):
 
 def test_update_with_missing_username(cli_runner: CliRunner, cli: Typer):
     missing_username = "missing-username"
-    result = cli_runner.invoke(cli, f"users update {missing_username} --role owner")
+    result = cli_runner.invoke(cli, f"database users update {missing_username} --role owner")
 
     assert result.exit_code == 0
     assert result.output == f"User with username {missing_username!r} does not exists in database. Skipping...\n"
@@ -59,7 +59,7 @@ def test_update_with_same_user_role(cli_runner: CliRunner, cli: Typer, role_stri
     username = "username"
     UserSyncFactory.create(username=username, role=UserRole(role_string))
 
-    result = cli_runner.invoke(cli, f"users update {username} --role {role_string}")
+    result = cli_runner.invoke(cli, f"database users update {username} --role {role_string}")
 
     assert result.exit_code == 0
     assert result.output == f"User {username!r} already has role {role_string!r}. Skipping...\n"

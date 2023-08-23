@@ -28,6 +28,7 @@ from argilla.client.feedback.schemas import (
     RankingQuestion,
     RatingQuestion,
 )
+from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.feedback.training.schemas import (
     TrainingTaskForDPO,
     TrainingTaskForPPO,
@@ -36,7 +37,6 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForTextClassification,
     TrainingTaskTypes,
 )
-from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.feedback.unification import (
     LabelQuestionStrategy,
     MultiLabelQuestionStrategy,
