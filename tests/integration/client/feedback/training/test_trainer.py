@@ -153,12 +153,12 @@ def test_prepare_for_training_text_classification_with_formatting_func(
     ):
         task = TrainingTask.for_text_classification(wrong_formatting_func)
         trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, fetch_records=False)
-        trainer.update_config(num_steps=1)
+        trainer.update_config(num_iterations=1)
         trainer.train(__OUTPUT_DIR__)
 
     task = TrainingTask.for_text_classification(correct_formatting_func)
     trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, fetch_records=False)
-    trainer.update_config(num_steps=1)
+    trainer.update_config(num_iterations=1)
     trainer.train(__OUTPUT_DIR__)
 
 
