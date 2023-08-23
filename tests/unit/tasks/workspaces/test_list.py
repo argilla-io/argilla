@@ -45,3 +45,20 @@ async def test_list_workspaces(mocker: "MockerFixture", capsys):
     list_workspaces()
     captured = capsys.readouterr()
     assert all(col in captured.out for col in ("ID", "Name", "Creation Date", "Update Date", "test_workspace"))
+
+
+@pytest.mark.asyncio
+async def test_cli_workspaces_list(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", owner: "ServerUser"):
+    ws_factory = await WorkspaceFactory.create(name="test_workspace")
+    mocker.patch("argilla.client.api.ArgillaSingleton.init")
+    
+    workspace_list_mock = mocker.patch("argilla.client.workspaces.Workspace.list")
+    workspace_list_mock.return_value = [ws_factory]
+
+    result = cli_runner.invoke(
+        cli,
+        "workspaces list",
+    )
+
+    assert all(col in result.stdout for col in ("ID", "Name", "Creation Date", "Update Date", "test_workspace"))
+    assert result.exit_code == 0
