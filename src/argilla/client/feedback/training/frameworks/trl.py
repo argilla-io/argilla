@@ -287,7 +287,18 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
             def data_collator(data):
                 return dict((key, [d[key] for d in data]) for key in data[0])
 
+            def remove_truncated(sample):
+                return len(sample) < self._transformers_tokenizer.model_max_length
+
             dataset = dataset.map(tokenize, batched=False)
+            size_before = len(dataset)
+            dataset = dataset.filter(remove_truncated, batched=False)
+            size_after = len(dataset)
+            if size_after != size_before:
+                self._logger.info(
+                    f"Removed {size_before - size_after} samples ({1 - (size_after / size_before):%}), "
+                    "as these samples were longer than the maximum model length even before the generation."
+                )
             dataset.set_format(type="torch")
             self._trainer = self.trainer_cls(
                 model=self._transformers_model,
