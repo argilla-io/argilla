@@ -333,7 +333,8 @@ class ArgillaMixin:
             guidelines=existing_dataset.guidelines or None,
         )
 
-    def list(self: "FeedbackDataset", workspace: Optional[str] = None) -> List[RemoteFeedbackDataset]:
+    @classmethod
+    def list(cls: Type["FeedbackDataset"], workspace: Optional[str] = None) -> List[RemoteFeedbackDataset]:
         """Lists the `FeedbackDataset`s pushed to Argilla.
 
         Note that you may need to `rg.init(...)` with your Argilla credentials before
@@ -368,8 +369,8 @@ class ArgillaMixin:
                 id=dataset.id,
                 name=dataset.name,
                 workspace=workspace if workspace is not None else Workspace.from_id(dataset.workspace_id),
-                fields=self.__get_fields(client=httpx_client, id=dataset.id),
-                questions=self.__get_questions(client=httpx_client, id=dataset.id),
+                fields=cls.__get_fields(client=httpx_client, id=dataset.id),
+                questions=cls.__get_questions(client=httpx_client, id=dataset.id),
                 guidelines=dataset.guidelines or None,
             )
             for dataset in datasets
