@@ -3,7 +3,7 @@
     <span
       class="suggestion-info"
       v-text="title"
-      v-required-field="isRequired && { color: 'red' }"
+      v-required-field="{ show: isRequired, color: 'red' }"
       v-prefix-star="{
         show: hasSuggestion,
         tooltip: 'This question contains a suggestion',
@@ -48,8 +48,7 @@ export default {
   },
   computed: {
     showIcon() {
-      // TODO - move this to the template to after reviewing the jest.config
-      return this.tooltipMessage?.length ? true : false;
+      return !!this.tooltipMessage?.length;
     },
   },
 };
