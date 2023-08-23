@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Tuple, Type
+from typing import TYPE_CHECKING, List, Optional, Tuple, Type, Union
 from unittest.mock import ANY, MagicMock
 from uuid import UUID, uuid4
 
@@ -599,6 +599,78 @@ class TestSuiteDatasets:
         response_body = response.json()
         assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
 
+    # Helper function to create records with responses
+    async def create_records_with_response(
+        self,
+        num_records: int,
+        dataset: Dataset,
+        user: User,
+        response_status: ResponseStatus,
+        response_values: Optional[dict] = None,
+    ):
+        for record in await RecordFactory.create_batch(size=num_records, dataset=dataset):
+            await ResponseFactory.create(record=record, user=user, values=response_values, status=response_status)
+
+    @pytest.mark.parametrize(
+        "response_status_filter", ["missing", "discarded", "submitted", "draft", ["submitted", "draft"]]
+    )
+    async def test_list_dataset_records_with_response_status_filter(
+        self,
+        async_client: "AsyncClient",
+        owner: "User",
+        owner_auth_header: dict,
+        response_status_filter: Union[str, List[str]],
+    ):
+        num_responses_per_status = 10
+        response_values = {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}
+
+        dataset = await DatasetFactory.create()
+        # missing responses
+        await RecordFactory.create_batch(size=num_responses_per_status, dataset=dataset)
+        # discarded responses
+        await self.create_records_with_response(num_responses_per_status, dataset, owner, ResponseStatus.discarded)
+        # submitted responses
+        await self.create_records_with_response(
+            num_responses_per_status, dataset, owner, ResponseStatus.submitted, response_values
+        )
+        # drafted responses
+        await self.create_records_with_response(
+            num_responses_per_status, dataset, owner, ResponseStatus.draft, response_values
+        )
+
+        other_dataset = await DatasetFactory.create()
+        await RecordFactory.create_batch(size=2, dataset=other_dataset)
+
+        response_status_filter = (
+            [response_status_filter] if isinstance(response_status_filter, str) else response_status_filter
+        )
+        response_status_filter_url = [
+            f"response_status={response_status}" for response_status in response_status_filter
+        ]
+
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/records?{'&'.join(response_status_filter_url)}&include=responses",
+            headers=owner_auth_header,
+        )
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert len(response_json["items"]) == (num_responses_per_status * len(response_status_filter))
+
+        if "missing" in response_status_filter:
+            assert (
+                len([record for record in response_json["items"] if len(record["responses"]) == 0])
+                >= num_responses_per_status
+            )
+        assert all(
+            [
+                record["responses"][0]["status"] in response_status_filter
+                for record in response_json["items"]
+                if len(record["responses"]) > 0
+            ]
+        )
+
     async def test_list_dataset_records_without_authentication(self, async_client: "AsyncClient"):
         dataset = await DatasetFactory.create()
 
@@ -924,17 +996,6 @@ class TestSuiteDatasets:
 
         response_body = response.json()
         assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
-
-    async def create_records_with_response(
-        self,
-        num_records: int,
-        dataset: Dataset,
-        user: User,
-        response_status: ResponseStatus,
-        response_values: Optional[dict] = None,
-    ):
-        for record in await RecordFactory.create_batch(size=num_records, dataset=dataset):
-            await ResponseFactory.create(record=record, user=user, values=response_values, status=response_status)
 
     @pytest.mark.parametrize("response_status_filter", ["missing", "discarded", "submitted", "draft"])
     async def test_list_current_user_dataset_records_with_response_status_filter(
