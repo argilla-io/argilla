@@ -267,24 +267,7 @@ async def get_records_by_ids(
 async def list_records_by_dataset_id(
     db: "AsyncSession",
     dataset_id: UUID,
-    include: List[RecordInclude] = [],
-    offset: int = 0,
-    limit: int = LIST_RECORDS_LIMIT,
-) -> List[Record]:
-    query = select(Record).filter(Record.dataset_id == dataset_id)
-    if RecordInclude.responses in include:
-        query = query.options(joinedload(Record.responses))
-    if RecordInclude.suggestions in include:
-        query = query.options(joinedload(Record.suggestions))
-    query = query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
-    result = await db.execute(query)
-    return result.unique().scalars().all()
-
-
-async def list_records_by_dataset_id_and_user_id(
-    db: "AsyncSession",
-    dataset_id: UUID,
-    user_id: UUID,
+    user_id: Optional[UUID] = None,
     include: List[RecordInclude] = [],
     response_statuses: List[ResponseStatusFilter] = [],
     offset: int = 0,
@@ -309,7 +292,9 @@ async def list_records_by_dataset_id_and_user_id(
         .filter(Record.dataset_id == dataset_id)
         .outerjoin(
             Response,
-            and_(Response.record_id == Record.id, Response.user_id == user_id),
+            Response.record_id == Record.id
+            if user_id is None
+            else and_(Response.record_id == Record.id, Response.user_id == user_id),
         )
     )
 
