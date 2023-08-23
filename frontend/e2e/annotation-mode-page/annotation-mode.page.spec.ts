@@ -40,6 +40,14 @@ test.describe("Annotate page", () => {
     await expect(page).toHaveScreenshot();
   });
 
+  test("filter by workspaces from annotation page", async ({ page }) => {
+    await goToAnnotationPage(page);
+
+    await page.getByRole("link", { name: "argilla" }).click();
+
+    await expect(page).toHaveScreenshot();
+  });
+
   test("hide spark icon when user change suggested answer", async ({
     page,
   }) => {
@@ -89,11 +97,13 @@ test.describe("Annotate page", () => {
 
     await expect(page).toHaveScreenshot();
 
-    await page.getByText("Review Rating (optional)").scrollIntoViewIfNeeded();
+    await page
+      .getByText("Review Rating", { exact: true })
+      .scrollIntoViewIfNeeded();
 
     await expect(page).toHaveScreenshot();
 
-    await page.getByText("Ranking (optional)").scrollIntoViewIfNeeded();
+    await page.getByText("Ranking", { exact: true }).scrollIntoViewIfNeeded();
 
     await expect(page).toHaveScreenshot();
   });

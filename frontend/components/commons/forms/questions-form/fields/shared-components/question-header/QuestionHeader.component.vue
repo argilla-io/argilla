@@ -3,7 +3,7 @@
     <span
       class="suggestion-info"
       v-text="question.title"
-      v-optional-field="!question.isRequired"
+      v-required-field="{ show: question.isRequired, color: 'red' }"
       v-prefix-star="{
         enabled: showSuggestion,
         show: matchSuggestion,
