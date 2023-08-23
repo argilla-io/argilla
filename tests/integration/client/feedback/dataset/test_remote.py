@@ -15,6 +15,7 @@
 import pytest
 from argilla.client import api
 from argilla.client.feedback.dataset import FeedbackDataset
+from argilla.client.feedback.dataset.remote import RemoteFeedbackDataset
 from argilla.client.sdk.users.models import UserRole
 
 from tests.factories import DatasetFactory, RecordFactory, TextFieldFactory, TextQuestionFactory, UserFactory
@@ -73,3 +74,19 @@ async def test_delete_not_allowed_role(role: UserRole) -> None:
 
     with pytest.raises(PermissionError, match=f"User with role={role} is not allowed to call `delete`"):
         remote_dataset.delete()
+
+
+@pytest.mark.parametrize("role", [UserRole.owner])
+@pytest.mark.asyncio
+async def test_list(role: UserRole) -> None:
+    dataset = await DatasetFactory.create()
+    await TextFieldFactory.create(dataset=dataset, required=True)
+    await TextQuestionFactory.create(dataset=dataset, required=True)
+    await RecordFactory.create_batch(dataset=dataset, size=10)
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+    api.init(api_key=user.api_key)
+    remote_datasets = FeedbackDataset.list()
+    assert len(remote_datasets) == 1
+    assert all(isinstance(remote_dataset, RemoteFeedbackDataset) for remote_dataset in remote_datasets)
+    assert all(remote_dataset.workspace.id == dataset.workspace.id for remote_dataset in remote_datasets)
