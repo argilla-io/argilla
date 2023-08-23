@@ -206,7 +206,7 @@ By following these steps, you'll have a fresh and clean database to work with.
 At least one user is required to interact with Argila API and web UI. You can create easily create your user executing the following task:
 
 ```sh
-python -m argilla users create
+python -m argilla database users create
 ```
 
 This task will ask you for the required information to create your user, including `username`, `password` and so on.

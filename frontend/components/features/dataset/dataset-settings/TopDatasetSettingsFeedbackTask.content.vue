@@ -1,5 +1,5 @@
 <template>
-  <div class="top-content">
+  <div class="top-content" :class="separator ? '--separator' : null">
     <h1>Dataset settings</h1>
     <base-button
       :to="{ name: 'dataset-id-annotation-mode', params: { id: datasetId } }"
@@ -19,6 +19,10 @@ export default {
       type: String,
       required: true,
     },
+    separator: {
+      type: Boolean,
+      default: true,
+    },
   },
 };
 </script>
@@ -28,7 +32,10 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 100%;
-  border-bottom: 1px solid #e6e6e6;
+  padding-top: 2em;
+  &.--separator {
+    padding-bottom: 2em;
+    border-bottom: 1px solid #e6e6e6;
+  }
 }
 </style>
