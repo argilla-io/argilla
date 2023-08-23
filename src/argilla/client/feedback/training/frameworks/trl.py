@@ -281,7 +281,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
             dataset = concatenate_datasets([x for x in [self._train_dataset, self._eval_dataset] if x is not None])
 
             def tokenize(sample):
-                sample["input_ids"] = self._transformers_tokenizer.encode(sample["query"])
+                sample["input_ids"] = self._transformers_tokenizer.encode(sample["query"], truncation=True)
                 return sample
 
             def data_collator(data):
