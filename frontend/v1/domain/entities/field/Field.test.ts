@@ -48,14 +48,16 @@ describe("Field", () => {
 
   describe("update should", () => {
     test("isModified is false when the field was updated", () => {
+      const FAKE_TITLE_FROM_BACKEND = "TITLE FROM BACKEND";
       const field = createTextFieldMock("1");
       field.title = "NEW TITLE";
 
       expect(field.isModified).toBeTruthy();
 
-      field.update();
+      field.update(FAKE_TITLE_FROM_BACKEND, {});
 
       expect(field.isModified).toBeFalsy();
+      expect(field.title).toBe(FAKE_TITLE_FROM_BACKEND);
     });
   });
 

@@ -57,7 +57,10 @@ export class Field {
     };
   }
 
-  update() {
+  update(title: string, settings: any) {
+    this.title = title;
+    this.settings = settings;
+
     this.initializeOriginal();
   }
 

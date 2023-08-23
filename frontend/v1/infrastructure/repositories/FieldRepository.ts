@@ -39,9 +39,13 @@ export class FieldRepository {
     }
   }
 
-  private createRequest({ title, settings }: Field): Partial<BackendField> {
+  private createRequest({
+    name,
+    title,
+    settings,
+  }: Field): Partial<BackendField> {
     return {
-      title,
+      title: !title || title === "" ? name : title,
       settings,
     };
   }

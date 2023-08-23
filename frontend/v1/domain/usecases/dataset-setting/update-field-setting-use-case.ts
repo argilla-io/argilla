@@ -9,8 +9,8 @@ export class UpdateFieldSettingUseCase {
       throw new Error("Field is not valid for update");
     }
 
-    await this.fieldRepository.update(field);
+    const { title, settings } = await this.fieldRepository.update(field);
 
-    field.update();
+    field.update(title, settings);
   }
 }
