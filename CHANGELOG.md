@@ -22,6 +22,7 @@ These are the section headers that we use:
 - Added `login` command to login into an Argilla server ([#3600](https://github.com/argilla-io/argilla/pull/3600)).
 - Added `DELETE /api/v1/suggestions/{suggestion_id}` endpoint to delete a suggestion given its ID ([#3617](https://github.com/argilla-io/argilla/pull/3617)).
 - Added `DELETE /api/v1/records/{record_id}/suggestions` endpoint to delete several suggestions linked to the same record given their IDs ([#3617](https://github.com/argilla-io/argilla/pull/3617)).
+- Added `response_status` param to `GET /api/v1/datasets/{dataset_id}/records` to be able to filter by `response_status` as previously included for `GET /api/v1/me/datasets/{dataset_id}/records` ([#3613](https://github.com/argilla-io/argilla/pull/3613)).
 
 ### Changed
 
