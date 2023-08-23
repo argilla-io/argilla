@@ -18,6 +18,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
+from argilla.server.enums import ResponseStatus
 from argilla.server.models import Record, Response, Suggestion, User, UserRole
 from argilla.server.search_engine import SearchEngine
 from sqlalchemy import func, select
@@ -72,7 +73,9 @@ async def create_ranking_question(dataset: "Dataset") -> None:
 
 @pytest.mark.asyncio
 class TestSuiteRecords:
-    @pytest.mark.parametrize("response_status", ["submitted", "discarded", "draft"])
+    @pytest.mark.parametrize(
+        "response_status", [ResponseStatus.submitted, ResponseStatus.discarded, ResponseStatus.draft]
+    )
     @pytest.mark.parametrize(
         "create_questions_func, responses",
         [
@@ -149,7 +152,7 @@ class TestSuiteRecords:
         owner: User,
         owner_auth_header: dict,
         create_questions_func: Callable[["Dataset"], Awaitable[None]],
-        response_status: str,
+        response_status: ResponseStatus,
         responses: dict,
     ):
         dataset = await DatasetFactory.create()
@@ -195,7 +198,7 @@ class TestSuiteRecords:
         assert response.status_code == 422
         assert response.json() == {"detail": "Missing required question: 'input_ok'"}
 
-    @pytest.mark.parametrize("response_status", ["discarded", "draft"])
+    @pytest.mark.parametrize("response_status", [ResponseStatus.discarded, ResponseStatus.draft])
     @pytest.mark.parametrize(
         "create_questions_func, responses",
         [
@@ -305,7 +308,7 @@ class TestSuiteRecords:
         owner: User,
         owner_auth_header: dict,
         create_questions_func: Callable[["Dataset"], Awaitable[None]],
-        response_status: str,
+        response_status: ResponseStatus,
         responses: dict,
     ):
         dataset = await DatasetFactory.create()
@@ -620,9 +623,9 @@ class TestSuiteRecords:
                 "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
             }
 
-    @pytest.mark.parametrize("status", ["submitted", "discarded", "draft"])
-    async def test_create_record_submitted_response_with_wrong_values(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, status: str
+    @pytest.mark.parametrize("status", [ResponseStatus.submitted, ResponseStatus.discarded, ResponseStatus.draft])
+    async def test_create_record_response_with_wrong_values(
+        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, status: ResponseStatus
     ):
         record = await RecordFactory.create()
         response_json = {"status": status, "values": {"wrong_question": {"value": "wrong value"}}}
