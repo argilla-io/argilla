@@ -12,23 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from enum import Enum
 from typing import Any, Generic, List, Literal, Optional, Protocol, TypeVar, Union
 
 from pydantic import BaseModel, Field
+
+from argilla.server.enums import QuestionType
 
 try:
     from typing import Annotated
 except ImportError:
     from typing_extensions import Annotated
-
-
-class QuestionType(str, Enum):
-    text = "text"
-    rating = "rating"
-    label_selection = "label_selection"
-    multi_label_selection = "multi_label_selection"
-    ranking = "ranking"
 
 
 class ResponseValue(Protocol):
