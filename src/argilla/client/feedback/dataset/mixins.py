@@ -342,8 +342,8 @@ class ArgillaMixin:
         which will fail if Argilla is not deployed locally.
 
         Args:
-            workspace: the workspace where to list the datasets from. Defaults to `None`
-                which means that no workspace filtering will be applied.
+            workspace: the workspace where to list the datasets from. If not provided,
+                then the workspace filtering won't be applied. Defaults to `None`.
 
         Returns:
             A list of `RemoteFeedbackDataset` datasets, which are `FeedbackDataset`
@@ -360,8 +360,8 @@ class ArgillaMixin:
         try:
             datasets = datasets_api_v1.list_datasets(client=httpx_client).parsed
         except Exception as e:
-            raise Exception(
-                "Failed while listing the `FeedbackDataset` datasets in Argilla with" f" exception: {e}"
+            raise RuntimeError(
+                f"Failed while listing the `FeedbackDataset` datasets in Argilla with exception: {e}"
             ) from e
         return [
             RemoteFeedbackDataset(
@@ -373,5 +373,5 @@ class ArgillaMixin:
                 questions=cls.__get_questions(client=httpx_client, id=dataset.id),
                 guidelines=dataset.guidelines or None,
             )
-            for dataset in datasets
+            for dataset in datasets if workspace is None or dataset.workspace_id == workspace.id
         ]
