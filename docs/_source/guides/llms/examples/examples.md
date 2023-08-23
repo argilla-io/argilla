@@ -26,6 +26,14 @@ Learn how to add suggestions to your Feedback dataset using Setfit.
 
 Learn how to create synthetic data and annotations with OpenAI, LangChain, Transformers and Outlines.
 ```
+
+```{grid-item-card} Fine-tune a SetFit model using the ArgillaTrainer
+:link: trainer-feedback-setfit.html
+
+Learn how to use the ArgillaTrainer to fine-tune your Feedback dataset using Setfit.
+
+```
+
 ````
 
 ```{toctree}
@@ -34,5 +42,6 @@ Learn how to create synthetic data and annotations with OpenAI, LangChain, Trans
 curating-feedback-instructiondataset
 train-reward-model-rlhf
 labelling-feedback-setfit
+trainer-feedback-setfit
 labelling-feedback-langchain-syntethic
 ```
