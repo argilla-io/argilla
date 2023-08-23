@@ -116,9 +116,6 @@ export default {
       this.$root.$on("are-responses-untouched", (areResponsesUntouched) => {
         this.areResponsesUntouched = areResponsesUntouched;
       });
-      this.$root.$on("on-record-modified", (record) => {
-        this.saveDraft(record);
-      });
     },
     showNotification({ eventToFireOnClick, message, buttonMessage }) {
       Notification.dispatch("notify", {
@@ -137,7 +134,6 @@ export default {
   },
   destroyed() {
     this.$root.$off("are-responses-untouched");
-    this.$root.$off("on-record-modified");
     Notification.dispatch("clear");
   },
   setup() {

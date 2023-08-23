@@ -6,6 +6,22 @@
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
+        <div class="draft">
+          <p v-if="draftSaving">
+            <svgicon color="#0000005e" name="refresh" />
+            Saving
+          </p>
+          <p v-else-if="record.isSavedDraft">
+            <svgicon color="#0000005e" name="check" />
+            Saved
+            <BaseDate
+              class="tooltip"
+              :date="record.updatedAt"
+              format="date-relative-now"
+              :updateEverySecond="10"
+            />
+          </p>
+        </div>
         <p class="questions-form__title --heading5 --medium">
           Submit your feedback
         </p>
@@ -107,6 +123,8 @@
 
 <script>
 import "assets/icons/external-link";
+import "assets/icons/refresh";
+import "assets/icons/check";
 
 import { useQuestionFormViewModel } from "./useQuestionsFormViewModel";
 
@@ -152,8 +170,7 @@ export default {
       deep: true,
       immediate: true,
       handler() {
-        if (this.record.isModified)
-          this.$root.$emit("on-record-modified", this.record);
+        if (this.record.isModified) this.saveDraft(this.record);
 
         this.$root.$emit("record-changed", this.record);
       },
@@ -244,6 +261,7 @@ export default {
     }
   }
   &__content {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: $base-space * 4;
@@ -269,6 +287,43 @@ export default {
   &__right-area {
     display: inline-flex;
     gap: $base-space * 2;
+  }
+}
+
+.draft {
+  position: absolute;
+  right: $base-space;
+  top: $base-space;
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  align-items: center;
+  margin: 0;
+  @include font-size(12px);
+  color: $black-37;
+  font-weight: 500;
+  p {
+    margin: 0;
+    &:hover {
+      .tooltip {
+        opacity: 1;
+        height: auto;
+        width: auto;
+      }
+    }
+  }
+  .tooltip {
+    opacity: 0;
+    height: auto;
+    width: 0;
+    @extend %tooltip;
+    top: 50%;
+    transform: translateY(-50%);
+    right: calc(100% + 10px);
+    &:before {
+      position: absolute;
+      @extend %triangle-right;
+    }
   }
 }
 </style>
