@@ -16,6 +16,12 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [1.14.1](https://github.com/argilla-io/argilla/compare/v1.14.0...v1.14.1)
+
+### Fixed
+
+- Fixed PostgreSQL database not being updated after `begin_nested` because of missing `commit` ([#3567](https://github.com/argilla-io/argilla/pull/3567)).
+
 ## [1.14.0](https://github.com/argilla-io/argilla/compare/v1.13.3...v1.14.0)
 
 ### Added

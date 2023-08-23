@@ -1,8 +1,11 @@
-# Set up your annotation team
+# Assign annotations to your team
 Depending on the nature of your project and the size of your annotation team, you may want to have control over annotation overlap i.e., having multiple annotations for a single record. In this section, we will demonstrate 3 different workflows to get the level of overlap you need: full, zero or controlled.
 
 ```{note}
 You will need to decide the level of overlap before creating or pushing a dataset to Argilla, as this has implications on how your dataset is set up.
+```
+```{note}
+This guide only applies to Feedback datasets. To assign annotations in Text2Text, Token Classification and Text Classification datasets, follow [this tutorial](../../../tutorials/notebooks/labelling-tokenclassification-basics.ipynb).
 ```
 
 ## Full overlap

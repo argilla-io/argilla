@@ -11,8 +11,8 @@ This guide will help you with all the practical aspects of setting up an annotat
 Methods to configure a Feedback Dataset and push it to Argilla.
 
 ```
-```{grid-item-card} Set up your annotation team
-:link: set_up_annotation_team.html
+```{grid-item-card} Assign annotations to your team
+:link: assign_annotations.html
 
 Workflows to organize your annotation team.
 ```
@@ -63,7 +63,7 @@ Fine-tune basic models with feedback collected from Argilla.
 :hidden:
 
 create_dataset
-set_up_annotation_team
+assign_annotations
 update_dataset
 annotate_dataset
 collect_responses
