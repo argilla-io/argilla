@@ -140,7 +140,7 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             guidelines=guidelines,
         )
 
-    def filter_by(self, response_status: List[str]) -> FilteredRemoteFeedbackDataset:
+    def filter_by(self, response_status: List[FeedbackResponseStatusFilter]) -> FilteredRemoteFeedbackDataset:
         return FilteredRemoteFeedbackDataset(
             client=self._client,
             id=self.id,
