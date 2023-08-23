@@ -20,20 +20,10 @@ if TYPE_CHECKING:
     from click.testing import CliRunner
     from pytest_mock import MockerFixture
     from typer import Typer
-    from argilla.server.models import User as ServerUser
 
-# from tests.integration.conftest import owner
 from tests.integration.conftest import *  # for owner fixture
-from argilla.client.workspaces import Workspace
 from argilla.tasks.workspaces.list import list_workspaces
-
-from argilla.client.sdk.users.models import UserRole
-
-from argilla.client.api import ArgillaSingleton
-from tests.factories import (
-    UserFactory,
-    WorkspaceFactory,
-)
+from tests.factories import WorkspaceFactory
 
 
 @pytest.mark.asyncio
@@ -48,7 +38,7 @@ async def test_list_workspaces(mocker: "MockerFixture", capsys):
 
 
 @pytest.mark.asyncio
-async def test_cli_workspaces_list(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", owner: "ServerUser"):
+async def test_cli_workspaces_list(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
     ws_factory = await WorkspaceFactory.create(name="test_workspace")
     mocker.patch("argilla.client.api.ArgillaSingleton.init")
     
@@ -65,7 +55,7 @@ async def test_cli_workspaces_list(cli_runner: "CliRunner", cli: "Typer", mocker
 
 
 @pytest.mark.asyncio
-async def test_cli_workspaces_list_needs_login(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", owner: "ServerUser"):
+async def test_cli_workspaces_list_needs_login(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
     ws_factory = await WorkspaceFactory.create(name="test_workspace")
     mocker.patch("argilla.client.api.ArgillaSingleton.init")
     
