@@ -41,8 +41,8 @@ class TestSuiteSuggestions:
 
         assert response.status_code == 200
         assert response.json() == {
-            "id": f"{suggestion.id}",
-            "question_id": f"{suggestion.question_id}",
+            "id": str(suggestion.id),
+            "question_id": str(suggestion.question_id),
             "type": None,
             "score": None,
             "value": "negative",
