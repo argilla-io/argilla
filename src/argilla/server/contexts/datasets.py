@@ -462,7 +462,7 @@ async def delete_response(db: "AsyncSession", search_engine: SearchEngine, respo
 
 def validate_response_values(dataset: Dataset, values: Dict[str, ResponseValue], status: ResponseStatus):
     if not values:
-        if status == ResponseStatus.submitted:
+        if status != ResponseStatus.discarded:
             raise ValueError("Missing response values")
         return
 
