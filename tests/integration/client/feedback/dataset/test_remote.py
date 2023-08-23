@@ -89,3 +89,19 @@ async def test_list(role: UserRole) -> None:
     assert len(remote_datasets) == 1
     assert all(isinstance(remote_dataset, RemoteFeedbackDataset) for remote_dataset in remote_datasets)
     assert all(remote_dataset.workspace.id == dataset.workspace.id for remote_dataset in remote_datasets)
+
+
+@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
+@pytest.mark.asyncio
+async def test_list_with_workspace_name(role: UserRole) -> None:
+    dataset = await DatasetFactory.create()
+    await TextFieldFactory.create(dataset=dataset, required=True)
+    await TextQuestionFactory.create(dataset=dataset, required=True)
+    await RecordFactory.create_batch(dataset=dataset, size=10)
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+    api.init(api_key=user.api_key)
+    remote_datasets = FeedbackDataset.list(workspace=dataset.workspace.name)
+    assert len(remote_datasets) == 1
+    assert all(isinstance(remote_dataset, RemoteFeedbackDataset) for remote_dataset in remote_datasets)
+    assert all(remote_dataset.workspace.id == dataset.workspace.id for remote_dataset in remote_datasets)
