@@ -1,13 +1,15 @@
 import Vue from "vue";
 
 // NOTE - to use this directive, add to your html text element where to put a asterisk :
-//  v-required-field="{ color: 'blue'}"
+//  v-required-field="{ show: true, color: 'blue'}"
 //    => color (String) the color of the asterisk : black by default
 
 Vue.directive("required-field", {
   bind: (element, binding) => {
     if (binding?.value) {
-      const { color } = binding?.value ?? { color: "black" };
+      const { color, show } = binding?.value ?? { show: true, color: "black" };
+
+      if (!show) return;
 
       const text = document.createTextNode(" *");
       const textWrapper = document.createElement("span");
