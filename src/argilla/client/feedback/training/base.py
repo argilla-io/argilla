@@ -105,6 +105,16 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 seed=self._seed,
                 model=self._model,
             )
+        elif framework is Framework.AUTOTRAIN:
+            from argilla.client.feedback.training.frameworks.autotrain_advanced import ArgillaAutoTrainTrainer
+
+            self._trainer = ArgillaAutoTrainTrainer(
+                dataset=self._dataset,
+                task=self._task,
+                prepared_data=self._prepared_data,
+                seed=self._seed,
+                model=self._model,
+            )
         elif framework is Framework.PEFT:
             from argilla.client.feedback.training.frameworks.peft import ArgillaPeftTrainer
 

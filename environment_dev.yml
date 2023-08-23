@@ -53,6 +53,7 @@ dependencies:
       - span_marker
       - openai
       - autotrain-advanced
+      - accelerate>0.21
       - peft
       - trl>=0.5.0
       - rich!=13.1.0

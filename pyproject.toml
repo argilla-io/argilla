@@ -102,6 +102,7 @@ integrations = [
     "spacy == 3.5.3",
     "spacy-transformers >= 1.2.5",
     "transformers[torch] >= 4.19.0",
+    "accelerate>0.21",
     "evaluate",
     "seqeval",
     "setfit",
