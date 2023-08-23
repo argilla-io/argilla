@@ -23,9 +23,9 @@ export default (context, inject) => {
     return replaceText(regExp, text);
   };
 
-  const keywordsSpans = function (text, keywords) {
-    return (keywords || []).flatMap((keyword) => {
-      const regex = createRegExp(createPattern(keyword));
+  const keywordsSpans = function (text, keywords = []) {
+    return keywords.flatMap((keyword) => {
+      const regex = findWordRegex(keyword);
       return [...text.matchAll(regex)].map((match) => {
         return {
           start: match.index,
@@ -36,11 +36,7 @@ export default (context, inject) => {
   };
 
   const sortByLength = (keywords) => {
-    return (keywords || []).sort((a, b) => b.length - a.length);
-  };
-
-  const createPattern = (value) => {
-    return `/\b(${value})\b/i`;
+    return keywords.sort((a, b) => b.length - a.length);
   };
 
   const escapeRegExp = function (text) {
@@ -48,11 +44,7 @@ export default (context, inject) => {
   };
 
   const findWordRegex = (words) => {
-    return new RegExp("\\b" + words + "\\b");
-  };
-
-  const createRegExp = (pattern) => {
-    return new RegExp(pattern, "gmi");
+    return new RegExp("\\b" + words + "\\b", "gmi");
   };
 
   const replaceText = (regex, text) => {
