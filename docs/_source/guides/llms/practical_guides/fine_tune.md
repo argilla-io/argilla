@@ -139,6 +139,9 @@ trainer.train(output_dir="sft_model")
 
 Let's observe if it worked to train the model to respond within our template. We'll create a quick helper method for this.
 ```python
+from transformers import GenerationConfig, AutoTokenizer, GPT2LMHeadModel
+
+
 def generate(model_id: str, instruction: str, context: str = "") -> str:
     model = GPT2LMHeadModel.from_pretrained(model_id)
     tokenizer = AutoTokenizer.from_pretrained(model_id)
