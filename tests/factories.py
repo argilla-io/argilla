@@ -15,10 +15,10 @@
 import inspect
 
 import factory
+from argilla.server.enums import FieldType
 from argilla.server.models import (
     Dataset,
     Field,
-    FieldType,
     Question,
     QuestionType,
     Record,

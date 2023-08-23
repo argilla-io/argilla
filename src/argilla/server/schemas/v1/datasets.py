@@ -13,13 +13,11 @@
 #  limitations under the License.
 
 from datetime import datetime
-from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 from pydantic import (
     BaseModel,
-    Field,
     PositiveInt,
     conlist,
     constr,
@@ -38,7 +36,8 @@ try:
 except ImportError:
     from typing_extensions import Annotated
 
-from argilla.server.models import DatasetStatus, FieldType, QuestionSettings, QuestionType, ResponseStatus
+from argilla.server.enums import FieldType
+from argilla.server.models import DatasetStatus, QuestionSettings, QuestionType, ResponseStatus
 
 DATASET_NAME_REGEX = r"^(?!-|_)[a-zA-Z0-9-_ ]+$"
 DATASET_NAME_MIN_LENGTH = 1
@@ -335,11 +334,6 @@ class Response(BaseModel):
 
     class Config:
         orm_mode = True
-
-
-class RecordInclude(str, Enum):
-    responses = "responses"
-    suggestions = "suggestions"
 
 
 class RecordGetterDict(GetterDict):

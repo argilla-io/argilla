@@ -20,16 +20,21 @@ These are the section headers that we use:
 
 - Added `login` function in `argilla.client.login` to login into an Argilla server and store the credentials locally ([#3582](https://github.com/argilla-io/argilla/pull/3582)).
 - Added `login` command to login into an Argilla server ([#3600](https://github.com/argilla-io/argilla/pull/3600)).
+- Added `DELETE /api/v1/suggestions/{suggestion_id}` endpoint to delete a suggestion given its ID ([#3617](https://github.com/argilla-io/argilla/pull/3617)).
+- Added `DELETE /api/v1/records/{record_id}/suggestions` endpoint to delete several suggestions linked to the same record given their IDs ([#3617](https://github.com/argilla-io/argilla/pull/3617)).
 - Added `response_status` param to `GET /api/v1/datasets/{dataset_id}/records` to be able to filter by `response_status` as previously included for `GET /api/v1/me/datasets/{dataset_id}/records` ([#3613](https://github.com/argilla-io/argilla/pull/3613)).
+- Added `list` classmethod to `ArgillaMixin` to be used as `FeedbackDataset.list()`, also including the `workspace` to list from as arg ([#3619](https://github.com/argilla-io/argilla/pull/3619)).
 
 ### Changed
 
 - Updated `RemoteFeedbackDataset.delete_records` to use batch delete records endpoint ([#3580](https://github.com/argilla-io/argilla/pull/3580)).
 - Included `allowed_for_roles` for some `RemoteFeedbackDataset`, `RemoteFeedbackRecords`, and `RemoteFeedbackRecord` methods that are only allowed for users with roles `owner` and `admin` ([#3601](https://github.com/argilla-io/argilla/pull/3601)).
+- Renamed `ArgillaToFromMixin` to `ArgillaMixin` ([#3619](https://github.com/argilla-io/argilla/pull/3619)).
 
 ### Changed
 
 - Move `users` CLI app under `database` CLI app ([#3593](https://github.com/argilla-io/argilla/pull/3593)).
+- Move server `Enum` classes to `argilla.server.enums` module ([#3620](https://github.com/argilla-io/argilla/pull/3620)).
 
 ## [1.14.1](https://github.com/argilla-io/argilla/compare/v1.14.0...v1.14.1)
 
