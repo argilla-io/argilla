@@ -139,7 +139,7 @@ async def delete_record_suggestions(
     db: AsyncSession = Depends(get_async_db),
     record_id: UUID,
     current_user: User = Security(auth.get_current_user),
-    ids: str = Query(..., description="A comma separated list with the IDs of the records to be removed"),
+    ids: str = Query(..., description="A comma separated list with the IDs of the suggestions to be removed"),
 ):
     record = await _get_record(db, record_id)
 
