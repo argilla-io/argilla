@@ -45,7 +45,7 @@ if TYPE_CHECKING:
 warnings.simplefilter("always", DeprecationWarning)
 
 
-class ArgillaToFromMixin:
+class ArgillaMixin:
     # TODO(alvarobartt): remove when `delete` is implemented
     def __delete_dataset(self: "FeedbackDataset", client: "httpx.Client", id: UUID) -> None:
         try:
