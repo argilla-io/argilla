@@ -373,5 +373,6 @@ class ArgillaMixin:
                 questions=cls.__get_questions(client=httpx_client, id=dataset.id),
                 guidelines=dataset.guidelines or None,
             )
-            for dataset in datasets if workspace is None or dataset.workspace_id == workspace.id
+            for dataset in datasets
+            if workspace is None or dataset.workspace_id == workspace.id
         ]
