@@ -119,7 +119,7 @@ async def list_current_user_dataset_records(
 
     await authorize(current_user, DatasetPolicyV1.get(dataset))
 
-    records = await datasets.list_records_by_dataset_id_and_user_id(
+    records = await datasets.list_records_by_dataset_id(
         db,
         dataset_id,
         current_user.id,
