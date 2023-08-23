@@ -7,10 +7,7 @@
           @submit.prevent="onSubmit(field)"
           class="settings__edition-form__fields"
         >
-          <div
-            class="settings__edition-form__name"
-            v-optional-field="!field.required"
-          >
+          <div class="settings__edition-form__name">
             <h4
               v-optional-field="!field.required"
               class="--body1 --medium --capitalized"
