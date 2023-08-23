@@ -24,10 +24,10 @@ from tests.factories import DatasetFactory, RecordFactory, TextFieldFactory, Tex
 @pytest.mark.asyncio
 async def test_delete_records(role: UserRole) -> None:
     text_field = await TextFieldFactory.create(required=True)
-    rating_question = await TextQuestionFactory.create(required=True)
+    text_question = await TextQuestionFactory.create(required=True)
     dataset = await DatasetFactory.create(
         fields=[text_field],
-        questions=[rating_question],
+        questions=[text_question],
         records=await RecordFactory.create_batch(size=100),
     )
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
@@ -48,8 +48,8 @@ async def test_delete_records(role: UserRole) -> None:
 @pytest.mark.asyncio
 async def test_delete(role: UserRole) -> None:
     text_field = await TextFieldFactory.create(required=True)
-    rating_question = await TextQuestionFactory.create(required=True)
-    dataset = await DatasetFactory.create(fields=[text_field], questions=[rating_question])
+    text_question = await TextQuestionFactory.create(required=True)
+    dataset = await DatasetFactory.create(fields=[text_field], questions=[text_question])
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
     api.init(api_key=user.api_key)
@@ -64,8 +64,8 @@ async def test_delete(role: UserRole) -> None:
 @pytest.mark.asyncio
 async def test_delete_not_allowed_role(role: UserRole) -> None:
     text_field = await TextFieldFactory.create(required=True)
-    rating_question = await TextQuestionFactory.create(required=True)
-    dataset = await DatasetFactory.create(fields=[text_field], questions=[rating_question])
+    text_question = await TextQuestionFactory.create(required=True)
+    dataset = await DatasetFactory.create(fields=[text_field], questions=[text_question])
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
     api.init(api_key=user.api_key)
