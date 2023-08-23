@@ -18,8 +18,8 @@
 export default (context, inject) => {
   const highlightKeywords = function (text, keywords) {
     const sortedKeywords = sortByLength([...keywords]);
-    const pattern = sortedKeywords.map((keyword) => createPattern(keyword));
-    const regExp = createRegExp(pattern.join("|"));
+    const wordsEscaped = sortedKeywords.map((keyword) => escapeRegExp(keyword));
+    const regExp = findWordRegex(wordsEscaped.join("|"));
     return replaceText(regExp, text);
   };
 
@@ -35,32 +35,35 @@ export default (context, inject) => {
     });
   };
 
-  function sortByLength(keywords) {
+  const sortByLength = (keywords) => {
     return (keywords || []).sort((a, b) => b.length - a.length);
-  }
+  };
 
-  function createPattern(value) {
-    const pattern = "[^A-Za-zÀ-ÿ\u00f1\u00d10-9_@./#&+-]";
-    return `(${pattern})${escapeRegExp(value)}(${pattern})`;
-  }
+  const createPattern = (value) => {
+    return `/\b(${value})\b/i`;
+  };
 
   const escapeRegExp = function (text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
   };
 
-  function createRegExp(pattern) {
-    return new RegExp(pattern, "gmi");
-  }
+  const findWordRegex = (words) => {
+    return new RegExp("\\b" + words + "\\b");
+  };
 
-  function replaceText(regex, text) {
+  const createRegExp = (pattern) => {
+    return new RegExp(pattern, "gmi");
+  };
+
+  const replaceText = (regex, text) => {
     return htmlText(text).replace(regex, (matched) =>
       matched ? htmlHighlightText(matched) : matched
     );
-  }
+  };
 
-  function htmlHighlightText(text) {
+  const htmlHighlightText = (text) => {
     return `<span class="highlight-text">${htmlText(text)}</span>`;
-  }
+  };
 
   const htmlText = function (text) {
     return text
