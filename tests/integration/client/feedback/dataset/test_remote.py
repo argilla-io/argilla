@@ -15,7 +15,7 @@
 import pytest
 from argilla.client import api
 from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.dataset.remote import RemoteFeedbackDataset
+from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 from argilla.client.sdk.users.models import UserRole
 
 from tests.factories import DatasetFactory, RecordFactory, TextFieldFactory, TextQuestionFactory, UserFactory
