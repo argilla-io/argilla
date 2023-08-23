@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     import httpx
 
     from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+    from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
     from argilla.client.workspaces import Workspace
 
@@ -74,3 +75,16 @@ class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeed
             guidelines=guidelines,
             filters=filters,
         )
+
+    def add_records(
+        self,
+        records: Union["FeedbackRecord", Dict[str, Any], List[Union["FeedbackRecord", Dict[str, Any]]]],
+        show_progress: bool = True,
+    ) -> None:
+        raise NotImplementedError("`add_records` does not work for filtered datasets.")
+
+    def delete_records(self, records: Union["RemoteFeedbackRecord", List["RemoteFeedbackRecord"]]) -> None:
+        raise NotImplementedError("`delete_records` does not work for filtered datasets.")
+
+    def delete(self) -> None:
+        raise NotImplementedError("`delete` does not work for filtered datasets.")
