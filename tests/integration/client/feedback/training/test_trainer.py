@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import random
+from collections import Counter
 from typing import TYPE_CHECKING, List, Union
 
 import pytest
@@ -61,7 +63,7 @@ __OUTPUT_DIR__ = "tmp"
     "feedback_dataset_questions",
     "feedback_dataset_records",
 )
-def test_prepare_for_training_text_classification(
+def test_prepare_for_training_text_classification_with_defaults(
     framework: Union[Framework, str],
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
@@ -105,6 +107,61 @@ def test_prepare_for_training_text_classification(
         shutil.rmtree(__OUTPUT_DIR__)
 
 
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records",
+)
+def test_prepare_for_training_text_classification_with_formatting_func(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records: List[FeedbackRecord],
+):
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records * 5)
+    framework = Framework("setfit")
+
+    def wrong_formatting_func(sample):
+        text = sample["text"]
+        values = [resp["value"] for resp in sample["question-3"]]
+        counter = Counter(values)
+        if counter:
+            most_common = counter.most_common()
+            max_frequency = most_common[0][1]
+            most_common_elements = [element for element, frequency in most_common if frequency == max_frequency]
+            label = random.choice(most_common_elements)
+            return {"text": text, "label": label}
+        else:
+            return None
+
+    def correct_formatting_func(sample):
+        data = wrong_formatting_func(sample)
+        if data:
+            return (data["text"], data["label"])
+        else:
+            return None
+
+    with pytest.raises(
+        ValueError,
+        match=r"formatting_func must return \(text,label\) as a Tuple\[str, str\] or a Tuple\[str, List\[str\]\]",
+    ):
+        task = TrainingTask.for_text_classification(wrong_formatting_func)
+        trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, fetch_records=False)
+        trainer.update_config(num_iterations=1)
+        trainer.train(__OUTPUT_DIR__)
+
+    task = TrainingTask.for_text_classification(correct_formatting_func)
+    trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, fetch_records=False)
+    trainer.update_config(num_iterations=1)
+    trainer.train(__OUTPUT_DIR__)
+
+
 @pytest.mark.parametrize(
     "callable",
     (
@@ -119,7 +176,7 @@ def test_deprecations(callable) -> None:
         # This'll crash because we're passing None, but we only test the warning
         try:
             callable()
-        except:
+        except Exception:
             pass
 
 
@@ -131,5 +188,5 @@ def test_deprecations_for_text_classification():
         # This'll crash because we're passing None, but we only test the warning
         try:
             TrainingTaskMappingForTextClassification(None)
-        except:
+        except Exception:
             pass
