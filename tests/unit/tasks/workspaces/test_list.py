@@ -62,3 +62,23 @@ async def test_cli_workspaces_list(cli_runner: "CliRunner", cli: "Typer", mocker
 
     assert all(col in result.stdout for col in ("ID", "Name", "Creation Date", "Update Date", "test_workspace"))
     assert result.exit_code == 0
+
+
+@pytest.mark.asyncio
+async def test_cli_workspaces_list_needs_login(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", owner: "ServerUser"):
+    ws_factory = await WorkspaceFactory.create(name="test_workspace")
+    mocker.patch("argilla.client.api.ArgillaSingleton.init")
+    
+    workspace_list_mock = mocker.patch("argilla.client.workspaces.Workspace.list")
+    workspace_list_mock.return_value = [ws_factory]
+
+    argilla_singleton_exists_mock = mocker.patch("argilla.client.login.ArgillaCredentials.exists")
+    argilla_singleton_exists_mock.return_value = False
+
+    result = cli_runner.invoke(
+        cli,
+        "workspaces list",
+    )
+
+    assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout
+    assert result.exit_code == 1
