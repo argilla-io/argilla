@@ -21,44 +21,29 @@ if TYPE_CHECKING:
 
 
 def test_logout(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
-    logout_mock = mocker.patch("argilla.client.logout.logout")
+    init_callback_mock = mocker.patch("argilla.tasks.callback.init_callback")
+    argilla_credentials_remove_mock = mocker.patch("argilla.client.login.ArgillaCredentials.remove")
 
     result = cli_runner.invoke(
         cli,
-        'logout --api-url http://localhost:6900 --api-key api.key --workspace my_workspace --extra-headers "{\\"X-Unit-Test\\": \\"true\\"}"',
+        'logout',
     )
-
     assert result.exit_code == 0
-    logout_mock.assert_called_once_with(
-        api_url="http://localhost:6900",
-        api_key="api.key",
-        workspace="my_workspace",
-        extra_headers={"X-Unit-Test": "true"},
-    )
+
+    init_callback_mock.assert_called_once()
+    argilla_credentials_remove_mock.assert_called_once()
+
 
 
 def test_logout_fails(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
-    logout_mock = mocker.patch("argilla.client.logout.logout")
-    logout_mock.side_effect = ValueError
-
+    init_callback_mock = mocker.patch("argilla.tasks.callback.init_callback")
+    init_callback_mock.side_effect = ValueError("Error")
+    
     result = cli_runner.invoke(
         cli,
-        'logout --api-url http://localhost:6900 --api-key api.key --workspace my_workspace --extra-headers "{\\"X-Unit-Test\\": \\"true\\"}"',
+        'logout',
     )
-
     assert result.exit_code == 1
-    logout_mock.assert_called_once_with(
-        api_url="http://localhost:6900",
-        api_key="api.key",
-        workspace="my_workspace",
-        extra_headers={"X-Unit-Test": "true"},
-    )
 
+    init_callback_mock.assert_called_once()
 
-def test_logout_with_invalid_extra_headers(cli_runner: "CliRunner", cli: "Typer"):
-    result = cli_runner.invoke(
-        cli,
-        'logout --api-url http://localhost:6900 --api-key api.key --workspace my_workspace --extra-headers "{\\"X-Unit-Test\\": \\"true\\""',
-    )
-
-    assert result.exit_code == 1
