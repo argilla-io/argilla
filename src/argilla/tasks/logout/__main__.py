@@ -20,12 +20,13 @@ app = typer.Typer(invoke_without_command=True)
 
 @app.callback(help="Logout from an Argilla Server.")
 def logout():
-    from argilla.tasks.callback import init_callback
     from argilla.client.login import ArgillaCredentials
+    from argilla.tasks.callback import init_callback
 
     init_callback()
     ArgillaCredentials.remove()
     typer.echo("Logged out successfully from Argilla server!")
+
 
 if __name__ == "__main__":
     app()

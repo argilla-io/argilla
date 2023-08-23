@@ -26,7 +26,7 @@ def test_logout(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
 
     result = cli_runner.invoke(
         cli,
-        'logout',
+        "logout",
     )
     assert result.exit_code == 0
 
@@ -34,16 +34,14 @@ def test_logout(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
     argilla_credentials_remove_mock.assert_called_once()
 
 
-
 def test_logout_fails(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
     init_callback_mock = mocker.patch("argilla.tasks.callback.init_callback")
     init_callback_mock.side_effect = ValueError("Error")
-    
+
     result = cli_runner.invoke(
         cli,
-        'logout',
+        "logout",
     )
     assert result.exit_code == 1
 
     init_callback_mock.assert_called_once()
-
