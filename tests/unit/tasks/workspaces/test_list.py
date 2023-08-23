@@ -12,18 +12,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pytest
-
 from typing import TYPE_CHECKING
+
+import pytest
 
 if TYPE_CHECKING:
     from click.testing import CliRunner
     from pytest_mock import MockerFixture
     from typer import Typer
 
-from tests.integration.conftest import *  # for owner fixture
 from argilla.tasks.workspaces.list import list_workspaces
+
 from tests.factories import WorkspaceFactory
+from tests.integration.conftest import *  # for owner fixture
 
 
 @pytest.mark.asyncio
@@ -41,7 +42,7 @@ async def test_list_workspaces(mocker: "MockerFixture", capsys):
 async def test_cli_workspaces_list(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
     ws_factory = await WorkspaceFactory.create(name="test_workspace")
     mocker.patch("argilla.client.api.ArgillaSingleton.init")
-    
+
     workspace_list_mock = mocker.patch("argilla.client.workspaces.Workspace.list")
     workspace_list_mock.return_value = [ws_factory]
 
@@ -58,7 +59,7 @@ async def test_cli_workspaces_list(cli_runner: "CliRunner", cli: "Typer", mocker
 async def test_cli_workspaces_list_needs_login(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
     ws_factory = await WorkspaceFactory.create(name="test_workspace")
     mocker.patch("argilla.client.api.ArgillaSingleton.init")
-    
+
     workspace_list_mock = mocker.patch("argilla.client.workspaces.Workspace.list")
     workspace_list_mock.return_value = [ws_factory]
 

@@ -13,8 +13,10 @@
 #  limitations under the License.
 
 from typing import List
+
 from rich.console import Console
 from rich.table import Table
+
 from argilla import Workspace
 from argilla.tasks import async_typer
 

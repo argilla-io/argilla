@@ -15,10 +15,9 @@
 
 
 from argilla.tasks.async_typer import AsyncTyper
+from argilla.tasks.callback import init_callback
 
 from .list import list_workspaces
-
-from argilla.tasks.callback import init_callback
 
 app = AsyncTyper(help="Holds CLI commands for workspace management.", no_args_is_help=True, callback=init_callback)
 
