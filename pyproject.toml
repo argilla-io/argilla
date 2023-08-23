@@ -107,7 +107,8 @@ integrations = [
     "setfit",
     "span_marker",
     "openai",
-    "peft"
+    "peft",
+    "autotrain-advanced",
 ]
 tests = [
     "pytest",
