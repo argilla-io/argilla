@@ -23,6 +23,7 @@ from argilla.client.feedback.dataset.remote.filtered import FilteredRemoteFeedba
 from argilla.client.feedback.schemas.records import FeedbackRecord, RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
+from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
 from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
@@ -141,6 +142,17 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         )
 
     def filter_by(self, response_status: List[FeedbackResponseStatusFilter]) -> FilteredRemoteFeedbackDataset:
+        """Filters the current `RemoteFeedbackDataset` based on the `response_status` of
+        the responses of the records in Argilla. This method creates a new class instance
+        of `FilteredRemoteFeedbackDataset` with the given filters.
+
+        Args:
+            response_status: the response status/es to filter the dataset by. Can be
+                one of: draft, pending, submitted, and discarded.
+
+        Returns:
+            A new instance of `FilteredRemoteFeedbackDataset` with the given filters.
+        """
         return FilteredRemoteFeedbackDataset(
             client=self._client,
             id=self.id,
