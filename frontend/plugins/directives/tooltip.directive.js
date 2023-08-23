@@ -4,8 +4,7 @@ import Vue from "vue";
 //  v-tooltip="{ content: tooltipMessage, backgroundColor: '#FFF', borderColor: '#FFF', tooltipPosition: 'bottom' }"
 //    => content (String) the message to show in the tooltip
 //    => backgroundColor (String) the background color of the tooltip
-//    => borderColor (String) the border color of the tooltip
-//    => tooltipPosition (String) the positin of the tooltip (bottom, top, right, left) =>
+//    => borderColor (String) the border colon of the tooltip (bottom, top, right, left) =>
 // TODO - implement the other tooltip direction top/right/left
 
 Vue.directive("tooltip", {
@@ -70,6 +69,7 @@ Vue.directive("tooltip", {
 
       // NOTE - add the tooltip to the element and add event listenner to the close icon
       element.appendChild(tooltip);
+      element.textWrapper = textWrapper;
       closeIcon = document.getElementById(tooltipCloseIconId);
     }
 
@@ -84,11 +84,13 @@ Vue.directive("tooltip", {
         width
       );
     };
+
     element.clickOnClose = (event) => {
       // NOTE - stop propagation to not fire element.clickOnTooltipElement()
-      event.stopPropagation();
+      event?.stopPropagation();
       tooltip.style.display = "none";
     };
+
     element.clickOutsideEvent = function (event) {
       // NOTE - here we check if the click event is outside the element or it's children
       if (!(element == event.target || element.contains(event.target))) {
@@ -117,9 +119,20 @@ Vue.directive("tooltip", {
 
     // NOTE - init all eventListeners
     initEventsListener(element, closeIcon);
+
+    if (binding?.value.open) element.clickOnTooltipElementEvent();
   },
   unbind: (element) => {
     destroyEventsListener(element);
+  },
+  update(element, binding) {
+    element.textWrapper.innerText = binding?.value.content;
+
+    if (binding?.value.open) {
+      element.clickOnTooltipElementEvent();
+    } else {
+      element.clickOnClose();
+    }
   },
 });
 const isScrollable = function (element) {
@@ -147,11 +160,8 @@ const getElementOrParent = function (element) {
 const initEventsListener = (element, closeIcon) => {
   if (element && closeIcon) {
     closeIcon.addEventListener("click", element.clickOnClose);
-    closeIcon.addEventListener("touchstart", element.clickOnClose);
     element.addEventListener("click", element.clickOnTooltipElementEvent);
-    element.addEventListener("touchstart", element.clickOnTooltipElementEvent);
     document.body.addEventListener("click", element.clickOutsideEvent);
-    document.body.addEventListener("touchstart", element.clickOutsideEvent);
     getScrollableParent(element).addEventListener(
       "scroll",
       element.scrollInParent
@@ -254,6 +264,8 @@ const initTextStyle = (textWrapper, color = "rgba(0, 0, 0, 0.87)") => {
   textWrapper.style.fontWeight = "300";
   textWrapper.style.lineHeight = "18px";
   textWrapper.style.whiteSpace = "pre-wrap";
+  textWrapper.style.overflow = "auto";
+  textWrapper.style.maxHeight = "250px";
   textWrapper.style.color = `${color}`;
   return textWrapper;
 };

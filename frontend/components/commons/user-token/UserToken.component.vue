@@ -1,7 +1,7 @@
 <template>
   <div class="user-token">
     <h2
-      class="user-token-title --heading5 --semibold description__title"
+      class="user-token-title --heading5 --medium description__title"
       v-text="title"
     />
     <p

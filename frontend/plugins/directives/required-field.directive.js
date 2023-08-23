@@ -5,7 +5,7 @@ import Vue from "vue";
 //    => color (String) the color of the asterisk : black by default
 
 Vue.directive("required-field", {
-  bind: (element, binding) => {
+  bind: (element, binding, node) => {
     if (binding?.value) {
       const { color, show } = binding?.value ?? { show: true, color: "black" };
 
@@ -15,7 +15,10 @@ Vue.directive("required-field", {
       const textWrapper = document.createElement("span");
       textWrapper.style.color = color;
       textWrapper.appendChild(text);
-      element.appendChild(textWrapper);
+
+      node.context.$nextTick(() => {
+        element.insertAdjacentElement("afterEnd", textWrapper);
+      });
     }
   },
 });
