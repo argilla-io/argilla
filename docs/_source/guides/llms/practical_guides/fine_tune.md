@@ -84,7 +84,7 @@ template = """\
 ### Context: {context}\n
 ### Response: {response}"""
 
-def formatting_func(sample: Dict[str, Any]):
+def formatting_func(sample: Dict[str, Any]) -> str:
     # What `sample` looks like depends a lot on your FeedbackDataset fields and questions
     return template.format(
         instruction=sample["new-instruction"][0]["value"],
