@@ -39,7 +39,7 @@ export default (context, inject) => {
   };
 
   function createFindWordsPattern(value) {
-    return new RegExp("\\" + value, "g");
+    return new RegExp(`\\${value}|[${value}]`, "g");
   }
 
   const escapeRegExp = function (text) {
