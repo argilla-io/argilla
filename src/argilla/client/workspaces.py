@@ -47,7 +47,7 @@ class Workspace:
         id: the ID of the workspace to be managed. Defaults to None.
 
     Attributes:
-        __client: the `httpx.Client` initialized to interact with the Argilla API.
+        _client: the `httpx.Client` initialized to interact with the Argilla API.
         id: the ID of the workspace.
         name: the name of the workspace.
         users: the list of users linked to the workspace. Defaults to None.
@@ -65,7 +65,7 @@ class Workspace:
         []
     """
 
-    __client: "httpx.Client"
+    _client: "httpx.Client"  # Required to be able to use `allowed_for_roles` decorator
     id: UUID
     name: str
     users: Optional[List["WorkspaceUserModel"]] = None
@@ -114,7 +114,7 @@ class Workspace:
             A list of `WorkspaceUserModel` instances.
         """
         # TODO(@alvarobartt): Maybe we should return a list of rg.User instead.
-        return workspaces_api.list_workspace_users(self.__client, self.id).parsed
+        return workspaces_api.list_workspace_users(self._client, self.id).parsed
 
     def __repr__(self) -> str:
         return (
@@ -140,7 +140,7 @@ class Workspace:
         """
         try:
             workspaces_api.create_workspace_user(
-                client=self.__client,
+                client=self._client,
                 id=self.id,
                 user_id=user_id,
             )
@@ -168,7 +168,7 @@ class Workspace:
         """
         try:
             workspaces_api.delete_workspace_user(
-                client=self.__client,
+                client=self._client,
                 id=self.id,
                 user_id=user_id,
             )
@@ -197,7 +197,7 @@ class Workspace:
             >>> workspace.delete()
         """
         try:
-            workspaces_api_v1.delete_workspace(client=self.__client, id=self.id)
+            workspaces_api_v1.delete_workspace(client=self._client, id=self.id)
         except NotFoundApiError as e:
             raise ValueError(f"Workspace with id {self.id} doesn't exist in Argilla.") from e
         except AlreadyExistsApiError as e:
@@ -222,7 +222,7 @@ class Workspace:
     ) -> "Workspace":
         """Returns a new `Workspace` instance."""
         instance = cls.__new__(cls)
-        instance.__client = client or cls.__active_client()
+        instance._client = client or cls.__active_client()
         if isinstance(ws, (WorkspaceModelV0, WorkspaceModelV1)):
             instance.__dict__.update(ws.dict())
         return instance

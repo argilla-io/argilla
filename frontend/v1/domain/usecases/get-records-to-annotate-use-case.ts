@@ -1,4 +1,4 @@
-import { Field } from "../entities/Field";
+import { Field } from "../entities/field/Field";
 import { Question } from "../entities/question/Question";
 import { Record } from "../entities/record/Record";
 import { Suggestion } from "../entities/question/Suggestion";
@@ -48,6 +48,7 @@ export class GetRecordsToAnnotateUseCase {
 
           return new Field(
             field.id,
+            field.name,
             field.title,
             record.fields[fieldName],
             datasetId,

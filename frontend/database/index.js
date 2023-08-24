@@ -17,13 +17,7 @@
 
 import { Database } from "@vuex-orm/core";
 
-import { FeedbackDataset } from "@/models/feedback-task-model/feedback-dataset/FeedbackDataset.model";
-import { DatasetQuestion } from "@/models/feedback-task-model/dataset-question/DatasetQuestion.model";
-import { DatasetMetric } from "@/models/feedback-task-model/dataset-metric/DatasetMetric.model";
-import { DatasetField } from "@/models/feedback-task-model/dataset-field/DatasetField.model";
-import { Record } from "@/models/feedback-task-model/record/Record.model";
-import { RecordField } from "@/models/feedback-task-model/record-field/RecordField.model";
-import { RecordResponse } from "@/models/feedback-task-model/record-response/RecordResponse.model";
+import { DatasetFilter } from "@/models/feedback-task-model/dataset-filter/DatasetFilter.model";
 import { Pagination, DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { Notification } from "@/models/Notifications";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
@@ -44,13 +38,7 @@ import notifications from "@/database/modules/notifications";
 
 const database = new Database();
 
-database.register(FeedbackDataset);
-database.register(DatasetQuestion);
-database.register(DatasetMetric);
-database.register(DatasetField);
-database.register(Record);
-database.register(RecordField);
-database.register(RecordResponse);
+database.register(DatasetFilter);
 database.register(DatasetViewSettings);
 database.register(Pagination);
 database.register(AnnotationProgress);

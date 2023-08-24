@@ -1,6 +1,6 @@
 <template>
   <div class="dataset-delete" v-if="datasetName">
-    <h2 class="--heading5 --semibold">{{ sectionTitle }}</h2>
+    <h2 class="--heading5 --medium">{{ sectionTitle }}</h2>
     <base-card
       card-type="danger"
       :title="datasetDeleteTitle"

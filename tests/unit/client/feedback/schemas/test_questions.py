@@ -18,11 +18,17 @@ import pytest
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
+    QuestionSchema,
     RankingQuestion,
     RatingQuestion,
     TextQuestion,
 )
 from pydantic import ValidationError
+
+
+def test_question_schema_name_validation_error() -> None:
+    with pytest.raises(ValidationError, match=r"name\n  string does not match regex"):
+        QuestionSchema(name="Completion-A")
 
 
 @pytest.mark.parametrize(

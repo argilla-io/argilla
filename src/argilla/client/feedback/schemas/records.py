@@ -19,7 +19,10 @@ from uuid import UUID
 import httpx
 from pydantic import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, conint, validator
 
+from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
+from argilla.client.sdk.v1.records import api as records_api_v1
+from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
     from argilla.client.feedback.unification import UnifiedValueSchema
@@ -120,11 +123,9 @@ class SuggestionSchema(BaseModel):
 
 
 class FeedbackRecord(BaseModel):
-    """Schema for the records of a `FeedbackDataset` in Argilla.
+    """Schema for the records of a `FeedbackDataset`.
 
     Args:
-        id: The ID of the record in Argilla. Defaults to None, and is automatically
-            fulfilled internally once the record is pushed to Argilla.
         fields: Fields that match the `FeedbackDataset` defined fields. So this attribute
             contains the actual information shown in the UI for each record, being the
             record itself.
@@ -167,7 +168,6 @@ class FeedbackRecord(BaseModel):
 
     """
 
-    id: Optional[UUID] = None
     fields: Dict[str, str]
     metadata: Dict[str, Any] = Field(default_factory=dict)
     responses: List[ResponseSchema] = Field(default_factory=list)
@@ -226,12 +226,40 @@ class FeedbackRecord(BaseModel):
 
 
 class RemoteFeedbackRecord(FeedbackRecord):
+    """Schema for the records of a `RemoteFeedbackDataset`.
+
+    Note this schema shouldn't be instantiated directly, but just internally by the
+    `RemoteFeedbackDataset` class when fetching records from Argilla.
+
+    Args:
+        id: The ID of the record in Argilla. Defaults to None, and is automatically
+            fulfilled internally once the record is pushed to Argilla.
+        client: The Argilla client to use to push the record to Argilla. Is shared with
+            the `RemoteFeedbackDataset` that created this record.
+        name2id: A dictionary that maps the question names to their corresponding IDs.
+    """
+
     client: httpx.Client
     name2id: Dict[str, UUID]
 
+    id: UUID
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def update(
         self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
     ) -> None:
+        """Update a `RemoteFeedbackRecord`. Currently just `suggestions` are supported.
+
+        Note that this method will update the record in Argilla directly.
+
+        Args:
+            suggestions: can be a single `SuggestionSchema`, a list of `SuggestionSchema`,
+                a single dictionary, or a list of dictionaries. If a dictionary is provided,
+                it will be converted to a `SuggestionSchema` internally.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+        """
         super().update(suggestions)
         for suggestion in self.suggestions:
             suggestion.question_id = self.name2id[suggestion.question_name]
@@ -242,6 +270,7 @@ class RemoteFeedbackRecord(FeedbackRecord):
     def set_suggestions(
         self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
     ) -> None:
+        """Deprecated, use `update` instead."""
         warnings.warn(
             "`set_suggestions` is deprected in favor of `update` and will be removed in a future"
             " release.\n`set_suggestions` will be deprecated in Argilla v1.15.0, please"
@@ -250,6 +279,22 @@ class RemoteFeedbackRecord(FeedbackRecord):
             stacklevel=1,
         )
         self.update(suggestions=suggestions)
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def delete(self) -> FeedbackRecord:
+        """Deletes the `RemoteFeedbackRecord` from Argilla.
+
+        Returns:
+            The deleted record formatted as a `FeedbackRecord`.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+        """
+        try:
+            response = records_api_v1.delete_record(client=self.client, id=self.id)
+        except Exception as e:
+            raise RuntimeError(f"Failed to delete record with ID `{self.id}` from Argilla.") from e
+        return FeedbackRecord(**response.parsed.dict(exclude={"id", "inserted_at", "updated_at"}, exclude_none=True))
 
     class Config:
         arbitrary_types_allowed = True

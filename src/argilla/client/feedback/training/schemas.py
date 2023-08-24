@@ -61,7 +61,15 @@ class TrainingData(ABC):
             formatted_data.append(data)
         df = pd.DataFrame(formatted_data)
         df = df.explode(list(explode_columns))
-        df = df.drop_duplicates()
+        # In cases of MultiLabel datasets the label column contains a list,
+        # which is unhashable, so for those cases we transform the rows in the
+        # dataframe to tuples to drop duplicates and reconstruct the original
+        # dataframe format.
+        if df.applymap(lambda x: isinstance(x, list)).any().any():
+            df = pd.DataFrame(df.apply(tuple, 1).drop_duplicates().to_list(), columns=df.columns)
+        else:
+            df = df.drop_duplicates()
+
         df = df.dropna(how="any")
         return df.to_dict(orient="records")
 
@@ -243,11 +251,11 @@ class TrainingTaskMappingForTextClassification(BaseModel, TrainingData):
 
     def __repr__(self) -> str:
         return (
-            "TrainingTaskMappingForTextClassification",
-            f"\n\t text={self.text.name}",
-            f"\n\t label={self.label.question.name}",
-            f"\n\t multi_label={self.__multi_label__}",
-            f"\n\t all_labels={self.__all_labels__}",
+            "TrainingTaskMappingForTextClassification"
+            f"\n\t text={self.text.name}"
+            f"\n\t label={self.label.question.name}"
+            f"\n\t multi_label={self.__multi_label__}"
+            f"\n\t all_labels={self.__all_labels__}"
         )
 
     @requires_version("datasets>1.17.0")

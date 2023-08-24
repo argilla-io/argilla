@@ -1,5 +1,5 @@
 import { isEqual, cloneDeep } from "lodash";
-import { Field } from "../Field";
+import { Field } from "../field/Field";
 import { Question } from "../question/Question";
 import { Suggestion } from "../question/Suggestion";
 import { RecordAnswer } from "./RecordAnswer";

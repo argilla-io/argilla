@@ -5,7 +5,6 @@ Argilla is built around a few simple concepts. This section clarifies what those
 
 ![A sketch of the Argilla data model](/_static/images/main/argilla_data_model.png)
 
-
 ## Dataset
 
 A dataset is a collection of [records](#record) of a common type.
@@ -24,7 +23,7 @@ Records are defined by the type of **task** they are related to. Let's see three
 ### Examples
 
 ```{note}
-For information about the Data model for the new `FeedbackDataset`, check [this guide](../guides/llms/practical_guides/create_dataset.ipynb) instead.
+For information about the Data model for the new `FeedbackDataset`, check [this guide](../guides/llms/practical_guides/create_dataset.html) instead.
 ```
 
 #### Text classification record
@@ -67,7 +66,6 @@ record = rg.TextClassificationRecord(
     annotation_agent= "link or reference to annotator",
 )
 ```
-
 
 #### Token classification record
 
@@ -113,11 +111,9 @@ record = rg.Text2TextRecord(
 
 An annotation is a piece information assigned to a record, a label, token-level tags, or a set of labels, and typically by a human agent.
 
-
 ### Prediction
 
 A prediction is a piece information assigned to a record, a label or a set of labels and typically by a machine process.
-
 
 ### Metadata
 
@@ -128,10 +124,6 @@ Metadata will hold extra information that you want your record to have: if it be
 A task defines the objective and shape of the predictions and annotations inside a record.
 You can see our supported tasks at {ref}`tasks`.
 
-
 ## Settings
 
 For now, only a set of the predefined labels (labels schema) is configurable. Still, other settings like annotators, and metadata schema, are planned to be supported as part of dataset settings.
-
-
-

@@ -22,7 +22,7 @@ from packaging.version import parse as parse_version
 
 from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas import FeedbackRecord
-from argilla.client.feedback.types import AllowedQuestionTypes
+from argilla.client.feedback.schemas.types import AllowedQuestionTypes
 from argilla.utils.dependency import requires_version
 
 if TYPE_CHECKING:
@@ -69,13 +69,13 @@ class HuggingFaceDatasetMixin:
 
         for question in dataset.questions:
             if question.settings["type"] in ["text", "label_selection"]:
-                value = Value(dtype="string")
+                value = Value(dtype="string", id="question")
             elif question.settings["type"] == "rating":
-                value = Value(dtype="int32")
+                value = Value(dtype="int32", id="question")
             elif question.settings["type"] == "ranking":
-                value = Sequence({"rank": Value(dtype="uint8"), "value": Value(dtype="string")})
+                value = Sequence({"rank": Value(dtype="uint8"), "value": Value(dtype="string")}, id="question")
             elif question.settings["type"] in "multi_label_selection":
-                value = Sequence(Value(dtype="string"))
+                value = Sequence(Value(dtype="string"), id="question")
             else:
                 raise ValueError(
                     f"Question {question.name} is of type `{type(question).__name__}`,"
@@ -83,14 +83,13 @@ class HuggingFaceDatasetMixin:
                     f" `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}`."
                 )
 
-            hf_features[question.name] = Sequence(
+            hf_features[question.name] = [
                 {
-                    "user_id": Value(dtype="string"),
+                    "user_id": Value(dtype="string", id="question"),
                     "value": value,
-                    "status": Value(dtype="string"),
-                },
-                id="question",
-            )
+                    "status": Value(dtype="string", id="question"),
+                }
+            ]
             if question.name not in hf_dataset:
                 hf_dataset[question.name] = []
 
@@ -110,6 +109,7 @@ class HuggingFaceDatasetMixin:
         hf_features["external_id"] = Value(dtype="string", id="external_id")
         hf_dataset["external_id"] = []
 
+        hf_features["metadata"] = Value(dtype="string", id="metadata")
         hf_dataset["metadata"] = []
 
         for record in dataset.records:
@@ -117,55 +117,39 @@ class HuggingFaceDatasetMixin:
                 hf_dataset[field.name].append(record.fields[field.name])
             for question in dataset.questions:
                 if not record.responses:
-                    hf_dataset[question.name].append(None)
+                    hf_dataset[question.name].append([])
                 else:
                     responses = []
                     for response in record.responses:
                         if question.name not in response.values:
-                            responses.append(None)
                             continue
+                        formatted_response = {"user_id": response.user_id, "value": None, "status": response.status}
                         if question.settings["type"] == "ranking":
-                            responses.append([r.dict() for r in response.values[question.name].value])
+                            value = [r.dict() for r in response.values[question.name].value]
                         else:
-                            responses.append(response.values[question.name].value)
-                    hf_dataset[question.name].append(
-                        {
-                            "user_id": [r.user_id for r in record.responses],
-                            "value": responses,
-                            "status": [r.status for r in record.responses],
-                        }
-                    )
+                            value = response.values[question.name].value
+                        formatted_response["value"] = value
+                        responses.append(formatted_response)
+                    hf_dataset[question.name].append(responses)
 
-                suggestion = next(filter(lambda s: s.question_name == question.name, record.suggestions), None)
-                if not record.suggestions or not suggestion:
-                    hf_dataset[f"{question.name}-suggestion"].append(None)
-                    hf_dataset[f"{question.name}-suggestion-metadata"].append(
-                        {
-                            "type": None,
-                            "score": None,
-                            "agent": None,
-                        }
-                    )
-                else:
-                    hf_dataset[f"{question.name}-suggestion"].append(suggestion.value)
-                    hf_dataset[f"{question.name}-suggestion-metadata"].append(
-                        {
-                            "type": suggestion.type,
-                            "score": suggestion.score,
-                            "agent": suggestion.agent,
-                        }
-                    )
+                suggestion_value, suggestion_metadata = None, {"type": None, "score": None, "agent": None}
+                if record.suggestions:
+                    for suggestion in record.suggestions:
+                        if question.name == suggestion.question_name:
+                            suggestion_value = suggestion.value
+                            suggestion_metadata = {
+                                "type": suggestion.type,
+                                "score": suggestion.score,
+                                "agent": suggestion.agent,
+                            }
+                            break
+                hf_dataset[f"{question.name}-suggestion"].append(suggestion_value)
+                hf_dataset[f"{question.name}-suggestion-metadata"].append(suggestion_metadata)
 
-            hf_dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else None)
+            hf_dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else {})
             hf_dataset["external_id"].append(record.external_id or None)
 
-        if hf_dataset.get("metadata", None) is not None:
-            hf_features["metadata"] = Value(dtype="string")
-
-        return Dataset.from_dict(
-            hf_dataset,
-            features=Features(hf_features),
-        )
+        return Dataset.from_dict(hf_dataset, features=Features(hf_features))
 
     @requires_version("huggingface_hub")
     @requires_version("datasets")
@@ -239,7 +223,7 @@ class HuggingFaceDatasetMixin:
                 argilla_fields=self.fields,
                 argilla_questions=self.questions,
                 argilla_guidelines=self.guidelines,
-                argilla_record=json.loads(self.records[0].json()),
+                argilla_record=json.loads(self.records[0].json(exclude={"client", "id", "name2id"}, exclude_none=True)),
                 huggingface_record=hfds[0],
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
@@ -324,7 +308,7 @@ class HuggingFaceDatasetMixin:
                 " the `DatasetConfig` as `argilla.yaml` to the HuggingFace Hub."
             ) from e
 
-        hfds = load_dataset(repo_id, use_auth_token=auth, *args, **kwargs)
+        hfds = load_dataset(repo_id, token=auth, *args, **kwargs)  # use_auth_token is deprecated
         if isinstance(hfds, DatasetDict) and "split" not in kwargs:
             if len(hfds.keys()) > 1:
                 raise ValueError(
@@ -339,42 +323,58 @@ class HuggingFaceDatasetMixin:
             suggestions = []
             user_without_id = False
             for question in config.questions:
-                if hfds[index][question.name] is None or len(hfds[index][question.name]) < 1:
-                    continue
-                if len([None for user_id in hfds[index][question.name]["user_id"] if user_id is None]) > 1:
-                    warnings.warn(
-                        "Found more than one user without ID in the dataset, so just the"
-                        " responses for the first user without ID will be used, the rest"
-                        " will be discarded."
-                    )
-                user_without_id_response = False
+                if hfds[index][question.name] is not None and len(hfds[index][question.name]) > 0:
+                    if (
+                        len(
+                            [None for response in hfds[index][question.name] if response["user_id"] is None]
+                            if isinstance(hfds[index][question.name], list)
+                            else [None for user_id in hfds[index][question.name]["user_id"] if user_id is None]
+                        )
+                        > 1
+                    ):
+                        warnings.warn(
+                            "Found more than one user without ID in the dataset, so just the"
+                            " responses for the first user without ID will be used, the rest"
+                            " will be discarded."
+                        )
 
-                for user_id, value, status in zip(
-                    hfds[index][question.name]["user_id"],
-                    hfds[index][question.name]["value"],
-                    hfds[index][question.name]["status"],
-                ):
-                    if user_without_id_response:
-                        continue
-                    if user_id is None:
-                        if not user_without_id:
-                            user_without_id = True
-                            responses["user_without_id"] = {
+                    # Here for backwards compatibility
+                    original_responses = []
+                    if isinstance(hfds[index][question.name], list):
+                        original_responses = hfds[index][question.name]
+                    else:
+                        for user_id, value, status in zip(
+                            hfds[index][question.name]["user_id"],
+                            hfds[index][question.name]["value"],
+                            hfds[index][question.name]["status"],
+                        ):
+                            original_responses.append({"user_id": user_id, "value": value, "status": status})
+
+                    user_without_id_response = False
+                    for response in original_responses:
+                        if user_without_id_response:
+                            continue
+                        user_id = response["user_id"]
+                        status = response["status"]
+                        if user_id is None:
+                            if not user_without_id:
+                                user_without_id = True
+                                responses["user_without_id"] = {
+                                    "user_id": user_id,
+                                    "status": status,
+                                    "values": {},
+                                }
+                                user_without_id_response = True
+                        if user_id is not None and user_id not in responses:
+                            responses[user_id] = {
                                 "user_id": user_id,
                                 "status": status,
                                 "values": {},
                             }
-                            user_without_id_response = True
-                    if user_id is not None and user_id not in responses:
-                        responses[user_id] = {
-                            "user_id": user_id,
-                            "status": status,
-                            "values": {},
-                        }
-                    if value is not None:
-                        if question.settings["type"] == "ranking":
-                            value = [{"rank": r, "value": v} for r, v in zip(value["rank"], value["value"])]
+                        value = response["value"]
                         if value is not None:
+                            if question.settings["type"] == "ranking":
+                                value = [{"rank": r, "value": v} for r, v in zip(value["rank"], value["value"])]
                             responses[user_id or "user_without_id"]["values"].update({question.name: {"value": value}})
 
                 # First if-condition is here for backwards compatibility

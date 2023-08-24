@@ -263,7 +263,7 @@ async def redirect_api():
 
 
 app = FastAPI(docs_url=None)
-app.mount(settings.base_url, argilla_app)
+app.mount("/", argilla_app)
 
 configure_app_logging(app)
 configure_database(app)

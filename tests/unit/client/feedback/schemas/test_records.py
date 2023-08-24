@@ -87,7 +87,6 @@ def test_feedback_record(schema_kwargs: Dict[str, Any]) -> None:
     [
         (
             {
-                "id": "00000000-0000-0000-0000-000000000000",
                 "fields": {"text": "This is the first record", "label": "positive"},
             },
             {

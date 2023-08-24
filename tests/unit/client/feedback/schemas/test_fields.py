@@ -15,7 +15,22 @@
 from typing import Any, Dict
 
 import pytest
-from argilla.client.feedback.schemas.fields import TextField
+from argilla.client.feedback.schemas.fields import FieldSchema, TextField
+from pydantic import ValidationError
+
+
+def test_field_schema() -> None:
+    schema = FieldSchema(name="completion-a")
+    assert schema.id is None
+    assert schema.name == "completion-a"
+    assert schema.title == "Completion-a"
+    assert schema.type is None
+    assert schema.settings == {}
+
+
+def test_field_schema_name_validation_error() -> None:
+    with pytest.raises(ValidationError, match=r"name\n  string does not match regex"):
+        FieldSchema(name="Completion-A")
 
 
 @pytest.mark.parametrize(

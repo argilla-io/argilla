@@ -27,7 +27,6 @@
 
 <script>
 import { Base64 } from "js-base64";
-import { currentWorkspace } from "@/models/Workspace";
 import { useRoutes } from "@/v1/infrastructure/services";
 
 export default {
@@ -131,9 +130,6 @@ export default {
       return this.$route.query.tags
         ? JSON.parse(Base64.decode(this.$route.query.tags))
         : [];
-    },
-    workspace() {
-      return currentWorkspace(this.$route);
     },
   },
   methods: {

@@ -20,7 +20,18 @@ from sqlalchemy.ext.asyncio import async_object_session
 from argilla.server.contexts import accounts
 from argilla.server.daos.models.datasets import DatasetDB
 from argilla.server.errors import ForbiddenOperationError
-from argilla.server.models import Dataset, Field, Question, Record, Response, User, UserRole, Workspace, WorkspaceUser
+from argilla.server.models import (
+    Dataset,
+    Field,
+    Question,
+    Record,
+    Response,
+    Suggestion,
+    User,
+    UserRole,
+    Workspace,
+    WorkspaceUser,
+)
 
 PolicyAction = Callable[[User], Awaitable[bool]]
 
@@ -255,6 +266,15 @@ class DatasetPolicyV1:
         return is_allowed
 
     @classmethod
+    def delete_records(cls, dataset: Dataset) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (
+                actor.is_admin and await _exists_workspace_user_by_user_and_workspace_id(actor, dataset.workspace_id)
+            )
+
+        return is_allowed
+
+    @classmethod
     def search_records(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
             return actor.is_owner or await _exists_workspace_user_by_user_and_workspace_id(actor, dataset.workspace_id)
@@ -372,6 +392,16 @@ class RecordPolicyV1:
 
         return is_allowed
 
+    @classmethod
+    def delete_suggestions(cls, record: Record) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (
+                actor.is_admin
+                and await _exists_workspace_user_by_user_and_workspace_id(actor, record.dataset.workspace_id)
+            )
+
+        return is_allowed
+
 
 class ResponsePolicyV1:
     @classmethod
@@ -402,6 +432,18 @@ class ResponsePolicyV1:
                         actor, response.record.dataset.workspace_id
                     )
                 )
+            )
+
+        return is_allowed
+
+
+class SuggestionPolicyV1:
+    @classmethod
+    def delete(cls, suggestion: Suggestion) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (
+                actor.is_admin
+                and await _exists_workspace_user_by_user_and_workspace_id(actor, suggestion.record.dataset.workspace_id)
             )
 
         return is_allowed

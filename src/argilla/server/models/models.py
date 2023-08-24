@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import secrets
-from enum import Enum
 from typing import Any, List, Optional
 from uuid import UUID
 
@@ -23,36 +22,11 @@ from sqlalchemy import Enum as SAEnum
 from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from argilla.server.enums import DatasetStatus, ResponseStatus, SuggestionType, UserRole
 from argilla.server.models.base import DatabaseModel
 from argilla.server.models.questions import QuestionSettings
 
 _USER_API_KEY_BYTES_LENGTH = 80
-
-
-class FieldType(str, Enum):
-    text = "text"
-
-
-class ResponseStatus(str, Enum):
-    draft = "draft"
-    submitted = "submitted"
-    discarded = "discarded"
-
-
-class SuggestionType(str, Enum):
-    model = "model"
-    human = "human"
-
-
-class DatasetStatus(str, Enum):
-    draft = "draft"
-    ready = "ready"
-
-
-class UserRole(str, Enum):
-    owner = "owner"
-    admin = "admin"
-    annotator = "annotator"
 
 
 class Field(DatabaseModel):

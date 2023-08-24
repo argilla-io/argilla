@@ -31,9 +31,11 @@ from argilla.client.feedback.training.schemas import TrainingTaskMapping
 from argilla.client.models import Framework
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
     from argilla.server.models import User as ServerUser
     from sqlalchemy.ext.asyncio import AsyncSession
+
+    from tests.integration.helpers import SecuredClient
 
 
 def test_init(
@@ -153,17 +155,19 @@ def test_create_dataset_with_suggestions(argilla_user: "ServerUser"):
         ]
     )
 
-    ds.push_to_argilla(name="new_dataset")
+    remote_dataset = ds.push_to_argilla(name="new_dataset")
 
     with pytest.warns(DeprecationWarning):
-        ds.fetch_records()
+        remote_dataset.fetch_records()
 
-    assert len(ds.records) == 1
-    for record in ds.records:
+    assert len(remote_dataset.records) == 1
+    for record in remote_dataset.records:
         assert record.id is not None
         assert record.suggestions == (
             SuggestionSchema(
-                question_id=ds.question_by_name("text").id, question_name="text", value="This is a suggestion"
+                question_id=remote_dataset.question_by_name("text").id,
+                question_name="text",
+                value="This is a suggestion",
             ),
         )
 
@@ -176,17 +180,15 @@ async def test_update_dataset_records_with_suggestions(argilla_user: "ServerUser
 
     ds.add_records(records=[FeedbackRecord(fields={"text": "this is a text"})])
 
-    ds.push_to_argilla(name="new_dataset", workspace="argilla")
+    remote_dataset = ds.push_to_argilla(name="new_dataset", workspace="argilla")
 
-    ds.fetch_records()
-    assert len(ds.records) == 1
-    for record in ds.records:
+    assert len(remote_dataset.records) == 1
+    for record in remote_dataset.records:
         assert record.id is not None
         assert record.suggestions == ()
 
         record.set_suggestions([{"question_name": "text", "value": "This is a suggestion"}])
 
-    ds.push_to_argilla()
     # TODO: Review this requirement for tests and explain, try to avoid use or at least, document.
     await db.refresh(argilla_user, attribute_names=["datasets"])
     dataset = argilla_user.datasets[0]
@@ -194,11 +196,12 @@ async def test_update_dataset_records_with_suggestions(argilla_user: "ServerUser
     record = dataset.records[0]
     await db.refresh(record, attribute_names=["suggestions"])
 
-    ds.fetch_records()
-    for record in ds.records:
+    for record in remote_dataset.records:
         assert record.suggestions == (
             SuggestionSchema(
-                question_id=ds.question_by_name("text").id, question_name="text", value="This is a suggestion"
+                question_id=remote_dataset.question_by_name("text").id,
+                question_name="text",
+                value="This is a suggestion",
             ),
         )
 
@@ -415,10 +418,15 @@ async def test_push_to_argilla_and_from_argilla(
         ]
     )
 
+    with pytest.warns(
+        DeprecationWarning, match="Calling `push_to_argilla` no longer implies that the `FeedbackDataset`"
+    ):
+        remote_dataset = dataset.push_to_argilla(name="my-dataset")
+
     with pytest.warns(UserWarning, match="Multiple responses without `user_id`"):
         dataset.push_to_argilla(name="test-dataset")
 
-    dataset_from_argilla = FeedbackDataset.from_argilla(id=dataset.argilla_id)
+    dataset_from_argilla = FeedbackDataset.from_argilla(id=remote_dataset.id)
 
     assert dataset_from_argilla.guidelines == dataset.guidelines
     assert len(dataset_from_argilla.fields) == len(dataset.fields)
@@ -486,11 +494,10 @@ async def test_update_dataset_records_in_argilla(
         questions=feedback_dataset_questions,
     )
     dataset.add_records(records=feedback_dataset_records)
-    dataset.push_to_argilla(name="test-dataset")
+    remote_dataset = dataset.push_to_argilla(name="test-dataset")
     await db.refresh(argilla_user, attribute_names=["datasets"])
 
-    dataset.fetch_records()
-    for record in dataset.records:
+    for record in remote_dataset.records:
         record.set_suggestions(
             [
                 {
@@ -500,11 +507,10 @@ async def test_update_dataset_records_in_argilla(
             ]
         )
 
-    dataset.push_to_argilla()
     await db.refresh(argilla_user, attribute_names=["datasets"])
 
-    dataset = FeedbackDataset.from_argilla("test-dataset")
-    for record in dataset.records:
+    remote_dataset = FeedbackDataset.from_argilla("test-dataset")
+    for record in remote_dataset.records:
         record.set_suggestions(
             [
                 {
@@ -514,10 +520,9 @@ async def test_update_dataset_records_in_argilla(
             ]
         )
 
-    dataset.push_to_argilla()
     await db.refresh(argilla_user, attribute_names=["datasets"])
 
-    for record in dataset.records:
+    for record in remote_dataset.records:
         record.set_suggestions(
             [
                 {
@@ -527,10 +532,10 @@ async def test_update_dataset_records_in_argilla(
             ]
         )
 
-    dataset.push_to_argilla("new-test-dataset")
+    new_remote_dataset = dataset.push_to_argilla("new-test-dataset")
     await db.refresh(argilla_user, attribute_names=["datasets"])
 
-    record = dataset.records[0]
+    record = new_remote_dataset.records[0]
     with pytest.warns(UserWarning, match="A suggestion for question `question-1`"):
         record.set_suggestions(
             [
@@ -660,6 +665,10 @@ def test_push_to_huggingface_and_from_huggingface(
         Framework("spacy-transformers"),
     ],
 )
+@pytest.mark.parametrize(
+    "question",
+    ["question-3", "question-4"],
+)
 @pytest.mark.usefixtures(
     "feedback_dataset_guidelines",
     "feedback_dataset_fields",
@@ -668,6 +677,7 @@ def test_push_to_huggingface_and_from_huggingface(
 )
 def test_prepare_for_training_text_classification(
     framework: Union[Framework, str],
+    question: str,
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
@@ -679,7 +689,7 @@ def test_prepare_for_training_text_classification(
         questions=feedback_dataset_questions,
     )
     dataset.add_records(feedback_dataset_records)
-    label = dataset.question_by_name("question-3")
+    label = dataset.question_by_name(question)
     task_mapping = TrainingTaskMapping.for_text_classification(text=dataset.fields[0], label=label)
 
     dataset.prepare_for_training(framework=framework, task_mapping=task_mapping, fetch_records=False)

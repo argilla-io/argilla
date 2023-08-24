@@ -34,7 +34,7 @@ Some other cool attributes for a record are:
 In Argilla, records are created programmatically using the [client library](../reference/python/python_client.rst) within a Python script, a [Jupyter notebook](https://jupyter.org/), or another IDE.
 
 
-Let's see how to create and upload a basic record to the Argilla web app  (make sure Argilla is already installed on your machine as described in the [setup guide](../getting_started/installation/installation.md)):
+Let's see how to create and upload a basic record to the Argilla web app  (make sure Argilla is already installed on your machine as described in the [setup guide](../getting_started/quickstart_installation.html)):
 
 ### Create records
 
@@ -223,7 +223,7 @@ tagger.predict(sentence)
 
 ### Using ASGI middleware
 
-For using the ASGI middleware, see this [tutorial](/tutorials/notebooks/deploying-texttokenclassification-fastapi.html).
+For using the ASGI middleware, see this [tutorial](/tutorials/notebooks/deploying-texttokenclassification-fastapi.ipynb).
 
 ## Load Data
 
