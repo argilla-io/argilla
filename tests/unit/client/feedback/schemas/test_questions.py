@@ -232,6 +232,16 @@ def test_text_question(schema_kwargs: Dict[str, Any], expected_settings: Dict[st
             ValidationError,
             "ensure this value has at least 2 items",
         ),
+        (
+            {"name": "a", "description": "a", "required": True, "values": [0, 1]},
+            ValidationError,
+            "ensure this value is greater than or equal to 1",
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "values": [1, 11]},
+            ValidationError,
+            "ensure this value is less than or equal to 10",
+        ),
     ],
 )
 def test_rating_question_errors(
