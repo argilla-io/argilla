@@ -227,7 +227,7 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToAnnotationPage(page);
 
-      await page.getByPlaceholder("Search labels").first().fill("v");
+      await page.keyboard.press("v");
 
       await expect(page).toHaveScreenshot();
     });
@@ -236,11 +236,13 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToAnnotationPage(page);
 
-      await page.getByPlaceholder("Search labels").first().fill("v");
+      await page.keyboard.press("v");
       await expect(page).toHaveScreenshot();
-      await page.getByPlaceholder("Search labels").first().press("Backspace");
+
+      await page.keyboard.press("Backspace");
       await expect(page).toHaveScreenshot();
-      await page.getByPlaceholder("Search labels").first().fill("Pos");
+
+      await page.keyboard.insertText("Pos");
       await expect(page).toHaveScreenshot();
     });
     test("user can delete the search with backspace, write another search query and submit with shift+enter, ", async ({
@@ -249,11 +251,13 @@ test.describe("Annotation page shortcuts", () => {
       const record = await goToAnnotationPage(page);
       await mockRecordResponses(page, record.id, "submitted");
 
-      await page.getByPlaceholder("Search labels").first().fill("v");
+      await page.keyboard.press("v");
       await expect(page).toHaveScreenshot();
-      await page.getByPlaceholder("Search labels").first().press("Backspace");
+
+      await page.keyboard.press("Backspace");
       await expect(page).toHaveScreenshot();
-      await page.getByPlaceholder("Search labels").first().fill("Pos");
+
+      await page.keyboard.insertText("Pos");
       await expect(page).toHaveScreenshot();
 
       await page.keyboard.press("Tab");
@@ -262,7 +266,7 @@ test.describe("Annotation page shortcuts", () => {
       await page.keyboard.press("Tab");
       await page.keyboard.press("Space");
 
-      await page.getByText("Very Positive").first().press("Shift+Enter");
+      await page.keyboard.press("Shift+Enter");
 
       await expect(page).toHaveScreenshot();
     });
@@ -299,11 +303,13 @@ test.describe("Annotation page shortcuts", () => {
       const record = await goToAnnotationPage(page);
       await mockRecordResponses(page, record.id, "discarded");
 
-      await page.getByPlaceholder("Search labels").first().fill("v");
+      await page.keyboard.press("v");
       await expect(page).toHaveScreenshot();
-      await page.getByPlaceholder("Search labels").first().press("Backspace");
+
+      await page.keyboard.press("Backspace");
       await expect(page).toHaveScreenshot();
-      await page.getByPlaceholder("Search labels").first().fill("Pos");
+
+      await page.keyboard.insertText("Pos");
       await expect(page).toHaveScreenshot();
 
       await page.keyboard.press("Tab");
@@ -312,7 +318,7 @@ test.describe("Annotation page shortcuts", () => {
       await page.keyboard.press("Tab");
       await page.keyboard.press("Space");
 
-      await page.getByText("Very Positive").first().press("Shift+Backspace");
+      await page.keyboard.press("Shift+Backspace");
 
       await expect(page).toHaveScreenshot();
     });
@@ -322,13 +328,13 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToAnnotationPage(page);
 
-      await page.getByPlaceholder("Search labels").first().fill("v");
+      await page.keyboard.press("v");
 
-      await page.getByPlaceholder("Search labels").first().press("Tab");
-      await page.locator("#sentiment_positive").press("Tab");
-      await page.locator("#sentiment_very_positive").press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
 
-      await page.keyboard.type(" ");
+      await page.keyboard.press("Space");
 
       await expect(page).toHaveScreenshot();
     });
@@ -338,11 +344,11 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToAnnotationPage(page);
 
-      await page.getByPlaceholder("Search labels").first().fill("v");
-      await page.getByPlaceholder("Search labels").first().press("Tab");
-      await page.locator("#sentiment_positive").press("Tab");
-      await page.locator("#sentiment_very_positive").press("Tab");
-      await page.keyboard.type(" ");
+      await page.keyboard.press("v");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Space");
 
       await page.getByText("Loving").click();
 
@@ -352,23 +358,23 @@ test.describe("Annotation page shortcuts", () => {
     test("expand collapsable label", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.locator("#sentiment_positive").press("Tab");
-      await page.locator("#sentiment_very_positive").press("Tab");
-      await page.locator("#sentiment_negative").press("Tab");
-      await page.locator("#sentiment_neutral").press("Tab");
-      await page.locator("#sentiment_happy").press("Tab");
-      await page.locator("#sentiment_sad").press("Tab");
-      await page.locator("#sentiment_angry").press("Tab");
-      await page.locator("#sentiment_excited").press("Tab");
-      await page.locator("#sentiment_disappointed").press("Tab");
-      await page.locator("#sentiment_surprised").press("Tab");
-      await page.getByLabel("Grateful").press("Tab");
-      await page.getByLabel("Loving").press("Tab");
-      await page.getByLabel("Optimistic").press("Tab");
-      await page.getByLabel("Proud").press("Tab");
-      await page.getByLabel("Worried").press("Tab");
-      await page.getByLabel("Hopeful").press("Tab");
-      await page.getByLabel("Bored").press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
 
       await expect(page).toHaveScreenshot();
     });
@@ -376,7 +382,7 @@ test.describe("Annotation page shortcuts", () => {
     test("go to next question with shift and arrow down", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.locator("#sentiment_positive").press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
 
       await expect(page).toHaveScreenshot();
     });
@@ -386,10 +392,8 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToAnnotationPage(page);
 
-      await page.locator("#sentiment_positive").press("Shift+ArrowDown");
-      await page
-        .locator("#sentiment-multi-label_positive")
-        .press("Shift+ArrowUp");
+      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowUp");
 
       await expect(page).toHaveScreenshot();
     });
@@ -397,54 +401,54 @@ test.describe("Annotation page shortcuts", () => {
     test("the user move as a loop with tab key", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.locator("#sentiment_positive").press("Tab");
-      await page.locator("#sentiment_very_positive").press("Tab");
-      await page.locator("#sentiment_negative").press("Tab");
-      await page.locator("#sentiment_neutral").press("Tab");
-      await page.locator("#sentiment_happy").press("Tab");
-      await page.locator("#sentiment_sad").press("Tab");
-      await page.locator("#sentiment_angry").press("Tab");
-      await page.locator("#sentiment_excited").press("Tab");
-      await page.locator("#sentiment_disappointed").press("Tab");
-      await page.locator("#sentiment_surprised").press("Tab");
-      await page.getByLabel("Grateful").press("Tab");
-      await page.getByLabel("Loving").press("Tab");
-      await page.getByLabel("Optimistic").press("Tab");
-      await page.getByLabel("Proud").press("Tab");
-      await page.getByLabel("Worried").press("Tab");
-      await page.getByLabel("Hopeful").press("Tab");
-      await page.getByLabel("Bored").press("Tab");
-      await page.getByLabel("Amused").press("Tab");
-      await page.getByLabel("Confused").press("Tab");
-      await page.getByLabel("Frustrated").press("Tab");
-      await page.getByLabel("Content").press("Tab");
-      await page.getByLabel("Over the Moon").press("Tab");
-      await page.getByLabel("Heartbroken").press("Tab");
-      await page.getByLabel("Furious").press("Tab");
-      await page.getByLabel("Ecstatic").press("Tab");
-      await page.getByLabel("Devastated").press("Tab");
-      await page.getByLabel("Anxious").press("Tab");
-      await page.getByLabel("Terrified").press("Tab");
-      await page.getByLabel("Delighted").press("Tab");
-      await page.getByLabel("Disgusted").press("Tab");
-      await page.getByLabel("Jealous").press("Tab");
-      await page.getByLabel("Lonely").press("Tab");
-      await page.getByLabel("Shocked").press("Tab");
-      await page.getByLabel("Satisfied").press("Tab");
-      await page.getByLabel("Relaxed").press("Tab");
-      await page.getByLabel("Thankful").press("Tab");
-      await page.getByLabel("Annoyed").press("Tab");
-      await page.getByLabel("Guilty").press("Tab");
-      await page.getByLabel("Embarrassed").press("Tab");
-      await page.getByLabel("Ashamed").press("Tab");
-      await page.getByLabel("Pessimistic").press("Tab");
-      await page.getByLabel("Nostalgic").press("Tab");
-      await page.getByLabel("Sympathetic").press("Tab");
-      await page.getByLabel("Fearful").press("Tab");
-      await page.getByLabel("Hurt").press("Tab");
-      await page.locator("#sentiment_positive").press("Tab");
-      await page.locator("#sentiment_very_positive").press("Tab");
-      await page.locator("#sentiment_negative").press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
 
       await expect(page).toHaveScreenshot();
     });
@@ -454,8 +458,8 @@ test.describe("Annotation page shortcuts", () => {
     test("go to multilabel component", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.locator("#sentiment_positive").press("Shift+ArrowDown");
-      await page.locator("#sentiment-multi-label_positive").press("v");
+      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press("v");
 
       await expect(page).toHaveScreenshot();
     });
@@ -465,20 +469,23 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToAnnotationPage(page);
 
-      await page.locator("#sentiment_positive").press("Shift+ArrowDown");
-      await page.locator("#sentiment-multi-label_positive").press("Tab");
-      await page.locator("#sentiment-multi-label_very_positive").press("Tab");
-      await page.locator("#sentiment-multi-label_negative").press("Tab");
-      await page.locator("#sentiment-multi-label_neutral").press("Tab");
-      await page.locator("#sentiment-multi-label_happy").press("Tab");
-      await page.locator("#sentiment-multi-label_sad").press("Tab");
-      await page.locator("#sentiment-multi-label_angry").press("Tab");
-      await page.locator("#sentiment-multi-label_excited").press("Tab");
-      await page.locator("#sentiment-multi-label_disappointed").press("Tab");
-      await page.locator("#sentiment-multi-label_surprised").press("Tab");
-      await page.getByLabel("Grateful").press("Tab");
-      await page.getByLabel("Loving").press("Tab");
-      await page.getByLabel("Optimistic").press("Tab");
+      await page.keyboard.press("Shift+ArrowDown");
+
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+
+      await expect(page).toHaveScreenshot();
 
       await page.getByText("Negative").nth(1).click();
       await page.getByText("Neutral").nth(1).click();
@@ -491,55 +498,57 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToAnnotationPage(page);
 
-      await page.locator("#sentiment-multi-label_positive").press("Tab");
-      await page.locator("#sentiment-multi-label_very_positive").press("Tab");
-      await page.locator("#sentiment-multi-label_negative").press("Tab");
-      await page.locator("#sentiment-multi-label_neutral").press("Tab");
-      await page.locator("#sentiment-multi-label_happy").press("Tab");
-      await page.locator("#sentiment-multi-label_sad").press("Tab");
-      await page.locator("#sentiment-multi-label_angry").press("Tab");
-      await page.locator("#sentiment-multi-label_excited").press("Tab");
-      await page.locator("#sentiment-multi-label_disappointed").press("Tab");
-      await page.locator("#sentiment-multi-label_surprised").press("Tab");
-      await page.locator("#sentiment-multi-label_grateful").press("Tab");
-      await page.locator("#sentiment-multi-label_loving").press("Tab");
-      await page.locator("#sentiment-multi-label_optimistic").press("Tab");
-      await page.locator("#sentiment-multi-label_proud").press("Tab");
-      await page.locator("#sentiment-multi-label_worried").press("Tab");
-      await page.locator("#sentiment-multi-label_hopeful").press("Tab");
-      await page.locator("#sentiment-multi-label_bored").press("Tab");
-      await page.locator("#sentiment-multi-label_amused").press("Tab");
-      await page.locator("#sentiment-multi-label_confused").press("Tab");
-      await page.locator("#sentiment-multi-label_frustrated").press("Tab");
-      await page.locator("#sentiment-multi-label_content").press("Tab");
-      await page.locator("#sentiment-multi-label_over_the_moon").press("Tab");
-      await page.locator("#sentiment-multi-label_heartbroken").press("Tab");
-      await page.locator("#sentiment-multi-label_furious").press("Tab");
-      await page.locator("#sentiment-multi-label_ecstatic").press("Tab");
-      await page.locator("#sentiment-multi-label_devastated").press("Tab");
-      await page.locator("#sentiment-multi-label_anxious").press("Tab");
-      await page.locator("#sentiment-multi-label_terrified").press("Tab");
-      await page.locator("#sentiment-multi-label_delighted").press("Tab");
-      await page.locator("#sentiment-multi-label_disgusted").press("Tab");
-      await page.locator("#sentiment-multi-label_jealous").press("Tab");
-      await page.locator("#sentiment-multi-label_lonely").press("Tab");
-      await page.locator("#sentiment-multi-label_shocked").press("Tab");
-      await page.locator("#sentiment-multi-label_satisfied").press("Tab");
-      await page.locator("#sentiment-multi-label_relaxed").press("Tab");
-      await page.locator("#sentiment-multi-label_thankful").press("Tab");
-      await page.locator("#sentiment-multi-label_annoyed").press("Tab");
-      await page.locator("#sentiment-multi-label_guilty").press("Tab");
-      await page.locator("#sentiment-multi-label_embarrassed").press("Tab");
-      await page.locator("#sentiment-multi-label_ashamed").press("Tab");
-      await page.locator("#sentiment-multi-label_pessimistic").press("Tab");
-      await page.locator("#sentiment-multi-label_nostalgic").press("Tab");
-      await page.locator("#sentiment-multi-label_sympathetic").press("Tab");
-      await page.locator("#sentiment-multi-label_fearful").press("Tab");
-      await page.locator("#sentiment-multi-label_hurt").press("Tab");
-      await page.locator("#sentiment-multi-label_positive").press("Tab");
-      await page.locator("#sentiment-multi-label_very_positive").press("Tab");
-      await page.locator("#sentiment-multi-label_negative").press("Tab");
-      await page.locator("#sentiment-multi-label_neutral").press("Tab");
+      await page.keyboard.press("Shift+ArrowDown");
+
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
 
       await expect(page).toHaveScreenshot();
     });
@@ -547,11 +556,9 @@ test.describe("Annotation page shortcuts", () => {
     test("go to next question with shift and arrow down", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.locator("#sentiment_positive").press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
 
-      await page
-        .locator("#sentiment-multi-label_positive")
-        .press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
 
       await expect(page).toHaveScreenshot();
     });
@@ -561,12 +568,10 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToAnnotationPage(page);
 
-      await page.locator("#sentiment_positive").press("Shift+ArrowDown");
-      await page
-        .locator("#sentiment-multi-label_positive")
-        .press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
 
-      await page.getByLabel("1").press("Shift+ArrowUp");
+      await page.keyboard.press("Shift+ArrowUp");
 
       await expect(page).toHaveScreenshot();
     });
@@ -576,10 +581,8 @@ test.describe("Annotation page shortcuts", () => {
     test("go to rating component with keyboard", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.locator("#sentiment_positive").press("Shift+ArrowDown");
-      await page
-        .locator("#sentiment-multi-label_positive")
-        .press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
 
       await expect(page).toHaveScreenshot();
     });
@@ -589,18 +592,14 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToAnnotationPage(page);
 
-      await page.locator("#sentiment_positive").press("Shift+ArrowDown");
-      await page
-        .locator("#sentiment-multi-label_positive")
-        .press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
 
       await page.locator("label").filter({ hasText: "2" }).click();
 
-      await page
-        .getByText("This is a review of the review")
-        .press("Meta+Shift+ArrowRight");
+      await page.keyboard.press("Meta+Shift+ArrowRight");
 
-      await page.getByText("This is a review of the review").fill("TEST");
+      await page.keyboard.insertText("TEST");
 
       await expect(page).toHaveScreenshot();
     });
@@ -610,10 +609,8 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToAnnotationPage(page);
 
-      await page.locator("#sentiment_positive").press("Shift+ArrowDown");
-      await page
-        .locator("#sentiment-multi-label_positive")
-        .press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
 
       await page.keyboard.press("4");
 
@@ -723,11 +720,9 @@ test.describe("Annotation page shortcuts", () => {
     test("go to text component with keyboard", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.locator("#sentiment_positive").press("Shift+ArrowDown");
-      await page
-        .locator("#sentiment-multi-label_positive")
-        .press("Shift+ArrowDown");
-      await page.getByLabel("1").press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
 
       await expect(page).toHaveScreenshot();
     });
@@ -735,11 +730,9 @@ test.describe("Annotation page shortcuts", () => {
     test("go to previous question with keyboard", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.locator("#sentiment_positive").press("Shift+ArrowDown");
-      await page
-        .locator("#sentiment-multi-label_positive")
-        .press("Shift+ArrowDown");
-      await page.getByLabel("1").press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
 
       await page
         .getByText("This is a review of the review")
@@ -753,17 +746,13 @@ test.describe("Annotation page shortcuts", () => {
     const goToRankingComponent = async (page: Page) => {
       await goToAnnotationPage(page);
 
-      await page.locator("#sentiment_positive").press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
 
-      await page
-        .locator("#sentiment-multi-label_positive")
-        .press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
 
-      await page.getByLabel("1").press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
 
-      await page
-        .getByText("This is a review of the review")
-        .press("Shift+ArrowDown");
+      await page.keyboard.press("Shift+ArrowDown");
     };
 
     test("go to ranking component with keyboard", async ({ page }) => {
@@ -777,13 +766,11 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToRankingComponent(page);
 
-      await page.getByTitle("Option A").press("Shift+ArrowUp");
+      await page.keyboard.press("Shift+ArrowUp");
 
-      await page
-        .getByText("This is a review of the review")
-        .press("Meta+Shift+ArrowRight");
+      await page.keyboard.press("Meta+Shift+ArrowRight");
 
-      await page.getByText("This is a review of the review").fill("TEST");
+      await page.keyboard.insertText("TEST");
 
       await expect(page).toHaveScreenshot();
     });
@@ -791,7 +778,7 @@ test.describe("Annotation page shortcuts", () => {
     test("order ranking question options", async ({ page }) => {
       await goToRankingComponent(page);
 
-      await page.getByTitle("Option A").press("2");
+      await page.keyboard.press("2");
 
       await expect(page).toHaveScreenshot();
     });
@@ -821,18 +808,18 @@ test.describe("Annotation page shortcuts", () => {
     test("reorder ranking question options", async ({ page }) => {
       await goToRankingComponent(page);
 
-      await page.getByTitle("Option A").press("2");
+      await page.keyboard.press("2");
 
       await page.waitForTimeout(300);
 
-      await page.getByTitle("Option B").press("1");
+      await page.keyboard.press("1");
 
       await page.waitForTimeout(300);
 
-      await page.getByTitle("Option C").press("4");
+      await page.keyboard.press("4");
       await page.waitForTimeout(300);
 
-      await page.getByTitle("Option D").press("3");
+      await page.keyboard.press("3");
 
       await page.waitForTimeout(300);
 
@@ -842,19 +829,19 @@ test.describe("Annotation page shortcuts", () => {
     test("move as a loop in ranking component", async ({ page }) => {
       await goToRankingComponent(page);
 
-      await page.getByText("✨ Ranking (optional)").press("Tab");
+      await page.keyboard.press("Tab");
       await expect(page).toHaveScreenshot();
 
-      await page.getByText("✨ Ranking (optional)").press("Tab");
-      await page.getByText("✨ Ranking (optional)").press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
       await expect(page).toHaveScreenshot();
 
-      await page.getByText("✨ Ranking (optional)").press("Tab");
-      await page.getByText("✨ Ranking (optional)").press("Tab");
-      await page.getByText("✨ Ranking (optional)").press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
       await expect(page).toHaveScreenshot();
 
-      await page.getByText("✨ Ranking (optional)").press("Shift+Tab");
+      await page.keyboard.press("Shift+Tab");
       await expect(page).toHaveScreenshot();
     });
 
@@ -863,20 +850,20 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToRankingComponent(page);
 
-      await page.getByText("✨ Ranking (optional)").press("Tab");
+      await page.keyboard.press("Tab");
       await expect(page).toHaveScreenshot();
 
-      await page.getByText("✨ Ranking (optional)").press("Backspace");
-      await page.getByText("Ranking (optional)").press("Tab");
-      await page.getByText("Ranking (optional)").press("Backspace");
+      await page.keyboard.press("Backspace");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Backspace");
       await expect(page).toHaveScreenshot();
 
-      await page.getByText("Ranking (optional)").press("Tab");
-      await page.getByText("Ranking (optional)").press("Tab");
-      await page.getByText("Ranking (optional)").press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
       await expect(page).toHaveScreenshot();
 
-      await page.getByText("Ranking (optional)").press("Shift+Tab");
+      await page.keyboard.press("Shift+Tab");
       await expect(page).toHaveScreenshot();
     });
   });
