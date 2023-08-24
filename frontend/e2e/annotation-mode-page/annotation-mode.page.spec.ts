@@ -690,22 +690,25 @@ test.describe("Annotation page shortcuts", () => {
 
       await page.keyboard.press("1");
       await page.keyboard.press("2");
+
+      await page.waitForTimeout(400);
+
       await page.keyboard.press("1");
       await page.keyboard.press("0");
 
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(400);
 
       await expect(page).toHaveScreenshot();
 
       await page.keyboard.press("2");
 
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(400);
 
       await expect(page).toHaveScreenshot();
 
       await page.keyboard.press("8");
 
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(400);
 
       await expect(page).toHaveScreenshot();
 
