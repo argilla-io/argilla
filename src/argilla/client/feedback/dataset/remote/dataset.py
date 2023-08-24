@@ -141,7 +141,9 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             guidelines=guidelines,
         )
 
-    def filter_by(self, response_status: List[FeedbackResponseStatusFilter]) -> FilteredRemoteFeedbackDataset:
+    def filter_by(
+        self, response_status: Union[FeedbackResponseStatusFilter, List[FeedbackResponseStatusFilter]]
+    ) -> FilteredRemoteFeedbackDataset:
         """Filters the current `RemoteFeedbackDataset` based on the `response_status` of
         the responses of the records in Argilla. This method creates a new class instance
         of `FilteredRemoteFeedbackDataset` with the given filters.
@@ -161,7 +163,7 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             fields=self.fields,
             questions=self.questions,
             guidelines=self.guidelines,
-            filters={"response_status": response_status},
+            filters={"response_status": response_status if isinstance(response_status, list) else [response_status]},
         )
 
     def add_records(
