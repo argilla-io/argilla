@@ -155,6 +155,8 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         Returns:
             A new instance of `FilteredRemoteFeedbackDataset` with the given filters.
         """
+        if not isinstance(response_status, list):
+            response_status = [response_status]
         return FilteredRemoteFeedbackDataset(
             client=self._client,
             id=self.id,
@@ -163,7 +165,9 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             fields=self.fields,
             questions=self.questions,
             guidelines=self.guidelines,
-            filters={"response_status": response_status if isinstance(response_status, list) else [response_status]},
+            filters={
+                "response_status": [status.value if hasattr(status, "value") else status for status in response_status]
+            },
         )
 
     def add_records(
