@@ -52,7 +52,7 @@ export default (context, inject) => {
 
     const words = wordsEscaped.join("|");
 
-    return new RegExp(words, "gmi");
+    return new RegExp(`\\b${words}`, "gmi");
   };
 
   const replaceText = (regex, text) => {
