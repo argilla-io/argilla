@@ -79,7 +79,6 @@ export default {
     },
     autofocusPosition: {
       type: Number,
-      required: true,
     },
   },
   mounted() {

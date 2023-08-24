@@ -10,7 +10,7 @@
       :tabindex="isEditionModeActive ? '-1' : '0'"
     >
       <RenderMarkdownBaseComponent
-        v-if="question.settings.use_markdown && !isFocused"
+        v-if="question.settings.use_markdown && !isEditionModeActive"
         class="textarea--markdown"
         :markdown="question.answer.value"
         @click.native="onFocus"
@@ -19,6 +19,7 @@
         v-else
         class="textarea"
         :value="question.answer.value"
+        :originalValue="question.answer.originalValue"
         :placeholder="question.settings.placeholder"
         :isFocused="isFocused"
         @change-text="onChangeTextArea"

@@ -25,12 +25,13 @@ export abstract class QuestionAnswer {
   abstract matchSuggestion(suggestion: Suggestion): boolean;
 }
 export class TextQuestionAnswer extends QuestionAnswer {
+  public originalValue: string;
   constructor(public readonly type: QuestionType, public value: string) {
     super(type, value);
   }
 
   complete(answer: Answer) {
-    this.value = answer.value as string;
+    this.originalValue = this.value = answer.value as string;
   }
 
   clear() {

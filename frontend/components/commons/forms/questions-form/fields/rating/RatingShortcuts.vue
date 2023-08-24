@@ -14,7 +14,7 @@ export default {
   },
   computed: {
     options() {
-      return this.$slots.default[0].context?.options;
+      return this.$slots.default[0].context?.question.answer.values;
     },
   },
   methods: {

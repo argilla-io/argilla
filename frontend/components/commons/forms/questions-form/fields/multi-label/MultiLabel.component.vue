@@ -35,7 +35,7 @@ export default {
   },
   computed: {
     maxOptionsToShowBeforeCollapse() {
-      return this.visibleOptions ?? -1;
+      return this.question.settings.visible_options ?? -1;
     },
   },
   methods: {

@@ -44,6 +44,10 @@ export default {
       type: String,
       default: "",
     },
+    originalValue: {
+      type: String,
+      default: "",
+    },
     isFocused: {
       type: Boolean,
       default: () => false,
@@ -51,10 +55,8 @@ export default {
   },
   data: () => {
     return {
-      originalValue: null,
       sanitizedCurrentValue: null,
       currentValue: null,
-      focus: false,
     };
   },
   computed: {
@@ -80,15 +82,13 @@ export default {
     },
   },
   mounted() {
-    window.addEventListener("paste", this.pastePlainText);
-
     this.reset();
 
     this.textAreaWrapper = document.getElementById("contentId");
   },
   methods: {
     reset() {
-      this.currentValue = this.originalValue = this.value;
+      this.currentValue = this.value;
       this.sanitizedCurrentValue = " ";
       this.$nextTick(() => {
         this.sanitizedCurrentValue = DOMPurify.sanitize(this.currentValue);
@@ -119,6 +119,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 [contenteditable="true"] {
+  padding: 0.6em;
   outline: none;
   &:focus + span {
     display: block;
