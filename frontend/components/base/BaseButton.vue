@@ -269,8 +269,8 @@ export default {
     &:hover,
     &:active,
     &.active {
-      color: $danger;
-      border-color: $danger;
+      color: darken($danger, 10%);
+      border-color: darken($danger, 10%);
     }
   }
   &.light {

@@ -18,7 +18,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from argilla.server.models import FieldType
+from argilla.server.enums import FieldType
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.datasets import FieldTitle
 

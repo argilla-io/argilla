@@ -1,18 +1,16 @@
 <template>
   <div class="wrapper">
     <QuestionHeaderComponent
-      :title="title"
-      :isRequired="isRequired"
-      :hasSuggestion="hasSuggestion"
-      :tooltipMessage="description"
+      :question="question"
+      :showSuggestion="showSuggestion"
     />
 
     <LabelSelectionComponent
-      v-model="options"
-      :multiple="true"
-      :componentId="questionId"
-      :isFocused="isFocused"
+      :componentId="question.id"
+      v-model="question.answer.values"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
+      :multiple="true"
+      :isFocused="isFocused"
       @on-focus="onFocus"
     />
   </div>
@@ -22,19 +20,11 @@
 export default {
   name: "MultiLabelComponent",
   props: {
-    questionId: {
-      type: String,
+    question: {
+      type: Object,
       required: true,
     },
-    title: {
-      type: String,
-      required: true,
-    },
-    options: {
-      type: Array,
-      required: true,
-    },
-    isRequired: {
+    showSuggestion: {
       type: Boolean,
       default: () => false,
     },
@@ -42,21 +32,6 @@ export default {
       type: Boolean,
       default: () => false,
     },
-    description: {
-      type: String,
-      default: () => "",
-    },
-    visibleOptions: {
-      type: Number | null,
-      required: false,
-    },
-    hasSuggestion: {
-      type: Boolean,
-      default: () => false,
-    },
-  },
-  model: {
-    prop: "options",
   },
   computed: {
     maxOptionsToShowBeforeCollapse() {

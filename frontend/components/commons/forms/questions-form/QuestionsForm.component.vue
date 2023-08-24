@@ -1,6 +1,5 @@
 <template>
   <form
-    ref="formRef"
     class="questions-form"
     :class="{ '--focused-form': formHasFocus && interactionCount > 1 }"
     @submit.prevent="onSubmit"
@@ -24,83 +23,13 @@
           </NuxtLink>
         </p>
       </div>
-      <div
-        class="form-group"
-        v-for="(question, index) in record.questions"
-        :key="question.id"
-        @keydown.shift.arrow-down="
-          updateQuestionAutofocus(autofocusPosition + 1)
-        "
-        @keydown.shift.arrow-up="updateQuestionAutofocus(autofocusPosition - 1)"
-      >
-        <TextAreaComponent
-          v-if="question.isTextType"
-          ref="text"
-          :title="question.title"
-          v-model="question.answer.value"
-          :placeholder="question.settings.placeholder"
-          :useMarkdown="question.settings.use_markdown"
-          :hasSuggestion="!record.isSubmitted && question.matchSuggestion"
-          :isRequired="question.isRequired"
-          :description="question.description"
-          :isFocused="checkIfQuestionIsFocused(index)"
-          @on-focus="updateQuestionAutofocus(index)"
-        />
 
-        <SingleLabelComponent
-          v-if="question.isSingleLabelType"
-          ref="singleLabel"
-          :questionId="question.id"
-          :title="question.title"
-          v-model="question.answer.values"
-          :hasSuggestion="!record.isSubmitted && question.matchSuggestion"
-          :isRequired="question.isRequired"
-          :description="question.description"
-          :visibleOptions="question.settings.visible_options"
-          :isFocused="checkIfQuestionIsFocused(index)"
-          @on-focus="updateQuestionAutofocus(index)"
-          @on-user-answer="focusNext(index)"
-        />
-
-        <MultiLabelComponent
-          v-if="question.isMultiLabelType"
-          ref="multiLabel"
-          :questionId="question.id"
-          :title="question.title"
-          v-model="question.answer.values"
-          :hasSuggestion="!record.isSubmitted && question.matchSuggestion"
-          :isRequired="question.isRequired"
-          :description="question.description"
-          :visibleOptions="question.settings.visible_options"
-          :isFocused="checkIfQuestionIsFocused(index)"
-          @on-focus="updateQuestionAutofocus(index)"
-        />
-
-        <RatingComponent
-          v-if="question.isRatingType"
-          ref="rating"
-          :title="question.title"
-          v-model="question.answer.values"
-          :hasSuggestion="!record.isSubmitted && question.matchSuggestion"
-          :isRequired="question.isRequired"
-          :description="question.description"
-          :isFocused="checkIfQuestionIsFocused(index)"
-          @on-focus="updateQuestionAutofocus(index)"
-          @on-user-answer="focusNext(index)"
-        />
-
-        <RankingComponent
-          v-if="question.isRankingType"
-          ref="ranking"
-          :title="question.title"
-          v-model="question.answer.values"
-          :hasSuggestion="!record.isSubmitted && question.matchSuggestion"
-          :isRequired="question.isRequired"
-          :description="question.description"
-          :isFocused="checkIfQuestionIsFocused(index)"
-          @on-focus="updateQuestionAutofocus(index)"
-        />
-      </div>
+      <QuestionsComponent
+        :questions="record.questions"
+        :showSuggestion="!record.isSubmitted"
+        :autofocusPosition="autofocusPosition"
+        @on-focus="updateQuestionAutofocus"
+      />
     </div>
     <div class="footer-form">
       <div class="footer-form__left-footer">
@@ -176,9 +105,6 @@ export default {
 
       return !this.questionAreCompletedCorrectly;
     },
-    formWrapper() {
-      return this.$refs.formRef;
-    },
   },
   watch: {
     isFormUntouched(isFormUntouched) {
@@ -192,56 +118,6 @@ export default {
   },
   mounted() {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
-
-    const keyBoardHandler = (parent) => (e) => {
-      const focusable = parent.querySelectorAll(
-        'input[type="checkbox"], [tabindex="0"]'
-      );
-
-      const firstElement = focusable[0];
-      const lastElement = focusable[focusable.length - 1];
-
-      const isShiftKeyPressed = e.shiftKey;
-
-      const isArrowDownPressed = e.key === "ArrowDown";
-      const isArrowUpPressed = e.key === "ArrowUp";
-      const activeElementIsInForm = this.formWrapper.contains(
-        document.activeElement
-      );
-      const isLastElementActive = document.activeElement === lastElement;
-      const isFirstElementActive = document.activeElement === firstElement;
-
-      if (!activeElementIsInForm && isShiftKeyPressed && isArrowDownPressed) {
-        this.focusOnFirstQuestion(e);
-        return;
-      }
-
-      if (!activeElementIsInForm && isShiftKeyPressed && isArrowUpPressed) {
-        this.focusOnLastQuestion(e);
-        return;
-      }
-
-      if (e.key !== "Tab") return;
-      // TODO: Move to Single and Multi label component
-      // Is for manage the loop focus.
-      if (!isShiftKeyPressed && isLastElementActive) {
-        this.focusOn(e, firstElement);
-      }
-      if (isShiftKeyPressed && isFirstElementActive) {
-        this.focusOn(e, lastElement);
-      }
-    };
-
-    const initEventListenerFor = (aParent, aTypeOfComponent) => {
-      const parent = this.$refs[aTypeOfComponent][0].$el;
-
-      aParent.addEventListener("keydown", keyBoardHandler(parent));
-    };
-
-    ["text", "singleLabel", "multiLabel", "rating", "ranking"].forEach(
-      (componentType) =>
-        this.$refs[componentType] && initEventListenerFor(parent, componentType)
-    );
   },
   destroyed() {
     this.emitIsQuestionsFormUntouched(true);
@@ -255,20 +131,9 @@ export default {
       this.userComesFromOutside = false;
       this.focusOnFirstQuestion(e);
     },
-    focusOn($event, node) {
-      $event.preventDefault();
-      node.focus();
-    },
     focusOnFirstQuestion(e) {
       e.preventDefault();
       this.updateQuestionAutofocus(0);
-    },
-    focusOnLastQuestion(e) {
-      e.preventDefault();
-      this.updateQuestionAutofocus(this.numberOfQuestions);
-    },
-    focusNext(index) {
-      this.updateQuestionAutofocus(index + 1);
     },
     onClickOutside() {
       this.autofocusPosition = null;
@@ -323,9 +188,6 @@ export default {
       this.$emit("on-question-form-touched", !isFormUntouched);
 
       this.$root.$emit("are-responses-untouched", isFormUntouched);
-    },
-    checkIfQuestionIsFocused(index) {
-      return index === this.autofocusPosition;
     },
     updateQuestionAutofocus(index) {
       this.interactionCount++;

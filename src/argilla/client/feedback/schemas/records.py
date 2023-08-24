@@ -19,8 +19,10 @@ from uuid import UUID
 import httpx
 from pydantic import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, conint, validator
 
+from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.sdk.v1.records import api as records_api_v1
+from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
     from argilla.client.feedback.unification import UnifiedValueSchema
@@ -242,6 +244,7 @@ class RemoteFeedbackRecord(FeedbackRecord):
 
     id: UUID
 
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def update(
         self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
     ) -> None:
@@ -253,6 +256,9 @@ class RemoteFeedbackRecord(FeedbackRecord):
             suggestions: can be a single `SuggestionSchema`, a list of `SuggestionSchema`,
                 a single dictionary, or a list of dictionaries. If a dictionary is provided,
                 it will be converted to a `SuggestionSchema` internally.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
         """
         super().update(suggestions)
         for suggestion in self.suggestions:
@@ -274,11 +280,15 @@ class RemoteFeedbackRecord(FeedbackRecord):
         )
         self.update(suggestions=suggestions)
 
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def delete(self) -> FeedbackRecord:
         """Deletes the `RemoteFeedbackRecord` from Argilla.
 
         Returns:
             The deleted record formatted as a `FeedbackRecord`.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
         """
         try:
             response = records_api_v1.delete_record(client=self.client, id=self.id)

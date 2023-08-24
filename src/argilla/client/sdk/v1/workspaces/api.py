@@ -38,13 +38,9 @@ def get_workspace(client: httpx.Client, id: UUID) -> Response[Union[WorkspaceMod
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = WorkspaceModel(**response.json())
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = WorkspaceModel(**response.json())
+        return response_obj
     return handle_response_error(response)
 
 
@@ -56,13 +52,9 @@ def delete_workspace(
     response = client.delete(url=url)
 
     if response.status_code == 200:
-        parsed_response = WorkspaceModel(**response.json())
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = WorkspaceModel(**response.json())
+        return response_obj
     return handle_response_error(response)
 
 
@@ -84,11 +76,7 @@ def list_workspaces_me(
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = [WorkspaceModel(**workspace) for workspace in response.json()["items"]]
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = [WorkspaceModel(**workspace) for workspace in response.json()["items"]]
+        return response_obj
     return handle_response_error(response)

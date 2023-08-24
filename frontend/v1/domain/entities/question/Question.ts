@@ -10,20 +10,49 @@ import {
 } from "./QuestionAnswer";
 import { Suggestion } from "./Suggestion";
 
+interface OriginalQuestion {
+  title: string;
+  description: string;
+  settings: any;
+}
+
 export class Question {
-  private suggestion: Suggestion;
   public answer: QuestionAnswer;
+  private suggestion: Suggestion;
+  private original: OriginalQuestion;
 
   constructor(
     public readonly id: string,
     public readonly name: string,
-    public readonly description: string,
+    description: string,
     public readonly datasetId: string,
-    public readonly title: string,
+    title: string,
     public readonly isRequired: boolean,
-    public readonly settings: any
+    public settings: any
   ) {
     this.answer = this.createEmptyAnswers();
+    this.description = description;
+    this.title = title;
+
+    this.initializeOriginal();
+  }
+
+  private _description: string;
+  public get description(): string {
+    return this._description;
+  }
+
+  public set description(newDescription: string) {
+    this._description = newDescription?.trim() ?? "";
+  }
+
+  private _title: string;
+  public get title(): string {
+    return this._title;
+  }
+
+  public set title(newTitle: string) {
+    this._title = newTitle?.trim() ?? "";
   }
 
   public get isAnswered(): boolean {
@@ -62,8 +91,60 @@ export class Question {
     return !!this.suggestion && this.answer.matchSuggestion(this.suggestion);
   }
 
+  public get isModified(): boolean {
+    return (
+      this.title !== this.original.title ||
+      this.description !== this.original.description ||
+      this.settings.use_markdown !== this.original.settings.use_markdown ||
+      this.settings.visible_options !== this.original.settings.visible_options
+    );
+  }
+
+  private MAX_DESCRIPTION_LENGTH = 500;
+  private MAX_TITLE_LENGTH = 200;
+  public validate(): Record<"title" | "description", string[]> {
+    const validations: Record<"title" | "description", string[]> = {
+      title: [],
+      description: [],
+    };
+
+    if (!this.title) validations.title.push("This field is required.");
+
+    if (this.title.length > this.MAX_TITLE_LENGTH)
+      validations.title.push(
+        `This must be less than ${this.MAX_TITLE_LENGTH}.`
+      );
+
+    if (this.description.length > this.MAX_DESCRIPTION_LENGTH)
+      validations.description.push(
+        `This must be less than ${this.MAX_DESCRIPTION_LENGTH}.`
+      );
+
+    return validations;
+  }
+
+  public get isQuestionValid(): boolean {
+    return (
+      this.validate().title.length === 0 &&
+      this.validate().description.length === 0
+    );
+  }
+
   clearAnswer() {
     this.answer.clear();
+  }
+
+  restore() {
+    this.title = this.original.title;
+    this.description = this.original.description;
+    this.settings = {
+      ...this.settings,
+      ...this.original.settings,
+    };
+  }
+
+  update() {
+    this.initializeOriginal();
   }
 
   answerQuestionWithResponse(answer: RecordAnswer) {
@@ -111,5 +192,15 @@ export class Question {
         this.settings.options
       );
     }
+  }
+
+  private initializeOriginal() {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { options, ...rest } = this.settings;
+    this.original = {
+      title: this.title,
+      description: this.description,
+      settings: rest,
+    };
   }
 }

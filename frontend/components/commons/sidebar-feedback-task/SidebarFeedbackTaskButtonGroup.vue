@@ -17,8 +17,6 @@
 
 <template>
   <span class="sidebar__info" :class="groupName">
-    <!-- NOTE: HIDDEN FOR MVP
-    <p class="sidebar__info__title" v-text="groupName"></p> -->
     <IconButton
       v-for="{ id, icon, tooltip, type } in groupItems"
       :id="id"

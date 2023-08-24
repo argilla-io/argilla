@@ -2,15 +2,13 @@
   <RatingShortcuts>
     <div class="wrapper">
       <QuestionHeaderComponent
-        :title="title"
-        :hasSuggestion="hasSuggestion"
-        :isRequired="isRequired"
-        :tooltipMessage="description"
+        :question="question"
+        :showSuggestion="showSuggestion"
       />
 
       <RatingMonoSelectionComponent
         ref="ratingMonoSelectionRef"
-        v-model="options"
+        v-model="question.answer.values"
         :isFocused="isFocused"
         @on-focus="$emit('on-focus')"
       />
@@ -22,15 +20,11 @@
 export default {
   name: "RatingComponent",
   props: {
-    title: {
-      type: String,
+    question: {
+      type: Object,
       required: true,
     },
-    options: {
-      type: Array,
-      required: true,
-    },
-    isRequired: {
+    showSuggestion: {
       type: Boolean,
       default: () => false,
     },
@@ -38,20 +32,9 @@ export default {
       type: Boolean,
       default: () => false,
     },
-    description: {
-      type: String,
-      default: () => "",
-    },
-    hasSuggestion: {
-      type: Boolean,
-      default: () => false,
-    },
-  },
-  model: {
-    prop: "options",
   },
   watch: {
-    options: {
+    "question.answer.values": {
       deep: true,
       handler(newOptions) {
         if (newOptions.some((option) => option.isSelected))
@@ -66,6 +49,6 @@ export default {
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: $base-space;
 }
 </style>

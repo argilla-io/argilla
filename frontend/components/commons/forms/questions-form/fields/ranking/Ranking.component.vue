@@ -1,10 +1,8 @@
 <template>
   <div class="wrapper">
     <QuestionHeaderComponent
-      :title="title"
-      :isRequired="isRequired"
-      :hasSuggestion="hasSuggestion"
-      :tooltipMessage="description"
+      :question="question"
+      :showSuggestion="showSuggestion"
     />
     <DndSelectionComponent
       :ranking="ranking"
@@ -21,34 +19,23 @@ import { adaptQuestionsToSlots } from "./ranking-adapter";
 export default {
   name: "RankingComponent",
   props: {
-    title: {
-      type: String,
+    question: {
+      type: Object,
       required: true,
     },
-    isRequired: {
+    showSuggestion: {
       type: Boolean,
-      default: false,
+      default: () => false,
     },
     isFocused: {
       type: Boolean,
       default: () => false,
     },
-    description: {
-      type: String,
-      default: "",
-    },
-    options: {
-      type: Array,
-      required: true,
-    },
-    hasSuggestion: {
-      type: Boolean,
-      default: () => false,
-    },
   },
-  model: {
-    prop: "options",
-    event: "on-change",
+  data() {
+    return {
+      options: this.question.answer.values,
+    };
   },
   computed: {
     ranking() {
@@ -57,13 +44,11 @@ export default {
   },
   methods: {
     onChanged(newQuestionRanked) {
-      this.$emit(
-        "on-change",
-        this.options.map((option) => ({
-          ...option,
-          rank: newQuestionRanked.getRanking(option),
-        }))
-      );
+      this.question.answer.values.forEach((option) => {
+        option.rank = newQuestionRanked.getRanking(option);
+      });
+
+      this.options = this.question.answer.values;
     },
     onFocus() {
       this.$emit("on-focus");
@@ -76,6 +61,6 @@ export default {
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: $base-space;
 }
 </style>

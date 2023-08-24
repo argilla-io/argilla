@@ -87,6 +87,7 @@ export default {
   padding: 0 $base-space;
   border: 1px solid $black-10;
   border-radius: $border-radius-l;
+  background: palette(white);
   overflow: hidden;
   transition: all 0.2s ease-out;
   &:focus-within {

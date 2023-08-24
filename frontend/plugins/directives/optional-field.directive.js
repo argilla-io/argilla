@@ -4,7 +4,7 @@ import Vue from "vue";
 //  v-optional-field="true"
 
 Vue.directive("optional-field", {
-  bind: (element, binding) => {
+  bind: (element, binding, node) => {
     if (binding?.value) {
       const text = document.createTextNode(" (optional)");
       const textWrapper = document.createElement("span");
@@ -13,7 +13,10 @@ Vue.directive("optional-field", {
       textWrapper.style.fontWeight = "400";
 
       textWrapper.appendChild(text);
-      element.appendChild(textWrapper);
+
+      node.context.$nextTick(() => {
+        element.insertAdjacentElement("afterEnd", textWrapper);
+      });
     }
   },
 });

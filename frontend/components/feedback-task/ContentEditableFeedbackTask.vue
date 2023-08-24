@@ -7,28 +7,26 @@
         handler: onClickOutside,
       }"
     >
-      <transition appear name="fade">
-        <p
-          ref="text"
-          id="contentId"
-          class="content__text"
-          :class="textIsEdited ? '--edited-text' : null"
-          :contenteditable="true"
-          :placeholder="placeholder"
-          @input="onInputText"
-          v-html="sanitizedEditableText"
-          @focus="setFocus(true)"
-          @blur="setFocus(false)"
-          @keydown.shift.enter.exact="looseFocus"
-          @keydown.shift.backspace.exact="looseFocus"
-          @keydown.shift.space.exact="looseFocus"
-          @keydown.arrow-right.stop=""
-          @keydown.arrow-left.stop=""
-          @keydown.delete.exact.stop=""
-          @keydown.enter.exact.stop=""
-          @paste="pastePlainText"
-        />
-      </transition>
+      <p
+        ref="text"
+        id="contentId"
+        class="content__text"
+        :class="textIsEdited ? '--edited-text' : null"
+        :contenteditable="true"
+        :placeholder="placeholder"
+        @input="onInputText"
+        v-html="sanitizedCurrentValue"
+        @focus="setFocus(true)"
+        @blur="setFocus(false)"
+        @keydown.shift.enter.exact="looseFocus"
+        @keydown.shift.backspace.exact="looseFocus"
+        @keydown.shift.space.exact="looseFocus"
+        @keydown.arrow-right.stop=""
+        @keydown.arrow-left.stop=""
+        @keydown.delete.exact.stop=""
+        @keydown.enter.exact.stop=""
+        @paste="pastePlainText"
+      />
     </div>
   </span>
 </template>
@@ -53,17 +51,15 @@ export default {
   },
   data: () => {
     return {
-      defaultText: null,
+      originalValue: null,
+      sanitizedCurrentValue: null,
       currentValue: null,
-      editableText: null,
+      focus: false,
     };
   },
   computed: {
     textIsEdited() {
-      return this.defaultText !== this.value;
-    },
-    sanitizedEditableText() {
-      return DOMPurify.sanitize(this.editableText);
+      return this.originalValue !== this.value;
     },
   },
   watch: {
@@ -77,22 +73,33 @@ export default {
         }
       },
     },
-    value(newValue) {
-      if (newValue !== this.currentValue) this.editableText = newValue;
+    value() {
+      if (this.value !== this.currentValue) {
+        this.reset();
+      }
     },
   },
   mounted() {
-    this.editableText = this.defaultText = this.value;
+    window.addEventListener("paste", this.pastePlainText);
+
+    this.reset();
 
     this.textAreaWrapper = document.getElementById("contentId");
   },
   methods: {
+    reset() {
+      this.currentValue = this.originalValue = this.value;
+      this.sanitizedCurrentValue = " ";
+      this.$nextTick(() => {
+        this.sanitizedCurrentValue = DOMPurify.sanitize(this.currentValue);
+      });
+    },
     looseFocus() {
       this.textAreaWrapper.blur();
     },
     onInputText(event) {
       this.currentValue = event.target.innerText;
-      this.$emit("change-text", event.target.innerText);
+      this.$emit("change-text", this.currentValue);
     },
     setFocus(isFocus) {
       this.$emit("on-change-focus", isFocus);
@@ -112,7 +119,6 @@ export default {
 </script>
 <style lang="scss" scoped>
 [contenteditable="true"] {
-  padding: 0.6em;
   outline: none;
   &:focus + span {
     display: block;
