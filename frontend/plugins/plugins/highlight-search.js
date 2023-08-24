@@ -39,7 +39,8 @@ export default (context, inject) => {
   };
 
   function createFindWordsPattern(value) {
-    return new RegExp(`\\${value}|[${value}]`, "g");
+    const pattern = "[^A-Za-zÀ-ÿ\u00f1\u00d10-9_@./#&+-]";
+    return new RegExp(`(${pattern})${escapeRegExp(value)}(${pattern})`, "gmi");
   }
 
   const escapeRegExp = function (text) {
@@ -51,7 +52,7 @@ export default (context, inject) => {
 
     const words = wordsEscaped.join("|");
 
-    return new RegExp("\\b" + words + "\\b", "gmi");
+    return new RegExp(words, "gmi");
   };
 
   const replaceText = (regex, text) => {
