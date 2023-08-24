@@ -5,7 +5,7 @@ let wrapper = null;
 const options = {
   stubs: ["RenderMarkdownBaseComponent"],
   propsData: {
-    datasetDescription: "Lorem ipsum",
+    guidelines: "Lorem ipsum",
   },
 };
 beforeEach(() => {
