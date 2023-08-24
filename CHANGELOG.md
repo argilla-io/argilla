@@ -30,9 +30,6 @@ These are the section headers that we use:
 - Updated `RemoteFeedbackDataset.delete_records` to use batch delete records endpoint ([#3580](https://github.com/argilla-io/argilla/pull/3580)).
 - Included `allowed_for_roles` for some `RemoteFeedbackDataset`, `RemoteFeedbackRecords`, and `RemoteFeedbackRecord` methods that are only allowed for users with roles `owner` and `admin` ([#3601](https://github.com/argilla-io/argilla/pull/3601)).
 - Renamed `ArgillaToFromMixin` to `ArgillaMixin` ([#3619](https://github.com/argilla-io/argilla/pull/3619)).
-
-### Changed
-
 - Move `users` CLI app under `database` CLI app ([#3593](https://github.com/argilla-io/argilla/pull/3593)).
 - Move server `Enum` classes to `argilla.server.enums` module ([#3620](https://github.com/argilla-io/argilla/pull/3620)).
 
