@@ -9,7 +9,7 @@
         <div class="draft">
           <p v-if="draftSaving">
             <svgicon color="#0000005e" name="refresh" />
-            Saving
+            Saving...
           </p>
           <p v-else-if="record.isSavedDraft">
             <svgicon color="#0000005e" name="check" />
@@ -241,7 +241,7 @@ export default {
 
 .draft {
   position: absolute;
-  right: $base-space;
+  right: $base-space * 2;
   top: $base-space;
   display: flex;
   flex-direction: row;
