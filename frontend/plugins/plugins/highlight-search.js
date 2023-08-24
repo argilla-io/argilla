@@ -18,14 +18,13 @@
 export default (context, inject) => {
   const highlightKeywords = function (text, keywords) {
     const sortedKeywords = sortByLength([...keywords]);
-    const wordsEscaped = sortedKeywords.map((keyword) => escapeRegExp(keyword));
-    const regExp = findWordRegex(wordsEscaped.join("|"));
+    const regExp = createFindWordsRegex(sortedKeywords);
     return replaceText(regExp, text);
   };
 
   const keywordsSpans = function (text, keywords = []) {
     return keywords.flatMap((keyword) => {
-      const regex = findWordRegex(keyword);
+      const regex = createFindWordsPattern(keyword);
       return [...text.matchAll(regex)].map((match) => {
         return {
           start: match.index,
@@ -39,11 +38,19 @@ export default (context, inject) => {
     return keywords.sort((a, b) => b.length - a.length);
   };
 
+  function createFindWordsPattern(value) {
+    return new RegExp("\\" + value, "g");
+  }
+
   const escapeRegExp = function (text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
   };
 
-  const findWordRegex = (words) => {
+  const createFindWordsRegex = (keyWords) => {
+    const wordsEscaped = keyWords.map((keyword) => escapeRegExp(keyword));
+
+    const words = wordsEscaped.join("|");
+
     return new RegExp("\\b" + words + "\\b", "gmi");
   };
 
