@@ -89,15 +89,15 @@ def test_prepare_for_training_text_classification_with_defaults(
             NotImplementedError,
             match=f"Framework {framework} is not supported for this {TrainingTaskForTextClassification}.",
         ):
-            trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, fetch_records=False)
+            trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework)
     elif framework == Framework("spark-nlp"):
         with pytest.raises(NotImplementedError, match=f"{framework} is not a valid framework."):
-            trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, fetch_records=False)
+            trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework)
     else:
         if framework in [Framework("peft")] and sys.version_info < (3, 9):
             pass
         else:
-            trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, fetch_records=False)
+            trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework)
             if framework in [Framework("spacy"), Framework("spacy-transformers")]:
                 trainer.update_config(max_steps=1)
             elif framework in [Framework("transformers"), Framework("setfit")]:
@@ -153,12 +153,12 @@ def test_prepare_for_training_text_classification_with_formatting_func(
         match=r"formatting_func must return \(text,label\) as a Tuple\[str, str\] or a Tuple\[str, List\[str\]\]",
     ):
         task = TrainingTask.for_text_classification(wrong_formatting_func)
-        trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, fetch_records=False)
+        trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework)
         trainer.update_config(num_iterations=1)
         trainer.train(__OUTPUT_DIR__)
 
     task = TrainingTask.for_text_classification(correct_formatting_func)
-    trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, fetch_records=False)
+    trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework)
     trainer.update_config(num_iterations=1)
     trainer.train(__OUTPUT_DIR__)
 

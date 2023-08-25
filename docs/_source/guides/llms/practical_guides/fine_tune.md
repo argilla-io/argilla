@@ -127,7 +127,6 @@ trainer = ArgillaTrainer(
     dataset=feedback_dataset,
     task=task,
     framework="trl",
-    fetch_records=False,
     train_size=0.8,
     model="gpt2",
 )

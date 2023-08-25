@@ -65,24 +65,22 @@ def test_prepare_for_training_sft(
         return None
 
     task = TrainingTask.for_supervised_fine_tuning(formatting_func)
-    train_dataset = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False)
+    train_dataset = dataset.prepare_for_training(framework="trl", task=task)
     assert isinstance(train_dataset, Dataset)
     assert len(train_dataset) == 2
-    train_dataset_dict = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False, train_size=0.5)
+    train_dataset_dict = dataset.prepare_for_training(framework="trl", task=task, train_size=0.5)
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
     assert len(train_dataset_dict["train"]) == 1
 
-    trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2", fetch_records=False)
+    trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2")
     trainer.update_config(max_steps=3)
     assert trainer._trainer.training_args_kwargs["max_steps"] == 3
     trainer.update_config(max_steps=1)
     assert trainer._trainer.training_args_kwargs["max_steps"] == 1
     train_with_cleanup(trainer, "tmp_trl_dir")
 
-    eval_trainer = ArgillaTrainer(
-        dataset, task, framework="trl", model="sshleifer/tiny-gpt2", fetch_records=False, train_size=0.5
-    )
+    eval_trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2", train_size=0.5)
     eval_trainer.update_config(max_steps=1)
     train_with_cleanup(eval_trainer, "tmp_trl_dir")
 
@@ -123,24 +121,22 @@ def test_prepare_for_training_rm(
                 return [(sample["text"], sample["text"][5:10]), (sample["text"], sample["text"][:5])]
 
     task = TrainingTask.for_reward_modelling(formatting_func)
-    train_dataset = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False)
+    train_dataset = dataset.prepare_for_training(framework="trl", task=task)
     assert isinstance(train_dataset, Dataset)
     assert len(train_dataset) == 2
-    train_dataset_dict = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False, train_size=0.5)
+    train_dataset_dict = dataset.prepare_for_training(framework="trl", task=task, train_size=0.5)
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
     assert len(train_dataset_dict["train"]) == 1
 
-    trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2", fetch_records=False)
+    trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2")
     trainer.update_config(max_steps=3)
     assert trainer._trainer.training_args_kwargs["max_steps"] == 3
     trainer.update_config(max_steps=1)
     assert trainer._trainer.training_args_kwargs["max_steps"] == 1
     train_with_cleanup(trainer, "tmp_trl_dir")
 
-    eval_trainer = ArgillaTrainer(
-        dataset, task, framework="trl", model="sshleifer/tiny-gpt2", fetch_records=False, train_size=0.5
-    )
+    eval_trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2", train_size=0.5)
     eval_trainer.update_config(max_steps=1)
     train_with_cleanup(eval_trainer, "tmp_trl_dir")
 
@@ -172,24 +168,22 @@ def test_prepare_for_training_ppo(
         return sample["text"]
 
     task = TrainingTask.for_proximal_policy_optimization(formatting_func=formatting_func)
-    train_dataset = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False)
+    train_dataset = dataset.prepare_for_training(framework="trl", task=task)
     assert isinstance(train_dataset, Dataset)
     assert len(train_dataset) == 2
-    train_dataset_dict = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False, train_size=0.5)
+    train_dataset_dict = dataset.prepare_for_training(framework="trl", task=task, train_size=0.5)
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
     assert len(train_dataset_dict["train"]) == 1
 
-    trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2", fetch_records=False)
+    trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2")
     trainer.update_config(config=PPOConfig(batch_size=1, ppo_epochs=1), reward_model=reward_model)
     assert trainer._trainer.trainer_kwargs["config"].batch_size == 1
     trainer.update_config(generation_kwargs={"top_k": 0.0, "top_p": 1.0, "do_sample": True})
     assert trainer._trainer.training_args_kwargs["generation_kwargs"]["top_p"] == 1.0
     train_with_cleanup(trainer, "tmp_trl_dir")
 
-    eval_trainer = ArgillaTrainer(
-        dataset, task, framework="trl", model="sshleifer/tiny-gpt2", fetch_records=False, train_size=0.5
-    )
+    eval_trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2", train_size=0.5)
     eval_trainer.update_config(config=PPOConfig(batch_size=1, ppo_epochs=1), reward_model=reward_model)
     eval_trainer.update_config(max_steps=1)
     train_with_cleanup(eval_trainer, "tmp_trl_dir")
@@ -234,23 +228,21 @@ def test_prepare_for_training_dpo(
                 ]
 
     task = TrainingTask.for_direct_preference_optimization(formatting_func)
-    train_dataset = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False)
+    train_dataset = dataset.prepare_for_training(framework="trl", task=task)
     assert isinstance(train_dataset, Dataset)
     assert len(train_dataset) == 2
-    train_dataset_dict = dataset.prepare_for_training(framework="trl", task=task, fetch_records=False, train_size=0.5)
+    train_dataset_dict = dataset.prepare_for_training(framework="trl", task=task, train_size=0.5)
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
     assert len(train_dataset_dict["train"]) == 1
 
-    trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2", fetch_records=False)
+    trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2")
     trainer.update_config(max_steps=3)
     assert trainer._trainer.training_args_kwargs["max_steps"] == 3
     trainer.update_config(max_steps=1)
     assert trainer._trainer.training_args_kwargs["max_steps"] == 1
     train_with_cleanup(trainer, "tmp_trl_dir")
 
-    eval_trainer = ArgillaTrainer(
-        dataset, task, framework="trl", model="sshleifer/tiny-gpt2", fetch_records=False, train_size=0.5
-    )
+    eval_trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2", train_size=0.5)
     eval_trainer.update_config(max_steps=1)
     train_with_cleanup(eval_trainer, "tmp_trl_dir")
