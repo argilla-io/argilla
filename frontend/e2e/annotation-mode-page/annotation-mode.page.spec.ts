@@ -14,6 +14,7 @@ const shortcuts = Object.freeze({
   clear: "Shift+Space",
   discard: "Shift+Backspace",
   submit: "Shift+Enter",
+  focusOnForm: "Tab",
   goToNextQuestion: "Shift+ArrowDown",
   goToPrevQuestion: "Shift+ArrowUp",
   singleLabel: {
@@ -102,7 +103,6 @@ test.describe("Annotate page", () => {
 
     await expect(page).toHaveScreenshot();
   });
-
   test("filter by workspaces from annotation page", async ({ page }) => {
     await goToAnnotationPage(page);
 
@@ -242,6 +242,18 @@ test.describe("Annotate page", () => {
 });
 
 test.describe("Annotation page shortcuts", () => {
+  test.describe("Global shortcuts", () => {
+    test("when focus is not in form, press Tab to focus on first question", async ({ page }) => {
+      await goToAnnotationPage(page);
+      const formBox = await page.getByText("Submit your feedback").boundingBox();
+
+      await page.mouse.click(formBox.x - 25, formBox.y - 25); // click outside form to loose focus
+      await expect(page).toHaveScreenshot();
+
+      await page.keyboard.press(shortcuts.focusOnForm);
+      await expect(page).toHaveScreenshot();
+    });
+  });
   test.describe("Single component", () => {
     test("user press just letter V and go automatically to search bar and filter data", async ({
       page,
