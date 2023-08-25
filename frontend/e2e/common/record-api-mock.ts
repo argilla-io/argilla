@@ -120,7 +120,7 @@ export const mockRecord = async (
     async (route) => {
       await route.fulfill({
         json: {
-          items: [recordOne],
+          items: [recordOne, recordFor12ranking],
         },
       });
     }

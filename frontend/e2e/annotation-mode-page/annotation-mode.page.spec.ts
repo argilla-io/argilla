@@ -10,11 +10,13 @@ import {
   mockRecordForLongAndShortQuestion,
 } from "../common";
 
-const shortcuts = Object.freeze({
+const shortcuts = {
   clear: "Shift+Space",
   discard: "Shift+Backspace",
   submit: "Shift+Enter",
   focusOnForm: "Tab",
+  goToNextRecord: "Control+ArrowRight",
+  goToPrevRecord: "Control+ArrowLeft",
   goToNextQuestion: "Shift+ArrowDown",
   goToPrevQuestion: "Shift+ArrowUp",
   singleLabel: {
@@ -30,7 +32,7 @@ const shortcuts = Object.freeze({
     goToPrevRank: "Shift+Tab",
     unrank: "Backspace"
   }
-})
+};
 
 const goToAnnotationPage = async (page, shortAndLongQuestions = false) => {
   const dataset = newDatasetsMocked[0];
@@ -251,6 +253,50 @@ test.describe("Annotation page shortcuts", () => {
       await expect(page).toHaveScreenshot();
 
       await page.keyboard.press(shortcuts.focusOnForm);
+      await expect(page).toHaveScreenshot();
+    });
+    test("on first record, go to next record by pressing Ctrl+ArrowRight", async ({ page }) => {
+      await goToAnnotationPage(page);
+      const formBox = await page.getByText("Submit your feedback").boundingBox();
+
+      await page.mouse.click(formBox.x - 25, formBox.y - 25); // click outside form to loose focus
+      await expect(page).toHaveScreenshot();
+
+      await page.keyboard.press(shortcuts.goToNextRecord);
+      await expect(page).toHaveScreenshot();
+    });
+    test("on first record, can't go to prev record by pressing Ctrl+ArrowLeft", async ({ page }) => {
+      await goToAnnotationPage(page);
+      const formBox = await page.getByText("Submit your feedback").boundingBox();
+
+      await page.mouse.click(formBox.x - 25, formBox.y - 25); // click outside form to loose focus
+      await expect(page).toHaveScreenshot();
+
+      await page.keyboard.press(shortcuts.goToPrevRecord);
+      await expect(page).toHaveScreenshot();
+    });
+    test("on last record, can't go to next record by pressing Ctrl+ArrowRight", async ({ page }) => {
+      await goToAnnotationPage(page);
+      const formBox = await page.getByText("Submit your feedback").boundingBox();
+
+      await page.mouse.click(formBox.x - 25, formBox.y - 25); // click outside form to loose focus
+      await expect(page).toHaveScreenshot();
+
+      await page.keyboard.press(shortcuts.goToNextRecord);
+      await expect(page).toHaveScreenshot();
+      await page.keyboard.press(shortcuts.goToNextRecord);
+      await expect(page).toHaveScreenshot();
+    });
+    test("on last record, can go to prev record by pressing Ctrl+ArrowLeft", async ({ page }) => {
+      await goToAnnotationPage(page);
+      const formBox = await page.getByText("Submit your feedback").boundingBox();
+
+      await page.mouse.click(formBox.x - 25, formBox.y - 25); // click outside form to loose focus
+      await expect(page).toHaveScreenshot();
+
+      await page.keyboard.press(shortcuts.goToNextRecord);
+      await expect(page).toHaveScreenshot();
+      await page.keyboard.press(shortcuts.goToPrevRecord);
       await expect(page).toHaveScreenshot();
     });
   });
