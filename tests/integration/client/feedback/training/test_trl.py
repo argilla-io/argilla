@@ -15,7 +15,6 @@
 from collections import Counter
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List
 
-import pytest
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.training.base import ArgillaTrainer
@@ -25,15 +24,9 @@ from datasets import Dataset, DatasetDict
 from tests.integration.training.helpers import train_with_cleanup
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 
-@pytest.mark.usefixtures(
-    "feedback_dataset_guidelines",
-    "feedback_dataset_fields",
-    "feedback_dataset_questions",
-    "feedback_dataset_records",
-)
 def test_prepare_for_training_sft(
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
@@ -85,12 +78,6 @@ def test_prepare_for_training_sft(
     train_with_cleanup(eval_trainer, "tmp_trl_dir")
 
 
-@pytest.mark.usefixtures(
-    "feedback_dataset_guidelines",
-    "feedback_dataset_fields",
-    "feedback_dataset_questions",
-    "feedback_dataset_records",
-)
 def test_prepare_for_training_rm(
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
@@ -141,12 +128,6 @@ def test_prepare_for_training_rm(
     train_with_cleanup(eval_trainer, "tmp_trl_dir")
 
 
-@pytest.mark.usefixtures(
-    "feedback_dataset_guidelines",
-    "feedback_dataset_fields",
-    "feedback_dataset_questions",
-    "feedback_dataset_records",
-)
 def test_prepare_for_training_ppo(
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
@@ -189,12 +170,6 @@ def test_prepare_for_training_ppo(
     train_with_cleanup(eval_trainer, "tmp_trl_dir")
 
 
-@pytest.mark.usefixtures(
-    "feedback_dataset_guidelines",
-    "feedback_dataset_fields",
-    "feedback_dataset_questions",
-    "feedback_dataset_records",
-)
 def test_prepare_for_training_dpo(
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
