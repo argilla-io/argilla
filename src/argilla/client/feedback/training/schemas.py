@@ -270,7 +270,7 @@ class TrainingTask:
         return TrainingTaskForSFT(formatting_func=formatting_func)
 
     @classmethod
-    def for_reward_modelling(
+    def for_reward_modeling(
         cls,
         formatting_func: Callable[
             [Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]
@@ -299,7 +299,7 @@ class TrainingTask:
             ...         chosen = sample["response-2"]
             ...         rejected = sample["response-1"]
             ...     return chosen, rejected
-            >>> task = TrainingTask.for_reward_modelling(formatting_func=formatting_func)
+            >>> task = TrainingTask.for_reward_modeling(formatting_func=formatting_func)
             >>> dataset.prepare_for_training(framework="...", task=task)
 
         """
@@ -696,7 +696,7 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
 
 
 class TrainingTaskForRM(BaseModel, TrainingData):
-    """Training data for reward modelling
+    """Training data for reward modeling
 
     Args:
         formatting_func: A formatting function converting a dictionary of records into zero,
@@ -927,9 +927,9 @@ class TrainingTaskMapping(TrainingTask, RenamedDeprecationMixin):
         return super().for_supervised_fine_tuning(*args, **kwargs)
 
     @classmethod
-    def for_reward_modelling(cls, *args, **kwargs) -> TrainingTaskForRM:
+    def for_reward_modeling(cls, *args, **kwargs) -> TrainingTaskForRM:
         cls.warn()
-        return super().for_reward_modelling(*args, **kwargs)
+        return super().for_reward_modeling(*args, **kwargs)
 
     @classmethod
     def for_proximal_policy_optimization(cls, *args, **kwargs) -> TrainingTaskForPPO:

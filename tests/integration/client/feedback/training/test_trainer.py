@@ -168,7 +168,7 @@ def test_prepare_for_training_text_classification_with_formatting_func(
     (
         lambda: TrainingTaskMapping.for_text_classification(None, None),
         lambda: TrainingTaskMapping.for_direct_preference_optimization(None),
-        lambda: TrainingTaskMapping.for_reward_modelling(None),
+        lambda: TrainingTaskMapping.for_reward_modeling(None),
         lambda: TrainingTaskMapping.for_supervised_fine_tuning(None),
     ),
 )

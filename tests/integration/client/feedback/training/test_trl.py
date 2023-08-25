@@ -107,7 +107,7 @@ def test_prepare_for_training_rm(
             elif labels[0] == "c":
                 return [(sample["text"], sample["text"][5:10]), (sample["text"], sample["text"][:5])]
 
-    task = TrainingTask.for_reward_modelling(formatting_func)
+    task = TrainingTask.for_reward_modeling(formatting_func)
     train_dataset = dataset.prepare_for_training(framework="trl", task=task)
     assert isinstance(train_dataset, Dataset)
     assert len(train_dataset) == 2
