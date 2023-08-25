@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, Callable, List, Union
 
 import pytest
 
@@ -35,6 +35,7 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForTextClassification,
     TrainingTaskMapping,
     TrainingTaskMappingForTextClassification,
+    TrainingTaskTypes,
 )
 from argilla.client.feedback.unification import LabelQuestionUnification
 from argilla.client.models import Framework
@@ -114,7 +115,7 @@ def test_prepare_for_training_text_classification(
         lambda: TrainingTaskMapping.for_supervised_fine_tuning(None),
     ),
 )
-def test_deprecations(callable) -> None:
+def test_deprecations(callable: Callable[[], TrainingTaskTypes]) -> None:
     with pytest.warns(DeprecationWarning, match="`TrainingTaskMapping` has been renamed to `TrainingTask`"):
         # This'll crash because we're passing None, but we only test the warning
         try:
