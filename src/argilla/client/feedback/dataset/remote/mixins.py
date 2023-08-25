@@ -27,17 +27,6 @@ if TYPE_CHECKING:
 
 class ArgillaRecordsMixin:
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def __len__(self: Union["RemoteFeedbackRecords", "FilteredRemoteFeedbackRecords"]) -> int:
-        """Returns the number of records in the current `FeedbackDataset` in Argilla."""
-        try:
-            response = datasets_api_v1.get_metrics(client=self._client, id=self._dataset_id)
-        except Exception as e:
-            raise Exception(
-                f"Failed while getting the metrics from the current `FeedbackDataset` in Argilla with exception: {e}"
-            ) from e
-        return response.parsed.records.count
-
-    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def __getitem__(
         self: Union["RemoteFeedbackRecords", "FilteredRemoteFeedbackRecords"], key: Union[slice, int]
     ) -> Union[RemoteFeedbackRecord, List[RemoteFeedbackRecord]]:
