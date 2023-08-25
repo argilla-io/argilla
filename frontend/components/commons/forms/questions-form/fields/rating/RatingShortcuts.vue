@@ -24,7 +24,7 @@ export default {
     },
     answerRatingFor($event) {
       if (event.key == "Tab" ) return;
-      
+
       if (this.timer) clearTimeout(this.timer);
       $event.preventDefault();
 

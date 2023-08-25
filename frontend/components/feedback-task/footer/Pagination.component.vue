@@ -60,7 +60,7 @@ export default {
   methods: {
     onPressKeyboardShortCut({ code, ctrlKey }) {
       if (!ctrlKey) return;
-      
+
       switch (code) {
         case "ArrowRight": {
           const elem = this.$refs.nextButton.$el;
