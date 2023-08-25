@@ -71,6 +71,8 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaTRLTrainer")
     _logger.setLevel(logging.INFO)
 
+    require_version("transformers")
+    require_version("torch")
     require_version("trl>=0.5.0")
 
     def __init__(
