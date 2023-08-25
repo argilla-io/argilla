@@ -13,13 +13,14 @@
 #  limitations under the License.
 
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from tqdm import trange
 
 from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.remote.base import RemoteFeedbackDatasetBase, RemoteFeedbackRecordsBase
 from argilla.client.feedback.dataset.remote.filtered import FilteredRemoteFeedbackDataset
+from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
 from argilla.client.feedback.schemas.records import FeedbackRecord, RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
@@ -38,24 +39,9 @@ if TYPE_CHECKING:
 warnings.simplefilter("always", DeprecationWarning)
 
 
-class RemoteFeedbackRecords(RemoteFeedbackRecordsBase):
+class RemoteFeedbackRecords(RemoteFeedbackRecordsBase, ArgillaRecordsMixin):
     def __init__(self, dataset: "RemoteFeedbackDataset") -> None:
         super().__init__(dataset=dataset)
-
-    def __getitem__(self, key: Union[slice, int]) -> Union[RemoteFeedbackRecord, List[RemoteFeedbackRecord]]:
-        """Returns the record(s) at the given index(es) from Argilla.
-
-        Args:
-            key: the index(es) of the record(s) to return. Can either be a single index or a slice.
-
-        Returns:
-            Either the record of the given index, or a list with the records at the given indexes.
-        """
-        return super()._get_records(key=key)
-
-    def __iter__(self) -> Iterator[RemoteFeedbackRecord]:
-        """Iterates over the `FeedbackRecord`s of the current `FeedbackDataset` in Argilla."""
-        return super()._iter_records()
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def add(

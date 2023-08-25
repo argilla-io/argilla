@@ -12,9 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from argilla.client.feedback.dataset.remote.base import RemoteFeedbackDatasetBase, RemoteFeedbackRecordsBase
+from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
 from argilla.client.feedback.schemas.records import RemoteFeedbackRecord
 
 if TYPE_CHECKING:
@@ -28,26 +29,11 @@ if TYPE_CHECKING:
     from argilla.client.workspaces import Workspace
 
 
-class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase):
+class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase, ArgillaRecordsMixin):
     def __init__(self, dataset: "RemoteFeedbackDataset", filters: Dict[str, Any]) -> None:
         super().__init__(dataset=dataset)
 
         self._filters = filters
-
-    def __getitem__(self, key: Union[slice, int]) -> Union[RemoteFeedbackRecord, List[RemoteFeedbackRecord]]:
-        """Returns the record(s) at the given index(es) from Argilla.
-
-        Args:
-            key: the index(es) of the record(s) to return. Can either be a single index or a slice.
-
-        Returns:
-            Either the record of the given index, or a list with the records at the given indexes.
-        """
-        return super()._get_records(key=key, filters=self._filters)
-
-    def __iter__(self) -> Iterator[RemoteFeedbackRecord]:
-        """Iterates over the `FeedbackRecord`s of the current `FeedbackDataset` in Argilla."""
-        return super()._iter_records(filters=self._filters)
 
 
 class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeedbackRecords]):
@@ -73,6 +59,7 @@ class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeed
             fields=fields,
             questions=questions,
             guidelines=guidelines,
+            # kwargs
             filters=filters,
         )
 
