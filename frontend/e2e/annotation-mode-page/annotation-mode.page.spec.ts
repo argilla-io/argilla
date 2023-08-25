@@ -597,8 +597,8 @@ test.describe("Annotation page shortcuts", () => {
     test("go to rating component with keyboard", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
       await expect(page).toHaveScreenshot();
     });
@@ -608,8 +608,8 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
       await page.locator("label").filter({ hasText: "2" }).click();
 
@@ -625,8 +625,8 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
       await page.keyboard.press("4");
 
