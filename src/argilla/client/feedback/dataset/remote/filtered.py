@@ -15,8 +15,6 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from argilla.client.feedback.dataset.remote.base import RemoteFeedbackDatasetBase, RemoteFeedbackRecordsBase
-from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
-from argilla.client.feedback.schemas.records import RemoteFeedbackRecord
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -24,12 +22,12 @@ if TYPE_CHECKING:
     import httpx
 
     from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-    from argilla.client.feedback.schemas.records import FeedbackRecord
+    from argilla.client.feedback.schemas.records import FeedbackRecord, RemoteFeedbackRecord
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
     from argilla.client.workspaces import Workspace
 
 
-class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase, ArgillaRecordsMixin):
+class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase):
     def __init__(self, dataset: "RemoteFeedbackDataset", filters: Dict[str, Any]) -> None:
         super().__init__(dataset=dataset)
 

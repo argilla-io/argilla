@@ -20,7 +20,6 @@ from tqdm import trange
 from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.remote.base import RemoteFeedbackDatasetBase, RemoteFeedbackRecordsBase
 from argilla.client.feedback.dataset.remote.filtered import FilteredRemoteFeedbackDataset
-from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
 from argilla.client.feedback.schemas.records import FeedbackRecord, RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
@@ -39,7 +38,7 @@ if TYPE_CHECKING:
 warnings.simplefilter("always", DeprecationWarning)
 
 
-class RemoteFeedbackRecords(RemoteFeedbackRecordsBase, ArgillaRecordsMixin):
+class RemoteFeedbackRecords(RemoteFeedbackRecordsBase):
     def __init__(self, dataset: "RemoteFeedbackDataset") -> None:
         super().__init__(dataset=dataset)
 
