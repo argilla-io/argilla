@@ -10,19 +10,31 @@ import {
   mockRecordForLongAndShortQuestion,
 } from "../common";
 
+const shortcuts = Object.freeze({
+  clear: "",
+  discard: "Shift+Backspace",
+  submit: "Shift+Enter",
+  goToNextQuestion: "Shift+ArrowDown",
+  goToPrevQuestion: "Shift+ArrowUp",
+  singleLabel: {
+    select: "Space",
+    goToNextLabel: "Tab"
+  }
+})
+
 const goToAnnotationPage = async (page, shortAndLongQuestions = false) => {
   const dataset = newDatasetsMocked[0];
 
   await mockAllDatasets(page);
   const record = shortAndLongQuestions
     ? await mockRecordForLongAndShortQuestion(page, {
-        datasetId: dataset.id,
-        workspaceId: dataset.workspace_id,
-      })
+      datasetId: dataset.id,
+      workspaceId: dataset.workspace_id,
+    })
     : await mockRecord(page, {
-        datasetId: dataset.id,
-        workspaceId: dataset.workspace_id,
-      });
+      datasetId: dataset.id,
+      workspaceId: dataset.workspace_id,
+    });
 
   await loginUserAndWaitFor(page, "datasets");
 
@@ -261,12 +273,12 @@ test.describe("Annotation page shortcuts", () => {
       await expect(page).toHaveScreenshot();
 
       await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Space");
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.select);
 
-      await page.keyboard.press("Shift+Enter");
+      await page.keyboard.press(shortcuts.submit);
 
       await expect(page).toHaveScreenshot();
     });
@@ -284,10 +296,10 @@ test.describe("Annotation page shortcuts", () => {
       await expect(page).toHaveScreenshot();
 
       await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Space");
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.select);
 
       // TODO: find way to simulate Spacebar
       await page.keyboard.down("Shift");
@@ -313,12 +325,12 @@ test.describe("Annotation page shortcuts", () => {
       await expect(page).toHaveScreenshot();
 
       await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Space");
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.select);
 
-      await page.keyboard.press("Shift+Backspace");
+      await page.keyboard.press(shortcuts.discard);
 
       await expect(page).toHaveScreenshot();
     });
@@ -331,10 +343,10 @@ test.describe("Annotation page shortcuts", () => {
       await page.keyboard.press("v");
 
       await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
 
-      await page.keyboard.press("Space");
+      await page.keyboard.press(shortcuts.singleLabel.select);
 
       await expect(page).toHaveScreenshot();
     });
@@ -346,9 +358,9 @@ test.describe("Annotation page shortcuts", () => {
 
       await page.keyboard.press("v");
       await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Space");
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.select);
 
       await page.getByText("Loving").click();
 
@@ -358,23 +370,23 @@ test.describe("Annotation page shortcuts", () => {
     test("expand collapsable label", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
 
       await expect(page).toHaveScreenshot();
     });
@@ -382,7 +394,7 @@ test.describe("Annotation page shortcuts", () => {
     test("go to next question with shift and arrow down", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
       await expect(page).toHaveScreenshot();
     });
@@ -392,8 +404,8 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
-      await page.keyboard.press("Shift+ArrowUp");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToPrevQuestion);
 
       await expect(page).toHaveScreenshot();
     });
@@ -401,54 +413,54 @@ test.describe("Annotation page shortcuts", () => {
     test("the user move as a loop with tab key", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
 
       await expect(page).toHaveScreenshot();
     });
