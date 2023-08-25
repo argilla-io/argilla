@@ -269,7 +269,7 @@ class ArgillaTrainerSkeleton(ABC):
         """
 
     @abstractmethod
-    def train(self, output_dir: str = None) -> None:
+    def train(self, output_dir: Optional[str] = None) -> None:
         """
         Trains the model.
         """
