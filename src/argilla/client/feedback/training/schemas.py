@@ -67,7 +67,7 @@ TASK_STRUCTURE = {
 
 
 class TrainingData(ABC):
-    def _format_data(self, dataset: "FeedbackDataset"):
+    def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, Any]]:
         formatted_data = []
         explode_columns = set()
         for record in dataset.records:
@@ -421,7 +421,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
     def __id2label__(self):
         return self.label.question.__id2label__
 
-    def _format_data(self, dataset: "FeedbackDataset"):
+    def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, Any]]:
         if self.formatting_func is not None:
             output = set()
             for sample in dataset.format_as("datasets"):
@@ -649,7 +649,7 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
 
     formatting_func: Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]
 
-    def _format_data(self, dataset: "FeedbackDataset"):
+    def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
         formatted_texts = set()
         for sample in dataset.format_as("datasets"):
             if texts := self.formatting_func(sample):
@@ -716,7 +716,7 @@ class TrainingTaskForRM(BaseModel, TrainingData):
         [Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]
     ]
 
-    def _format_data(self, dataset: "FeedbackDataset"):
+    def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
         output = set()
         for sample in dataset.format_as("datasets"):
             chosen_rejecteds = self.formatting_func(sample)
@@ -775,7 +775,7 @@ class TrainingTaskForPPO(BaseModel, TrainingData):
 
     formatting_func: Callable[[Dict[str, Any]], Union[None, str, Iterator[str]]]
 
-    def _format_data(self, dataset: "FeedbackDataset"):
+    def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
         formatted_texts = set()
         for sample in dataset.format_as("datasets"):
             if texts := self.formatting_func(sample):
@@ -841,7 +841,7 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
 
     formatting_func: Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]
 
-    def _format_data(self, dataset: "FeedbackDataset"):
+    def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
         output = set()
         for sample in dataset.format_as("datasets"):
             prompt_chosen_rejecteds = self.formatting_func(sample)
