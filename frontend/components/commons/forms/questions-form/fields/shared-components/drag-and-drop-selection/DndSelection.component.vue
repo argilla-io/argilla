@@ -114,7 +114,7 @@ export default {
     },
     rankWithKeyboard(event, questionToMove) {
       if (this.timer) clearTimeout(this.timer);
-      if (event.shiftKey || event.key == "Tab") return;
+      if (event.shiftKey || event.key == "Tab" || event.ctrlKey) return;
 
       event.stopPropagation();
 

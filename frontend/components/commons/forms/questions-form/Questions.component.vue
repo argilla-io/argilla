@@ -90,29 +90,21 @@ export default {
       const firstElement = focusable[0];
       const lastElement = focusable[focusable.length - 1];
 
-      const isShiftKeyPressed = e.shiftKey;
-
-      const isArrowDownPressed = e.key === "ArrowDown";
-      const isArrowUpPressed = e.key === "ArrowUp";
+      const isTabPressed = e.key == "Tab";
       const activeElementIsInForm = this.formWrapper.contains(
         document.activeElement
       );
       const isLastElementActive = document.activeElement === lastElement;
       const isFirstElementActive = document.activeElement === firstElement;
 
-      if (!activeElementIsInForm && isShiftKeyPressed && isArrowDownPressed) {
+      if (!activeElementIsInForm && isTabPressed) {
         this.focusOnFirstQuestion(e);
         return;
       }
 
-      if (!activeElementIsInForm && isShiftKeyPressed && isArrowUpPressed) {
-        this.focusOnLastQuestion(e);
-        return;
-      }
-
-      if (e.key !== "Tab") return;
-      // TODO: Move to Single and Multi label component
+      // TODO: Move to question components
       // Is for manage the loop focus.
+      const isShiftKeyPressed = e.shiftKey;
       if (!isShiftKeyPressed && isLastElementActive) {
         this.focusOn(e, firstElement);
       }

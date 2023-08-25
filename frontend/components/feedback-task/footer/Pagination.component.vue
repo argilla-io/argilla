@@ -58,7 +58,9 @@ export default {
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
-    onPressKeyboardShortCut({ code }) {
+    onPressKeyboardShortCut({ code, ctrlKey }) {
+      if (!ctrlKey) return;
+      
       switch (code) {
         case "ArrowRight": {
           const elem = this.$refs.nextButton.$el;
