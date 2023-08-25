@@ -736,9 +736,9 @@ test.describe("Annotation page shortcuts", () => {
     test("go to text component with keyboard", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
-      await page.keyboard.press("Shift+ArrowDown");
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
       await expect(page).toHaveScreenshot();
     });
@@ -746,13 +746,13 @@ test.describe("Annotation page shortcuts", () => {
     test("go to previous question with keyboard", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
-      await page.keyboard.press("Shift+ArrowDown");
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
       await page
         .getByText("This is a review of the review")
-        .press("Shift+ArrowUp");
+        .press(shortcuts.goToPrevQuestion);
 
       await expect(page).toHaveScreenshot();
     });
