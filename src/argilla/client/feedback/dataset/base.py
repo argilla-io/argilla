@@ -370,7 +370,8 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             )
 
         if isinstance(task, TrainingTaskForTextClassification):
-            self.unify_responses(question=task.label.question, strategy=task.label.strategy)
+            if task.formatting_func is None:
+                self.unify_responses(question=task.label.question, strategy=task.label.strategy)
         elif not isinstance(
             task,
             (

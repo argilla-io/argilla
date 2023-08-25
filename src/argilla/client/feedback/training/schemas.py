@@ -15,7 +15,7 @@
 import logging
 import warnings
 from abc import ABC
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
 
 import pandas as pd
 from pydantic import BaseModel
@@ -47,6 +47,25 @@ if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
 
 
+TASK_STRUCTURE = {
+    "text_classification": {
+        "field": (TextField),
+        "question": (
+            LabelQuestion,
+            MultiLabelQuestion,
+            RatingQuestion,
+            RankingQuestion,
+        ),
+        "unification": (
+            LabelQuestionUnification,
+            MultiLabelQuestionUnification,
+            RatingQuestionUnification,
+            RankingQuestionUnification,
+        ),
+    }
+}
+
+
 class TrainingData(ABC):
     def _format_data(self, dataset: "FeedbackDataset"):
         formatted_data = []
@@ -54,17 +73,19 @@ class TrainingData(ABC):
         for record in dataset.records:
             data = {}
             for pydantic_field in self:
-                pydantic_field_name, pydantic_field_value = pydantic_field
-                if isinstance(pydantic_field_value, (TextField,)):
-                    data[pydantic_field_name] = record.fields[pydantic_field_value.name]
-                else:
-                    if pydantic_field_value.question.name not in record._unified_responses:
-                        continue
+                # with default and formatting_func either one can be None
+                if pydantic_field[-1] is not None:
+                    pydantic_field_name, pydantic_field_value = pydantic_field
+                    if isinstance(pydantic_field_value, (TextField,)):
+                        data[pydantic_field_name] = record.fields[pydantic_field_value.name]
                     else:
-                        data[pydantic_field_name] = [
-                            resp.value for resp in record._unified_responses[pydantic_field_value.question.name]
-                        ]
-                    explode_columns.add(pydantic_field_name)
+                        if pydantic_field_value.question.name not in record._unified_responses:
+                            continue
+                        else:
+                            data[pydantic_field_name] = [
+                                resp.value for resp in record._unified_responses[pydantic_field_value.question.name]
+                            ]
+                        explode_columns.add(pydantic_field_name)
             formatted_data.append(data)
         df = pd.DataFrame(formatted_data)
         if explode_columns:
@@ -79,6 +100,7 @@ class TrainingData(ABC):
             df = df.drop_duplicates()
 
         df = df.dropna(how="any")
+
         return df.to_dict(orient="records")
 
     @property
@@ -129,26 +151,30 @@ class TrainingTask:
     @classmethod
     def for_text_classification(
         cls,
-        text: TextField,
-        label: Union[
-            RatingQuestion,
-            LabelQuestion,
-            RankingQuestion,
-            MultiLabelQuestion,
-            RatingQuestionUnification,
-            LabelQuestionUnification,
-            MultiLabelQuestionUnification,
-            RankingQuestionUnification,
-        ],
+        formatting_func: Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]] = None,
+        text: Optional[TextField] = None,
+        label: Optional[
+            Union[
+                RatingQuestion,
+                LabelQuestion,
+                RankingQuestion,
+                MultiLabelQuestion,
+                RatingQuestionUnification,
+                LabelQuestionUnification,
+                MultiLabelQuestionUnification,
+                RankingQuestionUnification,
+            ]
+        ] = None,
         label_strategy: str = None,
     ) -> "TrainingTaskForTextClassification":
         """
-        _summary_
+        Define a task configuration for text classification. It takes default values for `text` and `label` using datasets Fields and Questions or a custom `formatting_func` as Callable. See Examples underneath for more details.
 
         Args:
-            text (TextField): The TextField to use for training.
-            label (Union[RatingQuestion, LabelQuestion, RankingQuestion, MultiLabelQuestion, RatingQuestionUnification, LabelQuestionUnification, MultiLabelQuestionUnification, RankingQuestionUnification]): _description_
-            label_strategy (str, optional): A strategy to unify responses. Defaults to None. This means it will initialize the default strategy for the label type.
+            formatting_func: A formatting function. Defaults to None.
+            text: The TextField to use for training. Defaults to None.
+            label: The *Question to use for training. Defaults to None.
+            label_strategy: A strategy to unify responses. Defaults to None. This means it will initialize the default strategy for the label type. Defaults to None.
 
         Raises:
             ValueError: if label is not a valid type with the question type.
@@ -162,49 +188,62 @@ class TrainingTask:
             >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
             >>> task = TrainingTask.for_text_classification(
             ...     text=dataset.fields[0],
-            ...     label=dataset.questions[0],
+            ...     label=dataset.questions[0]
             ... )
             >>> dataset.prepare_for_training(framework="...", task=task)
 
+            >>> from argilla import LabelQuestion, TrainingTask
+            >>> from collections import Counter
+            >>> import random
+            >>> def formatting_func(sample: Dict[str, Any]) -> Union[Tuple[str, str], Tuple[str, List[str]]]:
+            ...     text = sample["text"]
+            ...     values = [annotation["value"] for annotation in sample["label"]]
+            ...     counter = Counter(values)
+            ...     if counter:
+            ...         most_common = counter.most_common()
+            ...         max_frequency = most_common[0][1]
+            ...         most_common_elements = [element for element, frequency in most_common if frequency == max_frequency]
+            ...         label = random.choice(most_common_elements)
+            ...         return (text, label)
+            ...     else:
+            ...         return None
+            >>> task = TrainingTask.for_text_classification(formatting_func=formatting_func)
+            >>> dataset.prepare_for_training(framework="...", task=task)
         """
-        if isinstance(
-            label,
-            (
-                LabelQuestionUnification,
-                MultiLabelQuestionUnification,
-                RatingQuestionUnification,
-                RankingQuestionUnification,
-            ),
-        ):
-            if label_strategy is not None:
-                raise ValueError("label_strategy is already defined via Unification class.")
+        if (text and label) and formatting_func is not None:
+            raise ValueError("You must provide either `text` and `label`, or a `formatting_func`, not both.")
+
+        if formatting_func is not None:
+            if text or label:
+                raise ValueError("`formatting_func` is already defined, so you cannot define `text` and `label`.")
+            return TrainingTaskForTextClassification(formatting_func=formatting_func)
         else:
-            unification_kwargs = {"question": label}
-            if label_strategy is not None:
-                unification_kwargs["strategy"] = label_strategy
+            if isinstance(label, TASK_STRUCTURE["text_classification"]["unification"]):
+                if label_strategy is not None:
+                    raise ValueError("label_strategy is already defined via Unification class.")
             else:
-                _LOGGER.info(f"No label strategy defined. Using default strategy for {type(label)}.")
-            if isinstance(label, RatingQuestion):
-                label = RatingQuestionUnification(**unification_kwargs)
-            elif isinstance(label, MultiLabelQuestion):
-                label = MultiLabelQuestionUnification(**unification_kwargs)
-            elif isinstance(label, LabelQuestion):
-                label = LabelQuestionUnification(**unification_kwargs)
-            elif isinstance(label, RankingQuestion):
-                label = RankingQuestionUnification(**unification_kwargs)
-            else:
-                raise ValueError(f"Label type {type(label)} is not supported.")
-        return TrainingTaskForTextClassification(
-            text=text,
-            label=label,
-            label_strategy=label_strategy,
-        )
+                unification_kwargs = {"question": label}
+                if label_strategy is not None:
+                    unification_kwargs["strategy"] = label_strategy
+                else:
+                    _LOGGER.info(f"No label strategy defined. Using default strategy for {type(label)}.")
+                if isinstance(label, RatingQuestion):
+                    label = RatingQuestionUnification(**unification_kwargs)
+                elif isinstance(label, MultiLabelQuestion):
+                    label = MultiLabelQuestionUnification(**unification_kwargs)
+                elif isinstance(label, LabelQuestion):
+                    label = LabelQuestionUnification(**unification_kwargs)
+                elif isinstance(label, RankingQuestion):
+                    label = RankingQuestionUnification(**unification_kwargs)
+                else:
+                    raise ValueError(f"Label type {type(label)} is not supported.")
+            return TrainingTaskForTextClassification(text=text, label=label)
 
     @classmethod
     def for_supervised_fine_tuning(
         cls,
         formatting_func: Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]],
-    ) -> "TrainingTaskForTextClassification":
+    ) -> "TrainingTaskForSFT":
         """
         Return a task that can be used in `FeedbackDataset.prepare_for_training(framework="...", task)`
         to extract data from the Feedback Dataset in an immediately useful format.
@@ -323,25 +362,43 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
     """Training data for text classification
 
     Args:
+        formatting_func (Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]], optional): A formatting function. Defaults to None.
         text: TextField
         label: Union[RatingQuestionUnification, LabelQuestionUnification, MultiLabelQuestionUnification, RankingQuestionUnification]
 
     Examples:
-        >>> from argilla import LabelQuestion, TrainingTaskForTextClassification
+        >>> from argilla import LabelQuestion, TrainingTask
         >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
-        >>> label = RatingQuestionUnification(question=dataset.questions[0], strategy="mean")
-        >>> task = TrainingTaskForTextClassification(
+        >>> task = TrainingTask.for_text_classification(
         ...     text=dataset.fields[0],
-        ...     label=label,
+        ...     label=dataset.questions[0]
         ... )
+        >>> dataset.prepare_for_training(framework="...", task=task)
+
+        >>> from argilla import LabelQuestion, TrainingTask
+        >>> from collections import Counter
+        >>> def formatting_func(sample: Dict[str, Any]) -> Union[Tuple[str, str], Tuple[str, List[str]]]:
+        ...     text = sample["text"]
+        ...     values = [annotation["value"] for annotation in sample["label"]]
+        ...     counter = Counter(values)
+        ...     if counter:
+        ...         most_common = counter.most_common()
+        ...         max_frequency = most_common[0][1]
+        ...         most_common_elements = [element for element, frequency in most_common if frequency == max_frequency]
+        ...         label = random.choice(most_common_elements)
+        ...         return (text, label)
+        ...     else:
+        ...         return None
+        >>> task = TrainingTask.for_text_classification(formatting_func=formatting_func)
         >>> dataset.prepare_for_training(framework="...", task=task)
 
     """
 
-    text: TextField
+    formatting_func: Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]] = None
+    text: TextField = None
     label: Union[
         RatingQuestionUnification, LabelQuestionUnification, MultiLabelQuestionUnification, RankingQuestionUnification
-    ]
+    ] = None
 
     @property
     def supported_frameworks(self):
@@ -363,6 +420,47 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
     @property
     def __id2label__(self):
         return self.label.question.__id2label__
+
+    def _format_data(self, dataset: "FeedbackDataset"):
+        if self.formatting_func is not None:
+            output = set()
+            for sample in dataset.format_as("datasets"):
+                text_label = self.formatting_func(sample)
+                if text_label is None:
+                    continue
+
+                if isinstance(text_label, tuple) and isinstance(text_label[0], str):
+                    text_label = {text_label}
+                else:
+                    raise ValueError(
+                        "formatting_func must return (text,label) as a Tuple[str, str] or a Tuple[str, List[str]]"
+                    )
+
+                output |= set(text_label)
+
+            data = []
+            _all_labels = set()
+            for text, label in output:
+                data.append({"text": text, "label": label})
+                if isinstance(label, list):
+                    _multi_label = True
+                    _all_labels |= set(label)
+                else:
+                    _all_labels.add(label)
+                    _multi_label = False
+
+            # infer label type from output custum formatting function
+            if _multi_label:
+                self.label = MultiLabelQuestionUnification(
+                    question=MultiLabelQuestion(name="custom_func", labels=list(_all_labels))
+                )
+            else:
+                self.label = LabelQuestionUnification(
+                    question=LabelQuestion(name="custom_func", labels=list(_all_labels))
+                )
+            return data
+        else:
+            return super()._format_data(dataset)
 
     def unify_responses(self, responses: List[FeedbackRecord]):
         self.label.strategy.unify_responses(responses=responses, field=self.label.question)
@@ -396,7 +494,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
         self.test_framework_support(framework)
         import datasets
 
-        multi_label = isinstance(self.label.question, MultiLabelQuestion)
+        multi_label = self.__multi_label__
 
         datasets_dict = {"id": [], "text": [], "label": []}
         for index, entry in enumerate(data):
@@ -442,14 +540,13 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
     ) -> Union["spacy.token.DocBin", Tuple["spacy.token.DocBin", "spacy.token.DocBin"]]:
         from spacy.tokens import DocBin
 
-        all_labels = self.label.question.__all_labels__
+        all_labels = self.__all_labels__
 
         def _prepare(data):
             db = DocBin(store_user_data=True)
             # Creating the DocBin object as in https://spacy.io/usage/training#training-data
             for entry in data:
                 doc = lang.make_doc(entry["text"])
-                # doc.user_data["id"] = record.id
 
                 cats = dict.fromkeys(all_labels, 0)
                 if isinstance(entry["label"], list):
