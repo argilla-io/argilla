@@ -48,8 +48,8 @@ __OUTPUT_DIR__ = "tmp"
 @pytest.mark.parametrize(
     "framework",
     [
-        # Framework("spacy"),
-        # Framework("spacy-transformers"),
+        Framework("spacy"),
+        Framework("spacy-transformers"),
         Framework("transformers"),
         Framework("spark-nlp"),
         Framework("span_marker"),
