@@ -17,8 +17,6 @@
 
 <template>
   <span class="sidebar__info">
-    <!-- NOTE: HIDDEN FOR MVP
-    <p class="sidebar__info__title" v-text="groupName"></p> -->
     <IconButton
       v-for="{ id, icon, tooltip } in groupItems"
       :id="id"
@@ -67,13 +65,6 @@ export default {
 .sidebar {
   &__info {
     position: relative;
-    &__title {
-      margin-bottom: 0.5em;
-      text-align: center;
-      font-weight: 600;
-      @include font-size(12px);
-      text-transform: capitalize;
-    }
   }
 }
 </style>
