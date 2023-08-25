@@ -106,7 +106,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         set_seed(self._seed)
 
         if self._model is None:
-            self._model = "gpt2"
+            self._model = "gpt2-medium"
 
         if isinstance(self._dataset, DatasetDict):
             self._train_dataset = self._dataset["train"]
