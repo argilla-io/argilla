@@ -249,8 +249,8 @@ class TrainingTask:
         to extract data from the Feedback Dataset in an immediately useful format.
 
         Args:
-            formatting_func (Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]): A formatting function
-                converting a dictionary of records into zero, one or more text strings.
+            formatting_func: A formatting function converting a dictionary of records into zero,
+                one or more text strings.
 
         Returns:
             TrainingTaskForSFT: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
@@ -281,8 +281,8 @@ class TrainingTask:
         to extract data from the Feedback Dataset in an immediately useful format.
 
         Args:
-            formatting_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]]):
-                A formatting function converting a dictionary of records into zero, one or more chosen-rejected text tuples.
+            formatting_func: A formatting function converting a dictionary of records into zero,
+                one or more chosen-rejected text tuples.
 
         Returns:
             TrainingTaskForRM: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
@@ -314,8 +314,8 @@ class TrainingTask:
         to extract data from the Feedback Dataset in an immediately useful format.
 
         Args:
-            formatting_func (Callable[[Dict[str, Any]], Union[None, str, Iterator[str]]]):
-                A formatting function converting a dictionary of records into zero, one or more prompts.
+            formatting_func: A formatting function converting a dictionary of records into zero,
+                one or more prompts.
 
         Returns:
             TrainingTaskForPPO: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
@@ -333,8 +333,8 @@ class TrainingTask:
         to extract data from the Feedback Dataset in an immediately useful format.
 
         Args:
-            formatting_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]):
-                A formatting function converting a dictionary of records into zero, one or more prompt-chosen-rejected text tuples.
+            formatting_func: A formatting function converting a dictionary of records into zero,
+                one or more prompt-chosen-rejected text tuples.
 
         Returns:
             TrainingTaskForDPO: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
@@ -362,9 +362,10 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
     """Training data for text classification
 
     Args:
-        formatting_func (Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]], optional): A formatting function. Defaults to None.
-        text: TextField
-        label: Union[RatingQuestionUnification, LabelQuestionUnification, MultiLabelQuestionUnification, RankingQuestionUnification]
+        formatting_func: A formatting function returning the text to classify. Either a formatting function or
+            the text and label parameters are provided. Defaults to None.
+        text: The text field to take as the text to classify.
+        label: The question denoting the label of the text to classify.
 
     Examples:
         >>> from argilla import LabelQuestion, TrainingTask
@@ -394,10 +395,15 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
 
     """
 
-    formatting_func: Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]] = None
-    text: TextField = None
-    label: Union[
-        RatingQuestionUnification, LabelQuestionUnification, MultiLabelQuestionUnification, RankingQuestionUnification
+    formatting_func: Optional[Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]] = None
+    text: Optional[TextField] = None
+    label: Optional[
+        Union[
+            RatingQuestionUnification,
+            LabelQuestionUnification,
+            MultiLabelQuestionUnification,
+            RankingQuestionUnification,
+        ]
     ] = None
 
     @property
@@ -631,8 +637,8 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
     """Training data for supervised finetuning
 
     Args:
-        formatting_func (Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]): A formatting function
-            converting a dictionary of records into zero, one or more text strings.
+        formatting_func: A formatting function converting a dictionary of records into zero,
+            one or more text strings.
 
     Examples:
         >>> from argilla import TrainingTaskForSFT
@@ -693,8 +699,8 @@ class TrainingTaskForRM(BaseModel, TrainingData):
     """Training data for reward modelling
 
     Args:
-        formatting_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]]):
-            A formatting function converting a dictionary of records into zero, one or more chosen-rejected text tuples.
+        formatting_func: A formatting function converting a dictionary of records into zero,
+            one or more chosen-rejected text tuples.
 
     Examples:
         >>> from argilla import TrainingTaskForRM
@@ -764,7 +770,7 @@ class TrainingTaskForPPO(BaseModel, TrainingData):
     """Training data for proximal policy optimization
 
     Args:
-        text (TextField): The TextField to use for training.
+        text: The TextField to use for training.
 
     Examples:
         >>> from argilla import TrainingTaskForPPO
@@ -820,8 +826,8 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
     """Training data for direct preference optimization
 
     Args:
-        formatting_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]):
-            A formatting function converting a dictionary of records into zero, one or more prompt-chosen-rejected text tuples.
+        formatting_func: A formatting function converting a dictionary of records into zero,
+            one or more prompt-chosen-rejected text tuples.
 
     Examples:
         >>> from argilla import TrainingTaskForDPO
