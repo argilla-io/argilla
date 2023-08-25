@@ -11,7 +11,7 @@ import {
 } from "../common";
 
 const shortcuts = Object.freeze({
-  clear: "",
+  clear: "Shift+Space",
   discard: "Shift+Backspace",
   submit: "Shift+Enter",
   goToNextQuestion: "Shift+ArrowDown",
@@ -23,6 +23,11 @@ const shortcuts = Object.freeze({
   multiLabel: {
     select: "Space",
     goToNextLabel: "Tab"
+  },
+  ranking: {
+    goToNextRank: "Tab",
+    goToPrevRank: "Shift+Tab",
+    unrank: "Backspace"
   }
 })
 
@@ -762,13 +767,13 @@ test.describe("Annotation page shortcuts", () => {
     const goToRankingComponent = async (page: Page) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
     };
 
     test("go to ranking component with keyboard", async ({ page }) => {
@@ -782,7 +787,7 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToRankingComponent(page);
 
-      await page.keyboard.press("Shift+ArrowUp");
+      await page.keyboard.press(shortcuts.goToPrevQuestion);
 
       await page.keyboard.press("Meta+Shift+ArrowRight");
 
@@ -845,19 +850,19 @@ test.describe("Annotation page shortcuts", () => {
     test("move as a loop in ranking component", async ({ page }) => {
       await goToRankingComponent(page);
 
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
       await expect(page).toHaveScreenshot();
 
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
       await expect(page).toHaveScreenshot();
 
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
       await expect(page).toHaveScreenshot();
 
-      await page.keyboard.press("Shift+Tab");
+      await page.keyboard.press(shortcuts.ranking.goToPrevRank);
       await expect(page).toHaveScreenshot();
     });
 
@@ -866,20 +871,20 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToRankingComponent(page);
 
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
       await expect(page).toHaveScreenshot();
 
-      await page.keyboard.press("Backspace");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Backspace");
+      await page.keyboard.press(shortcuts.ranking.unrank);
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
+      await page.keyboard.press(shortcuts.ranking.unrank);
       await expect(page).toHaveScreenshot();
 
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
       await expect(page).toHaveScreenshot();
 
-      await page.keyboard.press("Shift+Tab");
+      await page.keyboard.press(shortcuts.ranking.goToPrevRank);
       await expect(page).toHaveScreenshot();
     });
   });
@@ -931,8 +936,8 @@ test.describe("Annotation page shortcuts", () => {
 
       await page.waitForTimeout(500);
 
-      await page.keyboard.press("Shift+Tab");
-      await page.keyboard.press("Backspace");
+      await page.keyboard.press(shortcuts.ranking.goToPrevRank);
+      await page.keyboard.press(shortcuts.ranking.unrank);
 
       await expect(page).toHaveScreenshot();
     });
@@ -947,8 +952,8 @@ test.describe("Annotation page shortcuts", () => {
 
       await page.waitForTimeout(500);
 
-      await page.keyboard.press("Shift+Tab");
-      await page.keyboard.press("Shift+Space");
+      await page.keyboard.press(shortcuts.ranking.goToPrevRank);
+      await page.keyboard.press(shortcuts.clear);
       await expect(page).toHaveScreenshot();
     });
   });
