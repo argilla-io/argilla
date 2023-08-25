@@ -1,7 +1,7 @@
 <template>
   <form
     class="questions-form"
-    :class="{ '--edited-form': !isFormUntouched }"
+    :class="{ '--edited-form': isFormTouched }"
     @submit.prevent="onSubmit"
   >
     <div class="questions-form__content">
@@ -89,31 +89,26 @@ export default {
       required: true,
     },
   },
-  data() {
-    return {
-      originalRecord: null,
-    };
-  },
   setup() {
     return useQuestionFormViewModel();
   },
   computed: {
-    isFormUntouched() {
-      return !this.record.isModified;
+    isFormTouched() {
+      return this.record.isModified;
     },
     questionAreCompletedCorrectly() {
       return this.record.questionAreCompletedCorrectly();
     },
     isSubmitButtonDisabled() {
       if (this.record.isSubmitted)
-        return this.isFormUntouched || !this.questionAreCompletedCorrectly;
+        return !this.isFormTouched || !this.questionAreCompletedCorrectly;
 
       return !this.questionAreCompletedCorrectly;
     },
   },
   watch: {
-    isFormUntouched(isFormUntouched) {
-      this.emitIsQuestionsFormUntouched(isFormUntouched);
+    isFormTouched(isFormTouched) {
+      this.emitIsQuestionsFormTouched(isFormTouched);
     },
     record: {
       deep: true,
@@ -130,7 +125,7 @@ export default {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
   },
   destroyed() {
-    this.emitIsQuestionsFormUntouched(true);
+    this.emitIsQuestionsFormTouched(false);
 
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
@@ -174,10 +169,10 @@ export default {
     async onSaveDraftImmediately() {
       await this.saveDraftImmediately(this.record);
     },
-    emitIsQuestionsFormUntouched(isFormUntouched) {
-      this.$emit("on-question-form-touched", !isFormUntouched);
+    emitIsQuestionsFormTouched(isFormTouched) {
+      this.$emit("on-question-form-touched", isFormTouched);
 
-      this.$root.$emit("are-responses-untouched", isFormUntouched);
+      this.$root.$emit("are-responses-untouched", !isFormTouched);
     },
   },
 };
