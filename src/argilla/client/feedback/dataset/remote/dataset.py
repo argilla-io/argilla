@@ -43,6 +43,17 @@ class RemoteFeedbackRecords(RemoteFeedbackRecordsBase):
         super().__init__(dataset=dataset)
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def __len__(self) -> int:
+        """Returns the number of records in the current `FeedbackDataset` in Argilla."""
+        try:
+            response = datasets_api_v1.get_metrics(client=self._client, id=self._dataset_id)
+        except Exception as e:
+            raise Exception(
+                f"Failed while getting the metrics from the current `FeedbackDataset` in Argilla with exception: {e}"
+            ) from e
+        return response.parsed.records.count
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def add(
         self,
         records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
