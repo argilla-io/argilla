@@ -87,7 +87,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         prepared_data=None,
         model: str = None,
         seed: int = None,
-    ):
+    ) -> None:
         super().__init__(dataset=dataset, task=task, prepared_data=prepared_data, model=model, seed=seed)
         import torch
         from datasets import DatasetDict
