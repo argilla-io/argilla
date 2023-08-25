@@ -9,11 +9,11 @@
         <div class="draft">
           <p v-if="draftSaving">
             <svgicon color="#0000005e" name="refresh" />
-            Saving...
+            {{ $t("saving") }}
           </p>
           <p v-else-if="record.isSavedDraft">
             <svgicon color="#0000005e" name="check" />
-            Saved
+            {{ $t("saved") }}
             <BaseDate
               class="tooltip"
               :date="record.updatedAt"
@@ -23,7 +23,7 @@
           </p>
         </div>
         <p class="questions-form__title --heading5 --medium">
-          Submit your feedback
+          {{ $t("submit-your-feedback") }}
         </p>
         <p class="questions-form__guidelines-link">
           Read the
@@ -99,7 +99,7 @@ export default {
   },
   computed: {
     isFormUntouched() {
-      return this.record.isModified;
+      return !this.record.isModified;
     },
     questionAreCompletedCorrectly() {
       return this.record.questionAreCompletedCorrectly();
@@ -120,8 +120,6 @@ export default {
       immediate: true,
       handler() {
         if (this.record.isModified) this.saveDraft(this.record);
-
-        this.$root.$emit("record-changed", this.record);
       },
     },
   },
@@ -133,11 +131,16 @@ export default {
   },
   destroyed() {
     this.emitIsQuestionsFormUntouched(true);
+
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
-    onPressKeyboardShortCut({ code, shiftKey }) {
+    onPressKeyboardShortCut({ code, shiftKey, ctrlKey }) {
       switch (code) {
+        case "KeyS": {
+          if (ctrlKey) this.onSaveDraftImmediately();
+          break;
+        }
         case "Enter": {
           this.onSubmit();
           break;
@@ -159,9 +162,7 @@ export default {
       this.$emit("on-discard-responses");
     },
     async onSubmit() {
-      if (!this.questionAreCompletedCorrectly) {
-        return;
-      }
+      if (!this.questionAreCompletedCorrectly) return;
 
       await this.submit(this.record);
 
@@ -169,6 +170,9 @@ export default {
     },
     async onClear() {
       await this.clear(this.record);
+    },
+    async onSaveDraftImmediately() {
+      await this.saveDraftImmediately(this.record);
     },
     emitIsQuestionsFormUntouched(isFormUntouched) {
       this.$emit("on-question-form-touched", !isFormUntouched);

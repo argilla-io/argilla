@@ -5,45 +5,78 @@ import { ClearRecordUseCase } from "~/v1/domain/usecases/clear-record-use-case";
 import { DiscardRecordUseCase } from "~/v1/domain/usecases/discard-record-use-case";
 import { SubmitRecordUseCase } from "~/v1/domain/usecases/submit-record-use-case";
 import { SaveDraftRecord } from "~/v1/domain/usecases/save-draft-use-case";
+import { useDebounce } from "~/v1/infrastructure/services/useDebouce";
+import { useQueue } from "~/v1/infrastructure/services/useQueue";
 
 export const useQuestionFormViewModel = () => {
+  const queue = useQueue();
+  const debounce = useDebounce(2000);
+
+  const draftSaving = ref(false);
   const discardUseCase = useResolve(DiscardRecordUseCase);
   const submitUseCase = useResolve(SubmitRecordUseCase);
   const clearUseCase = useResolve(ClearRecordUseCase);
   const saveDraftUseCase = useResolve(SaveDraftRecord);
 
-  const discard = async (record: Record) => {
-    await discardUseCase.execute(record);
+  const discard = (record: Record) => {
+    debounce.stop();
+
+    queue.enqueue(() => {
+      return discardUseCase.execute(record);
+    });
   };
 
-  const submit = async (record: Record) => {
-    await submitUseCase.execute(record);
+  const submit = (record: Record) => {
+    debounce.stop();
+
+    queue.enqueue(() => {
+      return submitUseCase.execute(record);
+    });
   };
 
-  const clear = async (record: Record) => {
-    await clearUseCase.execute(record);
+  const clear = (record: Record) => {
+    debounce.stop();
+
+    queue.enqueue(() => {
+      return clearUseCase.execute(record);
+    });
   };
 
-  const draftSaving = ref(false);
   const onSaveDraft = async (record: Record) => {
     if (!record.hasAnyQuestionAnswered) return;
     draftSaving.value = true;
+
     try {
       await saveDraftUseCase.execute(record);
-    } catch {
     } finally {
       draftSaving.value = false;
     }
   };
 
-  let timer = null;
-  const saveDraft = (record: Record) => {
-    if (timer) clearTimeout(timer);
+  const saveDraft = async (record: Record) => {
+    if (record.isSubmitted) return;
+    await debounce.wait();
 
-    timer = setTimeout(() => {
-      onSaveDraft(record);
-    }, 2000);
+    queue.enqueue(() => {
+      return onSaveDraft(record);
+    });
   };
 
-  return { clear, submit, discard, saveDraft, draftSaving };
+  const saveDraftImmediately = (record: Record) => {
+    if (record.isSubmitted) return;
+    debounce.stop();
+
+    queue.enqueue(() => {
+      return onSaveDraft(record);
+    });
+  };
+
+  return {
+    clear,
+    submit,
+    discard,
+    saveDraft,
+    draftSaving,
+    saveDraftImmediately,
+  };
 };
