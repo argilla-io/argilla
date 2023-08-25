@@ -77,7 +77,7 @@ class RemoteFeedbackRecordsBase:
         )
         return f"[{','.join([str(record) for record in self][:2])}, ...]"
 
-    def __parse_record(self, record: "FeedbackItemModel") -> RemoteFeedbackRecord:
+    def _parse_record(self, record: "FeedbackItemModel") -> RemoteFeedbackRecord:
         """Parses a `FeedbackItemModel` into a `RemoteFeedbackRecord`."""
         record = record.dict(
             exclude={
@@ -162,7 +162,7 @@ class RemoteFeedbackRecordsBase:
                 limit=limit,
                 **filters,
             ).parsed
-            records.extend([self.__parse_record(record) for record in fetched_records.items])
+            records.extend([self._parse_record(record) for record in fetched_records.items])
         return records[0] if isinstance(key, int) else records
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
@@ -178,7 +178,7 @@ class RemoteFeedbackRecordsBase:
                 **filters,
             ).parsed
             for record in batch.items:
-                yield self.__parse_record(record)
+                yield self._parse_record(record)
             current_batch += 1
 
             if len(batch.items) < FETCHING_BATCH_SIZE:
