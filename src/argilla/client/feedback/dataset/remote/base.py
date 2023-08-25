@@ -198,7 +198,7 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
         fields: List["AllowedFieldTypes"],
         questions: List["AllowedQuestionTypes"],
         guidelines: Optional[str] = None,
-        filters: Dict[str, Any] = {},
+        **kwargs: Any,
     ) -> None:
         """Initializes a `RemoteFeedbackDataset` instance in Argilla.
 
@@ -231,8 +231,7 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
         self._name = name
         self._workspace = workspace
 
-        extra_kwargs = {"filters": filters} if filters else {}
-        self._records = self.records_cls(dataset=self, **extra_kwargs)
+        self._records = self.records_cls(dataset=self, **kwargs)
 
     @property
     def records(self) -> T:
