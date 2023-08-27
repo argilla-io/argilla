@@ -1,4 +1,4 @@
-# Fine-tuning with responses to a Feedback Dataset
+# Fine-tuning with responses from a Feedback Dataset
 
 After [collecting the responses](/guides/llms/practical_guides/collect_responses.html) from our `FeedbackDataset` we can start fine-tuning our LLMs and other models. Due to the customizability of the task, this might require setting up a custom post-processing workflow but we will provide some good toy examples for the [LLM approaches](/guides/llms/conceptual_guides/rlhf.html): pre-training, supervised fine-tuning, and reinforcement learning through human feedback (RLHF). However, we also still provide for other NLP tasks like text classification.
 ## The `ArgillaTrainer`
@@ -39,16 +39,14 @@ trainer.predict("This is awesome!")
 
 We plan on adding more support for other tasks and frameworks so feel free to reach out on our Slack or GitHub to help us prioritize each task.
 
-| Framework/Task    | Text Classification | Supervised Fine-tuning | Reward Modeling | Proximal Policy Optimization | Direct Performance Optimization |
-|-------------------|--------------------|------------------------|-----------------|------------------------------|---------------------------------|
-| TRL               |                    | ✔️                      | ✔️               | ✔️                            | ✔️                               |
-| OpenAI            | ✔️                  |                        | ✔️               |                              |                                 |
-| AutoTrain         | ✔️                  | ✔️                      | ✔️               |                              |                                 |
-| SetFit            | ✔️                  |                        |                 |                              |                                 |
-| spaCy             | ✔️                  | ✔️                      |                 |                              |                                 |
-| Transformers      | ✔️                  | ✔️                      |                 |                              |                                 |
-| PEFT              | ✔️                  | ✔️                      |                 |                              |                                 |
-| SpanMarker        |                    | ✔️                      |                 |                              |                                 |
+| Task/Framework                   | TRL  | OpenAI | AutoTrain | SetFit | spaCy | Transformers | PEFT |
+|:--------------------------------|:-----|:-------|:----------|:-------|:------|:-------------|:-----|
+| Text Classification             |      | ✔️      | ✔️         | ✔️      | ✔️     | ✔️            | ✔️    |
+| Supervised Fine-tuning          | ✔️    |        |           |        |       |              |      |
+| Reward Modeling                 | ✔️    |        |           |        |       |              |      |
+| Proximal Policy Optimization    | ✔️    |        |           |        |       |              |      |
+| Direct Performance Optimization | ✔️    |        |           |        |       |              |      |
+
 
 ```{note}
 We also offer support for  Token Classification using our `TokenClassifcationDataset` but this is shown in [a section](/guides/train_a_model) about our older dataset-types.
@@ -69,11 +67,14 @@ Note that you don't need to pass all of them directly and that the values below 
 
 A `TaskMapping` is used to define how the data should be processed and formatted according to the associated task and framework. Each task has its own `TaskMapping.for_*`-classmethod and the data formatting can always be defined using a custom `formatting_func`. However, simpler tasks like Text Classification can also be defined using default definitions. These directly use the fields and questions from the FeedbackDataset configuration to infer how to prepare the data. Underneath you can find an overview of the `TaskMapping`` requirements.
 
-| Framework/Task    | Text Classification | Supervised Fine-tuning | Reward Modeling | Proximal Policy Optimization | Direct Performance Optimization |
-|-------------------|--------------------|------------------------|-----------------|------------------------------|---------------------------------|
-| Name              | for_text_classification| for_supervised_fine_tuning                  | ✔️               | ✔️                            | ✔️                               |
-| formatting_func   | Union[Tuple[str, str], Tuple[str, List[str]]]                  |                        | ✔️               |                              |                                 |
-| default           | ✔️                  | ✔️                      | ✔️               |                              |                                 |
+| Method                             | Content          | Return formatting_func                                     | Default           |
+|:-----------------------------------|:-----------------|:-----------------------------------------------------------|:------------------|
+| for_text_classification            | `text-label`     | `Union[Tuple[str, str], Tuple[str, List[str]]]`            | ✔️                 |
+| for_supervised_fine_tuning         | `text`           | `str`                                                      | ✗                 |
+| for_reward_modelling               | `chosen-rejected`| `Tuple[str, str]`                                          | ✗                 |
+| for_proximal_policy_optimization   | `text`           | `Union[str, Iterator[str]]`                                | ✗                 |
+| for_direct_performance_optimization| `prompt-chosen-rejected`                 | `Tuple[str, str]`                                          | ✗                 |
+
 
 ## Tasks
 
