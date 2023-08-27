@@ -15,6 +15,7 @@
 import pytest
 from argilla.client import api
 from argilla.client.feedback.dataset import FeedbackDataset
+from argilla.client.feedback.dataset.remote import RemoteFeedbackDataset
 from argilla.client.sdk.users.models import UserRole
 
 from tests.factories import DatasetFactory, RecordFactory, TextFieldFactory, TextQuestionFactory, UserFactory
@@ -23,13 +24,10 @@ from tests.factories import DatasetFactory, RecordFactory, TextFieldFactory, Tex
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
 async def test_delete_records(role: UserRole) -> None:
-    text_field = await TextFieldFactory.create(required=True)
-    rating_question = await TextQuestionFactory.create(required=True)
-    dataset = await DatasetFactory.create(
-        fields=[text_field],
-        questions=[rating_question],
-        records=await RecordFactory.create_batch(size=100),
-    )
+    dataset = await DatasetFactory.create()
+    await TextFieldFactory.create(dataset=dataset, required=True)
+    await TextQuestionFactory.create(dataset=dataset, required=True)
+    await RecordFactory.create_batch(dataset=dataset, size=10)
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
     api.init(api_key=user.api_key)
@@ -47,9 +45,10 @@ async def test_delete_records(role: UserRole) -> None:
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
 async def test_delete(role: UserRole) -> None:
-    text_field = await TextFieldFactory.create(required=True)
-    rating_question = await TextQuestionFactory.create(required=True)
-    dataset = await DatasetFactory.create(fields=[text_field], questions=[rating_question])
+    dataset = await DatasetFactory.create()
+    await TextFieldFactory.create(dataset=dataset, required=True)
+    await TextQuestionFactory.create(dataset=dataset, required=True)
+    await RecordFactory.create_batch(dataset=dataset, size=10)
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
     api.init(api_key=user.api_key)
@@ -63,9 +62,10 @@ async def test_delete(role: UserRole) -> None:
 @pytest.mark.parametrize("role", [UserRole.annotator])
 @pytest.mark.asyncio
 async def test_delete_not_allowed_role(role: UserRole) -> None:
-    text_field = await TextFieldFactory.create(required=True)
-    rating_question = await TextQuestionFactory.create(required=True)
-    dataset = await DatasetFactory.create(fields=[text_field], questions=[rating_question])
+    dataset = await DatasetFactory.create()
+    await TextFieldFactory.create(dataset=dataset, required=True)
+    await TextQuestionFactory.create(dataset=dataset, required=True)
+    await RecordFactory.create_batch(dataset=dataset, size=10)
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
     api.init(api_key=user.api_key)
@@ -73,3 +73,35 @@ async def test_delete_not_allowed_role(role: UserRole) -> None:
 
     with pytest.raises(PermissionError, match=f"User with role={role} is not allowed to call `delete`"):
         remote_dataset.delete()
+
+
+@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
+@pytest.mark.asyncio
+async def test_list(role: UserRole) -> None:
+    dataset = await DatasetFactory.create()
+    await TextFieldFactory.create(dataset=dataset, required=True)
+    await TextQuestionFactory.create(dataset=dataset, required=True)
+    await RecordFactory.create_batch(dataset=dataset, size=10)
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+    api.init(api_key=user.api_key)
+    remote_datasets = FeedbackDataset.list()
+    assert len(remote_datasets) == 1
+    assert all(isinstance(remote_dataset, RemoteFeedbackDataset) for remote_dataset in remote_datasets)
+    assert all(remote_dataset.workspace.id == dataset.workspace.id for remote_dataset in remote_datasets)
+
+
+@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
+@pytest.mark.asyncio
+async def test_list_with_workspace_name(role: UserRole) -> None:
+    dataset = await DatasetFactory.create()
+    await TextFieldFactory.create(dataset=dataset, required=True)
+    await TextQuestionFactory.create(dataset=dataset, required=True)
+    await RecordFactory.create_batch(dataset=dataset, size=10)
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+    api.init(api_key=user.api_key)
+    remote_datasets = FeedbackDataset.list(workspace=dataset.workspace.name)
+    assert len(remote_datasets) == 1
+    assert all(isinstance(remote_dataset, RemoteFeedbackDataset) for remote_dataset in remote_datasets)
+    assert all(remote_dataset.workspace.id == dataset.workspace.id for remote_dataset in remote_datasets)

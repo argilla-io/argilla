@@ -215,8 +215,7 @@ task = TrainingTask.for_text_classification(
 trainer = ArgillaTrainer(
     dataset=dataset,
     task=task,
-    framework="setfit",
-    fetch_records=False
+    framework="setfit"
 )
 trainer.update_config(num_train_epochs=2)
 trainer.train(output_dir="my_awesone_model")
@@ -329,8 +328,7 @@ task = TrainingTask.for_text_classification(
 trainer = ArgillaTrainer(
     dataset=dataset,
     task=task,
-    framework="setfit",
-    fetch_records=False
+    framework="setfit"
 )
 trainer.update_config(num_train_epochs=2)
 trainer.train(output_dir="my_awesone_model")

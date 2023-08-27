@@ -97,11 +97,13 @@ test.describe("Annotate page", () => {
 
     await expect(page).toHaveScreenshot();
 
-    await page.getByText("Review Rating (optional)").scrollIntoViewIfNeeded();
+    await page
+      .getByText("Review Rating", { exact: true })
+      .scrollIntoViewIfNeeded();
 
     await expect(page).toHaveScreenshot();
 
-    await page.getByText("Ranking (optional)").scrollIntoViewIfNeeded();
+    await page.getByText("Ranking", { exact: true }).scrollIntoViewIfNeeded();
 
     await expect(page).toHaveScreenshot();
   });

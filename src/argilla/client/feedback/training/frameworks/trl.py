@@ -71,6 +71,8 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaTRLTrainer")
     _logger.setLevel(logging.INFO)
 
+    require_version("transformers")
+    require_version("torch")
     require_version("trl>=0.5.0")
 
     def __init__(
@@ -85,7 +87,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         prepared_data=None,
         model: str = None,
         seed: int = None,
-    ):
+    ) -> None:
         super().__init__(dataset=dataset, task=task, prepared_data=prepared_data, model=model, seed=seed)
         import torch
         from datasets import DatasetDict
@@ -104,7 +106,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         set_seed(self._seed)
 
         if self._model is None:
-            self._model = "gpt2"
+            self._model = "gpt2-medium"
 
         if isinstance(self._dataset, DatasetDict):
             self._train_dataset = self._dataset["train"]

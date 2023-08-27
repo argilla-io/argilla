@@ -67,7 +67,7 @@ TASK_STRUCTURE = {
 
 
 class TrainingData(ABC):
-    def _format_data(self, dataset: "FeedbackDataset"):
+    def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, Any]]:
         formatted_data = []
         explode_columns = set()
         for record in dataset.records:
@@ -249,8 +249,8 @@ class TrainingTask:
         to extract data from the Feedback Dataset in an immediately useful format.
 
         Args:
-            formatting_func (Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]): A formatting function
-                converting a dictionary of records into zero, one or more text strings.
+            formatting_func: A formatting function converting a dictionary of records into zero,
+                one or more text strings.
 
         Returns:
             TrainingTaskForSFT: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
@@ -270,7 +270,7 @@ class TrainingTask:
         return TrainingTaskForSFT(formatting_func=formatting_func)
 
     @classmethod
-    def for_reward_modelling(
+    def for_reward_modeling(
         cls,
         formatting_func: Callable[
             [Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]
@@ -281,8 +281,8 @@ class TrainingTask:
         to extract data from the Feedback Dataset in an immediately useful format.
 
         Args:
-            formatting_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]]):
-                A formatting function converting a dictionary of records into zero, one or more chosen-rejected text tuples.
+            formatting_func: A formatting function converting a dictionary of records into zero,
+                one or more chosen-rejected text tuples.
 
         Returns:
             TrainingTaskForRM: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
@@ -299,7 +299,7 @@ class TrainingTask:
             ...         chosen = sample["response-2"]
             ...         rejected = sample["response-1"]
             ...     return chosen, rejected
-            >>> task = TrainingTask.for_reward_modelling(formatting_func=formatting_func)
+            >>> task = TrainingTask.for_reward_modeling(formatting_func=formatting_func)
             >>> dataset.prepare_for_training(framework="...", task=task)
 
         """
@@ -314,8 +314,8 @@ class TrainingTask:
         to extract data from the Feedback Dataset in an immediately useful format.
 
         Args:
-            formatting_func (Callable[[Dict[str, Any]], Union[None, str, Iterator[str]]]):
-                A formatting function converting a dictionary of records into zero, one or more prompts.
+            formatting_func: A formatting function converting a dictionary of records into zero,
+                one or more prompts.
 
         Returns:
             TrainingTaskForPPO: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
@@ -333,8 +333,8 @@ class TrainingTask:
         to extract data from the Feedback Dataset in an immediately useful format.
 
         Args:
-            formatting_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]):
-                A formatting function converting a dictionary of records into zero, one or more prompt-chosen-rejected text tuples.
+            formatting_func: A formatting function converting a dictionary of records into zero,
+                one or more prompt-chosen-rejected text tuples.
 
         Returns:
             TrainingTaskForDPO: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
@@ -362,9 +362,10 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
     """Training data for text classification
 
     Args:
-        formatting_func (Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]], optional): A formatting function. Defaults to None.
-        text: TextField
-        label: Union[RatingQuestionUnification, LabelQuestionUnification, MultiLabelQuestionUnification, RankingQuestionUnification]
+        formatting_func: A formatting function returning the text to classify. Either a formatting function or
+            the text and label parameters are provided. Defaults to None.
+        text: The text field to take as the text to classify.
+        label: The question denoting the label of the text to classify.
 
     Examples:
         >>> from argilla import LabelQuestion, TrainingTask
@@ -394,10 +395,15 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
 
     """
 
-    formatting_func: Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]] = None
-    text: TextField = None
-    label: Union[
-        RatingQuestionUnification, LabelQuestionUnification, MultiLabelQuestionUnification, RankingQuestionUnification
+    formatting_func: Optional[Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]] = None
+    text: Optional[TextField] = None
+    label: Optional[
+        Union[
+            RatingQuestionUnification,
+            LabelQuestionUnification,
+            MultiLabelQuestionUnification,
+            RankingQuestionUnification,
+        ]
     ] = None
 
     @property
@@ -421,7 +427,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
     def __id2label__(self):
         return self.label.question.__id2label__
 
-    def _format_data(self, dataset: "FeedbackDataset"):
+    def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, Any]]:
         if self.formatting_func is not None:
             output = set()
             for sample in dataset.format_as("datasets"):
@@ -631,8 +637,8 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
     """Training data for supervised finetuning
 
     Args:
-        formatting_func (Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]): A formatting function
-            converting a dictionary of records into zero, one or more text strings.
+        formatting_func: A formatting function converting a dictionary of records into zero,
+            one or more text strings.
 
     Examples:
         >>> from argilla import TrainingTaskForSFT
@@ -649,7 +655,7 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
 
     formatting_func: Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]
 
-    def _format_data(self, dataset: "FeedbackDataset"):
+    def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
         formatted_texts = set()
         for sample in dataset.format_as("datasets"):
             if texts := self.formatting_func(sample):
@@ -690,11 +696,11 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
 
 
 class TrainingTaskForRM(BaseModel, TrainingData):
-    """Training data for reward modelling
+    """Training data for reward modeling
 
     Args:
-        formatting_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]]):
-            A formatting function converting a dictionary of records into zero, one or more chosen-rejected text tuples.
+        formatting_func: A formatting function converting a dictionary of records into zero,
+            one or more chosen-rejected text tuples.
 
     Examples:
         >>> from argilla import TrainingTaskForRM
@@ -716,7 +722,7 @@ class TrainingTaskForRM(BaseModel, TrainingData):
         [Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]
     ]
 
-    def _format_data(self, dataset: "FeedbackDataset"):
+    def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
         output = set()
         for sample in dataset.format_as("datasets"):
             chosen_rejecteds = self.formatting_func(sample)
@@ -764,7 +770,7 @@ class TrainingTaskForPPO(BaseModel, TrainingData):
     """Training data for proximal policy optimization
 
     Args:
-        text (TextField): The TextField to use for training.
+        text: The TextField to use for training.
 
     Examples:
         >>> from argilla import TrainingTaskForPPO
@@ -775,7 +781,7 @@ class TrainingTaskForPPO(BaseModel, TrainingData):
 
     formatting_func: Callable[[Dict[str, Any]], Union[None, str, Iterator[str]]]
 
-    def _format_data(self, dataset: "FeedbackDataset"):
+    def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
         formatted_texts = set()
         for sample in dataset.format_as("datasets"):
             if texts := self.formatting_func(sample):
@@ -820,8 +826,8 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
     """Training data for direct preference optimization
 
     Args:
-        formatting_func (Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]):
-            A formatting function converting a dictionary of records into zero, one or more prompt-chosen-rejected text tuples.
+        formatting_func: A formatting function converting a dictionary of records into zero,
+            one or more prompt-chosen-rejected text tuples.
 
     Examples:
         >>> from argilla import TrainingTaskForDPO
@@ -841,7 +847,7 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
 
     formatting_func: Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]
 
-    def _format_data(self, dataset: "FeedbackDataset"):
+    def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
         output = set()
         for sample in dataset.format_as("datasets"):
             prompt_chosen_rejecteds = self.formatting_func(sample)
@@ -921,9 +927,9 @@ class TrainingTaskMapping(TrainingTask, RenamedDeprecationMixin):
         return super().for_supervised_fine_tuning(*args, **kwargs)
 
     @classmethod
-    def for_reward_modelling(cls, *args, **kwargs) -> TrainingTaskForRM:
+    def for_reward_modeling(cls, *args, **kwargs) -> TrainingTaskForRM:
         cls.warn()
-        return super().for_reward_modelling(*args, **kwargs)
+        return super().for_reward_modeling(*args, **kwargs)
 
     @classmethod
     def for_proximal_policy_optimization(cls, *args, **kwargs) -> TrainingTaskForPPO:

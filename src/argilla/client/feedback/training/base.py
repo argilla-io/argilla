@@ -42,7 +42,6 @@ class ArgillaTrainer(ArgillaTrainerV1):
         seed: Optional[int] = None,
         gpu_id: Optional[int] = -1,
         framework_kwargs: Optional[dict] = {},
-        fetch_records: bool = True,
     ) -> None:
         """
         Initialize an Argilla Trainer.
@@ -74,7 +73,6 @@ class ArgillaTrainer(ArgillaTrainerV1):
         self._prepared_data = self._dataset.prepare_for_training(
             framework=framework,
             task=task,
-            fetch_records=fetch_records,
             train_size=train_size,
             seed=seed,
             lang=lang,
@@ -271,7 +269,7 @@ class ArgillaTrainerSkeleton(ABC):
         """
 
     @abstractmethod
-    def train(self, output_dir: str = None) -> None:
+    def train(self, output_dir: Optional[str] = None) -> None:
         """
         Trains the model.
         """

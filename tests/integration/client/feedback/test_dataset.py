@@ -692,4 +692,4 @@ def test_prepare_for_training_text_classification(
     label = dataset.question_by_name(question)
     task = TrainingTask.for_text_classification(text=dataset.fields[0], label=label)
 
-    dataset.prepare_for_training(framework=framework, task=task, fetch_records=False)
+    dataset.prepare_for_training(framework=framework, task=task)

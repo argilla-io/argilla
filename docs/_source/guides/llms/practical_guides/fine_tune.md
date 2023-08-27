@@ -416,7 +416,6 @@ trainer = ArgillaTrainer(
     dataset=feedback_dataset,
     task=task,
     framework="trl",
-    fetch_records=False,
     train_size=0.8,
     model="gpt2",
 )
@@ -630,7 +629,7 @@ def formatting_func(sample: Dict[str, Any]) -> Iterator[Tuple[str, str]]:
             if chosen != rejected:
                 yield chosen, rejected
 
-task = TrainingTask.for_reward_modelling(formatting_func=formatting_func)
+task = TrainingTask.for_reward_modeling(formatting_func=formatting_func)
 ```
 
 You can observe the dataset created using this task by using `FeedbackDataset.prepare_for_training`, for example using the "trl" framework:

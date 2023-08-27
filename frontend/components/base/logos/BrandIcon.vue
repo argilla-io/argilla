@@ -75,7 +75,6 @@ export default {
       validator: (value) => ["default", "white"].includes(value),
     },
   },
-  data: () => ({}),
 };
 </script>
 <style lang="scss" scoped></style>

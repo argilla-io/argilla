@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_async_db
-from argilla.server.enums import ResponseStatusFilter
+from argilla.server.enums import RecordInclude, ResponseStatusFilter
 from argilla.server.models import Dataset as DatasetModel
 from argilla.server.models import ResponseStatus, User
 from argilla.server.policies import DatasetPolicyV1, authorize
@@ -37,7 +37,6 @@ from argilla.server.schemas.v1.datasets import (
     QuestionCreate,
     Questions,
     Record,
-    RecordInclude,
     Records,
     RecordsCreate,
     SearchRecord,

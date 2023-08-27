@@ -14,7 +14,7 @@
 
 import random
 from collections import Counter
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, Callable, List, Union
 
 import pytest
 
@@ -37,6 +37,7 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForTextClassification,
     TrainingTaskMapping,
     TrainingTaskMappingForTextClassification,
+    TrainingTaskTypes,
 )
 from argilla.client.feedback.unification import LabelQuestionUnification
 from argilla.client.models import Framework
@@ -47,8 +48,8 @@ __OUTPUT_DIR__ = "tmp"
 @pytest.mark.parametrize(
     "framework",
     [
-        # Framework("spacy"),
-        # Framework("spacy-transformers"),
+        Framework("spacy"),
+        Framework("spacy-transformers"),
         Framework("transformers"),
         Framework("spark-nlp"),
         Framework("span_marker"),
@@ -88,15 +89,15 @@ def test_prepare_for_training_text_classification_with_defaults(
             NotImplementedError,
             match=f"Framework {framework} is not supported for this {TrainingTaskForTextClassification}.",
         ):
-            trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, fetch_records=False)
+            trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework)
     elif framework == Framework("spark-nlp"):
         with pytest.raises(NotImplementedError, match=f"{framework} is not a valid framework."):
-            trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, fetch_records=False)
+            trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework)
     else:
         if framework in [Framework("peft")] and sys.version_info < (3, 9):
             pass
         else:
-            trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, fetch_records=False)
+            trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework)
             if framework in [Framework("spacy"), Framework("spacy-transformers")]:
                 trainer.update_config(max_steps=1)
             elif framework in [Framework("transformers"), Framework("setfit")]:
@@ -152,12 +153,12 @@ def test_prepare_for_training_text_classification_with_formatting_func(
         match=r"formatting_func must return \(text,label\) as a Tuple\[str, str\] or a Tuple\[str, List\[str\]\]",
     ):
         task = TrainingTask.for_text_classification(wrong_formatting_func)
-        trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, fetch_records=False)
+        trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework)
         trainer.update_config(num_iterations=1)
         trainer.train(__OUTPUT_DIR__)
 
     task = TrainingTask.for_text_classification(correct_formatting_func)
-    trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, fetch_records=False)
+    trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework)
     trainer.update_config(num_iterations=1)
     trainer.train(__OUTPUT_DIR__)
 
@@ -167,11 +168,11 @@ def test_prepare_for_training_text_classification_with_formatting_func(
     (
         lambda: TrainingTaskMapping.for_text_classification(None, None),
         lambda: TrainingTaskMapping.for_direct_preference_optimization(None),
-        lambda: TrainingTaskMapping.for_reward_modelling(None),
+        lambda: TrainingTaskMapping.for_reward_modeling(None),
         lambda: TrainingTaskMapping.for_supervised_fine_tuning(None),
     ),
 )
-def test_deprecations(callable) -> None:
+def test_deprecations(callable: Callable[[], TrainingTaskTypes]) -> None:
     with pytest.warns(DeprecationWarning, match="`TrainingTaskMapping` has been renamed to `TrainingTask`"):
         # This'll crash because we're passing None, but we only test the warning
         try:

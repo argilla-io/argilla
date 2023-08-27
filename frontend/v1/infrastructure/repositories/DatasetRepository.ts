@@ -8,7 +8,19 @@ export const DATASET_API_ERRORS = {
   ERROR_FETCHING_WORKSPACES: "ERROR_FETCHING_WORKSPACES",
   ERROR_FETCHING_DATASET_INFO: "ERROR_FETCHING_DATASET_INFO",
   ERROR_FETCHING_WORKSPACE_INFO: "ERROR_FETCHING_WORKSPACE_INFO",
+  ERROR_PATCHING_DATASET_GUIDELINES: "ERROR_PATCHING_DATASET_GUIDELINES",
+  ERROR_DELETING_DATASET: "ERROR_DELETING_DATASET",
 };
+
+interface BackendDatasetFeedbackTaskResponse {
+  guidelines: string;
+  id: string;
+  inserted_at: string;
+  name: string;
+  status: string;
+  updated_at: string;
+  workspace_id: string;
+}
 
 export class DatasetRepository implements IDatasetRepository {
   constructor(
@@ -70,6 +82,38 @@ export class DatasetRepository implements IDatasetRepository {
     );
 
     return [...otherDatasets, ...feedbackDatasets];
+  }
+
+  async update(dataset: Dataset) {
+    try {
+      const { data } =
+        await this.axios.patch<BackendDatasetFeedbackTaskResponse>(
+          `/v1/datasets/${dataset.id}`,
+          {
+            guidelines: dataset.guidelines,
+          }
+        );
+
+      return {
+        when: data.updated_at,
+      };
+    } catch (err) {
+      throw {
+        response: DATASET_API_ERRORS.ERROR_PATCHING_DATASET_GUIDELINES,
+      };
+    }
+  }
+
+  async delete(datasetId: string) {
+    try {
+      await this.axios.delete(`/v1/datasets/${datasetId}`, {
+        validateStatus: (status) => status === 200,
+      });
+    } catch (err) {
+      throw {
+        response: DATASET_API_ERRORS.ERROR_DELETING_DATASET,
+      };
+    }
   }
 
   private async getDatasetById(datasetId: string) {

@@ -19,7 +19,8 @@
       "@types/node",
       "@nuxt/typescript-build",
       "@nuxt/types",
-      "@types/jest"
+      "@types/jest",
+      "@nuxtjs/i18n"
     ]
   },
   "vueCompilerOptions": {
