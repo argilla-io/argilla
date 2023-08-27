@@ -26,7 +26,7 @@ export class RecordRepository {
     offset: number,
     status: string,
     searchText: string,
-    numberOfRecordsToFetch = 10
+    numberOfRecordsToFetch = 2
   ): Promise<BackedRecords> {
     if (searchText && searchText.length)
       return this.getRecordsByText(
@@ -196,12 +196,14 @@ export class RecordRepository {
     numberOfRecordsToFetch: number,
     status: string
   ) {
+    const backendStatus = status === "pending" ? "missing" : status;
     const params = new URLSearchParams();
+
     params.append("include", "responses");
     params.append("include", "suggestions");
     params.append("offset", offset.toString());
     params.append("limit", numberOfRecordsToFetch.toString());
-    params.append("response_status", status);
+    params.append("response_status", backendStatus);
 
     return params;
   }
