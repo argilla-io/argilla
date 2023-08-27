@@ -1,6 +1,6 @@
 # 🦾 Train a Model
 
-This guide showcases how to train a model on the `Dataset` classes in the Argilla client.
+This guide showcases how to train a model on the `TextClassification`, `TokenClassification` and `Text2TextClassification` classes in the Argilla client.
 The Dataset classes are lightweight containers for Argilla records. These classes facilitate importing from and exporting to different formats (e.g., `pandas.DataFrame`, `datasets.Dataset`) as well as sharing and versioning Argilla datasets using the Hugging Face Hub.
 
 For each record type, there's a corresponding Dataset class called `DatasetFor<RecordType>`.
@@ -13,7 +13,7 @@ There are two ways to train custom models on top of your annotated data:
 
 
 ````{note}
-For training models with the `FeedbackDataset` take a look [here](/guides/llms/practical_guides/practical_guides).
+For training models with the `FeedbackDataset` take a look [here](/guides/llms/practical_guides/practical_guides/fine-tune).
 ````
 
 ## Train directly

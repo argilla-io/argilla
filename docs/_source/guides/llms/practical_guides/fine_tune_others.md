@@ -1,12 +1,61 @@
-# Fine-tune other models
+# Fine-tuning overview
 
-After [collecting the responses](./collect_responses.html) from our `FeedbackDataset` we can start fine-tuning our basic models. Due to the customizability of the `FeedbackDataset`, this might require setting up a custom post-processing workflow but we will provide some good toy examples for the text classification task. We will add additional support for other tasks in the future.
+After [collecting the responses](./collect_responses.html) from our `FeedbackDataset` we can start fine-tuning our basic models. Due to the customizability of the `FeedbackDataset`, this might require setting up a custom post-processing workflow but we will provide some good toy examples for the text classification task, t
+
+## Train directly
+
+This is, quick and easy but does not offer specific customizations.
+
+The `ArgillaTrainer` is a wrapper around many of our favorite NLP libraries. It provides a very intuitive abstract workflow to facilitate simple training workflows using decent default pre-set configurations without having to worry about any data transformations from Argilla. We plan on adding more support for other tasks and frameworks so feel free to reach out on our Slack or GitHub.
+
+| Framework/Task    | TextClassification | Supervised Fine-tuning | Reward Modeling | Proximal Policy Optimization | Direct Performance Optimization |
+|-------------------|--------------------|------------------------|-----------------|------------------------------|---------------------------------|
+| TRL               |                    | ✔️                      | ✔️               | ✔️                            | ✔️                               |
+| OpenAI            | ✔️                  |                        | ✔️               |                              |                                 |
+| AutoTrain         | ✔️                  | ✔️                      | ✔️               |                              |                                 |
+| SetFit            | ✔️                  |                        |                 |                              |                                 |
+| spaCy             | ✔️                  | ✔️                      |                 |                              |                                 |
+| Transformers      | ✔️                  | ✔️                      |                 |                              |                                 |
+| PEFT              | ✔️                  | ✔️                      |                 |                              |                                 |
+| SpanMarker        |                    | ✔️                      |                 |                              |                                 |
+
 
 Generally, this is as easy as one-two-three but does slightly differ per task.
 
 1. First, we define a unification strategy for responses to `questions` we want to use.
-2. Next, we then define a task-mapping. This mapping defines which `fields` and `questions` we want to use from our dataset for the downstream training task. These mappings are then used for retrieving data from a dataset and initializing the training.
+2. Next, we then define a task-mapping. This mapping defines which `fields` and `questions` we want to use from our dataset for the downstream training task. These mappings are then used for retrieving data from a dataset and initializing the training. Alternatively, we can use a `formatting_func` to fully fine-tune and customize the data pre-processing.
 3. Lastly, we initialize the `ArgillaTrainer` and forward the task mapping, unification strategies and training framework.
+
+## Supervised Fine-tuning (SFT)
+
+### Background
+
+### Training
+
+#### Define a task
+
+#### Use ArgillaTrainer
+
+
+## Reward Modeling (RM)
+
+### Background
+
+### Training
+
+#### Define a task
+
+#### Use ArgillaTrainer
+
+## Reward Modeling
+
+### Background
+
+### Training
+
+#### Define a task
+
+#### Use ArgillaTrainer
 
 ## Text classification
 
@@ -219,7 +268,7 @@ dataset.prepare_for_training(
 ```
 ````
 
-### An end-to-end example
+#### An end-to-end example
 
 Below you can also find an end-to-end example of how to use the `ArgillaTrainer`.
 
