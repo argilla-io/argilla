@@ -1,20 +1,19 @@
-# Fine-tuning models
+# Fine-tuning with responses to a Feedback Dataset
 
-After [collecting the responses](./collect_responses.html) from our `FeedbackDataset` we can start fine-tuning our LLMs and other models. Due to the customizability of the task, this might require setting up a custom post-processing workflow but we will provide some good toy examples for the [classic LLM approaches](../conceptual_guides/rlhf.html): pre-training, supervised fine-tuning, reward modeling, and reinforcement learning.
-
+After [collecting the responses](/guides/llms/practical_guides/collect_responses.html) from our `FeedbackDataset` we can start fine-tuning our LLMs and other models. Due to the customizability of the task, this might require setting up a custom post-processing workflow but we will provide some good toy examples for the [LLM approaches](/guides/llms/conceptual_guides/rlhf.html): pre-training, supervised fine-tuning, and reinforcement learning through human feedback (RLHF). However, we also still provide for other NLP tasks like text classification.
 ## The `ArgillaTrainer`
 
 The `ArgillaTrainer` is a wrapper around many of our favorite NLP libraries. It provides a very intuitive abstract representation to facilitate simple training workflows using decent default pre-set configurations without having to worry about any data transformations from Argilla.
 
 Using the `ArgillaTrainer` is straighforward but does slightly differ per task.
 
-1. First, we then define a `TaskMapping`. This is done using a custom `formatting_func`` but some, like Text Classification, can also be defined using default definitions using the FeedbackDataset fields and questions. These mappings are then used for retrieving data from a dataset and initializing the training. We also offer some [unfication strategies](/guides/llms/practical_guides/collect_responses) out of the box.
-2. Next, we initialize the `ArgillaTrainer` and forward the task mapping and training framework. Some other interesting methods are:
+1. First, we then define a `TaskMapping`. This is done using a custom `formatting_func`. However, tasks like Text Classification can also be defined using default definitions using the FeedbackDataset fields and questions. These mappings are then used for retrieving data from a dataset and initializing the training. We also offer some ideas for [unifying data](/guides/llms/practical_guides/collect_responses) out of the box.
+2. Next, we initialize the `ArgillaTrainer` and forward the task mapping and training framework. Internally, this uses the `FeedbackData.prepare_for_training`-method to format the data according to the expectations from the framework. Some other interesting methods are:
    1. `ArgillaTrainer.update_config` to change framework specifc training paramaeters.
    2. `ArgillaTrainer.train` to start training.
    3. `ArgillTrainer.predict` to run inference.
 
-Underneath, you can see the happy flow.
+Underneath, you can see the happy flow for using the `ArgillaTrainer`.
 
 ```python
 from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
@@ -68,7 +67,7 @@ Note that you don't need to pass all of them directly and that the values below 
 
 ### The `TaskMapping`
 
-Each task has its own `TaskMapping.for_*`-classmethod and can be defined using a custom `formatting_func` but some, like Text Classification, can also be defined using default definitions using the `FeedbackDataset` fields and questions.
+A `TaskMapping` is used to define how the data should be processed and formatted according to the associated task and framework. Each task has its own `TaskMapping.for_*`-classmethod and the data formatting can always be defined using a custom `formatting_func`. However, simpler tasks like Text Classification can also be defined using default definitions. These directly use the fields and questions from the FeedbackDataset configuration to infer how to prepare the data. Underneath you can find an overview of the `TaskMapping`` requirements.
 
 | Framework/Task    | Text Classification | Supervised Fine-tuning | Reward Modeling | Proximal Policy Optimization | Direct Performance Optimization |
 |-------------------|--------------------|------------------------|-----------------|------------------------------|---------------------------------|
@@ -632,7 +631,9 @@ def formatting_func(sample: Dict[str, Any]) -> Iterator[Tuple[str, str]]:
 
 task = TrainingTask.for_reward_modelling(formatting_func=formatting_func)
 ```
+
 You can observe the dataset created using this task by using `FeedbackDataset.prepare_for_training`, for example using the "trl" framework:
+
 ```python
 dataset = feedback_dataset.prepare_for_training(framework="trl", task=task)
 """
@@ -830,5 +831,5 @@ print(output_text)
 The [TRL](https://huggingface.co/docs/trl) library implements and alternative way to incorporate humand feedback into an LLM which is called Direct Performance Optimization (DPO). This approach skips the step of training a separate reward model and directly uses the preference data during training as measure for optimization fo human feedback.
 #### Background
 
-#### Data
+#### Training
 
