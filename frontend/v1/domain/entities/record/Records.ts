@@ -18,4 +18,11 @@ export class Records {
     const arrayOffset = page - 1;
     return this.records.find((record) => record.arrayOffset === arrayOffset);
   }
+
+  getOffsetToFind(page: number, status: string): number {
+    if (this.records.length < page - 1) return page - 1;
+    const previousRecords = this.records.slice(0, page);
+
+    return previousRecords.filter((record) => record.status === status).length;
+  }
 }
