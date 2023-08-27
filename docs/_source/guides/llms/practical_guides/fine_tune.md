@@ -1,4 +1,4 @@
-# Fine-tuning with responses from a Feedback Dataset
+# Fine-tuning a Feedback Dataset
 
 After [collecting the responses](/guides/llms/practical_guides/collect_responses.html) from our `FeedbackDataset` we can start fine-tuning our LLMs and other models. Due to the customizability of the task, this might require setting up a custom post-processing workflow but we will provide some good toy examples for the [LLM approaches](/guides/llms/conceptual_guides/rlhf.html): pre-training, supervised fine-tuning, and reinforcement learning through human feedback (RLHF). However, we also still provide for other NLP tasks like text classification.
 ## The `ArgillaTrainer`
