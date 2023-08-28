@@ -1,15 +1,15 @@
 # Fine-tuning a Feedback Dataset
 
-After [collecting the responses](/guides/llms/practical_guides/collect_responses.html) from our `FeedbackDataset` we can start fine-tuning our LLMs and other models. Due to the customizability of the task, this might require setting up a custom post-processing workflow but we will provide some good toy examples for the [LLM approaches](/guides/llms/conceptual_guides/rlhf.html): pre-training, supervised fine-tuning, and reinforcement learning through human feedback (RLHF). However, we also still provide for other NLP tasks like text classification.
+After [collecting the responses](/guides/llms/practical_guides/collect_responses.html) from our `FeedbackDataset`, we can start fine-tuning our LLMs and other models. Due to the customizability of the task, this might require setting up a custom post-processing workflow, but we will provide some good toy examples for the [LLM approaches](/guides/llms/conceptual_guides/rlhf.html): pre-training, supervised fine-tuning, and reinforcement learning through human feedback (RLHF). However, we also still provide for other NLP tasks like text classification.
 ## The `ArgillaTrainer`
 
 The `ArgillaTrainer` is a wrapper around many of our favorite NLP libraries. It provides a very intuitive abstract representation to facilitate simple training workflows using decent default pre-set configurations without having to worry about any data transformations from Argilla.
 
-Using the `ArgillaTrainer` is straighforward but does slightly differ per task.
+Using the `ArgillaTrainer` is straightforward, but it slightly differs per task.
 
-1. First, we then define a `TaskMapping`. This is done using a custom `formatting_func`. However, tasks like Text Classification can also be defined using default definitions using the FeedbackDataset fields and questions. These mappings are then used for retrieving data from a dataset and initializing the training. We also offer some ideas for [unifying data](/guides/llms/practical_guides/collect_responses) out of the box.
-2. Next, we initialize the `ArgillaTrainer` and forward the task mapping and training framework. Internally, this uses the `FeedbackData.prepare_for_training`-method to format the data according to the expectations from the framework. Some other interesting methods are:
-   1. `ArgillaTrainer.update_config` to change framework specifc training paramaeters.
+1. First, we define a `TrainingTask`. This is done using a custom `formatting_func`. However, tasks like Text Classification can also be defined using default definitions using the `FeedbackDataset` fields and questions. These tasks are then used for retrieving data from a dataset and initializing the training. We also offer some ideas for [unifying data](/guides/llms/practical_guides/collect_responses) out of the box.
+2. Next, we initialize the `ArgillaTrainer` and forward the task and training framework. Internally, this uses the `FeedbackData.prepare_for_training`-method to format the data according to the expectations from the framework. Some other interesting methods are:
+   1. `ArgillaTrainer.update_config` to change framework specific training parameters.
    2. `ArgillaTrainer.train` to start training.
    3. `ArgillTrainer.predict` to run inference.
 
@@ -45,11 +45,11 @@ We plan on adding more support for other tasks and frameworks so feel free to re
 | Supervised Fine-tuning          | ✔️    |        |           |        |       |              |      |
 | Reward Modeling                 | ✔️    |        |           |        |       |              |      |
 | Proximal Policy Optimization    | ✔️    |        |           |        |       |              |      |
-| Direct Performance Optimization | ✔️    |        |           |        |       |              |      |
+| Direct Preference Optimization  | ✔️    |        |           |        |       |              |      |
 
 
 ```{note}
-We also offer support for  Token Classification using our `TokenClassifcationDataset` but this is shown in [a section](/guides/train_a_model) about our older dataset-types.
+We also offer support for Token Classification using our `TokenClassifcationDataset` but this is shown in [a section](/guides/train_a_model) about our older dataset-types.
 ```
 
 #### Training Configs
@@ -63,17 +63,17 @@ Note that you don't need to pass all of them directly and that the values below 
 ```{include} /_common/tabs/train_update_config.md
 ```
 
-### The `TaskMapping`
+### The `TrainingTask`
 
-A `TaskMapping` is used to define how the data should be processed and formatted according to the associated task and framework. Each task has its own `TaskMapping.for_*`-classmethod and the data formatting can always be defined using a custom `formatting_func`. However, simpler tasks like Text Classification can also be defined using default definitions. These directly use the fields and questions from the FeedbackDataset configuration to infer how to prepare the data. Underneath you can find an overview of the `TaskMapping`` requirements.
+A `TrainingTask` is used to define how the data should be processed and formatted according to the associated task and framework. Each task has its own `TrainingTask.for_*`-classmethod and the data formatting can always be defined using a custom `formatting_func`. However, simpler tasks like Text Classification can also be defined using default definitions. These directly use the fields and questions from the FeedbackDataset configuration to infer how to prepare the data. Underneath you can find an overview of the `TrainingTask` requirements.
 
-| Method                             | Content          | Return formatting_func                                     | Default           |
+| Method                             | Content          | `formatting_func` return type                                     | Default           |
 |:-----------------------------------|:-----------------|:-----------------------------------------------------------|:------------------|
 | for_text_classification            | `text-label`     | `Union[Tuple[str, str], Tuple[str, List[str]]]`            | ✔️                 |
-| for_supervised_fine_tuning         | `text`           | `str`                                                      | ✗                 |
-| for_reward_modelling               | `chosen-rejected`| `Tuple[str, str]`                                          | ✗                 |
-| for_proximal_policy_optimization   | `text`           | `Union[str, Iterator[str]]`                                | ✗                 |
-| for_direct_performance_optimization| `prompt-chosen-rejected`                 | `Tuple[str, str]`                                          | ✗                 |
+| for_supervised_fine_tuning         | `text`           | `Optional[Union[str, Iterator[str]]]`                                                      | ✗                 |
+| for_reward_modelling               | `chosen-rejected`| `Optional[Union[Tuple[str, str], Iterator[Tuple[str, str]]]]`                                          | ✗                 |
+| for_proximal_policy_optimization   | `text`           | `Optional[Union[str, Iterator[str]]]`                                | ✗                 |
+| for_direct_performance_optimization| `prompt-chosen-rejected`                 | `Optional[Union[Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]`                                          | ✗                 |
 
 
 ## Tasks
