@@ -71,9 +71,9 @@ A `TrainingTask` is used to define how the data should be processed and formatte
 |:-----------------------------------|:-----------------|:-----------------------------------------------------------|:------------------|
 | for_text_classification            | `text-label`     | `Union[Tuple[str, str], Tuple[str, List[str]]]`            | ✔️                 |
 | for_supervised_fine_tuning         | `text`           | `Optional[Union[str, Iterator[str]]]`                                                      | ✗                 |
-| for_reward_modelling               | `chosen-rejected`| `Optional[Union[Tuple[str, str], Iterator[Tuple[str, str]]]]`                                          | ✗                 |
+| for_reward_modeling               | `chosen-rejected`| `Optional[Union[Tuple[str, str], Iterator[Tuple[str, str]]]]`                                          | ✗                 |
 | for_proximal_policy_optimization   | `text`           | `Optional[Union[str, Iterator[str]]]`                                | ✗                 |
-| for_direct_performance_optimization| `prompt-chosen-rejected`                 | `Optional[Union[Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]`                                          | ✗                 |
+| for_direct_preference_optimization| `prompt-chosen-rejected`                 | `Optional[Union[Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]`                                          | ✗                 |
 
 
 ## Tasks
@@ -109,6 +109,8 @@ For a multi-label scenario it is recommended to add some examples without any la
 :::
 
 ::::
+
+We then use either `text-label`-pair to further fine-tune the model.
 
 #### Training
 
@@ -279,7 +281,7 @@ dataset
 # })
 ```
 
-There are many ways and great packages to deal with this `pre-training` phase, but generally, NLP training frameworks like [KerasNLP](https://keras.io/keras_nlp/) and [Hugging Face](https://huggingface.co/) offer great out-of-the-box methods for training a causal language model. In our guide, we will refer to the great docs off using Hugging Face `transformers` and `datasets` library and prepare our training data in the format they require for [training a causal language model](https://huggingface.co/learn/nlp-course/chapter7/6#training-a-causal-language-model-from-scratch).
+There are many ways and great packages to deal with this `pre-training` phase, but generally, NLP training frameworks like [KerasNLP](https://keras.io/keras_nlp/) and [Hugging Face](https://huggingface.co/) offer great out-of-the-box methods for training a causal language model. In our guide, we will refer to the great docs of the Hugging Face `transformers` and `datasets` libraries and prepare our training data in the format they require for [training a causal language model](https://huggingface.co/learn/nlp-course/chapter7/6#training-a-causal-language-model-from-scratch).
 
 ### Supervised finetuning
 
@@ -335,14 +337,14 @@ Virgin Australia commenced services on 31 August 2000 as Virgin Blue, with two a
 
 ::::
 
-Ultimately, the choice between these two approaches depends on the specific requirements of the application and the desired level of control over the model's output. By employing the appropriate fine-tuning strategy, we can enhance the model's performance and make it more suitable for a wide range of applications and use cases.
+Ultimately, the choice between these two approaches to be used as `text`-field depends on the specific requirements of the application and the desired level of control over the model's output. By employing the appropriate fine-tuning strategy, we can enhance the model's performance and make it more suitable for a wide range of applications and use cases.
 
 #### Training
 
 There are many good libraries to help with this step, however, we are a fan of the [Transformer Reinforcement Learning (TRL)](https://huggingface.co/docs/trl) package, [Transformer Reinforcement Learning X (TRLX)](https://github.com/CarperAI/trlx),and the no-code [Hugging Face AutoTrain](https://huggingface.co/spaces/autotrain-projects/autotrain-advanced) for fine-tuning. In both cases, we need a backbone model, obtained from the [pre-training step](#pre-training) and for example purposes we will use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en).
 
 ```{note}
-This dataset only contains a single annotator response per record. We gave some sugggestions on dealing with [responses from multiple annotators](/guides/llms/practical_guides/collect_responses).
+This dataset only contains a single annotator response per record. We gave some suggestions on dealing with [responses from multiple annotators](/guides/llms/practical_guides/collect_responses).
 ```
 
 ::::{tab-set}
@@ -360,7 +362,7 @@ from datasets import Dataset
 feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly-15k-curated-en")
 ```
 
-We offer the option to provide a `formatting_func` to the `TrainingTask.for_supervised_fine_tuning`. This function is applied to each sample in the dataset and can be used for anced preprocessing and data formatting. The function should return a tuple of `text`  as `str`.
+We offer the option to provide a `formatting_func` to the `TrainingTask.for_supervised_fine_tuning`. This function is applied to each sample in the dataset and can be used for advanced preprocessing and data formatting. The function should return a `text` as `str`.
 
 
 ```python
@@ -497,74 +499,26 @@ trainer = trlx.train('gpt2', samples=samples)
 
 ::::
 
-
 ### Reward Modeling
 
 #### Background
 
 A Reward Model (RM) is used to rate responses in alignment with human preferences and afterwards using this RM to fine-tune the LLM with the associated scores. Fine-tuning using a Reward Model can be done in different ways. We can either get the annotator to rate output completely manually, we can use a simple heuristic or we can use a stochastic preference model. Both [TRL](https://huggingface.co/docs/trl) and [TRLX](https://github.com/CarperAI/trlx) provide decent options for incorporating rewards. The [DeepSpeed library of Microsoft](https://github.com/microsoft/DeepSpeed/tree/master/blogs/deepspeed-chat) is a worthy mention too but will not be covered in our docs.
 
-The data required for these steps need to be used as comparison data to showcase the preference for the generated prompts. A good example is our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en), where we assumed that updated responses get preference over the older ones.
-
-```{note}
-The Dolly original dataset contained a lot of reference indicators "[]", which enforces the model to hallicinate and create references.
+```{include} /_common/dolly_dataset.md
 ```
 
-::::{tab-set}
-
-:::{tab-item} Original
-
-```bash
-### Instruction
-When did Virgin Australia start operating?
-
-### Context
-Virgin Australia, the trading name of Virgin Australia Airlines Pty Ltd, is an Australian-based airline.
-It is the largest airline by fleet size to use the Virgin brand. [2]
-It commenced services on 31 August 2000 as Virgin Blue, with two aircraft on a single route.[3]
-It suddenly found itself as a major airline in Australia's domestic market after the collapse of Ansett Australia in September 2001.
-The airline has since grown to directly serve 32 cities in Australia, from hubs in Brisbane, Melbourne and Sydney.[4]
-
-### Response:
-Virgin Australia commenced services on 31 August 2000 as Virgin Blue, with two aircraft on a single route.
-```
-:::
-
-:::{tab-item} Corrected
-
-```bash
-### Instruction
-When did Virgin Australia start operating?
-
-### Context
-Virgin Australia, the trading name of Virgin Australia Airlines Pty Ltd, is an Australian-based airline.
-It is the largest airline by fleet size to use the Virgin brand.
-It commenced services on 31 August 2000 as Virgin Blue, with two aircraft on a single route.
-It suddenly found itself as a major airline in Australia's domestic market after the collapse of Ansett Australia in September 2001.
-The airline has since grown to directly serve 32 cities in Australia, from hubs in Brisbane, Melbourne and Sydney.
-
-### Response:
-Virgin Australia commenced services on 31 August 2000 as Virgin Blue, with two aircraft on a single route.
-```
-
-:::
-
-::::
+In case of training an RM, we then use the `chosen-rejected`-pairs and train a classifier to distinguish between them.
 
 #### Training
 
-The data required for these steps need to be used as comparison data to showcase the preference for the generated prompts. Like before, we will use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en), where we assumed that updated responses get preference over the older ones.
-
-```python
-import argilla as rg
-
-feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly-15k-curated-en")
+```{include} /_common/dolly_dataset_info.md
 ```
 
 ::::{tab-set}
 
 :::{tab-item} TRL
-[TRL](https://huggingface.co/docs/trl) implements reward modeling, which can be used via the `ArgillaTrainer` class. We offer the option to provide a `formatting_func` to the `TrainingTask.for_reward_modelling`. This function is applied to each sample in the dataset and can be used for preprocessing and data formatting. The function should return a tuple of `chosen-rejected`-pairs  as `Tuple[str, str]`. To determine which response from the FeedbackDataset is superior, we can use the user annotations.
+[TRL](https://huggingface.co/docs/trl) implements reward modeling, which can be used via the `ArgillaTrainer` class. We offer the option to provide a `formatting_func` to the `TrainingTask.for_reward_modeling`. This function is applied to each sample in the dataset and can be used for preprocessing and data formatting. The function should return a tuple of `chosen-rejected`-pairs  as `Tuple[str, str]`. To determine which response from the FeedbackDataset is superior, we can use the user annotations.
 
 ```{note}
 The formatting function can also return `None` or a list of tuples. The `None` may be used if the annotations indicate that the text is low quality or harmful, and the latter could be used if multiple annotators provide additional written responses, resulting in multiple good `chosen-rejected` pairs.
@@ -600,6 +554,8 @@ And all questions (i.e. the right side of the Argilla annotation view) are provi
     ...
 }
 ```
+
+We can now define our formatting function, which should return `chosen-rejected`-pairs as tuple.
 
 ```python
 from typing import Any, Dict, Iterator, Tuple
@@ -718,32 +674,46 @@ As expected, the good response has a higher score than the worse response.
 The [TRL](https://huggingface.co/docs/trl) library implements the last step of RLHF: Proximal Policy Optimization (PPO). It requires prompts, which are then fed through the model being finetuned. Its results are passed through a reward model. Lastly, the prompts, responses and rewards are used to update the model through reinforcement learning.
 
 ```{note}
-PPO requires a trained trainer supervised fine-tuned model and reward model to function. Take a look at that task outlines above to train your own models.
+PPO requires a trained supervised fine-tuned model and reward model to work. Take a look at that task outlines above to train your own models.
+```
+
+```{include} /_common/dolly_dataset.md
+```
+
+In case of training an PPO, we then use the prompt and context data and correct the generated response from the SFT model by using the reward model. Hence, we will need to format the following `text`.
+
+```bash
+### Instruction
+When did Virgin Australia start operating?
+
+### Context
+Virgin Australia, the trading name of Virgin Australia Airlines Pty Ltd, is an Australian-based airline.
+It is the largest airline by fleet size to use the Virgin brand.
+It commenced services on 31 August 2000 as Virgin Blue, with two aircraft on a single route.
+It suddenly found itself as a major airline in Australia's domestic market after the collapse of Ansett Australia in September 2001.
+The airline has since grown to directly serve 32 cities in Australia, from hubs in Brisbane, Melbourne and Sydney.
+
+### Response:
+{to be generated by SFT model}
 ```
 
 #### Training
 
-The data required for these steps need to be used as comparison data to showcase the preference for the generated prompts. Like before, we will use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en), where we assumed that updated responses get preference over the older ones.
-
-```python
-import argilla as rg
-
-feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly-15k-curated-en")
+```{include} /_common/dolly_dataset_load.md
 ```
 
-This guide uses the reward model trained in the last phase, but you can also use our [roberta-base-reward-model-falcon-dolly reward model](https://huggingface.co/argilla/roberta-base-reward-model-falcon-dolly).
+**Data Preparation**
 
-```python
-from transformers import pipeline
-
-reward_model = pipeline("argilla/roberta-base-reward-model-falcon-dolly", model="reward_model")
-```
-
-As usual, we start with a task with a formatting function. For PPO, the formatting function only returns prompts.
+As usual, we start with a task with a formatting function. For PPO, the formatting function only returns prompts as `text`, which are formatted according to a template.
 
 ```python
 from argilla.feedback import TrainingTask
 from typing import Dict, Any, Iterator
+
+template = """\
+### Instruction: {instruction}\n
+### Context: {context}\n
+### Response: {response}"""
 
 def formatting_func(sample: Dict[str, Any]) -> Iterator[str]:
     for instruction, context in zip(sample["new-instruction"], sample["new-context"]):
@@ -771,6 +741,8 @@ Dataset({
 {'id': 922, 'query': '### Instruction: Is beauty objective or subjective?\n\n### Context: \n\n### Response:'}
 """
 ```
+
+**ArgillaTrainer**
 
 Instead of using this dataset, we'll use the task directly with our `FeedbackDataset` in the `ArgillaTrainer`. PPO requires us to specify the `reward_model`, and allows us to specify some other useful values as well:
 * `reward_model`: A sentiment analysis pipeline with the reward model. This produces a reward for a prompt + response.
@@ -804,6 +776,8 @@ trainer.update_config(
 trainer.train(output_dir="ppo_model")
 ```
 
+**Inference**
+
 After training, we can load this model and generate with it!
 
 ```python
@@ -822,7 +796,7 @@ encoding = tokenizer([inputs], return_tensors="pt")
 outputs = model.generate(**encoding, max_new_tokens=30)
 output_text = tokenizer.decode(outputs[0])
 print(output_text)
-# Yes it is because toads are a sub-classification of frogs.
+# Yes it is, toads are a sub-classification of frogs.
 ```
 
 ### Direct Preference Optimization
@@ -835,12 +809,98 @@ The [TRL](https://huggingface.co/docs/trl) library implements and alternative wa
 DPO requires a trained supervised fine-tuned model to function. Take a look at that task outline above to train your own model.
 ```
 
+```{include} /_common/dolly_dataset_info.md
+```
+
+In case of training an PPO, we then use the prompt and context data and correct the generated response from the SFT model by using the reward model. Hence, we will need to format the following `text`.
+
+```bash
+### Instruction
+When did Virgin Australia start operating?
+
+### Context
+Virgin Australia, the trading name of Virgin Australia Airlines Pty Ltd, is an Australian-based airline.
+It is the largest airline by fleet size to use the Virgin brand.
+It commenced services on 31 August 2000 as Virgin Blue, with two aircraft on a single route.
+It suddenly found itself as a major airline in Australia's domestic market after the collapse of Ansett Australia in September 2001.
+The airline has since grown to directly serve 32 cities in Australia, from hubs in Brisbane, Melbourne and Sydney.
+
+### Response:
+{to be generated by SFT model}
+```
+
+Within the DPO approach we infer the reward from the used prompt and the provided `prompt-chosen-rejected`-pairs.
+
 #### Training
 
-The data required for these steps need to be used as comparison data to showcase the preference for the generated prompts. Like before, we will use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en), where we assumed that updated responses get preference over the older ones.
+```{include} /_common/dolly_dataset_load.md
+```
+
+**Data Preperation**
+
+We will start with our a basic example of a formatting function. For DPO it should return `prompt-chosen-rejected`-pairs, where the prompt is formatted according to a template.
 
 ```python
-import argilla as rg
+from argilla.feedback import TrainingTask
+from typing import Dict, Any, Iterator
 
-feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly-15k-curated-en")
+template = """\
+### Instruction: {instruction}\n
+### Context: {context}\n
+### Response: {response}"""
+
+def formatting_func(sample: Dict[str, Any]) -> Iterator[Tuple[str, str]]:
+    # Our annotators were asked to provide new responses, which we assume are better than the originals
+    og_instruction = sample["original-instruction"]
+    og_context = sample["original-context"]
+    rejected = sample["original-response"]
+    prompt = template.format(instruction=og_instruction, context=og_context, response="")
+
+    for instruction, context, response in zip(sample["new-instruction"], sample["new-context"], sample["new-response"]):
+        if response["status"] == "submitted":
+            chosen = response["value"]
+            if chosen != rejected:
+                yield prompt, chosen, rejected
+
+
+task = TrainingTask.for_direct_preference_optimization(formatting_func=formatting_func)
+```
+
+**ArgillaTrainer**
+
+Instead of using this dataset, we'll use the task directly with our `FeedbackDataset` in the `ArgillaTrainer`. In contrary to PPO, we do not need to specify any reward model, because this preference modeling is inferred internally by the DPO-algorithm.
+
+```python
+from argilla.feedback import ArgillaTrainer
+
+trainer = ArgillaTrainer(
+    dataset=feedback_dataset,
+    task=task,
+    framework="trl",
+    model="gpt2",
+)
+trainer.train(output_dir="dpo_model")
+```
+
+**Inference**
+
+After training, we can load this model and generate with it!
+
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+model = AutoModelForCausalLM.from_pretrained("dpo_model")
+tokenizer = AutoTokenizer.from_pretrained("dpo_model")
+tokenizer.pad_token = tokenizer.eos_token
+
+inputs = template.format(
+    instruction="Is a toad a frog?",
+    context="Both frogs and toads are amphibians in the order Anura, which means \"without a tail.\" Toads are a sub-classification of frogs, meaning that all toads are frogs, but not all frogs are toads.",
+    response=""
+).strip()
+encoding = tokenizer([inputs], return_tensors="pt")
+outputs = model.generate(**encoding, max_new_tokens=30)
+output_text = tokenizer.decode(outputs[0])
+print(output_text)
+# Yes it is, toads are a sub-classification of frogs.
 ```
