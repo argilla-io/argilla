@@ -465,7 +465,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
 
                 self._test_output_formatting_func(text_label)
 
-                if not isinstance(text_label, tuple):
+                if isinstance(text_label, tuple):
                     text_label = {text_label}
 
                 output |= set(text_label)
@@ -659,10 +659,11 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
             return _prepare(data)
 
 
-def TrainingTaskForSFTFormat(BaseModel):
+class TrainingTaskForSFTFormat(BaseModel):
     """
     Union[str, List[str]]
     """
+
     format: Union[str, List[str]]
 
 
