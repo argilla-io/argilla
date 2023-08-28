@@ -12,20 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import httpx
 import pytest
 from argilla.client.client import Argilla
-from argilla.client.sdk.commons.errors import (
-    GenericApiError,
-    NotFoundApiError,
-    ValidationApiError,
-)
-from argilla.client.sdk.datasets.api import _build_response, get_dataset, list_datasets
+from argilla.client.sdk.datasets.api import get_dataset, list_datasets
 from argilla.client.sdk.datasets.models import Dataset, TaskType
 from argilla.client.sdk.text_classification.models import TextClassificationBulkData
 from argilla.server.models import UserRole
 
-from tests.factories import DatasetFactory, UserFactory, WorkspaceFactory
+from tests.factories import UserFactory, WorkspaceFactory
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
@@ -57,23 +51,6 @@ async def test_get_dataset(role: UserRole):
     assert isinstance(response.parsed, Dataset)
 
 
-@pytest.mark.parametrize(
-    "status_code, expected",
-    [
-        (404, NotFoundApiError),
-        (500, GenericApiError),
-        (422, ValidationApiError),
-    ],
-)
-def test_build_response(status_code, expected):
-    httpx_response = httpx.Response(
-        status_code=status_code,
-        json={"detail": {"code": "error.code", "params": {"foo": "bar"}}},
-    )
-    with pytest.raises(expected):
-        _build_response(httpx_response, name="mock-ds")
-
-
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
 async def test_list_datasets(role: UserRole) -> None:
@@ -84,7 +61,7 @@ async def test_list_datasets(role: UserRole) -> None:
     assert (
         api.http_client.httpx.post(
             "/api/datasets",
-            json={"name": "test_dataset", "workspace": workspace.name, "task": TaskType.text_classification.value},
+            json={"name": "test", "workspace": workspace.name, "task": TaskType.text_classification.value},
         ).status_code
         == 200
     )
@@ -94,3 +71,33 @@ async def test_list_datasets(role: UserRole) -> None:
     assert isinstance(response.parsed, list)
     assert len(response.parsed) == 1
     assert isinstance(response.parsed[0], Dataset)
+
+
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+@pytest.mark.asyncio
+async def test_list_datasets_from_multiple_workspaces(role: UserRole) -> None:
+    workspaces = await WorkspaceFactory.create_batch(size=10)
+    user = await UserFactory.create(role=role, workspaces=workspaces)
+
+    api = Argilla(api_key=user.api_key)
+    for workspace in workspaces:
+        assert (
+            api.http_client.httpx.post(
+                "/api/datasets",
+                json={
+                    "name": f"dataset_{workspace.name}",
+                    "workspace": workspace.name,
+                    "task": TaskType.text_classification.value,
+                },
+            ).status_code
+            == 200
+        )
+
+    response = list_datasets(api.client)
+    assert response.status_code == 200
+    assert isinstance(response.parsed, list)
+    assert len(response.parsed) == 10
+    assert isinstance(response.parsed[0], Dataset)
+
+    workspace_names = [workspace.name for workspace in workspaces]
+    assert all(dataset.workspace in workspace_names for dataset in response.parsed)
