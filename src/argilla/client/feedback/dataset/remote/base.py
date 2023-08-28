@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import warnings
-from typing import TYPE_CHECKING, Any, Generic, Iterator, List, Optional, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Generic, Iterator, List, Optional, Type, TypeVar, Union
 
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
@@ -27,8 +27,7 @@ if TYPE_CHECKING:
     import httpx
 
     from argilla.client.feedback.dataset.local import FeedbackDataset
-    from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-    from argilla.client.feedback.dataset.remote.filtered import FilteredRemoteFeedbackDataset
+    from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackItemModel
     from argilla.client.workspaces import Workspace
@@ -36,11 +35,11 @@ if TYPE_CHECKING:
 
 warnings.simplefilter("always", DeprecationWarning)
 
-T = TypeVar("T")
+T = TypeVar("T", bound="RemoteFeedbackRecordsBase")
 
 
 class RemoteFeedbackRecordsBase(ArgillaRecordsMixin):
-    def __init__(self, dataset: Union["RemoteFeedbackDataset", "FilteredRemoteFeedbackDataset"]) -> None:
+    def __init__(self, dataset: "RemoteFeedbackDatasetBase") -> None:
         """Initializes a `RemoteFeedbackRecords` instance to access a `FeedbackDataset`
         records in Argilla. This class is used to get records from Argilla, iterate over
         them, and push new records to Argilla.
@@ -76,6 +75,9 @@ class RemoteFeedbackRecordsBase(ArgillaRecordsMixin):
         )
         return f"[{','.join([str(record) for record in self][:2])}, ...]"
 
+    def __len__(self) -> None:
+        raise NotImplementedError(f"`records.__len__` not implemented for `{self.__class__.__name__}`.")
+
     def _parse_record(self, record: "FeedbackItemModel") -> RemoteFeedbackRecord:
         """Parses a `FeedbackItemModel` into a `RemoteFeedbackRecord`."""
         record = record.dict(
@@ -91,9 +93,19 @@ class RemoteFeedbackRecordsBase(ArgillaRecordsMixin):
             suggestion.update({"question_name": self.__question_id2name[suggestion["question_id"]]})
         return RemoteFeedbackRecord(client=self._client, name2id=self.__question_name2id, **record)
 
+    def add(
+        self,
+        records: Union["FeedbackRecord", Dict[str, Any], List[Union["FeedbackRecord", Dict[str, Any]]]],
+        show_progress: bool = True,
+    ) -> None:
+        raise NotImplementedError(f"`records.add` not implemented for `{self.__class__.__name__}`.")
+
+    def delete(self, records: List["RemoteFeedbackRecord"]) -> None:
+        raise NotImplementedError(f"`records.delete` not implemented for `{self.__class__.__name__}`.")
+
 
 class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
-    records_cls: Type[T] = None
+    records_cls: Type[T]
 
     def __init__(
         self,
@@ -206,6 +218,40 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
             The record(s) at the given index(es).
         """
         return self._records.__getitem__(key)
+
+    def add_records(
+        self,
+        records: Union["FeedbackRecord", Dict[str, Any], List[Union["FeedbackRecord", Dict[str, Any]]]],
+        show_progress: bool = True,
+    ) -> None:
+        """Adds the given records to the dataset and pushes those to Argilla.
+
+        Args:
+            records: can be a single `FeedbackRecord`, a list of `FeedbackRecord`,
+                a single dictionary, or a list of dictionaries. If a dictionary is provided,
+                it will be converted to a `FeedbackRecord` internally.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+            ValueError: if the given records are neither: `FeedbackRecord`, list of
+                `FeedbackRecord`, list of dictionaries as a record or dictionary as a
+                record; or if the given records do not match the expected schema.
+        """
+        self._records.add(records=records, show_progress=show_progress)
+
+    def delete_records(self, records: Union["RemoteFeedbackRecord", List["RemoteFeedbackRecord"]]) -> None:
+        """Deletes the given records from the dataset in Argilla.
+
+        Args:
+            records: the records to delete from the dataset. Can be a single record or a list
+                of records. But those need to be previously pushed to Argilla, otherwise
+                they won't be deleted.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+            RuntimeError: If the deletion of the records from Argilla fails.
+        """
+        self._records.delete(records=[records] if not isinstance(records, list) else records)
 
     def fetch_records(self) -> None:
         warnings.warn(

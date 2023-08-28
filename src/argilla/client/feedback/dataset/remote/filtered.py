@@ -33,19 +33,6 @@ class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase):
 
         self._filters = filters
 
-    def __len__(self) -> None:
-        raise NotImplementedError("`records.__len__` does not work for filtered datasets.")
-
-    def add(
-        self,
-        records: Union["FeedbackRecord", Dict[str, Any], List[Union["FeedbackRecord", Dict[str, Any]]]],
-        show_progress: bool = True,
-    ) -> None:
-        raise NotImplementedError("`records.add` does not work for filtered datasets.")
-
-    def delete(self, records: List["RemoteFeedbackRecord"]) -> None:
-        raise NotImplementedError("`records.delete` does not work for filtered datasets.")
-
 
 class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeedbackRecords]):
     records_cls = FilteredRemoteFeedbackRecords
@@ -73,16 +60,6 @@ class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeed
             # kwargs
             filters=filters,
         )
-
-    def add_records(
-        self,
-        records: Union["FeedbackRecord", Dict[str, Any], List[Union["FeedbackRecord", Dict[str, Any]]]],
-        show_progress: bool = True,
-    ) -> None:
-        raise NotImplementedError("`add_records` does not work for filtered datasets.")
-
-    def delete_records(self, records: Union["RemoteFeedbackRecord", List["RemoteFeedbackRecord"]]) -> None:
-        raise NotImplementedError("`delete_records` does not work for filtered datasets.")
 
     def delete(self) -> None:
         raise NotImplementedError("`delete` does not work for filtered datasets.")

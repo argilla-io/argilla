@@ -166,40 +166,6 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             },
         )
 
-    def add_records(
-        self,
-        records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
-        show_progress: bool = True,
-    ) -> None:
-        """Adds the given records to the dataset and pushes those to Argilla.
-
-        Args:
-            records: can be a single `FeedbackRecord`, a list of `FeedbackRecord`,
-                a single dictionary, or a list of dictionaries. If a dictionary is provided,
-                it will be converted to a `FeedbackRecord` internally.
-
-        Raises:
-            PermissionError: if the user does not have either `owner` or `admin` role.
-            ValueError: if the given records are neither: `FeedbackRecord`, list of
-                `FeedbackRecord`, list of dictionaries as a record or dictionary as a
-                record; or if the given records do not match the expected schema.
-        """
-        self._records.add(records=records, show_progress=show_progress)
-
-    def delete_records(self, records: Union["RemoteFeedbackRecord", List["RemoteFeedbackRecord"]]) -> None:
-        """Deletes the given records from the dataset in Argilla.
-
-        Args:
-            records: the records to delete from the dataset. Can be a single record or a list
-                of records. But those need to be previously pushed to Argilla, otherwise
-                they won't be deleted.
-
-        Raises:
-            PermissionError: if the user does not have either `owner` or `admin` role.
-            RuntimeError: If the deletion of the records from Argilla fails.
-        """
-        self._records.delete(records=[records] if not isinstance(records, list) else records)
-
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def delete(self) -> None:
         """Deletes the current `FeedbackDataset` from Argilla. This method is just working
