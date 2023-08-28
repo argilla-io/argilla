@@ -14,15 +14,16 @@
 
 from typing import List
 
-from rich.console import Console
-from rich.table import Table
-
-from argilla import Workspace
 from argilla.tasks import async_typer
 
 
 def list_workspaces() -> None:
     """List the workspaces in Argilla and prints them on the console."""
+    from rich.console import Console
+    from rich.table import Table
+
+    from argilla import Workspace
+
     workspaces = Workspace.list()
     table = Table(title="Workspaces")
 
