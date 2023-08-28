@@ -104,6 +104,10 @@ dataset = rg.FeedbackDataset(
 ```
 
 ```{note}
+After configuring your dataset, you can still edit the main information such as field titles, questions, descriptions, and markdown format from the UI. More info in [dataset settings](/reference/webapp/pages).
+```
+
+```{note}
 Fields and questions in the UI follow the order in which these are added to the `fields` and `questions` atrributes in the Python SDK.
 ```
 
