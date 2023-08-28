@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 from functools import lru_cache
-from typing import Union
+from typing import List, Optional, Union
 
 import httpx
 
@@ -36,6 +36,28 @@ def get_dataset(client: AuthenticatedClient, name: str) -> Response[Dataset]:
     )
 
     return _build_response(response=response, name=name)
+
+
+def list_datasets(client: AuthenticatedClient, workspace: Optional[str] = None) -> Response[List[Dataset]]:
+    url = "{}/api/datasets".format(client.base_url)
+
+    response = httpx.get(
+        url=url,
+        params={"workspace": workspace} if workspace else None,
+        headers=client.get_headers(),
+        cookies=client.get_cookies(),
+        timeout=client.get_timeout(),
+    )
+
+    if response.status_code == 200:
+        parsed_response = [Dataset(**dataset) for dataset in response.json()]
+        return Response(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+            parsed=parsed_response,
+        )
+    return handle_response_error(response)
 
 
 def copy_dataset(client: AuthenticatedClient, name: str, json_body: CopyDatasetRequest) -> Response[Dataset]:
