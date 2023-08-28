@@ -12,8 +12,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import asyncio
-import logging
 import warnings
 from asyncio import Future
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
@@ -22,6 +22,7 @@ from argilla.client.client import Argilla
 from argilla.client.datasets import Dataset
 from argilla.client.models import BulkResponse, Record  # TODO Remove TextGenerationRecord
 from argilla.client.sdk.commons import errors
+from argilla.client.sdk.datasets.models import Dataset as DatasetModel
 from argilla.client.sdk.v1.datasets.api import list_datasets as list_datasets_api_v1
 from argilla.client.sdk.workspaces.api import list_workspaces as list_workspaces_api_v0
 
@@ -434,6 +435,22 @@ def get_workspace() -> str:
         The name of the active workspace as a string.
     """
     return ArgillaSingleton.get().get_workspace()
+
+
+def list_datasets(workspace: Optional[str] = None) -> List[DatasetModel]:
+    """Lists all the available datasets for the current user in Argilla.
+
+    Args:
+        workspace: If provided, list datasets from that workspace only. Note that
+            the workspace must exist in advance, otherwise a HTTP 400 error will be
+            raised.
+
+    Returns:
+        A list of `DatasetModel` objects, containing the dataset
+        attributes: tags, metadata, name, id, task, owner, workspace, created_at,
+        and last_updated.
+    """
+    return ArgillaSingleton.get().list_datasets(workspace=workspace)
 
 
 def active_client() -> Argilla:

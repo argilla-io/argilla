@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-
 import logging
 import os
 import re
@@ -56,6 +55,7 @@ from argilla.client.sdk.commons.api import bulk
 from argilla.client.sdk.commons.errors import AlreadyExistsApiError, InputValueError, NotFoundApiError
 from argilla.client.sdk.datasets import api as datasets_api
 from argilla.client.sdk.datasets.models import CopyDatasetRequest, TaskType
+from argilla.client.sdk.datasets.models import Dataset as DatasetModel
 from argilla.client.sdk.metrics import api as metrics_api
 from argilla.client.sdk.metrics.models import MetricInfo
 from argilla.client.sdk.text2text.models import CreationText2TextRecord, Text2TextBulkData
@@ -262,6 +262,21 @@ class Argilla:
         user_workspaces = users_api.whoami(self.http_client).workspaces
         all_workspaces = workspaces_api.list_workspaces(client=self.http_client.httpx).parsed
         return [workspace for workspace in all_workspaces if workspace.name in user_workspaces]
+
+    def list_datasets(self, workspace: Optional[str] = None) -> List[DatasetModel]:
+        """Lists all the available datasets for the current user in Argilla.
+
+        Args:
+            workspace: If provided, list datasets from that workspace only. Note that
+                the workspace must exist in advance, otherwise a HTTP 400 error will be
+                raised.
+
+        Returns:
+            A list of `DatasetModel` objects, containing the dataset
+            attributes: tags, metadata, name, id, task, owner, workspace, created_at,
+            and last_updated.
+        """
+        return datasets_api.list_datasets(client=self.http_client, workspace=workspace).parsed
 
     def copy(self, dataset: str, name_of_copy: str, workspace: str = None):
         """Creates a copy of a dataset including its tags and metadata
