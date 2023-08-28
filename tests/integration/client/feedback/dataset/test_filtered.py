@@ -79,17 +79,25 @@ class TestFilteredRemoteFeedbackDataset:
         filtered_dataset = remote_dataset.filter_by(response_status=status)
         assert isinstance(filtered_dataset, FilteredRemoteFeedbackDataset)
 
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(
+            NotImplementedError, match=f"`records.delete` not implemented for `{filtered_dataset.records_cls.__name__}`"
+        ):
             filtered_dataset.delete_records(remote_dataset.records[0])
 
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(
+            NotImplementedError, match=f"`records.delete` not implemented for `{filtered_dataset.records_cls.__name__}`"
+        ):
             filtered_dataset.records.delete(remote_dataset.records[0])
 
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(
+            NotImplementedError, match=f"`records.add` not implemented for `{filtered_dataset.records_cls.__name__}`"
+        ):
             filtered_dataset.add_records(FeedbackRecord(fields={text_field.name: "test"}))
 
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(
+            NotImplementedError, match=f"`records.add` not implemented for `{filtered_dataset.records_cls.__name__}`"
+        ):
             filtered_dataset.records.add(FeedbackRecord(fields={text_field.name: "test"}))
 
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(NotImplementedError, match="`delete` does not work for filtered datasets."):
             filtered_dataset.delete()
