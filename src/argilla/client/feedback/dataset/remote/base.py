@@ -57,7 +57,6 @@ class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
                 and/or attributes.
         """
         self._dataset = dataset
-        self._dataset_id = self._dataset.id
         self._client = self._dataset._client  # Required to be able to use `allowed_for_roles` decorator
 
         self.__question_id2name = {question.id: question.name for question in self._dataset.questions}

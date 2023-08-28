@@ -47,7 +47,7 @@ class RemoteFeedbackRecords(RemoteFeedbackRecordsBase):
     def __len__(self) -> int:
         """Returns the number of records in the current `FeedbackDataset` in Argilla."""
         try:
-            response = datasets_api_v1.get_metrics(client=self._client, id=self._dataset_id)
+            response = datasets_api_v1.get_metrics(client=self._client, id=self._dataset.id)
         except Exception as e:
             raise Exception(
                 f"Failed while getting the metrics from the current `FeedbackDataset` in Argilla with exception: {e}"
@@ -58,7 +58,7 @@ class RemoteFeedbackRecords(RemoteFeedbackRecordsBase):
         """Fetches a batch of records from Argilla."""
         return datasets_api_v1.get_records(
             client=self._client,
-            id=self._dataset_id,
+            id=self._dataset.id,
             offset=offset,
             limit=limit,
         ).parsed
@@ -95,7 +95,7 @@ class RemoteFeedbackRecords(RemoteFeedbackRecordsBase):
                 )
             datasets_api_v1.add_records(
                 client=self._client,
-                id=self._dataset_id,
+                id=self._dataset.id,
                 records=records_batch,
             )
 
@@ -116,7 +116,7 @@ class RemoteFeedbackRecords(RemoteFeedbackRecordsBase):
             try:
                 datasets_api_v1.delete_records(
                     client=self._client,
-                    id=self._dataset_id,
+                    id=self._dataset.id,
                     record_ids=[record.id for record in records[start:end]],
                 )
             except Exception as e:

@@ -38,7 +38,7 @@ class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase):
         """Fetches a batch of records from Argilla."""
         return datasets_api_v1.get_records(
             client=self._client,
-            id=self._dataset_id,
+            id=self._dataset.id,
             offset=offset,
             limit=limit,
             **self._filters,
