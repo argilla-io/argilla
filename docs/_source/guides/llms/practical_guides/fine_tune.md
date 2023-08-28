@@ -120,7 +120,7 @@ Text classification is one of the most widely supported training tasks tasks wit
 from argilla.feedback import FeedbackDataset
 
 dataset = FeedbackDataset.from_huggingface(
-    repo_id="argilla/emotion"
+    repo_id="argilla/stackoverflow_feedback_demo"
 )
 ```
 
