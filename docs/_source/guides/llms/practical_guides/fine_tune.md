@@ -176,9 +176,7 @@ def formatting_func(sample):
     else:
         return None
 
-task = TrainingTask.for_text_classification(
-    formatting_func=formatting_func,
-)
+task = TrainingTask.for_text_classification(formatting_func=formatting_func)
 ```
 
 :::
@@ -195,7 +193,6 @@ trainer = ArgillaTrainer(
     dataset=feedback_dataset,
     task=task,
     framework="spacy",
-    fetch_records=False,
     train_size=0.8,
     model="en_core_web_sm",
 )
