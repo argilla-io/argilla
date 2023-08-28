@@ -13,12 +13,13 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Type
 from uuid import uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import DatasetStatus, Response, ResponseStatus, UserRole
+from argilla.server.models.models import Question
 from argilla.server.search_engine import SearchEngine
 from sqlalchemy import func, select
 
@@ -26,6 +27,10 @@ from tests.factories import (
     AdminFactory,
     AnnotatorFactory,
     DatasetFactory,
+    LabelSelectionQuestionFactory,
+    MultiLabelSelectionQuestionFactory,
+    RankingQuestionFactory,
+    RatingQuestionFactory,
     RecordFactory,
     ResponseFactory,
     TextQuestionFactory,
@@ -34,8 +39,11 @@ from tests.factories import (
 )
 
 if TYPE_CHECKING:
+    from argilla.server.models.models import User
     from httpx import AsyncClient
     from sqlalchemy.ext.asyncio import AsyncSession
+
+    from tests.factories import QuestionFactory
 
 
 @pytest.mark.asyncio
@@ -103,130 +111,163 @@ class TestSuiteResponses:
             "output_ok": {"value": "no"},
         }
 
-    async def test_update_response_from_submitted_to_discarded(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+    @pytest.mark.parametrize(
+        "QuestionFactory, response_value",
+        [
+            (TextQuestionFactory, "Unit Test!"),
+            (RatingQuestionFactory, 3),
+            (LabelSelectionQuestionFactory, "option1"),
+            (MultiLabelSelectionQuestionFactory, ["option1", "option2"]),
+            (
+                RankingQuestionFactory,
+                [
+                    {"value": "completion-a", "rank": 1},
+                    {"value": "completion-b", "rank": 2},
+                    {"value": "completion-c", "rank": 3},
+                ],
+            ),
+        ],
+    )
+    async def test_update_response_to_submitted_status(
+        self,
+        async_client: "AsyncClient",
+        QuestionFactory: Type["QuestionFactory"],
+        response_value: ResponseStatus,
+        owner: "User",
+        owner_auth_header: dict,
     ):
-        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
-        await TextQuestionFactory.create(name="input_ok", dataset=dataset)
-        await TextQuestionFactory.create(name="output_ok", dataset=dataset)
-        record = await RecordFactory.create(dataset=dataset)
+        question = await QuestionFactory.create()
+        record = await RecordFactory.create(dataset=question.dataset)
+        response = await ResponseFactory.create(record=record, user=owner, status=ResponseStatus.draft)
 
-        response = await ResponseFactory.create(
-            record=record,
-            values={
-                "input_ok": {"value": "no"},
-                "output_ok": {"value": "no"},
-            },
-            status="submitted",
-        )
-        response_json = {
-            "values": {
-                "input_ok": {"value": "yes"},
-                "output_ok": {"value": "yes"},
-            },
-            "status": "discarded",
-        }
-
+        response_json = {"values": {question.name: {"value": response_value}}, "status": ResponseStatus.submitted}
         resp = await async_client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
 
         assert resp.status_code == 200
-
-        response = await db.get(Response, response.id)
-        assert response.values == {
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "yes"},
-        }
-        assert response.status == ResponseStatus.discarded
-
-        resp_body = resp.json()
-        assert resp_body == {
+        assert resp.json() == {
             "id": str(response.id),
-            "values": {
-                "input_ok": {"value": "yes"},
-                "output_ok": {"value": "yes"},
-            },
-            "status": "discarded",
-            "record_id": str(response.record_id),
-            "user_id": str(response.user_id),
+            "record_id": str(record.id),
+            "values": {question.name: {"value": response_value}},
+            "status": ResponseStatus.submitted.value,
+            "user_id": str(owner.id),
             "inserted_at": response.inserted_at.isoformat(),
-            "updated_at": datetime.fromisoformat(resp_body["updated_at"]).isoformat(),
+            "updated_at": response.updated_at.isoformat(),
         }
 
-    async def test_update_response_from_submitted_to_discarded_without_values(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+    @pytest.mark.parametrize(
+        "QuestionFactory, response_value",
+        [
+            (TextQuestionFactory, "Unit Test!"),
+            (RatingQuestionFactory, 3),
+            (LabelSelectionQuestionFactory, "option1"),
+            (MultiLabelSelectionQuestionFactory, ["option1", "option2"]),
+            (
+                RankingQuestionFactory,
+                [
+                    {"value": "completion-a", "rank": 1},
+                    {"value": "completion-b", "rank": 2},
+                    {"value": "completion-c", "rank": 3},
+                ],
+            ),
+            (
+                RankingQuestionFactory,
+                [
+                    {"value": "completion-a", "rank": 1},
+                ],
+            ),
+        ],
+    )
+    @pytest.mark.parametrize("response_status", [ResponseStatus.draft, ResponseStatus.discarded])
+    async def test_update_response_to_non_submitted_status(
+        self,
+        async_client: "AsyncClient",
+        QuestionFactory: Type["QuestionFactory"],
+        response_value: Any,
+        response_status: ResponseStatus,
+        owner: "User",
+        owner_auth_header: dict,
     ):
-        response = await ResponseFactory.create(
-            values={
-                "input_ok": {"value": "no"},
-                "output_ok": {"value": "no"},
-            },
-            status="submitted",
-        )
-        response_json = {
-            "status": "discarded",
-        }
+        question = await QuestionFactory.create()
+        record = await RecordFactory.create(dataset=question.dataset)
+        response = await ResponseFactory.create(record=record, user=owner, status=ResponseStatus.submitted)
 
+        response_json = {"values": {question.name: {"value": response_value}}, "status": response_status}
         resp = await async_client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
 
         assert resp.status_code == 200
-
-        response = await db.get(Response, response.id)
-        assert response.values is None
-        assert response.status == ResponseStatus.discarded
-
-        resp_body = resp.json()
-        assert resp_body == {
+        assert resp.json() == {
             "id": str(response.id),
-            "values": None,
-            "status": "discarded",
-            "record_id": str(response.record_id),
-            "user_id": str(response.user_id),
+            "record_id": str(record.id),
+            "values": {question.name: {"value": response_value}},
+            "status": response_status.value,
+            "user_id": str(owner.id),
             "inserted_at": response.inserted_at.isoformat(),
-            "updated_at": datetime.fromisoformat(resp_body["updated_at"]).isoformat(),
+            "updated_at": response.updated_at.isoformat(),
         }
 
-    async def test_update_response_from_discarded_to_submitted(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+    @pytest.mark.parametrize(
+        "QuestionFactory, response_value",
+        [
+            (TextQuestionFactory, False),
+            (RatingQuestionFactory, "wrong-rating-value"),
+            (LabelSelectionQuestionFactory, False),
+            (MultiLabelSelectionQuestionFactory, "wrong-type"),
+            (MultiLabelSelectionQuestionFactory, ["option4", "option5"]),
+            (MultiLabelSelectionQuestionFactory, []),
+            (RankingQuestionFactory, "wrong-type"),
+            (RankingQuestionFactory, []),
+            (RankingQuestionFactory, [{"value": "completion-b", "rank": 1}]),
+            (
+                RankingQuestionFactory,
+                [
+                    {"value": "completion-b", "rank": 1},
+                    {"value": "completion-c", "rank": 2},
+                    {"value": "completion-a", "rank": 3},
+                    {"value": "completion-z", "rank": 4},
+                ],
+            ),
+            (
+                RankingQuestionFactory,
+                [
+                    {"value": "completion-b", "rank": 1},
+                    {"value": "completion-c", "rank": 2},
+                    {"value": "completion-a", "rank": 4},
+                ],
+            ),
+            (
+                RankingQuestionFactory,
+                [
+                    {"value": "completion-z", "rank": 1},
+                    {"value": "completion-c", "rank": 2},
+                    {"value": "completion-a", "rank": 3},
+                ],
+            ),
+            (
+                RankingQuestionFactory,
+                [
+                    {"value": "completion-a", "rank": 1},
+                    {"value": "completion-c", "rank": 2},
+                    {"value": "completion-a", "rank": 3},
+                ],
+            ),
+        ],
+    )
+    async def test_update_response_with_wrong_response_value(
+        self,
+        async_client: "AsyncClient",
+        QuestionFactory: Type["QuestionFactory"],
+        response_value: Any,
+        owner: "User",
+        owner_auth_header: dict,
     ):
-        response = await ResponseFactory.create(status="discarded")
-        response_json = {
-            "status": "submitted",
-        }
+        question = await QuestionFactory.create()
+        record = await RecordFactory.create(dataset=question.dataset)
+        response = await ResponseFactory.create(record=record, user=owner, status=ResponseStatus.draft)
 
+        response_json = {"values": {question.name: {"value": response_value}}, "status": ResponseStatus.submitted}
         resp = await async_client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
 
         assert resp.status_code == 422
-
-    async def test_update_response_from_discarded_to_submitted_without_values(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
-    ):
-        response = await ResponseFactory.create(status="discarded")
-        response_json = {
-            "status": "submitted",
-        }
-
-        resp = await async_client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
-
-        assert resp.status_code == 422
-
-        response = await db.get(Response, response.id)
-        assert response.values is None
-        assert response.status == ResponseStatus.discarded
-
-    async def test_update_response_with_wrong_values(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
-    ):
-        response = await ResponseFactory.create(status="discarded")
-        response_json = {"status": "submitted", "values": {"wrong_question": {"value": "wrong value"}}}
-
-        resp = await async_client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
-
-        assert resp.status_code == 422
-        assert resp.json() == {"detail": "Error: found responses for non configured questions: ['wrong_question']"}
-
-        response = await db.get(Response, response.id)
-        assert response.values is None
-        assert response.status == ResponseStatus.discarded
 
     async def test_update_response_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
