@@ -25,6 +25,12 @@ export default {
     answerRatingFor($event) {
       if ($event.key == "Tab") return;
 
+      if ($event.code == "Space") {
+        $event.preventDefault();
+        document.activeElement.click();
+        return;
+      }
+
       if (this.timer) clearTimeout(this.timer);
       $event.preventDefault();
 
