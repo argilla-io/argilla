@@ -269,21 +269,22 @@ test.describe("Annotation page shortcuts", () => {
         page,
       }) => {
         await goToAnnotationPageWith12Ranking(page);
-
         await expect(page).toHaveScreenshot();
 
         await page.keyboard.press(shortcuts.goToNextRecord);
         await page.waitForTimeout(300);
+
         await expect(page).toHaveScreenshot();
       });
       test("on first record, can't go to prev record by pressing Ctrl+ArrowLeft", async ({
         page,
       }) => {
         await goToAnnotationPageWith12Ranking(page);
-
         await expect(page).toHaveScreenshot();
 
         await page.keyboard.press(shortcuts.goToPrevRecord);
+        await page.waitForTimeout(300);
+
         await expect(page).toHaveScreenshot();
       });
       test("on last record, can't go to next record by pressing Ctrl+ArrowRight", async ({
