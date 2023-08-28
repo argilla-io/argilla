@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Union
+from typing import TYPE_CHECKING, Iterator, List, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
 from argilla.client.feedback.schemas.records import RemoteFeedbackRecord
@@ -21,14 +21,13 @@ from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackRecords
-    from argilla.client.feedback.dataset.remote.filtered import FilteredRemoteFeedbackRecords
+    from argilla.client.feedback.dataset.remote.base import RemoteFeedbackRecordsBase
 
 
 class ArgillaRecordsMixin:
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def __getitem__(
-        self: Union["RemoteFeedbackRecords", "FilteredRemoteFeedbackRecords"], key: Union[slice, int]
+        self: "RemoteFeedbackRecordsBase", key: Union[slice, int]
     ) -> Union[RemoteFeedbackRecord, List[RemoteFeedbackRecord]]:
         """Returns the record(s) at the given index(es) from Argilla.
 
@@ -77,30 +76,18 @@ class ArgillaRecordsMixin:
 
         records = []
         for offset, limit in zip(offsets, limits):
-            fetched_records = datasets_api_v1.get_records(
-                client=self._client,
-                id=self._dataset_id,
-                offset=offset,
-                limit=limit,
-                **({} if not hasattr(self, "_filters") else self._filters),
-            ).parsed
+            fetched_records = self._fetch_records(offset=offset, limit=limit)
             records.extend([self._parse_record(record) for record in fetched_records.items])
         return records[0] if isinstance(key, int) else records
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def __iter__(
-        self: Union["RemoteFeedbackRecords", "FilteredRemoteFeedbackRecords"]
+        self: "RemoteFeedbackRecordsBase",
     ) -> Iterator[RemoteFeedbackRecord]:
         """Iterates over the `FeedbackRecord`s of the current `FeedbackDataset` in Argilla."""
         current_batch = 0
         while True:
-            batch = datasets_api_v1.get_records(
-                client=self._client,
-                id=self._dataset_id,
-                offset=FETCHING_BATCH_SIZE * current_batch,
-                limit=FETCHING_BATCH_SIZE,
-                **({} if not hasattr(self, "_filters") else self._filters),
-            ).parsed
+            batch = self._fetch_records(offset=FETCHING_BATCH_SIZE * current_batch, limit=FETCHING_BATCH_SIZE)
             for record in batch.items:
                 yield self._parse_record(record)
             current_batch += 1

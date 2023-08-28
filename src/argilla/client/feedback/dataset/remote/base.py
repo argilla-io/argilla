@@ -13,12 +13,14 @@
 #  limitations under the License.
 
 import warnings
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, Generic, Iterator, List, Optional, Type, TypeVar, Union
 
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
 from argilla.client.feedback.schemas.records import RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserRole
+from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
@@ -29,7 +31,7 @@ if TYPE_CHECKING:
     from argilla.client.feedback.dataset.local import FeedbackDataset
     from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
-    from argilla.client.sdk.v1.datasets.models import FeedbackItemModel
+    from argilla.client.sdk.v1.datasets.models import FeedbackItemModel, FeedbackRecordsModel
     from argilla.client.workspaces import Workspace
 
 
@@ -38,7 +40,7 @@ warnings.simplefilter("always", DeprecationWarning)
 T = TypeVar("T", bound="RemoteFeedbackRecordsBase")
 
 
-class RemoteFeedbackRecordsBase(ArgillaRecordsMixin):
+class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
     def __init__(self, dataset: "RemoteFeedbackDatasetBase") -> None:
         """Initializes a `RemoteFeedbackRecords` instance to access a `FeedbackDataset`
         records in Argilla. This class is used to get records from Argilla, iterate over
@@ -92,6 +94,10 @@ class RemoteFeedbackRecordsBase(ArgillaRecordsMixin):
         for suggestion in record.get("suggestions", []):
             suggestion.update({"question_name": self.__question_id2name[suggestion["question_id"]]})
         return RemoteFeedbackRecord(client=self._client, name2id=self.__question_name2id, **record)
+
+    @abstractmethod
+    def _fetch_records(self, offset: int, limit: int) -> "FeedbackRecordsModel":
+        pass
 
     def add(
         self,

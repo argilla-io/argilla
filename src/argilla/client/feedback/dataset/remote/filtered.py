@@ -12,9 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from argilla.client.feedback.dataset.remote.base import RemoteFeedbackDatasetBase, RemoteFeedbackRecordsBase
+from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -22,8 +23,8 @@ if TYPE_CHECKING:
     import httpx
 
     from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-    from argilla.client.feedback.schemas.records import FeedbackRecord, RemoteFeedbackRecord
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
     from argilla.client.workspaces import Workspace
 
 
@@ -32,6 +33,16 @@ class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase):
         super().__init__(dataset=dataset)
 
         self._filters = filters
+
+    def _fetch_records(self, offset: int, limit: int) -> "FeedbackRecordsModel":
+        """Fetches a batch of records from Argilla."""
+        return datasets_api_v1.get_records(
+            client=self._client,
+            id=self._dataset_id,
+            offset=offset,
+            limit=limit,
+            **self._filters,
+        ).parsed
 
 
 class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeedbackRecords]):

@@ -32,6 +32,7 @@ if TYPE_CHECKING:
     import httpx
 
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
     from argilla.client.workspaces import Workspace
 
 
@@ -52,6 +53,15 @@ class RemoteFeedbackRecords(RemoteFeedbackRecordsBase):
                 f"Failed while getting the metrics from the current `FeedbackDataset` in Argilla with exception: {e}"
             ) from e
         return response.parsed.records.count
+
+    def _fetch_records(self, offset: int, limit: int) -> "FeedbackRecordsModel":
+        """Fetches a batch of records from Argilla."""
+        return datasets_api_v1.get_records(
+            client=self._client,
+            id=self._dataset_id,
+            offset=offset,
+            limit=limit,
+        ).parsed
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def add(
