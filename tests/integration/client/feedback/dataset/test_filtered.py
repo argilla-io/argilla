@@ -83,7 +83,13 @@ class TestFilteredRemoteFeedbackDataset:
             filtered_dataset.delete_records(remote_dataset.records[0])
 
         with pytest.raises(NotImplementedError):
+            filtered_dataset.records.delete(remote_dataset.records[0])
+
+        with pytest.raises(NotImplementedError):
             filtered_dataset.add_records(FeedbackRecord(fields={text_field.name: "test"}))
+
+        with pytest.raises(NotImplementedError):
+            filtered_dataset.records.add(FeedbackRecord(fields={text_field.name: "test"}))
 
         with pytest.raises(NotImplementedError):
             filtered_dataset.delete()
