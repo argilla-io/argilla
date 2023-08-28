@@ -38,6 +38,10 @@ These are the section headers that we use:
 
 - Fixed `RatingQuestion.values` validation to raise a `ValidationError` when values are out of range i.e. [1, 10] ([#3626](https://github.com/argilla-io/argilla/pull/3626)).
 
+### Removed
+
+- Remove `multi_task_text_token_classification` from `TaskType` as not used ([#3640](https://github.com/argilla-io/argilla/pull/3640)).
+
 ## [1.14.1](https://github.com/argilla-io/argilla/compare/v1.14.0...v1.14.1)
 
 ### Fixed
