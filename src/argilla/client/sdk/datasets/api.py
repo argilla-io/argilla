@@ -21,12 +21,12 @@ import httpx
 from argilla._constants import WORKSPACE_HEADER_NAME
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors_handler import handle_response_error
-from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
+from argilla.client.sdk.commons.models import Response
 from argilla.client.sdk.datasets.models import CopyDatasetRequest, Dataset
 
 
 @lru_cache(maxsize=None)
-def get_dataset(client: AuthenticatedClient, name: str) -> Response[Union[Dataset, ErrorMessage, HTTPValidationError]]:
+def get_dataset(client: AuthenticatedClient, name: str) -> Response[Dataset]:
     url = f"{client.base_url}/api/datasets/{name}"
 
     response = httpx.get(
@@ -40,12 +40,10 @@ def get_dataset(client: AuthenticatedClient, name: str) -> Response[Union[Datase
         response_obj = Response.from_httpx_response(response)
         response_obj.parsed = Dataset(**response.json())
         return response_obj
-    return handle_response_error(response)
+    handle_response_error(response)
 
 
-def list_datasets(
-    client: AuthenticatedClient, workspace: Optional[str] = None
-) -> Response[Union[List[Dataset], ErrorMessage, HTTPValidationError]]:
+def list_datasets(client: AuthenticatedClient, workspace: Optional[str] = None) -> Response[List[Dataset]]:
     url = f"{client.base_url}/api/datasets"
 
     headers = client.get_headers().copy()
@@ -63,12 +61,10 @@ def list_datasets(
         response_obj = Response.from_httpx_response(response)
         response_obj.parsed = [Dataset(**dataset) for dataset in response.json()]
         return response_obj
-    return handle_response_error(response)
+    handle_response_error(response)
 
 
-def copy_dataset(
-    client: AuthenticatedClient, name: str, json_body: CopyDatasetRequest
-) -> Response[Union[Dataset, ErrorMessage, HTTPValidationError]]:
+def copy_dataset(client: AuthenticatedClient, name: str, json_body: CopyDatasetRequest) -> Response[Dataset]:
     url = f"{client.base_url}/api/datasets/{name}:copy"
 
     response = httpx.put(
@@ -83,10 +79,10 @@ def copy_dataset(
         response_obj = Response.from_httpx_response(response)
         response_obj.parsed = Dataset(**response.json())
         return response_obj
-    return handle_response_error(response)
+    handle_response_error(response)
 
 
-def delete_dataset(client: AuthenticatedClient, name: str) -> Response[Union[ErrorMessage, HTTPValidationError]]:
+def delete_dataset(client: AuthenticatedClient, name: str) -> Response:
     url = f"{client.base_url}/api/datasets/{name}"
 
     response = httpx.delete(
@@ -104,4 +100,4 @@ def delete_dataset(client: AuthenticatedClient, name: str) -> Response[Union[Err
             headers=response.headers,
             parsed=response.json(),
         )
-    return handle_response_error(response, dataset=name)
+    handle_response_error(response, dataset=name)
