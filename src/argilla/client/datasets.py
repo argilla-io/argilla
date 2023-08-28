@@ -358,7 +358,9 @@ class DatasetBase:
                 "transformers" and "spacy" are currently supported. Default: `transformers`
             lang: The spacy nlp Language pipeline used to process the dataset. (Only for spacy framework)
             train_size: The size of the training set. If float, should be between 0.0 and 1.0 and represent the
+                proportion of the dataset to include in the train split.
             test_size: The size of the test set. If float, should be between 0.0 and 1.0 and represent the
+                proportion of the dataset to include in the test split.
             seed: Random state.
 
         Returns:

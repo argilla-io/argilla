@@ -281,7 +281,7 @@ _________________________________________________________________
         """
         return self._trainer.predict(text=text, as_argilla_records=as_argilla_records, **kwargs)
 
-    def train(self, output_dir: str = None):
+    def train(self, output_dir: str):
         """
         `train` takes in a path to a file and trains the model. If a path is provided,
         the model is saved to that path.
