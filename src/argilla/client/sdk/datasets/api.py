@@ -25,7 +25,7 @@ from argilla.client.sdk.datasets.models import CopyDatasetRequest, Dataset
 
 
 @lru_cache(maxsize=None)
-def get_dataset(client: AuthenticatedClient, name: str) -> Response[Dataset]:
+def get_dataset(client: AuthenticatedClient, name: str) -> Response[Union[Dataset, ErrorMessage, HTTPValidationError]]:
     url = f"{client.base_url}/api/datasets/{name}"
 
     response = httpx.get(
@@ -42,7 +42,9 @@ def get_dataset(client: AuthenticatedClient, name: str) -> Response[Dataset]:
     return handle_response_error(response)
 
 
-def list_datasets(client: AuthenticatedClient, workspace: Optional[str] = None) -> Response[List[Dataset]]:
+def list_datasets(
+    client: AuthenticatedClient, workspace: Optional[str] = None
+) -> Response[Union[List[Dataset], ErrorMessage, HTTPValidationError]]:
     url = f"{client.base_url}/api/datasets"
 
     response = httpx.get(
@@ -60,7 +62,9 @@ def list_datasets(client: AuthenticatedClient, workspace: Optional[str] = None) 
     return handle_response_error(response)
 
 
-def copy_dataset(client: AuthenticatedClient, name: str, json_body: CopyDatasetRequest) -> Response[Dataset]:
+def copy_dataset(
+    client: AuthenticatedClient, name: str, json_body: CopyDatasetRequest
+) -> Response[Union[Dataset, ErrorMessage, HTTPValidationError]]:
     url = f"{client.base_url}/api/datasets/{name}:copy"
 
     response = httpx.put(
@@ -78,8 +82,8 @@ def copy_dataset(client: AuthenticatedClient, name: str, json_body: CopyDatasetR
     return handle_response_error(response)
 
 
-def delete_dataset(client: AuthenticatedClient, name: str) -> httpx.Response:
-    url = "{}/api/datasets/{name}".format(client.base_url, name=name)
+def delete_dataset(client: AuthenticatedClient, name: str) -> Response[Union[ErrorMessage, HTTPValidationError]]:
+    url = f"{client.base_url}/api/datasets/{name}"
 
     response = httpx.delete(
         url=url,
