@@ -31,6 +31,11 @@ const shortcuts = {
     goToNextRank: "Tab",
     goToPrevRank: "Shift+Tab",
     unrank: "Backspace"
+  },
+  rating: {
+    goToNextRating: "Tab",
+    goToPrevRating: "Shift+Tab",
+    rate: "Space"
   }
 };
 
@@ -687,6 +692,36 @@ test.describe("Annotation page shortcuts", () => {
 
       await page.keyboard.press("4");
 
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("choose a different rating value with Tab and press Space to select this value", async ({
+      page,
+    }) => {
+      await goToAnnotationPage(page);
+
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await expect(page).toHaveScreenshot();
+
+      await page.keyboard.press(shortcuts.rating.goToNextRating);
+      await page.keyboard.press(shortcuts.rating.goToNextRating);
+      await page.keyboard.press(shortcuts.rating.rate);
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("choose a different rating value with Shift+Tab and press Space to select this value", async ({
+      page,
+    }) => {
+      await goToAnnotationPage(page);
+
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await expect(page).toHaveScreenshot();
+
+      await page.keyboard.press(shortcuts.rating.goToPrevRating);
+      await page.keyboard.press(shortcuts.rating.goToPrevRating);
+      await page.keyboard.press(shortcuts.rating.rate);
       await expect(page).toHaveScreenshot();
     });
   });
