@@ -77,9 +77,6 @@ class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
         )
         return f"[{','.join([str(record) for record in self][:2])}, ...]"
 
-    def __len__(self) -> None:
-        raise NotImplementedError(f"`records.__len__` not implemented for `{self.__class__.__name__}`.")
-
     def _parse_record(self, record: "FeedbackItemModel") -> RemoteFeedbackRecord:
         """Parses a `FeedbackItemModel` into a `RemoteFeedbackRecord`."""
         record = record.dict(
@@ -96,18 +93,20 @@ class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
         return RemoteFeedbackRecord(client=self._client, name2id=self.__question_name2id, **record)
 
     @abstractmethod
+    def __len__(self) -> int:
+        pass
+
+    @abstractmethod
     def _fetch_records(self, offset: int, limit: int) -> "FeedbackRecordsModel":
         pass
 
-    def add(
-        self,
-        records: Union["FeedbackRecord", Dict[str, Any], List[Union["FeedbackRecord", Dict[str, Any]]]],
-        show_progress: bool = True,
-    ) -> None:
-        raise NotImplementedError(f"`records.add` not implemented for `{self.__class__.__name__}`.")
+    @abstractmethod
+    def add(self) -> None:
+        pass
 
-    def delete(self, records: List["RemoteFeedbackRecord"]) -> None:
-        raise NotImplementedError(f"`records.delete` not implemented for `{self.__class__.__name__}`.")
+    @abstractmethod
+    def delete(self) -> None:
+        pass
 
 
 class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
