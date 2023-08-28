@@ -1,5 +1,5 @@
 <template>
-  <div ref="formRef">
+  <div>
     <p v-if="legend" class="questions__title --body3 --light" v-text="legend" />
     <div class="questions">
       <div
@@ -90,17 +90,8 @@ export default {
       const firstElement = focusable[0];
       const lastElement = focusable[focusable.length - 1];
 
-      const isTabPressed = e.key == "Tab";
-      const activeElementIsInForm = this.formWrapper.contains(
-        document.activeElement
-      );
       const isLastElementActive = document.activeElement === lastElement;
       const isFirstElementActive = document.activeElement === firstElement;
-
-      if (!activeElementIsInForm && isTabPressed) {
-        this.focusOnFirstQuestion(e);
-        return;
-      }
 
       // TODO: Move to question components
       // Is for manage the loop focus.
@@ -123,11 +114,6 @@ export default {
       (componentType) =>
         this.$refs[componentType] && initEventListenerFor(parent, componentType)
     );
-  },
-  computed: {
-    formWrapper() {
-      return this.$refs.formRef;
-    },
   },
   methods: {
     focusOnFirstQuestion(e) {

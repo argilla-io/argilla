@@ -5,6 +5,7 @@
     @submit.prevent="onSubmit"
     v-click-outside="onClickOutside"
     @click="onClickForm"
+    ref="formRef"
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
@@ -139,7 +140,17 @@ export default {
       this.autofocusPosition = null;
       this.userComesFromOutside = true;
     },
-    onPressKeyboardShortCut({ code, shiftKey }) {
+    onPressKeyboardShortCut(e) {
+      const { code, shiftKey } = e;
+
+      const activeElementIsInForm = this.$refs.formRef.contains(
+        document.activeElement
+      );
+
+      if (code == "Tab" && !activeElementIsInForm) {
+        this.focusOnFirstQuestion(e);
+      };
+
       if (!shiftKey) return;
 
       switch (code) {
