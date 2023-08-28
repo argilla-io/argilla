@@ -74,8 +74,8 @@ from argilla.client.sdk.token_classification.models import (
 )
 from argilla.client.sdk.token_classification.models import TokenClassificationRecord as SdkTokenClassificationRecord
 from argilla.client.sdk.users import api as users_api
-from argilla.client.sdk.workspaces import api as workspaces_api
-from argilla.client.sdk.workspaces.models import WorkspaceModel
+from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
+from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -259,9 +259,7 @@ class Argilla:
             A list of `WorkspaceModel` objects, containing the workspace
             attributes: name, id, created_at, and updated_at.
         """
-        user_workspaces = users_api.whoami(self.http_client).workspaces
-        all_workspaces = workspaces_api.list_workspaces(client=self.http_client.httpx).parsed
-        return [workspace for workspace in all_workspaces if workspace.name in user_workspaces]
+        return workspaces_api_v1.list_workspaces_me(client=self.http_client.httpx).parsed
 
     def copy(self, dataset: str, name_of_copy: str, workspace: str = None):
         """Creates a copy of a dataset including its tags and metadata
