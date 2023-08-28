@@ -4,8 +4,7 @@
     :class="{ '--focused-form': formHasFocus && interactionCount > 1 }"
     @submit.prevent="onSubmit"
     v-click-outside="onClickOutside"
-    @click="onClickForm"
-    ref="formRef"
+    @click="focusOnFirstQuestionFromOutside"
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
@@ -118,14 +117,14 @@ export default {
     this.onReset();
   },
   mounted() {
-    document.addEventListener("keydown", this.onPressKeyboardShortCut);
+    document.addEventListener("keydown", this.handleGlobalKeys);
   },
   destroyed() {
     this.emitIsQuestionsFormUntouched(true);
-    document.removeEventListener("keydown", this.onPressKeyboardShortCut);
+    document.removeEventListener("keydown", this.handleGlobalKeys);
   },
   methods: {
-    onClickForm(e) {
+    focusOnFirstQuestionFromOutside(e) {
       if (!this.userComesFromOutside) return;
       if (e.srcElement.id || e.srcElement.getAttribute("for")) return;
 
@@ -140,15 +139,13 @@ export default {
       this.autofocusPosition = null;
       this.userComesFromOutside = true;
     },
-    onPressKeyboardShortCut(e) {
+    handleGlobalKeys(e) {
       const { code, shiftKey } = e;
 
-      const activeElementIsInForm = this.$refs.formRef.contains(
-        document.activeElement
-      );
+      if (code == "Tab" && this.userComesFromOutside) {
+        this.focusOnFirstQuestionFromOutside(e);
 
-      if (code == "Tab" && !activeElementIsInForm) {
-        this.focusOnFirstQuestion(e);
+        return;
       }
 
       if (!shiftKey) return;
