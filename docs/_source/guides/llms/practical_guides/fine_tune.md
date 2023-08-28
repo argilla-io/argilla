@@ -163,6 +163,7 @@ dataset = FeedbackDataset.from_huggingface(
 
 def formatting_func(sample):
     text = sample["text"]
+    # Choose the most common label
     values = [resp["value"] for resp in sample["label"]]
     counter = Counter(values)
     if counter:
