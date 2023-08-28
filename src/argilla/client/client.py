@@ -261,7 +261,7 @@ class Argilla:
         """
         return workspaces_api_v1.list_workspaces_me(client=self.http_client.httpx).parsed
 
-    def copy(self, dataset: str, name_of_copy: str, workspace: str = None):
+    def copy(self, dataset: str, name_of_copy: str, workspace: Optional[str] = None) -> None:
         """Creates a copy of a dataset including its tags and metadata
 
         Args:
