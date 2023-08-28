@@ -24,7 +24,7 @@ from tests.factories import DatasetFactory, RecordFactory, TextFieldFactory, Tex
 @pytest.mark.asyncio
 class TestRemoteFeedbackDataset:
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_delete_records(role: UserRole) -> None:
+    async def test_delete_records(self, role: UserRole) -> None:
         dataset = await DatasetFactory.create()
         await TextFieldFactory.create(dataset=dataset, required=True)
         await TextQuestionFactory.create(dataset=dataset, required=True)
@@ -43,7 +43,7 @@ class TestRemoteFeedbackDataset:
         assert len(remote_dataset.records) == 0
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_delete(role: UserRole) -> None:
+    async def test_delete(self, role: UserRole) -> None:
         dataset = await DatasetFactory.create()
         await TextFieldFactory.create(dataset=dataset, required=True)
         await TextQuestionFactory.create(dataset=dataset, required=True)
@@ -58,7 +58,7 @@ class TestRemoteFeedbackDataset:
         assert not any(ds["name"] == remote_dataset.name for ds in datasets)
 
     @pytest.mark.parametrize("role", [UserRole.annotator])
-    async def test_delete_not_allowed_role(role: UserRole) -> None:
+    async def test_delete_not_allowed_role(self, role: UserRole) -> None:
         dataset = await DatasetFactory.create()
         await TextFieldFactory.create(dataset=dataset, required=True)
         await TextQuestionFactory.create(dataset=dataset, required=True)
@@ -72,7 +72,7 @@ class TestRemoteFeedbackDataset:
             remote_dataset.delete()
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
-    async def test_list(role: UserRole) -> None:
+    async def test_list(self, role: UserRole) -> None:
         dataset = await DatasetFactory.create()
         await TextFieldFactory.create(dataset=dataset, required=True)
         await TextQuestionFactory.create(dataset=dataset, required=True)
@@ -86,7 +86,7 @@ class TestRemoteFeedbackDataset:
         assert all(remote_dataset.workspace.id == dataset.workspace.id for remote_dataset in remote_datasets)
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
-    async def test_list_with_workspace_name(role: UserRole) -> None:
+    async def test_list_with_workspace_name(self, role: UserRole) -> None:
         dataset = await DatasetFactory.create()
         await TextFieldFactory.create(dataset=dataset, required=True)
         await TextQuestionFactory.create(dataset=dataset, required=True)
