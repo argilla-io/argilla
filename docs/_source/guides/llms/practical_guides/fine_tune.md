@@ -112,7 +112,7 @@ For a multi-label scenario it is recommended to add some examples without any la
 
 #### Training
 
-Text classification is one of the most widely supported training tasks tasks within NLP. For example purposes we will use our [Stackoverflow demo dataset](https://huggingface.co/datasets/argilla/stackoverflow_feedback_demo).
+Text classification is one of the most widely supported training tasks tasks within NLP. For example purposes we will use our [emotion demo dataset](https://huggingface.co/datasets/argilla/emotion).
 
 **Data Preparation**
 
@@ -120,7 +120,7 @@ Text classification is one of the most widely supported training tasks tasks wit
 from argilla.feedback import FeedbackDataset
 
 dataset = FeedbackDataset.from_huggingface(
-    repo_id="argilla/stackoverflow_feedback_demo"
+    repo_id="argilla/emotion"
 )
 ```
 
@@ -217,7 +217,7 @@ This is an unsupervised approach hence we only infer training data from a basic 
 Many training datasets for this task can be found online (e.g., [Hugging Face](https://huggingface.co/datasets?task_categories=task_categories:text-generation&sort=downloads)). You can either upload this in the right Argilla format but it might be needed to collect and fine-tune additional data with Argilla. So we, therefore, provide a basic setup underneath which should help you to start gathering or preparing pre-training data.
 
 ```{note}
-When it comes to pre-training an LLM, we generally do not need data of highest quality, but it is always smart to use domain-specfic data and to avoid data that might lead to undecired effect like hallucination and bias.
+When it comes to pre-training an LLM, we generally do not need data of highest quality, but it is always smart to use domain-specfic data and to avoid data that might lead to undesired effects like hallucination and bias.
 ```
 
 First, create a `FeedbackDataset` with records.
@@ -225,7 +225,7 @@ First, create a `FeedbackDataset` with records.
 ```python
 import argilla as rg
 
-# create promp-completion dataset
+# create prompt-completion dataset
 dataset = rg.FeedbackDataset(
     guidelines="Please, complete the following prompt fields with a brief text answer.",
     fields=[
@@ -504,7 +504,7 @@ trainer = trlx.train('gpt2', samples=samples)
 
 A Reward Model (RM) is used to rate responses in alignment with human preferences and afterwards using this RM to fine-tune the LLM with the associated scores. Fine-tuning using a Reward Model can be done in different ways. We can either get the annotator to rate output completely manually, we can use a simple heuristic or we can use a stochastic preference model. Both [TRL](https://huggingface.co/docs/trl) and [TRLX](https://github.com/CarperAI/trlx) provide decent options for incorporating rewards. The [DeepSpeed library of Microsoft](https://github.com/microsoft/DeepSpeed/tree/master/blogs/deepspeed-chat) is a worthy mention too but will not be covered in our docs.
 
-The data required for these steps need to be used as comparison data to showcase the preference for the generated prompts. Like before, we will use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en), where we assumed that updated responses get preference over the older ones.
+The data required for these steps need to be used as comparison data to showcase the preference for the generated prompts. A good example is our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en), where we assumed that updated responses get preference over the older ones.
 
 ```{note}
 The Dolly original dataset contained a lot of reference indicators "[]", which enforces the model to hallicinate and create references.
@@ -718,9 +718,8 @@ As expected, the good response has a higher score than the worse response.
 The [TRL](https://huggingface.co/docs/trl) library implements the last step of RLHF: Proximal Policy Optimization (PPO). It requires prompts, which are then fed through the model being finetuned. Its results are passed through a reward model. Lastly, the prompts, responses and rewards are used to update the model through reinforcement learning.
 
 ```{note}
-PPO requires a trained reward model to function. Take a look at that task outline above to train your own model.
+PPO requires a trained trainer supervised fine-tuned model and reward model to function. Take a look at that task outlines above to train your own models.
 ```
-
 
 #### Training
 
@@ -741,6 +740,7 @@ reward_model = pipeline("argilla/roberta-base-reward-model-falcon-dolly", model=
 ```
 
 As usual, we start with a task with a formatting function. For PPO, the formatting function only returns prompts.
+
 ```python
 from argilla.feedback import TrainingTask
 from typing import Dict, Any, Iterator
@@ -758,6 +758,7 @@ task = TrainingTask.for_proximal_policy_optimization(formatting_func=formatting_
 ```
 
 Like before, we can observe the resulting dataset:
+
 ```python
 dataset = feedback_dataset.prepare_for_training(framework="trl", task=task)
 """
@@ -824,10 +825,22 @@ print(output_text)
 # Yes it is because toads are a sub-classification of frogs.
 ```
 
-### Direct Performance Optimization
+### Direct Preference Optimization
 
-The [TRL](https://huggingface.co/docs/trl) library implements and alternative way to incorporate humand feedback into an LLM which is called Direct Performance Optimization (DPO). This approach skips the step of training a separate reward model and directly uses the preference data during training as measure for optimization fo human feedback.
 #### Background
+
+The [TRL](https://huggingface.co/docs/trl) library implements and alternative way to incorporate human feedback into an LLM which is called Direct Preference Optimization (DPO). This approach skips the step of training a separate reward model and directly uses the preference data during training as measure for optimization of human feedback. In order to properly use th
+
+```{note}
+DPO requires a trained supervised fine-tuned model to function. Take a look at that task outline above to train your own model.
+```
 
 #### Training
 
+The data required for these steps need to be used as comparison data to showcase the preference for the generated prompts. Like before, we will use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en), where we assumed that updated responses get preference over the older ones.
+
+```python
+import argilla as rg
+
+feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly-15k-curated-en")
+```
