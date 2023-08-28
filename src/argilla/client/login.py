@@ -36,7 +36,7 @@ class ArgillaCredentials(BaseModel):
 
     @classmethod
     def load(cls) -> "ArgillaCredentials":
-        if not ARGILLA_CREDENTIALS_FILE.exists():
+        if not cls.exists():
             raise FileNotFoundError(f"'{ARGILLA_CREDENTIALS_FILE}' does not exist.")
 
         with open(ARGILLA_CREDENTIALS_FILE, "r") as f:
@@ -44,7 +44,7 @@ class ArgillaCredentials(BaseModel):
 
     @classmethod
     def remove(cls) -> None:
-        if not ARGILLA_CREDENTIALS_FILE.exists():
+        if not cls.exists():
             raise FileNotFoundError(f"'{ARGILLA_CREDENTIALS_FILE}' does not exist.")
 
         ARGILLA_CREDENTIALS_FILE.unlink()
