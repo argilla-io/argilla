@@ -728,6 +728,25 @@ test.describe("Annotation page shortcuts", () => {
       await expect(page).toHaveScreenshot();
     });
 
+    test("press Space to unselect the value previously selected", async ({
+      page,
+    }) => {
+      await goToAnnotationPage(page);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await expect(page).toHaveScreenshot();
+      await page.keyboard.press(shortcuts.rating.goToNextRating);
+      await page.keyboard.press(shortcuts.rating.goToNextRating);
+      await page.keyboard.press(shortcuts.rating.rate);
+      await expect(page).toHaveScreenshot();
+      await page.keyboard.press(shortcuts.goToPrevQuestion);
+      await page.keyboard.press(shortcuts.rating.goToNextRating);
+      await page.keyboard.press(shortcuts.rating.goToNextRating);
+
+      await page.keyboard.press(shortcuts.rating.rate);
+      await expect(page).toHaveScreenshot();
+    });
+
     test("choose a different rating value with Shift+Tab and press Space to select this value", async ({
       page,
     }) => {
