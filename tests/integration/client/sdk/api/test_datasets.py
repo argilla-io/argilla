@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import httpx
 import pytest
 from argilla.client.client import Argilla
@@ -20,12 +20,12 @@ from argilla.client.sdk.commons.errors import (
     NotFoundApiError,
     ValidationApiError,
 )
-from argilla.client.sdk.datasets.api import _build_response, get_dataset
+from argilla.client.sdk.datasets.api import _build_response, get_dataset, list_datasets
 from argilla.client.sdk.datasets.models import Dataset, TaskType
 from argilla.client.sdk.text_classification.models import TextClassificationBulkData
 from argilla.server.models import UserRole
 
-from tests.factories import UserFactory, WorkspaceFactory
+from tests.factories import DatasetFactory, UserFactory, WorkspaceFactory
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
@@ -72,3 +72,25 @@ def test_build_response(status_code, expected):
     )
     with pytest.raises(expected):
         _build_response(httpx_response, name="mock-ds")
+
+
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+@pytest.mark.asyncio
+async def test_list_datasets(role: UserRole) -> None:
+    workspace = await WorkspaceFactory.create()
+    user = await UserFactory.create(role=role, workspaces=[workspace])
+
+    api = Argilla(api_key=user.api_key, workspace=workspace.name)
+    assert (
+        api.http_client.httpx.post(
+            "/api/datasets",
+            json={"name": "test_dataset", "workspace": workspace.name, "task": TaskType.text_classification.value},
+        ).status_code
+        == 200
+    )
+
+    response = list_datasets(api.client, workspace=workspace.name)
+    assert response.status_code == 200
+    assert isinstance(response.parsed, list)
+    assert len(response.parsed) == 1
+    assert isinstance(response.parsed[0], Dataset)
