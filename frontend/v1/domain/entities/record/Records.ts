@@ -20,7 +20,13 @@ export class Records {
   }
 
   getOffsetToFind(page: number, status: string): number {
-    if (this.records.length < page - 1) return page - 1;
+    const offsetToFind = page - 1;
+
+    if (this.records.length < offsetToFind) return offsetToFind;
+
+    const firstRecord = this.records[0];
+    if (firstRecord?.arrayOffset > offsetToFind) return offsetToFind;
+
     const previousRecords = this.records.slice(0, page);
 
     return previousRecords.filter((record) => record.status === status).length;
