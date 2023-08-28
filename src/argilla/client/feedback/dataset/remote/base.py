@@ -20,7 +20,6 @@ from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
 from argilla.client.feedback.schemas.records import RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserRole
-from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
