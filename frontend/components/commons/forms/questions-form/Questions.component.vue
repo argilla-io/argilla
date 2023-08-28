@@ -81,29 +81,22 @@ export default {
       type: Number,
     },
   },
+  computed: {
+    questionElements() {
+      return ["text", "singleLabel", "multiLabel", "rating", "ranking"]
+        .filter((componentType) => this.$refs[componentType])
+        .map((componentType) => this.$refs[componentType][0].$el);
+    },
+  },
   mounted() {
-    ["text", "singleLabel", "multiLabel", "rating", "ranking"].forEach(
-      (componentType) => {
-        const parent = this.$refs[componentType][0].$el;
-
-        parent?.addEventListener(
-          "keydown",
-          this.handleKeyboardToMoveLoop(parent)
-        );
-      }
-    );
+    this.questionElements.forEach((parent) => {
+      parent.addEventListener("keydown", this.handleKeyboardToMoveLoop(parent));
+    });
   },
   beforeDestroy() {
-    ["text", "singleLabel", "multiLabel", "rating", "ranking"].forEach(
-      (componentType) => {
-        const parent = this.$refs[componentType][0].$el;
-
-        parent?.removeEventListener(
-          "keydown",
-          this.handleKeyboardToMoveLoop(parent)
-        );
-      }
-    );
+    this.questionElements.forEach((parent) => {
+      parent.addEventListener("keydown", this.handleKeyboardToMoveLoop(parent));
+    });
   },
   methods: {
     handleKeyboardToMoveLoop(parent) {
@@ -120,8 +113,6 @@ export default {
         const isLastElementActive = document.activeElement === lastElement;
         const isFirstElementActive = document.activeElement === firstElement;
 
-        // TODO: Move to Single and Multi label component
-        // Is for manage the loop focus.
         if (!isShiftKeyPressed && isLastElementActive) {
           this.focusOn(e, firstElement);
         }
