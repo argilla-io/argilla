@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from typing import TYPE_CHECKING
+from unittest.mock import ANY
 
 import pytest
 
@@ -21,20 +22,37 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
     from typer import Typer
 
+from argilla.client.workspaces import Workspace
+from rich.table import Table
+
 from tests.factories import WorkspaceSyncFactory
 
 
 @pytest.mark.usefixtures("login_mock")
 def test_cli_workspaces_list(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
-    ws_factory = WorkspaceSyncFactory.create(name="test_workspace")
-
-    workspace_list_mock = mocker.patch("argilla.client.workspaces.Workspace.list")
-    workspace_list_mock.return_value = [ws_factory]
+    add_row_spy = mocker.spy(Table, "add_row")
+    workspace = WorkspaceSyncFactory.create(name="test_workspace")
+    workspace_list_mock = mocker.patch(
+        "argilla.client.workspaces.Workspace.list",
+        return_value=[
+            Workspace(
+                id=workspace.id, name=workspace.name, inserted_at=workspace.inserted_at, updated_at=workspace.updated_at
+            )
+        ],
+    )
 
     result = cli_runner.invoke(cli, "workspaces list")
 
     assert all(col in result.stdout for col in ("ID", "Name", "Creation Date", "Update Date", "test_workspace"))
     assert result.exit_code == 0
+
+    add_row_spy.assert_called_once_with(
+        ANY,  # `self` argument
+        str(workspace.id),
+        workspace.name,
+        workspace.inserted_at.isoformat(sep=" "),
+        workspace.updated_at.isoformat(sep=" "),
+    )
 
 
 def test_cli_workspaces_list_needs_login(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
