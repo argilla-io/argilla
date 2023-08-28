@@ -308,9 +308,11 @@ test.describe("Annotation page shortcuts", () => {
         await expect(page).toHaveScreenshot();
 
         await page.keyboard.press(shortcuts.goToNextRecord);
+        await page.waitForTimeout(300);
         await expect(page).toHaveScreenshot();
 
         await page.keyboard.press(shortcuts.goToPrevRecord);
+        await page.waitForTimeout(300);
         await expect(page).toHaveScreenshot();
       });
     });
