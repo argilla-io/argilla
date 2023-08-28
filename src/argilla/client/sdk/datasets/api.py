@@ -18,6 +18,7 @@ from typing import List, Optional, Union
 
 import httpx
 
+from argilla._constants import WORKSPACE_HEADER_NAME
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors_handler import handle_response_error
 from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
@@ -47,10 +48,13 @@ def list_datasets(
 ) -> Response[Union[List[Dataset], ErrorMessage, HTTPValidationError]]:
     url = f"{client.base_url}/api/datasets"
 
+    headers = client.get_headers().copy()
+    headers.pop(WORKSPACE_HEADER_NAME, None)
+
     response = httpx.get(
         url=url,
         params={"workspace": workspace} if workspace else None,
-        headers=client.get_headers(),
+        headers=headers,
         cookies=client.get_cookies(),
         timeout=client.get_timeout(),
     )
