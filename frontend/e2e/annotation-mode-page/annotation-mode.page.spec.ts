@@ -21,22 +21,22 @@ const shortcuts = {
   goToPrevQuestion: "Shift+ArrowUp",
   singleLabel: {
     select: "Space",
-    goToNextLabel: "Tab"
+    goToNextLabel: "Tab",
   },
   multiLabel: {
     select: "Space",
-    goToNextLabel: "Tab"
+    goToNextLabel: "Tab",
   },
   ranking: {
     goToNextRank: "Tab",
     goToPrevRank: "Shift+Tab",
-    unrank: "Backspace"
+    unrank: "Backspace",
   },
   rating: {
     goToNextRating: "Tab",
     goToPrevRating: "Shift+Tab",
-    rate: "Space"
-  }
+    rate: "Space",
+  },
 };
 
 const goToAnnotationPage = async (page, shortAndLongQuestions = false) => {
@@ -45,13 +45,13 @@ const goToAnnotationPage = async (page, shortAndLongQuestions = false) => {
   await mockAllDatasets(page);
   const record = shortAndLongQuestions
     ? await mockRecordForLongAndShortQuestion(page, {
-      datasetId: dataset.id,
-      workspaceId: dataset.workspace_id,
-    })
+        datasetId: dataset.id,
+        workspaceId: dataset.workspace_id,
+      })
     : await mockRecord(page, {
-      datasetId: dataset.id,
-      workspaceId: dataset.workspace_id,
-    });
+        datasetId: dataset.id,
+        workspaceId: dataset.workspace_id,
+      });
 
   await loginUserAndWaitFor(page, "datasets");
 
@@ -250,9 +250,13 @@ test.describe("Annotate page", () => {
 
 test.describe("Annotation page shortcuts", () => {
   test.describe("Global shortcuts", () => {
-    test("when focus is not in form, press Tab to focus on first question", async ({ page }) => {
+    test("when focus is not in form, press Tab to focus on first question", async ({
+      page,
+    }) => {
       await goToAnnotationPageWith12Ranking(page);
-      const formBox = await page.getByText("Submit your feedback").boundingBox();
+      const formBox = await page
+        .getByText("Submit your feedback")
+        .boundingBox();
 
       await page.mouse.click(formBox.x - 25, formBox.y - 25); // click outside form to loose focus
       await expect(page).toHaveScreenshot();
@@ -261,15 +265,20 @@ test.describe("Annotation page shortcuts", () => {
       await expect(page).toHaveScreenshot();
     });
     test.describe("Pagination", () => {
-      test("on first record, go to next record by pressing Ctrl+ArrowRight", async ({ page }) => {
+      test("on first record, go to next record by pressing Ctrl+ArrowRight", async ({
+        page,
+      }) => {
         await goToAnnotationPageWith12Ranking(page);
 
         await expect(page).toHaveScreenshot();
 
         await page.keyboard.press(shortcuts.goToNextRecord);
+        await page.waitForTimeout(300);
         await expect(page).toHaveScreenshot();
       });
-      test("on first record, can't go to prev record by pressing Ctrl+ArrowLeft", async ({ page }) => {
+      test("on first record, can't go to prev record by pressing Ctrl+ArrowLeft", async ({
+        page,
+      }) => {
         await goToAnnotationPageWith12Ranking(page);
 
         await expect(page).toHaveScreenshot();
@@ -277,7 +286,9 @@ test.describe("Annotation page shortcuts", () => {
         await page.keyboard.press(shortcuts.goToPrevRecord);
         await expect(page).toHaveScreenshot();
       });
-      test("on last record, can't go to next record by pressing Ctrl+ArrowRight", async ({ page }) => {
+      test("on last record, can't go to next record by pressing Ctrl+ArrowRight", async ({
+        page,
+      }) => {
         await goToAnnotationPageWith12Ranking(page);
         await expect(page).toHaveScreenshot();
 
@@ -287,7 +298,9 @@ test.describe("Annotation page shortcuts", () => {
         await page.keyboard.press(shortcuts.goToNextRecord);
         await expect(page).toHaveScreenshot();
       });
-      test("on last record, can go to prev record by pressing Ctrl+ArrowLeft", async ({ page }) => {
+      test("on last record, can go to prev record by pressing Ctrl+ArrowLeft", async ({
+        page,
+      }) => {
         await goToAnnotationPageWith12Ranking(page);
         await expect(page).toHaveScreenshot();
 
