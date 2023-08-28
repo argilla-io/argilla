@@ -23,16 +23,16 @@ export default {
       this.timer = null;
     },
     answerRatingFor($event) {
+      if (this.timer) clearTimeout(this.timer);
       if ($event.key == "Tab") return;
 
+      $event.preventDefault();
+
       if ($event.code == "Space") {
-        $event.preventDefault();
         document.activeElement.click();
+
         return;
       }
-
-      if (this.timer) clearTimeout(this.timer);
-      $event.preventDefault();
 
       this.keyCode += $event.key;
 
