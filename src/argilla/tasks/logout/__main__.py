@@ -12,8 +12,21 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .database import app as database_app
-from .login import app as login_app
-from .logout import app as logout_app
-from .server import app as server_app
-from .training import app as training_app
+
+import typer
+
+app = typer.Typer(invoke_without_command=True)
+
+
+@app.callback(help="Logout from an Argilla Server.")
+def logout():
+    from argilla.client.login import ArgillaCredentials
+    from argilla.tasks.callback import init_callback
+
+    init_callback()
+    ArgillaCredentials.remove()
+    typer.echo("Logged out successfully from Argilla server!")
+
+
+if __name__ == "__main__":
+    app()
