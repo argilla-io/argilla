@@ -28,12 +28,26 @@ Learn how to collect comparison or human preference data and train a reward mode
 Learn how to add suggestions to your Feedback dataset using Setfit.
 
 ```
+```{grid-item-card} Create and annotate synthetic data with LLMs
+:link: labelling-feedback-langchain-syntethic.html
+
+Learn how to create synthetic data and annotations with OpenAI, LangChain, Transformers and Outlines.
+```
+```{grid-item-card} Fine-tune a SetFit model using the ArgillaTrainer
+:link: trainer-feedback-setfit.html
+
+Learn how to use the ArgillaTrainer to fine-tune your Feedback dataset using Setfit.
+
+```
 ````
 
 ```{toctree}
 :hidden:
 
+fine-tuning-openai-rag-feedback
 curating-feedback-instructiondataset
 train-reward-model-rlhf
 labelling-feedback-setfit
+trainer-feedback-setfit
+labelling-feedback-langchain-syntethic
 ```
