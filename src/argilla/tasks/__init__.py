@@ -14,6 +14,7 @@
 
 from .database import app as database_app
 from .login import app as login_app
+from .logout import app as logout_app
 from .server import app as server_app
 from .training import app as training_app
 from .workspaces import app as workspaces_app

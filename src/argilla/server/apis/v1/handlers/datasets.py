@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_async_db
-from argilla.server.enums import ResponseStatusFilter
+from argilla.server.enums import RecordInclude, ResponseStatusFilter
 from argilla.server.models import Dataset as DatasetModel
 from argilla.server.models import ResponseStatus, User
 from argilla.server.policies import DatasetPolicyV1, authorize
@@ -37,7 +37,6 @@ from argilla.server.schemas.v1.datasets import (
     QuestionCreate,
     Questions,
     Record,
-    RecordInclude,
     Records,
     RecordsCreate,
     SearchRecord,
@@ -119,7 +118,7 @@ async def list_current_user_dataset_records(
 
     await authorize(current_user, DatasetPolicyV1.get(dataset))
 
-    records = await datasets.list_records_by_dataset_id_and_user_id(
+    records = await datasets.list_records_by_dataset_id(
         db,
         dataset_id,
         current_user.id,
@@ -138,6 +137,7 @@ async def list_dataset_records(
     db: AsyncSession = Depends(get_async_db),
     dataset_id: UUID,
     include: List[RecordInclude] = Query([], description="Relationships to include in the response"),
+    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
@@ -146,7 +146,9 @@ async def list_dataset_records(
 
     await authorize(current_user, DatasetPolicyV1.list_dataset_records_with_all_responses(dataset))
 
-    records = await datasets.list_records_by_dataset_id(db, dataset_id, include=include, offset=offset, limit=limit)
+    records = await datasets.list_records_by_dataset_id(
+        db, dataset_id, include=include, response_statuses=response_statuses, offset=offset, limit=limit
+    )
 
     return Records(items=records)
 

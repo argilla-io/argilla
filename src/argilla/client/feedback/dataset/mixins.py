@@ -45,7 +45,7 @@ if TYPE_CHECKING:
 warnings.simplefilter("always", DeprecationWarning)
 
 
-class ArgillaToFromMixin:
+class ArgillaMixin:
     # TODO(alvarobartt): remove when `delete` is implemented
     def __delete_dataset(self: "FeedbackDataset", client: "httpx.Client", id: UUID) -> None:
         try:
@@ -332,3 +332,47 @@ class ArgillaToFromMixin:
             questions=questions,
             guidelines=existing_dataset.guidelines or None,
         )
+
+    @classmethod
+    def list(cls: Type["FeedbackDataset"], workspace: Optional[str] = None) -> List[RemoteFeedbackDataset]:
+        """Lists the `FeedbackDataset`s pushed to Argilla.
+
+        Note that you may need to `rg.init(...)` with your Argilla credentials before
+        calling this function, otherwise, the default http://localhost:6900 will be used,
+        which will fail if Argilla is not deployed locally.
+
+        Args:
+            workspace: the workspace where to list the datasets from. If not provided,
+                then the workspace filtering won't be applied. Defaults to `None`.
+
+        Returns:
+            A list of `RemoteFeedbackDataset` datasets, which are `FeedbackDataset`
+            datasets previously pushed to Argilla via `push_to_argilla`.
+        """
+        client: "ArgillaClient" = ArgillaSingleton.get()
+        httpx_client: "httpx.Client" = client.http_client.httpx
+
+        if workspace is not None:
+            workspace = Workspace.from_name(workspace)
+
+        # TODO(alvarobartt or gabrielmbmb): add `workspace_id` in `GET /api/v1/datasets`
+        # and in `GET /api/v1/me/datasets` to filter by workspace
+        try:
+            datasets = datasets_api_v1.list_datasets(client=httpx_client).parsed
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed while listing the `FeedbackDataset` datasets in Argilla with exception: {e}"
+            ) from e
+        return [
+            RemoteFeedbackDataset(
+                client=httpx_client,
+                id=dataset.id,
+                name=dataset.name,
+                workspace=workspace if workspace is not None else Workspace.from_id(dataset.workspace_id),
+                fields=cls.__get_fields(client=httpx_client, id=dataset.id),
+                questions=cls.__get_questions(client=httpx_client, id=dataset.id),
+                guidelines=dataset.guidelines or None,
+            )
+            for dataset in datasets
+            if workspace is None or dataset.workspace_id == workspace.id
+        ]
