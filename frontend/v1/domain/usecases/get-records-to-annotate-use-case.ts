@@ -27,15 +27,19 @@ export class GetRecordsToAnnotateUseCase {
   ): Promise<void> {
     const savedRecords = this.recordsStorage.get();
 
-    const offsetForPagination = savedRecords.getOffsetToFind(page, status);
+    const { pageToFind, recordsToFetch } = savedRecords.getPageToFind(
+      page,
+      status
+    );
 
-    console.log("OFFSET", offsetForPagination);
+    console.log("pageToFind", pageToFind);
 
     const getRecords = this.recordRepository.getRecords(
       datasetId,
-      offsetForPagination,
+      pageToFind,
       status,
-      searchText
+      searchText,
+      recordsToFetch
     );
     const getQuestions = this.questionRepository.getQuestions(datasetId);
     const getFields = this.fieldRepository.getFields(datasetId);
@@ -97,7 +101,7 @@ export class GetRecordsToAnnotateUseCase {
           fields,
           answer,
           suggestions,
-          index + page - 1
+          index + page
         );
       }
     );
@@ -119,6 +123,12 @@ export class GetRecordsToAnnotateUseCase {
           .records.filter((r) => r.status === "discarded").length,
       },
       ["Pending", "Submitted", "Discarded"]
+    );
+
+    console.table(
+      this.recordsStorage
+        .get()
+        .records.map((r) => ({ id: r.id, offset: r.page }))
     );
   }
 }

@@ -21,10 +21,10 @@ export const useRecords = () => {
         (record) => record.id === newRecord.id
       );
 
-      if (recordIndex > 0) {
-        allRecords[recordIndex] = newRecord;
-      } else {
+      if (recordIndex === -1) {
         allRecords.push(newRecord);
+      } else {
+        allRecords[recordIndex] = newRecord;
       }
     });
 

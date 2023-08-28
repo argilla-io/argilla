@@ -23,15 +23,15 @@ export class RecordRepository {
 
   getRecords(
     datasetId: string,
-    offset: number,
+    page: number,
     status: string,
     searchText: string,
-    numberOfRecordsToFetch = 2
+    numberOfRecordsToFetch
   ): Promise<BackedRecords> {
     if (searchText && searchText.length)
       return this.getRecordsByText(
         datasetId,
-        offset,
+        page,
         status,
         searchText,
         numberOfRecordsToFetch
@@ -39,7 +39,7 @@ export class RecordRepository {
 
     return this.getRecordsDatasetId(
       datasetId,
-      offset,
+      page,
       status,
       numberOfRecordsToFetch
     );
@@ -111,14 +111,14 @@ export class RecordRepository {
 
   private async getRecordsDatasetId(
     datasetId: string,
-    offset: number,
+    page: number,
     status: string,
     numberOfRecordsToFetch: number
   ): Promise<BackedRecords> {
     try {
       const url = `/v1/me/datasets/${datasetId}/records`;
 
-      const params = this.createParams(offset, numberOfRecordsToFetch, status);
+      const params = this.createParams(page, numberOfRecordsToFetch, status);
 
       const { data } = await this.axios.get<Response<BackedRecord[]>>(url, {
         params,
@@ -137,7 +137,7 @@ export class RecordRepository {
 
   private async getRecordsByText(
     datasetId: string,
-    offset: number,
+    page: number,
     status: string,
     searchText: string,
     numberOfRecordsToFetch: number
@@ -155,7 +155,7 @@ export class RecordRepository {
         })
       );
 
-      const params = this.createParams(offset, numberOfRecordsToFetch, status);
+      const params = this.createParams(page, numberOfRecordsToFetch, status);
 
       const { data } = await this.axios.post(url, body, { params });
 
@@ -192,7 +192,7 @@ export class RecordRepository {
   }
 
   private createParams(
-    offset: number,
+    page: number,
     numberOfRecordsToFetch: number,
     status: string
   ) {
@@ -201,7 +201,7 @@ export class RecordRepository {
 
     params.append("include", "responses");
     params.append("include", "suggestions");
-    params.append("offset", offset.toString());
+    params.append("offset", `${page - 1}`);
     params.append("limit", numberOfRecordsToFetch.toString());
     params.append("response_status", backendStatus);
 
