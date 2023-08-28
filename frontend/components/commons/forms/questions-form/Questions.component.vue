@@ -82,40 +82,54 @@ export default {
     },
   },
   mounted() {
-    const keyBoardHandler = (parent) => (e) => {
-      const focusable = parent.querySelectorAll(
-        'input[type="checkbox"], [tabindex="0"]'
-      );
-
-      const firstElement = focusable[0];
-      const lastElement = focusable[focusable.length - 1];
-
-      const isLastElementActive = document.activeElement === lastElement;
-      const isFirstElementActive = document.activeElement === firstElement;
-
-      // TODO: Move to question components
-      // Is for manage the loop focus.
-      const isShiftKeyPressed = e.shiftKey;
-      if (!isShiftKeyPressed && isLastElementActive) {
-        this.focusOn(e, firstElement);
-      }
-      if (isShiftKeyPressed && isFirstElementActive) {
-        this.focusOn(e, lastElement);
-      }
-    };
-
-    const initEventListenerFor = (aParent, aTypeOfComponent) => {
-      const parent = this.$refs[aTypeOfComponent][0].$el;
-
-      aParent.addEventListener("keydown", keyBoardHandler(parent));
-    };
-
     ["text", "singleLabel", "multiLabel", "rating", "ranking"].forEach(
-      (componentType) =>
-        this.$refs[componentType] && initEventListenerFor(parent, componentType)
+      (componentType) => {
+        const parent = this.$refs[componentType][0].$el;
+
+        parent?.addEventListener(
+          "keydown",
+          this.handleKeyboardToMoveLoop(parent)
+        );
+      }
+    );
+  },
+  beforeDestroy() {
+    ["text", "singleLabel", "multiLabel", "rating", "ranking"].forEach(
+      (componentType) => {
+        const parent = this.$refs[componentType][0].$el;
+
+        parent?.removeEventListener(
+          "keydown",
+          this.handleKeyboardToMoveLoop(parent)
+        );
+      }
     );
   },
   methods: {
+    handleKeyboardToMoveLoop(parent) {
+      return (e) => {
+        if (e.key !== "Tab") return;
+        const isShiftKeyPressed = e.shiftKey;
+
+        const focusable = parent.querySelectorAll(
+          'input[type="checkbox"], [tabindex="0"]'
+        );
+        const firstElement = focusable[0];
+        const lastElement = focusable[focusable.length - 1];
+
+        const isLastElementActive = document.activeElement === lastElement;
+        const isFirstElementActive = document.activeElement === firstElement;
+
+        // TODO: Move to Single and Multi label component
+        // Is for manage the loop focus.
+        if (!isShiftKeyPressed && isLastElementActive) {
+          this.focusOn(e, firstElement);
+        }
+        if (isShiftKeyPressed && isFirstElementActive) {
+          this.focusOn(e, lastElement);
+        }
+      };
+    },
     focusOnFirstQuestion(e) {
       e.preventDefault();
       this.updateQuestionAutofocus(0);
