@@ -4,6 +4,12 @@ Here you can find end-to-end examples to help you get started with curanting dat
 
 ````{grid}  1 1 3 3
 :class-container: tuto-section-2
+```{grid-item-card} Fine-tuning and evaluating GPT-3.5 with human feedback for RAG
+:link: fine-tuning-openai-rag-feedback.html
+
+Learn how to fine-tune and evaluate gpt3.5-turbo models with human feedback for RAG applications with LlamaIndex.
+
+```
 ```{grid-item-card} Curate an instruction dataset for supervised fine-tuning
 :link: curating-feedback-instructiondataset.html
 
