@@ -67,6 +67,21 @@ TASK_STRUCTURE = {
 
 
 class TrainingData(ABC):
+    _formatting_func_return_types = None
+
+    def _test_output_formatting_func(self, sample: Any):
+        """
+        Test if the formatting function returns the expected format.
+        """
+        try:
+            if not type(sample) == iter:
+                self._formatting_func_return_types(format=sample)
+            return True
+        except Exception:
+            raise ValueError(
+                f"formatting_func must return {self._formatting_func_return_types.__annotations__['format']}, not {type(sample)}"
+            )
+
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, Any]]:
         formatted_data = []
         explode_columns = set()
@@ -358,6 +373,17 @@ class TrainingTask:
         return TrainingTaskForDPO(formatting_func=formatting_func)
 
 
+class TrainingTaskForTextClassificationFormat(BaseModel):
+    """
+    Union[
+        Tuple[str, str], Tuple[str, List[str]],
+        List[Tuple[str, str]], List[Tuple[str, List[str]]]
+    ]
+    """
+
+    format: Union[Tuple[str, str], Tuple[str, List[str]], List[Tuple[str, str]], List[Tuple[str, List[str]]]]
+
+
 class TrainingTaskForTextClassification(BaseModel, TrainingData):
     """Training data for text classification
 
@@ -396,6 +422,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
     """
 
     formatting_func: Optional[Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]] = None
+    _formatting_func_return_types = TrainingTaskForTextClassificationFormat
     text: Optional[TextField] = None
     label: Optional[
         Union[
@@ -430,17 +457,16 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, Any]]:
         if self.formatting_func is not None:
             output = set()
+
             for sample in dataset.format_as("datasets"):
                 text_label = self.formatting_func(sample)
                 if text_label is None:
                     continue
 
-                if isinstance(text_label, tuple) and isinstance(text_label[0], str):
+                self._test_output_formatting_func(text_label)
+
+                if not isinstance(text_label, tuple):
                     text_label = {text_label}
-                else:
-                    raise ValueError(
-                        "formatting_func must return (text,label) as a Tuple[str, str] or a Tuple[str, List[str]]"
-                    )
 
                 output |= set(text_label)
 
@@ -455,7 +481,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
                     _all_labels.add(label)
                     _multi_label = False
 
-            # infer label type from output custum formatting function
+            # infer label type from output custom formatting function
             if _multi_label:
                 self.label = MultiLabelQuestionUnification(
                     question=MultiLabelQuestion(name="custom_func", labels=list(_all_labels))
@@ -633,6 +659,13 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
             return _prepare(data)
 
 
+def TrainingTaskForSFTFormat(BaseModel):
+    """
+    Union[str, List[str]]
+    """
+    format: Union[str, List[str]]
+
+
 class TrainingTaskForSFT(BaseModel, TrainingData):
     """Training data for supervised finetuning
 
@@ -653,14 +686,21 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
 
     """
 
+    _formatting_func_return_types = TrainingTaskForSFTFormat
     formatting_func: Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
         formatted_texts = set()
         for sample in dataset.format_as("datasets"):
             if texts := self.formatting_func(sample):
+                if texts is None:
+                    continue
+
+                self._test_output_formatting_func(texts)
+
                 if isinstance(texts, str):
                     texts = {texts}
+
                 formatted_texts |= set(texts)
         return [{"text": text} for text in formatted_texts]
 
@@ -695,6 +735,17 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
         return ds
 
 
+class TrainingTaskForRMFormat(BaseModel):
+    """
+    Union[
+        Tuple[str, str], Tuple[str, List[str]],
+        List[Tuple[str, str]], List[Tuple[str, List[str]]]
+    ]
+    """
+
+    format: Union[Tuple[str, str], Tuple[str, List[str]], List[Tuple[str, str]], List[Tuple[str, List[str]]]]
+
+
 class TrainingTaskForRM(BaseModel, TrainingData):
     """Training data for reward modeling
 
@@ -718,6 +769,7 @@ class TrainingTaskForRM(BaseModel, TrainingData):
         >>> dataset.prepare_for_training(framework="...", task=task)
     """
 
+    _formatting_func_return_types = TrainingTaskForRMFormat
     formatting_func: Callable[
         [Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]
     ]
@@ -729,7 +781,9 @@ class TrainingTaskForRM(BaseModel, TrainingData):
             if chosen_rejecteds is None:
                 continue
 
-            if isinstance(chosen_rejecteds, tuple) and isinstance(chosen_rejecteds[0], str):
+            self._test_output_formatting_func(chosen_rejecteds)
+
+            if isinstance(chosen_rejecteds, tuple):
                 chosen_rejecteds = {chosen_rejecteds}
 
             output |= set(chosen_rejecteds)
@@ -766,6 +820,14 @@ class TrainingTaskForRM(BaseModel, TrainingData):
         return ds
 
 
+class TrainingTaskForPPOFormat(BaseModel):
+    """
+    Union[str, List[str]]
+    """
+
+    format: Union[str, List[str]]
+
+
 class TrainingTaskForPPO(BaseModel, TrainingData):
     """Training data for proximal policy optimization
 
@@ -779,12 +841,18 @@ class TrainingTaskForPPO(BaseModel, TrainingData):
         >>> dataset.prepare_for_training(framework="...", task=task)
     """
 
+    _formatting_func_return_types = TrainingTaskForPPOFormat
     formatting_func: Callable[[Dict[str, Any]], Union[None, str, Iterator[str]]]
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
         formatted_texts = set()
         for sample in dataset.format_as("datasets"):
             if texts := self.formatting_func(sample):
+                if texts is None:
+                    continue
+
+                self._test_output_formatting_func(texts)
+
                 if isinstance(texts, str):
                     texts = {texts}
                 formatted_texts |= set(texts)
@@ -822,6 +890,14 @@ class TrainingTaskForPPO(BaseModel, TrainingData):
         return ds
 
 
+class TrainingTaskForDPOFormat(BaseModel):
+    """
+    Union[Tuple[str, str, str], List[Tuple[str, str, str]]]
+    """
+
+    format: Union[Tuple[str, str, str], List[Tuple[str, str, str]]]
+
+
 class TrainingTaskForDPO(BaseModel, TrainingData):
     """Training data for direct preference optimization
 
@@ -845,6 +921,7 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
         >>> dataset.prepare_for_training(framework="...", task=task)
     """
 
+    _formatting_func_return_types = TrainingTaskForDPOFormat
     formatting_func: Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
@@ -854,7 +931,9 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
             if prompt_chosen_rejecteds is None:
                 continue
 
-            if isinstance(prompt_chosen_rejecteds, tuple) and isinstance(prompt_chosen_rejecteds[0], str):
+            self._test_output_formatting_func(prompt_chosen_rejecteds)
+
+            if isinstance(prompt_chosen_rejecteds, tuple):
                 prompt_chosen_rejecteds = {prompt_chosen_rejecteds}
 
             output |= set(prompt_chosen_rejecteds)

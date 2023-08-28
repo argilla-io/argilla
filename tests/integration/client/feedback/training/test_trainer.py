@@ -21,6 +21,7 @@ import pytest
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -35,6 +36,7 @@ from argilla.client.feedback.training import ArgillaTrainer
 from argilla.client.feedback.training.schemas import (
     TrainingTask,
     TrainingTaskForTextClassification,
+    TrainingTaskForTextClassificationFormat,
     TrainingTaskMapping,
     TrainingTaskMappingForTextClassification,
     TrainingTaskTypes,
@@ -150,7 +152,9 @@ def test_prepare_for_training_text_classification_with_formatting_func(
 
     with pytest.raises(
         ValueError,
-        match=r"formatting_func must return \(text,label\) as a Tuple\[str, str\] or a Tuple\[str, List\[str\]\]",
+        match=re.escape(
+            f"formatting_func must return {TrainingTaskForTextClassificationFormat.__annotations__['format']}, not <class 'dict'>"
+        ),
     ):
         task = TrainingTask.for_text_classification(wrong_formatting_func)
         trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework)

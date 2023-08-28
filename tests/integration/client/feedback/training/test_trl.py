@@ -12,19 +12,40 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import re
 from collections import Counter
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List
 
+import pytest
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.training.base import ArgillaTrainer
-from argilla.client.feedback.training.schemas import TrainingTask
+from argilla.client.feedback.training.schemas import (
+    TrainingTask,
+    TrainingTaskForDPOFormat,
+    TrainingTaskForPPOFormat,
+    TrainingTaskForRMFormat,
+    TrainingTaskForSFTFormat,
+)
 from datasets import Dataset, DatasetDict
 
 from tests.integration.training.helpers import train_with_cleanup
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+
+__OUTPUT_DIR__ = "tmp"
+__FRAMWORK__ = "trl"
+
+
+def try_wrong_format(dataset, task, format_func: Any) -> None:
+    task = task(lambda _: {"test": "test"})
+    with pytest.raises(
+        ValueError,
+        match=re.escape(f"formatting_func must return {format_func.__annotations__['format']}, not <class 'dict'>"),
+    ):
+        trainer = ArgillaTrainer(dataset=dataset, task=task, framework=__FRAMWORK__)
+        trainer.train(__OUTPUT_DIR__)
 
 
 def test_prepare_for_training_sft(
@@ -57,25 +78,29 @@ def test_prepare_for_training_sft(
             return f"### Text\n{sample['text']}"
         return None
 
+    try_wrong_format(
+        dataset=dataset, task=TrainingTask.for_supervised_fine_tuning, format_func=TrainingTaskForSFTFormat
+    )
+
     task = TrainingTask.for_supervised_fine_tuning(formatting_func)
-    train_dataset = dataset.prepare_for_training(framework="trl", task=task)
+    train_dataset = dataset.prepare_for_training(framework=__FRAMWORK__, task=task)
     assert isinstance(train_dataset, Dataset)
     assert len(train_dataset) == 2
-    train_dataset_dict = dataset.prepare_for_training(framework="trl", task=task, train_size=0.5)
+    train_dataset_dict = dataset.prepare_for_training(framework=__FRAMWORK__, task=task, train_size=0.5)
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
     assert len(train_dataset_dict["train"]) == 1
 
-    trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2")
+    trainer = ArgillaTrainer(dataset, task, framework=__FRAMWORK__, model="sshleifer/tiny-gpt2")
     trainer.update_config(max_steps=3)
     assert trainer._trainer.training_args_kwargs["max_steps"] == 3
     trainer.update_config(max_steps=1)
     assert trainer._trainer.training_args_kwargs["max_steps"] == 1
-    train_with_cleanup(trainer, "tmp_trl_dir")
+    train_with_cleanup(trainer, __OUTPUT_DIR__)
 
-    eval_trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2", train_size=0.5)
+    eval_trainer = ArgillaTrainer(dataset, task, framework=__FRAMWORK__, model="sshleifer/tiny-gpt2", train_size=0.5)
     eval_trainer.update_config(max_steps=1)
-    train_with_cleanup(eval_trainer, "tmp_trl_dir")
+    train_with_cleanup(eval_trainer, __OUTPUT_DIR__)
 
 
 def test_prepare_for_training_rm(
@@ -107,25 +132,27 @@ def test_prepare_for_training_rm(
             elif labels[0] == "c":
                 return [(sample["text"], sample["text"][5:10]), (sample["text"], sample["text"][:5])]
 
+    try_wrong_format(dataset=dataset, task=TrainingTask.for_reward_modeling, format_func=TrainingTaskForRMFormat)
+
     task = TrainingTask.for_reward_modeling(formatting_func)
-    train_dataset = dataset.prepare_for_training(framework="trl", task=task)
+    train_dataset = dataset.prepare_for_training(framework=__FRAMWORK__, task=task)
     assert isinstance(train_dataset, Dataset)
     assert len(train_dataset) == 2
-    train_dataset_dict = dataset.prepare_for_training(framework="trl", task=task, train_size=0.5)
+    train_dataset_dict = dataset.prepare_for_training(framework=__FRAMWORK__, task=task, train_size=0.5)
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
     assert len(train_dataset_dict["train"]) == 1
 
-    trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2")
+    trainer = ArgillaTrainer(dataset, task, framework=__FRAMWORK__, model="sshleifer/tiny-gpt2")
     trainer.update_config(max_steps=3)
     assert trainer._trainer.training_args_kwargs["max_steps"] == 3
     trainer.update_config(max_steps=1)
     assert trainer._trainer.training_args_kwargs["max_steps"] == 1
-    train_with_cleanup(trainer, "tmp_trl_dir")
+    train_with_cleanup(trainer, __OUTPUT_DIR__)
 
-    eval_trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2", train_size=0.5)
+    eval_trainer = ArgillaTrainer(dataset, task, framework=__FRAMWORK__, model="sshleifer/tiny-gpt2", train_size=0.5)
     eval_trainer.update_config(max_steps=1)
-    train_with_cleanup(eval_trainer, "tmp_trl_dir")
+    train_with_cleanup(eval_trainer, __OUTPUT_DIR__)
 
 
 def test_prepare_for_training_ppo(
@@ -148,26 +175,30 @@ def test_prepare_for_training_ppo(
     def formatting_func(sample: Dict[str, Any]):
         return sample["text"]
 
+    try_wrong_format(
+        dataset=dataset, task=TrainingTask.for_proximal_policy_optimization, format_func=TrainingTaskForPPOFormat
+    )
+
     task = TrainingTask.for_proximal_policy_optimization(formatting_func=formatting_func)
-    train_dataset = dataset.prepare_for_training(framework="trl", task=task)
+    train_dataset = dataset.prepare_for_training(framework=__FRAMWORK__, task=task)
     assert isinstance(train_dataset, Dataset)
     assert len(train_dataset) == 2
-    train_dataset_dict = dataset.prepare_for_training(framework="trl", task=task, train_size=0.5)
+    train_dataset_dict = dataset.prepare_for_training(framework=__FRAMWORK__, task=task, train_size=0.5)
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
     assert len(train_dataset_dict["train"]) == 1
 
-    trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2")
+    trainer = ArgillaTrainer(dataset, task, framework=__FRAMWORK__, model="sshleifer/tiny-gpt2")
     trainer.update_config(config=PPOConfig(batch_size=1, ppo_epochs=1), reward_model=reward_model)
     assert trainer._trainer.trainer_kwargs["config"].batch_size == 1
     trainer.update_config(generation_kwargs={"top_k": 0.0, "top_p": 1.0, "do_sample": True})
     assert trainer._trainer.training_args_kwargs["generation_kwargs"]["top_p"] == 1.0
-    train_with_cleanup(trainer, "tmp_trl_dir")
+    train_with_cleanup(trainer, __OUTPUT_DIR__)
 
-    eval_trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2", train_size=0.5)
+    eval_trainer = ArgillaTrainer(dataset, task, framework=__FRAMWORK__, model="sshleifer/tiny-gpt2", train_size=0.5)
     eval_trainer.update_config(config=PPOConfig(batch_size=1, ppo_epochs=1), reward_model=reward_model)
     eval_trainer.update_config(max_steps=1)
-    train_with_cleanup(eval_trainer, "tmp_trl_dir")
+    train_with_cleanup(eval_trainer, __OUTPUT_DIR__)
 
 
 def test_prepare_for_training_dpo(
@@ -202,22 +233,26 @@ def test_prepare_for_training_dpo(
                     (sample["text"][::-1], sample["text"], sample["text"][:5]),
                 ]
 
+    try_wrong_format(
+        dataset=dataset, task=TrainingTask.for_direct_preference_optimization, format_func=TrainingTaskForDPOFormat
+    )
+
     task = TrainingTask.for_direct_preference_optimization(formatting_func)
-    train_dataset = dataset.prepare_for_training(framework="trl", task=task)
+    train_dataset = dataset.prepare_for_training(framework=__FRAMWORK__, task=task)
     assert isinstance(train_dataset, Dataset)
     assert len(train_dataset) == 2
-    train_dataset_dict = dataset.prepare_for_training(framework="trl", task=task, train_size=0.5)
+    train_dataset_dict = dataset.prepare_for_training(framework=__FRAMWORK__, task=task, train_size=0.5)
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
     assert len(train_dataset_dict["train"]) == 1
 
-    trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2")
+    trainer = ArgillaTrainer(dataset, task, framework=__FRAMWORK__, model="sshleifer/tiny-gpt2")
     trainer.update_config(max_steps=3)
     assert trainer._trainer.training_args_kwargs["max_steps"] == 3
     trainer.update_config(max_steps=1)
     assert trainer._trainer.training_args_kwargs["max_steps"] == 1
-    train_with_cleanup(trainer, "tmp_trl_dir")
+    train_with_cleanup(trainer, __OUTPUT_DIR__)
 
-    eval_trainer = ArgillaTrainer(dataset, task, framework="trl", model="sshleifer/tiny-gpt2", train_size=0.5)
+    eval_trainer = ArgillaTrainer(dataset, task, framework=__FRAMWORK__, model="sshleifer/tiny-gpt2", train_size=0.5)
     eval_trainer.update_config(max_steps=1)
-    train_with_cleanup(eval_trainer, "tmp_trl_dir")
+    train_with_cleanup(eval_trainer, __OUTPUT_DIR__)
