@@ -258,9 +258,7 @@ test.describe("Annotation page shortcuts", () => {
     test.describe("Pagination", () => {
       test("on first record, go to next record by pressing Ctrl+ArrowRight", async ({ page }) => {
         await goToAnnotationPage(page);
-        const formBox = await page.getByText("Submit your feedback").boundingBox();
 
-        await page.mouse.click(formBox.x - 25, formBox.y - 25); // click outside form to loose focus
         await expect(page).toHaveScreenshot();
 
         await page.keyboard.press(shortcuts.goToNextRecord);
@@ -268,9 +266,7 @@ test.describe("Annotation page shortcuts", () => {
       });
       test("on first record, can't go to prev record by pressing Ctrl+ArrowLeft", async ({ page }) => {
         await goToAnnotationPage(page);
-        const formBox = await page.getByText("Submit your feedback").boundingBox();
 
-        await page.mouse.click(formBox.x - 25, formBox.y - 25); // click outside form to loose focus
         await expect(page).toHaveScreenshot();
 
         await page.keyboard.press(shortcuts.goToPrevRecord);
@@ -278,25 +274,21 @@ test.describe("Annotation page shortcuts", () => {
       });
       test("on last record, can't go to next record by pressing Ctrl+ArrowRight", async ({ page }) => {
         await goToAnnotationPage(page);
-        const formBox = await page.getByText("Submit your feedback").boundingBox();
-
-        await page.mouse.click(formBox.x - 25, formBox.y - 25); // click outside form to loose focus
         await expect(page).toHaveScreenshot();
 
         await page.keyboard.press(shortcuts.goToNextRecord);
         await expect(page).toHaveScreenshot();
+
         await page.keyboard.press(shortcuts.goToNextRecord);
         await expect(page).toHaveScreenshot();
       });
       test("on last record, can go to prev record by pressing Ctrl+ArrowLeft", async ({ page }) => {
         await goToAnnotationPage(page);
-        const formBox = await page.getByText("Submit your feedback").boundingBox();
-
-        await page.mouse.click(formBox.x - 25, formBox.y - 25); // click outside form to loose focus
         await expect(page).toHaveScreenshot();
 
         await page.keyboard.press(shortcuts.goToNextRecord);
         await expect(page).toHaveScreenshot();
+        
         await page.keyboard.press(shortcuts.goToPrevRecord);
         await expect(page).toHaveScreenshot();
       });
