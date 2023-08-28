@@ -3,5 +3,16 @@
   "ranking": "Ranking",
   "label_selection": "Label",
   "text": "Text",
-  "rating": "Rating"
+  "rating": "Rating",
+  "shortcuts": {
+    "pagination": {
+      "go_to_previous_record": "Previous (ctrl + ←)",
+      "go_to_next_record": "Next (ctrl + →)"
+    },
+    "questions_form": {
+      "clear": "Clear (⇧ Shift + ␣ Space)",
+      "discard": "Discard (⇧ Shift + ⌫ Backspace)",
+      "submit": "Submit (⇧ Shift + ↵ Enter)"
+    }
+  }
 }

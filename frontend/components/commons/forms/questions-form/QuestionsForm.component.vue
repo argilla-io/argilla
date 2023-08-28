@@ -33,7 +33,12 @@
     </div>
     <div class="footer-form">
       <div class="footer-form__left-footer">
-        <BaseButton type="button" class="primary text" @click.prevent="onClear">
+        <BaseButton
+          type="button"
+          class="primary text"
+          @click.prevent="onClear"
+          :title="$t('shortcuts.questions_form.clear')"
+        >
           <span v-text="'Clear'" />
         </BaseButton>
       </div>
@@ -43,6 +48,7 @@
           class="primary outline"
           @on-click="onDiscard"
           :disabled="record.isDiscarded"
+          :title="$t('shortcuts.questions_form.discard')"
         >
           <span v-text="'Discard'" />
         </BaseButton>
@@ -50,6 +56,7 @@
           type="submit"
           class="primary"
           :disabled="isSubmitButtonDisabled"
+          :title="$t('shortcuts.questions_form.submit')"
         >
           <span v-text="'Submit'" />
         </BaseButton>
@@ -282,4 +289,14 @@ export default {
     gap: $base-space * 2;
   }
 }
+
+// [data-title] {
+//   position: relative;
+//   overflow: visible;
+//   @extend %has-tooltip--top;
+//   &:before,
+//   &:after {
+//     margin-top: calc($base-space/2);
+//   }
+// }
 </style>
