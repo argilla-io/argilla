@@ -1,4 +1,4 @@
-The data required for these steps need to be used as comparison data to showcase the preference for the generated prompts. A good example is our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en), where we assumed that updated responses get preference over the older ones.Another good example is the [Anthropic RLHF dataset](https://huggingface.co/datasets/Anthropic/hh-rlhf).
+The data required for these steps need to be used as comparison data to showcase the preference for the generated prompts. A good example is our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en), where we assumed that updated responses get preference over the older ones. Another good example is the [Anthropic RLHF dataset](https://huggingface.co/datasets/Anthropic/hh-rlhf).
 
 ```{note}
 The Dolly original dataset contained a lot of reference indicators such as "[1]", which causes the model to hallucinate and incorrectly create references.

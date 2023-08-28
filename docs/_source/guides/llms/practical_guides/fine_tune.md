@@ -812,7 +812,7 @@ DPO requires a trained supervised fine-tuned model to function. Take a look at t
 ```{include} /_common/dolly_dataset_info.md
 ```
 
-In case of training an PPO, we then use the prompt and context data and correct the generated response from the SFT model by using the reward model. Hence, we will need to format the following `text`.
+In case of training using PPO, we then use the prompt and context data and correct the generated response from the SFT model by using the reward model. Hence, we will need to format the following `text`.
 
 ```bash
 ### Instruction
@@ -868,7 +868,7 @@ task = TrainingTask.for_direct_preference_optimization(formatting_func=formattin
 
 **ArgillaTrainer**
 
-Instead of using this dataset, we'll use the task directly with our `FeedbackDataset` in the `ArgillaTrainer`. In contrary to PPO, we do not need to specify any reward model, because this preference modeling is inferred internally by the DPO-algorithm.
+We'll use the task directly with our `FeedbackDataset` in the `ArgillaTrainer`. In contrary to PPO, we do not need to specify any reward model, because this preference modeling is inferred internally by the DPO-algorithm.
 
 ```python
 from argilla.feedback import ArgillaTrainer
