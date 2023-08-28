@@ -23,6 +23,7 @@ from argilla.client.datasets import Dataset
 from argilla.client.models import BulkResponse, Record  # TODO Remove TextGenerationRecord
 from argilla.client.sdk.commons import errors
 from argilla.client.sdk.v1.datasets.api import list_datasets as list_datasets_api_v1
+from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 from argilla.client.sdk.workspaces.api import list_workspaces as list_workspaces_api_v0
 
 Api = Argilla  # Backward compatibility
@@ -434,6 +435,23 @@ def get_workspace() -> str:
         The name of the active workspace as a string.
     """
     return ArgillaSingleton.get().get_workspace()
+
+
+def list_workspaces() -> List[WorkspaceModel]:
+    """Lists all the available workspaces for the current user.
+
+    Returns:
+        A list of `WorkspaceModel` objects, containing the workspace
+        attributes: name, id, created_at, and updated_at.
+    """
+    warnings.warn(
+        "`Workspace.list` is recommended over `list_workspaces`, since you can easily"
+        " access the workspaces as a list of `Workspace` objects with their attributes"
+        " and methods.",
+        UserWarning,
+        stacklevel=1,
+    )
+    return ArgillaSingleton.get().list_workspaces()
 
 
 def active_client() -> Argilla:
