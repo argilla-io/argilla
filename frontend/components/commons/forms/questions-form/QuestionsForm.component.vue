@@ -149,7 +149,7 @@ export default {
 
       if (code == "Tab" && !activeElementIsInForm) {
         this.focusOnFirstQuestion(e);
-      };
+      }
 
       if (!shiftKey) return;
 
