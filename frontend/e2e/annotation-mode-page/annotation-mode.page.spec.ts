@@ -294,9 +294,11 @@ test.describe("Annotation page shortcuts", () => {
         await expect(page).toHaveScreenshot();
 
         await page.keyboard.press(shortcuts.goToNextRecord);
+        await page.waitForTimeout(300);
         await expect(page).toHaveScreenshot();
 
         await page.keyboard.press(shortcuts.goToNextRecord);
+        await page.waitForTimeout(1000);
         await expect(page).toHaveScreenshot();
       });
       test("on last record, can go to prev record by pressing Ctrl+ArrowLeft", async ({

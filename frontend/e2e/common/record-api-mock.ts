@@ -166,7 +166,11 @@ export const mockRecordForLongAndShortQuestion = async (
   return recordOne;
 };
 
-export const mockRecordResponses = async (page: Page, recordId: string, status: "submitted" | "discarded") => {
+export const mockRecordResponses = async (
+  page: Page,
+  recordId: string,
+  status: "submitted" | "discarded"
+) => {
   await page.route(
     `*/**/api/v1/records/${recordId}/responses`,
     async (route, request) => {
@@ -200,6 +204,16 @@ export const mockRecordWith12Ranking = async (
       await route.fulfill({
         json: {
           items: [recordFor12rankingA, recordFor12rankingB],
+        },
+      });
+    }
+  );
+  await page.route(
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=2&limit=10&response_status=missing`,
+    async (route) => {
+      await route.fulfill({
+        json: {
+          items: [],
         },
       });
     }
