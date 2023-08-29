@@ -98,7 +98,7 @@ class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
             exclude_none=True,
         )
         return RemoteFeedbackRecord(
-            client=self._client, name2id=self.__question_name2id, suggestions=suggestions or None, **record
+            client=self._client, name2id=self.__question_name2id, suggestions=suggestions, **record
         )
 
     @abstractmethod
