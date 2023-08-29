@@ -413,6 +413,7 @@ class RemoteFeedbackRecord(FeedbackRecord):
             suggestions = [suggestions]
 
         existing_suggestions = {suggestion.question_name: suggestion for suggestion in self.suggestions}
+        delete_suggestions = []
         for suggestion in suggestions:
             if suggestion.question_name not in existing_suggestions:
                 warnings.warn(
@@ -423,9 +424,10 @@ class RemoteFeedbackRecord(FeedbackRecord):
                 )
             else:
                 existing_suggestions.pop(suggestion.question_name, None)
+                delete_suggestions.append(suggestion)
 
         records_api_v1.delete_suggestions(
-            client=self._client, id=self.id, suggestion_ids=[suggestion.id for suggestion in suggestions]
+            client=self._client, id=self.id, suggestion_ids=[suggestion.id for suggestion in delete_suggestions]
         )
         self.__dict__["suggestions"] = tuple(existing_suggestions.values())
 
