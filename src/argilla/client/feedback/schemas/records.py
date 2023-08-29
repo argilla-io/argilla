@@ -323,6 +323,8 @@ class RemoteFeedbackRecord(FeedbackRecord):
                     suggestion["question_id"] = self.name2id[suggestion["question_name"]]
                 if "id" in suggestion:
                     suggestion = RemoteSuggestionSchema(client=self._client, record_id=self.id, **suggestion)
+                else:
+                    suggestion = SuggestionSchema(**suggestion)
 
             if isinstance(suggestion, SuggestionSchema):
                 if not suggestion.question_id:
