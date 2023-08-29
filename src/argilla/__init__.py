@@ -45,6 +45,7 @@ if _TYPE_CHECKING:
         get_workspace,
         init,
         list_datasets,
+        list_workspaces,
         load,
         log,
         log_async,
@@ -120,6 +121,7 @@ _import_structure = {
         "set_workspace",
         "active_client",
         "list_datasets",
+        "list_workspaces",
     ],
     "client.models": [
         "Text2TextRecord",
