@@ -27,7 +27,7 @@ from argilla.client.feedback.schemas import (
     TextField,
     TextQuestion,
 )
-from argilla.client.feedback.training.schemas import TrainingTaskMapping
+from argilla.client.feedback.training.schemas import TrainingTask
 from argilla.client.models import Framework
 
 if TYPE_CHECKING:
@@ -690,6 +690,6 @@ def test_prepare_for_training_text_classification(
     )
     dataset.add_records(feedback_dataset_records)
     label = dataset.question_by_name(question)
-    task_mapping = TrainingTaskMapping.for_text_classification(text=dataset.fields[0], label=label)
+    task = TrainingTask.for_text_classification(text=dataset.fields[0], label=label)
 
-    dataset.prepare_for_training(framework=framework, task_mapping=task_mapping, fetch_records=False)
+    dataset.prepare_for_training(framework=framework, task=task)

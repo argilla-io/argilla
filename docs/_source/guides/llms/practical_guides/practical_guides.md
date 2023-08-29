@@ -47,14 +47,9 @@ Use the Argilla LangChain callback for monitoring, evaluation, and fine-tuning.
 ```{grid-item-card} Fine-tune LLMs
 :link: fine_tune.html
 
-Fine-tune an LLM with the feedback collected from Argilla.
-
+Fine-tune an LLM or other models with the feedback collected from Argilla.
 ```
-```{grid-item-card} Fine-tune other models
-:link: fine_tune_others.html
 
-Fine-tune basic models with feedback collected from Argilla.
-```
 ````
 
 ![Feedback dataset snapshot](../../../_static/images/llms/snapshot-feedback-demo.png)
@@ -70,5 +65,4 @@ collect_responses
 export_dataset
 use_argilla_callback_in_langchain
 fine_tune
-fine_tune_others
 ```
