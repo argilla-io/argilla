@@ -428,10 +428,15 @@ class RemoteFeedbackRecord(FeedbackRecord):
                 existing_suggestions.pop(suggestion.question_name, None)
                 delete_suggestions.append(suggestion)
 
-        records_api_v1.delete_suggestions(
-            client=self._client, id=self.id, suggestion_ids=[suggestion.id for suggestion in delete_suggestions]
-        )
-        self.__dict__["suggestions"] = tuple(existing_suggestions.values())
+        try:
+            records_api_v1.delete_suggestions(
+                client=self._client, id=self.id, suggestion_ids=[suggestion.id for suggestion in delete_suggestions]
+            )
+            self.__dict__["suggestions"] = tuple(existing_suggestions.values())
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to delete suggestions with IDs `{[suggestion.id for suggestion in delete_suggestions]}` from record with ID `{self.id}` from Argilla."
+            ) from e
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def delete(self) -> FeedbackRecord:
