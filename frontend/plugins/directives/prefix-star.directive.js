@@ -10,12 +10,15 @@ const sparkIcon = {
     element.prepend(emojiWrapper);
   },
   remove: (element) => {
-    element.removeChild(element.childNodes[0]);
+    if (element.childNodes.length === 2)
+      element.removeChild(element.childNodes[0]);
   },
 };
 
 Vue.directive("prefix-star", {
   update: (element, binding) => {
+    if (!binding?.value.enabled) return;
+
     if (binding?.value.show) {
       sparkIcon.add(element, binding);
     } else {
@@ -23,6 +26,8 @@ Vue.directive("prefix-star", {
     }
   },
   bind: (element, binding) => {
+    if (!binding?.value.enabled) return;
+
     if (binding?.value.show) {
       sparkIcon.add(element, binding);
     }

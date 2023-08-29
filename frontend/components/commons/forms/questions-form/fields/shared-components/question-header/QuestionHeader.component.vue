@@ -2,10 +2,11 @@
   <div class="title-area --body1">
     <span
       class="suggestion-info"
-      v-text="title"
-      v-required-field="{ show: isRequired, color: 'red' }"
+      v-text="question.title"
+      v-required-field="{ show: question.isRequired, color: 'red' }"
       v-prefix-star="{
-        show: hasSuggestion,
+        enabled: showSuggestion,
+        show: question.matchSuggestion,
         tooltip: 'This question contains a suggestion',
       }"
     />
@@ -13,13 +14,17 @@
       class="icon-info"
       v-if="showIcon"
       icon="info"
-      :id="`${title}QuestionHeader`"
+      :id="`${question.id}QuestionHeader`"
       :show-badge="false"
       iconColor="#acacac"
       badge-vertical-position="top"
       badge-horizontal-position="right"
       badge-border-color="white"
-      v-tooltip="{ content: tooltipMessage, backgroundColor: '#FFF' }"
+      v-tooltip="{
+        content: tooltipMessage,
+        open: openTooltip,
+        backgroundColor: '#FFF',
+      }"
     />
   </div>
 </template>
@@ -29,26 +34,36 @@ import "assets/icons/info";
 export default {
   name: "QuestionHeader",
   props: {
-    title: {
-      type: String,
+    question: {
+      type: Object,
       required: true,
     },
-    tooltipMessage: {
-      type: String,
-      default: () => "",
-    },
-    isRequired: {
-      type: Boolean,
-      default: () => false,
-    },
-    hasSuggestion: {
+    showSuggestion: {
       type: Boolean,
       default: () => false,
     },
   },
+  data() {
+    return {
+      tooltipMessage: this.question.description,
+      openTooltip: false,
+      timer: null,
+    };
+  },
   computed: {
     showIcon() {
-      return !!this.tooltipMessage?.length;
+      return !!this.question.description?.length;
+    },
+  },
+  watch: {
+    "question.description"() {
+      if (this.timer) clearTimeout(this.timer);
+      this.openTooltip = true;
+      this.tooltipMessage = this.question.description;
+
+      this.timer = setTimeout(() => {
+        this.openTooltip = false;
+      }, 2000);
     },
   },
 };
@@ -80,7 +95,6 @@ span {
   height: 20px;
   margin: 0;
   padding: 0;
-  overflow: inherit;
   vertical-align: middle;
   &[data-title] {
     position: relative;
