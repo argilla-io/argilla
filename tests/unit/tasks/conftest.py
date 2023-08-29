@@ -11,21 +11,25 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import json
 from typing import TYPE_CHECKING, Generator
 
 import pytest
 from argilla.__main__ import app
 from argilla.server.database import database_url_sync
-from argilla.server.models import DatabaseModel
 from argilla.tasks.database.migrate import migrate_db
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession
 from typer.testing import CliRunner
 
 from tests.database import SyncTestSession
+from tests.factories import UserSyncFactory
 
 if TYPE_CHECKING:
     from argilla.tasks.async_typer import AsyncTyper
+    from pytest_mock import MockerFixture
+    from sqlalchemy.engine import Connection
+    from sqlalchemy.orm import Session
 
 
 @pytest.fixture(scope="session")
@@ -52,7 +56,7 @@ def sync_connection() -> Generator["Connection", None, None]:
     engine.dispose()
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
     sync_connection.begin_nested()
     session = SyncTestSession()
@@ -82,3 +86,9 @@ def async_db_proxy(mocker: "MockerFixture", sync_db: "Session") -> "AsyncSession
     async_session.close = mocker.AsyncMock()
 
     return async_session
+
+
+@pytest.fixture
+def login_mock(mocker: "MockerFixture"):
+    mocker.patch("argilla.client.login.ArgillaCredentials.exists", return_value=True)
+    mocker.patch("argilla.client.api.ArgillaSingleton.init")

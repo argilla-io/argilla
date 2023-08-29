@@ -10,6 +10,10 @@ The methods mentioned in this page are only available for `FeedbackDataset`. For
 
 The first step will be to pull a dataset from Argilla with the `FeedbackDataset.from_argilla()` method. This method will return a new instance of `FeedbackDataset` with the same guidelines, fields, questions, and records (including responses if any) as the dataset in Argilla.
 
+:::{note}
+From Argilla 1.14.0, calling `from_argilla` will pull the `FeedbackDataset` from Argilla, but the instance will be remote, which implies that the additions, updates, and deletions of records will be pushed to Argilla as soon as they are made. This is a change from previous versions of Argilla, where you had to call `push_to_argilla` again to push the changes to Argilla.
+:::
+
 ```python
 dataset = rg.FeedbackDataset.from_argilla("my-dataset", workspace="my-workspace")
 ```

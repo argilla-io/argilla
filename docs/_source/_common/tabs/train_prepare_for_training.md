@@ -22,7 +22,7 @@ dataset_rg.prepare_for_training(framework="autotrain", train_size=1)
 ```
 :::
 
-:::{tab-item} Setfit
+:::{tab-item} SetFit
 
 ```python
 import argilla as rg
