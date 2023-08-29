@@ -25,21 +25,18 @@ def list_workspaces() -> None:
     from argilla import Workspace
 
     workspaces = Workspace.list()
+
     table = Table(title="Workspaces")
+    for column in ("ID", "Name", "Creation Date", "Update Date"):
+        table.add_column(column, justify="center")
 
-    columns = ("ID", "Name", "Creation Date", "Update Date")
-    [table.add_column(col, justify="center") for col in columns]
-
-    def grab_fields(workspace: Workspace) -> List[str]:
-        return [
+    for workspace in workspaces:
+        table.add_row(
             str(workspace.id),
             workspace.name,
             workspace.inserted_at.isoformat(sep=" "),
             workspace.updated_at.isoformat(sep=" "),
-        ]
-
-    for ws in workspaces:
-        table.add_row(*grab_fields(ws))
+        )
 
     console = Console()
     console.print(table)
