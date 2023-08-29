@@ -33,7 +33,8 @@ def delete_record(
         id: the id of the record to be deleted in Argilla.
 
     Returns:
-        A `Response` object with the response itself, and/or the error codes if applicable.
+        A `Response` object containing a `parsed` attribute with the parsed response if
+        the request was successful, which is a `FeedbackItemModel`.
     """
     url = f"/api/v1/records/{id}"
 
