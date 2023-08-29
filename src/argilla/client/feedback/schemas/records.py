@@ -448,5 +448,4 @@ class RemoteFeedbackRecord(FeedbackRecord):
     class Config:
         arbitrary_types_allowed = True
         validate_assignment = True
-        allow_mutation = False
         exclude = {"_unified_responses", "client", "name2id"}
