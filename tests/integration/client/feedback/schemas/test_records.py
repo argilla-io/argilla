@@ -41,14 +41,10 @@ if TYPE_CHECKING:
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
 async def test_delete(role: UserRole) -> None:
-    text_field = await TextFieldFactory.create(required=True)
-    text_question = await TextQuestionFactory.create(required=True)
-    records = await RecordFactory.create_batch(size=10)
-    dataset = await DatasetFactory.create(
-        fields=[text_field],
-        questions=[text_question],
-        records=records,
-    )
+    dataset = await DatasetFactory.create()
+    await TextFieldFactory.create(dataset=dataset, required=True)
+    await TextQuestionFactory.create(dataset=dataset, required=True)
+    await RecordFactory.create_batch(dataset=dataset, size=10)
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
     api.init(api_key=user.api_key)
@@ -66,14 +62,10 @@ async def test_delete(role: UserRole) -> None:
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
 async def test_update(role: UserRole, db: "AsyncSession") -> None:
-    text_field = await TextFieldFactory.create(required=True)
-    text_question = await TextQuestionFactory.create(required=True)
-    records = await RecordFactory.create_batch(size=10)
-    dataset = await DatasetFactory.create(
-        fields=[text_field],
-        questions=[text_question],
-        records=records,
-    )
+    await TextFieldFactory.create(dataset=dataset, required=True)
+    question = await TextQuestionFactory.create(dataset=dataset, required=True)
+    records = await RecordFactory.create_batch(dataset=dataset, size=10)
+    dataset = await DatasetFactory.create()
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
     api.init(api_key=user.api_key)
@@ -83,8 +75,8 @@ async def test_update(role: UserRole, db: "AsyncSession") -> None:
     assert all(record.suggestions == () for record in remote_records)
 
     suggestion = SuggestionSchema(
-        question_id=text_question.id,
-        question_name=text_question.name,
+        question_id=question.id,
+        question_name=question.name,
         value="suggestion",
     )
     for remote_record, factory_record in zip(remote_records, records):
@@ -100,14 +92,10 @@ async def test_update(role: UserRole, db: "AsyncSession") -> None:
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
 async def test_set_suggestions_deprecated(role: UserRole, db: "AsyncSession") -> None:
-    text_field = await TextFieldFactory.create(required=True)
-    text_question = await TextQuestionFactory.create(required=True)
-    records = await RecordFactory.create_batch(size=10)
-    dataset = await DatasetFactory.create(
-        fields=[text_field],
-        questions=[text_question],
-        records=records,
-    )
+    dataset = await DatasetFactory.create()
+    await TextFieldFactory.create(dataset=dataset, required=True)
+    question = await TextQuestionFactory.create(dataset=dataset, required=True)
+    records = await RecordFactory.create_batch(dataset=dataset, size=10)
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
     api.init(api_key=user.api_key)
@@ -117,8 +105,8 @@ async def test_set_suggestions_deprecated(role: UserRole, db: "AsyncSession") ->
     assert all(record.suggestions == () for record in remote_records)
 
     suggestion = SuggestionSchema(
-        question_id=text_question.id,
-        question_name=text_question.name,
+        question_id=question.id,
+        question_name=question.name,
         value="suggestion",
     )
     with pytest.warns(DeprecationWarning, match="`set_suggestions` is deprected in favor of `update`"):
@@ -135,9 +123,9 @@ async def test_set_suggestions_deprecated(role: UserRole, db: "AsyncSession") ->
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
 async def test_delete_suggestions(role: UserRole, db: "AsyncSession") -> None:
-    field = await TextFieldFactory.create(required=True)
-    question = await TextQuestionFactory.create(required=True)
-    dataset = await DatasetFactory.create(fields=[field], questions=[question])
+    dataset = await DatasetFactory.create()
+    await TextFieldFactory.create(dataset=dataset, required=True)
+    question = await TextQuestionFactory.create(dataset=dataset, required=True)
     record = await RecordFactory.create(dataset=dataset)
     await SuggestionFactory.create(record=record, question=question)
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
@@ -157,9 +145,9 @@ async def test_delete_suggestions(role: UserRole, db: "AsyncSession") -> None:
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
 async def test_delete_suggestion_inplace(role: UserRole, db: "AsyncSession") -> None:
-    field = await TextFieldFactory.create(required=True)
-    question = await TextQuestionFactory.create(required=True)
-    dataset = await DatasetFactory.create(fields=[field], questions=[question])
+    dataset = await DatasetFactory.create()
+    await TextFieldFactory.create(dataset=dataset, required=True)
+    question = await TextQuestionFactory.create(dataset=dataset, required=True)
     record = await RecordFactory.create(dataset=dataset)
     await SuggestionFactory.create(record=record, question=question)
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
