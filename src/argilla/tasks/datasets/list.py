@@ -65,3 +65,7 @@ def list_datasets(
 
     console = Console()
     console.print(table)
+
+
+if __name__ == "__main__":
+    typer.run(list_datasets)

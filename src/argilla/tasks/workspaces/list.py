@@ -12,21 +12,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List
-
-from argilla.tasks import async_typer
+import typer
 
 
 def list_workspaces() -> None:
     """List the workspaces in Argilla and prints them on the console."""
     from rich.console import Console
-    from rich.table import Table
 
     from argilla import Workspace
+    from argilla.tasks.rich import get_argilla_themed_table
 
     workspaces = Workspace.list()
 
-    table = Table(title="Workspaces")
+    table = get_argilla_themed_table(title="Workspaces")
     for column in ("ID", "Name", "Creation Date", "Update Date"):
         table.add_column(column, justify="center")
 
@@ -43,4 +41,4 @@ def list_workspaces() -> None:
 
 
 if __name__ == "__main__":
-    async_typer.run(list_workspaces)
+    typer.run(list_workspaces)
