@@ -40,6 +40,10 @@ export default {
     },
   },
   computed: {
+    datasetSettingsUrl() {
+      const { fullPath } = this.$route;
+      return `${window.origin}${fullPath}`;
+    },
     guidelines() {
       return (
         this.settings.dataset.guidelines ||
