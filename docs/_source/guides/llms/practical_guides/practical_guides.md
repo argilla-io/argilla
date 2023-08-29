@@ -22,6 +22,12 @@ Workflows to organize your annotation team.
 Make changes to an existing Feedback Dataset.
 
 ```
+```{grid-item-card} Filter a Feedback Dataset
+:link: filter_dataset.html
+
+Obtain a filtered version of your dataset based on the status of the annotations.
+
+```
 ```{grid-item-card} Annotate a Feedback Dataset
 :link: annotate_dataset.html
 
@@ -60,6 +66,7 @@ Fine-tune an LLM or other models with the feedback collected from Argilla.
 create_dataset
 assign_annotations
 update_dataset
+filter_dataset
 annotate_dataset
 collect_responses
 export_dataset
