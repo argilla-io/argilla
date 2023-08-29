@@ -136,6 +136,9 @@ class FeedbackRecord(BaseModel):
             users that must exist in Argilla. Each response corresponds to one of the
             `FeedbackDataset` questions, so the values should match the question type.
             Defaults to None.
+        suggestions: A list of `SuggestionSchema` that contains the suggestions
+            for the current record. Every suggestion is linked to only one
+            question. Defaults to an empty list.
         external_id: The external ID of the record, which means that the user can
             specify this ID to identify the record no matter what the Argilla ID is.
             Defaults to None.
