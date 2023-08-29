@@ -13,11 +13,12 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Awaitable, Callable
+from typing import TYPE_CHECKING, Any, Callable, Type
 from uuid import UUID, uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
+from argilla.server.enums import ResponseStatus
 from argilla.server.models import Record, Response, Suggestion, User, UserRole
 from argilla.server.search_engine import SearchEngine
 from sqlalchemy import func, select
@@ -27,6 +28,7 @@ from tests.factories import (
     DatasetFactory,
     LabelSelectionQuestionFactory,
     MultiLabelSelectionQuestionFactory,
+    QuestionFactory,
     RankingQuestionFactory,
     RatingQuestionFactory,
     RecordFactory,
@@ -72,74 +74,8 @@ async def create_ranking_question(dataset: "Dataset") -> None:
 
 @pytest.mark.asyncio
 class TestSuiteRecords:
-    @pytest.mark.parametrize("response_status", ["submitted", "discarded", "draft"])
     @pytest.mark.parametrize(
-        "create_questions_func, responses",
-        [
-            (
-                create_text_questions,
-                {
-                    "values": {
-                        "input_ok": {"value": "yes"},
-                        "output_ok": {"value": "yes"},
-                    },
-                },
-            ),
-            (
-                create_rating_questions,
-                {
-                    "values": {
-                        "rating_question_1": {"value": 5},
-                    },
-                },
-            ),
-            (
-                create_label_selection_questions,
-                {
-                    "values": {
-                        "label_selection_question_1": {"value": "option1"},
-                    },
-                },
-            ),
-            (
-                create_multi_label_selection_questions,
-                {
-                    "values": {
-                        "multi_label_selection_question_1": {"value": ["option1"]},
-                    },
-                },
-            ),
-            (
-                create_multi_label_selection_questions,
-                {
-                    "values": {
-                        "multi_label_selection_question_1": {"value": ["option1", "option2"]},
-                    },
-                },
-            ),
-            (
-                create_text_questions,
-                {
-                    "values": {
-                        "input_ok": {"value": "yes"},
-                    },
-                },
-            ),
-            (
-                create_ranking_question,
-                {
-                    "values": {
-                        "ranking_question_1": {
-                            "value": [
-                                {"value": "completion-b", "rank": 1},
-                                {"value": "completion-c", "rank": 2},
-                                {"value": "completion-a", "rank": 3},
-                            ]
-                        },
-                    }
-                },
-            ),
-        ],
+        "response_status", [ResponseStatus.submitted, ResponseStatus.discarded, ResponseStatus.draft]
     )
     async def test_create_record_response_with_required_questions(
         self,
@@ -148,14 +84,14 @@ class TestSuiteRecords:
         mock_search_engine: SearchEngine,
         owner: User,
         owner_auth_header: dict,
-        create_questions_func: Callable[["Dataset"], Awaitable[None]],
-        response_status: str,
-        responses: dict,
+        response_status: ResponseStatus,
     ):
         dataset = await DatasetFactory.create()
-        await create_questions_func(dataset)
+        await TextQuestionFactory.create(name="corrected-1", dataset=dataset, required=True)
+        await TextQuestionFactory.create(name="corrected-2", dataset=dataset)
         record = await RecordFactory.create(dataset=dataset)
 
+        responses = {"values": {"corrected-1": {"value": "Unit Test 1"}}}
         response_json = {**responses, "status": response_status}
         response = await async_client.post(
             f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
@@ -195,108 +131,7 @@ class TestSuiteRecords:
         assert response.status_code == 422
         assert response.json() == {"detail": "Missing required question: 'input_ok'"}
 
-    @pytest.mark.parametrize("response_status", ["discarded", "draft"])
-    @pytest.mark.parametrize(
-        "create_questions_func, responses",
-        [
-            (
-                create_text_questions,
-                {
-                    "values": {
-                        "output_ok": {"value": "yes"},
-                    },
-                },
-            ),
-            (
-                create_rating_questions,
-                {
-                    "values": {
-                        "rating_question_2": {"value": 5},
-                    },
-                },
-            ),
-            (
-                create_label_selection_questions,
-                {
-                    "values": {
-                        "label_selection_question_2": {"value": "option1"},
-                    },
-                },
-            ),
-            (
-                create_multi_label_selection_questions,
-                {
-                    "values": {
-                        "multi_label_selection_question_2": {"value": ["option1"]},
-                    },
-                },
-            ),
-            (
-                create_multi_label_selection_questions,
-                {
-                    "values": {
-                        "multi_label_selection_question_2": {"value": ["option1", "option2"]},
-                    },
-                },
-            ),
-            (
-                create_ranking_question,
-                {
-                    "values": {
-                        "ranking_question_2": {
-                            "value": [
-                                {"value": "completion-b", "rank": 1},
-                                {"value": "completion-c", "rank": 2},
-                                {"value": "completion-a", "rank": 3},
-                            ]
-                        },
-                    }
-                },
-            ),
-            (
-                create_ranking_question,
-                {
-                    "values": {
-                        "ranking_question_2": {
-                            "value": [
-                                {"value": "completion-b", "rank": 1},
-                                {"value": "completion-c", "rank": 1},
-                                {"value": "completion-a", "rank": 3},
-                            ]
-                        },
-                    }
-                },
-            ),
-            (
-                create_ranking_question,
-                {
-                    "values": {
-                        "ranking_question_2": {
-                            "value": [
-                                {"value": "completion-b", "rank": 1},
-                                {"value": "completion-c", "rank": 3},
-                                {"value": "completion-a", "rank": 3},
-                            ]
-                        },
-                    }
-                },
-            ),
-            (
-                create_ranking_question,
-                {
-                    "values": {
-                        "ranking_question_2": {
-                            "value": [
-                                {"value": "completion-b", "rank": 1},
-                                {"value": "completion-c", "rank": 1},
-                                {"value": "completion-a", "rank": 1},
-                            ]
-                        },
-                    }
-                },
-            ),
-        ],
-    )
+    @pytest.mark.parametrize("response_status", [ResponseStatus.discarded, ResponseStatus.draft])
     async def test_create_record_response_with_missing_required_questions(
         self,
         async_client: "AsyncClient",
@@ -304,14 +139,14 @@ class TestSuiteRecords:
         mock_search_engine: SearchEngine,
         owner: User,
         owner_auth_header: dict,
-        create_questions_func: Callable[["Dataset"], Awaitable[None]],
-        response_status: str,
-        responses: dict,
+        response_status: ResponseStatus,
     ):
         dataset = await DatasetFactory.create()
-        await create_questions_func(dataset)
+        await TextQuestionFactory.create(name="corrected-1", dataset=dataset, required=True)
+        await TextQuestionFactory.create(name="corrected-2", dataset=dataset)
         record = await RecordFactory.create(dataset=dataset)
 
+        responses = {"values": {"corrected-2": {"value": "Unit Test 2"}}}
         response_json = {**responses, "status": response_status}
         response = await async_client.post(
             f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
@@ -332,6 +167,108 @@ class TestSuiteRecords:
 
         response = (await db.execute(select(Response).where(Response.record_id == record.id))).scalar_one()
         mock_search_engine.update_record_response.assert_called_once_with(response)
+
+    @pytest.mark.parametrize(
+        "QuestionFactory, response_value",
+        [
+            (TextQuestionFactory, "Unit Test!"),
+            (RatingQuestionFactory, 3),
+            (LabelSelectionQuestionFactory, "option1"),
+            (MultiLabelSelectionQuestionFactory, ["option1", "option2"]),
+            (
+                RankingQuestionFactory,
+                [
+                    {"value": "completion-a", "rank": 1},
+                    {"value": "completion-b", "rank": 2},
+                    {"value": "completion-c", "rank": 3},
+                ],
+            ),
+        ],
+    )
+    async def test_create_record_response_with_submitted_status(
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        QuestionFactory: Type[QuestionFactory],
+        response_value: Any,
+        owner: User,
+        owner_auth_header: dict,
+    ):
+        question = await QuestionFactory.create()
+        record = await RecordFactory.create(dataset=question.dataset)
+
+        response_json = {"values": {question.name: {"value": response_value}}, "status": ResponseStatus.submitted}
+
+        response = await async_client.post(
+            f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+        )
+
+        response_body = response.json()
+        assert response.status_code == 201
+        assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
+        assert response.json() == {
+            "id": str(UUID(response_body["id"])),
+            "values": {question.name: {"value": response_value}},
+            "status": ResponseStatus.submitted,
+            "user_id": str(owner.id),
+            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
+            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+        }
+
+    @pytest.mark.parametrize("response_status", [ResponseStatus.discarded, ResponseStatus.draft])
+    @pytest.mark.parametrize(
+        "QuestionFactory, response_value",
+        [
+            (TextQuestionFactory, "Unit Test!"),
+            (RatingQuestionFactory, 3),
+            (LabelSelectionQuestionFactory, "option1"),
+            (MultiLabelSelectionQuestionFactory, ["option1", "option2"]),
+            (
+                RankingQuestionFactory,
+                [
+                    {"value": "completion-a", "rank": 1},
+                    {"value": "completion-b", "rank": 2},
+                    {"value": "completion-c", "rank": 3},
+                ],
+            ),
+            (
+                RankingQuestionFactory,
+                [
+                    {"value": "completion-a", "rank": 1},
+                ],
+            ),
+        ],
+    )
+    async def test_create_record_response_with_non_submitted_status(
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        response_status: ResponseStatus,
+        QuestionFactory: Type[QuestionFactory],
+        response_value: Any,
+        owner: User,
+        owner_auth_header: dict,
+    ):
+        question = await QuestionFactory.create()
+        record = await RecordFactory.create(dataset=question.dataset)
+
+        response_json = {"values": {question.name: {"value": response_value}}, "status": response_status}
+
+        response = await async_client.post(
+            f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+        )
+
+        response_body = response.json()
+        assert response.status_code == 201
+        assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
+        assert response.json() == {
+            "id": str(UUID(response_body["id"])),
+            "values": {question.name: {"value": response_value}},
+            "status": response_status.value,
+            "user_id": str(owner.id),
+            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
+            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+        }
 
     async def test_create_record_response_with_extra_question_responses(
         self, async_client: "AsyncClient", owner_auth_header: dict
@@ -620,9 +557,9 @@ class TestSuiteRecords:
                 "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
             }
 
-    @pytest.mark.parametrize("status", ["submitted", "discarded", "draft"])
-    async def test_create_record_submitted_response_with_wrong_values(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, status: str
+    @pytest.mark.parametrize("status", [ResponseStatus.submitted, ResponseStatus.discarded, ResponseStatus.draft])
+    async def test_create_record_response_with_wrong_values(
+        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, status: ResponseStatus
     ):
         record = await RecordFactory.create()
         response_json = {"status": status, "values": {"wrong_question": {"value": "wrong value"}}}

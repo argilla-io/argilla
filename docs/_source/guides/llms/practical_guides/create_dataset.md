@@ -9,6 +9,7 @@ To follow the steps in this guide, you will first need to connect to Argilla. Ch
 ```
 
 ## Define record `fields`
+
 A record in Argilla refers to a data item that requires annotation and can consist of one or multiple fields i.e., the pieces of information that will be shown to the user in the UI in order to complete the annotation task. This can be, for example, a prompt and output pair in the case of instruction datasets.
 
 As part of the `FeedbackDataset` configuration, you will need to specify the list of fields to show in the record card. As of Argilla 1.8.0, we only support one type of field, `TextField`, which is a plain text field. We have plans to expand the range of supported field types in future releases of Argilla.
@@ -101,6 +102,10 @@ dataset = rg.FeedbackDataset(
         ),
     ]
 )
+```
+
+```{note}
+After configuring your dataset, you can still edit the main information such as field titles, questions, descriptions, and markdown format from the UI. More info in [dataset settings](/reference/webapp/pages).
 ```
 
 ```{note}
@@ -393,7 +398,11 @@ record = rg.FeedbackRecord(
 
 ## Push to Argilla
 
-To import the dataset to your Argilla instance with the `FeedbackDataset.push_to_argilla()` method. Once pushed, you will be able to see your dataset in the UI.
+To import the dataset to your Argilla instance you can use the `push_to_argilla` method from your `FeedbackDataset` instance. Once pushed, you will be able to see your dataset in the UI.
+
+:::{note}
+From Argilla 1.14.0, calling `push_to_argilla` will not just push the `FeedbackDataset` into Argilla, but will also return the remote `FeedbackDataset` instance, which implies that the additions, updates, and deletions of records will be pushed to Argilla as soon as they are made. This is a change from previous versions of Argilla, where you had to call `push_to_argilla` again to push the changes to Argilla.
+:::
 
 ::::{tab-set}
 

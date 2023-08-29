@@ -6,7 +6,7 @@ This guide explains how to use the `ArgillaCallbackHandler` to integrate Argilla
 As of Argilla 1.14.0 the `FeedbackDataset` has been refactored to improve its usage, so if you're using Argilla 1.14.0 or higher, you won't be able to use the `ArgillaCallbackHandler` as it's not been updated in `LangChain` yet.
 :::
 
-## How to create a `LangChain`-compatible `FeedbackDataset`
+## `LangChain`-compatible `FeedbackDataset`
 
 Due to the way `LangChain` callbacks and `FeedbackDataset`s work, we need to create a `FeedbackDataset` in Argilla with a certain structure for the fields, while the questions and the guidelines remain open and can be defined by the user.
 
@@ -54,7 +54,7 @@ dataset.push_to_argilla("langchain-dataset")
 
 For more information on how to create a `FeedbackDataset`, please refer to the [Create a Feedback Dataset](create_dataset.md) guide.
 
-## How to use `ArgillaCallbackHandler`
+## Monitoring
 
 As all the `LangChain` callbacks, those are instantiated and provided to the `LangChain` LLMs, Chains, and/or Agents, and then there's no need to worry about them anymore, as those will automatically keep track of everything taking place in the `LangChain` pipeline. In this case, we're keeping track of both the input and the final response provided by the LLMs, Chains, and/or Agents.
 
@@ -68,7 +68,7 @@ argilla_callback = ArgillaCallbackHandler(
 )
 ```
 
-### Scenario 1: Tracking an LLM
+### An LLM
 
 First, let's just run a single LLM a few times and capture the resulting prompt-response pairs in Argilla.
 
@@ -88,7 +88,7 @@ llm.generate(["Tell me a joke", "Tell me a poem"] * 3)
 
 ![Argilla UI with LangChain LLM input-response](../../../_static/images/llms/langchain-integration/llm.png)
 
-### Scenario 2: Tracking an LLM in a chain
+### An LLM in a chain
 
 Then we can create a chain using a prompt template, and then track the initial prompt and the final response in Argilla.
 
@@ -118,7 +118,7 @@ synopsis_chain.apply(test_prompts)
 
 ![Argilla UI with LangChain Chain input-response](../../../_static/images/llms/langchain-integration/chain.png)
 
-### Scenario 3: Using an Agent with Tools
+### Agents with Tools
 
 Finally, as a more advanced workflow, you can create an agent that uses some tools. So that `ArgillaCallbackHandler` will keep track of the input and the output, but not about the intermediate steps/thoughts, so that given a prompt we log the original prompt and the final response to that given prompt.
 
@@ -147,3 +147,38 @@ agent.run("Who was the first president of the United States of America?")
 ```
 
 ![Argilla UI with LangChain Agent input-response](../../../_static/images/llms/langchain-integration/agent.png)
+
+## Synthetic data
+
+If you want to create synthetic data with LangChain, you can use the `ArgillaCallbackHandler` to keep track of the input and the output of the LLMs, Chains, and/or Agents, and then store that data in Argilla. This means you would monitor the data in a similar scenario as described above, but instead of providing a direct functional prompt tailored to data generation in order to setup your LLMs to come up with some synthetic data for a `TextField. If you want a more tailored approach to data generation and computational feedback, you can take a look at [this tutorial on langchain](../examples/labelling-feedback-langchain-syntethic.ipynb) or [this tutorial on setfit for suggestions](../examples/labelling-feedback-setfit.ipynb).
+
+```{warning}
+Do keep in mind that LLMs have licenses and not every LLM can be used for creating synthetic data in every operational setting. Please check the license of the LLM you are using before using it for creating synthetic data.
+```
+
+```python
+import random
+
+from langchain.callbacks import ArgillaCallbackHandler, StdOutCallbackHandler
+from langchain.llms import OpenAI
+
+argilla_callback = ArgillaCallbackHandler(
+    dataset_name="langchain-dataset",
+    api_url="...",
+    api_key="...",
+)
+
+topics = ["opening a new account", "applying for a loan", "applying for a credit card"]
+sentiment = ["positive", "neutral", "negative"]
+
+def get_prompt():
+    prompt = (
+        "Write a customer review for a bank. "
+        f"Do that for topic of {random.choice(topics)}. "
+        f"Do that with one a {random.choice(sentiment)} sentiment."
+    )
+    return template
+
+llm = OpenAI(temperature=0.9, callbacks=[argilla_callback])
+llm.generate([get_prompt() for _ in range(3)])
+```

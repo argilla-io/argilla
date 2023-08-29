@@ -101,13 +101,14 @@ integrations = [
     "snorkel >= 0.9.7",
     "spacy == 3.5.3",
     "spacy-transformers >= 1.2.5",
-    "transformers[torch] >= 4.19.0",
+    "transformers[torch] >= 4.30.0",
     "evaluate",
     "seqeval",
     "setfit",
     "span_marker",
     "openai",
-    "peft"
+    "peft",
+    "trl>=0.5.0"
 ]
 tests = [
     "pytest",

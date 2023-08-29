@@ -1,6 +1,6 @@
 # 🦾 Train a Model
 
-This guide showcases how to train a model on the `Dataset` classes in the Argilla client.
+This guide showcases how to train a model on the `TextClassification`, `TokenClassification` and `Text2TextClassification` classes in the Argilla client.
 The Dataset classes are lightweight containers for Argilla records. These classes facilitate importing from and exporting to different formats (e.g., `pandas.DataFrame`, `datasets.Dataset`) as well as sharing and versioning Argilla datasets using the Hugging Face Hub.
 
 For each record type, there's a corresponding Dataset class called `DatasetFor<RecordType>`.
@@ -11,16 +11,15 @@ There are two ways to train custom models on top of your annotated data:
 1. Train models using the Argilla training module, which is quick and easy but does not offer specific customization.
 2. Train with a custom workflow using the prepare for training methods, which requires some configuration but also offers more flexibility to integrate with your existing training workflows.
 
-
-````{note}
-For training models with the `FeedbackDataset` take a look [here](/guides/llms/practical_guides/practical_guides).
-````
-
 ## Train directly
 
 This is, quick and easy but does not offer specific customizations.
 
-The `ArgillaTrainer` is a wrapper around many of our favorite NLP libraries. It provides a very intuitive abstract workflow to facilitate simple training workflows using decent default pre-set configurations without having to worry about any data transformations from Argilla. We plan on adding more support for other tasks and frameworks so feel free to reach out on our Slack or GitHub.
+The `ArgillaTrainer` is a wrapper around many of our favorite NLP libraries. It provides a very intuitive abstract workflow to facilitate simple training workflows using decent default pre-set configurations without having to worry about any data transformations from Argilla. We plan on adding more support for other tasks and frameworks so feel free to reach out on our Slack or GitHub
+
+````{note}
+For training models with the `FeedbackDataset` take a look [here](/guides/llms/practical_guides/fine_tune).
+````
 
 | Framework/Task    | TextClassification | TokenClassification | Text2Text | Feedback  |
 |-------------------|--------------------|---------------------|-----------|-----------|
@@ -31,6 +30,8 @@ The `ArgillaTrainer` is a wrapper around many of our favorite NLP libraries. It 
 | Transformers      | ✔️                  | ✔️                   |           |           |
 | PEFT              | ✔️                  | ✔️                   |           |           |
 | SpanMarker        |                    | ✔️                   |           |           |
+
+
 
 ### The `ArgillaTrainer`
 

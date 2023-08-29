@@ -66,7 +66,7 @@ from argilla.client.sdk.commons.errors import (
 from argilla.client.sdk.datasets.models import TaskType
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import UserModel
-from argilla.client.sdk.workspaces import api as workspaces_api
+from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
 from argilla.client.sdk.workspaces.models import WorkspaceModel
 from argilla.server.apis.v0.models.text_classification import (
     TextClassificationBulkRequest,
@@ -175,7 +175,7 @@ def mock_init_ok(monkeypatch):
 
     monkeypatch.setattr(Status, "get_info", mock_get_info)
     monkeypatch.setattr(users_api, "whoami", mock_whoami)
-    monkeypatch.setattr(workspaces_api, "list_workspaces", mock_list_workspaces)
+    monkeypatch.setattr(workspaces_api_v1, "list_workspaces_me", mock_list_workspaces)
 
 
 @pytest.fixture

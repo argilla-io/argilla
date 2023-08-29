@@ -326,14 +326,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         return func
 
     def train(self, output_dir: str):
-        """
-        We create a SetFitModel object from a pretrained model, then create a SetFitTrainer object with
-        the model, and then train the model
-        """
-        from transformers import (
-            Trainer,
-            TrainingArguments,
-        )
+        from transformers import Trainer, TrainingArguments
 
         # check required path argument
         self.trainer_kwargs["output_dir"] = output_dir
