@@ -14,12 +14,13 @@
 #  limitations under the License.
 
 
-from argilla.tasks import database_app, login_app, logout_app, server_app, training_app
+from argilla.tasks import database_app, datasets_app, login_app, logout_app, server_app, training_app
 from argilla.tasks.async_typer import AsyncTyper
 
 app = AsyncTyper(rich_help_panel=True, help="Argilla CLI", no_args_is_help=True)
 
 app.add_typer(database_app, name="database")
+app.add_typer(datasets_app, name="datasets")
 app.add_typer(login_app, name="login")
 app.add_typer(logout_app, name="logout")
 app.add_typer(server_app, name="server")
