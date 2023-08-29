@@ -31,7 +31,7 @@
         :isLoading="isLoading"
       />
     </div>
-    <div class="delete-dataset-component" v-if="datasetTask">
+    <div class="delete-dataset-component" v-if="datasetTask && !isLoading">
       <DatasetDeleteComponent
         :datasetId="datasetId"
         :datasetTask="datasetTask"
