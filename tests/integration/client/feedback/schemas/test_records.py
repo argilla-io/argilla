@@ -62,10 +62,10 @@ async def test_delete(role: UserRole) -> None:
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
 async def test_update(role: UserRole, db: "AsyncSession") -> None:
+    dataset = await DatasetFactory.create()
     await TextFieldFactory.create(dataset=dataset, required=True)
     question = await TextQuestionFactory.create(dataset=dataset, required=True)
     records = await RecordFactory.create_batch(dataset=dataset, size=10)
-    dataset = await DatasetFactory.create()
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
     api.init(api_key=user.api_key)
