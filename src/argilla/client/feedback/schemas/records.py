@@ -308,7 +308,7 @@ class RemoteFeedbackRecord(FeedbackRecord):
         Raises:
             PermissionError: if the user does not have either `owner` or `admin` role.
         """
-        if isinstance(suggestions, (dict, SuggestionSchema, RemoteSuggestionSchema)):
+        if isinstance(suggestions, (dict, SuggestionSchema)):
             suggestions = [suggestions]
 
         existing_suggestions = {suggestion.question_name: suggestion for suggestion in self.suggestions}
