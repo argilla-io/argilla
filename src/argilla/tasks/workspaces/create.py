@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,18 +12,24 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import typer
+from argilla.tasks import async_typer
+from argilla.client.workspaces import Workspace
 
-from argilla.tasks.async_typer import AsyncTyper
-from argilla.tasks.callback import init_callback
 
-from .list import list_workspaces
-from .create import create_workspace
-
-app = AsyncTyper(help="Holds CLI commands for workspace management.", no_args_is_help=True, callback=init_callback)
-
-app.command(name="list", help="Lists workspaces of the logged user.")(list_workspaces)
-app.command(name="create", help="Create a workspace for the logged user.")(create_workspace)
+def create_workspace(
+        workspace_name: str,
+):
+    """Creates a workspace for the logged user in Argilla"""
+    if not workspace_name:
+        raise typer.BadParameter("Workspace name must be specified.")
+    try:
+        Workspace.create(name=workspace_name)
+        typer.echo(
+            f"Workspace with the name=`{workspace_name}` successfully created.")
+    except ValueError as e:
+        print(e)
 
 
 if __name__ == "__main__":
-    app()
+    async_typer.run(create_workspace)
