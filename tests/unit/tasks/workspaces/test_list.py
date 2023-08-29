@@ -57,7 +57,8 @@ def test_cli_workspaces_list(cli_runner: "CliRunner", cli: "Typer", mocker: "Moc
     assert result.exit_code == 0
 
 
-def test_cli_workspaces_list_needs_login(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
+@pytest.mark.usefixtures("not_logged_mock")
+def test_cli_workspaces_list_needs_login(cli_runner: "CliRunner", cli: "Typer"):
     result = cli_runner.invoke(cli, "workspaces list")
 
     assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout
