@@ -47,7 +47,6 @@ We plan on adding more support for other tasks and frameworks so feel free to re
 | Proximal Policy Optimization    | ✔️    |        |           |        |       |              |      |
 | Direct Preference Optimization  | ✔️    |        |           |        |       |              |      |
 
-
 ```{note}
 We also offer support for Token Classification using our `TokenClassifcationDataset` but this is shown in [a section](/guides/train_a_model) about our older dataset-types.
 ```
@@ -74,7 +73,6 @@ A `TrainingTask` is used to define how the data should be processed and formatte
 | for_reward_modeling               | `chosen-rejected`| `Optional[Union[Tuple[str, str], Iterator[Tuple[str, str]]]]`                                          | ✗                 |
 | for_proximal_policy_optimization   | `text`           | `Optional[Union[str, Iterator[str]]]`                                | ✗                 |
 | for_direct_preference_optimization| `prompt-chosen-rejected`                 | `Optional[Union[Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]`                                          | ✗                 |
-
 
 ## Tasks
 
@@ -125,7 +123,6 @@ dataset = FeedbackDataset.from_huggingface(
     repo_id="argilla/emotion"
 )
 ```
-
 
 For this task, we assume we need a `text-label`-pair or a `formatting_func` for defining the `TrainingTask.for_text_classification`.
 
@@ -184,7 +181,6 @@ task = TrainingTask.for_text_classification(formatting_func=formatting_func)
 
 :::
 
-
 ::::
 
 We can then define our `ArgillaTrainer` for any of [the supported frameworks](fine_tune.md#training-configs) and [customize the training config](#supported-frameworks) using `ArgillaTrainer.update_config`.
@@ -214,7 +210,6 @@ This is an unsupervised approach hence we only infer training data from a basic 
 ```
 
 #### Training
-
 
 Many training datasets for this task can be found online (e.g., [Hugging Face](https://huggingface.co/datasets?task_categories=task_categories:text-generation&sort=downloads)). You can either upload this in the right Argilla format but it might be needed to collect and fine-tune additional data with Argilla. So we, therefore, provide a basic setup underneath which should help you to start gathering or preparing pre-training data.
 
@@ -364,7 +359,6 @@ feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly
 
 We offer the option to provide a `formatting_func` to the `TrainingTask.for_supervised_fine_tuning`. This function is applied to each sample in the dataset and can be used for advanced preprocessing and data formatting. The function should return a `text` as `str`.
 
-
 ```python
 from argilla.feedback import TrainingTask
 from typing import Dict, Any
@@ -431,7 +425,6 @@ Let's observe if it worked to train the model to respond within our template. We
 
 ```python
 from transformers import GenerationConfig, AutoTokenizer, GPT2LMHeadModel
-
 
 def generate(model_id: str, instruction: str, context: str = "") -> str:
     model = GPT2LMHeadModel.from_pretrained(model_id)
