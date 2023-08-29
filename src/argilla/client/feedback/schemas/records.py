@@ -22,6 +22,7 @@ from pydantic import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr,
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.sdk.v1.records import api as records_api_v1
+from argilla.client.sdk.v1.suggestions import api as suggestions_api_v1
 from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
@@ -124,9 +125,7 @@ class SuggestionSchema(BaseModel):
 
 class RemoteSuggestionSchema(SuggestionSchema):
     client: httpx.Client
-
     id: UUID
-    record_id: UUID
 
     # TODO(alvarobartt): here to be able to use the `allowed_for_roles` decorator
     @property
@@ -137,11 +136,9 @@ class RemoteSuggestionSchema(SuggestionSchema):
     def delete(self) -> None:
         """Deletes the `RemoteSuggestionSchema` from Argilla."""
         try:
-            records_api_v1.delete_suggestions(client=self._client, id=self.record_id, suggestion_ids=[self.id])
+            suggestions_api_v1.delete_suggestion(client=self._client, id=self.id)
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to delete suggestion with ID `{self.id}` from record with ID `{self.record_id}` from Argilla."
-            ) from e
+            raise RuntimeError(f"Failed to delete suggestion with ID `{self.id}` from Argilla.") from e
 
     class Config:
         arbitrary_types_allowed = True
@@ -322,7 +319,7 @@ class RemoteFeedbackRecord(FeedbackRecord):
                 if "question_id" not in suggestion or not suggestion["question_id"]:
                     suggestion["question_id"] = self.name2id[suggestion["question_name"]]
                 if "id" in suggestion:
-                    suggestion = RemoteSuggestionSchema(client=self._client, record_id=self.id, **suggestion)
+                    suggestion = RemoteSuggestionSchema(client=self._client, **suggestion)
                 else:
                     suggestion = SuggestionSchema(**suggestion)
 
@@ -373,13 +370,12 @@ class RemoteFeedbackRecord(FeedbackRecord):
             if isinstance(suggestion, SuggestionSchema):
                 exclude = {"question_name"}
             elif isinstance(suggestion, RemoteSuggestionSchema):
-                exclude = {"client", "id", "record_id", "question_name"}
+                exclude = {"client", "id", "question_name"}
             pushed_suggestion = datasets_api_v1.set_suggestion(
                 client=self._client, record_id=self.id, **suggestion.dict(exclude_none=True, exclude=exclude)
             )
             existing_suggestions[suggestion.question_name] = RemoteSuggestionSchema(
                 client=self._client,
-                record_id=self.id,
                 question_name=suggestion.question_name,
                 **pushed_suggestion.parsed.dict(exclude_none=True),
             )

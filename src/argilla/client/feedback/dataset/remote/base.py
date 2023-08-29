@@ -83,7 +83,6 @@ class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
                 suggestions.append(
                     RemoteSuggestionSchema(
                         client=self._client,
-                        record_id=record.id,
                         question_name=self.__question_id2name[suggestion.question_id],
                         **suggestion.dict(),
                     )
@@ -307,7 +306,7 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
                         "id": ...,
                         "client": ...,
                         "name2id": ...,
-                        "suggestions": {"__all__": {"client", "id", "record_id", "question_id"}},
+                        "suggestions": {"__all__": {"client", "id", "question_id"}},
                     },
                     exclude_none=True,
                 )
