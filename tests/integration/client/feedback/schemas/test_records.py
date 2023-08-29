@@ -25,7 +25,14 @@ from argilla.client.feedback.schemas.records import (
 )
 from argilla.client.sdk.users.models import UserRole
 
-from tests.factories import DatasetFactory, RecordFactory, TextFieldFactory, TextQuestionFactory, UserFactory
+from tests.factories import (
+    DatasetFactory,
+    RecordFactory,
+    SuggestionFactory,
+    TextFieldFactory,
+    TextQuestionFactory,
+    UserFactory,
+)
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -123,3 +130,25 @@ async def test_set_suggestions_deprecated(role: UserRole, db: "AsyncSession") ->
         for remote_record in remote_records
         for suggestion in remote_record.suggestions
     )
+
+
+@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+@pytest.mark.asyncio
+async def test_delete_suggestions(role: UserRole, db: "AsyncSession") -> None:
+    field = await TextFieldFactory.create(required=True)
+    question = await TextQuestionFactory.create(required=True)
+    dataset = await DatasetFactory.create(fields=[field], questions=[question])
+    record = await RecordFactory.create(dataset=dataset)
+    await SuggestionFactory.create(record=record, question=question)
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+    api.init(api_key=user.api_key, workspace=dataset.workspace.name)
+
+    remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
+    assert len(remote_dataset.records) == 1
+    assert isinstance(remote_dataset.records[0], RemoteFeedbackRecord)
+    assert all(isinstance(suggestion, RemoteSuggestionSchema) for suggestion in remote_dataset.records[0].suggestions)
+
+    remote_dataset.records[0].delete_suggestions(remote_dataset.records[0].suggestions[0])
+    await db.refresh(record, attribute_names=["suggestions"])
+    assert len(remote_dataset.records[0].suggestions) == 0
