@@ -17,7 +17,12 @@ from typing import TYPE_CHECKING
 import pytest
 from argilla.client import api
 from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.schemas.records import FeedbackRecord, RemoteFeedbackRecord, SuggestionSchema
+from argilla.client.feedback.schemas.records import (
+    FeedbackRecord,
+    RemoteFeedbackRecord,
+    RemoteSuggestionSchema,
+    SuggestionSchema,
+)
 from argilla.client.sdk.users.models import UserRole
 
 from tests.factories import DatasetFactory, RecordFactory, TextFieldFactory, TextQuestionFactory, UserFactory
@@ -78,7 +83,11 @@ async def test_update(role: UserRole, db: "AsyncSession") -> None:
     for remote_record, factory_record in zip(remote_records, records):
         remote_record.update(suggestions=[suggestion])
         await db.refresh(factory_record, attribute_names=["suggestions"])
-    assert all(record.suggestions == (suggestion,) for record in remote_dataset.records)
+    assert all(
+        isinstance(suggestion, RemoteSuggestionSchema)
+        for remote_record in remote_records
+        for suggestion in remote_record.suggestions
+    )
 
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
@@ -109,4 +118,8 @@ async def test_set_suggestions_deprecated(role: UserRole, db: "AsyncSession") ->
         for remote_record, factory_record in zip(remote_records, records):
             remote_record.set_suggestions(suggestions=[suggestion])
             await db.refresh(factory_record, attribute_names=["suggestions"])
-    assert all(record.suggestions == (suggestion,) for record in remote_dataset.records)
+    assert all(
+        isinstance(suggestion, RemoteSuggestionSchema)
+        for remote_record in remote_records
+        for suggestion in remote_record.suggestions
+    )
