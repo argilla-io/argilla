@@ -10,9 +10,9 @@
       "go_to_next_record": "Next (ctrl + →)"
     },
     "questions_form": {
-      "clear": "Clear (⇧ shift + ␣ space)",
-      "discard": "Discard (⇧ shift + ⌫ backspace)",
-      "submit": "Submit (⇧ shift + ↵ enter)"
+      "clear": "Clear (⇧ shift + ␣ space)",
+      "discard": "Discard (⇧ shift + ⌫ backspace)",
+      "submit": "Submit (⇧ shift + ↵ enter)"
     }
   }
 }
