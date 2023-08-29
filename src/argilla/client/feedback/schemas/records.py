@@ -399,6 +399,38 @@ class RemoteFeedbackRecord(FeedbackRecord):
         self.update(suggestions=suggestions)
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def delete_suggestions(self, suggestions: Union[RemoteSuggestionSchema, List[RemoteSuggestionSchema]]) -> None:
+        """Deletes the provided suggestions from the record in Argilla. Note that the
+        suggestions must exist in Argilla to be removed from the record.
+
+        Args:
+            suggestions: can be a single `RemoteSuggestionSchema` or a list of
+                `RemoteSuggestionSchema`.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+        """
+        if isinstance(suggestions, RemoteSuggestionSchema):
+            suggestions = [suggestions]
+
+        existing_suggestions = {suggestion.question_name: suggestion for suggestion in self.suggestions}
+        for suggestion in suggestions:
+            if suggestion.question_name not in existing_suggestions:
+                warnings.warn(
+                    f"A suggestion for question `{suggestion.question_name}` has not been"
+                    " provided, so it cannot be removed.",
+                    UserWarning,
+                    stacklevel=1,
+                )
+            else:
+                existing_suggestions.pop(suggestion.question_name, None)
+
+        records_api_v1.delete_suggestions(
+            client=self._client, id=self.id, suggestion_ids=[suggestion.id for suggestion in suggestions]
+        )
+        self.__dict__["suggestions"] = tuple(existing_suggestions.values())
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def delete(self) -> FeedbackRecord:
         """Deletes the `RemoteFeedbackRecord` from Argilla.
 
@@ -409,7 +441,7 @@ class RemoteFeedbackRecord(FeedbackRecord):
             PermissionError: if the user does not have either `owner` or `admin` role.
         """
         try:
-            response = records_api_v1.delete_record(client=self.client, id=self.id)
+            response = records_api_v1.delete_record(client=self._client, id=self.id)
         except Exception as e:
             raise RuntimeError(f"Failed to delete record with ID `{self.id}` from Argilla.") from e
         return FeedbackRecord(**response.parsed.dict(exclude={"id", "inserted_at", "updated_at"}, exclude_none=True))
@@ -417,4 +449,5 @@ class RemoteFeedbackRecord(FeedbackRecord):
     class Config:
         arbitrary_types_allowed = True
         validate_assignment = True
+        allow_mutation = False
         exclude = {"_unified_responses", "client", "name2id"}
