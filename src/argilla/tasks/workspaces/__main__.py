@@ -1,3 +1,4 @@
+#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,9 +13,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .database import app as database_app
-from .login import app as login_app
-from .logout import app as logout_app
-from .server import app as server_app
-from .training import app as training_app
-from .workspaces import app as workspaces_app
+
+from argilla.tasks.async_typer import AsyncTyper
+from argilla.tasks.callback import init_callback
+
+from .list import list_workspaces
+
+app = AsyncTyper(help="Holds CLI commands for workspace management.", no_args_is_help=True, callback=init_callback)
+
+app.command(name="list", help="Lists workspaces of the logged user.")(list_workspaces)
+
+
+if __name__ == "__main__":
+    app()
