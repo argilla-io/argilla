@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Any, Dict, Generic, Iterator, List, Optional, 
 
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
-from argilla.client.feedback.schemas.records import RemoteFeedbackRecord
+from argilla.client.feedback.schemas.records import RemoteFeedbackRecord, RemoteSuggestionSchema
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.utils import allowed_for_roles
 
@@ -77,18 +77,29 @@ class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
 
     def _parse_record(self, record: "FeedbackItemModel") -> RemoteFeedbackRecord:
         """Parses a `FeedbackItemModel` into a `RemoteFeedbackRecord`."""
+        suggestions = []
+        if record.suggestions is not None:
+            for suggestion in record.suggestions:
+                suggestions.append(
+                    RemoteSuggestionSchema(
+                        client=self._client,
+                        record_id=record.id,
+                        question_name=self.__question_id2name[suggestion.question_id],
+                        **suggestion.dict(),
+                    )
+                )
         record = record.dict(
             exclude={
                 "inserted_at": ...,
                 "updated_at": ...,
                 "responses": {"__all__": {"id", "inserted_at", "updated_at"}},
-                "suggestions": {"__all__": {"id"}},
+                "suggestions": ...,
             },
             exclude_none=True,
         )
-        for suggestion in record.get("suggestions", []):
-            suggestion.update({"question_name": self.__question_id2name[suggestion["question_id"]]})
-        return RemoteFeedbackRecord(client=self._client, name2id=self.__question_name2id, **record)
+        return RemoteFeedbackRecord(
+            client=self._client, name2id=self.__question_name2id, suggestions=suggestions or None, **record
+        )
 
     @abstractmethod
     def __len__(self) -> int:
