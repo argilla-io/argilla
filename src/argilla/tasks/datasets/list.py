@@ -49,6 +49,8 @@ def list_datasets(
 
     if kind is None or kind == DatasetKind.feedback:
         for dataset in FeedbackDataset.list(workspace):
+            # TODO: add passing value for `Creation Date` and `Update Date` columns once `RemoteFeedbackDataset` has
+            # these attributes
             table.add_row(str(dataset.id), dataset.name, dataset.workspace.name, "Feedback", None, None, None)
 
     if kind is None or kind == DatasetKind.other:
