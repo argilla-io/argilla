@@ -40,7 +40,8 @@ export class Record {
 
   get isModified() {
     return (
-      this.originalQuestions && !isEqual(this.originalQuestions, this.questions)
+      !!this.originalQuestions &&
+      !isEqual(this.originalQuestions, this.questions)
     );
   }
 
