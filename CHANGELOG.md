@@ -30,6 +30,7 @@ These are the section headers that we use:
 - Added `filter_by` method in `RemoteFeedbackDataset` to filter based on `response_status` ([#3610](https://github.com/argilla-io/argilla/pull/3610)).
 - Added `list_workspaces` function (to be used as `rg.list_workspaces`, but `Workspace.list` is preferred) to list all the workspaces from an user in Argilla ([#3641](https://github.com/argilla-io/argilla/pull/3641)).
 - Added `list_datasets` function (to be used as `rg.list_datasets`) to list the `TextClassification`, `TokenClassification`, and `Text2Text` datasets in Argilla ([#3638](https://github.com/argilla-io/argilla/pull/3638)).
+- Added `workspaces list` command to list Argilla workspaces ([#3594](https://github.com/argilla-io/argilla/pull/3594)).
 
 ### Changed
 
