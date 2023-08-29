@@ -152,3 +152,26 @@ async def test_delete_suggestions(role: UserRole, db: "AsyncSession") -> None:
     remote_dataset.records[0].delete_suggestions(remote_dataset.records[0].suggestions[0])
     await db.refresh(record, attribute_names=["suggestions"])
     assert len(remote_dataset.records[0].suggestions) == 0
+
+
+@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+@pytest.mark.asyncio
+async def test_delete_suggestion_inplace(role: UserRole, db: "AsyncSession") -> None:
+    field = await TextFieldFactory.create(required=True)
+    question = await TextQuestionFactory.create(required=True)
+    dataset = await DatasetFactory.create(fields=[field], questions=[question])
+    record = await RecordFactory.create(dataset=dataset)
+    await SuggestionFactory.create(record=record, question=question)
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+    api.init(api_key=user.api_key, workspace=dataset.workspace.name)
+
+    remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
+    assert len(remote_dataset.records) == 1
+    assert isinstance(remote_dataset.records[0], RemoteFeedbackRecord)
+    assert all(isinstance(suggestion, RemoteSuggestionSchema) for suggestion in remote_dataset.records[0].suggestions)
+
+    for suggestion in remote_dataset.records[0].suggestions:
+        suggestion.delete()
+    await db.refresh(record, attribute_names=["suggestions"])
+    assert len(remote_dataset.records[0].suggestions) == 0
