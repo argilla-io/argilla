@@ -122,6 +122,34 @@ class SuggestionSchema(BaseModel):
         extra = Extra.forbid
 
 
+class RemoteSuggestionSchema(SuggestionSchema):
+    client: httpx.Client
+
+    id: UUID
+    record_id: UUID
+
+    # TODO(alvarobartt): here to be able to use the `allowed_for_roles` decorator
+    @property
+    def _client(self) -> httpx.Client:
+        return self.client
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def delete(self) -> None:
+        """Deletes the `RemoteSuggestionSchema` from Argilla."""
+        try:
+            records_api_v1.delete_suggestions(client=self._client, id=self.record_id, suggestion_ids=[self.id])
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to delete suggestion with ID `{self.id}` from record with ID `{self.record_id}` from Argilla."
+            ) from e
+
+    class Config:
+        arbitrary_types_allowed = True
+        validate_assignment = True
+        allow_mutation = False
+        exclude = {"client"}
+
+
 class FeedbackRecord(BaseModel):
     """Schema for the records of a `FeedbackDataset`.
 
