@@ -94,7 +94,7 @@ services:
    ports:
      - "80:80"
    environment:
-     ELASTICSEARCH: <elasticsearch-host_and_port>
+     ARGILLA_ELASTICSEARCH: <elasticsearch-host_and_port>
    restart: unless-stopped
 ```""".format(
     myst_substitutions["dockertag"]
@@ -109,7 +109,7 @@ services:
     ports:
       - "6900:80"
     environment:
-      ELASTICSEARCH: http://elasticsearch:9200
+      ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
       ARGILLA_LOCAL_AUTH_USERS_DB_FILE: /config/.users.yaml
 
     volumes:

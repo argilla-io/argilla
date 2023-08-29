@@ -28,13 +28,9 @@ jobs:
         with:
           version: '>= 435.0.0'
 
-      - name: Get Docker image tag from GITHUB_REF
-        id: docker-image-tag-from-ref
-        uses: ./.github/actions/docker-image-tag-from-ref
-
       - name: Remove PR environment if exists
         run: |
-          service_name="argilla-quickstart-${{ steps.docker-image-tag-from-ref.outputs.docker-image-tag }}"
+          service_name="argilla-quickstart-pr-${{ github.event.pull_request.number }}"
           services=$(gcloud run services list --project=argilla-ci --format="value(metadata.name)")
           if echo "$services" | grep -q "$service_name"; then
             echo "Service '$service_name' exists. Removing it..."
