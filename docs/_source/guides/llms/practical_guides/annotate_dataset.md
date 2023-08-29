@@ -1,6 +1,6 @@
 # Annotate a Feedback Dataset
 
-![Spanshot of the Submitted queue and the progress bar in a Feedback dataset](../../../_static/images/llms/snapshot-feedback-submitted.png)
+![Spanshot of the Submitted queue and the progress bar in a Feedback Dataset](../../../_static/images/llms/snapshot-feedback-submitted.png)
 
 After pushing a `FeedbackDataset` to Argilla, as explained in [Create a Feedback Dataset](create_dataset.ipynb), you can start annotating it through the Argilla UI.
 
@@ -67,7 +67,6 @@ Once all required questions have responses, the `Submit` button will be enabled 
 If you need to review your submitted or discarded responses, you can select the queue you need. From there, you can modify, submit or discard responses. You can also use the `Clear` button to remove the response and send the record back to the `Pending` queue.
 
 You can track your progress and the number of `Pending`, `Submitted` and `Discarded` responses by clicking the `Progress` icon in the sidebar.
-
 
 ## Shortcuts
 

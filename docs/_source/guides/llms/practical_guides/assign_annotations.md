@@ -1,4 +1,5 @@
 # Assign annotations to your team
+
 Depending on the nature of your project and the size of your annotation team, you may want to have control over annotation overlap i.e., having multiple annotations for a single record. In this section, we will demonstrate 3 different workflows to get the level of overlap you need: full, zero or controlled.
 
 ```{note}
