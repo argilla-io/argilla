@@ -39,7 +39,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         raise ValueError(f"{OPENAI_API_KEY} not found in environment variables.")
 
     def __init__(self, *args, **kwargs):
-        require_version("openai")
+        require_version("openai>=0.27.10")
         super().__init__(*args, **kwargs)
 
         if self._record_class is TokenClassificationRecord:

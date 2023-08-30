@@ -14,10 +14,12 @@
 
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
 from argilla.training.openai import ArgillaOpenAITrainer as ArgillaOpenAITrainerV1
+from argilla.utils.dependency import require_version
 
 
 class ArgillaOpenAITrainer(ArgillaOpenAITrainerV1, ArgillaTrainerSkeleton):
     def __init__(self, *args, **kwargs):
+        require_version("openai>=0.27.10")
         ArgillaTrainerSkeleton.__init__(self, *args, **kwargs)
 
         self.__legacy = False

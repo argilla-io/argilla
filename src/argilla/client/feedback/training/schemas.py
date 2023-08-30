@@ -1017,7 +1017,7 @@ class TrainingTaskForChatCompletion(BaseModel, TrainingData):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
 
-    @requires_version("openai")
+    @requires_version("openai>=0.27.10")
     def _prepare_for_training_with_openai(self, data: List[dict], train_size: float, seed: int) -> List[dict]:
         import datasets
 
