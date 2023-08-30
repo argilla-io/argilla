@@ -12,43 +12,21 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime
 from typing import TYPE_CHECKING, Type
-from uuid import uuid4
 
-import httpx
 import pytest
 from argilla.client.sdk.users.models import UserRole
-from argilla.client.users import User
 
 if TYPE_CHECKING:
+    from argilla.client.users import User
     from click.testing import CliRunner
     from pytest_mock import MockerFixture
     from typer import Typer
 
 
-@pytest.fixture
-def user() -> User:
-    user = User.__new__(User)
-    user.__dict__.update(
-        {
-            "_client": httpx.Client(),
-            "id": uuid4(),
-            "username": "unit-test",
-            "last_name": "unit-test",
-            "first_name": "unit-test",
-            "role": UserRole.owner,
-            "api_key": "apikey.unit-test",
-            "inserted_at": datetime.now(),
-            "updated_at": datetime.now(),
-        }
-    )
-    return user
-
-
 @pytest.mark.usefixtures("login_mock")
 class TestSuiteCreateUserCommand:
-    def test_create_user(self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", user: User) -> None:
+    def test_create_user(self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", user: "User") -> None:
         user_create_mock = mocker.patch("argilla.client.users.User.create", return_value=user)
         mocker.patch("argilla.client.users.User.workspaces", return_value=["ws1", "ws2"])
 
@@ -101,3 +79,11 @@ class TestSuiteCreateUserCommand:
             role=UserRole.owner,
             workspaces=["ws1", "ws2"],
         )
+
+
+@pytest.mark.usefixtures("not_logged_mock")
+def test_create_user_needs_login(cli_runner: "CliRunner", cli: "Typer") -> None:
+    result = cli_runner.invoke(cli, "users create --username unit-test --password unit-test")
+
+    assert result.exit_code == 1
+    assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout
