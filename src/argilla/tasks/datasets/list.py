@@ -45,7 +45,7 @@ def list_datasets(
         return Markdown(text)
 
     table = get_argilla_themed_table(title="Datasets")
-    for column in ("ID", "Name", "Workspace", "Type", "Tags", "Creation Date", "Update Date"):
+    for column in ("ID", "Name", "Workspace", "Type", "Tags", "Creation Date", "Last Update Date"):
         table.add_column(column, justify="center")
 
     if type_ is None or type_ == DatasetType.feedback:
