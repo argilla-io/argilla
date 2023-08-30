@@ -283,8 +283,7 @@ class RemoteFeedbackRecord(FeedbackRecord):
     def _client(self) -> httpx.Client:
         return self.client
 
-    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def update(
+    def __update_suggestions(
         self,
         suggestions: Union[
             RemoteSuggestionSchema,
@@ -295,7 +294,8 @@ class RemoteFeedbackRecord(FeedbackRecord):
             List[Dict[str, Any]],
         ],
     ) -> None:
-        """Update a `RemoteFeedbackRecord`. Currently just `suggestions` are supported.
+        """Updates the suggestions for the record in Argilla. Note that the suggestions
+        must exist in Argilla to be updated.
 
         Note that this method will update the record in Argilla directly.
 
@@ -304,9 +304,6 @@ class RemoteFeedbackRecord(FeedbackRecord):
                 a list of `RemoteSuggestionSchema` or `SuggestionSchema`, a single
                 dictionary, or a list of dictionaries. If a dictionary is provided,
                 it will be converted to a `RemoteSuggestionSchema` internally.
-
-        Raises:
-            PermissionError: if the user does not have either `owner` or `admin` role.
         """
         if isinstance(suggestions, (dict, SuggestionSchema)):
             suggestions = [suggestions]
@@ -381,6 +378,33 @@ class RemoteFeedbackRecord(FeedbackRecord):
             )
 
         self.__dict__["suggestions"] = tuple(existing_suggestions.values())
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def update(
+        self,
+        suggestions: Union[
+            RemoteSuggestionSchema,
+            List[RemoteSuggestionSchema],
+            SuggestionSchema,
+            List[SuggestionSchema],
+            Dict[str, Any],
+            List[Dict[str, Any]],
+        ],
+    ) -> None:
+        """Update a `RemoteFeedbackRecord`. Currently just `suggestions` are supported.
+
+        Note that this method will update the record in Argilla directly.
+
+        Args:
+            suggestions: can be a single `RemoteSuggestionSchema` or `SuggestionSchema`,
+                a list of `RemoteSuggestionSchema` or `SuggestionSchema`, a single
+                dictionary, or a list of dictionaries. If a dictionary is provided,
+                it will be converted to a `RemoteSuggestionSchema` internally.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+        """
+        self.__update_suggestions(suggestions=suggestions)
 
     def set_suggestions(
         self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
