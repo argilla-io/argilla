@@ -23,7 +23,14 @@ def whoami() -> None:
     from rich.markdown import Markdown
 
     from argilla.client.api import active_client
+    from argilla.tasks.callback import init_callback
     from argilla.tasks.rich import get_argilla_themed_panel
+
+    try:
+        init_callback()
+    except RuntimeError as e:
+        typer.echo("An unexpected error occurred when trying to get the current user")
+        raise typer.Exit(code=1) from e
 
     user = active_client()._user
     panel = get_argilla_themed_panel(
