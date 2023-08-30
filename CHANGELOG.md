@@ -47,7 +47,11 @@ These are the section headers that we use:
 
 ### Removed
 
-- Remove `multi_task_text_token_classification` from `TaskType` as not used ([#3640](https://github.com/argilla-io/argilla/pull/3640)).
+- Removed `multi_task_text_token_classification` from `TaskType` as not used ([#3640](https://github.com/argilla-io/argilla/pull/3640)).
+- Removed `argilla_id` in favor of `id` from `RemoteFeedbackDataset` ([#3663](https://github.com/argilla-io/argilla/pull/3663)).
+- Removed `fetch_records` from `RemoteFeedbackDataset` as now the records are lazily fetched from Argilla ([#3663](https://github.com/argilla-io/argilla/pull/3663)).
+- Removed `push_to_argilla` from `RemoteFeedbackDataset`, as it just works when calling it through a `FeedbackDataset` locally, as now the updates of the remote datasets are automatically pushed to Argilla ([#3663](https://github.com/argilla-io/argilla/pull/3663)).
+- Removed `set_suggestions` in favor of `update(suggestions=...)` for both `FeedbackRecord` and `RemoteFeedbackRecord`, as all the updates of any "updateable" attribute of a record will go through `update` instead ([#3663](https://github.com/argilla-io/argilla/pull/3663)).
 
 ## [1.14.1](https://github.com/argilla-io/argilla/compare/v1.14.0...v1.14.1)
 
