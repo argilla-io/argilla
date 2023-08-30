@@ -3,11 +3,11 @@
 :::{tab-item} OpenAI
 
 ```python
-# `OpenAI.FineTune` (legacy)
+# `OpenAI.FineTune`
 trainer.update_config(
     training_file = None,
     validation_file = None,
-    model = "curie,
+    model = "gpt-3.5-turbo-0613",
     hyperparameters = {"n_epochs": 1},
     suffix = None
 )
@@ -16,7 +16,7 @@ trainer.update_config(
 trainer.update_config(
     training_file = None,
     validation_file = None,
-    model = "curie,
+    model = "curie",
     n_epochs = 2,
     batch_size = None,
     learning_rate_multiplier = 0.1,

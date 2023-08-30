@@ -39,14 +39,14 @@ trainer.predict("This is awesome!")
 
 We plan on adding more support for other tasks and frameworks so feel free to reach out on our Slack or GitHub to help us prioritize each task.
 
-| Task/Framework                   | TRL  | OpenAI | SetFit | spaCy | Transformers | PEFT |
+| Task/Framework                  | TRL  | OpenAI | SetFit | spaCy | Transformers | PEFT |
 |:--------------------------------|:-----|:-------|:-------|:------|:-------------|:-----|
-| Text Classification             |      | ✔️      |  ✔️      | ✔️     | ✔️            | ✔️    |
-| Supervised Fine-tuning          | ✔️    |        |          |       |              |      |
-| Reward Modeling                 | ✔️    |        |          |       |              |      |
-| Proximal Policy Optimization    | ✔️    |        |          |       |              |      |
-| Direct Preference Optimization  | ✔️    |        |          |       |              |      |
-| Chat Completion                 | ✔️    |        |          |       |              |      |
+| Text Classification             |      | ✔️      |  ✔️     | ✔️     | ✔️            | ✔️    |
+| Supervised Fine-tuning          | ✔️    |        |        |       |              |      |
+| Reward Modeling                 | ✔️    |        |        |       |              |      |
+| Proximal Policy Optimization    | ✔️    |        |        |       |              |      |
+| Direct Preference Optimization  | ✔️    |        |        |       |              |      |
+| Chat Completion                 | ✔️    |        |        |       |              |      |
 
 ```{note}
 We also offer support for Token Classification using our `TokenClassifcationDataset` but this is shown in [a section](/guides/train_a_model) about our older dataset-types.
@@ -903,4 +903,4 @@ print(output_text)
 
 ### Chat Completion
 
-With the rise of chat-oriented models under OpenAI's ChatGPT, we have s
+With the rise of chat-oriented models under OpenAI's ChatGPT, we have seen a lot of interest in the use of LLMs for chat-oriented tasks. The main difference between chat-oriented models and the other LLMs is that they are trained on a different dataset. Instead of using a dataset of prompts and responses, they are trained on a dataset of conversations. This allows them to generate responses that are more conversational in nature. OpenAI has recently
