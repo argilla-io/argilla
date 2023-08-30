@@ -122,25 +122,25 @@ class TestSuiteListDatasetsCommand:
         feedback_dataset_list_mock.assert_called_once_with("unit-test")
         list_datasets_mock.assert_called_once_with("unit-test")
 
-    def test_list_datasets_using_kind_feedback_filter(
+    def test_list_datasets_using_type_feedback_filter(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"
     ) -> None:
         feedback_dataset_list_mock = mocker.patch("argilla.client.feedback.dataset.local.FeedbackDataset.list")
         list_datasets_mock = mocker.patch("argilla.client.api.list_datasets")
 
-        result = cli_runner.invoke(cli, "datasets list --kind feedback")
+        result = cli_runner.invoke(cli, "datasets list --type feedback")
 
         assert result.exit_code == 0
         feedback_dataset_list_mock.assert_called_once_with(None)
         list_datasets_mock.assert_not_called()
 
-    def test_list_datasets_using_kind_other_filter(
+    def test_list_datasets_using_type_other_filter(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"
     ) -> None:
         feedback_dataset_list_mock = mocker.patch("argilla.client.feedback.dataset.local.FeedbackDataset.list")
         list_datasets_mock = mocker.patch("argilla.client.api.list_datasets")
 
-        result = cli_runner.invoke(cli, "datasets list --kind other")
+        result = cli_runner.invoke(cli, "datasets list --type other")
 
         assert result.exit_code == 0
         feedback_dataset_list_mock.assert_not_called()

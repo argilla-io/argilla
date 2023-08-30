@@ -18,16 +18,17 @@ from typing import Dict, Optional
 import typer
 
 
-class DatasetKind(str, Enum):
+class DatasetType(str, Enum):
     feedback = "feedback"
     other = "other"
 
 
 def list_datasets(
     workspace: Optional[str] = typer.Option(None, help="List datasets in this workspace"),
-    kind: Optional[DatasetKind] = typer.Option(
+    type_: Optional[DatasetType] = typer.Option(
         None,
-        help="List datasets of this kind. This option can be used multiple times. By default, all datasets are listed.",
+        "--type",
+        help="The type of datasets to be listed. This option can be used multiple times. By default, all datasets are listed.",
     ),
 ) -> None:
     from rich.console import Console
@@ -44,16 +45,16 @@ def list_datasets(
         return Markdown(text)
 
     table = get_argilla_themed_table(title="Datasets")
-    for column in ("ID", "Name", "Workspace", "Kind", "Tags", "Creation Date", "Update Date"):
+    for column in ("ID", "Name", "Workspace", "Type", "Tags", "Creation Date", "Update Date"):
         table.add_column(column, justify="center")
 
-    if kind is None or kind == DatasetKind.feedback:
+    if type_ is None or type_ == DatasetType.feedback:
         for dataset in FeedbackDataset.list(workspace):
             # TODO: add passing value for `Creation Date` and `Update Date` columns once `RemoteFeedbackDataset` has
             # these attributes
             table.add_row(str(dataset.id), dataset.name, dataset.workspace.name, "Feedback", None, None, None)
 
-    if kind is None or kind == DatasetKind.other:
+    if type_ is None or type_ == DatasetType.other:
         for dataset in list_datasets_api(workspace):
             table.add_row(
                 dataset.id,
