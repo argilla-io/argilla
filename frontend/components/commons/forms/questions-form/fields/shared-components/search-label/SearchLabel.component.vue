@@ -22,8 +22,10 @@
       @input="$emit('input', $event.target.value)"
       @keydown.shift.backspace.exact="looseFocus"
       @keydown.shift.space.exact="looseFocus"
-      @keydown.arrow-right.stop=""
-      @keydown.arrow-left.stop=""
+      @keydown.ctrl.arrow-right.prevent=""
+      @keydown.meta.arrow-right.prevent=""
+      @keydown.ctrl.arrow-left.prevent=""
+      @keydown.meta.arrow-left.prevent=""
       @keydown.delete.exact.stop=""
       @keydown.enter.exact.stop=""
     />

@@ -31,10 +31,25 @@ export default {
 
       const helpContent = await folderContent("./shortcuts.md");
 
+      const manipulatedByPlatform = helpContent.body
+        .split("\n")
+        .map((row) => {
+          if (row.includes("(Other)"))
+            return this.$platform.isMac
+              ? undefined
+              : row.replace("(Other)", "");
+          if (row.includes("(Mac os)"))
+            return this.$platform.isMac
+              ? row.replace("(Mac os)", "")
+              : undefined;
+          return row;
+        })
+        .filter(Boolean);
+
       this.content.tabs.push({
         id: "shortcuts",
         name: "Shortcuts",
-        markdown: helpContent.body,
+        markdown: manipulatedByPlatform.join("\n"),
       });
     } catch (e) {
       console.log(e);

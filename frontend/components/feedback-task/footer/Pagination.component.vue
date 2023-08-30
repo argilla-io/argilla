@@ -6,7 +6,11 @@
         ref="prevButton"
         @click="onClickPrev"
         :disabled="isFirstPage"
-        :title="$t('shortcuts.pagination.go_to_previous_record')"
+        :title="
+          $platform.isMac
+            ? $t('shortcuts.pagination.go_to_previous_record_mac')
+            : $t('shortcuts.pagination.go_to_previous_record')
+        "
       >
         <svgicon name="chevron-left" width="8" height="8" />
         {{ prevButtonMessage }}
@@ -16,8 +20,11 @@
         class="pagination__button"
         ref="nextButton"
         @click="onClickNext"
-        :disabled="false"
-        :title="$t('shortcuts.pagination.go_to_next_record')"
+        :title="
+          $platform.isMac
+            ? $t('shortcuts.pagination.go_to_next_record_mac')
+            : $t('shortcuts.pagination.go_to_next_record')
+        "
       >
         {{ nextButtonMessage }}
         <svgicon name="chevron-right" width="8" height="8" />
@@ -47,7 +54,6 @@ export default {
     isFirstPage() {
       return this.currentPage === 1;
     },
-    // TODO: Move to the parent
     pageFromRoute() {
       return parseFloat(this.$route.query?._page) || 1;
     },
@@ -56,12 +62,15 @@ export default {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
   },
   destroyed() {
-    // TODO: Move this to the parent
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
-    onPressKeyboardShortCut({ code, ctrlKey }) {
-      if (!ctrlKey) return;
+    onPressKeyboardShortCut({ code, ctrlKey, metaKey }) {
+      if (this.$platform.isMac) {
+        if (!metaKey) return;
+      } else {
+        if (!ctrlKey) return;
+      }
 
       switch (code) {
         case "ArrowRight": {
