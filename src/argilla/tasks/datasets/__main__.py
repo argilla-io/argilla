@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +12,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import typer
 
-from argilla.tasks import database_app, datasets_app, login_app, logout_app, server_app, training_app, workspaces_app
-from argilla.tasks.async_typer import AsyncTyper
+from argilla.tasks.callback import init_callback
+from argilla.tasks.datasets.list import list_datasets
 
-app = AsyncTyper(rich_help_panel=True, help="Argilla CLI", no_args_is_help=True)
+app = typer.Typer(
+    help="Holds CLI commands for datasets management", invoke_without_command=True, callback=init_callback
+)
 
-app.add_typer(database_app, name="database")
-app.add_typer(datasets_app, name="datasets")
-app.add_typer(login_app, name="login")
-app.add_typer(logout_app, name="logout")
-app.add_typer(server_app, name="server")
-app.add_typer(training_app, name="train")
-app.add_typer(workspaces_app, name="workspaces")
+
+app.command(name="list", help="List datasets linked to user's workspaces")(list_datasets)
+
 
 if __name__ == "__main__":
     app()

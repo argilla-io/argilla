@@ -89,6 +89,11 @@ def async_db_proxy(mocker: "MockerFixture", sync_db: "Session") -> "AsyncSession
 
 
 @pytest.fixture
-def login_mock(mocker: "MockerFixture"):
+def login_mock(mocker: "MockerFixture") -> None:
     mocker.patch("argilla.client.login.ArgillaCredentials.exists", return_value=True)
     mocker.patch("argilla.client.api.ArgillaSingleton.init")
+
+
+@pytest.fixture
+def not_logged_mock(mocker: "MockerFixture") -> None:
+    mocker.patch("argilla.client.login.ArgillaCredentials.exists", return_value=False)
