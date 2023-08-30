@@ -130,10 +130,15 @@ export default {
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
-    onPressKeyboardShortCut({ code, shiftKey, ctrlKey }) {
+    onPressKeyboardShortCut(event) {
+      const { code, shiftKey, ctrlKey, metaKey } = event;
       switch (code) {
         case "KeyS": {
-          if (ctrlKey) this.onSaveDraftImmediately();
+          if (ctrlKey || metaKey) {
+            event.preventDefault();
+            event.stopPropagation();
+            this.onSaveDraftImmediately();
+          }
           break;
         }
         case "Enter": {
