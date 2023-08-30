@@ -31,6 +31,9 @@ These are the section headers that we use:
 - Added `list_workspaces` function (to be used as `rg.list_workspaces`, but `Workspace.list` is preferred) to list all the workspaces from an user in Argilla ([#3641](https://github.com/argilla-io/argilla/pull/3641)).
 - Added `list_datasets` function (to be used as `rg.list_datasets`) to list the `TextClassification`, `TokenClassification`, and `Text2Text` datasets in Argilla ([#3638](https://github.com/argilla-io/argilla/pull/3638)).
 - Added `workspaces list` command to list Argilla workspaces ([#3594](https://github.com/argilla-io/argilla/pull/3594)).
+- Added `datasets list` command to list Argilla datasets ([#3658](https://github.com/argilla-io/argilla/pull/3658)).
+- Added `users create` command to create users ([#3667](https://github.com/argilla-io/argilla/pull/3667)).
+- Added `users delete` command to delete users ([#3671](https://github.com/argilla-io/argilla/pull/3671)).
 
 ### Changed
 
