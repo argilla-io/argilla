@@ -156,7 +156,7 @@ export default {
     };
 
     // shortcuts
-    useGlobalShortcuts(saveDraftImmediately, onSubmit, onClear, onDiscard);
+    useGlobalShortcuts(onSaveDraftImmediately, onSubmit, onClear, onDiscard);
 
     return {
       onSubmit,
@@ -165,7 +165,6 @@ export default {
       draftSaving,
       isFormTouched,
       isSubmitButtonDisabled,
-      onSaveDraftImmediately,
     };
   },
   watch: {
