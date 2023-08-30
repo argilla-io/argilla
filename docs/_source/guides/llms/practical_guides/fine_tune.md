@@ -41,12 +41,12 @@ We plan on adding more support for other tasks and frameworks so feel free to re
 
 | Task/Framework                  | TRL  | OpenAI | SetFit | spaCy | Transformers | PEFT |
 |:--------------------------------|:-----|:-------|:-------|:------|:-------------|:-----|
-| Text Classification             |      | ✔️      |  ✔️     | ✔️     | ✔️            | ✔️    |
+| Text Classification             |      |        |  ✔️     | ✔️     | ✔️            | ✔️    |
 | Supervised Fine-tuning          | ✔️    |        |        |       |              |      |
 | Reward Modeling                 | ✔️    |        |        |       |              |      |
 | Proximal Policy Optimization    | ✔️    |        |        |       |              |      |
 | Direct Preference Optimization  | ✔️    |        |        |       |              |      |
-| Chat Completion                 | ✔️    |        |        |       |              |      |
+| Chat Completion                 |      | ✔️      |        |       |              |      |
 
 ```{note}
 We also offer support for Token Classification using our `TokenClassifcationDataset` but this is shown in [a section](/guides/train_a_model) about our older dataset-types.
