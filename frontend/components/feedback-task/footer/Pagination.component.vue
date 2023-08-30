@@ -59,13 +59,18 @@ export default {
     },
   },
   mounted() {
-    document.addEventListener("keydown", this.onPressKeyboardShortCut);
+    document.addEventListener("keydown", this.onPressKeyboardShortcuts);
   },
   destroyed() {
-    document.removeEventListener("keydown", this.onPressKeyboardShortCut);
+    document.removeEventListener("keydown", this.onPressKeyboardShortcuts);
   },
   methods: {
-    onPressKeyboardShortCut({ code, ctrlKey, metaKey }) {
+    stopPropagationForNativeBehavior(event) {
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    onPressKeyboardShortcuts(event) {
+      const { code, ctrlKey, metaKey } = event;
       if (this.$platform.isMac) {
         if (!metaKey) return;
       } else {
@@ -74,11 +79,13 @@ export default {
 
       switch (code) {
         case "ArrowRight": {
+          this.stopPropagationForNativeBehavior(event);
           const elem = this.$refs.nextButton.$el;
           elem.click();
           break;
         }
         case "ArrowLeft": {
+          this.stopPropagationForNativeBehavior(event);
           const elem = this.$refs.prevButton.$el;
           elem.click();
           break;

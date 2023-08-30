@@ -16,5 +16,5 @@ You can speed up your annotation by using these keyboard shortcuts:
 | Submit                       | `⇧ Shift` + `↵ Enter`      |
 | Go to next page (Mac os)     | `⌘ cmd` + `→ Right arrow`  |
 | Go to previous page (Mac os) | `⌘ cmd` + `← Left arrow`   |
-| Go to next page (Other)      | `⌃ ctrl` + `→ Right arrow` |
-| Go to previous page (Other)  | `⌃ ctrl` + `← Left arrow`  |
+| Go to next page (Other)      | `ctrl` + `→ Right arrow`   |
+| Go to previous page (Other)  | `ctrl` + `← Left arrow`    |

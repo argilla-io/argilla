@@ -6,8 +6,8 @@
   "rating": "Rating",
   "shortcuts": {
     "pagination": {
-      "go_to_previous_record": "Previous (⌃ ctrl + ←)",
-      "go_to_next_record": "Next (⌃ ctrl + →)",
+      "go_to_previous_record": "Previous (ctrl + ←)",
+      "go_to_next_record": "Next (ctrl + →)",
       "go_to_previous_record_mac": "Previous (⌘ cmd + ←)",
       "go_to_next_record_mac": "Next (⌘ cmd + →)"
     },

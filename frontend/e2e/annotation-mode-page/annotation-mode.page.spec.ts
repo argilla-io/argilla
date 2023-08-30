@@ -102,6 +102,8 @@ const goToAnnotationPageWith10Rating = async (page) => {
 
 test.use({
   viewport: { width: 1600, height: 1400 },
+  userAgent:
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.5790.75 Safari/537.36",
 });
 
 test.describe("Annotate page", () => {
