@@ -235,18 +235,6 @@ class FeedbackRecord(BaseModel):
 
         self.__dict__["suggestions"] = tuple(suggestions_dict.values())
 
-    def set_suggestions(
-        self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
-    ) -> None:
-        warnings.warn(
-            "`set_suggestions` is deprected in favor of `update` and will be removed in a future"
-            " release.\n`set_suggestions` will be deprecated in Argilla v1.15.0, please"
-            " use `update` instead.",
-            DeprecationWarning,
-            stacklevel=1,
-        )
-        self.update(suggestions=suggestions)
-
     class Config:
         extra = Extra.forbid
         validate_assignment = True
@@ -405,19 +393,6 @@ class RemoteFeedbackRecord(FeedbackRecord):
             PermissionError: if the user does not have either `owner` or `admin` role.
         """
         self.__update_suggestions(suggestions=suggestions)
-
-    def set_suggestions(
-        self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
-    ) -> None:
-        """Deprecated, use `update` instead."""
-        warnings.warn(
-            "`set_suggestions` is deprected in favor of `update` and will be removed in a future"
-            " release.\n`set_suggestions` will be deprecated in Argilla v1.15.0, please"
-            " use `update` instead.",
-            DeprecationWarning,
-            stacklevel=1,
-        )
-        self.update(suggestions=suggestions)
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def delete_suggestions(self, suggestions: Union[RemoteSuggestionSchema, List[RemoteSuggestionSchema]]) -> None:

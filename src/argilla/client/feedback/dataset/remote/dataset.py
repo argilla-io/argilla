@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from tqdm import trange
@@ -34,9 +33,6 @@ if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
     from argilla.client.workspaces import Workspace
-
-
-warnings.simplefilter("always", DeprecationWarning)
 
 
 class RemoteFeedbackRecords(RemoteFeedbackRecordsBase):

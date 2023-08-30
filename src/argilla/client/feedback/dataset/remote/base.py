@@ -34,8 +34,6 @@ if TYPE_CHECKING:
     from argilla.client.workspaces import Workspace
 
 
-warnings.simplefilter("always", DeprecationWarning)
-
 T = TypeVar("T", bound="RemoteFeedbackRecordsBase")
 
 
@@ -175,17 +173,6 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
         return self._records
 
     @property
-    def argilla_id(self) -> "UUID":
-        warnings.warn(
-            "`argilla_id` is deprected in favor of `id` and will be removed in a future"
-            " release. Please use `id` instead.\n`argilla_id` will be deprecated in"
-            " Argilla v1.15.0.",
-            DeprecationWarning,
-            stacklevel=1,
-        )
-        return self.id
-
-    @property
     def id(self) -> "UUID":
         """Returns the ID of the dataset in Argilla."""
         return self._id
@@ -265,25 +252,6 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
             RuntimeError: If the deletion of the records from Argilla fails.
         """
         self._records.delete(records=[records] if not isinstance(records, list) else records)
-
-    def fetch_records(self) -> None:
-        warnings.warn(
-            "`fetch_records` method is deprecated, as the records are fetched automatically"
-            " when iterating over a `FeedbackDataset` pushed to Argilla.\n`fetch_records`"
-            " will be deprecated in Argilla v1.15.0.",
-            DeprecationWarning,
-            stacklevel=1,
-        )
-
-    def push_to_argilla(self, *args, **kwargs) -> None:
-        warnings.warn(
-            "`push_to_argilla` is no longer working for a `FeedbackDataset` pushed to Argilla,"
-            " as the additions, deletions and/or updates over a `FeedbackDataset` in Argilla"
-            " are being tracked automatically, so there's no need to explicitly push them."
-            "\n`push_to_argilla` will be deprecated in Argilla v1.15.0.",
-            DeprecationWarning,
-            stacklevel=1,
-        )
 
     def pull(self) -> "FeedbackDataset":
         """Pulls the dataset from Argilla and returns a local instance of it.

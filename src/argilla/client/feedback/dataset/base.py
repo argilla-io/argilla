@@ -318,8 +318,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         test_size: Optional[float] = None,
         seed: Optional[int] = None,
         lang: Optional[str] = None,
-        fetch_records: Optional[bool] = None,
-    ):
+    ) -> Any:
         """
         Prepares the dataset for training for a specific training framework and NLP task by splitting the dataset into train and test sets.
 
@@ -332,18 +331,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             test_size: the size of the test set. If `None`, the whole dataset will be used for testing.
             seed: the seed to use for splitting the dataset into train and test sets.
             lang: the spaCy language to use for training. If `None`, the language of the dataset will be used.
-            fetch_records: whether to fetch the records from Argilla or use the local records instead. If `None`, use local.
         """
-        if fetch_records is not None:
-            warnings.warn(
-                "`fetch_records` is deprecated and will be removed in a future version."
-                " `records` will be fetched automatically from Argilla, if the dataset"
-                " is not in Argilla, then the local records will be used instead.\n`fetch_records`"
-                " will be deprecated in Argilla v1.15.0.",
-                DeprecationWarning,
-                stacklevel=1,
-            )
-
         if isinstance(framework, str):
             framework = Framework(framework)
 

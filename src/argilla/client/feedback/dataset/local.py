@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import warnings
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
@@ -22,9 +21,6 @@ from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQues
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import FeedbackRecord
-
-
-warnings.simplefilter("always", DeprecationWarning)
 
 
 class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin):
@@ -129,31 +125,6 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin):
         """
         for i in range(0, len(self._records), batch_size):
             yield self._records[i : i + batch_size]
-
-    def fetch_records(self) -> None:
-        warnings.warn(
-            "As the current `FeedbackDataset` is stored locally and not pushed to Argilla,"
-            " the method `fetch_records` won't do anything. If you want to fetch the records"
-            " from Argilla, make sure you're using an `RemoteFeedbackDataset`, either by"
-            " calling `FeedbackDataset.from_argilla` or by keeping the returned value from"
-            " `FeedbackDataset.push_to_argilla`.\n`fetch_records` will be deprecated in"
-            " Argilla v1.15.0.",
-            DeprecationWarning,
-            stacklevel=1,
-        )
-
-    @property
-    def argilla_id(self) -> None:
-        warnings.warn(
-            "As the current `FeedbackDataset` is stored locally, `argilla_id` won't"
-            " return anything as it's not pushed to Argilla. If you want to get the id"
-            " of a dataset in Argilla, make sure you're using an `RemoteFeedbackDataset`,"
-            " either by calling `FeedbackDataset.from_argilla` or by keeping the returned"
-            " value from `FeedbackDataset.push_to_argilla`.\n`argilla_id` will be deprecated in"
-            " Argilla v1.15.0.",
-            DeprecationWarning,
-            stacklevel=1,
-        )
 
     def add_records(
         self,
