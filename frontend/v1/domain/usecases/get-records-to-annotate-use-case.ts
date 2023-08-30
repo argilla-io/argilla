@@ -32,6 +32,7 @@ export class GetRecordsToAnnotateUseCase {
       status
     );
 
+    // eslint-disable-next-line no-console
     console.log("pageToFind", pageToFind);
 
     const getRecords = this.recordRepository.getRecords(
@@ -110,6 +111,7 @@ export class GetRecordsToAnnotateUseCase {
 
     this.recordsStorage.add(records);
 
+    // eslint-disable-next-line no-console
     console.table(
       {
         pending: this.recordsStorage
@@ -125,6 +127,7 @@ export class GetRecordsToAnnotateUseCase {
       ["Pending", "Submitted", "Discarded"]
     );
 
+    // eslint-disable-next-line no-console
     console.table(
       this.recordsStorage
         .get()

@@ -31,10 +31,7 @@
 <script>
 import { isNil } from "lodash";
 import { Notification } from "@/models/Notifications";
-import {
-  RECORD_STATUS,
-  RESPONSE_STATUS_FOR_API,
-} from "@/models/feedback-task-model/record/record.queries";
+import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
 import { LABEL_PROPERTIES } from "../../feedback-task/feedbackTask.properties";
 import { useRecordFeedbackTaskViewModel } from "./useRecordFeedbackTaskViewModel";
 
