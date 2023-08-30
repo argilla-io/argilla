@@ -997,20 +997,17 @@ class TrainingTaskForChatCompletion(BaseModel, TrainingData):
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
         output = set()
         for sample in dataset.format_as("datasets"):
-            chatid_turnid_role_content = self.formatting_func(sample)
-            if chatid_turnid_role_content is None:
+            chat_turn_role_content = self.formatting_func(sample)
+            if chat_turn_role_content is None:
                 continue
 
-            self._test_output_formatting_func(chatid_turnid_role_content)
+            self._test_output_formatting_func(chat_turn_role_content)
 
-            if isinstance(chatid_turnid_role_content, tuple):
-                chatid_turnid_role_content = {chatid_turnid_role_content}
+            if isinstance(chat_turn_role_content, tuple):
+                chat_turn_role_content = {chat_turn_role_content}
 
-            output |= set(chatid_turnid_role_content)
-        return [
-            {"chatid": chatid, "turnid": turnid, "role": role, "content": content}
-            for chatid, turnid, role, content in output
-        ]
+            output |= set(chat_turn_role_content)
+        return [{"chat": chat, "turn": turn, "role": role, "content": content} for chat, turn, role, content in output]
 
     @property
     def supported_frameworks(self):
@@ -1030,8 +1027,8 @@ class TrainingTaskForChatCompletion(BaseModel, TrainingData):
             """
             chats = []
             df = ds.to_pandas()
-            for chat_id in df["chatid"].unique():
-                df_filter = df[df["chatid"] == chat_id]
+            for chat_id in df["chat"].unique():
+                df_filter = df[df["chat"] == chat_id]
                 new_chat = {"messages": []}
                 for entry in df_filter.to_dict(orient="records"):
                     new_chat["messages"].append({"role": entry["role"], "content": entry["content"]})
@@ -1039,28 +1036,28 @@ class TrainingTaskForChatCompletion(BaseModel, TrainingData):
 
             return chats
 
-        datasets_dict = {"chatid": [], "turnid": [], "role": [], "content": []}
+        datasets_dict = {"chat": [], "turn": [], "role": [], "content": []}
         for entry in data:
             if entry["role"] not in ["system", "user", "assistant"]:
                 raise ValueError("Role must be one of 'system', 'user', 'assistant'")
-            datasets_dict["chatid"].append(entry["chatid"])
-            datasets_dict["turnid"].append(entry["turnid"])
+            datasets_dict["chat"].append(entry["chat"])
+            datasets_dict["turn"].append(entry["turn"])
             datasets_dict["role"].append(entry["role"])
             datasets_dict["content"].append(entry["content"])
 
         feature_dict = {
-            "chatid": datasets.Value("string"),
-            "turnid": datasets.Value("string"),
+            "chat": datasets.Value("string"),
+            "turn": datasets.Value("string"),
             "role": datasets.Value("string"),
             "content": datasets.Value("string"),
         }
 
         ds = datasets.Dataset.from_dict(datasets_dict, features=datasets.Features(feature_dict))
-        ds = ds.sort(column_names=["chatid", "turnid"])
+        ds = ds.sort(column_names=["chat", "turn"])
 
         if train_size != 1:
             ds = ds.train_test_split(
-                train_size=train_size, test_size=1 - train_size, seed=seed, stratify_by_column="chatid"
+                train_size=train_size, test_size=1 - train_size, seed=seed, stratify_by_column="chat"
             )
             return _dict_to_format(ds["train"]), _dict_to_format(ds["test"])
         else:
