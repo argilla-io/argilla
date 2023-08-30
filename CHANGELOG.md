@@ -18,6 +18,7 @@ These are the section headers that we use:
 
 ### Added
 
+- Added `Enable to update guidelines and dataset settings for Feedback Datasets directly in the UI` ([#3489](https://github.com/argilla-io/argilla/pull/3489))
 - Added `ArgillaTrainer` integration with TRL, allowing for easy supervised finetuning, reward modeling, direct preference optimization and proximal policy optimization ([#3467](https://github.com/argilla-io/argilla/pull/3467))
 - Added `formatting_func` to `ArgillaTrainer` for `FeedbackDataset` datasets add a custom formatting for the data ([#3599](https://github.com/argilla-io/argilla/pull/3599)).
 - Added `login` function in `argilla.client.login` to login into an Argilla server and store the credentials locally ([#3582](https://github.com/argilla-io/argilla/pull/3582)).
@@ -35,6 +36,7 @@ These are the section headers that we use:
 
 ### Changed
 
+- Changed `Optional label for * mark for required question` ([#3608](https://github.com/argilla-io/argilla/pull/3608))
 - Updated `RemoteFeedbackDataset.delete_records` to use batch delete records endpoint ([#3580](https://github.com/argilla-io/argilla/pull/3580)).
 - Included `allowed_for_roles` for some `RemoteFeedbackDataset`, `RemoteFeedbackRecords`, and `RemoteFeedbackRecord` methods that are only allowed for users with roles `owner` and `admin` ([#3601](https://github.com/argilla-io/argilla/pull/3601)).
 - Renamed `ArgillaToFromMixin` to `ArgillaMixin` ([#3619](https://github.com/argilla-io/argilla/pull/3619)).
@@ -43,6 +45,9 @@ These are the section headers that we use:
 
 ### Fixed
 
+- Fixed `Filter by workspace in breadcrumbs` ([#3577](https://github.com/argilla-io/argilla/pull/3577))
+- Fixed `Filter by workspace in datasets table` ([#3604](https://github.com/argilla-io/argilla/pull/3604))
+- Fixed `Query search highlight` for Text2Text and TextClassification ([#3621](https://github.com/argilla-io/argilla/pull/3621))
 - Fixed `RatingQuestion.values` validation to raise a `ValidationError` when values are out of range i.e. [1, 10] ([#3626](https://github.com/argilla-io/argilla/pull/3626)).
 
 ### Removed
@@ -52,6 +57,7 @@ These are the section headers that we use:
 - Removed `fetch_records` from `RemoteFeedbackDataset` as now the records are lazily fetched from Argilla ([#3663](https://github.com/argilla-io/argilla/pull/3663)).
 - Removed `push_to_argilla` from `RemoteFeedbackDataset`, as it just works when calling it through a `FeedbackDataset` locally, as now the updates of the remote datasets are automatically pushed to Argilla ([#3663](https://github.com/argilla-io/argilla/pull/3663)).
 - Removed `set_suggestions` in favor of `update(suggestions=...)` for both `FeedbackRecord` and `RemoteFeedbackRecord`, as all the updates of any "updateable" attribute of a record will go through `update` instead ([#3663](https://github.com/argilla-io/argilla/pull/3663)).
+- Remove unused `owner` attribute for client Dataset data model ([#3665](https://github.com/argilla-io/argilla/pull/3665))
 
 ## [1.14.1](https://github.com/argilla-io/argilla/compare/v1.14.0...v1.14.1)
 
