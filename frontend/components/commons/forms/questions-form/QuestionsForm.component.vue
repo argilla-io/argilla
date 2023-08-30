@@ -72,6 +72,7 @@
 
 <script>
 import { computed, watch, onMounted, onUnmounted } from "vue";
+import { useGlobalShortcuts } from "./useGlobalShortcuts";
 import "assets/icons/external-link";
 import "assets/icons/refresh";
 import "assets/icons/check";
@@ -155,38 +156,7 @@ export default {
     };
 
     // shortcuts
-    const onPressKeyboardShortCut = (event) => {
-      const { code, shiftKey, ctrlKey, metaKey } = event;
-      switch (code) {
-        case "KeyS": {
-          if (ctrlKey || metaKey) {
-            event.preventDefault();
-            event.stopPropagation();
-            onSaveDraftImmediately();
-          }
-          break;
-        }
-        case "Enter": {
-          onSubmit();
-          break;
-        }
-        case "Space": {
-          if (shiftKey) onClear();
-          break;
-        }
-        case "Backspace": {
-          onDiscard();
-          break;
-        }
-        default:
-      }
-    };
-    onMounted(() => {
-      document.addEventListener("keydown", onPressKeyboardShortCut);
-    });
-    onUnmounted(() => {
-      document.removeEventListener("keydown", onPressKeyboardShortCut);
-    });
+    useGlobalShortcuts(saveDraftImmediately, onSubmit, onClear, onDiscard);
 
     return {
       onSubmit,
