@@ -1021,7 +1021,7 @@ class TrainingTaskForChatCompletion(BaseModel, TrainingData):
     def _prepare_for_training_with_openai(self, data: List[dict], train_size: float, seed: int) -> List[dict]:
         import datasets
 
-        def _dict_to_format(ds: datasets.Dataset):
+        def _dict_to_format(ds: datasets.Dataset) -> List[Dict[str, List[Dict[str, str]]]]:
             """OpenAI expects a list of chats, each chat is a dict with a list of messages.
             Each message {"role": "user", "content": "Hello!"}
             """
