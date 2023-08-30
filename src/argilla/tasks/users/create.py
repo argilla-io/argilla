@@ -20,7 +20,7 @@ from argilla.client.sdk.users.models import UserRole
 
 
 def create_user(
-    username: str = typer.Option(..., help="The username of the user to be created"),
+    username: str = typer.Option(..., prompt=True, help="The username of the user to be created"),
     password: str = typer.Option(..., prompt=True, help="The password of the user to be created"),
     first_name: Optional[str] = typer.Option(None, help="The first name of the user to be created"),
     last_name: Optional[str] = typer.Option(None, help="The last name of the user to be created"),
@@ -58,13 +58,14 @@ def create_user(
 
     panel = get_argilla_themed_panel(
         Markdown(
-            "User successfully created:\n"
             f"- **Username**: {user.username}\n"
             f"- **First name**: {user.first_name}\n"
             f"- **Last name**: {user.last_name}\n"
             f"- **API Key**: {user.api_key}\n"
             f"- **Workspaces**: {user.workspaces}"
-        )
+        ),
+        title="User created",
+        title_align="left",
     )
 
     Console().print(panel)
