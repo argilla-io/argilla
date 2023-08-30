@@ -6,7 +6,7 @@ export function useGlobalShortcuts(
   onClear: Function,
   onDiscard: Function
 ) {
-  const onPressKeyboardShortCut = (event) => {
+  const onPressKeyboardShortCut = (event: KeyboardEvent) => {
     const { code, shiftKey, ctrlKey, metaKey } = event;
     switch (code) {
       case "KeyS": {
