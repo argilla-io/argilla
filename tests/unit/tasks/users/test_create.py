@@ -73,7 +73,7 @@ class TestSuiteCreateUserCommand:
         [
             (KeyError, "User with 'unit-test' already exists!"),
             (ValueError, "Provided parameters are not valid"),
-            (RuntimeError, "An error ocurred when trying to create the user"),
+            (RuntimeError, "An unexpected error occurred when trying to create the user"),
         ],
     )
     def test_create_user_errors(

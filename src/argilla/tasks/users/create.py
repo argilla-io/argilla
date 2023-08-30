@@ -53,7 +53,7 @@ def create_user(
         typer.echo(f"Provided parameters are not valid:\n\n{e}")
         raise typer.Exit(code=1) from e
     except RuntimeError as e:
-        typer.echo("An error ocurred when trying to create the user")
+        typer.echo("An unexpected error occurred when trying to create the user")
         raise typer.Exit(code=1) from e
 
     panel = get_argilla_themed_panel(
