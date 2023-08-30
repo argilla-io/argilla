@@ -12,21 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, Any
+import typer
 
-from rich.panel import Panel
-from rich.table import Table
+from argilla.tasks.callback import init_callback
 
-if TYPE_CHECKING:
-    from rich.console import RenderableType
+from .create import create_user
 
-# TODO: update colors after consulting it with UI expert
-_ARGILLA_BORDER_STYLE = "red"
-
-
-def get_argilla_themed_table(title: str, **kwargs: Any) -> Table:
-    return Table(title=title, border_style=_ARGILLA_BORDER_STYLE, **kwargs)
-
-
-def get_argilla_themed_panel(renderable: "RenderableType", **kwargs: Any) -> Panel:
-    return Panel(renderable=renderable, border_style=_ARGILLA_BORDER_STYLE, **kwargs)
+app = typer.Typer(help="Holds CLI commands for user management.", no_args_is_help=True, callback=init_callback)
+app.command(name="create", help="Creates a new user.")(create_user)
