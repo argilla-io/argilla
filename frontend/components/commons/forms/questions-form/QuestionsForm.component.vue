@@ -71,6 +71,7 @@
 </template>
 
 <script>
+import { computed, watch } from "vue";
 import "assets/icons/external-link";
 import "assets/icons/refresh";
 import "assets/icons/check";
@@ -89,37 +90,113 @@ export default {
       required: true,
     },
   },
-  setup() {
-    return useQuestionFormViewModel();
-  },
-  computed: {
-    isFormTouched() {
-      return this.record.isModified;
-    },
-    questionAreCompletedCorrectly() {
-      return this.record.questionAreCompletedCorrectly();
-    },
-    isSubmitButtonDisabled() {
-      if (this.record.isSubmitted)
-        return !this.isFormTouched || !this.questionAreCompletedCorrectly;
+  emits: ["on-submit-responses", "on-discard-responses"],
+  setup(props, { emit }) {
+    props.record.restore();
 
-      return !this.questionAreCompletedCorrectly;
-    },
+    const {
+      clear,
+      submit,
+      discard,
+      saveDraft,
+      draftSaving,
+      saveDraftImmediately,
+    } = useQuestionFormViewModel();
+
+    // computed
+    const isFormTouched = computed(() => {
+      return props.record.isModified;
+    });
+
+    const questionAreCompletedCorrectly = computed(() => {
+      return props.record.questionAreCompletedCorrectly();
+    });
+
+    const isSubmitButtonDisabled = computed(() => {
+      if (props.record.isSubmitted)
+        return !isFormTouched.value || !questionAreCompletedCorrectly.value;
+
+      return !questionAreCompletedCorrectly.value;
+    });
+
+    // watch
+    watch(
+      props.record,
+      () => {
+        if (props.record.isModified) saveDraft(props.record);
+      },
+      {
+        immediate: true,
+        deep: true,
+      }
+    );
+
+    // actions on questions
+    const onSubmit = async () => {
+      if (!questionAreCompletedCorrectly) return;
+
+      await submit(props.record);
+
+      emit("on-submit-responses");
+    };
+
+    const onDiscard = async () => {
+      await discard(props.record);
+
+      emit("on-discard-responses");
+    };
+
+    const onClear = async () => {
+      await clear(props.record);
+    };
+
+    const onSaveDraftImmediately = async () => {
+      await saveDraftImmediately(props.record);
+    };
+
+    // shortcuts
+    const onPressKeyboardShortCut = (event) => {
+      const { code, shiftKey, ctrlKey, metaKey } = event;
+      switch (code) {
+        case "KeyS": {
+          if (ctrlKey || metaKey) {
+            event.preventDefault();
+            event.stopPropagation();
+            onSaveDraftImmediately();
+          }
+          break;
+        }
+        case "Enter": {
+          onSubmit();
+          break;
+        }
+        case "Space": {
+          if (shiftKey) onClear();
+          break;
+        }
+        case "Backspace": {
+          onDiscard();
+          break;
+        }
+        default:
+      }
+    };
+
+    return {
+      onSubmit,
+      onDiscard,
+      onClear,
+      draftSaving,
+      isFormTouched,
+      isSubmitButtonDisabled,
+      onSaveDraftImmediately,
+      onPressKeyboardShortCut,
+    };
   },
   watch: {
     isFormTouched(isFormTouched) {
       this.emitIsQuestionsFormTouched(isFormTouched);
     },
-    record: {
-      deep: true,
-      immediate: true,
-      handler() {
-        if (this.record.isModified) this.saveDraft(this.record);
-      },
-    },
-  },
-  created() {
-    this.record.restore();
   },
   mounted() {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
@@ -130,50 +207,6 @@ export default {
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
-    onPressKeyboardShortCut(event) {
-      const { code, shiftKey, ctrlKey, metaKey } = event;
-      switch (code) {
-        case "KeyS": {
-          if (ctrlKey || metaKey) {
-            event.preventDefault();
-            event.stopPropagation();
-            this.onSaveDraftImmediately();
-          }
-          break;
-        }
-        case "Enter": {
-          this.onSubmit();
-          break;
-        }
-        case "Space": {
-          if (shiftKey) this.onClear();
-          break;
-        }
-        case "Backspace": {
-          this.onDiscard();
-          break;
-        }
-        default:
-      }
-    },
-    async onDiscard() {
-      await this.discard(this.record);
-
-      this.$emit("on-discard-responses");
-    },
-    async onSubmit() {
-      if (!this.questionAreCompletedCorrectly) return;
-
-      await this.submit(this.record);
-
-      this.$emit("on-submit-responses");
-    },
-    async onClear() {
-      await this.clear(this.record);
-    },
-    async onSaveDraftImmediately() {
-      await this.saveDraftImmediately(this.record);
-    },
     emitIsQuestionsFormTouched(isFormTouched) {
       this.$emit("on-question-form-touched", isFormTouched);
 
