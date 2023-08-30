@@ -23,10 +23,10 @@ from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     RatingQuestion,
-    SuggestionSchema,
     TextField,
     TextQuestion,
 )
+from argilla.client.feedback.schemas.records import RemoteSuggestionSchema
 from argilla.client.feedback.training.schemas import TrainingTask
 from argilla.client.models import Framework
 
@@ -141,7 +141,7 @@ def test_init_wrong_questions(
         )
 
 
-def test_create_dataset_with_suggestions(argilla_user: "ServerUser"):
+def test_create_dataset_with_suggestions(argilla_user: "ServerUser") -> None:
     api.init(api_key=argilla_user.api_key)
 
     ds = FeedbackDataset(fields=[TextField(name="text")], questions=[TextQuestion(name="text")])
@@ -161,15 +161,9 @@ def test_create_dataset_with_suggestions(argilla_user: "ServerUser"):
         remote_dataset.fetch_records()
 
     assert len(remote_dataset.records) == 1
-    for record in remote_dataset.records:
-        assert record.id is not None
-        assert record.suggestions == (
-            SuggestionSchema(
-                question_id=remote_dataset.question_by_name("text").id,
-                question_name="text",
-                value="This is a suggestion",
-            ),
-        )
+    assert remote_dataset.records[0].id is not None
+    assert isinstance(remote_dataset.records[0].suggestions[0], RemoteSuggestionSchema)
+    assert remote_dataset.records[0].suggestions[0].question_id == remote_dataset.question_by_name("text").id
 
 
 @pytest.mark.asyncio
@@ -183,11 +177,10 @@ async def test_update_dataset_records_with_suggestions(argilla_user: "ServerUser
     remote_dataset = ds.push_to_argilla(name="new_dataset", workspace="argilla")
 
     assert len(remote_dataset.records) == 1
-    for record in remote_dataset.records:
-        assert record.id is not None
-        assert record.suggestions == ()
+    assert remote_dataset.records[0].id is not None
+    assert remote_dataset.records[0].suggestions == ()
 
-        record.set_suggestions([{"question_name": "text", "value": "This is a suggestion"}])
+    remote_dataset.records[0].update(suggestions=[{"question_name": "text", "value": "This is a suggestion"}])
 
     # TODO: Review this requirement for tests and explain, try to avoid use or at least, document.
     await db.refresh(argilla_user, attribute_names=["datasets"])
@@ -197,13 +190,7 @@ async def test_update_dataset_records_with_suggestions(argilla_user: "ServerUser
     await db.refresh(record, attribute_names=["suggestions"])
 
     for record in remote_dataset.records:
-        assert record.suggestions == (
-            SuggestionSchema(
-                question_id=remote_dataset.question_by_name("text").id,
-                question_name="text",
-                value="This is a suggestion",
-            ),
-        )
+        assert record.suggestions[0].question_id == remote_dataset.question_by_name("text").id
 
 
 def test_add_records(
@@ -498,8 +485,8 @@ async def test_update_dataset_records_in_argilla(
     await db.refresh(argilla_user, attribute_names=["datasets"])
 
     for record in remote_dataset.records:
-        record.set_suggestions(
-            [
+        record.update(
+            suggestions=[
                 {
                     "question_name": "question-1",
                     "value": "This is a suggestion to question 1",
@@ -511,8 +498,8 @@ async def test_update_dataset_records_in_argilla(
 
     remote_dataset = FeedbackDataset.from_argilla("test-dataset")
     for record in remote_dataset.records:
-        record.set_suggestions(
-            [
+        record.update(
+            suggestions=[
                 {
                     "question_name": "question-1",
                     "value": "This is a suggestion to question 1",
@@ -523,8 +510,8 @@ async def test_update_dataset_records_in_argilla(
     await db.refresh(argilla_user, attribute_names=["datasets"])
 
     for record in remote_dataset.records:
-        record.set_suggestions(
-            [
+        record.update(
+            suggestions=[
                 {
                     "question_name": "question-2",
                     "value": 1,
@@ -537,8 +524,8 @@ async def test_update_dataset_records_in_argilla(
 
     record = new_remote_dataset.records[0]
     with pytest.warns(UserWarning, match="A suggestion for question `question-1`"):
-        record.set_suggestions(
-            [
+        record.update(
+            suggestions=[
                 {
                     "question_name": "question-1",
                     "value": "This is a suggestion to question 1",
