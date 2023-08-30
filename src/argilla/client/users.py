@@ -145,7 +145,8 @@ class User:
         """Deletes the user from Argilla.
 
         Raises:
-            BaseClientError: if the user cannot be deleted from Argilla.
+            ValueError: if the user doesn't exist in Argilla.
+            RuntimeError: if the user cannot be deleted from Argilla.
 
         Examples:
             >>> from argilla import rg
