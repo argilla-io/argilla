@@ -33,7 +33,6 @@ def create_user(
 ) -> None:
     from rich.console import Console
     from rich.markdown import Markdown
-    from rich.panel import Panel
 
     from argilla.client.users import User
     from argilla.tasks.rich import get_argilla_themed_panel
