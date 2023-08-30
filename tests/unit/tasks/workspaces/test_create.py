@@ -44,13 +44,15 @@ def test_cli_workspaces_create_needs_login(cli_runner: "CliRunner", cli: "Typer"
     assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout
     assert result.exit_code == 1
 
+
 @pytest.mark.usefixtures("login_mock")
 def test_workspace_create_already_exists(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
-    mocker.patch("argilla.client.workspaces.Workspace.create", side_effect=ValueError(
-        "Workspace with name=`workspace1` already exists, so please use a different name."))
+    mocker.patch(
+        "argilla.client.workspaces.Workspace.create",
+        side_effect=ValueError("Workspace with name=`workspace1` already exists, so please use a different name."),
+    )
 
     result = cli_runner.invoke(cli, "workspaces create workspace1")
-    print("Result: -------------------- ",
-          result.exception, result.stdout, result.exit_code)
+    print("Result: -------------------- ", result.exception, result.stdout, result.exit_code)
     assert result.stdout == "Workspace with name=`workspace1` already exists, so please use a different name.\n"
     assert result.exit_code == 0
