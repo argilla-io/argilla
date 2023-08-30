@@ -157,9 +157,6 @@ def test_create_dataset_with_suggestions(argilla_user: "ServerUser") -> None:
 
     remote_dataset = ds.push_to_argilla(name="new_dataset")
 
-    with pytest.warns(DeprecationWarning):
-        remote_dataset.fetch_records()
-
     assert len(remote_dataset.records) == 1
     assert remote_dataset.records[0].id is not None
     assert isinstance(remote_dataset.records[0].suggestions[0], RemoteSuggestionSchema)
@@ -405,13 +402,8 @@ async def test_push_to_argilla_and_from_argilla(
         ]
     )
 
-    with pytest.warns(
-        DeprecationWarning, match="Calling `push_to_argilla` no longer implies that the `FeedbackDataset`"
-    ):
-        remote_dataset = dataset.push_to_argilla(name="my-dataset")
-
     with pytest.warns(UserWarning, match="Multiple responses without `user_id`"):
-        dataset.push_to_argilla(name="test-dataset")
+        remote_dataset = dataset.push_to_argilla(name="my-dataset")
 
     dataset_from_argilla = FeedbackDataset.from_argilla(id=remote_dataset.id)
 
@@ -448,16 +440,16 @@ async def test_copy_dataset_in_argilla(
     same_dataset = FeedbackDataset.from_argilla("test-dataset")
     same_dataset_local = same_dataset.pull()
     same_dataset_local.push_to_argilla("copy-dataset")
-    assert same_dataset.argilla_id is not None
+    assert same_dataset.id is not None
 
     await db.refresh(argilla_user, attribute_names=["datasets"])
 
-    same_dataset = FeedbackDataset.from_argilla("copy-dataset")
-    assert same_dataset.argilla_id != dataset.argilla_id
-    assert [field.dict(exclude={"id"}) for field in same_dataset.fields] == [
+    same_dataset_copy = FeedbackDataset.from_argilla("copy-dataset")
+    assert same_dataset_copy.id != same_dataset.id
+    assert [field.dict(exclude={"id"}) for field in same_dataset_copy.fields] == [
         field.dict(exclude={"id"}) for field in dataset.fields
     ]
-    assert [question.dict(exclude={"id"}) for question in same_dataset.questions] == [
+    assert [question.dict(exclude={"id"}) for question in same_dataset_copy.questions] == [
         question.dict(exclude={"id"}) for question in dataset.questions
     ]
 

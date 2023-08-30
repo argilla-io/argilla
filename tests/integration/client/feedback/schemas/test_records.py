@@ -91,37 +91,6 @@ async def test_update(role: UserRole, db: "AsyncSession") -> None:
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
-async def test_set_suggestions_deprecated(role: UserRole, db: "AsyncSession") -> None:
-    dataset = await DatasetFactory.create()
-    await TextFieldFactory.create(dataset=dataset, required=True)
-    question = await TextQuestionFactory.create(dataset=dataset, required=True)
-    records = await RecordFactory.create_batch(dataset=dataset, size=10)
-    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
-
-    api.init(api_key=user.api_key)
-    remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
-    remote_records = [record for record in remote_dataset.records]
-    assert all(isinstance(record, RemoteFeedbackRecord) for record in remote_records)
-    assert all(record.suggestions == () for record in remote_records)
-
-    suggestion = SuggestionSchema(
-        question_id=question.id,
-        question_name=question.name,
-        value="suggestion",
-    )
-    with pytest.warns(DeprecationWarning, match="`set_suggestions` is deprected in favor of `update`"):
-        for remote_record, factory_record in zip(remote_records, records):
-            remote_record.set_suggestions(suggestions=[suggestion])
-            await db.refresh(factory_record, attribute_names=["suggestions"])
-    assert all(
-        isinstance(suggestion, RemoteSuggestionSchema)
-        for remote_record in remote_records
-        for suggestion in remote_record.suggestions
-    )
-
-
-@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-@pytest.mark.asyncio
 async def test_delete_suggestions(role: UserRole, db: "AsyncSession") -> None:
     dataset = await DatasetFactory.create()
     await TextFieldFactory.create(dataset=dataset, required=True)
