@@ -13,20 +13,20 @@
 #  limitations under the License.
 
 import typer
-from argilla.tasks import async_typer
+
 from argilla.client.workspaces import Workspace
+from argilla.tasks import async_typer
 
 
 def create_workspace(
-        workspace_name: str,
+    workspace_name: str,
 ):
     """Creates a workspace for the logged user in Argilla"""
     if not workspace_name:
         raise typer.BadParameter("Workspace name must be specified.")
     try:
         Workspace.create(name=workspace_name)
-        typer.echo(
-            f"Workspace with the name=`{workspace_name}` successfully created.")
+        typer.echo(f"Workspace with the name=`{workspace_name}` successfully created.")
     except ValueError as e:
         print(e)
 
