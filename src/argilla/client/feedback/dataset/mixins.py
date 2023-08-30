@@ -124,7 +124,7 @@ class ArgillaMixin:
         name: str,
         workspace: Optional[Union[str, Workspace]] = None,
         show_progress: bool = False,
-    ) -> Optional[RemoteFeedbackDataset]:
+    ) -> RemoteFeedbackDataset:
         """Pushes the `FeedbackDataset` to Argilla.
 
         Note that you may need to `rg.init(...)` with your Argilla credentials before calling this function, otherwise
