@@ -40,14 +40,17 @@
             </Validation>
 
             <BaseSwitch
-              :id="`use-markdown-${question.id}`"
               v-if="question.isTextType"
+              :id="`use-markdown-${question.id}`"
               v-model="question.settings.use_markdown"
               >Use Markdown</BaseSwitch
             >
 
             <BaseRangeSlider
-              v-if="question.settings.options.length > 3"
+              v-if="
+                question.settings.visible_options &&
+                question.settings.options.length > 3
+              "
               :id="`visible_options-${question.id}`"
               :min="3"
               :max="question.settings.options.length"
