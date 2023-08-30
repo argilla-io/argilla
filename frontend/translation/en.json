@@ -5,6 +5,7 @@
   "text": "Text",
   "rating": "Rating",
   "shortcuts": {
+    "label": "Shortcuts",
     "pagination": {
       "go_to_previous_record": "Previous (ctrl + ←)",
       "go_to_next_record": "Next (ctrl + →)",
