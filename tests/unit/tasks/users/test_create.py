@@ -58,6 +58,7 @@ class TestSuiteCreateUserCommand:
         )
 
         assert result.exit_code == 0
+        assert "User successfully created" in result.stdout
         user_create_mock.assert_called_once_with(
             username="unit-test",
             password="unit-test",
