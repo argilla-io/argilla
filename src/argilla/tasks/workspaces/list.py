@@ -25,7 +25,7 @@ def list_workspaces() -> None:
     workspaces = Workspace.list()
 
     table = get_argilla_themed_table(title="Workspaces")
-    for column in ("ID", "Name", "Creation Date", "Update Date"):
+    for column in ("ID", "Name", "Creation Date", "Last Update Date"):
         table.add_column(column, justify="center")
 
     for workspace in workspaces:

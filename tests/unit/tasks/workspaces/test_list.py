@@ -53,7 +53,7 @@ def test_cli_workspaces_list(cli_runner: "CliRunner", cli: "Typer", mocker: "Moc
         workspace.inserted_at.isoformat(sep=" "),
         workspace.updated_at.isoformat(sep=" "),
     )
-    assert all(col in result.stdout for col in ("ID", "Name", "Creation Date", "Update Date", "test_workspace"))
+    assert all(col in result.stdout for col in ("ID", "Name", "Creation Date", "Last Update Date", "test_workspace"))
     assert result.exit_code == 0
 
 
