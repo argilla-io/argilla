@@ -36,6 +36,7 @@ def create_user(
     from rich.panel import Panel
 
     from argilla.client.users import User
+    from argilla.tasks.rich import get_argilla_themed_panel
 
     try:
         user = User.create(
@@ -56,7 +57,7 @@ def create_user(
         typer.echo("An error ocurred when trying to create the user")
         raise typer.Exit(code=1) from e
 
-    panel = Panel(
+    panel = get_argilla_themed_panel(
         Markdown(
             "User successfully created:\n"
             f"- **Username**: {user.username}\n"

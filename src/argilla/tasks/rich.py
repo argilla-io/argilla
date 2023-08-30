@@ -12,11 +12,21 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
+from rich.panel import Panel
 from rich.table import Table
+
+if TYPE_CHECKING:
+    from rich.console import RenderableType
+
+# TODO: update colors after consulting it with UI expert
+_ARGILLA_BORDER_STYLE = "red"
 
 
 def get_argilla_themed_table(title: str, **kwargs: Any) -> Table:
-    # TODO: update colors after consulting it with UI expert
-    return Table(title=title, border_style="red", **kwargs)
+    return Table(title=title, border_style=_ARGILLA_BORDER_STYLE, **kwargs)
+
+
+def get_argilla_themed_panel(renderable: "RenderableType", **kwargs: Any) -> Panel:
+    return Panel(renderable=renderable, border_style=_ARGILLA_BORDER_STYLE, **kwargs)
