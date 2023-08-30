@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import { computed, watch, onMounted, onUnmounted } from "vue";
+import { computed, watch } from "vue";
 import { useGlobalShortcuts } from "./useGlobalShortcuts";
 import "assets/icons/external-link";
 import "assets/icons/refresh";
