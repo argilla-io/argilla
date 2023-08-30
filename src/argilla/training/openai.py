@@ -97,7 +97,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         training_file: str = None,
         validation_file: str = None,
         model: str = "curie",
-        n_epochs: int = 1,
+        n_epochs: int = None,
         batch_size: int = None,
         learning_rate_multiplier: float = 0.1,
         prompt_loss_weight: float = 0.1,
@@ -106,6 +106,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         classification_positive_class: str = None,
         classification_betas: list = None,
         suffix: str = None,
+        hyperparameters: dict = None,
     ):
         self.model_kwargs = {}
 
@@ -136,8 +137,11 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
                     self.model_kwargs["classification_n_classes"] = len(label_schema)
                     self.model_kwargs["compute_classification_metrics"] = True
         else:
-            self.model_kwargs["hyperparameters"] = {}
-            self.model_kwargs["hyperparameters"]["n_epochs"] = n_epochs or 1
+            if "hyperparameters":
+                self.model_kwargs["hyperparameters"] = hyperparameters
+            else:
+                self.model_kwargs["hyperparameters"] = {}
+                self.model_kwargs["hyperparameters"]["n_epochs"] = n_epochs or 1
 
     def update_config(
         self,

@@ -3,7 +3,16 @@
 :::{tab-item} OpenAI
 
 ```python
-# `OpenAI.FineTune`
+# `OpenAI.FineTune` (legacy)
+trainer.update_config(
+    training_file = None,
+    validation_file = None,
+    model = "curie,
+    hyperparameters = {"n_epochs": 1},
+    suffix = None
+)
+
+# `OpenAI.FineTune` (legacy)
 trainer.update_config(
     training_file = None,
     validation_file = None,

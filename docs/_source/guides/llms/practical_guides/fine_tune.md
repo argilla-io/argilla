@@ -46,6 +46,7 @@ We plan on adding more support for other tasks and frameworks so feel free to re
 | Reward Modeling                 | ✔️    |        |          |       |              |      |
 | Proximal Policy Optimization    | ✔️    |        |          |       |              |      |
 | Direct Preference Optimization  | ✔️    |        |          |       |              |      |
+| Chat Completion                 | ✔️    |        |          |       |              |      |
 
 ```{note}
 We also offer support for Token Classification using our `TokenClassifcationDataset` but this is shown in [a section](/guides/train_a_model) about our older dataset-types.
@@ -66,13 +67,15 @@ Note that you don't need to pass all of them directly and that the values below 
 
 A `TrainingTask` is used to define how the data should be processed and formatted according to the associated task and framework. Each task has its own `TrainingTask.for_*`-classmethod and the data formatting can always be defined using a custom `formatting_func`. However, simpler tasks like Text Classification can also be defined using default definitions. These directly use the fields and questions from the FeedbackDataset configuration to infer how to prepare the data. Underneath you can find an overview of the `TrainingTask` requirements.
 
-| Method                             | Content          | `formatting_func` return type                                     | Default           |
-|:-----------------------------------|:-----------------|:-----------------------------------------------------------|:------------------|
-| for_text_classification            | `text-label`     | `Union[Tuple[str, str], Tuple[str, List[str]]]`            | ✔️                 |
-| for_supervised_fine_tuning         | `text`           | `Optional[Union[str, Iterator[str]]]`                                                      | ✗                 |
-| for_reward_modeling               | `chosen-rejected`| `Optional[Union[Tuple[str, str], Iterator[Tuple[str, str]]]]`                                          | ✗                 |
-| for_proximal_policy_optimization   | `text`           | `Optional[Union[str, Iterator[str]]]`                                | ✗                 |
-| for_direct_preference_optimization| `prompt-chosen-rejected`                 | `Optional[Union[Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]`                                          | ✗                 |
+| Method                             | Content                      | `formatting_func` return type                                                    | Default|
+|:-----------------------------------|:-----------------------------|:---------------------------------------------------------------------------------|:-------|
+| for_text_classification            | `text-label`                 | `Union[Tuple[str, str], Tuple[str, List[str]]]`                                  | ✔️      |
+| for_supervised_fine_tuning         | `text`                       | `Optional[Union[str, Iterator[str]]]`                                            | ✗      |
+| for_reward_modeling                | `chosen-rejected`            | `Optional[Union[Tuple[str, str], Iterator[Tuple[str, str]]]]`                    | ✗      |
+| for_proximal_policy_optimization   | `text`                       | `Optional[Union[str, Iterator[str]]]`                                            | ✗      |
+| for_direct_preference_optimization | `prompt-chosen-rejected`     | `Optional[Union[Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]`          | ✗      |
+| for_chat_completion                | `chatid-turnid-user-content` | `Optional[Union[Tuple[str, str, str, str], Iterator[Tuple[str, str, str, str]]]]`| ✗      |
+
 
 ## Tasks
 
@@ -897,3 +900,7 @@ output_text = tokenizer.decode(outputs[0])
 print(output_text)
 # Yes it is, toads are a sub-classification of frogs.
 ```
+
+### Chat Completion
+
+With the rise of chat-oriented models under OpenAI's ChatGPT, we have s
