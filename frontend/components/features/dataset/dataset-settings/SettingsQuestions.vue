@@ -48,7 +48,7 @@
 
             <BaseRangeSlider
               v-if="
-                question.settings.visible_options &&
+                !!question.settings.visible_options &&
                 question.settings.options.length > 3
               "
               :id="`visible_options-${question.id}`"
