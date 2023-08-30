@@ -372,6 +372,15 @@ class TrainingTask:
         """
         return TrainingTaskForDPO(formatting_func=formatting_func)
 
+    @classmethod
+    def for_chat_completion(
+        cls,
+        formatting_func: Callable[
+            [Dict[str, Any]], Union[None, Tuple[str, str, str, str], Iterator[Tuple[str, str, str, str]]]
+        ],
+    ) -> "TrainingTaskForChatCompletion":
+        return TrainingTaskForChatCompletion(formatting_func=formatting_func)
+
 
 class TrainingTaskForTextClassificationFormat(BaseModel):
     """
@@ -973,12 +982,98 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
         return ds
 
 
+class TrainingTaskForChatCompletionFormat(BaseModel):
+    """
+    Union[Tuple[str, str, str, str], List[Tuple[str, str, str, str]]]
+    """
+
+    format: Union[Tuple[str, str, str, str], List[Tuple[str, str, str, str]]]
+
+
+class TrainingTaskForChatCompletion(BaseModel, TrainingData):
+    _formatting_func_return_types = TrainingTaskForChatCompletionFormat
+    formatting_func: Callable[[Dict[str, Any]], Union[None, str, Iterator[str]]]
+
+    def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
+        output = set()
+        for sample in dataset.format_as("datasets"):
+            chatid_turnid_role_content = self.formatting_func(sample)
+            if chatid_turnid_role_content is None:
+                continue
+
+            self._test_output_formatting_func(chatid_turnid_role_content)
+
+            if isinstance(chatid_turnid_role_content, tuple):
+                chatid_turnid_role_content = {chatid_turnid_role_content}
+
+            output |= set(chatid_turnid_role_content)
+        return [
+            {"chatid": chatid, "turnid": turnid, "role": role, "content": content}
+            for chatid, turnid, role, content in output
+        ]
+
+    @property
+    def supported_frameworks(self):
+        names = ["openai"]
+        return [Framework(name) for name in names]
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
+
+    @requires_version("openai")
+    def _prepare_for_training_with_openai(self, data: List[dict], train_size: float, seed: int) -> List[dict]:
+        import datasets
+
+        def _dict_to_format(ds: datasets.Dataset):
+            """OpenAI expects a list of chats, each chat is a dict with a list of messages.
+            Each message {"role": "user", "content": "Hello!"}
+            """
+            chats = []
+            df = ds.to_pandas()
+            for chat_id in df["chatid"].unique():
+                df_filter = df[df["chatid"] == chat_id]
+                new_chat = {"messages": []}
+                for entry in df_filter.to_dict(orient="records"):
+                    new_chat["messages"].append({"role": entry["role"], "content": entry["content"]})
+                chats.append(new_chat)
+
+            return chats
+
+        datasets_dict = {"chatid": [], "turnid": [], "role": [], "content": []}
+        for entry in data:
+            if entry["role"] not in ["system", "user", "assistant"]:
+                raise ValueError("Role must be one of 'system', 'user', 'assistant'")
+            datasets_dict["chatid"].append(entry["chatid"])
+            datasets_dict["turnid"].append(entry["turnid"])
+            datasets_dict["role"].append(entry["role"])
+            datasets_dict["content"].append(entry["content"])
+
+        feature_dict = {
+            "chatid": datasets.Value("string"),
+            "turnid": datasets.Value("string"),
+            "role": datasets.Value("string"),
+            "content": datasets.Value("string"),
+        }
+
+        ds = datasets.Dataset.from_dict(datasets_dict, features=datasets.Features(feature_dict))
+        ds = ds.sort(column_names=["chatid", "turnid"])
+
+        if train_size != 1:
+            ds = ds.train_test_split(
+                train_size=train_size, test_size=1 - train_size, seed=seed, stratify_by_column="chatid"
+            )
+            return _dict_to_format(ds["train"]), _dict_to_format(ds["test"])
+        else:
+            return _dict_to_format(ds)
+
+
 TrainingTaskTypes = Union[
     TrainingTaskForTextClassification,
     TrainingTaskForSFT,
     TrainingTaskForRM,
     TrainingTaskForPPO,
     TrainingTaskForDPO,
+    TrainingTaskForChatCompletion,
 ]
 
 
