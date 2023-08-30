@@ -13,7 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-
 from argilla.tasks.async_typer import AsyncTyper
 from argilla.tasks.callback import init_callback
 

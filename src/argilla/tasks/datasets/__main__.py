@@ -21,7 +21,6 @@ app = typer.Typer(
     help="Holds CLI commands for datasets management", invoke_without_command=True, callback=init_callback
 )
 
-
 app.command(name="list", help="List datasets linked to user's workspaces")(list_datasets)
 
 
