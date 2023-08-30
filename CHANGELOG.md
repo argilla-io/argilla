@@ -34,6 +34,7 @@ These are the section headers that we use:
 - Added `datasets list` command to list Argilla datasets ([#3658](https://github.com/argilla-io/argilla/pull/3658)).
 - Added `users create` command to create users ([#3667](https://github.com/argilla-io/argilla/pull/3667)).
 - Added `users delete` command to delete users ([#3671](https://github.com/argilla-io/argilla/pull/3671)).
+- Added `workspaces create` command to create an Argilla workspace ([#3676](https://github.com/argilla-io/argilla/pull/3676)).
 
 ### Changed
 
