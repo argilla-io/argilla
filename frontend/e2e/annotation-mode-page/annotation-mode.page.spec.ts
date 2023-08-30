@@ -1,14 +1,10 @@
 import { test, expect, Page } from "@playwright/test";
+import { mockRecordResponses } from "../common";
 import {
-  loginUserAndWaitFor,
-  mockAllDatasets,
-  newDatasetsMocked,
-  mockRecord,
-  mockRecordWith12Ranking,
-  mockRecordWithRating,
-  mockRecordResponses,
-  mockRecordForLongAndShortQuestion,
-} from "../common";
+  goToAnnotationPage,
+  goToAnnotationPageWith12Ranking,
+  goToAnnotationPageWith10Rating,
+} from "./goToAnnotationPage";
 
 const shortcuts = {
   clear: "Shift+Space",
@@ -37,67 +33,6 @@ const shortcuts = {
     goToPrevRating: "Shift+Tab",
     rate: "Space",
   },
-};
-
-const goToAnnotationPage = async (page, shortAndLongQuestions = false) => {
-  const dataset = newDatasetsMocked[0];
-
-  await mockAllDatasets(page);
-  const record = shortAndLongQuestions
-    ? await mockRecordForLongAndShortQuestion(page, {
-        datasetId: dataset.id,
-        workspaceId: dataset.workspace_id,
-      })
-    : await mockRecord(page, {
-        datasetId: dataset.id,
-        workspaceId: dataset.workspace_id,
-      });
-
-  await loginUserAndWaitFor(page, "datasets");
-
-  await page.waitForTimeout(2000);
-
-  await page.getByRole("link", { name: dataset.name }).click();
-
-  await page.waitForTimeout(3000);
-
-  return record;
-};
-
-const goToAnnotationPageWith12Ranking = async (page: Page) => {
-  const dataset = newDatasetsMocked[0];
-
-  await mockAllDatasets(page);
-  await mockRecordWith12Ranking(page, {
-    datasetId: dataset.id,
-    workspaceId: dataset.workspace_id,
-  });
-
-  await loginUserAndWaitFor(page, "datasets");
-
-  await page.waitForTimeout(1000);
-
-  await page.getByRole("link", { name: dataset.name }).click();
-
-  await page.waitForTimeout(1000);
-};
-
-const goToAnnotationPageWith10Rating = async (page) => {
-  const dataset = newDatasetsMocked[0];
-
-  await mockAllDatasets(page);
-  await mockRecordWithRating(page, {
-    datasetId: dataset.id,
-    workspaceId: dataset.workspace_id,
-  });
-
-  await loginUserAndWaitFor(page, "datasets");
-
-  await page.waitForTimeout(2000);
-
-  await page.getByRole("link", { name: dataset.name }).click();
-
-  await page.waitForTimeout(3000);
 };
 
 test.use({
@@ -317,6 +252,16 @@ test.describe("Annotation page shortcuts", () => {
         await page.waitForTimeout(300);
         await expect(page).toHaveScreenshot();
       });
+    });
+  });
+  test.describe("Shortcuts panel", () => {
+    test("open shortcut panel", async ({ page }) => {
+      await goToAnnotationPageWith12Ranking(page);
+
+      await page.locator("span:last-child > .icon-button").click();
+      await page.waitForTimeout(300);
+
+      await expect(page).toHaveScreenshot();
     });
   });
   test.describe("Single component", () => {
