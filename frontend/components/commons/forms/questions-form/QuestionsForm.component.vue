@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import { computed, watch } from "vue";
+import { computed, watch, onMounted, onUnmounted } from "vue";
 import "assets/icons/external-link";
 import "assets/icons/refresh";
 import "assets/icons/check";
@@ -181,6 +181,12 @@ export default {
         default:
       }
     };
+    onMounted(() => {
+      document.addEventListener("keydown", onPressKeyboardShortCut);
+    });
+    onUnmounted(() => {
+      document.removeEventListener("keydown", onPressKeyboardShortCut);
+    });
 
     return {
       onSubmit,
@@ -190,7 +196,6 @@ export default {
       isFormTouched,
       isSubmitButtonDisabled,
       onSaveDraftImmediately,
-      onPressKeyboardShortCut,
     };
   },
   watch: {
@@ -198,13 +203,8 @@ export default {
       this.emitIsQuestionsFormTouched(isFormTouched);
     },
   },
-  mounted() {
-    document.addEventListener("keydown", this.onPressKeyboardShortCut);
-  },
   destroyed() {
     this.emitIsQuestionsFormTouched(false);
-
-    document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
     emitIsQuestionsFormTouched(isFormTouched) {
