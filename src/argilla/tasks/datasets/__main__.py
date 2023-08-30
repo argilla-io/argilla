@@ -12,11 +12,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .database import app as database_app
-from .datasets import app as datasets_app
-from .login import app as login_app
-from .logout import app as logout_app
-from .server import app as server_app
-from .training import app as training_app
-from .users import app as users_app
-from .workspaces import app as workspaces_app
+import typer
+
+from argilla.tasks.callback import init_callback
+from argilla.tasks.datasets.list import list_datasets
+
+app = typer.Typer(
+    help="Holds CLI commands for datasets management", invoke_without_command=True, callback=init_callback
+)
+
+
+app.command(name="list", help="List datasets linked to user's workspaces")(list_datasets)
+
+
+if __name__ == "__main__":
+    app()
