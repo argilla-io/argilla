@@ -5,7 +5,7 @@ import { ClearRecordUseCase } from "~/v1/domain/usecases/clear-record-use-case";
 import { DiscardRecordUseCase } from "~/v1/domain/usecases/discard-record-use-case";
 import { SubmitRecordUseCase } from "~/v1/domain/usecases/submit-record-use-case";
 import { SaveDraftRecord } from "~/v1/domain/usecases/save-draft-use-case";
-import { useDebounce } from "~/v1/infrastructure/services/useDebouce";
+import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
 import { useQueue } from "~/v1/infrastructure/services/useQueue";
 
 export const useQuestionFormViewModel = () => {
