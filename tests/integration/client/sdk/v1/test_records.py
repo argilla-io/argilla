@@ -62,8 +62,8 @@ class TestRecordsSDK:
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_delete_suggestions_batch(self, role: UserRole) -> None:
-        questions = await RatingQuestionFactory.create_batch(size=3, required=True)
-        dataset = await DatasetFactory.create(questions=questions)
+        dataset = await DatasetFactory.create()
+        questions = await RatingQuestionFactory.create_batch(size=3, dataset=dataset, required=True)
         record = await RecordFactory.create(dataset=dataset)
         suggestions = []
         for question, value in zip(questions, [1, 2, 3]):
