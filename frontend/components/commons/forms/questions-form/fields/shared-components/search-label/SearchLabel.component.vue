@@ -20,6 +20,7 @@
       :ref="searchRef"
       :placeholder="placeholder"
       @input="$emit('input', $event.target.value)"
+      @keydown.shift.enter.exact="looseFocus"
       @keydown.shift.backspace.exact="looseFocus"
       @keydown.shift.space.exact="looseFocus"
       @keydown.ctrl.arrow-right.prevent=""

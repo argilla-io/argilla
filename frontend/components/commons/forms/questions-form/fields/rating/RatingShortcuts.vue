@@ -22,19 +22,19 @@ export default {
       this.keyCode = "";
       this.timer = null;
     },
-    answerRatingFor($event) {
+    answerRatingFor(event) {
       if (this.timer) clearTimeout(this.timer);
-      if ($event.key == "Tab") return;
+      if (event.key == "Tab") return;
 
-      $event.preventDefault();
+      event.preventDefault();
 
-      if ($event.code == "Space") {
+      if (event.code == "Space") {
         document.activeElement.click();
 
         return;
       }
 
-      this.keyCode += $event.key;
+      this.keyCode += event.key;
 
       if (isNaN(this.keyCode)) {
         this.reset();

@@ -640,8 +640,7 @@ test.describe("Annotation page shortcuts", () => {
 
       await page.locator("label").filter({ hasText: "2" }).click();
 
-      await page.keyboard.press("Meta+Shift+ArrowRight");
-
+      await page.getByText("This is a review of the review").fill("");
       await page.keyboard.insertText("TEST");
 
       await expect(page).toHaveScreenshot();
@@ -860,8 +859,7 @@ test.describe("Annotation page shortcuts", () => {
 
       await page.keyboard.press(shortcuts.goToPrevQuestion);
 
-      await page.keyboard.press("Meta+Shift+ArrowRight");
-
+      await page.getByText("This is a review of the review").fill("");
       await page.keyboard.insertText("TEST");
 
       await expect(page).toHaveScreenshot();
