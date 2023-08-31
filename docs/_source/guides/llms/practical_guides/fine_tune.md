@@ -1,6 +1,6 @@
 # Fine-tuning language models with Feedback Datasets
 
-After [collecting the responses](/guides/llms/practical_guides/collect_responses.html) from our `FeedbackDataset`, we can start fine-tuning our LLMs and other models. Due to the customizability of the task, this might require setting up a custom post-processing workflow, but we will provide some good toy examples for the [LLM approaches](/guides/llms/conceptual_guides/rlhf.html): pre-training, supervised fine-tuning, and reinforcement learning through human feedback (RLHF). However, we also still provide for other NLP tasks like text classification.
+After [collecting the responses](/guides/llms/practical_guides/collect_responses.html) from our `FeedbackDataset`, we can start fine-tuning our LLMs and other models. Due to the customizability of the task, this might require setting up a custom post-processing workflow, but we will provide some good toy examples for the [LLM approaches](/guides/llms/conceptual_guides/rlhf.html): supervised fine-tuning, and reinforcement learning through human feedback (RLHF). However, we also still provide for other NLP tasks like text classification.
 ## The `ArgillaTrainer`
 
 The `ArgillaTrainer` is a wrapper around many of our favorite NLP libraries. It provides a very intuitive abstract representation to facilitate simple training workflows using decent default pre-set configurations without having to worry about any data transformations from Argilla.
@@ -203,7 +203,7 @@ trainer.train(output_dir="textcat_model")
 
 #### Background
 
-The goal of Supervised Fine Tuning (SFT) is to optimize this pre-trained model to generate the responses that users are looking for. After pre-training a causal language model, it can generate feasible human text, but it will not be able to have proper `answers` to `question` phrases posed by the user in a conversational or instruction set. Therefore, we need to collect and curate data tailored to this use case to teach the model to mimic this data. We have a section in our docs about [collecting data for this task](../conceptual_guides/sft.html) and there are many good [pre-trained causal language models](https://huggingface.co/models?pipeline_tag=text-generation&sort=downloads) available on Hugging Face.
+The goal of Supervised Fine Tuning (SFT) is to optimize a pre-trained model to generate the responses that users are looking for. A causal language model can generate feasible human text, but it will not be able to have proper `answers` to `question` phrases posed by the user in a conversational or instruction set. Therefore, we need to collect and curate data tailored to this use case to teach the model to mimic this data. We have a section in our docs about [collecting data for this task](../conceptual_guides/sft.html) and there are many good [pre-trained causal language models](https://huggingface.co/models?pipeline_tag=text-generation&sort=downloads) available on Hugging Face.
 
 Data for the training phase is generally divided into two different types generic for domain-like finetuning or chat for fine-tuning an instruction set.
 
@@ -257,7 +257,7 @@ Ultimately, the choice between these two approaches to be used as `text`-field d
 
 #### Training
 
-There are many good libraries to help with this step, however, we are a fan of the [Transformer Reinforcement Learning (TRL)](https://huggingface.co/docs/trl) package, [Transformer Reinforcement Learning X (TRLX)](https://github.com/CarperAI/trlx),and the no-code [Hugging Face AutoTrain](https://huggingface.co/spaces/autotrain-projects/autotrain-advanced) for fine-tuning. In both cases, we need a backbone model, obtained from the [pre-training step](#pre-training) and for example purposes we will use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en).
+There are many good libraries to help with this step, however, we are a fan of the [Transformer Reinforcement Learning (TRL)](https://huggingface.co/docs/trl) package, [Transformer Reinforcement Learning X (TRLX)](https://github.com/CarperAI/trlx),and the no-code [Hugging Face AutoTrain](https://huggingface.co/spaces/autotrain-projects/autotrain-advanced) for fine-tuning. In both cases, we need a backbone model and for example purposes we will use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en).
 
 ```{note}
 This dataset only contains a single annotator response per record. We gave some suggestions on dealing with [responses from multiple annotators](/guides/llms/practical_guides/collect_responses).
