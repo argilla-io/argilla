@@ -35,6 +35,7 @@ These are the section headers that we use:
 - Added `users create` command to create users ([#3667](https://github.com/argilla-io/argilla/pull/3667)).
 - Added `whoami` command to get current user ([#3673](https://github.com/argilla-io/argilla/pull/3673)).
 - Added `users delete` command to delete users ([#3671](https://github.com/argilla-io/argilla/pull/3671)).
+- Added `datasets push-to-hub` command to push a `FeedbackDataset` from Argilla into the HuggingFace Hub ([#3685](https://github.com/argilla-io/argilla/pull/3685)).
 
 ### Changed
 
