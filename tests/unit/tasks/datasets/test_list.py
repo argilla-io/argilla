@@ -12,69 +12,29 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime
 from typing import TYPE_CHECKING
 from unittest.mock import ANY, call
-from uuid import uuid4
 
-import httpx
 import pytest
-from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-from argilla.client.feedback.schemas.fields import TextField
-from argilla.client.feedback.schemas.questions import TextQuestion
-from argilla.client.sdk.datasets.models import Dataset
-from argilla.client.workspaces import Workspace
 from rich.table import Table
 
 if TYPE_CHECKING:
+    from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+    from argilla.client.sdk.datasets.models import Dataset
     from click.testing import CliRunner
     from pytest_mock import MockerFixture
     from typer import Typer
 
 
-@pytest.fixture
-def remote_feedback_dataset() -> "RemoteFeedbackDataset":
-    workspace = Workspace.__new__(Workspace)
-    workspace.__dict__.update(
-        {
-            "id": uuid4(),
-            "name": "unit-test",
-            "inserted_at": datetime.now(),
-            "updated_at": datetime.now(),
-        }
-    )
-    return RemoteFeedbackDataset(
-        client=httpx.Client(),
-        id=uuid4(),
-        name="unit-test",
-        workspace=workspace,
-        fields=[TextField(name="prompt")],
-        questions=[TextQuestion(name="corrected")],
-    )
-
-
-@pytest.fixture
-def dataset() -> Dataset:
-    return Dataset(
-        name="unit-test",
-        id="rg.unit-test",
-        task="TextClassification",
-        owner="unit-test",
-        workspace="unit-test",
-        created_at=datetime.now(),
-        last_updated=datetime.now(),
-    )
-
-
-@pytest.mark.usefixtures("login_mock")
+@pytest.mark.usefixtures("login_mock", "remote_feedback_dataset", "dataset")
 class TestSuiteListDatasetsCommand:
     def test_list_datasets(
         self,
         cli_runner: "CliRunner",
         cli: "Typer",
         mocker: "MockerFixture",
-        remote_feedback_dataset: RemoteFeedbackDataset,
-        dataset: Dataset,
+        remote_feedback_dataset: "RemoteFeedbackDataset",
+        dataset: "Dataset",
     ) -> None:
         add_row_spy = mocker.spy(Table, "add_row")
         feedback_dataset_list_mock = mocker.patch(
