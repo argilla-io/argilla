@@ -12,18 +12,29 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING
+from datetime import datetime
+from uuid import uuid4
 
+import httpx
 import pytest
-
-if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
-    from sqlalchemy.ext.asyncio import AsyncSession
+from argilla.client.sdk.users.models import UserRole
+from argilla.client.users import User
 
 
-@pytest.fixture(autouse=True)
-def mock_session_local(mocker: "MockerFixture", async_db_proxy: "AsyncSession") -> None:
-    mocker.patch("argilla.tasks.users.create.AsyncSessionLocal", return_value=async_db_proxy)
-    mocker.patch("argilla.tasks.users.update.AsyncSessionLocal", return_value=async_db_proxy)
-    mocker.patch("argilla.tasks.users.create_default.AsyncSessionLocal", return_value=async_db_proxy)
-    mocker.patch("argilla.tasks.users.migrate.AsyncSessionLocal", return_value=async_db_proxy)
+@pytest.fixture
+def user() -> User:
+    user = User.__new__(User)
+    user.__dict__.update(
+        {
+            "_client": httpx.Client(),
+            "id": uuid4(),
+            "username": "unit-test",
+            "last_name": "unit-test",
+            "first_name": "unit-test",
+            "role": UserRole.owner,
+            "api_key": "apikey.unit-test",
+            "inserted_at": datetime.now(),
+            "updated_at": datetime.now(),
+        }
+    )
+    return user

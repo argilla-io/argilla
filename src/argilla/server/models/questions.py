@@ -12,10 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from enum import Enum
 from typing import Any, Generic, List, Literal, Optional, Protocol, TypeVar, Union
 
 from pydantic import BaseModel, Field
+
+from argilla.server.enums import QuestionType, ResponseStatus
 
 try:
     from typing import Annotated
@@ -23,20 +24,12 @@ except ImportError:
     from typing_extensions import Annotated
 
 
-class QuestionType(str, Enum):
-    text = "text"
-    rating = "rating"
-    label_selection = "label_selection"
-    multi_label_selection = "multi_label_selection"
-    ranking = "ranking"
-
-
 class ResponseValue(Protocol):
     value: Any
 
 
 class BaseQuestionSettings(BaseModel):
-    def check_response(self, response: ResponseValue):
+    def check_response(self, response: ResponseValue, status: Optional[ResponseStatus] = None):
         pass
 
 
@@ -44,7 +37,7 @@ class TextQuestionSettings(BaseQuestionSettings):
     type: Literal[QuestionType.text]
     use_markdown: bool = False
 
-    def check_response(self, response: ResponseValue):
+    def check_response(self, response: ResponseValue, status: Optional[ResponseStatus] = None):
         if not isinstance(response.value, str):
             raise ValueError(f"Expected text value, found {type(response.value)}")
 
@@ -61,7 +54,7 @@ class ValidOptionCheckerMixin(BaseQuestionSettings, Generic[T]):
     def option_values(self) -> List[T]:
         return [option.value for option in self.options]
 
-    def check_response(self, response: ResponseValue):
+    def check_response(self, response: ResponseValue, status: Optional[ResponseStatus] = None):
         if response.value not in self.option_values:
             raise ValueError(f"{response.value!r} is not a valid option.\nValid options are: {self.option_values!r}")
 
@@ -90,7 +83,7 @@ def _are_all_elements_in_list(elements: List[T], list_: List[T]) -> List[T]:
 class MultiLabelSelectionQuestionSettings(LabelSelectionQuestionSettings):
     type: Literal[QuestionType.multi_label_selection]
 
-    def check_response(self, response: ResponseValue):
+    def check_response(self, response: ResponseValue, status: Optional[ResponseStatus] = None):
         if not isinstance(response.value, list):
             raise ValueError(
                 f"This MultiLabelSelection question expects a list of values, found {type(response.value)}"
@@ -121,11 +114,12 @@ class RankingQuestionSettings(ValidOptionCheckerMixin[str]):
     def rank_values(self) -> List[int]:
         return list(range(1, len(self.option_values) + 1))
 
-    def check_response(self, response: ResponseValue):
+    def check_response(self, response: ResponseValue, status: Optional[ResponseStatus] = None):
         if not isinstance(response.value, list):
             raise ValueError(f"This Ranking question expects a list of values, found {type(response.value)}")
 
-        if len(response.value) != len(self.option_values):
+        # Only if the response is submitted check that all the possible options have been ranked
+        if status == ResponseStatus.submitted and len(response.value) != len(self.option_values):
             raise ValueError(
                 f"This Ranking question expects a list containing {len(self.option_values)} values, found a list of"
                 f" {len(response.value)} values"

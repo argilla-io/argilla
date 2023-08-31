@@ -1,13 +1,11 @@
 <template>
   <div class="wrapper">
     <QuestionHeaderComponent
-      :title="title"
-      :hasSuggestion="hasSuggestion"
-      :isRequired="isRequired"
-      :tooltipMessage="description"
+      :question="question"
+      :showSuggestion="showSuggestion"
     />
 
-    <RatingMonoSelectionComponent v-model="options" />
+    <RatingMonoSelectionComponent v-model="question.answer.values" />
   </div>
 </template>
 
@@ -15,29 +13,14 @@
 export default {
   name: "RatingComponent",
   props: {
-    title: {
-      type: String,
+    question: {
+      type: Object,
       required: true,
     },
-    options: {
-      type: Array,
-      required: true,
-    },
-    isRequired: {
+    showSuggestion: {
       type: Boolean,
       default: () => false,
     },
-    description: {
-      type: String,
-      default: () => "",
-    },
-    hasSuggestion: {
-      type: Boolean,
-      default: () => false,
-    },
-  },
-  model: {
-    prop: "options",
   },
 };
 </script>
@@ -46,6 +29,6 @@ export default {
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: $base-space;
 }
 </style>

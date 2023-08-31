@@ -101,13 +101,14 @@ integrations = [
     "snorkel >= 0.9.7",
     "spacy == 3.5.3",
     "spacy-transformers >= 1.2.5",
-    "transformers[torch] >= 4.19.0",
+    "transformers[torch] >= 4.30.0",
     "evaluate",
     "seqeval",
     "setfit",
     "span_marker",
     "openai",
-    "peft"
+    "peft",
+    "trl>=0.5.0"
 ]
 tests = [
     "pytest",
@@ -136,6 +137,7 @@ log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 log_cli = "True"
 testpaths = ["tests"]
+env = ["ARGILLA_DATABASE_URL=sqlite+aiosqlite://$HOME/.argilla/test.db"]
 
 
 [tool.coverage.run]

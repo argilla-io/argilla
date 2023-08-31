@@ -29,7 +29,7 @@ from argilla.server.models import User
 from datasets import Dataset
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 from argilla.client.feedback.schemas import (
     FeedbackRecord,

@@ -47,7 +47,7 @@ class User:
         id: the ID of the user to be managed. Defaults to None.
 
     Attributes:
-        __client: the `httpx.Client` initialized to interact with the Argilla API.
+        _client: the `httpx.Client` initialized to interact with the Argilla API.
         id: the ID of the user.
         username: the username of the user.
         first_name: the first name of the user.
@@ -65,7 +65,7 @@ class User:
         User(id='...', username='my-user', role='annotator', first_name='Luke', last_name="Skywalker', full_name='Luke Skywalker', role='annotator', api_key='...', inserted_at=datetime.datetime(2021, 8, 31, 10, 0, 0), updated_at=datetime.datetime(2021, 8, 31, 10, 0, 0))
     """
 
-    __client: "httpx.Client"
+    _client: "httpx.Client"  # Required to be able to use `allowed_for_roles` decorator
     username: str
     id: UUID
     first_name: str
@@ -116,10 +116,10 @@ class User:
         Returns:
             A list of `WorkspaceModel` the current user is linked to.
         """
-        connected_user = users_api.whoami_httpx(self.__client).parsed
+        connected_user = users_api.whoami_httpx(self._client).parsed
         if connected_user.role == UserRole.owner:
-            return users_api_v1.list_user_workspaces(self.__client, self.id).parsed
-        return workspaces_api_v1.list_workspaces_me(self.__client).parsed
+            return users_api_v1.list_user_workspaces(self._client, self.id).parsed
+        return workspaces_api_v1.list_workspaces_me(self._client).parsed
 
     def __repr__(self) -> str:
         return (
@@ -145,7 +145,8 @@ class User:
         """Deletes the user from Argilla.
 
         Raises:
-            BaseClientError: if the user cannot be deleted from Argilla.
+            ValueError: if the user doesn't exist in Argilla.
+            RuntimeError: if the user cannot be deleted from Argilla.
 
         Examples:
             >>> from argilla import rg
@@ -153,7 +154,7 @@ class User:
             >>> user.delete()
         """
         try:
-            users_api.delete_user(self.__client, user_id=self.id)
+            users_api.delete_user(self._client, user_id=self.id)
         except NotFoundApiError as e:
             raise ValueError(
                 f"User with username=`{self.username}` doesn't exist in Argilla, so please"
@@ -166,7 +167,7 @@ class User:
     def __new_instance(cls, client: Optional["httpx.Client"] = None, user: Optional["UserModel"] = None) -> "User":
         """Returns a new `User` instance."""
         instance = cls.__new__(cls)
-        instance.__client = client or cls.__active_client()
+        instance._client = client or cls.__active_client()
         if isinstance(user, UserModel):
             instance.__dict__.update(user.dict(exclude={"workspaces"}))
         return instance
@@ -197,7 +198,8 @@ class User:
             A new `User` instance.
 
         Raises:
-            ValueError: if the user already exists in Argilla.
+            KeyError: if the user already exists in Argilla.
+            ValueError: if the provided parameters are not valid.
             RuntimeError: if the user cannot be created in Argilla.
 
         Examples:
@@ -226,7 +228,7 @@ class User:
             ).parsed
             return cls.__new_instance(client, user)
         except AlreadyExistsApiError as e:
-            raise ValueError(
+            raise KeyError(
                 f"User with username=`{username}` already exists in Argilla, so please"
                 " make sure that the name you provided is a unique one."
             ) from e

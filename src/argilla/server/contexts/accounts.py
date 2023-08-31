@@ -132,6 +132,8 @@ async def create_user(db: "AsyncSession", user_create: UserCreate) -> User:
                     autocommit=False,
                 )
 
+    await db.commit()
+
     return user
 
 

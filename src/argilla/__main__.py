@@ -13,16 +13,34 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import warnings
 
-from argilla.tasks import database_app, server_app, training_app, users_app
+from argilla.tasks import (
+    database_app,
+    datasets_app,
+    login_app,
+    logout_app,
+    server_app,
+    training_app,
+    users_app,
+    whoami_app,
+    workspaces_app,
+)
 from argilla.tasks.async_typer import AsyncTyper
+
+warnings.simplefilter("ignore", UserWarning)
 
 app = AsyncTyper(rich_help_panel=True, help="Argilla CLI", no_args_is_help=True)
 
-app.add_typer(users_app, name="users")
 app.add_typer(database_app, name="database")
-app.add_typer(training_app, name="train")
+app.add_typer(datasets_app, name="datasets")
+app.add_typer(login_app, name="login")
+app.add_typer(logout_app, name="logout")
 app.add_typer(server_app, name="server")
+app.add_typer(training_app, name="train")
+app.add_typer(users_app, name="users")
+app.add_typer(whoami_app, name="whoami")
+app.add_typer(workspaces_app, name="workspaces")
 
 if __name__ == "__main__":
     app()
