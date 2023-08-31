@@ -116,7 +116,7 @@ def test_feedback_record(schema_kwargs: Dict[str, Any]) -> None:
         ),
     ],
 )
-def test_feedback_record_set_suggestions(
+def test_feedback_record_update(
     schema_kwargs: Dict[str, Any],
     suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]],
     expected_warning: Optional[Warning],
@@ -124,7 +124,7 @@ def test_feedback_record_set_suggestions(
 ) -> None:
     record = FeedbackRecord(**schema_kwargs)
     with pytest.warns(expected_warning, match=warning_match):
-        record.set_suggestions(suggestions)
+        record.update(suggestions)
 
 
 @pytest.mark.parametrize(

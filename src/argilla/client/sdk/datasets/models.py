@@ -41,7 +41,6 @@ class BaseDatasetModel(BaseModel):
 class Dataset(BaseDatasetModel):
     id: str
     task: TaskType
-    owner: str = None
     workspace: str = None
     created_at: datetime = None
     last_updated: datetime = None
