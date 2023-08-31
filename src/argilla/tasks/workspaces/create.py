@@ -17,10 +17,12 @@ import typer
 from argilla.client.workspaces import Workspace
 
 
-def create_workspace(name: str = typer.Argument(
-    default=None,
-    help="The name of the workspace to be created",
-)) -> None:
+def create_workspace(
+    name: str = typer.Argument(
+        default=None,
+        help="The name of the workspace to be created",
+    )
+) -> None:
     """Creates a workspace for the logged user in Argilla"""
     if not name:
         raise typer.BadParameter("Workspace name must be specified.")
@@ -31,8 +33,7 @@ def create_workspace(name: str = typer.Argument(
         typer.echo(e)
         raise typer.Exit(code=1) from e
     except RuntimeError as e:
-        typer.echo(
-            "An unexpected error occurred when trying to create the workspace")
+        typer.echo("An unexpected error occurred when trying to create the workspace")
         raise typer.Exit(code=1) from e
 
 

@@ -38,10 +38,10 @@ def test_cli_workspaces_create_needs_login(cli_runner: "CliRunner", cli: "Typer"
     assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout
     assert result.exit_code == 1
 
+
 @pytest.mark.usefixtures("login_mock")
 def test_cli_workspaces_create_with_name(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture") -> None:
-    workspaces_create_mock = mocker.patch(
-        "argilla.client.workspaces.Workspace.create")
+    workspaces_create_mock = mocker.patch("argilla.client.workspaces.Workspace.create")
     result = cli_runner.invoke(cli, "workspaces create workspace25")
 
     assert result.exit_code == 0
@@ -50,8 +50,10 @@ def test_cli_workspaces_create_with_name(cli_runner: "CliRunner", cli: "Typer", 
 
 @pytest.mark.usefixtures("login_mock")
 def test_workspace_create_already_exists(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
-    mocker.patch("argilla.client.workspaces.Workspace.create", side_effect=ValueError(
-        "Workspace with name=`workspace1` already exists, so please use a different name."))
+    mocker.patch(
+        "argilla.client.workspaces.Workspace.create",
+        side_effect=ValueError("Workspace with name=`workspace1` already exists, so please use a different name."),
+    )
 
     result = cli_runner.invoke(cli, "workspaces create workspace1")
 
@@ -61,8 +63,10 @@ def test_workspace_create_already_exists(cli_runner: "CliRunner", cli: "Typer", 
 
 @pytest.mark.usefixtures("login_mock")
 def test_workspace_create_runtime_exception(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
-    mocker.patch("argilla.client.workspaces.Workspace.create", side_effect=RuntimeError(
-        "An unexpected error occurred when trying to create the workspace"))
+    mocker.patch(
+        "argilla.client.workspaces.Workspace.create",
+        side_effect=RuntimeError("An unexpected error occurred when trying to create the workspace"),
+    )
 
     result = cli_runner.invoke(cli, "workspaces create workspace1")
     assert result.stdout == "An unexpected error occurred when trying to create the workspace\n"
