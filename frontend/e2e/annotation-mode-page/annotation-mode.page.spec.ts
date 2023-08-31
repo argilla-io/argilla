@@ -265,7 +265,7 @@ test.describe("Annotation page shortcuts", () => {
           await page.waitForTimeout(500);
 
           await expect(page).toHaveScreenshot();
-        })
+        });
         test("When focus is on a multiLabel Component", async ({ page }) => {
           await goToAnnotationPage(page);
           await page.waitForTimeout(500);
@@ -277,7 +277,7 @@ test.describe("Annotation page shortcuts", () => {
           await page.waitForTimeout(500);
 
           await expect(page).toHaveScreenshot();
-        })
+        });
         test("When focus is on a rating Component", async ({ page }) => {
           await goToAnnotationPage(page);
           await page.waitForTimeout(500);
@@ -290,7 +290,97 @@ test.describe("Annotation page shortcuts", () => {
           await page.waitForTimeout(500);
 
           await expect(page).toHaveScreenshot();
-        })
+        });
+      });
+      test.describe("Discard", () => {
+        test("When focus is on a singleLabel Component", async ({ page }) => {
+          await goToAnnotationPage(page);
+          const record = await goToAnnotationPage(page);
+          await mockRecordResponses(page, record.id, "discarded");
+
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.discard);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
+        test("When focus is on a multiLabel Component", async ({ page }) => {
+          await goToAnnotationPage(page);
+          const record = await goToAnnotationPage(page);
+          await mockRecordResponses(page, record.id, "discarded");
+          await page.waitForTimeout(500);
+
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.discard);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
+        test("When focus is on a rating Component", async ({ page }) => {
+          await goToAnnotationPage(page);
+          const record = await goToAnnotationPage(page);
+          await mockRecordResponses(page, record.id, "discarded");
+          await page.waitForTimeout(500);
+
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on rating question
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.discard);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
+      });
+      test.describe("Submit", () => {
+        test("When focus is on a singleLabel Component", async ({ page }) => {
+          await goToAnnotationPage(page);
+          const record = await goToAnnotationPage(page);
+          await mockRecordResponses(page, record.id, "submitted");
+
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.submit);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
+        test("When focus is on a multiLabel Component", async ({ page }) => {
+          await goToAnnotationPage(page);
+          const record = await goToAnnotationPage(page);
+          await mockRecordResponses(page, record.id, "submitted");
+          await page.waitForTimeout(500);
+
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.submit);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
+        test("When focus is on a rating Component", async ({ page }) => {
+          await goToAnnotationPage(page);
+          const record = await goToAnnotationPage(page);
+          await mockRecordResponses(page, record.id, "submitted");
+          await page.waitForTimeout(500);
+
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on rating question
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.submit);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
       });
     });
   });
