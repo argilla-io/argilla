@@ -1,6 +1,12 @@
 import { Page } from "@playwright/test";
 
-export const loginUserAndWaitFor = async (page: Page, waitForURL: string) => {
+export type Role = "admin" | "owner" | "annotator";
+
+export const loginUserAndWaitFor = async (
+  page: Page,
+  waitForURL: string,
+  role: Role = "admin"
+) => {
   await page.route("*/**/api/me", async (route) => {
     const response = await route.fetch();
     const json = await response.json();
@@ -10,6 +16,7 @@ export const loginUserAndWaitFor = async (page: Page, waitForURL: string) => {
         username: "FAKE_USER",
         first_name: "FAKE",
         full_name: "FAKE_USER",
+        role,
         workspaces: ["WORKSPACE 1"],
       },
     });

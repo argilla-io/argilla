@@ -12,17 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import typer
+from typing import Any, Literal, Optional
+from uuid import UUID
 
-from argilla.tasks.callback import init_callback
-from argilla.tasks.datasets.list import list_datasets
-
-app = typer.Typer(
-    help="Holds CLI commands for datasets management", invoke_without_command=True, callback=init_callback
-)
-
-app.command(name="list", help="List datasets linked to user's workspaces")(list_datasets)
+from pydantic import BaseModel
 
 
-if __name__ == "__main__":
-    app()
+class SuggestionModel(BaseModel):
+    id: UUID
+    question_id: UUID
+    value: Any
+    type: Optional[Literal["model", "human"]] = None
+    score: Optional[float] = None
+    agent: Optional[str] = None

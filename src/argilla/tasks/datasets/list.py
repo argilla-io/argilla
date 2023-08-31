@@ -24,7 +24,7 @@ class DatasetType(str, Enum):
 
 
 def list_datasets(
-    workspace: Optional[str] = typer.Option(None, help="List datasets in this workspace"),
+    workspace: Optional[str] = typer.Option(None, help="Filter datasets by workspace"),
     type_: Optional[DatasetType] = typer.Option(
         None,
         "--type",
@@ -32,21 +32,30 @@ def list_datasets(
     ),
 ) -> None:
     from rich.console import Console
-    from rich.markdown import Markdown
 
     from argilla.client.api import list_datasets as list_datasets_api
     from argilla.client.feedback.dataset.local import FeedbackDataset
+    from argilla.client.workspaces import Workspace
     from argilla.tasks.rich import get_argilla_themed_table
 
-    def build_tags_text(tags: Dict[str, str]) -> Markdown:
+    def build_tags_text(tags: Dict[str, str]) -> str:
         text = ""
-        for tag, description in tags.items():
-            text += f"- **{tag}**: {description}\n"
-        return Markdown(text)
+        for i, (tag, description) in enumerate(tags.items()):
+            text += f"• [b]{tag}[not b]: {description}"
+            if i < len(tags) - 1:
+                text += "\n"
+        return text
 
-    table = get_argilla_themed_table(title="Datasets")
+    table = get_argilla_themed_table(title="Datasets", show_lines=True)
     for column in ("ID", "Name", "Workspace", "Type", "Tags", "Creation Date", "Last Update Date"):
-        table.add_column(column, justify="center")
+        table.add_column(column, justify="center" if column != "Tags" else "left")
+
+    if workspace is not None:
+        try:
+            Workspace.from_name(workspace)
+        except ValueError as e:
+            typer.echo(f"Workspace '{workspace}' does not exist!")
+            raise typer.Exit(code=1) from e
 
     if type_ is None or type_ == DatasetType.feedback:
         for dataset in FeedbackDataset.list(workspace):
@@ -66,8 +75,7 @@ def list_datasets(
                 dataset.last_updated.isoformat(sep=" "),
             )
 
-    console = Console()
-    console.print(table)
+    Console().print(table)
 
 
 if __name__ == "__main__":
