@@ -22,13 +22,13 @@ export const useQuestionFormViewModel = (record: Record, { emit }) => {
   const saveDraftUseCase = useResolve(SaveDraftRecord);
 
   // computed
-  const isFormTouched = computed(() => {
+  const isFormTouched = computed((): boolean => {
     return record.isModified;
   });
-  const questionAreCompletedCorrectly = computed(() => {
+  const questionAreCompletedCorrectly = computed((): boolean => {
     return record.questionAreCompletedCorrectly();
   });
-  const isSubmitButtonDisabled = computed(() => {
+  const isSubmitButtonDisabled = computed((): boolean => {
     if (record.isSubmitted)
       return !isFormTouched.value || !questionAreCompletedCorrectly.value;
 
@@ -66,20 +66,20 @@ export const useQuestionFormViewModel = (record: Record, { emit }) => {
     await clear(record);
   };
 
-  const discard = (record: Record) => {
-    debounce.stop();
-
-    queue.enqueue(() => {
-      return discardUseCase.execute(record);
-    });
-  };
-
   // private methods
   const submit = (record: Record) => {
     debounce.stop();
 
     queue.enqueue(() => {
       return submitUseCase.execute(record);
+    });
+  };
+
+  const discard = (record: Record) => {
+    debounce.stop();
+
+    queue.enqueue(() => {
+      return discardUseCase.execute(record);
     });
   };
 
