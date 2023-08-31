@@ -45,7 +45,7 @@ from argilla.client.feedback.unification import (
 )
 from argilla.client.feedback.utils import generate_pydantic_schema
 from argilla.client.models import Framework
-from argilla.utils.dependency import require_version, requires_version
+from argilla.utils.dependency import require_dependencies, requires_dependencies
 
 if TYPE_CHECKING:
     from datasets import Dataset
@@ -247,7 +247,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         self._validate_records(records)
         return records
 
-    @requires_version("datasets")
+    @requires_dependencies("datasets")
     def format_as(self, format: Literal["datasets"]) -> "Dataset":
         """Formats the `FeedbackDataset` as a `datasets.Dataset` object.
 
@@ -382,7 +382,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                 data=data, train_size=train_size, seed=seed, framework=framework
             )
         elif framework in [Framework.SPACY, Framework.SPACY_TRANSFORMERS]:
-            require_version("spacy")
+            require_dependencies("spacy")
             import spacy
 
             if lang is None:

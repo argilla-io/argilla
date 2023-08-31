@@ -148,7 +148,7 @@ def requires_dependencies(requirements: Union[str, List[str]]) -> Callable[[Call
 
     Example:
     ```python
-    @requires_version("datasets>1.17.0")
+    @requires_dependencies("datasets>1.17.0")
     def from_datasets(self, ...):
         ...
     ```

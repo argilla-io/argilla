@@ -23,7 +23,7 @@ from argilla.client.models import TextClassificationRecord, TokenClassificationR
 from argilla.datasets import TextClassificationSettings, TokenClassificationSettings
 from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.training.utils import filter_allowed_args
-from argilla.utils.dependency import require_version
+from argilla.utils.dependency import require_dependencies
 
 
 class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
@@ -38,7 +38,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         raise ValueError(f"{OPENAI_API_KEY} not found in environment variables.")
 
     def __init__(self, *args, **kwargs):
-        require_version("openai")
+        require_dependencies("openai")
         super().__init__(*args, **kwargs)
 
         if self._record_class is TokenClassificationRecord:

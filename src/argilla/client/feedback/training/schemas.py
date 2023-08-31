@@ -36,7 +36,7 @@ from argilla.client.feedback.unification import (
     RatingQuestionUnification,
 )
 from argilla.client.models import Framework
-from argilla.utils.dependency import require_version, requires_version
+from argilla.utils.dependency import require_dependencies, requires_dependencies
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -497,7 +497,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
     def unify_responses(self, responses: List[FeedbackRecord]):
         self.label.strategy.unify_responses(responses=responses, field=self.label.question)
 
-    @requires_version("scikit-learn")
+    @requires_dependencies("scikit-learn")
     def _train_test_split(self, data: List[dict], train_size: float, seed: int) -> Tuple[List[dict], List[dict]]:
         from sklearn.model_selection import train_test_split
 
@@ -519,7 +519,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
             f"\n\t all_labels={self.__all_labels__}"
         )
 
-    @requires_version("datasets>1.17.0")
+    @requires_dependencies("datasets>1.17.0")
     def _prepare_for_training_with_transformers(
         self, data: List[dict], train_size: float, seed: int, framework: Union[str, Framework]
     ) -> Union["datasets.Dataset", "datasets.DatasetDict"]:
@@ -545,7 +545,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
         ds = datasets.Dataset.from_dict(datasets_dict, features=datasets.Features(feature_dict))
 
         if multi_label:
-            require_version("scikit-learn")
+            require_dependencies("scikit-learn")
             from sklearn.preprocessing import MultiLabelBinarizer
 
             labels = [rec["label"] for rec in ds]
@@ -566,7 +566,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
 
         return ds
 
-    @requires_version("spacy")
+    @requires_dependencies("spacy")
     def _prepare_for_training_with_spacy(
         self, data: List[dict], train_size: float, seed: int, lang: str
     ) -> Union["spacy.token.DocBin", Tuple["spacy.token.DocBin", "spacy.token.DocBin"]]:
@@ -713,7 +713,7 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
 
-    @requires_version("datasets>1.17.0")
+    @requires_dependencies("datasets>1.17.0")
     def _prepare_for_training_with_trl(
         self, data: List[dict], train_size: float, seed: int
     ) -> Union["datasets.Dataset", "datasets.DatasetDict"]:
@@ -798,7 +798,7 @@ class TrainingTaskForRM(BaseModel, TrainingData):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
 
-    @requires_version("datasets>1.17.0")
+    @requires_dependencies("datasets>1.17.0")
     def _prepare_for_training_with_trl(
         self, data: List[dict], train_size: float, seed: int
     ) -> Union["datasets.Dataset", "datasets.DatasetDict"]:
@@ -867,7 +867,7 @@ class TrainingTaskForPPO(BaseModel, TrainingData):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
 
-    @requires_version("datasets>1.17.0")
+    @requires_dependencies("datasets>1.17.0")
     def _prepare_for_training_with_trl(
         self, data: List[dict], train_size: float, seed: int
     ) -> Union["datasets.Dataset", "datasets.DatasetDict"]:
@@ -948,7 +948,7 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
 
-    @requires_version("datasets>1.17.0")
+    @requires_dependencies("datasets>1.17.0")
     def _prepare_for_training_with_trl(
         self, data: List[dict], train_size: float, seed: int
     ) -> Union["datasets.Dataset", "datasets.DatasetDict"]:
