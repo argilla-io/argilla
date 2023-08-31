@@ -45,6 +45,8 @@ class Queue {
   }
 }
 
-export const useQueue = () => {
+const useQueue = () => {
   return new Queue();
 };
+
+export { useQueue, Queue };
