@@ -15,21 +15,26 @@
 import typer
 
 from argilla.client.workspaces import Workspace
-from argilla.tasks import async_typer
 
 
-def create_workspace(
-    workspace_name: str,
-):
+def create_workspace(name: str = typer.Argument(
+    default=None,
+    help="The name of the workspace to be created",
+)) -> None:
     """Creates a workspace for the logged user in Argilla"""
-    if not workspace_name:
+    if not name:
         raise typer.BadParameter("Workspace name must be specified.")
     try:
-        Workspace.create(name=workspace_name)
-        typer.echo(f"Workspace with the name=`{workspace_name}` successfully created.")
+        Workspace.create(name=name)
+        typer.echo(f"Workspace with the name=`{name}` successfully created.")
     except ValueError as e:
-        print(e)
+        typer.echo(e)
+        raise typer.Exit(code=1) from e
+    except RuntimeError as e:
+        typer.echo(
+            "An unexpected error occurred when trying to create the workspace")
+        raise typer.Exit(code=1) from e
 
 
 if __name__ == "__main__":
-    async_typer.run(create_workspace)
+    typer.run(create_workspace)
