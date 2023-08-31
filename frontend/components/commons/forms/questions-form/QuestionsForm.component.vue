@@ -163,6 +163,7 @@ export default {
           break;
         }
         case "Space": {
+          e.preventDefault();
           this.onClear();
           break;
         }
