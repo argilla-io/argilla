@@ -109,3 +109,10 @@ class TestDependencyRequirements:
 
     def test_list_of_dependencies(self):
         require_dependencies(["datasets>1.17.0", "spacy", "scikit-learn"])
+
+    def test_list_without_dependencies(self):
+        with pytest.raises(
+            ValueError,
+            match="requirements cannot be an empty list."
+        ):
+            require_dependencies([])
