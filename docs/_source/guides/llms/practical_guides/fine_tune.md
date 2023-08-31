@@ -1,4 +1,4 @@
-# Fine-tuning a Feedback Dataset
+# Fine-tuning language models with Feedback Datasets
 
 After [collecting the responses](/guides/llms/practical_guides/collect_responses.html) from our `FeedbackDataset`, we can start fine-tuning our LLMs and other models. Due to the customizability of the task, this might require setting up a custom post-processing workflow, but we will provide some good toy examples for the [LLM approaches](/guides/llms/conceptual_guides/rlhf.html): pre-training, supervised fine-tuning, and reinforcement learning through human feedback (RLHF). However, we also still provide for other NLP tasks like text classification.
 ## The `ArgillaTrainer`
@@ -198,85 +198,6 @@ trainer = ArgillaTrainer(
 
 trainer.train(output_dir="textcat_model")
 ```
-
-### Pre-training
-
-#### Background
-
-When talking about pre-training, we generally talk about a simple `prompt-completion` task, where we need the model to pick up on basic statistics of the language it is learning. Given that you are familiar with Spanish cuisine and the prompt sentence, `The base ingredient of paella is ___`, you know that the word in the `___` is much more likely to be `rice` than `apples`.  So, you are basically training a causal language model or text generation model.
-
-```{note}
-This is an unsupervised approach hence we only infer training data from a basic sentence like `The base ingredient of paella is rice.` by starting with the word `The`, and from there unwrapping the sentence step by step.
-```
-
-#### Training
-
-Many training datasets for this task can be found online (e.g., [Hugging Face](https://huggingface.co/datasets?task_categories=task_categories:text-generation&sort=downloads)). You can either upload this in the right Argilla format but it might be needed to collect and fine-tune additional data with Argilla. So we, therefore, provide a basic setup underneath which should help you to start gathering or preparing pre-training data.
-
-```{note}
-When it comes to pre-training an LLM, we generally do not need data of highest quality, but it is always smart to use domain-specfic data and to avoid data that might lead to undesired effects like hallucination and bias.
-```
-
-First, create a `FeedbackDataset` with records.
-
-```python
-import argilla as rg
-
-# create prompt-completion dataset
-dataset = rg.FeedbackDataset(
-    guidelines="Please, complete the following prompt fields with a brief text answer.",
-    fields=[
-        rg.TextField(name="prompt"),
-    ],
-    questions=[
-        rg.TextQuestion(name="completion", title="Add a brief text answer."),
-    ]
-)
-
-# create a Feedback Records
-record = rg.FeedbackRecord(
-    fields={
-        "prompt": "The base ingredient of paella is rice."
-    }
-)
-
-dataset.add_records([record])
-```
-
-Then push it to Argilla via `push_to_argilla`.
-
-::::{tab-set}
-
-:::{tab-item} Argilla 1.14.0 or higher
-```python
-remote_dataset = dataset.push_to_argilla(name="pre-training")
-```
-:::
-
-:::{tab-item} Lower than Argilla 1.14.0
-```python
-dataset.push_to_argilla(name="pre-training")
-```
-:::
-::::
-
-And, finally, load the `FeedbackDataset` from Argilla.
-
-```python
-import argilla as rg
-from datasets import Dataset
-
-dataset = rg.FeedbackDataset.from_argilla("pre-training")
-prompts = {"prompt": [record.fields.get("prompt") for record in dataset.records]}
-dataset = Dataset.from_dict(prompts)
-dataset
-# Dataset({
-#     features: ['prompt'],
-#     num_rows: 1
-# })
-```
-
-There are many ways and great packages to deal with this `pre-training` phase, but generally, NLP training frameworks like [KerasNLP](https://keras.io/keras_nlp/) and [Hugging Face](https://huggingface.co/) offer great out-of-the-box methods for training a causal language model. In our guide, we will refer to the great docs of the Hugging Face `transformers` and `datasets` libraries and prepare our training data in the format they require for [training a causal language model](https://huggingface.co/learn/nlp-course/chapter7/6#training-a-causal-language-model-from-scratch).
 
 ### Supervised finetuning
 
