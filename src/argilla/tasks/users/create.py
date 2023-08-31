@@ -59,6 +59,7 @@ def create_user(
     panel = get_argilla_themed_panel(
         Markdown(
             f"- **Username**: {user.username}\n"
+            f"- **Role**: {user.role}\n"
             f"- **First name**: {user.first_name}\n"
             f"- **Last name**: {user.last_name}\n"
             f"- **API Key**: {user.api_key}\n"
