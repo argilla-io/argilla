@@ -82,9 +82,10 @@ def require_dependencies(requirements: Union[str, List[str]], fn_name: Optional[
 
     if isinstance(requirements, list):
         if len(requirements) == 0:
-            return
-        require_dependencies(requirements[0], func_name=fn_name)
-        return require_dependencies(requirements[1:], func_name=fn_name)
+            raise ValueError("requirements cannot be an empty list.")
+        for requirement in requirements:
+            require_dependencies(requirement, fn_name=fn_name)
+        return
 
     # non-versioned check
     if re.match(r"^[\w_\-\d]+$", requirements):
