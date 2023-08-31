@@ -113,14 +113,27 @@ class TestSuiteListDatasetsCommand:
         )
 
     def test_list_datasets_with_workspace(self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture") -> None:
+        workspace_from_name_mock = mocker.patch("argilla.client.workspaces.Workspace.from_name")
         feedback_dataset_list_mock = mocker.patch("argilla.client.feedback.dataset.local.FeedbackDataset.list")
         list_datasets_mock = mocker.patch("argilla.client.api.list_datasets")
 
         result = cli_runner.invoke(cli, "datasets list --workspace unit-test")
 
         assert result.exit_code == 0
+        workspace_from_name_mock.assert_called_once_with("unit-test")
         feedback_dataset_list_mock.assert_called_once_with("unit-test")
         list_datasets_mock.assert_called_once_with("unit-test")
+
+    def test_list_datasets_with_non_existing_workspace(
+        self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"
+    ) -> None:
+        workspace_from_name_mock = mocker.patch("argilla.client.workspaces.Workspace.from_name", side_effect=ValueError)
+
+        result = cli_runner.invoke(cli, "datasets list --workspace unit-test")
+
+        assert result.exit_code == 1
+        assert "Workspace 'unit-test' does not exist!" in result.stdout
+        workspace_from_name_mock.assert_called_once_with("unit-test")
 
     def test_list_datasets_using_type_feedback_filter(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"
