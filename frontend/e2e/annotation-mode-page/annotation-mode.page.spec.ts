@@ -253,6 +253,46 @@ test.describe("Annotation page shortcuts", () => {
         await expect(page).toHaveScreenshot();
       });
     });
+    test.describe("Form actions", () => {
+      test.describe("Clear", () => {
+        test("When focus is on a singleLabel Component", async ({ page }) => {
+          await goToAnnotationPage(page);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.clear);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        })
+        test("When focus is on a multiLabel Component", async ({ page }) => {
+          await goToAnnotationPage(page);
+          await page.waitForTimeout(500);
+
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.clear);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        })
+        test("When focus is on a rating Component", async ({ page }) => {
+          await goToAnnotationPage(page);
+          await page.waitForTimeout(500);
+
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on rating question
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.clear);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        })
+      });
+    });
   });
   test.describe("Shortcuts panel", () => {
     test("open shortcut panel", async ({ page }) => {
