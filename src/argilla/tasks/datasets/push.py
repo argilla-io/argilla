@@ -70,6 +70,3 @@ def push_to_hf(
         typer.echo("An unexpected error occurred when trying to push the `FeedbackDataset` to the HuggingFace Hub")
         raise typer.Exit(code=1) from e
 
-
-if __name__ == "__main__":
-    typer.run(push_to_hf)

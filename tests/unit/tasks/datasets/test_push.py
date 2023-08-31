@@ -25,7 +25,6 @@ if TYPE_CHECKING:
 
 @pytest.mark.usefixtures("login_mock")
 class TestSuiteDatasetsPushCommand:
-    @pytest.mark.usefixtures("remote_feedback_dataset")
     def test_push_to_hf(
         self,
         cli_runner: "CliRunner",
