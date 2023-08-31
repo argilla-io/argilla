@@ -23,4 +23,10 @@ def init_callback() -> None:
         typer.echo("You are not logged in. Please run `argilla login` to login to an Argilla server.")
         raise typer.Exit(code=1)
 
-    init()
+    try:
+        init()
+    except Exception as e:
+        typer.echo(
+            "The Argilla Server you are logged in is not available or not responding. Please make sure it's running and try again."
+        )
+        raise typer.Exit(code=1) from e

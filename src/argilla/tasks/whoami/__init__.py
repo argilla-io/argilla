@@ -12,17 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import typer
-
-from argilla.tasks.callback import init_callback
-from argilla.tasks.datasets.list import list_datasets
-
-app = typer.Typer(
-    help="Holds CLI commands for datasets management", invoke_without_command=True, callback=init_callback
-)
-
-app.command(name="list", help="List datasets linked to user's workspaces")(list_datasets)
-
+from .__main__ import app
 
 if __name__ == "__main__":
     app()

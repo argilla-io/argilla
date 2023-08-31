@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import json
+
 from typing import TYPE_CHECKING, Generator
 
 import pytest
@@ -23,7 +23,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typer.testing import CliRunner
 
 from tests.database import SyncTestSession
-from tests.factories import UserSyncFactory
 
 if TYPE_CHECKING:
     from argilla.tasks.async_typer import AsyncTyper
