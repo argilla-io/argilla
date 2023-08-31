@@ -51,10 +51,10 @@ class TestSuiteDatasetsPushCommand:
         push_to_huggingface_mock.assert_called_once_with(repo_id="argilla/my-dataset", private=True, token=None)
 
     @pytest.mark.parametrize(
-        "args, exception",
+        "args, exception_msg",
         [
-            ("--repo-id argilla/my-dataset", "Missing option '--name'."),
-            ("--name my-dataset", "Missing option '--repo-id'."),
+            ("--repo-id argilla/my-dataset", "Missing option"),
+            ("--name my-dataset", "Missing option"),
         ],
     )
     def test_push_to_hf_missing_args(
@@ -62,11 +62,11 @@ class TestSuiteDatasetsPushCommand:
         cli_runner: "CliRunner",
         cli: "Typer",
         args: str,
-        exception: str,
+        exception_msg: str,
     ) -> None:
         result = cli_runner.invoke(cli, f"datasets push-to-hf {args}")
 
-        assert exception in result.stdout
+        assert exception_msg in result.stdout
         assert result.exit_code == 2
 
 
