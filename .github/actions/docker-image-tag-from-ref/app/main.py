@@ -42,7 +42,7 @@ def get_tag_name() -> Union[str, None]:
 
 
 def clean_branch_name(branch_name: str) -> str:
-    return re.sub(r"[^A-Za-z0-9]", "-", branch_name)
+    return re.sub(r"[^A-Za-z0-9\.]", "-", branch_name)
 
 
 def get_docker_image_tag_from_reg() -> str:
