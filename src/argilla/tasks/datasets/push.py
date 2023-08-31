@@ -58,7 +58,7 @@ def push_to_hf(
         )
         dataset.push_to_huggingface(repo_id=repo_id, private=private, token=token)
         console.print(
-            f":sparkles: `FeedbackDataset` successfully pushed to the HuggingFace Hub at https://huggingface.co/{repo_id}"
+            f":sparkles: `FeedbackDataset` successfully pushed to the :hugs: HuggingFace Hub at https://huggingface.co/{repo_id}"
         )
     except ValueError as e:
         typer.echo(
