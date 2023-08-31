@@ -26,8 +26,9 @@ if TYPE_CHECKING:
     from typer import Typer
 
 
-@pytest.mark.usefixtures("login_mock", "remote_feedback_dataset", "dataset")
+@pytest.mark.usefixtures("login_mock")
 class TestSuiteListDatasetsCommand:
+    @pytest.mark.usefixtures("remote_feedback_dataset", "dataset")
     def test_list_datasets(
         self,
         cli_runner: "CliRunner",
