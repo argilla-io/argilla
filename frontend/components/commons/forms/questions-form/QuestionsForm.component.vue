@@ -71,8 +71,6 @@
 </template>
 
 <script>
-import { computed, watch } from "vue";
-import { useGlobalShortcuts } from "./useGlobalShortcuts";
 import "assets/icons/external-link";
 import "assets/icons/refresh";
 import "assets/icons/check";
@@ -92,80 +90,8 @@ export default {
     },
   },
   emits: ["on-submit-responses", "on-discard-responses"],
-  setup(props, { emit }) {
-    props.record.restore();
-
-    const {
-      clear,
-      submit,
-      discard,
-      saveDraft,
-      draftSaving,
-      saveDraftImmediately,
-    } = useQuestionFormViewModel();
-
-    // computed
-    const isFormTouched = computed(() => {
-      return props.record.isModified;
-    });
-
-    const questionAreCompletedCorrectly = computed(() => {
-      return props.record.questionAreCompletedCorrectly();
-    });
-
-    const isSubmitButtonDisabled = computed(() => {
-      if (props.record.isSubmitted)
-        return !isFormTouched.value || !questionAreCompletedCorrectly.value;
-
-      return !questionAreCompletedCorrectly.value;
-    });
-
-    // watch
-    watch(
-      props.record,
-      () => {
-        if (props.record.isModified) saveDraft(props.record);
-      },
-      {
-        immediate: true,
-        deep: true,
-      }
-    );
-
-    // actions on questions
-    const onSubmit = async () => {
-      if (!questionAreCompletedCorrectly) return;
-
-      await submit(props.record);
-
-      emit("on-submit-responses");
-    };
-
-    const onDiscard = async () => {
-      await discard(props.record);
-
-      emit("on-discard-responses");
-    };
-
-    const onClear = async () => {
-      await clear(props.record);
-    };
-
-    const onSaveDraftImmediately = async () => {
-      await saveDraftImmediately(props.record);
-    };
-
-    // shortcuts
-    useGlobalShortcuts(onSaveDraftImmediately, onSubmit, onClear, onDiscard);
-
-    return {
-      onSubmit,
-      onDiscard,
-      onClear,
-      draftSaving,
-      isFormTouched,
-      isSubmitButtonDisabled,
-    };
+  setup(props, context) {
+    return useQuestionFormViewModel(props.record, context);
   },
   watch: {
     isFormTouched(isFormTouched) {
