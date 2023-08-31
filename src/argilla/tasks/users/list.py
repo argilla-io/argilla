@@ -41,12 +41,13 @@ def list_users(
 
     try:
         if workspace is not None:
-            users = Workspace.from_name(workspace).users
+            try:
+                users = Workspace.from_name(workspace).users
+            except ValueError as e:
+                typer.echo(f"Workspace '{workspace}' does not exist!")
+                raise typer.Exit(code=1) from e
         else:
             users = User.list()
-    except ValueError as e:
-        typer.echo(f"Workspace '{workspace}' does not exist!")
-        raise typer.Exit(code=1) from e
     except RuntimeError as e:
         typer.echo("An unexpected error occurred when trying to retrieve the list of users from the Argilla server")
         raise typer.Exit(code=1) from e
