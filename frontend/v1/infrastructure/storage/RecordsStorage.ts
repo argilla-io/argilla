@@ -28,7 +28,7 @@ export const useRecords = () => {
       }
     });
 
-    state.save(new Records(allRecords, allRecords.length));
+    state.save(new Records(allRecords, newRecords.total));
   };
 
   return {

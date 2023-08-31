@@ -23,15 +23,15 @@ from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     RatingQuestion,
-    SuggestionSchema,
     TextField,
     TextQuestion,
 )
-from argilla.client.feedback.training.schemas import TrainingTaskMapping
+from argilla.client.feedback.schemas.records import RemoteSuggestionSchema
+from argilla.client.feedback.training.schemas import TrainingTask
 from argilla.client.models import Framework
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
     from argilla.server.models import User as ServerUser
     from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -141,7 +141,7 @@ def test_init_wrong_questions(
         )
 
 
-def test_create_dataset_with_suggestions(argilla_user: "ServerUser"):
+def test_create_dataset_with_suggestions(argilla_user: "ServerUser") -> None:
     api.init(api_key=argilla_user.api_key)
 
     ds = FeedbackDataset(fields=[TextField(name="text")], questions=[TextQuestion(name="text")])
@@ -157,19 +157,10 @@ def test_create_dataset_with_suggestions(argilla_user: "ServerUser"):
 
     remote_dataset = ds.push_to_argilla(name="new_dataset")
 
-    with pytest.warns(DeprecationWarning):
-        remote_dataset.fetch_records()
-
     assert len(remote_dataset.records) == 1
-    for record in remote_dataset.records:
-        assert record.id is not None
-        assert record.suggestions == (
-            SuggestionSchema(
-                question_id=remote_dataset.question_by_name("text").id,
-                question_name="text",
-                value="This is a suggestion",
-            ),
-        )
+    assert remote_dataset.records[0].id is not None
+    assert isinstance(remote_dataset.records[0].suggestions[0], RemoteSuggestionSchema)
+    assert remote_dataset.records[0].suggestions[0].question_id == remote_dataset.question_by_name("text").id
 
 
 @pytest.mark.asyncio
@@ -183,11 +174,10 @@ async def test_update_dataset_records_with_suggestions(argilla_user: "ServerUser
     remote_dataset = ds.push_to_argilla(name="new_dataset", workspace="argilla")
 
     assert len(remote_dataset.records) == 1
-    for record in remote_dataset.records:
-        assert record.id is not None
-        assert record.suggestions == ()
+    assert remote_dataset.records[0].id is not None
+    assert remote_dataset.records[0].suggestions == ()
 
-        record.set_suggestions([{"question_name": "text", "value": "This is a suggestion"}])
+    remote_dataset.records[0].update(suggestions=[{"question_name": "text", "value": "This is a suggestion"}])
 
     # TODO: Review this requirement for tests and explain, try to avoid use or at least, document.
     await db.refresh(argilla_user, attribute_names=["datasets"])
@@ -197,13 +187,7 @@ async def test_update_dataset_records_with_suggestions(argilla_user: "ServerUser
     await db.refresh(record, attribute_names=["suggestions"])
 
     for record in remote_dataset.records:
-        assert record.suggestions == (
-            SuggestionSchema(
-                question_id=remote_dataset.question_by_name("text").id,
-                question_name="text",
-                value="This is a suggestion",
-            ),
-        )
+        assert record.suggestions[0].question_id == remote_dataset.question_by_name("text").id
 
 
 def test_add_records(
@@ -418,13 +402,8 @@ async def test_push_to_argilla_and_from_argilla(
         ]
     )
 
-    with pytest.warns(
-        DeprecationWarning, match="Calling `push_to_argilla` no longer implies that the `FeedbackDataset`"
-    ):
-        remote_dataset = dataset.push_to_argilla(name="my-dataset")
-
     with pytest.warns(UserWarning, match="Multiple responses without `user_id`"):
-        dataset.push_to_argilla(name="test-dataset")
+        remote_dataset = dataset.push_to_argilla(name="my-dataset")
 
     dataset_from_argilla = FeedbackDataset.from_argilla(id=remote_dataset.id)
 
@@ -461,16 +440,16 @@ async def test_copy_dataset_in_argilla(
     same_dataset = FeedbackDataset.from_argilla("test-dataset")
     same_dataset_local = same_dataset.pull()
     same_dataset_local.push_to_argilla("copy-dataset")
-    assert same_dataset.argilla_id is not None
+    assert same_dataset.id is not None
 
     await db.refresh(argilla_user, attribute_names=["datasets"])
 
-    same_dataset = FeedbackDataset.from_argilla("copy-dataset")
-    assert same_dataset.argilla_id != dataset.argilla_id
-    assert [field.dict(exclude={"id"}) for field in same_dataset.fields] == [
+    same_dataset_copy = FeedbackDataset.from_argilla("copy-dataset")
+    assert same_dataset_copy.id != same_dataset.id
+    assert [field.dict(exclude={"id"}) for field in same_dataset_copy.fields] == [
         field.dict(exclude={"id"}) for field in dataset.fields
     ]
-    assert [question.dict(exclude={"id"}) for question in same_dataset.questions] == [
+    assert [question.dict(exclude={"id"}) for question in same_dataset_copy.questions] == [
         question.dict(exclude={"id"}) for question in dataset.questions
     ]
 
@@ -498,8 +477,8 @@ async def test_update_dataset_records_in_argilla(
     await db.refresh(argilla_user, attribute_names=["datasets"])
 
     for record in remote_dataset.records:
-        record.set_suggestions(
-            [
+        record.update(
+            suggestions=[
                 {
                     "question_name": "question-1",
                     "value": "This is a suggestion to question 1",
@@ -511,8 +490,8 @@ async def test_update_dataset_records_in_argilla(
 
     remote_dataset = FeedbackDataset.from_argilla("test-dataset")
     for record in remote_dataset.records:
-        record.set_suggestions(
-            [
+        record.update(
+            suggestions=[
                 {
                     "question_name": "question-1",
                     "value": "This is a suggestion to question 1",
@@ -523,8 +502,8 @@ async def test_update_dataset_records_in_argilla(
     await db.refresh(argilla_user, attribute_names=["datasets"])
 
     for record in remote_dataset.records:
-        record.set_suggestions(
-            [
+        record.update(
+            suggestions=[
                 {
                     "question_name": "question-2",
                     "value": 1,
@@ -537,8 +516,8 @@ async def test_update_dataset_records_in_argilla(
 
     record = new_remote_dataset.records[0]
     with pytest.warns(UserWarning, match="A suggestion for question `question-1`"):
-        record.set_suggestions(
-            [
+        record.update(
+            suggestions=[
                 {
                     "question_name": "question-1",
                     "value": "This is a suggestion to question 1",
@@ -665,6 +644,10 @@ def test_push_to_huggingface_and_from_huggingface(
         Framework("spacy-transformers"),
     ],
 )
+@pytest.mark.parametrize(
+    "question",
+    ["question-3", "question-4"],
+)
 @pytest.mark.usefixtures(
     "feedback_dataset_guidelines",
     "feedback_dataset_fields",
@@ -673,6 +656,7 @@ def test_push_to_huggingface_and_from_huggingface(
 )
 def test_prepare_for_training_text_classification(
     framework: Union[Framework, str],
+    question: str,
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
@@ -684,7 +668,7 @@ def test_prepare_for_training_text_classification(
         questions=feedback_dataset_questions,
     )
     dataset.add_records(feedback_dataset_records)
-    label = dataset.question_by_name("question-3")
-    task_mapping = TrainingTaskMapping.for_text_classification(text=dataset.fields[0], label=label)
+    label = dataset.question_by_name(question)
+    task = TrainingTask.for_text_classification(text=dataset.fields[0], label=label)
 
-    dataset.prepare_for_training(framework=framework, task_mapping=task_mapping, fetch_records=False)
+    dataset.prepare_for_training(framework=framework, task=task)

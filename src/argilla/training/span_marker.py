@@ -27,11 +27,10 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaSpanMarkerTrainer")
     _logger.setLevel(logging.INFO)
 
-    require_version("datasets")
-    require_version("span_marker>=1.2")
-    require_version("transformers>=4.19.0")  # <- required for span_marker evaluation
-
     def __init__(self, *args, **kwargs) -> None:
+        require_version("datasets")
+        require_version("span_marker>=1.2")
+        require_version("transformers>=4.19.0")  # <- required for span_marker evaluation
         super().__init__(*args, **kwargs)
 
         import torch

@@ -16,6 +16,7 @@
 import concurrent.futures
 import datetime
 import re
+from pathlib import Path
 from time import sleep
 from typing import Iterable
 from uuid import uuid4
@@ -65,7 +66,7 @@ from argilla.client.sdk.commons.errors import (
 from argilla.client.sdk.datasets.models import TaskType
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import UserModel
-from argilla.client.sdk.workspaces import api as workspaces_api
+from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
 from argilla.client.sdk.workspaces.models import WorkspaceModel
 from argilla.server.apis.v0.models.text_classification import (
     TextClassificationBulkRequest,
@@ -174,7 +175,7 @@ def mock_init_ok(monkeypatch):
 
     monkeypatch.setattr(Status, "get_info", mock_get_info)
     monkeypatch.setattr(users_api, "whoami", mock_whoami)
-    monkeypatch.setattr(workspaces_api, "list_workspaces", mock_list_workspaces)
+    monkeypatch.setattr(workspaces_api_v1, "list_workspaces_me", mock_list_workspaces)
 
 
 @pytest.fixture
@@ -269,6 +270,46 @@ def test_init_environment_url(mock_init_ok, monkeypatch):
         token=api_key,
         timeout=60,
         headers={WORKSPACE_HEADER_NAME: workspace_name},
+    )
+
+
+def test_init_with_stored_credentials(mock_init_ok, mocker):
+    mocker.patch(
+        "builtins.open",
+        mocker.mock_open(
+            read_data='{"api_url": "http://integration-test.com:6900", "api_key": "integration.test", "workspace": "mock_workspace", "extra_headers": {"X-Integration-Test": "true"}}'
+        ),
+    )
+    path_mock = mocker.patch.object(Path, "exists")
+    path_mock.return_value = True
+
+    init()
+
+    assert active_client()._client == AuthenticatedClient(
+        base_url="http://integration-test.com:6900",
+        token="integration.test",
+        timeout=60,
+        headers={WORKSPACE_HEADER_NAME: "mock_workspace", "X-Integration-Test": "true"},
+    )
+
+
+def test_init_with_stored_credentials_overriding_workspace(mock_init_ok, mocker):
+    mocker.patch(
+        "builtins.open",
+        mocker.mock_open(
+            read_data='{"api_url": "http://integration-test.com:6900", "api_key": "integration.test", "workspace": "my_workspace", "extra_headers": {"X-Integration-Test": "true"}}'
+        ),
+    )
+    path_mock = mocker.patch.object(Path, "exists")
+    path_mock.return_value = True
+
+    init(workspace="mock_workspace")
+
+    assert active_client()._client == AuthenticatedClient(
+        base_url="http://integration-test.com:6900",
+        token="integration.test",
+        timeout=60,
+        headers={WORKSPACE_HEADER_NAME: "mock_workspace", "X-Integration-Test": "true"},
     )
 
 

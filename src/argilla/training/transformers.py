@@ -27,13 +27,12 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaTransformersTrainer")
     _logger.setLevel(logging.INFO)
 
-    require_version("torch")
-    require_version("datasets")
-    require_version("transformers")
-    require_version("evaluate")
-    require_version("seqeval")
-
     def __init__(self, *args, **kwargs):
+        require_version("torch")
+        require_version("datasets")
+        require_version("transformers")
+        require_version("evaluate")
+        require_version("seqeval")
         super().__init__(*args, **kwargs)
 
         import torch
@@ -327,14 +326,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         return func
 
     def train(self, output_dir: str):
-        """
-        We create a SetFitModel object from a pretrained model, then create a SetFitTrainer object with
-        the model, and then train the model
-        """
-        from transformers import (
-            Trainer,
-            TrainingArguments,
-        )
+        from transformers import Trainer, TrainingArguments
 
         # check required path argument
         self.trainer_kwargs["output_dir"] = output_dir

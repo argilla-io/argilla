@@ -1,6 +1,6 @@
 # Annotate a Feedback Dataset
 
-![Spanshot of the Submitted queue and the progress bar in a Feedback dataset](../../../_static/images/llms/snapshot-feedback-submitted.png)
+![Spanshot of the Submitted queue and the progress bar in a Feedback Dataset](../../../_static/images/llms/snapshot-feedback-submitted.png)
 
 After pushing a `FeedbackDataset` to Argilla, as explained in [Create a Feedback Dataset](create_dataset.ipynb), you can start annotating it through the Argilla UI.
 
@@ -60,12 +60,13 @@ Provide a text response inside the text area.
 
 Some questions may include a suggested response as well. Those questions will be marked with this icon ✨ and you will see the suggestion as a pre-filled response. If you agree with the suggestion, there is nothing you need to do; if you don't do any modifications, the suggestion will be saved as your response once you submit the response. In case the suggestion is not quite right, you will just need to make the necessary modifications.
 
+Additionally, you may find questions that are marked as required. Those questions will be marked with a red asterisk (<span style="color:red; font-weight:bold;">*</span>) and you will not be able to submit the response until you provide a response for those questions.
+
 Once all required questions have responses, the `Submit` button will be enabled and you will be able to submit your response for the questions of the given record. If you decide not to provide responses for a record, you can either move to the next record or you discard it instead using the `Discard` button.
 
 If you need to review your submitted or discarded responses, you can select the queue you need. From there, you can modify, submit or discard responses. You can also use the `Clear` button to remove the response and send the record back to the `Pending` queue.
 
 You can track your progress and the number of `Pending`, `Submitted` and `Discarded` responses by clicking the `Progress` icon in the sidebar.
-
 
 ## Shortcuts
 

@@ -32,9 +32,8 @@ class ArgillaPeftTrainer(ArgillaTransformersTrainer):
     if sys.version_info < (3, 9):
         raise Exception("Must be using Python 3.9 or higher or PEFT won't work.")
 
-    require_version("peft")
-
     def init_training_args(self):
+        require_version("peft")
         super().init_training_args()
 
         self.lora_kwargs = {

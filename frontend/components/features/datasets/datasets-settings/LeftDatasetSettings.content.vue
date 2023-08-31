@@ -16,7 +16,9 @@
       </base-action-tooltip>
     </div>
     <div class="dataset-description-component left-content-item">
-      <DatasetDescriptionComponent :datasetDescription="settingsDescription" />
+      <DatasetDescriptionReadOnlyComponent
+        :datasetDescription="settingsDescription"
+      />
     </div>
     <div
       class="labels-edition-component left-content-item"

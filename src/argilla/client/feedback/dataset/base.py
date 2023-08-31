@@ -28,8 +28,15 @@ from argilla.client.feedback.schemas import (
     RankingQuestion,
     RatingQuestion,
 )
-from argilla.client.feedback.training.schemas import TrainingTaskMappingForTextClassification
-from argilla.client.feedback.types import AllowedFieldTypes, AllowedQuestionTypes
+from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+from argilla.client.feedback.training.schemas import (
+    TrainingTaskForDPO,
+    TrainingTaskForPPO,
+    TrainingTaskForRM,
+    TrainingTaskForSFT,
+    TrainingTaskForTextClassification,
+    TrainingTaskTypes,
+)
 from argilla.client.feedback.unification import (
     LabelQuestionStrategy,
     MultiLabelQuestionStrategy,
@@ -306,24 +313,25 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
     def prepare_for_training(
         self,
         framework: Union[Framework, str],
-        task_mapping: TrainingTaskMappingForTextClassification,
+        task: TrainingTaskTypes,
         train_size: Optional[float] = 1,
         test_size: Optional[float] = None,
         seed: Optional[int] = None,
         lang: Optional[str] = None,
-        fetch_records: Optional[bool] = None,
-    ):
-        # TODO(davidberenstein1957): add missing docstrings and type annotations
-        if fetch_records is not None:
-            warnings.warn(
-                "`fetch_records` is deprecated and will be removed in a future version."
-                " `records` will be fetched automatically from Argilla, if the dataset"
-                " is not in Argilla, then the local records will be used instead.\n`fetch_records`"
-                " will be deprecated in Argilla v1.15.0.",
-                DeprecationWarning,
-                stacklevel=1,
-            )
+    ) -> Any:
+        """
+        Prepares the dataset for training for a specific training framework and NLP task by splitting the dataset into train and test sets.
 
+        Args:
+            framework: the framework to use for training. Currently supported frameworks are: `transformers`, `peft`,
+                `setfit`, `spacy`, `spacy-transformers`, `span_marker`, `spark-nlp`, `openai`, `trl`.
+            task: the NLP task to use for training. Currently supported tasks are: `TrainingTaskForTextClassification`,
+                `TrainingTaskForSFT`, `TrainingTaskForRM`, `TrainingTaskForPPO`, `TrainingTaskForDPO`.
+            train_size: the size of the train set. If `None`, the whole dataset will be used for training.
+            test_size: the size of the test set. If `None`, the whole dataset will be used for testing.
+            seed: the seed to use for splitting the dataset into train and test sets.
+            lang: the spaCy language to use for training. If `None`, the language of the dataset will be used.
+        """
         if isinstance(framework, str):
             framework = Framework(framework)
 
@@ -349,22 +357,31 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                 " dataset via the `FeedbackDataset.add_records` method first."
             )
 
-        if isinstance(task_mapping, TrainingTaskMappingForTextClassification):
-            self.unify_responses(question=task_mapping.label.question, strategy=task_mapping.label.strategy)
-        else:
-            raise ValueError(f"Training data {type(task_mapping)} is not supported yet")
+        if isinstance(task, TrainingTaskForTextClassification):
+            if task.formatting_func is None:
+                self.unify_responses(question=task.label.question, strategy=task.label.strategy)
+        elif not isinstance(
+            task,
+            (
+                TrainingTaskForSFT,
+                TrainingTaskForRM,
+                TrainingTaskForPPO,
+                TrainingTaskForDPO,
+            ),
+        ):
+            raise ValueError(f"Training data {type(task)} is not supported yet")
 
-        data = task_mapping._format_data([record for record in self.records])
+        data = task._format_data(self)
         if framework in [
             Framework.TRANSFORMERS,
             Framework.SETFIT,
             Framework.SPAN_MARKER,
             Framework.PEFT,
         ]:
-            return task_mapping._prepare_for_training_with_transformers(
+            return task._prepare_for_training_with_transformers(
                 data=data, train_size=train_size, seed=seed, framework=framework
             )
-        elif framework is Framework.SPACY or framework is Framework.SPACY_TRANSFORMERS:
+        elif framework in [Framework.SPACY, Framework.SPACY_TRANSFORMERS]:
             require_version("spacy")
             import spacy
 
@@ -376,11 +393,15 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                     lang = spacy.blank(lang)
                 else:
                     lang = spacy.load(lang)
-            return task_mapping._prepare_for_training_with_spacy(data=data, train_size=train_size, seed=seed, lang=lang)
+            return task._prepare_for_training_with_spacy(data=data, train_size=train_size, seed=seed, lang=lang)
         elif framework is Framework.SPARK_NLP:
-            return task_mapping._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
+            return task._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
         elif framework is Framework.OPENAI:
-            return task_mapping._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
+            return task._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
+        elif framework is Framework.TRL:
+            return task._prepare_for_training_with_trl(data=data, train_size=train_size, seed=seed)
+        elif framework is Framework.TRLX:
+            return task._prepare_for_training_with_trlx(data=data, train_size=train_size, seed=seed)
         else:
             raise NotImplementedError(
                 f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"

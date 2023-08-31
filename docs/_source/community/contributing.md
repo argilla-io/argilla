@@ -14,7 +14,7 @@ To get an overview of the project, read the [README](https://github.com/argilla-
 - [Find and review pull requests](https://github.com/argilla-io/argilla/pulls)
 - [Setting up the Argilla developer environment](./developer_docs.md)
 - [Write a tutorial](https://github.com/argilla-io/argilla/issues/2030)
-- [Schedule a meeting with our developer advocate](https://calendly.com/argilla-office-hours/meeting-with-david-from-argilla-30m)
+- [Schedule a meeting with our developer advocate](https://calendly.com/argilla-office-hours/30min)
 
 ## Getting started
 
@@ -33,7 +33,7 @@ If you spot a problem with the docs or our code, [search if an issue already exi
 
 #### Solve an issue
 
-Scan through our [existing issues](https://github.com/argilla-io/argilla/issues?q=is%3Aissue) to find one that interests you. You can narrow down the [search using `labels`](https://github.com/argilla-io/argilla/labels) as filters. If you find an issue to work on, you are welcome to [create a fork and start making changes](#make-changes). However, we always advise you to ask for some input within the discussion on the issue, or by contacting us via Slack or by [scheduling a meeting](https://calendly.com/argilla-office-hours/meeting-with-david-from-argilla-30m).
+Scan through our [existing issues](https://github.com/argilla-io/argilla/issues?q=is%3Aissue) to find one that interests you. You can narrow down the [search using `labels`](https://github.com/argilla-io/argilla/labels) as filters. If you find an issue to work on, you are welcome to [create a fork and start making changes](#make-changes). However, we always advise you to ask for some input within the discussion on the issue, or by contacting us via Slack or by [scheduling a meeting](https://calendly.com/argilla-office-hours/30min).
 
 ### Features and documentation
 
@@ -53,7 +53,7 @@ If you feel something can be enhanced, [search if the feature already exists](ht
 
 #### Solve an existing feature
 
-Scan through our [existing issues](https://github.com/argilla-io/argilla/issues?q=is%3Aissue+label%3Aenhancement) to find one that interests you. You can narrow down the [search using `labels`](https://github.com/argilla-io/argilla/labels) as filters. If you find a feature to work on, you are welcome to [create a fork and start making changes](#make-changes). However, we always advise you to ask for some input within the discussion on the issue, or by contacting us via Slack or by [scheduling a meeting](https://calendly.com/argilla-office-hours/meeting-with-david-from-argilla-30m).
+Scan through our [existing issues](https://github.com/argilla-io/argilla/issues?q=is%3Aissue+label%3Aenhancement) to find one that interests you. You can narrow down the [search using `labels`](https://github.com/argilla-io/argilla/labels) as filters. If you find a feature to work on, you are welcome to [create a fork and start making changes](#make-changes). However, we always advise you to ask for some input within the discussion on the issue, or by contacting us via Slack or by [scheduling a meeting](https://calendly.com/argilla-office-hours/30min).
 
 ### Make Changes
 

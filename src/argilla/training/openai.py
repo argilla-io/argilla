@@ -33,13 +33,12 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
     _end_token = OPENAI_END_TOKEN
     _whitespace = OPENAI_WHITESPACE
 
-    require_version("openai")
-
     OPENAI_API_KEY = "OPENAI_API_KEY"
     if OPENAI_API_KEY not in os.environ:
         raise ValueError(f"{OPENAI_API_KEY} not found in environment variables.")
 
     def __init__(self, *args, **kwargs):
+        require_version("openai")
         super().__init__(*args, **kwargs)
 
         if self._record_class is TokenClassificationRecord:

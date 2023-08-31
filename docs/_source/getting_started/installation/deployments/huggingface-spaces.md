@@ -45,9 +45,17 @@ You'll see the login screen where you need to use either `admin` or `argilla` wi
 For quick experimentation, you can jump directly into the next section. If you want to add access restrictions, go to the "Setting up secret environment variables" at the end of this document. Setting up secret variables is recommended for longer-term usage.
 :::
 
-### Create your first dataset
+### Your Argilla Space URL
 
 Once Argilla is running, you can use the UI with the Direct URL you'll find in the "Embed this Space" option (top right). You'll see a URL like this: `https://dvilasuero-argilla-setfit.hf.space`. This URL gives you access to a full-screen, stable Argilla instance, and is the `api_url` for reading and writing datasets using the Argilla Python library.
+
+:::{warning}
+In order to obtain a HF Space direct URL, the space must be set the space to "public" and you can find direct URL in "Embed this Space" menu.
+:::
+
+![HF_Space_Direct_URL](/_static/reference/webapp/HF_Space_Direct_URL.png)
+
+### Create your first dataset
 
 If everything went well, you are ready to use the Argilla Python client from an IDE such as Colab, Jupyter, or VS Code.
 

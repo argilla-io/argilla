@@ -123,6 +123,7 @@ $switch-thumb-size: 24px;
 $switch-ripple-size: 44px;
 .re-switch {
   display: flex;
+  align-items: center;
   position: relative;
   &.disabled {
     svg {
@@ -147,7 +148,6 @@ $switch-ripple-size: 44px;
   .re-switch-container {
     width: $switch-width;
     height: $switch-height;
-    margin: auto;
     position: relative;
     border-radius: $switch-height;
     transition: $swift-ease-out;
@@ -182,9 +182,8 @@ $switch-ripple-size: 44px;
     }
   }
   .re-switch-label {
-    height: $switch-height;
-    line-height: $switch-height;
     margin-right: 1em;
+    color: $black-54;
   }
 }
 

@@ -1,6 +1,9 @@
 import { useRouter } from "@nuxtjs/composition-api";
 import { Dataset } from "@/v1/domain/entities/Dataset";
 
+export const ROUTES = {
+  datasets: "datasets",
+};
 export const useRoutes = () => {
   const router = useRouter();
 
@@ -34,7 +37,7 @@ export const useRoutes = () => {
   };
 
   const goToDatasetsList = () => {
-    router.push({ path: "/datasets" });
+    router.push({ path: `/${ROUTES.datasets}` });
   };
 
   return { goToDatasetsList, goToSetting, getDatasetLink };
