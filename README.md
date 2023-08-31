@@ -20,8 +20,6 @@
 <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-sm.svg" />
 </a>
 </p>
-
-<h2 align="center">Open-source data curation platform for LLMs</h2>
 <br>
 
 
