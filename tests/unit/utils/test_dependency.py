@@ -17,8 +17,8 @@ import sys
 
 import pytest
 from argilla.utils.dependency import (
-    require_version,
-    requires_version,
+    require_dependencies,
+    requires_dependencies,
 )
 
 
@@ -26,10 +26,10 @@ class TestDependencyRequirements:
     @pytest.mark.parametrize(
         ("decorator", "package_name", "import_name", "version"),
         [
-            (requires_version("datasets>1.17.0"), "datasets", "datasets", ">1.17.0"),
-            (requires_version("spacy"), "spacy", "spacy", ""),
-            (requires_version("scikit-learn"), "scikit-learn", "sklearn", ""),
-            (requires_version("faiss"), "faiss", "faiss", ""),
+            (requires_dependencies("datasets>1.17.0"), "datasets", "datasets", ">1.17.0"),
+            (requires_dependencies("spacy"), "spacy", "spacy", ""),
+            (requires_dependencies("scikit-learn"), "scikit-learn", "sklearn", ""),
+            (requires_dependencies("faiss"), "faiss", "faiss", ""),
         ],
     )
     def test_missing_dependency_decorator(
@@ -57,10 +57,10 @@ class TestDependencyRequirements:
     @pytest.mark.parametrize(
         ("decorator"),
         [
-            requires_version("datasets>1.17.0"),
-            requires_version("spacy"),
-            requires_version("scikit-learn"),
-            requires_version(["datasets>1.17.0", "spacy", "scikit-learn"]),
+            requires_dependencies("datasets>1.17.0"),
+            requires_dependencies("spacy"),
+            requires_dependencies("scikit-learn"),
+            requires_dependencies(["datasets>1.17.0", "spacy", "scikit-learn"]),
         ],
     )
     def test_installed_dependency_decorator(self, decorator):
@@ -75,7 +75,7 @@ class TestDependencyRequirements:
 
     def test_installed_dependency_but_incorrect_version(self):
         def test_inner():
-            require_version("datasets<1.0.0")
+            require_dependencies("datasets<1.0.0")
             return True
 
         # This method should fail, as our dependencies require a higher version of datasets
@@ -88,24 +88,24 @@ class TestDependencyRequirements:
     def test_require_version_failures(self):
         # This operation is not supported
         with pytest.raises(ValueError):
-            require_version("datasets~=1.0.0")
+            require_dependencies("datasets~=1.0.0")
 
         # Add some unsupported tokens, e.g. " "
         with pytest.raises(ValueError):
-            require_version(" datasets")
+            require_dependencies(" datasets")
 
         # Add unsupported operation in second requirement version
         with pytest.raises(ValueError):
-            require_version("datasets>1.0.0,~1.17.0")
+            require_dependencies("datasets>1.0.0,~1.17.0")
 
     def test_special_python_case(self):
-        require_version("python>3.6")
+        require_dependencies("python>3.6")
 
     def test_multiple_version_requirements(self):
         # This is equivalent to just datasets>1.17.0, but we expect it to work still
-        require_version("datasets>1.0.0,>1.8.0,>1.17.0")
+        require_dependencies("datasets>1.0.0,>1.8.0,>1.17.0")
         # A more common example (designed not to break eventually):
-        require_version("datasets>1.17.0,<1000.0.0")
+        require_dependencies("datasets>1.17.0,<1000.0.0")
 
     def test_list_of_dependencies(self):
-        require_version(["datasets>1.17.0", "spacy", "scikit-learn"])
+        require_dependencies(["datasets>1.17.0", "spacy", "scikit-learn"])
