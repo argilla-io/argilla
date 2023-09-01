@@ -30,6 +30,7 @@
 </template>
 
 <script>
+import { useQuestionHeaderViewModel } from "./useQuestionHeaderViewModel";
 import "assets/icons/info";
 export default {
   name: "QuestionHeader",
@@ -40,35 +41,11 @@ export default {
     },
     showSuggestion: {
       type: Boolean,
-      default: () => false,
+      default: false,
     },
   },
-  data() {
-    return {
-      matchSuggestion: this.question.matchSuggestion,
-      tooltipMessage: this.question.description,
-      openTooltip: false,
-      timer: null,
-    };
-  },
-  computed: {
-    showIcon() {
-      return !!this.question.description?.length;
-    },
-  },
-  watch: {
-    "question.matchSuggestion"() {
-      this.matchSuggestion = this.question.matchSuggestion;
-    },
-    "question.description"() {
-      if (this.timer) clearTimeout(this.timer);
-      this.openTooltip = true;
-      this.tooltipMessage = this.question.description;
-
-      this.timer = setTimeout(() => {
-        this.openTooltip = false;
-      }, 2000);
-    },
+  setup(props) {
+    return useQuestionHeaderViewModel(props.question);
   },
 };
 </script>
