@@ -24,6 +24,7 @@ These are the section headers that we use:
 - Added `whoami` command to get current user ([#3673](https://github.com/argilla-io/argilla/pull/3673)).
 - Added `users delete` command to delete users ([#3671](https://github.com/argilla-io/argilla/pull/3671)).
 - Added `users list` command to list users ([#3688](https://github.com/argilla-io/argilla/pull/3688)).
+- Added `workspaces delete-user` command to remove a user from a workspace ([#3699](https://github.com/argilla-io/argilla/pull/3699)).
 
 ## [1.15.0](https://github.com/argilla-io/argilla/compare/v1.14.1...v1.15.0)
 
