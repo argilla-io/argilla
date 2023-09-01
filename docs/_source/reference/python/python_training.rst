@@ -70,3 +70,9 @@ SpanMarker Trainer
 
 .. automodule:: argilla.training.span_marker
    :members:
+
+TRL Trainer
+------------------
+
+.. automodule:: argilla.client.feedback.training.frameworks.trl
+   :members:

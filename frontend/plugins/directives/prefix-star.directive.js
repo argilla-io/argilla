@@ -10,7 +10,8 @@ const sparkIcon = {
     element.prepend(emojiWrapper);
   },
   remove: (element) => {
-    element.removeChild(element.childNodes[0]);
+    if (element.childNodes.length === 2)
+      element.removeChild(element.childNodes[0]);
   },
 };
 

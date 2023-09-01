@@ -11,12 +11,15 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+from datetime import datetime
 from typing import TYPE_CHECKING, Generator
+from uuid import uuid4
 
 import pytest
 from argilla.__main__ import app
+from argilla.client.workspaces import Workspace
 from argilla.server.database import database_url_sync
-from argilla.server.models import DatabaseModel
 from argilla.tasks.database.migrate import migrate_db
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,6 +29,9 @@ from tests.database import SyncTestSession
 
 if TYPE_CHECKING:
     from argilla.tasks.async_typer import AsyncTyper
+    from pytest_mock import MockerFixture
+    from sqlalchemy.engine import Connection
+    from sqlalchemy.orm import Session
 
 
 @pytest.fixture(scope="session")
@@ -52,7 +58,7 @@ def sync_connection() -> Generator["Connection", None, None]:
     engine.dispose()
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
     sync_connection.begin_nested()
     session = SyncTestSession()
@@ -82,3 +88,28 @@ def async_db_proxy(mocker: "MockerFixture", sync_db: "Session") -> "AsyncSession
     async_session.close = mocker.AsyncMock()
 
     return async_session
+
+
+@pytest.fixture
+def login_mock(mocker: "MockerFixture") -> None:
+    mocker.patch("argilla.client.login.ArgillaCredentials.exists", return_value=True)
+    mocker.patch("argilla.client.api.ArgillaSingleton.init")
+
+
+@pytest.fixture
+def not_logged_mock(mocker: "MockerFixture") -> None:
+    mocker.patch("argilla.client.login.ArgillaCredentials.exists", return_value=False)
+
+
+@pytest.fixture
+def workspace() -> Workspace:
+    workspace = Workspace.__new__(Workspace)
+    workspace.__dict__.update(
+        {
+            "id": uuid4(),
+            "name": "unit-test",
+            "inserted_at": datetime.now(),
+            "updated_at": datetime.now(),
+        }
+    )
+    return workspace

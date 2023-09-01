@@ -6,7 +6,7 @@
       v-required-field="{ show: question.isRequired, color: 'red' }"
       v-prefix-star="{
         enabled: showSuggestion,
-        show: matchSuggestion,
+        show: question.matchSuggestion,
         tooltip: 'This question contains a suggestion',
       }"
     />
@@ -45,7 +45,6 @@ export default {
   },
   data() {
     return {
-      matchSuggestion: this.question.matchSuggestion,
       tooltipMessage: this.question.description,
       openTooltip: false,
       timer: null,
@@ -57,9 +56,6 @@ export default {
     },
   },
   watch: {
-    "question.matchSuggestion"() {
-      this.matchSuggestion = this.question.matchSuggestion;
-    },
     "question.description"() {
       if (this.timer) clearTimeout(this.timer);
       this.openTooltip = true;

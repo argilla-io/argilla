@@ -46,14 +46,14 @@ dependencies:
       - spacy==3.5.3
       - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0.tar.gz
       - spacy-transformers>=1.2.5
-      - transformers[torch]>=4.19.0
+      - transformers[torch]>=4.30.0 # <- required for DPO with TRL
       - evaluate
       - seqeval
       - setfit
       - span_marker
       - openai
       - peft
-      - autotrain-advanced==0.5.2
+      - trl>=0.5.0
       - rich!=13.1.0
       # install Argilla in editable mode
       - -e .[server,listeners]

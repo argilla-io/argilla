@@ -15,7 +15,7 @@ All you need to take into account is:
 
 * Argilla creates an index template for these indices, so you may provide related template privileges to this ES role.
 
-Argilla uses the `ELASTICSEARCH` environment variable to set the ES connection.
+Argilla uses the `ARGILLA_ELASTICSEARCH` environment variable to set the ES connection.
 
 :::{note}
 Argilla supports ElasticSearch versions 8.8, 8.5, 8.0, and 7.17.

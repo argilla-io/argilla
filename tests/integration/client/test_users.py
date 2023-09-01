@@ -117,7 +117,7 @@ async def test_user_create(owner: "ServerUser") -> None:
             )
         ]
 
-    with pytest.raises(ValueError, match="already exists in Argilla"):
+    with pytest.raises(KeyError, match="already exists in Argilla"):
         User.create("test_user", password="test_password")
 
 

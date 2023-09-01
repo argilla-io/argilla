@@ -18,14 +18,13 @@
 export default (context, inject) => {
   const highlightKeywords = function (text, keywords) {
     const sortedKeywords = sortByLength([...keywords]);
-    const pattern = sortedKeywords.map((keyword) => createPattern(keyword));
-    const regExp = createRegExp(pattern.join("|"));
+    const regExp = createFindWordsRegex(sortedKeywords);
     return replaceText(regExp, text);
   };
 
-  const keywordsSpans = function (text, keywords) {
-    return (keywords || []).flatMap((keyword) => {
-      const regex = createRegExp(createPattern(keyword));
+  const keywordsSpans = function (text, keywords = []) {
+    return keywords.flatMap((keyword) => {
+      const regex = createFindWordsPattern(keyword);
       return [...text.matchAll(regex)].map((match) => {
         return {
           start: match.index,
@@ -35,32 +34,36 @@ export default (context, inject) => {
     });
   };
 
-  function sortByLength(keywords) {
-    return (keywords || []).sort((a, b) => b.length - a.length);
-  }
+  const sortByLength = (keywords) => {
+    return keywords.sort((a, b) => b.length - a.length);
+  };
 
-  function createPattern(value) {
+  function createFindWordsPattern(value) {
     const pattern = "[^A-Za-zÀ-ÿ\u00f1\u00d10-9_@./#&+-]";
-    return `(${pattern})${escapeRegExp(value)}(${pattern})`;
+    return new RegExp(`(${pattern})${escapeRegExp(value)}(${pattern})`, "gmi");
   }
 
   const escapeRegExp = function (text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
   };
 
-  function createRegExp(pattern) {
-    return new RegExp(pattern, "gmi");
-  }
+  const createFindWordsRegex = (keyWords) => {
+    const wordsEscaped = keyWords.map((keyword) => escapeRegExp(keyword));
 
-  function replaceText(regex, text) {
+    const words = wordsEscaped.join("|");
+
+    return new RegExp(`${words}`, "gmi");
+  };
+
+  const replaceText = (regex, text) => {
     return htmlText(text).replace(regex, (matched) =>
       matched ? htmlHighlightText(matched) : matched
     );
-  }
+  };
 
-  function htmlHighlightText(text) {
+  const htmlHighlightText = (text) => {
     return `<span class="highlight-text">${htmlText(text)}</span>`;
-  }
+  };
 
   const htmlText = function (text) {
     return text
