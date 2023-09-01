@@ -16,11 +16,13 @@
 from argilla.tasks.async_typer import AsyncTyper
 from argilla.tasks.callback import init_callback
 
+from .create import create_workspace
 from .list import list_workspaces
 
 app = AsyncTyper(help="Holds CLI commands for workspace management.", no_args_is_help=True, callback=init_callback)
 
 app.command(name="list", help="Lists workspaces of the logged user.")(list_workspaces)
+app.command(name="create", help="Create a workspace")(create_workspace)
 
 
 if __name__ == "__main__":
