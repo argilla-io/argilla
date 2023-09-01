@@ -12,15 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from enum import Enum
 from typing import Dict, Optional
 
 import typer
 
-
-class DatasetType(str, Enum):
-    feedback = "feedback"
-    other = "other"
+from argilla.tasks.datasets.enums import DatasetType
 
 
 def list_datasets(
