@@ -12,16 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import typer
+from argilla.client.sdk.v1.suggestions.models import SuggestionModel as ClientSchema
+from argilla.server.schemas.v1.suggestions import Suggestion as ServerSchema
 
-from argilla.tasks.callback import init_callback
 
-from .create import create_user
-from .delete import delete_user
-from .list import list_users
-
-app = typer.Typer(help="Holds CLI commands for user management.", no_args_is_help=True, callback=init_callback)
-
-app.command(name="create", help="Creates a new user")(create_user)
-app.command(name="delete", help="Deletes a user")(delete_user)
-app.command(name="list", help="List users")(list_users)
+def test_suggestion_schema(helpers) -> None:
+    assert helpers.are_compatible_api_schemas(ClientSchema.schema(), ServerSchema.schema())

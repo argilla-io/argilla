@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Any, Dict, Generic, Iterator, List, Optional, 
 
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
-from argilla.client.feedback.schemas.records import RemoteFeedbackRecord
+from argilla.client.feedback.schemas.records import RemoteFeedbackRecord, RemoteSuggestionSchema
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.utils import allowed_for_roles
 
@@ -33,8 +33,6 @@ if TYPE_CHECKING:
     from argilla.client.sdk.v1.datasets.models import FeedbackItemModel, FeedbackRecordsModel
     from argilla.client.workspaces import Workspace
 
-
-warnings.simplefilter("always", DeprecationWarning)
 
 T = TypeVar("T", bound="RemoteFeedbackRecordsBase")
 
@@ -77,18 +75,28 @@ class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
 
     def _parse_record(self, record: "FeedbackItemModel") -> RemoteFeedbackRecord:
         """Parses a `FeedbackItemModel` into a `RemoteFeedbackRecord`."""
+        suggestions = []
+        if record.suggestions is not None:
+            for suggestion in record.suggestions:
+                suggestions.append(
+                    RemoteSuggestionSchema(
+                        client=self._client,
+                        question_name=self.__question_id2name[suggestion.question_id],
+                        **suggestion.dict(),
+                    )
+                )
         record = record.dict(
             exclude={
                 "inserted_at": ...,
                 "updated_at": ...,
                 "responses": {"__all__": {"id", "inserted_at", "updated_at"}},
-                "suggestions": {"__all__": {"id"}},
+                "suggestions": ...,
             },
             exclude_none=True,
         )
-        for suggestion in record.get("suggestions", []):
-            suggestion.update({"question_name": self.__question_id2name[suggestion["question_id"]]})
-        return RemoteFeedbackRecord(client=self._client, name2id=self.__question_name2id, **record)
+        return RemoteFeedbackRecord(
+            client=self._client, name2id=self.__question_name2id, suggestions=suggestions, **record
+        )
 
     @abstractmethod
     def __len__(self) -> int:
@@ -163,17 +171,6 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
         dataset instance.
         """
         return self._records
-
-    @property
-    def argilla_id(self) -> "UUID":
-        warnings.warn(
-            "`argilla_id` is deprected in favor of `id` and will be removed in a future"
-            " release. Please use `id` instead.\n`argilla_id` will be deprecated in"
-            " Argilla v1.15.0.",
-            DeprecationWarning,
-            stacklevel=1,
-        )
-        return self.id
 
     @property
     def id(self) -> "UUID":
@@ -256,25 +253,6 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
         """
         self._records.delete(records=[records] if not isinstance(records, list) else records)
 
-    def fetch_records(self) -> None:
-        warnings.warn(
-            "`fetch_records` method is deprecated, as the records are fetched automatically"
-            " when iterating over a `FeedbackDataset` pushed to Argilla.\n`fetch_records`"
-            " will be deprecated in Argilla v1.15.0.",
-            DeprecationWarning,
-            stacklevel=1,
-        )
-
-    def push_to_argilla(self, *args, **kwargs) -> None:
-        warnings.warn(
-            "`push_to_argilla` is no longer working for a `FeedbackDataset` pushed to Argilla,"
-            " as the additions, deletions and/or updates over a `FeedbackDataset` in Argilla"
-            " are being tracked automatically, so there's no need to explicitly push them."
-            "\n`push_to_argilla` will be deprecated in Argilla v1.15.0.",
-            DeprecationWarning,
-            stacklevel=1,
-        )
-
     def pull(self) -> "FeedbackDataset":
         """Pulls the dataset from Argilla and returns a local instance of it.
 
@@ -290,6 +268,17 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
             guidelines=self.guidelines,
         )
         instance.add_records(
-            [record.dict(exclude={"client", "name2id", "id"}, exclude_none=True) for record in self._records]
+            records=[
+                record.dict(
+                    exclude={
+                        "id": ...,
+                        "client": ...,
+                        "name2id": ...,
+                        "suggestions": {"__all__": {"client", "id", "question_id"}},
+                    },
+                    exclude_none=True,
+                )
+                for record in self._records
+            ],
         )
         return instance

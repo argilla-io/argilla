@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.usefixtures("login_mock")
-class TestSuiteDeleteCommand:
+class TestSuiteDeleteUserCommand:
     def test_delete_user(self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", user: "User") -> None:
         user_from_name_mock = mocker.patch("argilla.client.users.User.from_name", return_value=user)
         user_delete_mock = mocker.patch("argilla.client.users.User.delete")

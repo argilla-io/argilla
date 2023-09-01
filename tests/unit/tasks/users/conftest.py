@@ -13,16 +13,28 @@
 #  limitations under the License.
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import httpx
 import pytest
 from argilla.client.sdk.users.models import UserRole
+from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 from argilla.client.users import User
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 
 @pytest.fixture
-def user() -> User:
+def user(mocker: "MockerFixture") -> User:
+    mocker.patch.object(
+        User,
+        "workspaces",
+        new_callable=lambda: [
+            WorkspaceModel(id=uuid4(), name="unit-test", inserted_at=datetime.now(), updated_at=datetime.now())
+        ],
+    )
     user = User.__new__(User)
     user.__dict__.update(
         {
