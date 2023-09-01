@@ -24,6 +24,10 @@ These are the section headers that we use:
 - Added `whoami` command to get current user ([#3673](https://github.com/argilla-io/argilla/pull/3673)).
 - Added `users delete` command to delete users ([#3671](https://github.com/argilla-io/argilla/pull/3671)).
 - Added `users list` command to list users ([#3688](https://github.com/argilla-io/argilla/pull/3688)).
+- Added `datasets list` command to list Argilla datasets ([#3658](https://github.com/argilla-io/argilla/pull/3658)).
+- Added `users create` command to create users ([#3667](https://github.com/argilla-io/argilla/pull/3667)).
+- Added `users delete` command to delete users ([#3671](https://github.com/argilla-io/argilla/pull/3671)).
+- Added `workspaces create` command to create an Argilla workspace ([#3676](https://github.com/argilla-io/argilla/pull/3676)).
 - Added `datasets push-to-hub` command to push a `FeedbackDataset` from Argilla into the HuggingFace Hub ([#3685](https://github.com/argilla-io/argilla/pull/3685)).
 
 ## [1.15.0](https://github.com/argilla-io/argilla/compare/v1.14.1...v1.15.0)
@@ -43,7 +47,6 @@ These are the section headers that we use:
 - Added `filter_by` method in `RemoteFeedbackDataset` to filter based on `response_status` ([#3610](https://github.com/argilla-io/argilla/pull/3610)).
 - Added `list_workspaces` function (to be used as `rg.list_workspaces`, but `Workspace.list` is preferred) to list all the workspaces from an user in Argilla ([#3641](https://github.com/argilla-io/argilla/pull/3641)).
 - Added `list_datasets` function (to be used as `rg.list_datasets`) to list the `TextClassification`, `TokenClassification`, and `Text2Text` datasets in Argilla ([#3638](https://github.com/argilla-io/argilla/pull/3638)).
-- Added `workspaces create` command to create an Argilla workspace ([#3676](https://github.com/argilla-io/argilla/pull/3676)).
 - Added `RemoteSuggestionSchema` to manage suggestions in Argilla, including the `delete` method to delete suggestios from Argilla via `DELETE /api/v1/suggestions/{suggestion_id}` ([#3651](https://github.com/argilla-io/argilla/pull/3651)).
 - Added `delete_suggestions` to `RemoteFeedbackRecord` to remove suggestions from Argilla via `DELETE /api/v1/records/{record_id}/suggestions` ([#3651](https://github.com/argilla-io/argilla/pull/3651)).
 

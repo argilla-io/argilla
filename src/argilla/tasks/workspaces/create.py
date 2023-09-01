@@ -19,23 +19,23 @@ from argilla.client.workspaces import Workspace
 
 def create_workspace(
     name: str = typer.Argument(
-        default=None,
+        ...,
         help="The name of the workspace to be created",
     )
 ) -> None:
     """Creates a workspace for the logged user in Argilla"""
-    if not name:
-        raise typer.BadParameter("Workspace name must be specified.")
+    from rich.console import Console
+    from argilla.tasks.rich import get_argilla_themed_panel
     try:
         Workspace.create(name=name)
-        typer.echo(f"Workspace with the name=`{name}` successfully created.")
+        panel = get_argilla_themed_panel(
+            f"Workspace with the name=`{name}` successfully created.", title="Workspace created", title_align="left"
+        )
+        Console().print(panel)
     except ValueError as e:
         typer.echo(e)
         raise typer.Exit(code=1) from e
     except RuntimeError as e:
-        typer.echo("An unexpected error occurred when trying to create the workspace")
+        typer.echo(
+            "An unexpected error occurred when trying to create the workspace")
         raise typer.Exit(code=1) from e
-
-
-if __name__ == "__main__":
-    typer.run(create_workspace)

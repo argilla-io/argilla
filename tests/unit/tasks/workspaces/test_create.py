@@ -26,9 +26,41 @@ from argilla.client.workspaces import Workspace
 
 
 @pytest.mark.usefixtures("login_mock")
-def test_cli_workspaces_create_without_name(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
-    result = cli_runner.invoke(cli, "workspaces create")
-    assert result.exit_code == 2
+class TestSuiteWorkspaceCreateCommand:
+    def test_cli_workspaces_create_without_name(self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
+        result = cli_runner.invoke(cli, "workspaces create")
+        assert result.exit_code == 2
+
+    def test_cli_workspaces_create_with_name(self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture") -> None:
+        workspaces_create_mock = mocker.patch(
+            "argilla.client.workspaces.Workspace.create")
+        result = cli_runner.invoke(cli, "workspaces create workspace25")
+
+        assert result.exit_code == 0
+        workspaces_create_mock.assert_called_once_with(name="workspace25")
+
+    def test_workspace_create_already_exists(self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
+        mocker.patch(
+            "argilla.client.workspaces.Workspace.create",
+            side_effect=ValueError(
+                "Workspace with name=`workspace1` already exists, so please use a different name."),
+        )
+
+        result = cli_runner.invoke(cli, "workspaces create workspace1")
+
+        assert result.stdout == "Workspace with name=`workspace1` already exists, so please use a different name.\n"
+        assert result.exit_code == 1
+
+    def test_workspace_create_runtime_exception(self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
+        mocker.patch(
+            "argilla.client.workspaces.Workspace.create",
+            side_effect=RuntimeError(
+                "An unexpected error occurred when trying to create the workspace"),
+        )
+
+        result = cli_runner.invoke(cli, "workspaces create workspace1")
+        assert result.stdout == "An unexpected error occurred when trying to create the workspace\n"
+        assert result.exit_code == 1
 
 
 @pytest.mark.usefixtures("not_logged_mock")
@@ -36,38 +68,4 @@ def test_cli_workspaces_create_needs_login(cli_runner: "CliRunner", cli: "Typer"
     result = cli_runner.invoke(cli, "workspaces create")
 
     assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout
-    assert result.exit_code == 1
-
-
-@pytest.mark.usefixtures("login_mock")
-def test_cli_workspaces_create_with_name(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture") -> None:
-    workspaces_create_mock = mocker.patch("argilla.client.workspaces.Workspace.create")
-    result = cli_runner.invoke(cli, "workspaces create workspace25")
-
-    assert result.exit_code == 0
-    workspaces_create_mock.assert_called_once_with(name="workspace25")
-
-
-@pytest.mark.usefixtures("login_mock")
-def test_workspace_create_already_exists(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
-    mocker.patch(
-        "argilla.client.workspaces.Workspace.create",
-        side_effect=ValueError("Workspace with name=`workspace1` already exists, so please use a different name."),
-    )
-
-    result = cli_runner.invoke(cli, "workspaces create workspace1")
-
-    assert result.stdout == "Workspace with name=`workspace1` already exists, so please use a different name.\n"
-    assert result.exit_code == 1
-
-
-@pytest.mark.usefixtures("login_mock")
-def test_workspace_create_runtime_exception(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
-    mocker.patch(
-        "argilla.client.workspaces.Workspace.create",
-        side_effect=RuntimeError("An unexpected error occurred when trying to create the workspace"),
-    )
-
-    result = cli_runner.invoke(cli, "workspaces create workspace1")
-    assert result.stdout == "An unexpected error occurred when trying to create the workspace\n"
     assert result.exit_code == 1
