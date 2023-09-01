@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
 @pytest.mark.usefixtures("login_mock")
 class TestSuiteDatasetsPushCommand:
-    def test_push_to_hf(
+    def test_push_to_huggingface(
         self,
         cli_runner: "CliRunner",
         cli: "Typer",
@@ -42,7 +42,8 @@ class TestSuiteDatasetsPushCommand:
         )
 
         result = cli_runner.invoke(
-            cli, "datasets push-to-hf --name my-dataset --workspace my-workspace --repo-id argilla/my-dataset --private"
+            cli,
+            "datasets push-to-huggingface --name my-dataset --workspace my-workspace --repo-id argilla/my-dataset --private",
         )
 
         assert result.exit_code == 0
@@ -56,23 +57,23 @@ class TestSuiteDatasetsPushCommand:
             ("--name my-dataset", "Missing option"),
         ],
     )
-    def test_push_to_hf_missing_args(
+    def test_push_to_huggingface_missing_args(
         self,
         cli_runner: "CliRunner",
         cli: "Typer",
         args: str,
         exception_msg: str,
     ) -> None:
-        result = cli_runner.invoke(cli, f"datasets push-to-hf {args}")
+        result = cli_runner.invoke(cli, f"datasets push-to-huggingface {args}")
 
         assert exception_msg in result.stdout
         assert result.exit_code == 2
 
 
 @pytest.mark.usefixtures("not_logged_mock")
-def test_cli_datasets_push_to_hf_needs_login(cli_runner: "CliRunner", cli: "Typer") -> None:
+def test_cli_datasets_push_to_huggingface_needs_login(cli_runner: "CliRunner", cli: "Typer") -> None:
     result = cli_runner.invoke(
-        cli, "datasets push-to-hf --name my-dataset --workspace my-workspace --repo-id argilla/my-dataset"
+        cli, "datasets push-to-huggingface --name my-dataset --workspace my-workspace --repo-id argilla/my-dataset"
     )
 
     assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout

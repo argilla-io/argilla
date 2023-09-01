@@ -16,14 +16,14 @@ import typer
 
 from argilla.tasks.callback import init_callback
 from argilla.tasks.datasets.list import list_datasets
-from argilla.tasks.datasets.push import push_to_hf
+from argilla.tasks.datasets.push import push_to_huggingface
 
 app = typer.Typer(
     help="Holds CLI commands for datasets management", invoke_without_command=True, callback=init_callback
 )
 
 app.command(name="list", help="List datasets linked to user's workspaces")(list_datasets)
-app.command(name="push-to-hf", help="Push a dataset to HuggingFace Hub")(push_to_hf)
+app.command(name="push-to-huggingface", help="Push a dataset to HuggingFace Hub")(push_to_huggingface)
 
 
 if __name__ == "__main__":

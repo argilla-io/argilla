@@ -17,7 +17,7 @@ from typing import Optional
 import typer
 
 
-def push_to_hf(
+def push_to_huggingface(
     name: str = typer.Option(..., help="The name of the dataset to be pushed to the HuggingFace Hub"),
     workspace: Optional[str] = typer.Option(None, help="The name of the workspace where the dataset is located"),
     repo_id: str = typer.Option(..., help="The HuggingFace Hub repo where the dataset will be pushed to"),
