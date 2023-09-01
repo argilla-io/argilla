@@ -104,18 +104,14 @@ export class Record {
 
       if (answerForQuestion) {
         question.answerQuestionWithResponse(answerForQuestion);
-
-        return question;
       }
 
-      if (!this.answer) {
-        const suggestion = this.suggestions?.find(
-          (s) => s.questionId === question.id
-        );
+      const suggestion = this.suggestions?.find(
+        (s) => s.questionId === question.id
+      );
 
-        if (suggestion) {
-          question.answerQuestionWithSuggestion(suggestion);
-        }
+      if (suggestion) {
+        question.answerQuestionWithSuggestion(suggestion);
       }
 
       return question;

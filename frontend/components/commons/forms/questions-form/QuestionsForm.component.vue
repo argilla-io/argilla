@@ -40,7 +40,7 @@
 
       <QuestionsComponent
         :questions="record.questions"
-        :showSuggestion="!record.isSubmitted"
+        :showSuggestion="!record.isSubmitted && !record.isDiscarded"
       />
     </div>
     <div class="footer-form">
