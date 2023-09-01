@@ -6,17 +6,14 @@ concurrency:
 
 on:
   workflow_dispatch:
-
   release:
     types:
       - "published"
-
   push:
     branches:
       - "main"
       - "develop"
       - "releases/**"
-
   pull_request:
     branches:
       - "main"
@@ -25,10 +22,16 @@ on:
       - "feature/**"
       - "feat/**"
       - "fix/**"
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
 
 jobs:
   check_repo_files:
     name: Check source changes
+    if: ${{ !github.event.pull_request.draft }}
     uses: ./.github/workflows/check-repo-files.yml
 
   deployable_check:
