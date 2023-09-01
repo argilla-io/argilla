@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import httpx
@@ -21,20 +22,13 @@ from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.questions import TextQuestion
 from argilla.client.sdk.datasets.models import Dataset
-from argilla.client.workspaces import Workspace
+
+if TYPE_CHECKING:
+    from argilla.client.workspaces import Workspace
 
 
 @pytest.fixture
-def remote_feedback_dataset() -> "RemoteFeedbackDataset":
-    workspace = Workspace.__new__(Workspace)
-    workspace.__dict__.update(
-        {
-            "id": uuid4(),
-            "name": "unit-test",
-            "inserted_at": datetime.now(),
-            "updated_at": datetime.now(),
-        }
-    )
+def remote_feedback_dataset(workspace: "Workspace") -> RemoteFeedbackDataset:
     return RemoteFeedbackDataset(
         client=httpx.Client(),
         id=uuid4(),
