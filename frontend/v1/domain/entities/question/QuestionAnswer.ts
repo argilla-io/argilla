@@ -15,10 +15,10 @@ export abstract class QuestionAnswer {
     if (this.answer) return;
 
     this.answer = answer;
-    this.onComplete(answer);
+    this.fill(answer);
   }
 
-  protected abstract onComplete(answer: Answer);
+  protected abstract fill(answer: Answer);
   abstract clear();
   abstract get isValid(): boolean;
   get hasValidValues(): boolean {
@@ -34,7 +34,7 @@ export class TextQuestionAnswer extends QuestionAnswer {
     super(type);
   }
 
-  protected onComplete(answer: Answer) {
+  protected fill(answer: Answer) {
     this.value = answer.value as string;
   }
 
@@ -77,7 +77,7 @@ export class SingleLabelQuestionAnswer extends QuestionAnswer {
     }));
   }
 
-  protected onComplete(answer: Answer) {
+  protected fill(answer: Answer) {
     this.values.forEach((value) => {
       value.isSelected = value.value === answer.value;
     });
@@ -126,7 +126,7 @@ export class MultiLabelQuestionAnswer extends QuestionAnswer {
     }));
   }
 
-  protected onComplete(answer: Answer) {
+  protected fill(answer: Answer) {
     const answerValues = answer.value as string[];
     this.values.forEach((label) => {
       label.isSelected = answerValues.includes(label.value);
@@ -183,7 +183,7 @@ export class RatingLabelQuestionAnswer extends QuestionAnswer {
     }));
   }
 
-  protected onComplete(answer: Answer) {
+  protected fill(answer: Answer) {
     this.values.forEach((rating) => {
       rating.isSelected = rating.value === answer.value;
     });
@@ -232,7 +232,7 @@ export class RankingQuestionAnswer extends QuestionAnswer {
     }));
   }
 
-  protected onComplete(answer: Answer) {
+  protected fill(answer: Answer) {
     const suggestedAnswers = answer.value as RankingAnswer[];
     this.values.forEach((ranking) => {
       ranking.rank = suggestedAnswers.find(

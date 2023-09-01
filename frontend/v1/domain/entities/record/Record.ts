@@ -26,6 +26,10 @@ export class Record {
     return this.answer?.status ?? DEFAULT_STATUS;
   }
 
+  get isPending() {
+    return this.status === DEFAULT_STATUS;
+  }
+
   get isSubmitted() {
     return this.status === "submitted";
   }
@@ -34,7 +38,7 @@ export class Record {
     return this.status === "discarded";
   }
 
-  get isSavedDraft() {
+  get isDraft() {
     return this.status === "draft";
   }
 
@@ -102,16 +106,14 @@ export class Record {
     return this.questions.map((question) => {
       const answerForQuestion = this.answer?.value[question.name];
 
-      if (answerForQuestion) {
-        question.answerQuestionWithResponse(answerForQuestion);
-      }
+      question.complete(answerForQuestion);
 
-      const suggestion = this.suggestions?.find(
-        (s) => s.questionId === question.id
-      );
+      if (this.isPending || this.isDraft) {
+        const suggestion = this.suggestions?.find(
+          (s) => s.questionId === question.id
+        );
 
-      if (suggestion) {
-        question.answerQuestionWithSuggestion(suggestion);
+        question.suggests(suggestion);
       }
 
       return question;
