@@ -12,58 +12,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime
 from typing import TYPE_CHECKING
 from unittest.mock import ANY, call
-from uuid import uuid4
 
-import httpx
 import pytest
-from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-from argilla.client.feedback.schemas.fields import TextField
-from argilla.client.feedback.schemas.questions import TextQuestion
-from argilla.client.sdk.datasets.models import Dataset
-from argilla.client.workspaces import Workspace
 from rich.table import Table
 
 if TYPE_CHECKING:
+    from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+    from argilla.client.sdk.datasets.models import Dataset
     from click.testing import CliRunner
     from pytest_mock import MockerFixture
     from typer import Typer
-
-
-@pytest.fixture
-def remote_feedback_dataset() -> "RemoteFeedbackDataset":
-    workspace = Workspace.__new__(Workspace)
-    workspace.__dict__.update(
-        {
-            "id": uuid4(),
-            "name": "unit-test",
-            "inserted_at": datetime.now(),
-            "updated_at": datetime.now(),
-        }
-    )
-    return RemoteFeedbackDataset(
-        client=httpx.Client(),
-        id=uuid4(),
-        name="unit-test",
-        workspace=workspace,
-        fields=[TextField(name="prompt")],
-        questions=[TextQuestion(name="corrected")],
-    )
-
-
-@pytest.fixture
-def dataset() -> Dataset:
-    return Dataset(
-        name="unit-test",
-        id="rg.unit-test",
-        task="TextClassification",
-        owner="unit-test",
-        workspace="unit-test",
-        created_at=datetime.now(),
-        last_updated=datetime.now(),
-    )
 
 
 @pytest.mark.usefixtures("login_mock")
@@ -73,8 +33,8 @@ class TestSuiteListDatasetsCommand:
         cli_runner: "CliRunner",
         cli: "Typer",
         mocker: "MockerFixture",
-        remote_feedback_dataset: RemoteFeedbackDataset,
-        dataset: Dataset,
+        remote_feedback_dataset: "RemoteFeedbackDataset",
+        dataset: "Dataset",
     ) -> None:
         add_row_spy = mocker.spy(Table, "add_row")
         feedback_dataset_list_mock = mocker.patch(
@@ -113,14 +73,27 @@ class TestSuiteListDatasetsCommand:
         )
 
     def test_list_datasets_with_workspace(self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture") -> None:
+        workspace_from_name_mock = mocker.patch("argilla.client.workspaces.Workspace.from_name")
         feedback_dataset_list_mock = mocker.patch("argilla.client.feedback.dataset.local.FeedbackDataset.list")
         list_datasets_mock = mocker.patch("argilla.client.api.list_datasets")
 
         result = cli_runner.invoke(cli, "datasets list --workspace unit-test")
 
         assert result.exit_code == 0
+        workspace_from_name_mock.assert_called_once_with("unit-test")
         feedback_dataset_list_mock.assert_called_once_with("unit-test")
         list_datasets_mock.assert_called_once_with("unit-test")
+
+    def test_list_datasets_with_non_existing_workspace(
+        self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"
+    ) -> None:
+        workspace_from_name_mock = mocker.patch("argilla.client.workspaces.Workspace.from_name", side_effect=ValueError)
+
+        result = cli_runner.invoke(cli, "datasets list --workspace unit-test")
+
+        assert result.exit_code == 1
+        assert "Workspace 'unit-test' does not exist!" in result.stdout
+        workspace_from_name_mock.assert_called_once_with("unit-test")
 
     def test_list_datasets_using_type_feedback_filter(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"

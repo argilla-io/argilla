@@ -12,22 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import typer
-import uvicorn
-
-app = typer.Typer(invoke_without_command=True)
-
-
-# using callback to ensure it is used as sole command
-@app.callback(help="Starts the Argilla FastAPI server.", invoke_without_command=True)
-def server(port: int = 6900, host: str = "0.0.0.0", access_log: bool = True):
-    uvicorn.run(
-        "argilla:app",
-        port=port,
-        host=host,
-        access_log=access_log,
-    )
-
+from .__main__ import app
 
 if __name__ == "__main__":
     app()

@@ -23,6 +23,7 @@ from argilla.tasks import (
     server_app,
     training_app,
     users_app,
+    whoami_app,
     workspaces_app,
 )
 from argilla.tasks.async_typer import AsyncTyper
@@ -38,6 +39,7 @@ app.add_typer(logout_app, name="logout")
 app.add_typer(server_app, name="server")
 app.add_typer(training_app, name="train")
 app.add_typer(users_app, name="users")
+app.add_typer(whoami_app, name="whoami")
 app.add_typer(workspaces_app, name="workspaces")
 
 if __name__ == "__main__":

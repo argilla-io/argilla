@@ -19,4 +19,5 @@ from .logout import app as logout_app
 from .server import app as server_app
 from .training import app as training_app
 from .users import app as users_app
+from .whoami import app as whoami_app
 from .workspaces import app as workspaces_app

@@ -1,6 +1,6 @@
-# Fine-tuning a Feedback Dataset
+# Fine-tuning language models with Feedback Datasets
 
-After [collecting the responses](/guides/llms/practical_guides/collect_responses.html) from our `FeedbackDataset`, we can start fine-tuning our LLMs and other models. Due to the customizability of the task, this might require setting up a custom post-processing workflow, but we will provide some good toy examples for the [LLM approaches](/guides/llms/conceptual_guides/rlhf.html): pre-training, supervised fine-tuning, and reinforcement learning through human feedback (RLHF). However, we also still provide for other NLP tasks like text classification.
+After [collecting the responses](/guides/llms/practical_guides/collect_responses.html) from our `FeedbackDataset`, we can start fine-tuning our LLMs and other models. Due to the customizability of the task, this might require setting up a custom post-processing workflow, but we will provide some good toy examples for the [LLM approaches](/guides/llms/conceptual_guides/rlhf.html): supervised fine-tuning, and reinforcement learning through human feedback (RLHF). However, we also still provide for other NLP tasks like text classification.
 ## The `ArgillaTrainer`
 
 The `ArgillaTrainer` is a wrapper around many of our favorite NLP libraries. It provides a very intuitive abstract representation to facilitate simple training workflows using decent default pre-set configurations without having to worry about any data transformations from Argilla.
@@ -199,90 +199,11 @@ trainer = ArgillaTrainer(
 trainer.train(output_dir="textcat_model")
 ```
 
-### Pre-training
-
-#### Background
-
-When talking about pre-training, we generally talk about a simple `prompt-completion` task, where we need the model to pick up on basic statistics of the language it is learning. Given that you are familiar with Spanish cuisine and the prompt sentence, `The base ingredient of paella is ___`, you know that the word in the `___` is much more likely to be `rice` than `apples`.  So, you are basically training a causal language model or text generation model.
-
-```{note}
-This is an unsupervised approach hence we only infer training data from a basic sentence like `The base ingredient of paella is rice.` by starting with the word `The`, and from there unwrapping the sentence step by step.
-```
-
-#### Training
-
-Many training datasets for this task can be found online (e.g., [Hugging Face](https://huggingface.co/datasets?task_categories=task_categories:text-generation&sort=downloads)). You can either upload this in the right Argilla format but it might be needed to collect and fine-tune additional data with Argilla. So we, therefore, provide a basic setup underneath which should help you to start gathering or preparing pre-training data.
-
-```{note}
-When it comes to pre-training an LLM, we generally do not need data of highest quality, but it is always smart to use domain-specfic data and to avoid data that might lead to undesired effects like hallucination and bias.
-```
-
-First, create a `FeedbackDataset` with records.
-
-```python
-import argilla as rg
-
-# create prompt-completion dataset
-dataset = rg.FeedbackDataset(
-    guidelines="Please, complete the following prompt fields with a brief text answer.",
-    fields=[
-        rg.TextField(name="prompt"),
-    ],
-    questions=[
-        rg.TextQuestion(name="completion", title="Add a brief text answer."),
-    ]
-)
-
-# create a Feedback Records
-record = rg.FeedbackRecord(
-    fields={
-        "prompt": "The base ingredient of paella is rice."
-    }
-)
-
-dataset.add_records([record])
-```
-
-Then push it to Argilla via `push_to_argilla`.
-
-::::{tab-set}
-
-:::{tab-item} Argilla 1.14.0 or higher
-```python
-remote_dataset = dataset.push_to_argilla(name="pre-training")
-```
-:::
-
-:::{tab-item} Lower than Argilla 1.14.0
-```python
-dataset.push_to_argilla(name="pre-training")
-```
-:::
-::::
-
-And, finally, load the `FeedbackDataset` from Argilla.
-
-```python
-import argilla as rg
-from datasets import Dataset
-
-dataset = rg.FeedbackDataset.from_argilla("pre-training")
-prompts = {"prompt": [record.fields.get("prompt") for record in dataset.records]}
-dataset = Dataset.from_dict(prompts)
-dataset
-# Dataset({
-#     features: ['prompt'],
-#     num_rows: 1
-# })
-```
-
-There are many ways and great packages to deal with this `pre-training` phase, but generally, NLP training frameworks like [KerasNLP](https://keras.io/keras_nlp/) and [Hugging Face](https://huggingface.co/) offer great out-of-the-box methods for training a causal language model. In our guide, we will refer to the great docs of the Hugging Face `transformers` and `datasets` libraries and prepare our training data in the format they require for [training a causal language model](https://huggingface.co/learn/nlp-course/chapter7/6#training-a-causal-language-model-from-scratch).
-
 ### Supervised finetuning
 
 #### Background
 
-The goal of Supervised Fine Tuning (SFT) is to optimize this pre-trained model to generate the responses that users are looking for. After pre-training a causal language model, it can generate feasible human text, but it will not be able to have proper `answers` to `question` phrases posed by the user in a conversational or instruction set. Therefore, we need to collect and curate data tailored to this use case to teach the model to mimic this data. We have a section in our docs about [collecting data for this task](../conceptual_guides/sft.html) and there are many good [pre-trained causal language models](https://huggingface.co/models?pipeline_tag=text-generation&sort=downloads) available on Hugging Face.
+The goal of Supervised Fine Tuning (SFT) is to optimize a pre-trained model to generate the responses that users are looking for. A causal language model can generate feasible human text, but it will not be able to have proper `answers` to `question` phrases posed by the user in a conversational or instruction set. Therefore, we need to collect and curate data tailored to this use case to teach the model to mimic this data. We have a section in our docs about [collecting data for this task](../conceptual_guides/sft.html) and there are many good [pre-trained causal language models](https://huggingface.co/models?pipeline_tag=text-generation&sort=downloads) available on Hugging Face.
 
 Data for the training phase is generally divided into two different types generic for domain-like finetuning or chat for fine-tuning an instruction set.
 
@@ -336,7 +257,7 @@ Ultimately, the choice between these two approaches to be used as `text`-field d
 
 #### Training
 
-There are many good libraries to help with this step, however, we are a fan of the [Transformer Reinforcement Learning (TRL)](https://huggingface.co/docs/trl) package, [Transformer Reinforcement Learning X (TRLX)](https://github.com/CarperAI/trlx),and the no-code [Hugging Face AutoTrain](https://huggingface.co/spaces/autotrain-projects/autotrain-advanced) for fine-tuning. In both cases, we need a backbone model, obtained from the [pre-training step](#pre-training) and for example purposes we will use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en).
+There are many good libraries to help with this step, however, we are a fan of the [Transformer Reinforcement Learning (TRL)](https://huggingface.co/docs/trl) package, [Transformer Reinforcement Learning X (TRLX)](https://github.com/CarperAI/trlx),and the no-code [Hugging Face AutoTrain](https://huggingface.co/spaces/autotrain-projects/autotrain-advanced) for fine-tuning. In both cases, we need a backbone model and for example purposes we will use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en).
 
 ```{note}
 This dataset only contains a single annotator response per record. We gave some suggestions on dealing with [responses from multiple annotators](/guides/llms/practical_guides/collect_responses).

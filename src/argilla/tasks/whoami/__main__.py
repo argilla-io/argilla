@@ -17,14 +17,32 @@ import typer
 app = typer.Typer(invoke_without_command=True)
 
 
-@app.callback(help="Logout from an Argilla Server.")
-def logout():
-    from argilla.client.login import ArgillaCredentials
+@app.callback(help="Check the current user on the Argilla Server")
+def whoami() -> None:
+    from rich.console import Console
+    from rich.markdown import Markdown
+
+    from argilla.client.api import active_client
     from argilla.tasks.callback import init_callback
+    from argilla.tasks.rich import get_argilla_themed_panel
 
     init_callback()
-    ArgillaCredentials.remove()
-    typer.echo("Logged out successfully from Argilla server!")
+    user = active_client()._user
+
+    panel = get_argilla_themed_panel(
+        Markdown(
+            f"- **Username**: {user.username}\n"
+            f"- **Role**: {user.role}\n"
+            f"- **First name**: {user.first_name}\n"
+            f"- **Last name**: {user.last_name}\n"
+            f"- **API Key**: {user.api_key}\n"
+            f"- **Workspaces**: {user.workspaces}"
+        ),
+        title="Current User",
+        title_align="left",
+    )
+
+    Console().print(panel)
 
 
 if __name__ == "__main__":

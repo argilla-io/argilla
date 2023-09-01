@@ -11,11 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import json
+
+from datetime import datetime
 from typing import TYPE_CHECKING, Generator
+from uuid import uuid4
 
 import pytest
 from argilla.__main__ import app
+from argilla.client.workspaces import Workspace
 from argilla.server.database import database_url_sync
 from argilla.tasks.database.migrate import migrate_db
 from sqlalchemy import create_engine
@@ -23,7 +26,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typer.testing import CliRunner
 
 from tests.database import SyncTestSession
-from tests.factories import UserSyncFactory
 
 if TYPE_CHECKING:
     from argilla.tasks.async_typer import AsyncTyper
@@ -97,3 +99,17 @@ def login_mock(mocker: "MockerFixture") -> None:
 @pytest.fixture
 def not_logged_mock(mocker: "MockerFixture") -> None:
     mocker.patch("argilla.client.login.ArgillaCredentials.exists", return_value=False)
+
+
+@pytest.fixture
+def workspace() -> Workspace:
+    workspace = Workspace.__new__(Workspace)
+    workspace.__dict__.update(
+        {
+            "id": uuid4(),
+            "name": "unit-test",
+            "inserted_at": datetime.now(),
+            "updated_at": datetime.now(),
+        }
+    )
+    return workspace
