@@ -23,26 +23,21 @@ export class RecordRepository {
 
   getRecords(
     datasetId: string,
-    page: number,
+    fromRecord: number,
+    howMany: number,
     status: string,
-    searchText: string,
-    numberOfRecordsToFetch
+    searchText: string
   ): Promise<BackedRecords> {
-    if (searchText && searchText.length)
+    if (searchText?.length)
       return this.getRecordsByText(
         datasetId,
-        page,
+        fromRecord,
+        howMany,
         status,
-        searchText,
-        numberOfRecordsToFetch
+        searchText
       );
 
-    return this.getRecordsDatasetId(
-      datasetId,
-      page,
-      status,
-      numberOfRecordsToFetch
-    );
+    return this.getRecordsDatasetId(datasetId, fromRecord, howMany, status);
   }
 
   async deleteRecordResponse(record: Record) {
@@ -111,14 +106,14 @@ export class RecordRepository {
 
   private async getRecordsDatasetId(
     datasetId: string,
-    page: number,
-    status: string,
-    numberOfRecordsToFetch: number
+    fromRecord: number,
+    howMany: number,
+    status: string
   ): Promise<BackedRecords> {
     try {
       const url = `/v1/me/datasets/${datasetId}/records`;
 
-      const params = this.createParams(page, numberOfRecordsToFetch, status);
+      const params = this.createParams(fromRecord, howMany, status);
 
       const { data } = await this.axios.get<Response<BackedRecord[]>>(url, {
         params,
@@ -137,10 +132,10 @@ export class RecordRepository {
 
   private async getRecordsByText(
     datasetId: string,
-    page: number,
+    fromRecord: number,
+    howMany: number,
     status: string,
-    searchText: string,
-    numberOfRecordsToFetch: number
+    searchText: string
   ): Promise<BackedRecords> {
     try {
       const url = `/v1/me/datasets/${datasetId}/records/search`;
@@ -155,7 +150,7 @@ export class RecordRepository {
         })
       );
 
-      const params = this.createParams(page, numberOfRecordsToFetch, status);
+      const params = this.createParams(fromRecord, howMany, status);
 
       const { data } = await this.axios.post(url, body, { params });
 
@@ -191,18 +186,15 @@ export class RecordRepository {
     };
   }
 
-  private createParams(
-    page: number,
-    numberOfRecordsToFetch: number,
-    status: string
-  ) {
+  private createParams(fromRecord: number, howMany: number, status: string) {
+    const offset = `${fromRecord - 1}`;
     const backendStatus = status === "pending" ? "missing" : status;
     const params = new URLSearchParams();
 
     params.append("include", "responses");
     params.append("include", "suggestions");
-    params.append("offset", `${page - 1}`);
-    params.append("limit", numberOfRecordsToFetch.toString());
+    params.append("offset", offset);
+    params.append("limit", howMany.toString());
     params.append("response_status", backendStatus);
 
     return params;

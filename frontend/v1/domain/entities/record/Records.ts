@@ -1,5 +1,7 @@
 import { Record } from "./Record";
 
+const NEXT_RECORDS_TO_FETCH = 10;
+
 export class Records {
   public readonly records: Record[];
   constructor(records: Record[] = [], public readonly total: number = 0) {
@@ -7,7 +9,7 @@ export class Records {
   }
 
   get hasRecordsToAnnotate() {
-    return this.records.length;
+    return this.records.length > 0;
   }
 
   existsRecordOn(page: number) {
@@ -21,30 +23,38 @@ export class Records {
   getPageToFind(
     page: number,
     status: string
-  ): { pageToFind: number; recordsToFetch: number } {
-    if (!this.hasRecordsToAnnotate)
-      return { pageToFind: page, recordsToFetch: 10 };
-
-    const changedRecords = this.records.filter(
-      (record) => record.status !== status
-    ).length;
-
-    const firstRecord = this.records[0];
-    const latestRecord = this.records[this.records.length - 1];
-
-    const isMovingToNext = page > latestRecord?.page;
+  ): { fromRecord: number; howMany: number } {
+    const currentPage = {
+      fromRecord: page,
+      howMany: NEXT_RECORDS_TO_FETCH,
+    };
+    if (!this.hasRecordsToAnnotate) return currentPage;
+    const recordsAnnotated = this.quantityOfRecordsAnnotated(status);
+    const isMovingToNext = page > this.lastRecord.page;
 
     if (isMovingToNext) {
       return {
-        pageToFind: latestRecord.page + 1 - changedRecords,
-        recordsToFetch: 10,
+        fromRecord: this.lastRecord.page + 1 - recordsAnnotated,
+        howMany: NEXT_RECORDS_TO_FETCH,
       };
-    } else if (firstRecord.page > page)
+    } else if (this.firstRecord.page > page)
       return {
-        pageToFind: firstRecord.page - 1,
-        recordsToFetch: 1,
+        fromRecord: this.firstRecord.page - 1,
+        howMany: 1,
       };
 
-    return { pageToFind: page, recordsToFetch: 10 };
+    return currentPage;
+  }
+
+  private get lastRecord() {
+    return this.records[this.records.length - 1];
+  }
+
+  private get firstRecord() {
+    return this.records[0];
+  }
+
+  private quantityOfRecordsAnnotated(status: string) {
+    return this.records.filter((record) => record.status !== status).length;
   }
 }

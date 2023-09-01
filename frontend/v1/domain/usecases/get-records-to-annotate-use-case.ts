@@ -27,20 +27,14 @@ export class GetRecordsToAnnotateUseCase {
   ): Promise<void> {
     const savedRecords = this.recordsStorage.get();
 
-    const { pageToFind, recordsToFetch } = savedRecords.getPageToFind(
-      page,
-      status
-    );
-
-    // eslint-disable-next-line no-console
-    console.log("pageToFind", pageToFind);
+    const { fromRecord, howMany } = savedRecords.getPageToFind(page, status);
 
     const getRecords = this.recordRepository.getRecords(
       datasetId,
-      pageToFind,
+      fromRecord,
+      howMany,
       status,
-      searchText,
-      recordsToFetch
+      searchText
     );
     const getQuestions = this.questionRepository.getQuestions(datasetId);
     const getFields = this.fieldRepository.getFields(datasetId);
@@ -110,28 +104,5 @@ export class GetRecordsToAnnotateUseCase {
     const records = new Records(recordsToAnnotate, recordsFromBackend.total);
 
     this.recordsStorage.add(records);
-
-    // eslint-disable-next-line no-console
-    console.table(
-      {
-        pending: this.recordsStorage
-          .get()
-          .records.filter((r) => r.status === "pending").length,
-        submitted: this.recordsStorage
-          .get()
-          .records.filter((r) => r.status === "submitted").length,
-        discarded: this.recordsStorage
-          .get()
-          .records.filter((r) => r.status === "discarded").length,
-      },
-      ["Pending", "Submitted", "Discarded"]
-    );
-
-    // eslint-disable-next-line no-console
-    console.table(
-      this.recordsStorage
-        .get()
-        .records.map((r) => ({ id: r.id, offset: r.page }))
-    );
   }
 }
