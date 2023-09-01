@@ -81,6 +81,11 @@ class TestSuiteWorkspaceDeleteUser:
         assert result.exit_code == 1
         assert "User with username 'unit-test' does not belong to the workspace 'unit-test'" in result.stdout
 
+    def test_workspace_delete_user_without_workspace_name(self, cli_runner: "CliRunner", cli: "Typer") -> None:
+        result = cli_runner.invoke(cli, "workspaces delete-user unit-test")
+
+        assert result.exit_code == 2
+
 
 @pytest.mark.usefixtures("not_logged_mock")
 def test_list_users_needs_login(cli_runner: "CliRunner", cli: "Typer") -> None:
