@@ -89,13 +89,15 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      isFormTouched: false,
+    };
+  },
   setup() {
     return useQuestionFormViewModel();
   },
   computed: {
-    isFormTouched() {
-      return this.record.isModified;
-    },
     questionAreCompletedCorrectly() {
       return this.record.questionAreCompletedCorrectly();
     },
@@ -108,6 +110,8 @@ export default {
   },
   watch: {
     isFormTouched(isFormTouched) {
+      if (this.record.isPending || this.record.isDraft) return;
+
       this.emitIsQuestionsFormTouched(isFormTouched);
     },
     record: {
@@ -115,11 +119,13 @@ export default {
       immediate: true,
       handler() {
         if (this.record.isModified) this.saveDraft(this.record);
+
+        this.isFormTouched = this.record.isModified;
       },
     },
   },
   created() {
-    this.record.restore();
+    this.record.initialize();
   },
   mounted() {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
@@ -142,7 +148,7 @@ export default {
           break;
         }
         case "Enter": {
-          this.onSubmit();
+          if (shiftKey) this.onSubmit();
           break;
         }
         case "Space": {
@@ -150,7 +156,7 @@ export default {
           break;
         }
         case "Backspace": {
-          this.onDiscard();
+          if (shiftKey) this.onDiscard();
           break;
         }
         default:

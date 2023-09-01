@@ -7,7 +7,8 @@ import { RecordAnswer } from "./RecordAnswer";
 const DEFAULT_STATUS = "pending";
 
 export class Record {
-  private originalQuestions: Question[];
+  // eslint-disable-next-line no-use-before-define
+  private original: Record;
 
   constructor(
     public readonly id: string,
@@ -43,40 +44,40 @@ export class Record {
   }
 
   get isModified() {
-    return (
-      !!this.originalQuestions &&
-      !isEqual(this.originalQuestions, this.questions)
-    );
+    const { original, ...rest } = this;
+
+    return !!original && !isEqual(original, rest);
   }
 
   discard(answer: RecordAnswer) {
-    this.originalQuestions = null;
     this.answer = answer;
-
     this.updatedAt = answer.updatedAt;
 
-    this.restore();
+    this.initialize();
   }
 
   submit(answer: RecordAnswer) {
-    this.originalQuestions = null;
     this.answer = answer;
-
     this.updatedAt = answer.updatedAt;
 
-    this.restore();
+    this.initialize();
   }
 
   clear() {
     this.questions.forEach((question) => question.clearAnswer());
 
     this.answer = null;
+
+    this.initialize();
   }
 
-  restore() {
+  initialize() {
     this.completeQuestion();
 
-    this.originalQuestions = cloneDeep(this.questions);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { original, ...rest } = this;
+
+    this.original = cloneDeep(rest);
   }
 
   get hasAnyQuestionAnswered() {

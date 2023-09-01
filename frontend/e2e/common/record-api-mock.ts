@@ -88,7 +88,7 @@ export const mockRecord = async (
   await mockFields(page, datasetId);
 
   await page.route(
-    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing`,
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing&response_status=draft`,
     async (route) => {
       await route.fulfill({
         json: {
@@ -112,7 +112,7 @@ export const mockRecordForLongAndShortQuestion = async (
   await mockFields(page, datasetId);
 
   await page.route(
-    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing`,
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing&response_status=draft`,
     async (route) => {
       await route.fulfill({
         json: {
