@@ -25,7 +25,9 @@ def create_workspace(
 ) -> None:
     """Creates a workspace for the logged user in Argilla"""
     from rich.console import Console
+
     from argilla.tasks.rich import get_argilla_themed_panel
+
     try:
         Workspace.create(name=name)
         panel = get_argilla_themed_panel(
@@ -36,6 +38,5 @@ def create_workspace(
         typer.echo(e)
         raise typer.Exit(code=1) from e
     except RuntimeError as e:
-        typer.echo(
-            "An unexpected error occurred when trying to create the workspace")
+        typer.echo("An unexpected error occurred when trying to create the workspace")
         raise typer.Exit(code=1) from e
