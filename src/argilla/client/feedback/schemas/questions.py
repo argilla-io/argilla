@@ -135,7 +135,7 @@ class _LabelQuestion(QuestionSchema, LabelMappingMixin):
     """
 
     labels: Union[conlist(str, unique_items=True, min_items=2), Dict[str, str]]
-    visible_labels: Optional[conint(ge=3)] = 20
+    visible_labels: Optional[conint(ge=3)] = None
 
     @validator("labels", always=True)
     def labels_dict_must_be_valid(cls, v: Union[List[str], Dict[str, str]]) -> Union[List[str], Dict[str, str]]:
