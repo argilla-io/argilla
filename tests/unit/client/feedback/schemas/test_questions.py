@@ -80,12 +80,12 @@ def test_label_question_errors(
         (
             {"name": "a", "description": "a", "required": True, "labels": ["a", "b", "c"], "visible_labels": 4},
             UserWarning,
-            "`visible_labels=4` is greater than the total number of labels (3), so it will be set to `3`.",
+            "\`visible_labels=4\` is greater than the total number of labels \(3\), so it will be set to \`3\`.",
         ),
         (
             {"name": "a", "description": "a", "required": True, "labels": ["a", "b"], "visible_labels": 3},
             UserWarning,
-            "`labels=['a', 'b']` has less than 3 labels, so `visible_labels` will be set to `None`, which means that all the labels will be visible.",
+            "\`labels=\['a', 'b'\]\` has less than 3 labels, so \`visible_labels\` will be set to \`None\`, which means that all the labels will be visible.",
         ),
     ],
 )
@@ -209,12 +209,12 @@ def test_multi_label_question_errors(
         (
             {"name": "a", "description": "a", "required": True, "labels": ["a", "b", "c"], "visible_labels": 4},
             UserWarning,
-            "`visible_labels=4` is greater than the total number of labels (3), so it will be set to `3`.",
+            "\`visible_labels=4\` is greater than the total number of labels \(3\), so it will be set to \`3\`.",
         ),
         (
             {"name": "a", "description": "a", "required": True, "labels": ["a", "b"], "visible_labels": 3},
             UserWarning,
-            "`labels=['a', 'b']` has less than 3 labels, so `visible_labels` will be set to `None`, which means that all the labels will be visible.",
+            "\`labels=\['a', 'b'\]\` has less than 3 labels, so \`visible_labels\` will be set to \`None\`, which means that all the labels will be visible.",
         ),
     ],
 )
