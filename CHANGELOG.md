@@ -30,6 +30,10 @@ These are the section headers that we use:
 - Added `workspaces create` command to create an Argilla workspace ([#3676](https://github.com/argilla-io/argilla/pull/3676)).
 - Added `datasets push-to-hub` command to push a `FeedbackDataset` from Argilla into the HuggingFace Hub ([#3685](https://github.com/argilla-io/argilla/pull/3685)).
 
+### Fixed
+
+- Fixed `Pending queue` pagination problems when during data annotation ([#3677](https://github.com/argilla-io/argilla/pull/3677))
+
 ## [1.15.0](https://github.com/argilla-io/argilla/compare/v1.14.1...v1.15.0)
 
 ### Added
