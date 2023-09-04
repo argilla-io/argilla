@@ -30,7 +30,7 @@ These are the section headers that we use:
 - Added `users delete` command to delete users ([#3671](https://github.com/argilla-io/argilla/pull/3671)).
 - Added `workspaces create` command to create an Argilla workspace ([#3676](https://github.com/argilla-io/argilla/pull/3676)).
 - Added `datasets push-to-hub` command to push a `FeedbackDataset` from Argilla into the HuggingFace Hub ([#3685](https://github.com/argilla-io/argilla/pull/3685)).
-- Added `datasets delete` command to delete a `FeedbackDataset` ([#3703](https://github.com/argilla-io/argilla/pull/3703)).
+- Added `datasets delete` command to delete a `FeedbackDataset` from Argilla ([#3703](https://github.com/argilla-io/argilla/pull/3703)).
 
 ### Fixed
 
