@@ -25,6 +25,7 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
+<!-- Since version 1.16.0 you can use `python -m argilla info` command to easily get the used versions -->
 **Environment (please complete the following information):**
  - OS [e.g. iOS]:
  - Browser [e.g. chrome, safari]:
