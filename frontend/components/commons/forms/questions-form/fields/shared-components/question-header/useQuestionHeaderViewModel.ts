@@ -2,7 +2,6 @@ import { ref, Ref, computed, watch } from "vue-demi";
 import { Question } from "~/v1/domain/entities/question/Question";
 
 export const useQuestionHeaderViewModel = (question: Question) => {
-  const matchSuggestion = ref<boolean>(question.matchSuggestion);
   const tooltipMessage = ref<string>(question.description);
   const openTooltip = ref<boolean>(false);
   const timer = ref<NodeJS.Timeout>(null);
@@ -11,12 +10,6 @@ export const useQuestionHeaderViewModel = (question: Question) => {
     return !!question.description?.length;
   });
 
-  watch(
-    () => question.matchSuggestion,
-    () => {
-      matchSuggestion.value = question.matchSuggestion;
-    }
-  );
   watch(
     () => question.description,
     () => {
@@ -30,5 +23,5 @@ export const useQuestionHeaderViewModel = (question: Question) => {
     }
   );
 
-  return { matchSuggestion, showIcon, tooltipMessage, openTooltip };
+  return { showIcon, tooltipMessage, openTooltip };
 };

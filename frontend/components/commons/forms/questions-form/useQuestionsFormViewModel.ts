@@ -9,7 +9,7 @@ import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
 import { useQueue } from "~/v1/infrastructure/services/useQueue";
 
 export const useQuestionFormViewModel = (record: Record, context) => {
-  record.restore();
+  record.initialize();
 
   const queue = useQueue();
   const debounce = useDebounce(2000);
