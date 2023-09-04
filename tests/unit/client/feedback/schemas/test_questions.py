@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import string
 from typing import Any, Dict, Type, Union
 
 import pytest
@@ -81,7 +82,7 @@ def test_label_question_errors(
             {
                 "type": "label_selection",
                 "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
-                "visible_options": 20,
+                "visible_options": None,
             },
         ),
         (
@@ -89,15 +90,15 @@ def test_label_question_errors(
             {
                 "type": "label_selection",
                 "options": [{"value": "a", "text": "A"}, {"value": "b", "text": "B"}],
-                "visible_options": 20,
+                "visible_options": None,
             },
         ),
         (
-            {"name": "a", "description": "a", "required": True, "labels": ["a", "b"], "visible_labels": 5},
+            {"name": "a", "description": "a", "required": True, "labels": ["a", "b"], "visible_labels": 3},
             {
                 "type": "label_selection",
                 "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
-                "visible_options": 5,
+                "visible_options": None,
             },
         ),
         (
@@ -106,6 +107,28 @@ def test_label_question_errors(
                 "type": "label_selection",
                 "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
                 "visible_options": None,
+            },
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "labels": list(string.ascii_lowercase)},
+            {
+                "type": "label_selection",
+                "options": [{"value": a, "text": a} for a in string.ascii_lowercase],
+                "visible_options": 20,
+            },
+        ),
+        (
+            {
+                "name": "a",
+                "description": "a",
+                "required": True,
+                "labels": list(string.ascii_lowercase),
+                "visible_labels": len(string.ascii_lowercase) * 2,
+            },
+            {
+                "type": "label_selection",
+                "options": [{"value": a, "text": a} for a in string.ascii_lowercase],
+                "visible_options": len(string.ascii_lowercase),
             },
         ),
     ],
@@ -164,7 +187,7 @@ def test_multi_label_question_errors(
             {
                 "type": "multi_label_selection",
                 "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
-                "visible_options": 20,
+                "visible_options": None,
             },
         ),
         (
@@ -172,7 +195,7 @@ def test_multi_label_question_errors(
             {
                 "type": "multi_label_selection",
                 "options": [{"value": "a", "text": "A"}, {"value": "b", "text": "B"}],
-                "visible_options": 20,
+                "visible_options": None,
             },
         ),
         (
@@ -180,7 +203,7 @@ def test_multi_label_question_errors(
             {
                 "type": "multi_label_selection",
                 "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
-                "visible_options": 5,
+                "visible_options": None,
             },
         ),
         (
@@ -189,6 +212,28 @@ def test_multi_label_question_errors(
                 "type": "multi_label_selection",
                 "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
                 "visible_options": None,
+            },
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "labels": list(string.ascii_lowercase)},
+            {
+                "type": "multi_label_selection",
+                "options": [{"value": a, "text": a} for a in string.ascii_lowercase],
+                "visible_options": 20,
+            },
+        ),
+        (
+            {
+                "name": "a",
+                "description": "a",
+                "required": True,
+                "labels": list(string.ascii_lowercase),
+                "visible_labels": len(string.ascii_lowercase) * 2,
+            },
+            {
+                "type": "multi_label_selection",
+                "options": [{"value": a, "text": a} for a in string.ascii_lowercase],
+                "visible_options": len(string.ascii_lowercase),
             },
         ),
     ],
