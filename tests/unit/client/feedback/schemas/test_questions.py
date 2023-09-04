@@ -75,6 +75,30 @@ def test_label_question_errors(
 
 
 @pytest.mark.parametrize(
+    "schema_kwargs, expected_warning, expected_warning_message",
+    [
+        (
+            {"name": "a", "description": "a", "required": True, "labels": ["a", "b", "c"], "visible_labels": 4},
+            UserWarning,
+            "`visible_labels=4` is greater than the total number of labels (3), so it will be set to `3`.",
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "labels": ["a", "b"], "visible_labels": 3},
+            UserWarning,
+            "`labels=['a', 'b']` has less than 3 labels, so `visible_labels` will be set to `None`, which means that all the labels will be visible.",
+        ),
+    ],
+)
+def test_label_question_warnings(
+    schema_kwargs: Dict[str, Any],
+    expected_warning: Warning,
+    expected_warning_message: str,
+) -> None:
+    with pytest.warns(expected_warning, match=expected_warning_message):
+        LabelQuestion(**schema_kwargs)
+
+
+@pytest.mark.parametrize(
     "schema_kwargs, expected_settings",
     [
         (
@@ -176,6 +200,30 @@ def test_multi_label_question_errors(
     schema_kwargs: Dict[str, Any], expected_exception: Exception, expected_exception_message: Union[str, None]
 ) -> None:
     with pytest.raises(expected_exception, match=expected_exception_message):
+        MultiLabelQuestion(**schema_kwargs)
+
+
+@pytest.mark.parametrize(
+    "schema_kwargs, expected_warning, expected_warning_message",
+    [
+        (
+            {"name": "a", "description": "a", "required": True, "labels": ["a", "b", "c"], "visible_labels": 4},
+            UserWarning,
+            "`visible_labels=4` is greater than the total number of labels (3), so it will be set to `3`.",
+        ),
+        (
+            {"name": "a", "description": "a", "required": True, "labels": ["a", "b"], "visible_labels": 3},
+            UserWarning,
+            "`labels=['a', 'b']` has less than 3 labels, so `visible_labels` will be set to `None`, which means that all the labels will be visible.",
+        ),
+    ],
+)
+def test_multi_label_question_warnings(
+    schema_kwargs: Dict[str, Any],
+    expected_warning: Warning,
+    expected_warning_message: str,
+) -> None:
+    with pytest.warns(expected_warning, match=expected_warning_message):
         MultiLabelQuestion(**schema_kwargs)
 
 
