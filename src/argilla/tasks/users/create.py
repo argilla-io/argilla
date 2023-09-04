@@ -21,7 +21,9 @@ from argilla.client.sdk.users.models import UserRole
 
 def create_user(
     username: str = typer.Option(..., prompt=True, help="The username of the user to be created"),
-    password: str = typer.Option(..., prompt=True, help="The password of the user to be created"),
+    password: str = typer.Option(
+        ..., prompt=True, confirmation_prompt=True, hide_input=True, help="The password of the user to be created"
+    ),
     first_name: Optional[str] = typer.Option(None, help="The first name of the user to be created"),
     last_name: Optional[str] = typer.Option(None, help="The last name of the user to be created"),
     role: UserRole = typer.Option(UserRole.annotator, help="The role of the user to be created"),
