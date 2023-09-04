@@ -24,8 +24,8 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.usefixtures("login_mock")
-class TestSuiteDatasetsPushCommand:
-    def test_push_to_huggingface(
+class TestSuiteDeleteDataset:
+    def test_delete_dataset(
         self,
         cli_runner: "CliRunner",
         cli: "Typer",
@@ -36,43 +36,43 @@ class TestSuiteDatasetsPushCommand:
             "argilla.client.feedback.dataset.local.FeedbackDataset.from_argilla",
             return_value=remote_feedback_dataset,
         )
-        push_to_huggingface_mock = mocker.patch(
-            "argilla.client.feedback.integrations.huggingface.dataset.HuggingFaceDatasetMixin.push_to_huggingface",
-            return_value=None,
+        remote_feedback_dataset_delete_mock = mocker.patch(
+            "argilla.client.feedback.dataset.remote.dataset.RemoteFeedbackDataset.delete"
         )
 
-        result = cli_runner.invoke(
-            cli,
-            "datasets --name my-dataset --workspace my-workspace push-to-huggingface --repo-id argilla/my-dataset --private",
-        )
+        result = cli_runner.invoke(cli, "datasets --name unit-test --workspace unit-test delete")
 
         assert result.exit_code == 0
-        dataset_from_argilla_mock.assert_called_once_with(name="my-dataset", workspace="my-workspace")
-        push_to_huggingface_mock.assert_called_once_with(repo_id="argilla/my-dataset", private=True, token=None)
+        assert "`FeedbackDataset` with name=unit-test and workspace=unit-test deleted successfully" in result.stdout
+        dataset_from_argilla_mock.assert_called_once_with(name="unit-test", workspace="unit-test")
+        remote_feedback_dataset_delete_mock.assert_called_once()
 
-    def test_push_to_huggingface_missing_repo_id_arg(
+    def test_delete_dataset_runtime_error(
         self,
         cli_runner: "CliRunner",
         cli: "Typer",
         mocker: "MockerFixture",
         remote_feedback_dataset: "RemoteFeedbackDataset",
     ) -> None:
-        mocker.patch(
+        dataset_from_argilla_mock = mocker.patch(
             "argilla.client.feedback.dataset.local.FeedbackDataset.from_argilla",
             return_value=remote_feedback_dataset,
         )
+        remote_feedback_dataset_delete_mock = mocker.patch(
+            "argilla.client.feedback.dataset.remote.dataset.RemoteFeedbackDataset.delete", side_effect=RuntimeError
+        )
 
-        result = cli_runner.invoke(cli, "datasets --name my-dataset push-to-huggingface")
+        result = cli_runner.invoke(cli, "datasets --name unit-test --workspace unit-test delete")
 
-        assert "Missing option" in result.stdout
-        assert result.exit_code == 2
+        assert result.exit_code == 1
+        assert "An unexpected error occurred when trying to delete the `FeedbackDataset`" in result.stdout
+        dataset_from_argilla_mock.assert_called_once_with(name="unit-test", workspace="unit-test")
+        remote_feedback_dataset_delete_mock.assert_called_once()
 
 
 @pytest.mark.usefixtures("not_logged_mock")
-def test_cli_datasets_push_to_huggingface_needs_login(cli_runner: "CliRunner", cli: "Typer") -> None:
-    result = cli_runner.invoke(
-        cli, "datasets --name my-dataset --workspace my-workspace push-to-huggingface --repo-id argilla/my-dataset"
-    )
+def test_cli_datasets_delete_needs_login(cli_runner: "CliRunner", cli: "Typer") -> None:
+    result = cli_runner.invoke(cli, "datasets --name my-dataset --workspace my-workspace delete")
 
     assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout
     assert result.exit_code == 1
