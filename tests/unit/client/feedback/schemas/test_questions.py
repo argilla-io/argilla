@@ -138,7 +138,7 @@ def test_label_question_warnings(
             {
                 "type": "label_selection",
                 "options": [{"value": a, "text": a} for a in string.ascii_lowercase],
-                "visible_options": 20,
+                "visible_options": None,
             },
         ),
         (
@@ -267,7 +267,7 @@ def test_multi_label_question_warnings(
             {
                 "type": "multi_label_selection",
                 "options": [{"value": a, "text": a} for a in string.ascii_lowercase],
-                "visible_options": 20,
+                "visible_options": None,
             },
         ),
         (

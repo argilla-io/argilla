@@ -173,8 +173,6 @@ class _LabelQuestion(QuestionSchema, LabelMappingMixin):
                     stacklevel=1,
                 )
                 visible_options = None
-        if not visible_options and total_options > 20:
-            visible_options = 20
         values["settings"]["visible_options"] = visible_options
         return values
 
