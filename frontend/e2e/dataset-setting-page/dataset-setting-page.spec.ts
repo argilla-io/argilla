@@ -5,13 +5,14 @@ import {
   newDatasetsMocked,
   mockRecord,
   mockDatasetDeletion,
+  Role,
 } from "../common";
 
 test.use({
   viewport: { width: 1600, height: 1800 },
 });
 
-const goToDatasetSettingPage = async (page: Page) => {
+const goToDatasetSettingPage = async (page: Page, role?: Role) => {
   const dataset = newDatasetsMocked[0];
 
   await mockAllDatasets(page);
@@ -20,7 +21,7 @@ const goToDatasetSettingPage = async (page: Page) => {
     workspaceId: dataset.workspace_id,
   });
 
-  await loginUserAndWaitFor(page, "datasets");
+  await loginUserAndWaitFor(page, "datasets", role);
 
   await page.waitForTimeout(1000);
 
@@ -38,6 +39,14 @@ const goToDatasetSettingPage = async (page: Page) => {
 };
 
 test.describe("Dataset setting page", () => {
+  test.describe("annotator role", () => {
+    test("just see the information tab with basic info", async ({ page }) => {
+      await goToDatasetSettingPage(page, "annotator");
+
+      await expect(page).toHaveScreenshot();
+    });
+  });
+
   test.describe("information tab", () => {
     test("update guidelines", async ({ page }) => {
       await goToDatasetSettingPage(page);

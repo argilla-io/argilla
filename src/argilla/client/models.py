@@ -48,6 +48,8 @@ class Framework(Enum):
         span_marker: SpanMarker Tom Aarsen library
         spark-nlp: Spark NLP John Snow Labs library
         openai: OpenAI LLMs
+        trl: Transformer Reinforcement Learning
+        trlx: Transformer Reinforcement Learning X
     """
 
     TRANSFORMERS = "transformers"
@@ -58,6 +60,8 @@ class Framework(Enum):
     SPAN_MARKER = "span_marker"
     SPARK_NLP = "spark-nlp"
     OPENAI = "openai"
+    TRL = "trl"
+    TRLX = "trlx"
     # AUTOTRAIN = "autotrain"
 
     @classmethod

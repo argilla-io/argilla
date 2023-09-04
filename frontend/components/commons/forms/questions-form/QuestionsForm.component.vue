@@ -11,7 +11,7 @@
             <svgicon color="#0000005e" name="refresh" />
             {{ $t("saving") }}
           </p>
-          <p v-else-if="record.isSavedDraft">
+          <p v-else-if="record.isDraft">
             <svgicon color="#0000005e" name="check" />
             {{ $t("saved") }}
             <BaseDate
@@ -40,7 +40,7 @@
 
       <QuestionsComponent
         :questions="record.questions"
-        :showSuggestion="!record.isSubmitted"
+        :showSuggestion="record.isPending || record.isDraft"
       />
     </div>
     <div class="footer-form">
@@ -95,6 +95,8 @@ export default {
   },
   watch: {
     isFormTouched(isFormTouched) {
+      if (this.record.isPending || this.record.isDraft) return;
+
       this.emitIsQuestionsFormTouched(isFormTouched);
     },
   },

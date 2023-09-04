@@ -15,9 +15,15 @@
 from argilla.client.feedback import (
     ArgillaTrainer,
     LabelQuestionStrategy,
+    LabelQuestionUnification,
     MultiLabelQuestionStrategy,
+    MultiLabelQuestionUnification,
+    RankingQuestionStrategy,
+    RankingQuestionUnification,
     RatingQuestionStrategy,
-    TrainingTaskMapping,
+    RatingQuestionUnification,
+    TrainingTask,
+    TrainingTaskMapping,  # <- Deprecated
 )
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
@@ -38,6 +44,12 @@ __all__ = [
     "LabelQuestionStrategy",
     "MultiLabelQuestionStrategy",
     "RatingQuestionStrategy",
+    "RankingQuestionStrategy",
+    "LabelQuestionUnification",
+    "MultiLabelQuestionUnification",
+    "RatingQuestionUnification",
+    "RankingQuestionUnification",
+    "TrainingTask",
     "TrainingTaskMapping",
     "FeedbackDataset",
     "FeedbackRecord",

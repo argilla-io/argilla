@@ -7,7 +7,8 @@ import { RecordAnswer } from "./RecordAnswer";
 const DEFAULT_STATUS = "pending";
 
 export class Record {
-  private originalQuestions: Question[];
+  // eslint-disable-next-line no-use-before-define
+  private original: Record;
 
   constructor(
     public readonly id: string,
@@ -26,6 +27,10 @@ export class Record {
     return this.answer?.status ?? DEFAULT_STATUS;
   }
 
+  get isPending() {
+    return this.status === DEFAULT_STATUS;
+  }
+
   get isSubmitted() {
     return this.status === "submitted";
   }
@@ -34,45 +39,45 @@ export class Record {
     return this.status === "discarded";
   }
 
-  get isSavedDraft() {
+  get isDraft() {
     return this.status === "draft";
   }
 
   get isModified() {
-    return (
-      !!this.originalQuestions &&
-      !isEqual(this.originalQuestions, this.questions)
-    );
+    const { original, ...rest } = this;
+
+    return !!original && !isEqual(original, rest);
   }
 
   discard(answer: RecordAnswer) {
-    this.originalQuestions = null;
     this.answer = answer;
-
     this.updatedAt = answer.updatedAt;
 
-    this.restore();
+    this.initialize();
   }
 
   submit(answer: RecordAnswer) {
-    this.originalQuestions = null;
     this.answer = answer;
-
     this.updatedAt = answer.updatedAt;
 
-    this.restore();
+    this.initialize();
   }
 
   clear() {
     this.questions.forEach((question) => question.clearAnswer());
 
     this.answer = null;
+
+    this.initialize();
   }
 
-  restore() {
+  initialize() {
     this.completeQuestion();
 
-    this.originalQuestions = cloneDeep(this.questions);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { original, ...rest } = this;
+
+    this.original = cloneDeep(rest);
   }
 
   get hasAnyQuestionAnswered() {
@@ -102,20 +107,14 @@ export class Record {
     return this.questions.map((question) => {
       const answerForQuestion = this.answer?.value[question.name];
 
-      if (answerForQuestion) {
-        question.answerQuestionWithResponse(answerForQuestion);
+      question.complete(answerForQuestion);
 
-        return question;
-      }
-
-      if (!this.answer) {
+      if (this.isPending || this.isDraft) {
         const suggestion = this.suggestions?.find(
           (s) => s.questionId === question.id
         );
 
-        if (suggestion) {
-          question.answerQuestionWithSuggestion(suggestion);
-        }
+        question.suggests(suggestion);
       }
 
       return question;
