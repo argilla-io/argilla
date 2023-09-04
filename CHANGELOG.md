@@ -24,6 +24,7 @@ These are the section headers that we use:
 - Added `whoami` command to get current user ([#3673](https://github.com/argilla-io/argilla/pull/3673)).
 - Added `users delete` command to delete users ([#3671](https://github.com/argilla-io/argilla/pull/3671)).
 - Added `users list` command to list users ([#3688](https://github.com/argilla-io/argilla/pull/3688)).
+- Added `workspaces delete-user` command to remove a user from a workspace ([#3699](https://github.com/argilla-io/argilla/pull/3699)).
 - Added `datasets list` command to list Argilla datasets ([#3658](https://github.com/argilla-io/argilla/pull/3658)).
 - Added `users create` command to create users ([#3667](https://github.com/argilla-io/argilla/pull/3667)).
 - Added `users delete` command to delete users ([#3671](https://github.com/argilla-io/argilla/pull/3671)).
