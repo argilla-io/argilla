@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import warnings
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
@@ -153,9 +154,17 @@ class _LabelQuestion(QuestionSchema, LabelMappingMixin):
             ]
         if isinstance(values.get("labels"), list):
             values["settings"]["options"] = [{"value": label, "text": label} for label in values.get("labels")]
-        values["settings"]["visible_options"] = values.get(
-            "visible_labels"
-        )  # `None` is a possible value, which means all labels are visible
+        visible_options = values.get("visible_labels")
+        total_options = len(values["settings"]["options"])
+        if visible_options and visible_options > total_options:
+            warnings.warn(
+                f"`visible_labels={visible_options}` is greater than the total number"
+                f" of labels ({total_options}), so it will be set to `{total_options}`."
+            )
+            visible_options = total_options
+        if not visible_options and total_options > 20:
+            visible_options = 20
+        values["settings"]["visible_options"] = visible_options
         return values
 
 
