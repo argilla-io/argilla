@@ -157,11 +157,18 @@ class _LabelQuestion(QuestionSchema, LabelMappingMixin):
         visible_options = values.get("visible_labels")
         total_options = len(values["settings"]["options"])
         if visible_options and visible_options > total_options:
-            warnings.warn(
-                f"`visible_labels={visible_options}` is greater than the total number"
-                f" of labels ({total_options}), so it will be set to `{total_options}`."
-            )
-            visible_options = total_options
+            if total_options >= 3:
+                warnings.warn(
+                    f"`visible_labels={visible_options}` is greater than the total number"
+                    f" of labels ({total_options}), so it will be set to `{total_options}`."
+                )
+                visible_options = total_options
+            else:
+                warnings.warn(
+                    f"`labels={values.get('labels')} has less than 3 labels, so `visible_labels`"
+                    " will be set to `None`, which means that all the labels will be visible."
+                )
+                visible_options = None
         if not visible_options and total_options > 20:
             visible_options = 20
         values["settings"]["visible_options"] = visible_options
