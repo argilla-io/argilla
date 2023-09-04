@@ -167,7 +167,7 @@ class _LabelQuestion(QuestionSchema, LabelMappingMixin):
                 visible_options = total_options
             else:
                 warnings.warn(
-                    f"`labels={values.get('labels')} has less than 3 labels, so `visible_labels`"
+                    f"`labels={values.get('labels')}` has less than 3 labels, so `visible_labels`"
                     " will be set to `None`, which means that all the labels will be visible.",
                     UserWarning,
                     stacklevel=1,
