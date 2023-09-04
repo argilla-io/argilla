@@ -26,8 +26,8 @@ _COMMANDS_REQUIRING_DATASET = ["delete", "push-to-huggingface"]
 
 def callback(
     ctx: typer.Context,
-    name: Optional[str] = typer.Option(None, help="The name of the "),
-    workspace: Optional[str] = typer.Option(None, help=""),
+    name: Optional[str] = typer.Option(None, help="The name of the `FeedbackDataset` to which apply the command"),
+    workspace: Optional[str] = typer.Option(None, help="The name of the workspace where the `FeedbackDataset` belongs"),
 ) -> None:
     init_callback()
 
