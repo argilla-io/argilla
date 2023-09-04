@@ -175,6 +175,7 @@ export default {
   position: absolute;
   right: $base-space * 2;
   top: $base-space;
+  user-select: none;
   display: flex;
   flex-direction: row;
   gap: 5px;
