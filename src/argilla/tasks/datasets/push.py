@@ -18,54 +18,38 @@ import typer
 
 
 def push_to_huggingface(
-    name: str = typer.Option(..., help="The name of the dataset to be pushed to the HuggingFace Hub"),
-    workspace: Optional[str] = typer.Option(None, help="The name of the workspace where the dataset is located"),
+    ctx: typer.Context,
     repo_id: str = typer.Option(..., help="The HuggingFace Hub repo where the dataset will be pushed to"),
     private: bool = typer.Option(False, help="Whether the dataset should be private or not"),
     token: Optional[str] = typer.Option(None, help="The HuggingFace Hub token to be used for pushing the dataset"),
 ) -> None:
     """Pushes a dataset from Argilla into the HuggingFace Hub. Note that this command
     is just available for `FeedbackDataset` datasets."""
-    from rich.console import Console
+    from rich.live import Live
+    from rich.spinner import Spinner
 
     from argilla.client.feedback.dataset.local import FeedbackDataset
 
-    console = Console()
+    dataset: "FeedbackDataset" = ctx.obj
+
+    spinner = Spinner(
+        name="dots",
+        text=f"Pushing `FeedbackDataset` with name={dataset.name} and workspace={dataset.workspace.name} to the"
+        " HuggingFace Hub...",
+        style="red",
+    )
 
     try:
-        console.print(
-            f":one: Retrieving `FeedbackDataset` with name={name} from Argilla..."
-            if not workspace
-            else f":one: Retrieving `FeedbackDataset` with name={name} and workspace={workspace} from Argilla..."
-        )
-        dataset = FeedbackDataset.from_argilla(name=name, workspace=workspace)
+        with Live(spinner, refresh_per_second=20):
+            dataset.push_to_huggingface(repo_id=repo_id, private=private, token=token)
     except ValueError as e:
         typer.echo(
-            f"`FeedbackDataset` with name={name} not found in Argilla."
-            if not workspace
-            else f"`FeedbackDataset with name={name} and workspace={workspace} not found in Argilla."
-        )
-        raise typer.Exit(1) from e
-    except Exception as e:
-        typer.echo("An unexpected error occurred when trying to get the `FeedbackDataset` from Argilla.")
-        raise typer.Exit(code=1) from e
-
-    try:
-        console.print(
-            f":two: Pushing `FeedbackDataset` with name={name} to the HuggingFace Hub..."
-            if not workspace
-            else f":two: Pushing `FeedbackDataset` with name={name} and workspace={workspace} to the HuggingFace Hub..."
-        )
-        dataset.push_to_huggingface(repo_id=repo_id, private=private, token=token)
-        console.print(
-            f":sparkles: `FeedbackDataset` successfully pushed to the :hugs: HuggingFace Hub at https://huggingface.co/{repo_id}"
-        )
-    except ValueError as e:
-        typer.echo(
-            f"The `FeedbackDataset` has no records to push to the HuggingFace Hub. Make"
-            " sure to add records before pushing it."
+            "The `FeedbackDataset` has no records to push to the HuggingFace Hub. Make sure to add records before"
+            " pushing it."
         )
         raise typer.Exit(1) from e
     except Exception as e:
         typer.echo("An unexpected error occurred when trying to push the `FeedbackDataset` to the HuggingFace Hub")
         raise typer.Exit(code=1) from e
+
+    typer.echo(f"`FeedbackDataset` successfully pushed to the HuggingFace Hub at https://huggingface.co/{repo_id}")
