@@ -71,7 +71,7 @@ class TestSuiteDatasetsPushCommand:
 @pytest.mark.usefixtures("not_logged_mock")
 def test_cli_datasets_push_to_huggingface_needs_login(cli_runner: "CliRunner", cli: "Typer") -> None:
     result = cli_runner.invoke(
-        cli, "datasets push-to-huggingface --name my-dataset --workspace my-workspace --repo-id argilla/my-dataset"
+        cli, "datasets --name my-dataset --workspace my-workspace push-to-huggingface --repo-id argilla/my-dataset"
     )
 
     assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout

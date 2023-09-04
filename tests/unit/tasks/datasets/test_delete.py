@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from typer import Typer
 
 
-@pytest.mark.usefixture("login_mock")
+@pytest.mark.usefixtures("login_mock")
 class TestSuiteDeleteDataset:
     def test_delete_dataset(
         self,
@@ -68,3 +68,11 @@ class TestSuiteDeleteDataset:
         assert "An unexpected error occurred when trying to delete the `FeedbackDataset`" in result.stdout
         dataset_from_argilla_mock.assert_called_once_with(name="unit-test", workspace="unit-test")
         remote_feedback_dataset_delete_mock.assert_called_once()
+
+
+@pytest.mark.usefixtures("not_logged_mock")
+def test_cli_datasets_delete_needs_login(cli_runner: "CliRunner", cli: "Typer") -> None:
+    result = cli_runner.invoke(cli, "datasets --name my-dataset --workspace my-workspace delete")
+
+    assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout
+    assert result.exit_code == 1
