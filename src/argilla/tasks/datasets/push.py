@@ -25,7 +25,6 @@ def push_to_huggingface(
 ) -> None:
     """Pushes a dataset from Argilla into the HuggingFace Hub. Note that this command
     is just available for `FeedbackDataset` datasets."""
-    from rich.console import Console
     from rich.live import Live
     from rich.spinner import Spinner
 
@@ -33,11 +32,10 @@ def push_to_huggingface(
 
     dataset: "FeedbackDataset" = ctx.obj
 
-    console = Console()
-
     spinner = Spinner(
         name="dots",
-        text=f"Pushing `FeedbackDataset` with [b]name[not b]={dataset.name} and [b]workspace[not b]={dataset.workspace.name} to the HuggingFace Hub...",
+        text=f"Pushing `FeedbackDataset` with name={dataset.name} and workspace={dataset.workspace.name} to the"
+        " HuggingFace Hub...",
         style="red",
     )
 
@@ -46,14 +44,12 @@ def push_to_huggingface(
             dataset.push_to_huggingface(repo_id=repo_id, private=private, token=token)
     except ValueError as e:
         typer.echo(
-            f"The `FeedbackDataset` has no records to push to the HuggingFace Hub. Make"
-            " sure to add records before pushing it."
+            "The `FeedbackDataset` has no records to push to the HuggingFace Hub. Make sure to add records before"
+            " pushing it."
         )
         raise typer.Exit(1) from e
     except Exception as e:
         typer.echo("An unexpected error occurred when trying to push the `FeedbackDataset` to the HuggingFace Hub")
         raise typer.Exit(code=1) from e
 
-    console.print(
-        f":sparkles: `FeedbackDataset` successfully pushed to the :hugs: HuggingFace Hub at https://huggingface.co/{repo_id}"
-    )
+    typer.echo(f"`FeedbackDataset` successfully pushed to the HuggingFace Hub at https://huggingface.co/{repo_id}")
