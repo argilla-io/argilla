@@ -7,8 +7,10 @@ import { SubmitRecordUseCase } from "~/v1/domain/usecases/submit-record-use-case
 import { SaveDraftRecord } from "~/v1/domain/usecases/save-draft-use-case";
 import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
 import { useQueue } from "~/v1/infrastructure/services/useQueue";
+import { useBeforeUnload } from "~/v1/infrastructure/services/useBeforeUnload";
 
 export const useQuestionFormViewModel = () => {
+  const beforeUnload = useBeforeUnload();
   const queue = useQueue();
   const debounce = useDebounce(2000);
 
@@ -47,16 +49,20 @@ export const useQuestionFormViewModel = () => {
     draftSaving.value = true;
 
     try {
+      beforeUnload.confirm();
       await saveDraftUseCase.execute(record);
     } finally {
       draftSaving.value = false;
+      beforeUnload.destroy();
     }
   };
 
   const saveDraft = async (record: Record) => {
     if (record.isSubmitted) return;
+    beforeUnload.confirm();
     await debounce.wait();
 
+    beforeUnload.destroy();
     queue.enqueue(() => {
       return onSaveDraft(record);
     });
