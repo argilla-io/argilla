@@ -81,7 +81,9 @@ export class Record {
   }
 
   get hasAnyQuestionAnswered() {
-    return this.questions.some((question) => question.answer.isValid);
+    return this.questions.some(
+      (question) => question.answer.isValid || question.answer.isPartiallyValid
+    );
   }
 
   questionAreCompletedCorrectly() {

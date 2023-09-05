@@ -21,6 +21,11 @@ export abstract class QuestionAnswer {
   protected abstract fill(answer: Answer);
   abstract clear();
   abstract get isValid(): boolean;
+
+  get isPartiallyValid(): boolean {
+    return false;
+  }
+
   get hasValidValues(): boolean {
     return true;
   }
@@ -249,6 +254,10 @@ export class RankingQuestionAnswer extends QuestionAnswer {
 
   get isValid(): boolean {
     return this.values.every((value) => value.rank);
+  }
+
+  get isPartiallyValid(): boolean {
+    return this.values.some((value) => value.rank);
   }
 
   get hasValidValues(): boolean {

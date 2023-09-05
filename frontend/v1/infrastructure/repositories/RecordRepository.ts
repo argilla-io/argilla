@@ -191,10 +191,14 @@ export class RecordRepository {
   ): Omit<BackendResponse, "id" | "updated_at"> {
     const values = {} as BackendAnswerCombinations;
 
-    questions.forEach((question) => {
-      if (question.answer.isValid)
+    questions
+      .filter(
+        (question) =>
+          question.answer.isValid || question.answer.isPartiallyValid
+      )
+      .forEach((question) => {
         values[question.name] = { value: question.answer.valuesAnswered };
-    });
+      });
 
     return {
       status,
