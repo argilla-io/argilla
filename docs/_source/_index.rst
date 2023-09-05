@@ -12,41 +12,33 @@
    getting_started/installation/deployments/deployments.md
    getting_started/installation/configurations/configurations.md
 
+
 .. toctree::
-   :caption: Conceptual Guides
+   :caption: LLMs
    :maxdepth: 3
    :hidden:
 
-   guides/conceptual_guides/conceptual_guides
-   guides/conceptual_guides/data_model
-   guides/conceptual_guides/llm/llm
-   guides/conceptual_guides/sft
-   guides/conceptual_guides/rm
-   guides/conceptual_guides/rlhf
+   guides/llms/conceptual_guides/conceptual_guides
+   guides/llms/practical_guides/practical_guides
+   guides/llms/examples/examples
 
 .. toctree::
-   :caption: Practical Guides
+   :caption: Guides
    :maxdepth: 3
    :hidden:
 
-   guides/practical_guides/practical_guides
-   guides/practical_guides/choose_dataset
-   guides/practical_guides/create_dataset
-   guides/practical_guides/assign_annotations
-   guides/practical_guides/update_dataset
-   guides/practical_guides/filter_dataset
-   guides/practical_guides/annotate_dataset
-   guides/practical_guides/collect_responses
-   guides/practical_guides/export_dataset
-   guides/practical_guides/fine_tune
+   guides/log_load_and_prepare_data
+   guides/train_a_model
+   guides/query_datasets
+   guides/measure_datasets_with_metrics
+   guides/log_model_explanations
+   guides/schedule_jobs_with_listeners
+   guides/use_active_learning
+   guides/programmatic_labeling_with_rules
+   guides/preannotate_with_fewshot_learning
+   guides/label_records_with_semanticsearch
 
-.. toctree::
-   :caption: Integrations
-   :maxdepth: 3
-   :hidden:
 
-   guides/integrations/use_argilla_callback_in_langchain
-   guides/integrations/process_documents_with_unstructured
 
 .. toctree::
    :caption: Tutorials
@@ -67,6 +59,7 @@
 
    reference/python/index
    reference/webapp/index
+   reference/datamodel
    reference/notebooks
    reference/telemetry
    reference/terminology
