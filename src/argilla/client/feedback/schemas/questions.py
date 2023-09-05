@@ -173,6 +173,14 @@ class _LabelQuestion(QuestionSchema, LabelMappingMixin):
                     stacklevel=1,
                 )
                 visible_options = None
+        if not visible_options and total_options > 20:
+            warnings.warn(
+                "Since `visible_labels` has not been provided or is `None`, and the total number"
+                " of labels is greater than 20, `visible_labels` will be set to `20`.",
+                UserWarning,
+                stacklevel=1,
+            )
+            visible_options = 20
         values["settings"]["visible_options"] = visible_options
         return values
 
