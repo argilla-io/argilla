@@ -80,7 +80,7 @@ class TestSuiteWorkspaceAddUser:
 
         assert result.exit_code == 1
         assert "An unexpected error occurred when trying to add user to the workspace" in result.stdout
-    
+
     def test_workspace_add_user_with_unexpected_error_retieve_user(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", workspace, user
     ) -> None:
