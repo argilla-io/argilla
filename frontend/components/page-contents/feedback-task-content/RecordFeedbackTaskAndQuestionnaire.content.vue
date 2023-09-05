@@ -292,6 +292,7 @@ export default {
     this.$root.$off("go-to-prev-page");
     this.$root.$off("status-filter-changed");
     this.$root.$off("search-filter-changed");
+    Notification.dispatch("clear");
   },
   setup() {
     return useRecordFeedbackTaskViewModel();

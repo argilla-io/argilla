@@ -85,6 +85,7 @@ export default {
   destroyed() {
     this.$root.$off("are-responses-untouched");
     this.$root.$off("go-to-page");
+    Notification.dispatch("clear");
   },
   setup() {
     return usePaginationFeedbackTaskViewModel();
