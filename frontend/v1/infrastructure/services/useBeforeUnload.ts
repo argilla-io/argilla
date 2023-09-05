@@ -1,6 +1,6 @@
 class BeforeUnload {
   confirm() {
-    window.onbeforeunload = () => "NO!";
+    window.onbeforeunload = () => "";
   }
 
   destroy() {
