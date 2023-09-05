@@ -69,6 +69,30 @@ class TestSuiteWorkspaceAddUser:
         assert result.exit_code == 1
         assert "User with username 'unit-test' already exists in workspace 'unit-test'" in result.stdout
 
+    def test_workspace_add_user_with_unexpected_error(
+        self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", workspace, user
+    ) -> None:
+        mocker.patch("argilla.client.workspaces.Workspace.from_name", return_value=workspace)
+        mocker.patch("argilla.client.users.User.from_name", return_value=user)
+        mocker.patch("argilla.client.workspaces.Workspace.add_user", side_effect=RuntimeError)
+
+        result = cli_runner.invoke(cli, "workspaces --name unit-test add-user unit-test")
+
+        assert result.exit_code == 1
+        assert "An unexpected error occurred when trying to add user to the workspace" in result.stdout
+    
+    def test_workspace_add_user_with_unexpected_error_retieve_user(
+        self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", workspace, user
+    ) -> None:
+        mocker.patch("argilla.client.workspaces.Workspace.from_name", return_value=workspace)
+        mocker.patch("argilla.client.users.User.from_name", side_effect=RuntimeError)
+        mocker.patch("argilla.client.workspaces.Workspace.add_user")
+
+        result = cli_runner.invoke(cli, "workspaces --name unit-test add-user unit-test")
+
+        assert result.exit_code == 1
+        assert "An unexpected error occurred when trying to retrieve the user from the Argilla server" in result.stdout
+
     def test_workspace_add_user_without_workspace_name(self, cli_runner: "CliRunner", cli: "Typer") -> None:
         result = cli_runner.invoke(cli, "workspaces add-user unit-test")
 
