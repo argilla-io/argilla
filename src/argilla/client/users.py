@@ -121,6 +121,33 @@ class User:
             return users_api_v1.list_user_workspaces(self._client, self.id).parsed
         return workspaces_api_v1.list_workspaces_me(self._client).parsed
 
+    @property
+    def is_owner(self) -> bool:
+        """Returns whether the current user is an owner or not.
+
+        Returns:
+            A boolean indicating whether the current user is an owner or not.
+        """
+        return self.role == UserRole.owner
+
+    @property
+    def is_admin(self) -> bool:
+        """Returns whether the current user is an admin or not.
+
+        Returns:
+            A boolean indicating whether the current user is an admin or not.
+        """
+        return self.role == UserRole.admin
+
+    @property
+    def is_annotator(self) -> bool:
+        """Returns whether the current user is an annotator or not.
+
+        Returns:
+            A boolean indicating whether the current user is an annotator or not.
+        """
+        return self.role == UserRole.annotator
+
     def __repr__(self) -> str:
         return (
             f"User(id={self.id}, username={self.username}, role={self.role},"

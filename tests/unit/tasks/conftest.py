@@ -16,8 +16,12 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Generator
 from uuid import uuid4
 
+import httpx
 import pytest
 from argilla.__main__ import app
+from argilla.client.sdk.users.models import UserRole
+from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
+from argilla.client.users import User
 from argilla.client.workspaces import Workspace
 from argilla.server.database import database_url_sync
 from argilla.tasks.database.migrate import migrate_db
@@ -113,3 +117,31 @@ def workspace() -> Workspace:
         }
     )
     return workspace
+
+
+@pytest.fixture
+def user(mocker: "MockerFixture", workspace: Workspace) -> User:
+    mocker.patch.object(
+        User,
+        "workspaces",
+        new_callable=lambda: [
+            WorkspaceModel(
+                id=workspace.id, name=workspace.name, inserted_at=workspace.inserted_at, updated_at=workspace.updated_at
+            )
+        ],
+    )
+    user = User.__new__(User)
+    user.__dict__.update(
+        {
+            "_client": httpx.Client(),
+            "id": uuid4(),
+            "username": "unit-test",
+            "last_name": "unit-test",
+            "first_name": "unit-test",
+            "role": UserRole.admin,
+            "api_key": "apikey.unit-test",
+            "inserted_at": datetime.now(),
+            "updated_at": datetime.now(),
+        }
+    )
+    return user
