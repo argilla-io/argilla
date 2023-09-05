@@ -19,9 +19,9 @@ import typer
 
 from argilla.tasks.callback import init_callback
 
+from .add_user import add_user
 from .create import create_workspace
 from .delete_user import delete_user
-from .add_user import add_user
 from .list import list_workspaces
 
 _COMMANDS_REQUIRING_WORKSPACE = ["add-user", "delete-user"]

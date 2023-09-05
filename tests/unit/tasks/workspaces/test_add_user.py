@@ -57,7 +57,6 @@ class TestSuiteWorkspaceAddUser:
         assert result.exit_code == 1
         assert "User with username 'unit-test' does not exist" in result.stdout
 
-
     def test_workspace_add_user_with_user_belonging_to_workspace(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", workspace, user
     ) -> None:
