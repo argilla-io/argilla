@@ -19,6 +19,7 @@ import typer
 if TYPE_CHECKING:
     from argilla.client.workspaces import Workspace
 
+
 def add_user(
     ctx: typer.Context,
     username: str = typer.Argument(..., help="The username of the user to be added to the workspace"),
