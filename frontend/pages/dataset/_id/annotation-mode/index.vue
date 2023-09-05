@@ -28,7 +28,7 @@
     <template v-slot:sidebar-right>
       <SidebarFeedbackTaskComponent
         :datasetId="datasetId"
-        @refresh="onRefresh()"
+        @refresh="loadDataset()"
       />
     </template>
     <template v-slot:top>
@@ -57,27 +57,10 @@ export default {
   },
   data() {
     return {
-      areResponsesUntouched: true,
       visibleTrainModal: false,
     };
   },
-  beforeRouteLeave(to, from, next) {
-    const isNotificationForThisRoute =
-      !this.areResponsesUntouched &&
-      ["datasets", "dataset-id-settings", "user-settings"].includes(to.name);
-
-    if (isNotificationForThisRoute) {
-      this.showNotification({
-        eventToFireOnClick: next,
-        message: this.$t("changes_no_submit"),
-        buttonMessage: this.$t("button.ignore_and_continue"),
-      });
-    } else {
-      next();
-    }
-  },
   created() {
-    this.onBusEventAreResponsesUntouched();
     this.checkIfUrlHaveRecordStatusOrInitiateQueryParams();
   },
   methods: {
@@ -92,41 +75,11 @@ export default {
           },
         });
     },
-    onRefresh() {
-      if (this.areResponsesUntouched) {
-        return this.loadDataset();
-      }
-
-      this.showNotification({
-        eventToFireOnClick: async () => {
-          this.loadDataset();
-        },
-        message: this.$t("changes_no_submit"),
-        buttonMessage: this.$t("button.ignore_and_continue"),
-      });
-    },
-    onBusEventAreResponsesUntouched() {
-      this.$root.$on("are-responses-untouched", (areResponsesUntouched) => {
-        this.areResponsesUntouched = areResponsesUntouched;
-      });
-    },
-    showNotification({ eventToFireOnClick, message, buttonMessage }) {
-      Notification.dispatch("notify", {
-        message: message ?? "",
-        numberOfChars: 500,
-        type: "warning",
-        buttonText: buttonMessage ?? "",
-        async onClick() {
-          eventToFireOnClick();
-        },
-      });
-    },
     showTrainModal(value) {
       this.visibleTrainModal = value;
     },
   },
   destroyed() {
-    this.$root.$off("are-responses-untouched");
     Notification.dispatch("clear");
   },
   setup() {
