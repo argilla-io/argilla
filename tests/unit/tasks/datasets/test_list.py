@@ -56,8 +56,8 @@ class TestSuiteListDatasetsCommand:
                     remote_feedback_dataset.workspace.name,
                     "Feedback",
                     None,
-                    None,
-                    None,
+                    remote_feedback_dataset.created_at.isoformat(sep=" "),
+                    remote_feedback_dataset.updated_at.isoformat(sep=" "),
                 ),
                 call(
                     ANY,
