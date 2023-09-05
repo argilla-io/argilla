@@ -34,6 +34,8 @@ def remote_feedback_dataset(workspace: "Workspace") -> RemoteFeedbackDataset:
         id=uuid4(),
         name="unit-test",
         workspace=workspace,
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
         fields=[TextField(name="prompt")],
         questions=[TextQuestion(name="corrected")],
     )
