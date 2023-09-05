@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 
 def test_create_default(sync_db: "Session", cli_runner: "CliRunner", cli: "Typer"):
-    result = cli_runner.invoke(cli, "database users create_default")
+    result = cli_runner.invoke(cli, "server database users create_default")
 
     assert result.exit_code == 0
     assert result.output != ""
@@ -39,7 +39,7 @@ def test_create_default(sync_db: "Session", cli_runner: "CliRunner", cli: "Typer
 
 
 def test_create_default_with_specific_api_key_and_password(sync_db: "Session", cli_runner: "CliRunner", cli: "Typer"):
-    result = cli_runner.invoke(cli, "database users create_default --api-key my-api-key --password my-password")
+    result = cli_runner.invoke(cli, "server database users create_default --api-key my-api-key --password my-password")
 
     assert result.exit_code == 0
     assert result.output != ""
@@ -54,7 +54,7 @@ def test_create_default_with_specific_api_key_and_password(sync_db: "Session", c
 
 
 def test_create_default_quiet(sync_db: "Session", cli_runner: "CliRunner", cli: "Typer"):
-    result = cli_runner.invoke(cli, "database users create_default --quiet")
+    result = cli_runner.invoke(cli, "server database users create_default --quiet")
 
     assert result.exit_code == 0
     assert result.output == ""
@@ -62,13 +62,13 @@ def test_create_default_quiet(sync_db: "Session", cli_runner: "CliRunner", cli: 
 
 
 def test_create_default_with_existent_default_user(sync_db: "Session", cli_runner: "CliRunner", cli: "Typer"):
-    result = cli_runner.invoke(cli, "database users create_default")
+    result = cli_runner.invoke(cli, "server database users create_default")
 
     assert result.exit_code == 0
     assert result.output != ""
     assert sync_db.query(User).count() == 1
 
-    result = cli_runner.invoke(cli, "database users create_default")
+    result = cli_runner.invoke(cli, "server database users create_default")
 
     assert result.exit_code == 0
     assert result.output == "User with default username already found on database, will not do anything.\n"
@@ -76,13 +76,13 @@ def test_create_default_with_existent_default_user(sync_db: "Session", cli_runne
 
 
 def test_create_default_with_existent_default_user_and_quiet(sync_db: "Session", cli_runner: "CliRunner", cli: "Typer"):
-    result = cli_runner.invoke(cli, "database users create_default")
+    result = cli_runner.invoke(cli, "server database users create_default")
 
     assert result.exit_code == 0
     assert result.output != ""
     assert sync_db.query(User).count() == 1
 
-    result = cli_runner.invoke(cli, "database users create_default --quiet")
+    result = cli_runner.invoke(cli, "server database users create_default --quiet")
 
     assert result.exit_code == 0
     assert result.output == ""

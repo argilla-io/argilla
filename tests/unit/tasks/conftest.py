@@ -24,7 +24,7 @@ from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 from argilla.client.users import User
 from argilla.client.workspaces import Workspace
 from argilla.server.database import database_url_sync
-from argilla.tasks.database.migrate import migrate_db
+from argilla.tasks.server.database.migrate import migrate_db
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession
 from typer.testing import CliRunner
