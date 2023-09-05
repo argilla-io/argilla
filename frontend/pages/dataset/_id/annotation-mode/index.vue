@@ -46,8 +46,6 @@
 <script>
 import HeaderAndTopAndOneColumn from "@/layouts/HeaderAndTopAndOneColumn";
 import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
-import { Notification } from "@/models/Notifications";
-
 import { useAnnotationModeViewModel } from "./useAnnotationModeViewModel";
 
 export default {
