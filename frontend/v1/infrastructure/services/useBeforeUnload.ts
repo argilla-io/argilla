@@ -1,13 +1,14 @@
-class BeforeUnload {
-  confirm() {
-    window.onbeforeunload = () => "";
-  }
-
-  destroy() {
-    window.onbeforeunload = undefined;
-  }
-}
-
 export const useBeforeUnload = () => {
-  return new BeforeUnload();
+  const confirm = () => {
+    window.onbeforeunload = () => true;
+  };
+
+  const destroy = () => {
+    window.onbeforeunload = undefined;
+  };
+
+  return {
+    confirm,
+    destroy,
+  };
 };

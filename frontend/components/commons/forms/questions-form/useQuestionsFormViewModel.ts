@@ -45,7 +45,6 @@ export const useQuestionFormViewModel = () => {
   };
 
   const onSaveDraft = async (record: Record) => {
-    if (!record.hasAnyQuestionAnswered) return;
     draftSaving.value = true;
 
     try {
@@ -62,7 +61,6 @@ export const useQuestionFormViewModel = () => {
     beforeUnload.confirm();
     await debounce.wait();
 
-    beforeUnload.destroy();
     queue.enqueue(() => {
       return onSaveDraft(record);
     });
