@@ -12,12 +12,17 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .datasets import app as datasets_app
-from .info import app as info_app
-from .login import app as login_app
-from .logout import app as logout_app
-from .server import app as server_app
-from .training import app as training_app
-from .users import app as users_app
-from .whoami import app as whoami_app
-from .workspaces import app as workspaces_app
+import typer
+
+
+def start(
+    host: str = typer.Option("0.0.0.0"), port: int = typer.Option(6900), access_log: bool = typer.Option(True)
+) -> None:
+    import uvicorn
+
+    uvicorn.run(
+        "argilla:app",
+        port=port,
+        host=host,
+        access_log=access_log,
+    )

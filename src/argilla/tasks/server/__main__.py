@@ -13,20 +13,15 @@
 #  limitations under the License.
 
 import typer
-import uvicorn
 
-app = typer.Typer(invoke_without_command=True)
+from .database import app as database_app
+from .start import start
+
+app = typer.Typer()
 
 
-# using callback to ensure it is used as sole command
-@app.callback(help="Starts the Argilla FastAPI server.", invoke_without_command=True)
-def server(port: int = 6900, host: str = "0.0.0.0", access_log: bool = True):
-    uvicorn.run(
-        "argilla:app",
-        port=port,
-        host=host,
-        access_log=access_log,
-    )
+app.add_typer(database_app, name="database")
+app.command(name="start", help="Starts the Argilla server")(start)
 
 
 if __name__ == "__main__":

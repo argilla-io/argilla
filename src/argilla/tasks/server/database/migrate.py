@@ -22,7 +22,7 @@ from alembic.util import CommandError
 
 from argilla.server.database import ALEMBIC_CONFIG_FILE, TAGGED_REVISIONS
 from argilla.tasks import async_typer
-from argilla.tasks.database import utils
+from argilla.tasks.server.database import utils
 
 
 def migrate_db(revision: Optional[str] = typer.Option(default="head", help="DB Revision to migrate to")):

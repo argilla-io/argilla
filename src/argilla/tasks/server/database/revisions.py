@@ -17,7 +17,7 @@ import typer
 
 from argilla.server.database import ALEMBIC_CONFIG_FILE, TAGGED_REVISIONS
 from argilla.tasks import async_typer
-from argilla.tasks.database import utils
+from argilla.tasks.server.database import utils
 
 
 def revisions():
