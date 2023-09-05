@@ -26,7 +26,7 @@ from argilla.server.security.model import (
     WorkspaceCreate,
 )
 from argilla.tasks import async_typer
-from argilla.tasks.database.users.utils import get_or_new_workspace
+from argilla.tasks.server.database.users.utils import get_or_new_workspace
 
 USER_API_KEY_MIN_LENGTH = 8
 

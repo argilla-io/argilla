@@ -12,17 +12,17 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import typer
+from typing import TYPE_CHECKING
 
-from .database import app as database_app
-from .start import start
-
-app = typer.Typer(help="Commands for managing the Argilla server")
-
-
-app.add_typer(database_app, name="database")
-app.command(name="start", help="Starts the Argilla server")(start)
+if TYPE_CHECKING:
+    from click.testing import CliRunner
+    from pytest_mock import MockerFixture
+    from typer import Typer
 
 
-if __name__ == "__main__":
-    app()
+def test_start_command(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture") -> None:
+    uvicorn_run_mock = mocker.patch("uvicorn.run")
+    result = cli_runner.invoke(cli, "server start --host 1.1.1.1 --port 6899 --no-access-log")
+
+    assert result.exit_code == 0
+    uvicorn_run_mock.assert_called_once_with("argilla:app", host="1.1.1.1", port=6899, access_log=False)
