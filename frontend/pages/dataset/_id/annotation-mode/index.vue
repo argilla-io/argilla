@@ -79,9 +79,6 @@ export default {
       this.visibleTrainModal = value;
     },
   },
-  destroyed() {
-    Notification.dispatch("clear");
-  },
   setup() {
     return useAnnotationModeViewModel();
   },
