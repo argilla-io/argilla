@@ -11,18 +11,3 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-import typer
-
-from .database import app as database_app
-from .start import start
-
-app = typer.Typer(help="Commands for managing the Argilla server")
-
-
-app.add_typer(database_app, name="database")
-app.command(name="start", help="Starts the Argilla server")(start)
-
-
-if __name__ == "__main__":
-    app()

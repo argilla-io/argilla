@@ -14,15 +14,17 @@
 
 import typer
 
-from .database import app as database_app
-from .start import start
 
-app = typer.Typer(help="Commands for managing the Argilla server")
+def start(
+    host: str = typer.Option("0.0.0.0", help="The host where the Argilla server will be binded"),
+    port: int = typer.Option(6900, help="The port where the Argilla server will be binded"),
+    access_log: bool = typer.Option(True, help="Whether to enable or disable the Argilla server access log"),
+) -> None:
+    import uvicorn
 
-
-app.add_typer(database_app, name="database")
-app.command(name="start", help="Starts the Argilla server")(start)
-
-
-if __name__ == "__main__":
-    app()
+    uvicorn.run(
+        "argilla:app",
+        port=port,
+        host=host,
+        access_log=access_log,
+    )

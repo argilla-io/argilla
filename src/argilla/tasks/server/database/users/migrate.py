@@ -23,7 +23,7 @@ from argilla.server.models import User, UserRole
 from argilla.server.security.auth_provider.local.settings import settings
 from argilla.server.security.model import USER_USERNAME_REGEX, WORKSPACE_NAME_REGEX
 from argilla.tasks import async_typer
-from argilla.tasks.database.users.utils import get_or_new_workspace
+from argilla.tasks.server.database.users.utils import get_or_new_workspace
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
