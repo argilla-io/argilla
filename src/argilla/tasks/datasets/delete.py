@@ -12,13 +12,23 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .database import app as database_app
-from .datasets import app as datasets_app
-from .info import app as info_app
-from .login import app as login_app
-from .logout import app as logout_app
-from .server import app as server_app
-from .training import app as training_app
-from .users import app as users_app
-from .whoami import app as whoami_app
-from .workspaces import app as workspaces_app
+from typing import TYPE_CHECKING
+
+import typer
+
+if TYPE_CHECKING:
+    from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+
+
+def delete_dataset(ctx: typer.Context) -> None:
+    dataset: "RemoteFeedbackDataset" = ctx.obj
+
+    try:
+        dataset.delete()
+    except RuntimeError as e:
+        typer.echo("An unexpected error occurred when trying to delete the `FeedbackDataset`")
+        raise typer.Exit(code=1) from e
+
+    typer.echo(
+        f"`FeedbackDataset` with name={dataset.name} and workspace={dataset.workspace.name} deleted successfully"
+    )

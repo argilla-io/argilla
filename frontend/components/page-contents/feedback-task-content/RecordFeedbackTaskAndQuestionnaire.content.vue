@@ -50,19 +50,10 @@ export default {
       recordStatusToFilterWith: null,
       searchTextToFilterWith: null,
       currentPage: null,
-      totalRecords: null,
-      numberOfFetch: 0,
       fetching: false,
     };
   },
   computed: {
-    filterParams() {
-      return {
-        _search: this.searchTextToFilterWith,
-        _page: this.currentPage,
-        _status: this.recordStatusToFilterWith,
-      };
-    },
     noMoreDataMessage() {
       return `You've reached the end of the data for the ${this.recordStatusToFilterWith} queue.`;
     },
@@ -119,7 +110,6 @@ export default {
       );
     }
 
-    this.numberOfFetch++;
     this.fetching = false;
   },
   watch: {
@@ -206,7 +196,6 @@ export default {
       this.$root.$emit("reset-search-filter");
     },
     checkAndEmitTotalRecords({ searchFilter, value }) {
-      // NOTE - update the totalRecords to show ONLY if a search input is applied
       if (searchFilter?.length) {
         this.$root.$emit("total-records", value);
       } else {

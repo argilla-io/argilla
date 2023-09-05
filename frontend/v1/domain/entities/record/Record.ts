@@ -18,7 +18,7 @@ export class Record {
     public answer: RecordAnswer,
     private readonly suggestions: Suggestion[],
     public updatedAt: string,
-    public readonly arrayOffset: number
+    public readonly page: number
   ) {
     this.completeQuestion();
   }

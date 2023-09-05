@@ -17,14 +17,14 @@ export const useRecords = () => {
     const allRecords = [...oldRecords.records];
 
     newRecords.records.forEach((newRecord) => {
-      const existingRecord = allRecords.findIndex(
+      const recordIndex = allRecords.findIndex(
         (record) => record.id === newRecord.id
       );
 
-      if (existingRecord > 0) {
-        allRecords[existingRecord] = newRecord;
-      } else {
+      if (recordIndex === -1) {
         allRecords.push(newRecord);
+      } else {
+        allRecords[recordIndex] = newRecord;
       }
     });
 

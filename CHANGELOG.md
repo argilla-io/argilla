@@ -24,7 +24,18 @@ These are the section headers that we use:
 - Added `whoami` command to get current user ([#3673](https://github.com/argilla-io/argilla/pull/3673)).
 - Added `users delete` command to delete users ([#3671](https://github.com/argilla-io/argilla/pull/3671)).
 - Added `users list` command to list users ([#3688](https://github.com/argilla-io/argilla/pull/3688)).
+- Added `workspaces delete-user` command to remove a user from a workspace ([#3699](https://github.com/argilla-io/argilla/pull/3699)).
+- Added `datasets list` command to list Argilla datasets ([#3658](https://github.com/argilla-io/argilla/pull/3658)).
+- Added `users create` command to create users ([#3667](https://github.com/argilla-io/argilla/pull/3667)).
+- Added `users delete` command to delete users ([#3671](https://github.com/argilla-io/argilla/pull/3671)).
+- Added `workspaces create` command to create an Argilla workspace ([#3676](https://github.com/argilla-io/argilla/pull/3676)).
 - Added `datasets push-to-hub` command to push a `FeedbackDataset` from Argilla into the HuggingFace Hub ([#3685](https://github.com/argilla-io/argilla/pull/3685)).
+- Added `info` command to get info about the used Argilla client and server ([#3707](https://github.com/argilla-io/argilla/pull/3707)).
+- Added `datasets delete` command to delete a `FeedbackDataset` from Argilla ([#3703](https://github.com/argilla-io/argilla/pull/3703)).
+
+### Fixed
+
+- Fixed `Pending queue` pagination problems when during data annotation ([#3677](https://github.com/argilla-io/argilla/pull/3677))
 
 ## [1.15.0](https://github.com/argilla-io/argilla/compare/v1.14.1...v1.15.0)
 
