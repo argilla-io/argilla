@@ -33,7 +33,6 @@
 import { isNil } from "lodash";
 import { Notification } from "@/models/Notifications";
 import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
-import { LABEL_PROPERTIES } from "../../feedback-task/feedbackTask.properties";
 import { useRecordFeedbackTaskViewModel } from "./useRecordFeedbackTaskViewModel";
 
 export default {
@@ -211,10 +210,10 @@ export default {
         newSearchValue !== this.searchFilterFromQuery
       ) {
         Notification.dispatch("notify", {
-          message: "Your changes will be lost if you apply the search filter",
+          message: this.$t("changes_no_submit"),
+          buttonText: this.$t("button.ignore_and_continue"),
           numberOfChars: 500,
           type: "warning",
-          buttonText: LABEL_PROPERTIES.CONTINUE,
           async onClick() {
             await localApplySearchFilter(newSearchValue);
           },
@@ -236,10 +235,10 @@ export default {
 
       if (this.questionFormTouched) {
         Notification.dispatch("notify", {
-          message: "Your changes will be lost if you move to another view",
+          message: this.$t("changes_no_submit"),
+          buttonText: this.$t("button.ignore_and_continue"),
           numberOfChars: 500,
           type: "warning",
-          buttonText: LABEL_PROPERTIES.CONTINUE,
           async onClick() {
             await localApplyStatusFilter(newStatus);
           },

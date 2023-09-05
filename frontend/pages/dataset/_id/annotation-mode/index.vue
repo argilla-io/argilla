@@ -46,7 +46,6 @@
 <script>
 import HeaderAndTopAndOneColumn from "@/layouts/HeaderAndTopAndOneColumn";
 import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
-import { LABEL_PROPERTIES } from "@/components/feedback-task/feedbackTask.properties";
 import { Notification } from "@/models/Notifications";
 
 import { useAnnotationModeViewModel } from "./useAnnotationModeViewModel";
@@ -70,8 +69,8 @@ export default {
     if (isNotificationForThisRoute) {
       this.showNotification({
         eventToFireOnClick: next,
-        message: this.toastMessageOnLeavingRoute,
-        buttonMessage: this.buttonMessage,
+        message: this.$t("changes_no_submit"),
+        buttonMessage: this.$t("button.ignore_and_continue"),
       });
     } else {
       next();
@@ -80,12 +79,6 @@ export default {
   created() {
     this.onBusEventAreResponsesUntouched();
     this.checkIfUrlHaveRecordStatusOrInitiateQueryParams();
-
-    this.toastMessageOnRefresh =
-      "Your changes will be lost if you refresh the page";
-    this.toastMessageOnLeavingRoute =
-      "Your changes will be lost if you leave the current page";
-    this.buttonMessage = LABEL_PROPERTIES.CONTINUE;
   },
   methods: {
     checkIfUrlHaveRecordStatusOrInitiateQueryParams() {
@@ -108,8 +101,8 @@ export default {
         eventToFireOnClick: async () => {
           this.loadDataset();
         },
-        message: this.toastMessageOnRefresh,
-        buttonMessage: this.buttonMessage,
+        message: this.$t("changes_no_submit"),
+        buttonMessage: this.$t("button.ignore_and_continue"),
       });
     },
     onBusEventAreResponsesUntouched() {

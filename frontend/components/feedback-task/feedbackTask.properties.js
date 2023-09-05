@@ -7,8 +7,4 @@ const COMPONENT_TYPE = Object.freeze({
   RANKING: "RANKING",
 });
 
-const LABEL_PROPERTIES = Object.freeze({
-  CONTINUE: "Continue",
-});
-
-export { COMPONENT_TYPE, LABEL_PROPERTIES };
+export { COMPONENT_TYPE };
