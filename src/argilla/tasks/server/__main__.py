@@ -17,7 +17,7 @@ import typer
 from .database import app as database_app
 from .start import start
 
-app = typer.Typer()
+app = typer.Typer(help="Commands for managing the Argilla server")
 
 
 app.add_typer(database_app, name="database")
