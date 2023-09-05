@@ -209,7 +209,7 @@ export default {
         this.questionFormTouched &&
         newSearchValue !== this.searchFilterFromQuery
       ) {
-        Notification.dispatch("notify", {
+        return Notification.dispatch("notify", {
           message: this.$t("changes_no_submit"),
           buttonText: this.$t("button.ignore_and_continue"),
           numberOfChars: 500,
@@ -221,9 +221,10 @@ export default {
             localEmitResetSearchFilter();
           },
         });
-      } else {
-        await this.applySearchFilter(newSearchValue);
       }
+
+      if (newSearchValue !== this.searchFilterFromQuery)
+        return await this.applySearchFilter(newSearchValue);
     },
     async onStatusFilterChanged(newStatus) {
       if (this.recordStatusToFilterWith === newStatus) {
