@@ -85,6 +85,11 @@ def test__label_question_errors(
             UserWarning,
             "\`labels=\['a', 'b'\]\` has less than 3 labels, so \`visible_labels\` will be set to \`None\`, which means that all the labels will be visible.",
         ),
+        (
+            {"name": "a", "description": "a", "required": True, "labels": list(range(100))},
+            UserWarning,
+            "Since \`visible_labels\` has not been provided and the total number of labels is greater than 20, \`visible_labels\` will be set to \`20\`.",
+        ),
     ],
 )
 def test__label_question_warnings(
