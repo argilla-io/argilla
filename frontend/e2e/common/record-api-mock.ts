@@ -142,3 +142,21 @@ export const mockDiscardRecord = async (page: Page, recordId: string) => {
     }
   );
 };
+
+export const mockSubmitRecord = async (page: Page, recordId: string) => {
+  await page.route(
+    `*/**/api/v1/records/${recordId}/responses`,
+    async (route) => {
+      await route.fulfill({
+        json: {
+          id: recordId,
+          values: {},
+          status: "submitted",
+          user_id: "3e760b76-e19a-480a-b436-a85812b98843",
+          inserted_at: "2023-07-28T14:45:37",
+          updated_at: "2023-07-28T14:45:37",
+        },
+      });
+    }
+  );
+};

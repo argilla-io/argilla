@@ -5,6 +5,7 @@ import {
   newDatasetsMocked,
   mockRecord,
   mockDiscardRecord,
+  mockSubmitRecord,
   mockRecordForLongAndShortQuestion,
 } from "../common";
 
@@ -14,13 +15,13 @@ const goToAnnotationPage = async (page, shortAndLongQuestions = false) => {
   await mockAllDatasets(page);
   const record = shortAndLongQuestions
     ? await mockRecordForLongAndShortQuestion(page, {
-        datasetId: dataset.id,
-        workspaceId: dataset.workspace_id,
-      })
+      datasetId: dataset.id,
+      workspaceId: dataset.workspace_id,
+    })
     : await mockRecord(page, {
-        datasetId: dataset.id,
-        workspaceId: dataset.workspace_id,
-      });
+      datasetId: dataset.id,
+      workspaceId: dataset.workspace_id,
+    });
 
   await loginUserAndWaitFor(page, "datasets");
 
@@ -126,4 +127,150 @@ test.describe("Annotate page", () => {
 
     await expect(page).toHaveScreenshot();
   });
+
+  test.describe("pending record", () => {
+    test("form have been modified without submit and user try to go to home page => NO alert", async ({ page }) => {
+      await goToAnnotationPage(page);
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByText('Very Positive').first().click();
+      await expect(page).toHaveScreenshot();
+
+      await page.getByRole('link', { name: 'Home' }).click()
+
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("form have been modified without submit and user try to go to settings page => NO alert", async ({ page }) => {
+      await goToAnnotationPage(page);
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByText('Very Positive').first().click();
+      await expect(page).toHaveScreenshot();
+
+      await page.getByRole('button', { name: 'Dataset settings' }).click()
+
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("form have been modified without submit and user try to refresh from sidebar => NO alert", async ({ page }) => {
+      await goToAnnotationPage(page);
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByText('Very Positive').first().click();
+      await expect(page).toHaveScreenshot();
+
+      await page.getByRole('button', { name: 'Refresh' }).click()
+
+      await expect(page).toHaveScreenshot();
+    });
+  });
+  test.describe("discarded record", () => {
+    test("form have been modified without submit and user try to go to home page => NO alert", async ({ page }) => {
+      const record = await goToAnnotationPage(page);
+      await mockDiscardRecord(page, record.id);
+
+      await page.getByRole("button", { name: "Discard" }).click();
+      await page.waitForTimeout(2000);
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByText('Very Positive').first().click();
+      await expect(page).toHaveScreenshot();
+
+      await page.getByRole('link', { name: 'Home' }).click()
+
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("form have been modified without submit and user try to go to settings page => NO alert", async ({ page }) => {
+      const record = await goToAnnotationPage(page);
+      await mockDiscardRecord(page, record.id);
+
+      await page.getByRole("button", { name: "Discard" }).click();
+      await page.waitForTimeout(2000);
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByText('Very Positive').first().click();
+      await expect(page).toHaveScreenshot();
+
+      await page.getByRole('button', { name: 'Dataset settings' }).click()
+
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("form have been modified without submit and user try to refresh from sidebar => NO alert", async ({ page }) => {
+      const record = await goToAnnotationPage(page);
+      await mockDiscardRecord(page, record.id);
+
+      await page.getByRole("button", { name: "Discard" }).click();
+      await page.waitForTimeout(2000);
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByText('Very Positive').first().click();
+      await expect(page).toHaveScreenshot();
+
+      await page.getByRole('button', { name: 'Refresh' }).click()
+
+      await expect(page).toHaveScreenshot();
+    });
+  });
+  test.describe("submitted record", () => {
+    test("form have been modified without submit and user try to go to home page => NO alert", async ({ page }) => {
+      const record = await goToAnnotationPage(page);
+      await mockSubmitRecord(page, record.id);
+
+      await page.getByRole("button", { name: "Submit" }).click();
+      await page.waitForTimeout(2000);
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByText('Very Positive').first().click();
+      await expect(page).toHaveScreenshot();
+
+      await page.getByRole('link', { name: 'Home' }).click()
+
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("form have been modified without submit and user try to go to settings page => NO alert", async ({ page }) => {
+      const record = await goToAnnotationPage(page);
+      await mockSubmitRecord(page, record.id);
+
+      await page.getByRole("button", { name: "Submit" }).click();
+      await page.waitForTimeout(2000);
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByText('Very Positive').first().click();
+      await expect(page).toHaveScreenshot();
+
+      await page.getByRole('button', { name: 'Dataset settings' }).click()
+
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("form have been modified without submit and user try to refresh from sidebar => NO alert", async ({ page }) => {
+      const record = await goToAnnotationPage(page);
+      await mockSubmitRecord(page, record.id);
+
+      await page.getByRole("button", { name: "Submit" }).click();
+      await page.waitForTimeout(2000);
+
+      await expect(page).toHaveScreenshot();
+
+      await page.getByText('Very Positive').first().click();
+      await expect(page).toHaveScreenshot();
+
+      await page.getByRole('button', { name: 'Refresh' }).click()
+
+      await expect(page).toHaveScreenshot();
+    });
+  });
+
 });
