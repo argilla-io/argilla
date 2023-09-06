@@ -9,7 +9,9 @@ You can speed up your annotation by using these keyboard shortcuts:
 | Go to previous label         | `⇧ shift` + `⇥ tab`        |
 | Select/unselect label        | `␣ space`                  |
 | Filter labels                | Type label name            |
-| Select numerical value       | Type number                |
+| Select rating       | Type number                |
+| Rank option | Type number |
+| Change option rank           | Select option and type number|
 | Unrank option                | `⌫ backspace`              |
 | Clear                        | `⇧ shift` + `␣ space`      |
 | Discard                      | `⇧ shift` + `⌫ backspace`  |
