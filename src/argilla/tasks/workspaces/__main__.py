@@ -19,6 +19,7 @@ import typer
 
 from argilla.tasks.callback import init_callback
 
+from .add_user import add_user
 from .create import create_workspace
 from .delete_user import delete_user
 from .list import list_workspaces
@@ -57,6 +58,7 @@ app = typer.Typer(help="Holds CLI commands for workspace management.", no_args_i
 app.command(name="create", help="Create a workspace")(create_workspace)
 app.command(name="list", help="Lists workspaces of the logged user.")(list_workspaces)
 app.command(name="delete-user", help="Deletes a user from a workspace.")(delete_user)
+app.command(name="add-user", help="Adds a user to a workspace.")(add_user)
 
 
 if __name__ == "__main__":

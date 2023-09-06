@@ -58,6 +58,8 @@ def create_user(
         typer.echo("An unexpected error occurred when trying to create the user")
         raise typer.Exit(code=1) from e
 
+    workspaces_str = ", ".join(workspace.name for workspace in user.workspaces)
+
     panel = get_argilla_themed_panel(
         Markdown(
             f"- **Username**: {user.username}\n"
@@ -65,7 +67,7 @@ def create_user(
             f"- **First name**: {user.first_name}\n"
             f"- **Last name**: {user.last_name}\n"
             f"- **API Key**: {user.api_key}\n"
-            f"- **Workspaces**: {user.workspaces}"
+            f"- **Workspaces**: {workspaces_str}"
         ),
         title="User created",
         title_align="left",

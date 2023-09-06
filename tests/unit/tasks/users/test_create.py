@@ -28,7 +28,6 @@ if TYPE_CHECKING:
 class TestSuiteCreateUserCommand:
     def test_create_user(self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", user: "User") -> None:
         user_create_mock = mocker.patch("argilla.client.users.User.create", return_value=user)
-        mocker.patch("argilla.client.users.User.workspaces", return_value=["ws1", "ws2"])
 
         result = cli_runner.invoke(
             cli,
@@ -37,6 +36,11 @@ class TestSuiteCreateUserCommand:
 
         assert result.exit_code == 0
         assert "User created" in result.stdout
+        assert "Username: unit-test" in result.stdout
+        assert "Role: admin" in result.stdout
+        assert "First name: unit-test" in result.stdout
+        assert "Last name: unit-test" in result.stdout
+        assert "Workspaces: unit-test" in result.stdout
         user_create_mock.assert_called_once_with(
             username="unit-test",
             password="unit-test",
