@@ -16,7 +16,7 @@ import alembic.config
 import typer
 
 from argilla.server.database import ALEMBIC_CONFIG_FILE, TAGGED_REVISIONS
-from argilla.tasks import async_typer
+from argilla.tasks import typer_ext
 from argilla.tasks.server.database import utils
 
 
@@ -41,4 +41,4 @@ def revisions():
 
 
 if __name__ == "__main__":
-    async_typer.run(revisions)
+    typer_ext.run(revisions)

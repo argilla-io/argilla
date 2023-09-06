@@ -25,7 +25,7 @@ from argilla.server.security.model import (
     UserCreate,
     WorkspaceCreate,
 )
-from argilla.tasks import async_typer
+from argilla.tasks import typer_ext
 from argilla.tasks.server.database.users.utils import get_or_new_workspace
 
 USER_API_KEY_MIN_LENGTH = 8
@@ -130,4 +130,4 @@ async def create(
 
 
 if __name__ == "__main__":
-    async_typer.run(create)
+    typer_ext.run(create)
