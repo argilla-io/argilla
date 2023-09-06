@@ -77,6 +77,19 @@ export const recordOne = {
   updated_at: "2023-07-18T07:43:38",
 };
 
+export const recordTwo = {
+  id: "9cf21756-00a0-479d-aa46-f2ef9dcf89f2",
+  fields: {
+    text: "Second record",
+  },
+  metadata: null,
+  external_id: null,
+  responses: [],
+  suggestions: [],
+  inserted_at: "2023-07-18T07:43:38",
+  updated_at: "2023-07-18T07:43:38",
+};
+
 export const mockRecord = async (
   page: Page,
   { datasetId, workspaceId }: DatasetData
@@ -93,6 +106,29 @@ export const mockRecord = async (
       await route.fulfill({
         json: {
           items: [recordOne],
+        },
+      });
+    }
+  );
+
+  return recordOne;
+};
+export const mockTwoRecords = async (
+  page: Page,
+  { datasetId, workspaceId }: DatasetData
+) => {
+  await mockFeedbackTaskDataset(page, { datasetId, workspaceId });
+
+  await mockQuestion(page, datasetId);
+
+  await mockFields(page, datasetId);
+
+  await page.route(
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing&response_status=draft`,
+    async (route) => {
+      await route.fulfill({
+        json: {
+          items: [recordOne, recordTwo],
         },
       });
     }
