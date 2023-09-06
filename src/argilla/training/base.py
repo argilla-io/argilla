@@ -267,7 +267,7 @@ _________________________________________________________________
             + f"{self._trainer}"
         )
 
-    def predict(self, text: Union[List[str], str] = None, as_argilla_records: bool = True, **kwargs):
+    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
         """
         `predict` takes a string or list of strings and returns a list of dictionaries, each dictionary
         containing the text, the predicted label, and the confidence score.

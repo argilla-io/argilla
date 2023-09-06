@@ -322,8 +322,6 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
 
                 responses.append(response)
         else:
-            for entry in text:
-                pass
             raise NotImplementedError(
                 f"Prediction for the new OpenAI API is not supported yet. Take a look at their docs https://platform.openai.com/docs/api-reference/chat/create and use `model={self._model}`"
             )
