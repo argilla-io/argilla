@@ -21,14 +21,23 @@ if TYPE_CHECKING:
 
 
 def delete_dataset(ctx: typer.Context) -> None:
+    from argilla.tasks.rich import echo_in_panel
+
     dataset: "RemoteFeedbackDataset" = ctx.obj
 
     try:
         dataset.delete()
     except RuntimeError as e:
-        typer.echo("An unexpected error occurred when trying to delete the `FeedbackDataset`")
+        echo_in_panel(
+            "An unexpected error occurred when trying to delete the `FeedbackDataset`",
+            title="Unexpected error",
+            title_align="left",
+            success=False,
+        )
         raise typer.Exit(code=1) from e
 
-    typer.echo(
-        f"`FeedbackDataset` with name={dataset.name} and workspace={dataset.workspace.name} deleted successfully"
+    echo_in_panel(
+        f"`FeedbackDataset` with name={dataset.name} and workspace={dataset.workspace.name} deleted successfully",
+        title="Dataset deleted",
+        title_align="left",
     )

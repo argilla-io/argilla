@@ -32,6 +32,7 @@ def callback(
     init_callback()
 
     from argilla.client.feedback.dataset.local import FeedbackDataset
+    from argilla.tasks.rich import echo_in_panel
 
     if ctx.invoked_subcommand not in _COMMANDS_REQUIRING_DATASET:
         return
@@ -40,27 +41,30 @@ def callback(
         raise typer.BadParameter("The command requires a workspace name provided using '--name' option")
 
     try:
-        typer.echo(
-            f"Retrieving `FeedbackDataset` with name={name} from Argilla..."
-            if not workspace
-            else f"Retrieving `FeedbackDataset` with name={name} and workspace={workspace} from Argilla..."
-        )
         dataset = FeedbackDataset.from_argilla(name=name, workspace=workspace)
     except ValueError as e:
-        typer.echo(
-            f"`FeedbackDataset` with name={name} not found in Argilla."
+        echo_in_panel(
+            f"`FeedbackDataset` with name={name} not found in Argilla. Try using '--workspace' option."
             if not workspace
-            else f"`FeedbackDataset with name={name} and workspace={workspace} not found in Argilla."
+            else f"`FeedbackDataset with name={name} and workspace={workspace} not found in Argilla.",
+            title="Dataset not found",
+            title_align="left",
+            success=False,
         )
         raise typer.Exit(1) from e
     except Exception as e:
-        typer.echo("An unexpected error occurred when trying to get the `FeedbackDataset` from Argilla.")
+        echo_in_panel(
+            "An unexpected error occurred when trying to get the `FeedbackDataset` from Argilla.",
+            title="Unexpected error",
+            title_align="left",
+            success=False,
+        )
         raise typer.Exit(code=1) from e
 
     ctx.obj = dataset
 
 
-app = typer.Typer(help="Holds CLI commands for datasets management", invoke_without_command=False, callback=callback)
+app = typer.Typer(help="Holds CLI commands for datasets management", no_args_is_help=True, callback=callback)
 
 app.command(name="list", help="List datasets linked to user's workspaces")(list_datasets)
 app.command(name="push-to-huggingface", help="Push a dataset to HuggingFace Hub")(push_to_huggingface)

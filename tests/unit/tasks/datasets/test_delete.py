@@ -43,7 +43,7 @@ class TestSuiteDeleteDataset:
         result = cli_runner.invoke(cli, "datasets --name unit-test --workspace unit-test delete")
 
         assert result.exit_code == 0
-        assert "`FeedbackDataset` with name=unit-test and workspace=unit-test deleted successfully" in result.stdout
+        assert "`FeedbackDataset` with name=unit-test and workspace=unit-test deleted" in result.stdout
         dataset_from_argilla_mock.assert_called_once_with(name="unit-test", workspace="unit-test")
         remote_feedback_dataset_delete_mock.assert_called_once()
 
@@ -74,5 +74,5 @@ class TestSuiteDeleteDataset:
 def test_cli_datasets_delete_needs_login(cli_runner: "CliRunner", cli: "Typer") -> None:
     result = cli_runner.invoke(cli, "datasets --name my-dataset --workspace my-workspace delete")
 
-    assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout
+    assert "You are not logged in. Please run 'argilla login' to login" in result.stdout
     assert result.exit_code == 1

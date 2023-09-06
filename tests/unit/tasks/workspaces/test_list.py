@@ -61,5 +61,5 @@ def test_cli_workspaces_list(cli_runner: "CliRunner", cli: "Typer", mocker: "Moc
 def test_cli_workspaces_list_needs_login(cli_runner: "CliRunner", cli: "Typer"):
     result = cli_runner.invoke(cli, "workspaces list")
 
-    assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout
+    assert "You are not logged in. Please run 'argilla login' to login" in result.stdout
     assert result.exit_code == 1

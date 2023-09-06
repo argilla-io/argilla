@@ -92,7 +92,7 @@ class TestSuiteListDatasetsCommand:
         result = cli_runner.invoke(cli, "datasets list --workspace unit-test")
 
         assert result.exit_code == 1
-        assert "Workspace 'unit-test' does not exist!" in result.stdout
+        assert "Workspace with name=unit-test does not exist" in result.stdout
         workspace_from_name_mock.assert_called_once_with("unit-test")
 
     def test_list_datasets_using_type_feedback_filter(
@@ -124,5 +124,5 @@ class TestSuiteListDatasetsCommand:
 def test_cli_datasets_list_needs_login(cli_runner: "CliRunner", cli: "Typer") -> None:
     result = cli_runner.invoke(cli, "datasets list")
 
-    assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout
+    assert "You are not logged in. Please run 'argilla login' to login" in result.stdout
     assert result.exit_code == 1

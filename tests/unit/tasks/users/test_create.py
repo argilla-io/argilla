@@ -53,7 +53,7 @@ class TestSuiteCreateUserCommand:
     @pytest.mark.parametrize(
         "ExceptionType, expected_msg",
         [
-            (KeyError, "User with 'unit-test' already exists!"),
+            (KeyError, "User with name=unit-test already exists"),
             (ValueError, "Provided parameters are not valid"),
             (RuntimeError, "An unexpected error occurred when trying to create the user"),
         ],
@@ -90,4 +90,4 @@ def test_create_user_needs_login(cli_runner: "CliRunner", cli: "Typer") -> None:
     result = cli_runner.invoke(cli, "users create --username unit-test --password unit-test")
 
     assert result.exit_code == 1
-    assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout
+    assert "You are not logged in. Please run 'argilla login' to login" in result.stdout

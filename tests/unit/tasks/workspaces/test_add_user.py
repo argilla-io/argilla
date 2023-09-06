@@ -34,7 +34,7 @@ class TestSuiteWorkspaceAddUser:
         result = cli_runner.invoke(cli, "workspaces --name unit-test add-user unit-test")
 
         assert result.exit_code == 0
-        assert "User with username 'unit-test' has been added to 'unit-test' workspace" in result.stdout
+        assert "User with username=unit-test has been added to workspace=unit-test" in result.stdout
 
     def test_workspace_add_user_with_non_existing_workspace(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"
@@ -44,7 +44,7 @@ class TestSuiteWorkspaceAddUser:
         result = cli_runner.invoke(cli, "workspaces --name unit-test add-user unit-test")
 
         assert result.exit_code == 1
-        assert "Workspace 'unit-test' does not exist" in result.stdout
+        assert "Workspace with name=unit-test does not exist" in result.stdout
 
     def test_workspace_add_user_with_non_existing_user(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", workspace, user
@@ -55,7 +55,7 @@ class TestSuiteWorkspaceAddUser:
         result = cli_runner.invoke(cli, "workspaces --name unit-test add-user unit-test")
 
         assert result.exit_code == 1
-        assert "User with username 'unit-test' does not exist" in result.stdout
+        assert "User with username=unit-test does not exist" in result.stdout
 
     def test_workspace_add_user_with_owner_user(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", workspace, user
@@ -67,10 +67,7 @@ class TestSuiteWorkspaceAddUser:
         result = cli_runner.invoke(cli, "workspaces --name unit-test add-user unit-test")
 
         assert result.exit_code == 1
-        assert (
-            "User with name=unit-test is an owner. Users with owner role don't need specific permissions per"
-            " workspace, as those are super-users with privileges over everything under Argilla." in result.stdout
-        )
+        assert "User with name=unit-test is an owner" in result.stdout
 
     def test_workspace_add_user_with_user_belonging_to_workspace(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", workspace, user
@@ -82,7 +79,7 @@ class TestSuiteWorkspaceAddUser:
         result = cli_runner.invoke(cli, "workspaces --name unit-test add-user unit-test")
 
         assert result.exit_code == 1
-        assert "User with username 'unit-test' already exists in workspace 'unit-test'" in result.stdout
+        assert "User with username=unit-test already exists in workspace=unit-test" in result.stdout
 
     def test_workspace_add_user_with_unexpected_error(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", workspace, user
@@ -106,7 +103,7 @@ class TestSuiteWorkspaceAddUser:
         result = cli_runner.invoke(cli, "workspaces --name unit-test add-user unit-test")
 
         assert result.exit_code == 1
-        assert "An unexpected error occurred when trying to retrieve the user from the Argilla server" in result.stdout
+        assert "An unexpected error occurred when trying to retrieve the user" in result.stdout
 
     def test_workspace_add_user_without_workspace_name(self, cli_runner: "CliRunner", cli: "Typer") -> None:
         result = cli_runner.invoke(cli, "workspaces add-user unit-test")
@@ -119,4 +116,4 @@ def test_list_users_needs_login(cli_runner: "CliRunner", cli: "Typer") -> None:
     result = cli_runner.invoke(cli, "workspaces --name unit-test add-user unit-test")
 
     assert result.exit_code == 1
-    assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout
+    assert "You are not logged in. Please run 'argilla login' to login" in result.stdout
