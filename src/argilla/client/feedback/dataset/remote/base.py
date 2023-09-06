@@ -270,7 +270,7 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
         """
         self._records.delete(records=[records] if not isinstance(records, list) else records)
 
-    def pull(self) -> "FeedbackDataset":
+    def pull_from_argilla(self) -> "FeedbackDataset":
         """Pulls the dataset from Argilla and returns a local instance of it.
 
         Returns:
@@ -299,3 +299,12 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
             ],
         )
         return instance
+
+    def pull(self) -> "FeedbackDataset":
+        """`pull` will be deprecated in future versions. Use `pull_from_argilla` instead."""
+        warnings.warn(
+            "`pull` will be deprecated in future versions. Use `pull_from_argilla` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.pull_from_argilla()
