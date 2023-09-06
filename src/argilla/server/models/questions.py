@@ -118,25 +118,27 @@ class RankingQuestionSettings(ValidOptionCheckerMixin[str]):
         if not isinstance(response.value, list):
             raise ValueError(f"This Ranking question expects a list of values, found {type(response.value)}")
 
-        # Only if the response is submitted check that all the possible options have been ranked
-        if status == ResponseStatus.submitted and len(response.value) != len(self.option_values):
-            raise ValueError(
-                f"This Ranking question expects a list containing {len(self.option_values)} values, found a list of"
-                f" {len(response.value)} values"
-            )
-
         values = []
         ranks = []
         for response_option in response.value:
             values.append(response_option.get("value"))
             ranks.append(response_option.get("rank"))
 
-        invalid_ranks = _are_all_elements_in_list(ranks, self.rank_values)
-        if invalid_ranks:
-            raise ValueError(
-                f"{invalid_ranks!r} are not valid ranks for this Ranking question.\nValid ranks are:"
-                f" {self.rank_values!r}"
-            )
+        # Only if the response is submitted check that all the possible options have been ranked or that all the
+        # provided options contains a valid rank
+        if status == ResponseStatus.submitted:
+            if len(response.value) != len(self.option_values):
+                raise ValueError(
+                    f"This Ranking question expects a list containing {len(self.option_values)} values, found a list of"
+                    f" {len(response.value)} values"
+                )
+
+            invalid_ranks = _are_all_elements_in_list(ranks, self.rank_values)
+            if invalid_ranks:
+                raise ValueError(
+                    f"{invalid_ranks!r} are not valid ranks for this Ranking question.\nValid ranks are:"
+                    f" {self.rank_values!r}"
+                )
 
         invalid_values = _are_all_elements_in_list(values, self.option_values)
         if invalid_values:

@@ -26,7 +26,7 @@ export const useStoreFor = <T, S>(Ctor: Class<T>) => {
         this.$patch({ state });
       },
       get(): T {
-        return create(Ctor, this.$state.state);
+        return create(Ctor, this.state);
       },
     },
   });
