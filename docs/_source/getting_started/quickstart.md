@@ -24,5 +24,6 @@ An end-to-end workflow:
 :hidden:
 
 quickstart_installation
+quickstart_workflow_feedback
 quickstart_workflow
 ```
