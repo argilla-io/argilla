@@ -14,8 +14,6 @@
 
 import warnings
 
-import typer
-
 from argilla.tasks import (
     datasets_app,
     info_app,
@@ -36,17 +34,21 @@ app = ArgillaTyper(help="Argilla CLI", no_args_is_help=True)
 
 @app.error_handler(PermissionError)
 def handler_permission_error(e: PermissionError) -> None:
+    import sys
+
     from rich.console import Console
 
     from argilla.tasks.rich import get_argilla_themed_panel
 
     panel = get_argilla_themed_panel(
-        "Logged in user doesn't have enough permissions to execute this command.",
+        "Logged in user doesn't have enough permissions to execute this command",
         title="Not enough permissions",
+        title_align="left",
         success=False,
     )
 
     Console().print(panel)
+    sys.exit(1)
 
 
 app.add_typer(datasets_app, name="datasets")
