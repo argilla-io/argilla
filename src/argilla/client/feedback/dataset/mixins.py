@@ -240,7 +240,8 @@ class ArgillaMixin:
         *,
         workspace: Optional[str] = None,
         id: Optional[str] = None,
-    ) -> RemoteFeedbackDataset:
+        sync: bool = True,
+    ) -> Union["FeedbackDataset", RemoteFeedbackDataset]:
         """Retrieves an existing `FeedbackDataset` from Argilla (must have been pushed in advance).
 
         Note that even though no argument is mandatory, you must provide either the `name`,
@@ -251,6 +252,9 @@ class ArgillaMixin:
             workspace: the workspace of the `FeedbackDataset` to retrieve from Argilla.
                 If not provided, the active workspace will be used.
             id: the ID of the `FeedbackDataset` to retrieve from Argilla. Defaults to `None`.
+            sync: the option to choose to sync the retrieved `FeedbackDataset` with Argilla, or
+                to work with a local `FeedbackDataset` instead. Defaults to `True`, which means
+                that you will be working with a synced `RemoteFeedbackDataset` instead.
 
         Returns:
             The `RemoteFeedbackDataset` retrieved from Argilla.
@@ -280,7 +284,7 @@ class ArgillaMixin:
         fields = cls.__get_fields(client=httpx_client, id=existing_dataset.id)
         questions = cls.__get_questions(client=httpx_client, id=existing_dataset.id)
 
-        return RemoteFeedbackDataset(
+        dataset = RemoteFeedbackDataset(
             client=httpx_client,
             id=existing_dataset.id,
             name=existing_dataset.name,
@@ -291,6 +295,9 @@ class ArgillaMixin:
             questions=questions,
             guidelines=existing_dataset.guidelines or None,
         )
+        if not sync:
+            dataset = dataset.pull_from_argilla()
+        return dataset
 
     @classmethod
     def list(cls: Type["FeedbackDataset"], workspace: Optional[str] = None) -> List[RemoteFeedbackDataset]:
