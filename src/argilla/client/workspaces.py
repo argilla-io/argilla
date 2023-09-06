@@ -156,7 +156,7 @@ class Workspace:
         except RuntimeError as e:
             raise RuntimeError(f"Error while retrieving user with id=`{user_id}` from Argilla.") from e
 
-        if user.role == UserRole.owner:
+        if user.is_owner:
             warnings.warn(
                 "The user you are trying to add to the workspace has the `owner` role, so it"
                 " will be excluded from the workspace. Note that users with `owner` role are"
@@ -205,7 +205,7 @@ class Workspace:
         except RuntimeError as e:
             raise RuntimeError(f"Error while retrieving user with id=`{user_id}` from Argilla.") from e
 
-        if user.role == UserRole.owner:
+        if user.is_owner:
             warnings.warn(
                 "The user you are trying to delete from the workspace has the `owner` role, so it"
                 " will be excluded from the workspace. Note that users with `owner` role are"
