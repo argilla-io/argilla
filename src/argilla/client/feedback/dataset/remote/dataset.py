@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import warnings
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
@@ -146,6 +147,16 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             fields=fields,
             questions=questions,
             guidelines=guidelines,
+        )
+        warnings.warn(
+            "Note that this is an instance of `RemoteFeedbackDataset`, which implies that will be"
+            " synced with Argilla, and all the additions, updates, and deletions will be"
+            " automatically pushed to Argilla. If you want to work with a local `FeedbackDataset`"
+            " instead, you can either call `pull_from_argilla` on this instance, or call"
+            " `FeedbackDataset.from_argilla` with the same arguments you used to create this"
+            " instance, but adding `sync=False`.",
+            UserWarning,
+            stacklevel=2,
         )
 
     def filter_by(
