@@ -309,7 +309,12 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
         )
         return self.pull_from_argilla()
 
-    def push_to_argilla(self) -> None:
+    def push_to_argilla(
+        self,
+        name: Optional[str] = None,
+        workspace: Optional[Union[str, Workspace]] = None,
+        show_progress: Optional[bool] = None,
+    ) -> None:
         """`push_to_argilla` doesn't work for neither `RemoteFeedbackDataset` nor `FilteredRemoteFeedbackDataset`."""
         warnings.warn(
             "`push_to_argilla` doesn't work for neither `RemoteFeedbackDataset` nor `FilteredRemoteFeedbackDataset`,"
