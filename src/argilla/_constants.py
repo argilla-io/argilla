@@ -32,6 +32,6 @@ ES_INDEX_REGEX_PATTERN = r"^(?!-|_)[a-z0-9-_]+$"
 OPENAI_SEPARATOR = "\n\n###\n\n"
 OPENAI_END_TOKEN = " END"
 OPENAI_WHITESPACE = " "
-OPENAI_LEGACY_MODEL = ["babbage", "davinci", "curie", "ada"]
+OPENAI_LEGACY_MODELS = ["babbage", "davinci", "curie", "ada"]
 
 _JS_MAX_SAFE_INTEGER = 9007199254740991

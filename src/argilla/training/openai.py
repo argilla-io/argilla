@@ -19,7 +19,7 @@ from typing import List, Union
 
 import numpy as np
 
-from argilla._constants import OPENAI_END_TOKEN, OPENAI_LEGACY_MODEL, OPENAI_SEPARATOR, OPENAI_WHITESPACE
+from argilla._constants import OPENAI_END_TOKEN, OPENAI_LEGACY_MODELS, OPENAI_SEPARATOR, OPENAI_WHITESPACE
 from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.datasets import TextClassificationSettings, TokenClassificationSettings
 from argilla.training.base import ArgillaTrainerSkeleton
@@ -59,7 +59,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         if self._model is None:
             self._model = "gpt-3.5-turbo"
 
-        if any([self._model in model for model in OPENAI_LEGACY_MODEL]):
+        if any([self._model in model for model in OPENAI_LEGACY_MODELS]):
             self._logger.warning("Using the OpenAI legacy trainer, please use a newer model.")
             self.__legacy = True
         else:
