@@ -18,7 +18,7 @@ from argilla.utils.dependency import require_version
 
 
 class ArgillaOpenAITrainer(ArgillaOpenAITrainerV1, ArgillaTrainerSkeleton):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         require_version("openai>=0.27.10")
         ArgillaTrainerSkeleton.__init__(self, *args, **kwargs)
 

@@ -38,7 +38,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
     if OPENAI_API_KEY not in os.environ:
         raise ValueError(f"{OPENAI_API_KEY} not found in environment variables.")
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         require_version("openai>=0.27.10")
         super().__init__(*args, **kwargs)
 
@@ -82,7 +82,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
 
         self.init_training_args(model=self._model)
 
-    def _convert_data_to_new_format(self, dataset):
+    def _convert_data_to_new_format(self, dataset) -> List[dict]:
         new_dataset = []
         for entry in dataset:
             new_dataset.append(
@@ -178,7 +178,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
                 formatted_string.append(f"{key}: {val}")
         return "\nhttps://platform.openai.com/docs/api-reference/fine-tune\n" + "\n".join(formatted_string)
 
-    def upload_dataset_to_openai(self, dataset, file_name):
+    def upload_dataset_to_openai(self, dataset, file_name) -> str:
         import io
         import json
 
@@ -201,7 +201,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         file_id = upload_response.id
         return file_id
 
-    def train(self, output_dir: str = None):
+    def train(self, output_dir: str = None) -> None:
         """
         We create a openai.FineTune object from a pretrained model, and send data to finetune it.
         """
@@ -245,7 +245,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
             message = f"`openai.FineTuningJob.retrieve('{self.finetune_id}')`"
         self._logger.info(f"Waiting for training OpenAI will send an email when done. Get info by running: {message}.")
 
-    def init_model(self):
+    def init_model(self) -> None:
         import openai
 
         if self.finetune_id is not None:
@@ -263,7 +263,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
             self._model = response.id
             self._logger.info(response)
 
-    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
+    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs) -> Union[List, str]:
         """
         The function takes in a list of strings and returns a list of predictions
 
@@ -334,7 +334,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         else:
             return responses
 
-    def save(self, *arg, **kwargs):
+    def save(self, *arg, **kwargs) -> None:
         """
         The function saves the model to the path specified, and also saves the label2id and id2label
         dictionaries to the same path
