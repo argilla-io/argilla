@@ -192,8 +192,8 @@ class _LabelQuestion(QuestionSchema, LabelMappingMixin):
                         stacklevel=1,
                     )
                     visible_labels = None
+        values["visible_labels"] = visible_labels
         values["settings"]["visible_options"] = visible_labels
-
         return values
 
 
