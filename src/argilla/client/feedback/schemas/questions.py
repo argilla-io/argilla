@@ -119,6 +119,10 @@ class RatingQuestion(QuestionSchema, LabelMappingMixin):
         return values
 
 
+UndefinedType = Literal["undefined"]
+UNDEFINED = "undefined"
+
+
 class _LabelQuestion(QuestionSchema, LabelMappingMixin):
     """Protected schema for the `FeedbackDataset` label questions, which are the ones that
     will require a label response from the user. This class should not be used directly,
@@ -137,7 +141,7 @@ class _LabelQuestion(QuestionSchema, LabelMappingMixin):
     """
 
     labels: Union[conlist(str, unique_items=True, min_items=2), Dict[str, str]]
-    visible_labels: Union[Literal["undefined"], conint(ge=3), None] = "undefined"
+    visible_labels: Union[UndefinedType, conint(ge=3), None] = UNDEFINED
 
     @validator("labels", pre=True, always=True)
     def labels_dict_must_be_valid(cls, v: Union[List[str], Dict[str, str]]) -> Union[List[str], Dict[str, str]]:
@@ -157,7 +161,7 @@ class _LabelQuestion(QuestionSchema, LabelMappingMixin):
         elif isinstance(values.get("labels"), list):
             values["settings"]["options"] = [{"value": label, "text": label} for label in values.get("labels")]
 
-        if values.get("visible_labels") == "undefined":
+        if values.get("visible_labels") == UNDEFINED:
             if len(values.get("labels", [])) > 20:
                 warnings.warn(
                     "Since `visible_labels` has not been provided and the total number"
