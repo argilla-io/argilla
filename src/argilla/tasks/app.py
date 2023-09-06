@@ -14,6 +14,8 @@
 
 import warnings
 
+import typer
+
 from argilla.tasks import (
     datasets_app,
     info_app,
@@ -24,12 +26,28 @@ from argilla.tasks import (
     whoami_app,
     workspaces_app,
 )
-from argilla.tasks.async_typer import AsyncTyper
+from argilla.tasks.typer_ext import ArgillaTyper
 from argilla.utils.dependency import is_package_with_extras_installed
 
 warnings.simplefilter("ignore", UserWarning)
 
-app = AsyncTyper(rich_help_panel=True, help="Argilla CLI", no_args_is_help=True)
+app = ArgillaTyper(help="Argilla CLI", no_args_is_help=True)
+
+
+@app.error_handler(PermissionError)
+def handler_permission_error(e: PermissionError) -> None:
+    from rich.console import Console
+
+    from argilla.tasks.rich import get_argilla_themed_panel
+
+    panel = get_argilla_themed_panel(
+        "Logged in user doesn't have enough permissions to execute this command.",
+        title="Not enough permissions",
+        success=False,
+    )
+
+    Console().print(panel)
+
 
 app.add_typer(datasets_app, name="datasets")
 app.add_typer(info_app, name="info")
