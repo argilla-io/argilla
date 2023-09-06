@@ -28,5 +28,7 @@ def get_argilla_themed_table(title: str, **kwargs: Any) -> Table:
     return Table(title=title, border_style=_ARGILLA_BORDER_STYLE, **kwargs)
 
 
-def get_argilla_themed_panel(renderable: "RenderableType", **kwargs: Any) -> Panel:
-    return Panel(renderable=renderable, border_style=_ARGILLA_BORDER_STYLE, **kwargs)
+def get_argilla_themed_panel(renderable: "RenderableType", title: str, success: bool = True, **kwargs: Any) -> Panel:
+    if success:
+        title = f"[green]{title}"
+    return Panel(renderable=renderable, border_style=_ARGILLA_BORDER_STYLE, title=title, **kwargs)
