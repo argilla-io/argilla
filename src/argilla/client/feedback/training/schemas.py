@@ -119,7 +119,7 @@ class TrainingData(ABC):
         return df.to_dict(orient="records")
 
     @property
-    def supported_frameworks(self):
+    def supported_frameworks(self) -> List[Framework]:
         return []
 
     def test_framework_support(self, framework: Union[str, Framework]):
@@ -443,7 +443,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
     ] = None
 
     @property
-    def supported_frameworks(self):
+    def supported_frameworks(self) -> List[Framework]:
         names = ["transformers", "spacy", "openai", "setfit", "peft", "spark-nlp", "spacy-transformers"]
         return [Framework(name) for name in names]
 
@@ -715,7 +715,7 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
         return [{"text": text} for text in formatted_texts]
 
     @property
-    def supported_frameworks(self):
+    def supported_frameworks(self) -> List[Framework]:
         names = ["trl"]
         return [Framework(name) for name in names]
 
@@ -800,7 +800,7 @@ class TrainingTaskForRM(BaseModel, TrainingData):
         return [{"chosen": chosen, "rejected": rejected} for chosen, rejected in output]
 
     @property
-    def supported_frameworks(self):
+    def supported_frameworks(self) -> List[Framework]:
         names = ["trl"]
         return [Framework(name) for name in names]
 
@@ -869,7 +869,7 @@ class TrainingTaskForPPO(BaseModel, TrainingData):
         return [{"query": text} for text in formatted_texts]
 
     @property
-    def supported_frameworks(self):
+    def supported_frameworks(self) -> List[Framework]:
         names = ["trl"]
         return [Framework(name) for name in names]
 
@@ -950,7 +950,7 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
         return [{"prompt": prompt, "chosen": chosen, "rejected": rejected} for prompt, chosen, rejected in output]
 
     @property
-    def supported_frameworks(self):
+    def supported_frameworks(self) -> List[Framework]:
         names = ["trl"]
         return [Framework(name) for name in names]
 
@@ -1010,7 +1010,7 @@ class TrainingTaskForChatCompletion(BaseModel, TrainingData):
         return [{"chat": chat, "turn": turn, "role": role, "content": content} for chat, turn, role, content in output]
 
     @property
-    def supported_frameworks(self):
+    def supported_frameworks(self) -> List[Framework]:
         names = ["openai"]
         return [Framework(name) for name in names]
 

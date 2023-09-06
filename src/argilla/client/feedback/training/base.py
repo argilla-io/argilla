@@ -263,7 +263,7 @@ class ArgillaTrainerSkeleton(ABC):
         """
 
     @abstractmethod
-    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
+    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs) -> None:
         """
         Predicts the label of the text.
         """
