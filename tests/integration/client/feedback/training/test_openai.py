@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     pass
 
 
-def test_training_task_for_chat_completion():
+def test_training_task_for_chat_completion(mocked_openai):
     dataset = rg.FeedbackDataset.from_huggingface("argilla/customer_assistant")
     # adapation from LlamaIndex's TEXT_QA_PROMPT_TMPL_MSGS[1].content
     user_message_prompt = """Context information is below.
@@ -75,8 +75,9 @@ def test_training_task_for_chat_completion():
             model="davinci",
         )
 
-    rg.feedback.ArgillaTrainer(
+    trainer = rg.feedback.ArgillaTrainer(
         dataset=dataset,
         task=task,
         framework="openai",
     )
+    trainer.train("mock")
