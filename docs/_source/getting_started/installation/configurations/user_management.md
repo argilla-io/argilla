@@ -154,7 +154,7 @@ User with default credentials succesfully created:
 
 #### Python client
 
-You can get the current active user in Argilla using the `me` classmethod in the `User` class. Note that the `me` method will return the active user as specified via the credentials provided via `rg.init`.
+You can get the current active user in Argilla using the `me` classmethod in the `User` class. Note that the `me` method will return the active user as specified via the credentials provided via `rg.init`. Also, it is possible [set this information using environment variables](/getting_started/installation/configurations/server_configuration.html#client), which allows for skipping `rg,init`.
 
 ```python
 import argilla as rg
