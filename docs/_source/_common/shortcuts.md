@@ -2,19 +2,19 @@ You can speed up your annotation by using these keyboard shortcuts:
 
 | Action                       | Keys                       |
 | ---------------------------- | -------------------------- |
-| Activate feedback form       | `⇥ Tab`                    |
-| Go to next question          | `⇧ Shift` + `↓ Down arrow` |
-| Go to previous question      | `⇧ Shift` + `↑ Up arrow`   |
-| Go to next label             | `⇥ Tab`                    |
-| Go to previous label         | `⇧ Shift` + `⇥ Tab`        |
-| Select/unselect label        | `␣ Space`                  |
+| Activate feedback form       | `⇥ tab`                    |
+| Go to next question          | `⇧ shift` + `↓ down arrow` |
+| Go to previous question      | `⇧ shift` + `↑ up arrow`   |
+| Go to next label             | `⇥ tab`                    |
+| Go to previous label         | `⇧ shift` + `⇥ tab`        |
+| Select/unselect label        | `␣ space`                  |
 | Filter labels                | Type label name            |
 | Select numerical value       | Type number                |
-| Unrank option                | `⌫ Backspace`              |
-| Clear                        | `⇧ Shift` + `␣ Space`      |
-| Discard                      | `⇧ Shift` + `⌫ Backspace`  |
-| Submit                       | `⇧ Shift` + `↵ Enter`      |
-| Go to next page (Mac os)     | `⌘ cmd` + `→ Right arrow`  |
-| Go to previous page (Mac os) | `⌘ cmd` + `← Left arrow`   |
-| Go to next page (Other)      | `ctrl` + `→ Right arrow`   |
-| Go to previous page (Other)  | `ctrl` + `← Left arrow`    |
+| Unrank option                | `⌫ backspace`              |
+| Clear                        | `⇧ shift` + `␣ space`      |
+| Discard                      | `⇧ shift` + `⌫ backspace`  |
+| Submit                       | `⇧ shift` + `↵ enter`      |
+| Go to next page (Mac os)     | `⌘ cmd` + `→ right arrow`  |
+| Go to previous page (Mac os) | `⌘ cmd` + `← left arrow`   |
+| Go to next page (Other)      | `ctrl` + `→ right arrow`   |
+| Go to previous page (Other)  | `ctrl` + `← left arrow`    |
