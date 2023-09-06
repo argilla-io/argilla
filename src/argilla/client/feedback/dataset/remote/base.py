@@ -308,3 +308,14 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
             stacklevel=2,
         )
         return self.pull_from_argilla()
+
+    def push_to_argilla(self) -> None:
+        """`push_to_argilla` doesn't work for neither `RemoteFeedbackDataset` nor `FilteredRemoteFeedbackDataset`."""
+        warnings.warn(
+            "`push_to_argilla` doesn't work for neither `RemoteFeedbackDataset` nor `FilteredRemoteFeedbackDataset`,"
+            " as the additions, updates, and deletions over those will be automatically pushed to Argilla, without"
+            " explicitly calling `push_to_argilla` as in the local `FeedbackDataset`.",
+            UserWarning,
+            stacklevel=2,
+        )
+        pass
