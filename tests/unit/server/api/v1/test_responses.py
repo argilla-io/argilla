@@ -48,11 +48,33 @@ if TYPE_CHECKING:
 
 @pytest.mark.asyncio
 class TestSuiteResponses:
+    @pytest.mark.parametrize(
+        "response_json",
+        [
+            {
+                "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                "status": "submitted",
+            },
+            {
+                "values": {"input_ok": {"value": "yes"}},
+                "status": "submitted",
+            },
+            {
+                "values": {"output_ok": {"value": "yes"}},
+                "status": "draft",
+            },
+        ],
+    )
     async def test_update_response(
-        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        mock_search_engine: SearchEngine,
+        owner_auth_header: dict,
+        response_json: dict,
     ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
-        await TextQuestionFactory.create(name="input_ok", dataset=dataset)
+        await TextQuestionFactory.create(name="input_ok", dataset=dataset, required=True)
         await TextQuestionFactory.create(name="output_ok", dataset=dataset)
         record = await RecordFactory.create(dataset=dataset)
 
@@ -61,24 +83,17 @@ class TestSuiteResponses:
             values={"input_ok": {"value": "no"}, "output_ok": {"value": "no"}},
             status=ResponseStatus.submitted,
         )
-        response_json = {
-            "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
-            "status": "submitted",
-        }
 
         resp = await async_client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
 
         assert resp.status_code == 200
-        assert (await db.get(Response, response.id)).values == {
-            "input_ok": {"value": "yes"},
-            "output_ok": {"value": "yes"},
-        }
+        assert (await db.get(Response, response.id)).values == response_json["values"]
 
         resp_body = resp.json()
         assert resp_body == {
             "id": str(response.id),
-            "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
-            "status": "submitted",
+            "values": response_json["values"],
+            "status": response_json["status"],
             "record_id": str(response.record_id),
             "user_id": str(response.user_id),
             "inserted_at": response.inserted_at.isoformat(),
@@ -173,6 +188,14 @@ class TestSuiteResponses:
                 RankingQuestionFactory,
                 [
                     {"value": "completion-a", "rank": 1},
+                ],
+            ),
+            (
+                RankingQuestionFactory,
+                [
+                    {"value": "completion-a", "rank": 1},
+                    {"value": "completion-b"},
+                    {"value": "completion-c"},
                 ],
             ),
         ],

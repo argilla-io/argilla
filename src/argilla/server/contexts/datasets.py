@@ -441,7 +441,11 @@ async def update_response(
 
     async with db.begin_nested():
         response = await response.update(
-            db, values=jsonable_encoder(response_update.values), status=response_update.status, autocommit=False
+            db,
+            values=jsonable_encoder(response_update.values),
+            status=response_update.status,
+            replace_dict=True,
+            autocommit=False,
         )
         await search_engine.update_record_response(response)
 
