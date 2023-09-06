@@ -15,7 +15,7 @@
 import asyncio
 import sys
 from functools import wraps
-from typing import Any, Callable, Coroutine, TypeVar
+from typing import Any, Callable, Coroutine, Dict, Type, TypeVar
 
 import typer
 
@@ -28,9 +28,13 @@ else:
 P = ParamSpec("P")
 R = TypeVar("R")
 
+HandleErrorFunc = Callable[[Exception], None]
 
-# https://github.com/tiangolo/typer/issues/88#issuecomment-1613013597
-class AsyncTyper(typer.Typer):
+
+class ArgillaTyper(typer.Typer):
+    error_handlers: Dict[Type[Exception], HandleErrorFunc] = {}
+
+    # https://github.com/tiangolo/typer/issues/88#issuecomment-1613013597
     def command(
         self, *args: Any, **kwargs: Any
     ) -> Callable[[Callable[P, Coroutine[Any, Any, R]]], Callable[P, Coroutine[Any, Any, R]]]:
@@ -50,8 +54,25 @@ class AsyncTyper(typer.Typer):
 
         return decorator
 
+    def error_handler(self, exc: Type[Exception]) -> Callable[[HandleErrorFunc], None]:
+        def decorator(func: HandleErrorFunc) -> None:
+            self.error_handlers[exc] = func
+
+        return decorator
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        try:
+            return super().__call__(*args, **kwargs)
+        except typer.Exit as e:
+            raise e
+        except Exception as e:
+            handler = self.error_handlers.get(type(e))
+            if handler is None:
+                raise e
+            handler(e)
+
 
 def run(function: Callable[..., Coroutine[Any, Any, Any]]) -> None:
-    app = AsyncTyper(add_completion=False)
+    app = ArgillaTyper(add_completion=False)
     app.command()(function)
     app()
