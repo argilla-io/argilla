@@ -21,62 +21,11 @@
           </NuxtLink>
         </p>
       </div>
-      <div
-        class="form-group"
-        v-for="question in record.questions"
-        :key="question.id"
-      >
-        <TextAreaComponent
-          v-if="question.isTextType"
-          :title="question.title"
-          v-model="question.answer.value"
-          :placeholder="question.settings.placeholder"
-          :useMarkdown="question.settings.use_markdown"
-          :hasSuggestion="!record.isSubmitted && question.matchSuggestion"
-          :isRequired="question.isRequired"
-          :description="question.description"
-        />
 
-        <SingleLabelComponent
-          v-if="question.isSingleLabelType"
-          :questionId="question.id"
-          :title="question.title"
-          v-model="question.answer.values"
-          :hasSuggestion="!record.isSubmitted && question.matchSuggestion"
-          :isRequired="question.isRequired"
-          :description="question.description"
-          :visibleOptions="question.settings.visible_options"
-        />
-
-        <MultiLabelComponent
-          v-if="question.isMultiLabelType"
-          :questionId="question.id"
-          :title="question.title"
-          v-model="question.answer.values"
-          :hasSuggestion="!record.isSubmitted && question.matchSuggestion"
-          :isRequired="question.isRequired"
-          :description="question.description"
-          :visibleOptions="question.settings.visible_options"
-        />
-
-        <RatingComponent
-          v-if="question.isRatingType"
-          :title="question.title"
-          v-model="question.answer.values"
-          :hasSuggestion="!record.isSubmitted && question.matchSuggestion"
-          :isRequired="question.isRequired"
-          :description="question.description"
-        />
-
-        <RankingComponent
-          v-if="question.isRankingType"
-          :title="question.title"
-          v-model="question.answer.values"
-          :hasSuggestion="!record.isSubmitted && question.matchSuggestion"
-          :isRequired="question.isRequired"
-          :description="question.description"
-        />
-      </div>
+      <QuestionsComponent
+        :questions="record.questions"
+        :showSuggestion="!record.isSubmitted"
+      />
     </div>
     <div class="footer-form">
       <div class="footer-form__left-footer">

@@ -140,7 +140,7 @@ By default, if the Argilla instance has no users, the following default owner us
 For security reasons, we recommend changing at least the password and the API key. You can do this via the following CLI command:
 
 ```bash
-python -m argilla users create_default --password new-password --api-key new-api-key
+python -m argilla database users create_default --password new-password --api-key new-api-key
 ```
 
 Which should produce the following output:
@@ -171,11 +171,11 @@ user = rg.User.me()
 You can create a new user in Argilla using the `create` command in the `users` group.
 
 ```bash
-python -m argilla users create
+python -m argilla database users create
 ```
 
 ```
-Usage: python -m argilla users create [OPTIONS]
+Usage: python -m argilla database users create [OPTIONS]
 
   Creates a new user in the Argilla database with provided parameters
 
@@ -202,7 +202,7 @@ Options:
 So for example, to create a new user with `admin` role, you can run the following command:
 
 ```bash
-python -m argilla users create --username new-user --first-name New --last-name User --password new-password --role admin
+python -m argilla database users create --username new-user --first-name New --last-name User --password new-password --role admin
 ```
 
 #### Python client
@@ -235,7 +235,7 @@ Please note that the provided workspaces must exist; otherwise, an error will be
 You can change the assigned role for an existing user.
 
 ```bash
-python -m argilla users update argilla --role owner
+python -m argilla database users update argilla --role owner
 ```
 ```bash
 User 'argilla' successfully updated:
@@ -279,7 +279,7 @@ user = rg.User.from_id("new-user")
 #### CLI
 
 ```bash
-python -m argilla users create --role annotator --first-name Nick --last-name Name --username nick --password 11223344 --workspace ws
+python -m argilla database users create --role annotator --first-name Nick --last-name Name --username nick --password 11223344 --workspace ws
 ```
 
 ```
@@ -387,7 +387,7 @@ The task will also create an extra workspace for each user named after their use
 
 ```bash
 export ARGILLA_LOCAL_AUTH_USERS_DB_FILE=/path/to/.users.yml
-python -m argilla users migrate
+python -m argilla database users migrate
 ```
 
 ```
@@ -450,7 +450,7 @@ docker-compose up
 And after running the containers you can run the task to migrate the users as follows:
 
 ```bash
-docker-compose exec argilla python -m argilla users migrate
+docker-compose exec argilla python -m argilla database users migrate
 ```
 
 If everything went well, the configured users can now log in, their annotations will be tracked with their usernames, and they'll have access to the defined workspaces.

@@ -44,7 +44,7 @@ FeedbackDataset
 .. automodule:: argilla.client.feedback.dataset.local
    :members: FeedbackDataset
 
-.. automodule:: argilla.client.feedback.dataset.remote
+.. automodule:: argilla.client.feedback.dataset.remote.dataset
    :members: RemoteFeedbackDataset, RemoteFeedbackRecords
 
 .. automodule:: argilla.client.feedback.dataset.mixins

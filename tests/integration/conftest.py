@@ -33,7 +33,7 @@ from argilla.server.models.base import DatabaseModel
 from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.server import app, argilla_app
 from argilla.server.settings import settings
-from argilla.tasks.database.migrate import migrate_db
+from argilla.tasks.server.database.migrate import migrate_db
 from argilla.utils import telemetry
 from argilla.utils.telemetry import TelemetryClient
 from fastapi.testclient import TestClient

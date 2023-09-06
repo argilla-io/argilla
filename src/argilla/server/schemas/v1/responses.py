@@ -57,4 +57,11 @@ class DiscardedResponseUpdate(BaseModel):
     status: Literal[ResponseStatus.discarded]
 
 
-ResponseUpdate = Annotated[Union[SubmittedResponseUpdate, DiscardedResponseUpdate], Field(discriminator="status")]
+class DraftResponseUpdate(BaseModel):
+    values: Optional[Dict[str, ResponseValueUpdate]]
+    status: Literal[ResponseStatus.draft]
+
+
+ResponseUpdate = Annotated[
+    Union[SubmittedResponseUpdate, DiscardedResponseUpdate, DraftResponseUpdate], Field(discriminator="status")
+]

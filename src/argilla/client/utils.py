@@ -30,7 +30,11 @@ _R = TypeVar("_R")
 
 def allowed_for_roles(roles: List[UserRole]) -> Callable[[Callable[_P, _R]], Callable[_P, _R]]:
     """Decorator function to check the role of the user calling the function, to restrict
-    access to certain Argilla functions for users with certain roles.
+    access to certain Argilla functions for users with certain roles. Note that the method
+    inside the class to be decorated must contain the `_client` attribute with the active
+    client at the class initialization time; otherwise, the current active client will be
+    used instead, which in most of the cases won't match the client used during the class
+    initialization.
 
     Args:
         roles: List of roles that are allowed to call the function.
@@ -44,7 +48,7 @@ def allowed_for_roles(roles: List[UserRole]) -> Callable[[Callable[_P, _R]], Cal
     def decorator(func: Callable[_P, _R]) -> Callable[_P, _R]:
         @functools.wraps(func)
         def wrapper(*args: _P.args, **kwargs: _P.kwargs) -> _R:
-            client = args[0].__client if hasattr(args[0], "__client") else active_client().http_client.httpx
+            client = args[0]._client if hasattr(args[0], "_client") else active_client().http_client.httpx
             user = users_api.whoami_httpx(client).parsed
             if user.role not in roles:
                 raise PermissionError(

@@ -26,6 +26,7 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackMetricsModel,
     FeedbackQuestionModel,
     FeedbackRecordsModel,
+    FeedbackResponseStatusFilter,
     FeedbackSuggestionModel,
 )
 
@@ -54,13 +55,9 @@ def create_dataset(
     response = client.post(url=url, json=body)
 
     if response.status_code == 201:
-        parsed_response = FeedbackDatasetModel(**response.json())
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = FeedbackDatasetModel(**response.json())
+        return response_obj
     return handle_response_error(response)
 
 
@@ -82,13 +79,9 @@ def get_dataset(
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = FeedbackDatasetModel(**response.json())
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = FeedbackDatasetModel(**response.json())
+        return response_obj
     return handle_response_error(response)
 
 
@@ -107,11 +100,7 @@ def delete_dataset(client: httpx.Client, id: UUID) -> Response[Union[ErrorMessag
     response = client.delete(url=url)
 
     if response.status_code == 200:
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-        )
+        return Response.from_httpx_response(response)
     return handle_response_error(response)
 
 
@@ -135,13 +124,9 @@ def publish_dataset(
     response = client.put(url=url)
 
     if response.status_code == 200:
-        parsed_response = FeedbackDatasetModel(**response.json())
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = FeedbackDatasetModel(**response.json())
+        return response_obj
     return handle_response_error(response)
 
 
@@ -162,26 +147,29 @@ def list_datasets(
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = [FeedbackDatasetModel(**dataset) for dataset in response.json()["items"]]
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = [FeedbackDatasetModel(**dataset) for dataset in response.json()["items"]]
+        return response_obj
     return handle_response_error(response)
 
 
 def get_records(
-    client: httpx.Client, id: UUID, offset: int = 0, limit: int = 50
+    client: httpx.Client,
+    id: UUID,
+    offset: int = 0,
+    limit: int = 50,
+    response_status: Optional[List[FeedbackResponseStatusFilter]] = None,
 ) -> Response[Union[FeedbackRecordsModel, ErrorMessage, HTTPValidationError]]:
-    """Sends a GET request to `/api/v1/datasets/{id}/records` endpoint to retrieve a list of `FeedbackTask` records.
+    """Sends a GET request to `/api/v1/datasets/{id}/records` endpoint to retrieve a
+    list of `FeedbackTask` records.
 
     Args:
         client: the authenticated Argilla client to be used to send the request to the API.
         id: the id of the dataset to retrieve the records from.
         offset: the offset to be used in the pagination. Defaults to 0.
         limit: the limit to be used in the pagination. Defaults to 50.
+        response_status: the status of the responses to be retrieved. Can either be
+            `draft`, `missing`, `discarded`, or `submitted`. Defaults to None.
 
     Returns:
         A `Response` object containing a `parsed` attribute with the parsed response if the
@@ -191,16 +179,15 @@ def get_records(
 
     params = {"include": ["responses", "suggestions"], "offset": offset, "limit": limit}
 
+    if response_status is not None:
+        params["response_status"] = response_status
+
     response = client.get(url=url, params=params)
 
     if response.status_code == 200:
-        parsed_response = FeedbackRecordsModel(**response.json())
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = FeedbackRecordsModel(**response.json())
+        return response_obj
     return handle_response_error(response)
 
 
@@ -249,11 +236,30 @@ def add_records(
     response = client.post(url=url, json={"items": records})
 
     if response.status_code == 204:
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-        )
+        return Response.from_httpx_response(response)
+    return handle_response_error(response)
+
+
+def delete_records(
+    client: httpx.Client, id: UUID, record_ids: List[UUID]
+) -> Response[Union[ErrorMessage, HTTPValidationError]]:
+    """Sends a DELETE request to `/api/v1/{id}/records` endpoint to remove a list of `FeedbackDataset` records.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to remove the records from.
+        record_ids: the IDs of the records to be removed from the dataset.
+
+    Returns:
+        A `Response` object with the response itself, and/or the errors codes if applicable.
+    """
+    url = f"/api/v1/datasets/{id}/records"
+
+    uuids_str = ",".join([str(record_id) for record_id in record_ids])
+    response = client.delete(url=url, params={"ids": uuids_str})
+
+    if response.status_code == 204:
+        return Response.from_httpx_response(response)
     return handle_response_error(response)
 
 
@@ -275,13 +281,9 @@ def get_fields(
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = [FeedbackFieldModel(**item) for item in response.json()["items"]]
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = [FeedbackFieldModel(**item) for item in response.json()["items"]]
+        return response_obj
     return handle_response_error(response)
 
 
@@ -304,13 +306,9 @@ def add_field(
     response = client.post(url=url, json=field)
 
     if response.status_code == 201:
-        parsed_response = FeedbackFieldModel(**response.json())
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = FeedbackFieldModel(**response.json())
+        return response_obj
     return handle_response_error(response)
 
 
@@ -333,13 +331,9 @@ def get_questions(
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = [FeedbackQuestionModel(**item) for item in response.json()["items"]]
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = [FeedbackQuestionModel(**item) for item in response.json()["items"]]
+        return response_obj
     return handle_response_error(response)
 
 
@@ -361,13 +355,9 @@ def add_question(
     response = client.post(url=url, json=question)
 
     if response.status_code == 201:
-        parsed_response = FeedbackQuestionModel(**response.json())
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = FeedbackQuestionModel(**response.json())
+        return response_obj
     return handle_response_error(response)
 
 
@@ -412,13 +402,9 @@ def set_suggestion(
     response = client.put(url=url, json=suggestion)
 
     if response.status_code in [200, 201]:
-        parsed_response = FeedbackSuggestionModel(**response.json())
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = FeedbackSuggestionModel(**response.json())
+        return response_obj
     return handle_response_error(response)
 
 
@@ -442,11 +428,7 @@ def get_metrics(
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = FeedbackMetricsModel(**response.json())
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = FeedbackMetricsModel(**response.json())
+        return response_obj
     return handle_response_error(response)

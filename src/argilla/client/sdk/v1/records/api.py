@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Union
+from typing import List, Union
 from uuid import UUID
 
 import httpx
@@ -33,17 +33,39 @@ def delete_record(
         id: the id of the record to be deleted in Argilla.
 
     Returns:
-        A `Response` object with the response itself, and/or the error codes if applicable.
+        A `Response` object containing a `parsed` attribute with the parsed response if
+        the request was successful, which is a `FeedbackItemModel`.
     """
     url = f"/api/v1/records/{id}"
 
     response = client.delete(url=url)
 
     if response.status_code == 200:
-        return Response(
-            parsed=FeedbackItemModel.parse_raw(response.content),
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = FeedbackItemModel.parse_raw(response.content)
+        return response_obj
+    return handle_response_error(response)
+
+
+def delete_suggestions(
+    client: httpx.Client, id: UUID, suggestion_ids: List[UUID]
+) -> Response[Union[ErrorMessage, HTTPValidationError]]:
+    """Sends a DELETE request to `/api/v1/records/{id}/suggestions` endpoint to delete
+    suggestions from a record in Argilla.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the record in Argilla.
+        suggestion_ids: the ids of the suggestions to be deleted from the record.
+
+    Returns:
+        A `Response` object with the response itself, and/or the error codes if applicable.
+    """
+    url = f"/api/v1/records/{id}/suggestions"
+    params = {"ids": ",".join([str(suggestion_id) for suggestion_id in suggestion_ids])}
+
+    response = client.delete(url=url, params=params)
+
+    if response.status_code == 204:
+        return Response.from_httpx_response(response)
     return handle_response_error(response)

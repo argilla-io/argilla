@@ -109,26 +109,7 @@ class RatingQuestion(QuestionSchema, LabelMappingMixin):
     """
 
     type: Literal["rating"] = Field("rating", allow_mutation=False)
-    values: List[int] = Field(unique_items=True, min_items=2)
-
-    @validator("values")
-    def check_values(cls, values: List[int]):
-        if len(values) > 10:
-            warnings.warn(
-                "`values` list contains more than 10 elements, which is not supported from Argilla 1.14.0 onwards. "
-                "Please, make sure `values` is a list with more than 1 element and less or equal than 10 "
-                "before pushing the dataset into Argilla. Otherwise, the `push_to_argilla` method will fail",
-            )
-        for value in values:
-            if not 1 <= value <= 10:
-                warnings.warn(
-                    "At least one `value` in `values` is out of range [1, 10], "
-                    "which is not supported from Argilla 1.14.0 onwards. "
-                    "Please, make sure `values` is a list with unique values within the range [1, 10] "
-                    "before pushing the dataset into Argilla. Otherwise, the `push_to_argilla` method will fail. ",
-                )
-                break
-        return values
+    values: List[int] = Field(..., unique_items=True, ge=1, le=10, min_items=2)
 
     @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:

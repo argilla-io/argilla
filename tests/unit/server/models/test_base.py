@@ -13,14 +13,14 @@
 #  limitations under the License.
 
 import asyncio
-from copy import copy
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import pytest
 import pytest_asyncio
 from argilla.server.models.base import DatabaseModel
 from pydantic import BaseModel
-from sqlalchemy import inspect, select
+from sqlalchemy import JSON, inspect, select
+from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import Mapped, mapped_column
 
 if TYPE_CHECKING:
@@ -34,6 +34,7 @@ class Model(DatabaseModel):
     str_col: Mapped[Optional[str]] = mapped_column()
     int_col: Mapped[Optional[int]] = mapped_column()
     external_id: Mapped[Optional[str]] = mapped_column(unique=True)
+    dict_col: Mapped[Optional[Dict[str, Any]]] = mapped_column(MutableDict.as_mutable(JSON))
 
     __upsertable_columns__ = {"str_col", "int_col"}
 
@@ -85,10 +86,21 @@ class TestDatabaseModel:
         assert model.int_col == 1
 
     async def test_database_model_update(self, db: "AsyncSession"):
-        model = await Model.create(db, str_col="unit-test", int_col=1, autocommit=True)
-        model = await model.update(db, str_col="unit-test-2", int_col=2, autocommit=True)
+        model = await Model.create(
+            db, str_col="unit-test", int_col=1, dict_col={"a": 1, "b": 2, "c": 3}, autocommit=True
+        )
+
+        model = await model.update(db, str_col="unit-test-2", int_col=2, dict_col={"a": 10}, autocommit=True)
         assert model.str_col == "unit-test-2"
         assert model.int_col == 2
+        assert model.dict_col == {"a": 10, "b": 2, "c": 3}
+
+        model = await model.update(
+            db, str_col="unit-test-2", int_col=2, dict_col={"a": 10}, replace_dict=True, autocommit=True
+        )
+        assert model.str_col == "unit-test-2"
+        assert model.int_col == 2
+        assert model.dict_col == {"a": 10}
 
     async def test_database_model_upsert_many(self, db: "AsyncSession"):
         models = []
@@ -144,3 +156,13 @@ class TestDatabaseModel:
         model = await Model.create(db, str_col="unit-test", int_col=1, autocommit=True)
         model = await model.delete(db)
         assert (await db.execute(select(Model).filter_by(id=model.id))).scalar_one_or_none() is None
+
+    async def test_database_model_delete_many(self, db: "AsyncSession"):
+        for i in range(5):
+            await Model.create(db, str_col=f"unit-test-{i}", int_col=i, external_id=f"external-id-{i}")
+        for i in range(1, 6):
+            await Model.create(db, str_col=f"unit-test-{i}", int_col=i * 10, external_id=f"external-id-{i * 10}")
+
+        removed = await Model.delete_many(db, params=[Model.int_col < 10], autocommit=True)
+
+        assert len(removed) == 5

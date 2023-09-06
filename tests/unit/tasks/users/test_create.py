@@ -12,242 +12,82 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Type
 
 import pytest
-from argilla.server.contexts import accounts
-from argilla.server.models import User, UserRole, Workspace
-from click.testing import CliRunner
-from typer import Typer
-
-from tests.factories import UserSyncFactory, WorkspaceSyncFactory
+from argilla.client.sdk.users.models import UserRole
 
 if TYPE_CHECKING:
-    from sqlalchemy.orm import Session
+    from argilla.client.users import User
+    from click.testing import CliRunner
+    from pytest_mock import MockerFixture
+    from typer import Typer
 
 
-@pytest.mark.parametrize("role_string", ["owner", "admin", "annotator"])
-def test_create(sync_db: "Session", cli_runner: CliRunner, cli: Typer, role_string: str):
-    result = cli_runner.invoke(
-        cli,
-        f"users create --first-name first-name --username username --role {role_string} "
-        "--password 12345678 --workspace workspace",
+@pytest.mark.usefixtures("login_mock")
+class TestSuiteCreateUserCommand:
+    def test_create_user(self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", user: "User") -> None:
+        user_create_mock = mocker.patch("argilla.client.users.User.create", return_value=user)
+
+        result = cli_runner.invoke(
+            cli,
+            "users create --username unit-test --password unit-test --first-name unit-test --last-name unit-test --role owner --workspace ws1 --workspace ws2",
+        )
+
+        assert result.exit_code == 0
+        assert "User created" in result.stdout
+        assert "Username: unit-test" in result.stdout
+        assert "Role: admin" in result.stdout
+        assert "First name: unit-test" in result.stdout
+        assert "Last name: unit-test" in result.stdout
+        assert "Workspaces: unit-test" in result.stdout
+        user_create_mock.assert_called_once_with(
+            username="unit-test",
+            password="unit-test",
+            first_name="unit-test",
+            last_name="unit-test",
+            role=UserRole.owner,
+            workspaces=["ws1", "ws2"],
+        )
+
+    @pytest.mark.parametrize(
+        "ExceptionType, expected_msg",
+        [
+            (KeyError, "User with 'unit-test' already exists!"),
+            (ValueError, "Provided parameters are not valid"),
+            (RuntimeError, "An unexpected error occurred when trying to create the user"),
+        ],
     )
+    def test_create_user_errors(
+        self,
+        cli_runner: "CliRunner",
+        cli: "Typer",
+        mocker: "MockerFixture",
+        ExceptionType: Type[Exception],
+        expected_msg: str,
+    ) -> None:
+        user_create_mock = mocker.patch("argilla.client.users.User.create", side_effect=ExceptionType)
 
-    assert result.exit_code == 0
-    assert sync_db.query(User).count() == 1
-    assert sync_db.query(Workspace).count() == 1
+        result = cli_runner.invoke(
+            cli,
+            "users create --username unit-test --password unit-test --first-name unit-test --last-name unit-test --role owner --workspace ws1 --workspace ws2",
+        )
 
-    user = sync_db.query(User).filter_by(username="username").first()
-    assert user
-    assert user.first_name == "first-name"
-    assert user.username == "username"
-    assert user.role.value == UserRole(role_string).value
-    assert accounts.verify_password("12345678", user.password_hash)
-    assert user.api_key
-    assert [ws.name for ws in user.workspaces] == ["workspace"]
-
-
-def test_create_with_default_role(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    result = cli_runner.invoke(
-        cli,
-        "users create --first-name first-name --username username --password 12345678",
-        input="\n",
-    )
-
-    assert result.exit_code == 0
-    assert sync_db.query(User).count() == 1
-    assert sync_db.query(Workspace).count() == 0
-
-    user = sync_db.query(User).filter_by(username="username").first()
-    assert user
-    assert user.role == UserRole.annotator
+        assert result.exit_code == 1
+        assert expected_msg in result.stdout
+        user_create_mock.assert_called_once_with(
+            username="unit-test",
+            password="unit-test",
+            first_name="unit-test",
+            last_name="unit-test",
+            role=UserRole.owner,
+            workspaces=["ws1", "ws2"],
+        )
 
 
-@pytest.mark.parametrize("role_string", ["owner", "admin", "annotator"])
-def test_create_with_input_role(sync_db: "Session", cli_runner: CliRunner, cli: Typer, role_string: str):
-    result = cli_runner.invoke(
-        cli,
-        "users create --first-name first-name --username username --password 12345678",
-        input=f"{role_string}\n",
-    )
-
-    assert result.exit_code == 0
-    assert sync_db.query(User).count() == 1
-    assert sync_db.query(Workspace).count() == 0
-
-    user = sync_db.query(User).filter_by(username="username").first()
-    assert user
-    assert user.role.value == UserRole(role_string).value
-
-
-def test_create_with_invalid_role(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    result = cli_runner.invoke(
-        cli,
-        "users create --first-name first-name --username username --role bad_role "
-        "--password 12345678 --workspace workspace",
-    )
-
-    assert result.exit_code == 2
-    assert sync_db.query(User).count() == 0
-    assert sync_db.query(Workspace).count() == 0
-
-
-def test_create_with_input_password(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    result = cli_runner.invoke(
-        cli,
-        "users create --first-name first-name --username username --role owner",
-        input="12345678\n12345678\n",
-    )
-
-    assert result.exit_code == 0
-    assert sync_db.query(User).count() == 1
-    assert sync_db.query(Workspace).count() == 0
-
-    user = sync_db.query(User).filter_by(username="username").first()
-    assert user
-    assert accounts.verify_password("12345678", user.password_hash)
-
-
-def test_create_with_invalid_password(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    result = cli_runner.invoke(
-        cli, "users create --first-name first-name --username username --password 1234 --role owner"
-    )
+@pytest.mark.usefixtures("not_logged_mock")
+def test_create_user_needs_login(cli_runner: "CliRunner", cli: "Typer") -> None:
+    result = cli_runner.invoke(cli, "users create --username unit-test --password unit-test")
 
     assert result.exit_code == 1
-    assert sync_db.query(User).count() == 0
-    assert sync_db.query(Workspace).count() == 0
-
-
-def test_create_with_input_username(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    result = cli_runner.invoke(cli, "users create --first-name first-name --password 12345678", input="username\n")
-
-    assert result.exit_code == 0
-    assert sync_db.query(User).count() == 1
-    assert sync_db.query(Workspace).count() == 0
-
-    assert sync_db.query(User).filter_by(username="username").first()
-
-
-def test_create_with_invalid_username(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    result = cli_runner.invoke(
-        cli, "users create --first-name first-name --username Invalid-Username --password 12345678 --role owner"
-    )
-
-    assert result.exit_code == 1
-    assert sync_db.query(User).count() == 0
-    assert sync_db.query(Workspace).count() == 0
-
-
-def test_create_with_existing_username(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    UserSyncFactory.create(username="username")
-
-    result = cli_runner.invoke(
-        cli, "users create --first-name first-name --username username --role owner --password 12345678"
-    )
-
-    assert result.exit_code == 0
-    assert "username" in result.output
-    assert sync_db.query(User).count() == 1
-    assert sync_db.query(Workspace).count() == 0
-
-
-def test_create_with_last_name(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    result = cli_runner.invoke(
-        cli,
-        "users create --first-name first-name --last-name last-name --username username --password 12345678 --role owner",
-    )
-
-    assert result.exit_code == 0
-    assert sync_db.query(User).count() == 1
-    assert sync_db.query(Workspace).count() == 0
-
-    user = sync_db.query(User).filter_by(username="username").first()
-    assert user
-    assert user.last_name == "last-name"
-
-
-def test_create_with_api_key(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    result = cli_runner.invoke(
-        cli,
-        "users create --first-name first-name --username username --role owner --password 12345678 --api-key abcdefgh",
-    )
-
-    assert result.exit_code == 0
-    assert sync_db.query(User).count() == 1
-    assert sync_db.query(Workspace).count() == 0
-
-    user = sync_db.query(User).filter_by(username="username").first()
-    assert user
-    assert user.api_key == "abcdefgh"
-
-
-def test_create_with_invalid_api_key(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    result = cli_runner.invoke(
-        cli, "users create --first-name first-name --username username --role owner --password 12345678 --api-key abc"
-    )
-
-    assert result.exit_code == 1
-    assert sync_db.query(User).count() == 0
-    assert sync_db.query(Workspace).count() == 0
-
-
-def test_create_with_existing_api_key(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    UserSyncFactory.create(api_key="abcdefgh")
-
-    result = cli_runner.invoke(
-        cli,
-        "users create --first-name first-name --username username --role owner --password 12345678 --api-key abcdefgh",
-    )
-
-    assert result.exit_code == 0
-    assert "abcdefgh" in result.output
-    assert sync_db.query(User).count() == 1
-    assert sync_db.query(Workspace).count() == 0
-
-
-def test_create_with_multiple_workspaces(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    result = cli_runner.invoke(
-        cli,
-        "users create --first-name first-name --username username --role owner --password 12345678 "
-        "--workspace workspace-a --workspace workspace-b",
-    )
-
-    assert result.exit_code == 0
-    assert sync_db.query(User).count() == 1
-    assert sync_db.query(Workspace).count() == 2
-
-    user = sync_db.query(User).filter_by(username="username").first()
-    assert user
-    assert [ws.name for ws in user.workspaces] == ["workspace-a", "workspace-b"]
-
-
-def test_create_with_existent_workspaces(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    WorkspaceSyncFactory.create(name="workspace-a")
-    WorkspaceSyncFactory.create(name="workspace-b")
-
-    result = cli_runner.invoke(
-        cli,
-        "users create --first-name first-name --username username --role owner --password 12345678 "
-        "--workspace workspace-a --workspace workspace-b --workspace workspace-c",
-    )
-
-    assert result.exit_code == 0
-    assert sync_db.query(User).count() == 1
-    assert sync_db.query(Workspace).count() == 3
-
-    user = sync_db.query(User).filter_by(username="username").first()
-    assert user
-    assert [ws.name for ws in user.workspaces] == ["workspace-a", "workspace-b", "workspace-c"]
-
-
-def test_create_with_invalid_workspaces(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    result = cli_runner.invoke(
-        cli,
-        "users create --first-name first-name --username username --role owner --password 12345678 "
-        "--workspace workspace-a --workspace 'invalid workspace' --workspace workspace-c",
-    )
-
-    assert result.exit_code == 1
-    assert sync_db.query(User).count() == 0
-    assert sync_db.query(Workspace).count() == 0
+    assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout

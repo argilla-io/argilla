@@ -22,7 +22,7 @@ dataset_rg.prepare_for_training(framework="autotrain", train_size=1)
 ```
 :::
 
-:::{tab-item} Setfit
+:::{tab-item} SetFit
 
 ```python
 import argilla as rg
@@ -88,6 +88,16 @@ import argilla as rg
 dataset_rg = rg.load("<my_dataset>")
 dataset_rg.prepare_for_training(framework="spark-nlp", train_size=1)
 # <pd.DataFrame>
+```
+:::
+
+:::{tab-item} TRL
+
+```python
+import argilla as rg
+
+dataset_rg = rg.load("<my_dataset>")
+dataset_rg.prepare_for_training(framework="trl", task=..., train_size=1)
 ```
 :::
 

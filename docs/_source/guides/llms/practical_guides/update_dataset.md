@@ -1,5 +1,6 @@
-# Update a Feedback dataset
-Oftentimes datasets that we have created previously need modifications or updates. In this section, we will explore some of the most common workflows to change an existing Feedback dataset in Argilla.
+# Update a Feedback Dataset
+
+Oftentimes datasets that we have created previously need modifications or updates. In this section, we will explore some of the most common workflows to change an existing `FeedbackDataset` in Argilla.
 
 Remember that you will need to connect to Argilla to perform any of the actions below.
 
@@ -10,9 +11,13 @@ rg.init(
 )
 ```
 
-## Add more records
+## Add records
 
-To add a (list of) Feedback record(s) to an existing dataset you will only need to load the dataset using the Python client and use the `add_records` method as explained below:
+To add a `FeedbackRecord` and/or a list of `FeedbackRecord`s to an existing dataset you will need to load the `FeedbackDataset` from Argilla first, calling `FeedbackDataset.from_argilla`, and then call the `add_records` method.
+
+:::{note}
+From Argilla 1.14.0, calling `from_argilla` will pull the `FeedbackDataset` from Argilla, but the instance will be remote, which implies that the additions, updates, and deletions of records will be pushed to Argilla as soon as they are made. This is a change from previous versions of Argilla, where you had to call `push_to_argilla` again to push the changes to Argilla.
+:::
 
 ::::{tab-set}
 
@@ -45,7 +50,9 @@ To learn about the format that these records follow, check [this page](create_da
 
 ## Delete existing records
 
-From `v1.14.0` it is also possible to delete records from a Feedback dataset using the `delete` method like so:
+From `v1.14.0`, it is possible to delete records from a `FeedbackDataset` in Argilla. Remember that from 1.14.0, when pulling a `FeedbackDataset` from Argilla via the `from_argilla` method, the returned instance is a remote `FeedbackDataset`, which implies that all the additions, updates, and deletions are directly pushed to Argilla, without having to call `push_to_argilla` for those to be pushed to Argilla.
+
+The first alternative is to call the `delete` method over a single `FeedbackRecord` in the dataset, which will delete that record from Argilla.
 
 ```python
 # load the dataset
@@ -54,18 +61,22 @@ dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_works
 dataset.records[0].delete()
 ```
 
-If you prefer to delete a list of records, you can also achive this in this way:
+Otherwise, you can also select one or more records from the existing `FeedbackDataset` (which are `FeedbackRecord`s in Argilla) and call the `delete_records` method to delete them from Argilla.
 
 ```python
 # load the dataset
 dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_workspace")
 # delete a list of records from a dataset
-dataset.delete_records([record for record in dataset.records[:5]])
+dataset.delete_records(list(dataset.records[:5]))
 ```
 
 ## Add or update suggestions in existing records
 
 You can also add suggestions to records that have been already pushed to Argilla and from `v1.14.0` update existing ones.
+
+:::{note}
+From Argilla 1.14.0, calling `from_argilla` will pull the `FeedbackDataset` from Argilla, but the instance will be remote, which implies that the additions, updates, and deletions of records will be pushed to Argilla as soon as they are made. This is a change from previous versions of Argilla, where you had to call `push_to_argilla` again to push the changes to Argilla.
+:::
 
 ::::{tab-set}
 
@@ -102,3 +113,30 @@ dataset.push_to_argilla()
 ::::
 
 To learn about the schema that these suggestions should follow check [this page](create_dataset.md#add-suggestions).
+
+## Delete suggestions from existing records
+
+From Argilla `v1.15.0`, you can also delete suggestions from existing records in Argilla via either the `delete_suggestions` method available for every record in Argilla, or via the `delete` method of every suggestion.
+
+To delete some or all the suggestions from a `FeedbackRecord` pushed to Argilla, you can do the following:
+
+```python
+dataset = rg.FeedbackDataset.from_argilla(name="my-dataset", workspace="my-workspace")
+
+# Delete ALL the suggestions from a record in Argilla
+for record in dataset.records:
+    record.delete_suggestions(list(record.suggestions))
+
+# Delete just the first 2 suggestions from a record in Argilla
+for record in dataset.records:
+    record.delete_suggestions(list(record.suggestions[:2]))
+```
+
+Or just delete a single suggestion from a record in Argilla:
+
+```python
+dataset = rg.FeedbackDataset.from_argilla(name="my-dataset", workspace="my-workspace")
+
+# Delete the first suggestion from a record in Argilla
+dataset.records[0].suggestions[0].delete()
+```

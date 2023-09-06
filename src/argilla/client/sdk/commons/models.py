@@ -15,13 +15,16 @@
 import socket
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Generic, List, MutableMapping, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Generic, List, MutableMapping, Optional, TypeVar, Union
 from uuid import uuid4
 
 from pydantic import BaseModel, Field, validator
 from pydantic.generics import GenericModel
 
 from argilla.client.models import Vectors as ClientVectors
+
+if TYPE_CHECKING:
+    from httpx import Response as HTTPXResponse
 
 MACHINE_NAME = socket.gethostname()
 
@@ -112,6 +115,14 @@ class Response(GenericModel, Generic[R]):
     content: bytes
     headers: MutableMapping[str, str]
     parsed: Optional[R]
+
+    @classmethod
+    def from_httpx_response(cls, response: "HTTPXResponse") -> "Response[R]":
+        return cls(
+            status_code=response.status_code,
+            content=response.content,
+            headers=response.headers,
+        )
 
 
 class BulkResponse(BaseModel):

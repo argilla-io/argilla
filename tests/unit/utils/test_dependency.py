@@ -14,12 +14,10 @@
 
 import importlib
 import sys
+from typing import Any, List
 
 import pytest
-from argilla.utils.dependency import (
-    require_version,
-    requires_version,
-)
+from argilla.utils.dependency import is_package_with_extras_installed, require_version, requires_version
 
 
 class TestDependencyRequirements:
@@ -105,3 +103,15 @@ class TestDependencyRequirements:
         require_version("datasets>1.0.0,>1.8.0,>1.17.0")
         # A more common example (designed not to break eventually):
         require_version("datasets>1.17.0,<1000.0.0")
+
+
+@pytest.mark.parametrize(
+    "args, expected", [(["argilla", ["server"]], True), (["invented_package", ["invented"]], False)]
+)
+def test_is_package_with_extras_installed(args: List[Any], expected: bool) -> None:
+    assert is_package_with_extras_installed(*args) == expected
+
+
+def test_is_package_with_extras_installed_raises_key_error() -> None:
+    with pytest.raises(KeyError, match="'argilla' package does not provide 'invented' extra"):
+        is_package_with_extras_installed("argilla", ["invented"])

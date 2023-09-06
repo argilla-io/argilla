@@ -47,7 +47,6 @@ for record in feedback.records:
 count_submitted = OrderedDict(sorted(count_submitted.items()))
 count_submitted = [{"submitted_responses": k, "no_records": v} for k, v in count_submitted.items()]
 
-
 fig = px.bar(count_submitted, x="submitted_responses", y="no_records")
 fig.update_xaxes(title_text="No. of submitted responses", dtick=1)
 fig.update_yaxes(title_text="No. of records")
@@ -90,7 +89,7 @@ You can unify responses by using a `FeedbackDataset` in combination with a `Ques
 ```{include} /_common/tabs/unfication_strategies.md
 ```
 
-Once you have unified your responses, you will have a dataset that's ready for [fine-tuning](fine_tune.ipynb). Remember to save your unified dataset following one of the methods explained in [Export a Feedback dataset](export_dataset.ipynb).
+Once you have unified your responses, you will have a dataset that's ready for [fine-tuning](fine_tune.ipynb). Remember to save your unified dataset following one of the methods explained in [Export a Feedback Dataset](export_dataset.ipynb).
 
 ### Strategies
 
@@ -109,6 +108,7 @@ Once you have unified your responses, you will have a dataset that's ready for [
 * *Lowest / highest score*: Depending on how the question is formulated, you can take the `max` or `min` value.
 
 #### For texts: `TextQuestion`
+
 * *Rate / rank the responses*: Make a new dataset that includes the texts you have collected in the record fields and ask your annotation team to rate or rank the responses. Then choose the response with the highest score. If there is a tie, choose one of the options randomly or consider duplicating the record as explained below.
 * *Choose based on the annotator*: Take a subset of the records (enough to get a good representation of responses from each annotator), and rate / rank them as explained in the section above. Then, give each annotator a score based on the preferences of the team. You can use this score to choose text responses over the whole dataset.
 * *Choose based on answers to other questions*: You can use the answers to other questions as quality markers. For example, you can assume that whoever gave the lowest score will make a more extensive correction and you may want to choose that as the final text. However, this method does not guarantee that the text will be of good quality.

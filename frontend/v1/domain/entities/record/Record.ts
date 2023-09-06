@@ -1,4 +1,4 @@
-import { Field } from "../Field";
+import { Field } from "../field/Field";
 import { Question } from "../question/Question";
 import { Suggestion } from "../question/Suggestion";
 import { RecordAnswer } from "./RecordAnswer";
@@ -13,7 +13,7 @@ export class Record {
     public readonly fields: Field[],
     public answer: RecordAnswer,
     private readonly suggestions: Suggestion[],
-    public readonly arrayOffset: number
+    public readonly page: number
   ) {
     this.completeQuestion();
   }

@@ -20,7 +20,7 @@ from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
-from argilla.server.enums import ResponseStatusFilter
+from argilla.server.enums import RecordInclude, ResponseStatusFilter
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
@@ -33,7 +33,7 @@ from argilla.server.models import (
     Suggestion,
 )
 from argilla.server.models.suggestions import SuggestionCreateWithRecordId
-from argilla.server.schemas.v1.datasets import DatasetCreate, FieldCreate, QuestionCreate, RecordInclude, RecordsCreate
+from argilla.server.schemas.v1.datasets import DatasetCreate, FieldCreate, QuestionCreate, RecordsCreate
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
 from argilla.server.search_engine import SearchEngine
@@ -117,6 +117,8 @@ async def publish_dataset(db: "AsyncSession", search_engine: SearchEngine, datas
         dataset = await dataset.update(db, status=DatasetStatus.ready, autocommit=False)
         await search_engine.create_index(dataset)
 
+    await db.commit()
+
     return dataset
 
 
@@ -124,6 +126,9 @@ async def delete_dataset(db: "AsyncSession", search_engine: SearchEngine, datase
     async with db.begin_nested():
         dataset = await dataset.delete(db, autocommit=False)
         await search_engine.delete_index(dataset)
+
+    await db.commit()
+
     return dataset
 
 
@@ -221,7 +226,21 @@ async def delete_record(db: "AsyncSession", search_engine: "SearchEngine", recor
     async with db.begin_nested():
         record = await record.delete(db=db, autocommit=False)
         await search_engine.delete_records(dataset=record.dataset, records=[record])
+
+    await db.commit()
+
     return record
+
+
+async def delete_records(
+    db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, records_ids: List[UUID]
+) -> None:
+    async with db.begin_nested():
+        params = [Record.id.in_(records_ids), Record.dataset_id == dataset.id]
+        records = await Record.delete_many(db=db, params=params, autocommit=False)
+        await search_engine.delete_records(dataset=dataset, records=records)
+
+    await db.commit()
 
 
 async def get_records_by_ids(
@@ -248,24 +267,7 @@ async def get_records_by_ids(
 async def list_records_by_dataset_id(
     db: "AsyncSession",
     dataset_id: UUID,
-    include: List[RecordInclude] = [],
-    offset: int = 0,
-    limit: int = LIST_RECORDS_LIMIT,
-) -> List[Record]:
-    query = select(Record).filter(Record.dataset_id == dataset_id)
-    if RecordInclude.responses in include:
-        query = query.options(joinedload(Record.responses))
-    if RecordInclude.suggestions in include:
-        query = query.options(joinedload(Record.suggestions))
-    query = query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
-    result = await db.execute(query)
-    return result.unique().scalars().all()
-
-
-async def list_records_by_dataset_id_and_user_id(
-    db: "AsyncSession",
-    dataset_id: UUID,
-    user_id: UUID,
+    user_id: Optional[UUID] = None,
     include: List[RecordInclude] = [],
     response_statuses: List[ResponseStatusFilter] = [],
     offset: int = 0,
@@ -290,7 +292,9 @@ async def list_records_by_dataset_id_and_user_id(
         .filter(Record.dataset_id == dataset_id)
         .outerjoin(
             Response,
-            and_(Response.record_id == Record.id, Response.user_id == user_id),
+            Response.record_id == Record.id
+            if user_id is None
+            else and_(Response.record_id == Record.id, Response.user_id == user_id),
         )
     )
 
@@ -374,6 +378,8 @@ async def create_records(
             await record.awaitable_attrs.responses
         await search_engine.add_records(dataset, records)
 
+    await db.commit()
+
 
 async def get_response_by_id(db: "AsyncSession", response_id: UUID) -> Union[Response, None]:
     result = await db.execute(
@@ -423,6 +429,8 @@ async def create_response(
         await db.flush([response])
         await search_engine.update_record_response(response)
 
+    await db.commit()
+
     return response
 
 
@@ -433,9 +441,15 @@ async def update_response(
 
     async with db.begin_nested():
         response = await response.update(
-            db, values=jsonable_encoder(response_update.values), status=response_update.status, autocommit=False
+            db,
+            values=jsonable_encoder(response_update.values),
+            status=response_update.status,
+            replace_dict=True,
+            autocommit=False,
         )
         await search_engine.update_record_response(response)
+
+    await db.commit()
 
     return response
 
@@ -444,6 +458,9 @@ async def delete_response(db: "AsyncSession", search_engine: SearchEngine, respo
     async with db.begin_nested():
         response = await response.delete(db, autocommit=False)
         await search_engine.delete_record_response(response)
+
+    await db.commit()
+
     return response
 
 
@@ -464,7 +481,7 @@ def validate_response_values(dataset: Dataset, values: Dict[str, ResponseValue],
 
         question_response = values_copy.pop(question.name, None)
         if question_response:
-            question.parsed_settings.check_response(question_response)
+            question.parsed_settings.check_response(question_response, status)
 
     if values_copy:
         raise ValueError(f"Error: found responses for non configured questions: {list(values_copy.keys())!r}")
@@ -502,3 +519,21 @@ async def upsert_suggestion(
         schema=SuggestionCreateWithRecordId(record_id=record.id, **suggestion_create.dict()),
         constraints=[Suggestion.record_id, Suggestion.question_id],
     )
+
+
+async def delete_suggestions(db: "AsyncSession", record: Record, suggestions_ids: List[UUID]) -> None:
+    params = [Suggestion.id.in_(suggestions_ids), Suggestion.record_id == record.id]
+    await Suggestion.delete_many(db=db, params=params)
+
+
+async def get_suggestion_by_id(db: "AsyncSession", suggestion_id: "UUID") -> Union[Suggestion, None]:
+    result = await db.execute(
+        select(Suggestion)
+        .filter_by(id=suggestion_id)
+        .options(selectinload(Suggestion.record).selectinload(Record.dataset))
+    )
+    return result.scalar_one_or_none()
+
+
+async def delete_suggestion(db: "AsyncSession", suggestion: Suggestion) -> Suggestion:
+    return await suggestion.delete(db)

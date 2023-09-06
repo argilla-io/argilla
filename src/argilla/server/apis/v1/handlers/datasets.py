@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_async_db
-from argilla.server.enums import ResponseStatusFilter
+from argilla.server.enums import RecordInclude, ResponseStatusFilter
 from argilla.server.models import Dataset as DatasetModel
 from argilla.server.models import ResponseStatus, User
 from argilla.server.policies import DatasetPolicyV1, authorize
@@ -37,7 +37,6 @@ from argilla.server.schemas.v1.datasets import (
     QuestionCreate,
     Questions,
     Record,
-    RecordInclude,
     Records,
     RecordsCreate,
     SearchRecord,
@@ -46,10 +45,12 @@ from argilla.server.schemas.v1.datasets import (
 )
 from argilla.server.search_engine import SearchEngine, UserResponseStatusFilter, get_search_engine
 from argilla.server.security import auth
+from argilla.server.utils import parse_uuids
 from argilla.utils.telemetry import TelemetryClient, get_telemetry_client
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
 LIST_DATASET_RECORDS_LIMIT_LTE = 1000
+DELETE_DATASET_RECORDS_LIMIT = 100
 
 router = APIRouter(tags=["datasets"])
 
@@ -117,7 +118,7 @@ async def list_current_user_dataset_records(
 
     await authorize(current_user, DatasetPolicyV1.get(dataset))
 
-    records = await datasets.list_records_by_dataset_id_and_user_id(
+    records = await datasets.list_records_by_dataset_id(
         db,
         dataset_id,
         current_user.id,
@@ -136,6 +137,7 @@ async def list_dataset_records(
     db: AsyncSession = Depends(get_async_db),
     dataset_id: UUID,
     include: List[RecordInclude] = Query([], description="Relationships to include in the response"),
+    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
@@ -144,7 +146,9 @@ async def list_dataset_records(
 
     await authorize(current_user, DatasetPolicyV1.list_dataset_records_with_all_responses(dataset))
 
-    records = await datasets.list_records_by_dataset_id(db, dataset_id, include=include, offset=offset, limit=limit)
+    records = await datasets.list_records_by_dataset_id(
+        db, dataset_id, include=include, response_statuses=response_statuses, offset=offset, limit=limit
+    )
 
     return Records(items=records)
 
@@ -287,6 +291,34 @@ async def create_dataset_records(
         telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": len(records_create.items)})
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+
+
+@router.delete("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_dataset_records(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+    ids: str = Query(..., description="A comma separated list with the IDs of the records to be removed"),
+):
+    dataset = await _get_dataset(db, dataset_id)
+
+    await authorize(current_user, DatasetPolicyV1.delete_records(dataset))
+
+    record_ids = parse_uuids(ids)
+    num_records = len(record_ids)
+
+    if num_records == 0:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No record IDs provided")
+
+    if num_records > DELETE_DATASET_RECORDS_LIMIT:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Cannot delete more than {DELETE_DATASET_RECORDS_LIMIT} records at once",
+        )
+
+    await datasets.delete_records(db, search_engine, dataset, record_ids)
 
 
 @router.post(

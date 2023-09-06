@@ -15,117 +15,62 @@
 from typing import List, Optional
 
 import typer
-from pydantic import constr
 
-from argilla.server.contexts import accounts
-from argilla.server.database import AsyncSessionLocal
-from argilla.server.models import User, UserRole
-from argilla.server.security.model import (
-    USER_PASSWORD_MIN_LENGTH,
-    UserCreate,
-    WorkspaceCreate,
-)
-from argilla.tasks import async_typer
-from argilla.tasks.users.utils import get_or_new_workspace
-
-USER_API_KEY_MIN_LENGTH = 8
+from argilla.client.sdk.users.models import UserRole
 
 
-class UserCreateForTask(UserCreate):
-    api_key: Optional[constr(min_length=USER_API_KEY_MIN_LENGTH)]
-    workspaces: Optional[List[WorkspaceCreate]]
-
-
-def role_callback(value: str) -> str:
-    try:
-        return UserRole(value).value
-    except ValueError:
-        raise typer.BadParameter("Only Camila is allowed")
-
-
-def password_callback(password: str = None) -> str:
-    # if password is None:
-    #     raise typer.BadParameter("Password must be specified.")
-    # if len(password)<USER_PASSWORD_MIN_LENGTH:
-    #     raise typer.BadParameter(f"Password must be at least {USER_PASSWORD_MIN_LENGTH} characters long.")
-    return password
-
-
-def api_key_callback(api_key: str) -> str:
-    # if api_key and len(api_key)<USER_PASSWORD_MIN_LENGTH:
-    #     raise typer.BadParameter(f"API key must a string with a minimum length of {USER_API_KEY_MIN_LENGTH} characters.")
-    return api_key
-
-
-async def create(
-    first_name: str = typer.Option(default=None, help="First name as a string."),
-    username: str = typer.Option(
-        default=None,
-        prompt=True,
-        help="Username as a lowercase string without spaces allowing letters, numbers, dashes and underscores.",
-    ),
-    role: UserRole = typer.Option(
-        prompt=True,
-        default=UserRole.annotator.value,
-        show_default=True,
-        help="Role for the user.",
-    ),
+def create_user(
+    username: str = typer.Option(..., prompt=True, help="The username of the user to be created"),
     password: str = typer.Option(
-        default=None,
-        prompt=True,
-        callback=password_callback,
-        help=f"Password as a string with a minimum length of {USER_PASSWORD_MIN_LENGTH} characters.",
+        ..., prompt=True, confirmation_prompt=True, hide_input=True, help="The password of the user to be created"
     ),
-    last_name: str = typer.Option(default=None, help="Last name as a string."),
-    api_key: Optional[str] = typer.Option(
-        default=None,
-        callback=api_key_callback,
-        help=f"API key as a string with a minimum length of {USER_API_KEY_MIN_LENGTH} characters. If not specified a secure random API key will be generated",
+    first_name: Optional[str] = typer.Option(None, help="The first name of the user to be created"),
+    last_name: Optional[str] = typer.Option(None, help="The last name of the user to be created"),
+    role: UserRole = typer.Option(UserRole.annotator, help="The role of the user to be created"),
+    workspaces: Optional[List[str]] = typer.Option(
+        None,
+        "--workspace",
+        help="A workspace name to which the user will be linked to. This option can be provided several times.",
     ),
-    workspace: List[str] = typer.Option(
-        default=[], help="A workspace that the user will be a member of (can be used multiple times)."
-    ),
-):
-    """Creates a new user in the Argilla database with provided parameters"""
-    async with AsyncSessionLocal() as session:
-        if await accounts.get_user_by_username(session, username):
-            typer.echo(f"User with username {username!r} already exists in database. Skipping...")
-            return
+) -> None:
+    from rich.console import Console
+    from rich.markdown import Markdown
 
-        if await accounts.get_user_by_api_key(session, api_key):
-            typer.echo(f"User with api_key {api_key!r} already exists in database. Skipping...")
-            return
+    from argilla.client.users import User
+    from argilla.tasks.rich import get_argilla_themed_panel
 
-        user_create = UserCreateForTask(
+    try:
+        user = User.create(
+            username=username,
+            password=password,
             first_name=first_name,
             last_name=last_name,
-            username=username,
             role=role,
-            password=password,
-            api_key=api_key,
-            workspaces=[WorkspaceCreate(name=workspace_name) for workspace_name in workspace],
+            workspaces=workspaces,
         )
+    except KeyError as e:
+        typer.echo(f"User with '{username}' already exists!")
+        raise typer.Exit(code=1) from e
+    except ValueError as e:
+        typer.echo(f"Provided parameters are not valid:\n\n{e}")
+        raise typer.Exit(code=1) from e
+    except RuntimeError as e:
+        typer.echo("An unexpected error occurred when trying to create the user")
+        raise typer.Exit(code=1) from e
 
-        user = await User.create(
-            session,
-            first_name=user_create.first_name,
-            last_name=user_create.last_name,
-            username=user_create.username,
-            role=user_create.role,
-            password_hash=accounts.hash_password(user_create.password),
-            api_key=user_create.api_key,
-            workspaces=[await get_or_new_workspace(session, workspace.name) for workspace in user_create.workspaces],
-        )
+    workspaces_str = ", ".join(workspace.name for workspace in user.workspaces)
 
-        typer.echo("User successfully created:")
-        typer.echo(f"• first_name: {user.first_name!r}")
-        if user.last_name:
-            typer.echo(f"• last_name: {user.last_name!r}")
-        typer.echo(f"• username: {user.username!r}")
-        typer.echo(f"• role: {user.role.value!r}")
-        typer.echo(f"• api_key: {user.api_key!r}")
-        typer.echo(f"• workspaces: {[workspace.name for workspace in user.workspaces]!r}")
+    panel = get_argilla_themed_panel(
+        Markdown(
+            f"- **Username**: {user.username}\n"
+            f"- **Role**: {user.role}\n"
+            f"- **First name**: {user.first_name}\n"
+            f"- **Last name**: {user.last_name}\n"
+            f"- **API Key**: {user.api_key}\n"
+            f"- **Workspaces**: {workspaces_str}"
+        ),
+        title="User created",
+        title_align="left",
+    )
 
-
-if __name__ == "__main__":
-    async_typer.run(create)
+    Console().print(panel)

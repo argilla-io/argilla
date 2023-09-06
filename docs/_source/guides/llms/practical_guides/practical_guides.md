@@ -2,7 +2,6 @@
 
 This guide will help you with all the practical aspects of setting up an annotation project for training and fine-tuning LLMs using Argilla's Feedback Task Datasets. It covers everything from defining your task to collecting, organizing, and using the feedback effectively.
 
-
 ````{grid}  1 1 3 3
 :class-container: tuto-section-2
 ```{grid-item-card} Create a Feedback Dataset
@@ -11,8 +10,8 @@ This guide will help you with all the practical aspects of setting up an annotat
 Methods to configure a Feedback Dataset and push it to Argilla.
 
 ```
-```{grid-item-card} Set up your annotation team
-:link: set_up_annotation_team.html
+```{grid-item-card} Assign annotations to your team
+:link: assign_annotations.html
 
 Workflows to organize your annotation team.
 ```
@@ -20,6 +19,12 @@ Workflows to organize your annotation team.
 :link: update_dataset.html
 
 Make changes to an existing Feedback Dataset.
+
+```
+```{grid-item-card} Filter a Feedback Dataset
+:link: filter_dataset.html
+
+Obtain a filtered version of your dataset based on the status of the annotations.
 
 ```
 ```{grid-item-card} Annotate a Feedback Dataset
@@ -47,28 +52,23 @@ Use the Argilla LangChain callback for monitoring, evaluation, and fine-tuning.
 ```{grid-item-card} Fine-tune LLMs
 :link: fine_tune.html
 
-Fine-tune an LLM with the feedback collected from Argilla.
-
+Fine-tune an LLM or other models with the feedback collected from Argilla.
 ```
-```{grid-item-card} Fine-tune other models
-:link: fine_tune_others.html
 
-Fine-tune basic models with feedback collected from Argilla.
-```
 ````
 
-![Feedback dataset snapshot](../../../_static/images/llms/snapshot-feedback-demo.png)
+![Feedback Dataset snapshot](../../../_static/images/llms/snapshot-feedback-demo.png)
 
 ```{toctree}
 :hidden:
 
 create_dataset
-set_up_annotation_team
+assign_annotations
 update_dataset
+filter_dataset
 annotate_dataset
 collect_responses
 export_dataset
 use_argilla_callback_in_langchain
 fine_tune
-fine_tune_others
 ```

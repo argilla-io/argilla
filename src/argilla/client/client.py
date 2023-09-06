@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-
 import logging
 import os
 import re
@@ -26,7 +25,13 @@ import httpx
 from rich import print as rprint
 from rich.progress import Progress
 
-from argilla._constants import DEFAULT_API_KEY, DEFAULT_USERNAME, ES_INDEX_REGEX_PATTERN, WORKSPACE_HEADER_NAME
+from argilla._constants import (
+    DEFAULT_API_KEY,
+    DEFAULT_API_URL,
+    DEFAULT_USERNAME,
+    ES_INDEX_REGEX_PATTERN,
+    WORKSPACE_HEADER_NAME,
+)
 from argilla.client.apis.datasets import Datasets
 from argilla.client.apis.metrics import MetricsAPI
 from argilla.client.apis.search import Search, VectorSearch
@@ -50,6 +55,7 @@ from argilla.client.sdk.commons.api import bulk
 from argilla.client.sdk.commons.errors import AlreadyExistsApiError, InputValueError, NotFoundApiError
 from argilla.client.sdk.datasets import api as datasets_api
 from argilla.client.sdk.datasets.models import CopyDatasetRequest, TaskType
+from argilla.client.sdk.datasets.models import Dataset as DatasetModel
 from argilla.client.sdk.metrics import api as metrics_api
 from argilla.client.sdk.metrics.models import MetricInfo
 from argilla.client.sdk.text2text.models import CreationText2TextRecord, Text2TextBulkData
@@ -68,8 +74,8 @@ from argilla.client.sdk.token_classification.models import (
 )
 from argilla.client.sdk.token_classification.models import TokenClassificationRecord as SdkTokenClassificationRecord
 from argilla.client.sdk.users import api as users_api
-from argilla.client.sdk.workspaces import api as workspaces_api
-from argilla.client.sdk.workspaces.models import WorkspaceModel
+from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
+from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -104,11 +110,29 @@ class Argilla:
                 the headers of argilla client requests, like additional security restrictions. Default: `None`.
 
         """
-        api_url = api_url or os.getenv("ARGILLA_API_URL", "http://localhost:6900")
+        from argilla.client.login import ArgillaCredentials
+
+        api_url = api_url or os.getenv("ARGILLA_API_URL")
+        api_key = api_key or os.getenv("ARGILLA_API_KEY")
+        workspace = workspace or os.getenv("ARGILLA_WORKSPACE")
+        extra_headers = extra_headers or {}
+
+        if api_url is None and api_key is None:
+            try:
+                credentials = ArgillaCredentials.load()
+                api_url = credentials.api_url
+                api_key = credentials.api_key
+                if not workspace:
+                    workspace = credentials.workspace
+                extra_headers = credentials.extra_headers
+            except FileNotFoundError:
+                pass
+
+        api_url = api_url or DEFAULT_API_URL
+        api_key = api_key or DEFAULT_API_KEY
+
         # Checking that the api_url does not end in '/'
         api_url = re.sub(r"\/$", "", api_url)
-        api_key = api_key or os.getenv("ARGILLA_API_KEY", DEFAULT_API_KEY)
-        workspace = workspace or os.getenv("ARGILLA_WORKSPACE")
         headers = extra_headers or {}
 
         self._client: AuthenticatedClient = AuthenticatedClient(
@@ -235,11 +259,24 @@ class Argilla:
             A list of `WorkspaceModel` objects, containing the workspace
             attributes: name, id, created_at, and updated_at.
         """
-        user_workspaces = users_api.whoami(self.http_client).workspaces
-        all_workspaces = workspaces_api.list_workspaces(client=self.http_client.httpx).parsed
-        return [workspace for workspace in all_workspaces if workspace.name in user_workspaces]
+        return workspaces_api_v1.list_workspaces_me(client=self.http_client.httpx).parsed
 
-    def copy(self, dataset: str, name_of_copy: str, workspace: str = None):
+    def list_datasets(self, workspace: Optional[str] = None) -> List[DatasetModel]:
+        """Lists all the available datasets for the current user in Argilla.
+
+        Args:
+            workspace: If provided, list datasets from that workspace only. Note that
+                the workspace must exist in advance, otherwise a HTTP 400 error will be
+                raised.
+
+        Returns:
+            A list of `DatasetModel` objects, containing the dataset
+            attributes: tags, metadata, name, id, task, owner, workspace, created_at,
+            and last_updated.
+        """
+        return datasets_api.list_datasets(client=self.http_client, workspace=workspace).parsed
+
+    def copy(self, dataset: str, name_of_copy: str, workspace: Optional[str] = None) -> None:
         """Creates a copy of a dataset including its tags and metadata
 
         Args:

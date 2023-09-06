@@ -13,14 +13,14 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Tuple, Type
-from unittest.mock import MagicMock
+from typing import TYPE_CHECKING, List, Optional, Tuple, Type, Union
+from unittest.mock import ANY, MagicMock
 from uuid import UUID, uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v1.handlers.datasets import LIST_DATASET_RECORDS_LIMIT_DEFAULT
-from argilla.server.enums import ResponseStatusFilter
+from argilla.server.enums import RecordInclude, ResponseStatusFilter
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
@@ -49,7 +49,6 @@ from argilla.server.schemas.v1.datasets import (
     VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH,
     VALUE_TEXT_OPTION_TEXT_MAX_LENGTH,
     VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
-    RecordInclude,
 )
 from argilla.server.search_engine import (
     Query,
@@ -599,6 +598,78 @@ class TestSuiteDatasets:
         response_body = response.json()
         assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
 
+    # Helper function to create records with responses
+    async def create_records_with_response(
+        self,
+        num_records: int,
+        dataset: Dataset,
+        user: User,
+        response_status: ResponseStatus,
+        response_values: Optional[dict] = None,
+    ):
+        for record in await RecordFactory.create_batch(size=num_records, dataset=dataset):
+            await ResponseFactory.create(record=record, user=user, values=response_values, status=response_status)
+
+    @pytest.mark.parametrize(
+        "response_status_filter", ["missing", "discarded", "submitted", "draft", ["submitted", "draft"]]
+    )
+    async def test_list_dataset_records_with_response_status_filter(
+        self,
+        async_client: "AsyncClient",
+        owner: "User",
+        owner_auth_header: dict,
+        response_status_filter: Union[str, List[str]],
+    ):
+        num_responses_per_status = 10
+        response_values = {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}
+
+        dataset = await DatasetFactory.create()
+        # missing responses
+        await RecordFactory.create_batch(size=num_responses_per_status, dataset=dataset)
+        # discarded responses
+        await self.create_records_with_response(num_responses_per_status, dataset, owner, ResponseStatus.discarded)
+        # submitted responses
+        await self.create_records_with_response(
+            num_responses_per_status, dataset, owner, ResponseStatus.submitted, response_values
+        )
+        # drafted responses
+        await self.create_records_with_response(
+            num_responses_per_status, dataset, owner, ResponseStatus.draft, response_values
+        )
+
+        other_dataset = await DatasetFactory.create()
+        await RecordFactory.create_batch(size=2, dataset=other_dataset)
+
+        response_status_filter = (
+            [response_status_filter] if isinstance(response_status_filter, str) else response_status_filter
+        )
+        response_status_filter_url = [
+            f"response_status={response_status}" for response_status in response_status_filter
+        ]
+
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/records?{'&'.join(response_status_filter_url)}&include=responses",
+            headers=owner_auth_header,
+        )
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert len(response_json["items"]) == (num_responses_per_status * len(response_status_filter))
+
+        if "missing" in response_status_filter:
+            assert (
+                len([record for record in response_json["items"] if len(record["responses"]) == 0])
+                >= num_responses_per_status
+            )
+        assert all(
+            [
+                record["responses"][0]["status"] in response_status_filter
+                for record in response_json["items"]
+                if len(record["responses"]) > 0
+            ]
+        )
+
     async def test_list_dataset_records_without_authentication(self, async_client: "AsyncClient"):
         dataset = await DatasetFactory.create()
 
@@ -924,17 +995,6 @@ class TestSuiteDatasets:
 
         response_body = response.json()
         assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
-
-    async def create_records_with_response(
-        self,
-        num_records: int,
-        dataset: Dataset,
-        user: User,
-        response_status: ResponseStatus,
-        response_values: Optional[dict] = None,
-    ):
-        for record in await RecordFactory.create_batch(size=num_records, dataset=dataset):
-            await ResponseFactory.create(record=record, user=user, values=response_values, status=response_status)
 
     @pytest.mark.parametrize("response_status_filter", ["missing", "discarded", "submitted", "draft"])
     async def test_list_current_user_dataset_records_with_response_status_filter(
@@ -2796,6 +2856,99 @@ class TestSuiteDatasets:
         assert response.status_code == 404
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
+
+    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+    async def test_delete_dataset_records(
+        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, role: UserRole
+    ):
+        dataset = await DatasetFactory.create()
+        user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
+        records = await RecordFactory.create_batch(10, dataset=dataset)
+        random_uuids = [str(uuid4()) for _ in range(0, 5)]
+
+        records_ids = [str(record.id) for record in records]
+
+        uuids_str = ",".join(records_ids + random_uuids)
+
+        response = await async_client.delete(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            params={"ids": uuids_str},
+        )
+
+        assert response.status_code == 204, response.json()
+        assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
+        # `delete_records` is called with the records returned by the delete statement, which are different ORM objects
+        # than the ones created by the factory
+        mock_search_engine.delete_records.assert_called_once_with(dataset=dataset, records=ANY)
+
+    async def test_delete_dataset_records_with_no_ids(self, async_client: "AsyncClient", owner_auth_header: dict):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.delete(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            params={"ids": ""},
+        )
+
+        assert response.status_code == 422
+
+    async def test_delete_dataset_records_exceeding_limit(self, async_client: "AsyncClient", owner_auth_header: dict):
+        dataset = await DatasetFactory.create()
+        records = await RecordFactory.create_batch(200, dataset=dataset)
+
+        records_ids = [str(record.id) for record in records]
+
+        response = await async_client.delete(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            params={"ids": ",".join(records_ids)},
+        )
+
+        assert response.status_code == 422
+
+    async def test_delete_dataset_records_from_another_dataset(
+        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+    ):
+        dataset_a = await DatasetFactory.create()
+        dataset_b = await DatasetFactory.create()
+        records_a = await RecordFactory.create_batch(10, dataset=dataset_a)
+        records_b = await RecordFactory.create_batch(10, dataset=dataset_b)
+
+        records_ids_a = [str(record.id) for record in records_a]
+        records_ids_b = [str(record.id) for record in records_b]
+
+        uuids_str = ",".join(records_ids_a + records_ids_b)
+
+        response = await async_client.delete(
+            f"/api/v1/datasets/{dataset_a.id}/records", headers=owner_auth_header, params={"ids": uuids_str}
+        )
+
+        assert response.status_code == 204
+
+    async def test_delete_dataset_records_as_admin_from_another_workspace(self, async_client: "AsyncClient"):
+        dataset = await DatasetFactory.create()
+        user = await UserFactory.create(role=UserRole.admin)
+
+        response = await async_client.delete(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            params={"ids": ""},
+        )
+
+        assert response.status_code == 403
+
+    async def test_delete_dataset_records_as_annotator(self, async_client: "AsyncClient"):
+        dataset = await DatasetFactory.create()
+        user = await UserFactory.create(workspaces=[dataset.workspace], role=UserRole.annotator)
+
+        response = await async_client.delete(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            params={"ids": ""},
+        )
+
+        assert response.status_code == 403
 
     async def test_search_dataset_records(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict

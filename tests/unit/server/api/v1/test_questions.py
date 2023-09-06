@@ -52,13 +52,32 @@ if TYPE_CHECKING:
         ),
         (
             TextQuestionFactory,
-            {"description": None},
+            {"description": None, "settings": {"type": "text"}},
             {"type": "text", "use_markdown": False},
         ),
         (
             TextQuestionFactory,
-            {"name": "New Name", "required": True, "dataset_id": str(uuid4())},
+            {"name": "New Name", "required": True, "dataset_id": str(uuid4()), "settings": {"type": "text"}},
             {"type": "text", "use_markdown": False},
+        ),
+        (
+            RatingQuestionFactory,
+            {"name": "New Name", "description": "New Description", "settings": {"type": "rating"}},
+            {
+                "type": "rating",
+                "options": [
+                    {"value": 1},
+                    {"value": 2},
+                    {"value": 3},
+                    {"value": 4},
+                    {"value": 5},
+                    {"value": 6},
+                    {"value": 7},
+                    {"value": 8},
+                    {"value": 9},
+                    {"value": 10},
+                ],
+            },
         ),
         (
             LabelSelectionQuestionFactory,
@@ -99,6 +118,18 @@ if TYPE_CHECKING:
                 "visible_options": None,
             },
         ),
+        (
+            RankingQuestionFactory,
+            {"name": "New Name", "description": "New Description", "settings": {"type": "ranking"}},
+            {
+                "type": "ranking",
+                "options": [
+                    {"value": "completion-a", "text": "Completion A", "description": None},
+                    {"value": "completion-b", "text": "Completion B", "description": None},
+                    {"value": "completion-c", "text": "Completion C", "description": None},
+                ],
+            },
+        ),
     ],
 )
 @pytest.mark.parametrize("role", [UserRole.owner])
@@ -121,7 +152,7 @@ async def test_update_question(
     title = payload.get("title") or question.title
     description = payload.get("description") or question.description
 
-    assert response.status_code == 200
+    assert response.status_code == 200, response.json()
     assert response.json() == {
         "id": str(question.id),
         "name": question.name,
@@ -144,28 +175,10 @@ async def test_update_question(
     "QuestionFactory, payload",
     [
         (TextQuestionFactory, {"title": None, "description": None, "settings": None}),
-        (TextQuestionFactory, {"settings": {"type": "text"}}),
         (TextQuestionFactory, {"settings": {"type": "text", "use_markdown": None}}),
         (TextQuestionFactory, {"title": "New Title", "settings": {"type": "label_selection"}}),
-        (
-            RatingQuestionFactory,
-            {"settings": {"type": "rating", "options": [{"value": 94}, {"value": 95}, {"value": 96}]}},
-        ),
         (LabelSelectionQuestionFactory, {"settings": {"type": "label_selection", "visible_options": -5}}),
         (MultiLabelSelectionQuestionFactory, {"settings": {"type": "multi_label_selection", "visible_options": -5}}),
-        (
-            RankingQuestionFactory,
-            {
-                "settings": {
-                    "type": "ranking",
-                    "options": [
-                        {"value": "option-a", "text": "Option A", "description": None},
-                        {"value": "option-b", "text": "Option B", "description": None},
-                        {"value": "option-c", "text": "Option C", "description": None},
-                    ],
-                }
-            },
-        ),
     ],
 )
 @pytest.mark.asyncio
@@ -176,7 +189,7 @@ async def test_update_question_with_invalid_settings(
 
     response = await async_client.patch(f"/api/v1/questions/{question.id}", headers=owner_auth_header, json=payload)
 
-    assert response.status_code == 422
+    assert response.status_code == 422, payload
 
 
 @pytest.mark.asyncio

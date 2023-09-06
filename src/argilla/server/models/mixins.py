@@ -26,6 +26,7 @@ from typing_extensions import Self
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
     from sqlalchemy.orm import InstrumentedAttribute
+    from sqlalchemy.sql.elements import BinaryExpression
 
 Schema = TypeVar("Schema", bound=BaseModel)
 
@@ -46,13 +47,13 @@ def _schema_or_kwargs(schema: Union[Schema, None], values: Dict[str, Any]) -> Di
 class CRUDMixin:
     __upsertable_columns__: Union[Set[str], None] = None
 
-    def fill(self, **kwargs: Any) -> Self:
+    def fill(self, replace_dict: bool = False, **kwargs: Any) -> Self:
         for key, value in kwargs.items():
             if not hasattr(self, key):
                 raise AttributeError(f"Model `{self.__class__.__name__}` has no attribute `{key}`")
             # If the value is a dict, set value for each key one by one, as we want to update only the keys that are in
             # `value` and not override the whole dict.
-            if isinstance(value, dict):
+            if isinstance(value, dict) and not replace_dict:
                 dict_col = getattr(self, key) or {}
                 dict_col.update(value)
                 value = dict_col
@@ -80,10 +81,15 @@ class CRUDMixin:
         return result.scalars().unique().one_or_none()
 
     async def update(
-        self, db: "AsyncSession", schema: Union[Schema, None] = None, autocommit: bool = True, **kwargs: Any
+        self,
+        db: "AsyncSession",
+        schema: Union[Schema, None] = None,
+        replace_dict: bool = False,
+        autocommit: bool = True,
+        **kwargs: Any,
     ) -> Self:
         _values = _schema_or_kwargs(schema, kwargs)
-        updated = self.fill(**_values)
+        updated = self.fill(replace_dict=replace_dict, **_values)
         return await updated.save(db, autocommit)
 
     @classmethod
@@ -134,6 +140,16 @@ class CRUDMixin:
         if autocommit:
             await db.commit()
         return self
+
+    @classmethod
+    async def delete_many(
+        cls, db: "AsyncSession", params: List["BinaryExpression"], autocommit: bool = True
+    ) -> List[Self]:
+        delete_stmt = sql.delete(cls).filter(*params).returning(cls)
+        result = await db.execute(delete_stmt)
+        if autocommit:
+            await db.commit()
+        return result.scalars().all()
 
     async def save(self, db: "AsyncSession", autocommit: bool = True) -> Self:
         db.add(self)
