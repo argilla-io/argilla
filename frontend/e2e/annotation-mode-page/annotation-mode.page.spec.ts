@@ -347,7 +347,7 @@ test.describe("Annotate page", () => {
 
       await page.getByRole('button', { name: 'Next' }).click()
       await expect(page).toHaveScreenshot();
-      
+
       await page.getByRole('button', { name: 'Ignore and continue' }).click()
       await expect(page).toHaveScreenshot();
     });
