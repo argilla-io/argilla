@@ -38,6 +38,7 @@ These are the section headers that we use:
 
 - Move `database` commands under `server` group of commands ([#3710](https://github.com/argilla-io/argilla/pull/3710))
 - `server` commands only included in the CLI app when `server` extra requirements are installed ([#3710](https://github.com/argilla-io/argilla/pull/3710)).
+- Updated `PUT /api/v1/responses/{response_id}` to replace `values` stored with received `values` in request ([#3711](https://github.com/argilla-io/argilla/pull/3711)).
 
 ### Fixed
 
