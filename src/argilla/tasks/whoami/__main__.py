@@ -19,17 +19,16 @@ app = typer.Typer(invoke_without_command=True)
 
 @app.callback(help="Check the current user on the Argilla Server")
 def whoami() -> None:
-    from rich.console import Console
     from rich.markdown import Markdown
 
     from argilla.client.api import active_client
     from argilla.tasks.callback import init_callback
-    from argilla.tasks.rich import get_argilla_themed_panel
+    from argilla.tasks.rich import echo_in_panel
 
     init_callback()
     user = active_client()._user
 
-    panel = get_argilla_themed_panel(
+    echo_in_panel(
         Markdown(
             f"- **Username**: {user.username}\n"
             f"- **Role**: {user.role}\n"
@@ -41,8 +40,6 @@ def whoami() -> None:
         title="Current User",
         title_align="left",
     )
-
-    Console().print(panel)
 
 
 if __name__ == "__main__":

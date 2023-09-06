@@ -29,6 +29,7 @@ def push_to_huggingface(
     from rich.spinner import Spinner
 
     from argilla.client.feedback.dataset.local import FeedbackDataset
+    from argilla.tasks.rich import echo_in_panel
 
     dataset: "FeedbackDataset" = ctx.obj
 
@@ -43,13 +44,25 @@ def push_to_huggingface(
         with Live(spinner, refresh_per_second=20):
             dataset.push_to_huggingface(repo_id=repo_id, private=private, token=token)
     except ValueError as e:
-        typer.echo(
+        echo_in_panel(
             "The `FeedbackDataset` has no records to push to the HuggingFace Hub. Make sure to add records before"
-            " pushing it."
+            " pushing it.",
+            title="No records to push",
+            title_align="left",
+            success=False,
         )
         raise typer.Exit(1) from e
     except Exception as e:
-        typer.echo("An unexpected error occurred when trying to push the `FeedbackDataset` to the HuggingFace Hub")
+        echo_in_panel(
+            "An unexpected error occurred when trying to push the `FeedbackDataset` to the HuggingFace Hub",
+            title="Unexpected error",
+            title_align="left",
+            success=False,
+        )
         raise typer.Exit(code=1) from e
 
-    typer.echo(f"`FeedbackDataset` successfully pushed to the HuggingFace Hub at https://huggingface.co/{repo_id}")
+    echo_in_panel(
+        f"`FeedbackDataset` successfully pushed to the HuggingFace Hub at https://huggingface.co/{repo_id}",
+        title="Dataset pushed",
+        title_align="left",
+    )

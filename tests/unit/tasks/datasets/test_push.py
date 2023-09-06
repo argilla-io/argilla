@@ -74,5 +74,5 @@ def test_cli_datasets_push_to_huggingface_needs_login(cli_runner: "CliRunner", c
         cli, "datasets --name my-dataset --workspace my-workspace push-to-huggingface --repo-id argilla/my-dataset"
     )
 
-    assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout
+    assert "You are not logged in. Please run 'argilla login' to login" in result.stdout
     assert result.exit_code == 1

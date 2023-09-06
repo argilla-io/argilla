@@ -16,21 +16,23 @@ import typer
 
 
 def delete_user(username: str = typer.Argument(..., help="The username of the user to be removed")) -> None:
-    from rich.console import Console
-
     from argilla.client.users import User
-    from argilla.tasks.rich import get_argilla_themed_panel
+    from argilla.tasks.rich import echo_in_panel
 
     try:
         User.from_name(username).delete()
     except ValueError as e:
-        typer.echo(f"User with username '{username}' doesn't exist!")
+        echo_in_panel(
+            f"User with username={username} doesn't exist.", title="User not found", title_align="left", success=False
+        )
         raise typer.Exit(code=1) from e
     except RuntimeError as e:
-        typer.echo("An unexpected error occurred when trying to remove the user")
+        echo_in_panel(
+            "An unexpected error occurred when trying to remove the user.",
+            title="Unexpected error",
+            title_align="left",
+            success=False,
+        )
         raise typer.Exit(code=1) from e
 
-    panel = get_argilla_themed_panel(
-        f"User with username '{username}' has been removed!", title="User removed", title_align="left"
-    )
-    Console().print(panel)
+    echo_in_panel(f"User with username '{username}' has been removed!", title="User removed", title_align="left")

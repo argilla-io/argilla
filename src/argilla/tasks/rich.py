@@ -14,6 +14,7 @@
 
 from typing import TYPE_CHECKING, Any
 
+from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
@@ -32,3 +33,7 @@ def get_argilla_themed_panel(renderable: "RenderableType", title: str, success: 
     if success:
         title = f"[green]{title}"
     return Panel(renderable=renderable, border_style=_ARGILLA_BORDER_STYLE, title=title, **kwargs)
+
+
+def echo_in_panel(renderable: "RenderableType", title: str, success: bool = True, **kwargs: Any) -> None:
+    Console().print(get_argilla_themed_panel(renderable, title, success, **kwargs))

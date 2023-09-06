@@ -33,5 +33,5 @@ def test_cli_whoami(cli_runner: "CliRunner", cli: "Typer") -> None:
 def test_cli_whoami_needs_login(cli_runner: "CliRunner", cli: "Typer") -> None:
     result = cli_runner.invoke(cli, "whoami")
 
-    assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout
+    assert "You are not logged in. Please run 'argilla login' to login" in result.stdout
     assert result.exit_code == 1

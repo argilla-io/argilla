@@ -24,38 +24,43 @@ def delete_user(
     ctx: typer.Context,
     username: str = typer.Argument(..., help="The username of the user to be removed from the workspace"),
 ) -> None:
-    from rich.console import Console
-
-    from argilla.client.users import User
-    from argilla.tasks.rich import get_argilla_themed_panel
+    from argilla.tasks.rich import echo_in_panel
+    from argilla.tasks.workspaces.utils import get_user
 
     workspace: "Workspace" = ctx.obj
 
-    try:
-        user = User.from_name(username)
-    except ValueError as e:
-        typer.echo(f"User with username '{username}' does not exist")
-        raise typer.Exit(code=1) from e
-    except RuntimeError as e:
-        typer.echo("An unexpected error occurred when trying to retrieve the user from the Argilla server")
-        raise typer.Exit(code=1) from e
+    user = get_user(username)
 
     if user.is_owner:
-        typer.echo(f"User with username '{username}' is an owner and cannot be removed from any workspace")
+        echo_in_panel(
+            f"User with username={username} is an owner and cannot be removed from any workspace",
+            title="User is owner",
+            title_align="left",
+            success=False,
+        )
         raise typer.Exit(code=1)
 
     try:
         workspace.delete_user(user.id)
     except ValueError as e:
-        typer.echo(f"User with username '{username}' does not belong to the workspace '{workspace.name}'")
+        echo_in_panel(
+            f"User with username={username} does not belong to the workspace={workspace.name}.",
+            title="User not in workspace",
+            title_align="left",
+            success=False,
+        )
         raise typer.Exit(code=1) from e
     except RuntimeError as e:
-        typer.echo("An unexpected error occurred when trying to delete the user from the workspace")
+        echo_in_panel(
+            "An unexpected error occurred when trying to delete the user from the workspace.",
+            title="Unexpected error",
+            title_align="left",
+            success=False,
+        )
         raise typer.Exit(code=1) from e
 
-    panel = get_argilla_themed_panel(
-        f"User with username '{username}' has been removed from '{workspace.name}' workspace",
+    echo_in_panel(
+        f"User with username={username} has been removed from workspace={workspace.name}",
         title="User deleted",
         title_align="left",
     )
-    Console().print(panel)

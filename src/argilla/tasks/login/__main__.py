@@ -35,6 +35,7 @@ def login(
     import json
 
     from argilla.client.login import login as login_func
+    from argilla.tasks.rich import echo_in_panel
 
     try:
         if extra_headers:
@@ -42,15 +43,24 @@ def login(
         else:
             headers = {}
         login_func(api_url=api_url, api_key=api_key, workspace=workspace, extra_headers=headers)
-        typer.echo(f"Logged in successfully to '{api_url}' Argilla server!")
     except json.JSONDecodeError as e:
-        typer.echo("The provided extra headers are not a valid JSON string.")
-        raise typer.Exit(code=1) from e
-    except ValueError as e:
-        typer.echo(
-            f"Could not login to the '{api_url}' Argilla server. Please check the provided credentials and try again."
+        echo_in_panel(
+            "The provided extra headers are not a valid JSON string.",
+            title="Extra headers error",
+            title_align="left",
+            success=False,
         )
         raise typer.Exit(code=1) from e
+    except ValueError as e:
+        echo_in_panel(
+            f"Could not login to the '{api_url}' Argilla server. Please check the provided credentials and try again.",
+            title="Login error",
+            title_align="left",
+            success=False,
+        )
+        raise typer.Exit(code=1) from e
+
+    echo_in_panel(f"Logged in successfully to '{api_url}' Argilla server!", title="Logged in", title_align="left")
 
 
 if __name__ == "__main__":

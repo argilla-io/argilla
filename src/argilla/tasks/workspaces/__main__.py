@@ -40,14 +40,25 @@ def callback(
         raise typer.BadParameter("The command requires a workspace name provided using '--name' option")
 
     from argilla.client.workspaces import Workspace
+    from argilla.tasks.rich import echo_in_panel
 
     try:
         workspace = Workspace.from_name(name)
     except ValueError as e:
-        typer.echo(f"Workspace '{name}' does not exist")
+        echo_in_panel(
+            f"Workspace with name={name} does not exist.",
+            title="Workspace not found",
+            title_align="left",
+            success=False,
+        )
         raise typer.Exit(code=1) from e
     except RuntimeError as e:
-        typer.echo("An unexpected error occurred when trying to get the workspace from the Argilla server")
+        echo_in_panel(
+            "An unexpected error occurred when trying to get the workspace from the Argilla server",
+            title="Unexpected error",
+            title_align="left",
+            success=False,
+        )
         raise typer.Exit(code=1) from e
 
     ctx.obj = workspace

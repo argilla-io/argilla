@@ -32,7 +32,9 @@ def list_datasets(
     from argilla.client.api import list_datasets as list_datasets_api
     from argilla.client.feedback.dataset.local import FeedbackDataset
     from argilla.client.workspaces import Workspace
-    from argilla.tasks.rich import get_argilla_themed_table
+    from argilla.tasks.rich import echo_in_panel, get_argilla_themed_table
+
+    console = Console()
 
     def build_tags_text(tags: Dict[str, str]) -> str:
         text = ""
@@ -50,7 +52,12 @@ def list_datasets(
         try:
             Workspace.from_name(workspace)
         except ValueError as e:
-            typer.echo(f"Workspace '{workspace}' does not exist!")
+            echo_in_panel(
+                f"Workspace with name={workspace} does not exist",
+                title="Workspace not found",
+                title_align="left",
+                success=False,
+            )
             raise typer.Exit(code=1) from e
 
     if type_ is None or type_ == DatasetType.feedback:
@@ -77,8 +84,4 @@ def list_datasets(
                 dataset.last_updated.isoformat(sep=" "),
             )
 
-    Console().print(table)
-
-
-if __name__ == "__main__":
-    typer.run(list_datasets)
+    console.print(table)

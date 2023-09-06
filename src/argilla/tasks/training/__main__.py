@@ -40,15 +40,15 @@ def train(
     device: int = typer.Option(default=-1, help="The GPU id to be used for training."),
     output_dir: str = typer.Option(default="model", help="Output directory for the saved model."),
     update_config_kwargs: str = typer.Option(default={}, help="update_config() kwargs to be passed as a dictionary."),
-    api_url: str = typer.Option(default=None, envvar="ARGILLA_API_URL", help="The API url to be used for training."),
-    api_key: str = typer.Option(default=None, envvar="ARGILLA_API_KEY", help="The API key to be used for training."),
 ):
     import json
 
     from argilla.client.api import init
+    from argilla.tasks.callback import init_callback
     from argilla.training import ArgillaTrainer
 
-    init(api_url=api_url, api_key=api_key)
+    init_callback()
+
     trainer = ArgillaTrainer(
         name=name,
         framework=framework,
