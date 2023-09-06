@@ -154,3 +154,6 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin):
             self._records += records
         else:
             self._records = records
+
+    def filter_by(self, **kwargs: Any) -> Any:
+        raise NotImplementedError("Filtering is not supported for local datasets yet.")
