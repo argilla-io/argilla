@@ -94,7 +94,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
 
     def init_training_args(
         self,
-        training_file: str = None,
+        training_file: Optional[str] = None,
         validation_file: str = None,
         model: str = "curie",
         n_epochs: int = None,
@@ -107,7 +107,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         classification_betas: list = None,
         suffix: str = None,
         hyperparameters: dict = None,
-    ):
+    ) -> None:
         self.model_kwargs = {}
 
         self.model_kwargs["training_file"] = training_file

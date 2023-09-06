@@ -11,15 +11,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import re
-from typing import TYPE_CHECKING
 
-import argilla as rg
 import pytest
+from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.training.schemas import TrainingTaskForChatCompletionFormat
-
-if TYPE_CHECKING:
-    pass
 
 
 def test_training_task_for_chat_completion(mocked_openai):
