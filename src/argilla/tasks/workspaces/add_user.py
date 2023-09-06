@@ -40,6 +40,13 @@ def add_user(
         typer.echo("An unexpected error occurred when trying to retrieve the user from the Argilla server")
         raise typer.Exit(code=1) from e
 
+    if user.is_owner:
+        typer.echo(
+            f"User with name={username} is an owner. Users with owner role don't need specific permissions per"
+            " workspace, as those are super-users with privileges over everything under Argilla."
+        )
+        raise typer.Exit(code=1)
+
     try:
         workspace.add_user(user.id)
     except ValueError as e:

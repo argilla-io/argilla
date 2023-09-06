@@ -57,6 +57,21 @@ class TestSuiteWorkspaceAddUser:
         assert result.exit_code == 1
         assert "User with username 'unit-test' does not exist" in result.stdout
 
+    def test_workspace_add_user_with_owner_user(
+        self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", workspace, user
+    ) -> None:
+        user.role = "owner"
+        mocker.patch("argilla.client.workspaces.Workspace.from_name", return_value=workspace)
+        mocker.patch("argilla.client.users.User.from_name", return_value=user)
+
+        result = cli_runner.invoke(cli, "workspaces --name unit-test add-user unit-test")
+
+        assert result.exit_code == 1
+        assert (
+            "User with name=unit-test is an owner. Users with owner role don't need specific permissions per"
+            " workspace, as those are super-users with privileges over everything under Argilla." in result.stdout
+        )
+
     def test_workspace_add_user_with_user_belonging_to_workspace(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", workspace, user
     ) -> None:
