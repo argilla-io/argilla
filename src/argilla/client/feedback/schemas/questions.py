@@ -170,16 +170,16 @@ class _LabelQuestion(QuestionSchema, LabelMappingMixin):
                 visible_labels = None
         else:
             visible_labels = values.get("visible_labels")
-            total_options = len(values.get("labels", []))
-            if visible_labels and visible_labels > total_options:
-                if total_options >= 3:
+            total_labels = len(values.get("labels", []))
+            if visible_labels and visible_labels > total_labels:
+                if total_labels >= 3:
                     warnings.warn(
                         f"`visible_labels={visible_labels}` is greater than the total number"
-                        f" of labels ({total_options}), so it will be set to `{total_options}`.",
+                        f" of labels ({total_labels}), so it will be set to `{total_labels}`.",
                         UserWarning,
                         stacklevel=1,
                     )
-                    visible_labels = total_options
+                    visible_labels = total_labels
                 else:
                     warnings.warn(
                         f"`labels={values.get('labels')}` has less than 3 labels, so `visible_labels`"
