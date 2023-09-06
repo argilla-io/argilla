@@ -12,14 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.tasks.async_typer import AsyncTyper
+from argilla.tasks.typer_ext import ArgillaTyper
 
 from .create import create
 from .create_default import create_default
 from .migrate import migrate
 from .update import update
 
-app = AsyncTyper(
+app = ArgillaTyper(
     help="CLI commands for user and workspace management using the database connection", no_args_is_help=True
 )
 

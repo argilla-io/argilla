@@ -32,7 +32,7 @@ from typer.testing import CliRunner
 from tests.database import SyncTestSession
 
 if TYPE_CHECKING:
-    from argilla.tasks.async_typer import AsyncTyper
+    from argilla.tasks.typer_ext import ArgillaTyper
     from pytest_mock import MockerFixture
     from sqlalchemy.engine import Connection
     from sqlalchemy.orm import Session
@@ -44,7 +44,7 @@ def cli_runner() -> CliRunner:
 
 
 @pytest.fixture(scope="session")
-def cli() -> "AsyncTyper":
+def cli() -> "ArgillaTyper":
     return app
 
 
