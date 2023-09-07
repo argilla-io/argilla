@@ -34,7 +34,7 @@ class TestSuiteWorkspaceDeleteUser:
         result = cli_runner.invoke(cli, "workspaces --name unit-test delete-user unit-test")
 
         assert result.exit_code == 0
-        assert "User with username 'unit-test' has been removed from 'unit-test' workspace" in result.stdout
+        assert "User with username=unit-test has been removed from workspace=unit-test" in result.stdout
 
     def test_workspace_delete_user_with_non_existing_workspace(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"
@@ -44,7 +44,7 @@ class TestSuiteWorkspaceDeleteUser:
         result = cli_runner.invoke(cli, "workspaces --name unit-test delete-user unit-test")
 
         assert result.exit_code == 1
-        assert "Workspace 'unit-test' does not exist" in result.stdout
+        assert "Workspace with name=unit-test does not exist" in result.stdout
 
     def test_workspace_delete_user_with_non_existing_user(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", workspace, user
@@ -55,7 +55,7 @@ class TestSuiteWorkspaceDeleteUser:
         result = cli_runner.invoke(cli, "workspaces --name unit-test delete-user unit-test")
 
         assert result.exit_code == 1
-        assert "User with username 'unit-test' does not exist" in result.stdout
+        assert "User with username=unit-test does not exist" in result.stdout
 
     def test_workspace_delete_user_with_owner_user(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", workspace, user
@@ -67,7 +67,7 @@ class TestSuiteWorkspaceDeleteUser:
         result = cli_runner.invoke(cli, "workspaces --name unit-test delete-user unit-test")
 
         assert result.exit_code == 1
-        assert "User with username 'unit-test' is an owner and cannot be removed from any workspace" in result.stdout
+        assert "User with username=unit-test is an owner and cannot be removed" in result.stdout
 
     def test_workspace_delete_user_with_user_not_belonging_to_workspace(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", workspace, user
@@ -79,7 +79,7 @@ class TestSuiteWorkspaceDeleteUser:
         result = cli_runner.invoke(cli, "workspaces --name unit-test delete-user unit-test")
 
         assert result.exit_code == 1
-        assert "User with username 'unit-test' does not belong to the workspace 'unit-test'" in result.stdout
+        assert "User with username=unit-test does not belong to the workspace" in result.stdout
 
     def test_workspace_delete_user_without_workspace_name(self, cli_runner: "CliRunner", cli: "Typer") -> None:
         result = cli_runner.invoke(cli, "workspaces delete-user unit-test")
@@ -92,4 +92,4 @@ def test_list_users_needs_login(cli_runner: "CliRunner", cli: "Typer") -> None:
     result = cli_runner.invoke(cli, "workspaces --name unit-test delete-user unit-test")
 
     assert result.exit_code == 1
-    assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout
+    assert "You are not logged in. Please run 'argilla login' to login" in result.stdout

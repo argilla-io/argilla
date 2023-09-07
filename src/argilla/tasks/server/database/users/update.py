@@ -17,7 +17,7 @@ import typer
 from argilla.server.contexts import accounts
 from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import UserRole
-from argilla.tasks import async_typer
+from argilla.tasks import typer_ext
 
 
 async def update(
@@ -52,4 +52,4 @@ async def update(
 
 
 if __name__ == "__main__":
-    async_typer.run(update)
+    typer_ext.run(update)

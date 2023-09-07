@@ -48,7 +48,7 @@ class TestSuiteWorkspaceCreateCommand:
 
         result = cli_runner.invoke(cli, "workspaces create workspace1")
 
-        assert result.stdout == "Workspace with name=`workspace1` already exists, so please use a different name.\n"
+        assert "Workspace with name=workspace1 already exists" in result.stdout
         assert result.exit_code == 1
 
     def test_workspace_create_runtime_exception(self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
@@ -58,7 +58,7 @@ class TestSuiteWorkspaceCreateCommand:
         )
 
         result = cli_runner.invoke(cli, "workspaces create workspace1")
-        assert result.stdout == "An unexpected error occurred when trying to create the workspace\n"
+        assert "An unexpected error occurred when trying to create the workspace" in result.stdout
         assert result.exit_code == 1
 
 
@@ -66,5 +66,5 @@ class TestSuiteWorkspaceCreateCommand:
 def test_cli_workspaces_create_needs_login(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
     result = cli_runner.invoke(cli, "workspaces create")
 
-    assert "You are not logged in. Please run `argilla login` to login to an Argilla server." in result.stdout
+    assert "You are not logged in. Please run 'argilla login' to login" in result.stdout
     assert result.exit_code == 1

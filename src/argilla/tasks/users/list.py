@@ -26,7 +26,7 @@ def list_users(
     from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
     from argilla.client.users import User
     from argilla.client.workspaces import Workspace
-    from argilla.tasks.rich import get_argilla_themed_table
+    from argilla.tasks.rich import echo_in_panel, get_argilla_themed_table
 
     def build_workspaces_text(workspaces: Union[List[str], List[WorkspaceModel], None]) -> str:
         text = ""
@@ -44,12 +44,22 @@ def list_users(
             try:
                 users = Workspace.from_name(workspace).users
             except ValueError as e:
-                typer.echo(f"Workspace '{workspace}' does not exist!")
+                echo_in_panel(
+                    f"Workspace with name={workspace} does not exist.",
+                    title="Workspace not found",
+                    title_align="left",
+                    success=False,
+                )
                 raise typer.Exit(code=1) from e
         else:
             users = User.list()
     except RuntimeError as e:
-        typer.echo("An unexpected error occurred when trying to retrieve the list of users from the Argilla server")
+        echo_in_panel(
+            "An unexpected error occurred when trying to retrieve the list of users from the Argilla server.",
+            title="Unexpected error",
+            title_align="left",
+            success=False,
+        )
         raise typer.Exit(code=1) from e
 
     table = get_argilla_themed_table(title="Users", show_lines=True)

@@ -37,7 +37,7 @@ def create_user(
     from rich.markdown import Markdown
 
     from argilla.client.users import User
-    from argilla.tasks.rich import get_argilla_themed_panel
+    from argilla.tasks.rich import echo_in_panel
 
     try:
         user = User.create(
@@ -49,18 +49,30 @@ def create_user(
             workspaces=workspaces,
         )
     except KeyError as e:
-        typer.echo(f"User with '{username}' already exists!")
+        echo_in_panel(
+            f"User with name={username} already exists.",
+            title="User already exists",
+            title_align="left",
+            success=False,
+        )
         raise typer.Exit(code=1) from e
     except ValueError as e:
-        typer.echo(f"Provided parameters are not valid:\n\n{e}")
+        echo_in_panel(
+            f"Provided parameters are not valid:\n\n{e}", title="Invalid parameters", title_align="left", success=False
+        )
         raise typer.Exit(code=1) from e
     except RuntimeError as e:
-        typer.echo("An unexpected error occurred when trying to create the user")
+        echo_in_panel(
+            "An unexpected error occurred when trying to create the user.",
+            title="Unexpected error",
+            title_align="left",
+            success=False,
+        )
         raise typer.Exit(code=1) from e
 
     workspaces_str = ", ".join(workspace.name for workspace in user.workspaces)
 
-    panel = get_argilla_themed_panel(
+    echo_in_panel(
         Markdown(
             f"- **Username**: {user.username}\n"
             f"- **Role**: {user.role}\n"
@@ -72,5 +84,3 @@ def create_user(
         title="User created",
         title_align="left",
     )
-
-    Console().print(panel)

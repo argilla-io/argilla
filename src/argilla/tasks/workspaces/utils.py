@@ -14,37 +14,23 @@
 
 import typer
 
-from argilla.client.workspaces import Workspace
+from argilla.client.users import User
+from argilla.tasks.rich import echo_in_panel
 
 
-def create_workspace(
-    name: str = typer.Argument(
-        ...,
-        help="The name of the workspace to be created",
-    )
-) -> None:
-    """Creates a workspace for the logged user in Argilla"""
-    from argilla.tasks.rich import echo_in_panel
-
+def get_user(username: str) -> User:
     try:
-        Workspace.create(name=name)
+        return User.from_name(username)
     except ValueError as e:
         echo_in_panel(
-            f"Workspace with name={name} already exists.",
-            title="Workspace already exists",
-            title_align="left",
-            success=False,
+            f"User with username={username} does not exist", title="User not found", title_align="left", success=False
         )
         raise typer.Exit(code=1) from e
     except RuntimeError as e:
         echo_in_panel(
-            "An unexpected error occurred when trying to create the workspace.",
+            "An unexpected error occurred when trying to retrieve the user from the Argilla server",
             title="Unexpected error",
             title_align="left",
             success=False,
         )
         raise typer.Exit(code=1) from e
-
-    echo_in_panel(
-        f"Workspace with the name={name} successfully created.", title="Workspace created", title_align="left"
-    )

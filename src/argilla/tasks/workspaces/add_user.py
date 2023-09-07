@@ -24,41 +24,45 @@ def add_user(
     ctx: typer.Context,
     username: str = typer.Argument(..., help="The username of the user to be added to the workspace"),
 ) -> None:
-    from rich.console import Console
-
     from argilla.client.users import User
-    from argilla.tasks.rich import get_argilla_themed_panel
+    from argilla.tasks.rich import echo_in_panel
+    from argilla.tasks.workspaces.utils import get_user
 
     workspace: "Workspace" = ctx.obj
 
-    try:
-        user = User.from_name(username)
-    except ValueError as e:
-        typer.echo(f"User with username '{username}' does not exist")
-        raise typer.Exit(code=1) from e
-    except RuntimeError as e:
-        typer.echo("An unexpected error occurred when trying to retrieve the user from the Argilla server")
-        raise typer.Exit(code=1) from e
+    user = get_user(username)
 
     if user.is_owner:
-        typer.echo(
+        echo_in_panel(
             f"User with name={username} is an owner. Users with owner role don't need specific permissions per"
-            " workspace, as those are super-users with privileges over everything under Argilla."
+            " workspace, as those are super-users with privileges over everything under Argilla.",
+            title="User is owner",
+            title_align="left",
+            success=False,
         )
         raise typer.Exit(code=1)
 
     try:
         workspace.add_user(user.id)
     except ValueError as e:
-        typer.echo(f"User with username '{username}' already exists in workspace '{workspace.name}'")
+        echo_in_panel(
+            f"User with username={username} already exists in workspace={workspace.name}.",
+            title="User already exists",
+            title_align="left",
+            success=False,
+        )
         raise typer.Exit(code=1) from e
     except RuntimeError as e:
-        typer.echo("An unexpected error occurred when trying to add user to the workspace")
+        echo_in_panel(
+            "An unexpected error occurred when trying to add user to the workspace.",
+            title="Unexpected error",
+            title_align="left",
+            success=False,
+        )
         raise typer.Exit(code=1) from e
 
-    panel = get_argilla_themed_panel(
-        f"User with username '{username}' has been added to '{workspace.name}' workspace",
-        title="User Added",
+    echo_in_panel(
+        f"User with username={username} has been added to workspace={workspace.name}",
+        title="User added",
         title_align="left",
     )
-    Console().print(panel)

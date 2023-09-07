@@ -18,13 +18,17 @@ app = typer.Typer(invoke_without_command=True)
 
 
 @app.callback(help="Logout from an Argilla Server.")
-def logout():
+def logout(force: bool = typer.Option(False, help="Force the logout even if the server cannot be reached")) -> None:
     from argilla.client.login import ArgillaCredentials
     from argilla.tasks.callback import init_callback
+    from argilla.tasks.rich import echo_in_panel
 
-    init_callback()
+    if not force:
+        init_callback()
+
     ArgillaCredentials.remove()
-    typer.echo("Logged out successfully from Argilla server!")
+
+    echo_in_panel("Logged out successfully from Argilla server!", title="Logout", title_align="left")
 
 
 if __name__ == "__main__":
