@@ -40,6 +40,7 @@ These are the section headers that we use:
 
 ### Fixed
 
+- Fixed error messages when deleting a `DatasetForTextClassification` ([#3652](https://github.com/argilla-io/argilla/pull/3652))
 - Fixed `RatingQuestion.values` validation to raise a `ValidationError` when values are out of range i.e. [1, 10] ([#3626](https://github.com/argilla-io/argilla/pull/3626)).
 
 ### Removed
