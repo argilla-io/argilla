@@ -210,10 +210,13 @@ class DatasetPolicy:
 
 class DatasetPolicyV1:
     @classmethod
-    async def list(cls, actor: User, workspace_id: Optional[UUID] = None) -> bool:
-        if actor.is_owner or workspace_id is None:
-            return True
-        return await _exists_workspace_user_by_user_and_workspace_id(actor, workspace_id)
+    def list(cls, workspace_id: Optional[UUID] = None) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            if actor.is_owner or workspace_id is None:
+                return True
+            await _exists_workspace_user_by_user_and_workspace_id(actor, workspace_id)
+
+        return is_allowed
 
     @classmethod
     def get(cls, dataset: Dataset) -> PolicyAction:
