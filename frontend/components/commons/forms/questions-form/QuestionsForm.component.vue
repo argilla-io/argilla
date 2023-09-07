@@ -12,7 +12,6 @@
             {{ $t("saving") }}
           </p>
           <p v-else-if="record.isDraft">
-            <svgicon color="#0000005e" name="check" />
             {{ $t("saved") }}
             <BaseDate
               class="tooltip"
@@ -73,7 +72,6 @@
 <script>
 import "assets/icons/external-link";
 import "assets/icons/refresh";
-import "assets/icons/check";
 
 import { useQuestionFormViewModel } from "./useQuestionsFormViewModel";
 
@@ -268,6 +266,7 @@ export default {
         opacity: 1;
         height: auto;
         width: auto;
+        overflow: visible;
       }
     }
   }
@@ -279,6 +278,7 @@ export default {
     top: 50%;
     transform: translateY(-50%);
     right: calc(100% + 10px);
+    overflow: hidden;
     &:before {
       position: absolute;
       @extend %triangle-right;
