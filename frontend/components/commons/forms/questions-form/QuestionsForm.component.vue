@@ -1,13 +1,28 @@
 <template>
   <form
     class="questions-form"
-    :class="{ '--edited-form': !isFormUntouched }"
+    :class="{ '--edited-form': isFormTouched }"
     @submit.prevent="onSubmit"
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
+        <div class="draft">
+          <p v-if="draftSaving">
+            <svgicon color="#0000005e" name="refresh" />
+            {{ $t("saving") }}
+          </p>
+          <p v-else-if="record.isDraft">
+            {{ $t("saved") }}
+            <BaseDate
+              class="tooltip"
+              :date="record.updatedAt"
+              format="date-relative-now"
+              :updateEverySecond="10"
+            />
+          </p>
+        </div>
         <p class="questions-form__title --heading5 --medium">
-          Submit your feedback
+          {{ $t("submit-your-feedback") }}
         </p>
         <p class="questions-form__guidelines-link">
           Read the
@@ -24,7 +39,7 @@
 
       <QuestionsComponent
         :questions="record.questions"
-        :showSuggestion="!record.isSubmitted"
+        :showSuggestion="record.isPending || record.isDraft"
       />
     </div>
     <div class="footer-form">
@@ -56,7 +71,8 @@
 
 <script>
 import "assets/icons/external-link";
-import { isEqual, cloneDeep } from "lodash";
+import "assets/icons/refresh";
+
 import { useQuestionFormViewModel } from "./useQuestionsFormViewModel";
 
 export default {
@@ -73,48 +89,63 @@ export default {
   },
   data() {
     return {
-      originalRecord: null,
+      isFormTouched: false,
     };
   },
   setup() {
     return useQuestionFormViewModel();
   },
   computed: {
-    isFormUntouched() {
-      return isEqual(this.originalRecord, this.record);
-    },
     questionAreCompletedCorrectly() {
       return this.record.questionAreCompletedCorrectly();
     },
     isSubmitButtonDisabled() {
       if (this.record.isSubmitted)
-        return this.isFormUntouched || !this.questionAreCompletedCorrectly;
+        return !this.isFormTouched || !this.questionAreCompletedCorrectly;
 
       return !this.questionAreCompletedCorrectly;
     },
   },
   watch: {
-    isFormUntouched(isFormUntouched) {
-      this.emitIsQuestionsFormUntouched(isFormUntouched);
+    isFormTouched(isFormTouched) {
+      if (this.record.isSubmitted)
+        this.emitIsQuestionsFormTouched(isFormTouched);
+    },
+    record: {
+      deep: true,
+      immediate: true,
+      handler() {
+        if (this.record.isModified) this.saveDraft(this.record);
+
+        this.isFormTouched = this.record.isModified;
+      },
     },
   },
   created() {
-    this.record.restore();
-
-    this.onReset();
+    this.record.initialize();
   },
   mounted() {
     document.addEventListener("keydown", this.onPressKeyboardShortCut);
   },
   destroyed() {
-    this.emitIsQuestionsFormUntouched(true);
+    this.emitIsQuestionsFormTouched(false);
+
     document.removeEventListener("keydown", this.onPressKeyboardShortCut);
   },
   methods: {
-    onPressKeyboardShortCut({ code, shiftKey }) {
+    onPressKeyboardShortCut(event) {
+      const { code, shiftKey, ctrlKey, metaKey } = event;
       switch (code) {
+        case "KeyS": {
+          if (ctrlKey || metaKey) {
+            event.preventDefault();
+            event.stopPropagation();
+            this.onSaveDraftImmediately();
+          }
+          break;
+        }
         case "Enter": {
-          this.onSubmit();
+          if (shiftKey) this.onSubmit();
           break;
         }
         case "Space": {
@@ -122,7 +153,7 @@ export default {
           break;
         }
         case "Backspace": {
-          this.onDiscard();
+          if (shiftKey) this.onDiscard();
           break;
         }
         default:
@@ -132,32 +163,24 @@ export default {
       await this.discard(this.record);
 
       this.$emit("on-discard-responses");
-
-      this.onReset();
     },
     async onSubmit() {
-      if (!this.questionAreCompletedCorrectly) {
-        return;
-      }
+      if (!this.questionAreCompletedCorrectly) return;
 
       await this.submit(this.record);
 
       this.$emit("on-submit-responses");
-
-      this.onReset();
     },
     async onClear() {
       await this.clear(this.record);
-
-      this.onReset();
     },
-    onReset() {
-      this.originalRecord = cloneDeep(this.record);
+    async onSaveDraftImmediately() {
+      await this.saveDraftImmediately(this.record);
     },
-    emitIsQuestionsFormUntouched(isFormUntouched) {
-      this.$emit("on-question-form-touched", !isFormUntouched);
+    emitIsQuestionsFormTouched(isFormTouched) {
+      this.$emit("on-question-form-touched", isFormTouched);
 
-      this.$root.$emit("are-responses-untouched", isFormUntouched);
+      this.$root.$emit("are-responses-untouched", !isFormTouched);
     },
   },
 };
@@ -194,6 +217,7 @@ export default {
     }
   }
   &__content {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: $base-space * 4;
@@ -219,6 +243,46 @@ export default {
   &__right-area {
     display: inline-flex;
     gap: $base-space * 2;
+  }
+}
+
+.draft {
+  position: absolute;
+  right: $base-space * 2;
+  top: $base-space;
+  user-select: none;
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  align-items: center;
+  margin: 0;
+  @include font-size(12px);
+  color: $black-37;
+  font-weight: 500;
+  p {
+    margin: 0;
+    &:hover {
+      .tooltip {
+        opacity: 1;
+        height: auto;
+        width: auto;
+        overflow: visible;
+      }
+    }
+  }
+  .tooltip {
+    opacity: 0;
+    height: auto;
+    width: 0;
+    @extend %tooltip;
+    top: 50%;
+    transform: translateY(-50%);
+    right: calc(100% + 10px);
+    overflow: hidden;
+    &:before {
+      position: absolute;
+      @extend %triangle-right;
+    }
   }
 }
 </style>

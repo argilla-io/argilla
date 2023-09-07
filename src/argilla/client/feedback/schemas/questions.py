@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import warnings
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
@@ -118,6 +119,10 @@ class RatingQuestion(QuestionSchema, LabelMappingMixin):
         return values
 
 
+UndefinedType = Literal["undefined"]
+UNDEFINED = "undefined"
+
+
 class _LabelQuestion(QuestionSchema, LabelMappingMixin):
     """Protected schema for the `FeedbackDataset` label questions, which are the ones that
     will require a label response from the user. This class should not be used directly,
@@ -130,14 +135,15 @@ class _LabelQuestion(QuestionSchema, LabelMappingMixin):
             the list must contain at least two unique labels. Additionally, `labels` can
             also be a dictionary of labels, where the keys are the labels, and the values
             are the labels that will be shown in the UI.
-        visible_labels: The number of visible labels in the UI. Defaults to 20, and must
-            be 3 or greater.
+        visible_labels: The number of visible labels in the UI. Defaults to undefined,
+            which means that it will be automatically set, otherwise it must be either None
+            which means all the labels will be shown, or 3 or greater.
     """
 
     labels: Union[conlist(str, unique_items=True, min_items=2), Dict[str, str]]
-    visible_labels: Optional[conint(ge=3)] = 20
+    visible_labels: Union[UndefinedType, conint(ge=3), None] = UNDEFINED
 
-    @validator("labels", always=True)
+    @validator("labels", pre=True, always=True)
     def labels_dict_must_be_valid(cls, v: Union[List[str], Dict[str, str]]) -> Union[List[str], Dict[str, str]]:
         if isinstance(v, dict):
             assert len(v.keys()) > 1, "ensure this dict has at least 2 items"
@@ -147,15 +153,47 @@ class _LabelQuestion(QuestionSchema, LabelMappingMixin):
     @root_validator(skip_on_failure=True)
     def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         values["settings"]["type"] = values.get("type")
+
         if isinstance(values.get("labels"), dict):
             values["settings"]["options"] = [
                 {"value": key, "text": value} for key, value in values.get("labels").items()
             ]
-        if isinstance(values.get("labels"), list):
+        elif isinstance(values.get("labels"), list):
             values["settings"]["options"] = [{"value": label, "text": label} for label in values.get("labels")]
-        values["settings"]["visible_options"] = values.get(
-            "visible_labels"
-        )  # `None` is a possible value, which means all labels are visible
+
+        if values.get("visible_labels") == UNDEFINED:
+            if len(values.get("labels", [])) > 20:
+                warnings.warn(
+                    "Since `visible_labels` has not been provided and the total number"
+                    " of labels is greater than 20, `visible_labels` will be set to `20`.",
+                    UserWarning,
+                    stacklevel=1,
+                )
+                visible_labels = 20
+            else:
+                visible_labels = None
+        else:
+            visible_labels = values.get("visible_labels")
+            total_labels = len(values.get("labels", []))
+            if visible_labels and visible_labels > total_labels:
+                if total_labels >= 3:
+                    warnings.warn(
+                        f"`visible_labels={visible_labels}` is greater than the total number"
+                        f" of labels ({total_labels}), so it will be set to `{total_labels}`.",
+                        UserWarning,
+                        stacklevel=1,
+                    )
+                    visible_labels = total_labels
+                else:
+                    warnings.warn(
+                        f"`labels={values.get('labels')}` has less than 3 labels, so `visible_labels`"
+                        " will be set to `None`, which means that all the labels will be visible.",
+                        UserWarning,
+                        stacklevel=1,
+                    )
+                    visible_labels = None
+        values["visible_labels"] = visible_labels
+        values["settings"]["visible_options"] = visible_labels
         return values
 
 

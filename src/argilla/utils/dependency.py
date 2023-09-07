@@ -13,25 +13,19 @@
 #  limitations under the License.
 
 import functools
+import importlib.metadata
+import importlib.util
 import operator
 import re
 import sys
-from typing import Callable, Optional, TypeVar
+from typing import Callable, Dict, List, Optional, TypeVar
+
+from packaging import version
 
 if sys.version_info >= (3, 10):
     from typing import ParamSpec
 else:
     from typing_extensions import ParamSpec
-
-from packaging import version
-
-# This file was adapted from Hugging Face's wonderful transformers module
-
-# The package importlib_metadata is in a different place, depending on the python version.
-if sys.version_info < (3, 8):
-    import importlib_metadata
-else:
-    import importlib.metadata as importlib_metadata
 
 ops = {
     "<": operator.lt,
@@ -66,7 +60,7 @@ def _compare_versions(
 def require_version(requirement: str, func_name: Optional[str] = None) -> None:
     """
     Perform a runtime check of the dependency versions, using the exact same syntax used by pip.
-    The installed module version comes from the *site-packages* dir via *importlib_metadata*.
+    The installed module version comes from the *site-packages* dir via *importlib.metadata*.
 
     Args:
         requirement (`str`): pip style definition, e.g.,  "tokenizers==0.9.4", "tqdm>=4.27", "numpy"
@@ -113,8 +107,8 @@ def require_version(requirement: str, func_name: Optional[str] = None) -> None:
 
     # check if any version is installed
     try:
-        got_version = importlib_metadata.version(package)
-    except importlib_metadata.PackageNotFoundError:
+        got_version = importlib.metadata.version(package)
+    except importlib.metadata.PackageNotFoundError:
         raise ModuleNotFoundError(
             f"'{package}' must be installed{f' to use `{func_name}`' if func_name else ''}! You can"
             f" install '{package}' with this command: `pip install {requirement}`"
@@ -133,7 +127,7 @@ _R = TypeVar("_R")
 def requires_version(requirement: str) -> Callable[[Callable[_P, _R]], Callable[_P, _R]]:
     """Decorator variant of `require_version`.
     Perform a runtime check of the dependency versions, using the exact same syntax used by pip.
-    The installed module version comes from the *site-packages* dir via *importlib_metadata*.
+    The installed module version comes from the *site-packages* dir via *importlib.metadata*.
 
     Args:
         requirement (`str`): pip style definition, e.g.,  "tokenizers==0.9.4", "tqdm>=4.27", "numpy"
@@ -157,4 +151,55 @@ def requires_version(requirement: str) -> Callable[[Callable[_P, _R]], Callable[
     return decorator
 
 
-__all__ = ["requires_version", "require_version"]
+def _group_by_extra(dependencies: List[str]) -> Dict[str, List[str]]:
+    grouped = {"base": []}
+
+    for dep in dependencies:
+        # Extract the name of the dependency by splitting at the first space or '['
+        dep_name = dep.split()[0].split("[")[0]
+
+        if "; extra ==" in dep:
+            # Split the dependency and the extra value
+            _, extra_value = dep.split(" ; extra ==")
+            extra_value = extra_value.strip().strip("'")
+
+            # Append the dependency name to the right extra group
+            if extra_value not in grouped:
+                grouped[extra_value] = []
+            grouped[extra_value].append(dep_name)
+        else:
+            grouped["base"].append(dep_name)
+
+    return grouped
+
+
+def is_package_with_extras_installed(name: str, extras: List[str]) -> bool:
+    """Checks the given extras of a package are installed.
+
+    Args:
+        name: the name of the package to check.
+        extras: the extras to check.
+
+    Returns:
+        `True`, if the extras are installed, `False` otherwise.
+    """
+    try:
+        requirements = importlib.metadata.requires(name)
+    except importlib.metadata.PackageNotFoundError:
+        return False
+
+    grouped_requirements = _group_by_extra(requirements)
+    available_extras = list(grouped_requirements.keys())
+    for extra in extras:
+        if extra not in available_extras:
+            raise KeyError(f"'{name}' package does not provide '{extra}' extra")
+        for requirement in grouped_requirements[extra]:
+            try:
+                importlib.metadata.version(requirement)
+            except importlib.metadata.PackageNotFoundError:
+                return False
+
+    return True
+
+
+__all__ = ["requires_version", "require_version", "is_package_with_extras_installed"]

@@ -25,11 +25,14 @@ export class GetRecordsToAnnotateUseCase {
     status: string,
     searchText: string
   ): Promise<void> {
-    const arrayOffset = page - 1;
+    const savedRecords = this.recordsStorage.get();
+
+    const { fromRecord, howMany } = savedRecords.getPageToFind(page, status);
 
     const getRecords = this.recordRepository.getRecords(
       datasetId,
-      arrayOffset,
+      fromRecord,
+      howMany,
       status,
       searchText
     );
@@ -74,7 +77,8 @@ export class GetRecordsToAnnotateUseCase {
           ? new RecordAnswer(
               userAnswer.id,
               userAnswer.status,
-              userAnswer.values
+              userAnswer.values,
+              userAnswer.updated_at
             )
           : null;
 
@@ -93,7 +97,8 @@ export class GetRecordsToAnnotateUseCase {
           fields,
           answer,
           suggestions,
-          index + arrayOffset
+          record.updated_at,
+          index + page
         );
       }
     );

@@ -11,18 +11,21 @@ interface BackendSuggestion {
   question_id: string;
   value: BackendAnswerCombinations;
 }
-export type BackendResponseStatus = "submitted" | "pending" | "discarded";
+export type BackendRecordStatus = "submitted" | "discarded" | "draft";
 
 export interface BackendResponse {
   id: string;
-  status: BackendResponseStatus;
+  status: BackendRecordStatus;
   values: BackendAnswerCombinations;
+  updated_at: string;
 }
+
 export interface BackedRecord {
   id: string;
   suggestions: BackendSuggestion[];
   responses: BackendResponse[];
   fields: { [key: string]: string };
+  updated_at: string;
 }
 export interface BackedRecords {
   records: BackedRecord[];

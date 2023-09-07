@@ -8,14 +8,24 @@ export type QuestionType =
   | "label_selection"
   | "multi_label_selection";
 export abstract class QuestionAnswer {
-  constructor(
-    public readonly type: QuestionType,
-    public readonly value: unknown
-  ) {}
+  private answer: Answer;
+  constructor(public readonly type: QuestionType) {}
 
-  abstract complete(answer: Answer);
+  complete(answer: Answer) {
+    if (this.answer) return;
+
+    this.answer = answer;
+    this.fill(answer);
+  }
+
+  protected abstract fill(answer: Answer);
   abstract clear();
   abstract get isValid(): boolean;
+
+  get isPartiallyValid(): boolean {
+    return false;
+  }
+
   get hasValidValues(): boolean {
     return true;
   }
@@ -26,10 +36,10 @@ export abstract class QuestionAnswer {
 }
 export class TextQuestionAnswer extends QuestionAnswer {
   constructor(public readonly type: QuestionType, public value: string) {
-    super(type, value);
+    super(type);
   }
 
-  complete(answer: Answer) {
+  protected fill(answer: Answer) {
     this.value = answer.value as string;
   }
 
@@ -64,7 +74,7 @@ export class SingleLabelQuestionAnswer extends QuestionAnswer {
     questionName: string,
     value: SingleLabelValue[]
   ) {
-    super(type, value);
+    super(type);
     this.values = value.map((label) => ({
       ...label,
       id: `${questionName}_${label.value}`,
@@ -72,7 +82,7 @@ export class SingleLabelQuestionAnswer extends QuestionAnswer {
     }));
   }
 
-  complete(answer: Answer) {
+  protected fill(answer: Answer) {
     this.values.forEach((value) => {
       value.isSelected = value.value === answer.value;
     });
@@ -113,7 +123,7 @@ export class MultiLabelQuestionAnswer extends QuestionAnswer {
     questionName: string,
     value: MultiLabelValue[]
   ) {
-    super(type, value);
+    super(type);
     this.values = value.map((label) => ({
       ...label,
       id: `${questionName}_${label.value}`,
@@ -121,7 +131,7 @@ export class MultiLabelQuestionAnswer extends QuestionAnswer {
     }));
   }
 
-  complete(answer: Answer) {
+  protected fill(answer: Answer) {
     const answerValues = answer.value as string[];
     this.values.forEach((label) => {
       label.isSelected = answerValues.includes(label.value);
@@ -170,7 +180,7 @@ export class RatingLabelQuestionAnswer extends QuestionAnswer {
     questionName: string,
     value: RatingValue[]
   ) {
-    super(type, value);
+    super(type);
     this.values = value.map((rating) => ({
       id: `${questionName}_${rating.value}`,
       value: rating.value,
@@ -178,7 +188,7 @@ export class RatingLabelQuestionAnswer extends QuestionAnswer {
     }));
   }
 
-  complete(answer: Answer) {
+  protected fill(answer: Answer) {
     this.values.forEach((rating) => {
       rating.isSelected = rating.value === answer.value;
     });
@@ -219,7 +229,7 @@ export class RankingQuestionAnswer extends QuestionAnswer {
     questionName: string,
     value: RankingValue[]
   ) {
-    super(type, value);
+    super(type);
     this.values = value.map((ranking) => ({
       ...ranking,
       id: `${questionName}_${ranking.value}`,
@@ -227,7 +237,7 @@ export class RankingQuestionAnswer extends QuestionAnswer {
     }));
   }
 
-  complete(answer: Answer) {
+  protected fill(answer: Answer) {
     const suggestedAnswers = answer.value as RankingAnswer[];
     this.values.forEach((ranking) => {
       ranking.rank = suggestedAnswers.find(
@@ -244,6 +254,10 @@ export class RankingQuestionAnswer extends QuestionAnswer {
 
   get isValid(): boolean {
     return this.values.every((value) => value.rank);
+  }
+
+  get isPartiallyValid(): boolean {
+    return this.values.some((value) => value.rank);
   }
 
   get hasValidValues(): boolean {

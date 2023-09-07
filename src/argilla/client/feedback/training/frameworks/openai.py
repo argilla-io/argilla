@@ -13,19 +13,16 @@
 #  limitations under the License.
 
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
-from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.openai import ArgillaOpenAITrainer as ArgillaOpenAITrainerV1
+from argilla.utils.dependency import require_version
 
 
 class ArgillaOpenAITrainer(ArgillaOpenAITrainerV1, ArgillaTrainerSkeleton):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
+        require_version("openai>=0.27.10")
         ArgillaTrainerSkeleton.__init__(self, *args, **kwargs)
 
-        if self._record_class is TokenClassificationRecord:
-            raise NotImplementedError("OpenAI does not support `TokenClassification` tasks.")
-        elif self._record_class is TextClassificationRecord and self._multi_label:
-            raise NotImplementedError("OpenAI does not support multi-label TextClassification tasks.")
-
+        self.__legacy = False
         self.sleep_timer = 10
         self.device = None
         self.finetune_id = None
@@ -34,7 +31,7 @@ class ArgillaOpenAITrainer(ArgillaOpenAITrainerV1, ArgillaTrainerSkeleton):
             self._logger.warning("Seed is not supported for OpenAI. Ignoring seed for training.")
 
         if self._model is None:
-            self._model = "curie"
+            self._model = "gpt-3.5-turbo-0613"
 
         if isinstance(self._dataset, tuple):
             self._train_dataset = self._dataset[0]
@@ -42,5 +39,8 @@ class ArgillaOpenAITrainer(ArgillaOpenAITrainerV1, ArgillaTrainerSkeleton):
         else:
             self._train_dataset = self._dataset
             self._eval_dataset = None
+
+        if self._model != "gpt-3.5-turbo-0613":
+            raise NotImplementedError("Legacy models are not supported for OpenAI with the FeedbackDataset.")
 
         self.init_training_args(model=self._model)

@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import warnings
 from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 from uuid import UUID
 
@@ -20,7 +19,7 @@ from tqdm import trange
 
 from argilla.client.api import ArgillaSingleton
 from argilla.client.feedback.constants import PUSHING_BATCH_SIZE
-from argilla.client.feedback.dataset.remote import RemoteFeedbackDataset
+from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 from argilla.client.feedback.schemas import (
     LabelQuestion,
     MultiLabelQuestion,
@@ -41,8 +40,6 @@ if TYPE_CHECKING:
     from argilla.client.feedback.dataset.local import FeedbackDataset
     from argilla.client.feedback.schemas.types import AllowedFieldTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel
-
-warnings.simplefilter("always", DeprecationWarning)
 
 
 class ArgillaMixin:
@@ -124,10 +121,10 @@ class ArgillaMixin:
 
     def push_to_argilla(
         self: "FeedbackDataset",
-        name: Optional[str] = None,
+        name: str,
         workspace: Optional[Union[str, Workspace]] = None,
         show_progress: bool = False,
-    ) -> Optional[RemoteFeedbackDataset]:
+    ) -> RemoteFeedbackDataset:
         """Pushes the `FeedbackDataset` to Argilla.
 
         Note that you may need to `rg.init(...)` with your Argilla credentials before calling this function, otherwise
@@ -143,22 +140,6 @@ class ArgillaMixin:
         """
         client: "ArgillaClient" = ArgillaSingleton.get()
         httpx_client: "httpx.Client" = client.http_client.httpx
-
-        if name is None:
-            warnings.warn(
-                "`push_to_argilla` will no longer be used to push changes to an existing"
-                " `FeedbackDataset` in Argilla, but to create a new one instead. So on,"
-                " please use `push_to_argilla` with the `name` argument and the `workspace`"
-                " if applicable. If you want to update an existing `FeedbackDataset` in"
-                " Argilla, you will need to either keep the returned dataset from the"
-                " `push_to_argilla` call and the functions will automatically call Argilla"
-                " or just call this function and then `from_argilla` to retrieve the"
-                " `FeedbackDataset` from Argilla.\n`push_to_argilla` with no arguments will"
-                " be deprecated in Argilla v1.15.0.",
-                DeprecationWarning,
-                stacklevel=1,
-            )
-            return
 
         if workspace is None:
             workspace = Workspace.from_name(client.get_workspace())
@@ -192,23 +173,13 @@ class ArgillaMixin:
             client=httpx_client, id=argilla_id, show_progress=show_progress, question_mapping=question_name2id
         )
 
-        warnings.warn(
-            "Calling `push_to_argilla` no longer implies that the `FeedbackDataset` can"
-            " be updated in Argilla. If you want to push a `FeedbackDataset` and then"
-            " update it in Argilla, you need to catch the returned object and use it"
-            " instead: `remote_ds = ds.push_to_argilla(...)`. Otherwise, you can just"
-            " call `push_to_argilla` and then `from_argilla` to retrieve the"
-            " `FeedbackDataset` from Argilla, so the current `FeedbackDataset` can be"
-            f" retrieved as `FeedbackDataset.from_argilla(id='{argilla_id}')`.",
-            DeprecationWarning,
-            stacklevel=1,
-        )
-
         return RemoteFeedbackDataset(
             client=httpx_client,
             id=argilla_id,
             name=name,
             workspace=workspace,
+            created_at=new_dataset.inserted_at,
+            updated_at=new_dataset.updated_at,
             fields=fields,
             questions=questions,
             guidelines=self.guidelines,
@@ -269,7 +240,6 @@ class ArgillaMixin:
         *,
         workspace: Optional[str] = None,
         id: Optional[str] = None,
-        with_records: Optional[bool] = None,  # TODO(alvarobartt): deprecate `with_records`
     ) -> RemoteFeedbackDataset:
         """Retrieves an existing `FeedbackDataset` from Argilla (must have been pushed in advance).
 
@@ -281,8 +251,6 @@ class ArgillaMixin:
             workspace: the workspace of the `FeedbackDataset` to retrieve from Argilla.
                 If not provided, the active workspace will be used.
             id: the ID of the `FeedbackDataset` to retrieve from Argilla. Defaults to `None`.
-            with_records: whether to retrieve the records of the `FeedbackDataset` from
-                Argilla. Defaults to `None`.
 
         Returns:
             The `RemoteFeedbackDataset` retrieved from Argilla.
@@ -295,17 +263,6 @@ class ArgillaMixin:
             >>> rg.init(...)
             >>> dataset = rg.FeedbackDataset.from_argilla(name="my_dataset")
         """
-        if with_records is not None:
-            warnings.warn(
-                "`with_records` will no longer be used to retrieve the records of a"
-                " `FeedbackDataset` from Argilla, as by default no records will be"
-                " fetched from Argilla. To retrieve the records you will need to explicitly"
-                " fetch those via `fetch_records` from the returned `RemoteFeedbackDataset`.",
-                "\n`with_records` will be deprecated in Argilla v1.15.0.",
-                DeprecationWarning,
-                stacklevel=1,
-            )
-
         httpx_client: "httpx.Client" = ArgillaSingleton.get().http_client.httpx
 
         existing_dataset = feedback_dataset_in_argilla(name=name, workspace=workspace, id=id)
@@ -314,7 +271,7 @@ class ArgillaMixin:
                 f"Could not find a `FeedbackDataset` in Argilla with name='{name}'."
                 if name and not workspace
                 else (
-                    "Could not find a `FeedbackDataset` in Argilla with name='{name}' and workspace='{workspace}'."
+                    f"Could not find a `FeedbackDataset` in Argilla with name='{name}' and workspace='{workspace}'."
                     if name and workspace
                     else (f"Could not find a `FeedbackDataset` in Argilla with ID='{id}'.")
                 )
@@ -328,6 +285,8 @@ class ArgillaMixin:
             id=existing_dataset.id,
             name=existing_dataset.name,
             workspace=Workspace.from_id(existing_dataset.workspace_id),
+            created_at=existing_dataset.inserted_at,
+            updated_at=existing_dataset.updated_at,
             fields=fields,
             questions=questions,
             guidelines=existing_dataset.guidelines or None,
@@ -355,24 +314,28 @@ class ArgillaMixin:
         if workspace is not None:
             workspace = Workspace.from_name(workspace)
 
-        # TODO(alvarobartt or gabrielmbmb): add `workspace_id` in `GET /api/v1/datasets`
-        # and in `GET /api/v1/me/datasets` to filter by workspace
         try:
-            datasets = datasets_api_v1.list_datasets(client=httpx_client).parsed
+            datasets = datasets_api_v1.list_datasets(
+                client=httpx_client, workspace_id=workspace.id if workspace is not None else None
+            ).parsed
         except Exception as e:
             raise RuntimeError(
                 f"Failed while listing the `FeedbackDataset` datasets in Argilla with exception: {e}"
             ) from e
+
+        if len(datasets) == 0:
+            return []
         return [
             RemoteFeedbackDataset(
                 client=httpx_client,
                 id=dataset.id,
                 name=dataset.name,
                 workspace=workspace if workspace is not None else Workspace.from_id(dataset.workspace_id),
+                created_at=dataset.inserted_at,
+                updated_at=dataset.updated_at,
                 fields=cls.__get_fields(client=httpx_client, id=dataset.id),
                 questions=cls.__get_questions(client=httpx_client, id=dataset.id),
                 guidelines=dataset.guidelines or None,
             )
             for dataset in datasets
-            if workspace is None or dataset.workspace_id == workspace.id
         ]

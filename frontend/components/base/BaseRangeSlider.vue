@@ -39,7 +39,7 @@ export default {
   },
   data() {
     return {
-      range: this.value,
+      range: Math.min(this.max, this.value),
     };
   },
   model: {

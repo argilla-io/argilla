@@ -34,10 +34,6 @@ class UserCreateModel(BaseModel):
     password: str = Field(min_length=8, max_length=100)
     workspaces: Optional[List[str]] = None
 
-    # TODO(alvarobartt): confirm with @frascuchon
-    # disabled: Optional[bool] = None
-    # api_key: Optional[str]  # backward compatibility
-
 
 class UserModel(BaseModel):
     id: UUID
@@ -46,7 +42,7 @@ class UserModel(BaseModel):
     full_name: Optional[str]
     username: str
     role: UserRole
-    workspaces: List[str]
+    workspaces: Optional[List[str]]
     api_key: str
     inserted_at: datetime
     updated_at: datetime

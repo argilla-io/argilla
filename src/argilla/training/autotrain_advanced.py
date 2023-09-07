@@ -128,6 +128,7 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainMixin):
 
         if self._model is None:
             self._model = "bert-base-uncased"
+            self._logger.warning(f"No model defined. Using the default model {self._model}.")
 
         data_dict = {}
         self._num_samples = 0

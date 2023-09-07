@@ -20,15 +20,15 @@
       >
         <DatasetTrainComponent
           datasetTask="FeedbackTask"
-          :datasetName="datasetName"
-          :workspaceName="workspace"
+          :datasetName="dataset.name"
+          :workspaceName="dataset.workspace"
         />
       </BaseModal>
     </template>
     <template v-slot:sidebar-right>
       <SidebarFeedbackTaskComponent
         :datasetId="datasetId"
-        @refresh="onRefresh()"
+        @refresh="loadDataset()"
       />
     </template>
     <template v-slot:top>
@@ -46,9 +46,6 @@
 <script>
 import HeaderAndTopAndOneColumn from "@/layouts/HeaderAndTopAndOneColumn";
 import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
-import { LABEL_PROPERTIES } from "@/components/feedback-task/feedbackTask.properties";
-import { Notification } from "@/models/Notifications";
-
 import { useAnnotationModeViewModel } from "./useAnnotationModeViewModel";
 
 export default {
@@ -58,42 +55,11 @@ export default {
   },
   data() {
     return {
-      areResponsesUntouched: true,
       visibleTrainModal: false,
     };
   },
-  beforeRouteLeave(to, from, next) {
-    const isNotificationForThisRoute =
-      !this.areResponsesUntouched &&
-      ["datasets", "dataset-id-settings", "user-settings"].includes(to.name);
-
-    if (isNotificationForThisRoute) {
-      this.showNotification({
-        eventToFireOnClick: next,
-        message: this.toastMessageOnLeavingRoute,
-        buttonMessage: this.buttonMessage,
-      });
-    } else {
-      next();
-    }
-  },
-  computed: {
-    datasetName() {
-      return this.dataset.name;
-    },
-    workspace() {
-      return this.dataset.workspace;
-    },
-  },
   created() {
-    this.onBusEventAreResponsesUntouched();
     this.checkIfUrlHaveRecordStatusOrInitiateQueryParams();
-
-    this.toastMessageOnRefresh =
-      "Your changes will be lost if you refresh the page";
-    this.toastMessageOnLeavingRoute =
-      "Your changes will be lost if you leave the current page";
-    this.buttonMessage = LABEL_PROPERTIES.CONTINUE;
   },
   methods: {
     checkIfUrlHaveRecordStatusOrInitiateQueryParams() {
@@ -107,42 +73,9 @@ export default {
           },
         });
     },
-    onRefresh() {
-      if (this.areResponsesUntouched) {
-        return this.loadDataset();
-      }
-
-      this.showNotification({
-        eventToFireOnClick: async () => {
-          this.loadDataset();
-        },
-        message: this.toastMessageOnRefresh,
-        buttonMessage: this.buttonMessage,
-      });
-    },
-    onBusEventAreResponsesUntouched() {
-      this.$root.$on("are-responses-untouched", (areResponsesUntouched) => {
-        this.areResponsesUntouched = areResponsesUntouched;
-      });
-    },
-    showNotification({ eventToFireOnClick, message, buttonMessage }) {
-      Notification.dispatch("notify", {
-        message: message ?? "",
-        numberOfChars: 500,
-        type: "warning",
-        buttonText: buttonMessage ?? "",
-        async onClick() {
-          eventToFireOnClick();
-        },
-      });
-    },
     showTrainModal(value) {
       this.visibleTrainModal = value;
     },
-  },
-  destroyed() {
-    this.$root.$off("are-responses-untouched");
-    Notification.dispatch("clear");
   },
   setup() {
     return useAnnotationModeViewModel();
