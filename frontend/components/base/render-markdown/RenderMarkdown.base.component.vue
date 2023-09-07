@@ -5,6 +5,7 @@
 import { marked } from "marked";
 import { markedHighlight } from "marked-highlight";
 import hljs from "highlight.js";
+import * as DOMPurify from "dompurify";
 marked.use(
   markedHighlight({
     langPrefix: "hljs language-",
@@ -31,11 +32,13 @@ export default {
   computed: {
     markdownToHtml() {
       const cleanedMarkdown = this.cleanMarkdown(this.markdown);
-      return marked.parse(cleanedMarkdown, {
+      const dirtyMarkdown = marked.parse(cleanedMarkdown, {
         headerIds: false,
         mangle: false,
         breaks: true,
       });
+
+      return DOMPurify.sanitize(dirtyMarkdown);
     },
   },
 };
