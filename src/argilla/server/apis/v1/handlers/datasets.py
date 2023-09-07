@@ -76,7 +76,7 @@ async def list_current_user_datasets(
 ):
     await authorize(current_user, DatasetPolicyV1.list(workspace_id))
 
-    if not workspace_id is not None:
+    if not workspace_id:
         if current_user.is_owner:
             dataset_list = await datasets.list_datasets(db)
         else:
