@@ -1,6 +1,6 @@
 # Filter a Dataset
 
-## Filter a Feedback Dataset
+## Feedback Dataset
 From Argilla 1.15.0, the `filter_by` method has been included for the `FeedbackDataset`s pushed to Argilla, which allows you to filter the records in a dataset based on the `response_status` of the annotations of the records. So on, to be able to use the `filter_by` method, you will need to make sure that you are using a `FeedbackDataset` in Argilla.
 
 ### Filter by `response_status`
@@ -38,7 +38,7 @@ The `filter_by` method returns a new instance which is a `FeedbackDataset` with 
 :::
 
 
-## Filter older datasets
+## Other datasets
 
 The search in Argilla is driven by Elasticsearch's powerful [query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/query-dsl-query-string-query.html#query-string-syntax).
 It allows you to perform simple fuzzy searches of words and phrases, or complex queries taking full advantage of Argilla's data model.

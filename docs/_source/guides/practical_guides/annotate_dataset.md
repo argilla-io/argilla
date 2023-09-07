@@ -1,14 +1,17 @@
-# Annotate a Feedback Dataset
+# Annotate a  dataset
 
-![Spanshot of the Submitted queue and the progress bar in a Feedback Dataset](../../../_static/images/llms/snapshot-feedback-submitted.png)
+After pushing a `FeedbackDataset` to Argilla, as explained in [Create a Dataset](create_dataset.ipynb), you can start annotating it through the Argilla UI.
 
-After pushing a `FeedbackDataset` to Argilla, as explained in [Create a Feedback Dataset](create_dataset.ipynb), you can start annotating it through the Argilla UI.
+## Feedback Dataset
+
+![Spanshot of the Submitted queue and the progress bar in a Feedback Dataset](/_static/images/llms/snapshot-feedback-submitted.png)
 
 As you open the dataset in the UI, you will see by default the records with `Pending` responses, i.e. records that still don't have a response (annotation), in a single-record view. On the left, you can find the record to annotate and on the right the form with the questions to answer. You can navigate through the records using the `Prev` and `Next` buttons in the bottom bar. You may use the search bar to filter the records based on specific words or phrases.
 
 ```{hint}
 It is important that the dataset has annotations for a wide variety of records with diverse content. Try not to restrict your annotations to records retrieved in a single search or records with very similar content.
 ```
+
 ```{note}
 If you are having issues with the search engine, you may need to reindex the dataset, as explained [here](../../../getting_started/installation/configurations/database_migrations.md#feedback-datasets).
 ```
@@ -68,7 +71,25 @@ If you need to review your submitted or discarded responses, you can select the 
 
 You can track your progress and the number of `Pending`, `Submitted` and `Discarded` responses by clicking the `Progress` icon in the sidebar.
 
-## Shortcuts
+### Shortcuts
 
 ```{include} /_common/shortcuts.md
 ```
+
+## Other datasets
+
+The records classes covered in this section correspond to 3 equivalent datasets:
+
+ 1. `DatasetForTextClassification`
+ 2. `DatasetForTokenClassification`
+ 3. `DatasetForText2Text`
+
+
+### Shortcuts
+
+You can speed up the annotation process by using these shortcuts:
+
+|Action|Keys|
+|------|----|
+|Go to previous page|&larr; `Left arrow`|
+|Go to next page|&rarr; `Right arrow`|
