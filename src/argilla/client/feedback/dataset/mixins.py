@@ -314,10 +314,10 @@ class ArgillaMixin:
         if workspace is not None:
             workspace = Workspace.from_name(workspace)
 
-        # TODO(alvarobartt or gabrielmbmb): add `workspace_id` in `GET /api/v1/datasets`
-        # and in `GET /api/v1/me/datasets` to filter by workspace
         try:
-            datasets = datasets_api_v1.list_datasets(client=httpx_client).parsed
+            datasets = datasets_api_v1.list_datasets(
+                client=httpx_client, workspace_id=workspace.id if workspace else None
+            ).parsed
         except Exception as e:
             raise RuntimeError(
                 f"Failed while listing the `FeedbackDataset` datasets in Argilla with exception: {e}"
@@ -335,5 +335,4 @@ class ArgillaMixin:
                 guidelines=dataset.guidelines or None,
             )
             for dataset in datasets
-            if workspace is None or dataset.workspace_id == workspace.id
         ]
