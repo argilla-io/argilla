@@ -50,7 +50,7 @@ from tests.factories import (
 )
 
 
-@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner, UserRole.annotator])
+@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
 @pytest.mark.asyncio
 async def test_list_datasets(role: UserRole) -> None:
     dataset = await DatasetFactory.create()
@@ -63,6 +63,38 @@ async def test_list_datasets(role: UserRole) -> None:
     assert isinstance(response.parsed, list)
     assert len(response.parsed) > 0
     assert isinstance(response.parsed[0], FeedbackDatasetModel)
+
+
+@pytest.mark.parametrize(
+    "role, with_workspace, expected_length",
+    [
+        (UserRole.owner, False, 2),
+        (UserRole.owner, True, 1),
+        (UserRole.admin, False, 0),
+        (UserRole.admin, True, 1),
+        (UserRole.annotator, False, 0),
+        (UserRole.annotator, True, 1),
+    ],
+)
+@pytest.mark.asyncio
+async def test_list_datasets_by_workspace_id(role: UserRole, with_workspace: bool, expected_length: int) -> None:
+    workspace = await WorkspaceFactory.create()
+    dataset = await DatasetFactory.create(workspace=workspace)
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace] if with_workspace else [])
+
+    another_workspace = await WorkspaceFactory.create()
+    await DatasetFactory.create(workspace=another_workspace)
+
+    api = Argilla(api_key=user.api_key)
+    response = list_datasets(
+        client=api.client.httpx, workspace_id=str(dataset.workspace.id) if with_workspace else None
+    )
+
+    assert response.status_code == 200
+    assert isinstance(response.parsed, list)
+    assert len(response.parsed) == expected_length
+    if expected_length > 0:
+        assert isinstance(response.parsed[0], FeedbackDatasetModel)
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner, UserRole.annotator])
