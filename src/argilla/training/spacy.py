@@ -76,8 +76,11 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
         self._nlp = None
         self._model = model
 
-        self.config = {}
+        if self._model is None:
+            self._model = "en_core_web_sm"
+            self._logger.warning(f"No model defined. Using the default model {self._model}.")
 
+        self.config = {}
         if self._record_class == TokenClassificationRecord:
             self._column_mapping = {
                 "text": "text",

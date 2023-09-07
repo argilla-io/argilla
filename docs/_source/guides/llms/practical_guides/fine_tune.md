@@ -39,13 +39,14 @@ trainer.predict("This is awesome!")
 
 We plan on adding more support for other tasks and frameworks so feel free to reach out on our Slack or GitHub to help us prioritize each task.
 
-| Task/Framework                   | TRL  | OpenAI | SetFit | spaCy | Transformers | PEFT |
+| Task/Framework                  | TRL  | OpenAI | SetFit | spaCy | Transformers | PEFT |
 |:--------------------------------|:-----|:-------|:-------|:------|:-------------|:-----|
-| Text Classification             |      | ✔️      |  ✔️      | ✔️     | ✔️            | ✔️    |
-| Supervised Fine-tuning          | ✔️    |        |          |       |              |      |
-| Reward Modeling                 | ✔️    |        |          |       |              |      |
-| Proximal Policy Optimization    | ✔️    |        |          |       |              |      |
-| Direct Preference Optimization  | ✔️    |        |          |       |              |      |
+| Text Classification             |      |        |  ✔️     | ✔️     | ✔️            | ✔️    |
+| Supervised Fine-tuning          | ✔️    |        |        |       |              |      |
+| Reward Modeling                 | ✔️    |        |        |       |              |      |
+| Proximal Policy Optimization    | ✔️    |        |        |       |              |      |
+| Direct Preference Optimization  | ✔️    |        |        |       |              |      |
+| Chat Completion                 |      | ✔️      |        |       |              |      |
 
 ```{note}
 We also offer support for Token Classification using our `TokenClassifcationDataset` but this is shown in [a section](/guides/train_a_model) about our older dataset-types.
@@ -66,13 +67,15 @@ Note that you don't need to pass all of them directly and that the values below 
 
 A `TrainingTask` is used to define how the data should be processed and formatted according to the associated task and framework. Each task has its own `TrainingTask.for_*`-classmethod and the data formatting can always be defined using a custom `formatting_func`. However, simpler tasks like Text Classification can also be defined using default definitions. These directly use the fields and questions from the FeedbackDataset configuration to infer how to prepare the data. Underneath you can find an overview of the `TrainingTask` requirements.
 
-| Method                             | Content          | `formatting_func` return type                                     | Default           |
-|:-----------------------------------|:-----------------|:-----------------------------------------------------------|:------------------|
-| for_text_classification            | `text-label`     | `Union[Tuple[str, str], Tuple[str, List[str]]]`            | ✔️                 |
-| for_supervised_fine_tuning         | `text`           | `Optional[Union[str, Iterator[str]]]`                                                      | ✗                 |
-| for_reward_modeling               | `chosen-rejected`| `Optional[Union[Tuple[str, str], Iterator[Tuple[str, str]]]]`                                          | ✗                 |
-| for_proximal_policy_optimization   | `text`           | `Optional[Union[str, Iterator[str]]]`                                | ✗                 |
-| for_direct_preference_optimization| `prompt-chosen-rejected`                 | `Optional[Union[Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]`                                          | ✗                 |
+| Method                             | Content                      | `formatting_func` return type                                                    | Default|
+|:-----------------------------------|:-----------------------------|:---------------------------------------------------------------------------------|:-------|
+| for_text_classification            | `text-label`                 | `Union[Tuple[str, str], Tuple[str, List[str]]]`                                  | ✔️      |
+| for_supervised_fine_tuning         | `text`                       | `Union[str, Iterator[str]]`                                            | ✗      |
+| for_reward_modeling                | `chosen-rejected`            | `Union[Tuple[str, str], Iterator[Tuple[str, str]]]`                    | ✗      |
+| for_proximal_policy_optimization   | `text`                       | `Union[str, Iterator[str]]]`                                            | ✗      |
+| for_direct_preference_optimization | `prompt-chosen-rejected`     | `Union[Tuple[str, str, str], Iterator[Tuple[str, str, str]]]`          | ✗      |
+| for_chat_completion                | `chat-turn-role-content` | `Union[Tuple[str, str, str, str], Iterator[Tuple[str, str, str, str]]]`| ✗      |
+
 
 ## Tasks
 
@@ -750,7 +753,7 @@ Within the DPO approach we infer the reward from the formatted prompt and the pr
 ```{include} /_common/dolly_dataset_load.md
 ```
 
-**Data Preperation**
+**Data Preparation**
 
 We will start with our a basic example of a formatting function. For DPO it should return `prompt-chosen-rejected`-pairs, where the prompt is formatted according to a template.
 
@@ -817,4 +820,136 @@ outputs = model.generate(**encoding, max_new_tokens=30)
 output_text = tokenizer.decode(outputs[0])
 print(output_text)
 # Yes it is, toads are a sub-classification of frogs.
+```
+
+### Chat Completion
+
+#### Background
+
+With the rise of chat-oriented models under OpenAI's ChatGPT, we have seen a lot of interest in the use of LLMs for chat-oriented tasks. The main difference between chat-oriented models and the other LLMs is that they are trained on a differently formatted dataset. Instead of using a dataset of prompts and responses, they are trained on a dataset of conversations. This allows them to generate responses that are more conversational in nature. And, OpenAI does support fine-tuning LLMs for chat-completion use cases. More information at https://openai.com/blog/gpt-3-5-turbo-fine-tuning-and-api-updates.
+
+::::{tab-set}
+
+::: {tab-item} conversation
+
+```bash
+User: Hello, how are you?
+Agent: I am doing great!
+User: When did Virgin Australia start operating?
+Agent: Virgin Australia commenced services on 31 August 2000 as Virgin Blue.
+User: That is incorrect. I believe it was 2001.
+Agent: You are right, it was 2001.
+```
+
+:::
+
+::: {tab-item} prompt-completion
+
+```bash
+### Instruction
+When did Virgin Australia start operating?
+
+### Context
+Virgin Australia, the trading name of Virgin Australia Airlines Pty Ltd, is an Australian-based airline.
+It is the largest airline by fleet size to use the Virgin brand.
+It commenced services on 31 August 2000 as Virgin Blue, with two aircraft on a single route.
+It suddenly found itself as a major airline in Australia's domestic market after the collapse of Ansett Australia in September 2001.
+The airline has since grown to directly serve 32 cities in Australia, from hubs in Brisbane, Melbourne and Sydney.
+
+### Response:
+{to be generated by SFT model}
+```
+
+:::
+
+::::
+
+#### Training
+
+```{include} /_common/dolly_dataset_load.md
+```
+
+**Data Preparation**
+
+We will use [the dataset](https://huggingface.co/datasets/argilla/customer_assistant) from [this tutorial](/guides/llms/examples/fine-tuning-openai-rag-feedback).
+
+```python
+dataset = rg.FeedbackDataset.from_huggingface("argilla/customer_assistant")
+```
+
+We will start with our basic example of a formatting function. For Chat Completion it should return `chat-turn-role-text`, where the prompt is formatted according to a template. We require this split because each conversational chain needs to be able to be retraced in the correct order and based on the user roles that might have been speaking.
+
+```{note}
+We infer a so called message because OpenAI expect this output format but this might differ for other scenario's.
+```
+
+```python
+from argilla.feedback import TrainingTask
+from typing import Dict, Any, Iterator
+
+
+# adapation from LlamaIndex's TEXT_QA_PROMPT_TMPL_MSGS[1].content
+user_message_prompt ="""Context information is below.
+---------------------
+{context_str}
+---------------------
+Given the context information and not prior knowledge but keeping your Argilla Cloud assistant style, answer the query.
+Query: {query_str}
+Answer:
+"""
+# adapation from LlamaIndex's TEXT_QA_SYSTEM_PROMPT
+system_prompt = """You are an expert customer service assistant for the Argilla Cloud product that is trusted around the world.
+Always answer the query using the provided context information, and not prior knowledge.
+Some rules to follow:
+1. Never directly reference the given context in your answer.
+2. Avoid statements like 'Based on the context, ...' or 'The context information ...' or anything along those lines.
+"""
+
+def formatting_func(sample: dict) -> Union[Tuple[str, str, str, str], List[Tuple[str, str, str, str]]]:
+    from uuid import uuid4
+    if sample["response"]:
+        chat = str(uuid4())
+        user_message = user_message_prompt.format(context_str=sample["context"], query_str=sample["user-message"])
+        return [
+            (chat, "0", "system", system_prompt),
+            (chat, "1", "user", user_message),
+            (chat, "2", "assistant", sample["response"][0]["value"])
+        ]
+    else:
+        return None
+
+task = TrainingTask.for_chat_completion(formatting_func=formatting_func)
+```
+
+**ArgillaTrainer**
+
+We'll use the task directly with our `FeedbackDataset` in the `ArgillaTrainer`. The only configurable parameter is `n_epochs` but this is also optimized internally.
+
+```python
+
+```python
+from argilla.feedback import ArgillaTrainer
+
+trainer = ArgillaTrainer(
+    dataset=feedback_dataset,
+    task=task,
+    framework="openai",
+)
+trainer.train(output_dir="chat-completion")
+```
+
+**Inference**
+
+After training, we can directly use the model but we need to do so so, we need to use the `openai` framework. Therefore, we suggest taking a look at [their docs](https://platform.openai.com/docs/guides/fine-tuning/use-a-fine-tuned-model).
+
+```python
+import openai
+
+completion = openai.ChatCompletion.create(
+  model="ft:gpt-3.5-turbo:my-org:custom_suffix:id",
+  messages=[
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Hello!"}
+  ]
+)
 ```

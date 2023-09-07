@@ -18,6 +18,7 @@ These are the section headers that we use:
 
 ### Added
 
+- Added `ArgillaTrainer` integration with OpenAI, allowing fine tuning for chat completion ([#3615](https://github.com/argilla-io/argilla/pull/3615))
 - Added `workspaces list` command to list Argilla workspaces ([#3594](https://github.com/argilla-io/argilla/pull/3594)).
 - Added `datasets list` command to list Argilla datasets ([#3658](https://github.com/argilla-io/argilla/pull/3658)).
 - Added `users create` command to create users ([#3667](https://github.com/argilla-io/argilla/pull/3667)).

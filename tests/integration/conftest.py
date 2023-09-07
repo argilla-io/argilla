@@ -30,14 +30,13 @@ from argilla.client.sdk.users import api as users_api
 from argilla.datasets.__init__ import configure_dataset
 from argilla.server.database import get_async_db
 from argilla.server.models import User, UserRole, Workspace
-from argilla.server.models.base import DatabaseModel
 from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.server import app, argilla_app
 from argilla.server.settings import settings
 from argilla.utils import telemetry
 from argilla.utils.telemetry import TelemetryClient
 from fastapi.testclient import TestClient
-from opensearchpy import OpenSearch
+from pydantic import BaseModel
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
@@ -351,3 +350,19 @@ def dataset_text2text(mocked_client: SecuredClient) -> str:
     log(name=dataset, records=records)
 
     return dataset
+
+
+class _MockResponse(BaseModel):
+    id: str = "1234"
+
+
+@pytest.fixture
+def mocked_openai(mocker):
+    # Mock the requests to OpenAI APIs
+    response = _MockResponse()
+    mocker.patch("openai.FineTune.retrieve", return_value=response)
+    mocker.patch("openai.FineTuningJob.retrieve", return_value=response)
+    mocker.patch("openai.Model.retrieve", return_value=response)
+    mocker.patch("openai.FineTuningJob.create", return_value=response)
+    mocker.patch("openai.FineTune.create", return_value=response)
+    mocker.patch("openai.File.create", return_value=response)
