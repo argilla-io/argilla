@@ -1,4 +1,4 @@
-# Collect responses from an annotated dataset
+# Collect responses and metrics from an annotated dataset
 
 ## Feedback Dataset
 
@@ -121,3 +121,7 @@ Once you have unified your responses, you will have a dataset that's ready for [
 
 ```{include} /_common/other_datasets.md
 ```
+
+# TODO: add section on metrics
+
+https://docs.argilla.io/en/latest/guides/measure_datasets_with_metrics.html
