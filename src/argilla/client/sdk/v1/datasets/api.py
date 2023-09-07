@@ -157,7 +157,10 @@ def list_datasets(
 
     if response.status_code == 200:
         response_obj = Response.from_httpx_response(response)
-        response_obj.parsed = [FeedbackDatasetModel(**dataset) for dataset in response.json()["items"]]
+        if response.json()["items"] is None or len(response.json()["items"]) == 0:
+            response_obj.parsed = []
+        else:
+            response_obj.parsed = [FeedbackDatasetModel(**dataset) for dataset in response.json()["items"]]
         return response_obj
     return handle_response_error(response)
 
