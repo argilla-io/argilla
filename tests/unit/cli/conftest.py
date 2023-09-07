@@ -13,29 +13,21 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import httpx
 import pytest
 from argilla.__main__ import app
-from argilla.cli.server.database.migrate import migrate_db
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 from argilla.client.users import User
 from argilla.client.workspaces import Workspace
-from argilla.server.database import database_url_sync
-from sqlalchemy import create_engine
-from sqlalchemy.ext.asyncio import AsyncSession
 from typer.testing import CliRunner
-
-from tests.database import SyncTestSession
 
 if TYPE_CHECKING:
     from argilla.cli.typer_ext import ArgillaTyper
     from pytest_mock import MockerFixture
-    from sqlalchemy.engine import Connection
-    from sqlalchemy.orm import Session
 
 
 @pytest.fixture(scope="session")
@@ -46,52 +38,6 @@ def cli_runner() -> CliRunner:
 @pytest.fixture(scope="session")
 def cli() -> "ArgillaTyper":
     return app
-
-
-@pytest.fixture(scope="session")
-def sync_connection() -> Generator["Connection", None, None]:
-    engine = create_engine(database_url_sync())
-    conn = engine.connect()
-    SyncTestSession.configure(bind=conn)
-    migrate_db("head")
-
-    yield conn
-
-    migrate_db("base")
-    conn.close()
-    engine.dispose()
-
-
-@pytest.fixture(autouse=True)
-def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
-    sync_connection.begin_nested()
-    session = SyncTestSession()
-
-    yield session
-
-    session.close()
-    SyncTestSession.remove()
-    sync_connection.rollback()
-
-
-@pytest.fixture
-def async_db_proxy(mocker: "MockerFixture", sync_db: "Session") -> "AsyncSession":
-    """Create a mocked `AsyncSession` that proxies to the sync session. This will allow us to execute the async CLI commands
-    and then in the unit test function use the sync session to assert the changes.
-
-    Args:
-        mocker: pytest-mock fixture.
-        sync_db: Sync session.
-
-    Returns:
-        Mocked `AsyncSession` that proxies to the sync session.
-    """
-    async_session = AsyncSession()
-    async_session.sync_session = sync_db
-    async_session._proxied = sync_db
-    async_session.close = mocker.AsyncMock()
-
-    return async_session
 
 
 @pytest.fixture

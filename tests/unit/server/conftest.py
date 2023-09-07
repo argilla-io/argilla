@@ -11,14 +11,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import asyncio
+
 import contextlib
-from typing import TYPE_CHECKING, AsyncGenerator, Dict, Generator
+from typing import AsyncGenerator, Dict, Generator
 
 import pytest
 import pytest_asyncio
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
-from argilla.cli.server.database.migrate import migrate_db
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.datasets import DatasetsDAO
 from argilla.server.daos.records import DatasetRecordsDAO
@@ -32,14 +31,9 @@ from argilla.utils import telemetry
 from argilla.utils.telemetry import TelemetryClient
 from httpx import AsyncClient
 from opensearchpy import OpenSearch
-from sqlalchemy import NullPool
-from sqlalchemy.ext.asyncio import create_async_engine
 
-from tests.database import TestSession, set_task
+from tests.database import TestSession
 from tests.factories import AnnotatorFactory, OwnerFactory, UserFactory
-
-if TYPE_CHECKING:
-    from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession
 
 
 @pytest.fixture(scope="session")
@@ -69,13 +63,6 @@ def es():
     return GenericElasticEngineBackend.get_instance()
 
 
-@pytest.fixture(scope="session")
-def event_loop() -> Generator["asyncio.AbstractEventLoop", None, None]:
-    loop = asyncio.get_event_loop_policy().get_event_loop()
-    yield loop
-    loop.close()
-
-
 @pytest.fixture(scope="function")
 def mock_search_engine(mocker) -> Generator["SearchEngine", None, None]:
     return mocker.AsyncMock(SearchEngine)
@@ -94,34 +81,6 @@ async def annotator() -> User:
 @pytest.fixture(scope="function")
 def owner_auth_header(owner: User) -> Dict[str, str]:
     return {API_KEY_HEADER_NAME: owner.api_key}
-
-
-@pytest_asyncio.fixture(scope="session")
-async def connection() -> AsyncGenerator["AsyncConnection", None]:
-    set_task(asyncio.current_task())
-    database_url = settings.database_url
-    engine = create_async_engine(database_url, poolclass=NullPool)
-    conn = await engine.connect()
-    TestSession.configure(bind=conn)
-    migrate_db("head")
-
-    yield conn
-
-    migrate_db("base")
-    await conn.close()
-    await engine.dispose()
-
-
-@pytest_asyncio.fixture(autouse=True)
-async def db(connection: "AsyncConnection") -> AsyncGenerator["AsyncSession", None]:
-    await connection.begin_nested()
-    session = TestSession()
-
-    yield session
-
-    await session.close()
-    await TestSession.remove()
-    await connection.rollback()
 
 
 @pytest_asyncio.fixture(scope="function")
