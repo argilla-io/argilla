@@ -87,7 +87,7 @@ def list_workspace_users(
 
     if response.status_code == 200:
         response_obj = Response.from_httpx_response(response)
-        response_obj.parsed = [UserModel(**workspace) for workspace in response.json()]
+        response_obj.parsed = [UserModel(**user) for user in response.json()]
         return response_obj
     return handle_response_error(response)
 
