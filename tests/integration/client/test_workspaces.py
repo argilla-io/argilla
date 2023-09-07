@@ -17,8 +17,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from argilla.client.api import ArgillaSingleton
-from argilla.client.sdk.users.models import UserRole
-from argilla.client.sdk.workspaces.models import WorkspaceUserModel
+from argilla.client.sdk.users.models import UserModel, UserRole
 from argilla.client.workspaces import Workspace
 
 from tests.factories import (
@@ -30,7 +29,6 @@ from tests.factories import (
 
 if TYPE_CHECKING:
     from argilla.server.models import User as ServerUser
-    from sqlalchemy.ext.asyncio import AsyncSession
 
 
 def test_workspace_cls_init() -> None:
@@ -118,7 +116,7 @@ async def test_workspace_users(owner: "ServerUser") -> None:
     ArgillaSingleton.init(api_key=owner.api_key)
 
     workspace = Workspace.from_name(name=workspace.name)
-    assert all(isinstance(user, WorkspaceUserModel) for user in workspace.users)
+    assert all(isinstance(user, UserModel) for user in workspace.users)
 
 
 @pytest.mark.parametrize("role", [UserRole.annotator])

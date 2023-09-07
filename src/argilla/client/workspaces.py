@@ -35,7 +35,7 @@ from argilla.client.utils import allowed_for_roles
 if TYPE_CHECKING:
     import httpx
 
-    from argilla.client.sdk.workspaces.models import WorkspaceUserModel
+    from argilla.client.sdk.users.models import UserModel
 
 
 class Workspace:
@@ -61,7 +61,7 @@ class Workspace:
         >>> workspace = rg.Workspace.from_name("my-workspace") # or `Workspace.from_id("...")`
         >>> workspace.add_user("my-user")
         >>> print(workspace.users)
-        [WorkspaceUserModel(id='...', first_name='Luke', last_name="Skywalker', full_name='Luke Skywalker', username='my-user', role='annotator', workspaces=['my-workspace'], api_key='...', inserted_at=datetime.datetime(2021, 8, 31, 10, 0, 0), updated_at=datetime.datetime(2021, 8, 31, 10, 0, 0))]
+        [UserModel(id='...', first_name='Luke', last_name="Skywalker', full_name='Luke Skywalker', username='my-user', role='annotator', workspaces=['my-workspace'], api_key='...', inserted_at=datetime.datetime(2021, 8, 31, 10, 0, 0), updated_at=datetime.datetime(2021, 8, 31, 10, 0, 0))]
         >>> workspace.delete_user("my-user")
         >>> print(workspace.users)
         []
@@ -70,7 +70,7 @@ class Workspace:
     _client: "httpx.Client"  # Required to be able to use `allowed_for_roles` decorator
     id: UUID
     name: str
-    users: Optional[List["WorkspaceUserModel"]] = None
+    users: Optional[List["UserModel"]] = None
     inserted_at: datetime
     updated_at: datetime
 
@@ -109,11 +109,11 @@ class Workspace:
 
     @property
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def users(self) -> List["WorkspaceUserModel"]:
+    def users(self) -> List["UserModel"]:
         """Returns the list of users linked to the workspace.
 
         Returns:
-            A list of `WorkspaceUserModel` instances.
+            A list of `UserModel` instances.
         """
         # TODO(@alvarobartt): Maybe we should return a list of rg.User instead.
         return workspaces_api.list_workspace_users(self._client, self.id).parsed
