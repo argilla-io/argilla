@@ -6,16 +6,16 @@
         <BaseButton
           title="Copy to clipboard"
           class="text_field_component__copy-button"
-          @click.prevent="$copyToClipboard(fieldText)"
+          @click.prevent="$copyToClipboard(text)"
         >
           <svgicon color="#acacac" name="copy" width="18" height="18" />
         </BaseButton>
       </BaseActionTooltip>
     </div>
-    <transition name="fade" v-if="fieldText" appear mode="out-in">
-      <div class="content-area --body1" :key="fieldText">
-        <div v-if="!useMarkdown" v-text="fieldText" />
-        <RenderMarkdownBaseComponent v-else :markdown="fieldText" />
+    <transition name="fade" v-if="text" appear mode="out-in">
+      <div class="content-area --body1" :key="text">
+        <div v-if="!useMarkdown" v-html="text" />
+        <RenderMarkdownBaseComponent v-else :markdown="text" />
       </div>
     </transition>
   </div>
@@ -36,6 +36,19 @@ export default {
     useMarkdown: {
       type: Boolean,
       default: false,
+    },
+  },
+  computed: {
+    searchValue() {
+      return this.$route.query?._search ?? "";
+    },
+    text() {
+      const currentText = this.fieldText;
+      const newText = currentText.replaceAll(
+        this.searchValue,
+        this.$htmlHighlightText(this.searchValue)
+      );
+      return newText;
     },
   },
 };
