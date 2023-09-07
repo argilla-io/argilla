@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.cli.app import app
+import typer
 
-if __name__ == "__main__":
-    app()
+from argilla.cli.callback import init_callback
+
+from .create import create_user
+from .delete import delete_user
+from .list import list_users
+
+app = typer.Typer(help="Holds CLI commands for user management.", no_args_is_help=True, callback=init_callback)
+
+app.command(name="create", help="Creates a new user")(create_user)
+app.command(name="delete", help="Deletes a user")(delete_user)
+app.command(name="list", help="List users")(list_users)

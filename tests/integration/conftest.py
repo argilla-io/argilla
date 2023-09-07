@@ -20,6 +20,7 @@ import httpx
 import pytest
 import pytest_asyncio
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
+from argilla.cli.server.database.migrate import migrate_db
 from argilla.client.api import ArgillaSingleton, delete, log
 from argilla.client.apis.datasets import TextClassificationSettings
 from argilla.client.client import Argilla, AuthenticatedClient
@@ -32,7 +33,6 @@ from argilla.server.models import User, UserRole, Workspace
 from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.server import app, argilla_app
 from argilla.server.settings import settings
-from argilla.tasks.server.database.migrate import migrate_db
 from argilla.utils import telemetry
 from argilla.utils.telemetry import TelemetryClient
 from fastapi.testclient import TestClient
