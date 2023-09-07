@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
@@ -69,16 +69,22 @@ async def _get_dataset(
 
 @router.get("/me/datasets", response_model=Datasets)
 async def list_current_user_datasets(
-    *, db: AsyncSession = Depends(get_async_db), current_user: User = Security(auth.get_current_user)
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    workspace_id: Optional[UUID] = None,
+    current_user: User = Security(auth.get_current_user),
 ):
-    await authorize(current_user, DatasetPolicyV1.list)
+    await authorize(current_user, DatasetPolicyV1.list(workspace_id))
 
-    if current_user.is_owner:
-        dataset_list = await datasets.list_datasets(db)
-        return Datasets(items=dataset_list)
-
-    await current_user.awaitable_attrs.datasets
-    return Datasets(items=current_user.datasets)
+    if not workspace_id is not None:
+        if current_user.is_owner:
+            dataset_list = await datasets.list_datasets(db)
+        else:
+            await current_user.awaitable_attrs.datasets
+            dataset_list = current_user.datasets
+    else:
+        dataset_list = await datasets.list_datasets_by_workspace_id(db, workspace_id)
+    return Datasets(items=dataset_list)
 
 
 @router.get("/datasets/{dataset_id}/fields", response_model=Fields)
