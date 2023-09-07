@@ -214,7 +214,7 @@ class DatasetPolicyV1:
         async def is_allowed(actor: User) -> bool:
             if actor.is_owner or workspace_id is None:
                 return True
-            await _exists_workspace_user_by_user_and_workspace_id(actor, workspace_id)
+            return await _exists_workspace_user_by_user_and_workspace_id(actor, workspace_id)
 
         return is_allowed
 
