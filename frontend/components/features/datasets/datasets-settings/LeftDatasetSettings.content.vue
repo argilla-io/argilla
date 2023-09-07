@@ -17,7 +17,7 @@
     </div>
     <div class="dataset-description-component left-content-item">
       <DatasetDescriptionReadOnlyComponent
-        :datasetDescription="settingsDescription"
+        :guidelines="settingsDescription"
       />
     </div>
     <div
