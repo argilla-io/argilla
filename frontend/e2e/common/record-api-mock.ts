@@ -5,6 +5,7 @@ import {
   mockQuestionLongAndShortQuestions,
 } from "./question-api-mock";
 import { mockFields } from "./field-api-mock";
+import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
 
 export const recordOne = {
   id: "9cf21756-00a0-479d-aa46-f2ef9dcf89f1",
@@ -77,6 +78,19 @@ export const recordOne = {
   updated_at: "2023-07-18T07:43:38",
 };
 
+export const recordTwo = {
+  id: "9cf21756-00a0-479d-aa46-f2ef9dcf89f2",
+  fields: {
+    text: "Second record",
+  },
+  metadata: null,
+  external_id: null,
+  responses: [],
+  suggestions: [],
+  inserted_at: "2023-07-18T07:43:38",
+  updated_at: "2023-07-18T07:43:38",
+};
+
 export const mockRecord = async (
   page: Page,
   { datasetId, workspaceId }: DatasetData
@@ -88,11 +102,34 @@ export const mockRecord = async (
   await mockFields(page, datasetId);
 
   await page.route(
-    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing`,
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing&response_status=draft`,
     async (route) => {
       await route.fulfill({
         json: {
           items: [recordOne],
+        },
+      });
+    }
+  );
+
+  return recordOne;
+};
+
+export const mockTwoRecords = async (
+  page: Page,
+  { datasetId, workspaceId }: DatasetData
+) => {
+  await mockFeedbackTaskDataset(page, { datasetId, workspaceId });
+
+  await mockQuestion(page, datasetId);
+
+  await mockFields(page, datasetId);
+  await page.route(
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing&response_status=draft`,
+    async (route) => {
+      await route.fulfill({
+        json: {
+          items: [recordOne, recordTwo],
         },
       });
     }
@@ -112,7 +149,7 @@ export const mockRecordForLongAndShortQuestion = async (
   await mockFields(page, datasetId);
 
   await page.route(
-    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing`,
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing&response_status=draft`,
     async (route) => {
       await route.fulfill({
         json: {
@@ -139,6 +176,61 @@ export const mockDiscardRecord = async (page: Page, recordId: string) => {
           updated_at: "2023-07-28T14:45:37",
         },
       });
+    }
+  );
+};
+
+export const mockSubmitRecord = async (page: Page, recordId: string) => {
+  await page.route(
+    `*/**/api/v1/records/${recordId}/responses`,
+    async (route) => {
+      await route.fulfill({
+        json: {
+          id: recordId,
+          values: {},
+          status: "submitted",
+          user_id: "3e760b76-e19a-480a-b436-a85812b98843",
+          inserted_at: "2023-07-28T14:45:37",
+          updated_at: "2023-07-28T14:45:37",
+        },
+      });
+    }
+  );
+};
+
+const debounce = useDebounce(1000);
+export const mockDraftRecord = async (page: Page, recordId: string) => {
+  await page.route(`*/**/api/v1/responses/${recordId}`, async (route) => {
+    await debounce.wait();
+    await route.fulfill({
+      json: {
+        values: {},
+        status: "draft",
+        user_id: "3e760b76-e19a-480a-b436-a85812b98843",
+        inserted_at: "2023-07-28T14:45:37",
+        updated_at: "2023-07-28T14:45:37",
+      },
+    });
+
+    debounce.stop();
+  });
+
+  await page.route(
+    `*/**/api/v1/records/${recordId}/responses`,
+    async (route) => {
+      await debounce.wait();
+      await route.fulfill({
+        json: {
+          id: recordId,
+          values: {},
+          status: "draft",
+          user_id: "3e760b76-e19a-480a-b436-a85812b98843",
+          inserted_at: "2023-07-28T14:45:37",
+          updated_at: "2023-07-28T14:45:37",
+        },
+      });
+
+      debounce.stop();
     }
   );
 };

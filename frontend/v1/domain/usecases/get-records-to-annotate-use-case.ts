@@ -77,7 +77,8 @@ export class GetRecordsToAnnotateUseCase {
           ? new RecordAnswer(
               userAnswer.id,
               userAnswer.status,
-              userAnswer.values
+              userAnswer.values,
+              userAnswer.updated_at
             )
           : null;
 
@@ -96,6 +97,7 @@ export class GetRecordsToAnnotateUseCase {
           fields,
           answer,
           suggestions,
+          record.updated_at,
           index + page
         );
       }

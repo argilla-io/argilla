@@ -17,53 +17,49 @@ import "assets/icons/time";
 import "assets/icons/discard";
 export default {
   props: {
-    title: {
+    recordStatus: {
       type: String,
     },
   },
   computed: {
     getStatusInfo() {
-      let statusInfo = null;
-      switch (this.title.toUpperCase()) {
-        case "PENDING":
-          statusInfo = {
-            name: "Pending",
-            icon: null,
-            class: "--pending",
-          };
-          break;
-        case "EDITED":
-          statusInfo = {
-            name: "Pending",
-            icon: "time",
-            class: "--edited",
-          };
-          break;
-        case "DISCARDED":
-          statusInfo = {
-            name: "Discarded",
-            icon: "discard",
-            class: "--discarded",
-          };
-          break;
-        case "VALIDATED":
-          statusInfo = {
+      switch (this.recordStatus) {
+        case "validated":
+          return {
             name: "Validate",
             icon: "validate",
             class: "--validated",
           };
-          break;
-        case "SUBMITTED":
-          statusInfo = {
+
+        case "edited":
+          return {
+            name: "Pending",
+            icon: "time",
+            class: "--edited",
+          };
+
+        case "pending":
+        case "draft":
+          return {
+            name: "Pending",
+            icon: null,
+            class: "--pending",
+          };
+
+        case "discarded":
+          return {
+            name: "Discarded",
+            icon: "discard",
+            class: "--discarded",
+          };
+
+        case "submitted":
+          return {
             name: "Submitted",
             icon: "validate",
             class: "--submitted",
           };
-          break;
-        default:
-          console.log(`wrong status: ${this.title}`);
       }
-      return statusInfo;
     },
   },
 };
@@ -79,6 +75,7 @@ export default {
   @include font-size(13px);
   border-radius: 50px;
   font-weight: 600;
+
   &.--validated {
     background: palette(green);
     border: 1px solid palette(green);
@@ -87,6 +84,7 @@ export default {
     background: #bb720a;
     border: 1px solid #bb720a;
   }
+
   &.--discarded {
     background: #a7a7a7;
     border: 1px solid #a7a7a7;
@@ -100,6 +98,7 @@ export default {
     border: 1px solid #b6b9ff;
     color: #4c4ea3;
   }
+
   .svg-icon {
     margin-right: 0.5em;
   }

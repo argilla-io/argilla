@@ -22,6 +22,7 @@ import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-us
 import { DeleteDatasetUseCase } from "@/v1/domain/usecases/delete-dataset-use-case";
 import { GetRecordsToAnnotateUseCase } from "~/v1/domain/usecases/get-records-to-annotate-use-case";
 import { SubmitRecordUseCase } from "@/v1/domain/usecases/submit-record-use-case";
+import { SaveDraftRecord } from "@/v1/domain/usecases/save-draft-use-case";
 import { ClearRecordUseCase } from "@/v1/domain/usecases/clear-record-use-case";
 import { DiscardRecordUseCase } from "@/v1/domain/usecases/discard-record-use-case";
 import { GetUserMetricsUseCase } from "@/v1/domain/usecases/get-user-metrics-use-case";
@@ -75,6 +76,8 @@ export const loadDependencyContainer = (context: Context) => {
     register(GetUserMetricsUseCase)
       .withDependencies(MetricsRepository, useMetrics)
       .build(),
+
+    register(SaveDraftRecord).withDependency(RecordRepository).build(),
 
     register(GetDatasetSettingsUseCase)
       .withDependencies(

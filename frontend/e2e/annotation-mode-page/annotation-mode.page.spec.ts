@@ -4,8 +4,11 @@ import {
   mockAllDatasets,
   newDatasetsMocked,
   mockRecord,
+  mockTwoRecords,
   mockDiscardRecord,
+  mockSubmitRecord,
   mockRecordForLongAndShortQuestion,
+  mockDraftRecord,
 } from "../common";
 
 const goToAnnotationPage = async (page, shortAndLongQuestions = false) => {
