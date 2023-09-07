@@ -85,7 +85,7 @@ if TYPE_CHECKING:
 
 @pytest.mark.asyncio
 class TestSuiteDatasets:
-    async def test_list_current_user_datasets(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_list_current_user_datasets(self, async_client: "AsyncClient", owner_auth_header: dict) -> None:
         dataset_a = await DatasetFactory.create(name="dataset-a")
         dataset_b = await DatasetFactory.create(name="dataset-b", guidelines="guidelines")
         dataset_c = await DatasetFactory.create(name="dataset-c", status=DatasetStatus.ready)
@@ -125,7 +125,7 @@ class TestSuiteDatasets:
             ]
         }
 
-    async def test_list_current_user_datasets_without_authentication(self, async_client: "AsyncClient"):
+    async def test_list_current_user_datasets_without_authentication(self, async_client: "AsyncClient") -> None:
         response = await async_client.get("/api/v1/me/datasets")
 
         assert response.status_code == 401
@@ -133,7 +133,7 @@ class TestSuiteDatasets:
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
     async def test_list_current_user_datasets_as_restricted_user_role(
         self, async_client: "AsyncClient", role: UserRole
-    ):
+    ) -> None:
         workspace = await WorkspaceFactory.create()
         user = await UserFactory.create(workspaces=[workspace], role=role)
 
