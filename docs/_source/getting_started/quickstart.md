@@ -25,4 +25,5 @@ An end-to-end workflow:
 
 quickstart_installation
 quickstart_workflow
+quickstart_workflow_feedback
 ```
