@@ -14,8 +14,8 @@
 
 import re
 
+import argilla as rg
 import pytest
-from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.training.schemas import TrainingTaskForChatCompletionFormat
 
 

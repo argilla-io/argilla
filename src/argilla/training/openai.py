@@ -15,7 +15,7 @@
 import logging
 import os
 import time
-from typing import List, Union
+from typing import List, Optional, Union
 
 import numpy as np
 
