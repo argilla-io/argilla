@@ -148,6 +148,31 @@ class TestSuiteDatasets:
         response_body = response.json()
         assert [dataset["name"] for dataset in response_body["items"]] == ["dataset-a", "dataset-b"]
 
+    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.annotator, UserRole.admin])
+    async def test_list_current_user_datasets_by_workspace_id(
+        self, async_client: "AsyncClient", role: UserRole
+    ) -> None:
+        workspace = await WorkspaceFactory.create()
+        another_workspace = await WorkspaceFactory.create()
+
+        user = (
+            await UserFactory.create(role=role)
+            if role == UserRole.owner
+            else await UserFactory.create(workspaces=[workspace], role=role)
+        )
+
+        await DatasetFactory.create(name="dataset-a", workspace=workspace)
+        await DatasetFactory.create(name="dataset-b", workspace=another_workspace)
+
+        response = await async_client.get(
+            "/api/v1/me/datasets", params={"workspace_id": workspace.id}, headers={API_KEY_HEADER_NAME: user.api_key}
+        )
+
+        assert response.status_code == 200
+
+        response_body = response.json()
+        assert [dataset["name"] for dataset in response_body["items"]] == ["dataset-a"]
+
     async def test_list_dataset_fields(self, async_client: "AsyncClient", owner_auth_header: dict):
         dataset = await DatasetFactory.create()
         text_field_a = await TextFieldFactory.create(
