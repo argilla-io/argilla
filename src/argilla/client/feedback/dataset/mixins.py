@@ -316,12 +316,15 @@ class ArgillaMixin:
 
         try:
             datasets = datasets_api_v1.list_datasets(
-                client=httpx_client, workspace_id=workspace.id if workspace else None
+                client=httpx_client, workspace_id=workspace.id if workspace is not None else None
             ).parsed
         except Exception as e:
             raise RuntimeError(
                 f"Failed while listing the `FeedbackDataset` datasets in Argilla with exception: {e}"
             ) from e
+
+        if len(datasets) == 0:
+            return []
         return [
             RemoteFeedbackDataset(
                 client=httpx_client,
