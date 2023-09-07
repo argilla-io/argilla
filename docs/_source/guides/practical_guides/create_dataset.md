@@ -1,9 +1,5 @@
 # Create a dataset
 
-## What dataset to choose?
-
-Argilla offers four distinct datasets with pros and cons.
-
 ## Feedback Dataset
 
 The Feedback Task datasets allow you to combine multiple questions of different kinds, so the first step will be to define the aim of your project and the kind of data and feedback you will need to get there. With this information, you can start configuring a dataset and formatting records using the Python SDK.
@@ -426,3 +422,311 @@ dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 ::::
 
 Now you're ready to start [the annotation process](annotate_dataset.ipynb).
+
+## Other Datasets
+
+The records classes covered in this section correspond to 3 equivalent datasets:
+
+ 1. `DatasetForTextClassification`
+ 2. `DatasetForTokenClassification`
+ 3. `DatasetForText2Text`
+
+Under the hood, the Dataset classes store the records in a simple Python list. Therefore, working with a Dataset class is not very different from working with a simple list of records, but before creating a dataset we should first define dataset settings and a labeling schema.
+
+Argilla datasets have certain *settings* that you can configure via the `rg.*Settings` classes, for example, `rg.TextClassificationSettings`. The Dataset classes do some extra checks for you, to make sure you do not mix record types when appending or indexing into a dataset.
+
+### Configure the Dataset
+
+You can define your Argilla dataset, which sets the allowed labels for your predictions and annotations. Once you set a labeling schema, each time you log into the corresponding dataset, Argilla will perform validations of the added predictions and annotations to make sure they comply with the schema.
+You can set your labels using the code below or from the [Dataset settings page](/reference/webapp/pages.md#dataset-settings) in the UI.
+
+If you forget to define a labeling schema, Argilla will aggregate the labels it finds in the dataset automatically, but you will need to validate it. To do this, go to your [Dataset settings page](../reference/webapp/pages.md#dataset-settings) and click _Save schema_.
+
+![Schema not saved](/_static/images/guides/guides-define_schema.png)
+
+::::{tab-set}
+
+:::{tab-item} Text Classification
+```python
+import argilla as rg
+
+settings = rg.TextClassificationSettings(label_schema=["A", "B", "C"])
+
+rg.configure_dataset(name="my_dataset", settings=settings)
+```
+:::
+
+:::{tab-item} Token Classification
+```python
+import argilla as rg
+
+settings = rg.TokenClassificationSettings(label_schema=["A", "B", "C"])
+
+rg.configure_dataset(name="my_dataset", settings=settings)
+```
+:::
+
+:::{tab-item} Text2Text
+Because we do not require a labeling schema for `Text2Text`, we can create a dataset by directly logging records via `rg.log()`.
+:::
+
+::::
+
+### Add records
+
+The main component of the Argilla data model is called a record. A dataset in Argilla is a collection of these records.
+Records can be of different types depending on the currently supported tasks:
+
+ 1. `TextClassificationRecord`
+ 2. `TokenClassificationRecord`
+ 3. `Text2TextRecord`
+
+The most critical attributes of a record that are common to all types are:
+
+ - `text`: The input text of the record (Required);
+ - `annotation`: Annotate your record in a task-specific manner (Optional);
+ - `prediction`: Add task-specific model predictions to the record (Optional);
+ - `metadata`: Add some arbitrary metadata to the record (Optional);
+
+Some other cool attributes for a record are:
+
+ - `vectors`: Input vectors to enable [semantic search](label_records_with_semanticsearch.html).
+ - `explanation`: Token attributions for [highlighting text](log_model_explanations.html).
+
+In Argilla, records are created programmatically using the [client library](/reference/python/python_client.rst) within a Python script, a [Jupyter notebook](https://jupyter.org/), or another IDE.
+
+
+Let's see how to create and upload a basic record to the Argilla web app  (make sure Argilla is already installed on your machine as described in the [setup guide](../getting_started/quickstart_installation.html)).
+
+We support different tasks within the Argilla eco-system focused on NLP: `Text Classification`, `Token Classification` and `Text2Text`.
+
+
+::::{tab-set}
+
+:::{tab-item} Text Classification
+
+```python
+import argilla as rg
+
+rec = rg.TextClassificationRecord(
+    text="beautiful accomodations stayed hotel santa... hotels higer ranked website.",
+    prediction=[("price", 0.75), ("hygiene", 0.25)],
+    annotation="price"
+)
+rg.log(records=rec, name="my_dataset")
+```
+![single_textclass_record](/_static/reference/webapp/features-single_textclass_record.png)
+:::
+
+:::{tab-item} Text Classification (multi-label)
+```python
+import argilla as rg
+
+rec = rg.TextClassificationRecord(
+    text="damn this kid and her fancy clothes makes me feel like a bad parent.",
+    prediction=[("admiration", 0.75), ("annoyance", 0.25)],
+    annotation=["price", "annoyance"],
+    multi_label=True
+)
+rg.log(records=rec, name="my_dataset")
+```
+![multi_textclass_record](/_static/reference/webapp/features-multi_textclass_record.png)
+:::
+
+
+:::{tab-item} Token Classification
+```python
+import argilla as rg
+
+record = rg.TokenClassificationRecord(
+    text="Michael is a professor at Harvard",
+    tokens=["Michael", "is", "a", "professor", "at", "Harvard"],
+    prediction=[("NAME", 0, 7, 0.75), ("LOC", 26, 33, 0.8)],
+    annotation=[("NAME", 0, 7), ("LOC", 26, 33)],
+)
+rg.log(records=rec, name="my_dataset")
+```
+![tokclass_record](/_static/reference/webapp/features-tokclass_record.png)
+:::
+
+:::{tab-item} Text2Text
+```python
+import argilla as rg
+
+record = rg.Text2TextRecord(
+    text="A giant giant spider is discovered... how much does he make in a year?",
+    prediction=["He has 3*4 trees. So he has 12*5=60 apples."],
+)
+rg.log(records=rec, name="my_dataset")
+```
+
+![text2text_record](/_static/reference/webapp/features-text2text_record.png)
+:::
+
+::::
+
+### Add suggestions
+
+Suggestions refer to suggested responses (e.g. model predictions) that you can add to your records to make the annotation process faster. These can be added during the creation of the record or at a later stage. We allow for multiple suggestions per record.
+
+::::{tab-set}
+
+:::{tab-item} Text Classification
+
+In this case, we expect a `List[Tuple[str, float]]` as the prediction, where the first element of the tuple is the label and the second the confidence score.
+
+```python
+
+```python
+import argilla as rg
+
+rec = rg.TextClassificationRecord(
+    text=...,
+    prediction=[("label_1", 0.75), ("label_2", 0.25)],
+)
+```
+![single_textclass_record](/_static/reference/webapp/features-single_textclass_record.png)
+:::
+
+:::{tab-item} Text Classification (multi-label)
+
+In this case, we expect a `List[Tuple[str, float]]` as the prediction, where the second element of the tuple is the confidence score of the prediction. In case of multi-label, the `multi_label` attribute of the record should be set to `True`.
+
+```python
+import argilla as rg
+
+rec = rg.TextClassificationRecord(
+    text=...,
+    prediction=[("label_1", 0.75), ("label_2", 0.75)],
+    multi_label=True
+)
+```
+![multi_textclass_record](/_static/reference/webapp/features-multi_textclass_record.png)
+:::
+
+
+:::{tab-item} Token Classification
+
+In this case, we expect a `List[Tuple[str, int, int, float]]` as the prediction, where the second and third elements of the tuple are the start and end indices of the token in the text.
+
+```python
+import argilla as rg
+
+record = rg.TokenClassificationRecord(
+    text=...,
+    tokens=...,
+    prediction=[("label_1", 0, 7, 0.75), ("label_2", 26, 33, 0.8)],
+)
+```
+![tokclass_record](/_static/reference/webapp/features-tokclass_record.png)
+:::
+
+:::{tab-item} Text2Text
+
+In this case, we expect a `List[str]` as the prediction.
+
+```python
+import argilla as rg
+
+record = rg.Text2TextRecord(
+    text=...,
+    prediction=["He has 3*4 trees. So he has 12*5=60 apples."],
+)
+```
+
+![text2text_record](/_static/reference/webapp/features-text2text_record.png)
+:::
+
+::::
+
+### Add annotations
+
+If your dataset includes some annotations, you can add those to the records as you create them. Make sure that the responses adhere to the same format as Argilla’s output and meet the schema requirements.
+
+::::{tab-set}
+:::{tab-item} Text Classification
+
+In this case, we expect a `str` as the annotation.
+
+```python
+import argilla as rg
+
+rec = rg.TextClassificationRecord(
+    text=...,
+    annotation="label_1",
+)
+```
+![single_textclass_record](/_static/reference/webapp/features-single_textclass_record.png)
+
+:::
+
+:::{tab-item} Text Classification (multi-label)
+
+In this case, we expect a `List[str]` as the annotation. In case of multi-label, the `multi_label` attribute of the record should be set to `True`.
+
+```python
+import argilla as rg
+
+rec = rg.TextClassificationRecord(
+    text=...,
+    annotation=["label_1", "label_2"],
+    multi_label=True
+)
+```
+
+![multi_textclass_record](/_static/reference/webapp/features-multi_textclass_record.png)
+
+:::
+
+:::{tab-item} Token Classification
+
+In this case, we expect a `List[Tuple[str, int, int]]` as the annotation, where the second and third elements of the tuple are the start and end indices of the token in the text.
+
+```python
+import argilla as rg
+
+record = rg.TokenClassificationRecord(
+    text=...,
+    tokens=...,
+    annotation=[("label_1", 0, 7), ("label_2", 26, 33)],
+)
+```
+
+![tokclass_record](/_static/reference/webapp/features-tokclass_record.png)
+
+:::
+
+:::{tab-item} Text2Text
+
+In this case, we expect a `str` as the annotation.
+
+```python
+import argilla as rg
+
+record = rg.Text2TextRecord(
+    text=...,
+    annotation="He has 3*4 trees. So he has 12*5=60 apples.",
+)
+```
+
+![text2text_record](/_static/reference/webapp/features-text2text_record.png)
+
+:::
+
+::::
+
+### Push to Argilla
+
+We can push records to Argilla using the `rg.log()` function. This function takes a list of records and the name of the dataset to which we want to push the records.
+
+```python
+import argilla as rg
+
+rec = rg.TextClassificationRecord(
+    text="beautiful accomodations stayed hotel santa... hotels higer ranked website.",
+    prediction=[("price", 0.75), ("hygiene", 0.25)],
+    annotation="price"
+)
+
+rg.log(records=rec, name="my_dataset")
+```

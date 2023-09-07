@@ -48,19 +48,12 @@ Collect annotations and solve disagreements.
 :link: export_dataset.html
 
 Export your dataset and save it in the Hugging Face Hub or locally.
-
-```
-```{grid-item-card} Monitoring LangChain apps
-:link: use_argilla_callback_in_langchain.html
-
-Use the Argilla LangChain callback for monitoring, evaluation, and fine-tuning.
 ```
 ```{grid-item-card} Fine-tune LLMs
 :link: fine_tune.html
 
 Fine-tune an LLM or other models with the feedback collected from Argilla.
 ```
-
 ````
 
-![Feedback Dataset snapshot](../../../_static/images/llms/snapshot-feedback-demo.png)
+![Feedback Dataset snapshot](/_static/images/llms/snapshot-feedback-demo.png)
