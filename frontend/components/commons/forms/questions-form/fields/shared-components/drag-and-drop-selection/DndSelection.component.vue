@@ -112,9 +112,14 @@ export default {
       this.keyCode = "";
       this.timer = null;
     },
+    isGlobalShortcut(event) {
+      return (
+        event.shiftKey || event.key == "Tab" || event.ctrlKey || event.metaKey
+      );
+    },
     rankWithKeyboard(event, questionToMove) {
       if (this.timer) clearTimeout(this.timer);
-      if (event.shiftKey || event.key == "Tab") return;
+      if (this.isGlobalShortcut(event)) return;
 
       event.stopPropagation();
 

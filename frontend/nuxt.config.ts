@@ -73,6 +73,7 @@ const config: NuxtConfig = {
     { src: "~/plugins/plugins/filters.js" },
     { src: "~/plugins/plugins/variables.js" },
     { src: "~/plugins/plugins/vue-draggable.js" },
+    { src: "~/plugins/plugins/platform.ts" },
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)

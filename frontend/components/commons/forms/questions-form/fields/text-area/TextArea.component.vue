@@ -6,6 +6,7 @@
     />
     <div
       class="container"
+      :class="isEditionModeActive ? '--focused' : null"
       @focus="onFocus"
       :tabindex="isEditionModeActive ? '-1' : '0'"
     >

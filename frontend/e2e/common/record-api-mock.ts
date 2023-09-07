@@ -79,10 +79,23 @@ export const recordOne = {
   updated_at: "2023-07-18T07:43:38",
 };
 
-const recordFor12ranking = {
+const recordFor12rankingA = {
   id: "1da11112-69ac-4cc9-947e-c8293243510a",
   fields: {
-    text: "blablabla",
+    text: "First Record",
+  },
+  metadata: {},
+  external_id: null,
+  responses: [],
+  suggestions: [],
+  inserted_at: "2023-07-26T12:15:02",
+  updated_at: "2023-07-26T12:15:02",
+};
+
+const recordFor12rankingB = {
+  id: "1da11112-69ac-4cc9-947e-c8293243510b",
+  fields: {
+    text: "Second record",
   },
   metadata: {},
   external_id: null,
@@ -153,7 +166,11 @@ export const mockRecordForLongAndShortQuestion = async (
   return recordOne;
 };
 
-export const mockRecordResponses = async (page: Page, recordId: string, status: "submitted" | "discarded") => {
+export const mockRecordResponses = async (
+  page: Page,
+  recordId: string,
+  status: "submitted" | "discarded"
+) => {
   await page.route(
     `*/**/api/v1/records/${recordId}/responses`,
     async (route, request) => {
@@ -186,7 +203,17 @@ export const mockRecordWith12Ranking = async (
     async (route) => {
       await route.fulfill({
         json: {
-          items: [recordFor12ranking],
+          items: [recordFor12rankingA, recordFor12rankingB],
+        },
+      });
+    }
+  );
+  await page.route(
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=2&limit=10&response_status=missing`,
+    async (route) => {
+      await route.fulfill({
+        json: {
+          items: [],
         },
       });
     }

@@ -1,78 +1,44 @@
 import { test, expect, Page } from "@playwright/test";
+import { mockRecordResponses } from "../common";
 import {
-  loginUserAndWaitFor,
-  mockAllDatasets,
-  newDatasetsMocked,
-  mockRecord,
-  mockRecordWith12Ranking,
-  mockRecordWithRating,
-  mockRecordResponses,
-  mockRecordForLongAndShortQuestion,
-} from "../common";
+  goToAnnotationPage,
+  goToAnnotationPageWith12Ranking,
+  goToAnnotationPageWith10Rating,
+} from "./goToAnnotationPage";
 
-const goToAnnotationPage = async (page, shortAndLongQuestions = false) => {
-  const dataset = newDatasetsMocked[0];
-
-  await mockAllDatasets(page);
-  const record = shortAndLongQuestions
-    ? await mockRecordForLongAndShortQuestion(page, {
-        datasetId: dataset.id,
-        workspaceId: dataset.workspace_id,
-      })
-    : await mockRecord(page, {
-        datasetId: dataset.id,
-        workspaceId: dataset.workspace_id,
-      });
-
-  await loginUserAndWaitFor(page, "datasets");
-
-  await page.waitForTimeout(2000);
-
-  await page.getByRole("link", { name: dataset.name }).click();
-
-  await page.waitForTimeout(3000);
-
-  return record;
-};
-
-const goToAnnotationPageWith12Ranking = async (page: Page) => {
-  const dataset = newDatasetsMocked[0];
-
-  await mockAllDatasets(page);
-  await mockRecordWith12Ranking(page, {
-    datasetId: dataset.id,
-    workspaceId: dataset.workspace_id,
-  });
-
-  await loginUserAndWaitFor(page, "datasets");
-
-  await page.waitForTimeout(1000);
-
-  await page.getByRole("link", { name: dataset.name }).click();
-
-  await page.waitForTimeout(1000);
-};
-
-const goToAnnotationPageWith10Rating = async (page) => {
-  const dataset = newDatasetsMocked[0];
-
-  await mockAllDatasets(page);
-  await mockRecordWithRating(page, {
-    datasetId: dataset.id,
-    workspaceId: dataset.workspace_id,
-  });
-
-  await loginUserAndWaitFor(page, "datasets");
-
-  await page.waitForTimeout(2000);
-
-  await page.getByRole("link", { name: dataset.name }).click();
-
-  await page.waitForTimeout(3000);
+const shortcuts = {
+  clear: "Shift+Space",
+  discard: "Shift+Backspace",
+  submit: "Shift+Enter",
+  focusOnForm: "Tab",
+  goToNextRecord: "Control+ArrowRight",
+  goToPrevRecord: "Control+ArrowLeft",
+  goToNextQuestion: "Shift+ArrowDown",
+  goToPrevQuestion: "Shift+ArrowUp",
+  singleLabel: {
+    select: "Space",
+    goToNextLabel: "Tab",
+  },
+  multiLabel: {
+    select: "Space",
+    goToNextLabel: "Tab",
+  },
+  ranking: {
+    goToNextRank: "Tab",
+    goToPrevRank: "Shift+Tab",
+    unrank: "Backspace",
+  },
+  rating: {
+    goToNextRating: "Tab",
+    goToPrevRating: "Shift+Tab",
+    rate: "Space",
+  },
 };
 
 test.use({
   viewport: { width: 1600, height: 1400 },
+  userAgent:
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.5790.75 Safari/537.36",
 });
 
 test.describe("Annotate page", () => {
@@ -81,7 +47,6 @@ test.describe("Annotate page", () => {
 
     await expect(page).toHaveScreenshot();
   });
-
   test("filter by workspaces from annotation page", async ({ page }) => {
     await goToAnnotationPage(page);
 
@@ -221,6 +186,214 @@ test.describe("Annotate page", () => {
 });
 
 test.describe("Annotation page shortcuts", () => {
+  test.describe("Global shortcuts", () => {
+    test("when focus is not in form, press Tab to focus on first question", async ({
+      page,
+    }) => {
+      await goToAnnotationPageWith12Ranking(page);
+      const formBox = await page
+        .getByText("Submit your feedback")
+        .boundingBox();
+
+      await page.mouse.click(formBox.x - 25, formBox.y - 25); // click outside form to loose focus
+      await expect(page).toHaveScreenshot();
+
+      await page.keyboard.press(shortcuts.focusOnForm);
+      await expect(page).toHaveScreenshot();
+    });
+    test.describe("Pagination", () => {
+      test("on first record, go to next record by pressing Ctrl+ArrowRight", async ({
+        page,
+      }) => {
+        await goToAnnotationPageWith12Ranking(page);
+        await expect(page).toHaveScreenshot();
+
+        await page.keyboard.press(shortcuts.goToNextRecord);
+        await page.waitForTimeout(300);
+
+        await expect(page).toHaveScreenshot();
+      });
+      test("on first record, can't go to prev record by pressing Ctrl+ArrowLeft", async ({
+        page,
+      }) => {
+        await goToAnnotationPageWith12Ranking(page);
+        await expect(page).toHaveScreenshot();
+
+        await page.keyboard.press(shortcuts.goToPrevRecord);
+        await page.waitForTimeout(300);
+
+        await expect(page).toHaveScreenshot();
+      });
+      test("on last record, can't go to next record by pressing Ctrl+ArrowRight", async ({
+        page,
+      }) => {
+        await goToAnnotationPageWith12Ranking(page);
+        await expect(page).toHaveScreenshot();
+
+        await page.keyboard.press(shortcuts.goToNextRecord);
+        await page.waitForTimeout(300);
+        await expect(page).toHaveScreenshot();
+
+        await page.keyboard.press(shortcuts.goToNextRecord);
+        await page.waitForTimeout(1000);
+        await expect(page).toHaveScreenshot();
+      });
+      test("on last record, can go to prev record by pressing Ctrl+ArrowLeft", async ({
+        page,
+      }) => {
+        await goToAnnotationPageWith12Ranking(page);
+        await expect(page).toHaveScreenshot();
+
+        await page.keyboard.press(shortcuts.goToNextRecord);
+        await page.waitForTimeout(300);
+        await expect(page).toHaveScreenshot();
+
+        await page.keyboard.press(shortcuts.goToPrevRecord);
+        await page.waitForTimeout(300);
+        await expect(page).toHaveScreenshot();
+      });
+    });
+    test.describe("Form actions", () => {
+      test.describe("Clear", () => {
+        test("When focus is on a singleLabel Component", async ({ page }) => {
+          await goToAnnotationPage(page);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.clear);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
+        test("When focus is on a multiLabel Component", async ({ page }) => {
+          await goToAnnotationPage(page);
+          await page.waitForTimeout(500);
+
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.clear);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
+        test("When focus is on a rating Component", async ({ page }) => {
+          await goToAnnotationPage(page);
+          await page.waitForTimeout(500);
+
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on rating question
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.clear);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
+      });
+      test.describe("Discard", () => {
+        test("When focus is on a singleLabel Component", async ({ page }) => {
+          await goToAnnotationPage(page);
+          const record = await goToAnnotationPage(page);
+          await mockRecordResponses(page, record.id, "discarded");
+
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.discard);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
+        test("When focus is on a multiLabel Component", async ({ page }) => {
+          await goToAnnotationPage(page);
+          const record = await goToAnnotationPage(page);
+          await mockRecordResponses(page, record.id, "discarded");
+          await page.waitForTimeout(500);
+
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.discard);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
+        test("When focus is on a rating Component", async ({ page }) => {
+          await goToAnnotationPage(page);
+          const record = await goToAnnotationPage(page);
+          await mockRecordResponses(page, record.id, "discarded");
+          await page.waitForTimeout(500);
+
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on rating question
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.discard);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
+      });
+      test.describe("Submit", () => {
+        test("When focus is on a singleLabel Component", async ({ page }) => {
+          await goToAnnotationPage(page);
+          const record = await goToAnnotationPage(page);
+          await mockRecordResponses(page, record.id, "submitted");
+
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.submit);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
+        test("When focus is on a multiLabel Component", async ({ page }) => {
+          await goToAnnotationPage(page);
+          const record = await goToAnnotationPage(page);
+          await mockRecordResponses(page, record.id, "submitted");
+          await page.waitForTimeout(500);
+
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.submit);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
+        test("When focus is on a rating Component", async ({ page }) => {
+          await goToAnnotationPage(page);
+          const record = await goToAnnotationPage(page);
+          await mockRecordResponses(page, record.id, "submitted");
+          await page.waitForTimeout(500);
+
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on rating question
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.submit);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
+      });
+    });
+  });
+  test.describe("Shortcuts panel", () => {
+    test("open shortcut panel", async ({ page }) => {
+      await goToAnnotationPageWith12Ranking(page);
+
+      await page.locator("span:last-child > .icon-button").click();
+      await page.waitForTimeout(300);
+
+      await expect(page).toHaveScreenshot();
+    });
+  });
   test.describe("Single component", () => {
     test("user press just letter V and go automatically to search bar and filter data", async ({
       page,
@@ -261,12 +434,12 @@ test.describe("Annotation page shortcuts", () => {
       await expect(page).toHaveScreenshot();
 
       await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Space");
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.select);
 
-      await page.keyboard.press("Shift+Enter");
+      await page.keyboard.press(shortcuts.submit);
 
       await expect(page).toHaveScreenshot();
     });
@@ -284,10 +457,10 @@ test.describe("Annotation page shortcuts", () => {
       await expect(page).toHaveScreenshot();
 
       await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Space");
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.select);
 
       // TODO: find way to simulate Spacebar
       await page.keyboard.down("Shift");
@@ -313,12 +486,12 @@ test.describe("Annotation page shortcuts", () => {
       await expect(page).toHaveScreenshot();
 
       await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Space");
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.select);
 
-      await page.keyboard.press("Shift+Backspace");
+      await page.keyboard.press(shortcuts.discard);
 
       await expect(page).toHaveScreenshot();
     });
@@ -331,10 +504,10 @@ test.describe("Annotation page shortcuts", () => {
       await page.keyboard.press("v");
 
       await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
 
-      await page.keyboard.press("Space");
+      await page.keyboard.press(shortcuts.singleLabel.select);
 
       await expect(page).toHaveScreenshot();
     });
@@ -346,9 +519,9 @@ test.describe("Annotation page shortcuts", () => {
 
       await page.keyboard.press("v");
       await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Space");
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.select);
 
       await page.getByText("Loving").click();
 
@@ -358,23 +531,23 @@ test.describe("Annotation page shortcuts", () => {
     test("expand collapsable label", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
 
       await expect(page).toHaveScreenshot();
     });
@@ -382,7 +555,7 @@ test.describe("Annotation page shortcuts", () => {
     test("go to next question with shift and arrow down", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
       await expect(page).toHaveScreenshot();
     });
@@ -392,8 +565,8 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
-      await page.keyboard.press("Shift+ArrowUp");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToPrevQuestion);
 
       await expect(page).toHaveScreenshot();
     });
@@ -401,54 +574,54 @@ test.describe("Annotation page shortcuts", () => {
     test("the user move as a loop with tab key", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
 
       await expect(page).toHaveScreenshot();
     });
@@ -458,7 +631,7 @@ test.describe("Annotation page shortcuts", () => {
     test("go to multilabel component", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
       await page.keyboard.press("v");
 
       await expect(page).toHaveScreenshot();
@@ -469,21 +642,21 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
 
       await expect(page).toHaveScreenshot();
 
@@ -498,57 +671,57 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
+      await page.keyboard.press(shortcuts.multiLabel.goToNextLabel);
 
       await expect(page).toHaveScreenshot();
     });
@@ -556,9 +729,9 @@ test.describe("Annotation page shortcuts", () => {
     test("go to next question with shift and arrow down", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
       await expect(page).toHaveScreenshot();
     });
@@ -568,10 +741,10 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
-      await page.keyboard.press("Shift+ArrowUp");
+      await page.keyboard.press(shortcuts.goToPrevQuestion);
 
       await expect(page).toHaveScreenshot();
     });
@@ -581,8 +754,8 @@ test.describe("Annotation page shortcuts", () => {
     test("go to rating component with keyboard", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
       await expect(page).toHaveScreenshot();
     });
@@ -592,8 +765,8 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
       await page.locator("label").filter({ hasText: "2" }).click();
 
@@ -609,11 +782,60 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
       await page.keyboard.press("4");
 
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("choose a different rating value with Tab and press Space to select this value", async ({
+      page,
+    }) => {
+      await goToAnnotationPage(page);
+
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await expect(page).toHaveScreenshot();
+
+      await page.keyboard.press(shortcuts.rating.goToNextRating);
+      await page.keyboard.press(shortcuts.rating.goToNextRating);
+      await page.keyboard.press(shortcuts.rating.rate);
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("press Space to unselect the value previously selected", async ({
+      page,
+    }) => {
+      await goToAnnotationPage(page);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await expect(page).toHaveScreenshot();
+      await page.keyboard.press(shortcuts.rating.goToNextRating);
+      await page.keyboard.press(shortcuts.rating.goToNextRating);
+      await page.keyboard.press(shortcuts.rating.rate);
+      await expect(page).toHaveScreenshot();
+      await page.keyboard.press(shortcuts.goToPrevQuestion);
+      await page.keyboard.press(shortcuts.rating.goToNextRating);
+      await page.keyboard.press(shortcuts.rating.goToNextRating);
+
+      await page.keyboard.press(shortcuts.rating.rate);
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("choose a different rating value with Shift+Tab and press Space to select this value", async ({
+      page,
+    }) => {
+      await goToAnnotationPage(page);
+
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await expect(page).toHaveScreenshot();
+
+      await page.keyboard.press(shortcuts.rating.goToPrevRating);
+      await page.keyboard.press(shortcuts.rating.goToPrevRating);
+      await page.keyboard.press(shortcuts.rating.rate);
       await expect(page).toHaveScreenshot();
     });
   });
@@ -720,9 +942,9 @@ test.describe("Annotation page shortcuts", () => {
     test("go to text component with keyboard", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
-      await page.keyboard.press("Shift+ArrowDown");
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
       await expect(page).toHaveScreenshot();
     });
@@ -730,13 +952,13 @@ test.describe("Annotation page shortcuts", () => {
     test("go to previous question with keyboard", async ({ page }) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
-      await page.keyboard.press("Shift+ArrowDown");
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
       await page
         .getByText("This is a review of the review")
-        .press("Shift+ArrowUp");
+        .press(shortcuts.goToPrevQuestion);
 
       await expect(page).toHaveScreenshot();
     });
@@ -746,13 +968,13 @@ test.describe("Annotation page shortcuts", () => {
     const goToRankingComponent = async (page: Page) => {
       await goToAnnotationPage(page);
 
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
 
-      await page.keyboard.press("Shift+ArrowDown");
+      await page.keyboard.press(shortcuts.goToNextQuestion);
     };
 
     test("go to ranking component with keyboard", async ({ page }) => {
@@ -766,7 +988,7 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToRankingComponent(page);
 
-      await page.keyboard.press("Shift+ArrowUp");
+      await page.keyboard.press(shortcuts.goToPrevQuestion);
 
       await page.keyboard.press("Meta+Shift+ArrowRight");
 
@@ -829,19 +1051,19 @@ test.describe("Annotation page shortcuts", () => {
     test("move as a loop in ranking component", async ({ page }) => {
       await goToRankingComponent(page);
 
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
       await expect(page).toHaveScreenshot();
 
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
       await expect(page).toHaveScreenshot();
 
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
       await expect(page).toHaveScreenshot();
 
-      await page.keyboard.press("Shift+Tab");
+      await page.keyboard.press(shortcuts.ranking.goToPrevRank);
       await expect(page).toHaveScreenshot();
     });
 
@@ -850,20 +1072,20 @@ test.describe("Annotation page shortcuts", () => {
     }) => {
       await goToRankingComponent(page);
 
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
       await expect(page).toHaveScreenshot();
 
-      await page.keyboard.press("Backspace");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Backspace");
+      await page.keyboard.press(shortcuts.ranking.unrank);
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
+      await page.keyboard.press(shortcuts.ranking.unrank);
       await expect(page).toHaveScreenshot();
 
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
+      await page.keyboard.press(shortcuts.ranking.goToNextRank);
       await expect(page).toHaveScreenshot();
 
-      await page.keyboard.press("Shift+Tab");
+      await page.keyboard.press(shortcuts.ranking.goToPrevRank);
       await expect(page).toHaveScreenshot();
     });
   });
@@ -915,8 +1137,8 @@ test.describe("Annotation page shortcuts", () => {
 
       await page.waitForTimeout(500);
 
-      await page.keyboard.press("Shift+Tab");
-      await page.keyboard.press("Backspace");
+      await page.keyboard.press(shortcuts.ranking.goToPrevRank);
+      await page.keyboard.press(shortcuts.ranking.unrank);
 
       await expect(page).toHaveScreenshot();
     });
@@ -931,8 +1153,8 @@ test.describe("Annotation page shortcuts", () => {
 
       await page.waitForTimeout(500);
 
-      await page.keyboard.press("Shift+Tab");
-      await page.keyboard.press("Shift+Space");
+      await page.keyboard.press(shortcuts.ranking.goToPrevRank);
+      await page.keyboard.press(shortcuts.clear);
       await expect(page).toHaveScreenshot();
     });
   });

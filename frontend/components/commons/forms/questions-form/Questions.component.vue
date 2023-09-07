@@ -1,5 +1,5 @@
 <template>
-  <div ref="formRef">
+  <div>
     <p v-if="legend" class="questions__title --body3 --light" v-text="legend" />
     <div class="questions">
       <div
@@ -81,63 +81,46 @@ export default {
       type: Number,
     },
   },
-  mounted() {
-    const keyBoardHandler = (parent) => (e) => {
-      const focusable = parent.querySelectorAll(
-        'input[type="checkbox"], [tabindex="0"]'
-      );
-
-      const firstElement = focusable[0];
-      const lastElement = focusable[focusable.length - 1];
-
-      const isShiftKeyPressed = e.shiftKey;
-
-      const isArrowDownPressed = e.key === "ArrowDown";
-      const isArrowUpPressed = e.key === "ArrowUp";
-      const activeElementIsInForm = this.formWrapper.contains(
-        document.activeElement
-      );
-      const isLastElementActive = document.activeElement === lastElement;
-      const isFirstElementActive = document.activeElement === firstElement;
-
-      if (!activeElementIsInForm && isShiftKeyPressed && isArrowDownPressed) {
-        this.focusOnFirstQuestion(e);
-        return;
-      }
-
-      if (!activeElementIsInForm && isShiftKeyPressed && isArrowUpPressed) {
-        this.focusOnLastQuestion(e);
-        return;
-      }
-
-      if (e.key !== "Tab") return;
-      // TODO: Move to Single and Multi label component
-      // Is for manage the loop focus.
-      if (!isShiftKeyPressed && isLastElementActive) {
-        this.focusOn(e, firstElement);
-      }
-      if (isShiftKeyPressed && isFirstElementActive) {
-        this.focusOn(e, lastElement);
-      }
-    };
-
-    const initEventListenerFor = (aParent, aTypeOfComponent) => {
-      const parent = this.$refs[aTypeOfComponent][0].$el;
-
-      aParent.addEventListener("keydown", keyBoardHandler(parent));
-    };
-
-    ["text", "singleLabel", "multiLabel", "rating", "ranking"].forEach(
-      (componentType) =>
-        this.$refs[componentType] && initEventListenerFor(parent, componentType)
-    );
-  },
   computed: {
-    formWrapper() {
-      return this.$refs.formRef;
+    questionElements() {
+      return ["text", "singleLabel", "multiLabel", "rating", "ranking"]
+        .filter((componentType) => this.$refs[componentType])
+        .map((componentType) => this.$refs[componentType][0].$el);
     },
   },
+  mounted() {
+    this.questionElements.forEach((parent) => {
+      parent.addEventListener("keydown", this.handleKeyboardToMoveLoop(parent));
+    });
+  },
+  beforeDestroy() {
+    this.questionElements.forEach((parent) => {
+      parent.addEventListener("keydown", this.handleKeyboardToMoveLoop(parent));
+    });
+  },
   methods: {
+    handleKeyboardToMoveLoop(parent) {
+      return (e) => {
+        if (e.key !== "Tab") return;
+        const isShiftKeyPressed = e.shiftKey;
+
+        const focusable = parent.querySelectorAll(
+          'input[type="checkbox"], [tabindex="0"]'
+        );
+        const firstElement = focusable[0];
+        const lastElement = focusable[focusable.length - 1];
+
+        const isLastElementActive = document.activeElement === lastElement;
+        const isFirstElementActive = document.activeElement === firstElement;
+
+        if (!isShiftKeyPressed && isLastElementActive) {
+          this.focusOn(e, firstElement);
+        }
+        if (isShiftKeyPressed && isFirstElementActive) {
+          this.focusOn(e, lastElement);
+        }
+      };
+    },
     focusOnFirstQuestion(e) {
       e.preventDefault();
       this.updateQuestionAutofocus(0);

@@ -1,18 +1,22 @@
 You can speed up your annotation by using these keyboard shortcuts:
 
-|Action|Keys|
-|------|----|
-|Go to next page|`→ Right arrow`|
-|Go to previous page|`← Left arrow`|
-|Activate feedback form|`⇧ Shift` + `↓ Down arrow`|
-|Go to next question|`⇧ Shift` + `↓ Down arrow`|
-|Go to previous question|`⇧ Shift` + `↑ Up arrow`|
-|Go to next label|`⇥ Tab`|
-|Go to previous label|`⇧ Shift` + `⇥ Tab`|
-|Select/unselect label </br>(*Label* and *MultiLabel* questions)|`␣ Space`|
-|Filter labels </br>(*Label* and *MultiLabel* questions)|Type label name|
-|Select numerical value </br>(*Ranking* and *Rating* questions)|Type number|
-|Unrank option </br>(*Ranking* question)|`⌫ Backspace`|
-|Clear|`⇧ Shift` + `␣ Space`|
-|Discard|`⇧ Shift` + `⌫ Backspace`|
-|Submit|`⇧ Shift` + `↵ Enter`|
+| Action                       | Keys                       |
+| ---------------------------- | -------------------------- |
+| Activate feedback form       | `⇥ tab`                    |
+| Go to next question          | `⇧ shift` + `↓ down arrow` |
+| Go to previous question      | `⇧ shift` + `↑ up arrow`   |
+| Go to next label             | `⇥ tab`                    |
+| Go to previous label         | `⇧ shift` + `⇥ tab`        |
+| Select/unselect label        | `␣ space`                  |
+| Filter labels                | Type label name            |
+| Select rating       | Type number                |
+| Rank option | Type number |
+| Change option rank           | Select option and type number|
+| Unrank option                | `⌫ backspace`              |
+| Clear                        | `⇧ shift` + `␣ space`      |
+| Discard                      | `⇧ shift` + `⌫ backspace`  |
+| Submit                       | `⇧ shift` + `↵ enter`      |
+| Go to next page (Mac os)     | `⌘ cmd` + `→ right arrow`  |
+| Go to previous page (Mac os) | `⌘ cmd` + `← left arrow`   |
+| Go to next page (Other)      | `ctrl` + `→ right arrow`   |
+| Go to previous page (Other)  | `ctrl` + `← left arrow`    |

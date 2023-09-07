@@ -3,5 +3,19 @@
   "ranking": "Ranking",
   "label_selection": "Label",
   "text": "Text",
-  "rating": "Rating"
+  "rating": "Rating",
+  "shortcuts": {
+    "label": "Shortcuts",
+    "pagination": {
+      "go_to_previous_record": "Previous (ctrl + ←)",
+      "go_to_next_record": "Next (ctrl + →)",
+      "go_to_previous_record_mac": "Previous (⌘ cmd + ←)",
+      "go_to_next_record_mac": "Next (⌘ cmd + →)"
+    },
+    "questions_form": {
+      "clear": "Clear (⇧ shift + ␣ space)",
+      "discard": "Discard (⇧ shift + ⌫ backspace)",
+      "submit": "Submit (⇧ shift + ↵ enter)"
+    }
+  }
 }

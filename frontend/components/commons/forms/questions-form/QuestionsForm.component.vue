@@ -4,7 +4,7 @@
     :class="{ '--focused-form': formHasFocus && interactionCount > 1 }"
     @submit.prevent="onSubmit"
     v-click-outside="onClickOutside"
-    @click="onClickForm"
+    @click="focusOnFirstQuestionFromOutside"
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
@@ -33,7 +33,12 @@
     </div>
     <div class="footer-form">
       <div class="footer-form__left-footer">
-        <BaseButton type="button" class="primary text" @click.prevent="onClear">
+        <BaseButton
+          type="button"
+          class="primary text"
+          @click.prevent="onClear"
+          :title="$t('shortcuts.questions_form.clear')"
+        >
           <span v-text="'Clear'" />
         </BaseButton>
       </div>
@@ -43,6 +48,7 @@
           class="primary outline"
           @on-click="onDiscard"
           :disabled="record.isDiscarded"
+          :title="$t('shortcuts.questions_form.discard')"
         >
           <span v-text="'Discard'" />
         </BaseButton>
@@ -50,6 +56,7 @@
           type="submit"
           class="primary"
           :disabled="isSubmitButtonDisabled"
+          :title="$t('shortcuts.questions_form.submit')"
         >
           <span v-text="'Submit'" />
         </BaseButton>
@@ -117,14 +124,14 @@ export default {
     this.onReset();
   },
   mounted() {
-    document.addEventListener("keydown", this.onPressKeyboardShortCut);
+    document.addEventListener("keydown", this.handleGlobalKeys);
   },
   destroyed() {
     this.emitIsQuestionsFormUntouched(true);
-    document.removeEventListener("keydown", this.onPressKeyboardShortCut);
+    document.removeEventListener("keydown", this.handleGlobalKeys);
   },
   methods: {
-    onClickForm(e) {
+    focusOnFirstQuestionFromOutside(e) {
       if (!this.userComesFromOutside) return;
       if (e.srcElement.id || e.srcElement.getAttribute("for")) return;
 
@@ -139,7 +146,15 @@ export default {
       this.autofocusPosition = null;
       this.userComesFromOutside = true;
     },
-    onPressKeyboardShortCut({ code, shiftKey }) {
+    handleGlobalKeys(e) {
+      const { code, shiftKey } = e;
+
+      if (code == "Tab" && this.userComesFromOutside) {
+        this.focusOnFirstQuestionFromOutside(e);
+
+        return;
+      }
+
       if (!shiftKey) return;
 
       switch (code) {
@@ -148,6 +163,7 @@ export default {
           break;
         }
         case "Space": {
+          e.preventDefault();
           this.onClear();
           break;
         }
@@ -274,4 +290,14 @@ export default {
     gap: $base-space * 2;
   }
 }
+
+// [data-title] {
+//   position: relative;
+//   overflow: visible;
+//   @extend %has-tooltip--top;
+//   &:before,
+//   &:after {
+//     margin-top: calc($base-space/2);
+//   }
+// }
 </style>

@@ -20,8 +20,8 @@ export default {
       },
     };
   },
-  async fetch() {
-    try {
+  methods: {
+    async getShortcutsDocumentation() {
       const folderContent = require.context(
         `../../../../docs/_source/_common/`,
         false,
@@ -29,12 +29,40 @@ export default {
         "lazy"
       );
 
-      const helpContent = await folderContent("./shortcuts.md");
+      const shortcutContent = await folderContent("./shortcuts.md");
+      const shortcuts = shortcutContent.body.split("\n");
 
+      this.removeTitle(shortcuts);
+
+      return this.parseByPlatform(shortcuts);
+    },
+    removeTitle(shortcuts) {
+      shortcuts.shift();
+      return shortcuts;
+    },
+    parseByPlatform(shortcuts) {
+      const otherOS = "(Other)";
+      const macOsX = "(Mac os)";
+      const manipulatedByPlatform = shortcuts
+        .map((row) => {
+          if (row.includes(otherOS))
+            return this.$platform.isMac ? undefined : row.replace(otherOS, "");
+          if (row.includes(macOsX))
+            return this.$platform.isMac ? row.replace(macOsX, "") : undefined;
+
+          return row;
+        })
+        .filter(Boolean);
+
+      return manipulatedByPlatform.join("\n");
+    },
+  },
+  async fetch() {
+    try {
       this.content.tabs.push({
         id: "shortcuts",
-        name: "Shortcuts",
-        markdown: helpContent.body,
+        name: this.$t("shortcuts.label"),
+        markdown: await this.getShortcutsDocumentation(),
       });
     } catch (e) {
       console.log(e);
