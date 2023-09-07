@@ -1,7 +1,9 @@
-# Fine-tuning language models with Feedback Datasets
+# Fine-tuning language models
+
+## Feedback Dataset
 
 After [collecting the responses](/guides/llms/practical_guides/collect_responses.html) from our `FeedbackDataset`, we can start fine-tuning our LLMs and other models. Due to the customizability of the task, this might require setting up a custom post-processing workflow, but we will provide some good toy examples for the [LLM approaches](/guides/llms/conceptual_guides/rlhf.html): supervised fine-tuning, and reinforcement learning through human feedback (RLHF). However, we also still provide for other NLP tasks like text classification.
-## The `ArgillaTrainer`
+### The `ArgillaTrainer`
 
 The `ArgillaTrainer` is a wrapper around many of our favorite NLP libraries. It provides a very intuitive abstract representation to facilitate simple training workflows using decent default pre-set configurations without having to worry about any data transformations from Argilla.
 
@@ -35,7 +37,7 @@ trainer.train(output_dir="my_setfit_model")
 trainer.predict("This is awesome!")
 ```
 
-### Supported Frameworks
+#### Supported Frameworks
 
 We plan on adding more support for other tasks and frameworks so feel free to reach out on our Slack or GitHub to help us prioritize each task.
 
@@ -51,7 +53,7 @@ We plan on adding more support for other tasks and frameworks so feel free to re
 We also offer support for Token Classification using our `TokenClassifcationDataset` but this is shown in [a section](/guides/train_a_model) about our older dataset-types.
 ```
 
-#### Training Configs
+##### Training Configs
 
 The trainer also has an `ArgillaTrainer.update_config()` method, which maps a dict with `**kwargs` to the respective framework. So, these can be derived from the underlying framework that was used to initialize the trainer. Underneath, you can find an overview of these variables for the supported frameworks.
 
@@ -62,7 +64,7 @@ Note that you don't need to pass all of them directly and that the values below 
 ```{include} /_common/tabs/train_update_config.md
 ```
 
-### The `TrainingTask`
+#### The `TrainingTask`
 
 A `TrainingTask` is used to define how the data should be processed and formatted according to the associated task and framework. Each task has its own `TrainingTask.for_*`-classmethod and the data formatting can always be defined using a custom `formatting_func`. However, simpler tasks like Text Classification can also be defined using default definitions. These directly use the fields and questions from the FeedbackDataset configuration to infer how to prepare the data. Underneath you can find an overview of the `TrainingTask` requirements.
 
@@ -74,11 +76,11 @@ A `TrainingTask` is used to define how the data should be processed and formatte
 | for_proximal_policy_optimization   | `text`           | `Optional[Union[str, Iterator[str]]]`                                | ✗                 |
 | for_direct_preference_optimization| `prompt-chosen-rejected`                 | `Optional[Union[Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]`                                          | ✗                 |
 
-## Tasks
+### Tasks
 
-### Text Classification
+#### Text Classification
 
-#### Background
+##### Background
 
 Text classification is a widely used NLP task where labels are assigned to text. Major companies rely on it for various applications. Sentiment analysis, a popular form of text classification, assigns labels like 🙂 positive, 🙁 negative, or 😐 neutral to text. Additionally, we distinguish between single- and multi-label text classification.
 
@@ -110,7 +112,7 @@ For a multi-label scenario it is recommended to add some examples without any la
 
 We then use either `text-label`-pair to further fine-tune the model.
 
-#### Training
+##### Training
 
 Text classification is one of the most widely supported training tasks tasks within NLP. For example purposes we will use our [emotion demo dataset](https://huggingface.co/datasets/argilla/emotion).
 
@@ -199,9 +201,9 @@ trainer = ArgillaTrainer(
 trainer.train(output_dir="textcat_model")
 ```
 
-### Supervised finetuning
+#### Supervised finetuning
 
-#### Background
+##### Background
 
 The goal of Supervised Fine Tuning (SFT) is to optimize a pre-trained model to generate the responses that users are looking for. A causal language model can generate feasible human text, but it will not be able to have proper `answers` to `question` phrases posed by the user in a conversational or instruction set. Therefore, we need to collect and curate data tailored to this use case to teach the model to mimic this data. We have a section in our docs about [collecting data for this task](../conceptual_guides/sft.html) and there are many good [pre-trained causal language models](https://huggingface.co/models?pipeline_tag=text-generation&sort=downloads) available on Hugging Face.
 
@@ -255,7 +257,7 @@ Virgin Australia commenced services on 31 August 2000 as Virgin Blue, with two a
 
 Ultimately, the choice between these two approaches to be used as `text`-field depends on the specific requirements of the application and the desired level of control over the model's output. By employing the appropriate fine-tuning strategy, we can enhance the model's performance and make it more suitable for a wide range of applications and use cases.
 
-#### Training
+##### Training
 
 There are many good libraries to help with this step, however, we are a fan of the [Transformer Reinforcement Learning (TRL)](https://huggingface.co/docs/trl) package, [Transformer Reinforcement Learning X (TRLX)](https://github.com/CarperAI/trlx),and the no-code [Hugging Face AutoTrain](https://huggingface.co/spaces/autotrain-projects/autotrain-advanced) for fine-tuning. In both cases, we need a backbone model and for example purposes we will use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en).
 
@@ -413,9 +415,9 @@ trainer = trlx.train('gpt2', samples=samples)
 
 ::::
 
-### Reward Modeling
+#### Reward Modeling
 
-#### Background
+##### Background
 
 A Reward Model (RM) is used to rate responses in alignment with human preferences and afterwards using this RM to fine-tune the LLM with the associated scores. Fine-tuning using a Reward Model can be done in different ways. We can either get the annotator to rate output completely manually, we can use a simple heuristic or we can use a stochastic preference model. Both [TRL](https://huggingface.co/docs/trl) and [TRLX](https://github.com/CarperAI/trlx) provide decent options for incorporating rewards. The [DeepSpeed library of Microsoft](https://github.com/microsoft/DeepSpeed/tree/master/blogs/deepspeed-chat) is a worthy mention too but will not be covered in our docs.
 
@@ -424,7 +426,7 @@ A Reward Model (RM) is used to rate responses in alignment with human preference
 
 In case of training an RM, we then use the `chosen-rejected`-pairs and train a classifier to distinguish between them.
 
-#### Training
+##### Training
 
 ```{include} /_common/dolly_dataset_info.md
 ```
@@ -581,9 +583,9 @@ As expected, the good response has a higher score than the worse response.
 
 ::::
 
-### Proximal Policy Optimization
+#### Proximal Policy Optimization
 
-#### Background
+##### Background
 
 The [TRL](https://huggingface.co/docs/trl) library implements the last step of RLHF: Proximal Policy Optimization (PPO). It requires prompts, which are then fed through the model being finetuned. Its results are passed through a reward model. Lastly, the prompts, responses and rewards are used to update the model through reinforcement learning.
 
@@ -611,7 +613,7 @@ The airline has since grown to directly serve 32 cities in Australia, from hubs 
 {to be generated by SFT model}
 ```
 
-#### Training
+##### Training
 
 ```{include} /_common/dolly_dataset_load.md
 ```
@@ -713,9 +715,9 @@ print(output_text)
 # Yes it is, toads are a sub-classification of frogs.
 ```
 
-### Direct Preference Optimization
+#### Direct Preference Optimization
 
-#### Background
+##### Background
 
 The [TRL](https://huggingface.co/docs/trl) library implements and alternative way to incorporate human feedback into an LLM which is called Direct Preference Optimization (DPO). This approach skips the step of training a separate reward model and directly uses the preference data during training as measure for optimization of human feedback. In order to properly use th
 
@@ -745,7 +747,7 @@ The airline has since grown to directly serve 32 cities in Australia, from hubs 
 
 Within the DPO approach we infer the reward from the formatted prompt and the provided preference data as `prompt-chosen-rejected`-pairs.
 
-#### Training
+##### Training
 
 ```{include} /_common/dolly_dataset_load.md
 ```
@@ -818,3 +820,107 @@ output_text = tokenizer.decode(outputs[0])
 print(output_text)
 # Yes it is, toads are a sub-classification of frogs.
 ```
+
+## Other datasets
+
+```{include} /_common/other_datasets.md
+```
+
+### The `ArgillaTrainer`
+
+The ArgillaTrainer is a wrapper around many of our favorite NLP libraries. It provides a very intuitive abstract representation to facilitate simple training workflows using decent default pre-set configurations without having to worry about any data transformations from Argilla.
+
+#### Supported frameworks
+
+We plan on adding more support for other tasks and frameworks so feel free to reach out on our Slack or GitHub to help us prioritize each task.
+
+| Framework/Task    | TextClassification | TokenClassification | Text2Text | Feedback  |
+|-------------------|--------------------|---------------------|-----------|-----------|
+| OpenAI            | ✔️                  |                     | ✔️         |           |
+| AutoTrain         | ✔️                  | ✔️                   | ✔️         |           |
+| SetFit            | ✔️                  |                     |           |           |
+| spaCy             | ✔️                  | ✔️                   |           |           |
+| Transformers      | ✔️                  | ✔️                   |           |           |
+| PEFT              | ✔️                  | ✔️                   |           |           |
+| SpanMarker        |                    | ✔️                   |           |           |
+
+
+##### Tranining configs
+
+
+The trainer also has an `ArgillaTrainer.update_config()` method, which maps a dict with `**kwargs` to the respective framework. So, these can be derived from the underlying framework that was used to initialize the trainer. Underneath, you can find an overview of these variables for the supported frameworks.
+
+```{note}
+Note that you don't need to pass all of them directly and that the values below are their default configurations.
+```
+
+```{include} /_common/tabs/train_update_config.md
+```
+
+### Tasks
+
+#### Text Classification
+
+##### Background
+
+Text classification is a widely used NLP task where labels are assigned to text. Major companies rely on it for various applications. Sentiment analysis, a popular form of text classification, assigns labels like 🙂 positive, 🙁 negative, or 😐 neutral to text. Additionally, we distinguish between single- and multi-label text classification.
+
+::::{tab-set}
+
+:::{tab-item} Single-label
+Single-label text classification refers to the task of assigning a single category or label to a given text sample. Each text is associated with only one predefined class or category. For example, in sentiment analysis, a single-label text classification task would involve assigning labels such as "positive," "negative," or "neutral" to texts based on their sentiment.
+
+```batch
+"The help for my application of a new card and mortgage was great", "positive"
+```
+
+:::
+
+:::{tab-item} Multi-label
+Multi-label text classification is generally more complex than single-label classification due to the challenge of determining and predicting multiple relevant labels for each text. It finds applications in various domains, including document tagging, topic labeling, and content recommendation systems. For example, in customer care, a multi-label text classification task would involve assigning topics such as "new_card," "mortgage," or "opening_hours" to texts based on their content.
+
+```{tip}
+For a multi-label scenario it is recommended to add some examples without any labels to improve model performance.
+```
+
+```batch
+"The help for my application of a new card and mortgage was great", ["new_card", "mortgage"]
+```
+
+:::
+
+::::
+
+##### Training
+
+```python
+from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
+
+dataset = FeedbackDataset.from_huggingface(
+    repo_id="argilla/emotion"
+)
+task = TrainingTask.for_text_classification(
+    text=dataset.field_by_name("text"),
+    label=dataset.question_by_name("label"),
+)
+trainer = ArgillaTrainer(
+    dataset=dataset,
+    task=task,
+    framework="setfit"
+)
+trainer.update_config(num_iterations=1)
+trainer.train(output_dir="my_setfit_model")
+trainer.predict("This is awesome!")
+``````
+
+#### Token Classification
+
+##### Background
+
+##### Training
+
+#### Text2Text
+
+##### Background
+
+##### Training

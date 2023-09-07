@@ -17,3 +17,13 @@ Argilla offers different datasets that are to different usecases. The main diffe
 | Multiple annotators per record 	| ✔️               	|                              	|                               	|                     	|
 | Multiple-tasks in one UI      	| ✔️               	|                              	|                               	|                     	|
 | Synchronization with database 	| ✔️               	|                              	|                               	|                     	|
+
+## Feedback Dataset
+
+### What is a Feedback Dataset?
+
+A Feedback Dataset is a dataset that is designed to collect feedback from annotators. It is a dataset that is designed to be used in a feedback loop with a model. The feedback is collected in the form of annotations. The annotations are collected in a Feedback Task UI. The Feedback Task UI is a web application that is hosted
+
+### Create a Feedback Dataset
+
+###

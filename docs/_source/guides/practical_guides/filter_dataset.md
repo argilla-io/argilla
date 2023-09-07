@@ -40,6 +40,9 @@ The `filter_by` method returns a new instance which is a `FeedbackDataset` with 
 
 ## Other datasets
 
+```{include} /_common/other_datasets.md
+```
+
 The search in Argilla is driven by Elasticsearch's powerful [query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/query-dsl-query-string-query.html#query-string-syntax).
 It allows you to perform simple fuzzy searches of words and phrases, or complex queries taking full advantage of Argilla's data model.
 

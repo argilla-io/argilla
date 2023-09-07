@@ -78,12 +78,8 @@ You can track your progress and the number of `Pending`, `Submitted` and `Discar
 
 ## Other datasets
 
-The records classes covered in this section correspond to 3 equivalent datasets:
-
- 1. `DatasetForTextClassification`
- 2. `DatasetForTokenClassification`
- 3. `DatasetForText2Text`
-
+```{include} /_common/other_datasets.md
+```
 
 ### Shortcuts
 

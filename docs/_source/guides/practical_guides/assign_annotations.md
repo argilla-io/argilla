@@ -5,15 +5,15 @@ Depending on the nature of your project and the size of your annotation team, yo
 ```{note}
 You will need to decide the level of overlap before creating or pushing a dataset to Argilla, as this has implications on how your dataset is set up.
 ```
-```{note}
-This guide only applies to Feedback datasets. To assign annotations in Text2Text, Token Classification and Text Classification datasets, follow [this tutorial](../../../tutorials/notebooks/labelling-tokenclassification-basics.ipynb).
-```
 
-## Full overlap
+
+## Feedback Dataset
+
+### Full overlap
 
 The Feedback Task supports having multiple annotations for your records by default. This means that all users with access to the dataset can give responses to all the records in the dataset. To have this full overlap just push the dataset (as detailed in [Create a Feedback Dataset](create_dataset.md#push-to-argilla)) in a workspace where all team members have access. Learn more about managing user access to workspaces [here](../../../getting_started/installation/configurations/user_management.md#assign-a-user-to-a-workspace).
 
-## Zero overlap
+### Zero overlap
 
 If you only want one annotation per record, we recommend that you split your records into chunks and assign each of them to a single annotator. Then, you can create several datasets, one in each annotator's personal workspace with the records assigned to them.
 
@@ -131,7 +131,7 @@ for username, records in assignments.items():
 The `Workspace` class was introduced in Argilla's Python SDK in version 1.11.0. To manage and create workspaces in earlier versions of Argilla check our [User Management Guide](../../../getting_started/installation/configurations/user_management.md)
 ```
 
-## Controlled overlap
+### Controlled overlap
 
 Sometimes you prefer to have more control over the annotation overlap and decide on a limited number of responses you want for each record. You may opt for this option because you want your team to be more efficient or perhaps to calculate the agreement between pairs of annotators. In this case, you also need to create several datasets and push them to the annotators' personal workspaces with the difference that each record will appear in multiple datasets.
 
@@ -168,4 +168,9 @@ Like in the previous method, you will need to import the assignment of each anno
 
 ```{warning}
 If you use this method, we recommend you will need to add an id to the records in order to combine the responses in post-processing. Learn how to set a record id [here](create_dataset.md#add-records).
+```
+
+## Other datasets
+
+```{include} /_common/other_datasets.md
 ```

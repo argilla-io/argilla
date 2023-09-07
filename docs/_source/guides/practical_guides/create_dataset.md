@@ -425,11 +425,8 @@ Now you're ready to start [the annotation process](annotate_dataset.ipynb).
 
 ## Other Datasets
 
-The records classes covered in this section correspond to 3 equivalent datasets:
-
- 1. `DatasetForTextClassification`
- 2. `DatasetForTokenClassification`
- 3. `DatasetForText2Text`
+```{include} /_common/other_datasets.md
+```
 
 Under the hood, the Dataset classes store the records in a simple Python list. Therefore, working with a Dataset class is not very different from working with a simple list of records, but before creating a dataset we should first define dataset settings and a labeling schema.
 
