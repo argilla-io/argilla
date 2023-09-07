@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, AsyncGenerator, Dict, Generator
 import pytest
 import pytest_asyncio
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
+from argilla.cli.server.database.migrate import migrate_db
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.datasets import DatasetsDAO
 from argilla.server.daos.records import DatasetRecordsDAO
@@ -27,7 +28,6 @@ from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.server import argilla_app
 from argilla.server.services.datasets import DatasetsService
 from argilla.server.settings import settings
-from argilla.tasks.server.database.migrate import migrate_db
 from argilla.utils import telemetry
 from argilla.utils.telemetry import TelemetryClient
 from httpx import AsyncClient
