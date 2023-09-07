@@ -10,11 +10,4 @@ const RECORD_STATUS_COLOR = Object.freeze({
   SUBMITTED: "#3e5cc9",
 });
 
-// NOTE - IMPORTANT : in the backend, the status are in lowercase
-const RESPONSE_STATUS_FOR_API = Object.freeze({
-  MISSING: "missing",
-  DISCARDED: "discarded",
-  SUBMITTED: "submitted",
-});
-
-export { RECORD_STATUS, RECORD_STATUS_COLOR, RESPONSE_STATUS_FOR_API };
+export { RECORD_STATUS, RECORD_STATUS_COLOR };

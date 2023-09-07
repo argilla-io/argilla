@@ -6,5 +6,9 @@
   "rating": "Rating",
   "saving": "Saving...",
   "saved": "Saved",
-  "submit-your-feedback": "Submit your feedback"
+  "submit-your-feedback": "Submit your feedback",
+  "button": {
+    "ignore_and_continue": "Ignore and continue"
+  },
+  "changes_no_submit": "You didn't submit your changes"
 }

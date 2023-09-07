@@ -33,7 +33,6 @@
 import { isNil } from "lodash";
 import { Notification } from "@/models/Notifications";
 import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
-import { LABEL_PROPERTIES } from "../../feedback-task/feedbackTask.properties";
 import { useRecordFeedbackTaskViewModel } from "./useRecordFeedbackTaskViewModel";
 
 export default {
@@ -50,19 +49,10 @@ export default {
       recordStatusToFilterWith: null,
       searchTextToFilterWith: null,
       currentPage: null,
-      totalRecords: null,
-      numberOfFetch: 0,
       fetching: false,
     };
   },
   computed: {
-    filterParams() {
-      return {
-        _search: this.searchTextToFilterWith,
-        _page: this.currentPage,
-        _status: this.recordStatusToFilterWith,
-      };
-    },
     noMoreDataMessage() {
       return `You've reached the end of the data for the ${this.recordStatusToFilterWith} queue.`;
     },
@@ -119,7 +109,6 @@ export default {
       );
     }
 
-    this.numberOfFetch++;
     this.fetching = false;
   },
   watch: {
@@ -206,7 +195,6 @@ export default {
       this.$root.$emit("reset-search-filter");
     },
     checkAndEmitTotalRecords({ searchFilter, value }) {
-      // NOTE - update the totalRecords to show ONLY if a search input is applied
       if (searchFilter?.length) {
         this.$root.$emit("total-records", value);
       } else {
@@ -221,11 +209,11 @@ export default {
         this.questionFormTouched &&
         newSearchValue !== this.searchFilterFromQuery
       ) {
-        Notification.dispatch("notify", {
-          message: "Your changes will be lost if you apply the search filter",
+        return Notification.dispatch("notify", {
+          message: this.$t("changes_no_submit"),
+          buttonText: this.$t("button.ignore_and_continue"),
           numberOfChars: 500,
           type: "warning",
-          buttonText: LABEL_PROPERTIES.CONTINUE,
           async onClick() {
             await localApplySearchFilter(newSearchValue);
           },
@@ -233,9 +221,10 @@ export default {
             localEmitResetSearchFilter();
           },
         });
-      } else {
-        await this.applySearchFilter(newSearchValue);
       }
+
+      if (newSearchValue !== this.searchFilterFromQuery)
+        return await this.applySearchFilter(newSearchValue);
     },
     async onStatusFilterChanged(newStatus) {
       if (this.recordStatusToFilterWith === newStatus) {
@@ -247,10 +236,10 @@ export default {
 
       if (this.questionFormTouched) {
         Notification.dispatch("notify", {
-          message: "Your changes will be lost if you move to another view",
+          message: this.$t("changes_no_submit"),
+          buttonText: this.$t("button.ignore_and_continue"),
           numberOfChars: 500,
           type: "warning",
-          buttonText: LABEL_PROPERTIES.CONTINUE,
           async onClick() {
             await localApplyStatusFilter(newStatus);
           },
@@ -304,6 +293,7 @@ export default {
     this.$root.$off("go-to-prev-page");
     this.$root.$off("status-filter-changed");
     this.$root.$off("search-filter-changed");
+    Notification.dispatch("clear");
   },
   setup() {
     return useRecordFeedbackTaskViewModel();

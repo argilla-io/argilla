@@ -95,9 +95,8 @@ export default {
   },
   watch: {
     isFormTouched(isFormTouched) {
-      if (this.record.isPending || this.record.isDraft) return;
-
-      this.emitIsQuestionsFormTouched(isFormTouched);
+      if (this.record.isSubmitted)
+        this.emitIsQuestionsFormTouched(isFormTouched);
     },
   },
   destroyed() {

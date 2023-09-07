@@ -73,6 +73,8 @@ async def create(
     password: str = typer.Option(
         default=None,
         prompt=True,
+        confirmation_prompt=True,
+        hide_input=True,
         callback=password_callback,
         help=f"Password as a string with a minimum length of {USER_PASSWORD_MIN_LENGTH} characters.",
     ),

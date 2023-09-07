@@ -18,7 +18,7 @@ export class Record {
     public answer: RecordAnswer,
     private readonly suggestions: Suggestion[],
     public updatedAt: string,
-    public readonly arrayOffset: number
+    public readonly page: number
   ) {
     this.completeQuestion();
   }
@@ -81,7 +81,9 @@ export class Record {
   }
 
   get hasAnyQuestionAnswered() {
-    return this.questions.some((question) => question.answer.isValid);
+    return this.questions.some(
+      (question) => question.answer.isValid || question.answer.isPartiallyValid
+    );
   }
 
   questionAreCompletedCorrectly() {
