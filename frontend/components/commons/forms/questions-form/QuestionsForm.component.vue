@@ -135,6 +135,7 @@ export default {
   methods: {
     onPressKeyboardShortCut(event) {
       const { code, shiftKey, ctrlKey, metaKey } = event;
+
       switch (code) {
         case "KeyS": {
           if (ctrlKey || metaKey) {
