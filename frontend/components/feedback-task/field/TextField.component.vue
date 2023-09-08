@@ -43,11 +43,14 @@ export default {
       return this.$route.query?._search ?? "";
     },
     text() {
-      const currentText = this.fieldText;
-      const newText = currentText.replaceAll(
-        this.searchValue,
-        this.$htmlHighlightText(this.searchValue)
+      if (this.searchValue.length === 0) return this.fieldText;
+
+      const regex = new RegExp(`\\b${this.searchValue}\\b`, `gi`);
+
+      const newText = this.fieldText.replaceAll(regex, (match) =>
+        this.$htmlHighlightText(match)
       );
+
       return newText;
     },
   },
