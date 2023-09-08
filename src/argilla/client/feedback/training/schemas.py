@@ -382,6 +382,23 @@ class TrainingTask:
     ) -> "TrainingTaskForChatCompletion":
         return TrainingTaskForChatCompletion(formatting_func=formatting_func)
 
+    @classmethod
+    def for_sentence_similarity(
+        cls,
+        formatting_func: Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]],
+    ) -> "TrainingTaskForSentenceSimilarity":
+        """
+        Return a task that can be used in `FeedbackDataset.prepare_for_training(framework="...", task)`
+        to extract data from the Feedback Dataset in a format suitable for sentence similarity.
+
+        Args:
+            formatting_func: A formatting function converting a dictionary of records into a dict.
+
+        Returns:
+            TrainingTaskForSentenceSimilarity: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
+        """
+        return TrainingTaskForSentenceSimilarity(formatting_func=formatting_func)
+
 
 class TrainingTaskForTextClassificationFormat(BaseModel):
     """
