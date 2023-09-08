@@ -1,4 +1,4 @@
-# What are practical guides?
+# Practical guides overview
 
 This guide will help you with all the practical aspects of setting up an annotation project for training and fine-tuning LLMs using Argilla's Feedback Task Datasets. It covers everything from defining your task to collecting, organizing, and using the feedback effectively.
 
