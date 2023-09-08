@@ -54,6 +54,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
 
         if self._model is None:
             self._model = "bert-base-cased"
+            self._logger.warning(f"No model defined. Using the default model {self._model}.")
 
         if isinstance(self._dataset, DatasetDict):
             self._train_dataset = self._dataset["train"]

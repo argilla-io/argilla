@@ -119,7 +119,7 @@ class TrainingData(ABC):
         return df.to_dict(orient="records")
 
     @property
-    def supported_frameworks(self):
+    def supported_frameworks(self) -> List[Framework]:
         return []
 
     def test_framework_support(self, framework: Union[str, Framework]):
@@ -372,6 +372,15 @@ class TrainingTask:
         """
         return TrainingTaskForDPO(formatting_func=formatting_func)
 
+    @classmethod
+    def for_chat_completion(
+        cls,
+        formatting_func: Callable[
+            [Dict[str, Any]], Union[None, Tuple[str, str, str, str], Iterator[Tuple[str, str, str, str]]]
+        ],
+    ) -> "TrainingTaskForChatCompletion":
+        return TrainingTaskForChatCompletion(formatting_func=formatting_func)
+
 
 class TrainingTaskForTextClassificationFormat(BaseModel):
     """
@@ -434,7 +443,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
     ] = None
 
     @property
-    def supported_frameworks(self):
+    def supported_frameworks(self) -> List[Framework]:
         names = ["transformers", "spacy", "openai", "setfit", "peft", "spark-nlp", "spacy-transformers"]
         return [Framework(name) for name in names]
 
@@ -706,7 +715,7 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
         return [{"text": text} for text in formatted_texts]
 
     @property
-    def supported_frameworks(self):
+    def supported_frameworks(self) -> List[Framework]:
         names = ["trl"]
         return [Framework(name) for name in names]
 
@@ -791,7 +800,7 @@ class TrainingTaskForRM(BaseModel, TrainingData):
         return [{"chosen": chosen, "rejected": rejected} for chosen, rejected in output]
 
     @property
-    def supported_frameworks(self):
+    def supported_frameworks(self) -> List[Framework]:
         names = ["trl"]
         return [Framework(name) for name in names]
 
@@ -860,7 +869,7 @@ class TrainingTaskForPPO(BaseModel, TrainingData):
         return [{"query": text} for text in formatted_texts]
 
     @property
-    def supported_frameworks(self):
+    def supported_frameworks(self) -> List[Framework]:
         names = ["trl"]
         return [Framework(name) for name in names]
 
@@ -941,7 +950,7 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
         return [{"prompt": prompt, "chosen": chosen, "rejected": rejected} for prompt, chosen, rejected in output]
 
     @property
-    def supported_frameworks(self):
+    def supported_frameworks(self) -> List[Framework]:
         names = ["trl"]
         return [Framework(name) for name in names]
 
@@ -973,12 +982,95 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
         return ds
 
 
+class TrainingTaskForChatCompletionFormat(BaseModel):
+    """
+    Union[Tuple[str, str, str, str], List[Tuple[str, str, str, str]]]
+    """
+
+    format: Union[Tuple[str, str, str, str], List[Tuple[str, str, str, str]]]
+
+
+class TrainingTaskForChatCompletion(BaseModel, TrainingData):
+    _formatting_func_return_types = TrainingTaskForChatCompletionFormat
+    formatting_func: Callable[[Dict[str, Any]], Union[None, str, Iterator[str]]]
+
+    def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
+        output = set()
+        for sample in dataset.format_as("datasets"):
+            chat_turn_role_content = self.formatting_func(sample)
+            if chat_turn_role_content is None:
+                continue
+
+            self._test_output_formatting_func(chat_turn_role_content)
+
+            if isinstance(chat_turn_role_content, tuple):
+                chat_turn_role_content = {chat_turn_role_content}
+
+            output |= set(chat_turn_role_content)
+        return [{"chat": chat, "turn": turn, "role": role, "content": content} for chat, turn, role, content in output]
+
+    @property
+    def supported_frameworks(self) -> List[Framework]:
+        names = ["openai"]
+        return [Framework(name) for name in names]
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
+
+    @requires_version("openai>=0.27.10")
+    def _prepare_for_training_with_openai(self, data: List[dict], train_size: float, seed: int) -> List[dict]:
+        import datasets
+
+        def _dict_to_format(ds: datasets.Dataset) -> List[Dict[str, List[Dict[str, str]]]]:
+            """OpenAI expects a list of chats, each chat is a dict with a list of messages.
+            Each message {"role": "user", "content": "Hello!"}
+            """
+            chats = []
+            df = ds.to_pandas()
+            for chat_id in df["chat"].unique():
+                df_filter = df[df["chat"] == chat_id]
+                new_chat = {"messages": []}
+                for entry in df_filter.to_dict(orient="records"):
+                    new_chat["messages"].append({"role": entry["role"], "content": entry["content"]})
+                chats.append(new_chat)
+
+            return chats
+
+        datasets_dict = {"chat": [], "turn": [], "role": [], "content": []}
+        for entry in data:
+            if entry["role"] not in ["system", "user", "assistant"]:
+                raise ValueError("Role must be one of 'system', 'user', 'assistant'")
+            datasets_dict["chat"].append(entry["chat"])
+            datasets_dict["turn"].append(entry["turn"])
+            datasets_dict["role"].append(entry["role"])
+            datasets_dict["content"].append(entry["content"])
+
+        feature_dict = {
+            "chat": datasets.Value("string"),
+            "turn": datasets.Value("string"),
+            "role": datasets.Value("string"),
+            "content": datasets.Value("string"),
+        }
+
+        ds = datasets.Dataset.from_dict(datasets_dict, features=datasets.Features(feature_dict))
+        ds = ds.sort(column_names=["chat", "turn"])
+
+        if train_size != 1:
+            ds = ds.train_test_split(
+                train_size=train_size, test_size=1 - train_size, seed=seed, stratify_by_column="chat"
+            )
+            return _dict_to_format(ds["train"]), _dict_to_format(ds["test"])
+        else:
+            return _dict_to_format(ds)
+
+
 TrainingTaskTypes = Union[
     TrainingTaskForTextClassification,
     TrainingTaskForSFT,
     TrainingTaskForRM,
     TrainingTaskForPPO,
     TrainingTaskForDPO,
+    TrainingTaskForChatCompletion,
 ]
 
 

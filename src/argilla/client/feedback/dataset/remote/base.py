@@ -14,6 +14,7 @@
 
 import warnings
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Generic, Iterator, List, Optional, Type, TypeVar, Union
 
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
@@ -125,6 +126,8 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
         id: "UUID",
         name: str,
         workspace: "Workspace",
+        created_at: datetime,
+        updated_at: datetime,
         fields: List["AllowedFieldTypes"],
         questions: List["AllowedQuestionTypes"],
         guidelines: Optional[str] = None,
@@ -141,6 +144,8 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
             id: contains the UUID of the dataset in Argilla.
             name: contains the name of the dataset in Argilla.
             workspace: contains the `Workspace` instance that the dataset belongs to in Argilla.
+            created_at: contains the datetime when the dataset was created in Argilla.
+            updated_at: contains the datetime when the dataset was last updated in Argilla.
             fields: contains the fields that will define the schema of the records in the dataset.
             questions: contains the questions that will be used to annotate the dataset.
             guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
@@ -160,6 +165,8 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
         self._id = id
         self._name = name
         self._workspace = workspace
+        self._created_at = created_at
+        self._updated_at = updated_at
 
         self._records = self.records_cls(dataset=self, **kwargs)
 
@@ -191,6 +198,16 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
     def url(self) -> str:
         """Returns the URL of the dataset in Argilla."""
         return f"{self._client.base_url}/dataset/{self.id}/annotation-mode"
+
+    @property
+    def created_at(self) -> datetime:
+        """Returns the datetime when the dataset was created in Argilla."""
+        return self._created_at
+
+    @property
+    def updated_at(self) -> datetime:
+        """Returns the datetime when the dataset was last updated in Argilla."""
+        return self._updated_at
 
     def __repr__(self) -> str:
         """Returns a string representation of the dataset."""

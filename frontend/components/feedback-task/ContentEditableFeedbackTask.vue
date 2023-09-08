@@ -15,12 +15,13 @@
         :contenteditable="true"
         :placeholder="placeholder"
         @input="onInputText"
-        v-html="sanitizedCurrentValue"
+        v-text="sanitizedCurrentValue"
         @focus="setFocus(true)"
         @blur="setFocus(false)"
-        @keydown.shift.enter.exact="looseFocus"
-        @keydown.shift.backspace.exact="looseFocus"
-        @keydown.shift.space.exact="looseFocus"
+        @keydown.shift.enter.stop=""
+        @keydown.shift.backspace.stop=""
+        @keydown.shift.space.stop=""
+        @keydown.esc.exact="looseFocus"
         @keydown.arrow-right.stop=""
         @keydown.arrow-left.stop=""
         @keydown.delete.exact.stop=""
@@ -31,7 +32,6 @@
 </template>
 
 <script>
-import * as DOMPurify from "dompurify";
 export default {
   name: "ContentEditableFeedbackTask",
   props: {
@@ -78,9 +78,7 @@ export default {
     reset() {
       this.currentValue = this.originalValue = this.value;
       this.sanitizedCurrentValue = " ";
-      this.$nextTick(() => {
-        this.sanitizedCurrentValue = DOMPurify.sanitize(this.currentValue);
-      });
+      this.sanitizedCurrentValue = this.currentValue;
     },
     looseFocus() {
       this.textAreaWrapper.blur();

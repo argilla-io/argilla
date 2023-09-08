@@ -7,7 +7,16 @@
 trainer.update_config(
     training_file = None,
     validation_file = None,
-    model = "curie,
+    model = "gpt-3.5-turbo-0613",
+    hyperparameters = {"n_epochs": 1},
+    suffix = None
+)
+
+# `OpenAI.FineTune` (legacy)
+trainer.update_config(
+    training_file = None,
+    validation_file = None,
+    model = "curie",
     n_epochs = 2,
     batch_size = None,
     learning_rate_multiplier = 0.1,

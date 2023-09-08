@@ -14,11 +14,14 @@
 
 import importlib
 import sys
+from typing import Any, List
 
 import pytest
+
 from argilla.utils.dependency import (
     require_dependencies,
     requires_dependencies,
+    is_package_with_extras_installed
 )
 
 
@@ -116,3 +119,15 @@ class TestDependencyRequirements:
             match="requirements cannot be an empty list."
         ):
             require_dependencies([])
+
+
+@pytest.mark.parametrize(
+    "args, expected", [(["argilla", ["server"]], True), (["invented_package", ["invented"]], False)]
+)
+def test_is_package_with_extras_installed(args: List[Any], expected: bool) -> None:
+    assert is_package_with_extras_installed(*args) == expected
+
+
+def test_is_package_with_extras_installed_raises_key_error() -> None:
+    with pytest.raises(KeyError, match="'argilla' package does not provide 'invented' extra"):
+        is_package_with_extras_installed("argilla", ["invented"])

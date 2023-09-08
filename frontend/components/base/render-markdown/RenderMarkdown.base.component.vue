@@ -32,13 +32,13 @@ export default {
   computed: {
     markdownToHtml() {
       const cleanedMarkdown = this.cleanMarkdown(this.markdown);
-      const parsed = marked.parse(cleanedMarkdown, {
+      const dirtyMarkdown = marked.parse(cleanedMarkdown, {
         headerIds: false,
         mangle: false,
         breaks: true,
       });
 
-      return DOMPurify.sanitize(parsed);
+      return DOMPurify.sanitize(dirtyMarkdown);
     },
   },
 };

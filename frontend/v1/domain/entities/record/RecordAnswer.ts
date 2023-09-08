@@ -1,17 +1,12 @@
 import { Answer, AnswerCombinations } from "../IAnswer";
 
+export type RecordStatus = "submitted" | "discarded" | "draft";
+
 export class RecordAnswer implements Answer {
   constructor(
     public readonly id: string,
-    public status: "submitted" | "pending" | "discarded",
-    public readonly value: AnswerCombinations
+    public readonly status: RecordStatus,
+    public readonly value: AnswerCombinations,
+    public readonly updatedAt: string
   ) {}
-
-  discard() {
-    this.status = "discarded";
-  }
-
-  pending() {
-    this.status = "pending";
-  }
 }

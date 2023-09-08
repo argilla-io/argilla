@@ -178,6 +178,8 @@ class ArgillaMixin:
             id=argilla_id,
             name=name,
             workspace=workspace,
+            created_at=new_dataset.inserted_at,
+            updated_at=new_dataset.updated_at,
             fields=fields,
             questions=questions,
             guidelines=self.guidelines,
@@ -283,6 +285,8 @@ class ArgillaMixin:
             id=existing_dataset.id,
             name=existing_dataset.name,
             workspace=Workspace.from_id(existing_dataset.workspace_id),
+            created_at=existing_dataset.inserted_at,
+            updated_at=existing_dataset.updated_at,
             fields=fields,
             questions=questions,
             guidelines=existing_dataset.guidelines or None,
@@ -310,24 +314,28 @@ class ArgillaMixin:
         if workspace is not None:
             workspace = Workspace.from_name(workspace)
 
-        # TODO(alvarobartt or gabrielmbmb): add `workspace_id` in `GET /api/v1/datasets`
-        # and in `GET /api/v1/me/datasets` to filter by workspace
         try:
-            datasets = datasets_api_v1.list_datasets(client=httpx_client).parsed
+            datasets = datasets_api_v1.list_datasets(
+                client=httpx_client, workspace_id=workspace.id if workspace is not None else None
+            ).parsed
         except Exception as e:
             raise RuntimeError(
                 f"Failed while listing the `FeedbackDataset` datasets in Argilla with exception: {e}"
             ) from e
+
+        if len(datasets) == 0:
+            return []
         return [
             RemoteFeedbackDataset(
                 client=httpx_client,
                 id=dataset.id,
                 name=dataset.name,
                 workspace=workspace if workspace is not None else Workspace.from_id(dataset.workspace_id),
+                created_at=dataset.inserted_at,
+                updated_at=dataset.updated_at,
                 fields=cls.__get_fields(client=httpx_client, id=dataset.id),
                 questions=cls.__get_questions(client=httpx_client, id=dataset.id),
                 guidelines=dataset.guidelines or None,
             )
             for dataset in datasets
-            if workspace is None or dataset.workspace_id == workspace.id
         ]
