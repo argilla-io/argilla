@@ -46,8 +46,8 @@ https://github.com/argilla-io/argilla/assets/1107111/49e28d64-9799-4cac-be49-19d
 <a href="https://docs.argilla.io">📄 Documentation</a> | </span>
 <a href="#-quickstart">🚀 Quickstart</a> <span> | </span>
 <a href="#-cheatsheet">🎼 Cheatsheet</a> <span> | </span>
-<a href="#-contribute">🫱🏾‍🫲🏼 Contribute</a> <span> | </span>
-<a href="#-roadmap">🗺️ Roadmap</a>
+<a href="#-project-architecture">🛠️ Architecture</a> <span> | </span>
+<a href="#-contribute">🫱🏾‍🫲🏼 Contribute</a>
 </p>
 </h3>
 
