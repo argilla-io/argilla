@@ -18,7 +18,7 @@ import importlib.util
 import operator
 import re
 import sys
-from typing import Callable, List, Optional, TypeVar, Union, Dict
+from typing import Callable, Dict, List, Optional, TypeVar, Union
 
 from packaging import version
 

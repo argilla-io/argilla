@@ -17,12 +17,7 @@ import sys
 from typing import Any, List
 
 import pytest
-
-from argilla.utils.dependency import (
-    require_dependencies,
-    requires_dependencies,
-    is_package_with_extras_installed
-)
+from argilla.utils.dependency import is_package_with_extras_installed, require_dependencies, requires_dependencies
 
 
 class TestDependencyRequirements:
@@ -114,10 +109,7 @@ class TestDependencyRequirements:
         require_dependencies(["datasets>1.17.0", "spacy", "scikit-learn"])
 
     def test_list_without_dependencies(self):
-        with pytest.raises(
-            ValueError,
-            match="requirements cannot be an empty list."
-        ):
+        with pytest.raises(ValueError, match="requirements cannot be an empty list."):
             require_dependencies([])
 
 

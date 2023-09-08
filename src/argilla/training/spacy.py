@@ -333,10 +333,7 @@ class ArgillaSpaCyTransformersTrainer(_ArgillaSpaCyTrainerBase):
             **kwargs: The `ArgillaSpaCyTrainerBase` arguments.
         """
         require_dependencies(
-            [
-                "spacy>=3.5.3",  # Required to generate the `spacy-transformers` configuration
-                "spacy-transformers"
-            ]
+            ["spacy>=3.5.3", "spacy-transformers"]  # Required to generate the `spacy-transformers` configuration
         )
         self.update_transformer = update_transformer
         super().__init__(**kwargs)
