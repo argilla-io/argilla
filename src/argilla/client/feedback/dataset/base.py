@@ -37,6 +37,7 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForSFT,
     TrainingTaskForTextClassification,
     TrainingTaskTypes,
+    TrainingTaskForSentenceSimilarity
 )
 from argilla.client.feedback.unification import (
     LabelQuestionStrategy,
@@ -325,9 +326,9 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
 
         Args:
             framework: the framework to use for training. Currently supported frameworks are: `transformers`, `peft`,
-                `setfit`, `spacy`, `spacy-transformers`, `span_marker`, `spark-nlp`, `openai`, `trl`.
+                `setfit`, `spacy`, `spacy-transformers`, `span_marker`, `spark-nlp`, `openai`, `trl`, `sentence-transformers`.
             task: the NLP task to use for training. Currently supported tasks are: `TrainingTaskForTextClassification`,
-                `TrainingTaskForSFT`, `TrainingTaskForRM`, `TrainingTaskForPPO`, `TrainingTaskForDPO`.
+                `TrainingTaskForSFT`, `TrainingTaskForRM`, `TrainingTaskForPPO`, `TrainingTaskForDPO`, `TrainingTaskForSentenceSimilarity`.
             train_size: the size of the train set. If `None`, the whole dataset will be used for training.
             test_size: the size of the test set. If `None`, the whole dataset will be used for testing.
             seed: the seed to use for splitting the dataset into train and test sets.
@@ -369,6 +370,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                 TrainingTaskForPPO,
                 TrainingTaskForDPO,
                 TrainingTaskForChatCompletion,
+                TrainingTaskForSentenceSimilarity
             ),
         ):
             raise ValueError(f"Training data {type(task)} is not supported yet")
@@ -404,6 +406,8 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             return task._prepare_for_training_with_trl(data=data, train_size=train_size, seed=seed)
         elif framework is Framework.TRLX:
             return task._prepare_for_training_with_trlx(data=data, train_size=train_size, seed=seed)
+        elif framework is Framework.SENTENCE_TRANSFORMERS:
+            return task._prepare_for_training_with_sentence_similarity(data=data, train_size=train_size, seed=seed)
         else:
             raise NotImplementedError(
                 f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
