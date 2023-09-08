@@ -167,6 +167,17 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 seed=self._seed,
                 model=self._model,
             )
+        elif framework is Framework.SENTENCE_TRANSFORMERS:
+            from argilla.client.feedback.training.frameworks.sentence_transformers import ArgillaSentenceTransformersTrainer
+
+            self._trainer = ArgillaSentenceTransformersTrainer(
+                dataset=self._dataset,
+                task=self._task,
+                prepared_data=self._prepared_data,
+                seed=self._seed,
+                model=self._model,
+                **framework_kwargs  # cross_encoder
+            )
         else:
             raise NotImplementedError(f"{framework} is not a valid framework.")
 
