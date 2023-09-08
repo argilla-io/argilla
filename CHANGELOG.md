@@ -16,10 +16,11 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
-## 1.15.1
+## [1.15.1](https://github.com/argilla-io/argilla/compare/v1.15.0...v1.15.1)
 
 ### Fixed
 
+- Fixed `Text component` now you need to press Escape to exit the text area ([#3733](https://github.com/argilla-io/argilla/pull/3733))
 - Fixed `SearchEngine` was creating the same number of primary shards and replica shards for each `FeedbackDataset` ([#3736](https://github.com/argilla-io/argilla/pull/3736)).
 
 ## [1.15.0](https://github.com/argilla-io/argilla/compare/v1.14.1...v1.15.0)
