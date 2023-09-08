@@ -133,7 +133,7 @@ _R = TypeVar("_R")
 
 
 def requires_dependencies(requirements: Union[str, List[str]]) -> Callable[[Callable[_P, _R]], Callable[_P, _R]]:
-    """Decorator variant of `require_version`.
+    """Decorator variant of `require_dependencies`.
     Perform a runtime check of the dependency versions, using the exact same syntax used by pip.
     The installed module version comes from the *site-packages* dir via *importlib.metadata*.
 
