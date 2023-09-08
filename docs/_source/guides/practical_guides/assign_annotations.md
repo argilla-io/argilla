@@ -174,3 +174,39 @@ If you use this method, we recommend you will need to add an id to the records i
 
 ```{include} /_common/other_datasets.md
 ```
+
+### Zero overlap
+By default these datasets don't allow overlap i.e., they only allow one response. This means that you only need to log your dataset in a workspace where all members of the annotation team has access to get zero overlap.
+
+You may ask your team to self-organise and work on any available unvalidated records, but to avoid stepping on each other's toes, it is recommended to divide the records among your teammates. Follow [this tutorial](../../tutorials/notebooks/labelling-tokenclassification-basics.ipynb) to learn how.
+
+
+### Full overlap
+If you would like to collect responses from all members of your annotation team for every record, then you will need to log the full dataset several times, once in each annotator's personal workspace.
+
+To do this, get a list of users as explained [above](#zero-overlap) and run the following code:
+
+```python
+# make a list of records
+records = [...]
+
+# loop through the user list
+for user in users:
+    # check that the user has a personal workspace and create it if not
+    try:
+        workspace = rg.Workspace.from_name(user.username)
+    except:
+        workspace = rg.Workspace.create(user.username)
+        user = rg.User.from_name(user.username)
+        workspace.add_user(user.id)
+
+    # log the records in their personal workspace
+    rg.log(
+        records=records,
+        workspace=workspace,
+        name='my_dataset'
+    )
+```
+
+### Controlled overlap
+For some projects, it might be necessary to have some overlap but without the need
