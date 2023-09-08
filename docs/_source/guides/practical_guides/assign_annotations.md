@@ -209,4 +209,22 @@ for user in users:
 ```
 
 ### Controlled overlap
-For some projects, it might be necessary to have some overlap but without the need
+To control the annotation overlap in these datasets you can follow the same method detailed in [the section about Feedback Datasets](#controlled-overlap), although with a different logging method. Once you have run the code in that section to make the assignments, you can log them like so:
+
+```python
+# loop through the assignments dictionary
+for user, records in assignments.items():
+    # check that the user has a personal workspace and create it if not
+    try:
+        workspace = rg.Workspace.from_name(user.username)
+    except:
+        workspace = rg.Workspace.create(user.username)
+        user = rg.User.from_name(user.username)
+        workspace.add_user(user.id)
+    # log the records in their personal workspace
+    rg.log(
+        records=records,
+        workspace=workspace,
+        name="my_dataset"
+    )
+```
