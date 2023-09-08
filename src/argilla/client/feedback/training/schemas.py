@@ -43,6 +43,7 @@ _LOGGER = logging.getLogger(__name__)
 if TYPE_CHECKING:
     import datasets
     import spacy
+    from sentence_transformers import InputExample
 
     from argilla.client.feedback.dataset import FeedbackDataset
 
@@ -1062,6 +1063,20 @@ class TrainingTaskForChatCompletion(BaseModel, TrainingData):
             return _dict_to_format(ds["train"]), _dict_to_format(ds["test"])
         else:
             return _dict_to_format(ds)
+
+
+class TrainingTaskForSentenceSimilarityFormat(BaseModel):
+    r"""
+    Union[
+        Dict[str, Union[float, int]],  # case 1 with with two string elements and one int/float, case 3 with one or three strings and one int/float.
+        Dict[str, str],                # case 2 with two elements, case 4 with three elements
+    ]
+
+    For a reference of the different cases take a look at:
+    https://huggingface.co/blog/how-to-train-sentence-transformers#how-to-prepare-your-dataset-for-training-a-sentence-transformers-model    
+    """
+
+    format: Union[Dict[str, Union[float, int]], Dict[str, str]]
 
 
 TrainingTaskTypes = Union[
