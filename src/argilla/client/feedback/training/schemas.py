@@ -1079,6 +1079,106 @@ class TrainingTaskForSentenceSimilarityFormat(BaseModel):
     format: Union[Dict[str, Union[float, int]], Dict[str, str]]
 
 
+class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
+    """Training data for sentence similarity.
+
+    Args:
+        formatting_func: A formatting function converting a dictionary of records into
+            a dictionary of a pair of sentences, a pair of sentences and a label,
+            a sentence and a label or a triplet of sentences.
+
+    Examples:
+        Example for argilla/emotion dataset:
+        >>> from argilla import TrainingTaskForSentenceSimilarity
+        >>> dataset = rg.FeedbackDataset.from_argilla(name="argilla/emotion")
+        >>> def formatting_func(sample: Dict[str, Any]):
+        ...     return {"sentence": sample["text"], "label": int(sample["label"][0]["value"])}
+        >>> task = TrainingTaskForSentenceSimilarity(formatting_func=formatting_func)
+        >>> dataset.prepare_for_training(framework="...", task=task)
+    """
+
+    _formatting_func_return_types = TrainingTaskForSentenceSimilarityFormat
+    formatting_func: Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]
+
+    def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, Any]]:
+        outputs = []
+        for sample in dataset:
+            output = self.formatting_func(sample)
+            if output is None:
+                continue
+
+            self._test_output_formatting_func(output)
+
+            outputs.append(output)
+
+        return outputs
+
+    @property
+    def supported_frameworks(self):
+        names = ["sentence-transformers"]
+        return [Framework(name) for name in names]
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
+
+    @requires_version("scikit-learn")
+    def _train_test_split(self, data: List[dict], train_size: float, seed: int) -> Tuple[List[dict], List[dict]]:
+        from sklearn.model_selection import train_test_split
+
+        return train_test_split(
+            data,
+            train_size=train_size,
+            shuffle=True,
+            random_state=seed,
+        )
+
+    @requires_version("sentence-transformers")
+    def _prepare_for_training_with_sentence_similarity(
+        self, data: List[dict], train_size: float, seed: int
+    ) -> Union["InputExample", Tuple["InputExample", "InputExample"]]:
+        from sentence_transformers import InputExample
+
+        # Use the first sample to decide what type of dataset to generate:
+        sample_keys = data[0].keys()
+        if "label" in sample_keys:
+            if (len(sample_keys) == 3) and all(s in sample_keys for s in ["sentence-1", "sentence-2"]):
+                dataset_fields = lambda sample: {"texts": [sample["sentence-1"], sample["sentence-2"]], "label": sample["label"]}
+            elif all(s in sample_keys for s in ["sentence-1", "sentence-2", "sentence-3"]):
+                dataset_fields = lambda sample: {"texts": [sample["sentence-1"], sample["sentence-2"], sample["sentence-3"]], "label": sample["label"]}
+            elif (len(sample_keys) == 2) and ("sentence" in sample_keys):
+                raise ValueError(
+                    "Datasets containing a `sentence` and a `label` should be transformed "\
+                    "to contain triplets of `sentence-1`, `sentence-2`, `sentence-3` and `label`."\
+                    r"An example can be seen at: https://github.com/UKPLab/sentence-transformers/blob/master/examples/training/other/training_batch_hard_trec.py"
+                )
+            else:
+                raise ValueError(
+                    "Labeled datasets must contain a pair of `sentence-1` and "\
+                    "`sentence-2` or triplets `sentence-1`, `sentence-2`, `sentence-3` "\
+                    "as well as a `label`."
+                )
+        else:
+            if len(sample_keys) == 2:
+                dataset_fields = lambda sample: {"texts": [sample["sentence-1"], sample["sentence-2"]]}
+            elif 1:
+                dataset_fields = lambda sample: {"texts": [sample["sentence-1"], sample["sentence-2"], sample["sentence-3"]]}
+            else:
+                raise ValueError(
+                    "Unlabeled datasets must contain a pair of `sentence-1` and "\
+                    "`sentence-2` or triplets `sentence-1`, `sentence-2`, `sentence-3`."
+                )
+
+        train_samples = []
+        for i, sample in enumerate(data):
+            train_samples.append(InputExample(guid=i, **dataset_fields(sample)))
+        
+        if train_size != 1:
+            train_data, test_data = self._train_test_split(train_samples, train_size, seed)
+            return train_data, test_data
+        else:
+            return train_samples
+
+
 TrainingTaskTypes = Union[
     TrainingTaskForTextClassification,
     TrainingTaskForSFT,
@@ -1086,6 +1186,7 @@ TrainingTaskTypes = Union[
     TrainingTaskForPPO,
     TrainingTaskForDPO,
     TrainingTaskForChatCompletion,
+    TrainingTaskForSentenceSimilarity
 ]
 
 
