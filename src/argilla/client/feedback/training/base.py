@@ -50,7 +50,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             dataset: the dataset to be used for training.
             task: the training data to be used for training.
             framework: the framework to use for training. Currently, "transformers", "setfit", "spacy", "peft",
-                "openai", "span_marker" and "trl" are supported.
+                "openai", "span_marker", "trl" and "sentence-transformers" are supported.
             lang: the spaCy language model to use for training, just required when `framework="spacy"`.
                 Defaults to None, but it will be set to `spacy.blank("en")` if not specified.
             model: name or path to the baseline model to be used. If not specified will set to a good default
