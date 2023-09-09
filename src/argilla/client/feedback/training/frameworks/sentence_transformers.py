@@ -146,7 +146,6 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
 
         if "model" in self.model_kwargs:
             self._model = self.model_kwargs["model"]
-            # self._model = self.model_kwargs["model_name_or_path"]
 
     def train(self, output_dir: Optional[str] = None) -> None:
         """
