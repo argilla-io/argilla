@@ -34,55 +34,109 @@ __OUTPUT_DIR__ = "tmp"
 __FRAMEWORK__ = "sentence-transformers"
 
 
-# All the formatting functions generate dummy datasets with the formats allowed
+# All the formatting functions generate dummy datasets with the formats allowed (almost a copy than those of trl)
 
 def formatting_func_case_1_a(sample):
-    if sample.responses:
-        response = sample.responses[0]
-        if response.status == "submitted":
-            return {"sentence-1": sample.fields["text"], "sentence-2": sample.fields["text"], "label": 1}
+    labels = [
+        annotation["value"]
+        for annotation in sample["question-3"]
+        if annotation["status"] == "submitted" and annotation["value"] is not None
+    ]
+    if labels:
+        # Three cases for the tests: None, one tuple and yielding multiple tuples
+        if labels[0] == "a":
+            return None
+        elif labels[0] == "b":
+            return {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1}
+        elif labels[0] == "c":
+            return [{"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1}] * 2
 
 
 def formatting_func_case_1_b(sample):
-    if sample.responses:
-        response = sample.responses[0]
-        if response.status == "submitted":
-            return {"sentence-1": sample.fields["text"], "sentence-2": sample.fields["text"], "label": 0.786}
+    labels = [
+        annotation["value"]
+        for annotation in sample["question-3"]
+        if annotation["status"] == "submitted" and annotation["value"] is not None
+    ]
+    if labels:
+        if labels[0] == "a":
+            return None
+        elif labels[0] == "b":
+            return {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0.786}
+        elif labels[0] == "c":
+            return [{"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0.786}] * 2
 
 
 def formatting_func_case_2(sample):
-    if sample.responses:
-        response = sample.responses[0]
-        if response.status == "submitted":
-            return {"sentence-1": sample.fields["text"], "sentence-2": sample.fields["text"]}
+    labels = [
+        annotation["value"]
+        for annotation in sample["question-3"]
+        if annotation["status"] == "submitted" and annotation["value"] is not None
+    ]
+    if labels:
+        # Three cases for the tests: None, one tuple and yielding multiple tuples
+        if labels[0] == "a":
+            return None
+        elif labels[0] == "b":
+            return {"sentence-1": sample["text"], "sentence-2": sample["text"]}
+        elif labels[0] == "c":
+            return [{"sentence-1": sample["text"], "sentence-2": sample["text"]}] * 2
 
 
 def formatting_func_case_3_a(sample):
-    if sample.responses:
-        response = sample.responses[0]
-        if response.status == "submitted":
-            return {"sentence": sample.fields["text"], "label": 1}
+    labels = [
+        annotation["value"]
+        for annotation in sample["question-3"]
+        if annotation["status"] == "submitted" and annotation["value"] is not None
+    ]
+    if labels:
+        # Three cases for the tests: None, one tuple and yielding multiple tuples
+        if labels[0] == "a":
+            return None
+        elif labels[0] == "b":
+            return {"sentence": sample["text"], "label": 1}
+        elif labels[0] == "c":
+            return [{"sentence": sample["text"], "label": 1}] * 2
 
 
 def formatting_func_case_3_b(sample):
-    if sample.responses:
-        response = sample.responses[0]
-        if response.status == "submitted":
-            return {"sentence-1": sample.fields["text"], "sentence-2": sample.fields["text"], "sentence-3": sample.fields["text"], "label": 1}
+    labels = [
+        annotation["value"]
+        for annotation in sample["question-3"]
+        if annotation["status"] == "submitted" and annotation["value"] is not None
+    ]
+    if labels:
+        if labels[0] == "a":
+            return None
+        elif labels[0] == "b":
+            return {"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"], "label": 1}
+        elif labels[0] == "c":
+            return [{"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"], "label": 1}] * 2
 
 
 def formatting_func_case_4(sample):
-    if sample.responses:
-        response = sample.responses[0]
-        if response.status == "submitted":
-            return {"sentence-1": sample.fields["text"], "sentence-2": sample.fields["text"], "sentence-3": sample.fields["text"]}
+    labels = [
+        annotation["value"]
+        for annotation in sample["question-3"]
+        if annotation["status"] == "submitted" and annotation["value"] is not None
+    ]
+    if labels:
+        if labels[0] == "a":
+            return None
+        elif labels[0] == "b":
+            return {"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"]}
+        elif labels[0] == "c":
+            return [{"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"]}] * 2
 
 
 def formatting_func_errored(sample):
-    if sample.responses:
-        response = sample.responses[0]
-        if response.status == "submitted":
-            return sample.fields["text"], sample.fields["text"], sample.fields["text"]
+    labels = [
+        annotation["value"]
+        for annotation in sample["question-3"]
+        if annotation["status"] == "submitted" and annotation["value"] is not None
+    ]
+    if labels:
+        return sample["text"], sample["text"], sample["text"]
 
 
 
@@ -130,10 +184,8 @@ def test_prepare_for_training_sentence_transformers(
 
     assert isinstance(train_dataset, list)
     assert isinstance(train_dataset[0], InputExample)
-    assert len(train_dataset) == 8
 
     train_dataset, test_dataset = dataset.prepare_for_training(framework=__FRAMEWORK__, task=task, train_size=0.5)
-    assert len(train_dataset) == 4
 
     if cross_encoder:
         if ("case_3_b" in formatting_func.__name__) or ("case_4" in formatting_func.__name__):

@@ -1093,7 +1093,7 @@ class TrainingTaskForSentenceSimilarityFormat(BaseModel):
     https://huggingface.co/blog/how-to-train-sentence-transformers#how-to-prepare-your-dataset-for-training-a-sentence-transformers-model    
     """
 
-    format: Union[Dict[str, Union[float, int]], Dict[str, str]]
+    format: Union[Dict[str, Union[float, int]], Dict[str, str], List[Dict[str, Union[float, int]]], List[Dict[str, str]]]
 
 
 class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
@@ -1115,11 +1115,11 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
     """
 
     _formatting_func_return_types = TrainingTaskForSentenceSimilarityFormat
-    formatting_func: Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]
+    formatting_func: Callable[[Dict[str, Any]], Union[None, Dict[str, Union[float, int]], Dict[str, str], List[Dict[str, Union[float, int]]], List[Dict[str, str]]]]
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, Any]]:
         outputs = []
-        for sample in dataset:
+        for sample in dataset.format_as("datasets"):
             output = self.formatting_func(sample)
             if output is None:
                 continue
@@ -1178,7 +1178,7 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
         else:
             if len(sample_keys) == 2:
                 dataset_fields = lambda sample: {"texts": [sample["sentence-1"], sample["sentence-2"]]}
-            elif 1:
+            elif len(sample_keys) == 3:
                 dataset_fields = lambda sample: {"texts": [sample["sentence-1"], sample["sentence-2"], sample["sentence-3"]]}
             else:
                 raise ValueError(
@@ -1187,8 +1187,12 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
                 )
 
         train_samples = []
-        for i, sample in enumerate(data):
-            train_samples.append(InputExample(guid=i, **dataset_fields(sample)))
+        for sample in data:
+            if isinstance(sample, list):
+                for record in sample:
+                    train_samples.append(InputExample(**dataset_fields(record)))
+            else:
+                train_samples.append(InputExample(**dataset_fields(sample)))
         
         if train_size != 1:
             stratify = None
