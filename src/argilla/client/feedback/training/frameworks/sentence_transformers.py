@@ -193,6 +193,3 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
             # dataset for example should be done taking the extra information from the argilla 
             # dataset instead of the defaults
             self._trainer.save(output_dir, model_name=None, create_model_card=False, train_datasets=None)
-
-    def __repr__(self) -> str:
-        return type(self).__name__
