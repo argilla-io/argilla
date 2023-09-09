@@ -97,10 +97,10 @@ def formatting_func_errored(sample):
     "formatting_func",
     [
         formatting_func_case_1_a,
-        # formatting_func_case_1_b,
-        # formatting_func_case_2,
-        # formatting_func_case_3_b,
-        # formatting_func_case_4,
+        formatting_func_case_1_b,
+        formatting_func_case_2,
+        formatting_func_case_3_b,
+        formatting_func_case_4,
     ]
 )
 @pytest.mark.usefixtures(

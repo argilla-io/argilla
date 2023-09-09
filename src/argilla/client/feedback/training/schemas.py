@@ -1139,7 +1139,7 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
         return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
 
     @requires_version("scikit-learn")
-    def _train_test_split(self, data: List[dict], train_size: float, seed: int) -> Tuple[List[dict], List[dict]]:
+    def _train_test_split(self, data: List[dict], train_size: float, seed: int, stratify = None) -> Tuple[List[dict], List[dict]]:
         from sklearn.model_selection import train_test_split
 
         return train_test_split(
@@ -1147,6 +1147,7 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
             train_size=train_size,
             shuffle=True,
             random_state=seed,
+            stratify=stratify
         )
 
     @requires_version("sentence-transformers")
@@ -1190,7 +1191,12 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
             train_samples.append(InputExample(guid=i, **dataset_fields(sample)))
         
         if train_size != 1:
-            train_data, test_data = self._train_test_split(train_samples, train_size, seed)
+            stratify = None
+            if (label := train_samples[0].label):
+                if isinstance(label, int):
+                    stratify = [example.label for example in train_samples]
+
+            train_data, test_data = self._train_test_split(train_samples, train_size, seed, stratify=stratify)
             return train_data, test_data
         else:
             return train_samples
