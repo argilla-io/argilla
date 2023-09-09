@@ -29,9 +29,6 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaSentenceTransformersTrainer")
     _logger.setLevel(logging.INFO)
 
-    # TODO: Update with https://github.com/argilla-io/argilla/pull/3555
-    require_version("sentence-transformers")
-
     def __init__(
         self,
         dataset: "FeedbackDataset",
@@ -42,6 +39,9 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
         train_size: Optional[float] = 1,
         cross_encoder: bool = False
     ) -> None:
+        # TODO: Update with https://github.com/argilla-io/argilla/pull/3555
+        require_version("sentence-transformers")
+
         super().__init__(dataset=dataset, task=task, prepared_data=prepared_data, model=model, train_size=train_size, seed=seed)
 
         # The prepared_data is lost in the TrainerSkeleton, is this intended?
