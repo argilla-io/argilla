@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import logging
-from typing import List, Union, Optional, TYPE_CHECKING
+from typing import List, Union, Optional, TYPE_CHECKING, Tuple
 
 from argilla.training.utils import get_default_args, filter_allowed_args
 from argilla.utils.dependency import require_version
@@ -175,11 +175,43 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
         if output_dir is not None:
             self.save(output_dir)
 
-    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
+    def predict(self, text: Union[List[List[str]], Tuple[str, List[str]]], as_argilla_records: bool = False, **kwargs) -> List[float]:
         """
-        Predicts the label of the text.
+        Predicts the similarity of the sentences.
+
+        Args:
+            text: The sentences to obtain the similarity from.
+                Allowed inputs are:
+                - A list with a single sentence (as a string) and a list of sentences to compare against.
+                - A list with pair of sentences.
+            as_argilla_records: If True, the prediction will be returned as an Argilla record. If
+                False, the prediction will be returned as a string. Defaults to True
+
+        Returns:
+            A list of predicted similarities.
         """
-        raise NotImplementedError("work in progress")
+        if isinstance(text[0], str):
+            sentences = [(text[0], sentence) for sentence in text[1]]
+        else:
+            sentences = text
+
+        if self._cross_encoder:
+            prediction = list(self._trainer.predict(sentences, **kwargs))
+
+        else:
+            from sentence_transformers.util import cos_sim
+            # Under this model we could potentially obtain the similarity of all vs all
+            # the input sentences, but maybe is more intuitive to return only the similarities
+            # between pairs as we do with the CrossEncoder predictions.
+            sources, targets = zip(*sentences)
+            embeds_source = self._trainer.encode(sources, **kwargs)
+            embeds_target = self._trainer.encode(targets, **kwargs)
+            prediction = list(cos_sim(embeds_source, embeds_target).numpy()[0])
+
+        if as_argilla_records:
+            raise NotImplementedError("To be done")
+
+        return prediction
 
     def save(self, output_dir: str) -> None:
         """

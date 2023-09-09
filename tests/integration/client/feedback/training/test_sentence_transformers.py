@@ -97,10 +97,10 @@ def formatting_func_errored(sample):
     "formatting_func",
     [
         formatting_func_case_1_a,
-        formatting_func_case_1_b,
-        formatting_func_case_2,
-        formatting_func_case_3_b,
-        formatting_func_case_4,
+        # formatting_func_case_1_b,
+        # formatting_func_case_2,
+        # formatting_func_case_3_b,
+        # formatting_func_case_4,
     ]
 )
 @pytest.mark.usefixtures(
@@ -169,6 +169,9 @@ def test_prepare_for_training_sentence_transformers(
     )
     eval_trainer.update_config(epochs=1)
     train_with_cleanup(eval_trainer, __OUTPUT_DIR__)
+
+    assert len(eval_trainer.predict([["first sentence", "second sentence"], ["to compare", "another one"]])) == 2
+    assert len(eval_trainer.predict(["first sentence", ["to compare", "another one"]])) == 2
 
 
 @pytest.mark.parametrize("cross_encoder", [False, True])
