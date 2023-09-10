@@ -99,23 +99,25 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
                 lambda x: {"float_label": x["label"].to(torch.float)}, remove_columns=["label"]
             ).rename_column("float_label", "label")
 
-        if self._record_class == TextClassificationRecord:
-            columns_mapping = {"text": "text", "label": "binarized_label"}
-            if self._multi_label:
-                self._train_dataset = _apply_column_mapping(self._train_dataset, columns_mapping)
-                self._train_dataset = convert_to_floats(self._train_dataset)
-
-                if self._eval_dataset is not None:
-                    self._eval_dataset = _apply_column_mapping(self._eval_dataset, columns_mapping)
-                    self._eval_dataset = convert_to_floats(self._eval_dataset)
-
         self.model_kwargs = {}
         self.model_kwargs["pretrained_model_name_or_path"] = self._model
-        self.model_kwargs["num_labels"] = len(self._label_list)
-        self.model_kwargs["id2label"] = self._id2label
-        self.model_kwargs["label2id"] = self._label2id
-        if self._multi_label:
-            self.model_kwargs["problem_type"] = "multi_label_classification"
+
+        if self._record_class in [TextClassificationRecord, TokenClassificationRecord]:
+            self.model_kwargs["num_labels"] = len(self._label_list)
+            self.model_kwargs["id2label"] = self._id2label
+            self.model_kwargs["label2id"] = self._label2id
+            if self._multi_label:
+                self.model_kwargs["problem_type"] = "multi_label_classification"
+
+            if self._record_class == TextClassificationRecord:
+                columns_mapping = {"text": "text", "label": "binarized_label"}
+                if self._multi_label:
+                    self._train_dataset = _apply_column_mapping(self._train_dataset, columns_mapping)
+                    self._train_dataset = convert_to_floats(self._train_dataset)
+
+                    if self._eval_dataset is not None:
+                        self._eval_dataset = _apply_column_mapping(self._eval_dataset, columns_mapping)
+                        self._eval_dataset = convert_to_floats(self._eval_dataset)
 
         self.trainer_kwargs = get_default_args(TrainingArguments.__init__)
         self.trainer_kwargs["evaluation_strategy"] = "no" if self._eval_dataset is None else "epoch"
@@ -130,6 +132,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             padding_side = "left"
         else:
             padding_side = "right"
+
         self._transformers_tokenizer = AutoTokenizer.from_pretrained(
             self.model_kwargs.get("pretrained_model_name_or_path"), padding_side=padding_side, add_prefix_space=True
         )
@@ -149,7 +152,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
 
     def init_pipeline(self):
         import transformers
-        from transformers import pipeline
+        from transformers import AutoModelForQuestionAnswering, pipeline
 
         if self.device == "cuda":
             device = 0
@@ -176,8 +179,15 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
                 aggregation_strategy="first",
                 device=device,
             )
+        elif self._model_class == AutoModelForQuestionAnswering:
+            self._pipeline = pipeline(
+                task="question-answering",
+                model=self._transformers_model,
+                tokenizer=self._transformers_tokenizer,
+                device=device,
+            )
         else:
-            raise NotImplementedError("This is not implemented.")
+            raise NotImplementedError(f"{self._record_class} is not supported yet.")
 
     def update_config(self, **kwargs):
         """
@@ -202,8 +212,10 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
 
     def preprocess_datasets(self):
         from transformers import (
+            AutoModelForQuestionAnswering,
             DataCollatorForTokenClassification,
             DataCollatorWithPadding,
+            DefaultDataCollator,
         )
 
         def text_classification_preprocess_function(examples):
@@ -232,6 +244,56 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             tokenized_inputs["labels"] = labels
             return tokenized_inputs
 
+        def question_answering_preprocess_function(examples):
+            questions = [q.strip() for q in examples["question"]]
+            inputs = self._transformers_tokenizer(
+                questions,
+                examples["context"],
+                truncation="only_second",
+                return_offsets_mapping=True,
+                padding="max_length",
+            )
+
+            offset_mapping = inputs.pop("offset_mapping")
+            answers = examples["answer"]
+            start_positions = []
+            end_positions = []
+
+            for i, offset in enumerate(offset_mapping):
+                answer = answers[i]
+                start_char = answer["answer_start"][0]
+                end_char = answer["answer_start"][0] + len(answer["text"][0])
+                sequence_ids = inputs.sequence_ids(i)
+
+                # Find the start and end of the context
+                idx = 0
+                while sequence_ids[idx] != 1:
+                    idx += 1
+                context_start = idx
+                while sequence_ids[idx] == 1:
+                    idx += 1
+                context_end = idx - 1
+
+                # If the answer is not fully inside the context, label it (0, 0)
+                if offset[context_start][0] > end_char or offset[context_end][1] < start_char:
+                    start_positions.append(0)
+                    end_positions.append(0)
+                else:
+                    # Otherwise it's the start and end token positions
+                    idx = context_start
+                    while idx <= context_end and offset[idx][0] <= start_char:
+                        idx += 1
+                    start_positions.append(idx - 1)
+
+                    idx = context_end
+                    while idx >= context_start and offset[idx][1] >= end_char:
+                        idx -= 1
+                    end_positions.append(idx + 1)
+
+            inputs["start_positions"] = start_positions
+            inputs["end_positions"] = end_positions
+            return inputs
+
         # set correct tokenization
         if self._record_class == TextClassificationRecord:
             preprocess_function = text_classification_preprocess_function
@@ -245,6 +307,11 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             preprocess_function = token_classification_preprocess_function
             self._data_collator = DataCollatorForTokenClassification(tokenizer=self._transformers_tokenizer)
             remove_columns = ["id", "tokens", "ner_tags"]
+            replace_labels = False
+        elif self._model_class == AutoModelForQuestionAnswering:
+            preprocess_function = question_answering_preprocess_function
+            self._data_collator = DefaultDataCollator()
+            remove_columns = self._train_dataset.column_names
             replace_labels = False
         else:
             raise NotImplementedError("`Text2TextRecord` is not supported yet.")
@@ -267,6 +334,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
     def compute_metrics(self):
         import evaluate
         import numpy as np
+        from transformers import AutoModelForQuestionAnswering
 
         func = None
         if self._record_class == TextClassificationRecord:
@@ -322,8 +390,24 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
                 }
 
             func = compute_metrics
+        elif AutoModelForQuestionAnswering:
+            f1 = evaluate.load("f1")
+
+            def compute_metrics_question_answering(pred):
+                squad_labels = pred.label_ids
+                squad_preds = pred.predictions.argmax(-1)
+
+                # Calculate Exact Match (EM)
+                em = sum([1 if p == l else 0 for p, l in zip(squad_preds, squad_labels)]) / len(squad_labels)
+
+                # Calculate F1-score
+                f1_score = f1(squad_labels, squad_preds, average="macro")
+
+                return {"exact_match": em, "f1": f1_score}
+
+            func = compute_metrics_question_answering
         else:
-            raise NotImplementedError("Text2Text is not implemented.")
+            raise NotImplementedError("Other record types are not supported yet.")
         return func
 
     def train(self, output_dir: str):
@@ -341,10 +425,15 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
 
         self._transformers_model.to(self.device)
         # set trainer
+        if self.device == "cuda":
+            self.trainer_kwargs["no_cuda"] = False
+        elif self.device == "mps":
+            self.trainer_kwargs["use_mps_device"] = True
         self._training_args = TrainingArguments(**self.trainer_kwargs)
         self._transformers_trainer = Trainer(
             args=self._training_args,
             model=self._transformers_model,
+            tokenizer=self._transformers_tokenizer,
             train_dataset=self._tokenized_train_dataset,
             eval_dataset=self._tokenized_eval_dataset,
             compute_metrics=compute_metrics,

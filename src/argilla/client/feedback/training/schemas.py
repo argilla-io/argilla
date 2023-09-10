@@ -28,6 +28,7 @@ from argilla.client.feedback.schemas import (
     RankingQuestion,
     RatingQuestion,
     TextField,
+    TextQuestion,
 )
 from argilla.client.feedback.unification import (
     LabelQuestionUnification,
@@ -62,7 +63,12 @@ TASK_STRUCTURE = {
             RatingQuestionUnification,
             RankingQuestionUnification,
         ),
-    }
+    },
+    "question_answering": {
+        "field": (TextField),
+        "question": (TextQuestion),
+        "unification": (),
+    },
 }
 
 
@@ -93,6 +99,14 @@ class TrainingData(ABC):
                     pydantic_field_name, pydantic_field_value = pydantic_field
                     if isinstance(pydantic_field_value, (TextField,)):
                         data[pydantic_field_name] = record.fields[pydantic_field_value.name]
+                    elif isinstance(pydantic_field_value, (TextQuestion,)):
+                        if pydantic_field_value.name not in record._unified_responses:
+                            continue
+                        else:
+                            data[pydantic_field_name] = [
+                                resp for resp in record._unified_responses[pydantic_field_value.name].value
+                            ]
+                        explode_columns.add(pydantic_field_name)
                     else:
                         if pydantic_field_value.question.name not in record._unified_responses:
                             continue
@@ -103,6 +117,7 @@ class TrainingData(ABC):
                         explode_columns.add(pydantic_field_name)
             formatted_data.append(data)
         df = pd.DataFrame(formatted_data)
+
         if explode_columns:
             df = df.explode(list(explode_columns))
         # In cases of MultiLabel datasets the label column contains a list,
@@ -115,7 +130,6 @@ class TrainingData(ABC):
             df = df.drop_duplicates()
 
         df = df.dropna(how="any")
-
         return df.to_dict(orient="records")
 
     @property
@@ -380,6 +394,28 @@ class TrainingTask:
         ],
     ) -> "TrainingTaskForChatCompletion":
         return TrainingTaskForChatCompletion(formatting_func=formatting_func)
+
+    @classmethod
+    def for_question_answering(
+        cls,
+        formatting_func: Optional[Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]] = None,
+        question: Optional[TextField] = None,
+        context: Optional[TextField] = None,
+        answer: Optional[TextQuestion] = None,
+    ) -> "TrainingTaskForQuestionAnswering":
+        if (question and context and answer) and formatting_func is not None:
+            raise ValueError(
+                "You must provide either `question`, `context` and `answer`, or a `formatting_func`, not both."
+            )
+
+        if formatting_func is not None:
+            if question or context or answer:
+                raise ValueError(
+                    "`formatting_func` is already defined, so you cannot define `question`, `context` and `answer`."
+                )
+            return TrainingTaskForQuestionAnswering(formatting_func=formatting_func)
+        else:
+            return TrainingTaskForQuestionAnswering(question=question, context=context, answer=answer)
 
 
 class TrainingTaskForTextClassificationFormat(BaseModel):
@@ -976,6 +1012,92 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
         }
 
         ds = datasets.Dataset.from_dict(datasets_dict, features=datasets.Features(feature_dict))
+        if train_size != 1:
+            ds = ds.train_test_split(train_size=train_size, test_size=1 - train_size, seed=seed)
+
+        return ds
+
+
+class TrainingTaskForQuestionAnsweringFormat(BaseModel):
+    """
+    Union[Tuple[str, str, str], List[Tuple[str, str, str]]]
+    """
+
+    format: Union[Tuple[str, str, str], List[Tuple[str, str, str]]]
+
+
+class TrainingTaskForQuestionAnswering(BaseModel, TrainingData):
+    _formatting_func_return_types = TrainingTaskForQuestionAnsweringFormat
+    formatting_func: Optional[Callable[[Dict[str, Any]], Union[None, str, Iterator[str]]]] = None
+    question: Optional[TextField] = None
+    context: Optional[TextField] = None
+    answer: Optional[TextQuestion] = None
+
+    def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
+        if self.formatting_func is not None:
+            output = set()
+            for sample in dataset.format_as("datasets"):
+                question_context_answer = self.formatting_func(sample)
+                if question_context_answer is None:
+                    continue
+
+                self._test_output_formatting_func(question_context_answer)
+
+                if isinstance(question_context_answer, tuple):
+                    question_context_answer = {question_context_answer}
+
+                output |= set(question_context_answer)
+            return [
+                {"question": question, "context": context, "answer": answer} for question, context, answer in output
+            ]
+        else:
+            return super()._format_data(dataset)
+
+    @property
+    def supported_frameworks(self) -> List[Framework]:
+        names = ["transformers"]
+        return [Framework(name) for name in names]
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
+
+    @requires_version("transformers")
+    def _prepare_for_training_with_transformers(
+        self, data: List[dict], train_size: float, seed: int, framework=None
+    ) -> Union["datasets.Dataset", "datasets.DatasetDict"]:
+        import datasets
+
+        datasets_dict = {
+            "question": [],
+            "context": [],
+            "answer": [],
+        }
+        for entry in data:
+            if any([entry["question"] is None, entry["context"] is None, entry["answer"] is None]):
+                continue
+            if entry["answer"] not in entry["context"]:
+                continue
+            # get index of answer in context
+            answer_start = entry["context"].index(entry["answer"])
+            datasets_dict["question"].append(entry["question"])
+            datasets_dict["context"].append(entry["context"])
+            datasets_dict["answer"].append({"answer_start": [answer_start], "text": [entry["answer"]]})
+
+        feature_dict = {
+            "question": datasets.Value("string"),
+            "context": datasets.Value("string"),
+            "answer": datasets.Sequence(
+                feature={
+                    "text": datasets.Value(dtype="string", id=None),
+                    "answer_start": datasets.Value(dtype="int32", id=None),
+                },
+                length=-1,
+                id=None,
+            ),
+        }
+
+        ds = datasets.Dataset.from_dict(datasets_dict, features=datasets.Features(feature_dict))
+
         if train_size != 1:
             ds = ds.train_test_split(train_size=train_size, test_size=1 - train_size, seed=seed)
 

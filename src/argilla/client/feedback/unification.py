@@ -167,6 +167,37 @@ class RatingQuestionStrategy(RatingQuestionStrategyMixin, Enum):
         return records
 
 
+class TextQuestionStrategy(Enum):
+    """
+    The TextQuestionStrategy class is an enumeration class that represents the different strategies.add()
+    Options:
+        - "disagreement": preserve the natural disagreement between annotators
+    """
+
+    DISAGREEMENT = "disagreement"
+
+    def unify_responses(self, records: List[FeedbackRecord], question: str):
+        UnifiedValueSchema.update_forward_refs()
+        unified_records = []
+        for rec in records:
+            if not rec.responses:
+                continue
+            # only allow for submitted responses
+            responses = [resp for resp in rec.responses if resp.status == "submitted"]
+            # get responses with a value that is most frequent
+            if question.name not in rec._unified_responses:
+                rec._unified_responses[question.name] = []
+            for resp in responses:
+                if question.name not in resp.values:
+                    continue
+                else:
+                    rec._unified_responses[question.name] = UnifiedValueSchema(
+                        value=resp.values[question.name].value, strategy=self.value
+                    )
+                unified_records.append(rec)
+        return unified_records
+
+
 class RankingQuestionStrategy(RatingQuestionStrategyMixin, Enum):
     """
     Options:
