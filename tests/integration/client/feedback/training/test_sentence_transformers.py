@@ -205,7 +205,7 @@ def test_prepare_for_training_sentence_transformers(
         framework_kwargs={"cross_encoder": cross_encoder}
     )
     trainer.update_config(batch_size=2)
-    assert trainer._trainer.dataloader_kwargs["batch_size"] == 2
+    assert trainer._trainer.data_kwargs["batch_size"] == 2
     trainer.update_config(epochs=1)
     assert trainer._trainer.trainer_kwargs["epochs"] == 1
     train_with_cleanup(trainer, __OUTPUT_DIR__)
@@ -221,6 +221,10 @@ def test_prepare_for_training_sentence_transformers(
     )
     eval_trainer.update_config(epochs=1)
     train_with_cleanup(eval_trainer, __OUTPUT_DIR__)
+
+    # Check an evaluator has been set (for the cases that it does make sense)
+    if not "case_2" in formatting_func.__name__:
+        assert eval_trainer._trainer.trainer_kwargs["evaluator"]
 
     assert len(eval_trainer.predict([["first sentence", "second sentence"], ["to compare", "another one"]])) == 2
     assert len(eval_trainer.predict(["first sentence", ["to compare", "another one"]])) == 2
