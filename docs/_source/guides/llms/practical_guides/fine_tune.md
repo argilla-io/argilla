@@ -42,6 +42,7 @@ We plan on adding more support for other tasks and frameworks so feel free to re
 | Task/Framework                  | TRL  | OpenAI | SetFit | spaCy | Transformers | PEFT |
 |:--------------------------------|:-----|:-------|:-------|:------|:-------------|:-----|
 | Text Classification             |      |        |  ✔️     | ✔️     | ✔️            | ✔️    |
+| Question Answering              |      |        |        |       | ✔️            |      |
 | Supervised Fine-tuning          | ✔️    |        |        |       |              |      |
 | Reward Modeling                 | ✔️    |        |        |       |              |      |
 | Proximal Policy Optimization    | ✔️    |        |        |       |              |      |
@@ -70,11 +71,12 @@ A `TrainingTask` is used to define how the data should be processed and formatte
 | Method                             | Content                      | `formatting_func` return type                                                    | Default|
 |:-----------------------------------|:-----------------------------|:---------------------------------------------------------------------------------|:-------|
 | for_text_classification            | `text-label`                 | `Union[Tuple[str, str], Tuple[str, List[str]]]`                                  | ✔️      |
-| for_supervised_fine_tuning         | `text`                       | `Union[str, Iterator[str]]`                                            | ✗      |
-| for_reward_modeling                | `chosen-rejected`            | `Union[Tuple[str, str], Iterator[Tuple[str, str]]]`                    | ✗      |
-| for_proximal_policy_optimization   | `text`                       | `Union[str, Iterator[str]]]`                                            | ✗      |
-| for_direct_preference_optimization | `prompt-chosen-rejected`     | `Union[Tuple[str, str, str], Iterator[Tuple[str, str, str]]]`          | ✗      |
-| for_chat_completion                | `chat-turn-role-content` | `Union[Tuple[str, str, str, str], Iterator[Tuple[str, str, str, str]]]`| ✗      |
+| for_question_answering             | `questio-context-answer`     | `Union[Tuple[str, str], Tuple[str, List[str]]]`                                  | ✔️      |
+| for_supervised_fine_tuning         | `text`                       | `Union[str, Iterator[str]]`                                                      | ✗      |
+| for_reward_modeling                | `chosen-rejected`            | `Union[Tuple[str, str], Iterator[Tuple[str, str]]]`                              | ✗      |
+| for_proximal_policy_optimization   | `text`                       | `Union[str, Iterator[str]]]`                                                     | ✗      |
+| for_direct_preference_optimization | `prompt-chosen-rejected`     | `Union[Tuple[str, str, str], Iterator[Tuple[str, str, str]]]`                    | ✗      |
+| for_chat_completion                | `chat-turn-role-content`     | `Union[Tuple[str, str, str, str], Iterator[Tuple[str, str, str, str]]]`          | ✗      |
 
 
 ## Tasks
@@ -111,7 +113,7 @@ For a multi-label scenario it is recommended to add some examples without any la
 
 ::::
 
-We then use either `text-label`-pair to further fine-tune the model.
+We then use either `text-label`-pair or a `formatting_func` to further fine-tune the model.
 
 #### Training
 
@@ -200,6 +202,109 @@ trainer = ArgillaTrainer(
 )
 
 trainer.train(output_dir="textcat_model")
+```
+
+### Question Answering
+
+#### Background
+
+The extractive Question Answering (QnA) task involves answering questions posed by users based on a given context. It is a challenging task that requires the model to understand the context of the question and provide an accurate answer. The model must be able to comprehend the question and the context in which it is asked, as well as the relationship between the two. Additionally, it must be able to extract the relevant information from the context and provide an answer that is both accurate and relevant to the question.
+
+Underneath you can find a sample of an extractive QnA dataset underneath:
+
+```batch
+{
+    'question': 'To whom did the Virgin Mary allegedly appear in 1858 in Lourdes France?',
+    'context': 'Architecturally, the school has a Catholic character. Atop the Main Building\'s gold dome is a golden statue of the Virgin Mary. Immediately in front of the Main Building and facing it, is a copper statue of Christ with arms upraised with the legend "Venite Ad Me Omnes". Next to the Main Building is the Basilica of the Sacred Heart. Immediately behind the basilica is the Grotto, a Marian place of prayer and reflection. It is a replica of the grotto at Lourdes, France where the Virgin Mary reputedly appeared to Saint Bernadette Soubirous in 1858. At the end of the main drive (and in a direct line that connects through 3 statues and the Gold Dome), is a simple, modern stone statue of Mary.',
+    'answers': 'Saint Bernadette Soubirous',
+}
+```
+
+```{note}
+Officially, answers need to be passed as a list of `{'answer_start': int, 'text': str}`-dicts. However, we only support a string, where the `answer_start` is inferred from the `context` and `text`-field.
+```
+
+We then use either `question-context-answet`-set or a `formatting_func` to further fine-tune the model.
+
+#### Training
+
+**Data Preparation**
+
+```python
+import argilla as rg
+from datasets import Dataset
+
+feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/squad")
+```
+
+We can use a default configuraiton where we initialize the `TrainingTask.for_question_answering` using the `question-context-answer`-set from the dataset. We also offer the option to provide a `formatting_func` to the `TrainingTask.for_question_asnwering`. This function is applied to each sample in the dataset and can be used for advanced preprocessing and data formatting. The function should return a `question-context-answer`-set as `str-str-str`.
+
+:::: {tab-set}
+
+::: {tab-item} question-context-answer-set
+
+```python
+from argilla.feedback import TrainingTask
+
+task = TrainingTask.for_question_answering(
+    question=feedback_dataset.question_by_name("question"),
+    context=feedback_dataset.question_by_name("context"),
+    answer=feedback_dataset.question_by_name("answer"),
+)
+```
+
+:::
+
+::: {tab-item} formatting_func
+
+```python
+from argilla.feedback import TrainingTask
+
+def formatting_func(sample):
+    responses = []
+    question = sample["question"]
+    context = sample["context"]
+    for answer in sample["answer"]:
+        responses.append((question, context, answer["value"])))
+    return responses
+
+task = TrainingTask.for_question_answering(formatting_func=formatting_func)
+```
+
+:::
+
+::::
+
+**ArgillaTrainer**
+
+Next, we can define our `ArgillaTrainer` for any of [the supported frameworks](fine_tune.md#training-configs) and [customize the training config](#supported-frameworks) using `ArgillaTrainer.update_config`.
+
+```python
+from argilla.feedback import ArgillaTrainer
+
+trainer = ArgillaTrainer(
+    dataset=feedback_dataset,
+    task=task,
+    framework="transformers",
+    train_size=0.8,
+)
+
+trainer.train(output_dir="qna_model")
+
+```
+
+**Inference**
+
+Lastly, this model can be used for inference using the `pipeline`-method from the [Transformers library](https://huggingface.co/tasks/question-answering). We can use the `question-answering`-pipeline for this task.
+
+```python
+from transformers import pipeline
+
+qa_model = pipeline("question-answering", model="qna_model")
+question = "Where do I live?"
+context = "My name is Merve and I live in İstanbul."
+qa_model(question = question, context = context)
+## {'answer': 'İstanbul', 'end': 39, 'score': 0.953, 'start': 31}
 ```
 
 ### Supervised finetuning
