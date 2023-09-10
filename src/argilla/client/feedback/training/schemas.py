@@ -103,9 +103,7 @@ class TrainingData(ABC):
                         if pydantic_field_value.name not in record._unified_responses:
                             continue
                         else:
-                            data[pydantic_field_name] = [
-                                resp for resp in record._unified_responses[pydantic_field_value.name].value
-                            ]
+                            data[pydantic_field_name] = record._unified_responses[pydantic_field_value.name].value
                         explode_columns.add(pydantic_field_name)
                     else:
                         if pydantic_field_value.question.name not in record._unified_responses:
@@ -128,7 +126,6 @@ class TrainingData(ABC):
             df = pd.DataFrame(df.apply(tuple, 1).drop_duplicates().to_list(), columns=df.columns)
         else:
             df = df.drop_duplicates()
-
         df = df.dropna(how="any")
         return df.to_dict(orient="records")
 

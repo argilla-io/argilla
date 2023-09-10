@@ -195,6 +195,7 @@ class TextQuestionStrategy(Enum):
                         value=resp.values[question.name].value, strategy=self.value
                     )
                 unified_records.append(rec)
+
         return unified_records
 
 

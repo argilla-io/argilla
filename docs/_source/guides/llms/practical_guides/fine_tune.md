@@ -265,7 +265,9 @@ def formatting_func(sample):
     question = sample["question"]
     context = sample["context"]
     for answer in sample["answer"]:
-        responses.append((question, context, answer["value"])))
+        if not all([question, context, answer["value"]]):
+            continue
+        responses.append((question, context, answer["value"]))
     return responses
 
 task = TrainingTask.for_question_answering(formatting_func=formatting_func)
