@@ -53,6 +53,8 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
                 self._model = "sentence-transformers/all-MiniLM-L6-v2"
             else:
                 self._model = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+        else:
+            self._model = model
  
         if isinstance(self._prepared_data, tuple):
             self._train_dataset = self._prepared_data[0]
