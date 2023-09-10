@@ -53,6 +53,9 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
                 self._model = "sentence-transformers/all-MiniLM-L6-v2"
             else:
                 self._model = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+
+            self._logger.warning(f"No model was selected, using pre-defined `{'Cross-Encoder' if self._cross_encoder else 'Bi-Encoder'}` with `{self._model}`.")
+
         else:
             self._model = model
  
@@ -88,37 +91,112 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
 
         self.model_kwargs = get_default_args(self._trainer_cls.__init__)
         self.trainer_kwargs = get_default_args(self._trainer_cls.fit)
-        self.dataloader_kwargs = {}
-        self.dataloader_kwargs["batch_size"] = 1
-        self._dataset_type = None
+        # These arguments don't exactly fit in either of the previous kwargs.
+        # We store here arguments that can be passed to the DataLoader or 
+        # related to the dataset types defined in sentence-transformers.
+        self.data_kwargs = {}
+        self.data_kwargs["batch_size"] = 32
+        self.data_kwargs["dataset_type"] = None
 
         # For a guide on the selection of the loss function:
         # https://huggingface.co/blog/how-to-train-sentence-transformers#loss-functions-for-training-a-sentence-transformers-model
-        if not self._loss_cls:
-            if sample.label:
-                if len(sample.texts) == 2:
-                    if isinstance(sample.label, int):
-                        from sentence_transformers.losses import ContrastiveLoss
-                        self._loss_cls = ContrastiveLoss
-                    else:
-                        from sentence_transformers.losses import CosineSimilarityLoss
-                        self._loss_cls = CosineSimilarityLoss
+        self._set_loss_cls(sample.label, len(sample.texts))
+        self._logger.warning(f"`loss_cls` parameter set as default `{self._loss_cls}`.")
+
+        if self._eval_dataset:
+            self._set_evaluator(sample.label, len(sample.texts))
+            self._logger.warning(f"`evaluator` parameter set to `{self.trainer_kwargs['evaluator']}` by default.")
+
+    def _set_loss_cls(self, label: Optional[Union[int, float]], number_of_sentences: int) -> None:
+        """
+        Helper method to choose a loss class for the model based on the type
+        of model, whether it has label or not and the number of sentences per example.
+
+        Args:
+            label: The label type, None should be passed if there is no label.
+            number_of_sentences: number of sentences (two or three normally).
+        """
+        if label:
+            if number_of_sentences == 2:
+                if isinstance(label, int):
+                    from sentence_transformers.losses import ContrastiveLoss
+                    self._loss_cls = ContrastiveLoss
                 else:
-                    if isinstance(sample.label, int):
-                        from sentence_transformers.losses import BatchHardTripletLoss
-                        self._loss_cls = BatchHardTripletLoss
-                    else:
-                        from sentence_transformers.losses import BatchAllTripletLoss
-                        self._loss_cls = BatchAllTripletLoss
-                        from sentence_transformers.datasets import SentenceLabelDataset
-                        self._dataset_type = SentenceLabelDataset
+                    from sentence_transformers.losses import CosineSimilarityLoss
+                    self._loss_cls = CosineSimilarityLoss
+
             else:
-                if len(sample.texts) == 3:
-                    from sentence_transformers.losses import TripletLoss
-                    self._loss_cls = TripletLoss
+                if isinstance(label, int):
+                    from sentence_transformers.losses import BatchHardTripletLoss
+                    self._loss_cls = BatchHardTripletLoss
                 else:
-                    from sentence_transformers.losses import MultipleNegativesRankingLoss
-                    self._loss_cls = MultipleNegativesRankingLoss
+                    from sentence_transformers.losses import BatchAllTripletLoss
+                    self._loss_cls = BatchAllTripletLoss
+                    from sentence_transformers.datasets import SentenceLabelDataset
+                    self.data_kwargs["dataset_type"] = SentenceLabelDataset
+
+        else:
+            if number_of_sentences == 3:
+                from sentence_transformers.losses import TripletLoss
+                self._loss_cls = TripletLoss
+            else:
+                from sentence_transformers.losses import MultipleNegativesRankingLoss
+                self._loss_cls = MultipleNegativesRankingLoss
+
+    def _set_evaluator(self, label: Optional[Union[int, float]] = None, number_of_sentences: int  = None, evaluator_cls = None) -> None:
+        """
+        Helper method to choose an evaluator for the model based on the type
+        of model, whether it has label or not and the number of sentences per example.
+        If neither label or number_of_sentences is set, it's assumed that evaluator_cls
+        is passed (via update_config).
+
+        Args:
+            label: The label type, None should be passed if there is no label.
+            number_of_sentences: Number of sentences (two or three normally).
+            evaluator_cls: Class to set without "best guess".
+        """
+        if evaluator_cls:
+            # When the user wants to set an evaluator on its own
+            if self._eval_dataset:
+                self._logger.warning("No `eval_dataset` found, `evaluator` cannot be set.")
+            else:
+                try:
+                    self.trainer_kwargs["evaluator"] = evaluator_cls.from_input_examples(self._eval_dataset)
+                except AttributeError:
+                    # For the moment it's easier (and covers most of the cases?) to allow only
+                    # a subset of the evaluators defined in sentence-transformers, inform
+                    # the user the one selected is not allowed.
+                    self.trainer_kwargs["evaluator"] = None
+                    self._logger.warning(f"Currently only developed evaluators that implement `cls.from_input_examples`.")
+        else:
+            if label:
+                if number_of_sentences == 2:
+                    if isinstance(label, int):
+                        if self._cross_encoder:
+                            from sentence_transformers.cross_encoder.evaluation import CEBinaryClassificationEvaluator
+                            self.trainer_kwargs["evaluator"] = CEBinaryClassificationEvaluator.from_input_examples(self._eval_dataset)
+                        else:
+                            from sentence_transformers.evaluation import BinaryClassificationEvaluator
+                            self.trainer_kwargs["evaluator"] = BinaryClassificationEvaluator.from_input_examples(self._eval_dataset)
+
+                    else:
+                        if self._cross_encoder:
+                            from sentence_transformers.cross_encoder.evaluation import CECorrelationEvaluator
+                            self.trainer_kwargs["evaluator"] = CECorrelationEvaluator.from_input_examples(self._eval_dataset)
+                        else:
+                            from sentence_transformers.evaluation import EmbeddingSimilarityEvaluator
+                            self.trainer_kwargs["evaluator"] = EmbeddingSimilarityEvaluator.from_input_examples(self._eval_dataset)
+
+                else:
+                    from sentence_transformers.evaluation import TripletEvaluator
+                    self.trainer_kwargs["evaluator"] = TripletEvaluator.from_input_examples(self._eval_dataset)
+            else:
+                if number_of_sentences == 3:
+                    from sentence_transformers.evaluation import TripletEvaluator
+                    self.trainer_kwargs["evaluator"] = TripletEvaluator.from_input_examples(self._eval_dataset)
+                else:
+                    # Hard to choose one here
+                    self.trainer_kwargs["evaluator"] = None
 
     def init_model(self) -> None:
         """
@@ -144,10 +222,21 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
         self.trainer_kwargs.update(filter_allowed_args(self._trainer_cls.fit, **kwargs))
 
         if "batch_size" in kwargs:
-            self.dataloader_kwargs["batch_size"] = kwargs["batch_size"]
+            self.data_kwargs["batch_size"] = kwargs.pop("batch_size")
 
-        if "model" in self.model_kwargs:
-            self._model = self.model_kwargs["model"]
+        # These parameters are allowed, but for simplicity
+        # they are passed as self._model as positional argument to avoid errors
+        # between Cross-Encoder/Bi-encoder.
+        if "model_name_or_path" in kwargs:
+            self._model = self.model_kwargs.pop("model_name_or_path")
+        if "model_name" in kwargs:
+            self._model = self.model_kwargs.pop("model_name")
+
+        if "loss_cls" in kwargs:
+            self._loss_cls = kwargs.pop("loss_cls")
+
+        if "evaluator" in kwargs:
+            self._set_evaluator(evaluator_cls=kwargs.pop("evaluator"))
 
     def train(self, output_dir: Optional[str] = None) -> None:
         """
@@ -156,10 +245,10 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
         from torch.utils.data import DataLoader
         self.init_model()
 
-        if self._dataset_type:
-            dataloader = DataLoader(dataset=self._dataset_type(self._train_dataset), batch_size=self.dataloader_kwargs["batch_size"])
+        if self.data_kwargs["dataset_type"]:
+            dataloader = DataLoader(dataset=self.data_kwargs["dataset_type"](self._train_dataset), batch_size=self.data_kwargs["batch_size"])
         else:
-            dataloader = DataLoader(dataset=self._train_dataset, batch_size=self.dataloader_kwargs["batch_size"])
+            dataloader = DataLoader(dataset=self._train_dataset, batch_size=self.data_kwargs["batch_size"])
 
         train_loss = self._loss_cls(self._trainer)
 
@@ -172,7 +261,6 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
             train_objectives,
             **self.trainer_kwargs
         )
-        # NOTE: We haven't used the evaluator yet
 
         if output_dir is not None:
             self.save(output_dir)
