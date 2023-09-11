@@ -177,9 +177,9 @@ def formatting_func(sample):
             element for element, frequency in most_common if frequency == max_frequency
         ]
         label = random.choice(most_common_elements)
-        return (text, label)
+        yield (text, label)
     else:
-        return None
+        yield None
 
 task = TrainingTask.for_text_classification(formatting_func=formatting_func)
 ```
@@ -399,7 +399,7 @@ template = """\
 
 def formatting_func(sample: Dict[str, Any]) -> str:
     # What `sample` looks like depends a lot on your FeedbackDataset fields and questions
-    return template.format(
+    yield template.format(
         instruction=sample["new-instruction"][0]["value"],
         context=sample["new-context"][0]["value"],
         response=sample["new-response"][0]["value"],
@@ -1015,13 +1015,13 @@ def formatting_func(sample: dict) -> Union[Tuple[str, str, str, str], List[Tuple
     if sample["response"]:
         chat = str(uuid4())
         user_message = user_message_prompt.format(context_str=sample["context"], query_str=sample["user-message"])
-        return [
+        yield [
             (chat, "0", "system", system_prompt),
             (chat, "1", "user", user_message),
             (chat, "2", "assistant", sample["response"][0]["value"])
         ]
     else:
-        return None
+        yield None
 
 task = TrainingTask.for_chat_completion(formatting_func=formatting_func)
 ```

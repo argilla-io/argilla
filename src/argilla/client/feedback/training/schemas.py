@@ -210,14 +210,15 @@ class TrainingTask:
             TrainingTaskForTextClassification: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
 
         Examples:
+            >>> # with defaults
             >>> from argilla import LabelQuestion, TrainingTask
             >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
             >>> task = TrainingTask.for_text_classification(
-            ...     text=dataset.fields[0],
-            ...     label=dataset.questions[0]
+            ...     text=dataset.field_by_name("text"),
+            ...     label=dataset.question_by_name("label")
             ... )
             >>> dataset.prepare_for_training(framework="...", task=task)
-
+            >>> # with formatting_func
             >>> from argilla import LabelQuestion, TrainingTask
             >>> from collections import Counter
             >>> import random
@@ -324,7 +325,7 @@ class TrainingTask:
             ...     else:
             ...         chosen = sample["response-2"]
             ...         rejected = sample["response-1"]
-            ...     return chosen, rejected
+            ...     yield (chosen, rejected)
             >>> task = TrainingTask.for_reward_modeling(formatting_func=formatting_func)
             >>> dataset.prepare_for_training(framework="...", task=task)
 
@@ -376,7 +377,7 @@ class TrainingTask:
             ...     else:
             ...         chosen = sample["response-2"]
             ...         rejected = sample["response-1"]
-            ...     return sample["prompt"], chosen, rejected
+            ...     yield (sample["prompt"], chosen, rejected)
             >>> task = TrainingTask.for_direct_preference_optimization(formatting_func=formatting_func)
             >>> dataset.prepare_for_training(framework="...", task=task)
 
@@ -390,6 +391,25 @@ class TrainingTask:
             [Dict[str, Any]], Union[None, Tuple[str, str, str, str], Iterator[Tuple[str, str, str, str]]]
         ],
     ) -> "TrainingTaskForChatCompletion":
+        """Training data for chat comletion
+        Args:
+            formatting_func: A formatting function converting a dictionary of records into zero,
+                one or more chat-turn-role-content text tuples.
+
+        Examples:
+            >>> from argilla import TrainingTaskForChatCompletion
+            >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
+            >>> def formatting_func(sample: Dict[str, Any]):
+            ...     from uuid import uuid4
+            ...     chat_id = str(uuid4())
+            ...     if sample["response"]:
+            ...         chat = str(uuid4())
+            ...         user_message = sample["prompt"][0]["value"]
+            ...         system_message = sample["response"][0]["value"]
+            ...         yield [(chat, "0", "user", user_message), (chat, "1", "assistant", system_message)]
+            >>> task = TrainingTaskForChatCompletion(formatting_func=formatting_func)
+            >>> dataset.prepare_for_training(framework="...", task=task)
+        """
         return TrainingTaskForChatCompletion(formatting_func=formatting_func)
 
     @classmethod
@@ -402,6 +422,38 @@ class TrainingTask:
         context: Optional[TextField] = None,
         answer: Optional[TextQuestion] = None,
     ) -> "TrainingTaskForQuestionAnswering":
+        """Training data for question answering
+
+        Args:
+            formatting_func: A formatting function converting a dictionary of records into zero,
+                one or more question-context-answer text tuples.
+            question: The TextField to use for training.
+            context: The TextField to use for training.
+            answer: The TextQuestion to use for training.
+
+        Examples:
+            >>> # with defaults
+            >>> from argilla import TrainingTaskForQuestionAnswering
+            >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
+            >>> task = TrainingTaskForQuestionAnswering(
+            ...     question=dataset.field_by_name("question"),
+            ...     context=dataset.field_by_name("context"),
+            ...     answer=dataset.question_by_name("answer"),
+            ... )
+            >>> dataset.prepare_for_training(framework="...", task=task)
+            >>> # with formatting_func
+            >>> from argilla import TrainingTaskForQuestionAnswering
+            >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
+            >>> def formatting_func(sample: Dict[str, Any]):
+            ...     question = sample["question"]
+            ...     context = sample["context"]
+            ...     for answer in sample["answer"]:
+            ...         if not all([question, context, answer["value"]]):
+            ...             continue
+            ...         yield (question, context, answer["value"])
+            >>> task = TrainingTaskForQuestionAnswering(formatting_func=formatting_func)
+            >>> dataset.prepare_for_training(framework="...", task=task)
+        """
         if (question and context and answer) and formatting_func is not None:
             raise ValueError(
                 "You must provide either `question`, `context` and `answer`, or a `formatting_func`, not both."
@@ -437,32 +489,33 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
         text: The text field to take as the text to classify.
         label: The question denoting the label of the text to classify.
 
-    Examples:
-        >>> from argilla import LabelQuestion, TrainingTask
-        >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
-        >>> task = TrainingTask.for_text_classification(
-        ...     text=dataset.fields[0],
-        ...     label=dataset.questions[0]
-        ... )
-        >>> dataset.prepare_for_training(framework="...", task=task)
-
-        >>> from argilla import LabelQuestion, TrainingTask
-        >>> from collections import Counter
-        >>> def formatting_func(sample: Dict[str, Any]) -> Union[Tuple[str, str], Tuple[str, List[str]]]:
-        ...     text = sample["text"]
-        ...     values = [annotation["value"] for annotation in sample["label"]]
-        ...     counter = Counter(values)
-        ...     if counter:
-        ...         most_common = counter.most_common()
-        ...         max_frequency = most_common[0][1]
-        ...         most_common_elements = [element for element, frequency in most_common if frequency == max_frequency]
-        ...         label = random.choice(most_common_elements)
-        ...         return (text, label)
-        ...     else:
-        ...         return None
-        >>> task = TrainingTask.for_text_classification(formatting_func=formatting_func)
-        >>> dataset.prepare_for_training(framework="...", task=task)
-
+        Examples:
+            >>> # with defaults
+            >>> from argilla import LabelQuestion, TrainingTask
+            >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
+            >>> task = TrainingTask.for_text_classification(
+            ...     text=dataset.field_by_name("text"),
+            ...     label=dataset.question_by_name("label")
+            ... )
+            >>> dataset.prepare_for_training(framework="...", task=task)
+            >>> # with formatting_func
+            >>> from argilla import LabelQuestion, TrainingTask
+            >>> from collections import Counter
+            >>> import random
+            >>> def formatting_func(sample: Dict[str, Any]) -> Union[Tuple[str, str], Tuple[str, List[str]]]:
+            ...     text = sample["text"]
+            ...     values = [annotation["value"] for annotation in sample["label"]]
+            ...     counter = Counter(values)
+            ...     if counter:
+            ...         most_common = counter.most_common()
+            ...         max_frequency = most_common[0][1]
+            ...         most_common_elements = [element for element, frequency in most_common if frequency == max_frequency]
+            ...         label = random.choice(most_common_elements)
+            ...         return (text, label)
+            ...     else:
+            ...         return None
+            >>> task = TrainingTask.for_text_classification(formatting_func=formatting_func)
+            >>> dataset.prepare_for_training(framework="...", task=task)
     """
 
     formatting_func: Optional[Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]] = None
@@ -555,13 +608,16 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
         )
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}"
-            f"\n\t text={self.text.name}"
-            f"\n\t label={self.label.question.name}"
-            f"\n\t multi_label={self.__multi_label__}"
-            f"\n\t all_labels={self.__all_labels__}"
-        )
+        if self.formatting_func is not None:
+            return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
+        else:
+            return (
+                f"{self.__class__.__name__}"
+                f"\n\t text={self.text.name}"
+                f"\n\t label={self.label.question.name}"
+                f"\n\t multi_label={self.__multi_label__}"
+                f"\n\t all_labels={self.__all_labels__}"
+            )
 
     @requires_version("datasets>1.17.0")
     def _prepare_for_training_with_transformers(
@@ -724,8 +780,8 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
         >>> def formatting_func(sample: Dict[str, Any]):
         ...     annotations = sample["good]
         ...     if annotations and annotations[0]["value"] == "Bad":
-        ...         return
-        ...     return template.format(prompt=sample["prompt"][0]["value"], response=sample["response"][0]["value"])
+        ...         return None
+        ...     yield template.format(prompt=sample["prompt"][0]["value"], response=sample["response"][0]["value"])
         >>> task = TrainingTaskForSFT(formatting_func=formatting_func)
         >>> dataset.prepare_for_training(framework="...", task=task)
 
@@ -809,7 +865,7 @@ class TrainingTaskForRM(BaseModel, TrainingData):
         ...     else:
         ...         chosen = sample["response-2"]
         ...         rejected = sample["response-1"]
-        ...     return chosen, rejected
+        ...     yield (chosen, rejected)
         >>> task = TrainingTaskForRM(formatting_func=formatting_func)
         >>> dataset.prepare_for_training(framework="...", task=task)
     """
@@ -961,7 +1017,7 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
         ...     else:
         ...         chosen = sample["response-2"]
         ...         rejected = sample["response-1"]
-        ...     return sample["prompt"], chosen, rejected
+        ...     yield (sample["prompt"], chosen, rejected)
         >>> task = TrainingTaskForDPO(formatting_func=formatting_func)
         >>> dataset.prepare_for_training(framework="...", task=task)
     """
@@ -1026,6 +1082,40 @@ class TrainingTaskForQuestionAnsweringFormat(BaseModel):
 
 
 class TrainingTaskForQuestionAnswering(BaseModel, TrainingData):
+    """
+    Training data for question answering
+
+    Args:
+        formatting_func: A formatting function converting a dictionary of records into zero,
+            one or more question-context-answer text tuples.
+        question: The TextField to use for training.
+        context: The TextField to use for training.
+        answer: The TextQuestion to use for training.
+
+    Examples:
+        >>> # with defaults
+        >>> from argilla import TrainingTaskForQuestionAnswering
+        >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
+        >>> task = TrainingTaskForQuestionAnswering(
+        ...     question=dataset.field_by_name("question"),
+        ...     context=dataset.field_by_name("context"),
+        ...     answer=dataset.question_by_name("answer"),
+        ... )
+        >>> dataset.prepare_for_training(framework="...", task=task)
+        >>> # with formatting_func
+        >>> from argilla import TrainingTaskForQuestionAnswering
+        >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
+        >>> def formatting_func(sample: Dict[str, Any]):
+        ...     question = sample["question"]
+        ...     context = sample["context"]
+        ...     for answer in sample["answer"]:
+        ...         if not all([question, context, answer["value"]]):
+        ...             continue
+        ...         yield (question, context, answer["value"])
+        >>> task = TrainingTaskForQuestionAnswering(formatting_func=formatting_func)
+        >>> dataset.prepare_for_training(framework="...", task=task)
+    """
+
     _formatting_func_return_types = TrainingTaskForQuestionAnsweringFormat
     formatting_func: Optional[Callable[[Dict[str, Any]], Union[None, str, Iterator[str]]]] = None
     question: Optional[TextField] = None
@@ -1058,7 +1148,15 @@ class TrainingTaskForQuestionAnswering(BaseModel, TrainingData):
         return [Framework(name) for name in names]
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
+        if self.formatting_func is not None:
+            return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
+        else:
+            return (
+                f"{self.__class__.__name__}"
+                f"\n\t question={self.text.name}"
+                f"\n\t context={self.context.name}"
+                f"\n\t answer={self.__multi_label__}"
+            )
 
     @requires_version("transformers")
     def _prepare_for_training_with_transformers(
@@ -1075,6 +1173,7 @@ class TrainingTaskForQuestionAnswering(BaseModel, TrainingData):
             if any([entry["question"] is None, entry["context"] is None, entry["answer"] is None]):
                 continue
             if entry["answer"] not in entry["context"]:
+                warnings.warn("This is extractive QnA but the answer is not in the context.")
                 continue
             # get index of answer in context
             answer_start = entry["context"].index(entry["answer"])
@@ -1112,8 +1211,29 @@ class TrainingTaskForChatCompletionFormat(BaseModel):
 
 
 class TrainingTaskForChatCompletion(BaseModel, TrainingData):
+    """Training data for chat comletion
+
+    Args:
+        formatting_func: A formatting function converting a dictionary of records into zero,
+            one or more chat-turn-role-content text tuples.
+
+    Examples:
+        >>> from argilla import TrainingTaskForChatCompletion
+        >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
+        >>> def formatting_func(sample: Dict[str, Any]):
+        ...     from uuid import uuid4
+        ...     chat_id = str(uuid4())
+        ...     if sample["response"]:
+        ...         chat = str(uuid4())
+        ...         user_message = sample["prompt"][0]["value"]
+        ...         system_message = sample["response"][0]["value"]
+        ...         yield [(chat, "0", "user", user_message), (chat, "1", "assistant", system_message)]
+        >>> task = TrainingTaskForChatCompletion(formatting_func=formatting_func)
+        >>> dataset.prepare_for_training(framework="...", task=task)
+    """
+
     _formatting_func_return_types = TrainingTaskForChatCompletionFormat
-    formatting_func: Callable[[Dict[str, Any]], Union[None, str, Iterator[str]]]
+    formatting_func: Callable[[Dict[str, Any]], Union[None, Dict[str, str], Iterator[Dict[str, str]]]]
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
         output = set()
