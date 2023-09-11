@@ -233,8 +233,6 @@ class TrainingTask:
             ...         most_common_elements = [element for element, frequency in most_common if frequency == max_frequency]
             ...         label = random.choice(most_common_elements)
             ...         return (text, label)
-            ...     else:
-            ...         return None
             >>> task = TrainingTask.for_text_classification(formatting_func=formatting_func)
             >>> dataset.prepare_for_training(framework="...", task=task)
         """
@@ -326,7 +324,7 @@ class TrainingTask:
             ...     else:
             ...         chosen = sample["response-2"]
             ...         rejected = sample["response-1"]
-            ...     yield (chosen, rejected)
+            ...     yield chosen, rejected
             >>> task = TrainingTask.for_reward_modeling(formatting_func=formatting_func)
             >>> dataset.prepare_for_training(framework="...", task=task)
 
@@ -378,7 +376,7 @@ class TrainingTask:
             ...     else:
             ...         chosen = sample["response-2"]
             ...         rejected = sample["response-1"]
-            ...     yield (sample["prompt"], chosen, rejected)
+            ...     yield sample["prompt"], chosen, rejected
             >>> task = TrainingTask.for_direct_preference_optimization(formatting_func=formatting_func)
             >>> dataset.prepare_for_training(framework="...", task=task)
 
@@ -451,7 +449,7 @@ class TrainingTask:
             ...     for answer in sample["answer"]:
             ...         if not all([question, context, answer["value"]]):
             ...             continue
-            ...         yield (question, context, answer["value"])
+            ...         yield question, context, answer["value"]
             >>> task = TrainingTaskForQuestionAnswering(formatting_func=formatting_func)
             >>> dataset.prepare_for_training(framework="...", task=task)
         """
@@ -512,9 +510,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
             ...         max_frequency = most_common[0][1]
             ...         most_common_elements = [element for element, frequency in most_common if frequency == max_frequency]
             ...         label = random.choice(most_common_elements)
-            ...         return (text, label)
-            ...     else:
-            ...         return None
+            ...         yield text, label
             >>> task = TrainingTask.for_text_classification(formatting_func=formatting_func)
             >>> dataset.prepare_for_training(framework="...", task=task)
     """
@@ -785,7 +781,7 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
         >>> def formatting_func(sample: Dict[str, Any]):
         ...     annotations = sample["good]
         ...     if annotations and annotations[0]["value"] == "Bad":
-        ...         return None
+        ...         return
         ...     yield template.format(prompt=sample["prompt"][0]["value"], response=sample["response"][0]["value"])
         >>> task = TrainingTaskForSFT(formatting_func=formatting_func)
         >>> dataset.prepare_for_training(framework="...", task=task)
@@ -870,7 +866,7 @@ class TrainingTaskForRM(BaseModel, TrainingData):
         ...     else:
         ...         chosen = sample["response-2"]
         ...         rejected = sample["response-1"]
-        ...     yield (chosen, rejected)
+        ...     yield chosen, rejected
         >>> task = TrainingTaskForRM(formatting_func=formatting_func)
         >>> dataset.prepare_for_training(framework="...", task=task)
     """
@@ -1022,7 +1018,7 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
         ...     else:
         ...         chosen = sample["response-2"]
         ...         rejected = sample["response-1"]
-        ...     yield (sample["prompt"], chosen, rejected)
+        ...     yield sample["prompt"], chosen, rejected
         >>> task = TrainingTaskForDPO(formatting_func=formatting_func)
         >>> dataset.prepare_for_training(framework="...", task=task)
     """
@@ -1116,7 +1112,7 @@ class TrainingTaskForQuestionAnswering(BaseModel, TrainingData):
         ...     for answer in sample["answer"]:
         ...         if not all([question, context, answer["value"]]):
         ...             continue
-        ...         yield (question, context, answer["value"])
+        ...         yield question, context, answer["value"]
         >>> task = TrainingTaskForQuestionAnswering(formatting_func=formatting_func)
         >>> dataset.prepare_for_training(framework="...", task=task)
     """
