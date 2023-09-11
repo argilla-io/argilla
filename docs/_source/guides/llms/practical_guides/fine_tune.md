@@ -237,7 +237,7 @@ from datasets import Dataset
 feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/squad")
 ```
 
-We can use a default configuraiton where we initialize the `TrainingTask.for_question_answering` using the `question-context-answer`-set from the dataset. We also offer the option to provide a `formatting_func` to the `TrainingTask.for_question_asnwering`. This function is applied to each sample in the dataset and can be used for advanced preprocessing and data formatting. The function should return a `question-context-answer`-set as `str-str-str`.
+We can use a default configuration where we initialize the `TrainingTask.for_question_answering` using the `question-context-answer`-set from the dataset. We also offer the option to provide a `formatting_func` to the `TrainingTask.for_question_asnwering`. This function is applied to each sample in the dataset and can be used for advanced preprocessing and data formatting. The function should return a `question-context-answer`-set as `str-str-str`.
 
 :::: {tab-set}
 
