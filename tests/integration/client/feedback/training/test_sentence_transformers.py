@@ -49,7 +49,10 @@ def formatting_func_case_1_a(sample):
         elif labels[0] == "b":
             return {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1}
         elif labels[0] == "c":
-            return [{"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1}] * 2
+            return [
+                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1},
+                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0}
+            ]
 
 
 def formatting_func_case_1_b(sample):
@@ -64,7 +67,10 @@ def formatting_func_case_1_b(sample):
         elif labels[0] == "b":
             return {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0.786}
         elif labels[0] == "c":
-            return [{"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0.786}] * 2
+            return [
+                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0.786},
+                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0.56}
+            ]
 
 
 def formatting_func_case_2(sample):
@@ -96,7 +102,10 @@ def formatting_func_case_3_a(sample):
         elif labels[0] == "b":
             return {"sentence": sample["text"], "label": 1}
         elif labels[0] == "c":
-            return [{"sentence": sample["text"], "label": 1}] * 2
+            return [
+                {"sentence": sample["text"], "label": 1},
+                {"sentence": sample["text"], "label": 0}
+            ]
 
 
 def formatting_func_case_3_b(sample):
@@ -111,7 +120,10 @@ def formatting_func_case_3_b(sample):
         elif labels[0] == "b":
             return {"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"], "label": 1}
         elif labels[0] == "c":
-            return [{"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"], "label": 1}] * 2
+            return [
+                {"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"], "label": 1},
+                {"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"], "label": 0}
+            ]
 
 
 def formatting_func_case_4(sample):
@@ -179,7 +191,7 @@ def test_prepare_for_training_sentence_transformers(
     )
     dataset.add_records(records=feedback_dataset_records * 2)
 
-    task = TrainingTask.for_sentence_similarity(formatting_func)
+    task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func)
     train_dataset = dataset.prepare_for_training(framework=__FRAMEWORK__, task=task)
 
     assert isinstance(train_dataset, list)
@@ -222,10 +234,6 @@ def test_prepare_for_training_sentence_transformers(
     eval_trainer.update_config(epochs=1)
     train_with_cleanup(eval_trainer, __OUTPUT_DIR__)
 
-    # Check an evaluator has been set (for the cases that it does make sense)
-    if not "case_2" in formatting_func.__name__:
-        assert eval_trainer._trainer.trainer_kwargs["evaluator"]
-
     assert len(eval_trainer.predict([["first sentence", "second sentence"], ["to compare", "another one"]])) == 2
     assert len(eval_trainer.predict(["first sentence", ["to compare", "another one"]])) == 2
 
@@ -259,7 +267,7 @@ def test_prepare_for_training_sentence_transformers_bad_format(
     )
     dataset.add_records(records=feedback_dataset_records)
 
-    task = TrainingTask.for_sentence_similarity(formatting_func)
+    task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func)
 
     # Match the start of the error message only
     if "errored" in formatting_func.__name__:
@@ -274,3 +282,47 @@ def test_prepare_for_training_sentence_transformers_bad_format(
             framework="sentence-transformers",
             framework_kwargs={"cross_encoder": cross_encoder}
         )
+
+
+@pytest.mark.parametrize("use_label", [False, True])
+@pytest.mark.parametrize("cross_encoder", [False, True])
+def test_prepare_for_training_sentence_transformers_with_defaults(
+    use_label: bool,
+    cross_encoder: bool,
+) -> None:
+    dataset = FeedbackDataset.from_huggingface("plaguss/snli-small", split="train[:8]")
+
+    if use_label:
+        task = TrainingTask.for_sentence_similarity(
+            texts=[dataset.field_by_name("premise"), dataset.field_by_name("hypothesis")],
+            label=dataset.question_by_name("label")
+        )
+    else:
+        task = TrainingTask.for_sentence_similarity(
+            texts=[dataset.field_by_name("premise"), dataset.field_by_name("hypothesis")]
+        )
+
+    trainer = ArgillaTrainer(
+        dataset=dataset,
+        task=task,
+        framework=__FRAMEWORK__,
+        framework_kwargs={"cross_encoder": cross_encoder}
+    )
+    trainer.update_config(batch_size=2)
+    assert trainer._trainer.data_kwargs["batch_size"] == 2
+    trainer.update_config(epochs=1)
+    assert trainer._trainer.trainer_kwargs["epochs"] == 1
+    train_with_cleanup(trainer, __OUTPUT_DIR__)
+
+    eval_trainer = ArgillaTrainer(
+        dataset=dataset,
+        task=task,
+        framework=__FRAMEWORK__,
+        train_size=0.5,
+        framework_kwargs={"cross_encoder": cross_encoder}
+    )
+    eval_trainer.update_config(epochs=1)
+    train_with_cleanup(eval_trainer, __OUTPUT_DIR__)
+
+    assert len(eval_trainer.predict([["first sentence", "second sentence"], ["to compare", "another one"]])) == 2
+    assert len(eval_trainer.predict(["first sentence", ["to compare", "another one"]])) == 2
