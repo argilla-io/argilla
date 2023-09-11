@@ -103,7 +103,6 @@ export default {
           return "#B6B9FF";
         case "submitted":
           return "#3E5CC9";
-        default:
       }
     },
   },

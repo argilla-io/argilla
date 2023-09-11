@@ -441,7 +441,11 @@ async def update_response(
 
     async with db.begin_nested():
         response = await response.update(
-            db, values=jsonable_encoder(response_update.values), status=response_update.status, autocommit=False
+            db,
+            values=jsonable_encoder(response_update.values),
+            status=response_update.status,
+            replace_dict=True,
+            autocommit=False,
         )
         await search_engine.update_record_response(response)
 
@@ -477,7 +481,7 @@ def validate_response_values(dataset: Dataset, values: Dict[str, ResponseValue],
 
         question_response = values_copy.pop(question.name, None)
         if question_response:
-            question.parsed_settings.check_response(question_response)
+            question.parsed_settings.check_response(question_response, status)
 
     if values_copy:
         raise ValueError(f"Error: found responses for non configured questions: {list(values_copy.keys())!r}")

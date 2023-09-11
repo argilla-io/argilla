@@ -64,6 +64,12 @@ export default {
       required: true,
     },
   },
+  computed: {
+    datasetSettingsUrl() {
+      const { fullPath } = this.$route;
+      return `${window.origin}${fullPath}`;
+    },
+  },
   methods: {
     onSubmit() {
       this.update(this.settings.dataset);

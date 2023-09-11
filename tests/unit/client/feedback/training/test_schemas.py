@@ -22,7 +22,7 @@ from argilla import (
     RatingQuestion,
     TextField,
 )
-from argilla.client.feedback.training.schemas import TrainingTaskMapping
+from argilla.client.feedback.training.schemas import TrainingTask
 from argilla.client.feedback.unification import (
     LabelQuestionUnification,
     MultiLabelQuestionUnification,
@@ -307,7 +307,7 @@ from spacy.tokens import DocBin
         ),
     ],
 )
-def test_task_mapping_for_text_classification(
+def test_task_for_text_classification(
     framework,
     label,
     train_size,
@@ -327,19 +327,19 @@ def test_task_mapping_for_text_classification(
         label = MultiLabelQuestionUnification(question=MultiLabelQuestion(**label_question_payload))
     data = [{"text": "This is a text", "label": "1"}, {"text": "This is a text", "label": "2"}]
     field = TextField(name="text")
-    task_mapping = TrainingTaskMapping.for_text_classification(text=field, label=label)
+    task = TrainingTask.for_text_classification(text=field, label=label)
     if framework == Framework.SPACY or framework == Framework.SPACY_TRANSFORMERS:
-        data = task_mapping._prepare_for_training_with_spacy(
+        data = task._prepare_for_training_with_spacy(
             data=data, train_size=train_size, seed=seed, lang=spacy.blank("en")
         )
     elif framework == Framework.OPENAI:
-        data = task_mapping._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
+        data = task._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
     elif framework == Framework.TRANSFORMERS:
-        data = task_mapping._prepare_for_training_with_transformers(
+        data = task._prepare_for_training_with_transformers(
             data=data, train_size=train_size, seed=seed, framework=Framework.TRANSFORMERS
         )
     elif framework == Framework.SPARK_NLP:
-        data = task_mapping._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
+        data = task._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
     else:
         raise ValueError(f"Framework {framework} not supported")
     if isinstance(data, tuple):
@@ -352,5 +352,5 @@ def test_task_mapping_for_text_classification(
 def test_training_task_repr(label_question_payload):
     field = TextField(name="text")
     label = LabelQuestion(**label_question_payload)
-    task_mapping = TrainingTaskMapping.for_text_classification(text=field, label=label)
+    task_mapping = TrainingTask.for_text_classification(text=field, label=label)
     assert isinstance(repr(task_mapping), str)

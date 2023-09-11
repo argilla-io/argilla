@@ -107,6 +107,12 @@ SHAP (SHapley Additive exPlanations) is a game theoretic approach to explain the
 OpenAI is a suite of APIs powered by large language and vision models which perform a variety of natural language and visual tasks.
 ```
 
+```{grid-item-card} LangChain
+:link: langchain.md
+
+The LangChain framework is a wrapper around LLM models that allows for easier data-aware and agent-based LLM models.
+```
+
 ```{grid-item-card} Unstructured
 :link: unstructured.md
 
@@ -143,5 +149,6 @@ transformersinterpret.md
 cleanlab.md
 shap.md
 openai.md
+langchain.md
 unstructured.md
 ```

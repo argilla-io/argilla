@@ -14,6 +14,7 @@
 #  limitations under the License.
 
 from datetime import datetime
+from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
@@ -37,6 +38,13 @@ class FeedbackRankingValueModel(BaseModel):
 
 class FeedbackValueModel(BaseModel):
     value: Union[StrictStr, StrictInt, List[str], List[FeedbackRankingValueModel]]
+
+
+class FeedbackResponseStatusFilter(str, Enum):
+    draft = "draft"
+    missing = "missing"
+    submitted = "submitted"
+    discarded = "discarded"
 
 
 class FeedbackResponseModel(BaseModel):

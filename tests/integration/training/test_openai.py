@@ -31,8 +31,9 @@ def test_update_config(dataset_text_classification):
     assert trainer._trainer.model_kwargs["prompt_loss_weight"] == 1
 
 
-def test_openai_train(dataset_text_classification):
-    ArgillaTrainer(name=dataset_text_classification, model=MODEL, framework=FRAMEWORK)
+def test_openai_train(dataset_text_classification, mocked_openai):
+    trainer = ArgillaTrainer(name=dataset_text_classification, model=MODEL, framework=FRAMEWORK)
+    trainer.train("model")
 
 
 def test_openai_train_multi_label(dataset_text_classification_multi_label):
@@ -47,5 +48,6 @@ def test_openai_train_token(dataset_token_classification):
         ArgillaTrainer(name=dataset_token_classification, model=MODEL, train_size=0.5, framework=FRAMEWORK)
 
 
-def test_openai_train_text2text(dataset_text2text):
-    ArgillaTrainer(name=dataset_text2text, model=MODEL, framework=FRAMEWORK)
+def test_openai_train_text2text(dataset_text2text, mocked_openai):
+    trainer = ArgillaTrainer(name=dataset_text2text, model=MODEL, framework=FRAMEWORK)
+    trainer.train("model")

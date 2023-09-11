@@ -12,9 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import dataclasses
 from types import TracebackType
-from typing import ContextManager, Optional, Type
+from typing import Any, ContextManager, Dict, Optional, Type
 
 from packaging.version import parse
 from pydantic import BaseModel
@@ -24,24 +23,52 @@ from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors import ApiCompatibilityError
 
 
-@dataclasses.dataclass(frozen=True)
-class ApiInfo:
+class ApiInfo(BaseModel):
     version: Optional[str] = None
 
 
-class Status(AbstractApi):
-    class _ApiInfo(BaseModel):
-        version: Optional[str] = None
+class ElasticSearchVersionDetails(BaseModel):
+    distribution: Optional[str] = None
+    number: str
+    build_flavor: Optional[str] = None
+    build_type: str
+    build_hash: str
+    build_date: str
+    build_snapshot: bool
+    lucene_version: str
+    minimum_wire_compatibility_version: str
+    minimum_index_compatibility_version: str
 
+
+class ElasticSearch(BaseModel):
+    name: str
+    cluster_name: str
+    cluster_uuid: str
+    version: ElasticSearchVersionDetails
+    tagline: str
+
+
+class ApiStatus(BaseModel):
+    version: str
+    elasticsearch: ElasticSearch
+    mem_info: Dict[str, Any]
+
+
+class Status(AbstractApi):
     def get_info(self) -> ApiInfo:
         """
         Get the connected API info
 
+        Returns:
+            ApiInfo: The API info
         """
 
         response = self.http_client.get("/api/_info")
-        api_info = self._ApiInfo.parse_obj(response)
-        return ApiInfo(version=api_info.version)
+        return ApiInfo.parse_obj(response)
+
+    def get_status(self) -> ApiStatus:
+        response = self.http_client.get("/api/_status")
+        return ApiStatus.parse_obj(response)
 
 
 class _ApiCompatibilityContextManager(ContextManager):

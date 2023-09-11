@@ -8,8 +8,23 @@
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
+        <div class="draft">
+          <p v-if="draftSaving">
+            <svgicon color="#0000005e" name="refresh" />
+            {{ $t("saving") }}
+          </p>
+          <p v-else-if="record.isDraft">
+            {{ $t("saved") }}
+            <BaseDate
+              class="tooltip"
+              :date="record.updatedAt"
+              format="date-relative-now"
+              :updateEverySecond="10"
+            />
+          </p>
+        </div>
         <p class="questions-form__title --heading5 --medium">
-          Submit your feedback
+          {{ $t("submit-your-feedback") }}
         </p>
         <p class="questions-form__guidelines-link">
           Read the
@@ -26,7 +41,7 @@
 
       <QuestionsComponent
         :questions="record.questions"
-        :showSuggestion="!record.isSubmitted"
+        :showSuggestion="record.isPending || record.isDraft"
         :autofocusPosition="autofocusPosition"
         @on-focus="updateQuestionAutofocus"
       />
@@ -67,7 +82,8 @@
 
 <script>
 import "assets/icons/external-link";
-import { isEqual, cloneDeep } from "lodash";
+import "assets/icons/refresh";
+
 import { useQuestionFormViewModel } from "./useQuestionsFormViewModel";
 
 export default {
@@ -84,7 +100,7 @@ export default {
   },
   data() {
     return {
-      originalRecord: null,
+      isFormTouched: false,
       autofocusPosition: 0,
       interactionCount: 0,
       userComesFromOutside: false,
@@ -100,75 +116,89 @@ export default {
     numberOfQuestions() {
       return this.record.questions.length;
     },
-    isFormUntouched() {
-      return isEqual(this.originalRecord, this.record);
-    },
     questionAreCompletedCorrectly() {
       return this.record.questionAreCompletedCorrectly();
     },
     isSubmitButtonDisabled() {
       if (this.record.isSubmitted)
-        return this.isFormUntouched || !this.questionAreCompletedCorrectly;
+        return !this.isFormTouched || !this.questionAreCompletedCorrectly;
 
       return !this.questionAreCompletedCorrectly;
     },
   },
   watch: {
-    isFormUntouched(isFormUntouched) {
-      this.emitIsQuestionsFormUntouched(isFormUntouched);
+    isFormTouched(isFormTouched) {
+      if (this.record.isSubmitted)
+        this.emitIsQuestionsFormTouched(isFormTouched);
+    },
+    record: {
+      deep: true,
+      immediate: true,
+      handler() {
+        if (this.record.isModified) this.saveDraft(this.record);
+
+        this.isFormTouched = this.record.isModified;
+      },
     },
   },
   created() {
-    this.record.restore();
-
-    this.onReset();
+    this.record.initialize();
   },
   mounted() {
     document.addEventListener("keydown", this.handleGlobalKeys);
   },
   destroyed() {
-    this.emitIsQuestionsFormUntouched(true);
+    this.emitIsQuestionsFormTouched(false);
+
     document.removeEventListener("keydown", this.handleGlobalKeys);
   },
   methods: {
-    focusOnFirstQuestionFromOutside(e) {
+    focusOnFirstQuestionFromOutside(event) {
       if (!this.userComesFromOutside) return;
-      if (e.srcElement.id || e.srcElement.getAttribute("for")) return;
+      if (event.srcElement.id || event.srcElement.getAttribute("for")) return;
 
       this.userComesFromOutside = false;
-      this.focusOnFirstQuestion(e);
+      this.focusOnFirstQuestion(event);
     },
-    focusOnFirstQuestion(e) {
-      e.preventDefault();
+    focusOnFirstQuestion(event) {
+      event.preventDefault();
       this.updateQuestionAutofocus(0);
     },
     onClickOutside() {
       this.autofocusPosition = null;
       this.userComesFromOutside = true;
     },
-    handleGlobalKeys(e) {
-      const { code, shiftKey } = e;
+    handleGlobalKeys(event) {
+      const { code, shiftKey, ctrlKey, metaKey } = event;
 
       if (code == "Tab" && this.userComesFromOutside) {
-        this.focusOnFirstQuestionFromOutside(e);
+        this.focusOnFirstQuestionFromOutside(event);
 
         return;
       }
 
-      if (!shiftKey) return;
-
       switch (code) {
+        case "KeyS": {
+          if (ctrlKey || metaKey) {
+            event.preventDefault();
+            event.stopPropagation();
+            this.onSaveDraftImmediately();
+          }
+          break;
+        }
         case "Enter": {
-          this.onSubmit();
+          if (shiftKey) this.onSubmit();
           break;
         }
         case "Space": {
-          e.preventDefault();
-          this.onClear();
+          if (shiftKey) {
+            event.preventDefault(); // TODO: Review this line
+            this.onClear();
+          }
           break;
         }
         case "Backspace": {
-          this.onDiscard();
+          if (shiftKey) this.onDiscard();
           break;
         }
         default:
@@ -180,8 +210,6 @@ export default {
       await this.discard(this.record);
 
       this.$emit("on-discard-responses");
-
-      this.onReset();
     },
     async onSubmit() {
       if (this.isSubmitButtonDisabled) return;
@@ -189,21 +217,17 @@ export default {
       await this.submit(this.record);
 
       this.$emit("on-submit-responses");
-
-      this.onReset();
     },
     async onClear() {
       await this.clear(this.record);
-
-      this.onReset();
     },
-    onReset() {
-      this.originalRecord = cloneDeep(this.record);
+    async onSaveDraftImmediately() {
+      await this.saveDraftImmediately(this.record);
     },
-    emitIsQuestionsFormUntouched(isFormUntouched) {
-      this.$emit("on-question-form-touched", !isFormUntouched);
+    emitIsQuestionsFormTouched(isFormTouched) {
+      this.$emit("on-question-form-touched", isFormTouched);
 
-      this.$root.$emit("are-responses-untouched", isFormUntouched);
+      this.$root.$emit("are-responses-untouched", !isFormTouched);
     },
     updateQuestionAutofocus(index) {
       this.interactionCount++;
@@ -291,13 +315,43 @@ export default {
   }
 }
 
-// [data-title] {
-//   position: relative;
-//   overflow: visible;
-//   @extend %has-tooltip--top;
-//   &:before,
-//   &:after {
-//     margin-top: calc($base-space/2);
-//   }
-// }
+.draft {
+  position: absolute;
+  right: $base-space * 2;
+  top: $base-space;
+  user-select: none;
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  align-items: center;
+  margin: 0;
+  @include font-size(12px);
+  color: $black-37;
+  font-weight: 500;
+  p {
+    margin: 0;
+    &:hover {
+      .tooltip {
+        opacity: 1;
+        height: auto;
+        width: auto;
+        overflow: visible;
+      }
+    }
+  }
+  .tooltip {
+    opacity: 0;
+    height: auto;
+    width: 0;
+    @extend %tooltip;
+    top: 50%;
+    transform: translateY(-50%);
+    right: calc(100% + 10px);
+    overflow: hidden;
+    &:before {
+      position: absolute;
+      @extend %triangle-right;
+    }
+  }
+}
 </style>

@@ -16,7 +16,7 @@ from typing import Any, Generic, List, Literal, Optional, Protocol, TypeVar, Uni
 
 from pydantic import BaseModel, Field
 
-from argilla.server.enums import QuestionType
+from argilla.server.enums import QuestionType, ResponseStatus
 
 try:
     from typing import Annotated
@@ -29,7 +29,7 @@ class ResponseValue(Protocol):
 
 
 class BaseQuestionSettings(BaseModel):
-    def check_response(self, response: ResponseValue):
+    def check_response(self, response: ResponseValue, status: Optional[ResponseStatus] = None):
         pass
 
 
@@ -37,7 +37,7 @@ class TextQuestionSettings(BaseQuestionSettings):
     type: Literal[QuestionType.text]
     use_markdown: bool = False
 
-    def check_response(self, response: ResponseValue):
+    def check_response(self, response: ResponseValue, status: Optional[ResponseStatus] = None):
         if not isinstance(response.value, str):
             raise ValueError(f"Expected text value, found {type(response.value)}")
 
@@ -54,7 +54,7 @@ class ValidOptionCheckerMixin(BaseQuestionSettings, Generic[T]):
     def option_values(self) -> List[T]:
         return [option.value for option in self.options]
 
-    def check_response(self, response: ResponseValue):
+    def check_response(self, response: ResponseValue, status: Optional[ResponseStatus] = None):
         if response.value not in self.option_values:
             raise ValueError(f"{response.value!r} is not a valid option.\nValid options are: {self.option_values!r}")
 
@@ -83,7 +83,7 @@ def _are_all_elements_in_list(elements: List[T], list_: List[T]) -> List[T]:
 class MultiLabelSelectionQuestionSettings(LabelSelectionQuestionSettings):
     type: Literal[QuestionType.multi_label_selection]
 
-    def check_response(self, response: ResponseValue):
+    def check_response(self, response: ResponseValue, status: Optional[ResponseStatus] = None):
         if not isinstance(response.value, list):
             raise ValueError(
                 f"This MultiLabelSelection question expects a list of values, found {type(response.value)}"
@@ -114,15 +114,9 @@ class RankingQuestionSettings(ValidOptionCheckerMixin[str]):
     def rank_values(self) -> List[int]:
         return list(range(1, len(self.option_values) + 1))
 
-    def check_response(self, response: ResponseValue):
+    def check_response(self, response: ResponseValue, status: Optional[ResponseStatus] = None):
         if not isinstance(response.value, list):
             raise ValueError(f"This Ranking question expects a list of values, found {type(response.value)}")
-
-        if len(response.value) != len(self.option_values):
-            raise ValueError(
-                f"This Ranking question expects a list containing {len(self.option_values)} values, found a list of"
-                f" {len(response.value)} values"
-            )
 
         values = []
         ranks = []
@@ -130,12 +124,21 @@ class RankingQuestionSettings(ValidOptionCheckerMixin[str]):
             values.append(response_option.get("value"))
             ranks.append(response_option.get("rank"))
 
-        invalid_ranks = _are_all_elements_in_list(ranks, self.rank_values)
-        if invalid_ranks:
-            raise ValueError(
-                f"{invalid_ranks!r} are not valid ranks for this Ranking question.\nValid ranks are:"
-                f" {self.rank_values!r}"
-            )
+        # Only if the response is submitted check that all the possible options have been ranked or that all the
+        # provided options contains a valid rank
+        if status == ResponseStatus.submitted:
+            if len(response.value) != len(self.option_values):
+                raise ValueError(
+                    f"This Ranking question expects a list containing {len(self.option_values)} values, found a list of"
+                    f" {len(response.value)} values"
+                )
+
+            invalid_ranks = _are_all_elements_in_list(ranks, self.rank_values)
+            if invalid_ranks:
+                raise ValueError(
+                    f"{invalid_ranks!r} are not valid ranks for this Ranking question.\nValid ranks are:"
+                    f" {self.rank_values!r}"
+                )
 
         invalid_values = _are_all_elements_in_list(values, self.option_values)
         if invalid_values:

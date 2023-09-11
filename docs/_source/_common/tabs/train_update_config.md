@@ -7,7 +7,16 @@
 trainer.update_config(
     training_file = None,
     validation_file = None,
-    model = "curie,
+    model = "gpt-3.5-turbo-0613",
+    hyperparameters = {"n_epochs": 1},
+    suffix = None
+)
+
+# `OpenAI.FineTune` (legacy)
+trainer.update_config(
+    training_file = None,
+    validation_file = None,
+    model = "curie",
     n_epochs = 2,
     batch_size = None,
     learning_rate_multiplier = 0.1,
@@ -203,6 +212,38 @@ trainer.update_config(
     marker_max_length = 128,
     entity_max_length = 8,
 )
+# `transformers.TrainingArguments`
+trainer.update_config(
+    per_device_train_batch_size = 8,
+    per_device_eval_batch_size = 8,
+    gradient_accumulation_steps = 1,
+    learning_rate = 5e-5,
+    weight_decay = 0,
+    adam_beta1 = 0.9,
+    adam_beta2 = 0.9,
+    adam_epsilon = 1e-8,
+    max_grad_norm = 1,
+    learning_rate = 5e-5,
+    num_train_epochs = 3,
+    max_steps = 0,
+    log_level = "passive",
+    logging_strategy = "steps",
+    save_strategy = "steps",
+    save_steps = 500,
+    seed = 42,
+    push_to_hub = False,
+    hub_model_id = "user_name/output_dir_name",
+    hub_strategy = "every_save",
+    hub_token = "1234",
+    hub_private_repo = False
+)
+```
+:::
+
+:::{tab-item} TRL
+
+```python
+# parameters from `trl.RewardTrainer`, `trl.SFTTrainer`, `trl.PPOTrainer` or `trl.DPOTrainer`.
 # `transformers.TrainingArguments`
 trainer.update_config(
     per_device_train_batch_size = 8,

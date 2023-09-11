@@ -58,6 +58,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
 
         if self._model is None:
             self._model = "bert-base-cased"
+            self._logger.warning(f"No model defined. Using the default model {self._model}.")
 
         if isinstance(self._dataset, DatasetDict):
             self._train_dataset = self._dataset["train"]
@@ -326,14 +327,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         return func
 
     def train(self, output_dir: str):
-        """
-        We create a SetFitModel object from a pretrained model, then create a SetFitTrainer object with
-        the model, and then train the model
-        """
-        from transformers import (
-            Trainer,
-            TrainingArguments,
-        )
+        from transformers import Trainer, TrainingArguments
 
         # check required path argument
         self.trainer_kwargs["output_dir"] = output_dir
