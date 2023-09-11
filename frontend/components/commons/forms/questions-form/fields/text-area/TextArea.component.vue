@@ -6,7 +6,8 @@
     />
     <div
       class="container"
-      :class="isEditionModeActive ? '--focused' : null"
+      ref="container"
+      :class="classes"
       @focus="onFocus"
       :tabindex="isEditionModeActive ? '-1' : '0'"
     >
@@ -25,6 +26,7 @@
         :isFocused="isFocused"
         @change-text="onChangeTextArea"
         @on-change-focus="onChangeFocus"
+        @on-exit-edition-mode="onExitEditionMode"
       />
     </div>
   </div>
@@ -50,6 +52,7 @@ export default {
   data: () => {
     return {
       isEditionModeActive: false,
+      isExitedFromEditionModeWithKeyboard: false,
     };
   },
   watch: {
@@ -61,6 +64,11 @@ export default {
     },
   },
   methods: {
+    onExitEditionMode() {
+      this.$refs.container.focus();
+      this.isEditionModeActive = false;
+      this.isExitedFromEditionModeWithKeyboard = true;
+    },
     onChangeTextArea(newText) {
       const isAnyText = newText?.length;
 
@@ -81,6 +89,20 @@ export default {
       if (event.defaultPrevented) return;
 
       this.isEditionModeActive = true;
+      this.isExitedFromEditionModeWithKeyboard = false;
+    },
+  },
+  computed: {
+    classes() {
+      if (this.isEditionModeActive) {
+        return "--editing";
+      }
+
+      if (this.isFocused && this.isExitedFromEditionModeWithKeyboard) {
+        return "--focus";
+      }
+
+      return null;
     },
   },
 };
@@ -100,8 +122,11 @@ export default {
   border-radius: $border-radius-s;
   min-height: 10em;
   background: palette(white);
-  &.--focused {
+  &.--editing {
     border-color: $primary-color;
+  }
+  &.--focus {
+    outline: 2px solid palette(apricot);
   }
   .content--exploration-mode & {
     border: none;

@@ -21,13 +21,15 @@
         @keydown.shift.enter.stop=""
         @keydown.shift.backspace.stop=""
         @keydown.shift.space.stop=""
-        @keydown.esc.exact="looseFocus"
-        @keydown.ctrl.arrow-right.exact.prevent=""
-        @keydown.meta.arrow-right.exact.prevent=""
-        @keydown.ctrl.arrow-left.exact.prevent=""
-        @keydown.meta.arrow-left.exact.prevent=""
-        @keydown.delete.exact.stop=""
-        @keydown.enter.exact.stop=""
+        @keydown.shift.arrow-up.stop=""
+        @keydown.shift.arrow-down.stop=""
+        @keydown.ctrl.arrow-right.stop=""
+        @keydown.meta.arrow-right.stop=""
+        @keydown.ctrl.arrow-left.stop=""
+        @keydown.meta.arrow-left.stop=""
+        @keydown.delete.stop=""
+        @keydown.enter.stop=""
+        @keydown.esc.exact="exitEditionMode"
         @paste="pastePlainText"
       />
     </div>
@@ -94,8 +96,10 @@ export default {
       this.sanitizedCurrentValue = " ";
       this.sanitizedCurrentValue = this.currentValue;
     },
-    looseFocus() {
+    exitEditionMode() {
       this.textAreaWrapper.blur();
+
+      this.$emit("on-exit-edition-mode");
     },
     onInputText(event) {
       this.currentValue = event.target.innerText;
