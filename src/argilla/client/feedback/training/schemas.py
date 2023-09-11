@@ -92,7 +92,7 @@ class TrainingData(ABC):
                 # with default and formatting_func either one can be None
                 if pydantic_field[-1] is not None:
                     pydantic_field_name, pydantic_field_value = pydantic_field
-                    if isinstance(pydantic_field_value, list):
+                    if isinstance(pydantic_field_value, (list, tuple, set)):
                         # NOTE: In the case of TrainingTaskForSentenceSimilarity with defaults,
                         # we need to grab multiple values, not just the text.
                         for pydantic_field_value_i in pydantic_field_value:
