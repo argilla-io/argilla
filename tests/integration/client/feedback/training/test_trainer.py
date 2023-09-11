@@ -222,14 +222,12 @@ def test_question_answering_with_formatting_func(
     trainer.train(__OUTPUT_DIR__)
 
     def formatting_func_with_yield(sample):
-        responses = []
         question = sample["label"]
         context = sample["text"]
         for answer in sample["question-1"]:
             if not all([question, context, answer["value"]]):
                 continue
-            responses.append((question, context, answer["value"]))
-        yield responses
+            yield question, context, answer["value"]
 
     task = TrainingTask.for_question_answering(formatting_func_with_yield)
     trainer = ArgillaTrainer(dataset=dataset, task=task, framework="transformers")
