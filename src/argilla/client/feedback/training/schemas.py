@@ -1220,8 +1220,14 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
             return self.label.question.__id2label__
 
     def __repr__(self) -> str:
-        # TODO: Update to include texts/labels when found
-        return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
+        return (
+            f"{self.__class__.__name__}"
+            f"\n\t texts={self.text.name}"
+            f"\n\t label={self.label.question.name}"
+            f"\n\t multi_label={self.__multi_label__}"
+            f"\n\t all_labels={self.__all_labels__}"
+            f"\n\t formatting_funct={self.formatting_func}"
+        )
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, Any]]:
         if self.formatting_func:
