@@ -1260,7 +1260,7 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
             formatted_data = super()._format_data(dataset)
             # NOTE: Maybe this post processing of the formatted data can be simplified
             # or directly done in super()._format_data(dataset).
-            new_keys = {field.name: f"sentence-{i+1}" for i, field in enumerate(self.texts)}
+            new_keys = {field.name: f"sentence-{i}" for i, field in enumerate(self.texts, start=1)}
             if self.label:
                 new_keys.update({self.label.question.name: "label"})
 
@@ -1300,36 +1300,32 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
         self, data: List[dict], train_size: float, seed: int
     ) -> Union["InputExample", Tuple["InputExample", "InputExample"]]:
         from sentence_transformers import InputExample
+        
+        if not len(data) > 0:
+            raise ValueError("The dataset must contain at least one sample to be able to train.")
 
         # Use the first sample to decide what type of dataset to generate:
-        sample_keys = data[0].keys()
-        if "label" in sample_keys:
-            if (len(sample_keys) == 3) and all(s in sample_keys for s in ["sentence-1", "sentence-2"]):
-                dataset_fields = lambda sample: {"texts": [sample["sentence-1"], sample["sentence-2"]], "label": sample["label"]}
-            elif all(s in sample_keys for s in ["sentence-1", "sentence-2", "sentence-3"]):
-                dataset_fields = lambda sample: {"texts": [sample["sentence-1"], sample["sentence-2"], sample["sentence-3"]], "label": sample["label"]}
-            elif (len(sample_keys) == 2) and ("sentence" in sample_keys):
-                raise ValueError(
-                    "Datasets containing a `sentence` and a `label` should be transformed "\
-                    "to contain triplets of `sentence-1`, `sentence-2`, `sentence-3` and `label`."\
-                    r"An example can be seen at: https://github.com/UKPLab/sentence-transformers/blob/master/examples/training/other/training_batch_hard_trec.py"
-                )
-            else:
-                raise ValueError(
-                    "Labeled datasets must contain a pair of `sentence-1` and "\
-                    "`sentence-2` or triplets `sentence-1`, `sentence-2`, `sentence-3` "\
-                    "as well as a `label`."
-                )
+        sample_keys = set(data[0].keys())
+        if sample_keys == {"label", "sentence-1", "sentence-2"}:
+            dataset_fields = lambda sample: {"texts": [sample["sentence-1"], sample["sentence-2"]], "label": sample["label"]}
+        elif sample_keys == sample_keys == {"label", "sentence-1", "sentence-2", "sentence-3"}:
+            dataset_fields = lambda sample: {"texts": [sample["sentence-1"], sample["sentence-2"], sample["sentence-3"]], "label": sample["label"]}
+        elif sample_keys == {"sentence-1", "sentence-2"}:
+            dataset_fields = lambda sample: {"texts": [sample["sentence-1"], sample["sentence-2"]]}
+        elif sample_keys == {"sentence-1", "sentence-2", "sentence-3"}:
+            dataset_fields = lambda sample: {"texts": [sample["sentence-1"], sample["sentence-2"], sample["sentence-3"]]}
+        elif sample_keys == {"label", "sentence"}:
+            raise ValueError(
+                "Datasets containing a `sentence` and a `label` should be transformed "\
+                "to contain triplets of `sentence-1`, `sentence-2`, `sentence-3` and `label`."\
+                r"An example can be seen at: https://github.com/UKPLab/sentence-transformers/blob/master/examples/training/other/training_batch_hard_trec.py"
+            )
         else:
-            if len(sample_keys) == 2:
-                dataset_fields = lambda sample: {"texts": [sample["sentence-1"], sample["sentence-2"]]}
-            elif len(sample_keys) == 3:
-                dataset_fields = lambda sample: {"texts": [sample["sentence-1"], sample["sentence-2"], sample["sentence-3"]]}
-            else:
-                raise ValueError(
-                    "Unlabeled datasets must contain a pair of `sentence-1` and "\
-                    "`sentence-2` or triplets `sentence-1`, `sentence-2`, `sentence-3`."
-                )
+            raise ValueError(
+                "Labeled datasets must contain a pair of `sentence-1` and "\
+                "`sentence-2` or triplets `sentence-1`, `sentence-2`, `sentence-3` "\
+                "and an optional `label`."
+            )
 
         train_samples = []
         for sample in data:
