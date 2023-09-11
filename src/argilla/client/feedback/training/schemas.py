@@ -395,7 +395,9 @@ class TrainingTask:
     @classmethod
     def for_question_answering(
         cls,
-        formatting_func: Optional[Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]] = None,
+        formatting_func: Optional[
+            Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]
+        ] = None,
         question: Optional[TextField] = None,
         context: Optional[TextField] = None,
         answer: Optional[TextQuestion] = None,
