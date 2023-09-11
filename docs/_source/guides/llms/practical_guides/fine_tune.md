@@ -76,7 +76,7 @@ A `TrainingTask` is used to define how the data should be processed and formatte
 | for_proximal_policy_optimization   | `text`                       | `Union[str, Iterator[str]]]`                                            | ✗      |
 | for_direct_preference_optimization | `prompt-chosen-rejected`     | `Union[Tuple[str, str, str], Iterator[Tuple[str, str, str]]]`          | ✗      |
 | for_chat_completion                | `chat-turn-role-content`     | `Union[Tuple[str, str, str, str], Iterator[Tuple[str, str, str, str]]]`| ✗      |
-| for_sentence_similarity            | `sentence-1-sentence-2-(sentence-3)-(label)` | `Union[Dict[str, Union[float, int]], Dict[str, str], List[Dict[str, Union[float, int]]], List[Dict[str, str]]]`| ✗      |
+| for_sentence_similarity            | `sentence-1-sentence-2-(sentence-3)-(label)` | `Union[Dict[str, Union[float, int]], Dict[str, str], List[Dict[str, Union[float, int]]], List[Dict[str, str]]]`| ✔️      |
 
 
 ## Tasks
