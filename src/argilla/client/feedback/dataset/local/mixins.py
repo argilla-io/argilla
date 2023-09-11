@@ -233,6 +233,12 @@ class ArgillaMixin:
             questions.append(question)
         return questions
 
+    def pull_from_argilla(self, *args, **kwargs):
+        """Pulling is only supported for remote datasets. Use `FeedbackDataset.from_argilla(...)` instead."""
+        raise NotImplementedError(
+            "Pulling is only supported for remote datasets. Use `FeedbackDataset.from_argilla(...)` instead."
+        )
+
     @classmethod
     def from_argilla(
         cls: Type["FeedbackDataset"],
@@ -344,3 +350,8 @@ class ArgillaMixin:
             for dataset in datasets
             if workspace is None or dataset.workspace_id == workspace.id
         ]
+
+    def delete(self) -> None:
+        raise NotImplementedError(
+            "Deleting is only supported for remote datasets. Use `FeedbackDataset.from_argilla(...).delete()` instead."
+        )

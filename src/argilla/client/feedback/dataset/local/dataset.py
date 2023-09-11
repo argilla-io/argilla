@@ -15,15 +15,15 @@
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
-from argilla.client.feedback.dataset.base import FeedbackDatasetBase
-from argilla.client.feedback.dataset.mixins import ArgillaMixin
+from argilla.client.feedback.dataset.local.base import FeedbackDatasetBase
+from argilla.client.feedback.dataset.local.mixins import ArgillaMixin
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import FeedbackRecord
 
 
-class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin):
+class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase):
     def __init__(
         self,
         *,
@@ -154,6 +154,11 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin):
             self._records += records
         else:
             self._records = records
+
+    def delete_records(self, *args, **kwargs):
+        raise NotImplementedError(
+            "Deleting records for local datasets can be done by deleting record from the list FeedbackDataset._records."
+        )
 
     def filter_by(self, **kwargs: Any) -> Any:
         raise NotImplementedError("Filtering is not supported for local datasets yet.")

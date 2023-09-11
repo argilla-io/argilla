@@ -13,11 +13,11 @@
 #  limitations under the License.
 
 import warnings
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Generic, Iterator, List, Optional, Type, TypeVar, Union
 
-from argilla.client.feedback.dataset.base import FeedbackDatasetBase, FeedbackDatasetSharedBase
+from argilla.client.feedback.dataset.local.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
 from argilla.client.feedback.schemas.records import RemoteFeedbackRecord, RemoteSuggestionSchema
 from argilla.client.sdk.users.models import UserRole
@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="RemoteFeedbackRecordsBase")
 
 
-class RemoteFeedbackRecordsBase(FeedbackDatasetSharedBase, ArgillaRecordsMixin):
+class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
     def __init__(self, dataset: "RemoteFeedbackDatasetBase") -> None:
         """Initializes a `RemoteFeedbackRecords` instance to access a `FeedbackDataset`
         records in Argilla. This class is used to get records from Argilla, iterate over
@@ -116,7 +116,7 @@ class RemoteFeedbackRecordsBase(FeedbackDatasetSharedBase, ArgillaRecordsMixin):
         pass
 
 
-class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
+class RemoteFeedbackDatasetBase(FeedbackDatasetBase, Generic[T]):
     records_cls: Type[T]
 
     def __init__(
@@ -170,6 +170,10 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
 
         self._records = self.records_cls(dataset=self, **kwargs)
 
+    # def _parse_records(self, *args, **kwargs):
+    #     """Parses a `FeedbackItemModel` into a `RemoteFeedbackRecord`."""
+    #     return self._records._parse_records(*args, **kwargs)
+
     @property
     def records(self) -> T:
         """Returns an instance of `RemoteFeedbackRecords` that allows you to iterate over
@@ -220,6 +224,10 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
     def __len__(self) -> int:
         """Returns the number of records in the dataset."""
         return self._records.__len__()
+
+    def iter(self) -> Iterator[RemoteFeedbackRecord]:
+        """Returns an iterator over the records in the dataset."""
+        return self.__iter__()
 
     def __iter__(self) -> Iterator[RemoteFeedbackRecord]:
         """Returns an iterator over the records in the dataset."""
@@ -312,7 +320,7 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
     def push_to_argilla(
         self,
         name: Optional[str] = None,
-        workspace: Optional[Union[str, Workspace]] = None,
+        workspace: Optional[Union[str, "Workspace"]] = None,
         show_progress: Optional[bool] = None,
     ) -> None:
         """`push_to_argilla` doesn't work for neither `RemoteFeedbackDataset` nor `FilteredRemoteFeedbackDataset`."""
@@ -323,4 +331,13 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
             UserWarning,
             stacklevel=2,
         )
-        pass
+        raise NotImplementedError(
+            "`push_to_argilla` doesn't work for neither `RemoteFeedbackDataset` nor `FilteredRemoteFeedbackDataset`.",
+            "First call `pull_from_argilla` to get a local instance of the dataset, and then call `push_to_argilla(*args, **kwargs)`",
+        )
+
+    def prepare_for_training(self):
+        """Prepares the dataset for training."""
+        raise NotImplementedError(
+            "`prepare_for_training` is not implemented for `RemoteFeedbackDataset`. First call `pull_from_argilla` to get a local instance of the dataset, and then call `prepare_for_training` on that instance."
+        )

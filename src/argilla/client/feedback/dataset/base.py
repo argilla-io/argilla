@@ -119,7 +119,6 @@ class FeedbackDatasetSharedBase(ABC):
     def delete(self) -> None:
         """Deletes a dataset."""
 
-    @abstractmethod
     def add(self) -> Any:
         """Adds records to the dataset."""
         warnings.warn(

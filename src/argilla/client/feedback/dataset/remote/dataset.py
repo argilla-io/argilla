@@ -167,7 +167,7 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
 
         Args:
             response_status: the response status/es to filter the dataset by. Can be
-                one of: draft, pending, submitted, and discarded.
+                one of: "draft", "pending", "submitted", or "discarded".
 
         Returns:
             A new instance of `FilteredRemoteFeedbackDataset` with the given filters.
