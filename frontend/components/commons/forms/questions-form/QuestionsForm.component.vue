@@ -1,7 +1,9 @@
 <template>
   <form
     class="questions-form"
-    :class="{ '--focused-form': formHasFocus && interactionCount > 1 }"
+    :class="{
+      '--focused-form': isFormTouched || (formHasFocus && interactionCount > 1),
+    }"
     @submit.prevent="onSubmit"
     v-click-outside="onClickOutside"
     @click="focusOnFirstQuestionFromOutside"

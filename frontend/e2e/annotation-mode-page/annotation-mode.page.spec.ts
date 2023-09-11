@@ -1138,6 +1138,7 @@ test.describe("Annotation page shortcuts", () => {
       await page.waitForTimeout(500);
 
       await page.keyboard.press(shortcuts.ranking.goToPrevRank);
+      await page.waitForTimeout(100);
       await page.keyboard.press(shortcuts.ranking.unrank);
 
       await expect(page).toHaveScreenshot();

@@ -273,7 +273,7 @@ export const mockRecordWith12Ranking = async (
   await mockFields(page, datasetId);
 
   await page.route(
-    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing`,
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing&response_status=draft`,
     async (route) => {
       await route.fulfill({
         json: {
@@ -283,7 +283,7 @@ export const mockRecordWith12Ranking = async (
     }
   );
   await page.route(
-    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=2&limit=10&response_status=missing`,
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=2&limit=10&response_status=missing&response_status=draft`,
     async (route) => {
       await route.fulfill({
         json: {
@@ -305,7 +305,7 @@ export const mockRecordWithRating = async (
   await mockFields(page, datasetId);
 
   await page.route(
-    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing`,
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing&response_status=draft`,
     async (route) => {
       await route.fulfill({
         json: {
