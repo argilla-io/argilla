@@ -4,10 +4,8 @@ description: When a RatingQuestion, LabelQuestion or MultiLabelQuestion is prese
 links:
   - linkText: Argilla unification docs
     linkLink: https://docs.argilla.io/en/latest/guides/llms/practical_guides/collect_responses.html#solve-disagreements
-  - linkText: Argilla fine-tuning docs
+  - linkText: Practical guide to Text Classification
     linkLink: https://docs.argilla.io/en/latest/guides/llms/practical_guides/fine_tune.html#text-classification
-  - linkText: ArgillaTrainer docs
-    linkLink: https://docs.argilla.io/en/latest/guides/train_a_model.html#the-argillatrainer
 ---
 
 ```python
