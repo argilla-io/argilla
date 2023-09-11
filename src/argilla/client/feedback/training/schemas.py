@@ -401,29 +401,64 @@ class TrainingTask:
     def for_sentence_similarity(
         cls,
         texts: Optional[List[TextField]] = None,
-        label: Optional[LabelQuestionUnification] = None,
-        formatting_func: Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]] = None,
-        label_strategy = None
+        label: Optional[LabelQuestion] = None,
+        formatting_func: Callable[[Dict[str, Any]], Union[None, Dict[str, Union[float, int]], Dict[str, str], List[Dict[str, Union[float, int]]], List[Dict[str, str]]]] = None,
+        label_strategy: Optional[LabelQuestionUnification] = None
     ) -> "TrainingTaskForSentenceSimilarity":
         """
+
         Return a task that can be used in `FeedbackDataset.prepare_for_training(framework="...", task)`
         to extract data from the Feedback Dataset in a format suitable for sentence similarity.
 
         Args:
-            formatting_func: A formatting function converting a dictionary of records into a dict.
+            texts: A list of TextFields to use for training, typically two text pieces, can be a triplet also.
+                Defaults to None.
+            label: The `LabelQuestion` to use for training. These models can be trained without
+                explicit use of labels, just with pairs or triplets of texts. Defaults to None.
+            formatting_func: A formatting function converting a dictionary of records into a dict
+                of `sentence-1`-`sentence-2` pairs or triplets `sentence-1`-`sentence-2`-`sentence-3`,
+                optionally including a `label` field.
+            label_strategy: A strategy to unify responses. Defaults to None. This means it will initialize the default strategy for the label type.
+
+        Raises:
+            ValueError: If label is not a valid type.
+            ValueError: if label_strategy is defined and label is already a Unification class.
 
         Returns:
             TrainingTaskForSentenceSimilarity: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
+
+        Examples:
+            >>> from argilla import LabelQuestion, TrainingTask
+            >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
+            >>> task = TrainingTask.for_text_classification(
+            ...     texts=[dataset.field_by_name("premise"), dataset.field_by_name("hypothesis")],
+            ...     label=dataset.question_by_name("label")
+            ... )
+            >>> dataset.prepare_for_training(framework="...", task=task)
+
+            >>> from argilla import LabelQuestion, TrainingTask
+            >>> from collections import Counter
+            >>> import random
+            >>> def formatting_func(sample: Dict[str, Any]) -> Union[Tuple[str, str], Tuple[str, List[str]]]:
+            ...     record = {"sentence-1": sample["premise"], "sentence-2": sample["hypothesis"]}
+            ...     values = [annotation["value"] for annotation in sample["label"]]
+            ...     counter = Counter(values)
+            ...     if counter:
+            ...         most_common = counter.most_common()
+            ...         max_frequency = most_common[0][1]
+            ...         most_common_elements = [element for element, frequency in most_common if frequency == max_frequency]
+            ...         record["label"] = label
+            ...         return record
+            ...     else:
+            ...         return None
+            >>> task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func)
+            >>> dataset.prepare_for_training(framework="...", task=task)
         """
 
-        # The label is optional, only check for texts
-        if texts and formatting_func is not None:
-        # if (texts and label) and formatting_func is not None:
-            raise ValueError("You must provide either `texts` and `label`, or a `formatting_func`, not both.")
+        if (texts or label) and formatting_func is not None:
+            raise ValueError("You must provide either `texts` and (optionally) `label`, or a `formatting_func`, not both.")
 
         if formatting_func is not None:
-            if texts or label:
-                raise ValueError("`formatting_func` is already defined, so you cannot define `texts` and `label`.")
             return TrainingTaskForSentenceSimilarity(formatting_func=formatting_func)
         else:
             if not label:
