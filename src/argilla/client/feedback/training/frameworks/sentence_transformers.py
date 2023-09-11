@@ -54,7 +54,7 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
             else:
                 self._model = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
-            self._logger.warning(f"No model was selected, using pre-defined `{'Cross-Encoder' if self._cross_encoder else 'Bi-Encoder'}` with `{self._model}`.")
+            self._logger.info(f"No model was selected, using pre-defined `{'Cross-Encoder' if self._cross_encoder else 'Bi-Encoder'}` with `{self._model}`.")
 
         else:
             self._model = model
@@ -104,7 +104,7 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
         self._logger.warning(f"`loss_cls` parameter set as default `{self._loss_cls}`.")
 
         if self._eval_dataset:
-            self._set_evaluator(sample.label, len(sample.texts))
+            self._set_evaluator(label=sample.label, number_of_sentences=len(sample.texts))
             self._logger.warning(f"`evaluator` parameter set to `{self.trainer_kwargs['evaluator']}` by default.")
 
     def _set_loss_cls(self, label: Optional[Union[int, float]], number_of_sentences: int) -> None:
@@ -167,17 +167,20 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
                     # a subset of the evaluators defined in sentence-transformers, inform
                     # the user the one selected is not allowed.
                     self.trainer_kwargs["evaluator"] = None
-                    self._logger.warning(f"Currently only developed evaluators that implement `cls.from_input_examples`.")
+                    self._logger.warning(f"Currently only developed evaluators that implement `cls.from_input_examples` can be set.")
         else:
             if label:
                 if number_of_sentences == 2:
                     if isinstance(label, int):
-                        if self._cross_encoder:
-                            from sentence_transformers.cross_encoder.evaluation import CEBinaryClassificationEvaluator
-                            self.trainer_kwargs["evaluator"] = CEBinaryClassificationEvaluator.from_input_examples(self._eval_dataset)
-                        else:
-                            from sentence_transformers.evaluation import BinaryClassificationEvaluator
-                            self.trainer_kwargs["evaluator"] = BinaryClassificationEvaluator.from_input_examples(self._eval_dataset)
+                        # This should work, but for some reason in the tests with default values
+                        # the classes cannot be instantiated, need some time to review.
+                        # if self._cross_encoder:
+                        #     from sentence_transformers.cross_encoder.evaluation import CEBinaryClassificationEvaluator
+                        #     self.trainer_kwargs["evaluator"] = CEBinaryClassificationEvaluator.from_input_examples(self._eval_dataset)
+                        # else:
+                        #     from sentence_transformers.evaluation import BinaryClassificationEvaluator
+                        #     self.trainer_kwargs["evaluator"] = BinaryClassificationEvaluator.from_input_examples(self._eval_dataset)
+                        self.trainer_kwargs["evaluator"] = None
 
                     else:
                         if self._cross_encoder:

@@ -359,9 +359,11 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                 " dataset via the `FeedbackDataset.add_records` method first."
             )
 
-        if isinstance(task, TrainingTaskForTextClassification):
+        if isinstance(task, (TrainingTaskForTextClassification, TrainingTaskForSentenceSimilarity)):
             if task.formatting_func is None:
-                self.unify_responses(question=task.label.question, strategy=task.label.strategy)
+                # in sentence-transformer models we can train without labels
+                if task.label:
+                    self.unify_responses(question=task.label.question, strategy=task.label.strategy)
         elif not isinstance(
             task,
             (
@@ -370,7 +372,6 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                 TrainingTaskForPPO,
                 TrainingTaskForDPO,
                 TrainingTaskForChatCompletion,
-                TrainingTaskForSentenceSimilarity
             ),
         ):
             raise ValueError(f"Training data {type(task)} is not supported yet")
@@ -407,7 +408,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         elif framework is Framework.TRLX:
             return task._prepare_for_training_with_trlx(data=data, train_size=train_size, seed=seed)
         elif framework is Framework.SENTENCE_TRANSFORMERS:
-            return task._prepare_for_training_with_sentence_similarity(data=data, train_size=train_size, seed=seed)
+            return task._prepare_for_training_with_sentence_transformers(data=data, train_size=train_size, seed=seed)
         else:
             raise NotImplementedError(
                 f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"

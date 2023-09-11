@@ -92,7 +92,22 @@ class TrainingData(ABC):
                 # with default and formatting_func either one can be None
                 if pydantic_field[-1] is not None:
                     pydantic_field_name, pydantic_field_value = pydantic_field
-                    if isinstance(pydantic_field_value, (TextField,)):
+                    if isinstance(pydantic_field_value, list):
+                        # NOTE: In the case of TrainingTaskForSentenceSimilarity with defaults,
+                        # we need to grab multiple values, not just the text.
+                        for pydantic_field_value_i in pydantic_field_value:
+                            if isinstance(pydantic_field_value_i, (TextField,)):
+                                data[pydantic_field_value_i.name] = record.fields[pydantic_field_value_i.name]
+                            else:
+                                if pydantic_field_value_i.question.name not in record._unified_responses:
+                                    continue
+                                else:
+                                    data[pydantic_field_name] = [
+                                        resp.value for resp in record._unified_responses[pydantic_field_value_i.question.name]
+                                    ]
+                                explode_columns.add(pydantic_field_name)
+
+                    elif isinstance(pydantic_field_value, (TextField,)):
                         data[pydantic_field_name] = record.fields[pydantic_field_value.name]
                     else:
                         if pydantic_field_value.question.name not in record._unified_responses:
@@ -385,7 +400,10 @@ class TrainingTask:
     @classmethod
     def for_sentence_similarity(
         cls,
-        formatting_func: Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]],
+        texts: Optional[List[TextField]] = None,
+        label: Optional[LabelQuestionUnification] = None,
+        formatting_func: Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]] = None,
+        label_strategy = None
     ) -> "TrainingTaskForSentenceSimilarity":
         """
         Return a task that can be used in `FeedbackDataset.prepare_for_training(framework="...", task)`
@@ -397,7 +415,34 @@ class TrainingTask:
         Returns:
             TrainingTaskForSentenceSimilarity: A task mapping instance to be used in `FeedbackDataset.prepare_for_training()`
         """
-        return TrainingTaskForSentenceSimilarity(formatting_func=formatting_func)
+
+        # The label is optional, only check for texts
+        if texts and formatting_func is not None:
+        # if (texts and label) and formatting_func is not None:
+            raise ValueError("You must provide either `texts` and `label`, or a `formatting_func`, not both.")
+
+        if formatting_func is not None:
+            if texts or label:
+                raise ValueError("`formatting_func` is already defined, so you cannot define `texts` and `label`.")
+            return TrainingTaskForSentenceSimilarity(formatting_func=formatting_func)
+        else:
+            if not label:
+                return TrainingTaskForSentenceSimilarity(texts=texts)
+
+            if isinstance(label, LabelQuestionUnification):
+                if label_strategy is not None:
+                    raise ValueError("label_strategy is already defined via Unification class.")
+            else:
+                unification_kwargs = {"question": label}
+                if label_strategy is not None:
+                    unification_kwargs["strategy"] = label_strategy
+                else:
+                    _LOGGER.info(f"No label strategy defined. Using default strategy for {type(label)}.")
+                if isinstance(label, LabelQuestion):
+                    label = LabelQuestionUnification(**unification_kwargs)
+                else:
+                    raise ValueError(f"Label type {type(label)} is not supported.")
+            return TrainingTaskForSentenceSimilarity(texts=texts, label=label)
 
 
 class TrainingTaskForTextClassificationFormat(BaseModel):
@@ -1115,28 +1160,87 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
     """
 
     _formatting_func_return_types = TrainingTaskForSentenceSimilarityFormat
-    formatting_func: Callable[[Dict[str, Any]], Union[None, Dict[str, Union[float, int]], Dict[str, str], List[Dict[str, Union[float, int]]], List[Dict[str, str]]]]
-
-    def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, Any]]:
-        outputs = []
-        for sample in dataset.format_as("datasets"):
-            output = self.formatting_func(sample)
-            if output is None:
-                continue
-
-            self._test_output_formatting_func(output)
-
-            outputs.append(output)
-
-        return outputs
+    formatting_func: Callable[[Dict[str, Any]], Union[None, Dict[str, Union[float, int]], Dict[str, str], List[Dict[str, Union[float, int]]], List[Dict[str, str]]]] = None
+    texts: Optional[List[TextField]] = None
+    label: Optional[LabelQuestionUnification] = None
 
     @property
     def supported_frameworks(self):
         names = ["sentence-transformers"]
         return [Framework(name) for name in names]
 
+    @property
+    def __all_labels__(self):
+        if self.label:
+            return self.label.question.__all_labels__
+
+    @property
+    def __label2id__(self):
+        if self.label:
+            return self.label.question.__label2id__
+
+    @property
+    def __id2label__(self):
+        if self.label:
+            return self.label.question.__id2label__
+
     def __repr__(self) -> str:
+        # TODO: Update to include texts/labels when found
         return f"{self.__class__.__name__}\n\t formatting_func={self.formatting_func}"
+
+    def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, Any]]:
+        if self.formatting_func:
+            outputs = []
+            for sample in dataset.format_as("datasets"):
+                output = self.formatting_func(sample)
+                if output is None:
+                    continue
+
+                self._test_output_formatting_func(output)
+
+                outputs.append(output)
+
+            if "label" in outputs[0]:
+                _all_labels = set()
+                for sample in outputs:
+                    if isinstance(sample, list):
+                        for response in sample:
+                            _all_labels.add(response["label"])
+                    else:
+                        _all_labels.add(sample["label"])
+
+                self.label = LabelQuestionUnification(
+                    question=LabelQuestion(name="custom_func", labels=list(_all_labels))
+                )
+
+            return outputs
+
+        else:
+            formatted_data = super()._format_data(dataset)
+            # NOTE: Maybe this post processing of the formatted data can be simplified
+            # or directly done in super()._format_data(dataset).
+            new_keys = {field.name: f"sentence-{i+1}" for i, field in enumerate(self.texts)}
+            if self.label:
+                new_keys.update({self.label.question.name: "label"})
+
+            outputs = []
+            for example in formatted_data:
+                record = {}
+                for k, v in new_keys.items():
+                    value = example[k]
+                    if v == "label":
+                        # At this point the label must be either an int or a float, determine which one is it.
+                        if value.lstrip("-").isdigit():
+                            value = int(value)
+                        else:
+                            value = float(value)
+                    record[v] = value
+                outputs.append(record)
+
+            return outputs
+
+    def unify_responses(self, responses: List[FeedbackRecord]):
+        self.label.strategy.unify_responses(responses=responses, field=self.label.question)
 
     @requires_version("scikit-learn")
     def _train_test_split(self, data: List[dict], train_size: float, seed: int, stratify = None) -> Tuple[List[dict], List[dict]]:
@@ -1151,7 +1255,7 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
         )
 
     @requires_version("sentence-transformers")
-    def _prepare_for_training_with_sentence_similarity(
+    def _prepare_for_training_with_sentence_transformers(
         self, data: List[dict], train_size: float, seed: int
     ) -> Union["InputExample", Tuple["InputExample", "InputExample"]]:
         from sentence_transformers import InputExample
