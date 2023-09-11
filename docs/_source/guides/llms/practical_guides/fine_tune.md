@@ -177,9 +177,7 @@ def formatting_func(sample):
             element for element, frequency in most_common if frequency == max_frequency
         ]
         label = random.choice(most_common_elements)
-        yield (text, label)
-    else:
-        yield None
+        yield text, label
 
 task = TrainingTask.for_text_classification(formatting_func=formatting_func)
 ```
@@ -1020,8 +1018,6 @@ def formatting_func(sample: dict) -> Union[Tuple[str, str, str, str], List[Tuple
             (chat, "1", "user", user_message),
             (chat, "2", "assistant", sample["response"][0]["value"])
         ]
-    else:
-        yield None
 
 task = TrainingTask.for_chat_completion(formatting_func=formatting_func)
 ```
