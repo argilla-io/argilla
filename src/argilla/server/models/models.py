@@ -104,6 +104,36 @@ class Suggestion(DatabaseModel):
         )
 
 
+class Vector(DatabaseModel):
+    __tablename__ = "vectors"
+
+    value: Mapped[List[Any]] = mapped_column(JSON)
+    vector_settings_id: Mapped[UUID] = mapped_column(ForeignKey("vectors_settings.id", ondelete="CASCADE"), index=True)
+    record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id", ondelete="CASCADE"), index=True)
+
+    vector_settings: Mapped["VectorSettings"] = relationship(back_populates="vectors")
+    record: Mapped["Record"] = relationship(back_populates="vectors")
+
+
+class VectorSettings(DatabaseModel):
+    __tablename__ = "vectors_settings"
+
+    name: Mapped[str] = mapped_column(index=True)
+    dimensions: Mapped[int] = mapped_column()
+    description: Mapped[str] = mapped_column(Text, nullable=True)
+    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
+
+    dataset: Mapped["Dataset"] = relationship(back_populates="vectors_settings")
+    vectors: Mapped[List["Vector"]] = relationship(
+        back_populates="vector_settings",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Vector.inserted_at.asc(),
+    )
+
+    __table_args__ = (UniqueConstraint("name", "dataset_id", name="vector_settings_name_dataset_id_uq"),)
+
+
 class Record(DatabaseModel):
     __tablename__ = "records"
 
@@ -124,6 +154,12 @@ class Record(DatabaseModel):
         cascade="all, delete-orphan",
         passive_deletes=True,
         order_by=Suggestion.inserted_at.asc(),
+    )
+    vectors: Mapped[List["Vector"]] = relationship(
+        back_populates="record",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Vector.inserted_at.asc(),
     )
 
     __table_args__ = (UniqueConstraint("external_id", "dataset_id", name="record_external_id_dataset_id_uq"),)
@@ -196,6 +232,12 @@ class Dataset(DatabaseModel):
         cascade="all, delete-orphan",
         passive_deletes=True,
         order_by=Record.inserted_at.asc(),
+    )
+    vectors_settings: Mapped[List["VectorSettings"]] = relationship(
+        back_populates="dataset",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=VectorSettings.inserted_at.asc(),
     )
 
     __table_args__ = (UniqueConstraint("name", "workspace_id", name="dataset_name_workspace_id_uq"),)
