@@ -10,6 +10,7 @@
       :class="classes"
       @focus="onFocus"
       :tabindex="isEditionModeActive ? '-1' : '0'"
+      @keydown.enter.exact="onEditMode"
     >
       <RenderMarkdownBaseComponent
         v-if="question.settings.use_markdown && !isEditionModeActive"
@@ -64,6 +65,13 @@ export default {
     },
   },
   methods: {
+    onEditMode(event) {
+      if (this.isExitedFromEditionModeWithKeyboard) {
+        event.stopPropagation();
+        event.preventDefault();
+        this.isEditionModeActive = true;
+      }
+    },
     onExitEditionMode() {
       this.$refs.container.focus();
       this.isEditionModeActive = false;
