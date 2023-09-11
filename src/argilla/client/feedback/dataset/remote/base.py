@@ -13,11 +13,11 @@
 #  limitations under the License.
 
 import warnings
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Generic, Iterator, List, Optional, Type, TypeVar, Union
 
-from argilla.client.feedback.dataset.base import FeedbackDatasetBase
+from argilla.client.feedback.dataset.base import FeedbackDatasetBase, FeedbackDatasetSharedBase
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
 from argilla.client.feedback.schemas.records import RemoteFeedbackRecord, RemoteSuggestionSchema
 from argilla.client.sdk.users.models import UserRole
@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="RemoteFeedbackRecordsBase")
 
 
-class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
+class RemoteFeedbackRecordsBase(FeedbackDatasetSharedBase, ArgillaRecordsMixin):
     def __init__(self, dataset: "RemoteFeedbackDatasetBase") -> None:
         """Initializes a `RemoteFeedbackRecords` instance to access a `FeedbackDataset`
         records in Argilla. This class is used to get records from Argilla, iterate over

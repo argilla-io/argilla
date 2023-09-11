@@ -74,7 +74,6 @@ class RemoteFeedbackRecords(RemoteFeedbackRecordsBase):
                 a single dictionary, or a list of dictionaries. If a dictionary is provided,
                 it will be converted to a `FeedbackRecord` internally.
             show_progress: Whether to show a `tqdm` progress bar while pushing the records.
-
         Raises:
             PermissionError: if the user does not have either `owner` or `admin` role.
             Exception: If the pushing of the records to Argilla fails.
