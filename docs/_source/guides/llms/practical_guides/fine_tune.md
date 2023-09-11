@@ -224,7 +224,7 @@ Underneath you can find a sample of an extractive QnA dataset underneath:
 Officially, answers need to be passed as a list of `{'answer_start': int, 'text': str}`-dicts. However, we only support a string, where the `answer_start` is inferred from the `context` and `text`-field.
 ```
 
-We then use either `question-context-answet`-set or a `formatting_func` to further fine-tune the model.
+We then use either `question-context-answer`-set or a `formatting_func` to further fine-tune the model.
 
 #### Training
 
@@ -247,8 +247,8 @@ We can use a default configuraiton where we initialize the `TrainingTask.for_que
 from argilla.feedback import TrainingTask
 
 task = TrainingTask.for_question_answering(
-    question=feedback_dataset.question_by_name("question"),
-    context=feedback_dataset.question_by_name("context"),
+    question=feedback_dataset.field_by_name("question"),
+    context=feedback_dataset.field_by_name("context"),
     answer=feedback_dataset.question_by_name("answer"),
 )
 ```
@@ -261,14 +261,12 @@ task = TrainingTask.for_question_answering(
 from argilla.feedback import TrainingTask
 
 def formatting_func(sample):
-    responses = []
     question = sample["question"]
     context = sample["context"]
     for answer in sample["answer"]:
         if not all([question, context, answer["value"]]):
             continue
-        responses.append((question, context, answer["value"]))
-    return responses
+        yield question, context, answer["value"]
 
 task = TrainingTask.for_question_answering(formatting_func=formatting_func)
 ```

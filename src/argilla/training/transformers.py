@@ -394,14 +394,14 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             f1 = evaluate.load("f1")
 
             def compute_metrics_question_answering(pred):
-                squad_labels = pred.label_ids
-                squad_preds = pred.predictions.argmax(-1)
+                labels = pred.label_ids
+                preds = pred.predictions.argmax(-1)
 
                 # Calculate Exact Match (EM)
-                em = sum([1 if p == l else 0 for p, l in zip(squad_preds, squad_labels)]) / len(squad_labels)
+                em = sum([int(p == l) for p, l in zip(preds, labels)]) / len(labels)
 
                 # Calculate F1-score
-                f1_score = f1(squad_labels, squad_preds, average="macro")
+                f1_score = f1(labels, preds, average="macro")
 
                 return {"exact_match": em, "f1": f1_score}
 
