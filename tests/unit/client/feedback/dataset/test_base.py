@@ -15,7 +15,7 @@
 from typing import TYPE_CHECKING, List
 
 import pytest
-from argilla.client.feedback.dataset.base import FeedbackDatasetBase
+from argilla.client.feedback.dataset.local.base import FeedbackDatasetBase
 from argilla.client.feedback.schemas import (
     RatingQuestion,
     TextField,
