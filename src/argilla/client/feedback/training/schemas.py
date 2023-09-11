@@ -1244,7 +1244,7 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
             if "label" in outputs[0]:
                 _all_labels = set()
                 for sample in outputs:
-                    if isinstance(sample, list):
+                    if isinstance(sample, (list, tuple, set)):
                         for response in sample:
                             _all_labels.add(response["label"])
                     else:
