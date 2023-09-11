@@ -158,9 +158,9 @@ def test_prepare_for_training_text_classification_with_formatting_func(
     def correct_formatting_func(sample):
         data = wrong_formatting_func(sample)
         if data:
-            return (data["text"], data["label"])
+            yield (data["text"], data["label"])
         else:
-            return None
+            yield None
 
     task = TrainingTask.for_text_classification(correct_formatting_func)
     trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework)
@@ -221,7 +221,7 @@ def test_question_answering_with_formatting_func(
     trainer.update_config(num_iterations=1)
     trainer.train(__OUTPUT_DIR__)
 
-    def formatting_func_with_field(sample):
+    def formatting_func_with_yield(sample):
         responses = []
         question = sample["label"]
         context = sample["text"]
@@ -229,9 +229,9 @@ def test_question_answering_with_formatting_func(
             if not all([question, context, answer["value"]]):
                 continue
             responses.append((question, context, answer["value"]))
-        return responses
+        yield responses
 
-    task = TrainingTask.for_question_answering(formatting_func_with_field)
+    task = TrainingTask.for_question_answering(formatting_func_with_yield)
     trainer = ArgillaTrainer(dataset=dataset, task=task, framework="transformers")
     trainer.update_config(num_iterations=1)
     trainer.train(__OUTPUT_DIR__)

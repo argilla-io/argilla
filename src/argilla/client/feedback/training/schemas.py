@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import logging
+import types
 import warnings
 from abc import ABC
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
@@ -80,7 +81,7 @@ class TrainingData(ABC):
         Test if the formatting function returns the expected format.
         """
         try:
-            if not type(sample) == iter:
+            if not isinstance(sample, types.GeneratorType):
                 self._formatting_func_return_types(format=sample)
             return True
         except Exception:
@@ -569,7 +570,11 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
 
             data = []
             _all_labels = set()
-            for text, label in output:
+            for text_label in output:
+                if text_label is None:
+                    continue
+                else:
+                    text, label = text_label
                 data.append({"text": text, "label": label})
                 if isinstance(label, list):
                     _multi_label = True
