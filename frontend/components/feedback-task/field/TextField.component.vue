@@ -12,9 +12,9 @@
         </BaseButton>
       </BaseActionTooltip>
     </div>
-    <transition name="fade" v-if="fieldText" appear mode="out-in">
-      <div class="content-area --body1" :key="fieldText">
-        <div v-if="!useMarkdown" v-text="fieldText" />
+    <transition name="fade" v-if="text" appear mode="out-in">
+      <div class="content-area --body1" :key="text">
+        <div v-if="!useMarkdown" v-text="text" />
         <RenderMarkdownBaseComponent v-else :markdown="text" />
       </div>
     </transition>
@@ -22,6 +22,7 @@
 </template>
 
 <script>
+import { useTextFieldViewModel } from "./useTextFieldViewModel";
 export default {
   name: "TextFieldComponent",
   props: {
@@ -42,26 +43,8 @@ export default {
       default: false,
     },
   },
-  computed: {
-    text() {
-      if (this.stringToHighlight.length === 0) return this.fieldText;
-
-      const regex = new RegExp(
-        `\\b(${this.stringToHighlight.replace(/`/g, "\\`")})`,
-        "gi"
-      );
-
-      const newText = this.fieldText.replace(regex, (match) =>
-        this.htmlHighlightFor(match)
-      );
-
-      return newText;
-    },
-  },
-  methods: {
-    htmlHighlightFor(aText) {
-      return `<span class="highlight-text">${aText}</span>`;
-    },
+  setup(props) {
+    return useTextFieldViewModel(props);
   },
 };
 </script>
