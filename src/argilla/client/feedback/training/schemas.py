@@ -1337,9 +1337,8 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
         
         if train_size != 1:
             stratify = None
-            if (label := train_samples[0].label):
-                if isinstance(label, int):
-                    stratify = [example.label for example in train_samples]
+            if (label := train_samples[0].label) and isinstance(label, int):
+                stratify = [example.label for example in train_samples]
 
             train_data, test_data = self._train_test_split(train_samples, train_size, seed, stratify=stratify)
             return train_data, test_data
