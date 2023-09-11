@@ -12,18 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, List, Callable, Union
+from typing import TYPE_CHECKING, Callable, List, Union
 
 import pytest
-
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.training.base import ArgillaTrainer
 from argilla.client.feedback.training.schemas import (
     TrainingTask,
 )
-
-from sentence_transformers import InputExample, SentenceTransformer, CrossEncoder
+from sentence_transformers import CrossEncoder, InputExample, SentenceTransformer
 
 from tests.integration.training.helpers import train_with_cleanup
 
@@ -35,6 +33,7 @@ __FRAMEWORK__ = "sentence-transformers"
 
 
 # All the formatting functions generate dummy datasets with the formats allowed (almost a copy than those of trl)
+
 
 def formatting_func_case_1_a(sample):
     labels = [
@@ -51,7 +50,7 @@ def formatting_func_case_1_a(sample):
         elif labels[0] == "c":
             return [
                 {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1},
-                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0}
+                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0},
             ]
 
 
@@ -69,7 +68,7 @@ def formatting_func_case_1_b(sample):
         elif labels[0] == "c":
             return [
                 {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0.786},
-                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0.56}
+                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0.56},
             ]
 
 
@@ -102,10 +101,7 @@ def formatting_func_case_3_a(sample):
         elif labels[0] == "b":
             return {"sentence": sample["text"], "label": 1}
         elif labels[0] == "c":
-            return [
-                {"sentence": sample["text"], "label": 1},
-                {"sentence": sample["text"], "label": 0}
-            ]
+            return [{"sentence": sample["text"], "label": 1}, {"sentence": sample["text"], "label": 0}]
 
 
 def formatting_func_case_3_b(sample):
@@ -118,11 +114,16 @@ def formatting_func_case_3_b(sample):
         if labels[0] == "a":
             return None
         elif labels[0] == "b":
-            return {"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"], "label": 1}
+            return {
+                "sentence-1": sample["text"],
+                "sentence-2": sample["text"],
+                "sentence-3": sample["text"],
+                "label": 1,
+            }
         elif labels[0] == "c":
             return [
                 {"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"], "label": 1},
-                {"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"], "label": 0}
+                {"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"], "label": 0},
             ]
 
 
@@ -151,14 +152,7 @@ def formatting_func_errored(sample):
         return sample["text"], sample["text"], sample["text"]
 
 
-
-@pytest.mark.parametrize(
-    "cross_encoder,model_type",
-    [
-        (False, SentenceTransformer),
-        (True, CrossEncoder)
-    ]
-)
+@pytest.mark.parametrize("cross_encoder,model_type", [(False, SentenceTransformer), (True, CrossEncoder)])
 @pytest.mark.parametrize(
     "formatting_func",
     [
@@ -167,7 +161,7 @@ def formatting_func_errored(sample):
         formatting_func_case_2,
         formatting_func_case_3_b,
         formatting_func_case_4,
-    ]
+    ],
 )
 @pytest.mark.usefixtures(
     "feedback_dataset_guidelines",
@@ -206,15 +200,12 @@ def test_prepare_for_training_sentence_transformers(
                     dataset=dataset,
                     task=task,
                     framework="sentence-transformers",
-                    framework_kwargs={"cross_encoder": cross_encoder}
+                    framework_kwargs={"cross_encoder": cross_encoder},
                 )
             return
 
     trainer = ArgillaTrainer(
-        dataset=dataset,
-        task=task,
-        framework=__FRAMEWORK__,
-        framework_kwargs={"cross_encoder": cross_encoder}
+        dataset=dataset, task=task, framework=__FRAMEWORK__, framework_kwargs={"cross_encoder": cross_encoder}
     )
     trainer.update_config(batch_size=2)
     assert trainer._trainer.data_kwargs["batch_size"] == 2
@@ -229,7 +220,7 @@ def test_prepare_for_training_sentence_transformers(
         task=task,
         framework=__FRAMEWORK__,
         train_size=0.5,
-        framework_kwargs={"cross_encoder": cross_encoder}
+        framework_kwargs={"cross_encoder": cross_encoder},
     )
     eval_trainer.update_config(epochs=1)
     train_with_cleanup(eval_trainer, __OUTPUT_DIR__)
@@ -239,13 +230,7 @@ def test_prepare_for_training_sentence_transformers(
 
 
 @pytest.mark.parametrize("cross_encoder", [False, True])
-@pytest.mark.parametrize(
-    "formatting_func",
-    [
-        formatting_func_case_3_a,
-        formatting_func_errored
-    ]
-)
+@pytest.mark.parametrize("formatting_func", [formatting_func_case_3_a, formatting_func_errored])
 @pytest.mark.usefixtures(
     "feedback_dataset_guidelines",
     "feedback_dataset_fields",
@@ -280,7 +265,7 @@ def test_prepare_for_training_sentence_transformers_bad_format(
             dataset=dataset,
             task=task,
             framework="sentence-transformers",
-            framework_kwargs={"cross_encoder": cross_encoder}
+            framework_kwargs={"cross_encoder": cross_encoder},
         )
 
 
@@ -295,7 +280,7 @@ def test_prepare_for_training_sentence_transformers_with_defaults(
     if use_label:
         task = TrainingTask.for_sentence_similarity(
             texts=[dataset.field_by_name("premise"), dataset.field_by_name("hypothesis")],
-            label=dataset.question_by_name("label")
+            label=dataset.question_by_name("label"),
         )
     else:
         task = TrainingTask.for_sentence_similarity(
@@ -303,10 +288,7 @@ def test_prepare_for_training_sentence_transformers_with_defaults(
         )
 
     trainer = ArgillaTrainer(
-        dataset=dataset,
-        task=task,
-        framework=__FRAMEWORK__,
-        framework_kwargs={"cross_encoder": cross_encoder}
+        dataset=dataset, task=task, framework=__FRAMEWORK__, framework_kwargs={"cross_encoder": cross_encoder}
     )
     trainer.update_config(batch_size=2)
     assert trainer._trainer.data_kwargs["batch_size"] == 2
@@ -319,7 +301,7 @@ def test_prepare_for_training_sentence_transformers_with_defaults(
         task=task,
         framework=__FRAMEWORK__,
         train_size=0.5,
-        framework_kwargs={"cross_encoder": cross_encoder}
+        framework_kwargs={"cross_encoder": cross_encoder},
     )
     eval_trainer.update_config(epochs=1)
     train_with_cleanup(eval_trainer, __OUTPUT_DIR__)

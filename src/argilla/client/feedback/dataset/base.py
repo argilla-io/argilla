@@ -34,10 +34,10 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForDPO,
     TrainingTaskForPPO,
     TrainingTaskForRM,
+    TrainingTaskForSentenceSimilarity,
     TrainingTaskForSFT,
     TrainingTaskForTextClassification,
     TrainingTaskTypes,
-    TrainingTaskForSentenceSimilarity
 )
 from argilla.client.feedback.unification import (
     LabelQuestionStrategy,

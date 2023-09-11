@@ -326,7 +326,7 @@ trainer.update_config(
 # can be set externally.
 trainer.update_config(
     batch_size=8,  # It will be passed to the DataLoader to generate batches during training.
-    loss_cls=losses.BatchAllTripletLoss    
+    loss_cls=losses.BatchAllTripletLoss
 )
 ```
 :::

@@ -13,13 +13,12 @@
 #  limitations under the License.
 
 import logging
-from typing import List, Union, Optional, TYPE_CHECKING, Tuple
-
-from argilla.training.utils import get_default_args, filter_allowed_args
-from argilla.utils.dependency import require_version
+from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
 from argilla.client.feedback.training.schemas import TrainingTaskForSentenceSimilarity
+from argilla.training.utils import filter_allowed_args, get_default_args
+from argilla.utils.dependency import require_version
 
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
@@ -33,16 +32,18 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
         self,
         dataset: "FeedbackDataset",
         task: TrainingTaskForSentenceSimilarity,
-        prepared_data = None,
+        prepared_data=None,
         model: str = None,
         seed: int = None,
         train_size: Optional[float] = 1,
-        cross_encoder: bool = False
+        cross_encoder: bool = False,
     ) -> None:
         # TODO: Update with https://github.com/argilla-io/argilla/pull/3555
         require_version("sentence-transformers")
 
-        super().__init__(dataset=dataset, task=task, prepared_data=prepared_data, model=model, train_size=train_size, seed=seed)
+        super().__init__(
+            dataset=dataset, task=task, prepared_data=prepared_data, model=model, train_size=train_size, seed=seed
+        )
 
         # The prepared_data is lost in the TrainerSkeleton, is this intended?
         self._prepared_data = prepared_data
@@ -54,11 +55,13 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
             else:
                 self._model = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
-            self._logger.info(f"No model was selected, using pre-defined `{'Cross-Encoder' if self._cross_encoder else 'Bi-Encoder'}` with `{self._model}`.")
+            self._logger.info(
+                f"No model was selected, using pre-defined `{'Cross-Encoder' if self._cross_encoder else 'Bi-Encoder'}` with `{self._model}`."
+            )
 
         else:
             self._model = model
- 
+
         if isinstance(self._prepared_data, tuple):
             self._train_dataset = self._prepared_data[0]
             self._eval_dataset = self._prepared_data[1]
@@ -81,18 +84,22 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
         if self._cross_encoder:
             # Cross encoders don't support training with triplets
             if (n := len(sample.texts)) > 2:
-                raise ValueError(f"Cross-encoders don't support training with triplets, the dataset has `{n}` sentences per sample.")
+                raise ValueError(
+                    f"Cross-encoders don't support training with triplets, the dataset has `{n}` sentences per sample."
+                )
 
             from sentence_transformers import CrossEncoder
+
             self._trainer_cls = CrossEncoder
         else:
             from sentence_transformers import SentenceTransformer
+
             self._trainer_cls = SentenceTransformer
 
         self.model_kwargs = get_default_args(self._trainer_cls.__init__)
         self.trainer_kwargs = get_default_args(self._trainer_cls.fit)
         # These arguments don't exactly fit in either of the previous kwargs.
-        # We store here arguments that can be passed to the DataLoader or 
+        # We store here arguments that can be passed to the DataLoader or
         # related to the dataset types defined in sentence-transformers.
         self.data_kwargs = {}
         self.data_kwargs["batch_size"] = 32
@@ -120,30 +127,39 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
             if number_of_sentences == 2:
                 if isinstance(label, int):
                     from sentence_transformers.losses import ContrastiveLoss
+
                     self._loss_cls = ContrastiveLoss
                 else:
                     from sentence_transformers.losses import CosineSimilarityLoss
+
                     self._loss_cls = CosineSimilarityLoss
 
             else:
                 if isinstance(label, int):
                     from sentence_transformers.losses import BatchHardTripletLoss
+
                     self._loss_cls = BatchHardTripletLoss
                 else:
                     from sentence_transformers.losses import BatchAllTripletLoss
+
                     self._loss_cls = BatchAllTripletLoss
                     from sentence_transformers.datasets import SentenceLabelDataset
+
                     self.data_kwargs["dataset_type"] = SentenceLabelDataset
 
         else:
             if number_of_sentences == 3:
                 from sentence_transformers.losses import TripletLoss
+
                 self._loss_cls = TripletLoss
             else:
                 from sentence_transformers.losses import MultipleNegativesRankingLoss
+
                 self._loss_cls = MultipleNegativesRankingLoss
 
-    def _set_evaluator(self, label: Optional[Union[int, float]] = None, number_of_sentences: int  = None, evaluator_cls = None) -> None:
+    def _set_evaluator(
+        self, label: Optional[Union[int, float]] = None, number_of_sentences: int = None, evaluator_cls=None
+    ) -> None:
         """
         Helper method to choose an evaluator for the model based on the type
         of model, whether it has label or not and the number of sentences per example.
@@ -167,7 +183,9 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
                     # a subset of the evaluators defined in sentence-transformers, inform
                     # the user the one selected is not allowed.
                     self.trainer_kwargs["evaluator"] = None
-                    self._logger.warning(f"Currently only developed evaluators that implement `cls.from_input_examples` can be set.")
+                    self._logger.warning(
+                        f"Currently only developed evaluators that implement `cls.from_input_examples` can be set."
+                    )
         else:
             if label:
                 if number_of_sentences == 2:
@@ -185,17 +203,25 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
                     else:
                         if self._cross_encoder:
                             from sentence_transformers.cross_encoder.evaluation import CECorrelationEvaluator
-                            self.trainer_kwargs["evaluator"] = CECorrelationEvaluator.from_input_examples(self._eval_dataset)
+
+                            self.trainer_kwargs["evaluator"] = CECorrelationEvaluator.from_input_examples(
+                                self._eval_dataset
+                            )
                         else:
                             from sentence_transformers.evaluation import EmbeddingSimilarityEvaluator
-                            self.trainer_kwargs["evaluator"] = EmbeddingSimilarityEvaluator.from_input_examples(self._eval_dataset)
+
+                            self.trainer_kwargs["evaluator"] = EmbeddingSimilarityEvaluator.from_input_examples(
+                                self._eval_dataset
+                            )
 
                 else:
                     from sentence_transformers.evaluation import TripletEvaluator
+
                     self.trainer_kwargs["evaluator"] = TripletEvaluator.from_input_examples(self._eval_dataset)
             else:
                 if number_of_sentences == 3:
                     from sentence_transformers.evaluation import TripletEvaluator
+
                     self.trainer_kwargs["evaluator"] = TripletEvaluator.from_input_examples(self._eval_dataset)
                 else:
                     # Hard to choose one here
@@ -216,7 +242,7 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
             self.trainer_kwargs.pop("train_dataloader")
 
         self._trainer = self._trainer_cls(self._model, **self.model_kwargs)
-    
+
     def update_config(self, **kwargs) -> None:
         """
         Updates the configuration of the trainer, but the parameters depend on the trainer.subclass.
@@ -246,10 +272,13 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
         Trains the model.
         """
         from torch.utils.data import DataLoader
+
         self.init_model()
 
         if self.data_kwargs["dataset_type"]:
-            dataloader = DataLoader(dataset=self.data_kwargs["dataset_type"](self._train_dataset), batch_size=self.data_kwargs["batch_size"])
+            dataloader = DataLoader(
+                dataset=self.data_kwargs["dataset_type"](self._train_dataset), batch_size=self.data_kwargs["batch_size"]
+            )
         else:
             dataloader = DataLoader(dataset=self._train_dataset, batch_size=self.data_kwargs["batch_size"])
 
@@ -259,16 +288,15 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
             train_objectives = dataloader
         else:
             train_objectives = [(dataloader, train_loss)]
-        
-        self._trainer.fit(
-            train_objectives,
-            **self.trainer_kwargs
-        )
+
+        self._trainer.fit(train_objectives, **self.trainer_kwargs)
 
         if output_dir is not None:
             self.save(output_dir)
 
-    def predict(self, text: Union[List[List[str]], Tuple[str, List[str]]], as_argilla_records: bool = False, **kwargs) -> List[float]:
+    def predict(
+        self, text: Union[List[List[str]], Tuple[str, List[str]]], as_argilla_records: bool = False, **kwargs
+    ) -> List[float]:
         """
         Predicts the similarity of the sentences.
 
@@ -293,6 +321,7 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
 
         else:
             from sentence_transformers.util import cos_sim
+
             # Under this model we could potentially obtain the similarity of all vs all
             # the input sentences, but maybe is more intuitive to return only the similarities
             # between pairs as we do with the CrossEncoder predictions.
@@ -314,6 +343,6 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
             self._trainer.save(output_dir)
         else:
             # For the moment just save the in the simplest form, creating the model card or the
-            # dataset for example should be done taking the extra information from the argilla 
+            # dataset for example should be done taking the extra information from the argilla
             # dataset instead of the defaults
             self._trainer.save(output_dir, model_name=None, create_model_card=False, train_datasets=None)
