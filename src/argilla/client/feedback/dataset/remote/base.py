@@ -225,7 +225,6 @@ class RemoteFeedbackDatasetBase(FeedbackDatasetBase, Generic[T]):
         """Returns the number of records in the dataset."""
         return self._records.__len__()
 
-
     def __iter__(self) -> Iterator[RemoteFeedbackRecord]:
         """Returns an iterator over the records in the dataset."""
         yield from self._records
