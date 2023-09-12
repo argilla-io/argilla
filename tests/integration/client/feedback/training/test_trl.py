@@ -28,14 +28,16 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForSFTFormat,
 )
 from datasets import Dataset, DatasetDict
+from transformers import AutoModelForCausalLM, AutoModelForSequenceClassification, AutoTokenizer
+from trl import AutoModelForCausalLMWithValueHead
 
 from tests.integration.training.helpers import train_with_cleanup
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
-__OUTPUT_DIR__ = "tmp"
-__FRAMWORK__ = "trl"
+OUTPUT_DIR = "tmp"
+FRAMEWORK = "trl"
 
 
 def try_wrong_format(dataset, task, format_func: Any) -> None:
@@ -44,8 +46,8 @@ def try_wrong_format(dataset, task, format_func: Any) -> None:
         ValueError,
         match=re.escape(f"formatting_func must return {format_func.__annotations__['format']}, not <class 'dict'>"),
     ):
-        trainer = ArgillaTrainer(dataset=dataset, task=task, framework=__FRAMWORK__)
-        trainer.train(__OUTPUT_DIR__)
+        trainer = ArgillaTrainer(dataset=dataset, task=task, framework=FRAMEWORK)
+        trainer.train(OUTPUT_DIR)
 
 
 def test_prepare_for_training_sft(
@@ -83,24 +85,37 @@ def test_prepare_for_training_sft(
     )
 
     task = TrainingTask.for_supervised_fine_tuning(formatting_func)
-    train_dataset = dataset.prepare_for_training(framework=__FRAMWORK__, task=task)
+    train_dataset = dataset.prepare_for_training(framework=FRAMEWORK, task=task)
     assert isinstance(train_dataset, Dataset)
     assert len(train_dataset) == 2
-    train_dataset_dict = dataset.prepare_for_training(framework=__FRAMWORK__, task=task, train_size=0.5)
+    train_dataset_dict = dataset.prepare_for_training(framework=FRAMEWORK, task=task, train_size=0.5)
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
     assert len(train_dataset_dict["train"]) == 1
 
-    trainer = ArgillaTrainer(dataset, task, framework=__FRAMWORK__, model="sshleifer/tiny-gpt2")
-    trainer.update_config(max_steps=3)
-    assert trainer._trainer.training_args_kwargs["max_steps"] == 3
-    trainer.update_config(max_steps=1)
-    assert trainer._trainer.training_args_kwargs["max_steps"] == 1
-    train_with_cleanup(trainer, __OUTPUT_DIR__)
+    small_model_id = "sshleifer/tiny-gpt2"
+    loaded_model = AutoModelForCausalLM.from_pretrained(small_model_id)
+    loaded_tokenizer = AutoTokenizer.from_pretrained(small_model_id)
+    loaded_tokenizer.pad_token_id = loaded_tokenizer.eos_token_id
+    # Set some values to track and assert later
+    loaded_model.test_value = 12
+    loaded_tokenizer.test_value = 12
+    for model, tokenizer in [(small_model_id, None), (loaded_model, loaded_tokenizer)]:
+        trainer = ArgillaTrainer(dataset, task, framework=FRAMEWORK, model=model, tokenizer=tokenizer)
+        trainer.update_config(max_steps=3)
+        assert trainer._trainer.training_args_kwargs["max_steps"] == 3
+        trainer.update_config(max_steps=1)
+        assert trainer._trainer.training_args_kwargs["max_steps"] == 1
+        train_with_cleanup(trainer, OUTPUT_DIR)
 
-    eval_trainer = ArgillaTrainer(dataset, task, framework=__FRAMWORK__, model="sshleifer/tiny-gpt2", train_size=0.5)
-    eval_trainer.update_config(max_steps=1)
-    train_with_cleanup(eval_trainer, __OUTPUT_DIR__)
+        eval_trainer = ArgillaTrainer(dataset, task, framework=FRAMEWORK, model=model, train_size=0.5)
+        eval_trainer.update_config(max_steps=1)
+        train_with_cleanup(eval_trainer, OUTPUT_DIR)
+
+        # Verify that the passed model and tokenizer are used
+        if tokenizer is not None:
+            assert loaded_model.test_value == 12
+            assert loaded_tokenizer.test_value == 12
 
 
 def test_prepare_for_training_rm(
@@ -135,24 +150,39 @@ def test_prepare_for_training_rm(
     try_wrong_format(dataset=dataset, task=TrainingTask.for_reward_modeling, format_func=TrainingTaskForRMFormat)
 
     task = TrainingTask.for_reward_modeling(formatting_func)
-    train_dataset = dataset.prepare_for_training(framework=__FRAMWORK__, task=task)
+    train_dataset = dataset.prepare_for_training(framework=FRAMEWORK, task=task)
     assert isinstance(train_dataset, Dataset)
     assert len(train_dataset) == 2
-    train_dataset_dict = dataset.prepare_for_training(framework=__FRAMWORK__, task=task, train_size=0.5)
+    train_dataset_dict = dataset.prepare_for_training(framework=FRAMEWORK, task=task, train_size=0.5)
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
     assert len(train_dataset_dict["train"]) == 1
 
-    trainer = ArgillaTrainer(dataset, task, framework=__FRAMWORK__, model="sshleifer/tiny-gpt2")
-    trainer.update_config(max_steps=3)
-    assert trainer._trainer.training_args_kwargs["max_steps"] == 3
-    trainer.update_config(max_steps=1)
-    assert trainer._trainer.training_args_kwargs["max_steps"] == 1
-    train_with_cleanup(trainer, __OUTPUT_DIR__)
+    small_model_id = "sshleifer/tiny-gpt2"
+    loaded_model = AutoModelForSequenceClassification.from_pretrained(small_model_id)
+    loaded_tokenizer = AutoTokenizer.from_pretrained(small_model_id)
+    loaded_tokenizer.pad_token_id = loaded_tokenizer.eos_token_id
+    # Set some values to track and assert later
+    loaded_model.test_value = 12
+    loaded_tokenizer.test_value = 12
+    for model, tokenizer in [(small_model_id, None), (loaded_model, loaded_tokenizer)]:
+        trainer = ArgillaTrainer(dataset, task, framework=FRAMEWORK, model=model, tokenizer=tokenizer)
+        trainer.update_config(max_steps=3)
+        assert trainer._trainer.training_args_kwargs["max_steps"] == 3
+        trainer.update_config(max_steps=1)
+        assert trainer._trainer.training_args_kwargs["max_steps"] == 1
+        train_with_cleanup(trainer, OUTPUT_DIR)
 
-    eval_trainer = ArgillaTrainer(dataset, task, framework=__FRAMWORK__, model="sshleifer/tiny-gpt2", train_size=0.5)
-    eval_trainer.update_config(max_steps=1)
-    train_with_cleanup(eval_trainer, __OUTPUT_DIR__)
+        eval_trainer = ArgillaTrainer(
+            dataset, task, framework=FRAMEWORK, model=model, tokenizer=tokenizer, train_size=0.5
+        )
+        eval_trainer.update_config(max_steps=1)
+        train_with_cleanup(eval_trainer, OUTPUT_DIR)
+
+        # Verify that the passed model and tokenizer are used
+        if tokenizer is not None:
+            assert loaded_model.test_value == 12
+            assert loaded_tokenizer.test_value == 12
 
 
 def test_prepare_for_training_ppo(
@@ -180,25 +210,44 @@ def test_prepare_for_training_ppo(
     )
 
     task = TrainingTask.for_proximal_policy_optimization(formatting_func=formatting_func)
-    train_dataset = dataset.prepare_for_training(framework=__FRAMWORK__, task=task)
+    train_dataset = dataset.prepare_for_training(framework=FRAMEWORK, task=task)
     assert isinstance(train_dataset, Dataset)
     assert len(train_dataset) == 2
-    train_dataset_dict = dataset.prepare_for_training(framework=__FRAMWORK__, task=task, train_size=0.5)
+    train_dataset_dict = dataset.prepare_for_training(framework=FRAMEWORK, task=task, train_size=0.5)
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
     assert len(train_dataset_dict["train"]) == 1
 
-    trainer = ArgillaTrainer(dataset, task, framework=__FRAMWORK__, model="sshleifer/tiny-gpt2")
-    trainer.update_config(config=PPOConfig(batch_size=1, ppo_epochs=1), reward_model=reward_model)
-    assert trainer._trainer.trainer_kwargs["config"].batch_size == 1
-    trainer.update_config(generation_kwargs={"top_k": 0.0, "top_p": 1.0, "do_sample": True})
-    assert trainer._trainer.training_args_kwargs["generation_kwargs"]["top_p"] == 1.0
-    train_with_cleanup(trainer, __OUTPUT_DIR__)
+    small_model_id = "sshleifer/tiny-gpt2"
+    loaded_model = AutoModelForCausalLMWithValueHead.from_pretrained(small_model_id)
+    loaded_tokenizer = AutoTokenizer.from_pretrained(small_model_id)
+    loaded_tokenizer.pad_token_id = loaded_tokenizer.eos_token_id
+    # Set some values to track and assert later
+    loaded_model.test_value = 12
+    loaded_tokenizer.test_value = 12
+    for model, tokenizer in [(small_model_id, None), (loaded_model, loaded_tokenizer)]:
+        trainer = ArgillaTrainer(dataset, task, framework=FRAMEWORK, model=model, tokenizer=tokenizer)
+        trainer.update_config(config=PPOConfig(batch_size=1, ppo_epochs=1), reward_model=reward_model)
+        assert trainer._trainer.trainer_kwargs["config"].batch_size == 1
+        trainer.update_config(generation_kwargs={"top_k": 0.0, "top_p": 1.0, "do_sample": True})
+        assert trainer._trainer.training_args_kwargs["generation_kwargs"]["top_p"] == 1.0
+        train_with_cleanup(trainer, OUTPUT_DIR)
 
-    eval_trainer = ArgillaTrainer(dataset, task, framework=__FRAMWORK__, model="sshleifer/tiny-gpt2", train_size=0.5)
-    eval_trainer.update_config(config=PPOConfig(batch_size=1, ppo_epochs=1), reward_model=reward_model)
-    eval_trainer.update_config(max_steps=1)
-    train_with_cleanup(eval_trainer, __OUTPUT_DIR__)
+        # Reload the model, as the previous trainer updated it
+        if tokenizer is not None:
+            model = AutoModelForCausalLMWithValueHead.from_pretrained(small_model_id)
+
+        eval_trainer = ArgillaTrainer(
+            dataset, task, framework=FRAMEWORK, model=model, tokenizer=tokenizer, train_size=0.5
+        )
+        eval_trainer.update_config(config=PPOConfig(batch_size=1, ppo_epochs=1), reward_model=reward_model)
+        eval_trainer.update_config(max_steps=1)
+        train_with_cleanup(eval_trainer, OUTPUT_DIR)
+
+        # Verify that the passed model and tokenizer are used
+        if tokenizer is not None:
+            assert loaded_model.test_value == 12
+            assert loaded_tokenizer.test_value == 12
 
 
 def test_prepare_for_training_dpo(
@@ -238,21 +287,36 @@ def test_prepare_for_training_dpo(
     )
 
     task = TrainingTask.for_direct_preference_optimization(formatting_func)
-    train_dataset = dataset.prepare_for_training(framework=__FRAMWORK__, task=task)
+    train_dataset = dataset.prepare_for_training(framework=FRAMEWORK, task=task)
     assert isinstance(train_dataset, Dataset)
     assert len(train_dataset) == 2
-    train_dataset_dict = dataset.prepare_for_training(framework=__FRAMWORK__, task=task, train_size=0.5)
+    train_dataset_dict = dataset.prepare_for_training(framework=FRAMEWORK, task=task, train_size=0.5)
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
     assert len(train_dataset_dict["train"]) == 1
 
-    trainer = ArgillaTrainer(dataset, task, framework=__FRAMWORK__, model="sshleifer/tiny-gpt2")
-    trainer.update_config(max_steps=3)
-    assert trainer._trainer.training_args_kwargs["max_steps"] == 3
-    trainer.update_config(max_steps=1)
-    assert trainer._trainer.training_args_kwargs["max_steps"] == 1
-    train_with_cleanup(trainer, __OUTPUT_DIR__)
+    small_model_id = "sshleifer/tiny-gpt2"
+    loaded_model = AutoModelForCausalLM.from_pretrained(small_model_id)
+    loaded_tokenizer = AutoTokenizer.from_pretrained(small_model_id)
+    loaded_tokenizer.pad_token_id = loaded_tokenizer.eos_token_id
+    # Set some values to track and assert later
+    loaded_model.test_value = 12
+    loaded_tokenizer.test_value = 12
+    for model, tokenizer in [(small_model_id, None), (loaded_model, loaded_tokenizer)]:
+        trainer = ArgillaTrainer(dataset, task, framework=FRAMEWORK, model=model, tokenizer=tokenizer)
+        trainer.update_config(max_steps=3)
+        assert trainer._trainer.training_args_kwargs["max_steps"] == 3
+        trainer.update_config(max_steps=1)
+        assert trainer._trainer.training_args_kwargs["max_steps"] == 1
+        train_with_cleanup(trainer, OUTPUT_DIR)
 
-    eval_trainer = ArgillaTrainer(dataset, task, framework=__FRAMWORK__, model="sshleifer/tiny-gpt2", train_size=0.5)
-    eval_trainer.update_config(max_steps=1)
-    train_with_cleanup(eval_trainer, __OUTPUT_DIR__)
+        eval_trainer = ArgillaTrainer(
+            dataset, task, framework=FRAMEWORK, model=model, tokenizer=tokenizer, train_size=0.5
+        )
+        eval_trainer.update_config(max_steps=1)
+        train_with_cleanup(eval_trainer, OUTPUT_DIR)
+
+        # Verify that the passed model and tokenizer are used
+        if tokenizer is not None:
+            assert loaded_model.test_value == 12
+            assert loaded_tokenizer.test_value == 12

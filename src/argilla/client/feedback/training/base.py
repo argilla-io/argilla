@@ -26,6 +26,7 @@ os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
 if TYPE_CHECKING:
     import spacy
+    from transformers import PreTrainedModel, PreTrainedTokenizer
 
     from argilla.client.feedback.dataset import FeedbackDataset
 
@@ -37,7 +38,8 @@ class ArgillaTrainer(ArgillaTrainerV1):
         task: TrainingTaskTypes,
         framework: Framework,
         lang: Optional["spacy.Language"] = None,
-        model: Optional[str] = None,
+        model: Optional[Union[str, "PreTrainedModel"]] = None,
+        tokenizer: Optional["PreTrainedTokenizer"] = None,
         train_size: Optional[float] = None,
         seed: Optional[int] = None,
         gpu_id: Optional[int] = -1,
@@ -53,8 +55,9 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 "openai", "span_marker" and "trl" are supported.
             lang: the spaCy language model to use for training, just required when `framework="spacy"`.
                 Defaults to None, but it will be set to `spacy.blank("en")` if not specified.
-            model: name or path to the baseline model to be used. If not specified will set to a good default
-                per framework, if applicable. Defaults to None.
+            model: name or path to the baseline model to be used, or a transformers PreTrainedModel instance.
+                If not specified will set to a good default per framework, if applicable. Defaults to None.
+            tokenizer: a transformers PreTrainedTokenizer instance to tokenize the text.
             train_size: the size of the training set. If not specified, the entire dataset will be used for training,
                 which may be an issue if `framework="spacy"` as it requires a validation set. Defaults to None.
             seed: the random seed to ensure reproducibility. Defaults to None.
@@ -69,6 +72,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
         self._task = task
         self._seed = seed  # split is used for train-test-split and should therefore be fixed
         self._model = model
+        self._tokenizer = tokenizer
 
         self._prepared_data = self._dataset.prepare_for_training(
             framework=framework,
@@ -92,6 +96,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 prepared_data=self._prepared_data,
                 seed=self._seed,
                 model=self._model,
+                tokenizer=self._tokenizer,
             )
         elif framework is Framework.TRANSFORMERS:
             from argilla.client.feedback.training.frameworks.transformers import ArgillaTransformersTrainer
@@ -102,6 +107,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 prepared_data=self._prepared_data,
                 seed=self._seed,
                 model=self._model,
+                tokenizer=self._tokenizer,
             )
         elif framework is Framework.PEFT:
             from argilla.client.feedback.training.frameworks.peft import ArgillaPeftTrainer
@@ -112,6 +118,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 prepared_data=self._prepared_data,
                 seed=self._seed,
                 model=self._model,
+                tokenizer=self._tokenizer,
             )
         elif framework is Framework.SPACY:
             from argilla.client.feedback.training.frameworks.spacy import ArgillaSpaCyTrainer
@@ -134,6 +141,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 prepared_data=self._prepared_data,
                 seed=self._seed,
                 model=self._model,
+                tokenizer=self._tokenizer,
                 gpu_id=gpu_id,
                 framework_kwargs=framework_kwargs,  # update_transformer
             )
@@ -156,6 +164,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 prepared_data=self._prepared_data,
                 seed=self._seed,
                 model=self._model,
+                tokenizer=self._tokenizer,
             )
         elif framework is Framework.TRL:
             from argilla.client.feedback.training.frameworks.trl import ArgillaTRLTrainer
@@ -166,6 +175,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 prepared_data=self._prepared_data,
                 seed=self._seed,
                 model=self._model,
+                tokenizer=self._tokenizer,
             )
         else:
             raise NotImplementedError(f"{framework} is not a valid framework.")
