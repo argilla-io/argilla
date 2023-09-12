@@ -1,5 +1,5 @@
 <template>
-  <div @keydown="answerRatingFor">
+  <div @keydown.prevent="answerRatingFor">
     <slot></slot>
   </div>
 </template>
@@ -25,8 +25,6 @@ export default {
     answerRatingFor(event) {
       if (this.timer) clearTimeout(this.timer);
       if (event.key == "Tab") return;
-
-      event.preventDefault();
 
       if (event.code == "Space") {
         document.activeElement.click();
