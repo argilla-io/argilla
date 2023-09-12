@@ -141,7 +141,6 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 prepared_data=self._prepared_data,
                 seed=self._seed,
                 model=self._model,
-                tokenizer=self._tokenizer,
                 gpu_id=gpu_id,
                 framework_kwargs=framework_kwargs,  # update_transformer
             )
@@ -164,7 +163,6 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 prepared_data=self._prepared_data,
                 seed=self._seed,
                 model=self._model,
-                tokenizer=self._tokenizer,
             )
         elif framework is Framework.TRL:
             from argilla.client.feedback.training.frameworks.trl import ArgillaTRLTrainer
