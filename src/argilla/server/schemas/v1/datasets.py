@@ -29,7 +29,7 @@ from pydantic.utils import GetterDict
 
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
-from argilla.server.search_engine import Query
+from argilla.server.search_engine import StringQuery
 
 try:
     from typing import Annotated
@@ -409,8 +409,12 @@ class RecordsCreate(BaseModel):
     items: conlist(item_type=RecordCreate, min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
 
 
+class TextQuery(BaseModel):
+    text: StringQuery
+
+
 class SearchRecordsQuery(BaseModel):
-    query: Query
+    query: TextQuery
 
 
 class SearchRecord(BaseModel):

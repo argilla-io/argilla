@@ -29,7 +29,14 @@ from argilla.server.models import (
     Record,
     Response,
     ResponseStatus,
-    User,
+)
+from argilla.server.search_engine.base import (
+    SearchEngine,
+    SearchResponseItem,
+    SearchResponses,
+    StringQuery,
+    UserResponse,
+    UserResponseStatusFilter,
 )
 from argilla.server.settings import settings
 
@@ -47,11 +54,6 @@ class SearchDocumentGetter(GetterDict):
         return super().get(key, default)
 
 
-class UserResponse(BaseModel):
-    values: Optional[Dict[str, Any]]
-    status: ResponseStatus
-
-
 class SearchDocument(BaseModel):
     id: UUID
     fields: Dict[str, Any]
@@ -64,36 +66,7 @@ class SearchDocument(BaseModel):
 
 
 @dataclasses.dataclass
-class TextQuery:
-    q: str
-    field: Optional[str] = None
-
-
-@dataclasses.dataclass
-class Query:
-    text: TextQuery
-
-
-@dataclasses.dataclass
-class UserResponseStatusFilter:
-    user: User
-    statuses: List[ResponseStatusFilter]
-
-
-@dataclasses.dataclass
-class SearchResponseItem:
-    record_id: UUID
-    score: Optional[float]
-
-
-@dataclasses.dataclass
-class SearchResponses:
-    items: List[SearchResponseItem]
-    total: int = 0
-
-
-@dataclasses.dataclass
-class SearchEngine:
+class OpenSearchEngine(SearchEngine):
     config: Dict[str, Any]
 
     es_number_of_shards: int
@@ -177,7 +150,7 @@ class SearchEngine:
     async def search(
         self,
         dataset: Dataset,
-        query: Union[Query, str],
+        query: Union[StringQuery, str],
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         offset: int = 0,
         limit: int = 100,
@@ -185,9 +158,9 @@ class SearchEngine:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html
 
         if isinstance(query, str):
-            query = Query(text=TextQuery(q=query))
+            query = StringQuery(q=query)
 
-        text_query = self._text_query_builder(dataset, text=query.text)
+        text_query = self._text_query_builder(dataset, text=query)
 
         bool_query = {"must": [text_query]}
         if user_response_status_filter:
@@ -213,7 +186,7 @@ class SearchEngine:
         return SearchResponses(items=items, total=total)
 
     @staticmethod
-    def _text_query_builder(dataset: Dataset, text: TextQuery) -> dict:
+    def _text_query_builder(dataset: Dataset, text: StringQuery) -> dict:
         if not text.field:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html
             field_names = [
@@ -315,7 +288,7 @@ async def get_search_engine() -> AsyncGenerator[SearchEngine, None]:
         retry_on_timeout=True,
         max_retries=5,
     )
-    search_engine = SearchEngine(
+    search_engine = OpenSearchEngine(
         config,
         es_number_of_shards=settings.es_records_index_shards,
         es_number_of_replicas=settings.es_records_index_replicas,
