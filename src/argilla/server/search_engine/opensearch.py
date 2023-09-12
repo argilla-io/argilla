@@ -30,9 +30,14 @@ from argilla.server.models import (
     Response,
     ResponseStatus,
 )
-from argilla.server.search_engine.base import (SearchEngine, SearchResponseItem, SearchResponses, StringQuery,
-                                               UserResponse,
-                                               UserResponseStatusFilter, )
+from argilla.server.search_engine.base import (
+    SearchEngine,
+    SearchResponseItem,
+    SearchResponses,
+    StringQuery,
+    UserResponse,
+    UserResponseStatusFilter,
+)
 from argilla.server.settings import settings
 
 

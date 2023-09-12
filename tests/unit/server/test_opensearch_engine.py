@@ -19,11 +19,11 @@ import pytest
 import pytest_asyncio
 from argilla.server.enums import ResponseStatusFilter
 from argilla.server.models import Dataset, User
-from argilla.server.search_engine.opensearch import OpenSearchEngine
 from argilla.server.search_engine import (
     StringQuery,
     UserResponseStatusFilter,
 )
+from argilla.server.search_engine.opensearch import OpenSearchEngine
 from opensearchpy import OpenSearch, RequestError, helpers
 from sqlalchemy.orm import Session
 
