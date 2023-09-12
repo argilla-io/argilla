@@ -115,9 +115,18 @@ export default {
 
         if (!isShiftKeyPressed && isLastElementActive) {
           this.focusOn(e, firstElement);
-        }
-        if (isShiftKeyPressed && isFirstElementActive) {
+        } else if (isShiftKeyPressed && isFirstElementActive) {
           this.focusOn(e, lastElement);
+        } else {
+          const index = Array.from(focusable).findIndex(
+            (r) => r === document.activeElement
+          );
+
+          const nextElementToFocus = isShiftKeyPressed
+            ? focusable[index - 1]
+            : focusable[index + 1];
+
+          this.focusOn(e, nextElementToFocus);
         }
       };
     },

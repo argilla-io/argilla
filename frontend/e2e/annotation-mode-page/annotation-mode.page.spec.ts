@@ -614,7 +614,7 @@ test.describe("Annotation page shortcuts", () => {
 
       await page.keyboard.press("v");
 
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
       await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
       await page.keyboard.press(shortcuts.singleLabel.goToNextLabel);
 
@@ -1096,7 +1096,7 @@ test.describe("Annotation page shortcuts", () => {
       await page.keyboard.press(shortcuts.text.readMode);
 
       await page.keyboard.press(shortcuts.text.editableMode);
-      await page.keyboard.insertText("Modified");
+      await page.keyboard.insertText("Modified ");
 
       await expect(page).toHaveScreenshot();
     });

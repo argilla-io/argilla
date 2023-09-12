@@ -181,7 +181,13 @@ export default {
   },
   methods: {
     keyboardHandler($event) {
-      if ($event.key === "Tab" || $event.shiftKey || $event.ctrlKey) return;
+      if (
+        $event.key === "Tab" ||
+        $event.shiftKey ||
+        $event.ctrlKey ||
+        $event.metaKey
+      )
+        return;
 
       if (!this.$refs.searchComponentRef) return;
 
