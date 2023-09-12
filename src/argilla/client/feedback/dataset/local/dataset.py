@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from argilla.client.feedback.schemas import FeedbackRecord
 
 
-class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase):
+class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin):
     def __init__(
         self,
         *,

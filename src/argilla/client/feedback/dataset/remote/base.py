@@ -225,9 +225,6 @@ class RemoteFeedbackDatasetBase(FeedbackDatasetBase, Generic[T]):
         """Returns the number of records in the dataset."""
         return self._records.__len__()
 
-    def iter(self) -> Iterator[RemoteFeedbackRecord]:
-        """Returns an iterator over the records in the dataset."""
-        return self.__iter__()
 
     def __iter__(self) -> Iterator[RemoteFeedbackRecord]:
         """Returns an iterator over the records in the dataset."""
@@ -330,10 +327,6 @@ class RemoteFeedbackDatasetBase(FeedbackDatasetBase, Generic[T]):
             " explicitly calling `push_to_argilla` as in the local `FeedbackDataset`.",
             UserWarning,
             stacklevel=2,
-        )
-        raise NotImplementedError(
-            "`push_to_argilla` doesn't work for neither `RemoteFeedbackDataset` nor `FilteredRemoteFeedbackDataset`.",
-            "First call `pull_from_argilla` to get a local instance of the dataset, and then call `push_to_argilla(*args, **kwargs)`",
         )
 
     def prepare_for_training(self):
