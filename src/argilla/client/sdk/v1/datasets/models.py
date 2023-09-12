@@ -42,7 +42,7 @@ class FeedbackValueModel(BaseModel):
 
 class FeedbackResponseStatusFilter(str, Enum):
     draft = "draft"
-    missing = "missing"
+    missing = "missing"  # not a status as-is, used as a filter to indicate no response
     submitted = "submitted"
     discarded = "discarded"
 
