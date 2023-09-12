@@ -33,7 +33,6 @@ def create_user(
         help="A workspace name to which the user will be linked to. This option can be provided several times.",
     ),
 ) -> None:
-    from rich.console import Console
     from rich.markdown import Markdown
 
     from argilla.cli.rich import echo_in_panel
