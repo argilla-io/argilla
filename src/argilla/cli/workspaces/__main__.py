@@ -64,7 +64,7 @@ def callback(
     ctx.obj = workspace
 
 
-app = typer.Typer(help="Holds CLI commands for workspace management.", no_args_is_help=True, callback=callback)
+app = typer.Typer(help="Commands for workspace management", no_args_is_help=True, callback=callback)
 
 app.command(name="create", help="Create a workspace")(create_workspace)
 app.command(name="list", help="Lists workspaces of the logged user.")(list_workspaces)
