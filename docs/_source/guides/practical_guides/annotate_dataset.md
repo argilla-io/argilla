@@ -1,4 +1,4 @@
-# Annotate a  dataset
+# ✍️ Annotate a  dataset
 
 After pushing a `FeedbackDataset` to Argilla, as explained in [Create a Dataset](create_dataset.ipynb), you can start annotating it through the Argilla UI.
 

@@ -1,4 +1,4 @@
-# Export a dataset
+# 📥 Export a dataset
 
 Your Argilla instance will always have all your datasets and annotations saved and accessible. However, if you'd like to save your dataset either locally or in the Hugging Face Hub, in this section you will find some useful methods to do just that.
 

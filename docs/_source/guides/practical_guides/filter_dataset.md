@@ -1,4 +1,4 @@
-# Filter a Dataset
+# 🔎 Filter and query datasets
 
 ## Feedback Dataset
 From Argilla 1.15.0, the `filter_by` method has been included for the `FeedbackDataset`s pushed to Argilla, which allows you to filter the records in a dataset based on the `response_status` of the annotations of the records. So on, to be able to use the `filter_by` method, you will need to make sure that you are using a `FeedbackDataset` in Argilla.

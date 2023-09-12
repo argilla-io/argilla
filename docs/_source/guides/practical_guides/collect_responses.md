@@ -1,4 +1,4 @@
-# Collect responses and metrics from an annotated dataset
+# 📊 Collect responses and metrics
 
 ## Feedback Dataset
 

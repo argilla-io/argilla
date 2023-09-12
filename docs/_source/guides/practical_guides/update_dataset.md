@@ -1,4 +1,4 @@
-# Update a Feedback Dataset
+# 💫 Update a dataset
 
 Oftentimes datasets that we have created previously need modifications or updates. In this section, we will explore some of the most common workflows to change an existing `FeedbackDataset` in Argilla.
 
