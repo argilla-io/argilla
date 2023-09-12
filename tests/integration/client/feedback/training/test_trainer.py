@@ -150,8 +150,7 @@ def test_argilla_trainer_text_classification_with_model_tokenizer(
     tokenizer.test_value = 12
     if not (framework == Framework("peft") and sys.version_info < (3, 9)):
         trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, model=model, tokenizer=tokenizer)
-        # if framework == Framework("transformers"):
-        #     trainer.update_config(num_steps=1)
+        trainer.update_config(num_steps=1)
         trainer.train(__OUTPUT_DIR__)
 
         # Verify that the passed model and tokenizer are used
