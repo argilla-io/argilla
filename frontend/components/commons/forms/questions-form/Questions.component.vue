@@ -5,8 +5,10 @@
       <div
         v-for="(question, index) in questions"
         :key="question.id"
-        @keydown.shift.arrow-up="updateQuestionAutofocus(autofocusPosition - 1)"
-        @keydown.shift.arrow-down="
+        @keydown.shift.arrow-up.prevent="
+          updateQuestionAutofocus(autofocusPosition - 1)
+        "
+        @keydown.shift.arrow-down.prevent="
           updateQuestionAutofocus(autofocusPosition + 1)
         "
       >
