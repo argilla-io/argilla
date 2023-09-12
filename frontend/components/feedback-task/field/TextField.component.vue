@@ -6,7 +6,7 @@
         <BaseButton
           title="Copy to clipboard"
           class="text_field_component__copy-button"
-          @click.prevent="$copyToClipboard(text)"
+          @click.prevent="$copyToClipboard(fieldText)"
         >
           <svgicon color="#acacac" name="copy" width="18" height="18" />
         </BaseButton>
