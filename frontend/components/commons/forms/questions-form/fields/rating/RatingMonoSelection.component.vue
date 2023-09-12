@@ -112,10 +112,7 @@ input[type="checkbox"] {
   @extend %visuallyhidden;
   &:focus {
     & + .label-text {
-      outline: 2px solid palette(purple, 200);
-      &.label-active {
-        outline: 2px solid palette(apricot);
-      }
+      outline: 2px solid $primary-color;
     }
   }
 }

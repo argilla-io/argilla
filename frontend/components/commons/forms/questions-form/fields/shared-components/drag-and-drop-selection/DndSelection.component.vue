@@ -281,7 +281,7 @@ $max-visible-card-items: 12;
       transition: box-shadow 0.2s ease-out !important;
 
       &:focus {
-        outline: 2px solid $card-primary-color !important;
+        outline: 2px solid $primary-color !important;
       }
       &:focus:not(:focus-visible) {
         outline: none;
@@ -296,7 +296,7 @@ $max-visible-card-items: 12;
       background-color: $card-primary-color;
       color: palette(white);
       &:focus {
-        outline: 2px solid palette(apricot);
+        outline: 2px solid $primary-color;
       }
       &:focus:not(:focus-visible) {
         outline: none;
