@@ -35,6 +35,7 @@ describe("useTextFieldViewModel highlight text without any words between backtic
     const { text } = useTextFieldViewModel(props);
 
     expect(text.value).toBe(
+      // eslint-disable-next-line prettier/prettier
       "<span class=\"highlight-text\">This</span> is a sentence"
     );
   });
@@ -49,6 +50,7 @@ describe("useTextFieldViewModel highlight text without any words between backtic
     const { text } = useTextFieldViewModel(props);
 
     expect(text.value).toBe(
+      // eslint-disable-next-line prettier/prettier
       "<span class=\"highlight-text\">This</span> is a sentence"
     );
   });
@@ -63,6 +65,7 @@ describe("useTextFieldViewModel highlight text without any words between backtic
     const { text } = useTextFieldViewModel(props);
 
     expect(text.value).toBe(
+      // eslint-disable-next-line prettier/prettier
       "This <span class=\"highlight-text\">is</span> a sentence"
     );
   });
@@ -77,6 +80,7 @@ describe("useTextFieldViewModel highlight text without any words between backtic
     const { text } = useTextFieldViewModel(props);
 
     expect(text.value).toBe(
+      // eslint-disable-next-line prettier/prettier
       "This <span class=\"highlight-text\">is</span> <span class=\"highlight-text\">a</span> sentence"
     );
   });
@@ -117,6 +121,7 @@ describe("useTextFieldViewModel highlight text with a markdown with one word", (
     const { text } = useTextFieldViewModel(props);
 
     expect(text.value).toBe(
+      // eslint-disable-next-line prettier/prettier
       "<span class=\"highlight-text\">This</span> is a `sentence`"
     );
   });
@@ -131,6 +136,7 @@ describe("useTextFieldViewModel highlight text with a markdown with one word", (
     const { text } = useTextFieldViewModel(props);
 
     expect(text.value).toBe(
+      // eslint-disable-next-line prettier/prettier
       "<span class=\"highlight-text\">This</span> is a `sentence`"
     );
   });
@@ -145,6 +151,7 @@ describe("useTextFieldViewModel highlight text with a markdown with one word", (
     const { text } = useTextFieldViewModel(props);
 
     expect(text.value).toBe(
+      // eslint-disable-next-line prettier/prettier
       "This <span class=\"highlight-text\">is</span> a `sentence`"
     );
   });
@@ -159,6 +166,7 @@ describe("useTextFieldViewModel highlight text with a markdown with one word", (
     const { text } = useTextFieldViewModel(props);
 
     expect(text.value).toBe(
+      // eslint-disable-next-line prettier/prettier
       "This <span class=\"highlight-text\">is</span> <span class=\"highlight-text\">a</span> `sentence`"
     );
   });
@@ -199,6 +207,7 @@ describe("useTextFieldViewModel highlight text with a markdown with several word
     const { text } = useTextFieldViewModel(props);
 
     expect(text.value).toBe(
+      // eslint-disable-next-line prettier/prettier
       "<span class=\"highlight-text\">This</span> is `a sentence`"
     );
   });
@@ -213,6 +222,7 @@ describe("useTextFieldViewModel highlight text with a markdown with several word
     const { text } = useTextFieldViewModel(props);
 
     expect(text.value).toBe(
+      // eslint-disable-next-line prettier/prettier
       "<span class=\"highlight-text\">This</span> is `a sentence`"
     );
   });
@@ -227,6 +237,7 @@ describe("useTextFieldViewModel highlight text with a markdown with several word
     const { text } = useTextFieldViewModel(props);
 
     expect(text.value).toBe(
+      // eslint-disable-next-line prettier/prettier
       "This <span class=\"highlight-text\">is</span> `a sentence`"
     );
   });
@@ -241,6 +252,7 @@ describe("useTextFieldViewModel highlight text with a markdown with several word
     const { text } = useTextFieldViewModel(props);
 
     expect(text.value).toBe(
+      // eslint-disable-next-line prettier/prettier
       "This <span class=\"highlight-text\">is</span> `a sentence`"
     );
   });
@@ -269,6 +281,7 @@ describe("sentence with duplicated words and markdown", () => {
     const { text } = useTextFieldViewModel(props);
 
     expect(text.value).toBe(
+      // eslint-disable-next-line prettier/prettier
       "<span class=\"highlight-text\">record</span> <span class=\"highlight-text\">record</span> records `recordssss` <span class=\"highlight-text\">rEcOrD</span> <span class=\"highlight-text\">RECORD</span>"
     );
   });
