@@ -51,10 +51,6 @@ class FeedbackDatasetSharedBase(ABC):
         """Returns an iterator over the records in the dataset."""
         yield from self._records
 
-    @abstractmethod
-    def iter(self) -> Any:
-        """Returns an iterator over the records in the dataset."""
-
     @property
     @abstractproperty
     def records(self) -> Any:

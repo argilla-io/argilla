@@ -94,24 +94,11 @@ class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeed
         )
 
     def delete(self) -> None:
-        raise NotImplementedError(
-            "`delete` does not work for filtered datasets. First call `filter_reset()` and then `delete()`."
+        warnings.warn(
+            message="`delete` does not work for filtered datasets. First call `filter_reset()` and then `delete()`.",
+            stacklevel=2,
         )
 
     def filter_by(self, *args, **kwargs) -> "FilteredRemoteFeedbackDataset":
         warnings.warn(message="Removing old filters and applying new ones.", stacklevel=2)
         super.filter_by(*args, **kwargs)
-
-    def filter_reset(self) -> "FilteredRemoteFeedbackDataset":
-        super().__init__(
-            client=self._client,
-            id=self.id,
-            name=self.name,
-            workspace=self.workspace,
-            created_at=self.created_at,
-            updated_at=self.updated_at,
-            fields=self.fields,
-            questions=self.questions,
-            guidelines=self.guidelines,
-            filters=[],
-        )

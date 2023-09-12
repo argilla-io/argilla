@@ -12,7 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
+import logging
+import warnings
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 from uuid import UUID
 
 from tqdm import trange
@@ -28,10 +30,32 @@ from argilla.client.feedback.schemas import (
     TextField,
     TextQuestion,
 )
-from argilla.client.feedback.schemas.types import AllowedQuestionTypes
+from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+from argilla.client.feedback.training.schemas import (
+    TrainingTaskForDPO,
+    TrainingTaskForPPO,
+    TrainingTaskForRM,
+    TrainingTaskForSFT,
+    TrainingTaskForTextClassification,
+    TrainingTaskTypes,
+)
+from argilla.client.feedback.unification import (
+    LabelQuestionStrategy,
+    MultiLabelQuestionStrategy,
+    RankingQuestionStrategy,
+    RatingQuestionStrategy,
+)
 from argilla.client.feedback.utils import feedback_dataset_in_argilla
+from argilla.client.models import Framework
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.workspaces import Workspace
+from argilla.utils.dependency import require_version
+
+if TYPE_CHECKING:
+    pass
+
+
+_LOGGER = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     import httpx
@@ -352,6 +376,142 @@ class ArgillaMixin:
         ]
 
     def delete(self) -> None:
-        raise NotImplementedError(
+        warnings.warn(
             "Deleting is only supported for remote datasets. Use `FeedbackDataset.from_argilla(...).delete()` instead."
         )
+
+
+class ArgillaUnificationDatasetMixin:
+    def unify_responses(
+        self,
+        question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
+        strategy: Union[
+            str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy, RankingQuestionStrategy
+        ],
+    ) -> None:
+        """
+        The `unify_responses` function takes a question and a strategy as input and applies the strategy
+        to unify the responses for that question.
+
+        Args:
+            question The `question` parameter can be either a string representing the name of the
+                question, or an instance of one of the question classes (`LabelQuestion`, `MultiLabelQuestion`,
+                `RatingQuestion`, `RankingQuestion`).
+            strategy The `strategy` parameter is used to specify the strategy to be used for unifying
+                responses for a given question. It can be either a string or an instance of a strategy class.
+        """
+        if isinstance(question, str):
+            question = self.question_by_name(question)
+
+        if isinstance(strategy, str):
+            if isinstance(question, LabelQuestion):
+                strategy = LabelQuestionStrategy(strategy)
+            elif isinstance(question, MultiLabelQuestion):
+                strategy = MultiLabelQuestionStrategy(strategy)
+            elif isinstance(question, RatingQuestion):
+                strategy = RatingQuestionStrategy(strategy)
+            elif isinstance(question, RankingQuestion):
+                strategy = RankingQuestionStrategy(strategy)
+            else:
+                raise ValueError(f"Question {question} is not supported yet")
+
+        strategy.unify_responses(self.records, question)
+
+
+class ArgillaTrainDatasetMixin:
+    def prepare_for_training(
+        self,
+        framework: Union[Framework, str],
+        task: TrainingTaskTypes,
+        train_size: Optional[float] = 1,
+        test_size: Optional[float] = None,
+        seed: Optional[int] = None,
+        lang: Optional[str] = None,
+    ) -> Any:
+        """
+        Prepares the dataset for training for a specific training framework and NLP task by splitting the dataset into train and test sets.
+
+        Args:
+            framework: the framework to use for training. Currently supported frameworks are: `transformers`, `peft`,
+                `setfit`, `spacy`, `spacy-transformers`, `span_marker`, `spark-nlp`, `openai`, `trl`.
+            task: the NLP task to use for training. Currently supported tasks are: `TrainingTaskForTextClassification`,
+                `TrainingTaskForSFT`, `TrainingTaskForRM`, `TrainingTaskForPPO`, `TrainingTaskForDPO`.
+            train_size: the size of the train set. If `None`, the whole dataset will be used for training.
+            test_size: the size of the test set. If `None`, the whole dataset will be used for testing.
+            seed: the seed to use for splitting the dataset into train and test sets.
+            lang: the spaCy language to use for training. If `None`, the language of the dataset will be used.
+        """
+        if isinstance(framework, str):
+            framework = Framework(framework)
+
+        # validate train and test sizes
+        if train_size is None:
+            train_size = 1
+        if test_size is None:
+            test_size = 1 - train_size
+
+        # check if all numbers are larger than 0
+        if not [abs(train_size), abs(test_size)] == [train_size, test_size]:
+            raise ValueError("`train_size` and `test_size` must be larger than 0.")
+        # check if train sizes sum up to 1
+        if not (train_size + test_size) == 1:
+            raise ValueError("`train_size` and `test_size` must sum to 1.")
+
+        if test_size == 0:
+            test_size = None
+
+        if len(self.records) < 1:
+            raise ValueError(
+                "No records found in the dataset. Make sure you add records to the"
+                " dataset via the `FeedbackDataset.add_records` method first."
+            )
+
+        if isinstance(task, TrainingTaskForTextClassification):
+            if task.formatting_func is None:
+                self.unify_responses(question=task.label.question, strategy=task.label.strategy)
+        elif not isinstance(
+            task,
+            (
+                TrainingTaskForSFT,
+                TrainingTaskForRM,
+                TrainingTaskForPPO,
+                TrainingTaskForDPO,
+            ),
+        ):
+            raise ValueError(f"Training data {type(task)} is not supported yet")
+
+        data = task._format_data(self)
+        if framework in [
+            Framework.TRANSFORMERS,
+            Framework.SETFIT,
+            Framework.SPAN_MARKER,
+            Framework.PEFT,
+        ]:
+            return task._prepare_for_training_with_transformers(
+                data=data, train_size=train_size, seed=seed, framework=framework
+            )
+        elif framework in [Framework.SPACY, Framework.SPACY_TRANSFORMERS]:
+            require_version("spacy")
+            import spacy
+
+            if lang is None:
+                _LOGGER.warning("spaCy `lang` is not provided. Using `en`(English) as default language.")
+                lang = spacy.blank("en")
+            elif lang.isinstance(str):
+                if len(lang) == 2:
+                    lang = spacy.blank(lang)
+                else:
+                    lang = spacy.load(lang)
+            return task._prepare_for_training_with_spacy(data=data, train_size=train_size, seed=seed, lang=lang)
+        elif framework is Framework.SPARK_NLP:
+            return task._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
+        elif framework is Framework.OPENAI:
+            return task._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
+        elif framework is Framework.TRL:
+            return task._prepare_for_training_with_trl(data=data, train_size=train_size, seed=seed)
+        elif framework is Framework.TRLX:
+            return task._prepare_for_training_with_trlx(data=data, train_size=train_size, seed=seed)
+        else:
+            raise NotImplementedError(
+                f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
+            )

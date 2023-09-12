@@ -315,9 +315,8 @@ class RemoteFeedbackDatasetBase(FeedbackDatasetBase, Generic[T]):
 
     def push_to_argilla(
         self,
-        name: Optional[str] = None,
-        workspace: Optional[Union[str, "Workspace"]] = None,
-        show_progress: Optional[bool] = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """`push_to_argilla` doesn't work for neither `RemoteFeedbackDataset` nor `FilteredRemoteFeedbackDataset`."""
         warnings.warn(
@@ -330,6 +329,6 @@ class RemoteFeedbackDatasetBase(FeedbackDatasetBase, Generic[T]):
 
     def prepare_for_training(self):
         """Prepares the dataset for training."""
-        raise NotImplementedError(
+        warnings.warn(
             "`prepare_for_training` is not implemented for `RemoteFeedbackDataset`. First call `pull_from_argilla` to get a local instance of the dataset, and then call `prepare_for_training` on that instance."
         )

@@ -12,18 +12,23 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import warnings
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
 from argilla.client.feedback.dataset.local.base import FeedbackDatasetBase
-from argilla.client.feedback.dataset.local.mixins import ArgillaMixin
+from argilla.client.feedback.dataset.local.mixins import (
+    ArgillaMixin,
+    ArgillaTrainDatasetMixin,
+    ArgillaUnificationDatasetMixin,
+)
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import FeedbackRecord
 
 
-class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin):
+class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, ArgillaTrainDatasetMixin, ArgillaUnificationDatasetMixin):
     def __init__(
         self,
         *,
@@ -117,7 +122,7 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin):
             raise IndexError(f"This dataset contains {len(self)} records, so index {key} is out of range.")
         return self._records[key]
 
-    def iter(self, batch_size: Optional[int] = FETCHING_BATCH_SIZE) -> Iterator[List["FeedbackRecord"]]:
+    def __iter__(self, batch_size: Optional[int] = FETCHING_BATCH_SIZE) -> Iterator[List["FeedbackRecord"]]:
         """Returns an iterator over the records in the dataset.
 
         Args:
@@ -156,9 +161,11 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin):
             self._records = records
 
     def delete_records(self, *args, **kwargs):
-        raise NotImplementedError(
-            "Deleting records for local datasets can be done by deleting record from the list FeedbackDataset._records."
+        warnings.warn(
+            "Deleting records is not supported for local datasets yet. Please use FeedbackDataset.records` to get and delete a copy the records."
         )
 
     def filter_by(self, **kwargs: Any) -> Any:
-        raise NotImplementedError("Filtering is not supported for local datasets yet.")
+        warnings.warn(
+            "Filtering is not supported for local datasets yet. Please use `FeedbackDataset.records` to get and filter a copy the records."
+        )

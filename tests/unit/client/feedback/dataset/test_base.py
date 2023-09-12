@@ -32,11 +32,57 @@ class FeedbackDataset(FeedbackDatasetBase):
         pass
 
 
+# # __getitem__, __len__, __repr__, add_records, delete, delete_records, filter_by, prepare_for_training, pull_from_argilla, push_to_argilla
+# class FeedbackDatasetWithProperties(FeedbackDatasetBase):
+#     def __len__(self) -> None:
+#         pass
+
+#     def __repr__(self) -> None:
+#         pass
+
+#     def __getitem__(self) -> None:
+#         pass
+
+#     @property
+#     def records(self) -> None:
+#         pass
+
+#     def add_records(self) -> None:
+#         pass
+
+#     def delete(self) -> None:
+#         pass
+
+#     def delete_records(self) -> None:
+#         pass
+
+#     def filter_by(self) -> None:
+#         pass
+
+#     def prepare_for_training(self) -> None:
+#         pass
+
+#     def pull_from_argilla(self) -> None:
+#         pass
+
+#     def push_to_argilla(self) -> None:
+#         pass
+
+
 def test_init(
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
 ) -> None:
+    with pytest.raises(TypeError, match="Can't instantiate abstract class FeedbackDataset"):
+        dataset = FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=feedback_dataset_fields,
+            questions=feedback_dataset_questions,
+        )
+    FeedbackDataset.__abstractmethods__ = set()
+    FeedbackDataset.__abstractproperties__ = set()
+
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
         fields=feedback_dataset_fields,
