@@ -364,7 +364,7 @@ async def search_dataset_records(
 
     search_responses = await search_engine.search(
         dataset=dataset,
-        query=search_engine_query,
+        query=search_engine_query.text,
         user_response_status_filter=user_response_status_filter,
         offset=offset,
         limit=limit,
