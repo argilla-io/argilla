@@ -134,7 +134,7 @@ export default {
     border-color: $primary-color;
   }
   &.--focus {
-    outline: 2px solid palette(apricot);
+    outline: 2px solid $primary-color;
   }
   .content--exploration-mode & {
     border: none;
