@@ -12,20 +12,21 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import TYPE_CHECKING
+
 import typer
 
-
-def delete_user(username: str = typer.Argument(..., help="The username of the user to be removed")) -> None:
-    from argilla.cli.rich import echo_in_panel
+if TYPE_CHECKING:
     from argilla.client.users import User
 
+
+def delete_user(ctx: typer.Context) -> None:
+    from argilla.cli.rich import echo_in_panel
+
+    user: "User" = ctx.obj
+
     try:
-        User.from_name(username).delete()
-    except ValueError as e:
-        echo_in_panel(
-            f"User with username={username} doesn't exist.", title="User not found", title_align="left", success=False
-        )
-        raise typer.Exit(code=1) from e
+        user.delete()
     except RuntimeError as e:
         echo_in_panel(
             "An unexpected error occurred when trying to remove the user.",
@@ -35,4 +36,4 @@ def delete_user(username: str = typer.Argument(..., help="The username of the us
         )
         raise typer.Exit(code=1) from e
 
-    echo_in_panel(f"User with username '{username}' has been removed!", title="User removed", title_align="left")
+    echo_in_panel(f"User with username={user.username} has been removed.", title="User removed", title_align="left")
