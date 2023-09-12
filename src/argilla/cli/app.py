@@ -66,7 +66,7 @@ if is_package_with_extras_installed("argilla", ["server"]):
     from argilla.cli.server.database import app as deprecated_app
 
     app.add_typer(server_app, name="server")
-    app.add_typer(deprecated_app, name="database", callback=deprecated_database_cmd_callback)
+    app.add_typer(deprecated_app, name="database", callback=deprecated_database_cmd_callback, deprecated=True)
 
 if __name__ == "__main__":
     app()
