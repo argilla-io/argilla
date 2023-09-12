@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import logging
-import warnings
 from abc import ABC, abstractproperty
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
@@ -23,27 +22,18 @@ from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetM
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     FieldSchema,
-    LabelQuestion,
-    MultiLabelQuestion,
-    RankingQuestion,
-    RatingQuestion,
 )
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.feedback.training.schemas import (
     TrainingTaskForChatCompletion,
     TrainingTaskForDPO,
     TrainingTaskForPPO,
+    TrainingTaskForQuestionAnswering,
     TrainingTaskForRM,
     TrainingTaskForSentenceSimilarity,
     TrainingTaskForSFT,
     TrainingTaskForTextClassification,
     TrainingTaskTypes,
-)
-from argilla.client.feedback.unification import (
-    LabelQuestionStrategy,
-    MultiLabelQuestionStrategy,
-    RankingQuestionStrategy,
-    RatingQuestionStrategy,
 )
 from argilla.client.feedback.utils import generate_pydantic_schema
 from argilla.client.models import Framework
@@ -273,42 +263,6 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             return self._huggingface_format(self)
         raise ValueError(f"Unsupported format '{format}'.")
 
-    # TODO(davidberenstein1957): detatch unification into a mixin
-    def unify_responses(
-        self,
-        question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
-        strategy: Union[
-            str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy, RankingQuestionStrategy
-        ],
-    ) -> None:
-        """
-        The `unify_responses` function takes a question and a strategy as input and applies the strategy
-        to unify the responses for that question.
-
-        Args:
-            question The `question` parameter can be either a string representing the name of the
-                question, or an instance of one of the question classes (`LabelQuestion`, `MultiLabelQuestion`,
-                `RatingQuestion`, `RankingQuestion`).
-            strategy The `strategy` parameter is used to specify the strategy to be used for unifying
-                responses for a given question. It can be either a string or an instance of a strategy class.
-        """
-        if isinstance(question, str):
-            question = self.question_by_name(question)
-
-        if isinstance(strategy, str):
-            if isinstance(question, LabelQuestion):
-                strategy = LabelQuestionStrategy(strategy)
-            elif isinstance(question, MultiLabelQuestion):
-                strategy = MultiLabelQuestionStrategy(strategy)
-            elif isinstance(question, RatingQuestion):
-                strategy = RatingQuestionStrategy(strategy)
-            elif isinstance(question, RankingQuestion):
-                strategy = RankingQuestionStrategy(strategy)
-            else:
-                raise ValueError(f"Question {question} is not supported yet")
-
-        strategy.unify_responses(self.records, question)
-
     # TODO(alvarobartt,davidberenstein1957): we should consider having something like
     # `export(..., training=True)` to export the dataset records in any format, replacing
     # both `format_as` and `prepare_for_training`
@@ -364,6 +318,9 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                 # in sentence-transformer models we can train without labels
                 if task.label:
                     self.unify_responses(question=task.label.question, strategy=task.label.strategy)
+        elif isinstance(task, TrainingTaskForQuestionAnswering):
+            if task.formatting_func is None:
+                self.unify_responses(question=task.answer.name, strategy="disagreement")
         elif not isinstance(
             task,
             (

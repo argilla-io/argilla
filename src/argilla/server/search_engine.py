@@ -318,7 +318,7 @@ async def get_search_engine() -> AsyncGenerator[SearchEngine, None]:
     search_engine = SearchEngine(
         config,
         es_number_of_shards=settings.es_records_index_shards,
-        es_number_of_replicas=settings.es_records_index_shards,
+        es_number_of_replicas=settings.es_records_index_replicas,
     )
     try:
         yield search_engine
