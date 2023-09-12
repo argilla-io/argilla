@@ -56,6 +56,10 @@ export default {
       type: Boolean,
       default: () => false,
     },
+    isEditionModeActive: {
+      type: Boolean,
+      required: true,
+    },
   },
   data: () => {
     return {
@@ -79,6 +83,11 @@ export default {
         }
       },
     },
+    isEditionModeActive() {
+      if (this.isFocused && this.isEditionModeActive) {
+        this.$refs.text.focus();
+      }
+    },
     value() {
       if (this.value !== this.currentValue) {
         this.reset();
@@ -87,8 +96,6 @@ export default {
   },
   mounted() {
     this.reset();
-
-    this.textAreaWrapper = document.getElementById("contentId");
   },
   methods: {
     reset() {
@@ -97,7 +104,7 @@ export default {
       this.sanitizedCurrentValue = this.currentValue;
     },
     exitEditionMode() {
-      this.textAreaWrapper.blur();
+      this.$refs.text.blur();
 
       this.$emit("on-exit-edition-mode");
     },

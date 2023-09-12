@@ -25,6 +25,7 @@
         :originalValue="question.answer.originalValue"
         :placeholder="question.settings.placeholder"
         :isFocused="isFocused"
+        :isEditionModeActive="isEditionModeActive"
         @change-text="onChangeTextArea"
         @on-change-focus="onChangeFocus"
         @on-exit-edition-mode="onExitEditionMode"
