@@ -373,10 +373,12 @@ test.describe("Annotation page shortcuts", () => {
 
           await expect(page).toHaveScreenshot();
         });
-        test("When focus is on a text component but is editing the user can not clear", async ({
+        test("When focus is on a text component but is editing the user can not discard", async ({
           page,
         }) => {
           await goToAnnotationPage(page);
+          const record = await goToAnnotationPage(page);
+          await mockRecordResponses(page, record.id, "discarded");
           await page.waitForTimeout(500);
 
           await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
@@ -393,6 +395,8 @@ test.describe("Annotation page shortcuts", () => {
           page,
         }) => {
           await goToAnnotationPage(page);
+          const record = await goToAnnotationPage(page);
+          await mockRecordResponses(page, record.id, "discarded");
           await page.waitForTimeout(500);
 
           await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
@@ -451,10 +455,12 @@ test.describe("Annotation page shortcuts", () => {
 
           await expect(page).toHaveScreenshot();
         });
-        test("When focus is on a text component but is editing the user can not clear", async ({
+        test("When focus is on a text component but is editing the user can not submit", async ({
           page,
         }) => {
           await goToAnnotationPage(page);
+          const record = await goToAnnotationPage(page);
+          await mockRecordResponses(page, record.id, "submitted");
           await page.waitForTimeout(500);
 
           await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
@@ -471,6 +477,8 @@ test.describe("Annotation page shortcuts", () => {
           page,
         }) => {
           await goToAnnotationPage(page);
+          const record = await goToAnnotationPage(page);
+          await mockRecordResponses(page, record.id, "submitted");
           await page.waitForTimeout(500);
 
           await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
