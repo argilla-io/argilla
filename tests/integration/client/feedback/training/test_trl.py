@@ -114,8 +114,8 @@ def test_prepare_for_training_sft(
 
         # Verify that the passed model and tokenizer are used
         if tokenizer is not None:
-            assert loaded_model.test_value == 12
-            assert loaded_tokenizer.test_value == 12
+            assert trainer._trainer._transformers_model.test_value == 12
+            assert trainer._trainer._transformers_tokenizer.test_value == 12
 
 
 def test_prepare_for_training_rm(
@@ -181,8 +181,8 @@ def test_prepare_for_training_rm(
 
         # Verify that the passed model and tokenizer are used
         if tokenizer is not None:
-            assert loaded_model.test_value == 12
-            assert loaded_tokenizer.test_value == 12
+            assert trainer._trainer._transformers_model.test_value == 12
+            assert trainer._trainer._transformers_tokenizer.test_value == 12
 
 
 def test_prepare_for_training_ppo(
@@ -246,8 +246,8 @@ def test_prepare_for_training_ppo(
 
         # Verify that the passed model and tokenizer are used
         if tokenizer is not None:
-            assert loaded_model.test_value == 12
-            assert loaded_tokenizer.test_value == 12
+            assert trainer._trainer._transformers_model.test_value == 12
+            assert trainer._trainer._transformers_tokenizer.test_value == 12
 
 
 def test_prepare_for_training_dpo(
@@ -318,5 +318,5 @@ def test_prepare_for_training_dpo(
 
         # Verify that the passed model and tokenizer are used
         if tokenizer is not None:
-            assert loaded_model.test_value == 12
-            assert loaded_tokenizer.test_value == 12
+            assert trainer._trainer._transformers_model.test_value == 12
+            assert trainer._trainer._transformers_tokenizer.test_value == 12
