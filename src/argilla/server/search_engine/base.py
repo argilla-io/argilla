@@ -14,13 +14,22 @@
 
 import dataclasses
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Iterable, List, Literal, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel
 
 from argilla.server.enums import ResponseStatus, ResponseStatusFilter
 from argilla.server.models import Dataset, Record, Response, User
+
+__all__ = [
+    "SearchEngine",
+    "UserResponse",
+    "StringQuery",
+    "UserResponseStatusFilter",
+    "SearchResponseItem",
+    "SearchResponses",
+]
 
 
 class UserResponse(BaseModel):
