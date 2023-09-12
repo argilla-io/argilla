@@ -919,6 +919,7 @@ test.describe("Annotation page shortcuts", () => {
       await page.keyboard.press(shortcuts.rating.goToNextRating);
       await page.keyboard.press(shortcuts.rating.rate);
       await expect(page).toHaveScreenshot();
+      await page.keyboard.press(shortcuts.text.readMode);
       await page.keyboard.press(shortcuts.goToPrevQuestion);
       await page.keyboard.press(shortcuts.rating.goToNextRating);
       await page.keyboard.press(shortcuts.rating.goToNextRating);
