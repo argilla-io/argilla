@@ -25,6 +25,8 @@
 </template>
 
 <script>
+import { usePaginationViewModel } from "./usePaginationViewModel";
+
 export default {
   name: "PaginationComponent",
   props: {
@@ -42,44 +44,13 @@ export default {
     },
   },
   computed: {
-    isFirstPage() {
-      return this.currentPage === 1;
-    },
-    // TODO: Move to the parent
     pageFromRoute() {
       return parseFloat(this.$route.query?._page) || 1;
     },
   },
-  mounted() {
-    document.addEventListener("keydown", this.onPressKeyboardShortCut);
-  },
-  destroyed() {
-    // TODO: Move this to the parent
-    document.removeEventListener("keydown", this.onPressKeyboardShortCut);
-  },
-  methods: {
-    onPressKeyboardShortCut({ code }) {
-      switch (code) {
-        case "ArrowRight": {
-          const elem = this.$refs.nextButton.$el;
-          elem.click();
-          break;
-        }
-        case "ArrowLeft": {
-          const elem = this.$refs.prevButton.$el;
-          elem.click();
-          break;
-        }
-        default:
-        // Do nothing => the code is not registered as shortcut
-      }
-    },
-    onClickPrev() {
-      this.$emit("on-click-prev");
-    },
-    onClickNext() {
-      this.$emit("on-click-next");
-    },
+  emits: ["on-click-prev", "on-click-next"],
+  setup(props, context) {
+    return usePaginationViewModel(props, context);
   },
 };
 </script>
