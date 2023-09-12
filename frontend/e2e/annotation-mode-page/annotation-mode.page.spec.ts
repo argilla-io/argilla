@@ -33,6 +33,10 @@ const shortcuts = {
     goToPrevRating: "Shift+Tab",
     rate: "Space",
   },
+  text: {
+    readMode: "Escape",
+    editableMode: "Enter",
+  },
 };
 
 test.use({
@@ -291,6 +295,39 @@ test.describe("Annotation page shortcuts", () => {
 
           await expect(page).toHaveScreenshot();
         });
+        test("When focus is on a text component but is editing the user can not clear", async ({
+          page,
+        }) => {
+          await goToAnnotationPage(page);
+          await page.waitForTimeout(500);
+
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on rating question
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on text component
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.clear);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
+        test("When focus is on a text component and the user applied the read mode", async ({
+          page,
+        }) => {
+          await goToAnnotationPage(page);
+          await page.waitForTimeout(500);
+
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on rating question
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on text component
+          await page.keyboard.press(shortcuts.text.readMode);
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.clear);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
       });
       test.describe("Discard", () => {
         test("When focus is on a singleLabel Component", async ({ page }) => {
@@ -336,6 +373,39 @@ test.describe("Annotation page shortcuts", () => {
 
           await expect(page).toHaveScreenshot();
         });
+        test("When focus is on a text component but is editing the user can not clear", async ({
+          page,
+        }) => {
+          await goToAnnotationPage(page);
+          await page.waitForTimeout(500);
+
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on rating question
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on text component
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.discard);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
+        test("When focus is on a text component and the user applied the read mode", async ({
+          page,
+        }) => {
+          await goToAnnotationPage(page);
+          await page.waitForTimeout(500);
+
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on rating question
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on text component
+          await page.keyboard.press(shortcuts.text.readMode);
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.discard);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
       });
       test.describe("Submit", () => {
         test("When focus is on a singleLabel Component", async ({ page }) => {
@@ -374,6 +444,39 @@ test.describe("Annotation page shortcuts", () => {
 
           await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
           await page.keyboard.press(shortcuts.goToNextQuestion); // focus on rating question
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.submit);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
+        test("When focus is on a text component but is editing the user can not clear", async ({
+          page,
+        }) => {
+          await goToAnnotationPage(page);
+          await page.waitForTimeout(500);
+
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on rating question
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on text component
+          await expect(page).toHaveScreenshot();
+
+          await page.keyboard.press(shortcuts.submit);
+          await page.waitForTimeout(500);
+
+          await expect(page).toHaveScreenshot();
+        });
+        test("When focus is on a text component and the user applied the read mode", async ({
+          page,
+        }) => {
+          await goToAnnotationPage(page);
+          await page.waitForTimeout(500);
+
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on multiLabel question
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on rating question
+          await page.keyboard.press(shortcuts.goToNextQuestion); // focus on text component
+          await page.keyboard.press(shortcuts.text.readMode);
           await expect(page).toHaveScreenshot();
 
           await page.keyboard.press(shortcuts.submit);
@@ -956,9 +1059,56 @@ test.describe("Annotation page shortcuts", () => {
       await page.keyboard.press(shortcuts.goToNextQuestion);
       await page.keyboard.press(shortcuts.goToNextQuestion);
 
-      await page
-        .getByText("This is a review of the review")
-        .press(shortcuts.goToPrevQuestion);
+      await page.keyboard.press(shortcuts.text.readMode);
+      await page.keyboard.press(shortcuts.goToPrevQuestion);
+
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("the user want to loose focus", async ({ page }) => {
+      await goToAnnotationPage(page);
+
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+
+      await page.keyboard.press(shortcuts.text.readMode);
+
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("the user want to edit again focus", async ({ page }) => {
+      await goToAnnotationPage(page);
+
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+
+      await page.keyboard.press(shortcuts.text.readMode);
+
+      await page.keyboard.press(shortcuts.text.editableMode);
+      await page.keyboard.insertText("Modified");
+
+      await expect(page).toHaveScreenshot();
+    });
+
+    test("in edit mode the user can use any key without execute any global shortcut", async ({
+      page,
+    }) => {
+      await goToAnnotationPage(page);
+
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+      await page.keyboard.press(shortcuts.goToNextQuestion);
+
+      await page.keyboard.press(shortcuts.text.readMode);
+
+      await page.keyboard.press(shortcuts.text.editableMode);
+      await page.keyboard.insertText("Modified");
+      await page.keyboard.press("Enter");
+      await page.keyboard.press("Control+Shift+ArrowLeft");
+      await page.keyboard.press("Shift+Enter");
+      await page.keyboard.insertText("Expected");
 
       await expect(page).toHaveScreenshot();
     });
@@ -974,6 +1124,7 @@ test.describe("Annotation page shortcuts", () => {
 
       await page.keyboard.press(shortcuts.goToNextQuestion);
 
+      await page.keyboard.press(shortcuts.text.readMode);
       await page.keyboard.press(shortcuts.goToNextQuestion);
     };
 
