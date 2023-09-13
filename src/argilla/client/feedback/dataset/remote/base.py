@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import warnings
-from abc import ABC, abstractmethod
+from abc import ABC
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Generic, Iterator, List, Optional, Type, TypeVar, Union
 
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from argilla.client.feedback.dataset.local import FeedbackDataset
     from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
-    from argilla.client.sdk.v1.datasets.models import FeedbackItemModel, FeedbackRecordsModel
+    from argilla.client.sdk.v1.datasets.models import FeedbackItemModel
     from argilla.client.workspaces import Workspace
 
 
@@ -99,22 +99,6 @@ class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
             client=self._client, name2id=self.__question_name2id, suggestions=suggestions, **record
         )
 
-    @abstractmethod
-    def __len__(self) -> int:
-        pass
-
-    @abstractmethod
-    def _fetch_records(self, offset: int, limit: int) -> "FeedbackRecordsModel":
-        pass
-
-    @abstractmethod
-    def add(self) -> None:
-        pass
-
-    @abstractmethod
-    def delete(self) -> None:
-        pass
-
 
 class RemoteFeedbackDatasetBase(FeedbackDatasetBase, Generic[T]):
     records_cls: Type[T]
@@ -169,10 +153,6 @@ class RemoteFeedbackDatasetBase(FeedbackDatasetBase, Generic[T]):
         self._updated_at = updated_at
 
         self._records = self.records_cls(dataset=self, **kwargs)
-
-    # def _parse_records(self, *args, **kwargs):
-    #     """Parses a `FeedbackItemModel` into a `RemoteFeedbackRecord`."""
-    #     return self._records._parse_records(*args, **kwargs)
 
     @property
     def records(self) -> T:

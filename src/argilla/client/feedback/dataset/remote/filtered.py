@@ -101,4 +101,4 @@ class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeed
 
     def filter_by(self, *args, **kwargs) -> "FilteredRemoteFeedbackDataset":
         warnings.warn(message="Removing old filters and applying new ones.", stacklevel=2)
-        super.filter_by(*args, **kwargs)
+        super().filter_by(*args, **kwargs)

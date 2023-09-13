@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from argilla.client.feedback.schemas import FeedbackRecord
 
 
-class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, ArgillaTrainDatasetMixin, ArgillaUnificationDatasetMixin):
+class FeedbackDataset(ArgillaMixin, ArgillaTrainDatasetMixin, ArgillaUnificationDatasetMixin, FeedbackDatasetBase):
     def __init__(
         self,
         *,
@@ -165,7 +165,7 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, ArgillaTrainDatasetMixi
             "Deleting records is not supported for local datasets yet. Please use FeedbackDataset.records` to get and delete a copy the records."
         )
 
-    def filter_by(self, **kwargs: Any) -> Any:
+    def filter_by(self, *args, **kwargs: Any) -> Any:
         warnings.warn(
             "Filtering is not supported for local datasets yet. Please use `FeedbackDataset.records` to get and filter a copy the records."
         )

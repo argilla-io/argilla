@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, List
 
 import pytest
 from argilla.client.feedback.dataset.local.base import FeedbackDatasetBase
+from argilla.client.feedback.dataset.local.dataset import FeedbackDataset as FeedbackDatasetReal
 from argilla.client.feedback.schemas import (
     RatingQuestion,
     TextField,
@@ -30,43 +31,6 @@ class FeedbackDataset(FeedbackDatasetBase):
     @property
     def records(self) -> None:
         pass
-
-
-# # __getitem__, __len__, __repr__, add_records, delete, delete_records, filter_by, prepare_for_training, pull_from_argilla, push_to_argilla
-# class FeedbackDatasetWithProperties(FeedbackDatasetBase):
-#     def __len__(self) -> None:
-#         pass
-
-#     def __repr__(self) -> None:
-#         pass
-
-#     def __getitem__(self) -> None:
-#         pass
-
-#     @property
-#     def records(self) -> None:
-#         pass
-
-#     def add_records(self) -> None:
-#         pass
-
-#     def delete(self) -> None:
-#         pass
-
-#     def delete_records(self) -> None:
-#         pass
-
-#     def filter_by(self) -> None:
-#         pass
-
-#     def prepare_for_training(self) -> None:
-#         pass
-
-#     def pull_from_argilla(self) -> None:
-#         pass
-
-#     def push_to_argilla(self) -> None:
-#         pass
 
 
 def test_init(
@@ -192,3 +156,30 @@ def test_init_wrong_questions(
                 TextQuestion(name="question-1", required=True),
             ],
         )
+
+
+def test_warning_unsupported_methods(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+) -> None:
+    dataset = FeedbackDatasetReal(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+
+    with pytest.warns(
+        match="Deleting records is not supported for local datasets yet. Please use FeedbackDataset.records` to get and delete a copy the records."
+    ):
+        dataset.delete_records()
+
+    with pytest.warns(
+        match="Filtering is not supported for local datasets yet. Please use `FeedbackDataset.records` to get and filter a copy the records."
+    ):
+        dataset.filter_by()
+
+    with pytest.warns(
+        match="Deleting is only supported for remote datasets. Use `FeedbackDataset.from_argilla\(...\).delete\(\)` instead."
+    ):
+        dataset.delete()
