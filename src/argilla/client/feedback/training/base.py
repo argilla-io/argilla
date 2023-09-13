@@ -14,6 +14,7 @@
 
 import os
 import textwrap
+import warnings
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, List, Optional, Union
 
@@ -55,9 +56,11 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 "openai", "span_marker" and "trl" are supported.
             lang: the spaCy language model to use for training, just required when `framework="spacy"`.
                 Defaults to None, but it will be set to `spacy.blank("en")` if not specified.
-            model: name or path to the baseline model to be used, or a transformers PreTrainedModel instance.
-                If not specified will set to a good default per framework, if applicable. Defaults to None.
-            tokenizer: a transformers PreTrainedTokenizer instance to tokenize the text.
+            model: name or path to the baseline model to be used, or a transformers PreTrainedModel instance
+                if the framework is "transformers", "peft" or "trl". If not specified will set to a good default
+                per framework, if applicable. Defaults to None.
+            tokenizer: a transformers PreTrainedTokenizer instance to tokenize the text. Only used with the
+                "transformers", "peft" or "trl" frameworks.
             train_size: the size of the training set. If not specified, the entire dataset will be used for training,
                 which may be an issue if `framework="spacy"` as it requires a validation set. Defaults to None.
             seed: the random seed to ensure reproducibility. Defaults to None.
@@ -85,6 +88,11 @@ class ArgillaTrainer(ArgillaTrainerV1):
         if isinstance(framework, str):
             framework = Framework(framework)
 
+        if tokenizer and framework not in (Framework.TRANSFORMERS, Framework.PEFT, Framework.TRL):
+            warnings.warn(
+                f"Passing a tokenizer is not supported for the {framework} framework.", UserWarning, stacklevel=2
+            )
+
         if framework is Framework.SETFIT:
             if not isinstance(task, TrainingTaskForTextClassification):
                 raise NotImplementedError(f"{Framework.SETFIT} only supports `TextClassification` tasks.")
@@ -96,7 +104,6 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 prepared_data=self._prepared_data,
                 seed=self._seed,
                 model=self._model,
-                tokenizer=self._tokenizer,
             )
         elif framework is Framework.TRANSFORMERS:
             from argilla.client.feedback.training.frameworks.transformers import ArgillaTransformersTrainer

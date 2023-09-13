@@ -339,3 +339,26 @@ def test_deprecations_for_text_classification():
             TrainingTaskMappingForTextClassification(None)
         except Exception:
             pass
+
+
+def test_tokenizer_warning_wrong_framework(
+    feedback_dataset_fields,
+    feedback_dataset_questions,
+    feedback_dataset_records,
+    feedback_dataset_guidelines,
+) -> None:
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records * 5)
+    questions = [
+        question for question in dataset.questions if isinstance(question, (LabelQuestion, MultiLabelQuestion))
+    ]
+    label = LabelQuestionUnification(question=questions[0])
+    task = TrainingTask.for_text_classification(text=dataset.fields[0], label=label)
+
+    tokenizer = AutoTokenizer.from_pretrained("gpt2")
+    with pytest.warns(UserWarning, match="Passing a tokenizer is not supported for the setfit framework."):
+        ArgillaTrainer(dataset=dataset, task=task, framework="setfit", tokenizer=tokenizer)
