@@ -488,7 +488,7 @@ class TrainingTask:
     def for_sentence_similarity(
         cls,
         texts: Optional[List[TextField]] = None,
-        label: Optional[LabelQuestion] = None,
+        label: Optional[Union[LabelQuestion, RankingQuestion]] = None,
         formatting_func: Callable[
             [Dict[str, Any]],
             Union[
@@ -509,7 +509,7 @@ class TrainingTask:
         Args:
             texts: A list of TextFields to use for training, typically two text pieces, can be a triplet also.
                 Defaults to None.
-            label: The `LabelQuestion` to use for training. These models can be trained without
+            label: The `LabelQuestion` or `RankingQuestion` to use for training. These models can be trained without
                 explicit use of labels, just with pairs or triplets of texts. Defaults to None.
             formatting_func: A formatting function converting a dictionary of records into a dict
                 of `sentence-1`-`sentence-2` pairs or triplets `sentence-1`-`sentence-2`-`sentence-3`,
@@ -573,6 +573,8 @@ class TrainingTask:
                     _LOGGER.info(f"No label strategy defined. Using default strategy for {type(label)}.")
                 if isinstance(label, LabelQuestion):
                     label = LabelQuestionUnification(**unification_kwargs)
+                elif isinstance(label, RankingQuestion):
+                    label = RankingQuestionUnification(**unification_kwargs)
                 else:
                     raise ValueError(f"Label type {type(label)} is not supported.")
             return TrainingTaskForSentenceSimilarity(texts=texts, label=label)
@@ -1458,7 +1460,7 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
         ],
     ] = None
     texts: Optional[List[TextField]] = None
-    label: Optional[LabelQuestionUnification] = None
+    label: Optional[Union[LabelQuestionUnification, RankingQuestionUnification]] = None
 
     @property
     def supported_frameworks(self):
@@ -1536,6 +1538,9 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
                             value = int(value)
                         else:
                             value = float(value)
+                        if isinstance(self.label, RankingQuestionUnification):
+                            max_value = max([float(x) for x in self.label.question.__all_labels__])
+                            value = (value / 100) * float(max_value)
                     record[v] = value
                 outputs.append(record)
 
@@ -1564,21 +1569,28 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
         # Use the first sample to decide what type of dataset to generate:
         sample_keys = set(data[0].keys())
         if sample_keys == {"label", "sentence-1", "sentence-2"}:
-            dataset_fields = lambda sample: {
-                "texts": [sample["sentence-1"], sample["sentence-2"]],
-                "label": sample["label"],
-            }
+
+            def dataset_fields(sample):
+                return {"texts": [sample["sentence-1"], sample["sentence-2"]], "label": sample["label"]}
+
         elif sample_keys == sample_keys == {"label", "sentence-1", "sentence-2", "sentence-3"}:
-            dataset_fields = lambda sample: {
-                "texts": [sample["sentence-1"], sample["sentence-2"], sample["sentence-3"]],
-                "label": sample["label"],
-            }
+
+            def dataset_fields(sample):
+                return {
+                    "texts": [sample["sentence-1"], sample["sentence-2"], sample["sentence-3"]],
+                    "label": sample["label"],
+                }
+
         elif sample_keys == {"sentence-1", "sentence-2"}:
-            dataset_fields = lambda sample: {"texts": [sample["sentence-1"], sample["sentence-2"]]}
+
+            def dataset_fields(sample):
+                return {"texts": [sample["sentence-1"], sample["sentence-2"]]}
+
         elif sample_keys == {"sentence-1", "sentence-2", "sentence-3"}:
-            dataset_fields = lambda sample: {
-                "texts": [sample["sentence-1"], sample["sentence-2"], sample["sentence-3"]]
-            }
+
+            def dataset_fields(sample):
+                return {"texts": [sample["sentence-1"], sample["sentence-2"], sample["sentence-3"]]}
+
         elif sample_keys == {"label", "sentence"}:
             raise ValueError(
                 "Datasets containing a `sentence` and a `label` should be transformed "

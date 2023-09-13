@@ -43,12 +43,12 @@ We plan on adding more support for other tasks and frameworks so feel free to re
 |:--------------------------------|:-----|:-------|:-------|:------|:-------------|:-----|:---------------------|
 | Text Classification             |      |        |  ✔️     | ✔️     | ✔️            | ✔️    |                      |
 | Question Answering              |      |        |        |       | ✔️            |      |                      |
+| Sentence Similarity             |      |        |        |       |              |      | ✔️                    |
 | Supervised Fine-tuning          | ✔️    |        |        |       |              |      |                      |
 | Reward Modeling                 | ✔️    |        |        |       |              |      |                      |
 | Proximal Policy Optimization    | ✔️    |        |        |       |              |      |                      |
 | Direct Preference Optimization  | ✔️    |        |        |       |              |      |                      |
 | Chat Completion                 |      | ✔️      |        |       |              |      |                      |
-| Sentence Similarity             |      |        |        |       |              |      | ✔️                    |
 
 ```{note}
 We also offer support for Token Classification using our `TokenClassifcationDataset` but this is shown in [a section](/guides/train_a_model) about our older dataset-types.
@@ -304,6 +304,194 @@ question = "Where do I live?"
 context = "My name is Merve and I live in İstanbul."
 qa_model(question = question, context = context)
 ## {'answer': 'İstanbul', 'end': 39, 'score': 0.953, 'start': 31}
+```
+
+### Sentence Similarity
+
+#### Background
+
+Sentence Similarity is the task of determining how similar two texts are. By transforming the text into embeddings (vectors representing the semantic information) we can compute the similarity between these texts , computing the distance between their vectors. The [Sentence-Transformers](https://www.sbert.net/) library makes easy to compute these sentence embeddings, and use them for information retrieval and clustering. Besides these tasks it is also commonly used to optimize Retrieval Augmented Generation (RAG) and re-ranking taks. Generally, there are two types of models that can be fine-tuned.
+
+::::{tab-set}
+
+:::{tab-item} Bi-Encoder
+A bi-encoder consists of two separate neural network models, each responsible for encoding a single sentence or text. These encoders work independently and do not share weights. The primary objective of a bi-encoder is to encode individual sentences or texts into fixed-length vectors in a way that preserves the semantic meaning of the input. These fixed-length vectors can later be used for various tasks, such as retrieval or classification. Bi-encoders are often used in tasks where you need to encode a large set of texts into vectors (e.g., creating embeddings for documents in a corpus). These embeddings can then be used for tasks like information retrieval, clustering, and classification.
+:::
+
+:::{tab-item} Cross-Encoder
+A cross encoder consists of a single neural network model that takes multiple input sentences or texts simultaneously. It processes pairs of sentences or texts in one forward pass. The main objective of a cross encoder is to provide a single scalar score or similarity measure for a pair of input sentences or texts. This score represents the similarity or relevance between the two input texts. Cross encoders are commonly used in applications like text matching, question-answering, document retrieval, and recommendation systems where you need to compare two pieces of text and assess their similarity or relevance.
+:::
+
+::::
+
+In this [blog article](https://huggingface.co/blog/how-to-train-sentence-transformers) from hugging face you can see the different types of datasets that can be used for training `sentence-transformers` models.
+
+#### Training
+
+:::{note}
+We can easily switch between `Bi-Encoder` and `Cross Encoder` based models using the `framework_kwargs={"cross_encoder": True}`. Additionally, data can be provided in three different ways, hence . Keep in mind the `Cross Encoder` based models don't allow training with sentence triplets.
+:::
+
+::::{tab-set}
+
+:::{tab-item} sentence-1-sentence-2
+
+The example is a pair of positive (similar) sentences without a label. For example, pairs of paraphrases, pairs of full texts and their summaries, pairs of duplicate questions, pairs of (query, response), or pairs of (source_language, target_language). Natural Language Inference datasets can also be formatted this way by pairing entailing sentences.
+
+:::
+
+:::{tab-item} sentence-1-sentence-2-label
+
+The example is a pair of sentences and a label indicating how similar they are. The label can be either an integer or a float. This case applies to datasets originally prepared for Natural Language Inference (NLI), since they contain pairs of sentences with a label indicating whether they infer each other or not.
+
+:::
+
+:::{tab-item} sentence-1-sentence-2-sentence-3
+
+**only works with Bi Encoders**
+
+The example is a triplet (anchor, positive, negative) without classes or labels for the sentences.
+
+:::
+
+:::{tab-item} sentence-1-label
+
+**only works with Bi Encoders**
+
+The example is a sentence with an integer label. This data format is easily converted by loss functions into three sentences (triplets) where the first is an "anchor", the second a "positive" of the same class as the anchor, and the third a "negative" of a different class. Each sentence has an integer label indicating the class to which it belongs.
+
+:::
+
+::::
+
+**Data Preparation**
+
+Let's use a small version of [snli](https://huggingface.co/datasets/snli) dataset for this example, ready to work with argilla [snli-small](https://huggingface.co/datasets/plaguss/snli-small).
+
+
+```python
+import argilla as rg
+
+dataset = rg.FeedbackDataset.from_huggingface("plaguss/snli-small")
+```
+
+::::{tab-set}
+
+:::{tab-item} sentence-1-sentence-2-label
+
+We offer the option to use default unification strategies and formatting based on a `sentence`-pairs and `sentence-` triplets, with or without `label`. Here we infer formatting information based on two `TextField` and a `LabelQuestion` or `RankingQuestion`. This is the easiest way to define a `TrainingTask` for sentence similarity but if you need a custom workflow, you can use `formatting_func`.
+
+```{note}
+An overview of the unifcation measures can be found [here](/guides/llms/practical_guides/collect_responses). For this type of task, only `LabelQuestion` or `RankingQuestion` applies.
+```
+
+```python
+from argilla.feedback import TrainingTask
+
+task = TrainingTask.for_sentence_similarity(
+    texts=[dataset.field_by_name("premise"), dataset.field_by_name("hypothesis")],
+    label=dataset.question_by_name("label")
+)
+```
+
+:::
+
+:::{tab-item} formatting_func
+We offer the option to provide a `formatting_func` to the `TrainingTask.for_sentence_similarity`. This function is applied to each sample in the dataset and can be used for more advanced preprocessing and data formatting. The function can return a dict with `sentence-1`, `sentence-2` and optionally `sentence-3` and the corresponding sentences, and it can also include a `label`, which can be either an `int` (to represent the class) or a `float`, as well as lists of these elements.
+
+```python
+def formatting_func(sample):
+    record = {"sentence-1": sample["premise"], "sentence-2": sample["hypothesis"]}
+
+    # Choose the most common label
+    values = [resp["value"] for resp in sample["label"]]
+    counter = Counter(values)
+    if counter:
+        most_common = counter.most_common()
+        max_frequency = most_common[0][1]
+        most_common_elements = [
+            element for element, frequency in most_common if frequency == max_frequency
+        ]
+        label = random.choice(most_common_elements)
+        record["label"] = label
+        return record
+    else:
+        return None
+
+task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func)
+```
+
+:::
+
+::::
+
+**ArgillaTrainer**
+
+We’ll use the task directly with our `FeedbackDataset` in the `ArgillaTrainer`. For this case we are using the default `SentenceTransformer` model, to fine-tune a `Cross Encoder` based, pass `framework_kwargs={"cross_encoder": True}`.
+
+```python
+from argilla.feedback import ArgillaTrainer
+
+trainer = ArgillaTrainer(
+    dataset=dataset,
+    task=task,
+    framework="sentence-transformers",
+    framework_kwargs={"cross_encoder": False}
+)
+trainer.train(output_dir="my_sentence_transformer_model")
+```
+
+**Inference**
+
+These models can be loaded using `sentence-transformers` (or `transformers`), the reader can take a look to each type of model at the following links:
+
+- [Bi-Encoder](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
+- [Cross-Encoder](https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2)
+
+But the `ArgillaTrainer` offers the possibility to predict the sentence similarity from its API. Lets check how they work using the same sample sentences from [sentence similarity task](https://huggingface.co/tasks/sentence-similarity) in Hugging Face:
+
+```python
+from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
+
+trainer.predict(
+    [
+        "Machine learning is so easy.",
+        ["Deep learning is so straightforward.", "This is so difficult, like rocket science.", "I can't believe how much I struggled with this."]
+    ]
+)
+# [0.77857256, 0.4587626, 0.29062212]
+```
+
+Just to see the other format that can be passed to get the sentence similarity (a list with pairs of sentences), let's see the following example (the pairs don't need to share the first sentence, it's a example to check the same values are returned with both options).
+
+```python
+
+trainer.predict(
+    [
+        ["Machine learning is so easy.", "Deep learning is so straightforward."],
+        ["Machine learning is so easy.", "This is so difficult, like rocket science."],
+        ["Machine learning is so easy.", "I can't believe how much I struggled with this."]
+    ]
+)
+# [0.77857256, 0.4587626, 0.29062212]
+```
+
+The previous result were obtained assuming the model trained was a `SentenceTransformer`. If instead of using a `SentenceTransformer` model (a `Bi-Encoder` based model) we would have chosen a `Cross-Encoder` we would obtain a different result, but with the same interpretation.
+
+```python
+trainer = ArgillaTrainer(
+    dataset=dataset,
+    task=task,
+    framework="sentence-transformers",
+    framework_kwargs={"cross_encoder": True}
+)
+trainer.predict(
+    [
+        "Machine learning is so easy.",
+        ["Deep learning is so straightforward.", "This is so difficult, like rocket science.", "I can't believe how much I struggled with this."]
+    ]
+)
+# [2.2006402, -6.2634926, -10.251489]
 ```
 
 ### Supervised finetuning
@@ -1056,141 +1244,5 @@ completion = openai.ChatCompletion.create(
 )
 ```
 
-### Sentence Similarity
 
-#### Background
-
-Sentence Similarity is the task of determining how similar two texts are. By transforming the text into embeddings (vectors representing the semantic information) we can compute the similarity between these texts , computing the distance between their vectors. The [Sentence-Transformers](https://www.sbert.net/) library makes easy to compute these sentence embeddings, and use them for information retrieval and clustering.
-
-In this [blog article](https://huggingface.co/blog/how-to-train-sentence-transformers) from hugging face you can see the different types of datasets that can be used for training `sentence-transformers` models (keep in mind the `Cross Encoder` based models don't allow training with sentence triplets).
-
-#### Training
-
-Let's use a small version of [snli](https://huggingface.co/datasets/snli) dataset for this example, ready to work with argilla [snli-small](https://huggingface.co/datasets/plaguss/snli-small).
-
-**Data Preparation**
-
-```python
-import argilla as rg
-
-dataset = rg.FeedbackDataset.from_huggingface("plaguss/snli-small")
-```
-
-::::{tab-set}
-
-:::{tab-item} sentence-1-sentence-2-label
-We offer the option to use default unification strategies and formatting based on a `sentence`-pairs and `sentence-` triplets, with or without `label`. Here we infer formatting information based on tw `TextField` and a `LabelQuestion`. This is the easiest way to define a `TrainingTask` for sentence similarity but if you need a custom workflow, you can use `formatting_func`.
-
-```{note}
-An overview of the unifcation measures can be found [here](/guides/llms/practical_guides/collect_responses). For this type of task, only `LabelQuestion` applies.
-```
-
-```python
-from argilla.feedback import TrainingTask
-
-task = TrainingTask.for_sentence_similarity(
-    texts=[dataset.field_by_name("premise"), dataset.field_by_name("hypothesis")],
-    label=dataset.question_by_name("label")
-)
-```
-
-:::
-
-:::{tab-item} formatting_func
-We offer the option to provide a `formatting_func` to the `TrainingTask.for_sentence_similarity`. This function is applied to each sample in the dataset and can be used for more advanced preprocessing and data formatting. The function can return a dict with `sentence-1`, `sentence-2` and optionally `sentence-3` and the corresponding sentences, and it can also include a `label`, which can be either an `int` (to represent the class) or a `float`, as well as lists of these elements.
-
-```python
-def formatting_func(sample):
-    record = {"sentence-1": sample["premise"], "sentence-2": sample["hypothesis"]}
-
-    # Choose the most common label
-    values = [resp["value"] for resp in sample["label"]]
-    counter = Counter(values)
-    if counter:
-        most_common = counter.most_common()
-        max_frequency = most_common[0][1]
-        most_common_elements = [
-            element for element, frequency in most_common if frequency == max_frequency
-        ]
-        label = random.choice(most_common_elements)
-        record["label"] = label
-        return record
-    else:
-        return None
-
-task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func)
-```
-
-:::
-
-::::
-
-**ArgillaTrainer**
-
-We’ll use the task directly with our `FeedbackDataset` in the `ArgillaTrainer`. For this case we are using the default `SentenceTransformer` model, to fine-tune a `Cross Encoder` based, pass `framework_kwargs={"cross_encoder": True}`.
-
-```python
-from argilla.feedback import ArgillaTrainer
-
-trainer = ArgillaTrainer(
-    dataset=dataset,
-    task=task,
-    framework="sentence-transformers",
-    framework_kwargs={"cross_encoder": False}
-)
-trainer.train(output_dir="my_sentence_transformer_model")
-```
-
-**Inference**
-
-These models can be loaded using `sentence-transformers` (or `transformers`), the reader can take a look to each type of model at the following links:
-
-- [Bi-Encoder](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
-- [Cross-Encoder](https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2)
-
-But the `ArgillaTrainer` offers the possibility to predict the sentence similarity from its API. Lets check how they work using the same sample sentences from [sentence similarity task](https://huggingface.co/tasks/sentence-similarity) in Hugging Face:
-
-```python
-from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
-
-trainer.predict(
-    [
-        "Machine learning is so easy.",
-        ["Deep learning is so straightforward.", "This is so difficult, like rocket science.", "I can't believe how much I struggled with this."]
-    ]
-)
-# [0.77857256, 0.4587626, 0.29062212]
-```
-
-Just to see the other format that can be passed to get the sentence similarity (a list with pairs of sentences), let's see the following example (the pairs don't need to share the first sentence, it's a example to check the same values are returned with both options).
-
-```python
-
-trainer.predict(
-    [
-        ["Machine learning is so easy.", "Deep learning is so straightforward."],
-        ["Machine learning is so easy.", "This is so difficult, like rocket science."],
-        ["Machine learning is so easy.", "I can't believe how much I struggled with this."]
-    ]
-)
-# [0.77857256, 0.4587626, 0.29062212]
-```
-
-The previous result were obtained assuming the model trained was a `SentenceTransformer`. If instead of using a `SentenceTransformer` model (a `Bi-Encoder` based model) we would have chosen a `Cross-Encoder` we would obtain a different result, but with the same interpretation.
-
-```python
-trainer = ArgillaTrainer(
-    dataset=dataset,
-    task=task,
-    framework="sentence-transformers",
-    framework_kwargs={"cross_encoder": False}
-)
-trainer.predict(
-    [
-        "Machine learning is so easy.",
-        ["Deep learning is so straightforward.", "This is so difficult, like rocket science.", "I can't believe how much I struggled with this."]
-    ]
-)
-# [2.2006402, -6.2634926, -10.251489]
-```
 
