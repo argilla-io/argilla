@@ -84,6 +84,21 @@ describe("useTextFieldViewModel highlight text without any words between backtic
       "This <span class=\"highlight-text\">is</span> <span class=\"highlight-text\">a</span> sentence"
     );
   });
+
+  test("return the fieldText with corresponding words highlighted independently of the order of words", () => {
+    const props = {
+      fieldText: "This is a sentence",
+      stringToHighlight: "a This",
+      useMarkdown: true,
+    };
+
+    const { text } = useTextFieldViewModel(props);
+
+    expect(text.value).toBe(
+      // eslint-disable-next-line prettier/prettier
+      "<span class=\"highlight-text\">This</span> is <span class=\"highlight-text\">a</span> sentence"
+    );
+  });
 });
 
 describe("useTextFieldViewModel highlight text with a markdown with one word", () => {
@@ -170,6 +185,21 @@ describe("useTextFieldViewModel highlight text with a markdown with one word", (
       "This <span class=\"highlight-text\">is</span> <span class=\"highlight-text\">a</span> `sentence`"
     );
   });
+
+  test("return the fieldText with corresponding words highlighted independently of the order of words and without highlighting the markdown word", () => {
+    const props = {
+      fieldText: "This is a `sentence`",
+      stringToHighlight: "`Sentence` ThiS A",
+      useMarkdown: true,
+    };
+
+    const { text } = useTextFieldViewModel(props);
+
+    expect(text.value).toBe(
+      // eslint-disable-next-line prettier/prettier
+      "<span class=\"highlight-text\">This</span> is <span class=\"highlight-text\">a</span> `sentence`"
+    );
+  });
 });
 
 describe("useTextFieldViewModel highlight text with a markdown with several words", () => {
@@ -246,6 +276,21 @@ describe("useTextFieldViewModel highlight text with a markdown with several word
     const props = {
       fieldText: "This is `a sentence`",
       stringToHighlight: "Is `a Sentence`",
+      useMarkdown: true,
+    };
+
+    const { text } = useTextFieldViewModel(props);
+
+    expect(text.value).toBe(
+      // eslint-disable-next-line prettier/prettier
+      "This <span class=\"highlight-text\">is</span> `a sentence`"
+    );
+  });
+
+  test("return the fieldText with corresponding words highlighted independently of the order of words and without highlighting the markdown word", () => {
+    const props = {
+      fieldText: "This is `a sentence`",
+      stringToHighlight: "`a Sentence` Is",
       useMarkdown: true,
     };
 
