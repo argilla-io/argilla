@@ -4,21 +4,31 @@
       :question="question"
       :showSuggestion="showSuggestion"
     />
-
-    <div class="container" :class="isFocused ? '--focused' : null">
+    <div
+      class="container"
+      ref="container"
+      :class="classes"
+      @focus="onFocus"
+      :tabindex="isEditionModeActive ? '-1' : '0'"
+      @keydown.enter.exact.prevent="onEditMode"
+    >
       <RenderMarkdownBaseComponent
-        v-if="question.settings.use_markdown && !isFocused"
+        v-if="question.settings.use_markdown && !isEditionModeActive"
         class="textarea--markdown"
         :markdown="question.answer.value"
-        @click.native="setFocus(true)"
+        @click.native="onFocus"
       />
       <ContentEditableFeedbackTask
         v-else
         class="textarea"
         :value="question.answer.value"
+        :originalValue="question.answer.originalValue"
         :placeholder="question.settings.placeholder"
+        :isFocused="isFocused"
+        :isEditionModeActive="isEditionModeActive"
         @change-text="onChangeTextArea"
-        @on-change-focus="setFocus"
+        @on-change-focus="onChangeFocus"
+        @on-exit-edition-mode="onExitEditionMode"
       />
     </div>
   </div>
@@ -36,13 +46,36 @@ export default {
       type: Boolean,
       default: () => false,
     },
+    isFocused: {
+      type: Boolean,
+      default: () => false,
+    },
   },
   data: () => {
     return {
-      isFocused: false,
+      isEditionModeActive: false,
+      isExitedFromEditionModeWithKeyboard: false,
     };
   },
+  watch: {
+    isFocused: {
+      immediate: true,
+      handler(newValue) {
+        this.isEditionModeActive = newValue;
+      },
+    },
+  },
   methods: {
+    onEditMode() {
+      if (this.isExitedFromEditionModeWithKeyboard) {
+        this.isEditionModeActive = true;
+      }
+    },
+    onExitEditionMode() {
+      this.$refs.container.focus();
+      this.isEditionModeActive = false;
+      this.isExitedFromEditionModeWithKeyboard = true;
+    },
     onChangeTextArea(newText) {
       const isAnyText = newText?.length;
 
@@ -52,8 +85,31 @@ export default {
         this.$emit("on-error", !isAnyText);
       }
     },
-    setFocus(status) {
-      this.isFocused = status;
+    onChangeFocus(isFocus) {
+      this.isEditionModeActive = isFocus;
+
+      if (isFocus) {
+        this.$emit("on-focus");
+      }
+    },
+    onFocus(event) {
+      if (event.defaultPrevented) return;
+
+      this.isEditionModeActive = true;
+      this.isExitedFromEditionModeWithKeyboard = false;
+    },
+  },
+  computed: {
+    classes() {
+      if (this.isEditionModeActive) {
+        return "--editing";
+      }
+
+      if (this.isFocused && this.isExitedFromEditionModeWithKeyboard) {
+        return "--focus";
+      }
+
+      return null;
     },
   },
 };
@@ -73,8 +129,11 @@ export default {
   border-radius: $border-radius-s;
   min-height: 10em;
   background: palette(white);
-  &.--focused {
+  &.--editing {
     border-color: $primary-color;
+  }
+  &.--focus {
+    outline: 2px solid $primary-color;
   }
   .content--exploration-mode & {
     border: none;

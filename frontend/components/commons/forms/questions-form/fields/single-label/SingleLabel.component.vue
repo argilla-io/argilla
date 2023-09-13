@@ -10,6 +10,8 @@
       :componentId="question.id"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
       :multiple="false"
+      :isFocused="isFocused"
+      @on-focus="onFocus"
     />
   </div>
 </template>
@@ -26,10 +28,28 @@ export default {
       type: Boolean,
       default: () => false,
     },
+    isFocused: {
+      type: Boolean,
+      default: () => false,
+    },
   },
   computed: {
     maxOptionsToShowBeforeCollapse() {
       return this.question.settings.visible_options ?? -1;
+    },
+  },
+  methods: {
+    onFocus() {
+      this.$emit("on-focus");
+    },
+  },
+  watch: {
+    "question.answer.values": {
+      deep: true,
+      handler(newOptions) {
+        if (newOptions.some((option) => option.isSelected))
+          this.$emit("on-user-answer");
+      },
     },
   },
 };
