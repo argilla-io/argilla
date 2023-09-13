@@ -134,10 +134,13 @@ All Python metrics are covered in:
 from argilla import metrics
 ```
 
-.. note::
+```{note}
 This feature is experimental, you can expect some changes in the Python API. Please report on Github any issue you encounter.
+````
 
-.. note:: Verify you have already installed Jupyter Widgets in order to properly visualize the plots. See https://ipywidgets.readthedocs.io/en/latest/user_install.html
+```{note}
+Verify you have already installed Jupyter Widgets in order to properly visualize the plots. See https://ipywidgets.readthedocs.io/en/latest/user_install.html
+````
 
 For running this guide you need to install the following dependencies:
 
