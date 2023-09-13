@@ -1,5 +1,5 @@
 export class Dataset {
-  private originalGuidelines: string;
+  public originalGuidelines: string;
   constructor(
     public readonly id: string,
     public readonly name: string,

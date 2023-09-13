@@ -27,7 +27,7 @@
         >
           <svgicon name="chevron-right" width="12" height="12"></svgicon>
         </base-button>
-        <transition name="fade" appear duration="500">
+        <transition name="fade" appear duration="500" mode="out-in">
           <slot></slot>
         </transition>
       </div>
@@ -58,7 +58,7 @@ export default {
   top: 0;
   right: 0;
   background: palette(grey, 700);
-  padding: 1em 1.5em;
+  padding: 1em 1.5em 0 1.5em;
   border-left: 1px solid palette(grey, 600);
   overflow: visible;
   pointer-events: all;
