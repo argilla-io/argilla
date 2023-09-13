@@ -27,7 +27,7 @@ def framework_callback(value: str):
 
 
 # using callback to ensure it is used as sole command
-@app.callback(help="Starts the ArgillaTrainer.", invoke_without_command=True)
+@app.callback(help="Starts the ArgillaTrainer", invoke_without_command=True)
 def train(
     name: str = typer.Option(default=None, help="The name of the dataset to be used for training."),
     framework: Framework = typer.Option(default=None, help="The framework to be used for training."),

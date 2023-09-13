@@ -25,21 +25,21 @@ export default {
   name: "HeaderAndTopAndOneColumnsLayout",
   data: () => {
     return {
-      visibleMetrics: false,
+      showPanel: false,
     };
   },
   computed: {
     layoutClass() {
-      return this.visibleMetrics ? "--visible-metrics" : null;
+      return this.showPanel ? "--panel" : null;
     },
   },
   created() {
-    this.$nuxt.$on("on-sidebar-toggle-metrics", (value) => {
-      this.visibleMetrics = value;
+    this.$nuxt.$on("on-sidebar-toggle-panel", (value) => {
+      this.showPanel = value;
     });
   },
   beforeDestroy() {
-    this.$nuxt.$off("on-sidebar-toggle-metrics");
+    this.$nuxt.$off("on-sidebar-toggle-panel");
   },
 };
 </script>
@@ -54,7 +54,7 @@ $gap-width: $base-space * 7;
   grid-row-gap: 0px;
   height: 100vh;
   transition: 0.4s ease-in-out;
-  &.--visible-metrics {
+  &.--panel {
     @include media(">desktop") {
       grid-template-columns: $gap-width 1fr calc($gap-width / 2) $sidebarWidth;
       transition: 0.4s ease-out;
