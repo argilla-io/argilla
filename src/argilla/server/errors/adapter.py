@@ -15,6 +15,7 @@
 import logging
 
 import pydantic
+from fastapi.exceptions import RequestValidationError
 
 from argilla.server.errors.base_errors import BadRequestError, GenericServerError, ServerError, ValidationError
 
@@ -24,8 +25,9 @@ _LOGGER = logging.getLogger("argilla")
 def exception_to_argilla_error(error: Exception) -> ServerError:
     if isinstance(error, ServerError):
         return error
+
     _LOGGER.error(error)
-    if isinstance(error, pydantic.error_wrappers.ValidationError):
+    if isinstance(error, RequestValidationError):
         return ValidationError(error)
 
     if isinstance(error, AssertionError):
