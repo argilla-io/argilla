@@ -502,7 +502,9 @@ The goal of Supervised Fine Tuning (SFT) is to optimize a pre-trained model to g
 
 Data for the training phase is generally divided into two different types generic for domain-like finetuning or chat for fine-tuning an instruction set.
 
-*Generic*
+::::{tab-set}
+
+:::{tab-item} Generic
 
 In a generic fine-tuning setting, the aim is to make the model more proficient in generating coherent and contextually appropriate text within a particular domain. For example, if we want the model to generate text related to medical research, we would fine-tune it using a dataset consisting of medical literature, research papers, or related documents. By exposing the model to domain-specific data during training, it becomes more knowledgeable about the terminology, concepts, and writing style prevalent in that domain. This enables the model to generate more accurate and contextually appropriate responses when prompted with queries or tasks related to the specific domain. An example of this format is the [PubMed data](https://huggingface.co/datasets/pubmed), but it might be smart to add some nuance by generic instruction phrases that indicate the scope of the data, like `Generate a medical paper abstract: ...`.
 
@@ -510,28 +512,13 @@ In a generic fine-tuning setting, the aim is to make the model more proficient i
 # Five distinct ester hydrolases (EC 3-1) have been characterized in guinea-pig epidermis. These are carboxylic esterase, acid phosphatase, pyrophosphatase, and arylsulphatase A and B. Their properties are consistent with those of lysosomal enzymes.
 ```
 
-*Chat*
+:::
+
+:::{tab-item} Chat
+
 
 On the other hand, instruction-based fine-tuning involves training the model to understand and respond to specific instructions or prompts given by the user. This approach allows for greater control and specificity in the generated output. For example, if we want the model to summarize a given text, we can fine-tune it using a dataset that consists of pairs of text passages and their corresponding summaries. The model can then be instructed to generate a summary based on a given input text. By fine-tuning the model in this manner, it becomes more adept at following instructions and producing output that aligns with the desired task or objective. An example of this format used is our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en) with `instruction`, `context` and `response` fields. However, we can also have simpler datasets with only `question` and `answer` fields.
 
-::::{tab-set}
-
-:::{tab-item} Template
-
-```bash
-### Instruction
-{instruction}
-
-### Context
-{context}
-
-### Response:
-{response}
-```
-
-:::
-
-:::{tab-item} Example
 
 ```bash
 ### Instruction
@@ -547,7 +534,6 @@ Virgin Australia commenced services on 31 August 2000 as Virgin Blue, with two a
 :::
 
 ::::
-
 Ultimately, the choice between these two approaches to be used as `text`-field depends on the specific requirements of the application and the desired level of control over the model's output. By employing the appropriate fine-tuning strategy, we can enhance the model's performance and make it more suitable for a wide range of applications and use cases.
 
 #### Training
