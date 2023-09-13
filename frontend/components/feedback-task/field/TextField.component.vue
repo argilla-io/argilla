@@ -18,7 +18,7 @@
         </BaseActionTooltip>
       </div>
       <div class="content-area --body1">
-        <div v-if="!useMarkdown" v-text="text" />
+        <div v-if="!useMarkdown" v-html="text" />
         <RenderMarkdownBaseComponent v-else :markdown="text" />
       </div>
     </div>

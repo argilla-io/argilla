@@ -1,15 +1,25 @@
 import { computed, ComputedRef, ref } from "vue-demi";
 
+type TSentenceInfo = {
+  substring: string;
+  index_min: number;
+  index_max: number;
+  hasBacktick: boolean;
+};
+
 export const useTextFieldViewModel = (props: {
   fieldText: string;
   stringToHighlight: string;
   useMarkdown: boolean;
 }) => {
   const text: ComputedRef<string> = computed(() => {
-    if (props.stringToHighlight.length === 0 || !props.useMarkdown)
-      return props.fieldText;
+    const newText = ref(
+      props.useMarkdown
+        ? props.fieldText
+        : sanitizeHtmlToRenderText(props.fieldText)
+    );
 
-    const newText = ref(props.fieldText);
+    if (props.stringToHighlight.length === 0) return newText.value;
 
     const splittedStringToHightlight = props.stringToHighlight.split(/\s+/);
 
@@ -23,10 +33,7 @@ export const useTextFieldViewModel = (props: {
   });
 
   const getHighlightedSentenceFor = (aWord: string, aText: string) => {
-    const wordsWithoutMarkown = getWordsWithoutMarkown(aText);
-
-    if (!wordsWithoutMarkown?.toLowerCase().includes(aWord?.toLowerCase()))
-      return aText;
+    const sentenceInfos: TSentenceInfo[] = getSentenceInfosFor(aText);
 
     const specialChars = /[`!@#$%^&*()_\-+=[\]{};':"\\|,.<>/?~ ]/;
 
@@ -36,22 +43,50 @@ export const useTextFieldViewModel = (props: {
       ? new RegExp(`${escapeCharacters}`, "gi")
       : new RegExp(`\\b${escapeCharacters}\\b`, "gi");
 
-    return aText.replace(regexExactWord, (match) => htmlHighlightFor(match));
+    return aText.replace(regexExactWord, (match, index) => {
+      const matchInfo: TSentenceInfo = sentenceInfos.find(
+        (info) => index >= info.index_min && index <= info.index_max
+      );
+
+      if (!matchInfo || (matchInfo.hasBacktick && props.useMarkdown))
+        return match;
+
+      return htmlHighlightFor(match);
+    });
   };
 
-  const getWordsWithoutMarkown = (aText: string) => {
+  const getSentenceInfosFor = (aText: string): TSentenceInfo[] => {
     const regexToSeparateMarkdown = /[^`]+|`[^`]*`/g;
 
-    const matchesWithoutMarkdown = aText
-      .match(regexToSeparateMarkdown)
-      ?.filter((match) => !match.includes("`"))
-      .join("");
+    const matchesWithoutMarkdown: RegExpMatchArray = aText.match(
+      regexToSeparateMarkdown
+    );
 
-    return matchesWithoutMarkdown;
+    const sentenceInfos: TSentenceInfo[] = matchesWithoutMarkdown.map(
+      (substring, index) => {
+        return {
+          substring,
+          index_min: index,
+          index_max: index + substring.length,
+          hasBacktick: substring.includes("`"),
+        };
+      }
+    );
+
+    return sentenceInfos;
   };
 
   const htmlHighlightFor: (aText: string) => string = (aText: string) =>
     `<span class="highlight-text">${aText}</span>`;
+
+  const sanitizeHtmlToRenderText = (text: string) => {
+    return text
+      .toString()
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  };
 
   return { text };
 };
