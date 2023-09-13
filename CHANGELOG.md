@@ -53,6 +53,7 @@ These are the section headers that we use:
 - Fixed `Pending queue` pagination problems when during data annotation ([#3677](https://github.com/argilla-io/argilla/pull/3677))
 - Fixed `visible_labels` default value to be 20 just when `visible_labels` not provided and `len(labels) > 20`, otherwise it will either be the provided `visible_labels` value or `None`, for `LabelQuestion` and `MultiLabelQuestion` ([#3702](https://github.com/argilla-io/argilla/pull/3702)).
 - Fixed `DatasetCard` generation when `RemoteFeedbackDataset` contains suggestions ([#3718](https://github.com/argilla-io/argilla/pull/3718)).
+- Add missing `draft` status in `ResponseSchema` as now there can be responses with `draft` status when annotating via the UI ([#3749](https://github.com/argilla-io/argilla/pull/3749)).
 
 ## [1.15.0](https://github.com/argilla-io/argilla/compare/v1.14.1...v1.15.0)
 
