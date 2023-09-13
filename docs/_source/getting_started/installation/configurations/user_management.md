@@ -256,6 +256,14 @@ user.delete()
 
 ::::
 
+### Default user for the `argilla/argilla-server` Docker image
+
+If you're using the `argilla/argilla-server` Docker image, you can create the default user `argilla` with `owner` role by setting the following environment variables:
+
+- `DEFAULT_USER_ENABLED`: Set to `true` to enable the default user creation.
+- `DEFAULT_USER_PASSWORD`: If `DEFAULT_USER_ENABLED` is set to `true`, this environment variable must be set to the password for the default user.
+- `DEFAULT_USER_API_KEY`: If `DEFAULT_USER_ENABLED` is set to `true`, this environment variable must be set to the API key for the default user.
+
 ### Migrate users from the `users.yaml` file
 
 The migration command can create users and workspaces automatically from a YAML file with the following format:
