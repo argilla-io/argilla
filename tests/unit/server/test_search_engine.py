@@ -341,6 +341,7 @@ class TestSuiteElasticSearchEngine:
             (SearchQuery(text=TextQuery(q="cash")), 3),
             (SearchQuery(text=TextQuery(q="card payment")), 5),
             (SearchQuery(text=TextQuery(q="nothing")), 0),
+            (SearchQuery(text=TextQuery(q="rate negative")), 1),  # Terms are found in two different fields
             (SearchQuery(text=TextQuery(q="negative", field="label")), 4),
             (SearchQuery(text=TextQuery(q="00000", field="textId")), 1),
             (SearchQuery(text=TextQuery(q="card payment", field="text")), 5),

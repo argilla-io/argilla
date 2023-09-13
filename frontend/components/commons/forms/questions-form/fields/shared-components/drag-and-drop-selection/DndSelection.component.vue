@@ -7,13 +7,22 @@
       :sort="false"
     >
       <div
-        v-for="{ text, value } in ranking.questions"
-        :key="value"
+        v-for="item in ranking.questions"
+        :id="item.value"
+        :key="item.value"
         class="draggable__rank-card--unranked"
-        :title="text"
+        :title="item.text"
+        tabindex="0"
+        ref="questions"
+        @keydown="rankWithKeyboard($event, item)"
+        @focus="onFocus"
       >
-        <svgicon width="6" name="draggable" />
-        <span class="draggable__rank-card__title" v-text="text" />
+        <svgicon width="6" name="draggable" :id="`${item.value}-icon`" />
+        <span
+          class="draggable__rank-card__title"
+          v-text="item.text"
+          :id="`${item.value}-span`"
+        />
       </div>
     </draggable>
 
@@ -34,13 +43,22 @@
           @remove="onMoveEnd"
         >
           <div
-            v-for="{ text, value } in items"
-            :key="value"
+            v-for="item in items"
+            :id="item.value"
+            :key="item.value"
             class="draggable__rank-card--ranked"
-            :title="text"
+            :title="item.text"
+            tabindex="0"
+            ref="items"
+            @keydown="rankWithKeyboard($event, item)"
+            @focus="onFocus"
           >
-            <svgicon width="6" name="draggable" />
-            <span class="draggable__rank-card__title" v-text="text" />
+            <svgicon width="6" name="draggable" :id="`${item.value}-icon`" />
+            <span
+              class="draggable__rank-card__title"
+              v-text="item.text"
+              :id="`${item.value}-span`"
+            />
           </div>
         </draggable>
       </div>
@@ -50,6 +68,8 @@
 
 <script>
 import "assets/icons/draggable";
+import { isNil } from "lodash";
+
 export default {
   name: "DndSelectionComponent",
   props: {
@@ -57,10 +77,123 @@ export default {
       type: Object,
       required: true,
     },
+    isFocused: {
+      type: Boolean,
+      default: () => false,
+    },
+  },
+  data() {
+    return {
+      timer: null,
+      keyCode: "",
+    };
+  },
+  watch: {
+    isFocused: {
+      immediate: true,
+      handler(newValue) {
+        const questionsAndItems = [
+          ...(this.$refs.questions || []),
+          ...(this.$refs.items || []),
+        ];
+
+        const componentContainsActiveElement = questionsAndItems?.includes(
+          document.activeElement
+        );
+
+        if (newValue && !componentContainsActiveElement) {
+          this.focusOnFirstQuestionOrItem();
+        }
+      },
+    },
   },
   methods: {
+    reset() {
+      this.keyCode = "";
+      this.timer = null;
+    },
+    isGlobalShortcut(event) {
+      return (
+        event.shiftKey || event.key == "Tab" || event.ctrlKey || event.metaKey
+      );
+    },
+    rankWithKeyboard(event, questionToMove) {
+      if (this.timer) clearTimeout(this.timer);
+      if (this.isGlobalShortcut(event)) return;
+
+      event.stopPropagation();
+
+      this.keyCode += event.key;
+
+      if (this.onUnRankFor(event.key, questionToMove)) {
+        this.focusOnFirstQuestionOrItem();
+        this.reset();
+        return;
+      }
+
+      if (isNaN(this.keyCode)) {
+        this.reset();
+        return;
+      }
+
+      const slotTo = this.ranking.slots[this.keyCode - 1];
+
+      if (!slotTo) {
+        this.reset();
+        return;
+      }
+
+      this.ranking.moveQuestionToSlot(questionToMove, slotTo);
+      this.onMoveEnd();
+
+      this.$nextTick(() => {
+        const questionRanked = this.$refs.items?.find(
+          ({ title }) => title == questionToMove?.text
+        );
+
+        questionRanked?.focus();
+      });
+
+      this.timer = setTimeout(() => {
+        this.$nextTick(() => {
+          this.focusOnFirstQuestionOrItem();
+          this.reset();
+        });
+      }, 300);
+    },
+    onUnRankFor(key, question) {
+      const isRanked = !isNil(question.rank);
+
+      if (key == "Backspace" && isRanked) {
+        question.rank = null;
+
+        return true;
+      }
+
+      return false;
+    },
+    focusOnFirstQuestionOrItem() {
+      this.$nextTick(() => {
+        const firstQuestion = this.$refs.questions?.find(
+          ({ title }) => title == this.ranking.questions[0]?.text
+        );
+
+        if (!firstQuestion) {
+          const firstItem = this.$refs.items[0];
+
+          firstItem?.focus();
+
+          return;
+        }
+
+        firstQuestion.focus();
+      });
+    },
     onMoveEnd() {
       this.$emit("on-reorder", this.ranking);
+    },
+    onFocus() {
+      this.$emit("on-focus");
     },
   },
 };
@@ -119,10 +252,14 @@ $max-visible-card-items: 12;
     padding: $base-space;
     border-radius: $border-radius;
     cursor: move;
+
     &[draggable="true"] {
       background: $card-ghost-color;
       color: $card-primary-color;
       box-shadow: $shadow-500;
+      &:focus {
+        outline: none !important;
+      }
     }
     &.ghost-ticket {
       background: $card-empty-color;
@@ -141,7 +278,14 @@ $max-visible-card-items: 12;
       @extend .draggable__rank-card;
       background-color: $card-secondary-color;
       color: $card-primary-color;
-      transition: box-shadow 0.2s ease-out;
+      transition: box-shadow 0.2s ease-out !important;
+
+      &:focus {
+        outline: 2px solid $primary-color !important;
+      }
+      &:focus:not(:focus-visible) {
+        outline: none;
+      }
       &:hover {
         box-shadow: $shadow-100;
         transition: box-shadow 0.2s ease-in;
@@ -151,6 +295,12 @@ $max-visible-card-items: 12;
       @extend .draggable__rank-card;
       background-color: $card-primary-color;
       color: palette(white);
+      &:focus {
+        outline: 2px solid $primary-color;
+      }
+      &:focus:not(:focus-visible) {
+        outline: none;
+      }
     }
     &__title {
       overflow: hidden;
