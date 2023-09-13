@@ -1,0 +1,1 @@
+The records classes covered in this section correspond to three datasets: `DatasetForTextClassification`, `DatasetForTokenClassification`, and `DatasetForText2Text`. These will be deprecated in Argilla 2.0 and replaced by the `FeedbackDataset` class. Take a look [here](/practical_guides/choose_dataset.md) for additional context.

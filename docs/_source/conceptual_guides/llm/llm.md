@@ -1,4 +1,5 @@
-# An overview
+# Data collection for LLMs
+
 Argilla Feedback is purpose-built to support **customized and multifaceted feedback in Large Language Model (LLM) projects**. Serving as a critical tool for LLM fine-tuning and Reinforcement Learning from Human Feedback (RLHF), Argilla Feedback provides a flexible platform essential for the evaluation and fine-tuning stages of LLMs tailored to unique use cases. The figure below encapsulates the stages detailed in these guides:
 
 
@@ -26,13 +27,7 @@ Introduction to data collection for supervised and instruction fine-tuning.
 Introduction to data collection for reward modeling.
 
 ```
-```{grid-item-card} Argilla Feedback Data Model
-:link: data_model.html
-
-Introduction to the main components to build human-in-the-loop workflows for LLMs.
-```
 ````
-
 
 ```{toctree}
 :hidden:

@@ -70,6 +70,7 @@ elasticsearch.md
 server_configuration.md
 user_management.md
 workspace_management.md
+dataset_management.md
 database_migrations.md
 image_support.md
 ```
