@@ -101,8 +101,13 @@ class TestFilteredRemoteFeedbackDataset:
         with pytest.raises(NotImplementedError, match="`records.add` does not work for filtered datasets."):
             filtered_dataset.records.add(FeedbackRecord(fields={text_field.name: "test"}))
 
-        with pytest.raises(NotImplementedError, match="`delete` does not work for filtered datasets."):
+        with pytest.warns(
+            match="`delete` does not work for filtered datasets. First call `filter_reset\(\)` and then `delete\(\)`."
+        ):
             filtered_dataset.delete()
+
+        with pytest.warns(match="Removing old filters and applying new ones."):
+            filtered_dataset.filter_by()
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_attributes(self, role: UserRole) -> None:

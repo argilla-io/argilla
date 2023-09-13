@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import warnings
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
@@ -77,6 +78,7 @@ class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeed
         guidelines: Optional[str] = None,
         filters: Dict[str, Any] = {},
     ) -> None:
+        self._filters = filters
         super().__init__(
             client=client,
             id=id,
@@ -92,4 +94,11 @@ class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeed
         )
 
     def delete(self) -> None:
-        raise NotImplementedError("`delete` does not work for filtered datasets.")
+        warnings.warn(
+            message="`delete` does not work for filtered datasets. First call `filter_reset()` and then `delete()`.",
+            stacklevel=2,
+        )
+
+    def filter_by(self, *args, **kwargs) -> "FilteredRemoteFeedbackDataset":
+        warnings.warn(message="Removing old filters and applying new ones.", stacklevel=2)
+        super().filter_by(*args, **kwargs)

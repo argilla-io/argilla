@@ -13,11 +13,11 @@
 #  limitations under the License.
 
 import warnings
-from abc import ABC, abstractmethod
+from abc import ABC
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Generic, Iterator, List, Optional, Type, TypeVar, Union
 
-from argilla.client.feedback.dataset.base import FeedbackDatasetBase
+from argilla.client.feedback.dataset.local.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
 from argilla.client.feedback.schemas.records import RemoteFeedbackRecord, RemoteSuggestionSchema
 from argilla.client.sdk.users.models import UserRole
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from argilla.client.feedback.dataset.local import FeedbackDataset
     from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
-    from argilla.client.sdk.v1.datasets.models import FeedbackItemModel, FeedbackRecordsModel
+    from argilla.client.sdk.v1.datasets.models import FeedbackItemModel
     from argilla.client.workspaces import Workspace
 
 
@@ -99,24 +99,8 @@ class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
             client=self._client, name2id=self.__question_name2id, suggestions=suggestions, **record
         )
 
-    @abstractmethod
-    def __len__(self) -> int:
-        pass
 
-    @abstractmethod
-    def _fetch_records(self, offset: int, limit: int) -> "FeedbackRecordsModel":
-        pass
-
-    @abstractmethod
-    def add(self) -> None:
-        pass
-
-    @abstractmethod
-    def delete(self) -> None:
-        pass
-
-
-class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
+class RemoteFeedbackDatasetBase(FeedbackDatasetBase, Generic[T]):
     records_cls: Type[T]
 
     def __init__(
@@ -311,9 +295,8 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
 
     def push_to_argilla(
         self,
-        name: Optional[str] = None,
-        workspace: Optional[Union[str, Workspace]] = None,
-        show_progress: Optional[bool] = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """`push_to_argilla` doesn't work for neither `RemoteFeedbackDataset` nor `FilteredRemoteFeedbackDataset`."""
         warnings.warn(
@@ -323,4 +306,9 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
             UserWarning,
             stacklevel=2,
         )
-        pass
+
+    def prepare_for_training(self):
+        """Prepares the dataset for training."""
+        warnings.warn(
+            "`prepare_for_training` is not implemented for `RemoteFeedbackDataset`. First call `pull_from_argilla` to get a local instance of the dataset, and then call `prepare_for_training` on that instance."
+        )

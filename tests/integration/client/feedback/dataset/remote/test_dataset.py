@@ -120,3 +120,24 @@ class TestRemoteFeedbackDataset:
         assert isinstance(remote_dataset.url, str)
         assert isinstance(remote_dataset.created_at, datetime)
         assert isinstance(remote_dataset.updated_at, datetime)
+
+    @pytest.mark.parametrize("role", [UserRole.owner])
+    async def test_not_implemented_methods(self, role: UserRole) -> None:
+        dataset = await DatasetFactory.create()
+        await TextFieldFactory.create(dataset=dataset, required=True)
+        await TextQuestionFactory.create(dataset=dataset, required=True)
+        await RecordFactory.create_batch(dataset=dataset, size=10)
+        user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+        api.init(api_key=user.api_key)
+        ds = FeedbackDataset.from_argilla(id=dataset.id)
+
+        with pytest.warns(
+            match="`prepare_for_training` is not implemented for `RemoteFeedbackDataset`. First call `pull_from_argilla` to get a local instance of the dataset, and then call `prepare_for_training` on that instance."
+        ):
+            ds.prepare_for_training()
+
+        with pytest.warns(
+            match="`push_to_argilla` doesn't work for neither `RemoteFeedbackDataset` nor `FilteredRemoteFeedbackDataset`,"
+        ):
+            ds.push_to_argilla()
