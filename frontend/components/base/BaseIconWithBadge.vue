@@ -3,6 +3,7 @@
     class="icon-with-badge"
     :data-title="tooltip"
     @on-click="onClickIcon"
+    :tabIndex="-1"
   >
     <i
       :key="showBadge"

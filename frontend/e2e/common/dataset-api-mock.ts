@@ -6,6 +6,7 @@ export interface DatasetData {
 
 const fakeDateMonthAgo = (monthAgo) => {
   const now = new Date();
+  now.setHours(0, 0, 0, 0);
 
   now.setMonth(now.getMonth() - monthAgo);
 
