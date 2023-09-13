@@ -247,7 +247,7 @@ $toast-colors: map-merge(
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 2em;
+  padding: $base-space $base-space * 2;
   overflow: hidden;
   z-index: 1052;
   pointer-events: none;

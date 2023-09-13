@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from tqdm import trange
@@ -129,6 +130,8 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         id: "UUID",
         name: str,
         workspace: "Workspace",
+        created_at: datetime,
+        updated_at: datetime,
         fields: List["AllowedFieldTypes"],
         questions: List["AllowedQuestionTypes"],
         guidelines: Optional[str] = None,
@@ -138,6 +141,8 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             id=id,
             name=name,
             workspace=workspace,
+            created_at=created_at,
+            updated_at=updated_at,
             fields=fields,
             questions=questions,
             guidelines=guidelines,
@@ -164,6 +169,8 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             id=self.id,
             name=self.name,
             workspace=self.workspace,
+            created_at=self.created_at,
+            updated_at=self.updated_at,
             fields=self.fields,
             questions=self.questions,
             guidelines=self.guidelines,

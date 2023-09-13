@@ -22,14 +22,14 @@ from argilla.client.models import TextClassificationRecord, TokenClassificationR
 from argilla.training.spacy import ArgillaSpaCyTrainer as ArgillaSpaCyTrainerV1
 from argilla.training.spacy import ArgillaSpaCyTransformersTrainer as ArgillaSpaCyTransformersTrainerV1
 from argilla.training.spacy import _ArgillaSpaCyTrainerBase as _ArgillaSpaCyTrainerBaseV1
-from argilla.utils.dependency import require_version
+from argilla.utils.dependency import require_dependencies
 
 
 class _ArgillaSpaCyTrainerBase(_ArgillaSpaCyTrainerBaseV1, ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaSpaCyTrainer")
     _logger.setLevel(logging.INFO)
 
-    require_version("spacy")
+    require_dependencies("spacy")
 
     def __init__(
         self,
@@ -111,13 +111,13 @@ class _ArgillaSpaCyTrainerBase(_ArgillaSpaCyTrainerBaseV1, ArgillaTrainerSkeleto
 
         if self.use_gpu:
             try:
-                require_version("torch")
+                require_dependencies("torch")
                 self.has_torch = True
             except Exception:
                 self.has_torch = False
 
             try:
-                require_version("tensorflow")
+                require_dependencies("tensorflow")
                 self.has_tensorflow = True
             except Exception:
                 self.has_tensorflow = False

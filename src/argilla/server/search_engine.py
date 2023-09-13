@@ -219,7 +219,7 @@ class SearchEngine:
             field_names = [
                 f"fields.{field.name}" for field in dataset.fields if field.settings.get("type") == FieldType.text
             ]
-            return {"multi_match": {"query": text.q, "fields": field_names, "operator": "and"}}
+            return {"multi_match": {"query": text.q, "type": "cross_fields", "fields": field_names, "operator": "and"}}
         else:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-query.html
             return {"match": {f"fields.{text.field}": {"query": text.q, "operator": "and"}}}
@@ -318,7 +318,7 @@ async def get_search_engine() -> AsyncGenerator[SearchEngine, None]:
     search_engine = SearchEngine(
         config,
         es_number_of_shards=settings.es_records_index_shards,
-        es_number_of_replicas=settings.es_records_index_shards,
+        es_number_of_replicas=settings.es_records_index_replicas,
     )
     try:
         yield search_engine

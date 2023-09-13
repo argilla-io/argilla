@@ -17,17 +17,14 @@ import logging
 from argilla.client.feedback.training.frameworks.transformers import ArgillaTransformersTrainer
 from argilla.client.models import TextClassificationRecord
 from argilla.training.setfit import ArgillaSetFitTrainer as ArgillaSetFitTrainerV1
-from argilla.utils.dependency import require_version
+from argilla.utils.dependency import require_dependencies
 
 
 class ArgillaSetFitTrainer(ArgillaSetFitTrainerV1, ArgillaTransformersTrainer):
     _logger = logging.getLogger("ArgillaSetFitTrainer")
     _logger.setLevel(logging.INFO)
 
-    require_version("torch")
-    require_version("datasets")
-    require_version("transformers")
-    require_version("setfit>=0.6")
+    require_dependencies(["torch", "datasets", "transformers", "setfit>=0.6"])
 
     def __init__(self, *args, **kwargs):
         if kwargs.get("model") is None and "model" in kwargs:

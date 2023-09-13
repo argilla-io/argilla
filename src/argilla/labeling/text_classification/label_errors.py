@@ -22,7 +22,7 @@ from pkg_resources import parse_version
 
 from argilla.client.datasets import DatasetForTextClassification
 from argilla.client.models import TextClassificationRecord
-from argilla.utils.dependency import requires_version
+from argilla.utils.dependency import requires_dependencies
 
 
 class SortBy(Enum):
@@ -39,7 +39,7 @@ class SortBy(Enum):
         )
 
 
-@requires_version("cleanlab")
+@requires_dependencies("cleanlab")
 def find_label_errors(
     records: Union[List[TextClassificationRecord], DatasetForTextClassification],
     sort_by: Union[str, SortBy] = "likelihood",

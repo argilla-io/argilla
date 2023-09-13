@@ -67,6 +67,7 @@
    :hidden:
 
    reference/python/index
+   reference/cli
    reference/webapp/index
    reference/notebooks
    reference/telemetry
