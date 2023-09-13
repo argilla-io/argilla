@@ -48,18 +48,6 @@
    tutorials_and_integrations/tutorials/tutorials
    tutorials_and_integrations/integrations/integrations
 
-
-.. toctree::
-   :caption: Tutorials
-   :maxdepth: 3
-   :hidden:
-
-   tutorials/tutorials
-   tutorials/steps/steps.md
-   tutorials/tasks/tasks.md
-   tutorials/libraries/libraries.md
-   tutorials/techniques/techniques.md
-
 .. toctree::
    :caption: Reference
    :maxdepth: 3

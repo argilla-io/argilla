@@ -143,7 +143,7 @@ dataset = rg.FeedbackDataset.from_argilla(name="my-dataset", workspace="my-works
 dataset.records[0].suggestions[0].delete()
 ```
 
-### Other datasets
+## Other datasets
 
 ```{include} /_common/other_datasets.md
 ```
