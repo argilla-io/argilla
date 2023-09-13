@@ -49,7 +49,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 server = [
     # Basic dependencies
-    "fastapi >= 0.75,< 0.89",
+    "fastapi >= 0.103.1",
     "opensearch-py ~= 2.0.0",
     "elasticsearch8[async] ~= 8.7.0",
     "uvicorn[standard] >= 0.15.0,< 0.21.0",
@@ -134,7 +134,9 @@ where = ["src"]
 version = { attr = "argilla.__version__" }
 
 [tool.setuptools.package-data]
-"argilla.client.feedback.integrations.huggingface.card" = ["argilla_template.md"]
+"argilla.client.feedback.integrations.huggingface.card" = [
+    "argilla_template.md",
+]
 
 [tool.pytest.ini_options]
 log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
