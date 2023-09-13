@@ -219,7 +219,7 @@ class SearchEngine:
             field_names = [
                 f"fields.{field.name}" for field in dataset.fields if field.settings.get("type") == FieldType.text
             ]
-            return {"multi_match": {"query": text.q, "fields": field_names, "operator": "and"}}
+            return {"multi_match": {"query": text.q, "type": "cross_fields", "fields": field_names, "operator": "and"}}
         else:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-query.html
             return {"match": {f"fields.{text.field}": {"query": text.q, "operator": "and"}}}
