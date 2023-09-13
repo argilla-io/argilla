@@ -340,6 +340,7 @@ class TestSuiteOpenSearchEngine:
             (StringQuery(q="cash"), 3),
             (StringQuery(q="card payment"), 5),
             (StringQuery(q="nothing"), 0),
+            (StringQuery(q="rate negative"), 1),  # Terms are found in two different fields
             (StringQuery(q="negative", field="label"), 4),
             (StringQuery(q="00000", field="textId"), 1),
             (StringQuery(q="card payment", field="text"), 5),
