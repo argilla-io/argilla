@@ -14,7 +14,7 @@
 
 from uuid import UUID
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Security, status
+from fastapi import APIRouter, Depends, HTTPException, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla.server.contexts import datasets
@@ -45,7 +45,7 @@ async def update_response(
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
     response_id: UUID,
-    response_update: ResponseUpdate = Body(..., discriminator="status"),
+    response_update: ResponseUpdate,
     current_user: User = Security(auth.get_current_user),
 ):
     response = await _get_response(db, response_id)
