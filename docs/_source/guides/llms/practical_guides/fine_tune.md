@@ -446,6 +446,12 @@ trainer = ArgillaTrainer(
 trainer.train(output_dir="sft_model")
 ```
 
+```{note}
+You can also initialize the `ArgillaTrainer` with an already initialized `model` and `tokenizer` for additional fine-grained control. This might be useful if you wish to ensure that the tokenizer adds the EOS token.
+
+If the trained model still generates endlessly, then it is recommended to 1) pass a `tokenizer` that certainly adds an EOS token and 2) pass a custom Data Collator that does not set the label for the EOS token to -100.
+```
+
 **Inference**
 
 Let's observe if it worked to train the model to respond within our template. We'll create a quick helper method for this.
