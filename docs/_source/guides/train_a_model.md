@@ -57,7 +57,6 @@ rg.log(records=records, name="<my_dataset_name>", workspace="<my_workspace_name>
 
 The trainer also has an `ArgillaTrainer.update_config()` method, which maps `**kwargs` to the respective framework. So, these can be derived from the underlying framework that was used to initialize the trainer. Underneath, you can find an overview of these variables for the supported frameworks. Note that you don't need to pass all of them directly and that the values below are their default configurations.
 
-
 ```{include} /_common/tabs/train_update_config.md
 ```
 
@@ -66,7 +65,7 @@ The trainer also has an `ArgillaTrainer.update_config()` method, which maps `**k
 We also add CLI support for the `ArgillaTrainer`. This can be used when for example executing training on an external machine. Not that the `--update-config-kwargs` always uses the `update_config()` method for the corresponding class. Hence, you should take this into account to configure training via the CLI command by passing a JSON-serializable string.
 
 ```bash
-Usage: python -m argilla train [OPTIONS] COMMAND [ARGS]...
+Usage: argilla train [OPTIONS] COMMAND [ARGS]...
 
 Starts the ArgillaTrainer.
 
@@ -82,8 +81,6 @@ Options:
 --device                      INTEGER                                                   The GPU id to be used for training. [default: -1]
 --output-dir                  TEXT                                                      Output directory for the saved model. [default: model]
 --update-config-kwargs        TEXT                                                      update_config() kwargs to be passed as a dictionary. [default: {}]
---api-url                     TEXT                                                      The API url to be used for training. [env var: ARGILLA_API_URL] [default: None]
---api-key                     TEXT                                                      The API key to be used for training. [env var: ARGILLA_API_KEY] [default: None]
 ```
 
 ### An example workflow

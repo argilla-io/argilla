@@ -40,4 +40,23 @@ client = Argilla(
 ```
 :::
 
+:::{tab-item} CLI
+
+From `1.16.0` version you can use the CLI to connect to an Argilla server.
+
+First login to the Argilla server using the CLI
+
+```sh
+argilla login --api-url http://localhost:6900 --api-key argilla.apikey
+```
+
+Then call `init` function without arguments to use the stored credentials created by the `login` command
+
+```python
+import argilla as rg
+
+rg.init()
+```
+:::
+
 ::::
