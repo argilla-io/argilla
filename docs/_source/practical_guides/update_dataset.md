@@ -48,7 +48,7 @@ dataset.push_to_argilla()
 :::
 ::::
 
-To learn about the format that these records follow, check [this page](create_dataset.md#add-records) or go to our [cheatsheet](../../../getting_started/cheatsheet.md#create-records).
+To learn about the format that these records follow, check [this page](create_dataset.md#add-records) or go to our [cheatsheet](/getting_started/cheatsheet.md#create-records).
 
 ### Delete existing records
 

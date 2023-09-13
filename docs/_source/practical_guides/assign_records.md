@@ -6,19 +6,18 @@ Depending on the nature of your project and the size of your annotation team, yo
 You will need to decide the level of overlap before creating or pushing a dataset to Argilla, as this has implications on how your dataset is set up.
 ```
 
-
 ## Feedback Dataset
 
 ### Full overlap
 
-The Feedback Task supports having multiple annotations for your records by default. This means that all users with access to the dataset can give responses to all the records in the dataset. To have this full overlap just push the dataset (as detailed in [Create a Feedback Dataset](create_dataset.md#push-to-argilla)) in a workspace where all team members have access. Learn more about managing user access to workspaces [here](../../../getting_started/installation/configurations/user_management.md#assign-a-user-to-a-workspace).
+The Feedback Task supports having multiple annotations for your records by default. This means that all users with access to the dataset can give responses to all the records in the dataset. To have this full overlap just push the dataset (as detailed in [Create a Feedback Dataset](create_dataset.md#push-to-argilla)) in a workspace where all team members have access. Learn more about managing user access to workspaces [here](/getting_started/installation/configurations/user_management.md#assign-a-user-to-a-workspace).
 
 ### Zero overlap
 
 If you only want one annotation per record, we recommend that you split your records into chunks and assign each of them to a single annotator. Then, you can create several datasets, one in each annotator's personal workspace with the records assigned to them.
 
 ```{note}
-This assumes that each annotator has a personal workspace attached to their user. If this is not the case, learn how create a workspace and assign it to a user [here](../../../getting_started/installation/configurations/user_management.md#assign-a-user-to-a-workspace).
+This assumes that each annotator has a personal workspace attached to their user. If this is not the case, learn how create a workspace and assign it to a user [here](/getting_started/installation/configurations/user_management.md#assign-a-user-to-a-workspace).
 ```
 
 Here's how you can do this:
@@ -128,7 +127,7 @@ for username, records in assignments.items():
 ::::
 
 ```{note}
-The `Workspace` class was introduced in Argilla's Python SDK in version 1.11.0. To manage and create workspaces in earlier versions of Argilla check our [User Management Guide](../../../getting_started/installation/configurations/user_management.md)
+The `Workspace` class was introduced in Argilla's Python SDK in version 1.11.0. To manage and create workspaces in earlier versions of Argilla check our [User Management Guide](/getting_started/installation/configurations/user_management.md)
 ```
 
 ### Controlled overlap
@@ -178,7 +177,7 @@ If you use this method, we recommend you will need to add an id to the records i
 ### Zero overlap
 By default these datasets don't allow overlap i.e., they only allow one response. This means that you only need to log your dataset in a workspace where all members of the annotation team has access to get zero overlap.
 
-You may ask your team to self-organise and work on any available unvalidated records, but to avoid stepping on each other's toes, it is recommended to divide the records among your teammates. Follow [this tutorial](../../tutorials/notebooks/labelling-tokenclassification-basics.ipynb) to learn how.
+You may ask your team to self-organise and work on any available unvalidated records, but to avoid stepping on each other's toes, it is recommended to divide the records among your teammates. Follow [this tutorial](/tutorials/notebooks/labelling-tokenclassification-basics.ipynb) to learn how.
 
 
 ### Full overlap

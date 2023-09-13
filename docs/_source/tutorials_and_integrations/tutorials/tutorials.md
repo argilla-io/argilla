@@ -48,6 +48,8 @@ Learn how to use the ArgillaTrainer to fine-tune your Feedback Dataset using Set
 ```{include} /_common/other_datasets.md
 ```
 
+Looking for more tutorials? Check out our [notebooks folder](/reference/notebooks)!
+
 ````{grid}  1 1 3 3
 :class-container: tuto-section-2
 ```{grid-item-card} 🤯 Few-shot classification
