@@ -147,11 +147,15 @@ export class Question {
     this.initializeOriginal();
   }
 
-  answerQuestionWithResponse(answer: RecordAnswer) {
+  complete(answer: RecordAnswer) {
+    if (!answer) return;
+
     this.answer.complete(answer);
   }
 
-  answerQuestionWithSuggestion(suggestion: Suggestion) {
+  suggests(suggestion: Suggestion) {
+    if (!suggestion) return;
+
     this.suggestion = suggestion;
     this.answer.complete(suggestion);
   }

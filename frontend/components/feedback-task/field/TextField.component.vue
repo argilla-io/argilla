@@ -1,8 +1,12 @@
 <template>
   <div class="text_field_component">
     <div class="title-area --body2">
-      <span v-text="title" />
-      <BaseActionTooltip tooltip="Copied" tooltip-position="left">
+      <span class="text_field_component__title-content" v-text="title" />
+      <BaseActionTooltip
+        class="text_field_component__tooltip"
+        tooltip="Copied"
+        tooltip-position="left"
+      >
         <BaseButton
           title="Copy to clipboard"
           class="text_field_component__copy-button"
@@ -68,7 +72,16 @@ export default {
     white-space: pre-wrap;
     word-break: break-word;
   }
+  &__title-content {
+    word-break: break-word;
+    width: calc(100% - 30px);
+  }
+  &__tooltip {
+    display: flex;
+    align-self: flex-start;
+  }
   &__copy-button {
+    flex-shrink: 0;
     padding: 0;
     z-index: 2;
   }

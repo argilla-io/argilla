@@ -1,3 +1,4 @@
+import { isEqual, cloneDeep } from "lodash";
 import { Field } from "../field/Field";
 import { Question } from "../question/Question";
 import { Suggestion } from "../question/Suggestion";
@@ -6,6 +7,9 @@ import { RecordAnswer } from "./RecordAnswer";
 const DEFAULT_STATUS = "pending";
 
 export class Record {
+  // eslint-disable-next-line no-use-before-define
+  private original: Record;
+
   constructor(
     public readonly id: string,
     public readonly datasetId: string,
@@ -13,6 +17,7 @@ export class Record {
     public readonly fields: Field[],
     public answer: RecordAnswer,
     private readonly suggestions: Suggestion[],
+    public updatedAt: string,
     public readonly page: number
   ) {
     this.completeQuestion();
@@ -20,6 +25,10 @@ export class Record {
 
   get status() {
     return this.answer?.status ?? DEFAULT_STATUS;
+  }
+
+  get isPending() {
+    return this.status === DEFAULT_STATUS;
   }
 
   get isSubmitted() {
@@ -30,22 +39,51 @@ export class Record {
     return this.status === "discarded";
   }
 
+  get isDraft() {
+    return this.status === "draft";
+  }
+
+  get isModified() {
+    const { original, ...rest } = this;
+
+    return !!original && !isEqual(original, rest);
+  }
+
   discard(answer: RecordAnswer) {
     this.answer = answer;
+    this.updatedAt = answer.updatedAt;
+
+    this.initialize();
   }
 
   submit(answer: RecordAnswer) {
     this.answer = answer;
+    this.updatedAt = answer.updatedAt;
+
+    this.initialize();
   }
 
   clear() {
     this.questions.forEach((question) => question.clearAnswer());
 
     this.answer = null;
+
+    this.initialize();
   }
 
-  restore() {
+  initialize() {
     this.completeQuestion();
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { original, ...rest } = this;
+
+    this.original = cloneDeep(rest);
+  }
+
+  get hasAnyQuestionAnswered() {
+    return this.questions.some(
+      (question) => question.answer.isValid || question.answer.isPartiallyValid
+    );
   }
 
   questionAreCompletedCorrectly() {
@@ -71,20 +109,14 @@ export class Record {
     return this.questions.map((question) => {
       const answerForQuestion = this.answer?.value[question.name];
 
-      if (answerForQuestion) {
-        question.answerQuestionWithResponse(answerForQuestion);
+      question.complete(answerForQuestion);
 
-        return question;
-      }
-
-      if (!this.answer) {
+      if (this.isPending || this.isDraft) {
         const suggestion = this.suggestions?.find(
           (s) => s.questionId === question.id
         );
 
-        if (suggestion) {
-          question.answerQuestionWithSuggestion(suggestion);
-        }
+        question.suggests(suggestion);
       }
 
       return question;

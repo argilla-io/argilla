@@ -1,6 +1,6 @@
 <template>
   <div class="record">
-    <StatusTag class="record__status" :title="recordStatus" />
+    <StatusTag class="record__status" :recordStatus="recordStatus" />
     <div
       v-for="{ id, title, content, isTextType, settings } in fields"
       :key="id"

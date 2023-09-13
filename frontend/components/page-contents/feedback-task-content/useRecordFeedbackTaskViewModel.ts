@@ -21,5 +21,10 @@ export const useRecordFeedbackTaskViewModel = () => {
     await getRecords.execute(datasetId, page, status, searchText);
   };
 
-  return { records, loadMetrics, loadRecords, clearRecords };
+  return {
+    records,
+    loadMetrics,
+    loadRecords,
+    clearRecords,
+  };
 };
