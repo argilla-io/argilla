@@ -22,6 +22,7 @@ from .create import create_user
 from .delete import delete_user
 from .list import list_users
 
+app = typer.Typer(help="Commands for user management", no_args_is_help=True, callback=init_callback)
 _COMMANDS_REQUIRING_USER = ["delete"]
 
 
