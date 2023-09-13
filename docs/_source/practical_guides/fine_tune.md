@@ -1,8 +1,9 @@
-# 🦾 Fine-tune language models
+# 🦾 Fine-tune LLMs and other language models
 
 ## Feedback Dataset
 
 After [collecting the responses](/guides/llms/practical_guides/collect_responses.html) from our `FeedbackDataset`, we can start fine-tuning our LLMs and other models. Due to the customizability of the task, this might require setting up a custom post-processing workflow, but we will provide some good toy examples for the [LLM approaches](/guides/llms/conceptual_guides/rlhf.html): supervised fine-tuning, and reinforcement learning through human feedback (RLHF). However, we also still provide for other NLP tasks like text classification.
+
 ### The `ArgillaTrainer`
 
 The `ArgillaTrainer` is a wrapper around many of our favorite NLP libraries. It provides a very intuitive abstract representation to facilitate simple training workflows using decent default pre-set configurations without having to worry about any data transformations from Argilla.
@@ -834,19 +835,16 @@ The ArgillaTrainer is a wrapper around many of our favorite NLP libraries. It pr
 
 We plan on adding more support for other tasks and frameworks so feel free to reach out on our Slack or GitHub to help us prioritize each task.
 
-| Framework/Task    | TextClassification | TokenClassification | Text2Text | Feedback  |
-|-------------------|--------------------|---------------------|-----------|-----------|
-| OpenAI            | ✔️                  |                     | ✔️         |           |
-| AutoTrain         | ✔️                  | ✔️                   | ✔️         |           |
-| SetFit            | ✔️                  |                     |           |           |
-| spaCy             | ✔️                  | ✔️                   |           |           |
-| Transformers      | ✔️                  | ✔️                   |           |           |
-| PEFT              | ✔️                  | ✔️                   |           |           |
-| SpanMarker        |                    | ✔️                   |           |           |
-
+| Framework/Task    | TextClassification | TokenClassification | Text2Text |
+|-------------------|--------------------|---------------------|-----------|
+| OpenAI            | ✔️                  |                     | ✔️         |
+| SetFit            | ✔️                  |                     |           |
+| spaCy             | ✔️                  | ✔️                   |           |
+| Transformers      | ✔️                  | ✔️                   |           |
+| PEFT              | ✔️                  | ✔️                   |           |
+| SpanMarker        |                    | ✔️                   |           |
 
 ##### Tranining configs
-
 
 The trainer also has an `ArgillaTrainer.update_config()` method, which maps a dict with `**kwargs` to the respective framework. So, these can be derived from the underlying framework that was used to initialize the trainer. Underneath, you can find an overview of these variables for the supported frameworks.
 

@@ -7,10 +7,12 @@ The Feedback Task datasets allow you to combine multiple questions of different 
 This guide will walk you through all the elements you will need to configure to create a `FeedbackDataset` and add records to it.
 
 ```{note}
-To follow the steps in this guide, you will first need to connect to Argilla. Check how to do so in our [cheatsheet](../../../getting_started/cheatsheet.md#connect-to-argilla).
+To follow the steps in this guide, you will first need to connect to Argilla. Check how to do so in our [cheatsheet](/getting_started/cheatsheet.md#connect-to-argilla).
 ```
 
-### Define record `fields`
+### Configure the dataset
+
+#### Define `fields`
 
 A record in Argilla refers to a data item that requires annotation and can consist of one or multiple fields i.e., the pieces of information that will be shown to the user in the UI in order to complete the annotation task. This can be, for example, a prompt and output pair in the case of instruction datasets.
 
@@ -34,7 +36,7 @@ fields = [
 The order of the fields in the UI follows the order in which these are added to the `fields` attribute in the Python SDK.
 ```
 
-### Define `questions`
+#### Define `questions`
 
 To collect feedback for your dataset, you need to formulate questions. The Feedback Task currently supports the following types of questions:
 
@@ -63,7 +65,7 @@ Check out the following tabs to learn how to set up questions according to their
 ```{include} /_common/tabs/question_settings.md
 ```
 
-### Define `guidelines`
+#### Define `guidelines`
 
 Once you have decided on the data to show and the questions to ask, it's important to provide clear guidelines to the annotators. These guidelines help them understand the task and answer the questions consistently. You can provide guidelines in two ways:
 
@@ -72,7 +74,7 @@ Once you have decided on the data to show and the questions to ask, it's importa
 
 It is good practice to use at least the dataset guidelines if not both methods. Question descriptions should be short and provide context to a specific question. They can be a summary of the guidelines to that question, but often times that is not sufficient to align the whole annotation team. In the guidelines, you can include a description of the project, details on how to answer each question with examples, instructions on when to discard a record, etc.
 
-### Configure the dataset
+#### Create the dataset
 
 Once the scope of the project is defined, which implies knowing the `fields`, `questions` and `guidelines` (if applicable), you can proceed to create the `FeedbackDataset`. To do so, you will need to define the following arguments:
 

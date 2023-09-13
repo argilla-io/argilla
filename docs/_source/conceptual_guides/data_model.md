@@ -46,6 +46,9 @@ Guidelines are a crucial component of the feedback collection process. They prov
 
 ## Other datasets
 
+```{include} /_common/other_datasets.md
+```
+
 Argilla is built around a few simple concepts. This section clarifies what those concepts are. Let's take a look at Argilla's data model:
 
 ![A sketch of the Argilla data model](/_static/images/main/argilla_data_model.png)

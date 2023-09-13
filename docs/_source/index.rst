@@ -17,36 +17,37 @@
    :maxdepth: 3
    :hidden:
 
-   guides/conceptual_guides/conceptual_guides
-   guides/conceptual_guides/data_model
-   guides/conceptual_guides/llm/llm
-   guides/conceptual_guides/sft
-   guides/conceptual_guides/rm
-   guides/conceptual_guides/rlhf
+   conceptual_guides/conceptual_guides
+   conceptual_guides/data_model
+   conceptual_guides/llm/llm
+   conceptual_guides/sft
+   conceptual_guides/rm
+   conceptual_guides/rlhf
 
 .. toctree::
    :caption: Practical Guides
    :maxdepth: 3
    :hidden:
 
-   guides/practical_guides/practical_guides
-   guides/practical_guides/choose_dataset
-   guides/practical_guides/create_dataset
-   guides/practical_guides/assign_annotations
-   guides/practical_guides/update_dataset
-   guides/practical_guides/filter_dataset
-   guides/practical_guides/annotate_dataset
-   guides/practical_guides/collect_responses
-   guides/practical_guides/export_dataset
-   guides/practical_guides/fine_tune
+   practical_guides/practical_guides
+   practical_guides/choose_dataset
+   practical_guides/create_dataset
+   practical_guides/assign_annotations
+   practical_guides/update_dataset
+   practical_guides/filter_dataset
+   practical_guides/annotate_dataset
+   practical_guides/collect_responses
+   practical_guides/export_dataset
+   practical_guides/fine_tune
 
 .. toctree::
-   :caption: Integrations
+   :caption: Tutorials and Integrations
    :maxdepth: 3
    :hidden:
 
-   guides/integrations/use_argilla_callback_in_langchain
-   guides/integrations/process_documents_with_unstructured
+   tutorials_and_integrations/tutorials/tutorials
+   tutorials_and_integrations/integrations/integrations
+
 
 .. toctree::
    :caption: Tutorials
