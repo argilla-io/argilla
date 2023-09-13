@@ -127,7 +127,6 @@ nbsphinx_execute = "never"
 getting_started_html = open("./_common/getting_started.html", "r", encoding="utf8").read()
 next_steps_html = open("./_common/next_steps.html", "r", encoding="utf8").read()
 
-
 # -- AUTODOC IMPORT MOCKS ---------------------------------------------------
 autodoc_typehints = "signature"
 autodoc_mock_imports = [
@@ -142,6 +141,7 @@ autodoc_mock_imports = [
     "snorkel",
     "spacy",
     "spacy_transformers",
+    "sentence_transformers",
     "torch",
     "transformers",
     "evaluate",
@@ -150,6 +150,7 @@ autodoc_mock_imports = [
     "span_marker",
     "openai",
     "peft",
+    "trl",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
