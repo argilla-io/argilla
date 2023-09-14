@@ -3,7 +3,7 @@
 Your Argilla instance will always have all your datasets and annotations saved and accessible. However, if you'd like to save your dataset either locally or in the Hugging Face Hub, in this section you will find some useful methods to do just that.
 ​
 ## Feedback Dataset
-​
+
 ### Pull from Argilla
 ​
 The first step will be to pull a dataset from Argilla with the `FeedbackDataset.from_argilla()` method. This method will return a new instance of `FeedbackDataset` with the same guidelines, fields, questions, and records (including responses if any) as the dataset in Argilla.
@@ -17,7 +17,6 @@ dataset = rg.FeedbackDataset.from_argilla("my-dataset", workspace="my-workspace"
 ```
 ​
 At this point, you can do any post-processing you may need with this dataset e.g., [unifying responses](collect_responses.ipynb) from multiple annotators. Once you're happy with the result, you can decide on some of the following options to save it.
-​
 ​
 ### Push back to Argilla
 ​
@@ -96,7 +95,7 @@ This workaround will just export the records into the desired format, not the da
 ```{include} /_common/other_datasets.md
 ```
 ​
-### Load the Argilla dataset
+### Pull from Argilla
 ​
 You can simply load the dataset from Argilla using the `rg.load()` function.
 ​
@@ -116,16 +115,32 @@ dataset_ds = dataset_rg.to_datasets()
 # export to a pandas DataFrame
 df = dataset_rg.to_pandas()
 ```
+
+### Push back to Argilla
+
+When using other datasets pulled from Argilla via `rg.load`, you can always push the dataset back to Argilla. This can be done using the `rg.log()` function, just like you did when pushing records for the first time to Argilla. If the records don't exist already in the dataset, these will be added to it, otherwise, the existing records will be updated.
+
+```python
+import argilla as rg
+
+dataset_rg = rg.load("my_dataset")
+
+# loop through the records and change them
+
+rg.log(dataset_rg, name="my_dataset")
+```
 ​
-### Save the dataset
-Your dataset will always be safe and accesible from Argilla, but in case you need to share or save it somewhere else, here are a couple of options.
-​
+### Push to the Hugging Face Hub
+
 You can push your dataset in the form of a Hugging Face Dataset directly to the hub. Just use the `to_datasets()` transformation as explained in the previous section and push the dataset:
 ​
 ```python
 # push the dataset to the Hugging Face Hub
 dataset_ds.push_to_hub("my_dataset")
 ```
+​
+### Save to disk
+Your dataset will always be safe and accesible from Argilla, but in case you need to share or save it somewhere else, here are a couple of options.
 ​
 Alternatively, you can save the dataset locally. To do that, we recommend formatting the dataset as a [Hugging Face Dataset](https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/main_classes#datasets.Dataset.save_to_disk) or [Pandas DataFrame](https://pandas.pydata.org/docs/reference/io.html) first and use the methods native to these libraries to export as csv, json, parquet, etc.
 ​

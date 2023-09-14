@@ -10,7 +10,7 @@ For a practical, hands-on introduction, you can dive straight into our How-to Gu
 
 ````{grid}  1 1 3 3
 :class-container: tuto-section-2
-```{grid-item-card} Data collection for LLMs
+```{grid-item-card} Data collection for RLHF
 :link: rlhf.html
 
 Introduction to data collection for LLMs and RLHF.
