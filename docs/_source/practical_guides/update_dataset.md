@@ -166,7 +166,7 @@ rg.log(name="my_first_dataset", records=record[0])
 ```
 
 ### Delete existing records
-You can delete records by passing their `id` into the `rg.delete_records()` function or using a query that matches the records. Learn more [here](/reference/python/python_client.rst#argilla.delete_records)
+You can delete records by passing their `id` into the `rg.delete_records()` function or using a query that matches the records. Learn more [here](/reference/python/python_client.rst#argilla.delete_records).
 
 ```python
 ## Delete by id
