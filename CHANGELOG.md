@@ -51,6 +51,7 @@ These are the section headers that we use:
 - Display a `UserWarning` when the `user_id` in `Workspace.add_user` and `Workspace.delete_user` is the ID of an user with the owner role as they don't require explicit permissions ([#3716](https://github.com/argilla-io/argilla/issues/3716)).
 - Rename `tasks` sub-package to `cli` ([#3723](https://github.com/argilla-io/argilla/pull/3723)).
 - Changed `argilla database` command in the CLI to now be accessed via `argilla server database`, to be deprecated in the upcoming release ([#3754](https://github.com/argilla-io/argilla/pull/3754)).
+- Changed `visible_options` (of label and multi label selection questions) validation in the backend to check that the provided value is greater or equal than/to 3 and less or equal than/to the number of provided options ([#3773](https://github.com/argilla-io/argilla/pull/3773)).
 
 ### Fixed
 
