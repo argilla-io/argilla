@@ -12,6 +12,8 @@ Here we describe the available trainers in Argilla:
 - :ref:`python ref spacy_trainer`: Internal mechanism for handling training logic of spaCy models
 - :ref:`python ref transformers_trainer`: Internal mechanism for handling training logic of Transformers models
 - :ref:`python ref span_marker_trainer`: Internal mechanism for handling training logic of SpanMarker models
+- :ref:`python ref trl_trainer`: Internal mechanism for handling training logic of TRL models
+- :ref:`python ref sentence_transformers_trainer`: Internal mechanism for handling training logic of SentenceTransformer models
 
 
 .. _python ref base_trainer:
@@ -71,8 +73,18 @@ SpanMarker Trainer
 .. automodule:: argilla.training.span_marker
    :members:
 
+.. _python ref trl_trainer:
+
 TRL Trainer
 ------------------
 
 .. automodule:: argilla.client.feedback.training.frameworks.trl
+   :members:
+
+.. _python ref sentence_transformers_trainer:
+
+SentenceTransformer Trainer
+------------------
+
+.. automodule:: argilla.client.feedback.training.frameworks.sentence_transformers
    :members:
