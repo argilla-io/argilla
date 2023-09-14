@@ -23,7 +23,7 @@ from packaging.version import parse as parse_version
 from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas import FeedbackRecord
 from argilla.client.feedback.schemas.types import AllowedQuestionTypes
-from argilla.utils.dependency import requires_version
+from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
     from datasets import Dataset
@@ -35,7 +35,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class HuggingFaceDatasetMixin:
     @staticmethod
-    @requires_version("datasets")
+    @requires_dependencies("datasets")
     def _huggingface_format(dataset: "FeedbackDataset") -> "Dataset":
         """Formats a `FeedbackDataset` as a `datasets.Dataset` object.
 
@@ -151,8 +151,7 @@ class HuggingFaceDatasetMixin:
 
         return Dataset.from_dict(hf_dataset, features=Features(hf_features))
 
-    @requires_version("huggingface_hub")
-    @requires_version("datasets")
+    @requires_dependencies(["huggingface_hub", "datasets"])
     def push_to_huggingface(
         self: "FeedbackDataset", repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs
     ) -> None:
@@ -239,8 +238,7 @@ class HuggingFaceDatasetMixin:
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
 
     @classmethod
-    @requires_version("huggingface_hub")
-    @requires_version("datasets")
+    @requires_dependencies(["huggingface_hub", "datasets"])
     def from_huggingface(cls: Type["FeedbackDataset"], repo_id: str, *args: Any, **kwargs: Any) -> "FeedbackDataset":
         """Loads a `FeedbackDataset` from the HuggingFace Hub.
 

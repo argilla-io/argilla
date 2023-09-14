@@ -20,7 +20,7 @@ from datasets import DatasetDict
 
 from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.base import ArgillaTrainerSkeleton
-from argilla.utils.dependency import require_version
+from argilla.utils.dependency import require_dependencies
 
 
 class AutoTrainMixin:
@@ -114,8 +114,7 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainMixin):
     except KeyError:
         raise KeyError("Please set the `AUTOTRAIN_USERNAME` and `HF_AUTH_TOKEN` environment variables.")
 
-    require_version("autotrain-advanced")
-    require_version("datasets")
+    require_dependencies(["autotrain-advanced", "datasets"])
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
