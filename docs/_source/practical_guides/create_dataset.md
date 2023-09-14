@@ -2,6 +2,9 @@
 
 ## Feedback Dataset
 
+```{include} /_common/feedback_dataset.md
+```
+
 The Feedback Task datasets allow you to combine multiple questions of different kinds, so the first step will be to define the aim of your project and the kind of data and feedback you will need to get there. With this information, you can start configuring a dataset and formatting records using the Python SDK.
 
 This guide will walk you through all the elements you will need to configure to create a `FeedbackDataset` and add records to it.
@@ -509,7 +512,6 @@ Let's see how to create and upload a basic record to the Argilla web app  (make 
 
 We support different tasks within the Argilla eco-system focused on NLP: `Text Classification`, `Token Classification` and `Text2Text`.
 
-
 ::::{tab-set}
 
 :::{tab-item} Text Classification
@@ -544,7 +546,6 @@ rg.log(records=rec, name="my_dataset")
 
 ![multi_textclass_record](/_static/reference/webapp/features-multi_textclass_record.png)
 :::
-
 
 :::{tab-item} Token Classification
 

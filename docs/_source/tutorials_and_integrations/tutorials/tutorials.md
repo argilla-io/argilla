@@ -2,6 +2,9 @@
 
 **Feedback Dataset**
 
+```{include} /_common/feedback_dataset.md
+```
+
 Here you can find end-to-end examples to help you get started with curanting datasets and collecting feedback to fine-tune LLMs and other language models.
 
 ````{grid}  1 1 3 3

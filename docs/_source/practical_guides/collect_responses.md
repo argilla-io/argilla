@@ -2,6 +2,9 @@
 
 ## Feedback Dataset
 
+```{include} /_common/feedback_dataset.md
+```
+
 To collect the responses given by annotators via Python, you can simply load the dataset from Argilla as follows:
 
 ```python

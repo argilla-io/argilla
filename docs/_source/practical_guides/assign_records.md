@@ -8,6 +8,9 @@ You will need to decide the level of overlap before creating or pushing a datase
 
 ## Feedback Dataset
 
+```{include} /_common/feedback_dataset.md
+```
+
 ### Full overlap
 
 The Feedback Task supports having multiple annotations for your records by default. This means that all users with access to the dataset can give responses to all the records in the dataset. To have this full overlap just push the dataset (as detailed in [Create a Feedback Dataset](create_dataset.md#push-to-argilla)) in a workspace where all team members have access. Learn more about managing user access to workspaces [here](/getting_started/installation/configurations/user_management.md#assign-a-user-to-a-workspace).

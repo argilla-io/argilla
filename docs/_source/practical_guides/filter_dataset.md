@@ -1,6 +1,10 @@
 # 🔎 Filter and query datasets
 
 ## Feedback Dataset
+
+```{include} /_common/feedback_dataset.md
+```
+
 From Argilla 1.15.0, the `filter_by` method has been included for the `FeedbackDataset`s pushed to Argilla, which allows you to filter the records in a dataset based on the `response_status` of the annotations of the records. So on, to be able to use the `filter_by` method, you will need to make sure that you are using a `FeedbackDataset` in Argilla.
 
 ### Filter by `response_status`
@@ -257,6 +261,7 @@ Note that the URL cannot exceed the metadata length limit.
 ### Vector fields
 
 It is also possible to query the presense of vector field. Imagine you only want to include records with `vectors={"vector_1": vector_1}`. You can then define a query `vectors.vector_1: *`.
+
 ### Filters as query string
 
 Just like the metadata, you can also use the filter fields in you query.

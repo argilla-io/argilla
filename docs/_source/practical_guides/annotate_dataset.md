@@ -2,6 +2,9 @@
 
 ## Feedback Dataset
 
+```{include} /_common/feedback_dataset.md
+```
+
 ![Spanshot of the Submitted queue and the progress bar in a Feedback Dataset](/_static/images/llms/snapshot-feedback-submitted.png)
 
 After pushing a `FeedbackDataset` to Argilla, as explained in [Create a Dataset](create_dataset.ipynb), you can start annotating it through the Argilla UI.
