@@ -8,7 +8,7 @@ The Dolly original dataset contained a lot of reference indicators such as "[1]"
 
 :::{tab-item} Original
 
-```bash
+```
 ### Instruction
 When did Virgin Australia start operating?
 
@@ -26,7 +26,7 @@ Virgin Australia commenced services on 31 August 2000 as Virgin Blue, with two a
 
 :::{tab-item} Corrected
 
-```bash
+```
 ### Instruction
 When did Virgin Australia start operating?
 

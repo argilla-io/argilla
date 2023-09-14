@@ -35,11 +35,11 @@ record = TextClassificationRecord(
 )
 ```
 
-If you want a concise example of applying token attributions, take a look [here](../tutorials/notebooks/monitoring-textclassification-shaptransformersinterpret-explainability).
+If you want a concise example of applying token attributions, take a look [here](/tutorials/notebooks/monitoring-textclassification-shaptransformersinterpret-explainability).
 
 ## Certainty filters
 
-![filter-score](../_static/reference/webapp/features-filter-score.png "Filter Score")
+![filter-score](/_static/reference/webapp/features-filter-score.png "Filter Score")
 
 It is possible to add a certainty score to each of the logged predictions. Often, these certainty scores are already included in major packages like the `predict_proba()` from `sklearn` and the `return_all_scores`for `transformers`. This additional information seldom has extra significant impact on the model latency but does offer a lot of additional understanding about the performance of the model. Within our UI, it is possible to select and filter scores. We could argue that it is more relevant to start annotating less certain entries, so we could use these filters to find less certain data. Do you want a more applied example, take a look at [this tutorial about TextClassification](../../tutorials/notebooks/monitoring-textclassification-transformers-explainability.ipynb)
 

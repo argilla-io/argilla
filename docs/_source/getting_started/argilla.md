@@ -24,8 +24,8 @@
 | [🎼 Cheatsheet](/getting_started/cheatsheet)                                    | Brief **code snippets** for our main functionalities              |
 | [🔧 Installation](/getting_started/installation/deployments/deployments)        | **Everything deployment**: Docker, Kubernetes, Cloud and way more |
 | [⚙️ Configuration](/getting_started/installation/configurations/configurations)  | User management and **deployment tweaking**                       |
-| [💥 LLMs](/guides/llms/conceptual_guides/conceptual_guides)                     | Generative AI, **ChatGPT and friends**                            |
-| [🦮 Guides](/guides/log_load_and_prepare_data)                                  | **Conceptual overview** of our main functionalities               |
+| [💥 Concepts about LLMs](/conceptual_guides/llm/llm)                            | Generative AI, **ChatGPT and friends**                            |
+| [🦮 Practical Guides](/practical_guides/practical_guides)                       | **Conceptual overview** of our main functionalities               |
 | [🧗‍♀️ Tutorials](/tutorials/tutorials)                                            | Specific **applied end-to-end examples**                          |
 | [🏷️ References](/reference/python/index)                                        | Itemized information and **API docs**                             |
 | [🏘️ Community](/community/contributing)                                         | Everything about for **developers and contributing**              |
