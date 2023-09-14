@@ -95,10 +95,15 @@ class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeed
 
     def delete(self) -> None:
         warnings.warn(
-            message="`delete` does not work for filtered datasets. First call `filter_reset()` and then `delete()`.",
+            "`delete` does not work for filtered datasets. First call `filter_reset()` and then `delete()`.",
+            UserWarning,
             stacklevel=2,
         )
 
     def filter_by(self, *args, **kwargs) -> "FilteredRemoteFeedbackDataset":
-        warnings.warn(message="Removing old filters and applying new ones.", stacklevel=2)
+        warnings.warn(
+            "Removing old filters and applying new ones.",
+            UserWarning,
+            stacklevel=2,
+        )
         super().filter_by(*args, **kwargs)

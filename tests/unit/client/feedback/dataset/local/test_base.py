@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, List
 
 import pytest
 from argilla.client.feedback.dataset.local.base import FeedbackDatasetBase
-from argilla.client.feedback.dataset.local.dataset import FeedbackDataset as FeedbackDatasetReal
+from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
     RatingQuestion,
     TextField,
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 
-class FeedbackDataset(FeedbackDatasetBase):
+class MockFeedbackDataset(FeedbackDatasetBase):
     @property
     def records(self) -> None:
         pass
@@ -38,16 +38,16 @@ def test_init(
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
 ) -> None:
-    with pytest.raises(TypeError, match="Can't instantiate abstract class FeedbackDataset"):
-        dataset = FeedbackDataset(
+    with pytest.raises(TypeError, match="Can't instantiate abstract class MockFeedbackDataset"):
+        dataset = MockFeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
             questions=feedback_dataset_questions,
         )
-    FeedbackDataset.__abstractmethods__ = set()
-    FeedbackDataset.__abstractproperties__ = set()
+    MockFeedbackDataset.__abstractmethods__ = set()
+    MockFeedbackDataset.__abstractproperties__ = set()
 
-    dataset = FeedbackDataset(
+    dataset = MockFeedbackDataset(
         guidelines=feedback_dataset_guidelines,
         fields=feedback_dataset_fields,
         questions=feedback_dataset_questions,
@@ -75,13 +75,13 @@ def test_init_wrong_guidelines(
     feedback_dataset_fields: List["AllowedFieldTypes"], feedback_dataset_questions: List["AllowedQuestionTypes"]
 ) -> None:
     with pytest.raises(TypeError, match="Expected `guidelines` to be"):
-        FeedbackDataset(
+        MockFeedbackDataset(
             guidelines=[],
             fields=feedback_dataset_fields,
             questions=feedback_dataset_questions,
         )
     with pytest.raises(ValueError, match="Expected `guidelines` to be"):
-        FeedbackDataset(
+        MockFeedbackDataset(
             guidelines="",
             fields=feedback_dataset_fields,
             questions=feedback_dataset_questions,
@@ -92,25 +92,25 @@ def test_init_wrong_fields(
     feedback_dataset_guidelines: str, feedback_dataset_questions: List["AllowedQuestionTypes"]
 ) -> None:
     with pytest.raises(TypeError, match="Expected `fields` to be a list"):
-        FeedbackDataset(
+        MockFeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=None,
             questions=feedback_dataset_questions,
         )
     with pytest.raises(TypeError, match="Expected `fields` to be a list of `FieldSchema`"):
-        FeedbackDataset(
+        MockFeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=[{"wrong": "field"}],
             questions=feedback_dataset_questions,
         )
     with pytest.raises(ValueError, match="At least one `FieldSchema` in `fields` must be required"):
-        FeedbackDataset(
+        MockFeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=[TextField(name="test", required=False)],
             questions=feedback_dataset_questions,
         )
     with pytest.raises(ValueError, match="Expected `fields` to have unique names"):
-        FeedbackDataset(
+        MockFeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=[
                 TextField(name="test", required=True),
@@ -124,7 +124,7 @@ def test_init_wrong_questions(
     feedback_dataset_guidelines: str, feedback_dataset_fields: List["AllowedFieldTypes"]
 ) -> None:
     with pytest.raises(TypeError, match="Expected `questions` to be a list, got"):
-        FeedbackDataset(
+        MockFeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
             questions=None,
@@ -133,13 +133,13 @@ def test_init_wrong_questions(
         TypeError,
         match="Expected `questions` to be a list of",
     ):
-        FeedbackDataset(
+        MockFeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
             questions=[{"wrong": "question"}],
         )
     with pytest.raises(ValueError, match="At least one question in `questions` must be required"):
-        FeedbackDataset(
+        MockFeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
             questions=[
@@ -148,7 +148,7 @@ def test_init_wrong_questions(
             ],
         )
     with pytest.raises(ValueError, match="Expected `questions` to have unique names"):
-        FeedbackDataset(
+        MockFeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=feedback_dataset_fields,
             questions=[
@@ -163,14 +163,14 @@ def test_warning_unsupported_methods(
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
 ) -> None:
-    dataset = FeedbackDatasetReal(
+    dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
         fields=feedback_dataset_fields,
         questions=feedback_dataset_questions,
     )
 
     with pytest.warns(
-        match="Deleting records is not supported for local datasets yet. Please use FeedbackDataset.records` to get and delete a copy the records."
+        match="Deleting records is not supported for local datasets yet. Please use `FeedbackDataset.records` to get and delete a copy the records."
     ):
         dataset.delete_records()
 

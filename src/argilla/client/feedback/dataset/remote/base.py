@@ -307,8 +307,11 @@ class RemoteFeedbackDatasetBase(FeedbackDatasetBase, Generic[T]):
             stacklevel=2,
         )
 
-    def prepare_for_training(self):
+    def prepare_for_training(self) -> None:
         """Prepares the dataset for training."""
         warnings.warn(
-            "`prepare_for_training` is not implemented for `RemoteFeedbackDataset`. First call `pull_from_argilla` to get a local instance of the dataset, and then call `prepare_for_training` on that instance."
+            "`prepare_for_training` is not implemented for `RemoteFeedbackDataset`. First call `pull_from_argilla`"
+            " to get a local instance of the dataset, and then call `prepare_for_training` on that instance.",
+            UserWarning,
+            stacklevel=2,
         )

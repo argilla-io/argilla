@@ -53,18 +53,15 @@ from argilla.client.workspaces import Workspace
 from argilla.utils.dependency import require_dependencies
 
 if TYPE_CHECKING:
-    pass
-
-
-_LOGGER = logging.getLogger(__name__)
-
-if TYPE_CHECKING:
     import httpx
 
     from argilla.client.client import Argilla as ArgillaClient
     from argilla.client.feedback.dataset.local import FeedbackDataset
     from argilla.client.feedback.schemas.types import AllowedFieldTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class ArgillaMixin:
@@ -258,12 +255,6 @@ class ArgillaMixin:
             questions.append(question)
         return questions
 
-    def pull_from_argilla(self, *args, **kwargs):
-        """Pulling is only supported for remote datasets. Use `FeedbackDataset.from_argilla(...)` instead."""
-        raise NotImplementedError(
-            "Pulling is only supported for remote datasets. Use `FeedbackDataset.from_argilla(...)` instead."
-        )
-
     @classmethod
     def from_argilla(
         cls: Type["FeedbackDataset"],
@@ -379,7 +370,7 @@ class ArgillaMixin:
         ]
 
 
-class UnificationMixin:
+class ArgillaUnificationDatasetMixin:
     def unify_responses(
         self,
         question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],

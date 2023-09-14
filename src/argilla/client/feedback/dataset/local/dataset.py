@@ -16,15 +16,19 @@ import warnings
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
-from argilla.client.feedback.dataset.base import FeedbackDatasetSharedBase
-from argilla.client.feedback.dataset.local.mixins import ArgillaMixin, UnificationMixin
+from argilla.client.feedback.dataset.local.base import FeedbackDatasetBase
+from argilla.client.feedback.dataset.local.mixins import (
+    ArgillaMixin,
+    ArgillaTrainDatasetMixin,
+    ArgillaUnificationDatasetMixin,
+)
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import FeedbackRecord
 
 
-class FeedbackDataset(FeedbackDatasetSharedBase, ArgillaMixin, UnificationMixin):
+class FeedbackDataset(ArgillaMixin, ArgillaUnificationDatasetMixin, ArgillaTrainDatasetMixin, FeedbackDatasetBase):
     def __init__(
         self,
         *,
@@ -158,10 +162,28 @@ class FeedbackDataset(FeedbackDatasetSharedBase, ArgillaMixin, UnificationMixin)
 
     def delete_records(self, *args, **kwargs):
         warnings.warn(
-            "Deleting records is not supported for local datasets yet. Please use FeedbackDataset.records` to get and delete a copy the records."
+            "Deleting records is not supported for local datasets yet. Please use `FeedbackDataset.records` to get and delete a copy the records.",
+            UserWarning,
+            stacklevel=2,
         )
 
     def filter_by(self, *args, **kwargs: Any) -> Any:
         warnings.warn(
-            "Filtering is not supported for local datasets yet. Please use `FeedbackDataset.records` to get and filter a copy the records."
+            "Filtering is not supported for local datasets yet. Please use `FeedbackDataset.records` to get and filter a copy the records.",
+            UserWarning,
+            stacklevel=2,
+        )
+
+    def pull_from_argilla(self, *args, **kwargs) -> None:
+        warnings.warn(
+            "Pulling is only supported for remote datasets. Use `FeedbackDataset.from_argilla(...)` instead.",
+            UserWarning,
+            stacklevel=2,
+        )
+
+    def delete(self) -> None:
+        warnings.warn(
+            "Deleting is only supported for remote datasets. Use `FeedbackDataset.from_argilla(...).delete()` instead.",
+            UserWarning,
+            stacklevel=2,
         )
