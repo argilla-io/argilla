@@ -29,7 +29,7 @@ def info() -> None:
     from argilla.cli.rich import get_argilla_themed_panel
 
     init_callback()
-    
+
     info = server_info()
     panel = get_argilla_themed_panel(
         Markdown(
