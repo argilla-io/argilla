@@ -11,44 +11,55 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import AsyncGenerator, List, TYPE_CHECKING, Union
 
-import random
-from typing import TYPE_CHECKING, List, Union
+from opensearchpy import RequestError
+from sqlalchemy.orm import Session
 
-import pytest
-import pytest_asyncio
 from argilla.server.enums import ResponseStatusFilter
-from argilla.server.models import Dataset, User
+from argilla.server.models import Record, User, VectorSettings
 from argilla.server.search_engine import (
     StringQuery,
     UserResponseStatusFilter,
 )
-from argilla.server.search_engine.opensearch import OpenSearchEngine
-from opensearchpy import OpenSearch, RequestError, helpers
-from sqlalchemy.orm import Session
-
+from argilla.server.search_engine.commons import index_name_for_dataset
 from tests.factories import (
-    DatasetFactory,
     LabelSelectionQuestionFactory,
     MultiLabelSelectionQuestionFactory,
-    RatingQuestionFactory,
-    RecordFactory,
     ResponseFactory,
-    TextFieldFactory,
-    TextQuestionFactory,
     UserFactory,
 )
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
+import random
+
+import pytest
+import pytest_asyncio
+from opensearchpy import OpenSearch
+
+from argilla.server.models import Dataset
+from argilla.server.search_engine.opensearch import OpenSearchEngine
+from tests.factories import (
+    DatasetFactory,
+    RatingQuestionFactory,
+    RecordFactory,
+    TextFieldFactory,
+    TextQuestionFactory,
+    VectorFactory,
+    VectorSettingsFactory,
+)
+
 
 @pytest_asyncio.fixture(scope="function")
 async def dataset_for_pagination(opensearch: OpenSearch):
+    from opensearchpy import helpers
+
     dataset = await DatasetFactory.create(fields=[], questions=[])
     records = await RecordFactory.create_batch(size=100, dataset=dataset)
     await dataset.awaitable_attrs.records
-    index_name = f"rg.{dataset.id}"
+    index_name = index_name_for_dataset(dataset)
 
     opensearch.indices.create(index=index_name, body={"mappings": {"properties": {"id": {"type": "keyword"}}}})
 
@@ -74,7 +85,7 @@ async def dataset_for_pagination(opensearch: OpenSearch):
 
 @pytest_asyncio.fixture(scope="function")
 @pytest.mark.asyncio
-async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine) -> Dataset:
+async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine, opensearch: OpenSearch) -> Dataset:
     text_question = await TextQuestionFactory()
     rating_question = await RatingQuestionFactory()
 
@@ -86,6 +97,10 @@ async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine) ->
         ],
         questions=[text_question, rating_question],
     )
+
+    await dataset.awaitable_attrs.fields
+    await dataset.awaitable_attrs.questions
+    await dataset.awaitable_attrs.vectors_settings
 
     await opensearch_engine.create_index(dataset)
 
@@ -173,7 +188,54 @@ async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine) ->
     return dataset
 
 
+@pytest_asyncio.fixture(scope="function")
 @pytest.mark.asyncio
+async def test_banking_sentiment_dataset_with_vectors(
+    opensearch_engine: OpenSearchEngine, opensearch: OpenSearch, test_banking_sentiment_dataset: Dataset
+) -> Dataset:
+    vectors_settings = await VectorSettingsFactory.create_batch(5, dataset=test_banking_sentiment_dataset)
+
+    for settings in vectors_settings:
+        await opensearch_engine.configure_index_vectors(settings)
+
+    vectors = []
+    for record in test_banking_sentiment_dataset.records:
+        for settings in vectors_settings:
+            vectors.append(
+                await VectorFactory.create(
+                    vector_settings=settings,
+                    record=record,
+                    value=[random.uniform(-10, 10) for _ in range(0, settings.dimensions)],
+                )
+            )
+        await record.awaitable_attrs.vectors
+
+    await opensearch_engine.set_records_vectors(test_banking_sentiment_dataset, vectors=vectors)
+
+    opensearch.indices.refresh(index=index_name_for_dataset(test_banking_sentiment_dataset))
+
+    await test_banking_sentiment_dataset.awaitable_attrs.vectors_settings
+    await test_banking_sentiment_dataset.awaitable_attrs.records
+
+    return test_banking_sentiment_dataset
+
+
+@pytest_asyncio.fixture()
+async def opensearch_engine(elasticsearch_config: dict) -> AsyncGenerator[OpenSearchEngine, None]:
+    engine = OpenSearchEngine(config=elasticsearch_config, es_number_of_replicas=0, es_number_of_shards=1)
+    yield engine
+
+    await engine.client.close()
+
+
+async def _refresh_dataset(dataset: Dataset):
+    await dataset.awaitable_attrs.fields
+    await dataset.awaitable_attrs.questions
+    await dataset.awaitable_attrs.vectors_settings
+
+
+@pytest.mark.asyncio
+@pytest.mark.skip("Must be configure with a configured engine before")
 class TestSuiteOpenSearchEngine:
     async def test_get_index_or_raise(self, opensearch_engine: OpenSearchEngine):
         dataset = await DatasetFactory.create()
@@ -186,11 +248,12 @@ class TestSuiteOpenSearchEngine:
         self, opensearch_engine: OpenSearchEngine, db: "AsyncSession", opensearch: OpenSearch
     ):
         dataset = await DatasetFactory.create()
-        await dataset.awaitable_attrs.fields
-        await dataset.awaitable_attrs.questions
+
+        await _refresh_dataset(dataset)
+
         await opensearch_engine.create_index(dataset)
 
-        index_name = f"rg.{dataset.id}"
+        index_name = index_name_for_dataset(dataset)
         assert opensearch.indices.exists(index=index_name)
 
         index = opensearch.indices.get(index=index_name)[index_name]
@@ -204,6 +267,7 @@ class TestSuiteOpenSearchEngine:
                 "responses": {"dynamic": "true", "type": "object"},
             },
         }
+        assert index["settings"]["index"]["knn"] == "false"
         assert index["settings"]["index"]["number_of_shards"] == str(opensearch_engine.es_number_of_shards)
         assert index["settings"]["index"]["number_of_replicas"] == str(opensearch_engine.es_number_of_replicas)
 
@@ -215,12 +279,12 @@ class TestSuiteOpenSearchEngine:
     ):
         text_fields = await TextFieldFactory.create_batch(5)
         dataset = await DatasetFactory.create(fields=text_fields)
-        await dataset.awaitable_attrs.fields
-        await dataset.awaitable_attrs.questions
+
+        await _refresh_dataset(dataset)
 
         await opensearch_engine.create_index(dataset)
 
-        index_name = f"rg.{dataset.id}"
+        index_name = index_name_for_dataset(dataset)
         assert opensearch.indices.exists(index=index_name)
 
         index = opensearch.indices.get(index=index_name)[index_name]
@@ -254,11 +318,12 @@ class TestSuiteOpenSearchEngine:
 
         all_questions = text_questions + rating_questions + label_questions + multilabel_questions
         dataset = await DatasetFactory.create(questions=all_questions)
-        await dataset.awaitable_attrs.fields
+
+        await _refresh_dataset(dataset)
 
         await opensearch_engine.create_index(dataset)
 
-        index_name = f"rg.{dataset.id}"
+        index_name = index_name_for_dataset(dataset)
         assert opensearch.indices.exists(index=index_name)
 
         index = opensearch.indices.get(index=index_name)[index_name]
@@ -313,11 +378,12 @@ class TestSuiteOpenSearchEngine:
         self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch, db: Session
     ):
         dataset = await DatasetFactory.create()
-        await dataset.awaitable_attrs.fields
-        await dataset.awaitable_attrs.questions
+
+        await _refresh_dataset(dataset)
+
         await opensearch_engine.create_index(dataset)
 
-        index_name = f"rg.{dataset.id}"
+        index_name = index_name_for_dataset(dataset)
         assert opensearch.indices.exists(index=index_name)
 
         with pytest.raises(RequestError, match="resource_already_exists_exception"):
@@ -354,7 +420,7 @@ class TestSuiteOpenSearchEngine:
         query: Union[str, StringQuery],
         expected_items: int,
     ):
-        opensearch.indices.refresh(index=f"rg.{test_banking_sentiment_dataset.id}")
+        opensearch.indices.refresh(index=index_name_for_dataset(test_banking_sentiment_dataset))
 
         result = await opensearch_engine.search(test_banking_sentiment_dataset, query=query)
 
@@ -450,10 +516,12 @@ class TestSuiteOpenSearchEngine:
             responses=[],
         )
 
+        await _refresh_dataset(dataset)
+
         await opensearch_engine.create_index(dataset)
         await opensearch_engine.add_records(dataset, records)
 
-        index_name = f"rg.{dataset.id}"
+        index_name = index_name_for_dataset(dataset)
         opensearch.indices.refresh(index=index_name)
 
         es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
@@ -469,13 +537,15 @@ class TestSuiteOpenSearchEngine:
             responses=[],
         )
 
+        await _refresh_dataset(dataset)
+
         await opensearch_engine.create_index(dataset)
         await opensearch_engine.add_records(dataset, records)
 
         records_to_delete, records_to_keep = records[:5], records[5:]
         await opensearch_engine.delete_records(dataset, records_to_delete)
 
-        index_name = f"rg.{dataset.id}"
+        index_name = index_name_for_dataset(dataset)
         opensearch.indices.refresh(index=index_name)
 
         deleted_docs = [
@@ -508,7 +578,7 @@ class TestSuiteOpenSearchEngine:
         await record.awaitable_attrs.dataset
         await opensearch_engine.update_record_response(response)
 
-        index_name = f"rg.{test_banking_sentiment_dataset.id}"
+        index_name = index_name_for_dataset(test_banking_sentiment_dataset)
         opensearch.indices.refresh(index=index_name)
 
         results = opensearch.get(index=index_name, id=record.id)
@@ -548,7 +618,7 @@ class TestSuiteOpenSearchEngine:
         await record.awaitable_attrs.dataset
         await opensearch_engine.update_record_response(response)
 
-        index_name = f"rg.{test_banking_sentiment_dataset.id}"
+        index_name = index_name_for_dataset(test_banking_sentiment_dataset)
 
         opensearch.indices.refresh(index=index_name)
 
@@ -567,10 +637,92 @@ class TestSuiteOpenSearchEngine:
         results = opensearch.get(index=index_name, id=record.id)
         assert results["_source"]["responses"] == {}
 
+    async def test_create_dataset_index_with_vectors(self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch):
+        vectors_settings = await VectorSettingsFactory.create_batch(5)
+        dataset = await DatasetFactory.create(vectors_settings=vectors_settings)
+
+        await dataset.awaitable_attrs.vectors_settings
+        await dataset.awaitable_attrs.fields
+        await dataset.awaitable_attrs.questions
+
+        await opensearch_engine.create_index(dataset)
+
+        index_name = index_name_for_dataset(dataset)
+        assert opensearch.indices.exists(index=index_name)
+
+        index = opensearch.indices.get(index=index_name)[index_name]
+        assert index["mappings"]["properties"]["vectors"]["properties"] == {
+            str(settings.id): {
+                "type": "knn_vector",
+                "dimension": settings.dimensions,
+                "method": {
+                    "engine": "lucene",
+                    "space_type": "l2",
+                    "name": "hnsw",
+                    "parameters": {"ef_construction": 4, "m": 2},
+                },
+            }
+            for settings in vectors_settings
+        }
+
+        assert index["settings"]["index"]["knn"] == "false"
+
+    async def test_similarity_search_with_incomplete_inputs(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset_with_vectors: Dataset,
+    ):
+        settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
+        with pytest.raises(
+            expected_exception=ValueError, match="Must provide vector value or record to compute the similarity search"
+        ):
+            await opensearch_engine.similarity_search(
+                dataset=test_banking_sentiment_dataset_with_vectors, vector_settings=settings
+            )
+
+    async def test_similarity_search_by_vector_value(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset_with_vectors: Dataset,
+    ):
+        selected_record = test_banking_sentiment_dataset_with_vectors.records[0]
+        selected_vector = selected_record.vectors[0]
+
+        responses = await opensearch_engine.similarity_search(
+            dataset=test_banking_sentiment_dataset_with_vectors,
+            vector_settings=selected_vector.vector_settings,
+            value=selected_vector.value,
+            max_results=1,
+        )
+
+        assert responses.total == 1
+        assert responses.items[0].record_id == selected_record.id
+
+    async def test_similarity_search_by_record(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset_with_vectors: Dataset,
+    ):
+        selected_record: Record = test_banking_sentiment_dataset_with_vectors.records[0]
+        vector_settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
+
+        responses = await opensearch_engine.similarity_search(
+            dataset=test_banking_sentiment_dataset_with_vectors,
+            vector_settings=vector_settings,
+            record=selected_record,
+            max_results=1,
+        )
+
+        assert responses.total == 1
+        assert responses.items[0].record_id == selected_record.id
+
     async def _configure_record_responses(
         self, opensearch: OpenSearch, dataset: Dataset, response_status: List[ResponseStatusFilter], user: User
     ):
-        index_name = f"rg.{dataset.id}"
+        index_name = index_name_for_dataset(dataset)
         another_user = await UserFactory.create()
 
         # Create two responses with the same status (one in each record)
