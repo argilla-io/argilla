@@ -1640,17 +1640,17 @@ class TestSuiteDatasets:
                 {
                     "type": "label_selection",
                     "options": [
-                        {"value": "positive", "text": "Positive"},
-                        {"value": "negative", "text": "Negative"},
-                        {"value": "neutral", "text": "Neutral"},
+                        {"value": "positive", "text": "Positive", "description": "Text with a positive sentiment"},
+                        {"value": "negative", "text": "Negative", "description": "Text with a negative sentiment"},
+                        {"value": "neutral", "text": "Neutral", "description": "Text with a neutral sentiment"},
                     ],
                 },
                 {
                     "type": "label_selection",
                     "options": [
-                        {"value": "positive", "text": "Positive", "description": None},
-                        {"value": "negative", "text": "Negative", "description": None},
-                        {"value": "neutral", "text": "Neutral", "description": None},
+                        {"value": "positive", "text": "Positive", "description": "Text with a positive sentiment"},
+                        {"value": "negative", "text": "Negative", "description": "Text with a negative sentiment"},
+                        {"value": "neutral", "text": "Neutral", "description": "Text with a neutral sentiment"},
                     ],
                     "visible_options": None,
                 },
