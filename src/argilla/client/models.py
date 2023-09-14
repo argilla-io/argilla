@@ -50,6 +50,7 @@ class Framework(Enum):
         openai: OpenAI LLMs
         trl: Transformer Reinforcement Learning
         trlx: Transformer Reinforcement Learning X
+        sentence-transformers: Sentence Transformers library
     """
 
     TRANSFORMERS = "transformers"
@@ -62,6 +63,7 @@ class Framework(Enum):
     OPENAI = "openai"
     TRL = "trl"
     TRLX = "trlx"
+    SENTENCE_TRANSFORMERS = "sentence-transformers"
     # AUTOTRAIN = "autotrain"
 
     @classmethod

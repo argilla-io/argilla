@@ -18,6 +18,7 @@ These are the section headers that we use:
 
 ### Added
 
+- Added `ArgillaTrainer` integration with sentence-transformers, allowing fine tuning for sentence similarity ([#3739](https://github.com/argilla-io/argilla/pull/3739))
 - Added `ArgillaTrainer` integration with `TrainingTask.for_question_answering` ([#3740](https://github.com/argilla-io/argilla/pull/3740))
 - Added `Auto save record` to save automatically the current record that you are working on ([#3541](https://github.com/argilla-io/argilla/pull/3541))
 - Added `ArgillaTrainer` integration with OpenAI, allowing fine tuning for chat completion ([#3615](https://github.com/argilla-io/argilla/pull/3615))
