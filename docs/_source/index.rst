@@ -58,6 +58,7 @@
    :hidden:
 
    reference/python/index
+   reference/cli
    reference/webapp/index
    reference/datamodel
    reference/notebooks

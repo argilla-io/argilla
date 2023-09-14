@@ -20,7 +20,7 @@ from datasets import DatasetDict
 from argilla.client.models import TokenClassificationRecord
 from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.training.utils import filter_allowed_args, get_default_args
-from argilla.utils.dependency import require_version
+from argilla.utils.dependency import require_dependencies
 
 
 class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
@@ -28,9 +28,7 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
     _logger.setLevel(logging.INFO)
 
     def __init__(self, *args, **kwargs) -> None:
-        require_version("datasets")
-        require_version("span_marker>=1.2")
-        require_version("transformers>=4.19.0")  # <- required for span_marker evaluation
+        require_dependencies(["datasets", "span_marker>=1.2", "transformers>=4.19.0"])
         super().__init__(*args, **kwargs)
 
         import torch
@@ -49,6 +47,7 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
 
         if self._model is None:
             self._model = "bert-base-cased"
+            self._logger.warning(f"No model defined. Using the default model {self._model}.")
 
         if isinstance(self._dataset, DatasetDict):
             self._train_dataset = self._dataset["train"]

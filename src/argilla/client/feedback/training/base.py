@@ -50,7 +50,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             dataset: the dataset to be used for training.
             task: the training data to be used for training.
             framework: the framework to use for training. Currently, "transformers", "setfit", "spacy", "peft",
-                "openai", "span_marker" and "trl" are supported.
+                "openai", "span_marker", "trl" and "sentence-transformers" are supported.
             lang: the spaCy language model to use for training, just required when `framework="spacy"`.
                 Defaults to None, but it will be set to `spacy.blank("en")` if not specified.
             model: name or path to the baseline model to be used. If not specified will set to a good default
@@ -167,6 +167,19 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 seed=self._seed,
                 model=self._model,
             )
+        elif framework is Framework.SENTENCE_TRANSFORMERS:
+            from argilla.client.feedback.training.frameworks.sentence_transformers import (
+                ArgillaSentenceTransformersTrainer,
+            )
+
+            self._trainer = ArgillaSentenceTransformersTrainer(
+                dataset=self._dataset,
+                task=self._task,
+                prepared_data=self._prepared_data,
+                seed=self._seed,
+                model=self._model,
+                **framework_kwargs,  # cross_encoder
+            )
         else:
             raise NotImplementedError(f"{framework} is not a valid framework.")
 
@@ -263,7 +276,7 @@ class ArgillaTrainerSkeleton(ABC):
         """
 
     @abstractmethod
-    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
+    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs) -> None:
         """
         Predicts the label of the text.
         """

@@ -18,6 +18,10 @@ These are the section headers that we use:
 
 ### Added
 
+- Added `ArgillaTrainer` integration with sentence-transformers, allowing fine tuning for sentence similarity ([#3739](https://github.com/argilla-io/argilla/pull/3739))
+- Added `ArgillaTrainer` integration with `TrainingTask.for_question_answering` ([#3740](https://github.com/argilla-io/argilla/pull/3740))
+- Added `Auto save record` to save automatically the current record that you are working on ([#3541](https://github.com/argilla-io/argilla/pull/3541))
+- Added `ArgillaTrainer` integration with OpenAI, allowing fine tuning for chat completion ([#3615](https://github.com/argilla-io/argilla/pull/3615))
 - Added `workspaces list` command to list Argilla workspaces ([#3594](https://github.com/argilla-io/argilla/pull/3594)).
 - Added `datasets list` command to list Argilla datasets ([#3658](https://github.com/argilla-io/argilla/pull/3658)).
 - Added `users create` command to create users ([#3667](https://github.com/argilla-io/argilla/pull/3667)).
@@ -33,16 +37,37 @@ These are the section headers that we use:
 - Added `info` command to get info about the used Argilla client and server ([#3707](https://github.com/argilla-io/argilla/pull/3707)).
 - Added `datasets delete` command to delete a `FeedbackDataset` from Argilla ([#3703](https://github.com/argilla-io/argilla/pull/3703)).
 - Added `created_at` and `updated_at` properties to `RemoteFeedbackDataset` and `FilteredRemoteFeedbackDataset` ([#3709](https://github.com/argilla-io/argilla/pull/3709)).
+- Added handling `PermissionError` when executing a command with a logged in user with not enough permissions ([#3717](https://github.com/argilla-io/argilla/pull/3717)).
+- Added `workspaces add-user` command to add a user to workspace ([#3712](https://github.com/argilla-io/argilla/pull/3712)).
+- Added `workspace_id` param to `GET /api/v1/me/datasets` endpoint ([#3727](https://github.com/argilla-io/argilla/pull/3727)).
+- Added `workspace_id` arg to `list_datasets` in the Python SDK ([#3727](https://github.com/argilla-io/argilla/pull/3727)).
+- Added `argilla` script that allows to execute Argilla CLI using the `argilla` command ([#3730](https://github.com/argilla-io/argilla/pull/3730)).
 
 ### Changed
 
 - Move `database` commands under `server` group of commands ([#3710](https://github.com/argilla-io/argilla/pull/3710))
 - `server` commands only included in the CLI app when `server` extra requirements are installed ([#3710](https://github.com/argilla-io/argilla/pull/3710)).
 - Updated `PUT /api/v1/responses/{response_id}` to replace `values` stored with received `values` in request ([#3711](https://github.com/argilla-io/argilla/pull/3711)).
+- Display a `UserWarning` when the `user_id` in `Workspace.add_user` and `Workspace.delete_user` is the ID of an user with the owner role as they don't require explicit permissions ([#3716](https://github.com/argilla-io/argilla/issues/3716)).
+- Rename `tasks` sub-package to `cli` ([#3723](https://github.com/argilla-io/argilla/pull/3723)).
+- Changed `argilla database` command in the CLI to now be accessed via `argilla server database`, to be deprecated in the upcoming release ([#3754](https://github.com/argilla-io/argilla/pull/3754)).
 
 ### Fixed
 
+- Fixed `Field title too long` ([#3734](https://github.com/argilla-io/argilla/pull/3734))
+- Fixed error messages when deleting a `DatasetForTextClassification` ([#3652](https://github.com/argilla-io/argilla/pull/3652))
 - Fixed `Pending queue` pagination problems when during data annotation ([#3677](https://github.com/argilla-io/argilla/pull/3677))
+- Fixed `visible_labels` default value to be 20 just when `visible_labels` not provided and `len(labels) > 20`, otherwise it will either be the provided `visible_labels` value or `None`, for `LabelQuestion` and `MultiLabelQuestion` ([#3702](https://github.com/argilla-io/argilla/pull/3702)).
+- Fixed `DatasetCard` generation when `RemoteFeedbackDataset` contains suggestions ([#3718](https://github.com/argilla-io/argilla/pull/3718)).
+- Searches when queried words are distributed along the record fields ([3759](https://github.com/argilla-io/argilla/pull/3759))
+
+## [1.15.1](https://github.com/argilla-io/argilla/compare/v1.15.0...v1.15.1)
+
+### Fixed
+
+- Fixed `Text component` text content sanitization behavior just for markdown to prevent disappear the text([#3738](https://github.com/argilla-io/argilla/pull/3738))
+- Fixed `Text component` now you need to press Escape to exit the text area ([#3733](https://github.com/argilla-io/argilla/pull/3733))
+- Fixed `SearchEngine` was creating the same number of primary shards and replica shards for each `FeedbackDataset` ([#3736](https://github.com/argilla-io/argilla/pull/3736)).
 
 ## [1.15.0](https://github.com/argilla-io/argilla/compare/v1.14.1...v1.15.0)
 

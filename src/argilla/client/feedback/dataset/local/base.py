@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import logging
 from abc import abstractproperty
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
@@ -26,13 +25,10 @@ from argilla.client.feedback.schemas import (
 )
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.feedback.utils import generate_pydantic_schema
-from argilla.utils.dependency import requires_version
+from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
     from datasets import Dataset
-
-
-_LOGGER = logging.getLogger(__name__)
 
 
 class FeedbackDatasetBase(FeedbackDatasetSharedBase, HuggingFaceDatasetMixin):
@@ -228,7 +224,7 @@ class FeedbackDatasetBase(FeedbackDatasetSharedBase, HuggingFaceDatasetMixin):
         self._validate_records(records)
         return records
 
-    @requires_version("datasets")
+    @requires_dependencies("datasets")
     def format_as(self, format: Literal["datasets"]) -> "Dataset":
         """Formats the `FeedbackDataset` as a `datasets.Dataset` object.
 

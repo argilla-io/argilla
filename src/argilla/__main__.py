@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.tasks.app import app
+from argilla.cli.app import app
 
 if __name__ == "__main__":
     app()

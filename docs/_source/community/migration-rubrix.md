@@ -13,11 +13,10 @@ with the new module name
 
 `import argilla...`
 
-
 Equivalently, to launch the server:
 
 ````bash
-python -m argilla
+argilla server start
 ````
 
 instead of
@@ -52,7 +51,7 @@ By default, the new Argilla server won't check if datasets from a previous Rubri
 If you want the new Argilla Server to detect previous Rubrix datasets and make them accessible into your Argilla Server instance you can set the `ARGILLA_ENABLE_MIGRATION` like this before starting the Argilla server:
 
 ```bash
-ARGILLA_ENABLE_MIGRATION=1 python -m argilla
+ARGILLA_ENABLE_MIGRATION=1 argilla server start
 ```
 
 This will fetch info contained in the Rubrix instance `.rubrix.datasetsw-v0` index and

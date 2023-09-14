@@ -1,34 +1,19 @@
 <template>
   <div class="filters">
-    <span
-      class="filters__component"
-      v-for="{ id, componentType, placeholder, options } in sortedFiltersValue"
-      :key="id"
-    >
+    <span class="filters__component">
       <SearchBarBase
-        v-if="componentType === 'searchBar'"
         v-model="searchInput"
-        :placeholder="placeholder"
+        :placeholder="'Introduce a query'"
         :additionalInfo="additionalInfoForSearchComponent"
       />
-
-      <StatusFilter
-        v-if="componentType === 'statusSelector'"
-        :options="options"
-        v-model="selectedStatus"
-      />
+    </span>
+    <span class="filters__component">
+      <StatusFilter :options="statusOptions" v-model="selectedStatus" />
     </span>
   </div>
 </template>
 
 <script>
-import { isNil } from "lodash";
-import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
-import {
-  upsertDatasetFilters,
-  getFiltersByDatasetId,
-} from "@/models/feedback-task-model/dataset-filter/datasetFilter.queries";
-
 export default {
   name: "DatasetFiltersComponent",
   props: {
@@ -36,23 +21,16 @@ export default {
       type: String,
       required: true,
     },
-    orderBy: {
-      type: Object,
-      default: () => {
-        return { orderFilterBy: "order", ascendent: true };
-      },
-    },
   },
   data: () => {
     return {
       selectedStatus: null,
       searchInput: null,
-      sortedFiltersValue: [],
       totalRecords: null,
     };
   },
   beforeMount() {
-    this.selectedStatus = this.selectedStatus || this.statusFromRoute;
+    this.selectedStatus = this.selectedStatus ?? this.statusFromRoute;
     this.searchInput = this.searchInput ?? this.searchFromRoute;
 
     this.$root.$on("reset-status-filter", () => {
@@ -61,27 +39,16 @@ export default {
     this.$root.$on("reset-search-filter", () => {
       this.searchInput = this.searchFromRoute;
     });
-    this.$root.$on("total-records", (newTotalRecords) => {
-      this.totalRecords = newTotalRecords;
+    this.$root.$on("total-records", (totalRecords) => {
+      this.totalRecords = totalRecords;
     });
-
-    this.sortedFiltersValue = Object.values(this.filters).sort((a, b) =>
-      a.order > b.order ? -1 : 1
-    );
   },
   computed: {
     additionalInfoForSearchComponent() {
-      if (isNil(this.totalRecords) || this.totalRecords === 0) return null;
+      if (!this.totalRecords || this.totalRecords === 0) return null;
 
       if (this.totalRecords === 1) return `${this.totalRecords} record`;
       return `${this.totalRecords} records`;
-    },
-    filtersFromVuex() {
-      return getFiltersByDatasetId(
-        this.datasetId,
-        this.orderBy?.orderFilterBy,
-        this.orderBy?.ascendent
-      );
     },
     statusFromRoute() {
       return this.$route.query?._status;
@@ -99,78 +66,20 @@ export default {
     },
   },
   created() {
-    this.filters = {
-      searchText: {
-        id: "searchText",
-        name: "Search",
-        componentType: "searchBar",
-        order: 1,
-        placeholder: "Introduce a query",
+    this.statusOptions = [
+      {
+        id: "pending",
+        name: "Pending",
       },
-      statusSelector: {
-        id: "statusSelector",
-        name: "Status Selector",
-        componentType: "statusSelector",
-        order: 0,
-        options: [
-          {
-            id: "pending",
-            name: "Pending",
-          },
-          {
-            id: "submitted",
-            name: "Submitted",
-          },
-          {
-            id: "discarded",
-            name: "Discarded",
-          },
-        ],
+      {
+        id: "submitted",
+        name: "Submitted",
       },
-    };
-
-    this.selectedStatus =
-      this.$route.query?._status ?? RECORD_STATUS.PENDING.toLowerCase();
-    const filterValues = Object.values(this.filters);
-    const formattedFilters = this.factoryFiltersForOrm(filterValues);
-    upsertDatasetFilters(formattedFilters);
-  },
-  methods: {
-    onSearch(id, value) {
-      upsertDatasetFilters({
-        id,
-        value,
-      });
-    },
-    getFilterById(filterId) {
-      return this.filtersFromVuex.find((filter) => filter.id === filterId);
-    },
-    factoryFiltersForOrm(filterValues) {
-      return filterValues.map(
-        ({
-          id,
-          name,
-          componentType,
-          value,
-          order,
-          options,
-          placeholder,
-          groupId,
-        }) => {
-          return {
-            dataset_id: this.datasetId,
-            id,
-            name,
-            order,
-            component_type: componentType,
-            value,
-            options,
-            placeholder,
-            group_id: groupId,
-          };
-        }
-      );
-    },
+      {
+        id: "discarded",
+        name: "Discarded",
+      },
+    ];
   },
   beforeDestroy() {
     this.$root.$off("reset-status-filter");

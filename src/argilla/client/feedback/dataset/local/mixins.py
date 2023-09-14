@@ -44,12 +44,13 @@ from argilla.client.feedback.unification import (
     MultiLabelQuestionStrategy,
     RankingQuestionStrategy,
     RatingQuestionStrategy,
+    TextQuestionStrategy,
 )
 from argilla.client.feedback.utils import feedback_dataset_in_argilla
 from argilla.client.models import Framework
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.workspaces import Workspace
-from argilla.utils.dependency import require_version
+from argilla.utils.dependency import require_dependencies
 
 if TYPE_CHECKING:
     pass
@@ -351,14 +352,17 @@ class ArgillaMixin:
         if workspace is not None:
             workspace = Workspace.from_name(workspace)
 
-        # TODO(alvarobartt or gabrielmbmb): add `workspace_id` in `GET /api/v1/datasets`
-        # and in `GET /api/v1/me/datasets` to filter by workspace
         try:
-            datasets = datasets_api_v1.list_datasets(client=httpx_client).parsed
+            datasets = datasets_api_v1.list_datasets(
+                client=httpx_client, workspace_id=workspace.id if workspace is not None else None
+            ).parsed
         except Exception as e:
             raise RuntimeError(
                 f"Failed while listing the `FeedbackDataset` datasets in Argilla with exception: {e}"
             ) from e
+
+        if len(datasets) == 0:
+            return []
         return [
             RemoteFeedbackDataset(
                 client=httpx_client,
@@ -372,16 +376,10 @@ class ArgillaMixin:
                 guidelines=dataset.guidelines or None,
             )
             for dataset in datasets
-            if workspace is None or dataset.workspace_id == workspace.id
         ]
 
-    def delete(self) -> None:
-        warnings.warn(
-            "Deleting is only supported for remote datasets. Use `FeedbackDataset.from_argilla(...).delete()` instead."
-        )
 
-
-class ArgillaUnificationDatasetMixin:
+class UnificationMixin:
     def unify_responses(
         self,
         question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
@@ -412,6 +410,8 @@ class ArgillaUnificationDatasetMixin:
                 strategy = RatingQuestionStrategy(strategy)
             elif isinstance(question, RankingQuestion):
                 strategy = RankingQuestionStrategy(strategy)
+            elif isinstance(question, TextQuestion):
+                strategy = TextQuestionStrategy(strategy)
             else:
                 raise ValueError(f"Question {question} is not supported yet")
 
@@ -491,7 +491,7 @@ class ArgillaTrainDatasetMixin:
                 data=data, train_size=train_size, seed=seed, framework=framework
             )
         elif framework in [Framework.SPACY, Framework.SPACY_TRANSFORMERS]:
-            require_version("spacy")
+            require_dependencies("spacy")
             import spacy
 
             if lang is None:

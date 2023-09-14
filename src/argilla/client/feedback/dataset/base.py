@@ -12,21 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import logging
 import warnings
 from abc import ABC, abstractmethod, abstractproperty
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import Any, Dict, List, Union
 
-from argilla.client.feedback.schemas import (
-    FeedbackRecord,
-)
+from argilla.client.feedback.schemas import FeedbackRecord
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
-
-if TYPE_CHECKING:
-    pass
-
-
-_LOGGER = logging.getLogger(__name__)
 
 
 class FeedbackDatasetSharedBase(ABC):
@@ -136,7 +127,7 @@ class FeedbackDatasetSharedBase(ABC):
     def filter_by(self) -> Any:
         """Adds records to the dataset."""
 
-    def pull(self) -> "FeedbackDataset":
+    def pull(self) -> Any:
         """`pull` will be deprecated in future versions. Use `pull_from_argilla` instead."""
         warnings.warn(
             "`pull` will be deprecated in future versions. Use `pull_from_argilla` instead.",
@@ -147,7 +138,7 @@ class FeedbackDatasetSharedBase(ABC):
 
     @abstractmethod
     def pull_from_argilla(self) -> Any:
-        """ "Pulls the dataset from Argilla and returns a local instance of it."""
+        """Pulls the dataset from Argilla and returns a local instance of it."""
 
     @abstractmethod
     def push_to_argilla(self) -> Any:

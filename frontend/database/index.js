@@ -17,7 +17,6 @@
 
 import { Database } from "@vuex-orm/core";
 
-import { DatasetFilter } from "@/models/feedback-task-model/dataset-filter/DatasetFilter.model";
 import { Pagination, DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { Notification } from "@/models/Notifications";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
@@ -38,7 +37,6 @@ import notifications from "@/database/modules/notifications";
 
 const database = new Database();
 
-database.register(DatasetFilter);
 database.register(DatasetViewSettings);
 database.register(Pagination);
 database.register(AnnotationProgress);

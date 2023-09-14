@@ -5,6 +5,7 @@
         :recordStatus="record.status"
         :fields="record.fields"
       />
+
       <QuestionsFormComponent
         :key="record.id"
         class="question-form"
@@ -32,7 +33,6 @@
 import { isNil } from "lodash";
 import { Notification } from "@/models/Notifications";
 import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
-import { LABEL_PROPERTIES } from "../../feedback-task/feedbackTask.properties";
 import { useRecordFeedbackTaskViewModel } from "./useRecordFeedbackTaskViewModel";
 
 export default {
@@ -68,7 +68,7 @@ export default {
       return `You have no ${this.recordStatusToFilterWith} records matching the search input`;
     },
     statusClass() {
-      return `--${this.record.status.toLowerCase()}`;
+      return `--${this.record.status}`;
     },
     statusFilterFromQuery() {
       return this.$route.query?._status ?? RECORD_STATUS.PENDING.toLowerCase();
@@ -209,11 +209,11 @@ export default {
         this.questionFormTouched &&
         newSearchValue !== this.searchFilterFromQuery
       ) {
-        Notification.dispatch("notify", {
-          message: "Your changes will be lost if you apply the search filter",
+        return Notification.dispatch("notify", {
+          message: this.$t("changes_no_submit"),
+          buttonText: this.$t("button.ignore_and_continue"),
           numberOfChars: 500,
           type: "warning",
-          buttonText: LABEL_PROPERTIES.CONTINUE,
           async onClick() {
             await localApplySearchFilter(newSearchValue);
           },
@@ -221,9 +221,10 @@ export default {
             localEmitResetSearchFilter();
           },
         });
-      } else {
-        await this.applySearchFilter(newSearchValue);
       }
+
+      if (newSearchValue !== this.searchFilterFromQuery)
+        return await this.applySearchFilter(newSearchValue);
     },
     async onStatusFilterChanged(newStatus) {
       if (this.recordStatusToFilterWith === newStatus) {
@@ -235,10 +236,10 @@ export default {
 
       if (this.questionFormTouched) {
         Notification.dispatch("notify", {
-          message: "Your changes will be lost if you move to another view",
+          message: this.$t("changes_no_submit"),
+          buttonText: this.$t("button.ignore_and_continue"),
           numberOfChars: 500,
           type: "warning",
-          buttonText: LABEL_PROPERTIES.CONTINUE,
           async onClick() {
             await localApplyStatusFilter(newStatus);
           },
@@ -292,6 +293,7 @@ export default {
     this.$root.$off("go-to-prev-page");
     this.$root.$off("status-filter-changed");
     this.$root.$off("search-filter-changed");
+    Notification.dispatch("clear");
   },
   setup() {
     return useRecordFeedbackTaskViewModel();
@@ -313,19 +315,6 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-}
-.question-form {
-  border: 1px solid transparent;
-  background: palette(white);
-  &.--pending {
-    border-color: transparent;
-  }
-  &.--discarded {
-    border-color: #c3c3c3;
-  }
-  &.--submitted {
-    border-color: $primary-color;
   }
 }
 </style>

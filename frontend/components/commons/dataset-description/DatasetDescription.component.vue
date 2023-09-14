@@ -10,6 +10,7 @@
           class="description__content"
           :markdown="sanitizedDescription"
           :value="sanitizedDescription"
+          :originalValue="originalSanitizedDescription"
           :is="currentComponent"
           :key="currentComponent"
           @change-text="onChangeTextArea"
@@ -22,13 +23,12 @@
 <script>
 export default {
   props: {
-    guidelines: {
-      type: String,
+    dataset: {
+      type: Object,
     },
   },
   model: {
-    prop: "guidelines",
-    event: "input",
+    prop: "dataset",
   },
   data() {
     return {
@@ -40,12 +40,15 @@ export default {
   },
   computed: {
     sanitizedDescription() {
-      return this.guidelines ?? "";
+      return this.dataset.guidelines ?? "";
+    },
+    originalSanitizedDescription() {
+      return this.dataset.originalGuidelines ?? "";
     },
   },
   methods: {
     onChangeTextArea(newText) {
-      this.$emit("input", newText);
+      this.dataset.guidelines = newText;
     },
   },
 };
@@ -57,11 +60,15 @@ export default {
     min-height: 65px;
     display: block;
     background: palette(white);
-    padding: $base-space * 2;
+    padding: $base-space;
     border-radius: $border-radius;
     border: 1px solid $black-10;
     &:focus-within {
       border-color: $primary-color;
+    }
+
+    :deep(.content__text) {
+      padding: unset !important;
     }
   }
 }

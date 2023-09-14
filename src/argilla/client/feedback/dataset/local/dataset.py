@@ -16,19 +16,15 @@ import warnings
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
-from argilla.client.feedback.dataset.local.base import FeedbackDatasetBase
-from argilla.client.feedback.dataset.local.mixins import (
-    ArgillaMixin,
-    ArgillaTrainDatasetMixin,
-    ArgillaUnificationDatasetMixin,
-)
+from argilla.client.feedback.dataset.base import FeedbackDatasetSharedBase
+from argilla.client.feedback.dataset.local.mixins import ArgillaMixin, UnificationMixin
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import FeedbackRecord
 
 
-class FeedbackDataset(ArgillaMixin, ArgillaTrainDatasetMixin, ArgillaUnificationDatasetMixin, FeedbackDatasetBase):
+class FeedbackDataset(FeedbackDatasetSharedBase, ArgillaMixin, UnificationMixin):
     def __init__(
         self,
         *,

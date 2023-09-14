@@ -16,7 +16,7 @@
 from datasets import Dataset, DatasetDict
 
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
-from argilla.client.feedback.training.schemas import TrainingTaskForTextClassification
+from argilla.client.feedback.training.schemas import TrainingTaskForQuestionAnswering, TrainingTaskForTextClassification
 from argilla.training.transformers import ArgillaTransformersTrainer as ArgillaTransformersTrainerV1
 
 
@@ -27,6 +27,7 @@ class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSke
 
         import torch
         from transformers import (
+            AutoModelForQuestionAnswering,
             AutoModelForSequenceClassification,
             set_seed,
         )
@@ -59,6 +60,8 @@ class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSke
 
         if isinstance(self._task, TrainingTaskForTextClassification):
             self._model_class = AutoModelForSequenceClassification
+        elif isinstance(self._task, TrainingTaskForQuestionAnswering):
+            self._model_class = AutoModelForQuestionAnswering
         else:
             raise NotImplementedError(
                 f"ArgillaTransformersTrainer does not support {self._task.__class__.__name__} yet."

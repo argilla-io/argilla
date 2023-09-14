@@ -20,7 +20,7 @@ import numpy as np
 from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.transformers import ArgillaTransformersTrainer
 from argilla.training.utils import filter_allowed_args
-from argilla.utils.dependency import require_version
+from argilla.utils.dependency import require_dependencies
 
 
 class ArgillaPeftTrainer(ArgillaTransformersTrainer):
@@ -33,7 +33,7 @@ class ArgillaPeftTrainer(ArgillaTransformersTrainer):
         raise Exception("Must be using Python 3.9 or higher or PEFT won't work.")
 
     def init_training_args(self):
-        require_version("peft")
+        require_dependencies("peft")
         super().init_training_args()
 
         self.lora_kwargs = {

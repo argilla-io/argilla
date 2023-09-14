@@ -233,7 +233,6 @@ class TestSuiteDatasetApi:
                             "type": "value_error.str.regex",
                         }
                     ],
-                    "model": "Request",
                 },
             }
         }
