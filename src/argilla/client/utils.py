@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import functools
+import warnings
 from typing import Callable, List, TypeVar
 
 try:
@@ -21,6 +22,7 @@ except ImportError:
     from typing_extensions import ParamSpec
 
 from argilla.client.api import active_client
+from argilla.client.apis.status import Status
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import UserRole
 
@@ -60,3 +62,27 @@ def allowed_for_roles(roles: List[UserRole]) -> Callable[[Callable[_P, _R]], Cal
         return wrapper
 
     return decorator
+
+
+def server_version() -> str:
+    """Returns the version of the Argilla server that is currently active.
+
+    Note that the connections to Argilla are established via `rg.init`, `argilla login` or
+    setting the `ARGILLA_API_URL` and `ARGILLA_API_KEY` env variables.
+
+    Returns:
+        The version of the Argilla server that is currently active.
+    """
+    # Filtering the warnings to avoid some redundant and unrelated warnings
+    warnings.filterwarnings("ignore", category=UserWarning)
+
+    try:
+        client = active_client().client
+    except Exception as e:
+        raise RuntimeError(
+            "You must be logged in to Argilla to use this function."
+            " Please call `rg.init`, run `argilla login` or set the `ARGILLA_API_URL` and `ARGILLA_API_KEY` env variables."
+            " If you already did it, please check that the Argilla server is up and running."
+        ) from e
+
+    return Status(client).get_status().version
