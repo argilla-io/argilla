@@ -18,8 +18,9 @@ export const useTextFieldViewModel = (props: {
     if (props.useMarkdown) return props.fieldText;
 
     const sanitizeSentence = replaceHtmlChars(props.fieldText);
+    const sanitizeStringToHighlight = replaceHtmlChars(props.stringToHighlight);
 
-    return highlightText(sanitizeSentence, props.stringToHighlight);
+    return highlightText(sanitizeSentence, sanitizeStringToHighlight);
   });
 
   const highlightText = (sentence: string, stringToMatch: string): string => {
@@ -28,7 +29,10 @@ export const useTextFieldViewModel = (props: {
     };
 
     const createFindWordsRegex = () => {
-      return new RegExp(`${replaceHtmlChars(stringToMatch)}`, "gmi");
+      const betweenSpecialSymbols = `(?!\\w)${stringToMatch}(?!\\w)`;
+      const exactMatchWord = `\\b${stringToMatch}\\b`;
+
+      return new RegExp(`${betweenSpecialSymbols}|${exactMatchWord}`, "gmi");
     };
 
     const replaceText = () => {
