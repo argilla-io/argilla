@@ -4,7 +4,7 @@ This guide will help you set up workflows for **collecting comparison data to tr
 
 The steps to implement the comparison data collection process with Argilla are: **create the dataset**, **add records**, **labelers rank responses**, **prepare the dataset**, and **train the reward model**.
 
-<img src="../../../_static/images/llms/rm.svg" alt="Comparison collection for Reward Modeling" style="display:block;margin-left:auto;margin-right:auto;">
+<img src="/_static/images/llms/rm.svg" alt="Comparison collection for Reward Modeling" style="display:block;margin-left:auto;margin-right:auto;">
 
 :::{note}
 For a practical hands-on introduction, you may directly proceed to the How-to Guides or Examples section. This guide focuses on providing a detailed, conceptual description of the process.

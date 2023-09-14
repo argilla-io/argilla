@@ -39,6 +39,7 @@ We are working on it! We will be adding new features to the `FeedbackDataset` ov
 | RAG               	| ✔️               	|                              	|
 | Sentence Similarity               	| ✔️               	|                              	|
 | Question Answering               	| ✔️               	|                              	|
+| Image support               	| ✔️               	|                              	|
 | And many more               	| ✔️               	|                              	|
 
 ### Annotation workflows
