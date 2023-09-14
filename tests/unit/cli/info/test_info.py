@@ -59,6 +59,7 @@ def test_info_command(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixt
     assert f"Client version: {version}" in result.stdout
     assert "Server version: 1.2.3" in result.stdout
     assert "ElasticSearch version: 1.2.3" in result.stdout
+    status_get_status_mock.assert_called_once()
 
 
 @pytest.mark.usefixtures("not_logged_mock")
