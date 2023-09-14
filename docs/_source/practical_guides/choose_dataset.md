@@ -1,29 +1,73 @@
 # 🧐 Choose a dataset type
 
-Argilla offers different datasets that are to different usecases. The main difference originates from the newer Feedback Dataset, and the older 3 older datasets for Text Classification, for Token Classification, and Text2Text. The Feedback Dataset is tailored to multi-faceted and diverse feedback and the older datasets are focused on a single NLP tasks. It is good to take note that both dataset types are actively being maintaine. On the one hand, the older datasets are more feature rich in certain points but no new features are introduced, on the other hand, the Feedback Dataset is currently less feature rich in certain points but new features will actively be added over time.
+## FAQs
 
-| Features                      	| FeedbackDataset 	| DatasetForTextClassification 	| DatasetForTokenClassification 	| DatasetForText2Text 	|
-|-------------------------------	|-----------------	|------------------------------	|-------------------------------	|---------------------	|
-| Filtering                     	| limited           | ✔️                            	| ✔️                             	| ✔️                   	|
-| Sorting                       	| limited         	| ✔️                            	| ✔️                             	| ✔️                   	|
-| Suggestion/predictions        	| limited       	| ✔️                            	| ✔️                             	| ✔️                   	|
-| Vector search                 	|                 	| ✔️                            	| ✔️                             	| ✔️                   	|
-| Weak supervision              	|                 	| ✔️                            	| ✔️                             	| ✔️                   	|
-| Active learning               	|                 	| ✔️                            	| ✔️                             	| ✔️                   	|
-| Text classification           	| ✔️               	| ✔️                            	|                               	|                     	|
-| Token classificaiton          	|                 	|                              	| ✔️                             	|                     	|
-| Text2text                     	| ✔️               	|                              	|                               	| ✔️                   	|
-| Customizable tasks               	| ✔️               	|                              	|                               	|                     	|
-| Multiple annotators per record 	| ✔️               	|                              	|                               	|                     	|
-| Multiple-tasks in one UI      	| ✔️               	|                              	|                               	|                     	|
-| Synchronization with database 	| ✔️               	|                              	|                               	|                     	|
+**What? Different datasets?**
 
-## Feedback Dataset
+First things first, Argilla offers two generations of datasets. The new `FeedbackDataset` and the older datasets called the `DatasetForTextClassification`, `DatasetForTokenClassification`, and `DatasetForText2Text`.
 
-### What is a Feedback Dataset?
+**Why the new `FeedbackDataset`?**
 
-A Feedback Dataset is a dataset that is designed to collect feedback from annotators. It is a dataset that is designed to be used in a feedback loop with a model. The feedback is collected in the form of annotations. The annotations are collected in a Feedback Task UI. The Feedback Task UI is a web application that is hosted
+In short, the `FeedbackDataset` is a fully configurable dataset that can be used for any NLP task including LLM-focused tasks. The older datasets are focused on a single NLP task. As a result, the `FeedbackDataset` is more flexible and can be used for a wider range of use cases including all NLP tasks of the older datasets. The older datasets are more feature rich in certain points but no new features are introduced, on the other hand, the `FeedbackDataset` is currently less feature rich in certain points but new features will actively be added over time.
 
-### Create a Feedback Dataset
+**Will the older datasets be deprecated?**
 
-###
+We will continue to maintain the older datasets for the foreseeable future, but we recommend using the new `FeedbackDataset`, which is going to be the core of Argilla 2.0.
+
+**When should I use older datasets?**
+
+At the moment, the older datasets are better when doing basic Text Classification or Token Classification. They provide full support for `metadata-filters`, `bulk-annotation`, `weak supervision`, `active learning` and `vector search`.
+
+**When should I use `FeedbackDataset` better?**
+
+The `FeedbackDataset` is better when you need to do more `complex tasks` that need to represented in `one coherent UI`. This is extremely useful for `LLM` workflows where you need to do `multiple tasks` on the same record. The `FeedbackDataset` also supports `multiple annotators` per record, `customizable tasks` and `synchronization with a database`. However, it does not support `vector search`, `weak supervision` or `active learning` yet.
+
+**When will all the cool features of the older datasets be available in the `FeedbackDataset`?**
+
+We are working on it! We will be adding new features to the `FeedbackDataset` over time. If you need a specific feature, please let us know on [GitHub](https://github.com/argilla-io/argilla/issues) or Slack so we can prioritize it.
+
+## Table comparison
+
+### NLP Tasks
+
+| Task / Dataset                    | FeedbackDataset 	| Older datasets 	|
+|-------------------------------	|-----------------	|-------------------|
+| Text classification           	| ✔️               	| ✔️                  |
+| Token classificaiton          	|                 	| ✔️                  |
+| Text2text                     	| ✔️               	| ✔️                   |
+| RLHF               	| ✔️               	|                              	|
+| RAG               	| ✔️               	|                              	|
+| Sentence Similarity               	| ✔️               	|                              	|
+| Question Answering               	| ✔️               	|                              	|
+| And many more               	| ✔️               	|                              	|
+
+### Annotation workflows
+
+| Task / Dataset                    | FeedbackDataset 	| Older datasets 	|
+|-------------------------------	|-----------------	|-------------------|
+| bulk annotation           	|                	| ✔️                  |
+| vector search          	|                 	| ✔️                  |
+| active learning                     	|                	| ✔️                   |
+| weak supervision               	|                	| ✔️                             	|
+
+### User and team management
+
+| Features                      	| FeedbackDataset 	| Older datasets 	|
+|-------------------------------	|-----------------	|-------------------|
+| Multiple annotators per record 	| ✔️               	|                    |
+| Multiple-tasks in one UI      	| ✔️               	|                    |
+| Synchronization with database 	| ✔️               	|                    |
+
+### UI Sorting and filtering and querying
+
+| Features                      	| FeedbackDataset 	| Older datasets 	|
+|-------------------------------	|-----------------	|-------------------|
+| Record status filters 	| ✔️               	| ✔️                   |
+| Text query 	            | ✔️               	| ✔️                   |
+| Metadata filters       	|                	| ✔️                   |
+| Sorting 	            |                	| ✔️                   |
+| Prediction filters 	            |                	| ✔️                   |
+| Annotation filters 	            |                	| ✔️                   |
+| Similarity search 	            |                	| ✔️                   |
+
+
