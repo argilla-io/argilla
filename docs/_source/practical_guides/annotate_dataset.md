@@ -82,6 +82,7 @@ You can track your progress and the number of `Pending`, `Submitted` and `Discar
 ```
 
 ### Annotate and validate predictions
+
 The Argilla UI provides a simple and intuitive interface for annotating records. Each task offers a variety of small features and interactions to optimize annotations, like model predictions that one can simply validate assuming they work reasonably well on your dataset.
 
 #### Text Classification
@@ -91,7 +92,6 @@ For this task, you will only need to select the label(s) that describe the recor
 If the dataset is set up as a **single label** text classification, you can annotate the record by clicking on the desired label and the record will be validated automatically. If the record contains predictions, you may _validate_ the record instead and the label with the highest score will be selected automatically. To remove the validated label, just click on it again.
 
 ![Single label text classification record](/_static/reference/webapp/features-single_textclass_record.png)
-
 
 To annotate a record in a **multi-label** text classification task, click on one or multiple labels. Once a label is selected, its status will show as *Pending*. Click *Reset* if you want to discard your changes and recover the previous state of the record or *Validate* to save your annotation into the dataset. The status will then change to *Validated* in the upper left corner of the record card.
 
@@ -106,6 +106,7 @@ When the dataset contains a large list of labels (10 +), we encourage viewing th
 ```
 
 #### Token Classification
+
 ![Token classification record](/_static/reference/webapp/features-tokclass_record.png)
 
 For token classification datasets, you can highlight words (tokens) in the text and annotate them with a label. Under the hood, the highlighting takes advantage of the `tokens` information in the [Token Classification data model](/conceptual_guides/data_model.md#token-classification). For this task, predictions are shown as underlines. You can validate the predictions (or the absence of them) by pressing the _Validate_ button.
@@ -115,13 +116,16 @@ To remove specific labels, hover over the highlights and press the _X_ button or
 After modifying a record, either by adding or removing annotations, its status will change to _Pending_. When you have finished your annotation of the whole record, click *Validate* to save the changes. The status will change to *Validated* in the upper left corner of the record card. Alternatively, you can use the *Reset* button to discard your changes and recover the previous state of the record. If you want to discard the record from the dataset, click *Discard*.
 
 #### Text2Text
+
 ![Text2Text record](/_static/reference/webapp/features-text2text_record.png)
 For Text2Text datasets, there is a text box available for drafting or editing annotations. If a record has one or more predictions, the prediction with the highest score will be pre-filled. You can validate the prediction by clicking on the *Validate* button or edit the text making the changes directly in the text box. If you make any changes, the status will change to *Pending* and you will need to press shift+Enter or click the *Validate* button to save the changes. After validating, predictions can still be accessed in the prediction panel on the right side of the record card.
 
 Alternatively, you can discard your changes and revert to the previous state of the record using the *Reset* button or empty the text field by clicking the *Clear* button. If you want to discard the record from the dataset, click *Discard*.
 
 ### Search and filter records
+
 #### Filters
+
 The Argilla UI provides a set of filters that help you to quickly and conveniently navigate your records.
 For example, you can filter records by their predictions, by a specific metadata, or choose to only view records that are missing annotations.
 The filters are available in all [modes](/reference/webapp/pages.md#modes) of the UI.
@@ -150,7 +154,6 @@ This filter allows you to filter records with respect to their annotations:
 
 ##### Status filter
 
-
 This filter allows you to filter records with respect to their status:
 
 - **Default**: records without any annotation or edition.
@@ -159,7 +162,6 @@ This filter allows you to filter records with respect to their status:
 
 ##### Metadata filter
 
-
 This filter allows you to filter records with respect to their metadata.
 
 ```{hint}
@@ -167,9 +169,11 @@ Nested metadata will be flattened and the keys will be joint by a dot.
 ```
 
 #### Sort records
+
 With this component you can sort the records by various parameters, such as the predictions, annotations or their metadata.
 
 #### Search
+
 ![Search records](/_static/reference/webapp/features-search.png)
 
 The search bar in Argilla is driven by Elasticsearch's powerful [query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/query-dsl-query-string-query.html#query-string-syntax).
@@ -179,11 +183,13 @@ It allows you to perform simple fuzzy searches of words and phrases, or complex 
 Check out our guide for [filtering and querying datasets](filter_dataset.md) for a comprehensive guide on how to search in the Argilla UI.
 
 #### Semantic search
+
 This feature enables you to find similar records when exploring or annotating records. This leverages semantic search to find "semantically" similar records. In order to use this feature, your dataset records should contain vectors which can be associated when logging the dataset into Argilla.
 
 ![Similarity Search](/_static/reference/webapp/features-similaritysearch.png)
 
 ### Bulk labeling and actions
+
 For all tasks, you can use **bulk actions**. You can either select the records one by one with the selection box on the upper left of each card, or you can use the global selection box below the search bar, which will select all records shown on the page. Then you can _Validate_ and _Discard_ the selected records using the icons next to the global selection box. For the multi-label text classification and token classification tasks you can also _Clear_ and _Reset_ at bulk level.
 
 ![Bulk actions bar](/_static/reference/webapp/features-bulk-actions.png)
@@ -197,6 +203,7 @@ In multi-label text classification, you can remove labels from selected records 
 In single-label text classification, there is no need to validate after selecting your label.
 
 ### Weak labeling
+
 ![Weak labeling](/_static/reference/webapp/features-weak-labelling.png)
 
 The Argilla UI has a dedicated mode to find good **heuristic rules**, also often referred to as _labeling functions_, for a [weak supervision](https://www.snorkel.org/blog/weak-supervision) workflow.
@@ -221,13 +228,11 @@ This means, if you have filters set, the record list does not necessarily corres
 If you are happy with the metrics and/or the matching record list, you can save the rule by clicking on "Save rule".
 In this way it will be stored as part of the current dataset and can be accessed via the [manage rules](#manage-rules) button.
 
-
 ```{hint}
 If you want to add labels to the available list of labels, you can go to your [Dataset Settings page](/reference/webapp/pages.md#dataset-settings) and create new labels there.
 ```
 
 #### Rule Metrics
-
 
 After entering a query and selecting labels, Argilla provides you with some key metrics about the rule.
 Some metrics are only available if your dataset has also annotated records.
