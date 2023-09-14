@@ -15,6 +15,7 @@
 import typer
 
 from argilla.cli.callback import init_callback
+from argilla.client.utils import server_info
 
 app = typer.Typer(invoke_without_command=True)
 
@@ -26,24 +27,16 @@ def info() -> None:
 
     from argilla._version import version
     from argilla.cli.rich import get_argilla_themed_panel
-    from argilla.client.api import active_client
-    from argilla.client.apis.status import Status
 
     init_callback()
 
-    server_info = Status(active_client().client).get_status()
-
-    elasticsearch_version = (
-        f"{server_info.elasticsearch.version.number} ({server_info.elasticsearch.version.distribution})"
-        if server_info.elasticsearch.version.distribution
-        else server_info.elasticsearch.version.number
-    )
+    info = server_info()
 
     panel = get_argilla_themed_panel(
         Markdown(
             f"- **Client version:** {version}\n"
-            f"- **Server version:** {server_info.version}\n"
-            f"- **ElasticSearch version:** {elasticsearch_version}\n"
+            f"- **Server version:** {info.version}\n"
+            f"- **ElasticSearch version:** {info.elasticsearch_version}\n"
         ),
         title="Argilla Info",
         title_align="left",
