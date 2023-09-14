@@ -29,11 +29,11 @@ def info() -> None:
     from argilla.cli.rich import get_argilla_themed_panel
 
     init_callback()
-
+    
     info = server_info()
-
     panel = get_argilla_themed_panel(
         Markdown(
+            f"Connected to {info.url}\n"
             f"- **Client version:** {version}\n"
             f"- **Server version:** {info.version}\n"
             f"- **ElasticSearch version:** {info.elasticsearch_version}\n"
