@@ -1,333 +1,145 @@
 import { useTextFieldViewModel } from "./useTextFieldViewModel";
 
-describe("useTextFieldViewModel highlight text without any words between backtick", () => {
-  test("return the fieldText if the string to highlight is empty", () => {
-    const props = {
-      fieldText: "This is a sentence",
-      stringToHighlight: "",
-      useMarkdown: true,
-    };
-
-    const { text } = useTextFieldViewModel(props);
-
-    expect(text.value).toBe(props.fieldText);
-  });
-
-  test("return the fieldText if the string to highlight is not found", () => {
-    const props = {
-      fieldText: "This is a sentence",
-      stringToHighlight: "word",
-      useMarkdown: true,
-    };
-
-    const { text } = useTextFieldViewModel(props);
-
-    expect(text.value).toBe(props.fieldText);
-  });
-
-  test("return the fieldText with the corresponding word highlighted", () => {
+describe("markdown fields", () => {
+  test("there is no highlight for markdown fields", () => {
     const props = {
       fieldText: "This is a sentence",
       stringToHighlight: "This",
       useMarkdown: true,
     };
-
     const { text } = useTextFieldViewModel(props);
+    expect(text.value).toBe(props.fieldText);
+  });
+});
 
+describe("string to highlight is empty", () => {
+  test("return initial fieldText when sentence is empty", () => {
+    const props = {
+      fieldText: "This is a sentence",
+      stringToHighlight: "",
+      useMarkdown: false,
+    };
+    const { text } = useTextFieldViewModel(props);
+    expect(text.value).toBe(props.fieldText);
+  });
+});
+
+describe("raw text", () => {
+  test("the word this must be highlighted", () => {
+    const props = {
+      fieldText: "This is a sentence",
+      stringToHighlight: "this",
+      useMarkdown: false,
+    };
+    const { text } = useTextFieldViewModel(props);
     expect(text.value).toBe(
       // eslint-disable-next-line prettier/prettier
       "<span class=\"highlight-text\">This</span> is a sentence"
     );
   });
 
-  test("return the fieldText with the corresponding word highlighted independently of the case", () => {
+  test("the word This must be highlighted", () => {
     const props = {
       fieldText: "This is a sentence",
-      stringToHighlight: "THIs",
-      useMarkdown: true,
+      stringToHighlight: "This",
+      useMarkdown: false,
     };
-
     const { text } = useTextFieldViewModel(props);
-
     expect(text.value).toBe(
       // eslint-disable-next-line prettier/prettier
       "<span class=\"highlight-text\">This</span> is a sentence"
     );
   });
 
-  test("return the fieldText with the corresponding word highlighted independently of the position in the fieldtext", () => {
+  test("the word <p>The HTML must be highlighted", () => {
     const props = {
-      fieldText: "This is a sentence",
-      stringToHighlight: "Is",
-      useMarkdown: true,
+      fieldText:
+        "<p>The HTML <code>button</code> tag defines a clickable button.</p>",
+      stringToHighlight: "<p>The HTML",
+      useMarkdown: false,
     };
-
     const { text } = useTextFieldViewModel(props);
-
     expect(text.value).toBe(
       // eslint-disable-next-line prettier/prettier
-      "This <span class=\"highlight-text\">is</span> a sentence"
+      "<span class=\"highlight-text\">&lt;p&gt;The HTML</span> &lt;code&gt;button&lt;/code&gt; tag defines a clickable button.&lt;/p&gt;"
     );
   });
 
-  test("return the fieldText with corresponding words highlighted independently of the number of words", () => {
+  test("the word This must be highlighted (with backtick)", () => {
     const props = {
-      fieldText: "This is a sentence",
-      stringToHighlight: "Is A",
-      useMarkdown: true,
+      fieldText: "`This is a sentence",
+      stringToHighlight: "`This",
+      useMarkdown: false,
     };
-
     const { text } = useTextFieldViewModel(props);
-
     expect(text.value).toBe(
       // eslint-disable-next-line prettier/prettier
-      "This <span class=\"highlight-text\">is</span> <span class=\"highlight-text\">a</span> sentence"
+      "<span class=\"highlight-text\">`This</span> is a sentence"
     );
   });
 
-  test("return the fieldText with corresponding words highlighted independently of the order of words", () => {
+  test("the word This must be highlighted (surrounded by backticks)", () => {
     const props = {
-      fieldText: "This is a sentence",
-      stringToHighlight: "a This",
-      useMarkdown: true,
+      fieldText: "`This` is a sentence",
+      stringToHighlight: "`This`",
+      useMarkdown: false,
     };
-
     const { text } = useTextFieldViewModel(props);
-
     expect(text.value).toBe(
       // eslint-disable-next-line prettier/prettier
-      "<span class=\"highlight-text\">This</span> is <span class=\"highlight-text\">a</span> sentence"
+      "<span class=\"highlight-text\">`This`</span> is a sentence"
     );
   });
-});
 
-describe("useTextFieldViewModel highlight text with a markdown with one word", () => {
-  test("return the fieldText if the string to highlight is empty", () => {
+  test("the word This must be highlighted multiple time", () => {
     const props = {
-      fieldText: "This is a `sentence`",
+      fieldText: "`This` is a sentence and this sentence",
+      stringToHighlight: "this",
+      useMarkdown: false,
+    };
+    const { text } = useTextFieldViewModel(props);
+    expect(text.value).toBe(
+      // eslint-disable-next-line prettier/prettier
+      "`<span class=\"highlight-text\">This</span>` is a sentence and <span class=\"highlight-text\">this</span> sentence"
+    );
+  });
+
+  test("escape all HTML characters", () => {
+    const props = {
+      fieldText:
+        "<p>The HTML <code>button</code> tag defines a clickable button.</p>",
       stringToHighlight: "",
-      useMarkdown: true,
+      useMarkdown: false,
     };
-
     const { text } = useTextFieldViewModel(props);
-
-    expect(text.value).toBe(props.fieldText);
-  });
-
-  test("return the fieldText if the string to highlight is not found", () => {
-    const props = {
-      fieldText: "This is a `sentence`",
-      stringToHighlight: "word",
-      useMarkdown: true,
-    };
-
-    const { text } = useTextFieldViewModel(props);
-
-    expect(text.value).toBe(props.fieldText);
-  });
-
-  test("return the fieldText with the corresponding word highlighted", () => {
-    const props = {
-      fieldText: "This is a `sentence`",
-      stringToHighlight: "This",
-      useMarkdown: true,
-    };
-
-    const { text } = useTextFieldViewModel(props);
-
     expect(text.value).toBe(
-      // eslint-disable-next-line prettier/prettier
-      "<span class=\"highlight-text\">This</span> is a `sentence`"
+      "&lt;p&gt;The HTML &lt;code&gt;button&lt;/code&gt; tag defines a clickable button.&lt;/p&gt;"
     );
   });
 
-  test("return the fieldText with the corresponding word highlighted independently of the case", () => {
+  test("not found word", () => {
     const props = {
-      fieldText: "This is a `sentence`",
-      stringToHighlight: "THIs",
-      useMarkdown: true,
+      fieldText:
+        "<p>The HTML <code>button</code> tag defines a clickable button.</p>",
+      stringToHighlight: "foo",
+      useMarkdown: false,
     };
-
     const { text } = useTextFieldViewModel(props);
-
     expect(text.value).toBe(
-      // eslint-disable-next-line prettier/prettier
-      "<span class=\"highlight-text\">This</span> is a `sentence`"
+      "&lt;p&gt;The HTML &lt;code&gt;button&lt;/code&gt; tag defines a clickable button.&lt;/p&gt;"
     );
   });
 
-  test("return the fieldText with the corresponding word highlighted independently of the position in the fieldtext", () => {
+  test("not highlight partially", () => {
     const props = {
-      fieldText: "This is a `sentence`",
-      stringToHighlight: "Is",
-      useMarkdown: true,
+      fieldText:
+        "<p>The HTML <code>button</code> tag defines a clickable button.</p>",
+      stringToHighlight: "foo",
+      useMarkdown: false,
     };
-
     const { text } = useTextFieldViewModel(props);
-
     expect(text.value).toBe(
-      // eslint-disable-next-line prettier/prettier
-      "This <span class=\"highlight-text\">is</span> a `sentence`"
-    );
-  });
-
-  test("return the fieldText with corresponding words highlighted independently of the number of words and without highlighting the markdown word", () => {
-    const props = {
-      fieldText: "This is a `sentence`",
-      stringToHighlight: "Is a `Sentence`",
-      useMarkdown: true,
-    };
-
-    const { text } = useTextFieldViewModel(props);
-
-    expect(text.value).toBe(
-      // eslint-disable-next-line prettier/prettier
-      "This <span class=\"highlight-text\">is</span> <span class=\"highlight-text\">a</span> `sentence`"
-    );
-  });
-
-  test("return the fieldText with corresponding words highlighted independently of the order of words and without highlighting the markdown word", () => {
-    const props = {
-      fieldText: "This is a `sentence`",
-      stringToHighlight: "`Sentence` ThiS A",
-      useMarkdown: true,
-    };
-
-    const { text } = useTextFieldViewModel(props);
-
-    expect(text.value).toBe(
-      // eslint-disable-next-line prettier/prettier
-      "<span class=\"highlight-text\">This</span> is <span class=\"highlight-text\">a</span> `sentence`"
-    );
-  });
-});
-
-describe("useTextFieldViewModel highlight text with a markdown with several words", () => {
-  test("return the fieldText if the string to highlight is empty", () => {
-    const props = {
-      fieldText: "This is `a sentence`",
-      stringToHighlight: "",
-      useMarkdown: true,
-    };
-
-    const { text } = useTextFieldViewModel(props);
-
-    expect(text.value).toBe(props.fieldText);
-  });
-
-  test("return the fieldText if the string to highlight is not found", () => {
-    const props = {
-      fieldText: "This is `a sentence`",
-      stringToHighlight: "word",
-      useMarkdown: true,
-    };
-
-    const { text } = useTextFieldViewModel(props);
-
-    expect(text.value).toBe(props.fieldText);
-  });
-
-  test("return the fieldText with the corresponding word highlighted", () => {
-    const props = {
-      fieldText: "This is `a sentence`",
-      stringToHighlight: "This",
-      useMarkdown: true,
-    };
-
-    const { text } = useTextFieldViewModel(props);
-
-    expect(text.value).toBe(
-      // eslint-disable-next-line prettier/prettier
-      "<span class=\"highlight-text\">This</span> is `a sentence`"
-    );
-  });
-
-  test("return the fieldText with the corresponding word highlighted independently of the case", () => {
-    const props = {
-      fieldText: "This is `a sentence`",
-      stringToHighlight: "THIs",
-      useMarkdown: true,
-    };
-
-    const { text } = useTextFieldViewModel(props);
-
-    expect(text.value).toBe(
-      // eslint-disable-next-line prettier/prettier
-      "<span class=\"highlight-text\">This</span> is `a sentence`"
-    );
-  });
-
-  test("return the fieldText with the corresponding word highlighted independently of the position in the fieldtext", () => {
-    const props = {
-      fieldText: "This is `a sentence`",
-      stringToHighlight: "Is",
-      useMarkdown: true,
-    };
-
-    const { text } = useTextFieldViewModel(props);
-
-    expect(text.value).toBe(
-      // eslint-disable-next-line prettier/prettier
-      "This <span class=\"highlight-text\">is</span> `a sentence`"
-    );
-  });
-
-  test("return the fieldText with corresponding words highlighted independently of the number of words and without highlighting the markdown word", () => {
-    const props = {
-      fieldText: "This is `a sentence`",
-      stringToHighlight: "Is `a Sentence`",
-      useMarkdown: true,
-    };
-
-    const { text } = useTextFieldViewModel(props);
-
-    expect(text.value).toBe(
-      // eslint-disable-next-line prettier/prettier
-      "This <span class=\"highlight-text\">is</span> `a sentence`"
-    );
-  });
-
-  test("return the fieldText with corresponding words highlighted independently of the order of words and without highlighting the markdown word", () => {
-    const props = {
-      fieldText: "This is `a sentence`",
-      stringToHighlight: "`a Sentence` Is",
-      useMarkdown: true,
-    };
-
-    const { text } = useTextFieldViewModel(props);
-
-    expect(text.value).toBe(
-      // eslint-disable-next-line prettier/prettier
-      "This <span class=\"highlight-text\">is</span> `a sentence`"
-    );
-  });
-});
-
-describe("sentence with duplicated words and markdown", () => {
-  test("return the fieldText if the string to highlight is empty", () => {
-    const props = {
-      fieldText: "record record records `recordssss` rEcOrD RECORD",
-      stringToHighlight: "",
-      useMarkdown: true,
-    };
-
-    const { text } = useTextFieldViewModel(props);
-
-    expect(text.value).toBe(props.fieldText);
-  });
-
-  test("return the fieldText with the corresponding exact matching words", () => {
-    const props = {
-      fieldText: "record record records `recordssss` rEcOrD RECORD",
-      stringToHighlight: "record",
-      useMarkdown: true,
-    };
-
-    const { text } = useTextFieldViewModel(props);
-
-    expect(text.value).toBe(
-      // eslint-disable-next-line prettier/prettier
-      "<span class=\"highlight-text\">record</span> <span class=\"highlight-text\">record</span> records `recordssss` <span class=\"highlight-text\">rEcOrD</span> <span class=\"highlight-text\">RECORD</span>"
+      "&lt;p&gt;The HTML &lt;code&gt;button&lt;/code&gt; tag defines a clickable button.&lt;/p&gt;"
     );
   });
 });
