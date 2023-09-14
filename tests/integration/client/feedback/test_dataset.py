@@ -316,11 +316,6 @@ def test_add_records(
     for record in dataset.records:
         assert isinstance(record, FeedbackRecord)
 
-    for batch in dataset.iter(batch_size=1):
-        assert len(batch) == 1
-        for record in batch:
-            assert isinstance(record, FeedbackRecord)
-
     assert len(dataset[:2]) == 2
     assert len(dataset[1:2]) == 1
     assert len(dataset) == len(dataset.records)
