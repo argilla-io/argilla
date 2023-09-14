@@ -47,20 +47,18 @@ To connect to an old Argilla instance (`<1.3.0`) using newer clients, you should
 
 ### Get the current active `User`
 
+You can get the current active user in Argilla using the `me` classmethod in the `User` class. Note that the `me` method will return the active user as specified via the credentials provided via `rg.init`. Also, it is possible [set this information using environment variables](/getting_started/installation/configurations/server_configuration.html#client), which allows for skipping `rg,init`.
 ::::{tab-set}
 
 :::{tab-item} CLI
-After logging in, you can get the current active user in Argilla using the `whoami` command.
 
 ```bash
 argilla login --api-url http://localhost:6900
 argilla whoami
 ```
+
 :::
 
-#### Python client
-
-You can get the current active user in Argilla using the `me` classmethod in the `User` class. Note that the `me` method will return the active user as specified via the credentials provided via `rg.init`. Also, it is possible [set this information using environment variables](/getting_started/installation/configurations/server_configuration.html#client), which allows for skipping `rg,init`.
 :::{tab-item} Python client
 
 ```python
@@ -71,6 +69,7 @@ rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
 user = rg.User.me()
 ```
+
 :::
 
 ::::
@@ -110,6 +109,7 @@ user = rg.User.create(
     workspaces=["ws1", "ws2"]
 )
 ```
+
 :::
 
 ::::
@@ -190,6 +190,7 @@ user = rg.User.create(
 workspace = rg.Workspace.create(name="ws")
 workspace.add_user(user.id)
 ```
+
 :::
 
 ::::
@@ -209,6 +210,7 @@ You can list all the existing users in Argilla using the `list` command in the `
 ```bash
 argilla users list
 ```
+
 :::
 
 :::{tab-item} Python client
@@ -222,6 +224,7 @@ rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
 
 users = rg.User.list()
 ```
+
 :::
 
 ::::
@@ -241,6 +244,7 @@ You can delete an existing user in Argilla using the `delete` command in the `us
 ```bash
 argilla users --username existing-user delete
 ```
+
 :::
 
 :::{tab-item} Python client
@@ -255,6 +259,7 @@ rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 user = rg.User.from_name("existing-user")
 user.delete()
 ```
+
 :::
 
 ::::
