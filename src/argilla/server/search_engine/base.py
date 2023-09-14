@@ -17,10 +17,10 @@ from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, conint
 
 from argilla.server.enums import ResponseStatus, ResponseStatusFilter
-from argilla.server.models import Dataset, Record, Response, User
+from argilla.server.models import Dataset, Record, Response, User, Vector, VectorSettings
 
 __all__ = [
     "SearchEngine",
@@ -94,5 +94,26 @@ class SearchEngine(metaclass=ABCMeta):
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         offset: int = 0,
         limit: int = 100,
+    ) -> SearchResponses:
+        pass
+
+    @abstractmethod
+    async def configure_index_vectors(self, vector_settings: VectorSettings):
+        pass
+
+    @abstractmethod
+    async def set_records_vectors(self, dataset: Dataset, vectors: Iterable[Vector]):
+        pass
+
+    @abstractmethod
+    async def similarity_search(
+        self,
+        dataset: Dataset,
+        vector_settings: VectorSettings,
+        value: Optional[List[float]] = None,
+        record: Optional[Record] = None,
+        user_response_status_filter: Optional[UserResponseStatusFilter] = None,
+        max_results: conint(ge=2, le=500) = 100,
+        threshold: Optional[float] = None,
     ) -> SearchResponses:
         pass
