@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import Any, AsyncGenerator, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from opensearchpy import AsyncOpenSearch, helpers
 
@@ -28,6 +28,7 @@ from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine,
 from argilla.server.settings import settings
 
 
+@SearchEngine.register(engine_name="opensearch")
 @dataclasses.dataclass
 class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
     config: Dict[str, Any]
@@ -37,6 +38,24 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
 
     def __post_init__(self):
         self.client = AsyncOpenSearch(**self.config)
+
+    @classmethod
+    async def new_instance(cls) -> "OpenSearchEngine":
+        config = dict(
+            hosts=settings.elasticsearch,
+            verify_certs=settings.elasticsearch_ssl_verify,
+            ca_certs=settings.elasticsearch_ca_path,
+            retry_on_timeout=True,
+            max_retries=5,
+        )
+        return cls(
+            config,
+            es_number_of_shards=settings.es_records_index_shards,
+            es_number_of_replicas=settings.es_records_index_replicas,
+        )
+
+    async def close(self):
+        await self.client.close()
 
     def _configure_index_mappings(self, dataset) -> dict:
         return {
@@ -121,22 +140,3 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
         _, errors = await helpers.async_bulk(client=self.client, actions=actions, raise_on_error=False)
         if errors:
             raise RuntimeError(errors)
-
-
-async def get_search_engine() -> AsyncGenerator[SearchEngine, None]:
-    config = dict(
-        hosts=settings.elasticsearch,
-        verify_certs=settings.elasticsearch_ssl_verify,
-        ca_certs=settings.elasticsearch_ca_path,
-        retry_on_timeout=True,
-        max_retries=5,
-    )
-    search_engine = OpenSearchEngine(
-        config,
-        es_number_of_shards=settings.es_records_index_shards,
-        es_number_of_replicas=settings.es_records_index_replicas,
-    )
-    try:
-        yield search_engine
-    finally:
-        await search_engine.client.close()

@@ -16,12 +16,10 @@ import dataclasses
 from typing import Any, AsyncGenerator, Dict, List, Optional
 
 from elasticsearch8 import AsyncElasticsearch, helpers
-from pydantic import conint
 
-from argilla.server.models import Dataset, Record, VectorSettings
+from argilla.server.models import VectorSettings
 from argilla.server.search_engine import (
     SearchEngine,
-    SearchResponses,
     UserResponseStatusFilter,
 )
 from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine, field_name_for_vector_settings
@@ -36,6 +34,7 @@ def _compute_num_candidates_from_k(k: int):
     return 2000
 
 
+@SearchEngine.register(engine_name="opensearch")
 @dataclasses.dataclass
 class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
     config: Dict[str, Any]
@@ -46,6 +45,22 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
     def __post_init__(self):
         self.client = AsyncElasticsearch(**self.config)
 
+    async def new_instance(cls) -> "ElasticSearchEngine":
+        config = dict(
+            hosts=settings.elasticsearch,
+            verify_certs=settings.elasticsearch_ssl_verify,
+            ca_certs=settings.elasticsearch_ca_path,
+            retry_on_timeout=True,
+            max_retries=5,
+        )
+        return ElasticSearchEngine(
+            config,
+            es_number_of_shards=settings.es_records_index_shards,
+            es_number_of_replicas=settings.es_records_index_replicas,
+        )
+
+    async def close(self):
+        await self.client.close()
 
     def _configure_index_settings(self):
         return {
@@ -115,22 +130,3 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
         _, errors = await helpers.async_bulk(client=self.client, actions=actions, raise_on_error=False)
         if errors:
             raise RuntimeError(errors)
-
-
-async def get_search_engine() -> AsyncGenerator[SearchEngine, None]:
-    config = dict(
-        hosts=settings.elasticsearch,
-        verify_certs=settings.elasticsearch_ssl_verify,
-        ca_certs=settings.elasticsearch_ca_path,
-        retry_on_timeout=True,
-        max_retries=5,
-    )
-    search_engine = ElasticSearchEngine(
-        config,
-        es_number_of_shards=settings.es_records_index_shards,
-        es_number_of_replicas=settings.es_records_index_replicas,
-    )
-    try:
-        yield search_engine
-    finally:
-        await search_engine.client.close()
