@@ -28,7 +28,7 @@ from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine,
 from argilla.server.settings import settings
 
 
-def _compute_num_candidates_from_k(k: int):
+def _compute_num_candidates_from_k(k: int) -> int:
     if k < 50:
         return 500
     elif 50 <= k < 200:
@@ -46,7 +46,7 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
     def __post_init__(self):
         self.client = AsyncElasticsearch(**self.config)
 
-    def _configure_index_settings(self):
+    def _configure_index_settings(self) -> Dict[str, Any]:
         return {
             "number_of_shards": self.es_number_of_shards,
             "number_of_replicas": self.es_number_of_replicas,
