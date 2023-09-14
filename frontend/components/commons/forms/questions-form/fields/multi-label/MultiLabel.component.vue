@@ -10,6 +10,8 @@
       v-model="question.answer.values"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
       :multiple="true"
+      :isFocused="isFocused"
+      @on-focus="onFocus"
     />
   </div>
 </template>
@@ -26,10 +28,19 @@ export default {
       type: Boolean,
       default: () => false,
     },
+    isFocused: {
+      type: Boolean,
+      default: () => false,
+    },
   },
   computed: {
     maxOptionsToShowBeforeCollapse() {
       return this.question.settings.visible_options ?? -1;
+    },
+  },
+  methods: {
+    onFocus() {
+      this.$emit("on-focus");
     },
   },
 };

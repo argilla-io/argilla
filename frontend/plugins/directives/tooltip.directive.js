@@ -74,27 +74,34 @@ Vue.directive("tooltip", {
     }
 
     // NOTE - init function for event listeners. Needs to be passed throw 'element' object to be able to destroy them on unbind
-    element.clickOnTooltipElementEvent = () => {
-      tooltip.style.display = "flex";
-      elementOffset = initElementOffset(element);
-      tooltip = initTooltipPosition(
-        tooltip,
-        tooltipPosition,
-        elementOffset,
-        width
-      );
+    element.clickOnTooltipElementEvent = (event) => {
+      if (tooltip.getAttribute("tooltip-visible") === "true") {
+        element.clickOnClose(event);
+      } else {
+        tooltip.style.display = "flex";
+        tooltip.setAttribute("tooltip-visible", "true");
+        elementOffset = initElementOffset(element);
+        tooltip = initTooltipPosition(
+          tooltip,
+          tooltipPosition,
+          elementOffset,
+          width
+        );
+      }
     };
 
     element.clickOnClose = (event) => {
       // NOTE - stop propagation to not fire element.clickOnTooltipElement()
       event?.stopPropagation();
       tooltip.style.display = "none";
+      tooltip.setAttribute("tooltip-visible", "false");
     };
 
     element.clickOutsideEvent = function (event) {
       // NOTE - here we check if the click event is outside the element or it's children
       if (!(element == event.target || element.contains(event.target))) {
         tooltip.style.display = "none";
+        tooltip.setAttribute("tooltip-visible", "false");
       }
     };
     element.scrollInParent = function () {

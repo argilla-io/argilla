@@ -25,12 +25,11 @@ Finetune your FastAPI deployment:
 
 Manage your Argilla users:
 - User model
-- Prepare the DB
-- Get default user
 - Create a new user
 - Assign a user to a workspace
 - List all the existing users
 - Delete a user
+- Default user for the `argilla/argilla-server` Docker image
 - Migrate users from `users.yaml`
 - Migration users with Docker Compose
 ```
@@ -50,6 +49,7 @@ Manage your Argilla workspaces:
 :link: database_migrations.md
 
 Dealing with database migrations:
+- Migrating Argilla server database schema
 - Migrating from old schema
 - Reindex a dataset
 ```
@@ -70,7 +70,6 @@ elasticsearch.md
 server_configuration.md
 user_management.md
 workspace_management.md
-dataset_management.md
 database_migrations.md
 image_support.md
 ```

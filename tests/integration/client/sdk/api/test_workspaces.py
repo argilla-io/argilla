@@ -14,6 +14,7 @@
 
 import pytest
 from argilla.client.api import ArgillaSingleton
+from argilla.client.sdk.users.models import UserModel
 from argilla.client.sdk.workspaces.api import (
     create_workspace,
     create_workspace_user,
@@ -21,7 +22,7 @@ from argilla.client.sdk.workspaces.api import (
     list_workspace_users,
     list_workspaces,
 )
-from argilla.client.sdk.workspaces.models import WorkspaceModel, WorkspaceUserModel
+from argilla.client.sdk.workspaces.models import WorkspaceModel
 from argilla.server.models import User
 
 from tests.factories import WorkspaceFactory, WorkspaceUserFactory
@@ -58,7 +59,7 @@ async def test_list_workspace_users(owner: User) -> None:
     assert response.status_code == 200
     assert isinstance(response.parsed, list)
     assert len(response.parsed) > 0
-    assert isinstance(response.parsed[0], WorkspaceUserModel)
+    assert isinstance(response.parsed[0], UserModel)
 
 
 @pytest.mark.asyncio
@@ -68,7 +69,7 @@ async def test_create_workspace_user(owner: User) -> None:
 
     response = create_workspace_user(client=httpx_client, id=workspace.id, user_id=owner.id)
     assert response.status_code == 200
-    assert isinstance(response.parsed, WorkspaceUserModel)
+    assert isinstance(response.parsed, UserModel)
     assert response.parsed.id == owner.id
     assert response.parsed.workspaces[0] == workspace.name
 

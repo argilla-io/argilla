@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from argilla.client.feedback.dataset.remote.base import RemoteFeedbackDatasetBase, RemoteFeedbackRecordsBase
@@ -69,6 +70,8 @@ class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeed
         id: "UUID",
         name: str,
         workspace: "Workspace",
+        created_at: datetime,
+        updated_at: datetime,
         fields: List["AllowedFieldTypes"],
         questions: List["AllowedQuestionTypes"],
         guidelines: Optional[str] = None,
@@ -79,6 +82,8 @@ class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeed
             id=id,
             name=name,
             workspace=workspace,
+            created_at=created_at,
+            updated_at=updated_at,
             fields=fields,
             questions=questions,
             guidelines=guidelines,

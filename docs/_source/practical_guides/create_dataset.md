@@ -439,7 +439,7 @@ Argilla datasets have certain *settings* that you can configure via the `rg.*Set
 You can define your Argilla dataset, which sets the allowed labels for your predictions and annotations. Once you set a labeling schema, each time you log into the corresponding dataset, Argilla will perform validations of the added predictions and annotations to make sure they comply with the schema.
 You can set your labels using the code below or from the [Dataset settings page](/reference/webapp/pages.md#dataset-settings) in the UI.
 
-If you forget to define a labeling schema, Argilla will aggregate the labels it finds in the dataset automatically, but you will need to validate it. To do this, go to your [Dataset settings page](../reference/webapp/pages.md#dataset-settings) and click _Save schema_.
+If you forget to define a labeling schema, Argilla will aggregate the labels it finds in the dataset automatically, but you will need to validate it. To do this, go to your [Dataset settings page](/reference/webapp/pages.md#dataset-settings) and click _Save schema_.
 
 ![Schema not saved](/_static/images/guides/guides-define_schema.png)
 
@@ -495,7 +495,7 @@ Some other cool attributes for a record are:
 In Argilla, records are created programmatically using the [client library](/reference/python/python_client.rst) within a Python script, a [Jupyter notebook](https://jupyter.org/), or another IDE.
 
 
-Let's see how to create and upload a basic record to the Argilla web app  (make sure Argilla is already installed on your machine as described in the [setup guide](../getting_started/quickstart_installation.html)).
+Let's see how to create and upload a basic record to the Argilla web app  (make sure Argilla is already installed on your machine as described in the [setup guide](/getting_started/quickstart_installation.html)).
 
 We support different tasks within the Argilla eco-system focused on NLP: `Text Classification`, `Token Classification` and `Text2Text`.
 

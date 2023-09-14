@@ -15,23 +15,28 @@
         :contenteditable="true"
         :placeholder="placeholder"
         @input="onInputText"
-        v-html="sanitizedCurrentValue"
+        v-text="sanitizedCurrentValue"
         @focus="setFocus(true)"
         @blur="setFocus(false)"
-        @keydown.shift.enter.exact="looseFocus"
-        @keydown.shift.backspace.exact="looseFocus"
-        @keydown.shift.space.exact="looseFocus"
-        @keydown.arrow-right.stop=""
-        @keydown.arrow-left.stop=""
-        @keydown.delete.exact.stop=""
-        @keydown.enter.exact.stop=""
+        @keydown.shift.enter.stop=""
+        @keydown.shift.backspace.stop=""
+        @keydown.shift.space.stop=""
+        @keydown.shift.arrow-up.stop=""
+        @keydown.shift.arrow-down.stop=""
+        @keydown.ctrl.arrow-right.stop=""
+        @keydown.meta.arrow-right.stop=""
+        @keydown.ctrl.arrow-left.stop=""
+        @keydown.meta.arrow-left.stop=""
+        @keydown.delete.stop=""
+        @keydown.enter.stop=""
+        @keydown.esc.exact="exitEditionMode"
+        @paste="pastePlainText"
       />
     </div>
   </span>
 </template>
 
 <script>
-import * as DOMPurify from "dompurify";
 export default {
   name: "ContentEditableFeedbackTask",
   props: {
@@ -43,13 +48,23 @@ export default {
       type: String,
       default: "",
     },
+    originalValue: {
+      type: String,
+      default: "",
+    },
+    isFocused: {
+      type: Boolean,
+      default: () => false,
+    },
+    isEditionModeActive: {
+      type: Boolean,
+      required: true,
+    },
   },
   data: () => {
     return {
-      originalValue: null,
       sanitizedCurrentValue: null,
       currentValue: null,
-      focus: false,
     };
   },
   computed: {
@@ -58,6 +73,21 @@ export default {
     },
   },
   watch: {
+    isFocused: {
+      immediate: true,
+      handler(newValue) {
+        if (newValue) {
+          this.$nextTick(() => {
+            this.$refs.text.focus();
+          });
+        }
+      },
+    },
+    isEditionModeActive() {
+      if (this.isFocused && this.isEditionModeActive) {
+        this.$refs.text.focus();
+      }
+    },
     value() {
       if (this.value !== this.currentValue) {
         this.reset();
@@ -65,36 +95,28 @@ export default {
     },
   },
   mounted() {
-    window.addEventListener("paste", this.pastePlainText);
-
     this.reset();
-
-    this.textAreaWrapper = document.getElementById("contentId");
-  },
-  destroyed() {
-    window.removeEventListener("paste", this.pastePlainText);
   },
   methods: {
     reset() {
-      this.currentValue = this.originalValue = this.value;
+      this.currentValue = this.value;
       this.sanitizedCurrentValue = " ";
-      this.$nextTick(() => {
-        this.sanitizedCurrentValue = DOMPurify.sanitize(this.currentValue);
-      });
+      this.sanitizedCurrentValue = this.currentValue;
     },
-    looseFocus() {
-      this.textAreaWrapper.blur();
+    exitEditionMode() {
+      this.$refs.text.blur();
+
+      this.$emit("on-exit-edition-mode");
     },
     onInputText(event) {
       this.currentValue = event.target.innerText;
       this.$emit("change-text", this.currentValue);
     },
-    setFocus(status) {
-      this.focus = status;
-      this.$emit("on-change-focus", this.focus);
+    setFocus(isFocus) {
+      this.$emit("on-change-focus", isFocus);
     },
     pastePlainText(event) {
-      if (this.focus && event.target.isContentEditable) {
+      if (event.target.isContentEditable) {
         event.preventDefault();
         const text = event.clipboardData?.getData("text/plain") ?? "";
         document.execCommand("insertText", false, text);
@@ -108,6 +130,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 [contenteditable="true"] {
+  padding: 0.6em;
   outline: none;
   &:focus + span {
     display: block;

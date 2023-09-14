@@ -12,7 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from datetime import datetime
 from typing import List, Union
+from uuid import UUID
 
 import pytest
 from argilla.client import api
@@ -21,8 +23,16 @@ from argilla.client.feedback.dataset.remote.filtered import FilteredRemoteFeedba
 from argilla.client.feedback.schemas.records import FeedbackRecord, RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
+from argilla.client.workspaces import Workspace
 
-from tests.factories import DatasetFactory, RecordFactory, TextFieldFactory, TextQuestionFactory, UserFactory
+from tests.factories import (
+    DatasetFactory,
+    RecordFactory,
+    ResponseFactory,
+    TextFieldFactory,
+    TextQuestionFactory,
+    UserFactory,
+)
 
 
 @pytest.mark.asyncio
@@ -93,3 +103,25 @@ class TestFilteredRemoteFeedbackDataset:
 
         with pytest.raises(NotImplementedError, match="`delete` does not work for filtered datasets."):
             filtered_dataset.delete()
+
+    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+    async def test_attributes(self, role: UserRole) -> None:
+        dataset = await DatasetFactory.create()
+        user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+        await TextFieldFactory.create(dataset=dataset, required=True)
+        question = await TextQuestionFactory.create(dataset=dataset, required=True)
+        for record in await RecordFactory.create_batch(dataset=dataset, size=10):
+            await ResponseFactory.create(
+                record=record, user=user, values={question.name: {"value": ""}}, status="submitted"
+            )
+
+        api.init(api_key=user.api_key)
+        remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
+        filtered_dataset = remote_dataset.filter_by(response_status="submitted")
+
+        assert isinstance(filtered_dataset.id, UUID)
+        assert isinstance(filtered_dataset.name, str)
+        assert isinstance(filtered_dataset.workspace, Workspace)
+        assert isinstance(filtered_dataset.url, str)
+        assert isinstance(filtered_dataset.created_at, datetime)
+        assert isinstance(filtered_dataset.updated_at, datetime)

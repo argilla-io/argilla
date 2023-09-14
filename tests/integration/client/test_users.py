@@ -117,7 +117,7 @@ async def test_user_create(owner: "ServerUser") -> None:
             )
         ]
 
-    with pytest.raises(ValueError, match="already exists in Argilla"):
+    with pytest.raises(KeyError, match="already exists in Argilla"):
         User.create("test_user", password="test_password")
 
 
@@ -222,3 +222,25 @@ async def test_user_workspaces_from_owner_to_any(owner: "ServerUser", role: User
     assert len(user.workspaces) == len(workspaces)
     assert all(isinstance(workspace, (WorkspaceModelV0, WorkspaceModelV1)) for workspace in user.workspaces)
     assert [workspace.name for workspace in workspaces] == [workspace.name for workspace in user.workspaces]
+
+
+@pytest.mark.parametrize(
+    "role, is_owner, is_admin, is_annotator",
+    [
+        (UserRole.owner, True, False, False),
+        (UserRole.admin, False, True, False),
+        (UserRole.annotator, False, False, True),
+    ],
+)
+@pytest.mark.asyncio
+async def test_user_role_property(
+    role: UserRole, owner: "ServerUser", is_owner: bool, is_admin: bool, is_annotator: bool
+) -> None:
+    user = await UserFactory.create(role=role)
+
+    ArgillaSingleton.init(api_key=owner.api_key)
+
+    user = User.from_name(user.username)
+    assert user.is_owner == is_owner
+    assert user.is_admin == is_admin
+    assert user.is_annotator == is_annotator

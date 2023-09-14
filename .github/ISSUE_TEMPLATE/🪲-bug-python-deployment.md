@@ -23,6 +23,7 @@ my_bash_code
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
+<!-- Since version 1.16.0 you can use `python -m argilla info` command to easily get the used versions -->
 **Environment:**
  - Argilla Version [e.g. 1.0.0]:
  - ElasticSearch Version [e.g. 7.10.2]:

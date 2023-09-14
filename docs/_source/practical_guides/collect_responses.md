@@ -55,7 +55,7 @@ fig.update_yaxes(title_text="No. of records")
 fig.show()
 ```
 
-![Plot 1: Submitted responses per record](../../../_static/images/llms/collect_responses_plot_1.png)
+![Plot 1: Submitted responses per record](/_static/images/llms/collect_responses_plot_1.png)
 
 ```python
 # plot 2: distance between responses in rating question
@@ -73,7 +73,7 @@ fig.update_yaxes(dtick=1)
 fig.show()
 ```
 
-![Plot 2: Distance in annotator responses for the rating question](../../../_static/images/llms/collect_responses_plot_2.png)
+![Plot 2: Distance in annotator responses for the rating question](/_static/images/llms/collect_responses_plot_2.png)
 
 
 ```{hint}
@@ -126,7 +126,7 @@ This guide gives you a brief introduction to Argilla Metrics. Argilla Metrics en
 
 The main goal is to make it easier to build more robust models and training data, going beyond single-number metrics (e.g., F1).
 
-This guide gives a brief overview of currently supported metrics. For the full API documentation see the [Python API reference](../reference/python/python_metrics.rst).
+This guide gives a brief overview of currently supported metrics. For the full API documentation see the [Python API reference](/reference/python/python_metrics.rst).
 
 All Python metrics are covered in:
 
@@ -193,7 +193,7 @@ from argilla.metrics.token_classification import token_length
 
 token_length(name="spacy_sm_wnut17").visualize()
 ```
-![Token length plot](../_static/images/guides/metrics/token_length_plot.png)
+![Token length plot](/_static/images/guides/metrics/token_length_plot.png)
 
 ```python
 from argilla.metrics.token_classification import token_capitalness
@@ -201,7 +201,7 @@ from argilla.metrics.token_classification import token_capitalness
 token_capitalness(name="spacy_sm_wnut17").visualize()
 ```
 
-![Capitalness plot](../_static/images/guides/metrics/capitalness_plot.png)
+![Capitalness plot](/_static/images/guides/metrics/capitalness_plot.png)
 
 ```python
 from argilla.metrics.token_classification import token_frequency
@@ -209,7 +209,7 @@ from argilla.metrics.token_classification import token_frequency
 token_frequency(name="spacy_sm_wnut17", tokens=50).visualize()
 ```
 
-![Token frequency plot](../_static/images/guides/metrics/token_frequency.png)
+![Token frequency plot](/_static/images/guides/metrics/token_frequency.png)
 
 ```python
 from argilla.metrics.token_classification.metrics import top_k_mentions
@@ -217,7 +217,7 @@ from argilla.metrics.token_classification.metrics import top_k_mentions
 top_k_mentions(name="spacy_sm_wnut17", k=5000, threshold=2).visualize()
 ```
 
-![Top-k mentions plot](../_static/images/guides/metrics/top_k_plot.png)
+![Top-k mentions plot](/_static/images/guides/metrics/top_k_plot.png)
 
 ```python
 from argilla.metrics.token_classification import entity_labels
@@ -225,14 +225,14 @@ from argilla.metrics.token_classification import entity_labels
 entity_labels(name="spacy_sm_wnut17").visualize()
 ```
 
-![Predicted entities distribution](../_static/images/guides/metrics/entity_labels.png)
+![Predicted entities distribution](/_static/images/guides/metrics/entity_labels.png)
 
 ```python
 from argilla.metrics.token_classification import entity_density
 
 entity_density(name="spacy_sm_wnut17").visualize()
 ```
-![Entity density](../_static/images/guides/metrics/entity_density.png)
+![Entity density](/_static/images/guides/metrics/entity_density.png)
 
 ```python
 from argilla.metrics.token_classification import entity_capitalness
@@ -240,14 +240,14 @@ from argilla.metrics.token_classification import entity_capitalness
 entity_capitalness(name="spacy_sm_wnut17").visualize()
 ```
 
-![Entity capitalness](../_static/images/guides/metrics/entity_capitalness.png)
+![Entity capitalness](/_static/images/guides/metrics/entity_capitalness.png)
 
 ```python
 from argilla.metrics.token_classification import mention_length
 
 mention_length(name="spacy_sm_wnut17").visualize()
 ```
-![Mention length](../_static/images/guides/metrics/mention_length.png)
+![Mention length](/_static/images/guides/metrics/mention_length.png)
 
 ### 2. NER training metrics
 #### Analyze tags
@@ -296,7 +296,7 @@ top_k_mentions(
 ).visualize()
 ```
 
-![Top-k annotated entities](../_static/images/guides/metrics/top_k_annotated_entities.png)
+![Top-k annotated entities](/_static/images/guides/metrics/top_k_annotated_entities.png)
 
 From the above we see we can quickly detect an annotation issue: double quotes `"` are most of the time tagged as `O` (no entity) but in some cases (~60 examples) are tagged as beginning of entities like ORG or MISC, which is likely a hand-labeling error, including the quotes inside the entity span.
 
@@ -306,7 +306,7 @@ from argilla.metrics.token_classification import *
 entity_density(name="conll2002_es", compute_for=Annotations).visualize()
 ```
 
-![Entity density in Conll2002 dataset](../_static/images/guides/metrics/entity_density_conll2002.png)
+![Entity density in Conll2002 dataset](/_static/images/guides/metrics/entity_density_conll2002.png)
 
 ### 3. TextClassification metrics
 
@@ -343,10 +343,10 @@ from argilla.metrics.text_classification import f1
 f1(name="sst2").visualize()
 ```
 
-![F1 metrics](../_static/images/guides/metrics/f1.png)
+![F1 metrics](/_static/images/guides/metrics/f1.png)
 
 ```python
 # now compute metrics for negation ( -> negative precision and positive recall go down)
 f1(name="sst2", query="n't OR not").visualize()
 ```
-![F1 metrics from query](../_static/images/guides/metrics/negation_f1.png)
+![F1 metrics from query](/_static/images/guides/metrics/negation_f1.png)

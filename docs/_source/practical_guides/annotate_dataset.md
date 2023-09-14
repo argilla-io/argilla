@@ -13,7 +13,7 @@ It is important that the dataset has annotations for a wide variety of records w
 ```
 
 ```{note}
-If you are having issues with the search engine, you may need to reindex the dataset, as explained [here](../../../getting_started/installation/configurations/database_migrations.md#feedback-datasets).
+If you are having issues with the search engine, you may need to reindex the dataset, as explained [here](/getting_started/installation/configurations/database_migrations.md#feedback-datasets).
 ```
 
 We highly recommend that you read the annotation guidelines before starting the annotation, if there are any. If the guidelines have been specified, you can find them either on the dataset settings page or by clicking the "Read the annotation guidelines" button on the top right of the feedback panel, before starting the annotation.
@@ -90,21 +90,23 @@ For this task, you will only need to select the label(s) that describe the recor
 
 If the dataset is set up as a **single label** text classification, you can annotate the record by clicking on the desired label and the record will be validated automatically. If the record contains predictions, you may _validate_ the record instead and the label with the highest score will be selected automatically. To remove the validated label, just click on it again.
 
-![Single label text classification record](../../_static/reference/webapp/features-single_textclass_record.png)
+![Single label text classification record](/_static/reference/webapp/features-single_textclass_record.png)
 
 
 To annotate a record in a **multi-label** text classification task, click on one or multiple labels. Once a label is selected, its status will show as *Pending*. Click *Reset* if you want to discard your changes and recover the previous state of the record or *Validate* to save your annotation into the dataset. The status will then change to *Validated* in the upper left corner of the record card.
 
 If the **multi-label** record contains predictions and you would like to simply validate the predicted labels, click on *Validate* and all labels with a percentage above 50% will be automatically selected. You can also remove all annotations using the *Clear* button or discard a record from the dataset by clicking *Discard*.
 
-![Multi-label text classification record](../../_static/reference/webapp/features-multi_textclass_record.png)
+![Multi-label text classification record](/_static/reference/webapp/features-multi_textclass_record.png)
+
+You can also remove all annotations using the *Clear* button or discard a record from the dataset by clicking *Discard*.
 
 ```{note}
 When the dataset contains a large list of labels (10 +), we encourage viewing the record cards one by one (select 1 record per page from the footer) and using the arrow keys to move quickly between records.
 ```
 
 #### Token Classification
-![Token classification record](../../_static/reference/webapp/features-tokclass_record.png)
+![Token classification record](/_static/reference/webapp/features-tokclass_record.png)
 
 For token classification datasets, you can highlight words (tokens) in the text and annotate them with a label. Under the hood, the highlighting takes advantage of the `tokens` information in the [Token Classification data model](../python/python_client.rst#Argilla.client.models.TokenClassificationRecord). For this task, predictions are shown as underlines. You can validate the predictions (or the absence of them) by pressing the _Validate_ button.
 
@@ -125,11 +127,11 @@ For example, you can filter records by their predictions, by a specific metadata
 The filters are available in all [modes](dataset.md#modes) of the UI.
 
 ```{hint}
-You can also filter the records through the search bar by means of [queries](../../guides/queries.md).
+You can also filter the records through the search bar by means of [queries](/guides/queries.md).
 ```
 
 ```{note}
-Not all filters listed below are available for all [tasks](../../guides/task_examples.ipynb).
+Not all filters listed below are available for all [tasks](/guides/task_examples.ipynb).
 ```
 
 ##### Predictions filter
@@ -139,7 +141,7 @@ This filter allows you to filter records with respect of their predictions:
 - **Predicted as**: filter records by their predicted labels
 - **Predicted ok**: filter records whose predictions do, or do not, match the annotations
 - **Score**: filter records with respect to the score of their prediction
-- **Predicted by**: filter records by the [prediction agent](../python/python_client.rst#module-argilla.client.models)
+- **Predicted by**: filter records by the [prediction agent](/python/python_client.rst#module-argilla.client.models)
 
 ##### Annotations filter
 
@@ -147,7 +149,7 @@ This filter allows you to filter records with respect of their predictions:
 This filter allows you to filter records with respect to their annotations:
 
 - **Annotated as**: filter records with respect to their annotated labels
-- **Annotated by**: filter records by the [annotation agent](../python/python_client.rst#module-argilla.client.models)
+- **Annotated by**: filter records by the [annotation agent](/python/python_client.rst#module-argilla.client.models)
 - **Only records not covered by rules**: this option only appears if you [defined rules](define_rules.md) for your dataset.
   It allows you to show only records that are **not** covered by your rules.
 
@@ -173,7 +175,7 @@ Nested metadata will be flattened and the keys will be joint by a dot.
 With this component you can sort the records by various parameters, such as the predictions, annotations or their metadata.
 
 #### Search
-![Search records](../../_static/reference/webapp/features-search.png)
+![Search records](/_static/reference/webapp/features-search.png)
 
 The search bar in Argilla is driven by Elasticsearch's powerful [query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/query-dsl-query-string-query.html#query-string-syntax).
 
@@ -184,26 +186,26 @@ Check out our guide for [filtering and querying datasets](filter_dataset.md) for
 #### Semantic search
 This feature enables you to find similar records when exploring or annotating records. This leverages semantic search to find "semantically" similar records. In order to use this feature, your dataset records should contain vectors which can be associated when logging the dataset into Argilla.
 
-![Similarity Search](../../_static/reference/webapp/features-similaritysearch.png)
+![Similarity Search](/_static/reference/webapp/features-similaritysearch.png)
 
 ### Bulk labeling and actions
-For all [tasks](../../guides/task_examples.ipynb), you can use **bulk actions**. You can either select the records one by one with the selection box on the upper left of each card, or you can use the global selection box below the search bar, which will select all records shown on the page. Then you can _Validate_ and _Discard_ the selected records using the icons next to the global selection box. For the multi-label text classification and token classification tasks you can also _Clear_ and _Reset_ at bulk level.
+For all [tasks](/guides/task_examples.ipynb), you can use **bulk actions**. You can either select the records one by one with the selection box on the upper left of each card, or you can use the global selection box below the search bar, which will select all records shown on the page. Then you can _Validate_ and _Discard_ the selected records using the icons next to the global selection box. For the multi-label text classification and token classification tasks you can also _Clear_ and _Reset_ at bulk level.
 
-![Bulk actions bar](../../_static/reference/webapp/features-bulk-actions.png)
+![Bulk actions bar](/_static/reference/webapp/features-bulk-actions.png)
 
 For the text classification task, you can additionally **bulk annotate** the selected records by simply clicking on the pencil icon next to the global selection box and selecting the label(s) from the list.
 
 In multi-label text classification, you can remove labels from selected records by clicking the cross next to the label. You can also assign a partially used label to the whole selection by clicking on the tag button. Once you have made your selection, click *Select* to apply the annotations to all selected records. To finalize the validation, click on the "validate" icon.
 
-![Multi-label bulk annotation](../../_static/reference/webapp/features-multiclass-bulk-labels.png)
+![Multi-label bulk annotation](/_static/reference/webapp/features-multiclass-bulk-labels.png)
 
 In single-label text classification, there is no need to validate after selecting your label.
 
 ### Weak labeling
-![Weak labeling](../../_static/reference/webapp/features-weak-labelling.png)
+![Weak labeling](/_static/reference/webapp/features-weak-labelling.png)
 
 The Argilla UI has a dedicated mode to find good **heuristic rules**, also often referred to as _labeling functions_, for a [weak supervision](https://www.snorkel.org/blog/weak-supervision) workflow.
-As shown in our [guide](../../guides/weak-supervision.ipynb) and [tutorial](../../tutorials/labelling-textclassification-sentencetransformers-weaksupervision.ipynb), these rules allow you to quickly annotate your data with noisy labels in a semiautomatic way.
+As shown in our [guide](/guides/weak-supervision.ipynb) and [tutorial](/tutorials/labelling-textclassification-sentencetransformers-weaksupervision.ipynb), these rules allow you to quickly annotate your data with noisy labels in a semiautomatic way.
 
 You can access the _Weak labeling_ mode via the sidebar of the [Dataset page](dataset.md).
 
