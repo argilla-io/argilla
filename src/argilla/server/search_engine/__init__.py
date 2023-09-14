@@ -14,8 +14,9 @@
 
 from .base import *
 from .elasticsearch import ElasticSearchEngine
-from .elasticsearch import get_search_engine as elasticsearch_engine
 from .opensearch import OpenSearchEngine
-from .opensearch import get_search_engine as opensearch_engine
+from ..settings import settings
 
-get_search_engine = elasticsearch_engine
+
+async def get_search_engine():
+    yield SearchEngine.search_engine_by_name(settings.search_engine)
