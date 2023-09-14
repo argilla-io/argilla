@@ -147,7 +147,7 @@ class SearchEngine(metaclass=ABCMeta):
         value: Optional[List[float]] = None,
         record: Optional[Record] = None,
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
-        max_results: conint(ge=2, le=500) = 100,
+        max_results: int = 100,
         threshold: Optional[float] = None,
     ) -> SearchResponses:
         pass
