@@ -12,10 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from ..settings import settings
 from .base import *
 from .elasticsearch import ElasticSearchEngine
 from .opensearch import OpenSearchEngine
-from ..settings import settings
 
 
 async def get_search_engine():

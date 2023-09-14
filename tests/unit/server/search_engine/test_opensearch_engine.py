@@ -20,10 +20,10 @@ from argilla.server.search_engine import (
     UserResponseStatusFilter,
 )
 from argilla.server.search_engine.commons import index_name_for_dataset
+from argilla.server.settings import settings as server_settings
 from opensearchpy import RequestError
 from sqlalchemy.orm import Session
 
-from argilla.server.settings import settings as server_settings
 from tests.factories import (
     LabelSelectionQuestionFactory,
     MultiLabelSelectionQuestionFactory,
