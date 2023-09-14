@@ -31,6 +31,7 @@ from argilla.server.models import (
     ResponseStatus,
     ResponseValue,
     Suggestion,
+    VectorSettings,
 )
 from argilla.server.models.suggestions import SuggestionCreateWithRecordId
 from argilla.server.schemas.v1.datasets import DatasetCreate, FieldCreate, QuestionCreate, RecordsCreate
@@ -42,7 +43,7 @@ from argilla.server.security.model import User
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
-    from argilla.server.schemas.v1.datasets import DatasetUpdate
+    from argilla.server.schemas.v1.datasets import DatasetUpdate, VectorSettingsCreate
     from argilla.server.schemas.v1.fields import FieldUpdate
     from argilla.server.schemas.v1.questions import QuestionUpdate
     from argilla.server.schemas.v1.suggestions import SuggestionCreate
@@ -208,6 +209,27 @@ async def delete_question(db: "AsyncSession", question: Question) -> Question:
         raise ValueError("Questions cannot be deleted for a published dataset")
 
     return await question.delete(db)
+
+
+async def get_vector_settings_by_name_and_dataset_id(
+    db: "AsyncSession", name: str, dataset_id: UUID
+) -> Union[VectorSettings, None]:
+    return await VectorSettings.read_by(db, name=name, dataset_id=dataset_id)
+
+
+async def create_vector_settings(
+    db: "AsyncSession", dataset: Dataset, vector_settings_create: "VectorSettingsCreate"
+) -> VectorSettings:
+    if dataset.is_ready:
+        raise ValueError("Vector settings cannot be created for a published dataset")
+
+    return await VectorSettings.create(
+        db,
+        name=vector_settings_create.name,
+        dimensions=vector_settings_create.dimensions,
+        description=vector_settings_create.description,
+        dataset_id=dataset.id,
+    )
 
 
 async def get_record_by_id(

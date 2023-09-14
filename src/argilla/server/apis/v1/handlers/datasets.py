@@ -42,6 +42,8 @@ from argilla.server.schemas.v1.datasets import (
     SearchRecord,
     SearchRecordsQuery,
     SearchRecordsResult,
+    VectorSettings,
+    VectorSettingsCreate,
 )
 from argilla.server.search_engine import SearchEngine, UserResponseStatusFilter, get_search_engine
 from argilla.server.security import auth
@@ -272,6 +274,34 @@ async def create_dataset_question(
     try:
         question = await datasets.create_question(db, dataset, question_create)
         return question
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+
+
+@router.post(
+    "/datasets/{dataset_id}/vectors-settings", status_code=status.HTTP_201_CREATED, response_model=VectorSettings
+)
+async def create_dataset_vector_settings(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    dataset_id: UUID,
+    vector_settings_create: VectorSettingsCreate,
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = await _get_dataset(db, dataset_id)
+
+    await authorize(current_user, DatasetPolicyV1.create_vector_settings(dataset))
+
+    if await datasets.get_vector_settings_by_name_and_dataset_id(db, vector_settings_create.name, dataset_id):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Vector settings with name `{vector_settings_create.name}` already exists for dataset with id"
+            f" `{dataset_id}`",
+        )
+
+    try:
+        vector_settings = await datasets.create_vector_settings(db, dataset, vector_settings_create)
+        return vector_settings
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 

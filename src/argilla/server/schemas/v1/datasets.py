@@ -316,6 +316,24 @@ class QuestionCreate(BaseModel):
     settings: QuestionSettingsCreate
 
 
+class VectorSettings(BaseModel):
+    id: UUID
+    name: str
+    dimensions: int
+    description: Optional[str] = None
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class VectorSettingsCreate(BaseModel):
+    name: str
+    dimensions: PositiveInt
+    description: Optional[str] = None
+
+
 class ResponseValue(BaseModel):
     value: Any
 
