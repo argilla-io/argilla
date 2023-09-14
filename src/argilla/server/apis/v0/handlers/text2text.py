@@ -38,7 +38,7 @@ from argilla.server.services.tasks.text2text.models import ServiceText2TextQuery
 
 def configure_router():
     task_type = TaskType.text2text
-    base_endpoint = "/{name}/" + task_type
+    base_endpoint = f"/{{name}}/{task_type.value}"
 
     TasksFactory.register_task(
         task_type=TaskType.text2text,

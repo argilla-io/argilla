@@ -42,7 +42,7 @@ from argilla.server.services.tasks.token_classification.model import (
 
 def configure_router():
     task_type = TaskType.token_classification
-    base_endpoint = f"/{{name}}/{task_type}"
+    base_endpoint = f"/{{name}}/{task_type.value}"
 
     TasksFactory.register_task(
         task_type=task_type,

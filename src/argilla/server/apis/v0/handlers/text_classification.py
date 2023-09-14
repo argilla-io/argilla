@@ -51,6 +51,8 @@ from argilla.server.services.tasks.text_classification.model import (
 
 def configure_router():
     task_type = TaskType.text_classification
+    base_endpoint = f"/{{name}}/{task_type.value}"
+    new_base_endpoint = f"/{task_type.value}/{{name}}"
 
     TasksFactory.register_task(
         task_type=task_type,
@@ -59,9 +61,6 @@ def configure_router():
         record_class=ServiceTextClassificationRecord,
         metrics=TextClassificationMetrics,
     )
-
-    base_endpoint = f"/{{name}}/{task_type}"
-    new_base_endpoint = f"/{task_type}/{{name}}"
 
     router = APIRouter(tags=[task_type], prefix="/datasets")
 
