@@ -86,7 +86,7 @@ llm = OpenAI(temperature=0.9, callbacks=[argilla_callback])
 llm.generate(["Tell me a joke", "Tell me a poem"] * 3)
 ```
 
-![Argilla UI with LangChain LLM input-response](../../../_static/images/llms/langchain-integration/llm.png)
+![Argilla UI with LangChain LLM input-response](/_static/images/llms/langchain-integration/llm.png)
 
 ### An LLM in a chain
 
@@ -116,7 +116,7 @@ test_prompts = [{"title": "Documentary about Bigfoot in Paris"}]
 synopsis_chain.apply(test_prompts)
 ```
 
-![Argilla UI with LangChain Chain input-response](../../../_static/images/llms/langchain-integration/chain.png)
+![Argilla UI with LangChain Chain input-response](/_static/images/llms/langchain-integration/chain.png)
 
 ### Agents with Tools
 

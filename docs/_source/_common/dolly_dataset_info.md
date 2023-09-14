@@ -22,6 +22,7 @@ The airline has since grown to directly serve 32 cities in Australia, from hubs 
 ### Response:
 Virgin Australia commenced services on 31 August 2000 as Virgin Blue, with two aircraft on a single route.
 ```
+
 :::
 
 :::{tab-item} Corrected

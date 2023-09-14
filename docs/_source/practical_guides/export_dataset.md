@@ -22,19 +22,20 @@ At this point, you can do any post-processing you may need with this dataset e.g
 ### Push back to Argilla
 ​
 When using a `FeedbackDataset` pulled from Argilla via `FeedbackDataset.from_argilla`, you can always push the dataset back to Argilla in case you want to clone the dataset or explore it after post-processing.
-​
+
 ::::{tab-set}
-​
+
 :::{tab-item} Argilla 1.14.0 or higher
 ```python
-dataset = dataset.pull()
-remote_dataset = dataset.push_to_argilla(name="my-dataset-clone", workspace="my-workspace")
+# This publishes the dataset with its records to Argilla and returns the dataset in Argilla
+remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 ```
 :::
-​
+
 :::{tab-item} Lower than Argilla 1.14.0
 ```python
-dataset.push_to_argilla(name="my-dataset-clone", workspace="my-workspace")
+# This publishes the dataset with its records to Argilla and turns the dataset object into a dataset in Argilla
+dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 ```
 :::
 ::::

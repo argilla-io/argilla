@@ -167,7 +167,6 @@ As an example, here is how you can transform a whole dataset into records at onc
 records = [rg.FeedbackRecord(fields={"question": record["instruction"], "answer": record["response"]}) for record in hf_dataset if record["category"]=="open_qa"]
 ```
 
-
 Now, we simply add our records to the dataset we configured [above](#configure-the-dataset):
 
 ```python
@@ -194,6 +193,7 @@ record = rg.FeedbackRecord(
     ]
 )
 ```
+
 :::
 
 :::{tab-item} Multi-label
@@ -279,19 +279,24 @@ dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_works
 ::::{tab-set}
 
 :::{tab-item} Argilla 1.14.0 or higher
+
 ```python
 for record in dataset.records:
     record.update(suggestions=[{"question_name": "question", "value": ...}]) # Directly pushes the update to Argilla
 ```
+
 :::
 
 :::{tab-item} Lower than Argilla 1.14.0
+
 ```python
 for record in dataset.records:
     record.set_suggestions([{"question_name": "question", "value": ...}])
 dataset.push_to_argilla() # No need to provide `name` and `workspace` as has been retrieved via `from_argilla` classmethod
 ```
+
 :::
+
 ::::
 
 ### Add responses
@@ -316,6 +321,7 @@ record = rg.FeedbackRecord(
     ]
 )
 ```
+
 :::
 
 :::{tab-item} Multi-label
@@ -411,16 +417,21 @@ From Argilla 1.14.0, calling `push_to_argilla` will not just push the `FeedbackD
 ::::{tab-set}
 
 :::{tab-item} Argilla 1.14.0 or higher
+
 ```python
 remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 ```
+
 :::
 
 :::{tab-item} Lower than Argilla 1.14.0
+
 ```python
 dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 ```
+
 :::
+
 ::::
 
 Now you're ready to start [the annotation process](annotate_dataset.ipynb).
@@ -494,7 +505,6 @@ Some other cool attributes for a record are:
 
 In Argilla, records are created programmatically using the [client library](/reference/python/python_client.rst) within a Python script, a [Jupyter notebook](https://jupyter.org/), or another IDE.
 
-
 Let's see how to create and upload a basic record to the Argilla web app  (make sure Argilla is already installed on your machine as described in the [setup guide](/getting_started/quickstart_installation.html)).
 
 We support different tasks within the Argilla eco-system focused on NLP: `Text Classification`, `Token Classification` and `Text2Text`.
@@ -514,10 +524,12 @@ rec = rg.TextClassificationRecord(
 )
 rg.log(records=rec, name="my_dataset")
 ```
+
 ![single_textclass_record](/_static/reference/webapp/features-single_textclass_record.png)
 :::
 
 :::{tab-item} Text Classification (multi-label)
+
 ```python
 import argilla as rg
 
@@ -529,11 +541,13 @@ rec = rg.TextClassificationRecord(
 )
 rg.log(records=rec, name="my_dataset")
 ```
+
 ![multi_textclass_record](/_static/reference/webapp/features-multi_textclass_record.png)
 :::
 
 
 :::{tab-item} Token Classification
+
 ```python
 import argilla as rg
 
@@ -545,10 +559,12 @@ record = rg.TokenClassificationRecord(
 )
 rg.log(records=rec, name="my_dataset")
 ```
+
 ![tokclass_record](/_static/reference/webapp/features-tokclass_record.png)
 :::
 
 :::{tab-item} Text2Text
+
 ```python
 import argilla as rg
 
@@ -575,8 +591,6 @@ Suggestions refer to suggested responses (e.g. model predictions) that you can a
 In this case, we expect a `List[Tuple[str, float]]` as the prediction, where the first element of the tuple is the label and the second the confidence score.
 
 ```python
-
-```python
 import argilla as rg
 
 rec = rg.TextClassificationRecord(
@@ -584,6 +598,7 @@ rec = rg.TextClassificationRecord(
     prediction=[("label_1", 0.75), ("label_2", 0.25)],
 )
 ```
+
 ![single_textclass_record](/_static/reference/webapp/features-single_textclass_record.png)
 :::
 
@@ -600,9 +615,9 @@ rec = rg.TextClassificationRecord(
     multi_label=True
 )
 ```
+
 ![multi_textclass_record](/_static/reference/webapp/features-multi_textclass_record.png)
 :::
-
 
 :::{tab-item} Token Classification
 
@@ -617,6 +632,7 @@ record = rg.TokenClassificationRecord(
     prediction=[("label_1", 0, 7, 0.75), ("label_2", 26, 33, 0.8)],
 )
 ```
+
 ![tokclass_record](/_static/reference/webapp/features-tokclass_record.png)
 :::
 
@@ -643,6 +659,7 @@ record = rg.Text2TextRecord(
 If your dataset includes some annotations, you can add those to the records as you create them. Make sure that the responses adhere to the same format as Argilla’s output and meet the schema requirements.
 
 ::::{tab-set}
+
 :::{tab-item} Text Classification
 
 In this case, we expect a `str` as the annotation.
@@ -655,6 +672,7 @@ rec = rg.TextClassificationRecord(
     annotation="label_1",
 )
 ```
+
 ![single_textclass_record](/_static/reference/webapp/features-single_textclass_record.png)
 
 :::

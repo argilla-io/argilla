@@ -35,5 +35,4 @@ Introduction to data collection for reward modeling.
 rlhf
 sft
 rm
-data_model
 ```

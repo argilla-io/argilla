@@ -17,12 +17,8 @@
    :maxdepth: 3
    :hidden:
 
-   conceptual_guides/conceptual_guides
    conceptual_guides/data_model
    conceptual_guides/llm/llm
-   conceptual_guides/sft
-   conceptual_guides/rm
-   conceptual_guides/rlhf
 
 .. toctree::
    :caption: Practical Guides
@@ -32,7 +28,7 @@
    practical_guides/practical_guides
    practical_guides/choose_dataset
    practical_guides/create_dataset
-   practical_guides/assign_annotations
+   practical_guides/assign_records
    practical_guides/update_dataset
    practical_guides/filter_dataset
    practical_guides/annotate_dataset

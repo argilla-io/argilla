@@ -90,6 +90,7 @@ Text classification is a widely used NLP task where labels are assigned to text.
 ::::{tab-set}
 
 :::{tab-item} Single-label
+
 Single-label text classification refers to the task of assigning a single category or label to a given text sample. Each text is associated with only one predefined class or category. For example, in sentiment analysis, a single-label text classification task would involve assigning labels such as "positive," "negative," or "neutral" to texts based on their sentiment.
 
 ```batch
@@ -99,6 +100,7 @@ Single-label text classification refers to the task of assigning a single catego
 :::
 
 :::{tab-item} Multi-label
+
 Multi-label text classification is generally more complex than single-label classification due to the challenge of determining and predicting multiple relevant labels for each text. It finds applications in various domains, including document tagging, topic labeling, and content recommendation systems. For example, in customer care, a multi-label text classification task would involve assigning topics such as "new_card," "mortgage," or "opening_hours" to texts based on their content.
 
 ```{tip}
@@ -239,9 +241,9 @@ feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/squad")
 
 We can use a default configuration where we initialize the `TrainingTask.for_question_answering` using the `question-context-answer`-set from the dataset. We also offer the option to provide a `formatting_func` to the `TrainingTask.for_question_asnwering`. This function is applied to each sample in the dataset and can be used for advanced preprocessing and data formatting. The function should return a `question-context-answer`-set as `str-str-str`.
 
-:::: {tab-set}
+::::{tab-set}
 
-::: {tab-item} question-context-answer-set
+:::{tab-item} question-context-answer-set
 
 ```python
 from argilla.feedback import TrainingTask
@@ -255,7 +257,7 @@ task = TrainingTask.for_question_answering(
 
 :::
 
-::: {tab-item} formatting_func
+:::{tab-item} formatting_func
 
 ```python
 from argilla.feedback import TrainingTask
@@ -277,7 +279,7 @@ task = TrainingTask.for_question_answering(formatting_func=formatting_func)
 
 **ArgillaTrainer**
 
-Next, we can define our `ArgillaTrainer` for any of [the supported frameworks](fine_tune.md#training-configs) and [customize the training config](#supported-frameworks) using `ArgillaTrainer.update_config`.
+Next, we can define our `ArgillaTrainer` for any of the supported frameworks and customize the training config using `ArgillaTrainer.update_config`.
 
 ```python
 from argilla.feedback import ArgillaTrainer
@@ -316,11 +318,15 @@ Sentence Similarity is the task of determining how similar two texts are. By tra
 ::::{tab-set}
 
 :::{tab-item} Bi-Encoder
+
 A bi-encoder consists of two separate neural network models, each responsible for encoding a single sentence or text. These encoders work independently and do not share weights. The primary objective of a bi-encoder is to encode individual sentences or texts into fixed-length vectors in a way that preserves the semantic meaning of the input. These fixed-length vectors can later be used for various tasks, such as retrieval or classification. Bi-encoders are often used in tasks where you need to encode a large set of texts into vectors (e.g., creating embeddings for documents in a corpus). These embeddings can then be used for tasks like information retrieval, clustering, and classification.
+
 :::
 
 :::{tab-item} Cross-Encoder
+
 A cross-encoder consists of a single neural network model that takes multiple input sentences or texts simultaneously. It processes pairs of sentences or texts in one forward pass. The main objective of a cross-encoder is to provide a single scalar score or similarity measure for a pair of input sentences or texts. This score represents the similarity or relevance between the two input texts. Cross encoders are commonly used in applications like text matching, question-answering, document retrieval, and recommendation systems where you need to compare two pieces of text and assess their similarity or relevance.
+
 :::
 
 ::::
@@ -383,7 +389,7 @@ dataset = rg.FeedbackDataset.from_huggingface("plaguss/snli-small")
 We offer the option to use default unification strategies and formatting based on a `sentence`-pairs and `sentence-` triplets, with or without a `label`. Here we infer formatting information based on two `TextField` and a `LabelQuestion` or `RankingQuestion`. This is the easiest way to define a `TrainingTask` for sentence similarity but if you need a custom workflow, you can use `formatting_func`.
 
 ```{note}
-An overview of the unifcation measures can be found [here](/guides/llms/practical_guides/collect_responses). For this type of task, only `LabelQuestion` or `RankingQuestion` applies.
+An overview of the unifcation measures can be found [here](/practical_guides/collect_responses). For this type of task, only `LabelQuestion` or `RankingQuestion` applies.
 ```
 
 ```python
@@ -559,10 +565,6 @@ There are many good libraries to help with this step, however, we are a fan of t
 This dataset only contains a single annotator response per record. We gave some suggestions on dealing with [responses from multiple annotators](/practical_guides/collect_responses).
 ```
 
-::::{tab-set}
-
-:::{tab-item} TRL
-
 The [Transformer Reinforcement Learning (TRL)](https://huggingface.co/docs/trl) package provides a flexible and customizable framework for fine-tuning models. It allows users to have fine-grained control over the training process, enabling them to define their functions and to further specify the desired behavior of the model. This approach requires a deeper understanding of reinforcement learning concepts and techniques, as well as more careful experimentation. It is best suited for users who have experience in reinforcement learning and want fine-grained control over the training process. Additionally, it directly integrates with [Parameter-Efficient Fine-Tuning](https://huggingface.co/docs/peft/index) (PEFT) decreasing the computational complexity of this step of training an LLM.
 
 **Data Preparation**
@@ -674,40 +676,8 @@ def generate(model_id: str, instruction: str, context: str = "") -> str:
 
 ### Response: A frog is a small, round, black-eyed, frog with a long, black-winged head. It is a member of the family Pter
 ```
+
 Much better! This model follows the template like we want.
-
-:::
-
-:::{tab-item} TRLX
-
-The [Transformer Reinforcement Learning X (TRLX)](https://github.com/CarperAI/trlx), which has been heavily inspired by TRL but with an increased focus on incorporating Human Feedback into the training loop. However, out of the box, it also provides intuitive support for supervised `prompt-completion` fine-tuning using a relatively simple SDK, that takes tuples as `(prompt, completion)`. Take a look at the RLHF section for the other more feedback-oriented use cases of this library.
-
-```python
-import trlx
-
-# Let's create a Dataset for convenience
-data = {"instruction": [], "context": [], "response": []}
-for entry in feedback_dataset:
-    if entry.responses:
-        res = entry.responses[0].values
-        data["instruction"].append(res["new-instruction"].value)
-        data["context"].append(res["new-context"].value)
-        data["response"].append(res["new-response"].value)
-dataset = Dataset.from_dict(data)
-
-samples = [
-    [
-        f"### Instruction: {entry['instruction']} ### Context: {entry['context']}",
-        f"### Response: {entry['response']}"
-    ] for entry in dataset
-]
-
-trainer = trlx.train('gpt2', samples=samples)
-```
-
-:::
-
-::::
 
 #### Reward Modeling
 
@@ -715,7 +685,7 @@ trainer = trlx.train('gpt2', samples=samples)
 
 A Reward Model (RM) is used to rate responses in alignment with human preferences and afterwards using this RM to fine-tune the LLM with the associated scores. Fine-tuning using a Reward Model can be done in different ways. We can either get the annotator to rate output completely manually, we can use a simple heuristic or we can use a stochastic preference model. Both [TRL](https://huggingface.co/docs/trl) and [TRLX](https://github.com/CarperAI/trlx) provide decent options for incorporating rewards. The [DeepSpeed library of Microsoft](https://github.com/microsoft/DeepSpeed/tree/master/blogs/deepspeed-chat) is a worthy mention too but will not be covered in our docs.
 
-```{include} /_common/dolly_dataset.md
+```{include} /_common/dolly_dataset_info.md
 ```
 
 In case of training an RM, we then use the `chosen-rejected`-pairs and train a classifier to distinguish between them.
@@ -725,9 +695,6 @@ In case of training an RM, we then use the `chosen-rejected`-pairs and train a c
 ```{include} /_common/dolly_dataset_info.md
 ```
 
-::::{tab-set}
-
-:::{tab-item} TRL
 [TRL](https://huggingface.co/docs/trl) implements reward modeling, which can be used via the `ArgillaTrainer` class. We offer the option to provide a `formatting_func` to the `TrainingTask.for_reward_modeling`. This function is applied to each sample in the dataset and can be used for preprocessing and data formatting. The function should return a tuple of `chosen-rejected`-pairs  as `Tuple[str, str]`. To determine which response from the FeedbackDataset is superior, we can use the user annotations.
 
 ```{note}
@@ -873,9 +840,6 @@ print(score)
 # >> 2.2948970794677734
 ```
 As expected, the good response has a higher score than the worse response.
-:::
-
-::::
 
 #### Proximal Policy Optimization
 
@@ -887,7 +851,7 @@ The [TRL](https://huggingface.co/docs/trl) library implements the last step of R
 PPO requires a trained supervised fine-tuned model and reward model to work. Take a look at that task outlines above to train your own models.
 ```
 
-```{include} /_common/dolly_dataset.md
+```{include} /_common/dolly_dataset_info.md
 ```
 
 In case of training an PPO, we then use the prompt and context data and correct the generated response from the SFT model by using the reward model. Hence, we will need to format the following `text`.
@@ -1123,7 +1087,7 @@ With the rise of chat-oriented models under OpenAI's ChatGPT, we have seen a lot
 
 ::::{tab-set}
 
-::: {tab-item} conversation
+:::{tab-item} conversation
 
 ```bash
 User: Hello, how are you?
@@ -1136,9 +1100,9 @@ Agent: You are right, it was 2001.
 
 :::
 
-::: {tab-item} prompt-completion
+:::{tab-item} prompt-completion
 
-```bash
+```
 ### Instruction
 When did Virgin Australia start operating?
 
@@ -1164,7 +1128,7 @@ The airline has since grown to directly serve 32 cities in Australia, from hubs 
 
 **Data Preparation**
 
-We will use [the dataset](https://huggingface.co/datasets/argilla/customer_assistant) from [this tutorial](/guides/llms/examples/fine-tuning-openai-rag-feedback).
+We will use [the dataset](https://huggingface.co/datasets/argilla/customer_assistant) from [this tutorial](/tutorials_and_integrations/tutorials/feedback/fine-tuning-openai-rag-feedback).
 
 ```python
 dataset = rg.FeedbackDataset.from_huggingface("argilla/customer_assistant")
@@ -1215,8 +1179,6 @@ task = TrainingTask.for_chat_completion(formatting_func=formatting_func)
 **ArgillaTrainer**
 
 We'll use the task directly with our `FeedbackDataset` in the `ArgillaTrainer`. The only configurable parameter is `n_epochs` but this is also optimized internally.
-
-```python
 
 ```python
 from argilla.feedback import ArgillaTrainer
