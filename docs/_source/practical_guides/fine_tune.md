@@ -204,9 +204,9 @@ trainer = ArgillaTrainer(
 trainer.train(output_dir="textcat_model")
 ```
 
-### Question Answering
+#### Question Answering
 
-#### Background
+##### Background
 
 The extractive Question Answering (QnA) task involves answering questions posed by users based on a given context. It is a challenging task that requires the model to understand the context of the question and provide an accurate answer. The model must be able to comprehend the question and the context in which it is asked, as well as the relationship between the two. Additionally, it must be able to extract the relevant information from the context and provide an answer that is both accurate and relevant to the question.
 
@@ -226,7 +226,7 @@ Officially, answers need to be passed as a list of `{'answer_start': int, 'text'
 
 We then use either `question-context-answer`-set or a `formatting_func` to further fine-tune the model.
 
-#### Training
+##### Training
 
 **Data Preparation**
 
@@ -307,9 +307,9 @@ qa_model(question = question, context = context)
 ## {'answer': 'İstanbul', 'end': 39, 'score': 0.953, 'start': 31}
 ```
 
-### Sentence Similarity
+#### Sentence Similarity
 
-#### Background
+##### Background
 
 Sentence Similarity is the task of determining how similar two texts are. By transforming the text into embeddings (vectors representing the semantic information) we can compute the similarity between these texts, computing the distance between their vectors. The [Sentence-Transformers](https://www.sbert.net/) library makes it easy to compute these sentence embeddings and use them for information retrieval and clustering. Besides these tasks, it is also commonly used to optimize Retrieval Augmented Generation (RAG) and re-ranking tasks. Generally, two types of models can be fine-tuned.
 
@@ -327,7 +327,7 @@ A cross-encoder consists of a single neural network model that takes multiple in
 
 In this [blog article](https://huggingface.co/blog/how-to-train-sentence-transformers) from hugging face you can see the different types of datasets that can be used for training `sentence-transformers` models.
 
-#### Training
+##### Training
 
 :::{note}
 We can easily switch between `Bi-Encoder` and `Cross Encoder` based models using the `framework_kwargs={"cross_encoder": True}`. Additionally, data can be provided in three different ways, hence. Keep in mind the `Cross Encoder` based models don't allow training with sentence triplets.
@@ -1115,9 +1115,9 @@ print(output_text)
 # Yes it is, toads are a sub-classification of frogs.
 ```
 
-### Chat Completion
+#### Chat Completion
 
-#### Background
+##### Background
 
 With the rise of chat-oriented models under OpenAI's ChatGPT, we have seen a lot of interest in the use of LLMs for chat-oriented tasks. The main difference between chat-oriented models and the other LLMs is that they are trained on a differently formatted dataset. Instead of using a dataset of prompts and responses, they are trained on a dataset of conversations. This allows them to generate responses that are more conversational. And, OpenAI does support fine-tuning LLMs for chat-completion use cases. More information at https://openai.com/blog/gpt-3-5-turbo-fine-tuning-and-api-updates.
 
@@ -1157,7 +1157,7 @@ The airline has since grown to directly serve 32 cities in Australia, from hubs 
 
 ::::
 
-#### Training
+##### Training
 
 ```{include} /_common/dolly_dataset_load.md
 ```
