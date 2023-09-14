@@ -1657,6 +1657,26 @@ class TestSuiteDatasets:
             ),
             (
                 {
+                    "type": "label_selection",
+                    "options": [
+                        {"value": "positive", "text": "Positive"},
+                        {"value": "negative", "text": "Negative"},
+                        {"value": "neutral", "text": "Neutral"},
+                    ],
+                    "visible_options": 3,
+                },
+                {
+                    "type": "label_selection",
+                    "options": [
+                        {"value": "positive", "text": "Positive", "description": None},
+                        {"value": "negative", "text": "Negative", "description": None},
+                        {"value": "neutral", "text": "Neutral", "description": None},
+                    ],
+                    "visible_options": 3,
+                },
+            ),
+            (
+                {
                     "type": "ranking",
                     "options": [
                         {"value": "completion-a", "text": "Completion A", "description": "Completion A is the best"},
