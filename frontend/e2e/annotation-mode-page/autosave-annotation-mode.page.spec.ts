@@ -5,8 +5,7 @@ import {
   mockTwoRecords,
   loginUserAndWaitFor,
   mockDraftRecord,
-  mockDiscardRecord,
-  mockSubmitRecord,
+  mockRecordResponses,
 } from "../common";
 
 const goToAnnotationPageWithTwoRecords = async (page) => {
@@ -134,7 +133,7 @@ test.describe("discarded record", () => {
     page,
   }) => {
     const record = await goToAnnotationPageWithTwoRecords(page);
-    await mockDiscardRecord(page, record.id);
+    await mockRecordResponses(page, record.id, "discarded");
     await page.getByRole("button", { name: "Discard" }).click();
     await page.getByRole("button", { name: "Prev" }).click();
     await expect(page).toHaveScreenshot();
@@ -155,7 +154,7 @@ test.describe("submitted record", () => {
     page,
   }) => {
     const record = await goToAnnotationPageWithTwoRecords(page);
-    await mockSubmitRecord(page, record.id);
+    await mockRecordResponses(page, record.id, "submitted");
     await page.getByRole("button", { name: "Submit" }).click();
     await page.getByRole("button", { name: "Prev" }).click();
     await expect(page).toHaveScreenshot();
@@ -172,7 +171,7 @@ test.describe("submitted record", () => {
     page,
   }) => {
     const record = await goToAnnotationPageWithTwoRecords(page);
-    await mockSubmitRecord(page, record.id);
+    await mockRecordResponses(page, record.id, "submitted");
     await page.getByRole("button", { name: "Submit" }).click();
     await page.getByRole("button", { name: "Prev" }).click();
     await expect(page).toHaveScreenshot();
@@ -188,7 +187,7 @@ test.describe("submitted record", () => {
     page,
   }) => {
     const record = await goToAnnotationPageWithTwoRecords(page);
-    await mockSubmitRecord(page, record.id);
+    await mockRecordResponses(page, record.id, "submitted");
     await page.getByRole("button", { name: "Submit" }).click();
     await page.getByRole("button", { name: "Prev" }).click();
     await expect(page).toHaveScreenshot();
@@ -205,7 +204,7 @@ test.describe("submitted record", () => {
     page,
   }) => {
     const record = await goToAnnotationPageWithTwoRecords(page);
-    await mockSubmitRecord(page, record.id);
+    await mockRecordResponses(page, record.id, "submitted");
     await page.getByRole("button", { name: "Submit" }).click();
     await page.getByRole("button", { name: "Prev" }).click();
     await expect(page).toHaveScreenshot();
@@ -230,7 +229,7 @@ test.describe("submitted record", () => {
     page,
   }) => {
     const record = await goToAnnotationPageWithTwoRecords(page);
-    await mockSubmitRecord(page, record.id);
+    await mockRecordResponses(page, record.id, "submitted");
     await page.getByRole("button", { name: "Submit" }).click();
     await page.getByRole("button", { name: "Prev" }).click();
     await expect(page).toHaveScreenshot();
@@ -254,7 +253,7 @@ test.describe("submitted record", () => {
     page,
   }) => {
     const record = await goToAnnotationPageWithTwoRecords(page);
-    await mockSubmitRecord(page, record.id);
+    await mockRecordResponses(page, record.id, "submitted");
     await page.getByRole("button", { name: "Submit" }).click();
     await page.getByRole("button", { name: "Prev" }).click();
     await expect(page).toHaveScreenshot();

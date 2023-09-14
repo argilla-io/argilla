@@ -2325,7 +2325,6 @@ class TestSuiteDatasets:
             "detail": {
                 "code": "argilla.api.errors::ValidationError",
                 "params": {
-                    "model": "Request",
                     "errors": [
                         {
                             "loc": ["body", "items", 0, "responses"],

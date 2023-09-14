@@ -21,7 +21,7 @@ from pydantic import BaseModel
 
 from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.base import ArgillaTrainerSkeleton
-from argilla.utils.dependency import require_version
+from argilla.utils.dependency import require_dependencies
 
 __all__ = ["ArgillaSpaCyTrainer", "ArgillaSpaCyTransformersTrainer"]
 
@@ -69,7 +69,7 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
             NotImplementedError: If the `record_class` is not supported or if the
                 `init_training_args` method has not been implemented.
         """
-        require_version("spacy")
+        require_dependencies("spacy")
         super().__init__(*args, **kwargs)
         import spacy
 
@@ -114,13 +114,13 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
 
         if self.use_gpu:
             try:
-                require_version("torch")
+                require_dependencies("torch")
                 self.has_torch = True
             except Exception:
                 self.has_torch = False
 
             try:
-                require_version("tensorflow")
+                require_dependencies("tensorflow")
                 self.has_tensorflow = True
             except Exception:
                 self.has_tensorflow = False
@@ -332,8 +332,9 @@ class ArgillaSpaCyTransformersTrainer(_ArgillaSpaCyTrainerBase):
                 weights during the training. Defaults to True.
             **kwargs: The `ArgillaSpaCyTrainerBase` arguments.
         """
-        require_version("spacy>=3.5.3")  # Required to generate the `spacy-transformers` configuration
-        require_version("spacy-transformers")
+        require_dependencies(
+            ["spacy>=3.5.3", "spacy-transformers"]  # Required to generate the `spacy-transformers` configuration
+        )
         self.update_transformer = update_transformer
         super().__init__(**kwargs)
 

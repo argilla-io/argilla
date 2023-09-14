@@ -1,8 +1,12 @@
 <template>
   <form
     class="questions-form"
-    :class="{ '--edited-form': isFormTouched }"
+    :class="{
+      '--focused-form': isFormTouched || (formHasFocus && interactionCount > 1),
+    }"
     @submit.prevent="onSubmit"
+    v-click-outside="onClickOutside"
+    @click="focusOnFirstQuestionFromOutside"
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
@@ -40,11 +44,18 @@
       <QuestionsComponent
         :questions="record.questions"
         :showSuggestion="record.isPending || record.isDraft"
+        :autofocusPosition="autofocusPosition"
+        @on-focus="updateQuestionAutofocus"
       />
     </div>
     <div class="footer-form">
       <div class="footer-form__left-footer">
-        <BaseButton type="button" class="primary text" @click.prevent="onClear">
+        <BaseButton
+          type="button"
+          class="primary text"
+          @click.prevent="onClear"
+          :title="$t('shortcuts.questions_form.clear')"
+        >
           <span v-text="'Clear'" />
         </BaseButton>
       </div>
@@ -54,6 +65,7 @@
           class="primary outline"
           @on-click="onDiscard"
           :disabled="record.isDiscarded"
+          :title="$t('shortcuts.questions_form.discard')"
         >
           <span v-text="'Discard'" />
         </BaseButton>
@@ -61,6 +73,7 @@
           type="submit"
           class="primary"
           :disabled="isSubmitButtonDisabled"
+          :title="$t('shortcuts.questions_form.submit')"
         >
           <span v-text="'Submit'" />
         </BaseButton>
@@ -90,12 +103,21 @@ export default {
   data() {
     return {
       isFormTouched: false,
+      autofocusPosition: 0,
+      interactionCount: 0,
+      userComesFromOutside: false,
     };
   },
   setup() {
     return useQuestionFormViewModel();
   },
   computed: {
+    formHasFocus() {
+      return this.autofocusPosition || this.autofocusPosition == 0;
+    },
+    numberOfQuestions() {
+      return this.record.questions.length;
+    },
     questionAreCompletedCorrectly() {
       return this.record.questionAreCompletedCorrectly();
     },
@@ -125,16 +147,37 @@ export default {
     this.record.initialize();
   },
   mounted() {
-    document.addEventListener("keydown", this.onPressKeyboardShortCut);
+    document.addEventListener("keydown", this.handleGlobalKeys);
   },
   destroyed() {
     this.emitIsQuestionsFormTouched(false);
 
-    document.removeEventListener("keydown", this.onPressKeyboardShortCut);
+    document.removeEventListener("keydown", this.handleGlobalKeys);
   },
   methods: {
-    onPressKeyboardShortCut(event) {
+    focusOnFirstQuestionFromOutside(event) {
+      if (!this.userComesFromOutside) return;
+      if (event.srcElement.id || event.srcElement.getAttribute("for")) return;
+
+      this.userComesFromOutside = false;
+      this.focusOnFirstQuestion(event);
+    },
+    focusOnFirstQuestion(event) {
+      event.preventDefault();
+      this.updateQuestionAutofocus(0);
+    },
+    onClickOutside() {
+      this.autofocusPosition = null;
+      this.userComesFromOutside = true;
+    },
+    handleGlobalKeys(event) {
       const { code, shiftKey, ctrlKey, metaKey } = event;
+
+      if (code == "Tab" && this.userComesFromOutside) {
+        this.focusOnFirstQuestionFromOutside(event);
+
+        return;
+      }
 
       switch (code) {
         case "KeyS": {
@@ -150,7 +193,10 @@ export default {
           break;
         }
         case "Space": {
-          if (shiftKey) this.onClear();
+          if (shiftKey) {
+            event.preventDefault(); // TODO: Review this line
+            this.onClear();
+          }
           break;
         }
         case "Backspace": {
@@ -161,12 +207,14 @@ export default {
       }
     },
     async onDiscard() {
+      if (this.record.isDiscarded) return;
+
       await this.discard(this.record);
 
       this.$emit("on-discard-responses");
     },
     async onSubmit() {
-      if (!this.questionAreCompletedCorrectly) return;
+      if (this.isSubmitButtonDisabled) return;
 
       await this.submit(this.record);
 
@@ -183,6 +231,13 @@ export default {
 
       this.$root.$emit("are-responses-untouched", !isFormTouched);
     },
+    updateQuestionAutofocus(index) {
+      this.interactionCount++;
+      this.autofocusPosition = Math.min(
+        this.numberOfQuestions - 1,
+        Math.max(0, index)
+      );
+    },
   },
 };
 </script>
@@ -196,7 +251,8 @@ export default {
   min-width: 0;
   justify-content: space-between;
   border-radius: $border-radius-m;
-  box-shadow: $shadow;
+  border: 1px solid transparent;
+  background: palette(white);
   &__header {
     align-items: baseline;
   }
@@ -212,7 +268,8 @@ export default {
       color: $black-37;
       outline: 0;
       text-decoration: none;
-      &:hover {
+      &:hover,
+      &:focus {
         text-decoration: underline;
       }
     }
@@ -226,7 +283,20 @@ export default {
     overflow: auto;
     scroll-behavior: smooth;
   }
-  &.--edited-form {
+
+  &.--pending {
+    border-color: transparent;
+    &:not(.--focused-form) {
+      box-shadow: $shadow;
+    }
+  }
+  &.--discarded {
+    border-color: #c3c3c3;
+  }
+  &.--submitted {
+    border-color: $primary-color;
+  }
+  &.--focused-form {
     border-color: palette(brown);
   }
 }
@@ -283,6 +353,7 @@ export default {
     &:before {
       position: absolute;
       @extend %triangle-right;
+      left: 100%;
     }
   }
 }

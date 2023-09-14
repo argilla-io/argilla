@@ -18,7 +18,7 @@ import importlib.util
 import operator
 import re
 import sys
-from typing import Callable, Dict, List, Optional, TypeVar
+from typing import Callable, Dict, List, Optional, TypeVar, Union
 
 from packaging import version
 
@@ -43,7 +43,7 @@ def _compare_versions(
     want_version: Optional[str],
     requirement: str,
     package: str,
-    func_name: Optional[str],
+    fn_name: Optional[str],
 ):
     if got_version is None or want_version is None:
         raise ValueError(
@@ -52,36 +52,44 @@ def _compare_versions(
         )
     if not ops[op](version.parse(got_version), version.parse(want_version)):
         raise ImportError(
-            f"{requirement} must be installed{f' to use `{func_name}`' if func_name else ''}, but found {package}=={got_version}."
+            f"{requirement} must be installed{f' to use `{fn_name}`' if fn_name else ''}, but found {package}=={got_version}."
             f" You can install a supported version of '{package}' with this command: `pip install -U {requirement}`"
         )
 
 
-def require_version(requirement: str, func_name: Optional[str] = None) -> None:
+def require_dependencies(requirements: Union[str, List[str]], fn_name: Optional[str] = None) -> None:
     """
     Perform a runtime check of the dependency versions, using the exact same syntax used by pip.
     The installed module version comes from the *site-packages* dir via *importlib.metadata*.
 
     Args:
-        requirement (`str`): pip style definition, e.g.,  "tokenizers==0.9.4", "tqdm>=4.27", "numpy"
-        func_name (`str`, *optional*): what suggestion to print in case of requirements not being met
+        requirements: pip style definition of dependencies, e.g. "tokenizers==0.9.4", "tqdm>=4.27", "numpy". Can either be a single dependency or a list of dependencies.
+        fn_name: what suggestion to print in case of requirements not being met
 
     Example:
     ```python
-    require_version("pandas>1.1.2")
-    require_version("datasets>1.17.0", "from_datasets")
+    require_dependencies("pandas>1.1.2")
+    require_dependencies("datasets>1.17.0", "from_datasets")
+    require_dependencies(["pandas>1.1.2", "datasets>1.17.0"])
     ```
     """
 
+    if isinstance(requirements, list):
+        if len(requirements) == 0:
+            raise ValueError("requirements cannot be an empty list.")
+        for requirement in requirements:
+            require_dependencies(requirement, fn_name=fn_name)
+        return
+
     # non-versioned check
-    if re.match(r"^[\w_\-\d]+$", requirement):
-        package, op, want_version = requirement, None, None
+    if re.match(r"^[\w_\-\d]+$", requirements):
+        package, op, want_version = requirements, None, None
     else:
-        match = re.findall(r"^([^!=<>\s]+)([\s!=<>]{1,2}.+)", requirement)
+        match = re.findall(r"^([^!=<>\s]+)([\s!=<>]{1,2}.+)", requirements)
         if not match:
             raise ValueError(
                 "requirement needs to be in the pip package format, .e.g., package_a==1.23, or package_b>=1.23, but"
-                f" got {requirement!r}."
+                f" got {requirements!r}."
             )
         package, want_full = match[0]
         want_range = want_full.split(",")  # there could be multiple requirements
@@ -91,18 +99,18 @@ def require_version(requirement: str, func_name: Optional[str] = None) -> None:
             if not match:
                 raise ValueError(
                     "requirement needs to be in the pip package format, .e.g., package_a==1.23, or package_b>=1.23,"
-                    f" but got {requirement!r}."
+                    f" but got {requirements!r}."
                 )
             op, want_version = match[0]
             wanted[op] = want_version
             if op not in ops:
-                raise ValueError(f"{requirement}: need one of {list(ops.keys())}, but got {op!r}.")
+                raise ValueError(f"{requirements}: need one of {list(ops.keys())}, but got {op!r}.")
 
     # special case
     if package == "python":
         got_version = ".".join([str(x) for x in sys.version_info[:3]])
         for op, want_version in wanted.items():
-            _compare_versions(op, got_version, want_version, requirement, package, func_name=func_name)
+            _compare_versions(op, got_version, want_version, requirements, package, fn_name=fn_name)
         return
 
     # check if any version is installed
@@ -110,31 +118,31 @@ def require_version(requirement: str, func_name: Optional[str] = None) -> None:
         got_version = importlib.metadata.version(package)
     except importlib.metadata.PackageNotFoundError:
         raise ModuleNotFoundError(
-            f"'{package}' must be installed{f' to use `{func_name}`' if func_name else ''}! You can"
-            f" install '{package}' with this command: `pip install {requirement}`"
+            f"'{package}' must be installed{f' to use `{fn_name}`' if fn_name else ''}! You can"
+            f" install '{package}' with this command: `pip install {requirements}`"
         )
 
     # check that the right version is installed if version number or a range was provided
     if want_version is not None:
         for op, want_version in wanted.items():
-            _compare_versions(op, got_version, want_version, requirement, package, func_name=func_name)
+            _compare_versions(op, got_version, want_version, requirements, package, fn_name=fn_name)
 
 
 _P = ParamSpec("_P")
 _R = TypeVar("_R")
 
 
-def requires_version(requirement: str) -> Callable[[Callable[_P, _R]], Callable[_P, _R]]:
-    """Decorator variant of `require_version`.
+def requires_dependencies(requirements: Union[str, List[str]]) -> Callable[[Callable[_P, _R]], Callable[_P, _R]]:
+    """Decorator variant of `require_dependencies`.
     Perform a runtime check of the dependency versions, using the exact same syntax used by pip.
     The installed module version comes from the *site-packages* dir via *importlib.metadata*.
 
     Args:
-        requirement (`str`): pip style definition, e.g.,  "tokenizers==0.9.4", "tqdm>=4.27", "numpy"
+        requirements: pip style definition, e.g.,  "tokenizers==0.9.4", "tqdm>=4.27", "numpy"
 
     Example:
     ```python
-    @requires_version("datasets>1.17.0")
+    @requires_dependencies("datasets>1.17.0")
     def from_datasets(self, ...):
         ...
     ```
@@ -143,7 +151,7 @@ def requires_version(requirement: str) -> Callable[[Callable[_P, _R]], Callable[
     def decorator(func: Callable[_P, _R]) -> Callable[_P, _R]:
         @functools.wraps(func)
         def wrapper(*args: _P.args, **kwargs: _P.kwargs) -> _R:
-            require_version(requirement, func.__name__)
+            require_dependencies(requirements, func.__name__)
             return func(*args, **kwargs)
 
         return wrapper
@@ -202,4 +210,4 @@ def is_package_with_extras_installed(name: str, extras: List[str]) -> bool:
     return True
 
 
-__all__ = ["requires_version", "require_version", "is_package_with_extras_installed"]
+__all__ = ["requires_dependencies", "require_dependencies", "is_package_with_extras_installed"]

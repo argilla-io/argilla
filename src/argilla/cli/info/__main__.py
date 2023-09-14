@@ -31,7 +31,8 @@ def info() -> None:
 
     init_callback()
 
-    server_info = Status(active_client().client).get_status()
+    client = active_client().client
+    server_info = Status(client).get_status()
 
     elasticsearch_version = (
         f"{server_info.elasticsearch.version.number} ({server_info.elasticsearch.version.distribution})"
@@ -41,6 +42,7 @@ def info() -> None:
 
     panel = get_argilla_themed_panel(
         Markdown(
+            f"Connected to {client.base_url}\n"
             f"- **Client version:** {version}\n"
             f"- **Server version:** {server_info.version}\n"
             f"- **ElasticSearch version:** {elasticsearch_version}\n"

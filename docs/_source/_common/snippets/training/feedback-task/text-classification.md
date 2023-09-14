@@ -9,7 +9,7 @@ links:
 ---
 
 ```python
-import argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
+from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
 
 dataset = FeedbackDataset.from_argilla(
     name="<my_dataset_name>",

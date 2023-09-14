@@ -60,7 +60,6 @@ class ValidationError(ServerError):
     HTTP_STATUS = status.HTTP_422_UNPROCESSABLE_ENTITY
 
     def __init__(self, error: pydantic.ValidationError):
-        self.model = error.model.__name__
         self.errors = error.errors()
 
 

@@ -6,6 +6,11 @@
         ref="prevButton"
         @click="onClickPrev"
         :disabled="isFirstPage"
+        :title="
+          $platform.isMac
+            ? $t('shortcuts.pagination.go_to_previous_record_mac')
+            : $t('shortcuts.pagination.go_to_previous_record')
+        "
       >
         <svgicon name="chevron-left" width="8" height="8" />
         {{ prevButtonMessage }}
@@ -15,7 +20,11 @@
         class="pagination__button"
         ref="nextButton"
         @click="onClickNext"
-        :disabled="false"
+        :title="
+          $platform.isMac
+            ? $t('shortcuts.pagination.go_to_next_record_mac')
+            : $t('shortcuts.pagination.go_to_next_record')
+        "
       >
         {{ nextButtonMessage }}
         <svgicon name="chevron-right" width="8" height="8" />
