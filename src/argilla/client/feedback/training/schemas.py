@@ -1271,7 +1271,6 @@ class TrainingTaskForQuestionAnswering(BaseModel, TrainingData):
                 f"\n\t answer={self.__multi_label__}"
             )
 
-
     @requires_dependencies("transformers")
     def _prepare_for_training_with_transformers(
         self, data: List[dict], train_size: float, seed: int, framework=None
