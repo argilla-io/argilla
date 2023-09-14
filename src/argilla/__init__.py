@@ -66,6 +66,7 @@ if _TYPE_CHECKING:
         TokenClassificationRecord,
     )
     from argilla.client.users import User
+    from argilla.client.utils import server_version
     from argilla.client.workspaces import Workspace
     from argilla.datasets import (
         TextClassificationSettings,
@@ -138,6 +139,7 @@ _import_structure = {
         "read_pandas",
     ],
     "client.users": ["User"],
+    "client.utils": ["server_version"],
     "client.workspaces": ["Workspace"],
     "monitoring.model_monitor": ["monitor"],
     "listeners.listener": [
