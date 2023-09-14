@@ -6,7 +6,9 @@ const replaceHtmlChars = (text: string): string => {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/"/g, "&quot;")
+    .replaceAll("/*", "&#x2F;&#42;")
+    .replaceAll("*/", "&#42;&#x2F;");
 };
 
 export const useTextFieldViewModel = (props: {
@@ -23,14 +25,21 @@ export const useTextFieldViewModel = (props: {
     return highlightText(sanitizeSentence, sanitizeStringToHighlight);
   });
 
-  const highlightText = (sentence: string, stringToMatch: string): string => {
+  const highlightText = (sentence: string, sentenceToMatch: string): string => {
     const htmlHighlightText = (text: string) => {
       return `<span class="highlight-text">${text}</span>`;
     };
 
     const createFindWordsRegex = () => {
-      const betweenSpecialSymbols = `(?!\\w)${stringToMatch}(?!\\w)`;
-      const exactMatchWord = `\\b${stringToMatch}\\b`;
+      const betweenSpecialSymbols = sentenceToMatch
+        .split(" ")
+        .map((word) => `(?!\\w)${word}(?!\\w)`)
+        .join("|");
+
+      const exactMatchWord = sentenceToMatch
+        .split(" ")
+        .map((word) => `\\b${word}\\b`)
+        .join("|");
 
       return new RegExp(`${betweenSpecialSymbols}|${exactMatchWord}`, "gmi");
     };

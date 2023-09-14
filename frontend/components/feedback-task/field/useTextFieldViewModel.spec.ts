@@ -61,7 +61,7 @@ describe("raw text", () => {
     const { text } = useTextFieldViewModel(props);
     expect(text.value).toBe(
       // eslint-disable-next-line prettier/prettier
-      "<span class=\"highlight-text\">&lt;p&gt;The HTML</span> &lt;code&gt;button&lt;/code&gt; tag defines a clickable button.&lt;/p&gt;"
+      "<span class=\"highlight-text\">&lt;p&gt;The</span> <span class=\"highlight-text\">HTML</span> &lt;code&gt;button&lt;/code&gt; tag defines a clickable button.&lt;/p&gt;"
     );
   });
 
