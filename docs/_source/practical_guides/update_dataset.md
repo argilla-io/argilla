@@ -147,3 +147,34 @@ dataset.records[0].suggestions[0].delete()
 
 ```{include} /_common/other_datasets.md
 ```
+### Add records
+Records can be added to your dataset by logging them using the `rg.log()` function, just like you did when pushing records for the first time to Argilla (as explained [here](/practical_guides/create_dataset.md#id4)). If the records don't exist already in the dataset, these will be added to it.
+### Update existing records
+It is possible to update records from your Argilla datasets using our Python API. This approach works the same way as an upsert in a normal database, based on the record `id`. You can update any arbitrary parameters and they will be over-written if you use the `id` of the original record.
+
+```python
+import argilla as rg
+
+# read all records in the dataset or define a specific search via the `query` parameter
+record = rg.load("my_first_dataset")
+
+# modify first record metadata (if no previous metadata dict you might need to create it)
+record[0].metadata["my_metadata"] = "im a new value"
+
+# log record to update it, this will keep everything but add my_metadata field and value
+rg.log(name="my_first_dataset", records=record[0])
+```
+
+### Delete existing records
+You can delete records by passing their `id` into the `rg.delete_records()` function or using a query that matches the records. Learn more [here](/reference/python/python_client.rst#argilla.delete_records)
+
+```python
+## Delete by id
+import argilla as rg
+rg.delete_records(name="example-dataset", ids=[1,3,5])
+```
+```python
+## Discard records by query
+import argilla as rg
+rg.delete_records(name="example-dataset", query="metadata.code=33", discard_only=True)
+```
