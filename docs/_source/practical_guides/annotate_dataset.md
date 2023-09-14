@@ -88,18 +88,16 @@ The Argilla UI provides a simple and intuitive interface for annotating records.
 
 For this task, you will only need to select the label(s) that describe the record best. Predictions are shown as percentages in the label tags and marked with a darker tone.
 
-If the dataset is set up as a **single label** text classification, you can annotate the record by clicking on the desired label and the record will be validated automatically. If the record contains predictions, you may _validate_ the record instead and the label with the highest score will be selected automatically.
+If the dataset is set up as a **single label** text classification, you can annotate the record by clicking on the desired label and the record will be validated automatically. If the record contains predictions, you may _validate_ the record instead and the label with the highest score will be selected automatically. To remove the validated label, just click on it again.
 
 ![Single label text classification record](../../_static/reference/webapp/features-single_textclass_record.png)
 
 
 To annotate a record in a **multi-label** text classification task, click on one or multiple labels. Once a label is selected, its status will show as *Pending*. Click *Reset* if you want to discard your changes and recover the previous state of the record or *Validate* to save your annotation into the dataset. The status will then change to *Validated* in the upper left corner of the record card.
 
-If the **multi-label** record contains predictions and you would like to simply validate the predicted labels, click on *Validate* and all labels with a percentage above 50% will be automatically selected.
+If the **multi-label** record contains predictions and you would like to simply validate the predicted labels, click on *Validate* and all labels with a percentage above 50% will be automatically selected. You can also remove all annotations using the *Clear* button or discard a record from the dataset by clicking *Discard*.
 
 ![Multi-label text classification record](../../_static/reference/webapp/features-multi_textclass_record.png)
-
-You can also remove all annotations using the *Clear* button or discard a record from the dataset by clicking *Discard*.
 
 ```{note}
 When the dataset contains a large list of labels (10 +), we encourage viewing the record cards one by one (select 1 record per page from the footer) and using the arrow keys to move quickly between records.
@@ -108,32 +106,17 @@ When the dataset contains a large list of labels (10 +), we encourage viewing th
 #### Token Classification
 ![Token classification record](../../_static/reference/webapp/features-tokclass_record.png)
 
-For token classification datasets, you can highlight words (tokens) in the text and annotate them with a label.
-Under the hood, the highlighting takes advantage of the `tokens` information in the [Token Classification data model](../python/python_client.rst#Argilla.client.models.TokenClassificationRecord).
+For token classification datasets, you can highlight words (tokens) in the text and annotate them with a label. Under the hood, the highlighting takes advantage of the `tokens` information in the [Token Classification data model](../python/python_client.rst#Argilla.client.models.TokenClassificationRecord). For this task, predictions are shown as underlines. You can validate the predictions (or the absence of them) by pressing the _Validate_ button.
+
 To remove specific labels, hover over the highlights and press the _X_ button or double-click directly on the colored area. You can also click the _Clear_ button to remove all annotations in the record.
 
-After modifying a record, either by adding or removing annotations, its status will change to _Pending_. When you have finished your annotation of the whole record, click *Validate* to save the changes. The status will change to *Validated* in the upper left corner of the record card. Alternatively, you can use the *Reset* button to discard your changes and recover the previous state of the record.
-
-If you want to discard the record from the dataset, click *Discard*.
-
-For this task, predictions are shown as underlines.
-You can also validate the predictions (or the absence of them) by pressing the _Validate_ button.
-
-If you make any changes or clear the predictions/annotations, the status will change to _Pending_. You can then click _Validate_ to save the changes or _Reset_ to revert them and restore the previous status.
+After modifying a record, either by adding or removing annotations, its status will change to _Pending_. When you have finished your annotation of the whole record, click *Validate* to save the changes. The status will change to *Validated* in the upper left corner of the record card. Alternatively, you can use the *Reset* button to discard your changes and recover the previous state of the record. If you want to discard the record from the dataset, click *Discard*.
 
 #### Text2Text
 ![Text2Text record](../../_static/reference/webapp/features-text2text_record.png)
-For Text2Text datasets, there is a text box available for drafting or editing annotations. If a record has one or more predictions, the prediction with the highest score will be pre-filled. You can empty the text field by clicking the *Clear* button.
+For Text2Text datasets, there is a text box available for drafting or editing annotations. If a record has one or more predictions, the prediction with the highest score will be pre-filled. You can validate the prediction by clicking on the *Validate* button or edit the text making the changes directly in the text box. If you make any changes, the status will change to *Pending* and you will need to press shift+Enter or click the *Validate* button to save the changes. After validating, predictions can still be accessed in the prediction panel on the right side of the record card.
 
-Remember to validate to save your changes after editing or drafting your annotation. Alternatively, you can discard your changes and revert to the previous state of the record using the *Reset* button.
-
-After validating your annotation, predictions can still be accessed in the prediction panel on the right side of the record card.
-
-If you want to discard the record from the dataset, click *Discard*.
-
-The prediction and its score will appear in a text box below the main text. You can validate the prediction by clicking on the *Validate* button or edit the text making the changes directly in the text box.
-
-If you make any changes, the status will change to *Pending* and you will need to press shift+Enter or click the *Validate* button to save the changes. You can also click the *Clear* button to start writing from scratch or *Reset* to undo your changes and restore the previous status.
+Alternatively, you can discard your changes and revert to the previous state of the record using the *Reset* button or empty the text field by clicking the *Clear* button. If you want to discard the record from the dataset, click *Discard*.
 
 ### Search and filter records
 #### Filters
