@@ -1271,7 +1271,7 @@ class TrainingTaskForQuestionAnswering(BaseModel, TrainingData):
                 f"\n\t answer={self.__multi_label__}"
             )
 
-    @requires_version("transformers")
+    @requires_dependency("transformers")
     def _prepare_for_training_with_transformers(
         self, data: List[dict], train_size: float, seed: int, framework=None
     ) -> Union["datasets.Dataset", "datasets.DatasetDict"]:
@@ -1549,7 +1549,7 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
     def unify_responses(self, responses: List[FeedbackRecord]):
         self.label.strategy.unify_responses(responses=responses, field=self.label.question)
 
-    @requires_version("scikit-learn")
+    @requires_dependencies("scikit-learn")
     def _train_test_split(
         self, data: List[dict], train_size: float, seed: int, stratify=None
     ) -> Tuple[List[dict], List[dict]]:
@@ -1557,7 +1557,7 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
 
         return train_test_split(data, train_size=train_size, shuffle=True, random_state=seed, stratify=stratify)
 
-    @requires_version("sentence-transformers")
+    @requires_dependencies("sentence-transformers")
     def _prepare_for_training_with_sentence_transformers(
         self, data: List[dict], train_size: float, seed: int
     ) -> Union["InputExample", Tuple["InputExample", "InputExample"]]:

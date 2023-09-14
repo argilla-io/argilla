@@ -37,7 +37,7 @@ An Argilla user composed of the following attributes:
 
 ### Python client
 
-The `User` class in the Python client gives developers with `owner` role the ability to create and manage users in Argilla. Check the [User - Python Reference](../reference/python/python_users.rst) to see the attributes, arguments, and methods of the `User` class.
+The `User` class in the Python client gives developers with `owner` role the ability to create and manage users in Argilla. Check the [User - Python Reference](/reference/python/python_users.rst) to see the attributes, arguments, and methods of the `User` class.
 
 ## How to guide
 

@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
 from argilla.client.feedback.training.schemas import TrainingTaskForSentenceSimilarity
 from argilla.training.utils import filter_allowed_args, get_default_args
-from argilla.utils.dependency import require_version
+from argilla.utils.dependency import require_dependencies
 
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
@@ -39,7 +39,7 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
         cross_encoder: bool = False,
     ) -> None:
         # TODO: Update with https://github.com/argilla-io/argilla/pull/3555
-        require_version("sentence-transformers")
+        require_dependencies("sentence-transformers")
 
         super().__init__(
             dataset=dataset, task=task, prepared_data=prepared_data, model=model, train_size=train_size, seed=seed
