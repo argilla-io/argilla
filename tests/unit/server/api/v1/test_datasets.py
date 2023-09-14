@@ -1640,26 +1640,6 @@ class TestSuiteDatasets:
                 {
                     "type": "label_selection",
                     "options": [
-                        {"value": "positive", "text": "Positive", "description": "Texts with positive sentiment"},
-                        {"value": "negative", "text": "Negative", "description": "Texts with negative sentiment"},
-                        {"value": "neutral", "text": "Neutral", "description": "Texts with neutral sentiment"},
-                    ],
-                    "visible_options": 10,
-                },
-                {
-                    "type": "label_selection",
-                    "options": [
-                        {"value": "positive", "text": "Positive", "description": "Texts with positive sentiment"},
-                        {"value": "negative", "text": "Negative", "description": "Texts with negative sentiment"},
-                        {"value": "neutral", "text": "Neutral", "description": "Texts with neutral sentiment"},
-                    ],
-                    "visible_options": 10,
-                },
-            ),
-            (
-                {
-                    "type": "label_selection",
-                    "options": [
                         {"value": "positive", "text": "Positive"},
                         {"value": "negative", "text": "Negative"},
                         {"value": "neutral", "text": "Neutral"},
@@ -2049,6 +2029,24 @@ class TestSuiteDatasets:
                     {"value": "b", "text": "b", "description": "b"},
                     {"value": "b", "text": "b", "description": "b"},
                 ],
+            },
+            {
+                "type": "label_selection",
+                "options": [
+                    {"value": "a", "text": "a", "description": "a"},
+                    {"value": "b", "text": "b", "description": "b"},
+                    {"value": "b", "text": "b", "description": "b"},
+                ],
+                "visible_options": 2,
+            },
+            {
+                "type": "label_selection",
+                "options": [
+                    {"value": "a", "text": "a", "description": "a"},
+                    {"value": "b", "text": "b", "description": "b"},
+                    {"value": "b", "text": "b", "description": "b"},
+                ],
+                "visible_options": 5,
             },
             {
                 "type": "ranking",
