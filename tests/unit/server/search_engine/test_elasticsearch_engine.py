@@ -11,9 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import AsyncGenerator, List, TYPE_CHECKING, Union
-
-from sqlalchemy.orm import Session
+from typing import TYPE_CHECKING, AsyncGenerator, List, Union
 
 from argilla.server.enums import ResponseStatusFilter
 from argilla.server.models import Record, User, VectorSettings
@@ -22,6 +20,8 @@ from argilla.server.search_engine import (
     UserResponseStatusFilter,
 )
 from argilla.server.search_engine.commons import index_name_for_dataset
+from sqlalchemy.orm import Session
+
 from tests.factories import (
     LabelSelectionQuestionFactory,
     MultiLabelSelectionQuestionFactory,
@@ -36,10 +36,10 @@ import random
 
 import pytest
 import pytest_asyncio
-from opensearchpy import OpenSearch
-
 from argilla.server.models import Dataset
 from argilla.server.search_engine.elasticsearch import ElasticSearchEngine
+from opensearchpy import OpenSearch
+
 from tests.factories import (
     DatasetFactory,
     RatingQuestionFactory,
@@ -219,7 +219,6 @@ async def test_banking_sentiment_dataset_with_vectors(
     return test_banking_sentiment_dataset
 
 
-
 @pytest_asyncio.fixture()
 async def elasticsearch_engine(elasticsearch_config: dict) -> AsyncGenerator[ElasticSearchEngine, None]:
     engine = ElasticSearchEngine(config=elasticsearch_config, es_number_of_replicas=0, es_number_of_shards=1)
@@ -228,7 +227,7 @@ async def elasticsearch_engine(elasticsearch_config: dict) -> AsyncGenerator[Ela
     await engine.client.close()
 
 
-async def _refresh_dataset(dataset:Dataset):
+async def _refresh_dataset(dataset: Dataset):
     await dataset.awaitable_attrs.fields
     await dataset.awaitable_attrs.questions
     await dataset.awaitable_attrs.vectors_settings
@@ -500,7 +499,9 @@ class TestSuiteElasticSearchEngine:
         offset: int,
         limit: int,
     ):
-        results = await elasticsearch_engine.search(dataset_for_pagination, query="documents", offset=offset, limit=limit)
+        results = await elasticsearch_engine.search(
+            dataset_for_pagination, query="documents", offset=offset, limit=limit
+        )
 
         assert len(results.items) == min(len(dataset_for_pagination.records) - offset, limit)
         assert results.total == 100
@@ -639,7 +640,9 @@ class TestSuiteElasticSearchEngine:
         results = opensearch.get(index=index_name, id=record.id)
         assert results["_source"]["responses"] == {}
 
-    async def test_create_dataset_index_with_vectors(self, elasticsearch_engine: ElasticSearchEngine, opensearch: OpenSearch):
+    async def test_create_dataset_index_with_vectors(
+        self, elasticsearch_engine: ElasticSearchEngine, opensearch: OpenSearch
+    ):
         vectors_settings = await VectorSettingsFactory.create_batch(5)
         dataset = await DatasetFactory.create(vectors_settings=vectors_settings)
 

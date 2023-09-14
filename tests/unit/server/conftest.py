@@ -40,6 +40,7 @@ from tests.factories import AnnotatorFactory, OwnerFactory, UserFactory
 def elasticsearch_config():
     return {"hosts": settings.elasticsearch}
 
+
 @pytest.fixture(scope="session", autouse=True)
 def opensearch(elasticsearch_config: dict) -> Generator[OpenSearch, None, None]:
     client = OpenSearch(**elasticsearch_config)

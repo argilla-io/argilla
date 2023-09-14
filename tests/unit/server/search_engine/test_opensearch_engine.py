@@ -11,10 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import AsyncGenerator, List, TYPE_CHECKING, Union
-
-from opensearchpy import RequestError
-from sqlalchemy.orm import Session
+from typing import TYPE_CHECKING, AsyncGenerator, List, Union
 
 from argilla.server.enums import ResponseStatusFilter
 from argilla.server.models import Record, User, VectorSettings
@@ -23,6 +20,9 @@ from argilla.server.search_engine import (
     UserResponseStatusFilter,
 )
 from argilla.server.search_engine.commons import index_name_for_dataset
+from opensearchpy import RequestError
+from sqlalchemy.orm import Session
+
 from tests.factories import (
     LabelSelectionQuestionFactory,
     MultiLabelSelectionQuestionFactory,
@@ -37,10 +37,10 @@ import random
 
 import pytest
 import pytest_asyncio
-from opensearchpy import OpenSearch
-
 from argilla.server.models import Dataset
 from argilla.server.search_engine.opensearch import OpenSearchEngine
+from opensearchpy import OpenSearch
+
 from tests.factories import (
     DatasetFactory,
     RatingQuestionFactory,
