@@ -42,7 +42,7 @@ These are the section headers that we use:
 - Added `workspace_id` param to `GET /api/v1/me/datasets` endpoint ([#3727](https://github.com/argilla-io/argilla/pull/3727)).
 - Added `workspace_id` arg to `list_datasets` in the Python SDK ([#3727](https://github.com/argilla-io/argilla/pull/3727)).
 - Added `argilla` script that allows to execute Argilla CLI using the `argilla` command ([#3730](https://github.com/argilla-io/argilla/pull/3730)).
-- Added `server_version` function to check the Argilla server version (also accessible via `rg.server_version`) ([#3772](https://github.com/argilla-io/argilla/issues/3772)).
+- Added `server_info` function to check the Argilla server information (also accessible via `rg.server_info`) ([#3772](https://github.com/argilla-io/argilla/issues/3772)).
 
 ### Changed
 
