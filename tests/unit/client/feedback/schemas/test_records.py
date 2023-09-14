@@ -35,7 +35,15 @@ from pydantic import ValidationError
                 {
                     "values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}},
                     "status": "submitted",
-                }
+                },
+                {
+                    "values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}},
+                    "status": "draft",
+                },
+                {
+                    "values": {},
+                    "status": "discarded",
+                },
             ],
             "suggestions": [
                 {

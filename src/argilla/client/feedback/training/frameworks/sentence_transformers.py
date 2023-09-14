@@ -38,7 +38,6 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
         train_size: Optional[float] = 1,
         cross_encoder: bool = False,
     ) -> None:
-        # TODO: Update with https://github.com/argilla-io/argilla/pull/3555
         require_dependencies("sentence-transformers")
 
         super().__init__(

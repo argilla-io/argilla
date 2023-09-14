@@ -60,8 +60,8 @@ class MetricSummaryParams:
 
 
 def configure_router(router: APIRouter, cfg: TaskConfig):
-    base_metrics_endpoint = f"/{cfg.task}/{{name}}/metrics"
-    new_base_metrics_endpoint = f"/{{name}}/{cfg.task}/metrics"
+    base_metrics_endpoint = f"/{cfg.task.value}/{{name}}/metrics"
+    new_base_metrics_endpoint = f"/{{name}}/{cfg.task.value}/metrics"
 
     @deprecate_endpoint(
         path=base_metrics_endpoint,
