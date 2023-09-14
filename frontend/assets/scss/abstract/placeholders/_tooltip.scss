@@ -135,7 +135,7 @@ $tooltip-border-radius: $border-radius-s;
 }
 
 %triangle-right {
-  left: -10px;
+  right: calc(100% + $tooltip-triangle-size/2);
   top: 50%;
   transform: translateY(-50%);
   @include triangle(
