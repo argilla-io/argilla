@@ -46,7 +46,6 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
     def __post_init__(self):
         self.client = AsyncElasticsearch(**self.config)
 
-
     def _configure_index_settings(self):
         return {
             "number_of_shards": self.es_number_of_shards,
