@@ -14,6 +14,7 @@
 
 import functools
 import warnings
+from dataclasses import dataclass
 from typing import Callable, List, TypeVar
 
 try:
@@ -64,20 +65,28 @@ def allowed_for_roles(roles: List[UserRole]) -> Callable[[Callable[_P, _R]], Cal
     return decorator
 
 
-def server_version() -> str:
-    """Returns the version of the Argilla server that is currently active.
+@dataclass
+class ServerInfo:
+    url: str
+    version: str
+    elasticsearch_version: str
+
+
+def server_info() -> ServerInfo:
+    """Returns the information about the Argilla server that is currently active.
 
     Note that the connections to Argilla are established via `rg.init`, `argilla login` or
     setting the `ARGILLA_API_URL` and `ARGILLA_API_KEY` env variables.
 
     Returns:
-        The version of the Argilla server that is currently active.
+        A `dataclass` with the following fields: `url`, `version` and `elasticsearch_version`.
     """
     # Filtering the warnings to avoid some redundant and unrelated warnings
     warnings.filterwarnings("ignore", category=UserWarning)
 
     try:
         client = active_client().client
+        info = Status(client).get_status()
     except Exception as e:
         raise RuntimeError(
             "You must be logged in to Argilla to use this function."
@@ -85,4 +94,12 @@ def server_version() -> str:
             " If you already did it, please check that the Argilla server is up and running."
         ) from e
 
-    return Status(client).get_status().version
+    return ServerInfo(
+        url=client.base_url,
+        version=info.version,
+        elasticsearch_version=(
+            f"{info.elasticsearch.version.number} ({info.elasticsearch.version.distribution})"
+            if info.elasticsearch.version.distribution
+            else info.elasticsearch.version.number
+        ),
+    )
