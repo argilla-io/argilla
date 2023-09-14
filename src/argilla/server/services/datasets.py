@@ -14,7 +14,8 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Type, TypeVar, cast
+from enum import Enum
+from typing import Any, Dict, List, Optional, Type, TypeVar, Union, cast
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -81,7 +82,7 @@ class DatasetsService:
         name: str,
         workspace: str,
         as_dataset_class: Type[ServiceDataset] = ServiceBaseDataset,
-        task: Optional[str] = None,
+        task: Optional[Union[str, Enum]] = None,
     ) -> ServiceDataset:
         found_dataset = self.__dao__.find_by_name(name=name, workspace=workspace, as_dataset_class=as_dataset_class)
 

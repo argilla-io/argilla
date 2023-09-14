@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
+from typing import TYPE_CHECKING, List
 from uuid import UUID
 
 import pytest
@@ -22,11 +23,37 @@ from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.workspaces import Workspace
 
-from tests.factories import DatasetFactory, RecordFactory, TextFieldFactory, TextQuestionFactory, UserFactory
+from tests.factories import (
+    DatasetFactory,
+    RecordFactory,
+    ResponseFactory,
+    TextFieldFactory,
+    TextQuestionFactory,
+    UserFactory,
+)
+
+if TYPE_CHECKING:
+    from argilla.client.sdk.users.models import UserModel as User
 
 
 @pytest.mark.asyncio
 class TestRemoteFeedbackDataset:
+    @pytest.mark.parametrize("statuses", [["draft", "discarded", "submitted"]])
+    async def test_from_argilla_with_responses(self, owner: "User", statuses: List[str]) -> None:
+        dataset = await DatasetFactory.create()
+        await TextFieldFactory.create(dataset=dataset, required=True)
+        text_question = await TextQuestionFactory.create(dataset=dataset, required=True)
+        for status, record in zip(statuses, await RecordFactory.create_batch(size=len(statuses), dataset=dataset)):
+            await ResponseFactory.create(record=record, values={text_question.name: {"value": ""}}, status=status)
+
+        api.init(api_key=owner.api_key)
+        remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
+        assert remote_dataset.id == dataset.id
+        assert all(
+            status in [response.status for record in remote_dataset.records for response in record.responses]
+            for status in statuses
+        )
+
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_delete_records(self, role: UserRole) -> None:
         dataset = await DatasetFactory.create()

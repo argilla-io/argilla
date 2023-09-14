@@ -12,5 +12,24 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-# coding: utf-8
-version = "1.17.0-dev"
+from typing import TYPE_CHECKING
+
+import pytest
+from argilla._version import version
+from argilla.client import api
+from argilla.client.utils import ServerInfo, server_info
+
+if TYPE_CHECKING:
+    from argilla.server.models import User as ServerUser
+
+
+def test_server_info_no_auth() -> None:
+    with pytest.raises(RuntimeError, match="You must be logged in to Argilla to use this function."):
+        server_info()
+
+
+def test_server_info(owner: "ServerUser") -> None:
+    api.init(api_key=owner.api_key)
+    info = server_info()
+    assert isinstance(info, ServerInfo)
+    assert info.version == version
