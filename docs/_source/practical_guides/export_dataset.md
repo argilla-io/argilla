@@ -94,3 +94,68 @@ This workaround will just export the records into the desired format, not the da
 
 ```{include} /_common/other_datasets.md
 ```
+
+### Load the Argilla dataset
+
+You can simply load the dataset from Argilla using the `rg.load()` function.
+
+```python
+import argilla as rg
+
+# load your annotated dataset from the Argilla web app
+dataset_rg = rg.load("my_dataset")
+```
+
+For easiness and manageability, Argilla offers transformations to Hugging Face Datasets and Pandas DataFrame.
+```python
+# export your Argilla Dataset to a datasets Dataset
+dataset_ds = dataset_rg.to_datasets()
+```
+```python
+# export to a pandas DataFrame
+df = dataset_rg.to_pandas()
+```
+
+### Save the dataset
+Your dataset will always be safe and accesible from Argilla, but in case you need to share or save it somewhere else, here are a couple of options.
+
+You can push your dataset in the form of a Hugging Face Dataset directly to the hub. Just use the `to_datasets()` transformation as explained in the previous section and push the dataset:
+
+```python
+# push the dataset to the Hugging Face Hub
+dataset_ds.push_to_hub("my_dataset")
+```
+
+Alternatively, you can save the dataset locally. To do that, we recommend formatting the dataset as a [Hugging Face Dataset](https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/main_classes#datasets.Dataset.save_to_disk) or [Pandas DataFrame](https://pandas.pydata.org/docs/reference/io.html) first and use the methods native to these libraries to export as csv, json, parquet, etc.
+
+```python
+# save locally using Hugging Face datasets
+
+import argilla as rg
+
+# load your annotated dataset from the Argilla web app
+dataset_rg = rg.load("my_dataset")
+
+# export your Argilla Dataset to a datasets Dataset
+dataset_ds = dataset_rg.to_datasets()
+
+dataset_ds.save_to_disk("my_dataset")  # Save as a `datasets.Dataset` in the local filesystem
+dataset_ds.to_csv("my_dataset.csv")  # Save as CSV
+dataset_ds.to_json("my_dataset.json")  # Save as JSON
+dataset_ds.to_parquet()  # Save as Parquet
+```
+
+```python
+# save locally using Pandas DataFrame
+import argilla as rg
+
+# load your annotated dataset from the Argilla web app
+dataset_rg = rg.load("my_dataset")
+
+# export your Argilla Dataset to a Pandas DataFrame
+df = dataset_rg.to_pandas()
+
+df.to_csv("my_dataset.csv")  # Save as CSV
+df.to_json("my_dataset.json")  # Save as JSON
+df.to_parquet("my_dataset.parquet")  # Save as Parquet
+```
