@@ -23,6 +23,7 @@ from argilla.server.search_engine.commons import index_name_for_dataset
 from opensearchpy import RequestError
 from sqlalchemy.orm import Session
 
+from argilla.server.settings import settings as server_settings
 from tests.factories import (
     LabelSelectionQuestionFactory,
     MultiLabelSelectionQuestionFactory,
@@ -235,7 +236,7 @@ async def _refresh_dataset(dataset: Dataset):
 
 
 @pytest.mark.asyncio
-@pytest.mark.skip("Must be configure with a configured engine before")
+@pytest.mark.skipif(not server_settings.search_engine == "opensearch", reason="Running on opensearch engine")
 class TestSuiteOpenSearchEngine:
     async def test_get_index_or_raise(self, opensearch_engine: OpenSearchEngine):
         dataset = await DatasetFactory.create()

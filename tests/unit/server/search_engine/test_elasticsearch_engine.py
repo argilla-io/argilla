@@ -22,6 +22,7 @@ from argilla.server.search_engine import (
 from argilla.server.search_engine.commons import index_name_for_dataset
 from sqlalchemy.orm import Session
 
+from argilla.server.settings import settings as server_settings
 from tests.factories import (
     LabelSelectionQuestionFactory,
     MultiLabelSelectionQuestionFactory,
@@ -234,7 +235,7 @@ async def _refresh_dataset(dataset: Dataset):
 
 
 @pytest.mark.asyncio
-@pytest.mark.skip("Must be configure with a configured engine before")
+@pytest.mark.skipif(not server_settings.search_engine == "elasticsearch", reason="Running on elasticsearch engine")
 class TestSuiteElasticSearchEngine:
     # TODO: Use other public method to detect the error
     async def test_get_index_or_raise(self, elasticsearch_engine: ElasticSearchEngine):
