@@ -1,10 +1,10 @@
 # ✍️ Annotate a  dataset
 
-After pushing a `FeedbackDataset` to Argilla, as explained in [Create a Dataset](create_dataset.ipynb), you can start annotating it through the Argilla UI.
-
 ## Feedback Dataset
 
 ![Spanshot of the Submitted queue and the progress bar in a Feedback Dataset](/_static/images/llms/snapshot-feedback-submitted.png)
+
+After pushing a `FeedbackDataset` to Argilla, as explained in [Create a Dataset](create_dataset.ipynb), you can start annotating it through the Argilla UI.
 
 As you open the dataset in the UI, you will see by default the records with `Pending` responses, i.e. records that still don't have a response (annotation), in a single-record view. On the left, you can find the record to annotate and on the right the form with the questions to answer. You can navigate through the records using the `Prev` and `Next` buttons in the bottom bar. You may use the search bar to filter the records based on specific words or phrases.
 
@@ -108,14 +108,14 @@ When the dataset contains a large list of labels (10 +), we encourage viewing th
 #### Token Classification
 ![Token classification record](/_static/reference/webapp/features-tokclass_record.png)
 
-For token classification datasets, you can highlight words (tokens) in the text and annotate them with a label. Under the hood, the highlighting takes advantage of the `tokens` information in the [Token Classification data model](../python/python_client.rst#Argilla.client.models.TokenClassificationRecord). For this task, predictions are shown as underlines. You can validate the predictions (or the absence of them) by pressing the _Validate_ button.
+For token classification datasets, you can highlight words (tokens) in the text and annotate them with a label. Under the hood, the highlighting takes advantage of the `tokens` information in the [Token Classification data model](/conceptual_guides/data_model.md#token-classification). For this task, predictions are shown as underlines. You can validate the predictions (or the absence of them) by pressing the _Validate_ button.
 
 To remove specific labels, hover over the highlights and press the _X_ button or double-click directly on the colored area. You can also click the _Clear_ button to remove all annotations in the record.
 
 After modifying a record, either by adding or removing annotations, its status will change to _Pending_. When you have finished your annotation of the whole record, click *Validate* to save the changes. The status will change to *Validated* in the upper left corner of the record card. Alternatively, you can use the *Reset* button to discard your changes and recover the previous state of the record. If you want to discard the record from the dataset, click *Discard*.
 
 #### Text2Text
-![Text2Text record](../../_static/reference/webapp/features-text2text_record.png)
+![Text2Text record](/_static/reference/webapp/features-text2text_record.png)
 For Text2Text datasets, there is a text box available for drafting or editing annotations. If a record has one or more predictions, the prediction with the highest score will be pre-filled. You can validate the prediction by clicking on the *Validate* button or edit the text making the changes directly in the text box. If you make any changes, the status will change to *Pending* and you will need to press shift+Enter or click the *Validate* button to save the changes. After validating, predictions can still be accessed in the prediction panel on the right side of the record card.
 
 Alternatively, you can discard your changes and revert to the previous state of the record using the *Reset* button or empty the text field by clicking the *Clear* button. If you want to discard the record from the dataset, click *Discard*.
@@ -124,43 +124,38 @@ Alternatively, you can discard your changes and revert to the previous state of 
 #### Filters
 The Argilla UI provides a set of filters that help you to quickly and conveniently navigate your records.
 For example, you can filter records by their predictions, by a specific metadata, or choose to only view records that are missing annotations.
-The filters are available in all [modes](dataset.md#modes) of the UI.
-
-```{hint}
-You can also filter the records through the search bar by means of [queries](/guides/queries.md).
-```
+The filters are available in all [modes](/reference/webapp/pages.md#modes) of the UI.
 
 ```{note}
-Not all filters listed below are available for all [tasks](/guides/task_examples.ipynb).
+Not all filters listed below are available for all tasks.
 ```
 
 ##### Predictions filter
 
 This filter allows you to filter records with respect of their predictions:
 
-- **Predicted as**: filter records by their predicted labels
-- **Predicted ok**: filter records whose predictions do, or do not, match the annotations
-- **Score**: filter records with respect to the score of their prediction
-- **Predicted by**: filter records by the [prediction agent](/python/python_client.rst#module-argilla.client.models)
+- **Predicted as**: filter records by their predicted labels.
+- **Predicted ok**: filter records whose predictions do, or do not, match the annotations.
+- **Score**: filter records with respect to the score of their prediction.
+- **Predicted by**: filter records by the [prediction agent](/reference/python/python_client.rst#module-argilla.client.models).
 
 ##### Annotations filter
 
 
 This filter allows you to filter records with respect to their annotations:
 
-- **Annotated as**: filter records with respect to their annotated labels
-- **Annotated by**: filter records by the [annotation agent](/python/python_client.rst#module-argilla.client.models)
-- **Only records not covered by rules**: this option only appears if you [defined rules](define_rules.md) for your dataset.
-  It allows you to show only records that are **not** covered by your rules.
+- **Annotated as**: filter records with respect to their annotated labels.
+- **Annotated by**: filter records by the [annotation agent](/reference/python/python_client.rst#module-argilla.client.models).
+- **Only records not covered by rules**: this option only appears if you have defined [weak labeling rules](#weak-labeling) for your dataset. It allows you to show only records that are **not** covered by your rules.
 
 ##### Status filter
 
 
 This filter allows you to filter records with respect to their status:
 
-- **Default**: records without any annotation or edition
-- **Validated**: records with validated annotations
-- **Edited**: records with annotations but still not validated
+- **Default**: records without any annotation or edition.
+- **Validated**: records with validated annotations.
+- **Edited**: records with annotations but still not validated.
 
 ##### Metadata filter
 
@@ -189,7 +184,7 @@ This feature enables you to find similar records when exploring or annotating re
 ![Similarity Search](/_static/reference/webapp/features-similaritysearch.png)
 
 ### Bulk labeling and actions
-For all [tasks](/guides/task_examples.ipynb), you can use **bulk actions**. You can either select the records one by one with the selection box on the upper left of each card, or you can use the global selection box below the search bar, which will select all records shown on the page. Then you can _Validate_ and _Discard_ the selected records using the icons next to the global selection box. For the multi-label text classification and token classification tasks you can also _Clear_ and _Reset_ at bulk level.
+For all tasks, you can use **bulk actions**. You can either select the records one by one with the selection box on the upper left of each card, or you can use the global selection box below the search bar, which will select all records shown on the page. Then you can _Validate_ and _Discard_ the selected records using the icons next to the global selection box. For the multi-label text classification and token classification tasks you can also _Clear_ and _Reset_ at bulk level.
 
 ![Bulk actions bar](/_static/reference/webapp/features-bulk-actions.png)
 
@@ -205,7 +200,7 @@ In single-label text classification, there is no need to validate after selectin
 ![Weak labeling](/_static/reference/webapp/features-weak-labelling.png)
 
 The Argilla UI has a dedicated mode to find good **heuristic rules**, also often referred to as _labeling functions_, for a [weak supervision](https://www.snorkel.org/blog/weak-supervision) workflow.
-As shown in our [guide](/guides/weak-supervision.ipynb) and [tutorial](/tutorials/labelling-textclassification-sentencetransformers-weaksupervision.ipynb), these rules allow you to quickly annotate your data with noisy labels in a semiautomatic way.
+As shown in our [guide](/guides/weak-supervision.ipynb) and [tutorial](/tutorials/notebooks/labelling-textclassification-sentencetransformers-weaksupervision.ipynb), these rules allow you to quickly annotate your data with noisy labels in a semiautomatic way.
 
 You can access the _Weak labeling_ mode via the sidebar of the [Dataset page](dataset.md).
 
@@ -215,7 +210,7 @@ The _Weak labeling_ mode is only available for text classification datasets.
 
 #### Query plus labels
 
-A rule in Argilla basically applies a chosen set of labels to a list of records that match a given [query](search_records.md), so all you need is a query plus labels.
+A rule in Argilla basically applies a chosen set of labels to a list of records that match a given [query](filter_dataset.md#other-datasets), so all you need is a query plus labels.
 After entering a query in the search bar and selecting one or multiple labels, you will see some [metrics](#rule-metrics) for the rule on the right and the matches of your query in the record list below.
 
 ```{warning}
@@ -228,7 +223,7 @@ In this way it will be stored as part of the current dataset and can be accessed
 
 
 ```{hint}
-If you want to add labels to the available list of labels, you can go to your [Dataset Settings page](pages.md#dataset-settings) and create new labels there.
+If you want to add labels to the available list of labels, you can go to your [Dataset Settings page](/reference/webapp/pages.md#dataset-settings) and create new labels there.
 ```
 
 #### Rule Metrics
@@ -248,13 +243,12 @@ For multi-label classification tasks, we only count wrongly predicted labels as 
 
 ##### Overall rule metrics
 
-
 From the [right sidebar](dataset.md#sidebar) you can access the **Overall rule metrics**.
 Here you will find the aggregated metrics, such as the coverages, the average precision and the total number of correctly/incorrectly predicted labels.
 You can also find an overview about how many rules you saved and how they are distributed with respect to their labels.
 
 ```{hint}
-If you struggle to increase the overall coverage, try to filter for the records that are not covered by your rules via the [Annotation filter](filter_records.md#annotations-filter).
+If you struggle to increase the overall coverage, try to filter for the records that are not covered by your rules via the [Annotation filter](#annotations-filter).
 ```
 
 #### Manage rules
