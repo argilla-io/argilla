@@ -46,33 +46,6 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
     def __post_init__(self):
         self.client = AsyncElasticsearch(**self.config)
 
-    async def similarity_search(
-        self,
-        dataset: Dataset,
-        vector_settings: VectorSettings,
-        value: Optional[List[float]] = None,
-        record: Optional[Record] = None,
-        user_response_status_filter: Optional[UserResponseStatusFilter] = None,
-        max_results: conint(ge=2, le=500) = 100,
-        threshold: Optional[float] = None,
-    ) -> SearchResponses:
-        if not (value or record):
-            raise ValueError("Must provide vector value or record to compute the similarity search")
-
-        vector_value = value
-        if not vector_value:
-            vector_value = record.vector_by_vector_settings_id(vector_settings.id).value
-
-        index = await self._get_index_or_raise(dataset)
-        response = await self._request_similarity_search(
-            index=index,
-            vector_settings=vector_settings,
-            value=vector_value,
-            k=max_results,
-            user_response_status_filter=user_response_status_filter,
-        )
-
-        return await self._process_search_response(response, threshold)
 
     def _configure_index_settings(self):
         return {
@@ -111,20 +84,6 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
             knn_query["filter"] = self._response_status_filter_builder(user_response_status_filter)
 
         return await self.client.search(index=index, knn=knn_query, _source=False, track_total_hits=True)
-
-    def _configure_index_mappings(self, dataset) -> dict:
-        return {
-            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic.html#dynamic-parameters
-            "dynamic": "strict",
-            "dynamic_templates": self._dynamic_templates_for_question_responses(dataset.questions),
-            "properties": {
-                # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
-                "id": {"type": "keyword"},
-                "responses": {"dynamic": True, "type": "object"},
-                **self._mapping_for_vectors_settings(dataset.vectors_settings),
-                **self._mapping_for_fields(dataset.fields),
-            },
-        }
 
     async def _create_index_request(self, index_name: str, mappings: dict, settings: dict) -> None:
         await self.client.indices.create(index=index_name, settings=settings, mappings=mappings)
