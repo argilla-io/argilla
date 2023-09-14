@@ -14,7 +14,7 @@
 
 import dataclasses
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, AsyncGenerator, Dict, Iterable, List, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, conint
@@ -62,6 +62,40 @@ class SearchResponses:
 
 
 class SearchEngine(metaclass=ABCMeta):
+    registered_classes = {}
+
+    @classmethod
+    @abstractmethod
+    async def new_instance(cls) -> "SearchEngine":
+        pass
+
+    @abstractmethod
+    async def close(self):
+        pass
+
+    @classmethod
+    def register(cls, engine_name: str):
+        def decorator(engine_class):
+            cls.registered_classes[engine_name] = engine_class
+            return engine_class
+
+        return decorator
+
+    @classmethod
+    async def search_engine_by_name(cls, engine_name: str) -> AsyncGenerator["SearchEngine", None]:
+        engine_name = engine_name.lower().strip()
+
+        if engine_name not in cls.registered_classes:
+            raise ValueError(f"No engine class registered for '{engine_name}'")
+
+        engine_class = cls.registered_classes[engine_name]
+
+        try:
+            engine = await engine_class.new_instance()
+            yield engine
+        finally:
+            await engine.close()
+
     @abstractmethod
     async def create_index(self, dataset: Dataset):
         pass
