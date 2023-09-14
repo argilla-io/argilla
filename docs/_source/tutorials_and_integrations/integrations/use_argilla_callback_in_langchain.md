@@ -52,7 +52,7 @@ Then you'll need to push that `FeedbackDataset` to Argilla as follows, otherwise
 dataset.push_to_argilla("langchain-dataset")
 ```
 
-For more information on how to create a `FeedbackDataset`, please refer to the [Create a Feedback Dataset](create_dataset.md) guide.
+For more information on how to create a `FeedbackDataset`, please refer to the [Create a Feedback Dataset](/practical_guides/create_dataset) guide.
 
 ## Monitoring
 
@@ -146,11 +146,11 @@ agent = initialize_agent(
 agent.run("Who was the first president of the United States of America?")
 ```
 
-![Argilla UI with LangChain Agent input-response](../../../_static/images/llms/langchain-integration/agent.png)
+![Argilla UI with LangChain Agent input-response](/_static/images/llms/langchain-integration/agent.png)
 
 ## Synthetic data
 
-If you want to create synthetic data with LangChain, you can use the `ArgillaCallbackHandler` to keep track of the input and the output of the LLMs, Chains, and/or Agents, and then store that data in Argilla. This means you would monitor the data in a similar scenario as described above, but instead of providing a direct functional prompt tailored to data generation in order to setup your LLMs to come up with some synthetic data for a `TextField. If you want a more tailored approach to data generation and computational feedback, you can take a look at [this tutorial on langchain](../examples/labelling-feedback-langchain-syntethic.ipynb) or [this tutorial on setfit for suggestions](../examples/labelling-feedback-setfit.ipynb).
+If you want to create synthetic data with LangChain, you can use the `ArgillaCallbackHandler` to keep track of the input and the output of the LLMs, Chains, and/or Agents, and then store that data in Argilla. This means you would monitor the data in a similar scenario as described above, but instead of providing a direct functional prompt tailored to data generation in order to setup your LLMs to come up with some synthetic data for a `TextField. If you want a more tailored approach to data generation and computational feedback, you can take a look at [this integration with LangChain](/tutorials_and_integrations/integrations/use_argilla_callback_in_langchain) or [this tutorial on SetFit for suggestions](/tutorials_and_integrations/tutorials/feedback/labelling-feedback-setfit).
 
 ```{warning}
 Do keep in mind that LLMs have licenses and not every LLM can be used for creating synthetic data in every operational setting. Please check the license of the LLM you are using before using it for creating synthetic data.

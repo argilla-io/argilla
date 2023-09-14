@@ -1,13 +1,13 @@
 # Fine-tuning language models with Feedback Datasets
 
-After [collecting the responses](/guides/llms/practical_guides/collect_responses.html) from our `FeedbackDataset`, we can start fine-tuning our LLMs and other models. Due to the customizability of the task, this might require setting up a custom post-processing workflow, but we will provide some good toy examples for the [LLM approaches](/guides/llms/conceptual_guides/rlhf.html): supervised fine-tuning, and reinforcement learning through human feedback (RLHF). However, we also still provide for other NLP tasks like text classification.
+After [collecting the responses](/practical_guides/collect_responses) from our `FeedbackDataset`, we can start fine-tuning our LLMs and other models. Due to the customizability of the task, this might require setting up a custom post-processing workflow, but we will provide some good toy examples for the [LLM approaches](/conceptual_guides/llm/rlhf): supervised fine-tuning, and reinforcement learning through human feedback (RLHF). However, we also still provide for other NLP tasks like text classification.
 ## The `ArgillaTrainer`
 
 The `ArgillaTrainer` is a wrapper around many of our favorite NLP libraries. It provides a very intuitive abstract representation to facilitate simple training workflows using decent default pre-set configurations without having to worry about any data transformations from Argilla.
 
 Using the `ArgillaTrainer` is straightforward, but it slightly differs per task.
 
-1. First, we define a `TrainingTask`. This is done using a custom `formatting_func`. However, tasks like Text Classification can also be defined using default definitions using the `FeedbackDataset` fields and questions. These tasks are then used for retrieving data from a dataset and initializing the training. We also offer some ideas for [unifying data](/guides/llms/practical_guides/collect_responses) out of the box.
+1. First, we define a `TrainingTask`. This is done using a custom `formatting_func`. However, tasks like Text Classification can also be defined using default definitions using the `FeedbackDataset` fields and questions. These tasks are then used for retrieving data from a dataset and initializing the training. We also offer some ideas for [unifying data](/practical_guides/collect_responses) out of the box.
 2. Next, we initialize the `ArgillaTrainer` and forward the task and training framework. Internally, this uses the `FeedbackData.prepare_for_training`-method to format the data according to the expectations from the framework. Some other interesting methods are:
    1. `ArgillaTrainer.update_config` to change framework specific training parameters.
    2. `ArgillaTrainer.train` to start training.
@@ -138,7 +138,7 @@ For this task, we assume we need a `text-label`-pair or a `formatting_func` for 
 We offer the option to use default unification strategies and formatting based on a `text-label`-pair. Here we infer formatting information based on a `TextField` and a `LabelQuestion`, `MultiLabelQuestion`, `RatingQuestion` or , `RankingQuestion` from the dataset. This is the easiest way to define a `TrainingTask` for text classification but if you need a custom workflow, you can use `formatting_func`.
 
 ```{note}
-An overview of the unifcation measures can be found [here](/guides/llms/practical_guides/collect_responses). The `RatingQuestion` and `RankingQuestion` can be unified using a "majority"-, "min"-, "max"- or "disagreement"-strategy. Both the `LabelQuestion` and `MultiLabelQuestion` can be resolved using a "majority"-, or "disagreement"-strategy.
+An overview of the unifcation measures can be found [here](/practical_guides/collect_responses). The `RatingQuestion` and `RankingQuestion` can be unified using a "majority"-, "min"-, "max"- or "disagreement"-strategy. Both the `LabelQuestion` and `MultiLabelQuestion` can be resolved using a "majority"-, or "disagreement"-strategy.
 ```
 
 ```python
@@ -187,7 +187,7 @@ task = TrainingTask.for_text_classification(formatting_func=formatting_func)
 
 ::::
 
-We can then define our `ArgillaTrainer` for any of [the supported frameworks](fine_tune.md#training-configs) and [customize the training config](#supported-frameworks) using `ArgillaTrainer.update_config`.
+We can then define our `ArgillaTrainer` for any of [the supported frameworks](fine_tune#training-configs) and [customize the training config](#supported-frameworks) using `ArgillaTrainer.update_config`.
 
 ```python
 from argilla.feedback import ArgillaTrainer
@@ -382,7 +382,7 @@ dataset = rg.FeedbackDataset.from_huggingface("plaguss/snli-small")
 We offer the option to use default unification strategies and formatting based on a `sentence`-pairs and `sentence-` triplets, with or without `label`. Here we infer formatting information based on two `TextField` and a `LabelQuestion` or `RankingQuestion`. This is the easiest way to define a `TrainingTask` for sentence similarity but if you need a custom workflow, you can use `formatting_func`.
 
 ```{note}
-An overview of the unifcation measures can be found [here](/guides/llms/practical_guides/collect_responses). For this type of task, only `LabelQuestion` or `RankingQuestion` applies.
+An overview of the unifcation measures can be found [here](/practical_guides/collect_responses). For this type of task, only `LabelQuestion` or `RankingQuestion` applies.
 ```
 
 ```python
@@ -498,7 +498,7 @@ trainer.predict(
 
 #### Background
 
-The goal of Supervised Fine Tuning (SFT) is to optimize a pre-trained model to generate the responses that users are looking for. A causal language model can generate feasible human text, but it will not be able to have proper `answers` to `question` phrases posed by the user in a conversational or instruction set. Therefore, we need to collect and curate data tailored to this use case to teach the model to mimic this data. We have a section in our docs about [collecting data for this task](../conceptual_guides/sft.html) and there are many good [pre-trained causal language models](https://huggingface.co/models?pipeline_tag=text-generation&sort=downloads) available on Hugging Face.
+The goal of Supervised Fine Tuning (SFT) is to optimize a pre-trained model to generate the responses that users are looking for. A causal language model can generate feasible human text, but it will not be able to have proper `answers` to `question` phrases posed by the user in a conversational or instruction set. Therefore, we need to collect and curate data tailored to this use case to teach the model to mimic this data. We have a section in our docs about [collecting data for this task](/conceptual_guides/llm/sft) and there are many good [pre-trained causal language models](https://huggingface.co/models?pipeline_tag=text-generation&sort=downloads) available on Hugging Face.
 
 Data for the training phase is generally divided into two different types generic for domain-like finetuning or chat for fine-tuning an instruction set.
 
@@ -520,7 +520,7 @@ In a generic fine-tuning setting, the aim is to make the model more proficient i
 On the other hand, instruction-based fine-tuning involves training the model to understand and respond to specific instructions or prompts given by the user. This approach allows for greater control and specificity in the generated output. For example, if we want the model to summarize a given text, we can fine-tune it using a dataset that consists of pairs of text passages and their corresponding summaries. The model can then be instructed to generate a summary based on a given input text. By fine-tuning the model in this manner, it becomes more adept at following instructions and producing output that aligns with the desired task or objective. An example of this format used is our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en) with `instruction`, `context` and `response` fields. However, we can also have simpler datasets with only `question` and `answer` fields.
 
 
-```bash
+```
 ### Instruction
 When did Virgin Australia start operating?
 
@@ -541,7 +541,7 @@ Ultimately, the choice between these two approaches to be used as `text`-field d
 There are many good libraries to help with this step, however, we are a fan of the [Transformer Reinforcement Learning (TRL)](https://huggingface.co/docs/trl) package, [Transformer Reinforcement Learning X (TRLX)](https://github.com/CarperAI/trlx),and the no-code [Hugging Face AutoTrain](https://huggingface.co/spaces/autotrain-projects/autotrain-advanced) for fine-tuning. In both cases, we need a backbone model and for example purposes we will use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en).
 
 ```{note}
-This dataset only contains a single annotator response per record. We gave some suggestions on dealing with [responses from multiple annotators](/guides/llms/practical_guides/collect_responses).
+This dataset only contains a single annotator response per record. We gave some suggestions on dealing with [responses from multiple annotators](/practical_guides/collect_responses).
 ```
 
 ::::{tab-set}
@@ -665,7 +665,7 @@ Much better! This model follows the template like we want.
 
 :::{tab-item} TRLX
 
-The [Transformer Reinforcement Learning X (TRLX)](https://github.com/CarperAI/trlx), which has been heavily inspired by TRL but with an increased focus on incorporating Human Feedback into the training loop. However, out of the box, it also provides intuitive support for supervised `prompt-completion` fine-tuning using a relatively simple SDK, that takes tuples as `(prompt, completion)`. Take a look at the [RLHF section](#rlhf) for the other more feedback-oriented use cases of this library.
+The [Transformer Reinforcement Learning X (TRLX)](https://github.com/CarperAI/trlx), which has been heavily inspired by TRL but with an increased focus on incorporating Human Feedback into the training loop. However, out of the box, it also provides intuitive support for supervised `prompt-completion` fine-tuning using a relatively simple SDK, that takes tuples as `(prompt, completion)`. Take a look at the other RLHF sections for the other more feedback-oriented use cases of this library.
 
 ```python
 import trlx
@@ -877,7 +877,7 @@ PPO requires a trained supervised fine-tuned model and reward model to work. Tak
 
 In case of training an PPO, we then use the prompt and context data and correct the generated response from the SFT model by using the reward model. Hence, we will need to format the following `text`.
 
-```bash
+```{bash}
 ### Instruction
 When did Virgin Australia start operating?
 
@@ -1009,7 +1009,7 @@ DPO requires a trained supervised fine-tuned model to function. Take a look at t
 
 In case of training using PPO, we then use the prompt and context data and correct the generated response from the SFT model by using the reward model. Hence, we will need to format the following `text`.
 
-```bash
+```
 ### Instruction
 When did Virgin Australia start operating?
 
@@ -1123,7 +1123,7 @@ Agent: You are right, it was 2001.
 
 ::: {tab-item} prompt-completion
 
-```bash
+```
 ### Instruction
 When did Virgin Australia start operating?
 
@@ -1149,7 +1149,7 @@ The airline has since grown to directly serve 32 cities in Australia, from hubs 
 
 **Data Preparation**
 
-We will use [the dataset](https://huggingface.co/datasets/argilla/customer_assistant) from [this tutorial](/guides/llms/examples/fine-tuning-openai-rag-feedback).
+We will use [the dataset](https://huggingface.co/datasets/argilla/customer_assistant) from [this tutorial](/tutorials_and_integrations/tutorials/feedback/fine-tuning-openai-rag-feedback.ipynb).
 
 ```python
 dataset = rg.FeedbackDataset.from_huggingface("argilla/customer_assistant")
@@ -1200,8 +1200,6 @@ task = TrainingTask.for_chat_completion(formatting_func=formatting_func)
 **ArgillaTrainer**
 
 We'll use the task directly with our `FeedbackDataset` in the `ArgillaTrainer`. The only configurable parameter is `n_epochs` but this is also optimized internally.
-
-```python
 
 ```python
 from argilla.feedback import ArgillaTrainer

@@ -48,6 +48,7 @@ To connect to an old Argilla instance (`<1.3.0`) using newer clients, you should
 ### Get the current active `User`
 
 You can get the current active user in Argilla using the `me` classmethod in the `User` class. Note that the `me` method will return the active user as specified via the credentials provided via `rg.init`. Also, it is possible [set this information using environment variables](/getting_started/installation/configurations/server_configuration.html#client), which allows for skipping `rg,init`.
+
 ::::{tab-set}
 
 :::{tab-item} CLI
@@ -90,6 +91,7 @@ So for example, to create a new user with `admin` role and member of `ws1` and `
 ```bash
 argilla users create --username new-user --first-name New --last-name User --role admin --workspace ws1 --workspace ws2
 ```
+
 :::
 
 :::{tab-item} Python client
@@ -121,6 +123,7 @@ You can change the assigned role for an existing user using the database connect
 ```bash
 argilla server database users update argilla --role owner
 ```
+
 ```bash
 User 'argilla' successfully updated:
 • role: 'admin' -> 'owner'
@@ -169,6 +172,7 @@ You can assign a user to a workspace using the `add-user` command in the `worksp
 ```bash
 argilla workspace --name ws1 add-user nick
 ```
+
 :::
 
 :::{tab-item} Python client
@@ -312,7 +316,7 @@ export ARGILLA_LOCAL_AUTH_USERS_DB_FILE=/path/to/.users.yml
 argilla server database users migrate
 ```
 
-```
+```bash
 Starting users migration process using file '.users.yml'
 Migrating User with username 'john'
 Migrating User with username 'tanya'
