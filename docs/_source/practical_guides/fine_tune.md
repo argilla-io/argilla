@@ -42,14 +42,16 @@ trainer.predict("This is awesome!")
 
 We plan on adding more support for other tasks and frameworks so feel free to reach out on our Slack or GitHub to help us prioritize each task.
 
-| Task/Framework                   | TRL  | OpenAI | SetFit | spaCy | Transformers | PEFT |
-|:--------------------------------|:-----|:-------|:-------|:------|:-------------|:-----|
-| Text Classification             |      | ✔️      |  ✔️      | ✔️     | ✔️            | ✔️    |
-| Supervised Fine-tuning          | ✔️    |        |          |       |              |      |
-| Reward Modeling                 | ✔️    |        |          |       |              |      |
-| Proximal Policy Optimization    | ✔️    |        |          |       |              |      |
-| Direct Preference Optimization  | ✔️    |        |          |       |              |      |
-
+| Task/Framework                  | TRL  | OpenAI | SetFit | spaCy | Transformers | PEFT | SentenceTransformers |
+|:--------------------------------|:-----|:-------|:-------|:------|:-------------|:-----|:---------------------|
+| Text Classification             |      |        |  ✔️     | ✔️     | ✔️            | ✔️    |                      |
+| Question Answering              |      |        |        |       | ✔️            |      |                      |
+| Sentence Similarity             |      |        |        |       |              |      | ✔️                    |
+| Supervised Fine-tuning          | ✔️    |        |        |       |              |      |                      |
+| Reward Modeling                 | ✔️    |        |        |       |              |      |                      |
+| Proximal Policy Optimization    | ✔️    |        |        |       |              |      |                      |
+| Direct Preference Optimization  | ✔️    |        |        |       |              |      |                      |
+| Chat Completion                 |      | ✔️      |        |       |              |      |                      |
 
 ##### Training Configs
 
@@ -66,13 +68,16 @@ Note that you don't need to pass all of them directly and that the values below 
 
 A `TrainingTask` is used to define how the data should be processed and formatted according to the associated task and framework. Each task has its own `TrainingTask.for_*`-classmethod and the data formatting can always be defined using a custom `formatting_func`. However, simpler tasks like Text Classification can also be defined using default definitions. These directly use the fields and questions from the FeedbackDataset configuration to infer how to prepare the data. Underneath you can find an overview of the `TrainingTask` requirements.
 
-| Method                             | Content          | `formatting_func` return type                                     | Default           |
-|:-----------------------------------|:-----------------|:-----------------------------------------------------------|:------------------|
-| for_text_classification            | `text-label`     | `Union[Tuple[str, str], Tuple[str, List[str]]]`            | ✔️                 |
-| for_supervised_fine_tuning         | `text`           | `Optional[Union[str, Iterator[str]]]`                                                      | ✗                 |
-| for_reward_modeling               | `chosen-rejected`| `Optional[Union[Tuple[str, str], Iterator[Tuple[str, str]]]]`                                          | ✗                 |
-| for_proximal_policy_optimization   | `text`           | `Optional[Union[str, Iterator[str]]]`                                | ✗                 |
-| for_direct_preference_optimization| `prompt-chosen-rejected`                 | `Optional[Union[Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]`                                          | ✗                 |
+| Method                             | Content                      | `formatting_func` return type                                                    | Default|
+|:-----------------------------------|:-----------------------------|:---------------------------------------------------------------------------------|:-------|
+| for_text_classification            | `text-label`                 | `Union[Tuple[str, str], Tuple[str, List[str]]]`                                  | ✔️      |
+| for_question_answering             | `questio-context-answer`     | `Union[Tuple[str, str], Tuple[str, List[str]]]`                                  | ✔️      |
+| for_sentence_similarity            | `sentence-1-sentence-2-(sentence-3)-(label)` | `Union[Dict[str, Union[float, int]], Dict[str, str], List[Dict[str, Union[float, int]]], List[Dict[str, str]]]`| ✔️      |
+| for_supervised_fine_tuning         | `text`                       | `Union[str, Iterator[str]]`                                            | ✗      |
+| for_reward_modeling                | `chosen-rejected`            | `Union[Tuple[str, str], Iterator[Tuple[str, str]]]`                    | ✗      |
+| for_proximal_policy_optimization   | `text`                       | `Union[str, Iterator[str]]]`                                            | ✗      |
+| for_direct_preference_optimization | `prompt-chosen-rejected`     | `Union[Tuple[str, str, str], Iterator[Tuple[str, str, str]]]`          | ✗      |
+| for_chat_completion                | `chat-turn-role-content`     | `Union[Tuple[str, str, str, str], Iterator[Tuple[str, str, str, str]]]`| ✗      |
 
 ### Tasks
 
@@ -197,6 +202,297 @@ trainer = ArgillaTrainer(
 )
 
 trainer.train(output_dir="textcat_model")
+```
+
+#### Question Answering
+
+##### Background
+
+The extractive Question Answering (QnA) task involves answering questions posed by users based on a given context. It is a challenging task that requires the model to understand the context of the question and provide an accurate answer. The model must be able to comprehend the question and the context in which it is asked, as well as the relationship between the two. Additionally, it must be able to extract the relevant information from the context and provide an answer that is both accurate and relevant to the question.
+
+You can find a sample of an extractive QnA dataset underneath:
+
+```batch
+{
+    'question': 'To whom did the Virgin Mary allegedly appear in 1858 in Lourdes France?',
+    'context': 'Architecturally, the school has a Catholic character. Atop the Main Building\'s gold dome is a golden statue of the Virgin Mary. Immediately in front of the Main Building and facing it, is a copper statue of Christ with arms upraised with the legend "Venite Ad Me Omnes". Next to the Main Building is the Basilica of the Sacred Heart. Immediately behind the basilica is the Grotto, a Marian place of prayer and reflection. It is a replica of the grotto at Lourdes, France where the Virgin Mary reputedly appeared to Saint Bernadette Soubirous in 1858. At the end of the main drive (and in a direct line that connects through 3 statues and the Gold Dome), is a simple, modern stone statue of Mary.',
+    'answers': 'Saint Bernadette Soubirous',
+}
+```
+
+```{note}
+Officially, answers need to be passed as a list of `{'answer_start': int, 'text': str}`-dicts. However, we only support a string, where the `answer_start` is inferred from the `context` and `text`-field.
+```
+
+We then use either `question-context-answer`-set or a `formatting_func` to further fine-tune the model.
+
+##### Training
+
+**Data Preparation**
+
+```python
+import argilla as rg
+from datasets import Dataset
+
+feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/squad")
+```
+
+We can use a default configuration where we initialize the `TrainingTask.for_question_answering` using the `question-context-answer`-set from the dataset. We also offer the option to provide a `formatting_func` to the `TrainingTask.for_question_asnwering`. This function is applied to each sample in the dataset and can be used for advanced preprocessing and data formatting. The function should return a `question-context-answer`-set as `str-str-str`.
+
+:::: {tab-set}
+
+::: {tab-item} question-context-answer-set
+
+```python
+from argilla.feedback import TrainingTask
+
+task = TrainingTask.for_question_answering(
+    question=feedback_dataset.field_by_name("question"),
+    context=feedback_dataset.field_by_name("context"),
+    answer=feedback_dataset.question_by_name("answer"),
+)
+```
+
+:::
+
+::: {tab-item} formatting_func
+
+```python
+from argilla.feedback import TrainingTask
+
+def formatting_func(sample):
+    question = sample["question"]
+    context = sample["context"]
+    for answer in sample["answer"]:
+        if not all([question, context, answer["value"]]):
+            continue
+        yield question, context, answer["value"]
+
+task = TrainingTask.for_question_answering(formatting_func=formatting_func)
+```
+
+:::
+
+::::
+
+**ArgillaTrainer**
+
+Next, we can define our `ArgillaTrainer` for any of [the supported frameworks](fine_tune.md#training-configs) and [customize the training config](#supported-frameworks) using `ArgillaTrainer.update_config`.
+
+```python
+from argilla.feedback import ArgillaTrainer
+
+trainer = ArgillaTrainer(
+    dataset=feedback_dataset,
+    task=task,
+    framework="transformers",
+    train_size=0.8,
+)
+
+trainer.train(output_dir="qna_model")
+
+```
+
+**Inference**
+
+Lastly, this model can be used for inference using the `pipeline`-method from the [Transformers library](https://huggingface.co/tasks/question-answering). We can use the `question-answering`-pipeline for this task.
+
+```python
+from transformers import pipeline
+
+qa_model = pipeline("question-answering", model="qna_model")
+question = "Where do I live?"
+context = "My name is Merve and I live in İstanbul."
+qa_model(question = question, context = context)
+## {'answer': 'İstanbul', 'end': 39, 'score': 0.953, 'start': 31}
+```
+
+#### Sentence Similarity
+
+##### Background
+
+Sentence Similarity is the task of determining how similar two texts are. By transforming the text into embeddings (vectors representing the semantic information) we can compute the similarity between these texts, computing the distance between their vectors. The [Sentence-Transformers](https://www.sbert.net/) library makes it easy to compute these sentence embeddings and use them for information retrieval and clustering. Besides these tasks, it is also commonly used to optimize Retrieval Augmented Generation (RAG) and re-ranking tasks. Generally, two types of models can be fine-tuned.
+
+::::{tab-set}
+
+:::{tab-item} Bi-Encoder
+A bi-encoder consists of two separate neural network models, each responsible for encoding a single sentence or text. These encoders work independently and do not share weights. The primary objective of a bi-encoder is to encode individual sentences or texts into fixed-length vectors in a way that preserves the semantic meaning of the input. These fixed-length vectors can later be used for various tasks, such as retrieval or classification. Bi-encoders are often used in tasks where you need to encode a large set of texts into vectors (e.g., creating embeddings for documents in a corpus). These embeddings can then be used for tasks like information retrieval, clustering, and classification.
+:::
+
+:::{tab-item} Cross-Encoder
+A cross-encoder consists of a single neural network model that takes multiple input sentences or texts simultaneously. It processes pairs of sentences or texts in one forward pass. The main objective of a cross-encoder is to provide a single scalar score or similarity measure for a pair of input sentences or texts. This score represents the similarity or relevance between the two input texts. Cross encoders are commonly used in applications like text matching, question-answering, document retrieval, and recommendation systems where you need to compare two pieces of text and assess their similarity or relevance.
+:::
+
+::::
+
+In this [blog article](https://huggingface.co/blog/how-to-train-sentence-transformers) from hugging face you can see the different types of datasets that can be used for training `sentence-transformers` models.
+
+##### Training
+
+:::{note}
+We can easily switch between `Bi-Encoder` and `Cross Encoder` based models using the `framework_kwargs={"cross_encoder": True}`. Additionally, data can be provided in three different ways, hence. Keep in mind the `Cross Encoder` based models don't allow training with sentence triplets.
+:::
+
+::::{tab-set}
+
+:::{tab-item} sentence-1-sentence-2
+
+The example is a pair of positive (similar) sentences without a label. For example, pairs of paraphrases, pairs of full texts and their summaries, pairs of duplicate questions, pairs of (query, response), or pairs of (source_language, target_language). Natural Language Inference datasets can also be formatted this way by pairing entailing sentences.
+
+:::
+
+:::{tab-item} sentence-1-sentence-2-label
+
+The example is a pair of sentences and a label indicating how similar they are. The label can be either an integer or a float. This case applies to datasets originally prepared for Natural Language Inference (NLI) since they contain pairs of sentences with a label indicating whether they infer each other or not.
+
+:::
+
+:::{tab-item} sentence-1-sentence-2-sentence-3
+
+**only works with Bi Encoders**
+
+The example is a triplet (anchor, positive, negative) without classes or labels for the sentences.
+
+:::
+
+:::{tab-item} sentence-1-label
+
+**only works with Bi Encoders**
+
+The example is a sentence with an integer label. This data format is easily converted by loss functions into three sentences (triplets) where the first is an "anchor", the second a "positive" of the same class as the anchor, and the third a "negative" of a different class. Each sentence has an integer label indicating the class to which it belongs.
+
+:::
+
+::::
+
+**Data Preparation**
+
+Let's use a small version of [snli](https://huggingface.co/datasets/snli) dataset for this example, ready to work with Argilla [snli-small](https://huggingface.co/datasets/plaguss/snli-small).
+
+
+```python
+import argilla as rg
+
+dataset = rg.FeedbackDataset.from_huggingface("plaguss/snli-small")
+```
+
+::::{tab-set}
+
+:::{tab-item} sentence-1-sentence-2-label
+
+We offer the option to use default unification strategies and formatting based on a `sentence`-pairs and `sentence-` triplets, with or without a `label`. Here we infer formatting information based on two `TextField` and a `LabelQuestion` or `RankingQuestion`. This is the easiest way to define a `TrainingTask` for sentence similarity but if you need a custom workflow, you can use `formatting_func`.
+
+```{note}
+An overview of the unifcation measures can be found [here](/guides/llms/practical_guides/collect_responses). For this type of task, only `LabelQuestion` or `RankingQuestion` applies.
+```
+
+```python
+from argilla.feedback import TrainingTask
+
+task = TrainingTask.for_sentence_similarity(
+    texts=[dataset.field_by_name("premise"), dataset.field_by_name("hypothesis")],
+    label=dataset.question_by_name("label")
+)
+```
+
+:::
+
+:::{tab-item} formatting_func
+We offer the option to provide a `formatting_func` to the `TrainingTask.for_sentence_similarity`. This function is applied to each sample in the dataset and can be used for more advanced preprocessing and data formatting. The function can return a dict with `sentence-1`, `sentence-2` and optionally `sentence-3` and the corresponding sentences, and it can also include a `label`, which can be either an `int` (to represent the class) or a `float`, as well as lists of these elements.
+
+```python
+def formatting_func(sample):
+    record = {"sentence-1": sample["premise"], "sentence-2": sample["hypothesis"]}
+
+    # Choose the most common label
+    values = [resp["value"] for resp in sample["label"]]
+    counter = Counter(values)
+    if counter:
+        most_common = counter.most_common()
+        max_frequency = most_common[0][1]
+        most_common_elements = [
+            element for element, frequency in most_common if frequency == max_frequency
+        ]
+        label = random.choice(most_common_elements)
+        record["label"] = label
+        return record
+    else:
+        return None
+
+task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func)
+```
+
+:::
+
+::::
+
+**ArgillaTrainer**
+
+We’ll use the task directly with our `FeedbackDataset` in the `ArgillaTrainer`. For this case we are using the default `SentenceTransformer` model, to fine-tune a `Cross Encoder` based, pass `framework_kwargs={"cross_encoder": True}`.
+
+```python
+from argilla.feedback import ArgillaTrainer
+
+trainer = ArgillaTrainer(
+    dataset=dataset,
+    task=task,
+    framework="sentence-transformers",
+    framework_kwargs={"cross_encoder": False}
+)
+trainer.train(output_dir="my_sentence_transformer_model")
+```
+
+**Inference**
+
+These models can be loaded using `sentence-transformers` (or `transformers`), the reader can take a look at each type of model at the following links:
+
+- [Bi-Encoder](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
+- [Cross-Encoder](https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2)
+
+However the `ArgillaTrainer` offers the possibility to predict the sentence similarity from its API. Let's check how they work using the same sample sentences from [sentence similarity task](https://huggingface.co/tasks/sentence-similarity) in Hugging Face:
+
+```python
+from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
+
+trainer.predict(
+    [
+        "Machine learning is so easy.",
+        ["Deep learning is so straightforward.", "This is so difficult, like rocket science.", "I can't believe how much I struggled with this."]
+    ]
+)
+# [0.77857256, 0.4587626, 0.29062212]
+```
+
+Just to see the other format that can be passed to get the sentence similarity (a list with pairs of sentences), let's see the following example (the pairs don't need to share the first sentence, it's an example to check the same values are returned with both options).
+
+```python
+
+trainer.predict(
+    [
+        ["Machine learning is so easy.", "Deep learning is so straightforward."],
+        ["Machine learning is so easy.", "This is so difficult, like rocket science."],
+        ["Machine learning is so easy.", "I can't believe how much I struggled with this."]
+    ]
+)
+# [0.77857256, 0.4587626, 0.29062212]
+```
+
+The previous results were obtained assuming the model trained was a `SentenceTransformer`. If instead of using a `SentenceTransformer` model (a `Bi-Encoder` based model) we would have chosen a `Cross-Encoder` we would obtain a different result, but with the same interpretation.
+
+```python
+trainer = ArgillaTrainer(
+    dataset=dataset,
+    task=task,
+    framework="sentence-transformers",
+    framework_kwargs={"cross_encoder": True}
+)
+trainer.predict(
+    [
+        "Machine learning is so easy.",
+        ["Deep learning is so straightforward.", "This is so difficult, like rocket science.", "I can't believe how much I struggled with this."]
+    ]
+)
+# [2.2006402, -6.2634926, -10.251489]
 ```
 
 #### Supervised finetuning
@@ -817,6 +1113,136 @@ outputs = model.generate(**encoding, max_new_tokens=30)
 output_text = tokenizer.decode(outputs[0])
 print(output_text)
 # Yes it is, toads are a sub-classification of frogs.
+```
+
+#### Chat Completion
+
+##### Background
+
+With the rise of chat-oriented models under OpenAI's ChatGPT, we have seen a lot of interest in the use of LLMs for chat-oriented tasks. The main difference between chat-oriented models and the other LLMs is that they are trained on a differently formatted dataset. Instead of using a dataset of prompts and responses, they are trained on a dataset of conversations. This allows them to generate responses that are more conversational. And, OpenAI does support fine-tuning LLMs for chat-completion use cases. More information at https://openai.com/blog/gpt-3-5-turbo-fine-tuning-and-api-updates.
+
+::::{tab-set}
+
+::: {tab-item} conversation
+
+```bash
+User: Hello, how are you?
+Agent: I am doing great!
+User: When did Virgin Australia start operating?
+Agent: Virgin Australia commenced services on 31 August 2000 as Virgin Blue.
+User: That is incorrect. I believe it was 2001.
+Agent: You are right, it was 2001.
+```
+
+:::
+
+::: {tab-item} prompt-completion
+
+```bash
+### Instruction
+When did Virgin Australia start operating?
+
+### Context
+Virgin Australia, the trading name of Virgin Australia Airlines Pty Ltd, is an Australian-based airline.
+It is the largest airline by fleet size to use the Virgin brand.
+It commenced services on 31 August 2000 as Virgin Blue, with two aircraft on a single route.
+It suddenly found itself as a major airline in Australia's domestic market after the collapse of Ansett Australia in September 2001.
+The airline has since grown to directly serve 32 cities in Australia, from hubs in Brisbane, Melbourne and Sydney.
+
+### Response:
+{to be generated by SFT model}
+```
+
+:::
+
+::::
+
+##### Training
+
+```{include} /_common/dolly_dataset_load.md
+```
+
+**Data Preparation**
+
+We will use [the dataset](https://huggingface.co/datasets/argilla/customer_assistant) from [this tutorial](/guides/llms/examples/fine-tuning-openai-rag-feedback).
+
+```python
+dataset = rg.FeedbackDataset.from_huggingface("argilla/customer_assistant")
+```
+
+We will start with our basic example of a formatting function. For Chat Completion it should return `chat-turn-role-text`, where the prompt is formatted according to a template. We require this split because each conversational chain needs to be able to be retraced in the correct order and based on the user roles that might have been speaking.
+
+```{note}
+We infer a so-called message because OpenAI expect this output format but this might differ for other scenarios.
+```
+
+```python
+from argilla.feedback import TrainingTask
+from typing import Dict, Any, Iterator
+
+
+# adapation from LlamaIndex's TEXT_QA_PROMPT_TMPL_MSGS[1].content
+user_message_prompt ="""Context information is below.
+---------------------
+{context_str}
+---------------------
+Given the context information and not prior knowledge but keeping your Argilla Cloud assistant style, answer the query.
+Query: {query_str}
+Answer:
+"""
+# Adapation from LlamaIndex's TEXT_QA_SYSTEM_PROMPT
+system_prompt = """You are an expert customer service assistant for the Argilla Cloud product that is trusted around the world.
+Always answer the query using the provided context information, and not prior knowledge.
+Some rules to follow:
+1. Never directly reference the given context in your answer.
+2. Avoid statements like 'Based on the context, ...' or 'The context information ...' or anything along those lines.
+"""
+
+def formatting_func(sample: dict) -> Union[Tuple[str, str, str, str], List[Tuple[str, str, str, str]]]:
+    from uuid import uuid4
+    if sample["response"]:
+        chat = str(uuid4())
+        user_message = user_message_prompt.format(context_str=sample["context"], query_str=sample["user-message"])
+        yield [
+            (chat, "0", "system", system_prompt),
+            (chat, "1", "user", user_message),
+            (chat, "2", "assistant", sample["response"][0]["value"])
+        ]
+
+task = TrainingTask.for_chat_completion(formatting_func=formatting_func)
+```
+
+**ArgillaTrainer**
+
+We'll use the task directly with our `FeedbackDataset` in the `ArgillaTrainer`. The only configurable parameter is `n_epochs` but this is also optimized internally.
+
+```python
+
+```python
+from argilla.feedback import ArgillaTrainer
+
+trainer = ArgillaTrainer(
+    dataset=feedback_dataset,
+    task=task,
+    framework="openai",
+)
+trainer.train(output_dir="chat-completion")
+```
+
+**Inference**
+
+After training, we can directly use the model but we need to do so so, we need to use the `openai` framework. Therefore, we suggest taking a look at [their docs](https://platform.openai.com/docs/guides/fine-tuning/use-a-fine-tuned-model).
+
+```python
+import openai
+
+completion = openai.ChatCompletion.create(
+  model="ft:gpt-3.5-turbo:my-org:custom_suffix:id",
+  messages=[
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Hello!"}
+  ]
+)
 ```
 
 ## Other datasets
