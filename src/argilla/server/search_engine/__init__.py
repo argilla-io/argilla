@@ -13,4 +13,8 @@
 #  limitations under the License.
 
 from .base import *
-from .opensearch import OpenSearchEngine, get_search_engine
+from .opensearch import OpenSearchEngine, get_search_engine as opensearch_engine
+from .elasticsearch import ElasticSearchEngine, get_search_engine as elasticsearch_engine
+
+
+get_search_engine = elasticsearch_engine
