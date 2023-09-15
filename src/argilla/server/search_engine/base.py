@@ -14,10 +14,11 @@
 
 import dataclasses
 from abc import ABCMeta, abstractmethod
+from contextlib import asynccontextmanager
 from typing import Any, AsyncGenerator, Dict, Iterable, List, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, conint
+from pydantic import BaseModel
 
 from argilla.server.enums import ResponseStatus, ResponseStatusFilter
 from argilla.server.models import Dataset, Record, Response, User, Vector, VectorSettings
@@ -82,7 +83,8 @@ class SearchEngine(metaclass=ABCMeta):
         return decorator
 
     @classmethod
-    async def search_engine_by_name(cls, engine_name: str) -> AsyncGenerator["SearchEngine", None]:
+    @asynccontextmanager
+    async def get_by_name(cls, engine_name: str) -> AsyncGenerator["SearchEngine", None]:
         engine_name = engine_name.lower().strip()
 
         if engine_name not in cls.registered_classes:
@@ -90,11 +92,16 @@ class SearchEngine(metaclass=ABCMeta):
 
         engine_class = cls.registered_classes[engine_name]
 
+        engine = None
+
         try:
             engine = await engine_class.new_instance()
             yield engine
+        except Exception as e:
+            raise e
         finally:
-            await engine.close()
+            if engine is not None:
+                await engine.close()
 
     @abstractmethod
     async def create_index(self, dataset: Dataset):
