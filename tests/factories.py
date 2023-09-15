@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import inspect
+import random
 
 import factory
 from argilla.server.enums import FieldType
@@ -26,6 +27,8 @@ from argilla.server.models import (
     Suggestion,
     User,
     UserRole,
+    Vector,
+    VectorSettings,
     Workspace,
     WorkspaceUser,
 )
@@ -220,6 +223,23 @@ class ResponseFactory(BaseFactory):
 
     record = factory.SubFactory(RecordFactory)
     user = factory.SubFactory(UserFactory)
+
+
+class VectorSettingsFactory(BaseFactory):
+    class Meta:
+        model = VectorSettings
+
+    name = factory.Sequence(lambda n: f"vector-{n}")
+    dimensions = factory.LazyAttribute(lambda _: random.randrange(16, 1024))
+    dataset = factory.SubFactory(DatasetFactory)
+
+
+class VectorFactory(BaseFactory):
+    class Meta:
+        model = Vector
+
+    vector_settings = factory.SubFactory(VectorSettingsFactory)
+    record = factory.SubFactory(RecordFactory)
 
 
 class FieldFactory(BaseFactory):
