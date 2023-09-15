@@ -100,25 +100,13 @@ export default {
       required: true,
     },
   },
-  emits: ["on-submit-responses", "on-discard-responses"],
+  emits: [
+    "on-submit-responses",
+    "on-discard-responses",
+    "on-question-form-touched",
+  ],
   setup(props, context) {
     return useQuestionFormViewModel(props.record, context);
-  },
-  watch: {
-    isFormTouched(isFormTouched) {
-      if (this.record.isSubmitted)
-        this.emitIsQuestionsFormTouched(isFormTouched);
-    },
-  },
-  destroyed() {
-    this.emitIsQuestionsFormTouched(false);
-  },
-  methods: {
-    emitIsQuestionsFormTouched(isFormTouched) {
-      this.$emit("on-question-form-touched", isFormTouched);
-
-      this.$root.$emit("are-responses-untouched", !isFormTouched);
-    },
   },
 };
 </script>

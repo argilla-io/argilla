@@ -21,13 +21,7 @@ export default {
     },
   },
   created() {
-    this.onBusEventAreResponsesUntouched();
     this.onBusEventGoToNextPage();
-  },
-  data() {
-    return {
-      areResponsesUntouched: true,
-    };
   },
   computed: {
     currentPage() {
@@ -51,12 +45,6 @@ export default {
     goToPrevPage() {
       this.$root.$emit("go-to-prev-page");
     },
-    onBusEventAreResponsesUntouched() {
-      // TODO - move logic to check if questionnaire is untouched in RecordFeedbackAndQuestionnaire component
-      this.$root.$on("are-responses-untouched", (areResponsesUntouched) => {
-        this.isQuestionFormTouched = !areResponsesUntouched;
-      });
-    },
     onBusEventGoToNextPage() {
       this.$root.$on("go-to-page", (newPage) => {
         this.currentPage = newPage;
@@ -75,7 +63,7 @@ export default {
       });
     },
     onPaginate(eventToFire) {
-      if (this.isQuestionFormTouched) {
+      if (this.isQuestionsFormTouched) {
         this.showNotificationBeforePaginate(eventToFire);
       } else {
         eventToFire();
@@ -83,7 +71,6 @@ export default {
     },
   },
   destroyed() {
-    this.$root.$off("are-responses-untouched");
     this.$root.$off("go-to-page");
     Notification.dispatch("clear");
   },

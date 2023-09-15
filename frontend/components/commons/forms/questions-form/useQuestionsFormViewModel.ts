@@ -5,6 +5,7 @@ import { useClear } from "./useClear";
 import { useSubmit } from "./useSubmit";
 import { useQuestionsFormFocus } from "./useQuestionsFormFocus";
 import { useHandleGlobalKeys } from "./useHandleGlobalKeys";
+import { useQuestionFormState } from "./useQuestionFormState";
 import { Record } from "~/v1/domain/entities/record/Record";
 import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
 import { useQueue } from "~/v1/infrastructure/services/useQueue";
@@ -12,18 +13,25 @@ import { useBeforeUnload } from "~/v1/infrastructure/services/useBeforeUnload";
 
 export const useQuestionFormViewModel = (
   record: Record,
-  context: SetupContext<("on-discard-responses" | "on-submit-responses")[]>
+  context: SetupContext<
+    (
+      | "on-discard-responses"
+      | "on-submit-responses"
+      | "on-question-form-touched"
+    )[]
+  >
 ) => {
   record.initialize();
+
+  // QUESTIONS FORM STATE
+  const { isFormTouched } = useQuestionFormState(record, context);
 
   // ACTIONS ON FORM
   const beforeUnload = useBeforeUnload();
   const queue = useQueue();
   const debounceForAutoSave = useDebounce(2000);
   const debounceForSavingMessage = useDebounce(1000);
-  const isFormTouched = ref(false);
 
-  // computed
   const questionAreCompletedCorrectly = computed((): boolean => {
     return record.questionAreCompletedCorrectly();
   });
@@ -58,7 +66,6 @@ export const useQuestionFormViewModel = (
     queue
   );
 
-  // watch
   watch(
     record,
     () => {
@@ -71,7 +78,7 @@ export const useQuestionFormViewModel = (
     }
   );
 
-  // FOR FOCUS AND GLOBAL KEYS
+  // FORM FOCUS AND GLOBAL KEYS
   const userComesFromOutside = ref(false);
 
   const {
