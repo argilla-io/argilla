@@ -79,7 +79,7 @@ jobs:
             DOCKER_HUB_TAGS="$DOCKER_HUB_TAGS,$IMAGE_NAME/latest"
           fi
 
-          echo "::set-output name=tags::$DOCKER_HUB_TAGS,$GCP_REGISTRY_TAG"
+          echo "$DOCKER_HUB_TAGS,$GCP_REGISTRY_TAG" >> $GITHUB_OUTPUT
         env:
           IMAGE_NAME: ${{ inputs.image_name }}
           DOCKER_IMAGE_TAG: ${{ steps.docker-image-tag-from-ref.outputs.docker-image-tag }}
