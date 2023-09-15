@@ -34,7 +34,7 @@ def _compute_num_candidates_from_k(k: int) -> int:
     return 2000
 
 
-@SearchEngine.register(engine_name="opensearch")
+@SearchEngine.register(engine_name="elasticsearch")
 @dataclasses.dataclass
 class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
     config: Dict[str, Any]
@@ -45,6 +45,7 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
     def __post_init__(self):
         self.client = AsyncElasticsearch(**self.config)
 
+    @classmethod
     async def new_instance(cls) -> "ElasticSearchEngine":
         config = dict(
             hosts=settings.elasticsearch,
@@ -53,7 +54,7 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
             retry_on_timeout=True,
             max_retries=5,
         )
-        return ElasticSearchEngine(
+        return cls(
             config,
             es_number_of_shards=settings.es_records_index_shards,
             es_number_of_replicas=settings.es_records_index_replicas,
