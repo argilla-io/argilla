@@ -1,4 +1,9 @@
-export const useBeforeUnload = () => {
+type TBeforeUnload = {
+  confirm: () => void;
+  destroy: () => void;
+};
+
+const useBeforeUnload: () => TBeforeUnload = () => {
   const confirm = () => {
     window.onbeforeunload = () => true;
   };
@@ -12,3 +17,5 @@ export const useBeforeUnload = () => {
     destroy,
   };
 };
+
+export { TBeforeUnload, useBeforeUnload };

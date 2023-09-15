@@ -1,4 +1,4 @@
-import { ref, computed, watch } from "vue-demi";
+import { ref, computed, watch, SetupContext } from "vue-demi";
 import { useDraft } from "./useDraft";
 import { useDiscard } from "./useDiscard";
 import { useClear } from "./useClear";
@@ -8,11 +8,16 @@ import { useHandleGlobalKeys } from "./useHandleGlobalKeys";
 import { Record } from "~/v1/domain/entities/record/Record";
 import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
 import { useQueue } from "~/v1/infrastructure/services/useQueue";
+import { useBeforeUnload } from "~/v1/infrastructure/services/useBeforeUnload";
 
-export const useQuestionFormViewModel = (record: Record, context) => {
+export const useQuestionFormViewModel = (
+  record: Record,
+  context: SetupContext<("on-discard-responses" | "on-submit-responses")[]>
+) => {
   record.initialize();
 
   // ACTIONS ON FORM
+  const beforeUnload = useBeforeUnload();
   const queue = useQueue();
   const debounceForAutoSave = useDebounce(2000);
   const debounceForSavingMessage = useDebounce(1000);
@@ -23,10 +28,22 @@ export const useQuestionFormViewModel = (record: Record, context) => {
     return record.questionAreCompletedCorrectly();
   });
 
-  const { onDiscard } = useDiscard(record, debounceForAutoSave, queue, context);
-  const { onClear } = useClear(record, debounceForAutoSave, queue);
+  const { onDiscard } = useDiscard(
+    record,
+    beforeUnload,
+    debounceForAutoSave,
+    queue,
+    context
+  );
+  const { onClear } = useClear(
+    record,
+    beforeUnload,
+    debounceForAutoSave,
+    queue
+  );
   const { isSubmitButtonDisabled, onSubmit } = useSubmit(
     record,
+    beforeUnload,
     questionAreCompletedCorrectly,
     isFormTouched,
     debounceForAutoSave,
@@ -35,6 +52,7 @@ export const useQuestionFormViewModel = (record: Record, context) => {
   );
   const { draftSaving, onSaveDraftImmediately, saveDraft } = useDraft(
     record,
+    beforeUnload,
     debounceForAutoSave,
     debounceForSavingMessage,
     queue

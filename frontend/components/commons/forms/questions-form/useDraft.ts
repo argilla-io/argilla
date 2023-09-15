@@ -4,15 +4,15 @@ import { Record } from "~/v1/domain/entities/record/Record";
 import { SaveDraftRecord } from "~/v1/domain/usecases/save-draft-use-case";
 import { Debounce } from "~/v1/infrastructure/services/useDebounce";
 import { Queue } from "~/v1/infrastructure/services/useQueue";
-import { useBeforeUnload } from "~/v1/infrastructure/services/useBeforeUnload";
+import { TBeforeUnload } from "~/v1/infrastructure/services/useBeforeUnload";
 
 export const useDraft = (
   record: Record,
+  beforeUnload: TBeforeUnload,
   debounceForAutoSave: Debounce,
   debounceForSavingMessage: Debounce,
   queue: Queue
 ) => {
-  const beforeUnload = useBeforeUnload();
   const draftSaving = ref(false);
   const saveDraftUseCase = useResolve(SaveDraftRecord);
 

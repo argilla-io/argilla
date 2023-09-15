@@ -4,9 +4,11 @@ import { SubmitRecordUseCase } from "~/v1/domain/usecases/submit-record-use-case
 import { Debounce } from "~/v1/infrastructure/services/useDebounce";
 import { Record } from "~/v1/domain/entities/record/Record";
 import { Queue } from "~/v1/infrastructure/services/useQueue";
+import { TBeforeUnload } from "~/v1/infrastructure/services/useBeforeUnload";
 
 export const useSubmit = (
   record: Record,
+  beforeUnload: TBeforeUnload,
   questionAreCompletedCorrectly: Ref<boolean>,
   isFormTouched: Ref<boolean>,
   debounce: Debounce,
@@ -24,6 +26,7 @@ export const useSubmit = (
 
   const onSubmit = async () => {
     if (isSubmitButtonDisabled.value) return;
+    beforeUnload.destroy();
 
     await submit(record);
 
