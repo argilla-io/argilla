@@ -229,7 +229,10 @@ async def create_vector_settings(
             dataset_id=dataset.id,
             autocommit=False,
         )
-        # TODO: call `search_engine.configure_index_vectors` once PR merged
+
+        if dataset.is_ready:
+            # TODO: call `search_engine.configure_index_vectors` once PR merged
+            pass
 
     await db.commit()
 
