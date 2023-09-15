@@ -20,8 +20,10 @@ class Debounce {
   }
 }
 
-export const useDebounce = (milliSeconds: number) => {
+const useDebounce = (milliSeconds: number) => {
   const debounce = new Debounce(milliSeconds);
 
   return debounce;
 };
+
+export { useDebounce, Debounce };
