@@ -23,7 +23,7 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForSFT,
 )
 from argilla.training.utils import filter_allowed_args
-from argilla.utils.dependency import require_version
+from argilla.utils.dependency import require_dependencies
 
 if TYPE_CHECKING:
     import transformers
@@ -72,9 +72,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaTRLTrainer")
     _logger.setLevel(logging.INFO)
 
-    require_version("transformers")
-    require_version("torch")
-    require_version("trl>=0.5.0")
+    require_dependencies(["transformers", "torch", "trl>=0.5.0"])
 
     def __init__(
         self,

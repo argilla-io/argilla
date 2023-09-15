@@ -18,7 +18,7 @@ We differentiate between three types of users depending on their role:
 
 - **Owner**: The owner is the user who created the Argilla instance. It has full access to all workspaces and can create new users and workspaces.
 - **Admin**: An admin user can only access the workspaces it has been assigned to. Admin users can manage datasets on assigned workspaces.
-- **Annotator**: As admin users, an annotator user can only access the workspaces it has been assigned to.
+- **Annotator**: As admin users, an annotator user can only access the workspaces it has been assigned to. Annotator users can only annotate datasets on assigned workspaces.
 
 An Argilla user composed of the following attributes:
 
@@ -39,121 +39,26 @@ An Argilla user composed of the following attributes:
 
 The `User` class in the Python client gives developers with `owner` role the ability to create and manage users in Argilla. Check the [User - Python Reference](../reference/python/python_users.rst) to see the attributes, arguments, and methods of the `User` class.
 
-The above user management model is configured using the Argilla tasks, which server maintainers can define before launching an Argilla instance.
-
-## Prepare the database
-
-First of all, you need to make sure that database tables and models are up-to-date. This task must be launched when a new version of Argilla is installed.
-
-```bash
-python -m argilla database migrate
-```
-
-```
-command: alembic -c /path/to/alembic.ini upgrade head
-INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
-INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
-INFO  [alembic.runtime.migration] Running upgrade  -> 74694870197c, create users table
-INFO  [alembic.runtime.migration] Running upgrade 74694870197c -> 82a5a88a3fa5, create workspaces table
-INFO  [alembic.runtime.migration] Running upgrade 82a5a88a3fa5 -> 1769ee58fbb4, create workspaces_users table
-```
-
-:::{note}
-It is important to launch this task prior to any other database action.
-:::
-
-### Migrate DB to an specific version
-
-If you want to apply migrations corresponding to a specific version or revision, for example, to apply a version rollback, you can pass the `--revision` option to the database migrate command:
-```bash
-python -m argilla database migrate --version 1.7
-```
-
-````bash
-INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
-INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
-command: alembic -c /path/to/alembic.ini downgrade 1769ee58fbb4
-INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
-INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
-INFO  [alembic.runtime.migration] Running downgrade ae5522b4c674 -> e402e9d9245e, create fields table
-INFO  [alembic.runtime.migration] Running downgrade e402e9d9245e -> 8be56284dac0, create responses table
-INFO  [alembic.runtime.migration] Running downgrade 8be56284dac0 -> 3a8e2f9b5dea, create records table
-INFO  [alembic.runtime.migration] Running downgrade 3a8e2f9b5dea -> b9099dc08489, create questions table
-INFO  [alembic.runtime.migration] Running downgrade b9099dc08489 -> 1769ee58fbb4, create datasets table
-````
-
-To see the available revisions you use the `database revisions` command:
-```bash
-python -m argilla database revisions
-```
-
-```bash
-INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
-INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
-
-Tagged revisions
------------------
-• 1.7 (revision: '1769ee58fbb4')
-• 1.8 (revision: 'ae5522b4c674')
-
-Alembic revisions
------------------
-e402e9d9245e -> ae5522b4c674 (head), create fields table
-8be56284dac0 -> e402e9d9245e, create responses table
-3a8e2f9b5dea -> 8be56284dac0, create records table
-b9099dc08489 -> 3a8e2f9b5dea, create questions table
-1769ee58fbb4 -> b9099dc08489, create datasets table
-82a5a88a3fa5 -> 1769ee58fbb4, create workspaces_users table
-74694870197c -> 82a5a88a3fa5, create workspaces table
-<base> -> 74694870197c, create users table
-
-Current revision
-----------------
-Current revision(s) for sqlite:////path/to/argilla.db?check_same_thread=False:
-Rev: 1769ee58fbb4
-Parent: 82a5a88a3fa5
-Path: /path/to/alembic/versions/1769ee58fbb4_create_workspaces_users_table.py
-
-    create workspaces_users table
-
-    Revision ID: 1769ee58fbb4
-    Revises: 82a5a88a3fa5
-    Create Date: 2023-02-14 10:36:56.313539
-```
-
 ## How to guide
 
 :::{note}
 To connect to an old Argilla instance (`<1.3.0`) using newer clients, you should specify the default user API key `rubrix.apikey`. Otherwise, connections will fail with an Unauthorized server error.
 :::
 
-### Get default `User`
+### Get the current active `User`
 
-#### CLI
+::::{tab-set}
 
-By default, if the Argilla instance has no users, the following default owner user will be configured:
-
-- username: `argilla`
-- password: `12345678`
-- api_key: `argilla.apikey`
-
-For security reasons, we recommend changing at least the password and the API key. You can do this via the following CLI command:
+:::{tab-item} CLI
+After logging in, you can get the current active user in Argilla using the `whoami` command.
 
 ```bash
-python -m argilla database users create_default --password new-password --api-key new-api-key
+argilla login --api-url http://localhost:6900
+argilla whoami
 ```
+:::
 
-Which should produce the following output:
-
-```bash
-User with default credentials succesfully created:
-• username: 'argilla'
-• password: 'newpassword'
-• api_key:  'new-api-key'
-```
-
-#### Python client
-
+:::{tab-item} Python client
 You can get the current active user in Argilla using the `me` classmethod in the `User` class. Note that the `me` method will return the active user as specified via the credentials provided via `rg.init`.
 
 ```python
@@ -163,51 +68,30 @@ rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
 user = rg.User.me()
 ```
+:::
+
+::::
 
 ### Create a `User`
 
-#### CLI
+::::{tab-set}
 
+:::{tab-item} CLI
 You can create a new user in Argilla using the `create` command in the `users` group.
 
 ```bash
-python -m argilla database users create
+argilla users create
 ```
 
-```
-Usage: python -m argilla database users create [OPTIONS]
-
-  Creates a new user in the Argilla database with provided parameters
-
-Options:
-  --first-name TEXT
-  --last-name TEXT
-  --username TEXT           Username as a lowercase string without spaces
-                            allowing letters, numbers, dashes and underscores.
-
-  --role [owner|annotator]  Role for the user.  [default: annotator]
-  --password TEXT           Password as a string with a minimum length of 8
-                            characters.
-
-  --api-key TEXT            API key as a string with a minimum length of 8
-                            characters. If not specified a secure random API
-                            key will be generated
-
-  --workspace TEXT          A workspace that the user will be a member of (can
-                            be used multiple times).
-
-  --help                    Show this message and exit.
-```
-
-So for example, to create a new user with `admin` role, you can run the following command:
+So for example, to create a new user with `admin` role and member of `ws1` and `ws2` workspaces, you can run the following command:
 
 ```bash
-python -m argilla database users create --username new-user --first-name New --last-name User --password new-password --role admin
+argilla users create --username new-user --first-name New --last-name User --role admin --workspace ws1 --workspace ws2
 ```
+:::
 
-#### Python client
-
-You can also create a new user in Argilla using the `create` classmethod in the `User` class.
+:::{tab-item} Python client
+You can also create a new user in Argilla using the `create` classmethod in the `User` class. The provided workspaces must exist in Argilla.
 
 ```python
 import argilla as rg
@@ -223,19 +107,16 @@ user = rg.User.create(
     workspaces=["ws1", "ws2"]
 )
 ```
-
-:::{note}
-Please note that the provided workspaces must exist; otherwise, an error will be raised.
 :::
+
+::::
 
 ### Update a `User`
 
-#### CLI
-
-You can change the assigned role for an existing user.
+You can change the assigned role for an existing user using the database connection, therefore the environment variable `ARGILLA_DATABASE_URL` must be set unless you're using SQLite in which case you should be executing the command from the machine where Argilla server is running.
 
 ```bash
-python -m argilla database users update argilla --role owner
+argilla server database users update argilla --role owner
 ```
 ```bash
 User 'argilla' successfully updated:
@@ -276,26 +157,18 @@ user = rg.User.from_id("new-user")
 
 ### Assign a `User` to a `Workspace`
 
-#### CLI
+::::{tab-set}
+
+:::{tab-item} CLI
+
+You can assign a user to a workspace using the `add-user` command in the `workspace` group.
 
 ```bash
-python -m argilla database users create --role annotator --first-name Nick --last-name Name --username nick --password 11223344 --workspace ws
+argilla workspace --name ws1 add-user nick
 ```
+:::
 
-```
-User successfully created:
-• first_name: 'Nick'
-• last_name: 'Name'
-• username: 'nick'
-• role: 'annotator'
-• api_key: 'SrX9T_4DAWK65Ztp4sADfB3g05t3bpwjwgfIwR3BP90uRg_LkWlsBXccAI9KTRbedxMNDdw15pM-9p56vPQhFv88d8e-M7PzVDZave92qPA'
-• workspaces: ['ws']
-```
-
-The workspace `ws` is automatically created and assigned to the user.
-
-#### Python client
-
+:::{tab-item} Python client
 To assign a user to a workspace, you can use the `add_user` method in the `Workspace` class. For more information about workspaces, see the [Workspace Management](./workspace_management.md) guide.
 
 ```python
@@ -314,16 +187,30 @@ user = rg.User.create(
 workspace = rg.Workspace.create(name="ws")
 workspace.add_user(user.id)
 ```
+:::
+
+::::
 
 ### List `User`s
-
-#### Python client
-
-You can list all the existing users in Argilla calling the `list` classmethod of the `User` class.
 
 :::{note}
 Just the "owner" can list all the users in Argilla.
 :::
+
+::::{tab-set}
+
+:::{tab-item} CLI
+
+You can list all the existing users in Argilla using the `list` command in the `users` group.
+
+```bash
+argilla users list
+```
+:::
+
+:::{tab-item} Python client
+
+You can list all the existing users in Argilla calling the `list` classmethod of the `User` class.
 
 ```python
 import argilla as rg
@@ -332,16 +219,30 @@ rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
 
 users = rg.User.list()
 ```
+:::
+
+::::
 
 ### Delete a `User`
-
-#### Python client
-
-You can delete an existing user from Argilla calling the `delete` method on the `User` class.
 
 :::{note}
 Just the "owner" can delete users in Argilla.
 :::
+
+::::{tab-set}
+
+:::{tab-item} CLI
+
+You can delete an existing user in Argilla using the `delete` command in the `users` group.
+
+```bash
+argilla users --username existing-user delete
+```
+:::
+
+:::{tab-item} Python client
+
+You can delete an existing user from Argilla calling the `delete` method on the `User` class.
 
 ```python
 import argilla as rg
@@ -351,10 +252,21 @@ rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 user = rg.User.from_name("existing-user")
 user.delete()
 ```
+:::
+
+::::
+
+### Default user for the `argilla/argilla-server` Docker image
+
+If you're using the `argilla/argilla-server` Docker image, you can create the default user `argilla` with `owner` role by setting the following environment variables:
+
+- `DEFAULT_USER_ENABLED`: Set to `true` to enable the default user creation.
+- `DEFAULT_USER_PASSWORD`: If `DEFAULT_USER_ENABLED` is set to `true`, this environment variable must be set to the password for the default user.
+- `DEFAULT_USER_API_KEY`: If `DEFAULT_USER_ENABLED` is set to `true`, this environment variable must be set to the API key for the default user.
 
 ### Migrate users from the `users.yaml` file
 
-The migration tasks can create users and workspaces automatically from a yaml file with the following format:
+The migration command can create users and workspaces automatically from a YAML file with the following format:
 
 ```yaml
 - username: john
@@ -381,13 +293,15 @@ The migration tasks can create users and workspaces automatically from a yaml fi
   disabled: False
 ```
 
+To do so, the command will connect to the Argilla server database directly, therefore the environment variable `ARGILLA_DATABASE_URL` must be set unless you're using SQLite in which case you should be executing the command from the machine where Argilla server is running.
+
 The user role will be computed depending on how workspaces are setup for each user. If no `workspace` attribute is defined, the user will be considered an `owner`. Otherwise, the assigned user role will be `annotator`.
 
 The task will also create an extra workspace for each user named after their username.
 
 ```bash
 export ARGILLA_LOCAL_AUTH_USERS_DB_FILE=/path/to/.users.yml
-python -m argilla database users migrate
+argilla server database users migrate
 ```
 
 ```
@@ -398,24 +312,10 @@ Migrating User with username 'daisy'
 Users migration process successfully finished
 ```
 
-Ensure everything went as expected via the `User` class from the Python client:
+Ensure everything went as expected logging in and listing the users via the CLI:
 
-```python
-import argilla as rg
-
-rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
-
-users = rg.User.list()
-for user in users:
-   print(f"username={user.username} role={user.role} workspaces={user.workspaces}")
-```
-
-Which should print:
-
-```
-username=john role=owner workspaces=['john']
-username=tanya role=annotator workspaces=['tanya', 'argilla', 'team']
-username=daisy role=annotator workspaces=['daisy', 'argilla', 'team', 'latam']
+```bash
+argilla users list
 ```
 
 ### Migrate users with Docker Compose
@@ -450,7 +350,7 @@ docker-compose up
 And after running the containers you can run the task to migrate the users as follows:
 
 ```bash
-docker-compose exec argilla python -m argilla database users migrate
+docker-compose exec argilla argilla server database users migrate
 ```
 
 If everything went well, the configured users can now log in, their annotations will be tracked with their usernames, and they'll have access to the defined workspaces.

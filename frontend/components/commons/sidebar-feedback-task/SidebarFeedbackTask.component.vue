@@ -1,25 +1,22 @@
 <template>
   <div class="sidebar__container">
     <SidebarFeedbackTaskPanel v-if="isPanelVisible" @close-panel="closePanel">
-      <FeedbackTaskProgress
-        v-if="getProgressComponentName === 'FeedbackTaskProgress'"
-      />
+      <HelpShortcut v-if="currentPanel === 'help-shortcut'" />
+      <FeedbackTaskProgress v-else-if="currentPanel === 'metrics'" />
     </SidebarFeedbackTaskPanel>
     <SidebarFeedbackTask
       @on-click-sidebar-action="onClickSidebarAction"
       :sidebar-items="sidebarItems"
-      :active-buttons="[currentMetric, currentMode]"
-      :expanded-component="currentMetric"
+      :active-buttons="[currentPanel, currentMode]"
+      :expanded-component="currentPanel"
     />
   </div>
 </template>
 
 <script>
-const SIDEBAR_GROUP = Object.freeze({
-  METRICS: "METRICS",
-  MODE: "MODE",
-  REFRESH: "REFRESH",
-});
+import "assets/icons/progress";
+import "assets/icons/refresh";
+import "assets/icons/shortcuts";
 
 export default {
   props: {
@@ -29,24 +26,13 @@ export default {
     },
   },
   data: () => ({
-    currentMetric: null,
+    currentPanel: null,
     currentMode: "annotate",
+    isPanelVisible: false,
   }),
-  computed: {
-    getProgressComponentName() {
-      return (
-        this.sidebarItems.metrics.buttons.find(
-          ({ id }) => id === this.currentMetric
-        )?.component || null
-      );
-    },
-    isPanelVisible() {
-      return !!this.currentMetric;
-    },
-  },
   created() {
     this.sidebarItems = {
-      metrics: {
+      firstGroup: {
         buttonType: "expandable",
         buttons: [
           {
@@ -59,7 +45,7 @@ export default {
           },
         ],
       },
-      refresh: {
+      secondGroup: {
         buttonType: "default",
         buttons: [
           {
@@ -72,32 +58,49 @@ export default {
           },
         ],
       },
+      bottomGroup: {
+        buttonType: "expandable",
+        buttons: [
+          {
+            id: "help-shortcut",
+            tooltip: "Shortcuts",
+            icon: "shortcuts",
+            action: "show-help",
+            type: "custom-expandable",
+            component: "HelpShortcut",
+          },
+        ],
+      },
     };
   },
   methods: {
     onClickSidebarAction(group, info) {
       switch (group.toUpperCase()) {
-        case SIDEBAR_GROUP.METRICS:
-          this.toggleMetrics(info);
+        case "FIRSTGROUP":
+          this.togglePanel(info);
           break;
-        case SIDEBAR_GROUP.MODE:
-          console.log("change-view-mode", info);
-          break;
-        case SIDEBAR_GROUP.REFRESH:
+        case "SECONDGROUP":
           this.$emit("refresh");
+          break;
+        case "BOTTOMGROUP":
+          this.togglePanel(info);
           break;
         default:
           console.warn(info);
       }
     },
-    toggleMetrics(panelContent) {
-      this.currentMetric =
-        this.currentMetric !== panelContent ? panelContent : null;
-      $nuxt.$emit("on-sidebar-toggle-metrics", !!this.currentMetric);
+    togglePanel(panelContent) {
+      this.currentPanel =
+        this.currentPanel !== panelContent ? panelContent : null;
+
+      this.isPanelVisible = !!this.currentPanel;
+
+      $nuxt.$emit("on-sidebar-toggle-panel", this.isPanelVisible);
     },
     closePanel() {
-      this.currentMetric = null;
-      $nuxt.$emit("on-sidebar-toggle-metrics", null);
+      this.isPanelVisible = false;
+      this.currentPanel = null;
+      $nuxt.$emit("on-sidebar-toggle-panel", null);
     },
   },
 };

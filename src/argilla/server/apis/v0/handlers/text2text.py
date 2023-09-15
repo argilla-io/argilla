@@ -29,9 +29,7 @@ from argilla.server.apis.v0.models.text2text import (
 )
 from argilla.server.commons.config import TasksFactory
 from argilla.server.commons.models import TaskType
-from argilla.server.errors import EntityNotFoundError
 from argilla.server.models import User
-from argilla.server.schemas.v0.datasets import CreateDatasetRequest
 from argilla.server.security import auth
 from argilla.server.services.datasets import DatasetsService
 from argilla.server.services.tasks.text2text import Text2TextService
@@ -40,7 +38,7 @@ from argilla.server.services.tasks.text2text.models import ServiceText2TextQuery
 
 def configure_router():
     task_type = TaskType.text2text
-    base_endpoint = "/{name}/" + task_type
+    base_endpoint = f"/{{name}}/{task_type.value}"
 
     TasksFactory.register_task(
         task_type=TaskType.text2text,

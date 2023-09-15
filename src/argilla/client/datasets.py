@@ -30,7 +30,7 @@ from argilla.client.models import (
     TokenClassificationRecord,
 )
 from argilla.client.sdk.datasets.models import TaskType
-from argilla.utils.dependency import require_version, requires_version
+from argilla.utils.dependency import require_dependencies, requires_dependencies
 from argilla.utils.span_utils import SpanUtils
 
 if TYPE_CHECKING:
@@ -120,7 +120,7 @@ class DatasetBase:
     def __str__(self):
         return repr(self)
 
-    @requires_version("datasets>1.17.0")
+    @requires_dependencies("datasets>1.17.0")
     def to_datasets(self) -> "datasets.Dataset":
         """Exports your records to a `datasets.Dataset`.
 
@@ -464,7 +464,7 @@ class DatasetBase:
             )
         elif framework in [Framework.SPACY, Framework.SPACY_TRANSFORMERS, Framework.SPARK_NLP, Framework.OPENAI]:
             if train_size and test_size:
-                require_version("scikit-learn")
+                require_dependencies("scikit-learn")
                 from sklearn.model_selection import train_test_split
 
                 records_train, records_test = train_test_split(
@@ -501,7 +501,7 @@ class DatasetBase:
                 f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
             )
 
-    @requires_version("spacy")
+    @requires_dependencies("spacy")
     def _prepare_for_training_with_spacy(
         self, **kwargs
     ) -> Union["spacy.token.DocBin", Tuple["spacy.token.DocBin", "spacy.token.DocBin"]]:
@@ -516,7 +516,7 @@ class DatasetBase:
 
         raise NotImplementedError
 
-    @requires_version("datasets>1.17.0")
+    @requires_dependencies("datasets>1.17.0")
     def _prepare_for_training_with_transformers(self, **kwargs) -> "datasets.Dataset":
         """Prepares the dataset for training using the "transformers" framework.
 
@@ -618,7 +618,7 @@ class DatasetForTextClassification(DatasetBase):
         super().__init__(records=records)
 
     @classmethod
-    @requires_version("datasets>1.17.0")
+    @requires_dependencies("datasets>1.17.0")
     def from_datasets(
         cls,
         dataset: "datasets.Dataset",
@@ -769,7 +769,7 @@ class DatasetForTextClassification(DatasetBase):
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForTextClassification":
         return cls([TextClassificationRecord(**row) for row in dataframe.to_dict("records")])
 
-    @requires_version("datasets>1.17.0")
+    @requires_dependencies("datasets>1.17.0")
     def _prepare_for_training_with_transformers(
         self,
         train_size: Optional[float] = None,
@@ -815,7 +815,7 @@ class DatasetForTextClassification(DatasetBase):
         ds = datasets.Dataset.from_dict(ds_dict, features=datasets.Features(feature_dict))
 
         if self._records[0].multi_label:
-            require_version("scikit-learn")
+            require_dependencies("scikit-learn")
             from sklearn.preprocessing import MultiLabelBinarizer
 
             labels = [rec["label"] for rec in ds]
@@ -836,7 +836,7 @@ class DatasetForTextClassification(DatasetBase):
 
         return ds
 
-    @requires_version("spacy")
+    @requires_dependencies("spacy")
     def _prepare_for_training_with_spacy(self, nlp: "spacy.Language", records: List[Record]) -> "spacy.tokens.DocBin":
         from spacy.tokens import DocBin
 
@@ -1015,7 +1015,7 @@ class DatasetForTokenClassification(DatasetBase):
         return parent_fields + ["tags"]  # compute annotation from tags
 
     @classmethod
-    @requires_version("datasets>1.17.0")
+    @requires_dependencies("datasets>1.17.0")
     def from_datasets(
         cls,
         dataset: "datasets.Dataset",
@@ -1093,7 +1093,7 @@ class DatasetForTokenClassification(DatasetBase):
     ) -> "DatasetForTokenClassification":
         return super().from_pandas(dataframe)
 
-    @requires_version("datasets>1.17.0")
+    @requires_dependencies("datasets>1.17.0")
     def _prepare_for_training_with_transformers(
         self,
         train_size: Optional[float] = None,
@@ -1133,7 +1133,7 @@ class DatasetForTokenClassification(DatasetBase):
 
         return ds
 
-    @requires_version("spacy")
+    @requires_dependencies("spacy")
     def _prepare_for_training_with_spacy(self, nlp: "spacy.Language", records: List[Record]) -> "spacy.tokens.DocBin":
         from spacy.tokens import DocBin
 
@@ -1326,7 +1326,7 @@ class DatasetForText2Text(DatasetBase):
         super().__init__(records=records)
 
     @classmethod
-    @requires_version("datasets>1.17.0")
+    @requires_dependencies("datasets>1.17.0")
     def from_datasets(
         cls,
         dataset: "datasets.Dataset",
@@ -1429,7 +1429,7 @@ class DatasetForText2Text(DatasetBase):
     def _from_pandas(cls, dataframe: pd.DataFrame) -> "DatasetForText2Text":
         return cls([Text2TextRecord(**row) for row in dataframe.to_dict("records")])
 
-    @requires_version("datasets>1.17.0")
+    @requires_dependencies("datasets>1.17.0")
     def _prepare_for_training_with_transformers(
         self,
         train_size: Optional[float] = None,

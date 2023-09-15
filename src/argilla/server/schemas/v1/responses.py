@@ -16,7 +16,8 @@ from datetime import datetime
 from typing import Any, Dict, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from fastapi import Body
+from pydantic import BaseModel
 
 try:
     from typing import Annotated
@@ -63,5 +64,5 @@ class DraftResponseUpdate(BaseModel):
 
 
 ResponseUpdate = Annotated[
-    Union[SubmittedResponseUpdate, DiscardedResponseUpdate, DraftResponseUpdate], Field(discriminator="status")
+    Union[SubmittedResponseUpdate, DiscardedResponseUpdate, DraftResponseUpdate], Body(..., discriminator="status")
 ]

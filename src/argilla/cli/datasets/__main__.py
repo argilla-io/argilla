@@ -64,7 +64,7 @@ def callback(
     ctx.obj = dataset
 
 
-app = typer.Typer(help="Holds CLI commands for datasets management", no_args_is_help=True, callback=callback)
+app = typer.Typer(help="Commands for dataset management", no_args_is_help=True, callback=callback)
 
 app.command(name="list", help="List datasets linked to user's workspaces")(list_datasets)
 app.command(name="push-to-huggingface", help="Push a dataset to HuggingFace Hub")(push_to_huggingface)
