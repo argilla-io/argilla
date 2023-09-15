@@ -23,6 +23,7 @@ export const useQuestionFormViewModel = () => {
 
   const discard = (record: Record) => {
     debounceForAutoSave.stop();
+    beforeUnload.destroy();
 
     queue.enqueue(() => {
       return discardUseCase.execute(record);
@@ -31,6 +32,7 @@ export const useQuestionFormViewModel = () => {
 
   const submit = (record: Record) => {
     debounceForAutoSave.stop();
+    beforeUnload.destroy();
 
     queue.enqueue(() => {
       return submitUseCase.execute(record);
@@ -39,6 +41,7 @@ export const useQuestionFormViewModel = () => {
 
   const clear = (record: Record) => {
     debounceForAutoSave.stop();
+    beforeUnload.destroy();
 
     queue.enqueue(() => {
       return clearUseCase.execute(record);
