@@ -81,7 +81,7 @@ jobs:
 
           echo "$DOCKER_HUB_TAGS,$GCP_REGISTRY_TAG" >> $GITHUB_OUTPUT
         env:
-          IMAGE_NAME: ${{ inputs.image_name }}
+          IMAGE_NAME: ${{ inputs.image-name }}
           DOCKER_IMAGE_TAG: ${{ steps.docker-image-tag-from-ref.outputs.docker-image-tag }}
 
       - name: Login to Docker Hub
