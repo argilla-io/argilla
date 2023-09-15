@@ -58,6 +58,7 @@ These are the section headers that we use:
 
 ### Fixed
 
+- Fixed `remove user modification in text component on clear answers` ([#3775](https://github.com/argilla-io/argilla/pull/3775))
 - Fixed `Highlight raw text field in dataset feedback task` ([#3731](https://github.com/argilla-io/argilla/pull/3731))
 - Fixed `Field title too long` ([#3734](https://github.com/argilla-io/argilla/pull/3734))
 - Fixed error messages when deleting a `DatasetForTextClassification` ([#3652](https://github.com/argilla-io/argilla/pull/3652))
