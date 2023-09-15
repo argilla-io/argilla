@@ -100,143 +100,24 @@ export default {
       required: true,
     },
   },
-  data() {
-    return {
-      isFormTouched: false,
-      autofocusPosition: 0,
-      interactionCount: 0,
-      userComesFromOutside: false,
-    };
-  },
-  setup() {
-    return useQuestionFormViewModel();
-  },
-  computed: {
-    formHasFocus() {
-      return this.autofocusPosition || this.autofocusPosition == 0;
-    },
-    numberOfQuestions() {
-      return this.record.questions.length;
-    },
-    questionAreCompletedCorrectly() {
-      return this.record.questionAreCompletedCorrectly();
-    },
-    isSubmitButtonDisabled() {
-      if (this.record.isSubmitted)
-        return !this.isFormTouched || !this.questionAreCompletedCorrectly;
-
-      return !this.questionAreCompletedCorrectly;
-    },
+  emits: ["on-submit-responses", "on-discard-responses"],
+  setup(props, context) {
+    return useQuestionFormViewModel(props.record, context);
   },
   watch: {
     isFormTouched(isFormTouched) {
       if (this.record.isSubmitted)
         this.emitIsQuestionsFormTouched(isFormTouched);
     },
-    record: {
-      deep: true,
-      immediate: true,
-      handler() {
-        if (this.record.isModified) this.saveDraft(this.record);
-
-        this.isFormTouched = this.record.isModified;
-      },
-    },
-  },
-  created() {
-    this.record.initialize();
-  },
-  mounted() {
-    document.addEventListener("keydown", this.handleGlobalKeys);
   },
   destroyed() {
     this.emitIsQuestionsFormTouched(false);
-
-    document.removeEventListener("keydown", this.handleGlobalKeys);
   },
   methods: {
-    focusOnFirstQuestionFromOutside(event) {
-      if (!this.userComesFromOutside) return;
-      if (event.srcElement.id || event.srcElement.getAttribute("for")) return;
-
-      this.userComesFromOutside = false;
-      this.focusOnFirstQuestion(event);
-    },
-    focusOnFirstQuestion(event) {
-      event.preventDefault();
-      this.updateQuestionAutofocus(0);
-    },
-    onClickOutside() {
-      this.autofocusPosition = null;
-      this.userComesFromOutside = true;
-    },
-    handleGlobalKeys(event) {
-      const { code, shiftKey, ctrlKey, metaKey } = event;
-
-      if (code == "Tab" && this.userComesFromOutside) {
-        this.focusOnFirstQuestionFromOutside(event);
-
-        return;
-      }
-
-      switch (code) {
-        case "KeyS": {
-          if (ctrlKey || metaKey) {
-            event.preventDefault();
-            event.stopPropagation();
-            this.onSaveDraftImmediately();
-          }
-          break;
-        }
-        case "Enter": {
-          if (shiftKey) this.onSubmit();
-          break;
-        }
-        case "Space": {
-          if (shiftKey) {
-            event.preventDefault(); // TODO: Review this line
-            this.onClear();
-          }
-          break;
-        }
-        case "Backspace": {
-          if (shiftKey) this.onDiscard();
-          break;
-        }
-        default:
-      }
-    },
-    async onDiscard() {
-      if (this.record.isDiscarded) return;
-
-      await this.discard(this.record);
-
-      this.$emit("on-discard-responses");
-    },
-    async onSubmit() {
-      if (this.isSubmitButtonDisabled) return;
-
-      await this.submit(this.record);
-
-      this.$emit("on-submit-responses");
-    },
-    async onClear() {
-      await this.clear(this.record);
-    },
-    async onSaveDraftImmediately() {
-      await this.saveDraftImmediately(this.record);
-    },
     emitIsQuestionsFormTouched(isFormTouched) {
       this.$emit("on-question-form-touched", isFormTouched);
 
       this.$root.$emit("are-responses-untouched", !isFormTouched);
-    },
-    updateQuestionAutofocus(index) {
-      this.interactionCount++;
-      this.autofocusPosition = Math.min(
-        this.numberOfQuestions - 1,
-        Math.max(0, index)
-      );
     },
   },
 };
