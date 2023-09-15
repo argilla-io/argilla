@@ -76,7 +76,7 @@ jobs:
           GCP_REGISTRY_TAG="europe-docker.pkg.dev/argilla-ci/$IMAGE_NAME:$DOCKER_IMAGE_TAG"
 
           if [[ $GITHUB_REF == refs/tags/* ]]; then
-            DOCKER_HUB_TAGS="$DOCKER_HUB_TAGS,$IMAGE_NAME/latest"
+            DOCKER_HUB_TAGS="$DOCKER_HUB_TAGS,$IMAGE_NAME:latest"
           fi
 
           echo "$DOCKER_HUB_TAGS,$GCP_REGISTRY_TAG" >> $GITHUB_OUTPUT
