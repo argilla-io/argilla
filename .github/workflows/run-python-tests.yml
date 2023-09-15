@@ -78,12 +78,12 @@ jobs:
           HF_HUB_ACCESS_TOKEN: ${{ secrets.HF_HUB_ACCESS_TOKEN }}
         run: echo "Enable HF access token"
       - name: Set huggingface hub credentials
-        if: startsWith(searchEngineDockerImage, 'docker.elastic.co')
+        if: startsWith(inputs.searchEngineDockerImage, 'docker.elastic.co')
         env:
           ARGILLA_SEARCH_ENGINE: elasticsearch
         run: echo "Configure elasticsearch engine"
       - name: Set huggingface hub credentials
-        if: startsWith(searchEngineDockerImage, 'opensearchproject')
+        if: startsWith(inputs.searchEngineDockerImage, 'opensearchproject')
         env:
           ARGILLA_SEARCH_ENGINE: opensearch
         run: echo "Configure opensearch engine"
