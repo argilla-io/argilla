@@ -1,90 +1,91 @@
-import { useResolve } from "ts-injecty";
-import { ref } from "vue-demi";
+import { ref, computed, watch } from "vue-demi";
+import { useDraft } from "./useDraft";
+import { useDiscard } from "./useDiscard";
+import { useClear } from "./useClear";
+import { useSubmit } from "./useSubmit";
+import { useQuestionsFormFocus } from "./useQuestionsFormFocus";
+import { useHandleGlobalKeys } from "./useHandleGlobalKeys";
 import { Record } from "~/v1/domain/entities/record/Record";
-import { ClearRecordUseCase } from "~/v1/domain/usecases/clear-record-use-case";
-import { DiscardRecordUseCase } from "~/v1/domain/usecases/discard-record-use-case";
-import { SubmitRecordUseCase } from "~/v1/domain/usecases/submit-record-use-case";
-import { SaveDraftRecord } from "~/v1/domain/usecases/save-draft-use-case";
 import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
 import { useQueue } from "~/v1/infrastructure/services/useQueue";
-import { useBeforeUnload } from "~/v1/infrastructure/services/useBeforeUnload";
 
-export const useQuestionFormViewModel = () => {
-  const beforeUnload = useBeforeUnload();
+export const useQuestionFormViewModel = (record: Record, context) => {
+  record.initialize();
+
+  // ACTIONS ON FORM
   const queue = useQueue();
   const debounceForAutoSave = useDebounce(2000);
   const debounceForSavingMessage = useDebounce(1000);
+  const isFormTouched = ref(false);
 
-  const draftSaving = ref(false);
-  const discardUseCase = useResolve(DiscardRecordUseCase);
-  const submitUseCase = useResolve(SubmitRecordUseCase);
-  const clearUseCase = useResolve(ClearRecordUseCase);
-  const saveDraftUseCase = useResolve(SaveDraftRecord);
+  // computed
+  const questionAreCompletedCorrectly = computed((): boolean => {
+    return record.questionAreCompletedCorrectly();
+  });
 
-  const discard = (record: Record) => {
-    debounceForAutoSave.stop();
+  const { onDiscard } = useDiscard(record, debounceForAutoSave, queue, context);
+  const { onClear } = useClear(record, debounceForAutoSave, queue);
+  const { isSubmitButtonDisabled, onSubmit } = useSubmit(
+    record,
+    questionAreCompletedCorrectly,
+    isFormTouched,
+    debounceForAutoSave,
+    queue,
+    context
+  );
+  const { draftSaving, onSaveDraftImmediately, saveDraft } = useDraft(
+    record,
+    debounceForAutoSave,
+    debounceForSavingMessage,
+    queue
+  );
 
-    queue.enqueue(() => {
-      return discardUseCase.execute(record);
-    });
-  };
-
-  const submit = (record: Record) => {
-    debounceForAutoSave.stop();
-
-    queue.enqueue(() => {
-      return submitUseCase.execute(record);
-    });
-  };
-
-  const clear = (record: Record) => {
-    debounceForAutoSave.stop();
-
-    queue.enqueue(() => {
-      return clearUseCase.execute(record);
-    });
-  };
-
-  const onSaveDraft = async (record: Record) => {
-    if (!record.hasAnyQuestionAnswered) return;
-    draftSaving.value = true;
-
-    try {
-      beforeUnload.confirm();
-      await saveDraftUseCase.execute(record);
-    } finally {
-      await debounceForSavingMessage.wait();
-
-      draftSaving.value = false;
-      beforeUnload.destroy();
+  // watch
+  watch(
+    record,
+    () => {
+      if (record.isModified) saveDraft(record);
+      isFormTouched.value = record.isModified;
+    },
+    {
+      immediate: true,
+      deep: true,
     }
-  };
+  );
 
-  const saveDraft = async (record: Record) => {
-    if (record.isSubmitted) return;
-    beforeUnload.confirm();
-    await debounceForAutoSave.wait();
+  // FOR FOCUS AND GLOBAL KEYS
+  const userComesFromOutside = ref(false);
 
-    queue.enqueue(() => {
-      return onSaveDraft(record);
-    });
-  };
+  const {
+    interactionCount,
+    autofocusPosition,
+    formHasFocus,
+    onClickOutside,
+    updateQuestionAutofocus,
+    focusOnFirstQuestionFromOutside,
+  } = useQuestionsFormFocus(record, userComesFromOutside);
 
-  const saveDraftImmediately = (record: Record) => {
-    if (record.isSubmitted) return;
-    debounceForAutoSave.stop();
-
-    queue.enqueue(() => {
-      return onSaveDraft(record);
-    });
-  };
+  useHandleGlobalKeys(
+    userComesFromOutside,
+    focusOnFirstQuestionFromOutside,
+    onSaveDraftImmediately,
+    onSubmit,
+    onClear,
+    onDiscard
+  );
 
   return {
-    clear,
-    submit,
-    discard,
-    saveDraft,
+    onClear,
+    onSubmit,
+    onDiscard,
     draftSaving,
-    saveDraftImmediately,
+    isSubmitButtonDisabled,
+    isFormTouched,
+    formHasFocus,
+    interactionCount,
+    onClickOutside,
+    updateQuestionAutofocus,
+    focusOnFirstQuestionFromOutside,
+    autofocusPosition,
   };
 };
