@@ -284,6 +284,7 @@ async def create_dataset_question(
 async def create_dataset_vector_settings(
     *,
     db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     vector_settings_create: VectorSettingsCreate,
     current_user: User = Security(auth.get_current_user),
@@ -300,7 +301,9 @@ async def create_dataset_vector_settings(
         )
 
     try:
-        vector_settings = await datasets.create_vector_settings(db, dataset, vector_settings_create)
+        vector_settings = await datasets.create_vector_settings(
+            db, search_engine, dataset=dataset, vector_settings_create=vector_settings_create
+        )
         return vector_settings
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))

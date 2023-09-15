@@ -218,18 +218,22 @@ async def get_vector_settings_by_name_and_dataset_id(
 
 
 async def create_vector_settings(
-    db: "AsyncSession", dataset: Dataset, vector_settings_create: "VectorSettingsCreate"
+    db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, vector_settings_create: "VectorSettingsCreate"
 ) -> VectorSettings:
-    if dataset.is_ready:
-        raise ValueError("Vector settings cannot be created for a published dataset")
+    async with db.begin_nested():
+        vector_settings = await VectorSettings.create(
+            db,
+            name=vector_settings_create.name,
+            dimensions=vector_settings_create.dimensions,
+            description=vector_settings_create.description,
+            dataset_id=dataset.id,
+            autocommit=False,
+        )
+        # TODO: call `search_engine.configure_index_vectors` once PR merged
 
-    return await VectorSettings.create(
-        db,
-        name=vector_settings_create.name,
-        dimensions=vector_settings_create.dimensions,
-        description=vector_settings_create.description,
-        dataset_id=dataset.id,
-    )
+    await db.commit()
+
+    return vector_settings
 
 
 async def get_record_by_id(
