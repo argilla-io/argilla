@@ -45,7 +45,7 @@ docker-compose stop
 :::
 
 :::{note}
-By default, telemetry is enabled. This helps us to improve our product. For more info about the metrics and disabling them check [telemetry](../../reference/telemetry.md).
+By default, telemetry is enabled. This helps us to improve our product. For more info about the metrics and disabling them check [telemetry](/reference/telemetry.md).
 
 :::
 
