@@ -33,7 +33,7 @@ class FeedbackDatasetModel(BaseModel):
 
 class FeedbackRankingValueModel(BaseModel):
     value: StrictStr
-    rank: conint(ge=1)
+    rank: Optional[conint(ge=1)] = None
 
 
 class FeedbackValueModel(BaseModel):
