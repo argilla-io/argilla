@@ -332,6 +332,10 @@ class VectorSettings(BaseModel):
         orm_mode = True
 
 
+class VectorsSettings(BaseModel):
+    items: List[VectorSettings]
+
+
 class VectorSettingsCreate(BaseModel):
     name: str = PydanticField(
         ...,

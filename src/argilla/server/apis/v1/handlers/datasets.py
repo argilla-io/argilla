@@ -44,6 +44,7 @@ from argilla.server.schemas.v1.datasets import (
     SearchRecordsResult,
     VectorSettings,
     VectorSettingsCreate,
+    VectorsSettings,
 )
 from argilla.server.search_engine import SearchEngine, UserResponseStatusFilter, get_search_engine
 from argilla.server.security import auth
@@ -58,9 +59,19 @@ router = APIRouter(tags=["datasets"])
 
 
 async def _get_dataset(
-    db: AsyncSession, dataset_id: UUID, with_fields: bool = False, with_questions: bool = False
+    db: AsyncSession,
+    dataset_id: UUID,
+    with_fields: bool = False,
+    with_questions: bool = False,
+    with_vectors_settings: bool = False,
 ) -> DatasetModel:
-    dataset = await datasets.get_dataset_by_id(db, dataset_id, with_fields=with_fields, with_questions=with_questions)
+    dataset = await datasets.get_dataset_by_id(
+        db,
+        dataset_id,
+        with_fields=with_fields,
+        with_questions=with_questions,
+        with_vectors_settings=with_vectors_settings,
+    )
     if not dataset:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -109,6 +120,17 @@ async def list_dataset_questions(
     await authorize(current_user, DatasetPolicyV1.get(dataset))
 
     return Questions(items=dataset.questions)
+
+
+@router.get("/datasets/{dataset_id}/vectors-settings", response_model=VectorsSettings)
+async def list_dataset_vector_settings(
+    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
+):
+    dataset = await _get_dataset(db, dataset_id, with_vectors_settings=True)
+
+    await authorize(current_user, DatasetPolicyV1.get(dataset))
+
+    return VectorsSettings(items=dataset.vectors_settings)
 
 
 @router.get("/me/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)

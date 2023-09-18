@@ -52,7 +52,11 @@ LIST_RECORDS_LIMIT = 20
 
 
 async def get_dataset_by_id(
-    db: "AsyncSession", dataset_id: UUID, with_fields: bool = False, with_questions: bool = False
+    db: "AsyncSession",
+    dataset_id: UUID,
+    with_fields: bool = False,
+    with_questions: bool = False,
+    with_vectors_settings: bool = False,
 ) -> Dataset:
     query = select(Dataset).filter_by(id=dataset_id)
     options = []
@@ -60,6 +64,8 @@ async def get_dataset_by_id(
         options.append(selectinload(Dataset.fields))
     if with_questions:
         options.append(selectinload(Dataset.questions))
+    if with_vectors_settings:
+        options.append(selectinload(Dataset.vectors_settings))
     if options:
         query = query.options(*options)
     result = await db.execute(query)
