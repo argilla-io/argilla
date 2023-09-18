@@ -160,7 +160,7 @@ bash scripts/build_frontend.sh
 Run database migrations executing the following task:
 
 ```sh
-python -m argilla database migrate
+argilla server database migrate
 ```
 
 The default SQLite database will be created at `~/.argilla/argilla.db`. This can be changed setting different values for `ARGILLA_DATABASE_URL` and `ARGILLA_HOME_PATH` environment variables.
@@ -175,13 +175,9 @@ alembic -c src/argilla/alembic.ini revision --autogenerate -m "descriptive messa
 
 `alembic` will automatically detect the changes made and generate a new migration script in the `src/argilla/server/alembic/versions` directory.
 
-<div class="alert alert-info">
-
-Note
-
+:::{note}
 After generating a new migration script, you will need to apply the migrations as described in [running database migrations](#running-database-migrations).
-
-</div>
+:::
 
 ### Recreating the database
 
@@ -196,17 +192,17 @@ rm ~/.argilla/argilla.db
 After deleting the database, you will need to run the database migrate task:
 
 ```sh
-python -m argilla database migrate
+argilla server database migrate
 ```
 
 By following these steps, you'll have a fresh and clean database to work with.
 
 ### Creating your first user
 
-At least one user is required to interact with Argila API and web UI. You can create easily create your user executing the following task:
+At least one user is required to interact with Argilla API and web UI. You can easily create one user executing the following command:
 
 ```sh
-python -m argilla database users create
+argilla server database users create
 ```
 
 This task will ask you for the required information to create your user, including `username`, `password` and so on.
@@ -216,7 +212,7 @@ This task will ask you for the required information to create your user, includi
 Finally to run the web app now simply execute:
 
 ```sh
-python -m argilla server
+argilla server start
 ```
 
 Congrats, you are ready to take _Argilla_ to the next level 🚀

@@ -29,6 +29,13 @@ from argilla.client.feedback.schemas import (
     TextQuestion,
 )
 from argilla.client.feedback.schemas.types import AllowedQuestionTypes
+from argilla.client.feedback.unification import (
+    LabelQuestionStrategy,
+    MultiLabelQuestionStrategy,
+    RankingQuestionStrategy,
+    RatingQuestionStrategy,
+    TextQuestionStrategy,
+)
 from argilla.client.feedback.utils import feedback_dataset_in_argilla
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.workspaces import Workspace
@@ -178,6 +185,8 @@ class ArgillaMixin:
             id=argilla_id,
             name=name,
             workspace=workspace,
+            created_at=new_dataset.inserted_at,
+            updated_at=new_dataset.updated_at,
             fields=fields,
             questions=questions,
             guidelines=self.guidelines,
@@ -283,6 +292,8 @@ class ArgillaMixin:
             id=existing_dataset.id,
             name=existing_dataset.name,
             workspace=Workspace.from_id(existing_dataset.workspace_id),
+            created_at=existing_dataset.inserted_at,
+            updated_at=existing_dataset.updated_at,
             fields=fields,
             questions=questions,
             guidelines=existing_dataset.guidelines or None,
@@ -310,24 +321,67 @@ class ArgillaMixin:
         if workspace is not None:
             workspace = Workspace.from_name(workspace)
 
-        # TODO(alvarobartt or gabrielmbmb): add `workspace_id` in `GET /api/v1/datasets`
-        # and in `GET /api/v1/me/datasets` to filter by workspace
         try:
-            datasets = datasets_api_v1.list_datasets(client=httpx_client).parsed
+            datasets = datasets_api_v1.list_datasets(
+                client=httpx_client, workspace_id=workspace.id if workspace is not None else None
+            ).parsed
         except Exception as e:
             raise RuntimeError(
                 f"Failed while listing the `FeedbackDataset` datasets in Argilla with exception: {e}"
             ) from e
+
+        if len(datasets) == 0:
+            return []
         return [
             RemoteFeedbackDataset(
                 client=httpx_client,
                 id=dataset.id,
                 name=dataset.name,
                 workspace=workspace if workspace is not None else Workspace.from_id(dataset.workspace_id),
+                created_at=dataset.inserted_at,
+                updated_at=dataset.updated_at,
                 fields=cls.__get_fields(client=httpx_client, id=dataset.id),
                 questions=cls.__get_questions(client=httpx_client, id=dataset.id),
                 guidelines=dataset.guidelines or None,
             )
             for dataset in datasets
-            if workspace is None or dataset.workspace_id == workspace.id
         ]
+
+
+class UnificationMixin:
+    def unify_responses(
+        self,
+        question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
+        strategy: Union[
+            str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy, RankingQuestionStrategy
+        ],
+    ) -> None:
+        """
+        The `unify_responses` function takes a question and a strategy as input and applies the strategy
+        to unify the responses for that question.
+
+        Args:
+            question The `question` parameter can be either a string representing the name of the
+                question, or an instance of one of the question classes (`LabelQuestion`, `MultiLabelQuestion`,
+                `RatingQuestion`, `RankingQuestion`).
+            strategy The `strategy` parameter is used to specify the strategy to be used for unifying
+                responses for a given question. It can be either a string or an instance of a strategy class.
+        """
+        if isinstance(question, str):
+            question = self.question_by_name(question)
+
+        if isinstance(strategy, str):
+            if isinstance(question, LabelQuestion):
+                strategy = LabelQuestionStrategy(strategy)
+            elif isinstance(question, MultiLabelQuestion):
+                strategy = MultiLabelQuestionStrategy(strategy)
+            elif isinstance(question, RatingQuestion):
+                strategy = RatingQuestionStrategy(strategy)
+            elif isinstance(question, RankingQuestion):
+                strategy = RankingQuestionStrategy(strategy)
+            elif isinstance(question, TextQuestion):
+                strategy = TextQuestionStrategy(strategy)
+            else:
+                raise ValueError(f"Question {question} is not supported yet")
+
+        strategy.unify_responses(self.records, question)

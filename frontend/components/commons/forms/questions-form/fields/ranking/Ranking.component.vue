@@ -4,8 +4,12 @@
       :question="question"
       :showSuggestion="showSuggestion"
     />
-
-    <DndSelectionComponent :ranking="ranking" @on-reorder="onChanged" />
+    <DndSelectionComponent
+      :ranking="ranking"
+      @on-reorder="onChanged"
+      :isFocused="isFocused"
+      @on-focus="onFocus"
+    />
   </div>
 </template>
 
@@ -23,6 +27,10 @@ export default {
       type: Boolean,
       default: () => false,
     },
+    isFocused: {
+      type: Boolean,
+      default: () => false,
+    },
   },
   data() {
     return {
@@ -30,9 +38,6 @@ export default {
     };
   },
   computed: {
-    optionsHasAllResponsesWithRank() {
-      return this.options.every((option) => option.rank);
-    },
     ranking() {
       return adaptQuestionsToSlots({ options: this.options });
     },
@@ -44,6 +49,9 @@ export default {
       });
 
       this.options = this.question.answer.values;
+    },
+    onFocus() {
+      this.$emit("on-focus");
     },
   },
 };

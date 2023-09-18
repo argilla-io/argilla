@@ -1,13 +1,20 @@
 <template>
   <div class="container">
     <div class="inputs-area">
-      <div class="input-button" v-for="option in options" :key="option.id">
+      <div
+        class="input-button"
+        v-for="option in options"
+        :key="option.id"
+        @keydown.enter.prevent
+      >
         <input
+          ref="options"
           type="checkbox"
           :name="option.value"
           :id="option.id"
           v-model="option.isSelected"
           @change="onSelect(option)"
+          @focus="onFocus"
         />
         <label
           class="label-text cursor-pointer"
@@ -28,23 +35,41 @@ export default {
       type: Array,
       required: true,
     },
+    isFocused: {
+      type: Boolean,
+      default: () => false,
+    },
   },
   model: {
     prop: "options",
     event: "on-change",
   },
+  watch: {
+    isFocused: {
+      immediate: true,
+      handler(newValue) {
+        if (newValue) {
+          this.$nextTick(() => {
+            const options = this.$refs?.options;
+            if (options.some((o) => o.contains(document.activeElement))) {
+              return;
+            }
+            options[0].focus();
+          });
+        }
+      },
+    },
+  },
   methods: {
     onSelect({ id, isSelected }) {
-      this.options.map((option) => {
-        if (option.id === id) {
-          option.isSelected = isSelected;
-        } else {
-          option.isSelected = false;
-        }
-        return option;
+      this.options.forEach((option) => {
+        option.isSelected = option.id === id ? isSelected : false;
       });
 
       this.$emit("on-change", this.options);
+    },
+    onFocus() {
+      this.$emit("on-focus");
     },
   },
 };
@@ -83,12 +108,29 @@ export default {
     background: darken(palette(purple, 800), 8%);
   }
 }
-input {
-  display: none;
+input[type="checkbox"] {
+  @extend %visuallyhidden;
+  &:focus {
+    & + .label-text {
+      outline: 2px solid $primary-color;
+    }
+  }
+}
+.input-button:not(:first-of-type) {
+  input[type="checkbox"] {
+    &:focus:not(:focus-visible) {
+      & + .label-text {
+        outline: none;
+        &.label-active {
+          outline: none;
+        }
+      }
+    }
+  }
 }
 .label-active {
   color: white;
-  background: #4c4ea3;
+  background: palette(purple, 200);
 }
 .cursor-pointer {
   cursor: pointer;

@@ -1,6 +1,6 @@
 <template>
   <div class="record">
-    <StatusTag class="record__status" :title="recordStatus" />
+    <StatusTag class="record__status" :recordStatus="recordStatus" />
     <div
       v-for="{ id, title, content, isTextType, settings } in fields"
       :key="id"
@@ -10,6 +10,7 @@
         :title="title"
         :fieldText="content"
         :useMarkdown="settings.use_markdown"
+        :stringToHighlight="searchValue"
       />
     </div>
   </div>
@@ -25,6 +26,11 @@ export default {
     fields: {
       type: Array,
       required: true,
+    },
+  },
+  computed: {
+    searchValue() {
+      return this.$route.query?._search ?? "";
     },
   },
 };

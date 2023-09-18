@@ -6,6 +6,11 @@
         ref="prevButton"
         @click="onClickPrev"
         :disabled="isFirstPage"
+        :title="
+          $platform.isMac
+            ? $t('shortcuts.pagination.go_to_previous_record_mac')
+            : $t('shortcuts.pagination.go_to_previous_record')
+        "
       >
         <svgicon name="chevron-left" width="8" height="8" />
         {{ prevButtonMessage }}
@@ -15,7 +20,11 @@
         class="pagination__button"
         ref="nextButton"
         @click="onClickNext"
-        :disabled="false"
+        :title="
+          $platform.isMac
+            ? $t('shortcuts.pagination.go_to_next_record_mac')
+            : $t('shortcuts.pagination.go_to_next_record')
+        "
       >
         {{ nextButtonMessage }}
         <svgicon name="chevron-right" width="8" height="8" />
@@ -45,27 +54,38 @@ export default {
     isFirstPage() {
       return this.currentPage === 1;
     },
-    // TODO: Move to the parent
     pageFromRoute() {
       return parseFloat(this.$route.query?._page) || 1;
     },
   },
   mounted() {
-    document.addEventListener("keydown", this.onPressKeyboardShortCut);
+    document.addEventListener("keydown", this.onPressKeyboardShortcuts);
   },
   destroyed() {
-    // TODO: Move this to the parent
-    document.removeEventListener("keydown", this.onPressKeyboardShortCut);
+    document.removeEventListener("keydown", this.onPressKeyboardShortcuts);
   },
   methods: {
-    onPressKeyboardShortCut({ code }) {
+    stopPropagationForNativeBehavior(event) {
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    onPressKeyboardShortcuts(event) {
+      const { code, ctrlKey, metaKey } = event;
+      if (this.$platform.isMac) {
+        if (!metaKey) return;
+      } else {
+        if (!ctrlKey) return;
+      }
+
       switch (code) {
         case "ArrowRight": {
+          this.stopPropagationForNativeBehavior(event);
           const elem = this.$refs.nextButton.$el;
           elem.click();
           break;
         }
         case "ArrowLeft": {
+          this.stopPropagationForNativeBehavior(event);
           const elem = this.$refs.prevButton.$el;
           elem.click();
           break;

@@ -12,44 +12,37 @@
    getting_started/installation/deployments/deployments.md
    getting_started/installation/configurations/configurations.md
 
-
 .. toctree::
-   :caption: LLMs
+   :caption: Conceptual Guides
    :maxdepth: 3
    :hidden:
 
-   guides/llms/conceptual_guides/conceptual_guides
-   guides/llms/practical_guides/practical_guides
-   guides/llms/examples/examples
+   conceptual_guides/data_model
+   conceptual_guides/llm/llm
 
 .. toctree::
-   :caption: Guides
+   :caption: Practical Guides
    :maxdepth: 3
    :hidden:
 
-   guides/log_load_and_prepare_data
-   guides/train_a_model
-   guides/query_datasets
-   guides/measure_datasets_with_metrics
-   guides/log_model_explanations
-   guides/schedule_jobs_with_listeners
-   guides/use_active_learning
-   guides/programmatic_labeling_with_rules
-   guides/preannotate_with_fewshot_learning
-   guides/label_records_with_semanticsearch
-
-
+   practical_guides/practical_guides
+   practical_guides/choose_dataset
+   practical_guides/create_dataset
+   practical_guides/assign_records
+   practical_guides/update_dataset
+   practical_guides/filter_dataset
+   practical_guides/annotate_dataset
+   practical_guides/collect_responses
+   practical_guides/export_dataset
+   practical_guides/fine_tune
 
 .. toctree::
-   :caption: Tutorials
+   :caption: Tutorials and Integrations
    :maxdepth: 3
    :hidden:
 
-   tutorials/tutorials
-   tutorials/steps/steps.md
-   tutorials/tasks/tasks.md
-   tutorials/libraries/libraries.md
-   tutorials/techniques/techniques.md
+   tutorials_and_integrations/tutorials/tutorials
+   tutorials_and_integrations/integrations/integrations
 
 .. toctree::
    :caption: Reference
@@ -58,8 +51,8 @@
    :hidden:
 
    reference/python/index
+   reference/cli
    reference/webapp/index
-   reference/datamodel
    reference/notebooks
    reference/telemetry
    reference/terminology

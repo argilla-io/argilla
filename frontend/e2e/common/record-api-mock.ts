@@ -2,9 +2,12 @@ import { Page } from "@playwright/test";
 import { DatasetData, mockFeedbackTaskDataset } from "./dataset-api-mock";
 import {
   mockQuestion,
+  mockQuestionWith12Ranking,
+  mockQuestionWithRating,
   mockQuestionLongAndShortQuestions,
 } from "./question-api-mock";
 import { mockFields } from "./field-api-mock";
+import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
 
 export const recordOne = {
   id: "9cf21756-00a0-479d-aa46-f2ef9dcf89f1",
@@ -77,6 +80,58 @@ export const recordOne = {
   updated_at: "2023-07-18T07:43:38",
 };
 
+export const recordTwo = {
+  id: "9cf21756-00a0-479d-aa46-f2ef9dcf89f2",
+  fields: {
+    text: "Second record",
+  },
+  metadata: null,
+  external_id: null,
+  responses: [],
+  suggestions: [],
+  inserted_at: "2023-07-18T07:43:38",
+  updated_at: "2023-07-18T07:43:38",
+};
+
+const recordFor12rankingA = {
+  id: "1da11112-69ac-4cc9-947e-c8293243510a",
+  fields: {
+    text: "First Record",
+  },
+  metadata: {},
+  external_id: null,
+  responses: [],
+  suggestions: [],
+  inserted_at: "2023-07-26T12:15:02",
+  updated_at: "2023-07-26T12:15:02",
+};
+
+const recordFor12rankingB = {
+  id: "1da11112-69ac-4cc9-947e-c8293243510b",
+  fields: {
+    text: "Second record",
+  },
+  metadata: {},
+  external_id: null,
+  responses: [],
+  suggestions: [],
+  inserted_at: "2023-07-26T12:15:02",
+  updated_at: "2023-07-26T12:15:02",
+};
+
+const recordForRating = {
+  id: "0203fc47-e30a-4f97-8f13-12bb816a3059",
+  fields: {
+    text: "Rate me",
+  },
+  metadata: {},
+  external_id: null,
+  responses: [],
+  suggestions: [],
+  inserted_at: "2023-07-21T09:23:20",
+  updated_at: "2023-07-21T09:23:20",
+};
+
 export const mockRecord = async (
   page: Page,
   { datasetId, workspaceId }: DatasetData
@@ -88,11 +143,34 @@ export const mockRecord = async (
   await mockFields(page, datasetId);
 
   await page.route(
-    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing`,
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing&response_status=draft`,
     async (route) => {
       await route.fulfill({
         json: {
           items: [recordOne],
+        },
+      });
+    }
+  );
+
+  return recordOne;
+};
+
+export const mockTwoRecords = async (
+  page: Page,
+  { datasetId, workspaceId }: DatasetData
+) => {
+  await mockFeedbackTaskDataset(page, { datasetId, workspaceId });
+
+  await mockQuestion(page, datasetId);
+
+  await mockFields(page, datasetId);
+  await page.route(
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing&response_status=draft`,
+    async (route) => {
+      await route.fulfill({
+        json: {
+          items: [recordOne, recordTwo],
         },
       });
     }
@@ -112,7 +190,7 @@ export const mockRecordForLongAndShortQuestion = async (
   await mockFields(page, datasetId);
 
   await page.route(
-    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing`,
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing&response_status=draft`,
     async (route) => {
       await route.fulfill({
         json: {
@@ -125,18 +203,113 @@ export const mockRecordForLongAndShortQuestion = async (
   return recordOne;
 };
 
-export const mockDiscardRecord = async (page: Page, recordId: string) => {
+export const mockRecordResponses = async (
+  page: Page,
+  recordId: string,
+  status: "submitted" | "discarded"
+) => {
+  await page.route(
+    `*/**/api/v1/records/${recordId}/responses`,
+    async (route, request) => {
+      await route.fulfill({
+        json: {
+          id: recordId,
+          values: request.postDataJSON().values,
+          status,
+          user_id: "3e760b76-e19a-480a-b436-a85812b98843",
+          inserted_at: "2023-07-28T14:45:37",
+          updated_at: "2023-07-28T14:45:37",
+        },
+      });
+    }
+  );
+};
+
+const debounce = useDebounce(1000);
+export const mockDraftRecord = async (page: Page, recordId: string) => {
+  await page.route(`*/**/api/v1/responses/${recordId}`, async (route) => {
+    await debounce.wait();
+    await route.fulfill({
+      json: {
+        values: {},
+        status: "draft",
+        user_id: "3e760b76-e19a-480a-b436-a85812b98843",
+        inserted_at: "2023-07-28T14:45:37",
+        updated_at: "2023-07-28T14:45:37",
+      },
+    });
+
+    debounce.stop();
+  });
+
   await page.route(
     `*/**/api/v1/records/${recordId}/responses`,
     async (route) => {
+      await debounce.wait();
       await route.fulfill({
         json: {
           id: recordId,
           values: {},
-          status: "discarded",
+          status: "draft",
           user_id: "3e760b76-e19a-480a-b436-a85812b98843",
           inserted_at: "2023-07-28T14:45:37",
           updated_at: "2023-07-28T14:45:37",
+        },
+      });
+
+      debounce.stop();
+    }
+  );
+};
+
+export const mockRecordWith12Ranking = async (
+  page: Page,
+  { datasetId, workspaceId }: DatasetData
+) => {
+  await mockFeedbackTaskDataset(page, { datasetId, workspaceId });
+
+  await mockQuestionWith12Ranking(page, datasetId);
+
+  await mockFields(page, datasetId);
+
+  await page.route(
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing&response_status=draft`,
+    async (route) => {
+      await route.fulfill({
+        json: {
+          items: [recordFor12rankingA, recordFor12rankingB],
+        },
+      });
+    }
+  );
+  await page.route(
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=2&limit=10&response_status=missing&response_status=draft`,
+    async (route) => {
+      await route.fulfill({
+        json: {
+          items: [],
+        },
+      });
+    }
+  );
+};
+
+export const mockRecordWithRating = async (
+  page: Page,
+  { datasetId, workspaceId }: DatasetData
+) => {
+  await mockFeedbackTaskDataset(page, { datasetId, workspaceId });
+
+  await mockQuestionWithRating(page, datasetId);
+
+  await mockFields(page, datasetId);
+
+  await page.route(
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing&response_status=draft`,
+    async (route) => {
+      await route.fulfill({
+        json: {
+          items: [recordForRating],
         },
       });
     }

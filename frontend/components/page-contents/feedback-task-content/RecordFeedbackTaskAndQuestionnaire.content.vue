@@ -5,6 +5,7 @@
         :recordStatus="record.status"
         :fields="record.fields"
       />
+
       <QuestionsFormComponent
         :key="record.id"
         class="question-form"
@@ -31,11 +32,7 @@
 <script>
 import { isNil } from "lodash";
 import { Notification } from "@/models/Notifications";
-import {
-  RECORD_STATUS,
-  RESPONSE_STATUS_FOR_API,
-} from "@/models/feedback-task-model/record/record.queries";
-import { LABEL_PROPERTIES } from "../../feedback-task/feedbackTask.properties";
+import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
 import { useRecordFeedbackTaskViewModel } from "./useRecordFeedbackTaskViewModel";
 
 export default {
@@ -52,40 +49,12 @@ export default {
       recordStatusToFilterWith: null,
       searchTextToFilterWith: null,
       currentPage: null,
-      totalRecords: null,
-      numberOfFetch: 0,
       fetching: false,
     };
   },
   computed: {
-    filterParams() {
-      return {
-        _search: this.searchTextToFilterWith,
-        _page: this.currentPage,
-        _status: this.recordStatusToFilterWith,
-      };
-    },
     noMoreDataMessage() {
       return `You've reached the end of the data for the ${this.recordStatusToFilterWith} queue.`;
-    },
-    recordStatusFilterValueForGetRecords() {
-      // NOTE - this is only used to fetch record, this is why the return value is in lowercase
-      let paramForUrl = null;
-      switch (this.recordStatusToFilterWith.toUpperCase()) {
-        case RECORD_STATUS.PENDING:
-          paramForUrl = RESPONSE_STATUS_FOR_API.MISSING;
-          break;
-        case RECORD_STATUS.SUBMITTED:
-          paramForUrl = RESPONSE_STATUS_FOR_API.SUBMITTED;
-          break;
-        case RECORD_STATUS.DISCARDED:
-          paramForUrl = RESPONSE_STATUS_FOR_API.DISCARDED;
-          break;
-        default:
-          // NOTE - by default, records with missing responses are fetched
-          paramForUrl = RESPONSE_STATUS_FOR_API.MISSING;
-      }
-      return paramForUrl;
     },
     record() {
       return this.records.getRecordOn(this.currentPage);
@@ -99,7 +68,7 @@ export default {
       return `You have no ${this.recordStatusToFilterWith} records matching the search input`;
     },
     statusClass() {
-      return `--${this.record.status.toLowerCase()}`;
+      return `--${this.record.status}`;
     },
     statusFilterFromQuery() {
       return this.$route.query?._status ?? RECORD_STATUS.PENDING.toLowerCase();
@@ -121,7 +90,7 @@ export default {
     await this.loadRecords(
       this.datasetId,
       this.currentPage,
-      this.recordStatusFilterValueForGetRecords,
+      this.recordStatusToFilterWith,
       this.searchTextToFilterWith
     );
 
@@ -135,12 +104,11 @@ export default {
       await this.loadRecords(
         this.datasetId,
         this.currentPage,
-        this.recordStatusFilterValueForGetRecords,
+        this.recordStatusToFilterWith,
         this.searchTextToFilterWith
       );
     }
 
-    this.numberOfFetch++;
     this.fetching = false;
   },
   watch: {
@@ -227,7 +195,6 @@ export default {
       this.$root.$emit("reset-search-filter");
     },
     checkAndEmitTotalRecords({ searchFilter, value }) {
-      // NOTE - update the totalRecords to show ONLY if a search input is applied
       if (searchFilter?.length) {
         this.$root.$emit("total-records", value);
       } else {
@@ -242,11 +209,11 @@ export default {
         this.questionFormTouched &&
         newSearchValue !== this.searchFilterFromQuery
       ) {
-        Notification.dispatch("notify", {
-          message: "Your changes will be lost if you apply the search filter",
+        return Notification.dispatch("notify", {
+          message: this.$t("changes_no_submit"),
+          buttonText: this.$t("button.ignore_and_continue"),
           numberOfChars: 500,
           type: "warning",
-          buttonText: LABEL_PROPERTIES.CONTINUE,
           async onClick() {
             await localApplySearchFilter(newSearchValue);
           },
@@ -254,9 +221,10 @@ export default {
             localEmitResetSearchFilter();
           },
         });
-      } else {
-        await this.applySearchFilter(newSearchValue);
       }
+
+      if (newSearchValue !== this.searchFilterFromQuery)
+        return await this.applySearchFilter(newSearchValue);
     },
     async onStatusFilterChanged(newStatus) {
       if (this.recordStatusToFilterWith === newStatus) {
@@ -268,10 +236,10 @@ export default {
 
       if (this.questionFormTouched) {
         Notification.dispatch("notify", {
-          message: "Your changes will be lost if you move to another view",
+          message: this.$t("changes_no_submit"),
+          buttonText: this.$t("button.ignore_and_continue"),
           numberOfChars: 500,
           type: "warning",
-          buttonText: LABEL_PROPERTIES.CONTINUE,
           async onClick() {
             await localApplyStatusFilter(newStatus);
           },
@@ -297,7 +265,7 @@ export default {
         await this.loadRecords(
           this.datasetId,
           newPage,
-          this.recordStatusFilterValueForGetRecords,
+          this.recordStatusToFilterWith,
           this.searchTextToFilterWith
         );
 
@@ -325,6 +293,7 @@ export default {
     this.$root.$off("go-to-prev-page");
     this.$root.$off("status-filter-changed");
     this.$root.$off("search-filter-changed");
+    Notification.dispatch("clear");
   },
   setup() {
     return useRecordFeedbackTaskViewModel();
@@ -346,19 +315,6 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-}
-.question-form {
-  border: 1px solid transparent;
-  background: palette(white);
-  &.--pending {
-    border-color: transparent;
-  }
-  &.--discarded {
-    border-color: #c3c3c3;
-  }
-  &.--submitted {
-    border-color: $primary-color;
   }
 }
 </style>

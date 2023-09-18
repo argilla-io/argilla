@@ -121,6 +121,33 @@ class User:
             return users_api_v1.list_user_workspaces(self._client, self.id).parsed
         return workspaces_api_v1.list_workspaces_me(self._client).parsed
 
+    @property
+    def is_owner(self) -> bool:
+        """Returns whether the current user is an owner or not.
+
+        Returns:
+            A boolean indicating whether the current user is an owner or not.
+        """
+        return self.role == UserRole.owner
+
+    @property
+    def is_admin(self) -> bool:
+        """Returns whether the current user is an admin or not.
+
+        Returns:
+            A boolean indicating whether the current user is an admin or not.
+        """
+        return self.role == UserRole.admin
+
+    @property
+    def is_annotator(self) -> bool:
+        """Returns whether the current user is an annotator or not.
+
+        Returns:
+            A boolean indicating whether the current user is an annotator or not.
+        """
+        return self.role == UserRole.annotator
+
     def __repr__(self) -> str:
         return (
             f"User(id={self.id}, username={self.username}, role={self.role},"
@@ -145,7 +172,8 @@ class User:
         """Deletes the user from Argilla.
 
         Raises:
-            BaseClientError: if the user cannot be deleted from Argilla.
+            ValueError: if the user doesn't exist in Argilla.
+            RuntimeError: if the user cannot be deleted from Argilla.
 
         Examples:
             >>> from argilla import rg
@@ -197,7 +225,8 @@ class User:
             A new `User` instance.
 
         Raises:
-            ValueError: if the user already exists in Argilla.
+            KeyError: if the user already exists in Argilla.
+            ValueError: if the provided parameters are not valid.
             RuntimeError: if the user cannot be created in Argilla.
 
         Examples:
@@ -226,7 +255,7 @@ class User:
             ).parsed
             return cls.__new_instance(client, user)
         except AlreadyExistsApiError as e:
-            raise ValueError(
+            raise KeyError(
                 f"User with username=`{username}` already exists in Argilla, so please"
                 " make sure that the name you provided is a unique one."
             ) from e

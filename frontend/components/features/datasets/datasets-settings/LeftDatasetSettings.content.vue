@@ -16,9 +16,7 @@
       </base-action-tooltip>
     </div>
     <div class="dataset-description-component left-content-item">
-      <DatasetDescriptionReadOnlyComponent
-        :datasetDescription="settingsDescription"
-      />
+      <DatasetDescriptionReadOnlyComponent :guidelines="settingsDescription" />
     </div>
     <div
       class="labels-edition-component left-content-item"
@@ -31,7 +29,7 @@
         :isLoading="isLoading"
       />
     </div>
-    <div class="delete-dataset-component" v-if="datasetTask">
+    <div class="delete-dataset-component" v-if="datasetTask && !isLoading">
       <DatasetDeleteComponent
         :datasetId="datasetId"
         :datasetTask="datasetTask"

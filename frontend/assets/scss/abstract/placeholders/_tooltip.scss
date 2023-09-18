@@ -21,6 +21,7 @@ $tooltip-border-radius: $border-radius-s;
   @include font-size($tooltip-font-size);
   font-weight: 500;
 }
+
 %has-tooltip--left {
   @extend %has-tooltip;
   &:after {
@@ -29,15 +30,7 @@ $tooltip-border-radius: $border-radius-s;
     right: calc(100% + 10px);
   }
   &:before {
-    right: calc(100% + $tooltip-triangle-size/2);
-    top: 50%;
-    transform: translateY(-50%);
-    @include triangle(
-      right,
-      $tooltip-triangle-size,
-      $tooltip-triangle-size,
-      $tooltip-bg
-    );
+    @extend %triangle-right;
   }
 }
 %has-tooltip--bottom {
@@ -84,15 +77,7 @@ $tooltip-border-radius: $border-radius-s;
     right: calc(-100% + 10px);
   }
   &:before {
-    right: calc(25% + $tooltip-triangle-size/2);
-    top: 50%;
-    transform: translateY(-50%);
-    @include triangle(
-      left,
-      $tooltip-triangle-size,
-      $tooltip-triangle-size,
-      $tooltip-bg
-    );
+    @extend %triangle-left;
   }
 }
 %tooltip-large-text {
@@ -135,4 +120,28 @@ $tooltip-border-radius: $border-radius-s;
       transition: opacity 0.3s ease 0.2s;
     }
   }
+}
+
+%triangle-left {
+  right: calc(100% + $tooltip-triangle-size/2);
+  top: 50%;
+  transform: translateY(-50%);
+  @include triangle(
+    right,
+    $tooltip-triangle-size,
+    $tooltip-triangle-size,
+    $tooltip-bg
+  );
+}
+
+%triangle-right {
+  right: calc(100% + $tooltip-triangle-size/2);
+  top: 50%;
+  transform: translateY(-50%);
+  @include triangle(
+    right,
+    $tooltip-triangle-size,
+    $tooltip-triangle-size,
+    $tooltip-bg
+  );
 }

@@ -29,7 +29,7 @@
         >
           <DatasetDescriptionComponent
             :key="settings.dataset.updatedAt"
-            v-model="settings.dataset.guidelines"
+            v-model="settings.dataset"
           />
           <div class="settings__edition-form__footer">
             <BaseButton

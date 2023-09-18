@@ -97,6 +97,12 @@ class Argilla:
         extra_headers: Optional[Dict[str, str]] = None,
     ):
         """
+        Inits `Argilla` instance.
+
+        If called with `api_url=None` and `api_key=None` and no values have been set for the environment variables
+        `ARGILLA_API_URL` and `ARGILLA_API_KEY`, then the local credentials stored by a previous call to `argilla login`
+        command will be used. If local credentials are not found, then `api_url` and `api_key` will fallback to the
+        default values.
 
         Args:
             api_url: Address of the REST API. If `None` (default) and the env variable ``ARGILLA_API_URL`` is not set,

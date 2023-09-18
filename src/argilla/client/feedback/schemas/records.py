@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import warnings
+from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 from uuid import UUID
 
@@ -39,7 +40,7 @@ class RankingValueSchema(BaseModel):
     """
 
     value: StrictStr
-    rank: conint(ge=1)
+    rank: Optional[conint(ge=1)] = None
 
 
 class ValueSchema(BaseModel):
@@ -50,6 +51,12 @@ class ValueSchema(BaseModel):
     """
 
     value: Union[StrictStr, StrictInt, List[str], List[RankingValueSchema]]
+
+
+class ResponseStatus(str, Enum):
+    draft = "draft"
+    submitted = "submitted"
+    discarded = "discarded"
 
 
 class ResponseSchema(BaseModel):
@@ -73,7 +80,7 @@ class ResponseSchema(BaseModel):
 
     user_id: Optional[UUID] = None
     values: Dict[str, ValueSchema]
-    status: Literal["submitted", "discarded"] = "submitted"
+    status: ResponseStatus = ResponseStatus.submitted
 
     @validator("user_id", always=True)
     def user_id_must_have_value(cls, v):

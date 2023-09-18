@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Awaitable, Callable
+from typing import Awaitable, Callable, Optional
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import async_object_session
@@ -210,8 +210,13 @@ class DatasetPolicy:
 
 class DatasetPolicyV1:
     @classmethod
-    async def list(cls, actor: User) -> bool:
-        return True
+    def list(cls, workspace_id: Optional[UUID] = None) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            if actor.is_owner or workspace_id is None:
+                return True
+            return await _exists_workspace_user_by_user_and_workspace_id(actor, workspace_id)
+
+        return is_allowed
 
     @classmethod
     def get(cls, dataset: Dataset) -> PolicyAction:
