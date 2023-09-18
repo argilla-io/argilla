@@ -13,9 +13,8 @@
 #  limitations under the License.
 
 from typing import Any, Dict, Literal, Optional
-from uuid import UUID
 
-from pydantic import BaseModel, Extra, Field, root_validator, validator
+from pydantic import BaseModel, Extra, Field, validator
 
 from argilla.client.feedback.schemas.validators import title_must_have_value
 
@@ -26,8 +25,6 @@ class FieldSchema(BaseModel):
     """Base schema for the `FeedbackDataset` fields.
 
     Args:
-        id: The ID of the field in Argilla. Defaults to None, and is automatically
-            fulfilled internally once the field is pushed to Argilla.
         name: The name of the field. This is the only required field.
         title: The title of the field. If not provided, it will be capitalized from
             the `name` field. And its what will be shown in the UI.
@@ -36,9 +33,6 @@ class FieldSchema(BaseModel):
         type: The type of the field. Defaults to None, and ideally it should be defined
             in the class inheriting from this one to be able to use a discriminated union
             based on the `type` field.
-        settings: The settings of the field. Defaults to an empty dict, and it is
-            automatically fulfilled internally before the field is pushed to Argilla,
-            as the `settings` is part of the payload that will be sent to Argilla.
 
     Disclaimer:
         You should not use this class directly, but instead use the classes that inherit
@@ -46,19 +40,17 @@ class FieldSchema(BaseModel):
         to be supported by Argilla.
     """
 
-    id: Optional[UUID] = None
     name: str = Field(..., regex=r"^(?=.*[a-z0-9])[a-z0-9_-]+$")
     title: Optional[str] = None
     required: bool = True
     type: Optional[FieldTypes] = None
-    settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)
 
     _title_must_have_value = validator("title", always=True, allow_reuse=True)(title_must_have_value)
 
     class Config:
         validate_assignment = True
         extra = Extra.forbid
-        exclude = {"id", "type"}
+        exclude = {"type"}
 
 
 class TextField(FieldSchema):
@@ -79,8 +71,9 @@ class TextField(FieldSchema):
     type: Literal["text"] = "text"
     use_markdown: bool = False
 
-    @root_validator(skip_on_failure=True)
-    def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        values["settings"]["type"] = values.get("type")
-        values["settings"]["use_markdown"] = values.get("use_markdown", False)
-        return values
+    @property
+    def server_settings(self) -> Dict[str, Any]:
+        settings = {}
+        settings["type"] = self.type
+        settings["use_markdown"] = self.use_markdown or False
+        return settings
