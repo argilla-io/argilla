@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import warnings
+from abc import abstractproperty
 from typing import Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Extra, Field, conint, conlist, validator
@@ -57,6 +58,13 @@ class QuestionSchema(BaseModel):
         validate_assignment = True
         extra = Extra.forbid
         exclude = {"type"}
+
+    @abstractproperty
+    def server_settings(self) -> Dict[str, Any]:
+        """Abstract property that should be implemented by the classes that inherit from
+        this one, and that will be used to create the `FeedbackDataset` in Argilla.
+        """
+        raise NotImplementedError
 
 
 class TextQuestion(QuestionSchema):

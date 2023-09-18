@@ -23,7 +23,7 @@ class LabelMappingMixin:
 
     @property
     def __all_labels__(self: "QuestionSchema") -> List[str]:
-        return [entry["value"] for entry in self.settings["options"]]
+        return [entry["value"] for entry in self.server_settings["options"]]
 
     @property
     def __label2id__(self) -> Dict[str, int]:

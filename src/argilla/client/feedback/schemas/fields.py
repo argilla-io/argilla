@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from abc import abstractproperty
 from typing import Any, Dict, Literal, Optional
 
 from pydantic import BaseModel, Extra, Field, validator
@@ -51,6 +52,13 @@ class FieldSchema(BaseModel):
         validate_assignment = True
         extra = Extra.forbid
         exclude = {"type"}
+
+    @abstractproperty
+    def server_settings(self) -> Dict[str, Any]:
+        """Abstract property that should be implemented by the classes that inherit from
+        this one, and that will be used to create the `FeedbackDataset` in Argilla.
+        """
+        raise NotImplementedError
 
 
 class TextField(FieldSchema):
