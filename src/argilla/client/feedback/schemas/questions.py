@@ -14,9 +14,8 @@
 
 import warnings
 from typing import Any, Dict, List, Literal, Optional, Union
-from uuid import UUID
 
-from pydantic import BaseModel, Extra, Field, conint, conlist, root_validator, validator
+from pydantic import BaseModel, Extra, Field, conint, conlist, validator
 
 from argilla.client.feedback.schemas.utils import LabelMappingMixin
 from argilla.client.feedback.schemas.validators import title_must_have_value
@@ -29,8 +28,6 @@ class QuestionSchema(BaseModel):
     in the dataset will have at least these fields.
 
     Args:
-        id: The ID of the question in Argilla. Defaults to None, and is automatically
-            fulfilled internally once the question is pushed to Argilla.
         name: The name of the question. This is the only required field.
         title: The title of the question. If not provided, it will be capitalized from
             the `name` field. And its what will be shown in the UI.
@@ -41,9 +38,6 @@ class QuestionSchema(BaseModel):
         type: The type of the question. Defaults to None, and ideally it should be defined
             in the class inheriting from this one to be able to use a discriminated union
             based on the `type` field.
-        settings: The settings of the question. Defaults to an empty dict, and it is
-            automatically fulfilled internally before the question is pushed to Argilla,
-            as the `settings` is part of the payload that will be sent to Argilla.
 
     Disclaimer:
         You should not use this class directly, but instead use the classes that inherit
@@ -51,23 +45,20 @@ class QuestionSchema(BaseModel):
         to be supported by Argilla.
     """
 
-    id: Optional[UUID] = None
     name: str = Field(..., regex=r"^(?=.*[a-z0-9])[a-z0-9_-]+$")
     title: Optional[str] = None
     description: Optional[str] = None
     required: bool = True
     type: Optional[QuestionTypes] = None
-    settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)
 
     _title_must_have_value = validator("title", always=True, allow_reuse=True)(title_must_have_value)
 
     class Config:
         validate_assignment = True
         extra = Extra.forbid
-        exclude = {"id", "type"}
+        exclude = {"type"}
 
 
-# TODO(alvarobartt): add `XResponse` (e.g. `TextResponse`) classes
 class TextQuestion(QuestionSchema):
     """Schema for the `FeedbackDataset` text questions, which are the ones that will
     require a text response from the user.
@@ -86,11 +77,12 @@ class TextQuestion(QuestionSchema):
     type: Literal["text"] = Field("text", allow_mutation=False)
     use_markdown: bool = False
 
-    @root_validator(skip_on_failure=True)
-    def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        values["settings"]["type"] = values.get("type")
-        values["settings"]["use_markdown"] = values.get("use_markdown", False)
-        return values
+    @property
+    def server_settings(self) -> Dict[str, Any]:
+        settings = {}
+        settings["type"] = self.type
+        settings["use_markdown"] = self.use_markdown or False
+        return settings
 
 
 class RatingQuestion(QuestionSchema, LabelMappingMixin):
@@ -112,11 +104,12 @@ class RatingQuestion(QuestionSchema, LabelMappingMixin):
     type: Literal["rating"] = Field("rating", allow_mutation=False)
     values: List[int] = Field(..., unique_items=True, ge=1, le=10, min_items=2)
 
-    @root_validator(skip_on_failure=True)
-    def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        values["settings"]["type"] = values.get("type")
-        values["settings"]["options"] = [{"value": value} for value in values.get("values")]
-        return values
+    @property
+    def server_settings(self) -> Dict[str, Any]:
+        settings = {}
+        settings["type"] = self.type
+        settings["options"] = [{"value": value} for value in self.values]
+        return settings
 
 
 UndefinedType = Literal["undefined"]
@@ -150,19 +143,16 @@ class _LabelQuestion(QuestionSchema, LabelMappingMixin):
             assert len(set(v.values())) == len(v.values()), "ensure this dict has unique values"
         return v
 
-    @root_validator(skip_on_failure=True)
-    def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        values["settings"]["type"] = values.get("type")
-
-        if isinstance(values.get("labels"), dict):
-            values["settings"]["options"] = [
-                {"value": key, "text": value} for key, value in values.get("labels").items()
-            ]
-        elif isinstance(values.get("labels"), list):
-            values["settings"]["options"] = [{"value": label, "text": label} for label in values.get("labels")]
-
-        if values.get("visible_labels") == UNDEFINED:
-            if len(values.get("labels", [])) > 20:
+    @property
+    def server_settings(self) -> Dict[str, Any]:
+        settings = {}
+        settings["type"] = self.type
+        if isinstance(self.labels, dict):
+            settings["options"] = [{"value": key, "text": value} for key, value in self.labels.items()]
+        elif isinstance(self.labels, list):
+            settings["options"] = [{"value": label, "text": label} for label in self.labels]
+        if self.visible_labels == UNDEFINED:
+            if len(self.labels) > 20:
                 warnings.warn(
                     "Since `visible_labels` has not been provided and the total number"
                     " of labels is greater than 20, `visible_labels` will be set to `20`.",
@@ -173,8 +163,8 @@ class _LabelQuestion(QuestionSchema, LabelMappingMixin):
             else:
                 visible_labels = None
         else:
-            visible_labels = values.get("visible_labels")
-            total_labels = len(values.get("labels", []))
+            visible_labels = self.visible_labels
+            total_labels = len(self.labels)
             if visible_labels and visible_labels > total_labels:
                 if total_labels >= 3:
                     warnings.warn(
@@ -186,15 +176,15 @@ class _LabelQuestion(QuestionSchema, LabelMappingMixin):
                     visible_labels = total_labels
                 else:
                     warnings.warn(
-                        f"`labels={values.get('labels')}` has less than 3 labels, so `visible_labels`"
+                        f"`labels={self.labels}` has less than 3 labels, so `visible_labels`"
                         " will be set to `None`, which means that all the labels will be visible.",
                         UserWarning,
                         stacklevel=1,
                     )
                     visible_labels = None
-        values["visible_labels"] = visible_labels
-        values["settings"]["visible_options"] = visible_labels
-        return values
+        self.visible_labels = visible_labels
+        settings["visible_options"] = visible_labels
+        return settings
 
 
 class LabelQuestion(_LabelQuestion):
@@ -272,13 +262,12 @@ class RankingQuestion(QuestionSchema, LabelMappingMixin):
             assert len(set(v.values())) == len(v.values()), "ensure this dict has unique values"
         return v
 
-    @root_validator(skip_on_failure=True)
-    def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        values["settings"]["type"] = values.get("type")
-        if isinstance(values.get("values"), dict):
-            values["settings"]["options"] = [
-                {"value": key, "text": value} for key, value in values.get("values").items()
-            ]
-        if isinstance(values.get("values"), list):
-            values["settings"]["options"] = [{"value": value, "text": value} for value in values.get("values")]
-        return values
+    @property
+    def server_settings(self) -> Dict[str, Any]:
+        settings = {}
+        settings["type"] = self.type
+        if isinstance(self.values, dict):
+            settings["options"] = [{"value": key, "text": value} for key, value in self.values.items()]
+        elif isinstance(self.values, list):
+            settings["options"] = [{"value": label, "text": label} for label in self.values]
+        return settings
