@@ -8,13 +8,11 @@ This guide will help you with all the practical aspects of setting up an annotat
 :link: choose_dataset.html
 
 Find the dataset type needed for your project.
-
 ```
 ```{grid-item-card} 🧑‍💻 Create a dataset
 :link: create_dataset.html
 
 Methods to configure a dataset and push it to Argilla.
-
 ```
 ```{grid-item-card} 🗂️ Assign records to your team
 :link: assign_records.html
@@ -25,7 +23,6 @@ Workflows to organize your annotation team.
 :link: update_dataset.html
 
 Make changes to an existing dataset.
-
 ```
 ```{grid-item-card} 🔎 Filter and query datasets
 :link: filter_dataset.html
@@ -37,7 +34,11 @@ Obtain a filtered version of your dataset.
 :link: annotate_dataset.html
 
 Learn to use Argilla's UI and its features.
+```
+```{grid-item-card} 🌊 Simplify annotation with machine feedback workflow
+:link: annotation_workflows/annotation_workflows.html
 
+Use things active learning, weak supervision, semantic search and job scheduling.
 ```
 ```{grid-item-card} 📊 Collect responses and metrics
 :link: collect_responses.html
@@ -49,7 +50,7 @@ Collect responses, get metrics and solve disagreements.
 
 Export your dataset and save it in the Hugging Face Hub or locally.
 ```
-```{grid-item-card} 🦾 Fine-tune language models
+```{grid-item-card} 🦾 Fine-tune LLMs and other models
 :link: fine_tune.html
 
 Fine-tune an LLM or other models with the feedback collected from Argilla.
