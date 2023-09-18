@@ -15,7 +15,7 @@
 from typing import Any, Dict
 from uuid import UUID
 
-from pydantic import BaseModel, Field, root_validator
+from pydantic import BaseModel, Field
 
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
