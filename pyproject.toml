@@ -91,7 +91,7 @@ integrations = [
     # TODO: `push_to_hub` fails up to 2.3.2, check patches when they come out eventually
     "datasets > 1.17.0,!= 2.3.2",
     # TODO: some backward comp. problems introduced in 0.5.0. 0.13 does not match with setfit
-    "huggingface_hub >= 0.5.0,< 0.13",
+    "huggingface_hub >= 0.5.0,< 0.18",
     # Version 0.12 fixes a known installation issue related to `sentencepiece` and `tokenizers`, more at https://github.com/flairNLP/flair/issues/3129
     # Version 0.12.2 relaxes the `huggingface_hub` dependency
     "flair >= 0.12.2",
