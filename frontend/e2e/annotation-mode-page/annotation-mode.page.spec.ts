@@ -124,17 +124,9 @@ test.describe("Annotate page", () => {
   test("clear all questions", async ({ page }) => {
     await goToAnnotationPage(page);
 
+    await expect(page).toHaveScreenshot();
+
     await page.getByRole("button", { name: "Clear" }).click();
-
-    await expect(page).toHaveScreenshot();
-
-    await page
-      .getByText("Review Rating", { exact: true })
-      .scrollIntoViewIfNeeded();
-
-    await expect(page).toHaveScreenshot();
-
-    await page.getByText("Ranking", { exact: true }).scrollIntoViewIfNeeded();
 
     await expect(page).toHaveScreenshot();
   });

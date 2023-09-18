@@ -16,6 +16,8 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [1.16.0](https://github.com/argilla-io/argilla/compare/v1.15.1...v1.16.0)
+
 ### Added
 
 - Added `ArgillaTrainer` integration with sentence-transformers, allowing fine tuning for sentence similarity ([#3739](https://github.com/argilla-io/argilla/pull/3739))
@@ -57,6 +59,7 @@ These are the section headers that we use:
 
 ### Fixed
 
+- Fixed `remove user modification in text component on clear answers` ([#3775](https://github.com/argilla-io/argilla/pull/3775))
 - Fixed `Highlight raw text field in dataset feedback task` ([#3731](https://github.com/argilla-io/argilla/pull/3731))
 - Fixed `Field title too long` ([#3734](https://github.com/argilla-io/argilla/pull/3734))
 - Fixed error messages when deleting a `DatasetForTextClassification` ([#3652](https://github.com/argilla-io/argilla/pull/3652))
@@ -66,6 +69,7 @@ These are the section headers that we use:
 - Add missing `draft` status in `ResponseSchema` as now there can be responses with `draft` status when annotating via the UI ([#3749](https://github.com/argilla-io/argilla/pull/3749)).
 - Searches when queried words are distributed along the record fields ([#3759](https://github.com/argilla-io/argilla/pull/3759)).
 - Fixed Python 3.11 compatibility issue with `/api/datasets` endpoints due to the `TaskType` enum replacement in the endpoint URL ([#3769](https://github.com/argilla-io/argilla/pull/3769)).
+- Fixed `RankingValueSchema` and `FeedbackRankingValueModel` schemas to allow `rank=None` when `status=draft` ([#3781](https://github.com/argilla-io/argilla/pull/3781)).
 
 ## [1.15.1](https://github.com/argilla-io/argilla/compare/v1.15.0...v1.15.1)
 
