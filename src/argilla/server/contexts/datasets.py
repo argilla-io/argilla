@@ -217,10 +217,30 @@ async def delete_question(db: "AsyncSession", question: Question) -> Question:
     return await question.delete(db)
 
 
+async def get_vector_settings_by_id(db: "AsyncSession", vector_settings_id: UUID) -> Union[VectorSettings, None]:
+    result = await db.execute(
+        select(VectorSettings).filter_by(id=vector_settings_id).options(selectinload(VectorSettings.dataset))
+    )
+    return result.scalar_one_or_none()
+
+
 async def get_vector_settings_by_name_and_dataset_id(
     db: "AsyncSession", name: str, dataset_id: UUID
 ) -> Union[VectorSettings, None]:
     return await VectorSettings.read_by(db, name=name, dataset_id=dataset_id)
+
+
+async def delete_vector_settings(db: "AsyncSession", vector_settings: VectorSettings) -> VectorSettings:
+    async with db.begin_nested():
+        vector_settings = await vector_settings.delete(db)
+
+        if vector_settings.dataset.is_ready:
+            # TODO: call search engine to remove it
+            pass
+
+    await db.commit()
+
+    return vector_settings
 
 
 async def create_vector_settings(

@@ -29,6 +29,7 @@ from argilla.server.models import (
     Suggestion,
     User,
     UserRole,
+    VectorSettings,
     Workspace,
     WorkspaceUser,
 )
@@ -362,6 +363,18 @@ class QuestionPolicyV1:
             return actor.is_owner or (
                 actor.is_admin
                 and await _exists_workspace_user_by_user_and_workspace_id(actor, question.dataset.workspace_id)
+            )
+
+        return is_allowed
+
+
+class VectorSettingsPolicyV1:
+    @classmethod
+    def delete(cls, vector_settings: VectorSettings) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (
+                actor.is_admin
+                and await _exists_workspace_user_by_user_and_workspace_id(actor, vector_settings.dataset.workspace_id)
             )
 
         return is_allowed
