@@ -84,19 +84,19 @@ export default {
     },
   },
   computed: {
-    questionElements() {
-      return ["text", "singleLabel", "multiLabel", "rating", "ranking"]
+    questionsWithLoopMovement() {
+      return ["singleLabel", "multiLabel", "rating", "ranking"]
         .filter((componentType) => this.$refs[componentType])
         .map((componentType) => this.$refs[componentType][0].$el);
     },
   },
   mounted() {
-    this.questionElements.forEach((parent) => {
+    this.questionsWithLoopMovement.forEach((parent) => {
       parent.addEventListener("keydown", this.handleKeyboardToMoveLoop(parent));
     });
   },
   beforeDestroy() {
-    this.questionElements.forEach((parent) => {
+    this.questionsWithLoopMovement.forEach((parent) => {
       parent.addEventListener("keydown", this.handleKeyboardToMoveLoop(parent));
     });
   },
