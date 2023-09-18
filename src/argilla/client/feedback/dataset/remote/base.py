@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Any, Dict, Generic, Iterator, List, Optional, 
 
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
-from argilla.client.feedback.schemas.records import RemoteFeedbackRecord, RemoteSuggestionSchema
+from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord, RemoteSuggestionSchema
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.utils import allowed_for_roles
 
