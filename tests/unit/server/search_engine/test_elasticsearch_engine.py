@@ -234,7 +234,7 @@ async def _refresh_dataset(dataset: Dataset):
     await dataset.awaitable_attrs.vectors_settings
 
 
-async def _refresh_records(*records:List[Record]):
+async def _refresh_records(*records: List[Record]):
     for record in records:
         await record.awaitable_attrs.vectors
         await record.awaitable_attrs.responses
