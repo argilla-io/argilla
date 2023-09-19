@@ -19,7 +19,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 from argilla.client.api import active_client
-from argilla.client.feedback.schemas.records import FeedbackRecord, SuggestionSchema
+from argilla.client.feedback.schemas.records import FeedbackRecord, ResponseSchema, SuggestionSchema
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.sdk.v1.records import api as records_api_v1
@@ -29,7 +29,7 @@ from argilla.client.utils import allowed_for_roles
 if TYPE_CHECKING:
     import httpx
 
-    from argilla.client.sdk.v1.datasets.models import FeedbackSuggestionModel
+    from argilla.client.sdk.v1.datasets.models import FeedbackResponseModel, FeedbackSuggestionModel
     from argilla.client.sdk.v1.records.models import FeedbackItemModel
 
 
@@ -91,6 +91,24 @@ class RemoteSuggestionSchema(SuggestionSchema, RemoteClient):
         allow_mutation = False
 
 
+class RemoteResponseSchema(ResponseSchema):
+    def to_local(self) -> "ResponseSchema":
+        """Converts the `RemoteResponseSchema` to a `ResponseSchema`."""
+        return ResponseSchema(
+            user_id=self.user_id,
+            values=self.values,
+            status=self.status,
+        )
+
+    @classmethod
+    def from_api(cls, payload: "FeedbackResponseModel") -> "RemoteResponseSchema":
+        return RemoteResponseSchema(
+            user_id=payload.user_id,
+            values=payload.values,
+            status=payload.status,
+        )
+
+
 class RemoteFeedbackRecord(FeedbackRecord, RemoteClient):
     """Schema for the records of a `RemoteFeedbackDataset`.
 
@@ -111,6 +129,7 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteClient):
     id: UUID
     question_name_to_id: Dict[str, UUID]
 
+    responses: List[RemoteResponseSchema] = Field(default_factory=list)
     suggestions: Union[Tuple[RemoteSuggestionSchema], List[RemoteSuggestionSchema]] = Field(
         default_factory=tuple, allow_mutation=False
     )
@@ -297,7 +316,7 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteClient):
         """Converts the `RemoteFeedbackRecord` to a `FeedbackRecord`."""
         return FeedbackRecord(
             fields=self.fields,
-            responses=self.responses,
+            responses=[response.to_local() for response in self.responses],
             suggestions=[suggestion.to_local() for suggestion in self.suggestions],
             metadata=self.metadata,
             external_id=self.external_id,
@@ -310,7 +329,7 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteClient):
         return RemoteFeedbackRecord(
             id=payload.id,
             fields=payload.fields,
-            responses=[response.dict(include={"user_id", "values", "status"}) for response in payload.responses]
+            responses=[RemoteResponseSchema.from_api(response) for response in payload.responses]
             if payload.responses
             else [],
             suggestions=[
