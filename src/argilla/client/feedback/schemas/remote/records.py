@@ -66,7 +66,7 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteClient):
     Args:
         client: The Argilla client to use to push the record to Argilla. Is shared with
             the `RemoteFeedbackDataset` that created this record.
-        name2id: A dictionary that maps the question names to their corresponding IDs.
+        question_name_to_id: A dictionary that maps the question names to their corresponding IDs.
         id: The ID of the record in Argilla. Defaults to None, and is automatically
             fulfilled internally once the record is pushed to Argilla.
         suggestions: A list of `RemoteSuggestionSchema` that contains the suggestions
@@ -74,9 +74,9 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteClient):
             question. Defaults to an empty list.
     """
 
-    name2id: Dict[str, UUID]
-
     id: UUID
+    question_name_to_id: Dict[str, UUID]
+
     suggestions: Union[Tuple[RemoteSuggestionSchema], List[RemoteSuggestionSchema]] = Field(
         default_factory=tuple, allow_mutation=False
     )
@@ -112,7 +112,7 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteClient):
         for suggestion in suggestions:
             if isinstance(suggestion, dict):
                 if "question_id" not in suggestion or not suggestion["question_id"]:
-                    suggestion["question_id"] = self.name2id[suggestion["question_name"]]
+                    suggestion["question_id"] = self.question_name_to_id[suggestion["question_name"]]
                 if "id" in suggestion:
                     suggestion = RemoteSuggestionSchema(client=self.client, **suggestion)
                 else:
@@ -120,7 +120,7 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteClient):
 
             if isinstance(suggestion, SuggestionSchema):
                 if not suggestion.question_id:
-                    suggestion.question_id = self.name2id[suggestion.question_name]
+                    suggestion.question_id = self.question_name_to_id[suggestion.question_name]
 
             if suggestion.question_name in new_suggestions:
                 warnings.warn(
@@ -261,4 +261,4 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteClient):
 
     class Config:
         validate_assignment = True
-        exclude = {"_unified_responses", "name2id"}
+        exclude = {"_unified_responses", "question_name_to_id"}

@@ -102,7 +102,7 @@ class ArgillaMixin:
         self: "FeedbackDataset",
         client: "httpx.Client",
         id: UUID,
-        question_mapping: Dict[str, UUID],
+        question_name_to_id: Dict[str, UUID],
         show_progress: bool = True,
     ) -> None:
         for i in trange(
@@ -172,12 +172,12 @@ class ArgillaMixin:
         fields = self.__add_fields(client=httpx_client, id=argilla_id)
 
         questions = self.__add_questions(client=httpx_client, id=argilla_id)
-        question_name2id = {question.name: question.id for question in questions}
+        question_name_to_id = {question.name: question.id for question in questions}
 
         self.__publish_dataset(client=httpx_client, id=argilla_id)
 
         self.__push_records(
-            client=httpx_client, id=argilla_id, show_progress=show_progress, question_mapping=question_name2id
+            client=httpx_client, id=argilla_id, show_progress=show_progress, question_name_to_id=question_name_to_id
         )
 
         return RemoteFeedbackDataset(

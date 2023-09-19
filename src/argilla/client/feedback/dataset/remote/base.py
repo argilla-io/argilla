@@ -57,8 +57,8 @@ class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
         self._dataset = dataset
         self._client = self._dataset._client  # Required to be able to use `allowed_for_roles` decorator
 
-        self.__question_id2name = {question.id: question.name for question in self._dataset.questions}
-        self.__question_name2id = {value: key for key, value in self.__question_id2name.items()}
+        self._question_id_to_name = {question.id: question.name for question in self._dataset.questions}
+        self._question_name_to_id = {value: key for key, value in self._question_id_to_name.items()}
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def __repr__(self) -> str:
