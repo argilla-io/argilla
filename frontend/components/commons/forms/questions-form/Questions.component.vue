@@ -97,7 +97,10 @@ export default {
   },
   beforeDestroy() {
     this.questionsWithLoopMovement.forEach((parent) => {
-      parent.addEventListener("keydown", this.handleKeyboardToMoveLoop(parent));
+      parent.removeEventListener(
+        "keydown",
+        this.handleKeyboardToMoveLoop(parent)
+      );
     });
   },
   methods: {
