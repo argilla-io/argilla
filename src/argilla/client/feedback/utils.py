@@ -56,14 +56,12 @@ def generate_pydantic_schema(fields: List[FieldSchema], name: Optional[str] = "F
     """
     fields_schema = {}
     for field in fields:
-        if field.settings["type"] not in FIELD_TYPE_TO_PYTHON_TYPE.keys():
+        if field.type not in FIELD_TYPE_TO_PYTHON_TYPE.keys():
             raise ValueError(
-                f"Field {field.name} has an unsupported type: {field.settings['type']}, for the moment only the"
+                f"Field {field.name} has an unsupported type: {field.type}, for the moment only the"
                 f" following types are supported: {list(FIELD_TYPE_TO_PYTHON_TYPE.keys())}"
             )
-        fields_schema.update(
-            {field.name: (FIELD_TYPE_TO_PYTHON_TYPE[field.settings["type"]], ... if field.required else None)}
-        )
+        fields_schema.update({field.name: (FIELD_TYPE_TO_PYTHON_TYPE[field.type], ... if field.required else None)})
     return create_model(name, **fields_schema)
 
 
