@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Any, Dict, Generic, Iterator, List, Optional, 
 
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
-from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord, RemoteSuggestionSchema
+from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.utils import allowed_for_roles
 
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from argilla.client.feedback.dataset.local import FeedbackDataset
     from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
-    from argilla.client.sdk.v1.datasets.models import FeedbackItemModel, FeedbackRecordsModel
+    from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
     from argilla.client.workspaces import Workspace
 
 
@@ -73,31 +73,6 @@ class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
             stacklevel=1,
         )
         return f"[{','.join([str(record) for record in self][:2])}, ...]"
-
-    def _parse_record(self, record: "FeedbackItemModel") -> RemoteFeedbackRecord:
-        """Parses a `FeedbackItemModel` into a `RemoteFeedbackRecord`."""
-        suggestions = []
-        if record.suggestions is not None:
-            for suggestion in record.suggestions:
-                suggestions.append(
-                    RemoteSuggestionSchema(
-                        client=self._client,
-                        question_name=self.__question_id2name[suggestion.question_id],
-                        **suggestion.dict(),
-                    )
-                )
-        record = record.dict(
-            exclude={
-                "inserted_at": ...,
-                "updated_at": ...,
-                "responses": {"__all__": {"id", "inserted_at", "updated_at"}},
-                "suggestions": ...,
-            },
-            exclude_none=True,
-        )
-        return RemoteFeedbackRecord(
-            client=self._client, name2id=self.__question_name2id, suggestions=suggestions, **record
-        )
 
     @abstractmethod
     def __len__(self) -> int:
