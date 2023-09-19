@@ -41,14 +41,6 @@ def elasticsearch_config():
     return {"hosts": settings.elasticsearch}
 
 
-@pytest_asyncio.fixture()
-async def opensearch_engine(elasticsearch_config: dict) -> AsyncGenerator[OpenSearchEngine, None]:
-    engine = OpenSearchEngine(config=elasticsearch_config, es_number_of_replicas=0, es_number_of_shards=1)
-    yield engine
-
-    await engine.client.close()
-
-
 @pytest.fixture(scope="session", autouse=True)
 def opensearch(elasticsearch_config: dict) -> Generator[OpenSearch, None, None]:
     client = OpenSearch(**elasticsearch_config)

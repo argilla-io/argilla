@@ -123,7 +123,11 @@ class HuggingFaceDatasetMixin:
                     for response in record.responses:
                         if question.name not in response.values:
                             continue
-                        formatted_response = {"user_id": response.user_id, "value": None, "status": response.status}
+                        formatted_response = {
+                            "user_id": response.user_id,
+                            "value": None,
+                            "status": response.status.value if hasattr(response.status, "value") else response.status,
+                        }
                         if question.settings["type"] == "ranking":
                             value = [r.dict() for r in response.values[question.name].value]
                         else:

@@ -1688,20 +1688,19 @@ class TestSuiteDatasets:
                 {
                     "type": "label_selection",
                     "options": [
-                        {"value": "positive", "text": "Positive", "description": "Texts with positive sentiment"},
-                        {"value": "negative", "text": "Negative", "description": "Texts with negative sentiment"},
-                        {"value": "neutral", "text": "Neutral", "description": "Texts with neutral sentiment"},
+                        {"value": "positive", "text": "Positive", "description": "Text with a positive sentiment"},
+                        {"value": "negative", "text": "Negative", "description": "Text with a negative sentiment"},
+                        {"value": "neutral", "text": "Neutral", "description": "Text with a neutral sentiment"},
                     ],
-                    "visible_options": 10,
                 },
                 {
                     "type": "label_selection",
                     "options": [
-                        {"value": "positive", "text": "Positive", "description": "Texts with positive sentiment"},
-                        {"value": "negative", "text": "Negative", "description": "Texts with negative sentiment"},
-                        {"value": "neutral", "text": "Neutral", "description": "Texts with neutral sentiment"},
+                        {"value": "positive", "text": "Positive", "description": "Text with a positive sentiment"},
+                        {"value": "negative", "text": "Negative", "description": "Text with a negative sentiment"},
+                        {"value": "neutral", "text": "Neutral", "description": "Text with a neutral sentiment"},
                     ],
-                    "visible_options": 10,
+                    "visible_options": None,
                 },
             ),
             (
@@ -1712,6 +1711,7 @@ class TestSuiteDatasets:
                         {"value": "negative", "text": "Negative"},
                         {"value": "neutral", "text": "Neutral"},
                     ],
+                    "visible_options": 3,
                 },
                 {
                     "type": "label_selection",
@@ -1720,7 +1720,7 @@ class TestSuiteDatasets:
                         {"value": "negative", "text": "Negative", "description": None},
                         {"value": "neutral", "text": "Neutral", "description": None},
                     ],
-                    "visible_options": None,
+                    "visible_options": 3,
                 },
             ),
             (
@@ -2097,6 +2097,24 @@ class TestSuiteDatasets:
                     {"value": "b", "text": "b", "description": "b"},
                     {"value": "b", "text": "b", "description": "b"},
                 ],
+            },
+            {
+                "type": "label_selection",
+                "options": [
+                    {"value": "a", "text": "a", "description": "a"},
+                    {"value": "b", "text": "b", "description": "b"},
+                    {"value": "b", "text": "b", "description": "b"},
+                ],
+                "visible_options": 2,
+            },
+            {
+                "type": "label_selection",
+                "options": [
+                    {"value": "a", "text": "a", "description": "a"},
+                    {"value": "b", "text": "b", "description": "b"},
+                    {"value": "b", "text": "b", "description": "b"},
+                ],
+                "visible_options": 5,
             },
             {
                 "type": "ranking",

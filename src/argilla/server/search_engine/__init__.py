@@ -12,5 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import AsyncGenerator
+
+from ..settings import settings
 from .base import *
-from .opensearch import OpenSearchEngine, get_search_engine
+from .elasticsearch import ElasticSearchEngine
+from .opensearch import OpenSearchEngine
+
+
+async def get_search_engine() -> AsyncGenerator[SearchEngine, None]:
+    async with SearchEngine.get_by_name(settings.search_engine) as engine:
+        yield engine

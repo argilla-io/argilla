@@ -16,14 +16,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import (
-    BaseModel,
-    PositiveInt,
-    conlist,
-    constr,
-    root_validator,
-    validator,
-)
+from pydantic import BaseModel, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
 from pydantic.utils import GetterDict
 
@@ -80,6 +73,7 @@ VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH = 1000
 
 LABEL_SELECTION_OPTIONS_MIN_ITEMS = 2
 LABEL_SELECTION_OPTIONS_MAX_ITEMS = 250
+LABEL_SELECTION_MIN_VISIBLE_OPTIONS = 3
 
 RANKING_OPTIONS_MIN_ITEMS = 2
 
@@ -255,7 +249,19 @@ class LabelSelectionQuestionSettingsCreate(UniqueValuesCheckerMixin):
         min_items=LABEL_SELECTION_OPTIONS_MIN_ITEMS,
         max_items=LABEL_SELECTION_OPTIONS_MAX_ITEMS,
     )
-    visible_options: Optional[PositiveInt] = None
+    visible_options: Optional[int] = PydanticField(None, ge=LABEL_SELECTION_MIN_VISIBLE_OPTIONS)
+
+    @root_validator
+    def check_visible_options_value(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        visible_options = values.get("visible_options")
+        if visible_options is not None:
+            num_options = len(values["options"])
+            if visible_options > num_options:
+                raise ValueError(
+                    "The value for 'visible_options' must be less or equal to the number of items in 'options'"
+                    f" ({num_options})"
+                )
+        return values
 
 
 class MultiLabelSelectionQuestionSettingsCreate(LabelSelectionQuestionSettingsCreate):

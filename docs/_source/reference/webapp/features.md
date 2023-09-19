@@ -4,10 +4,10 @@
 ## Annotate records
 
 ```{note}
-For information about features in the new Feedback Task datasets, please check [this guide](../../guides/llms/practical_guides/annotate_dataset.ipynb).
+For information about features in the new Feedback Task datasets, please check [this guide](/practical_guides/annotate_dataset.ipynb).
 ```
 
-![Annotate records](../../_static/reference/webapp/features-annotate.png)
+![Annotate records](/_static/reference/webapp/features-annotate.png)
 
 The Argilla UI has a dedicated mode to quickly label your data in a very intuitive way, or revise previous gold labels and correct them.
 Argilla's powerful search and filter functionalities, together with potential model predictions, can guide the annotation process and support the annotator.
@@ -27,11 +27,11 @@ The Argilla UI provides a simple and intuitive interface for annotating records.
 #### Text Classification
 
 ##### Single label
-![Single label text classification record](../../_static/reference/webapp/features-single_textclass_record.png)
+![Single label text classification record](/_static/reference/webapp/features-single_textclass_record.png)
 You can annotate the records with one click on the label. The record will be validated automatically.
 
 ##### Multi-label
-![Multi-label text classification record](../../_static/reference/webapp/features-multi_textclass_record.png)
+![Multi-label text classification record](/_static/reference/webapp/features-multi_textclass_record.png)
 To annotate a record, click on one or multiple labels. Once a record is annotated, its status will show as *Pending*. Click *Reset* if you want to discard your changes and recover the previous state of the record or *Validate* to save your annotation into the dataset. The status will then change to *Validated* in the upper left corner of the record card.
 
 You can also remove all annotations using the *Clear* button or discard a record from the dataset by clicking *Discard*.
@@ -41,7 +41,7 @@ When the dataset contains a large list of labels (10 +), we encourage viewing th
 ```
 
 #### Token Classification
-![Token classification record](../../_static/reference/webapp/features-tokclass_record.png)
+![Token classification record](/_static/reference/webapp/features-tokclass_record.png)
 
 For token classification datasets, you can highlight words (tokens) in the text and annotate them with a label.
 Under the hood, the highlighting takes advantage of the `tokens` information in the [Token Classification data model](../python/python_client.rst#Argilla.client.models.TokenClassificationRecord).
@@ -52,7 +52,7 @@ After modifying a record, either by adding or removing annotations, its status w
 If you want to discard the record from the dataset, click *Discard*.
 
 #### Text2Text
-![Text2Text record](../../_static/reference/webapp/features-text2text_record.png)
+![Text2Text record](/_static/reference/webapp/features-text2text_record.png)
 For Text2Text datasets, there is a text box available for drafting or editing annotations. If a record has one or more predictions, the prediction with the highest score will be pre-filled. You can empty the text field by clicking the *Clear* button.
 
 Remember to validate to save your changes after editing or drafting your annotation. Alternatively, you can discard your changes and revert to the previous state of the record using the *Reset* button.
@@ -64,15 +64,15 @@ If you want to discard the record from the dataset, click *Discard*.
 ### Bulk annotate
 
 
-For all [tasks](../../guides/task_examples.ipynb), you can use **bulk actions**. You can either select the records one by one with the selection box on the upper left of each card, or you can use the global selection box below the search bar, which will select all records shown on the page. Then you can _Validate_ and _Discard_ the selected records using the icons next to the global selection box. For the multi-label text classification and token classification tasks you can also _Clear_ and _Reset_ at bulk level.
+For all [tasks](/guides/task_examples.ipynb), you can use **bulk actions**. You can either select the records one by one with the selection box on the upper left of each card, or you can use the global selection box below the search bar, which will select all records shown on the page. Then you can _Validate_ and _Discard_ the selected records using the icons next to the global selection box. For the multi-label text classification and token classification tasks you can also _Clear_ and _Reset_ at bulk level.
 
-![Bulk actions bar](../../_static/reference/webapp/features-bulk-actions.png)
+![Bulk actions bar](/_static/reference/webapp/features-bulk-actions.png)
 
 For the text classification task, you can additionally **bulk annotate** the selected records by simply clicking on the pencil icon next to the global selection box and selecting the label(s) from the list.
 
 In multi-label text classification, you can remove labels from selected records by clicking the cross next to the label. You can also assign a partially used label to the whole selection by clicking on the tag button. Once you have made your selection, click *Select* to apply the annotations to all selected records. To finalize the validation, click on the "validate" icon.
 
-![Multi-label bulk annotation](../../_static/reference/webapp/features-multiclass-bulk-labels.png)
+![Multi-label bulk annotation](/_static/reference/webapp/features-multiclass-bulk-labels.png)
 
 In single-label text classification, there is no need to validate after selecting your label.
 
@@ -118,7 +118,7 @@ For example, you can use the **Status filter** to hide already annotated records
 You can find more information about how to use the search bar and the filters in our detailed [search guide](search_records.md) and [filter guide](filter_records.md).
 
 ```{note}
-Not all filters are available for all [tasks](../../guides/task_examples.ipynb).
+Not all filters are available for all [tasks](/guides/task_examples.ipynb).
 ```
 
 ### Progress metric
@@ -132,10 +132,10 @@ You can find more information about the metrics in our dedicated [metrics guide]
 
 ## Weak labeling
 
-![Weak labeling](../../_static/reference/webapp/features-weak-labelling.png)
+![Weak labeling](/_static/reference/webapp/features-weak-labelling.png)
 
 The Argilla UI has a dedicated mode to find good **heuristic rules**, also often referred to as _labeling functions_, for a [weak supervision](https://www.snorkel.org/blog/weak-supervision) workflow.
-As shown in our [guide](../../guides/weak-supervision.ipynb) and [tutorial](../../tutorials/labelling-textclassification-sentencetransformers-weaksupervision.ipynb), these rules allow you to quickly annotate your data with noisy labels in a semiautomatic way.
+As shown in our [guide](/guides/weak-supervision.ipynb) and [tutorial](/tutorials/labelling-textclassification-sentencetransformers-weaksupervision.ipynb), these rules allow you to quickly annotate your data with noisy labels in a semiautomatic way.
 
 You can access the _Weak labeling_ mode via the sidebar of the [Dataset page](dataset.md).
 
@@ -195,14 +195,14 @@ Here you will see a list of your saved rules.
 You can edit a rule by clicking on its name, or delete it by clicking on the trash icon.
 
 ## Semantic search
-This feature enables you to find similar records when exploring or annotating records. This leverages semantic search to find "semantically" similar records. In order to use this feature, your dataset records should contain vectors which can be associated when logging the dataset into Argilla. Check the Deep Dive Feature guide about [Semantic Search](../../guides/features/semantic-search.html) to understand how to benefit from this feature.
+This feature enables you to find similar records when exploring or annotating records. This leverages semantic search to find "semantically" similar records. In order to use this feature, your dataset records should contain vectors which can be associated when logging the dataset into Argilla. Check the Deep Dive Feature guide about [Semantic Search](/guides/features/semantic-search.html) to understand how to benefit from this feature.
 
-![Similarity Search](../../_static/reference/webapp/features-similaritysearch.png)
+![Similarity Search](/_static/reference/webapp/features-similaritysearch.png)
 
 
 ## Explore records
 
-![Explore records](../../_static/reference/webapp/features-explore.png)
+![Explore records](/_static/reference/webapp/features-explore.png)
 
 If you want to explore your dataset or analyze the predictions of a model, the Argilla UI offers a dedicated Explore mode.
 The powerful search functionality and intuitive filters allow you to quickly navigate through your records and dive deep into your dataset.
@@ -220,13 +220,13 @@ Both of the components can be used together to dissect in-depth your dataset, va
 You can find more information about how to use the search bar and the filters in our detailed [search guide](search_records.md) and [filter guide](filter_records.md).
 
 ```{note}
-Not all filters are available for all [tasks](../../guides/task_examples.ipynb).
+Not all filters are available for all [tasks](/guides/task_examples.ipynb).
 ```
 
 ### Predictions and annotations
 
 Predictions and annotations are an integral part of Argilla's [data models](../python/python_client.rst#module-Argilla.client.models).
-The way they are presented in the Argilla UI depends on the [task](../../guides/task_examples.ipynb) of the dataset and the mode activated in the right column.
+The way they are presented in the Argilla UI depends on the [task](/guides/task_examples.ipynb) of the dataset and the mode activated in the right column.
 
 #### Text classification
 
@@ -254,13 +254,13 @@ From the side bar you can access the [_Stats_ metrics](pages.md) that provide su
 
 ## Search Records
 
-![Search records](../../_static/reference/webapp/features-search.png)
+![Search records](/_static/reference/webapp/features-search.png)
 
 The search bar in Argilla is driven by Elasticsearch's powerful [query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/query-dsl-query-string-query.html#query-string-syntax).
 
 It allows you to perform simple fuzzy searches of words and phrases, or complex queries taking full advantage of Argilla's data model.
 
-Check out the [query guide](../../guides/queries.md) for a comprehensive guide on how to search in the Argilla UI.
+Check out the [query guide](/guides/queries.md) for a comprehensive guide on how to search in the Argilla UI.
 
 ## Filter Records
 
@@ -269,11 +269,11 @@ For example, you can filter records by their predictions, by a specific metadata
 The filters are available in all [modes](dataset.md#modes) of the UI.
 
 ```{hint}
-You can also filter the records through the search bar by means of [queries](../../guides/queries.md).
+You can also filter the records through the search bar by means of [queries](/guides/queries.md).
 ```
 
 ```{note}
-Not all filters listed below are available for all [tasks](../../guides/task_examples.ipynb).
+Not all filters listed below are available for all [tasks](/guides/task_examples.ipynb).
 ```
 
 ### Predictions filter
@@ -333,13 +333,13 @@ If you uploaded model predictions and want to check for which records the model 
 
 #### High loss
 
-If you logged the *model loss* as a metadata for each record, you can [sort the records](#sort-records) by this loss in descending order to see records for which the model disagrees with the annotations (see this [tutorial](../../tutorials/08-error_analysis_using_loss.ipynb) for an example).
+If you logged the *model loss* as a metadata for each record, you can [sort the records](#sort-records) by this loss in descending order to see records for which the model disagrees with the annotations (see this [tutorial](/tutorials/08-error_analysis_using_loss.ipynb) for an example).
 
 
 
 ## View dataset metrics
 
-![View metrics](../../_static/reference/webapp/features-metrics.png)
+![View metrics](/_static/reference/webapp/features-metrics.png)
 
 The **Dataset Metrics** are part of the **Sidebar** placed on the right side of **Argilla datasets**. To know more about this component, click [here](dataset.md).
 
@@ -364,7 +364,7 @@ In this mode, **progress** is related to the coverage of the rules. It shows the
 
 In the **total rules** section, users can find the number of rules related to the different categories.
 
-![Progress menu 2](../../_static/reference/webapp/features-weak-labelling.png)
+![Progress menu 2](/_static/reference/webapp/features-weak-labelling.png)
 
 #### Stats
 
