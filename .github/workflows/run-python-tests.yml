@@ -74,9 +74,20 @@ jobs:
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
       - name: Set huggingface hub credentials
         if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/releases')
-        env:
-          HF_HUB_ACCESS_TOKEN: ${{ secrets.HF_HUB_ACCESS_TOKEN }}
-        run: echo "Enable HF access token"
+        run: |
+          echo "HF_HUB_ACCESS_TOKEN=${{ secrets.HF_HUB_ACCESS_TOKEN }}" >> "$GITHUB_ENV"
+          echo "Enable HF access token"
+      - name: Set Argilla search engine env variable
+        if: startsWith(inputs.searchEngineDockerImage, 'docker.elastic.co')
+        # TODO(@frascuchon): Enable elasticsearch tests once the ci error is fixed
+        run: |
+          echo "ARGILLA_SEARCH_ENGINE=None" >> "$GITHUB_ENV"
+          echo "Configure elasticsearch engine"
+      - name: Set Argilla search engine env variable
+        if: startsWith(inputs.searchEngineDockerImage, 'opensearchproject')
+        run: |
+          echo "ARGILLA_SEARCH_ENGINE=opensearch" >> "$GITHUB_ENV"
+          echo "Configure elasticsearch engine"
       - name: Run tests 📈
         run: |
           pip install -e ".[server,listeners]"

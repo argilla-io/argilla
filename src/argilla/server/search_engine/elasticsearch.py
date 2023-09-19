@@ -13,14 +13,12 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import Any, Dict, List, Optional
+from typing import Any, AsyncGenerator, Dict, List, Optional
 
-from opensearchpy import AsyncOpenSearch, helpers
+from elasticsearch8 import AsyncElasticsearch, helpers
 
-from argilla.server.models import (
-    VectorSettings,
-)
-from argilla.server.search_engine.base import (
+from argilla.server.models import VectorSettings
+from argilla.server.search_engine import (
     SearchEngine,
     UserResponseStatusFilter,
 )
@@ -28,19 +26,27 @@ from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine,
 from argilla.server.settings import settings
 
 
-@SearchEngine.register(engine_name="opensearch")
+def _compute_num_candidates_from_k(k: int) -> int:
+    if k < 50:
+        return 500
+    elif 50 <= k < 200:
+        return 100
+    return 2000
+
+
+@SearchEngine.register(engine_name="elasticsearch")
 @dataclasses.dataclass
-class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
+class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
     config: Dict[str, Any]
 
     es_number_of_shards: int
     es_number_of_replicas: int
 
     def __post_init__(self):
-        self.client = AsyncOpenSearch(**self.config)
+        self.client = AsyncElasticsearch(**self.config)
 
     @classmethod
-    async def new_instance(cls) -> "OpenSearchEngine":
+    async def new_instance(cls) -> "ElasticSearchEngine":
         config = dict(
             hosts=settings.elasticsearch,
             verify_certs=settings.elasticsearch_ssl_verify,
@@ -57,38 +63,21 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
     async def close(self):
         await self.client.close()
 
-    def _configure_index_mappings(self, dataset) -> dict:
+    def _configure_index_settings(self) -> Dict[str, Any]:
         return {
-            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic.html#dynamic-parameters
-            "dynamic": "strict",
-            "dynamic_templates": self._dynamic_templates_for_question_responses(dataset.questions),
-            "properties": {
-                # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
-                "id": {"type": "keyword"},
-                "responses": {"dynamic": True, "type": "object"},
-                **self._mapping_for_vectors_settings(dataset.vectors_settings),
-                **self._mapping_for_fields(dataset.fields),
-            },
-        }
-
-    def _configure_index_settings(self):
-        return {
-            "index.knn": False,
             "number_of_shards": self.es_number_of_shards,
             "number_of_replicas": self.es_number_of_replicas,
         }
 
     def _mapping_for_vector_settings(self, vector_settings: VectorSettings) -> dict:
         return {
-            field_name_for_vector_settings(vector_settings): {
-                "type": "knn_vector",
-                "dimension": vector_settings.dimensions,
-                "method": {
-                    "name": "hnsw",
-                    "engine": "lucene",  # See https://opensearch.org/blog/Expanding-k-NN-with-Lucene-aNN/
-                    "space_type": "l2",
-                    "parameters": {"m": 2, "ef_construction": 4},
-                },
+            f"vectors.{vector_settings.id}": {
+                "type": "dense_vector",
+                "dims": vector_settings.dimensions,
+                "index": True,
+                # can similarity property also be part of config @frascuchon ?
+                # relates vector search similarity metric
+                "similarity": "l2_norm",  ## default value regarding the knn best practices es documentation
             }
         }
 
@@ -100,35 +89,37 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
         k: int,
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
     ) -> dict:
-        knn_query = {field_name_for_vector_settings(vector_settings): {"vector": value, "k": k}}
+        knn_query = {
+            "field": field_name_for_vector_settings(vector_settings),
+            "query_vector": value,
+            "k": k,
+            "num_candidates": _compute_num_candidates_from_k(k=k),
+        }
 
         if user_response_status_filter:
-            # See https://opensearch.org/docs/latest/search-plugins/knn/filter-search-knn/#efficient-k-nn-filtering
-            # Will work from Opensearch >= v2.4
             knn_query["filter"] = self._response_status_filter_builder(user_response_status_filter)
 
-        body = {"query": {"knn": knn_query}}
-        return await self.client.search(index=index, body=body, _source=False, track_total_hits=True)
+        return await self.client.search(index=index, knn=knn_query, _source=False, track_total_hits=True)
 
     async def _create_index_request(self, index_name: str, mappings: dict, settings: dict) -> None:
-        await self.client.indices.create(index=index_name, body=dict(settings=settings, mappings=mappings))
+        await self.client.indices.create(index=index_name, settings=settings, mappings=mappings)
 
     async def _delete_index_request(self, index_name: str):
         await self.client.indices.delete(index_name, ignore=[404], ignore_unavailable=True)
 
     async def _update_document_request(self, index_name: str, id: str, body: dict):
-        await self.client.update(index=index_name, id=id, body=body)
+        await self.client.update(index=index_name, id=id, **body)
 
     async def put_index_mapping_request(self, index: str, mappings: dict):
-        await self.client.indices.put_mapping(index=index, body={"properties": mappings})
+        await self.client.indices.put_mapping(index=index, properties=mappings)
 
     async def _index_search_request(self, index: str, query: dict, size: int, from_: int):
         return await self.client.search(
             index=index,
-            body={"query": query},
+            query=query,
             from_=from_,
             size=size,
-            _source=False,
+            source=False,
             sort="_score:desc,id:asc",
             track_total_hits=True,
         )
