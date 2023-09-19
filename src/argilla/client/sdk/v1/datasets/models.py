@@ -107,15 +107,6 @@ class FeedbackQuestionModel(BaseModel):
     updated_at: datetime
 
 
-class FeedbackSuggestionModel(BaseModel):
-    id: UUID
-    question_id: UUID
-    type: Optional[Literal["human", "model"]] = None
-    score: Optional[float] = None
-    value: Any
-    agent: Optional[str] = None
-
-
 class FeedbackRecordsMetricsModel(BaseModel):
     count: int
 
