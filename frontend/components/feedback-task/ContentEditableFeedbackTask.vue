@@ -101,7 +101,9 @@ export default {
     reset() {
       this.currentValue = this.value;
       this.sanitizedCurrentValue = " ";
-      this.sanitizedCurrentValue = this.currentValue;
+      this.$nextTick(() => {
+        this.sanitizedCurrentValue = this.currentValue;
+      });
     },
     exitEditionMode() {
       this.$refs.text.blur();

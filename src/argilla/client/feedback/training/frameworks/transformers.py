@@ -32,8 +32,9 @@ class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSke
             set_seed,
         )
 
-        self._transformers_model = None
-        self._transformers_tokenizer = None
+        model = kwargs.get("model", None)
+        self._transformers_model = model if model and not isinstance(model, str) else None
+        self._transformers_tokenizer = kwargs.get("tokenizer", None)
         self._pipeline = None
 
         self.device = "cpu"
