@@ -33,16 +33,22 @@ class FeedbackDatasetModel(BaseModel):
 
 class FeedbackRankingValueModel(BaseModel):
     value: StrictStr
-    rank: conint(ge=1)
+    rank: Optional[conint(ge=1)] = None
 
 
 class FeedbackValueModel(BaseModel):
     value: Union[StrictStr, StrictInt, List[str], List[FeedbackRankingValueModel]]
 
 
+class FeedbackResponseStatus(str, Enum):
+    draft = "draft"
+    submitted = "submitted"
+    discarded = "discarded"
+
+
 class FeedbackResponseStatusFilter(str, Enum):
     draft = "draft"
-    missing = "missing"
+    missing = "missing"  # not a status as-is, used as a filter to indicate no response
     submitted = "submitted"
     discarded = "discarded"
 
@@ -50,7 +56,7 @@ class FeedbackResponseStatusFilter(str, Enum):
 class FeedbackResponseModel(BaseModel):
     id: UUID
     values: Dict[str, FeedbackValueModel]
-    status: Literal["submitted", "discarded"]  # API also contains "missing", but it's just a filter-status
+    status: FeedbackResponseStatus
     user_id: UUID
     inserted_at: datetime
     updated_at: datetime

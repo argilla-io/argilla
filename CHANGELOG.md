@@ -16,6 +16,8 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [1.16.0](https://github.com/argilla-io/argilla/compare/v1.15.1...v1.16.0)
+
 ### Added
 
 - Added `ArgillaTrainer` integration with sentence-transformers, allowing fine tuning for sentence similarity ([#3739](https://github.com/argilla-io/argilla/pull/3739))
@@ -42,6 +44,8 @@ These are the section headers that we use:
 - Added `workspace_id` param to `GET /api/v1/me/datasets` endpoint ([#3727](https://github.com/argilla-io/argilla/pull/3727)).
 - Added `workspace_id` arg to `list_datasets` in the Python SDK ([#3727](https://github.com/argilla-io/argilla/pull/3727)).
 - Added `argilla` script that allows to execute Argilla CLI using the `argilla` command ([#3730](https://github.com/argilla-io/argilla/pull/3730)).
+- Added support for passing already initialized `model` and `tokenizer` instances to the `ArgillaTrainer` ([#3751](https://github.com/argilla-io/argilla/pull/3751))
+- Added `server_info` function to check the Argilla server information (also accessible via `rg.server_info`) ([#3772](https://github.com/argilla-io/argilla/issues/3772)).
 
 ### Changed
 
@@ -51,15 +55,21 @@ These are the section headers that we use:
 - Display a `UserWarning` when the `user_id` in `Workspace.add_user` and `Workspace.delete_user` is the ID of an user with the owner role as they don't require explicit permissions ([#3716](https://github.com/argilla-io/argilla/issues/3716)).
 - Rename `tasks` sub-package to `cli` ([#3723](https://github.com/argilla-io/argilla/pull/3723)).
 - Changed `argilla database` command in the CLI to now be accessed via `argilla server database`, to be deprecated in the upcoming release ([#3754](https://github.com/argilla-io/argilla/pull/3754)).
+- Changed `visible_options` (of label and multi label selection questions) validation in the backend to check that the provided value is greater or equal than/to 3 and less or equal than/to the number of provided options ([#3773](https://github.com/argilla-io/argilla/pull/3773)).
 
 ### Fixed
 
+- Fixed `remove user modification in text component on clear answers` ([#3775](https://github.com/argilla-io/argilla/pull/3775))
+- Fixed `Highlight raw text field in dataset feedback task` ([#3731](https://github.com/argilla-io/argilla/pull/3731))
 - Fixed `Field title too long` ([#3734](https://github.com/argilla-io/argilla/pull/3734))
 - Fixed error messages when deleting a `DatasetForTextClassification` ([#3652](https://github.com/argilla-io/argilla/pull/3652))
 - Fixed `Pending queue` pagination problems when during data annotation ([#3677](https://github.com/argilla-io/argilla/pull/3677))
 - Fixed `visible_labels` default value to be 20 just when `visible_labels` not provided and `len(labels) > 20`, otherwise it will either be the provided `visible_labels` value or `None`, for `LabelQuestion` and `MultiLabelQuestion` ([#3702](https://github.com/argilla-io/argilla/pull/3702)).
 - Fixed `DatasetCard` generation when `RemoteFeedbackDataset` contains suggestions ([#3718](https://github.com/argilla-io/argilla/pull/3718)).
-- Searches when queried words are distributed along the record fields ([3759](https://github.com/argilla-io/argilla/pull/3759))
+- Add missing `draft` status in `ResponseSchema` as now there can be responses with `draft` status when annotating via the UI ([#3749](https://github.com/argilla-io/argilla/pull/3749)).
+- Searches when queried words are distributed along the record fields ([#3759](https://github.com/argilla-io/argilla/pull/3759)).
+- Fixed Python 3.11 compatibility issue with `/api/datasets` endpoints due to the `TaskType` enum replacement in the endpoint URL ([#3769](https://github.com/argilla-io/argilla/pull/3769)).
+- Fixed `RankingValueSchema` and `FeedbackRankingValueModel` schemas to allow `rank=None` when `status=draft` ([#3781](https://github.com/argilla-io/argilla/pull/3781)).
 
 ## [1.15.1](https://github.com/argilla-io/argilla/compare/v1.15.0...v1.15.1)
 

@@ -3,7 +3,7 @@ title: SpanMarker
 description: The ArgillaSpanMarkerTrainer leverages SpanMarker to programmatically train with Argilla.
 links:
   - linkText: Argilla docs
-    linkLink: https://docs.argilla.io/en/latest/guides/train_a_model.html
+    linkLink: https://docs.argilla.io/en/practical_guides/fine_tune.html#token-classification
   - linkText: SpanMarker docs
     linkLink: https://tomaarsen.github.io/SpanMarkerNER
 ---

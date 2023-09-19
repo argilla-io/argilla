@@ -353,6 +353,7 @@ export default {
     &:before {
       position: absolute;
       @extend %triangle-right;
+      left: 100%;
     }
   }
 }

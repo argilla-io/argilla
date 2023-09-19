@@ -12,13 +12,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import Any, Dict, List, Optional, Set, Tuple
+
+from typing import Dict, List, Optional, Set, Tuple
 
 from pydantic import BaseModel, Field, validator
 
 from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.server.commons.models import PredictionStatus, TaskType
-from argilla.server.services.datasets import ServiceBaseDataset
 from argilla.server.services.search.model import ServiceBaseRecordsQuery, ServiceScoreRange
 from argilla.server.services.tasks.commons import ServiceBaseAnnotation, ServiceBaseRecord
 from argilla.utils import SpanUtils

@@ -35,7 +35,15 @@ from pydantic import ValidationError
                 {
                     "values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}},
                     "status": "submitted",
-                }
+                },
+                {
+                    "values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}},
+                    "status": "draft",
+                },
+                {
+                    "values": {},
+                    "status": "discarded",
+                },
             ],
             "suggestions": [
                 {
@@ -144,6 +152,7 @@ def test_value_schema(schema_kwargs: Dict[str, Any]) -> None:
     "schema_kwargs",
     [
         {"value": "question-1", "rank": 1},
+        {"value": "question-1", "rank": None},
     ],
 )
 def test_ranking_value_schema(schema_kwargs: Dict[str, Any]) -> None:
