@@ -12,17 +12,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from argilla.client.feedback.schemas.fields import TextField
 
 
 class RemoteFieldSchema(BaseModel):
     id: UUID
-    settings: Dict[str, Any] = Field(default_factory=dict)
 
     class Config:
         allow_mutation = False
