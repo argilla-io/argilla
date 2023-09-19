@@ -423,6 +423,51 @@ class TestSuiteDatasets:
 
         assert response.status_code == 404
 
+    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+    async def test_list_dataset_vectors_settings(self, async_client: "AsyncClient", role: UserRole):
+        dataset = await DatasetFactory.create()
+        vectors_settings = await VectorSettingsFactory.create_batch(size=3, dataset=dataset)
+        user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
+
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/vectors-settings", headers={API_KEY_HEADER_NAME: user.api_key}
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "items": [
+                {
+                    "id": str(vector_settings.id),
+                    "name": vector_settings.name,
+                    "dimensions": vector_settings.dimensions,
+                    "description": vector_settings.description,
+                    "inserted_at": vector_settings.inserted_at.isoformat(),
+                    "updated_at": vector_settings.updated_at.isoformat(),
+                }
+                for vector_settings in vectors_settings
+            ]
+        }
+
+    @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
+    async def test_list_dataset_vector_settings_as_user_from_another_workspace(
+        self, async_client: "AsyncClient", role: UserRole
+    ):
+        dataset = await DatasetFactory.create()
+        annotator = await UserFactory.create(role=role)
+
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/vectors-settings", headers={API_KEY_HEADER_NAME: annotator.api_key}
+        )
+
+        assert response.status_code == 403
+
+    async def test_list_dataset_vectors_settings_without_authentication(self, async_client: "AsyncClient"):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.get(f"/api/v1/datasets/{dataset.id}/vectors-settings")
+
+        assert response.status_code == 401
+
     async def test_list_dataset_records(self, async_client: "AsyncClient", owner_auth_header: dict):
         dataset = await DatasetFactory.create()
         record_a = await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
@@ -2222,6 +2267,20 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 403
+
+    async def test_create_dataset_vector_settings_without_authentication(self, async_client: "AsyncClient"):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/vectors-settings",
+            json={
+                "name": "vectors-for-search",
+                "dimensions": 384,
+                "description": "Vectors generated with sentence-transformers/all-MiniLM-L6-v2",
+            },
+        )
+
+        assert response.status_code == 401
 
     async def test_create_dataset_records(
         self,
