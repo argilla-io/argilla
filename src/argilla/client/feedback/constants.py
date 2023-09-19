@@ -12,8 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from argilla.client.feedback.schemas.fields import FieldTypes
+
 FETCHING_BATCH_SIZE = 250
 PUSHING_BATCH_SIZE = 32
 DELETE_DATASET_RECORDS_MAX_NUMBER = 100
 
-FIELD_TYPE_TO_PYTHON_TYPE = {"text": str}
+FIELD_TYPE_TO_PYTHON_TYPE = {FieldTypes.text: str}

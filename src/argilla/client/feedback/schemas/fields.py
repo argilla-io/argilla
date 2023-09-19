@@ -13,13 +13,16 @@
 #  limitations under the License.
 
 from abc import abstractproperty
-from typing import Any, Dict, Literal, Optional
+from enum import Enum
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, Extra, Field, validator
 
 from argilla.client.feedback.schemas.validators import title_must_have_value
 
-FieldTypes = Literal["text"]
+
+class FieldTypes(str, Enum):
+    text = "text"
 
 
 class FieldSchema(BaseModel):
@@ -44,7 +47,7 @@ class FieldSchema(BaseModel):
     name: str = Field(..., regex=r"^(?=.*[a-z0-9])[a-z0-9_-]+$")
     title: Optional[str] = None
     required: bool = True
-    type: Optional[FieldTypes] = None
+    type: Optional[FieldTypes] = Field(..., allow_mutation=False)
 
     _title_must_have_value = validator("title", always=True, allow_reuse=True)(title_must_have_value)
 
@@ -76,7 +79,7 @@ class TextField(FieldSchema):
         >>> TextField(name="text_field", title="Text Field")
     """
 
-    type: Literal["text"] = "text"
+    type: FieldTypes = Field(FieldTypes.text, allow_mutation=False)
     use_markdown: bool = False
 
     @property
