@@ -14,6 +14,7 @@
 
 import warnings
 from abc import abstractproperty
+from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Extra, Field, conint, conlist, validator
@@ -21,7 +22,13 @@ from pydantic import BaseModel, Extra, Field, conint, conlist, validator
 from argilla.client.feedback.schemas.utils import LabelMappingMixin
 from argilla.client.feedback.schemas.validators import title_must_have_value
 
-QuestionTypes = Literal["text", "rating", "label_selection", "multi_label_selection", "ranking"]
+
+class QuestionTypes(str, Enum):
+    text = "text"
+    rating = "rating"
+    label_selection = "label_selection"
+    multi_label_selection = "multi_label_selection"
+    ranking = "ranking"
 
 
 class QuestionSchema(BaseModel):
@@ -50,7 +57,7 @@ class QuestionSchema(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     required: bool = True
-    type: Optional[QuestionTypes] = None
+    type: Optional[QuestionTypes] = Field(..., allow_mutation=False)
 
     _title_must_have_value = validator("title", always=True, allow_reuse=True)(title_must_have_value)
 
@@ -82,7 +89,7 @@ class TextQuestion(QuestionSchema):
         >>> TextQuestion(name="text_question", title="Text Question")
     """
 
-    type: Literal["text"] = Field("text", allow_mutation=False)
+    type: QuestionTypes = Field(QuestionTypes.text, allow_mutation=False)
     use_markdown: bool = False
 
     @property
@@ -109,7 +116,7 @@ class RatingQuestion(QuestionSchema, LabelMappingMixin):
         >>> RatingQuestion(name="rating_question", title="Rating Question", values=[1, 2, 3, 4, 5])
     """
 
-    type: Literal["rating"] = Field("rating", allow_mutation=False)
+    type: QuestionTypes = Field(QuestionTypes.rating, allow_mutation=False)
     values: List[int] = Field(..., unique_items=True, ge=1, le=10, min_items=2)
 
     @property
@@ -215,7 +222,7 @@ class LabelQuestion(_LabelQuestion):
         >>> LabelQuestion(name="label_question", title="Label Question", labels=["label_1", "label_2"])
     """
 
-    type: Literal["label_selection"] = Field("label_selection", allow_mutation=False)
+    type: QuestionTypes = Field(QuestionTypes.label_selection, allow_mutation=False)
 
 
 class MultiLabelQuestion(_LabelQuestion):
@@ -238,7 +245,7 @@ class MultiLabelQuestion(_LabelQuestion):
         >>> MultiLabelQuestion(name="multi_label_question", title="Multi Label Question", labels=["label_1", "label_2"])
     """
 
-    type: Literal["multi_label_selection"] = Field("multi_label_selection", allow_mutation=False)
+    type: QuestionTypes = Field(QuestionTypes.multi_label_selection, allow_mutation=False)
 
 
 class RankingQuestion(QuestionSchema, LabelMappingMixin):
@@ -260,7 +267,7 @@ class RankingQuestion(QuestionSchema, LabelMappingMixin):
         >>> RankingQuestion(name="ranking_question", title="Ranking Question", labels=["label_1", "label_2"])
     """
 
-    type: Literal["ranking"] = Field("ranking", allow_mutation=False)
+    type: QuestionTypes = Field(QuestionTypes.ranking, allow_mutation=False)
     values: Union[conlist(str, unique_items=True, min_items=2), Dict[str, str]]
 
     @validator("values", always=True)
