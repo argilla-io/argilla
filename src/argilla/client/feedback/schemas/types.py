@@ -22,6 +22,18 @@ from argilla.client.feedback.schemas.questions import (
     RatingQuestion,
     TextQuestion,
 )
+from argilla.client.feedback.schemas.remote.fields import RemoteTextField
+from argilla.client.feedback.schemas.remote.questions import (
+    RemoteLabelQuestion,
+    RemoteMultiLabelQuestion,
+    RemoteRankingQuestion,
+    RemoteRatingQuestion,
+    RemoteTextQuestion,
+)
 
 AllowedFieldTypes = TextField
+AllowedRemoteFieldTypes = RemoteTextField
 AllowedQuestionTypes = Union[TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion, RankingQuestion]
+AllowedRemoteQuestionTypes = Union[
+    RemoteTextQuestion, RemoteRatingQuestion, RemoteLabelQuestion, RemoteMultiLabelQuestion, RemoteRankingQuestion
+]

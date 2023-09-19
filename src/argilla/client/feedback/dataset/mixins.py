@@ -20,15 +20,23 @@ from tqdm import trange
 from argilla.client.api import ArgillaSingleton
 from argilla.client.feedback.constants import PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-from argilla.client.feedback.schemas import (
+from argilla.client.feedback.schemas.fields import FieldTypes
+from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
+    QuestionTypes,
     RankingQuestion,
     RatingQuestion,
-    TextField,
     TextQuestion,
 )
-from argilla.client.feedback.schemas.types import AllowedQuestionTypes
+from argilla.client.feedback.schemas.remote.fields import RemoteTextField
+from argilla.client.feedback.schemas.remote.questions import (
+    RemoteLabelQuestion,
+    RemoteMultiLabelQuestion,
+    RemoteRankingQuestion,
+    RemoteRatingQuestion,
+    RemoteTextQuestion,
+)
 from argilla.client.feedback.unification import (
     LabelQuestionStrategy,
     MultiLabelQuestionStrategy,
@@ -45,12 +53,11 @@ if TYPE_CHECKING:
 
     from argilla.client.client import Argilla as ArgillaClient
     from argilla.client.feedback.dataset.local import FeedbackDataset
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes
+    from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel
 
 
 class ArgillaMixin:
-    # TODO(alvarobartt): remove when `delete` is implemented
     def __delete_dataset(self: "FeedbackDataset", client: "httpx.Client", id: UUID) -> None:
         try:
             datasets_api_v1.delete_dataset(client=client, id=id)
@@ -59,7 +66,7 @@ class ArgillaMixin:
                 f"Failed while deleting the `FeedbackDataset` with ID '{id}' from Argilla with" f" exception: {e}"
             ) from e
 
-    def __add_fields(self: "FeedbackDataset", client: "httpx.Client", id: UUID) -> List["AllowedFieldTypes"]:
+    def __add_fields(self: "FeedbackDataset", client: "httpx.Client", id: UUID) -> List["AllowedRemoteFieldTypes"]:
         fields = []
         for field in self._fields:
             try:
@@ -74,7 +81,9 @@ class ArgillaMixin:
                 ) from e
         return fields
 
-    def __add_questions(self: "FeedbackDataset", client: "httpx.Client", id: UUID) -> List["AllowedQuestionTypes"]:
+    def __add_questions(
+        self: "FeedbackDataset", client: "httpx.Client", id: UUID
+    ) -> List["AllowedRemoteQuestionTypes"]:
         questions = []
         for question in self._questions:
             try:
@@ -193,7 +202,7 @@ class ArgillaMixin:
         )
 
     @staticmethod
-    def __get_fields(client: "httpx.Client", id: UUID) -> List["AllowedFieldTypes"]:
+    def __get_fields(client: "httpx.Client", id: UUID) -> List["AllowedRemoteFieldTypes"]:
         fields = []
         for field in datasets_api_v1.get_fields(client=client, id=id).parsed:
             base_field = field.dict(include={"id", "name", "title", "required"})
@@ -208,7 +217,7 @@ class ArgillaMixin:
         return fields
 
     @staticmethod
-    def __get_questions(client: "httpx.Client", id: UUID) -> List["AllowedQuestionTypes"]:
+    def __get_questions(client: "httpx.Client", id: UUID) -> List["AllowedRemoteQuestionTypes"]:
         questions = []
         for question in datasets_api_v1.get_questions(client=client, id=id).parsed:
             question_dict = question.dict(include={"id", "name", "title", "description", "required"})
