@@ -70,9 +70,8 @@ class ArgillaMixin:
         fields = []
         for field in self._fields:
             try:
-                new_field = datasets_api_v1.add_field(client=client, id=id, field=field.dict(exclude={"id"})).parsed
-                field.id = new_field.id
-                fields.append(field)
+                new_field = datasets_api_v1.add_field(client=client, id=id, field=field.to_server_payload()).parsed
+                fields.append(new_field)
             except Exception as e:
                 self.__delete_dataset(client=client, id=id)
                 raise Exception(
@@ -88,10 +87,9 @@ class ArgillaMixin:
         for question in self._questions:
             try:
                 new_question = datasets_api_v1.add_question(
-                    client=client, id=id, question=question.dict(exclude={"id"})
+                    client=client, id=id, question=question.to_server_payload()
                 ).parsed
-                question.id = new_question.id
-                questions.append(question)
+                questions.append(new_question)
             except Exception as e:
                 self.__delete_dataset(client=client, id=id)
                 raise Exception(
@@ -114,26 +112,24 @@ class ArgillaMixin:
         question_name_to_id: Dict[str, UUID],
         show_progress: bool = True,
     ) -> None:
-        for i in trange(
-            0, len(self.records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=show_progress
-        ):
-            try:
-                records = []
-                for record in self.records[i : i + PUSHING_BATCH_SIZE]:
-                    if record.suggestions:
-                        for suggestion in record.suggestions:
-                            suggestion.question_id = question_mapping[suggestion.question_name]
-                    records.append(
-                        record.dict(
-                            exclude={"id": ..., "suggestions": {"__all__": {"question_name"}}}, exclude_none=True
-                        )
+        if len(self.records) > 0:
+            for i in trange(
+                0, len(self.records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=show_progress
+            ):
+                try:
+                    datasets_api_v1.add_records(
+                        client=client,
+                        id=id,
+                        records=[
+                            record.to_server_payload(question_name_to_id=question_name_to_id)
+                            for record in self.records[i : i + PUSHING_BATCH_SIZE]
+                        ],
                     )
-                datasets_api_v1.add_records(client=client, id=id, records=records)
-            except Exception as e:
-                self.__delete_dataset(client=client, id=id)
-                raise Exception(
-                    f"Failed while adding the records to the `FeedbackDataset` in Argilla with exception: {e}"
-                ) from e
+                except Exception as e:
+                    self.__delete_dataset(client=client, id=id)
+                    raise Exception(
+                        f"Failed while adding the records to the `FeedbackDataset` in Argilla with exception: {e}"
+                    ) from e
 
     def push_to_argilla(
         self: "FeedbackDataset",

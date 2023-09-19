@@ -112,12 +112,25 @@ class SuggestionSchema(BaseModel):
         ... )
     """
 
-    question_id: Optional[UUID] = None
     question_name: str
     type: Optional[Literal["model", "human"]] = None
     score: Optional[float] = None
     value: Any
     agent: Optional[str] = None
+
+    def to_server_payload(self, question_name_to_id: Dict[str, UUID]) -> Dict[str, Any]:
+        """Method that will be used to create the payload that will be sent to Argilla
+        to create a `SuggestionSchema` for a `FeedbackRecord`."""
+        payload = {}
+        payload["question_id"] = question_name_to_id[self.question_name]
+        payload["value"] = self.value
+        if self.type:
+            payload["type"] = self.type
+        if self.score:
+            payload["score"] = self.score
+        if self.agent:
+            payload["agent"] = self.agent
+        return payload
 
     class Config:
         extra = Extra.forbid
@@ -210,6 +223,24 @@ class FeedbackRecord(BaseModel):
             suggestions_dict[suggestion.question_name] = suggestion
 
         self.__dict__["suggestions"] = tuple(suggestions_dict.values())
+
+    def to_server_payload(self, question_name_to_id: Optional[Dict[str, UUID]] = None) -> Dict[str, Any]:
+        """Method that will be used to create the payload that will be sent to Argilla
+        to create a `FeedbackRecord` in the `FeedbackDataset`.
+        """
+        payload = {}
+        payload["fields"] = self.fields
+        if self.responses:
+            payload["responses"] = [response.dict() for response in self.responses]
+        if self.suggestions and question_name_to_id:
+            payload["suggestions"] = [
+                suggestion.to_server_payload(question_name_to_id) for suggestion in self.suggestions
+            ]
+        if self.metadata:
+            payload["metadata"] = self.metadata
+        if self.external_id:
+            payload["external_id"] = self.external_id
+        return payload
 
     class Config:
         extra = Extra.forbid

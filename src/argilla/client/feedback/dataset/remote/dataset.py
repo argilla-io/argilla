@@ -83,18 +83,13 @@ class RemoteFeedbackRecords(RemoteFeedbackRecordsBase):
         for i in trange(
             0, len(records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=not show_progress
         ):
-            records_batch = []
-            for record in records[i : i + PUSHING_BATCH_SIZE]:
-                if record.suggestions:
-                    for suggestion in record.suggestions:
-                        suggestion.question_id = self.__question_name2id[suggestion.question_name]
-                records_batch.append(
-                    record.dict(exclude={"id": ..., "suggestions": {"__all__": {"question_name"}}}, exclude_none=True)
-                )
             datasets_api_v1.add_records(
                 client=self._client,
                 id=self._dataset.id,
-                records=records_batch,
+                records=[
+                    record.to_server_payload(self._question_name_to_id)
+                    for record in records[i : i + PUSHING_BATCH_SIZE]
+                ],
             )
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
