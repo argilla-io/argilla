@@ -44,6 +44,7 @@ from argilla.client.feedback.training.schemas import (
 )
 from argilla.client.feedback.unification import LabelQuestionUnification
 from argilla.client.models import Framework
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 __OUTPUT_DIR__ = "tmp"
 
@@ -106,6 +107,55 @@ def test_prepare_for_training_text_classification_with_defaults(
             elif framework in [Framework("transformers"), Framework("setfit")]:
                 trainer.update_config(num_iterations=1)
             trainer.train(__OUTPUT_DIR__)
+
+    if Path(__OUTPUT_DIR__).exists():
+        shutil.rmtree(__OUTPUT_DIR__)
+
+
+@pytest.mark.parametrize(
+    ("framework", "model_id"),
+    [(Framework("transformers"), "bert-base-cased"), (Framework("peft"), "distilbert-base-cased")],
+)
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records",
+)
+def test_argilla_trainer_text_classification_with_model_tokenizer(
+    framework: Union[Framework, str],
+    model_id: str,
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records: List[FeedbackRecord],
+) -> None:
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records * 5)
+
+    questions = [
+        question for question in dataset.questions if isinstance(question, (LabelQuestion, MultiLabelQuestion))
+    ]
+    label = LabelQuestionUnification(question=questions[0])
+    task = TrainingTask.for_text_classification(text=dataset.fields[0], label=label)
+
+    model = AutoModelForSequenceClassification.from_pretrained(model_id, num_labels=3)
+    tokenizer = AutoTokenizer.from_pretrained(model_id, padding_side="right", add_prefix_space=True)
+    # Set some values to track and assert later
+    model.test_value = 12
+    tokenizer.test_value = 12
+    if not (framework == Framework("peft") and sys.version_info < (3, 9)):
+        trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, model=model, tokenizer=tokenizer)
+        trainer.update_config(num_steps=1)
+        trainer.train(__OUTPUT_DIR__)
+
+        # Verify that the passed model and tokenizer are used
+        assert trainer._trainer._transformers_model.test_value == 12
+        assert trainer._trainer._transformers_tokenizer.test_value == 12
 
     if Path(__OUTPUT_DIR__).exists():
         shutil.rmtree(__OUTPUT_DIR__)
@@ -289,3 +339,26 @@ def test_deprecations_for_text_classification():
             TrainingTaskMappingForTextClassification(None)
         except Exception:
             pass
+
+
+def test_tokenizer_warning_wrong_framework(
+    feedback_dataset_fields,
+    feedback_dataset_questions,
+    feedback_dataset_records,
+    feedback_dataset_guidelines,
+) -> None:
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records * 5)
+    questions = [
+        question for question in dataset.questions if isinstance(question, (LabelQuestion, MultiLabelQuestion))
+    ]
+    label = LabelQuestionUnification(question=questions[0])
+    task = TrainingTask.for_text_classification(text=dataset.fields[0], label=label)
+
+    tokenizer = AutoTokenizer.from_pretrained("gpt2")
+    with pytest.warns(UserWarning, match="Passing a tokenizer is not supported for the setfit framework."):
+        ArgillaTrainer(dataset=dataset, task=task, framework="setfit", tokenizer=tokenizer)
