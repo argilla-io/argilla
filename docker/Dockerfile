@@ -1,4 +1,4 @@
-FROM python:3.9-slim AS builder
+FROM python:3.10.12-slim AS builder
 
 # Copying argilla distribution files
 COPY dist/*.whl /packages/
@@ -6,6 +6,7 @@ RUN python -m venv /my-virtual-env
 ENV PATH="/my-virtual-env/bin:$PATH"
 RUN apt-get update && \
     apt-get install -y python-dev-is-python3 libpq-dev gcc && \
+    pip install uvicorn[standard] && \
     for wheel in /packages/*.whl; do pip install "$wheel"[server,postgresql]; done && \
     apt-get remove -y python-dev-is-python3 libpq-dev gcc && \
     apt-get clean && \
@@ -13,10 +14,10 @@ RUN apt-get update && \
     rm -rf /packages
 
 
-FROM python:3.9-slim
+FROM python:3.10.12-slim
 
 # Environment Variables
-ENV ARGILLA_HOME_PATH=/home/worker/argilla
+ENV ARGILLA_HOME_PATH=/var/lib/argilla
 ENV DEFAULT_USER_ENABLED=true
 ENV DEFAULT_USER_PASSWORD=1234
 ENV DEFAULT_USER_API_KEY=argilla.apikey
@@ -29,11 +30,13 @@ COPY --chown=worker:worker --from=builder /my-virtual-env /home/worker/my-virtua
 ENV PATH="/home/worker/my-virtual-env/bin:$PATH"
 
 # Create argilla volume
-RUN mkdir -p "$ARGILLA_HOME_PATH"
+RUN mkdir -p "$ARGILLA_HOME_PATH" && \
+    chown worker:worker "$ARGILLA_HOME_PATH"
 VOLUME $ARGILLA_HOME_PATH
 
 WORKDIR /home/worker
 RUN chmod +x start_argilla_server.sh
+
 USER worker
 
 # Exposing ports
