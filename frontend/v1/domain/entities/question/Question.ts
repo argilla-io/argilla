@@ -157,7 +157,7 @@ export class Question {
     if (!suggestion) return;
 
     this.suggestion = suggestion;
-    this.answer.complete(suggestion);
+    this.answer.completeWithSuggestions(suggestion);
   }
 
   private createEmptyAnswers(): QuestionAnswer {
