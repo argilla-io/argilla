@@ -201,13 +201,12 @@ class ArgillaMixin:
     def __get_fields(client: "httpx.Client", id: UUID) -> List["AllowedRemoteFieldTypes"]:
         fields = []
         for field in datasets_api_v1.get_fields(client=client, id=id).parsed:
-            base_field = field.dict(include={"id", "name", "title", "required"})
-            if field.settings["type"] == "text":
-                field = TextField(**base_field, use_markdown=field.settings["use_markdown"])
+            if field.settings["type"] == FieldTypes.text:
+                field = RemoteTextField.from_api(field)
             else:
                 raise ValueError(
                     f"Field '{field.name}' is not a supported field in the current Python package version,"
-                    " supported field types are: `TextField`."
+                    f" supported field types are: `{', '.join([arg.value for arg in FieldTypes])}`."
                 )
             fields.append(field)
         return fields
@@ -216,31 +215,20 @@ class ArgillaMixin:
     def __get_questions(client: "httpx.Client", id: UUID) -> List["AllowedRemoteQuestionTypes"]:
         questions = []
         for question in datasets_api_v1.get_questions(client=client, id=id).parsed:
-            question_dict = question.dict(include={"id", "name", "title", "description", "required"})
-            if question.settings["type"] == "rating":
-                question = RatingQuestion(**question_dict, values=[v["value"] for v in question.settings["options"]])
-            elif question.settings["type"] == "text":
-                question = TextQuestion(**question_dict, use_markdown=question.settings["use_markdown"])
-            elif question.settings["type"] in ["label_selection", "multi_label_selection", "ranking"]:
-                if all([label["value"] == label["text"] for label in question.settings["options"]]):
-                    labels = [label["value"] for label in question.settings["options"]]
-                else:
-                    labels = {label["value"]: label["text"] for label in question.settings["options"]}
-
-                if question.settings["type"] == "label_selection":
-                    question = LabelQuestion(
-                        **question_dict, labels=labels, visible_labels=question.settings["visible_options"]
-                    )
-                elif question.settings["type"] == "multi_label_selection":
-                    question = MultiLabelQuestion(
-                        **question_dict, labels=labels, visible_labels=question.settings["visible_options"]
-                    )
-                elif question.settings["type"] == "ranking":
-                    question = RankingQuestion(**question_dict, values=labels)
+            if question.settings["type"] == QuestionTypes.rating:
+                question = RemoteRatingQuestion.from_api(question)
+            elif question.settings["type"] == QuestionTypes.text:
+                question = RemoteTextQuestion.from_api(question)
+            elif question.settings["type"] == QuestionTypes.label_selection:
+                question = RemoteLabelQuestion.from_api(question)
+            elif question.settings["type"] == QuestionTypes.multi_label_selection:
+                question = RemoteMultiLabelQuestion.from_api(question)
+            elif question.settings["type"] == QuestionTypes.ranking:
+                question = RemoteRankingQuestion.from_api(question)
             else:
                 raise ValueError(
                     f"Question '{question.name}' is not a supported question in the current Python package"
-                    f" version, supported question types are: `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}`."
+                    f" version, supported question types are: `{', '.join([arg.value for arg in QuestionTypes])}`."
                 )
             questions.append(question)
         return questions

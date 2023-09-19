@@ -15,12 +15,12 @@
 from typing import TYPE_CHECKING, Iterator, List, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
+from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset.remote.base import RemoteFeedbackRecordsBase
-    from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 
 
 class ArgillaRecordsMixin:
@@ -76,7 +76,12 @@ class ArgillaRecordsMixin:
         records = []
         for offset, limit in zip(offsets, limits):
             fetched_records = self._fetch_records(offset=offset, limit=limit)
-            records.extend([self._parse_record(record) for record in fetched_records.items])
+            records.extend(
+                [
+                    RemoteFeedbackRecord.from_api(record, question_id_to_name=self._question_id_to_name)
+                    for record in fetched_records.items
+                ]
+            )
         return records[0] if isinstance(key, int) else records
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
@@ -88,7 +93,7 @@ class ArgillaRecordsMixin:
         while True:
             batch = self._fetch_records(offset=FETCHING_BATCH_SIZE * current_batch, limit=FETCHING_BATCH_SIZE)
             for record in batch.items:
-                yield self._parse_record(record)
+                yield RemoteFeedbackRecord.from_api(record, question_id_to_name=self._question_id_to_name)
             current_batch += 1
 
             if len(batch.items) < FETCHING_BATCH_SIZE:
