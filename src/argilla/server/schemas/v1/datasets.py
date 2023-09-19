@@ -13,14 +13,15 @@
 #  limitations under the License.
 
 from datetime import datetime
-from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
+from pydantic import BaseModel, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
 from pydantic.utils import GetterDict
 
+from argilla.server.schemas.base import UpdateSchema
+from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
 from argilla.server.search_engine import Query
 
 try:
@@ -28,16 +29,14 @@ try:
 except ImportError:
     from typing_extensions import Annotated
 
-from argilla.server.models import (
-    DatasetStatus,
-    FieldType,
-    QuestionSettings,
-    QuestionType,
-    ResponseStatus,
-)
+from argilla.server.enums import FieldType
+from argilla.server.models import DatasetStatus, QuestionSettings, QuestionType, ResponseStatus
 
-DATASET_CREATE_GUIDELINES_MIN_LENGTH = 1
-DATASET_CREATE_GUIDELINES_MAX_LENGTH = 10000
+DATASET_NAME_REGEX = r"^(?!-|_)[a-zA-Z0-9-_ ]+$"
+DATASET_NAME_MIN_LENGTH = 1
+DATASET_NAME_MAX_LENGTH = 200
+DATASET_GUIDELINES_MIN_LENGTH = 1
+DATASET_GUIDELINES_MAX_LENGTH = 10000
 
 FIELD_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 FIELD_CREATE_NAME_MIN_LENGTH = 1
@@ -54,9 +53,13 @@ QUESTION_CREATE_DESCRIPTION_MIN_LENGTH = 1
 QUESTION_CREATE_DESCRIPTION_MAX_LENGTH = 1000
 
 RATING_OPTIONS_MIN_ITEMS = 2
-RATING_OPTIONS_MAX_ITEMS = 100
+RATING_OPTIONS_MAX_ITEMS = 10
 
-VALUE_TEXT_OPTION_VALUE_MIN_LENGHT = 1
+RATING_LOWER_VALUE_ALLOWED = 1
+RATING_UPPER_VALUE_ALLOWED = 10
+
+
+VALUE_TEXT_OPTION_VALUE_MIN_LENGTH = 1
 VALUE_TEXT_OPTION_VALUE_MAX_LENGTH = 200
 VALUE_TEXT_OPTION_TEXT_MIN_LENGTH = 1
 VALUE_TEXT_OPTION_TEXT_MAX_LENGTH = 500
@@ -65,6 +68,7 @@ VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH = 1000
 
 LABEL_SELECTION_OPTIONS_MIN_ITEMS = 2
 LABEL_SELECTION_OPTIONS_MAX_ITEMS = 250
+LABEL_SELECTION_MIN_VISIBLE_OPTIONS = 3
 
 RANKING_OPTIONS_MIN_ITEMS = 2
 
@@ -90,15 +94,28 @@ class Datasets(BaseModel):
     items: List[Dataset]
 
 
+DatasetName = Annotated[
+    constr(regex=DATASET_NAME_REGEX, min_length=DATASET_NAME_MIN_LENGTH, max_length=DATASET_NAME_MAX_LENGTH),
+    PydanticField(..., description="Dataset name"),
+]
+
+DatasetGuidelines = Annotated[
+    constr(min_length=DATASET_GUIDELINES_MIN_LENGTH, max_length=DATASET_GUIDELINES_MAX_LENGTH),
+    PydanticField(..., description="Dataset guidelines"),
+]
+
+
 class DatasetCreate(BaseModel):
-    name: str
-    guidelines: Optional[
-        constr(
-            min_length=DATASET_CREATE_GUIDELINES_MIN_LENGTH,
-            max_length=DATASET_CREATE_GUIDELINES_MAX_LENGTH,
-        )
-    ]
+    name: DatasetName
+    guidelines: Optional[DatasetGuidelines]
     workspace_id: UUID
+
+
+class DatasetUpdate(UpdateSchema):
+    name: Optional[DatasetName]
+    guidelines: Optional[DatasetGuidelines]
+
+    __non_nullable_fields__ = {"name"}
 
 
 class RecordMetrics(BaseModel):
@@ -139,16 +156,22 @@ class Fields(BaseModel):
     items: List[Field]
 
 
+FieldName = Annotated[
+    constr(
+        regex=FIELD_CREATE_NAME_REGEX, min_length=FIELD_CREATE_NAME_MIN_LENGTH, max_length=FIELD_CREATE_NAME_MAX_LENGTH
+    ),
+    PydanticField(..., description="The name of the field"),
+]
+
+FieldTitle = Annotated[
+    constr(min_length=FIELD_CREATE_TITLE_MIN_LENGTH, max_length=FIELD_CREATE_TITLE_MAX_LENGTH),
+    PydanticField(..., description="The title of the field"),
+]
+
+
 class FieldCreate(BaseModel):
-    name: constr(
-        regex=FIELD_CREATE_NAME_REGEX,
-        min_length=FIELD_CREATE_NAME_MIN_LENGTH,
-        max_length=FIELD_CREATE_NAME_MAX_LENGTH,
-    )
-    title: constr(
-        min_length=FIELD_CREATE_TITLE_MIN_LENGTH,
-        max_length=FIELD_CREATE_TITLE_MAX_LENGTH,
-    )
+    name: FieldName
+    title: FieldTitle
     required: Optional[bool]
     settings: TextFieldSettings
 
@@ -186,10 +209,21 @@ class RatingQuestionSettingsCreate(UniqueValuesCheckerMixin):
         max_items=RATING_OPTIONS_MAX_ITEMS,
     )
 
+    @validator("options")
+    def check_option_value_range(cls, value: List[RatingQuestionSettingsOption]):
+        """Validator to control all values are in allowed range 1 <= x <= 10"""
+        for option in value:
+            if not RATING_LOWER_VALUE_ALLOWED <= option.value <= RATING_UPPER_VALUE_ALLOWED:
+                raise ValueError(
+                    f"Option value {option.value!r} out of range "
+                    f"[{RATING_LOWER_VALUE_ALLOWED!r}, {RATING_UPPER_VALUE_ALLOWED!r}]"
+                )
+        return value
+
 
 class ValueTextQuestionSettingsOption(BaseModel):
     value: constr(
-        min_length=VALUE_TEXT_OPTION_VALUE_MIN_LENGHT,
+        min_length=VALUE_TEXT_OPTION_VALUE_MIN_LENGTH,
         max_length=VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
     )
     text: constr(
@@ -211,7 +245,19 @@ class LabelSelectionQuestionSettingsCreate(UniqueValuesCheckerMixin):
         min_items=LABEL_SELECTION_OPTIONS_MIN_ITEMS,
         max_items=LABEL_SELECTION_OPTIONS_MAX_ITEMS,
     )
-    visible_options: Optional[PositiveInt] = None
+    visible_options: Optional[int] = PydanticField(None, ge=LABEL_SELECTION_MIN_VISIBLE_OPTIONS)
+
+    @root_validator
+    def check_visible_options_value(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        visible_options = values.get("visible_options")
+        if visible_options is not None:
+            num_options = len(values["options"])
+            if visible_options > num_options:
+                raise ValueError(
+                    "The value for 'visible_options' must be less or equal to the number of items in 'options'"
+                    f" ({num_options})"
+                )
+        return values
 
 
 class MultiLabelSelectionQuestionSettingsCreate(LabelSelectionQuestionSettingsCreate):
@@ -296,15 +342,13 @@ class Response(BaseModel):
         orm_mode = True
 
 
-class RecordInclude(str, Enum):
-    responses = "responses"
-
-
 class RecordGetterDict(GetterDict):
     def get(self, key: str, default: Any) -> Any:
         if key == "metadata":
             return getattr(self._obj, "metadata_", None)
         if key == "responses" and "responses" not in self._obj.__dict__:
+            return default
+        if key == "suggestions" and "suggestions" not in self._obj.__dict__:
             return default
         return super().get(key, default)
 
@@ -317,6 +361,7 @@ class Record(BaseModel):
     # TODO: move `responses` to `response` since contextualized endpoint will contains only the user response
     # response: Optional[Response]
     responses: Optional[List[Response]]
+    suggestions: Optional[List[Suggestion]]
     inserted_at: datetime
     updated_at: datetime
 
@@ -352,6 +397,7 @@ class RecordCreate(BaseModel):
     metadata: Optional[Dict[str, Any]]
     external_id: Optional[str]
     responses: Optional[List[UserResponseCreate]]
+    suggestions: Optional[List[SuggestionCreate]]
 
     @validator("responses")
     def check_user_id_is_unique(cls, values):

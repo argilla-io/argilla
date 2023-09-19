@@ -20,11 +20,10 @@ from opensearchpy import AsyncOpenSearch, helpers
 from pydantic import BaseModel
 from pydantic.utils import GetterDict
 
-from argilla.server.enums import ResponseStatusFilter
+from argilla.server.enums import FieldType, ResponseStatusFilter
 from argilla.server.models import (
     Dataset,
     Field,
-    FieldType,
     Question,
     QuestionType,
     Record,
@@ -78,7 +77,7 @@ class Query:
 @dataclasses.dataclass
 class UserResponseStatusFilter:
     user: User
-    status: ResponseStatusFilter
+    statuses: List[ResponseStatusFilter]
 
 
 @dataclasses.dataclass
@@ -141,9 +140,14 @@ class SearchEngine:
             for record in records
         ]
 
-        _, errors = await helpers.async_bulk(client=self.client, actions=bulk_actions, raise_on_error=False)
-        if errors:
-            raise RuntimeError(errors)
+        await self._bulk_op(bulk_actions)
+
+    async def delete_records(self, dataset: Dataset, records: Iterable[Record]):
+        index_name = await self._get_index_or_raise(dataset)
+
+        bulk_actions = [{"_op_type": "delete", "_id": record.id, "_index": index_name} for record in records]
+
+        await self._bulk_op(bulk_actions)
 
     async def update_record_response(self, response: Response):
         record = response.record
@@ -185,15 +189,11 @@ class SearchEngine:
 
         text_query = self._text_query_builder(dataset, text=query.text)
 
-        bool_query: dict = {"must": [text_query]}
+        bool_query = {"must": [text_query]}
         if user_response_status_filter:
             bool_query["filter"] = self._response_status_filter_builder(user_response_status_filter)
 
-        body = {
-            "_source": False,
-            "query": {"bool": bool_query},
-            # "sort": [{"_score": "desc"}, {"id": "asc"}],
-        }
+        body = {"_source": False, "query": {"bool": bool_query}}
 
         response = await self.client.search(
             index=self._index_name_for_dataset(dataset),
@@ -219,7 +219,7 @@ class SearchEngine:
             field_names = [
                 f"fields.{field.name}" for field in dataset.fields if field.settings.get("type") == FieldType.text
             ]
-            return {"multi_match": {"query": text.q, "fields": field_names, "operator": "and"}}
+            return {"multi_match": {"query": text.q, "type": "cross_fields", "fields": field_names, "operator": "and"}}
         else:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-query.html
             return {"match": {f"fields.{text.field}": {"query": text.q, "operator": "and"}}}
@@ -230,7 +230,7 @@ class SearchEngine:
     def _dynamic_templates_for_question_responses(self, questions: List[Question]) -> List[dict]:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic-templates.html
         return [
-            {"status_responses": {"path_match": f"responses.*.status", "mapping": {"type": "keyword"}}},
+            {"status_responses": {"path_match": "responses.*.status", "mapping": {"type": "keyword"}}},
             *[
                 {
                     f"{question.name}_responses": {
@@ -280,15 +280,31 @@ class SearchEngine:
     def _index_name_for_dataset(dataset: Dataset):
         return f"rg.{dataset.id}"
 
-    def _response_status_filter_builder(self, status_filter: UserResponseStatusFilter):
+    def _response_status_filter_builder(self, status_filter: UserResponseStatusFilter) -> Optional[Dict[str, Any]]:
+        if not status_filter.statuses:
+            return None
+
         user_response_field = f"responses.{status_filter.user.username}"
 
-        if status_filter.status == ResponseStatusFilter.missing:
+        statuses = [
+            ResponseStatus(status).value for status in status_filter.statuses if status != ResponseStatusFilter.missing
+        ]
+
+        filters = []
+        if ResponseStatusFilter.missing in status_filter.statuses:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
-            return [{"bool": {"must_not": {"exists": {"field": user_response_field}}}}]
-        else:
+            filters.append({"bool": {"must_not": {"exists": {"field": user_response_field}}}})
+
+        if statuses:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html
-            return [{"term": {f"{user_response_field}.status": status_filter.status}}]
+            filters.append({"terms": {f"{user_response_field}.status": statuses}})
+
+        return {"bool": {"should": filters, "minimum_should_match": 1}}
+
+    async def _bulk_op(self, actions: List[Dict[str, Any]]):
+        _, errors = await helpers.async_bulk(client=self.client, actions=actions, raise_on_error=False)
+        if errors:
+            raise RuntimeError(errors)
 
 
 async def get_search_engine() -> AsyncGenerator[SearchEngine, None]:
@@ -302,7 +318,7 @@ async def get_search_engine() -> AsyncGenerator[SearchEngine, None]:
     search_engine = SearchEngine(
         config,
         es_number_of_shards=settings.es_records_index_shards,
-        es_number_of_replicas=settings.es_records_index_shards,
+        es_number_of_replicas=settings.es_records_index_replicas,
     )
     try:
         yield search_engine

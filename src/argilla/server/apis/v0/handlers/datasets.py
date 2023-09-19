@@ -25,12 +25,7 @@ from argilla.server.apis.v0.models.commons.params import (
 )
 from argilla.server.errors import EntityNotFoundError
 from argilla.server.models import User
-from argilla.server.schemas.datasets import (
-    CopyDatasetRequest,
-    CreateDatasetRequest,
-    Dataset,
-    UpdateDatasetRequest,
-)
+from argilla.server.schemas.v0.datasets import CopyDatasetRequest, CreateDatasetRequest, Dataset, UpdateDatasetRequest
 from argilla.server.security import auth
 from argilla.server.services.datasets import DatasetsService
 
@@ -77,12 +72,7 @@ async def create_dataset(
     return Dataset.from_orm(dataset)
 
 
-@router.get(
-    "/{name}",
-    response_model=Dataset,
-    response_model_exclude_none=True,
-    operation_id="get_dataset",
-)
+@router.get("/{name}", response_model=Dataset, response_model_exclude_none=True, operation_id="get_dataset")
 async def get_dataset(
     name: str,
     ds_params: CommonTaskHandlerDependencies = Depends(),
@@ -92,12 +82,7 @@ async def get_dataset(
     return Dataset.from_orm(await service.find_by_name(user=current_user, name=name, workspace=ds_params.workspace))
 
 
-@router.patch(
-    "/{name}",
-    operation_id="update_dataset",
-    response_model=Dataset,
-    response_model_exclude_none=True,
-)
+@router.patch("/{name}", operation_id="update_dataset", response_model=Dataset, response_model_exclude_none=True)
 async def update_dataset(
     name: str,
     request: UpdateDatasetRequest,
@@ -110,10 +95,7 @@ async def update_dataset(
     return Dataset.from_orm(dataset)
 
 
-@router.delete(
-    "/{name}",
-    operation_id="delete_dataset",
-)
+@router.delete("/{name}", operation_id="delete_dataset")
 async def delete_dataset(
     name: str,
     ds_params: CommonTaskHandlerDependencies = Depends(),
@@ -127,10 +109,7 @@ async def delete_dataset(
         pass
 
 
-@router.put(
-    "/{name}:close",
-    operation_id="close_dataset",
-)
+@router.put("/{name}:close", operation_id="close_dataset")
 async def close_dataset(
     name: str,
     ds_params: CommonTaskHandlerDependencies = Depends(),
@@ -141,10 +120,7 @@ async def close_dataset(
     await service.close(user=current_user, dataset=found_ds)
 
 
-@router.put(
-    "/{name}:open",
-    operation_id="open_dataset",
-)
+@router.put("/{name}:open", operation_id="open_dataset")
 async def open_dataset(
     name: str,
     ds_params: CommonTaskHandlerDependencies = Depends(),
@@ -155,12 +131,7 @@ async def open_dataset(
     await service.open(user=current_user, dataset=found_ds)
 
 
-@router.put(
-    "/{name}:copy",
-    operation_id="copy_dataset",
-    response_model=Dataset,
-    response_model_exclude_none=True,
-)
+@router.put("/{name}:copy", operation_id="copy_dataset", response_model=Dataset, response_model_exclude_none=True)
 async def copy_dataset(
     name: str,
     copy_request: CopyDatasetRequest,

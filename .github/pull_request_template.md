@@ -1,6 +1,17 @@
-<!-- Thanks for your contribution! As part of our Community Growers initiative 🌱, we're donating Justdiggit bunds in your name to reforest sub-Saharan Africa. To claim your Community Growers certificate, please contact David Berenstein in our Slack community or fill in this form https://tally.so/r/n9XrxK once your PR has been merged. -->
+# Argilla Community Growers
 
-# Description
+Thanks for your contribution! As part of our Community Growers initiative 🌱, we're donating Justdiggit bunds in your name to reforest sub-Saharan Africa. To claim your Community Growers certificate, please contact David Berenstein in our Slack community or fill in this form https://tally.so/r/n9XrxK once your PR has been merged.
+
+# Pull Request Templates
+
+Please go the the `Preview` tab and select the appropriate sub-template:
+
+* [🐞-bug](?expand=1&template=bug.md)
+* [📚-documentation](?expand=1&template=docs.md)
+* [🆕-features](?expand=1&template=features.md)
+* [🔗-💥-integration](?expand=1&template=integration.md)
+
+# Generic Pull Request Template
 
 Please include a summary of the changes and the related issue. Please also include relevant motivation and context. List any dependencies that are required for this change.
 

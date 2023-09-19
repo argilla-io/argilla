@@ -63,7 +63,7 @@ export default {
       );
     },
     options() {
-      let options = [];
+      const options = [];
       options.push({
         id: "keywords",
         name: "Keywords",

@@ -16,27 +16,17 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from pydantic import BaseModel, Field
 
+from argilla._constants import PROTECTED_METADATA_FIELD_PREFIX
 from argilla.logging import LoggingMixin
 from argilla.server.commons.models import TaskType
 from argilla.server.daos.backend.base import IndexNotFoundError, InvalidSearchError
 from argilla.server.daos.backend.client_adapters.base import IClientAdapter
 from argilla.server.daos.backend.client_adapters.factory import ClientAdapterFactory
-from argilla.server.daos.backend.mappings.datasets import (
-    DATASETS_INDEX_NAME,
-    datasets_index_mappings,
-)
-from argilla.server.daos.backend.mappings.helpers import (
-    mappings,
-    tasks_common_mappings,
-    tasks_common_settings,
-)
+from argilla.server.daos.backend.mappings.datasets import DATASETS_INDEX_NAME, datasets_index_mappings
+from argilla.server.daos.backend.mappings.helpers import mappings, tasks_common_mappings, tasks_common_settings
 from argilla.server.daos.backend.mappings.text2text import text2text_mappings
-from argilla.server.daos.backend.mappings.text_classification import (
-    text_classification_mappings,
-)
-from argilla.server.daos.backend.mappings.token_classification import (
-    token_classification_mappings,
-)
+from argilla.server.daos.backend.mappings.text_classification import text_classification_mappings
+from argilla.server.daos.backend.mappings.token_classification import token_classification_mappings
 from argilla.server.daos.backend.metrics import ALL_METRICS
 from argilla.server.daos.backend.metrics.base import ElasticsearchMetric
 from argilla.server.daos.backend.search.model import (
@@ -50,8 +40,6 @@ from argilla.server.daos.backend.search.model import (
 from argilla.server.errors import BadRequestError, EntityNotFoundError
 from argilla.server.errors.task_errors import MetadataLimitExceededError
 from argilla.server.settings import settings
-
-NON_SEARCHABLE_PREFIX = "_"
 
 
 def dataset_records_index(dataset_id: str) -> str:
@@ -331,8 +319,8 @@ class GenericElasticEngineBackend(LoggingMixin):
 
         index_mappings = {}
         for field, value in metadata_values.items():
-            if field.startswith(NON_SEARCHABLE_PREFIX):
-                index_mappings[f"metadata.{field}"] = mappings.non_searchable_text_field()
+            if field.startswith(PROTECTED_METADATA_FIELD_PREFIX):
+                index_mappings[f"metadata.{field}"] = mappings.protected_non_searchable_field()
             elif detect_nested_type(value):
                 index_mappings[f"metadata.{field}"] = mappings.nested_field()
 

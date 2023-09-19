@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-
 import logging
 import os
 import re
@@ -28,6 +27,7 @@ from rich.progress import Progress
 
 from argilla._constants import (
     DEFAULT_API_KEY,
+    DEFAULT_API_URL,
     DEFAULT_USERNAME,
     ES_INDEX_REGEX_PATTERN,
     WORKSPACE_HEADER_NAME,
@@ -52,22 +52,14 @@ from argilla.client.models import (
 )
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.api import bulk
-from argilla.client.sdk.commons.errors import (
-    AlreadyExistsApiError,
-    InputValueError,
-    NotFoundApiError,
-)
+from argilla.client.sdk.commons.errors import AlreadyExistsApiError, InputValueError, NotFoundApiError
 from argilla.client.sdk.datasets import api as datasets_api
 from argilla.client.sdk.datasets.models import CopyDatasetRequest, TaskType
+from argilla.client.sdk.datasets.models import Dataset as DatasetModel
 from argilla.client.sdk.metrics import api as metrics_api
 from argilla.client.sdk.metrics.models import MetricInfo
-from argilla.client.sdk.text2text.models import (
-    CreationText2TextRecord,
-    Text2TextBulkData,
-)
-from argilla.client.sdk.text2text.models import (
-    Text2TextRecord as SdkText2TextRecord,
-)
+from argilla.client.sdk.text2text.models import CreationText2TextRecord, Text2TextBulkData
+from argilla.client.sdk.text2text.models import Text2TextRecord as SdkText2TextRecord
 from argilla.client.sdk.text_classification import api as text_classification_api
 from argilla.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
@@ -75,19 +67,15 @@ from argilla.client.sdk.text_classification.models import (
     LabelingRuleMetricsSummary,
     TextClassificationBulkData,
 )
-from argilla.client.sdk.text_classification.models import (
-    TextClassificationRecord as SdkTextClassificationRecord,
-)
+from argilla.client.sdk.text_classification.models import TextClassificationRecord as SdkTextClassificationRecord
 from argilla.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
 )
-from argilla.client.sdk.token_classification.models import (
-    TokenClassificationRecord as SdkTokenClassificationRecord,
-)
+from argilla.client.sdk.token_classification.models import TokenClassificationRecord as SdkTokenClassificationRecord
 from argilla.client.sdk.users import api as users_api
-from argilla.client.sdk.workspaces import api as workspaces_api
-from argilla.client.sdk.workspaces.models import WorkspaceModel
+from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
+from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -109,6 +97,12 @@ class Argilla:
         extra_headers: Optional[Dict[str, str]] = None,
     ):
         """
+        Inits `Argilla` instance.
+
+        If called with `api_url=None` and `api_key=None` and no values have been set for the environment variables
+        `ARGILLA_API_URL` and `ARGILLA_API_KEY`, then the local credentials stored by a previous call to `argilla login`
+        command will be used. If local credentials are not found, then `api_url` and `api_key` will fallback to the
+        default values.
 
         Args:
             api_url: Address of the REST API. If `None` (default) and the env variable ``ARGILLA_API_URL`` is not set,
@@ -122,11 +116,29 @@ class Argilla:
                 the headers of argilla client requests, like additional security restrictions. Default: `None`.
 
         """
-        api_url = api_url or os.getenv("ARGILLA_API_URL", "http://localhost:6900")
+        from argilla.client.login import ArgillaCredentials
+
+        api_url = api_url or os.getenv("ARGILLA_API_URL")
+        api_key = api_key or os.getenv("ARGILLA_API_KEY")
+        workspace = workspace or os.getenv("ARGILLA_WORKSPACE")
+        extra_headers = extra_headers or {}
+
+        if api_url is None and api_key is None:
+            try:
+                credentials = ArgillaCredentials.load()
+                api_url = credentials.api_url
+                api_key = credentials.api_key
+                if not workspace:
+                    workspace = credentials.workspace
+                extra_headers = credentials.extra_headers
+            except FileNotFoundError:
+                pass
+
+        api_url = api_url or DEFAULT_API_URL
+        api_key = api_key or DEFAULT_API_KEY
+
         # Checking that the api_url does not end in '/'
         api_url = re.sub(r"\/$", "", api_url)
-        api_key = api_key or os.getenv("ARGILLA_API_KEY", DEFAULT_API_KEY)
-        workspace = workspace or os.getenv("ARGILLA_WORKSPACE")
         headers = extra_headers or {}
 
         self._client: AuthenticatedClient = AuthenticatedClient(
@@ -138,7 +150,7 @@ class Argilla:
 
         self._user = users_api.whoami(client=self.http_client)  # .parsed
 
-        if not workspace and self._user.username == DEFAULT_USERNAME:
+        if not workspace and self._user.username == DEFAULT_USERNAME and DEFAULT_USERNAME in self._user.workspaces:
             warnings.warn(
                 "Default user was detected and no workspace configuration was provided,"
                 f" so the default {DEFAULT_USERNAME!r} workspace will be used. If you"
@@ -151,7 +163,7 @@ class Argilla:
             self.set_workspace(workspace or self._user.username)
         else:
             warnings.warn(
-                "No workspace configuration was detected. To work with Argilla "
+                "No workspace configuration was detected. To work with Argilla"
                 " datasets, specify a valid workspace name on `rg.init` or set it"
                 " up through the `rg.set_workspace` function.",
                 category=UserWarning,
@@ -253,11 +265,24 @@ class Argilla:
             A list of `WorkspaceModel` objects, containing the workspace
             attributes: name, id, created_at, and updated_at.
         """
-        user_workspaces = users_api.whoami(self.http_client).workspaces
-        all_workspaces = workspaces_api.list_workspaces(client=self.http_client.httpx).parsed
-        return [workspace for workspace in all_workspaces if workspace.name in user_workspaces]
+        return workspaces_api_v1.list_workspaces_me(client=self.http_client.httpx).parsed
 
-    def copy(self, dataset: str, name_of_copy: str, workspace: str = None):
+    def list_datasets(self, workspace: Optional[str] = None) -> List[DatasetModel]:
+        """Lists all the available datasets for the current user in Argilla.
+
+        Args:
+            workspace: If provided, list datasets from that workspace only. Note that
+                the workspace must exist in advance, otherwise a HTTP 400 error will be
+                raised.
+
+        Returns:
+            A list of `DatasetModel` objects, containing the dataset
+            attributes: tags, metadata, name, id, task, owner, workspace, created_at,
+            and last_updated.
+        """
+        return datasets_api.list_datasets(client=self.http_client, workspace=workspace).parsed
+
+    def copy(self, dataset: str, name_of_copy: str, workspace: Optional[str] = None) -> None:
         """Creates a copy of a dataset including its tags and metadata
 
         Args:
@@ -368,7 +393,7 @@ class Argilla:
             batch_size = chunk_size
 
         if batch_size > self._MAX_BATCH_SIZE:
-            _LOGGER.warning(
+            warnings.warn(
                 "The requested batch size is noticeably large, timeout errors may occur. "
                 f"Consider a batch size smaller than {self._MAX_BATCH_SIZE}",
             )

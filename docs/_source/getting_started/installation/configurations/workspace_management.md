@@ -37,12 +37,21 @@ The `Workspace` class in Argilla is composed of the following attributes:
 | `inserted_at` | `datetime` | The date and time when the workspace was created. |
 | `updated_at` | `datetime` | The date and time when the workspace was last updated. |
 
-
 ## How to guide
 
 ### Create a new `Workspace`
 
-#### Python client
+::::{tab-set}
+
+:::{tab-item} CLI
+You can create a new workspace in Argilla using the `create` command in the `workspaces` group.
+
+```bash
+argilla workspaces create my-new-workspace
+```
+:::
+
+:::{tab-item} Python client
 
 Creating a workspace in Argilla is now as easy as calling the `create` method from the `Workspace` class. It will return a `Workspace` instance.
 
@@ -53,12 +62,26 @@ rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
 workspace = rg.Workspace.create("new-workspace")
 ```
+:::
 
-### List all the existing `Workspaces`
+::::
 
-#### Python client
+### List `Workspaces`
 
-You can also list all the existing workspaces in Argilla using the `list` method. It will return a list of `Workspace` instances.
+The users with `owner` role can list all the existing workspaces in Argilla, while the users with `admin` role or `annotator` role can only list the workspaces they belong to.
+
+::::{tab-set}
+
+:::{tab-item} CLI
+You can list the workspaces in Argilla using the `list` command in the `workspaces` group.
+
+```bash
+argilla workspaces list
+```
+:::
+
+:::{tab-item} Python client
+You can also list the workspaces in Argilla using the `list` method. It will return a list of `Workspace` instances.
 
 ```python
 import argilla as rg
@@ -69,6 +92,9 @@ workspaces = rg.Workspace.list()
 for workspace in workspaces:
    ...
 ```
+:::
+
+::::
 
 ### Get a `Workspace` by name
 
@@ -104,13 +130,28 @@ workspace = rg.Workspace.from_id("00000000-0000-0000-0000-000000000000")
 
 ### Add, list, or delete users from a `Workspace`
 
-#### Python client
+::::{tab-set}
+
+:::{tab-item} CLI
+
+You can add or delete users from a workspace using the `add-user` and `delete-user` commands in the `workspaces` group.
+
+```bash
+argilla workspaces --name my-workspace add-user bob
+argilla workspaces --name my-workspace delete-user bob
+```
+
+Also, you can list the users of a workspace using the `list` command in the `users` group with the `--workspace` option.
+
+```bash
+argilla users list --workspace my-workspace
+```
+
+:::
+
+:::{tab-item} Python client
 
 Once you instantiate a `Workspace` instance from a workspace in Argilla, you can add, list, or delete users from it. But note that just the `owner` has sufficient permissions to perform those operations.
-
-:::{note}
-As of the 1.11.0 version of the Python client, to add and delete users from a `Workspace` one must use the `UUID` which is the unique identifier in Argilla for each user. To do so, one can simply use the `id` attribute of the `User` class. More information about it can be found in the [User - Python Reference](../reference/python/python_users.rst) or in the [User Management](user_management.md) guide.
-:::
 
 ```python
 import argilla as rg
@@ -124,4 +165,27 @@ for user in users:
    ...
 workspace.add_user("<USER_ID>")
 workspace.delete_user("<USER_ID>")
+```
+:::
+
+::::
+
+### Delete a `Workspace`
+
+#### Python client
+
+You can also delete a workspace using the Python client.
+
+:::{note}
+To delete a workspace, no dataset can be linked to it. If workspace contains any dataset, deletion will fail.
+:::
+
+```python
+import argilla as rg
+
+rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
+
+workspace = rg.Workspace.from_name("new-workspace")
+
+workspace.delete()
 ```

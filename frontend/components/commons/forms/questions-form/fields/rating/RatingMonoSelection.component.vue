@@ -1,19 +1,26 @@
 <template>
   <div class="container">
     <div class="inputs-area">
-      <div class="input-button" v-for="option in options" :key="option.id">
+      <div
+        class="input-button"
+        v-for="option in options"
+        :key="option.id"
+        @keydown.enter.prevent
+      >
         <input
+          ref="options"
           type="checkbox"
-          :name="option.text"
+          :name="option.value"
           :id="option.id"
-          v-model="option.is_selected"
+          v-model="option.isSelected"
           @change="onSelect(option)"
+          @focus="onFocus"
         />
         <label
           class="label-text cursor-pointer"
-          :class="{ 'label-active': option.is_selected }"
+          :class="{ 'label-active': option.isSelected }"
           :for="option.id"
-          v-text="option.text"
+          v-text="option.value"
         />
       </div>
     </div>
@@ -28,23 +35,41 @@ export default {
       type: Array,
       required: true,
     },
+    isFocused: {
+      type: Boolean,
+      default: () => false,
+    },
   },
   model: {
     prop: "options",
     event: "on-change",
   },
-  methods: {
-    onSelect({ id, is_selected }) {
-      this.options.map((option) => {
-        if (option.id === id) {
-          option.is_selected = is_selected;
-        } else {
-          option.is_selected = false;
+  watch: {
+    isFocused: {
+      immediate: true,
+      handler(newValue) {
+        if (newValue) {
+          this.$nextTick(() => {
+            const options = this.$refs?.options;
+            if (options.some((o) => o.contains(document.activeElement))) {
+              return;
+            }
+            options[0].focus();
+          });
         }
-        return option;
+      },
+    },
+  },
+  methods: {
+    onSelect({ id, isSelected }) {
+      this.options.forEach((option) => {
+        option.isSelected = option.id === id ? isSelected : false;
       });
 
       this.$emit("on-change", this.options);
+    },
+    onFocus() {
+      this.$emit("on-focus");
     },
   },
 };
@@ -56,7 +81,7 @@ export default {
   .inputs-area {
     display: inline-flex;
     gap: $base-space;
-    border-radius: 5em;
+    border-radius: $border-radius-rounded;
     border: 1px solid #cdcdff;
     background: #e0e0ff;
     &:hover {
@@ -65,29 +90,47 @@ export default {
   }
 }
 .label-text {
-  display: flex;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
-  border-radius: 50em;
-  height: 32px;
-  background: palette(purple, 800);
+  border-radius: $border-radius-rounded;
+  height: $base-space * 4;
+  min-width: $base-space * 4;
+  padding-inline: $base-space;
   outline: none;
-  padding-inline: 12px;
-  line-height: 32px;
+  background: palette(purple, 800);
+  color: palette(purple, 200);
   font-weight: 500;
   overflow: hidden;
-  color: palette(purple, 200);
-  box-shadow: 0;
   transition: all 0.2s ease-in-out;
   &:not(.label-active):hover {
     background: darken(palette(purple, 800), 8%);
   }
 }
-input {
-  display: none;
+input[type="checkbox"] {
+  @extend %visuallyhidden;
+  &:focus {
+    & + .label-text {
+      outline: 2px solid $primary-color;
+    }
+  }
+}
+.input-button:not(:first-of-type) {
+  input[type="checkbox"] {
+    &:focus:not(:focus-visible) {
+      & + .label-text {
+        outline: none;
+        &.label-active {
+          outline: none;
+        }
+      }
+    }
+  }
 }
 .label-active {
   color: white;
-  background: #4c4ea3;
+  background: palette(purple, 200);
 }
 .cursor-pointer {
   cursor: pointer;

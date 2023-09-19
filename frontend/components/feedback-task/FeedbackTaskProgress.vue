@@ -18,31 +18,20 @@
 <template>
   <SidebarFeedbackTaskProgress
     v-if="datasetMetrics"
-    :progressTotal="datasetMetrics.total_record"
-    :totalSubmitted="datasetMetrics.responses_submitted"
-    :totalDiscarded="datasetMetrics.responses_discarded"
+    :progressTotal="datasetMetrics.records"
+    :totalSubmitted="datasetMetrics.submitted"
+    :totalDiscarded="datasetMetrics.discarded"
   />
 </template>
 
 <script>
-import { getDatasetMetricsByDatasetIdAndUser } from "@/models/feedback-task-model/dataset-metric/datasetMetric.queries";
-
+import { useMetrics } from "@/v1/infrastructure/storage/MetricsStorage";
 export default {
-  props: {
-    userIdToShowMetrics: {
-      type: String,
-      required: true,
-    },
-  },
   computed: {
-    datasetId() {
-      return this.$route.params.id;
-    },
     datasetMetrics() {
-      return getDatasetMetricsByDatasetIdAndUser({
-        datasetId: this.datasetId,
-        userId: this.userIdToShowMetrics,
-      });
+      const { state: metrics } = useMetrics();
+
+      return metrics;
     },
   },
 };

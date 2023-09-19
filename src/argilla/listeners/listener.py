@@ -25,13 +25,7 @@ import schedule
 import argilla
 from argilla.client import api
 from argilla.client.sdk.commons.errors import NotFoundApiError
-from argilla.listeners.models import (
-    ListenerAction,
-    ListenerCondition,
-    Metrics,
-    RGListenerContext,
-    Search,
-)
+from argilla.listeners.models import ListenerAction, ListenerCondition, Metrics, RGListenerContext, Search
 
 
 @dataclasses.dataclass

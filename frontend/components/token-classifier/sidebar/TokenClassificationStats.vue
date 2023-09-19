@@ -100,7 +100,7 @@ export default {
   }),
   computed: {
     options() {
-      let options = [];
+      const options = [];
       options.push({
         id: "mentions",
         name: "Mentions",

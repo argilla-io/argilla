@@ -1,42 +1,74 @@
 <template>
   <div class="description">
-    <h2 class="--heading5 --semibold description__title" v-text="title" />
-    <RenderMarkdownBaseComponent
-      class="--body1 description__text"
-      :class="{ '--light': isColorLight }"
-      :markdown="datasetDescription"
+    <h2
+      class="--heading5 --medium description__title"
+      v-text="'Annotation guidelines'"
     />
+    <BaseCardWithTabs :tabs="tabs">
+      <template v-slot="{ currentComponent }">
+        <component
+          class="description__content"
+          :markdown="sanitizedDescription"
+          :value="sanitizedDescription"
+          :originalValue="originalSanitizedDescription"
+          :is="currentComponent"
+          :key="currentComponent"
+          @change-text="onChangeTextArea"
+        />
+      </template>
+    </BaseCardWithTabs>
   </div>
 </template>
 
 <script>
 export default {
   props: {
-    datasetDescription: {
-      type: String,
-      required: true,
-    },
-    isColorLight: {
-      type: Boolean,
-      default: false,
+    dataset: {
+      type: Object,
     },
   },
-  created() {
-    this.title = "Annotation guidelines";
+  model: {
+    prop: "dataset",
+  },
+  data() {
+    return {
+      tabs: [
+        { name: "Write", component: "ContentEditableFeedbackTask" },
+        { name: "Preview", component: "RenderMarkdownBaseComponent" },
+      ],
+    };
+  },
+  computed: {
+    sanitizedDescription() {
+      return this.dataset.guidelines ?? "";
+    },
+    originalSanitizedDescription() {
+      return this.dataset.originalGuidelines ?? "";
+    },
+  },
+  methods: {
+    onChangeTextArea(newText) {
+      this.dataset.guidelines = newText;
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
 .description {
-  &__text {
-    white-space: pre-wrap;
-    color: $black-87;
-    &:first-letter {
-      text-transform: capitalize;
+  &__content {
+    min-height: 65px;
+    display: block;
+    background: palette(white);
+    padding: $base-space;
+    border-radius: $border-radius;
+    border: 1px solid $black-10;
+    &:focus-within {
+      border-color: $primary-color;
     }
-    &.--light {
-      color: $black-37;
+
+    :deep(.content__text) {
+      padding: unset !important;
     }
   }
 }

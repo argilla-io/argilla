@@ -7,7 +7,16 @@
 trainer.update_config(
     training_file = None,
     validation_file = None,
-    model = "curie,
+    model = "gpt-3.5-turbo-0613",
+    hyperparameters = {"n_epochs": 1},
+    suffix = None
+)
+
+# `OpenAI.FineTune` (legacy)
+trainer.update_config(
+    training_file = None,
+    validation_file = None,
+    model = "curie",
     n_epochs = 2,
     batch_size = None,
     learning_rate_multiplier = 0.1,
@@ -227,6 +236,97 @@ trainer.update_config(
     hub_strategy = "every_save",
     hub_token = "1234",
     hub_private_repo = False
+)
+```
+:::
+
+:::{tab-item} TRL
+
+```python
+# parameters from `trl.RewardTrainer`, `trl.SFTTrainer`, `trl.PPOTrainer` or `trl.DPOTrainer`.
+# `transformers.TrainingArguments`
+trainer.update_config(
+    per_device_train_batch_size = 8,
+    per_device_eval_batch_size = 8,
+    gradient_accumulation_steps = 1,
+    learning_rate = 5e-5,
+    weight_decay = 0,
+    adam_beta1 = 0.9,
+    adam_beta2 = 0.9,
+    adam_epsilon = 1e-8,
+    max_grad_norm = 1,
+    learning_rate = 5e-5,
+    num_train_epochs = 3,
+    max_steps = 0,
+    log_level = "passive",
+    logging_strategy = "steps",
+    save_strategy = "steps",
+    save_steps = 500,
+    seed = 42,
+    push_to_hub = False,
+    hub_model_id = "user_name/output_dir_name",
+    hub_strategy = "every_save",
+    hub_token = "1234",
+    hub_private_repo = False
+)
+```
+:::
+
+:::{tab-item} sentence-transformers
+
+```python
+# parameters related to the model initialization from `sentence_transformers.SentenceTransformer`
+trainer.update_config(
+    model="sentence-transformers/all-MiniLM-L6-v2",
+    modules = False,
+    device="cuda",
+    cache_folder="dir/folder",
+    use_auth_token=True
+)
+# and from `sentence_transformers.CrossEncoder`
+trainer.update_config(
+    model="cross-encoder/ms-marco-MiniLM-L-6-v2",
+    num_labels=2,
+    max_length=128,
+    device="cpu",
+    tokenizer_args={},
+    automodel_args={},
+    default_activation_function=None
+)
+# Related to the training procedure from `sentence_transformers.SentenceTransformer`
+trainer.update_config(
+    steps_per_epoch = 2,
+    checkpoint_path: str = None,
+    checkpoint_save_steps: int = 500,
+    checkpoint_save_total_limit: int = 0
+)
+# and from `sentence_transformers.CrossEncoder`
+trainer.update_config(
+    loss_fct = None
+    activation_fct = nn.Identity(),
+)
+# the remaining arguments are common for both procedures
+trainer.update_config(
+    evaluator: SentenceEvaluator = evaluation.EmbeddingSimilarityEvaluator,
+    epochs: int = 1,
+    scheduler: str = 'WarmupLinear',
+    warmup_steps: int = 10000,
+    optimizer_class: Type[Optimizer] = torch.optim.AdamW,
+    optimizer_params : Dict[str, object]= {'lr': 2e-5},
+    weight_decay: float = 0.01,
+    evaluation_steps: int = 0,
+    output_path: str = None,
+    save_best_model: bool = True,
+    max_grad_norm: float = 1,
+    use_amp: bool = False,
+    callback: Callable[[float, int, int], None] = None,
+    show_progress_bar: bool = True,
+)
+# Other parameters that don't correspond to the initialization or the trainer, but
+# can be set externally.
+trainer.update_config(
+    batch_size=8,  # It will be passed to the DataLoader to generate batches during training.
+    loss_cls=losses.BatchAllTripletLoss
 )
 ```
 :::

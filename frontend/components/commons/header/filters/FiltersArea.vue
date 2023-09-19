@@ -122,12 +122,12 @@ export default {
       });
     },
     async onRemoveAllMetadataFilters(filters) {
-      let query = {};
+      const query = {};
       filters.forEach((f) => (query[f.key] = []));
       this.$emit("search-records", { query: { metadata: query } });
     },
     async onRemoveFiltersByGroup(filters) {
-      let query = {};
+      const query = {};
       filters.forEach(
         (f) => (query[f.key] = f.key === "score" ? undefined : [])
       );

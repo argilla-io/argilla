@@ -100,18 +100,15 @@ class mappings:
         return {"type": "float"}
 
     @staticmethod
-    def non_searchable_text_field():
-        return {"type": "text", "index": False}
+    def protected_non_searchable_field():
+        return {"type": "object", "enabled": False}
 
     @classmethod
     def dynamic_field(cls):
         return {"dynamic": True, "type": "object"}
 
 
-def configure_multilingual_stop_analyzer(
-    settings: Dict[str, Any],
-    supported_langs: List[str] = None,
-):
+def configure_multilingual_stop_analyzer(settings: Dict[str, Any], supported_langs: List[str] = None):
     lang2elastic_stop = {
         "en": english.STOPWORDS,
         "es": "_spanish_",

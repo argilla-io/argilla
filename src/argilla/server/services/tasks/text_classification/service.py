@@ -17,24 +17,14 @@ from typing import Iterable, List, Optional, Tuple
 
 from fastapi import Depends
 
-from argilla.server.errors.base_errors import (
-    EntityAlreadyExistsError,
-    EntityNotFoundError,
-    MissingDatasetRecordsError,
-)
+from argilla.server.errors.base_errors import EntityAlreadyExistsError, EntityNotFoundError, MissingDatasetRecordsError
 from argilla.server.services.datasets import DatasetsService
 from argilla.server.services.metrics import MetricsService
-from argilla.server.services.search.model import (
-    ServiceSearchResults,
-    ServiceSortableField,
-    ServiceSortConfig,
-)
+from argilla.server.services.search.model import ServiceSearchResults, ServiceSortableField, ServiceSortConfig
 from argilla.server.services.search.service import SearchRecordsService
 from argilla.server.services.storage.service import RecordsStorageService
 from argilla.server.services.tasks.commons import BulkResponse
-from argilla.server.services.tasks.text_classification.metrics import (
-    TextClassificationMetrics,
-)
+from argilla.server.services.tasks.text_classification.metrics import TextClassificationMetrics
 from argilla.server.services.tasks.text_classification.model import (
     DatasetLabelingRulesMetricsSummary,
     DatasetLabelingRulesSummary,

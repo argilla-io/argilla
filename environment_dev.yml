@@ -20,7 +20,7 @@ dependencies:
   # we need this to ensure syntax highlighting in the notebook code cells for the docs
   - ipython<8.0.0
   # for building the frontend
-  - nodejs~=14.17.0
+  - nodejs~=18.16.0
   - pip:
       # docs
       - sphinx==4.5.0
@@ -46,14 +46,15 @@ dependencies:
       - spacy==3.5.3
       - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0.tar.gz
       - spacy-transformers>=1.2.5
-      - transformers[torch]>=4.19.0
+      - transformers[torch]>=4.30.0 # <- required for DPO with TRL
       - evaluate
       - seqeval
       - setfit
       - span_marker
-      - openai
+      - openai>=0.27.10
       - peft
-      - autotrain-advanced==0.5.2
-      - rich==13.0.1
+      - trl>=0.5.0
+      - sentence-transformers
+      - rich!=13.1.0
       # install Argilla in editable mode
       - -e .[server,listeners]

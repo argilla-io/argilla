@@ -1,38 +1,46 @@
 <template>
-  <div class="wrapper">
-    <QuestionHeaderComponent
-      :title="title"
-      :isRequired="isRequired"
-      :tooltipMessage="description"
-    />
+  <RatingShortcuts>
+    <div class="wrapper">
+      <QuestionHeaderComponent
+        :question="question"
+        :showSuggestion="showSuggestion"
+      />
 
-    <RatingMonoSelectionComponent v-model="options" />
-  </div>
+      <RatingMonoSelectionComponent
+        ref="ratingMonoSelectionRef"
+        v-model="question.answer.values"
+        :isFocused="isFocused"
+        @on-focus="$emit('on-focus')"
+      />
+    </div>
+  </RatingShortcuts>
 </template>
 
 <script>
 export default {
   name: "RatingComponent",
   props: {
-    title: {
-      type: String,
+    question: {
+      type: Object,
       required: true,
     },
-    options: {
-      type: Array,
-      required: true,
-    },
-    isRequired: {
+    showSuggestion: {
       type: Boolean,
       default: () => false,
     },
-    description: {
-      type: String,
-      default: () => "",
+    isFocused: {
+      type: Boolean,
+      default: () => false,
     },
   },
-  model: {
-    prop: "options",
+  watch: {
+    "question.answer.values": {
+      deep: true,
+      handler(newOptions) {
+        if (newOptions.some((option) => option.isSelected))
+          this.$emit("on-user-answer");
+      },
+    },
   },
 };
 </script>
@@ -41,6 +49,6 @@ export default {
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: $base-space;
 }
 </style>

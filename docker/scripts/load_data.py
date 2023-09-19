@@ -147,18 +147,19 @@ class LoadDatasets:
         )
 
     @staticmethod
-    def load_curated_dolly_en():
-        print("Loading databricks-dolly-15k-curated-en dataset")
+    def load_feedback_dataset_from_huggingface(repo_id: str, split: str = "train", samples: int = 100):
+        print(f"Loading {repo_id} dataset")
 
         # Load dataset from the hub
-        dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly-15k-curated-en", split="train[:100]")
+        dataset = rg.FeedbackDataset.from_huggingface(
+            repo_id=repo_id, split=f"{split}{f'[:{samples}]' if samples else ''}"
+        )
 
         # Remove the `responses` from every `FeedbackRecord` to upload just the `fields`
         for record in dataset.records:
             record.responses = []
 
-        # Read in dataset, assuming it's a dataset for token classification
-        dataset.push_to_argilla(name="databricks-dolly-15k-curated-en")
+        dataset.push_to_argilla(name=repo_id.split("/")[-1])
 
 
 if __name__ == "__main__":
@@ -166,7 +167,7 @@ if __name__ == "__main__":
     LOAD_DATASETS = sys.argv[2]
 
     if LOAD_DATASETS.lower() == "none":
-        print("No datasets being loaded")
+        print("No datasets will be loaded")
     else:
         while True:
             try:
@@ -174,15 +175,31 @@ if __name__ == "__main__":
                 if response.status_code == 200:
                     ld = LoadDatasets(API_KEY)
 
-                    ld.load_curated_dolly_en()
+                    ld.load_feedback_dataset_from_huggingface(
+                        repo_id="argilla/databricks-dolly-15k-curated-en",
+                        split="train",
+                        samples=100,
+                    )
 
-                    if LOAD_DATASETS.lower() == "single":
-                        break
-                    ld.load_news_text_summarization()
-                    ld.load_news_programmatic_labeling()
-                    ld.load_gutenberg_spacy_ner_monitoring()
-                    ld.load_sst_sentiment_explainability()
-                    break
+                    if LOAD_DATASETS.lower() != "single":
+                        # `Text2TextDataset``
+                        ld.load_news_text_summarization()
+                        # `TextClassificationDataset`
+                        ld.load_news_programmatic_labeling()
+                        ld.load_sst_sentiment_explainability()
+                        # `TokenClassificationDataset`
+                        ld.load_gutenberg_spacy_ner_monitoring()
+                        # `FeedbackDataset`
+                        ld.load_feedback_dataset_from_huggingface(
+                            repo_id="argilla/oasst_response_quality",
+                            split="train",
+                            samples=100,
+                        )
+                        ld.load_feedback_dataset_from_huggingface(
+                            repo_id="argilla/oasst_response_comparison",
+                            split="train",
+                            samples=100,
+                        )
             except requests.exceptions.ConnectionError:
                 pass
             except Exception as e:

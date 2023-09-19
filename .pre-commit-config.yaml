@@ -20,13 +20,13 @@ repos:
           # - --remove-header
 
   - repo: https://github.com/psf/black
-    rev: 23.3.0
+    rev: 23.7.0
     hooks:
       - id: black
         additional_dependencies: ["typer==0.7.0"]
 
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.275
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.0.281
     hooks:
       # Simulate isort via (the much faster) ruff
       - id: ruff

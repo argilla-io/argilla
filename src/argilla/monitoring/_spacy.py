@@ -99,13 +99,7 @@ class SpacyNERMonitor(BaseMonitor):
             return doc
 
 
-def ner_monitor(
-    nlp: Language,
-    api: Api,
-    dataset: str,
-    sample_rate: float,
-    log_interval: float,
-) -> Language:
+def ner_monitor(nlp: Language, api: Api, dataset: str, sample_rate: float, log_interval: float) -> Language:
     return SpacyNERMonitor(
         nlp,
         api=api,

@@ -123,10 +123,10 @@ export default {
       };
 
       let idx = 0;
-      let textSpans = [];
+      const textSpans = [];
       const entities = normalizedEntities(this.entities, this.visualTokens);
       while (idx < this.visualTokens.length) {
-        let index = textSpans.length;
+        const index = textSpans.length;
         const entityArray = entities.filter(
           (entity) => entity.start_token <= idx && idx < entity.end_token
         );
@@ -214,7 +214,7 @@ export default {
       const to = Math.max(this.selectionStart, this.selectionEnd);
       const startToken = this.textSpans[from].tokens[0];
       const endToken = this.textSpans[to].tokens.reverse()[0];
-      let entities = [...this.entities];
+      const entities = [...this.entities];
       entities.push({
         start: startToken.start,
         end: endToken.end,
@@ -224,7 +224,7 @@ export default {
       this.onReset();
     },
     onChangeEntityLabel(entity, newLabel) {
-      let entities = this.entities.map((ent) => {
+      const entities = this.entities.map((ent) => {
         return ent.start === entity.start &&
           ent.end === entity.end &&
           ent.label === entity.label
@@ -241,7 +241,7 @@ export default {
           ent.end === entity.end &&
           ent.label === entity.label
       );
-      let entities = [...this.entities];
+      const entities = [...this.entities];
       entities.splice(found, 1);
       this.updateAnnotatedEntities(entities);
       this.onReset();

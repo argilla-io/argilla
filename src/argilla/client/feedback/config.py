@@ -12,63 +12,63 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import re
+import warnings
 from typing import List, Optional
 
-from pydantic import BaseModel
+try:
+    from typing import Annotated
+except ImportError:
+    from typing_extensions import Annotated
 
-from argilla.client.feedback.typing import AllowedFieldTypes, AllowedQuestionTypes
+from pydantic import BaseModel, Field
+
+try:
+    from yaml import SafeLoader, dump, load
+except ImportError:
+    raise ImportError(
+        "Please make sure to install `PyYAML` in order to use `DatasetConfig`. To do"
+        " so you can run `pip install pyyaml`."
+    )
+
+from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 
-class FeedbackDatasetConfig(BaseModel):
-    """`FeedbackDatasetConfig`
+class DatasetConfig(BaseModel):
+    fields: List[AllowedFieldTypes]
+    questions: List[Annotated[AllowedQuestionTypes, Field(..., discriminator="type")]]
+    guidelines: Optional[str] = None
 
-    Args:
-        fields (List[AllowedFieldTypes]): The fields of the feedback dataset.
-        questions (List[AllowedQuestionTypes]): The questions of the feedback dataset.
-        guidelines (Optional[str]): the guidelines of the feedback dataset. Defaults to None.
+    def to_yaml(self) -> str:
+        return dump(self.dict(exclude={"fields": {"__all__": {"id"}}, "questions": {"__all__": {"id"}}}))
 
-    Examples:
-        >>> import argilla as rg
-        >>> config = rg.FeedbackDatasetConfig(
-        ...     fields=[
-        ...         rg.TextField(name="text", title="Human prompt"),
-        ...     ],
-        ...     questions =[
-        ...         rg.TextQuestion(
-        ...             name="question-1",
-        ...             description="This is the first question",
-        ...             required=True,
-        ...         ),
-        ...         rg.RatingQuestion(
-        ...             name="question-2",
-        ...             description="This is the second question",
-        ...             required=True,
-        ...             values=[1, 2, 3, 4, 5],
-        ...         ),
-        ...         rg.LabelQuestion(
-        ...             name="relevant",
-        ...             title="Is the response relevant for the given prompt?",
-        ...             labels=["Yes","No"],
-        ...             required=True,
-        ...             visible_labels=None
-        ...         ),
-        ...         rg.MultiLabelQuestion(
-        ...             name="content_class",
-        ...             title="Does the response include any of the following?",
-        ...             description="Select all that apply",
-        ...             labels={"cat-1": "Category 1" , "cat-2": "Category 2"},
-        ...             required=False,
-        ...             visible_labels=4
-        ...         ),
-        ...     ],
-        ...     guidelines="Add some guidelines for the annotation team here."
-        ... )
+    @classmethod
+    def from_yaml(cls, yaml: str) -> "DatasetConfig":
+        yaml = re.sub(r"(\n\s*|)id: !!python/object:uuid\.UUID\s+int: \d+", "", yaml)
+        return cls(**load(yaml, Loader=SafeLoader))
 
-    """
 
+# TODO(alvarobartt): here for backwards compatibility, remove in 1.14.0
+class DeprecatedDatasetConfig(BaseModel):
     fields: List[AllowedFieldTypes]
     questions: List[AllowedQuestionTypes]
     guidelines: Optional[str] = None
 
-    class Config:
-        smart_union = True
+    def to_json(self) -> str:
+        warnings.warn(
+            "`DatasetConfig` can just be dumped to YAML, so make sure that you are"
+            " dumping to a YAML file instead of a JSON file. `DatasetConfig` will come"
+            " in YAML format from now on, instead of JSON format.",
+            DeprecationWarning,
+        )
+        return self.json()
+
+    @classmethod
+    def from_json(cls, json: str) -> "DeprecatedDatasetConfig":
+        warnings.warn(
+            "`DatasetConfig` can just be loaded from YAML, so make sure that you are"
+            " loading a YAML file instead of a JSON file. `DatasetConfig` will be dumped"
+            " as YAML from now on, instead of JSON.",
+            DeprecationWarning,
+        )
+        return cls.parse_raw(json)

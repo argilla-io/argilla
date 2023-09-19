@@ -1,23 +1,22 @@
 <template>
   <div class="record">
-    <StatusTag class="record__status" :title="recordStatus" />
+    <StatusTag class="record__status" :recordStatus="recordStatus" />
     <div
-      v-for="{ id, title, field_text, component_type, settings } in fields"
+      v-for="{ id, title, content, isTextType, settings } in fields"
       :key="id"
     >
       <TextFieldComponent
-        v-if="component_type === FIELD_COMPONENT_TYPE.TEXT_FIELD"
+        v-if="isTextType"
         :title="title"
-        :fieldText="field_text"
+        :fieldText="content"
         :useMarkdown="settings.use_markdown"
+        :stringToHighlight="searchValue"
       />
     </div>
   </div>
 </template>
 
 <script>
-import { FIELD_COMPONENT_TYPE } from "./feedbackTask.properties";
-
 export default {
   props: {
     recordStatus: {
@@ -29,8 +28,10 @@ export default {
       required: true,
     },
   },
-  created() {
-    this.FIELD_COMPONENT_TYPE = FIELD_COMPONENT_TYPE;
+  computed: {
+    searchValue() {
+      return this.$route.query?._search ?? "";
+    },
   },
 };
 </script>

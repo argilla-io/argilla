@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code 🛎
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Cache pip 👜
         uses: actions/cache@v3
         env:
@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "14"
+          node-version: "18"
       - name: Build Package 🍟
         run: |
           pip install -U build

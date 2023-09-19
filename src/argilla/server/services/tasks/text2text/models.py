@@ -17,15 +17,8 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from argilla.server.commons.models import PredictionStatus, TaskType
-from argilla.server.services.datasets import ServiceBaseDataset
-from argilla.server.services.search.model import (
-    ServiceBaseRecordsQuery,
-    ServiceScoreRange,
-)
-from argilla.server.services.tasks.commons import (
-    ServiceBaseAnnotation,
-    ServiceBaseRecord,
-)
+from argilla.server.services.search.model import ServiceBaseRecordsQuery, ServiceScoreRange
+from argilla.server.services.tasks.commons import ServiceBaseAnnotation, ServiceBaseRecord
 
 
 class ServiceText2TextPrediction(BaseModel):

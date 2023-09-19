@@ -22,14 +22,8 @@ from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.server.commons.models import PredictionStatus, TaskStatus, TaskType
 from argilla.server.helpers import flatten_dict
 from argilla.server.services.datasets import ServiceBaseDataset
-from argilla.server.services.search.model import (
-    ServiceBaseRecordsQuery,
-    ServiceScoreRange,
-)
-from argilla.server.services.tasks.commons import (
-    ServiceBaseAnnotation,
-    ServiceBaseRecord,
-)
+from argilla.server.services.search.model import ServiceBaseRecordsQuery, ServiceScoreRange
+from argilla.server.services.tasks.commons import ServiceBaseAnnotation, ServiceBaseRecord
 
 
 class ServiceLabelingRule(BaseModel):

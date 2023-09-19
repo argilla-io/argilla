@@ -82,6 +82,36 @@ In the new Conda environment, _Argilla_ will already be installed in [editable m
 with all the server dependencies. But if you're willing to install any other dependency you can do so via `pip` to install your own, or just
 see the available extras besides the `server` extras, which are: `listeners`, `postgresql`, and `tests`; all those installable as `pip install -e ".[<EXTRA_NAME>]"`.
 
+
+### Running tests
+To make sure there are no breaking changes, you should run all the tests as follows:
+```sh
+pytest tests
+```
+
+You can also run only the unit tests by providing the proper path:
+```sh
+pytest tests/unit
+```
+
+For the unit tests, you can also set up a PostgreSQL database instead of the default sqlite backend:
+```sh
+ARGILLA_DATABASE_URL=postgresql://postgres:postgres@localhost:5432 pytest tests/unit
+```
+
+For running more heavy integration tests you can just run pytest with the `tests/integration` folder:
+```sh
+pytest tests/integration
+```
+
+Note: For now, integration tests are mocking the connection to the Argilla server. In the future, this may change and tests will be launched using an up and running Argilla server instance.
+
+You will need an Elasticsearch instance up and running for the time being. You can get one running using Docker with the following command:
+
+```sh
+docker run -d --name elasticsearch-for-argilla -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" -e "xpack.security.enabled=false" docker.elastic.co/elasticsearch/elasticsearch:8.5.3
+```
+
 ### Code formatting tools
 
 To keep a consistent code format, we use [pre-commit](https://pre-commit.com) hooks. So on, you first need to install
@@ -97,6 +127,26 @@ Then, you can proceed with the `pre-commit` hooks installation by simply running
 pre-commit install
 ```
 
+### Running Frontend
+
+First, make sure you have Docker installed. If you don't have it installed, please download and install it, using [this guide](../getting_started/quickstart_installation.ipynb#Running-Argilla-Quickstart) as reference.
+
+Run the Argilla backend using Docker with the following command:
+
+```sh
+docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest
+```
+
+Navigate to the `frontend` folder from your project's root directory.
+
+Then, execute the command:
+
+```sh
+npm run dev
+```
+
+To log in, use the username `admin` and the password `12345678`. If you need more information, please check [here](../getting_started/quickstart_installation.ipynb).
+
 ### Building Frontend static files
 
 Build the static UI files in case you want to work on the UI:
@@ -110,7 +160,7 @@ bash scripts/build_frontend.sh
 Run database migrations executing the following task:
 
 ```sh
-python -m argilla database migrate
+argilla server database migrate
 ```
 
 The default SQLite database will be created at `~/.argilla/argilla.db`. This can be changed setting different values for `ARGILLA_DATABASE_URL` and `ARGILLA_HOME_PATH` environment variables.
@@ -125,13 +175,9 @@ alembic -c src/argilla/alembic.ini revision --autogenerate -m "descriptive messa
 
 `alembic` will automatically detect the changes made and generate a new migration script in the `src/argilla/server/alembic/versions` directory.
 
-<div class="alert alert-info">
-
-Note
-
+:::{note}
 After generating a new migration script, you will need to apply the migrations as described in [running database migrations](#running-database-migrations).
-
-</div>
+:::
 
 ### Recreating the database
 
@@ -146,17 +192,17 @@ rm ~/.argilla/argilla.db
 After deleting the database, you will need to run the database migrate task:
 
 ```sh
-python -m argilla database migrate
+argilla server database migrate
 ```
 
 By following these steps, you'll have a fresh and clean database to work with.
 
 ### Creating your first user
 
-At least one user is required to interact with Argila API and web UI. You can create easily create your user executing the following task:
+At least one user is required to interact with Argilla API and web UI. You can easily create one user executing the following command:
 
 ```sh
-python -m argilla users create
+argilla server database users create
 ```
 
 This task will ask you for the required information to create your user, including `username`, `password` and so on.
@@ -166,7 +212,7 @@ This task will ask you for the required information to create your user, includi
 Finally to run the web app now simply execute:
 
 ```sh
-python -m argilla server
+argilla server start
 ```
 
 Congrats, you are ready to take _Argilla_ to the next level 🚀

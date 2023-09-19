@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import warnings
 from datetime import datetime
 from typing import TYPE_CHECKING, Iterator, List, Optional, Union
 from uuid import UUID
@@ -23,15 +24,18 @@ from argilla.client.sdk.commons.errors import (
     NotFoundApiError,
     ValidationApiError,
 )
+from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
 from argilla.client.sdk.v1.workspaces.models import WorkspaceModel as WorkspaceModelV1
 from argilla.client.sdk.workspaces import api as workspaces_api
 from argilla.client.sdk.workspaces.models import WorkspaceModel as WorkspaceModelV0
+from argilla.client.users import User
+from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
     import httpx
 
-    from argilla.client.sdk.workspaces.models import WorkspaceUserModel
+    from argilla.client.sdk.users.models import UserModel
 
 
 class Workspace:
@@ -45,7 +49,7 @@ class Workspace:
         id: the ID of the workspace to be managed. Defaults to None.
 
     Attributes:
-        __client: the `httpx.Client` initialized to interact with the Argilla API.
+        _client: the `httpx.Client` initialized to interact with the Argilla API.
         id: the ID of the workspace.
         name: the name of the workspace.
         users: the list of users linked to the workspace. Defaults to None.
@@ -57,16 +61,16 @@ class Workspace:
         >>> workspace = rg.Workspace.from_name("my-workspace") # or `Workspace.from_id("...")`
         >>> workspace.add_user("my-user")
         >>> print(workspace.users)
-        [WorkspaceUserModel(id='...', first_name='Luke', last_name="Skywalker', full_name='Luke Skywalker', username='my-user', role='annotator', workspaces=['my-workspace'], api_key='...', inserted_at=datetime.datetime(2021, 8, 31, 10, 0, 0), updated_at=datetime.datetime(2021, 8, 31, 10, 0, 0))]
+        [UserModel(id='...', first_name='Luke', last_name="Skywalker', full_name='Luke Skywalker', username='my-user', role='annotator', workspaces=['my-workspace'], api_key='...', inserted_at=datetime.datetime(2021, 8, 31, 10, 0, 0), updated_at=datetime.datetime(2021, 8, 31, 10, 0, 0))]
         >>> workspace.delete_user("my-user")
         >>> print(workspace.users)
         []
     """
 
-    __client: "httpx.Client"
+    _client: "httpx.Client"  # Required to be able to use `allowed_for_roles` decorator
     id: UUID
     name: str
-    users: Optional[List["WorkspaceUserModel"]] = None
+    users: Optional[List["UserModel"]] = None
     inserted_at: datetime
     updated_at: datetime
 
@@ -104,14 +108,15 @@ class Workspace:
         raise Exception(error_msg)
 
     @property
-    def users(self) -> List["WorkspaceUserModel"]:
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def users(self) -> List["UserModel"]:
         """Returns the list of users linked to the workspace.
 
         Returns:
-            A list of `WorkspaceUserModel` instances.
+            A list of `UserModel` instances.
         """
         # TODO(@alvarobartt): Maybe we should return a list of rg.User instead.
-        return workspaces_api.list_workspace_users(self.__client, self.id).parsed
+        return workspaces_api.list_workspace_users(self._client, self.id).parsed
 
     def __repr__(self) -> str:
         return (
@@ -119,15 +124,21 @@ class Workspace:
             f" inserted_at={self.inserted_at}, updated_at={self.updated_at})"
         )
 
-    def add_user(self, user_id: str) -> None:
+    @allowed_for_roles(roles=[UserRole.owner])
+    def add_user(self, user_id: UUID) -> None:
         """Adds an existing user to the workspace in Argilla.
+
+        Note that users with `owner` role are excluded of the `add_user` method, as they
+        are superusers and they can access to all the workspaces and datasets in Argilla.
 
         Args:
             user_id: the ID of the user to be added to the workspace. The user must exist in Argilla.
 
         Raises:
-            ValueError: if the user with the provided ID already exists in the workspace.
-            RuntimeError: if there was an error while adding the user to the workspace.
+            ValueError: if the user with the provided ID either doesn't exist in Argilla or
+                already exists in the workspace.
+            RuntimeError: if there was an error while either fetching the user from Argilla or
+                adding the user to the workspace.
 
         Examples:
             >>> from argilla import rg
@@ -135,26 +146,48 @@ class Workspace:
             >>> workspace.add_user("my-user-id")
         """
         try:
-            workspaces_api.create_workspace_user(
-                client=self.__client,
-                id=self.id,
-                user_id=user_id,
+            user = User.from_id(user_id)
+        except ValueError as e:
+            raise ValueError(
+                f"User with id=`{user_id}` doesn't exist in Argilla, so please"
+                " make sure that the ID you provided is a valid one. Otherwise,"
+                " you can create a new one via the `User.create` method."
+            ) from e
+        except RuntimeError as e:
+            raise RuntimeError(f"Error while retrieving user with id=`{user_id}` from Argilla.") from e
+
+        if user.is_owner:
+            warnings.warn(
+                "The user you are trying to add to the workspace has the `owner` role, so it"
+                " will be excluded from the workspace. Note that users with `owner` role are"
+                " superusers and they can access to all the workspaces and datasets in Argilla.",
+                UserWarning,
+                stacklevel=2,
             )
+            return
+
+        try:
+            workspaces_api.create_workspace_user(client=self._client, id=self.id, user_id=user_id)
         except AlreadyExistsApiError as e:
             raise ValueError(f"User with id=`{user_id}` already exists in workspace with id=`{self.id}`.") from e
         except BaseClientError as e:
             raise RuntimeError(f"Error while adding user with id=`{user_id}` to workspace with id=`{self.id}`.") from e
 
-    def delete_user(self, user_id: str) -> None:
+    @allowed_for_roles(roles=[UserRole.owner])
+    def delete_user(self, user_id: UUID) -> None:
         """Deletes an existing user from the workspace in Argilla. Note that the user
         will not be deleted from Argilla, but just from the workspace.
+
+        Note that users with `owner` role are excluded of the `delete_user` method, as they
+        are superusers and they can access to all the workspaces and datasets in Argilla.
 
         Args:
             user_id: the ID of the user to be deleted from the workspace. The user must exist in Argilla.
 
         Raises:
-            ValueError: if the user with the provided ID doesn't exist in the workspace.
-            RuntimeError: if there was an error while deleting the user from the workspace.
+            ValueError: if the user with the provided ID doesn't exist in either the workspace or Argilla.
+            RuntimeError: if there was an error while retrieving the user from Argilla or
+                while deleting it from the workspace.
 
         Examples:
             >>> from argilla import rg
@@ -162,11 +195,28 @@ class Workspace:
             >>> workspace.delete_user("my-user-id")
         """
         try:
-            workspaces_api.delete_workspace_user(
-                client=self.__client,
-                id=self.id,
-                user_id=user_id,
+            user = User.from_id(user_id)
+        except ValueError as e:
+            raise ValueError(
+                f"User with id=`{user_id}` doesn't exist in Argilla, so please"
+                " make sure that the ID you provided is a valid one. Otherwise,"
+                " you can create a new one via the `User.create` method."
+            ) from e
+        except RuntimeError as e:
+            raise RuntimeError(f"Error while retrieving user with id=`{user_id}` from Argilla.") from e
+
+        if user.is_owner:
+            warnings.warn(
+                "The user you are trying to delete from the workspace has the `owner` role, so it"
+                " will be excluded from the workspace. Note that users with `owner` role are"
+                " superusers and they can access to all the workspaces and datasets in Argilla.",
+                UserWarning,
+                stacklevel=2,
             )
+            return
+
+        try:
+            workspaces_api.delete_workspace_user(client=self._client, id=self.id, user_id=user_id)
         except NotFoundApiError as e:
             raise ValueError(
                 f"Either the user with id=`{user_id}` doesn't exist in Argilla, or it"
@@ -176,6 +226,32 @@ class Workspace:
             raise RuntimeError(
                 f"Error while deleting user with id=`{user_id}` from workspace with id=`{self.id}`."
             ) from e
+
+    @allowed_for_roles(roles=[UserRole.owner])
+    def delete(self) -> None:
+        """Deletes an existing workspace from Argilla. Note that the workspace
+        cannot have any linked dataset to be removed from Argilla. Otherwise an error will be raised.
+
+        Raises:
+            ValueError: if the workspace does not exists or some datasets are linked to it.
+            RuntimeError: if there was an unexpected error while deleting the user from the workspace.
+
+        Examples:
+            >>> from argilla import rg
+            >>> workspace = rg.Workspace.from_name("my-workspace")
+            >>> workspace.delete()
+        """
+        try:
+            workspaces_api_v1.delete_workspace(client=self._client, id=self.id)
+        except NotFoundApiError as e:
+            raise ValueError(f"Workspace with id {self.id} doesn't exist in Argilla.") from e
+        except AlreadyExistsApiError as e:
+            # TODO: the already exists is to explicit for this context and should be generalized
+            raise ValueError(
+                f"Cannot delete workspace with id {self.id}. Some datasets are still linked to this workspace."
+            ) from e
+        except BaseClientError as e:
+            raise RuntimeError(f"Error while deleting workspace with id {self.id!r}.") from e
 
     @staticmethod
     def __active_client() -> "httpx.Client":
@@ -191,12 +267,13 @@ class Workspace:
     ) -> "Workspace":
         """Returns a new `Workspace` instance."""
         instance = cls.__new__(cls)
-        instance.__client = client or cls.__active_client()
+        instance._client = client or cls.__active_client()
         if isinstance(ws, (WorkspaceModelV0, WorkspaceModelV1)):
             instance.__dict__.update(ws.dict())
         return instance
 
     @classmethod
+    @allowed_for_roles(roles=[UserRole.owner])
     def create(cls, name: str) -> "Workspace":
         """Creates a new workspace in Argilla.
 
@@ -279,7 +356,7 @@ class Workspace:
         """
         client = cls.__active_client()
         try:
-            workspaces = workspaces_api.list_workspaces(client).parsed
+            workspaces = workspaces_api_v1.list_workspaces_me(client).parsed
         except Exception as e:
             raise RuntimeError("Error while retrieving the list of workspaces from Argilla.") from e
 
@@ -289,7 +366,7 @@ class Workspace:
 
         raise ValueError(
             f"Workspace with name=`{name}` doesn't exist in Argilla, so please"
-            "create it via the `Workspace.create` method as follows:"
+            " create it via the `Workspace.create` method as follows:"
             f" `Workspace.create('{name}')`."
         )
 
@@ -309,7 +386,7 @@ class Workspace:
         """
         client = cls.__active_client()
         try:
-            workspaces = workspaces_api.list_workspaces(client).parsed
+            workspaces = workspaces_api_v1.list_workspaces_me(client).parsed
             for ws in workspaces:
                 yield cls.__new_instance(client, ws)
         except Exception as e:

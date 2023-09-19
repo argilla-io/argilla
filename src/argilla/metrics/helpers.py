@@ -44,13 +44,7 @@ def bar(data: dict, title: str = "Bar", x_legend: str = "", y_legend: str = ""):
     return fig
 
 
-def stacked_bar(
-    x: list,
-    y_s: Dict[str, list],
-    title: str = "Bar",
-    x_legend: str = "",
-    y_legend: str = "",
-):
+def stacked_bar(x: list, y_s: Dict[str, list], title: str = "Bar", x_legend: str = "", y_legend: str = ""):
     import plotly.graph_objects as go
 
     if not x or not y_s:

@@ -22,8 +22,6 @@
 </p>
 
 <h2 align="center">Open-source data curation platform for LLMs</h2>
-<h3 align="center">MLOps for NLP: from data labeling to model monitoring</h2>
-
 <br>
 
 
@@ -48,8 +46,8 @@ https://github.com/argilla-io/argilla/assets/1107111/49e28d64-9799-4cac-be49-19d
 <a href="https://docs.argilla.io">📄 Documentation</a> | </span>
 <a href="#-quickstart">🚀 Quickstart</a> <span> | </span>
 <a href="#-cheatsheet">🎼 Cheatsheet</a> <span> | </span>
-<a href="#-contribute">🫱🏾‍🫲🏼 Contribute</a> <span> | </span>
-<a href="#-roadmap">🗺️ Roadmap</a>
+<a href="#-project-architecture">🛠️ Architecture</a> <span> | </span>
+<a href="#-contribute">🫱🏾‍🫲🏼 Contribute</a>
 </p>
 </h3>
 
@@ -204,7 +202,15 @@ trainer.train()
 
 <a href="https://argilla.io/blog/introducing-argilla-trainer"><img src="https://argilla.io/blog/introducing-argilla-trainer/train.png" width="100%"></a>
 
+## 🛠️ Project Architecture
 
+Argilla is built on 5 core components:
+
+- **Python SDK**: A Python SDK which is installable with `pip install argilla`. To interact with the Argilla Server and the Argilla UI. It provides an API to manage the data, configuration and annotation workflows.
+- **FastAPI Server**: The core of Argilla is a *Python FastAPI* server that manages the data, by pre-processing it and storing it in the vector database. Also, it stores application information in the relational database. It provides a REST API to interact with the data from the Python SDK and the Argilla UI. It also provides a web interface to visualize the data.
+- **Relational Database**: A relational database to store the metadata of the records and the annotations. *SQLite* is used as the default built-in option and is deployed separately with the Argilla Server but a separate *PostgreSQL* can be used too.
+- **Vector Database**: A vector database to store the records data and perform scalable vector similarity searches and basic document searches. We currently support *ElasticSearch* and *AWS OpenSearch* and they can be deployed as separate Docker images.
+- **Vue.js UI**: A web application to visualize and annotate your data, users and teams. It is built with *Vue.js* and is directly deployed alongside the Argilla Server within our Argilla Docker image.
 
 ## 📏 Principles
 -  **Open**: Argilla is free, open-source, and 100% compatible with major NLP libraries (Hugging Face transformers, spaCy, Stanford Stanza, Flair, etc.). In fact, you can **use and combine your preferred libraries** without implementing any specific interface.
@@ -223,7 +229,7 @@ trainer.train()
 
 ## 🫱🏾‍🫲🏼 Contribute
 
-We love contributors and have launched a [collaboration with JustDiggit](https://argilla.io/blog/introducing-argilla-community-growers) to hand out our very own bunds and help the re-greening of sub-Saharan Africa. To help our community with the creation of contributions, we have created our [developer](https://docs.argilla.io/en/latest/community/developer_docs.html) and [contributor](https://docs.argilla.io/en/latest/community/contributing.html) docs. Additionally, you can always [schedule a meeting](https://calendly.com/argilla-office-hours/meeting-with-david-from-argilla-30m) with our Developer Advocacy team so they can get you up to speed.
+We love contributors and have launched a [collaboration with JustDiggit](https://argilla.io/blog/introducing-argilla-community-growers) to hand out our very own bunds and help the re-greening of sub-Saharan Africa. To help our community with the creation of contributions, we have created our [developer](https://docs.argilla.io/en/latest/community/developer_docs.html) and [contributor](https://docs.argilla.io/en/latest/community/contributing.html) docs. Additionally, you can always [schedule a meeting](https://calendly.com/argilla-office-hours/30min) with our Developer Advocacy team so they can get you up to speed.
 
 ## 🥇 Contributors
 <a  href="https://github.com/argilla-io/argilla/graphs/contributors">

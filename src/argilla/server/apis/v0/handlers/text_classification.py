@@ -17,16 +17,10 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query, Security
 
-from argilla.server.apis.v0.handlers import (
-    metrics,
-    text_classification_dataset_settings,
-)
+from argilla.server.apis.v0.handlers import metrics, text_classification_dataset_settings
 from argilla.server.apis.v0.helpers import deprecate_endpoint
 from argilla.server.apis.v0.models.commons.model import BulkResponse
-from argilla.server.apis.v0.models.commons.params import (
-    CommonTaskHandlerDependencies,
-    RequestPagination,
-)
+from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies, RequestPagination
 from argilla.server.apis.v0.models.text_classification import (
     CreateLabelingRule,
     DatasetLabelingRulesMetricsSummary,
@@ -43,15 +37,11 @@ from argilla.server.apis.v0.models.text_classification import (
 from argilla.server.apis.v0.validators.text_classification import DatasetValidator
 from argilla.server.commons.config import TasksFactory
 from argilla.server.commons.models import TaskType
-from argilla.server.errors import EntityNotFoundError
 from argilla.server.models import User
-from argilla.server.schemas.datasets import CreateDatasetRequest
 from argilla.server.security import auth
 from argilla.server.services.datasets import DatasetsService
 from argilla.server.services.tasks.text_classification import TextClassificationService
-from argilla.server.services.tasks.text_classification.metrics import (
-    TextClassificationMetrics,
-)
+from argilla.server.services.tasks.text_classification.metrics import TextClassificationMetrics
 from argilla.server.services.tasks.text_classification.model import (
     ServiceLabelingRule,
     ServiceTextClassificationQuery,
@@ -61,6 +51,8 @@ from argilla.server.services.tasks.text_classification.model import (
 
 def configure_router():
     task_type = TaskType.text_classification
+    base_endpoint = f"/{{name}}/{task_type.value}"
+    new_base_endpoint = f"/{task_type.value}/{{name}}"
 
     TasksFactory.register_task(
         task_type=task_type,
@@ -69,9 +61,6 @@ def configure_router():
         record_class=ServiceTextClassificationRecord,
         metrics=TextClassificationMetrics,
     )
-
-    base_endpoint = f"/{{name}}/{task_type}"
-    new_base_endpoint = f"/{task_type}/{{name}}"
 
     router = APIRouter(tags=[task_type], prefix="/datasets")
 

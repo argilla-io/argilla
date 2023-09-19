@@ -12,24 +12,17 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Union
+from typing import List, Union
 from uuid import UUID
 
 import httpx
 
 from argilla.client.sdk.commons.errors_handler import handle_response_error
-from argilla.client.sdk.commons.models import (
-    ErrorMessage,
-    HTTPValidationError,
-    Response,
-)
+from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
 from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 
 
-def get_workspace(
-    client: httpx.Client,
-    id: UUID,
-) -> Response[Union[WorkspaceModel, ErrorMessage, HTTPValidationError]]:
+def get_workspace(client: httpx.Client, id: UUID) -> Response[Union[WorkspaceModel, ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/v1/workspaces/{id}` endpoint to retrieve a workspace.
 
     Args:
@@ -45,11 +38,45 @@ def get_workspace(
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = WorkspaceModel(**response.json())
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = WorkspaceModel(**response.json())
+        return response_obj
+    return handle_response_error(response)
+
+
+def delete_workspace(
+    client: httpx.Client, id: UUID
+) -> Response[Union[WorkspaceModel, ErrorMessage, HTTPValidationError]]:
+    url = f"/api/v1/workspaces/{id}"
+
+    response = client.delete(url=url)
+
+    if response.status_code == 200:
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = WorkspaceModel(**response.json())
+        return response_obj
+    return handle_response_error(response)
+
+
+def list_workspaces_me(
+    client: httpx.Client,
+) -> Response[Union[List[WorkspaceModel], ErrorMessage, HTTPValidationError]]:
+    """Sends a GET request to `/api/v1/me/workspaces` endpoint to get the list of
+    workspaces the current user has access to.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+
+    Returns:
+        A `Response` object containing a `parsed` attribute with the parsed response if
+        the request was successful, which is a list of `WorkspaceModel`.
+    """
+    url = "/api/v1/me/workspaces"
+
+    response = client.get(url=url)
+
+    if response.status_code == 200:
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = [WorkspaceModel(**workspace) for workspace in response.json()["items"]]
+        return response_obj
     return handle_response_error(response)

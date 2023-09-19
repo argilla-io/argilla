@@ -13,11 +13,12 @@
 #  limitations under the License.
 
 import asyncio
+from typing import Union
 
 from sqlalchemy import orm
-from sqlalchemy.ext.asyncio import AsyncSession, async_scoped_session
+from sqlalchemy.ext.asyncio import async_scoped_session, async_sessionmaker
 
-task = None
+task: Union[asyncio.Task, None] = None
 
 
 def set_task(t: asyncio.Task):
@@ -29,5 +30,5 @@ def get_task() -> asyncio.Task:
     return task
 
 
-TestSession = async_scoped_session(orm.sessionmaker(class_=AsyncSession, expire_on_commit=False), get_task)
+TestSession = async_scoped_session(async_sessionmaker(expire_on_commit=False, future=True), get_task)
 SyncTestSession = orm.scoped_session(orm.sessionmaker(class_=orm.Session, expire_on_commit=False))

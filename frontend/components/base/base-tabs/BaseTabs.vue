@@ -17,11 +17,9 @@
 
 <template>
   <ul class="tabs">
-    <li class="tab">
+    <li v-for="{ id, name } in tabs" :key="id" class="tab">
       <button
-        v-for="{ id, name } in tabs"
-        :key="id"
-        :class="['tab__button', getTabClass(id)]"
+        :class="['tab__button', `--${tabSize}`, getTabClass(id)]"
         @click="changeTab(id)"
       >
         <span>{{ name }}</span>
@@ -40,6 +38,10 @@ export default {
       type: Object,
       required: true,
     },
+    tabSize: {
+      type: String,
+      default: "small",
+    },
   },
   methods: {
     changeTab(id) {
@@ -55,28 +57,15 @@ export default {
 </script>
 <style lang="scss" scoped>
 .tabs {
+  position: relative;
   display: flex;
+  flex-shrink: 0;
   padding: 0;
+  margin-bottom: 0;
   list-style: none;
   overflow-y: auto;
   border-bottom: 1px solid $black-10;
   @extend %hide-scrollbar;
-  &:before,
-  &:after {
-    position: absolute;
-    content: "";
-    height: 40px;
-    width: 30px;
-    z-index: 1;
-  }
-  &:before {
-    left: 0;
-    background: linear-gradient(to right, palette(white), transparent 100%);
-  }
-  &:after {
-    right: 0;
-    background: linear-gradient(to left, palette(white), transparent 100%);
-  }
 }
 .tab {
   display: flex;
@@ -92,7 +81,13 @@ export default {
     outline: 0;
     white-space: nowrap;
     cursor: pointer;
-    @include font-size(13px);
+    &.--small {
+      @include font-size(13px);
+    }
+    &.--large {
+      @include font-size(16px);
+      padding: $base-space $base-space * 2;
+    }
     &.--active {
       border-color: $primary-color;
       transition: border-color 0.3s ease-in-out;

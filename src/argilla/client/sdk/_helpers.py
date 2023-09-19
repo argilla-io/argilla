@@ -18,16 +18,10 @@ import httpx
 
 from argilla.client.sdk.commons.errors import WrongResponseError
 from argilla.client.sdk.commons.errors_handler import handle_response_error
-from argilla.client.sdk.commons.models import (
-    ErrorMessage,
-    HTTPValidationError,
-    Response,
-)
+from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
 
 
-def build_raw_response(
-    response: httpx.Response,
-) -> Response[Union[Dict[str, Any], ErrorMessage, HTTPValidationError]]:
+def build_raw_response(response: httpx.Response) -> Response[Union[Dict[str, Any], ErrorMessage, HTTPValidationError]]:
     return build_typed_response(response)
 
 
@@ -35,8 +29,7 @@ ResponseType = TypeVar("ResponseType")
 
 
 def build_typed_response(
-    response: httpx.Response,
-    response_type_class: Optional[Type[ResponseType]] = None,
+    response: httpx.Response, response_type_class: Optional[Type[ResponseType]] = None
 ) -> Response[Union[ResponseType, ErrorMessage, HTTPValidationError]]:
     parsed_response = check_response(response, expected_response=response_type_class)
     if response_type_class:

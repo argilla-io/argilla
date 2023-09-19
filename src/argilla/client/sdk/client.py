@@ -249,11 +249,7 @@ ResponseType = TypeVar("ResponseType")
 
 
 @dataclasses.dataclass
-class AuthenticatedClient(
-    Client,
-    _ClientCommonDefaults,
-    _AuthenticatedClient,
-):
+class AuthenticatedClient(Client, _ClientCommonDefaults, _AuthenticatedClient):
     """A Client which has been authenticated for use on secured endpoints"""
 
     def __hash__(self):

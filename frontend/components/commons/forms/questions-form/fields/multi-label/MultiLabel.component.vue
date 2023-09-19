@@ -1,16 +1,17 @@
 <template>
   <div class="wrapper">
     <QuestionHeaderComponent
-      :title="title"
-      :isRequired="isRequired"
-      :tooltipMessage="description"
+      :question="question"
+      :showSuggestion="showSuggestion"
     />
 
     <LabelSelectionComponent
-      v-model="uniqueOptions"
-      :multiple="true"
-      :componentId="questionId"
+      :componentId="question.id"
+      v-model="question.answer.values"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
+      :multiple="true"
+      :isFocused="isFocused"
+      @on-focus="onFocus"
     />
   </div>
 </template>
@@ -19,50 +20,27 @@
 export default {
   name: "MultiLabelComponent",
   props: {
-    questionId: {
-      type: String,
+    question: {
+      type: Object,
       required: true,
     },
-    title: {
-      type: String,
-      required: true,
-    },
-    options: {
-      type: Array,
-      required: true,
-    },
-    isRequired: {
+    showSuggestion: {
       type: Boolean,
       default: () => false,
     },
-    description: {
-      type: String,
-      default: () => "",
+    isFocused: {
+      type: Boolean,
+      default: () => false,
     },
-    visibleOptions: {
-      type: Number | null,
-      required: false,
-    },
-  },
-  model: {
-    prop: "options",
-  },
-  data() {
-    return {
-      uniqueOptions: [],
-    };
-  },
-  beforeMount() {
-    this.uniqueOptions = this.options.reduce((accumulator, current) => {
-      if (!accumulator.find((item) => item.id === current.id)) {
-        accumulator.push(current);
-      }
-      return accumulator;
-    }, []);
   },
   computed: {
     maxOptionsToShowBeforeCollapse() {
-      return this.visibleOptions ?? -1;
+      return this.question.settings.visible_options ?? -1;
+    },
+  },
+  methods: {
+    onFocus() {
+      this.$emit("on-focus");
     },
   },
 };

@@ -13,12 +13,14 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Optional
 from uuid import UUID
 
 from pydantic import BaseModel
 
-from argilla.server.models import FieldType
+from argilla.server.enums import FieldType
+from argilla.server.schemas.base import UpdateSchema
+from argilla.server.schemas.v1.datasets import FieldTitle
 
 
 class TextFieldSettings(BaseModel):
@@ -38,3 +40,15 @@ class Field(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class TextFieldSettingsUpdate(UpdateSchema):
+    type: Literal[FieldType.text]
+    use_markdown: bool
+
+
+class FieldUpdate(UpdateSchema):
+    title: Optional[FieldTitle]
+    settings: Optional[TextFieldSettingsUpdate]
+
+    __non_nullable_fields__ = {"title", "settings"}

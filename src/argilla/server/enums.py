@@ -15,8 +15,47 @@
 from enum import Enum
 
 
+class FieldType(str, Enum):
+    text = "text"
+
+
+class ResponseStatus(str, Enum):
+    draft = "draft"
+    submitted = "submitted"
+    discarded = "discarded"
+
+
 class ResponseStatusFilter(str, Enum):
     draft = "draft"
     missing = "missing"
     submitted = "submitted"
     discarded = "discarded"
+
+
+class SuggestionType(str, Enum):
+    model = "model"
+    human = "human"
+
+
+class DatasetStatus(str, Enum):
+    draft = "draft"
+    ready = "ready"
+
+
+class UserRole(str, Enum):
+    owner = "owner"
+    admin = "admin"
+    annotator = "annotator"
+
+
+class RecordInclude(str, Enum):
+    responses = "responses"
+    suggestions = "suggestions"
+
+
+class QuestionType(str, Enum):
+    text = "text"
+    rating = "rating"
+    label_selection = "label_selection"
+    multi_label_selection = "multi_label_selection"
+    ranking = "ranking"

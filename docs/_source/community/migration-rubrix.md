@@ -13,11 +13,10 @@ with the new module name
 
 `import argilla...`
 
-
 Equivalently, to launch the server:
 
 ````bash
-python -m argilla
+argilla server start
 ````
 
 instead of
@@ -29,8 +28,9 @@ python -m rubrix
 ## Environment variables
 
 All the environment variables have changed from using the prefix `RUBRIX_` to using the prefix `ARGILLA_`.
-The `ELASTICSEARCH` and other non-prefixed variables are still available, but they will be removed in the future.
-You should use `ARGILLA_` version instead.
+
+.. warning::
+  From version `1.13.0`, the support for non-prefixed environment variables has been removed. All environment variables must be prefixed with `ARGILLA_`.
 
 The best to configure a new Argilla Server from Rubrix is just to duplicate all ENV variables for
 both, Rubrix and Argilla instances. This will simplify a version rollback if needed.
@@ -51,7 +51,7 @@ By default, the new Argilla server won't check if datasets from a previous Rubri
 If you want the new Argilla Server to detect previous Rubrix datasets and make them accessible into your Argilla Server instance you can set the `ARGILLA_ENABLE_MIGRATION` like this before starting the Argilla server:
 
 ```bash
-ARGILLA_ENABLE_MIGRATION=1 python -m argilla
+ARGILLA_ENABLE_MIGRATION=1 argilla server start
 ```
 
 This will fetch info contained in the Rubrix instance `.rubrix.datasetsw-v0` index and

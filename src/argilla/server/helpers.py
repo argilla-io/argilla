@@ -135,12 +135,7 @@ def remove_suffix(text: str, suffix: str):
     return text
 
 
-def replace_string_in_file(
-    filename: str,
-    string: str,
-    replace_by: str,
-    encoding: str = "utf-8",
-):
+def replace_string_in_file(filename: str, string: str, replace_by: str, encoding: str = "utf-8"):
     """Read a file and replace an old value in file by a new one"""
     # Safely read the input filename using 'with'
     with open(filename, encoding=encoding) as f:

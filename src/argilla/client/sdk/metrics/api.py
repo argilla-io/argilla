@@ -19,11 +19,7 @@ import httpx
 from argilla.client.sdk._helpers import build_raw_response
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.api import build_list_response
-from argilla.client.sdk.commons.models import (
-    ErrorMessage,
-    HTTPValidationError,
-    Response,
-)
+from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
 from argilla.client.sdk.metrics.models import MetricInfo
 
 
@@ -43,12 +39,7 @@ def get_dataset_metrics(
 
 
 def compute_metric(
-    client: AuthenticatedClient,
-    name: str,
-    task: str,
-    metric: str,
-    query: Optional[str] = None,
-    **query_params,
+    client: AuthenticatedClient, name: str, task: str, metric: str, query: Optional[str] = None, **query_params
 ) -> Response[Union[Dict[str, Any], ErrorMessage, HTTPValidationError]]:
     url = "{}/api/datasets/{task}/{name}/metrics/{metric}:summary".format(
         client.base_url, task=task, name=name, metric=metric

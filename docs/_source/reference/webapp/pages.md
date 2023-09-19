@@ -136,6 +136,34 @@ For example, if you are annotating and use the [Status filter](./features.md) to
 
 
 ## Dataset settings
+
+To access this page, click on the settings icon next to the user icon at the screen's top right.
+
+On this page, you can access the settings of a specific dataset and make modifications.
+
+
+### Feedback Task
+
+![Dataset page](/_static/reference/webapp/pages-dataset_settings_feedback.png)
+
+#### Info
+
+You can consult and edit the annotation guidelines in markdown format.
+
+#### Fields
+
+You can edit each field's title and activate the markdown format for each.
+
+#### Questions
+
+You have the ability to edit questions and their descriptions, activate markdown formatting for each question, and preview the results in real-time.
+
+#### Danger zone
+
+You can delete your dataset. Be careful this action is irreversible.
+
+### Other Tasks
+
 ![Dataset page](/_static/reference/webapp/pages-dataset_settings.png)
 
 You can access this page by clicking on the settings icon next to the user icon inside of the Dataset view.
@@ -144,15 +172,18 @@ In this page, you will be able to access the settings of a specific dataset and 
 
 ### Description and annotation guidelines
 
-Soon you will be able to edit this information.
+Support for editing this will only be added for the Feedback Task dataset.
 
 ### Labels
+
 Here you can [define your labeling schema](/guides/log_load_and_prepare_data) for this dataset, see the current one and add new labels to it.
 
 ### Danger zone
+
 In this area, you will find a button to delete the current dataset.
 
 ## User settings
+
 ![User settings page](/_static/images/reference/ui/user_settings_page.png)
 
 You can access this page by clicking on your user icon in the top right corner and selecting "My settings" in the dropdown.

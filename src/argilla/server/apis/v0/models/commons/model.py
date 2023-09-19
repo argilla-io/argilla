@@ -27,11 +27,7 @@ from argilla.server.services.search.model import (
     ServiceSearchResultsAggregations,
     ServiceSortableField,
 )
-from argilla.server.services.tasks.commons import (
-    ServiceBaseAnnotation,
-    ServiceBaseRecord,
-    ServiceBaseRecordInputs,
-)
+from argilla.server.services.tasks.commons import ServiceBaseAnnotation, ServiceBaseRecord, ServiceBaseRecordInputs
 
 
 class SortableField(ServiceSortableField):

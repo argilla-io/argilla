@@ -13,6 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import logging
+import warnings
 from enum import Enum
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -21,9 +22,7 @@ from pkg_resources import parse_version
 
 from argilla.client.datasets import DatasetForTextClassification
 from argilla.client.models import TextClassificationRecord
-from argilla.utils.dependency import requires_version
-
-_LOGGER = logging.getLogger(__name__)
+from argilla.utils.dependency import requires_dependencies
 
 
 class SortBy(Enum):
@@ -40,7 +39,7 @@ class SortBy(Enum):
         )
 
 
-@requires_version("cleanlab")
+@requires_dependencies("cleanlab")
 def find_label_errors(
     records: Union[List[TextClassificationRecord], DatasetForTextClassification],
     sort_by: Union[str, SortBy] = "likelihood",
@@ -124,7 +123,7 @@ def _check_and_update_kwargs(version: str, record: TextClassificationRecord, sor
         ValueError: If not supported kwargs ('sorted_index_method') are passed on.
     """
     if "multi_label" in kwargs:
-        _LOGGER.warning(
+        warnings.warn(
             "You provided the kwarg 'multi_label', but it is determined automatically. "
             f"We will set it to '{record.multi_label}'."
         )
@@ -148,16 +147,14 @@ def _check_and_update_kwargs(version: str, record: TextClassificationRecord, sor
             kwargs["return_indices_ranked_by"] = None
         # TODO: Remove this once https://github.com/cleanlab/cleanlab/issues/243 is solved
         elif kwargs["multi_label"]:
-            _LOGGER.warning(
+            warnings.warn(
                 "With cleanlab v2 and multi-label records there is an issue sorting records by 'likelihood' "
                 "(https://github.com/cleanlab/cleanlab/issues/243). We will sort by 'prediction' instead."
             )
             kwargs["return_indices_ranked_by"] = "self_confidence"
 
 
-def _construct_s_and_psx(
-    records: List[TextClassificationRecord],
-) -> Tuple[np.ndarray, np.ndarray]:
+def _construct_s_and_psx(records: List[TextClassificationRecord]) -> Tuple[np.ndarray, np.ndarray]:
     """Helper function to construct the s array and psx matrix.
 
     Args:

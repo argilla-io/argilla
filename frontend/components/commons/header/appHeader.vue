@@ -40,7 +40,7 @@
           @click-settings-icon="goToSettings()"
         />
       </template>
-      <user />
+      <user-avatar-tooltip />
     </base-topbar-brand>
     <loading-line v-if="showRecordsLoader" />
     <task-sidebar
@@ -121,6 +121,9 @@ export default {
     viewSettings() {
       return DatasetViewSettings.query().whereId(this.datasetName).first();
     },
+    /**
+     * @deprecated Replace with useRole
+     */
     isAdminOrOwnerRole() {
       const role = this.$auth.user.role;
       return role === "admin" || role === "owner";

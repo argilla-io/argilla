@@ -12,18 +12,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import logging
 from typing import Any, Dict
 
 from fastapi import HTTPException, Request
 from fastapi.exception_handlers import http_exception_handler
 from pydantic import BaseModel
 
-from argilla.server.commons import telemetry
 from argilla.server.errors.adapter import exception_to_argilla_error
-from argilla.server.errors.base_errors import ServerError
-
-_LOGGER = logging.getLogger("argilla")
+from argilla.server.errors.base_errors import (
+    EntityAlreadyExistsError,
+    EntityNotFoundError,
+    GenericServerError,
+    ServerError,
+)
+from argilla.utils import telemetry
 
 
 class ErrorDetail(BaseModel):
@@ -42,9 +44,21 @@ class ServerHTTPException(HTTPException):
 
 class APIErrorHandler:
     @staticmethod
+    async def track_error(error: ServerError, request: Request):
+        data = {
+            "code": error.code,
+            "user-agent": request.headers.get("user-agent"),
+            "accept-language": request.headers.get("accept-language"),
+        }
+        if isinstance(error, (GenericServerError, EntityNotFoundError, EntityAlreadyExistsError)):
+            data["type"] = error.type
+
+        telemetry.get_telemetry_client().track_data(action="ServerErrorFound", data=data)
+
+    @staticmethod
     async def common_exception_handler(request: Request, error: Exception):
         """Wraps errors as custom generic error"""
         argilla_error = exception_to_argilla_error(error)
-        await telemetry.track_error(argilla_error, request=request)
+        await APIErrorHandler.track_error(argilla_error, request=request)
 
         return await http_exception_handler(request, ServerHTTPException(argilla_error))

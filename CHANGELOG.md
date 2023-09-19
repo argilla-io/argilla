@@ -2,9 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semanti
-c Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!--
 These are the section headers that we use:
@@ -16,15 +14,237 @@ These are the section headers that we use:
 * "Security" in case of vulnerabilities.
 -->
 
-## [Unreleased]
+## [Unreleased]()
 
-### Fixed
+## [1.16.0](https://github.com/argilla-io/argilla/compare/v1.15.1...v1.16.0)
 
-- Fixed `sqlalchemy.error.OperationalError` being raised when running the unit tests if the local SQLite database file didn't exist and the migrations hadn't been applied ([#3307](https://github.com/argilla-io/argilla/pull/3307)).
+### Added
+
+- Added `ArgillaTrainer` integration with sentence-transformers, allowing fine tuning for sentence similarity ([#3739](https://github.com/argilla-io/argilla/pull/3739))
+- Added `ArgillaTrainer` integration with `TrainingTask.for_question_answering` ([#3740](https://github.com/argilla-io/argilla/pull/3740))
+- Added `Auto save record` to save automatically the current record that you are working on ([#3541](https://github.com/argilla-io/argilla/pull/3541))
+- Added `ArgillaTrainer` integration with OpenAI, allowing fine tuning for chat completion ([#3615](https://github.com/argilla-io/argilla/pull/3615))
+- Added `workspaces list` command to list Argilla workspaces ([#3594](https://github.com/argilla-io/argilla/pull/3594)).
+- Added `datasets list` command to list Argilla datasets ([#3658](https://github.com/argilla-io/argilla/pull/3658)).
+- Added `users create` command to create users ([#3667](https://github.com/argilla-io/argilla/pull/3667)).
+- Added `whoami` command to get current user ([#3673](https://github.com/argilla-io/argilla/pull/3673)).
+- Added `users delete` command to delete users ([#3671](https://github.com/argilla-io/argilla/pull/3671)).
+- Added `users list` command to list users ([#3688](https://github.com/argilla-io/argilla/pull/3688)).
+- Added `workspaces delete-user` command to remove a user from a workspace ([#3699](https://github.com/argilla-io/argilla/pull/3699)).
+- Added `datasets list` command to list Argilla datasets ([#3658](https://github.com/argilla-io/argilla/pull/3658)).
+- Added `users create` command to create users ([#3667](https://github.com/argilla-io/argilla/pull/3667)).
+- Added `users delete` command to delete users ([#3671](https://github.com/argilla-io/argilla/pull/3671)).
+- Added `workspaces create` command to create an Argilla workspace ([#3676](https://github.com/argilla-io/argilla/pull/3676)).
+- Added `datasets push-to-hub` command to push a `FeedbackDataset` from Argilla into the HuggingFace Hub ([#3685](https://github.com/argilla-io/argilla/pull/3685)).
+- Added `info` command to get info about the used Argilla client and server ([#3707](https://github.com/argilla-io/argilla/pull/3707)).
+- Added `datasets delete` command to delete a `FeedbackDataset` from Argilla ([#3703](https://github.com/argilla-io/argilla/pull/3703)).
+- Added `created_at` and `updated_at` properties to `RemoteFeedbackDataset` and `FilteredRemoteFeedbackDataset` ([#3709](https://github.com/argilla-io/argilla/pull/3709)).
+- Added handling `PermissionError` when executing a command with a logged in user with not enough permissions ([#3717](https://github.com/argilla-io/argilla/pull/3717)).
+- Added `workspaces add-user` command to add a user to workspace ([#3712](https://github.com/argilla-io/argilla/pull/3712)).
+- Added `workspace_id` param to `GET /api/v1/me/datasets` endpoint ([#3727](https://github.com/argilla-io/argilla/pull/3727)).
+- Added `workspace_id` arg to `list_datasets` in the Python SDK ([#3727](https://github.com/argilla-io/argilla/pull/3727)).
+- Added `argilla` script that allows to execute Argilla CLI using the `argilla` command ([#3730](https://github.com/argilla-io/argilla/pull/3730)).
+- Added support for passing already initialized `model` and `tokenizer` instances to the `ArgillaTrainer` ([#3751](https://github.com/argilla-io/argilla/pull/3751))
+- Added `server_info` function to check the Argilla server information (also accessible via `rg.server_info`) ([#3772](https://github.com/argilla-io/argilla/issues/3772)).
 
 ### Changed
 
-- The `POST /api/datasets/:dataset-id/:task/bulk` endpoint don't create the dataset if does not exists (Closes [#3244](https://github.com/argilla-io/argilla/issues/3244))
+- Move `database` commands under `server` group of commands ([#3710](https://github.com/argilla-io/argilla/pull/3710))
+- `server` commands only included in the CLI app when `server` extra requirements are installed ([#3710](https://github.com/argilla-io/argilla/pull/3710)).
+- Updated `PUT /api/v1/responses/{response_id}` to replace `values` stored with received `values` in request ([#3711](https://github.com/argilla-io/argilla/pull/3711)).
+- Display a `UserWarning` when the `user_id` in `Workspace.add_user` and `Workspace.delete_user` is the ID of an user with the owner role as they don't require explicit permissions ([#3716](https://github.com/argilla-io/argilla/issues/3716)).
+- Rename `tasks` sub-package to `cli` ([#3723](https://github.com/argilla-io/argilla/pull/3723)).
+- Changed `argilla database` command in the CLI to now be accessed via `argilla server database`, to be deprecated in the upcoming release ([#3754](https://github.com/argilla-io/argilla/pull/3754)).
+- Changed `visible_options` (of label and multi label selection questions) validation in the backend to check that the provided value is greater or equal than/to 3 and less or equal than/to the number of provided options ([#3773](https://github.com/argilla-io/argilla/pull/3773)).
+
+### Fixed
+
+- Fixed `remove user modification in text component on clear answers` ([#3775](https://github.com/argilla-io/argilla/pull/3775))
+- Fixed `Highlight raw text field in dataset feedback task` ([#3731](https://github.com/argilla-io/argilla/pull/3731))
+- Fixed `Field title too long` ([#3734](https://github.com/argilla-io/argilla/pull/3734))
+- Fixed error messages when deleting a `DatasetForTextClassification` ([#3652](https://github.com/argilla-io/argilla/pull/3652))
+- Fixed `Pending queue` pagination problems when during data annotation ([#3677](https://github.com/argilla-io/argilla/pull/3677))
+- Fixed `visible_labels` default value to be 20 just when `visible_labels` not provided and `len(labels) > 20`, otherwise it will either be the provided `visible_labels` value or `None`, for `LabelQuestion` and `MultiLabelQuestion` ([#3702](https://github.com/argilla-io/argilla/pull/3702)).
+- Fixed `DatasetCard` generation when `RemoteFeedbackDataset` contains suggestions ([#3718](https://github.com/argilla-io/argilla/pull/3718)).
+- Add missing `draft` status in `ResponseSchema` as now there can be responses with `draft` status when annotating via the UI ([#3749](https://github.com/argilla-io/argilla/pull/3749)).
+- Searches when queried words are distributed along the record fields ([#3759](https://github.com/argilla-io/argilla/pull/3759)).
+- Fixed Python 3.11 compatibility issue with `/api/datasets` endpoints due to the `TaskType` enum replacement in the endpoint URL ([#3769](https://github.com/argilla-io/argilla/pull/3769)).
+- Fixed `RankingValueSchema` and `FeedbackRankingValueModel` schemas to allow `rank=None` when `status=draft` ([#3781](https://github.com/argilla-io/argilla/pull/3781)).
+
+## [1.15.1](https://github.com/argilla-io/argilla/compare/v1.15.0...v1.15.1)
+
+### Fixed
+
+- Fixed `Text component` text content sanitization behavior just for markdown to prevent disappear the text([#3738](https://github.com/argilla-io/argilla/pull/3738))
+- Fixed `Text component` now you need to press Escape to exit the text area ([#3733](https://github.com/argilla-io/argilla/pull/3733))
+- Fixed `SearchEngine` was creating the same number of primary shards and replica shards for each `FeedbackDataset` ([#3736](https://github.com/argilla-io/argilla/pull/3736)).
+
+## [1.15.0](https://github.com/argilla-io/argilla/compare/v1.14.1...v1.15.0)
+
+### Added
+
+- Added `Enable to update guidelines and dataset settings for Feedback Datasets directly in the UI` ([#3489](https://github.com/argilla-io/argilla/pull/3489))
+- Added `ArgillaTrainer` integration with TRL, allowing for easy supervised finetuning, reward modeling, direct preference optimization and proximal policy optimization ([#3467](https://github.com/argilla-io/argilla/pull/3467))
+- Added `formatting_func` to `ArgillaTrainer` for `FeedbackDataset` datasets add a custom formatting for the data ([#3599](https://github.com/argilla-io/argilla/pull/3599)).
+- Added `login` function in `argilla.client.login` to login into an Argilla server and store the credentials locally ([#3582](https://github.com/argilla-io/argilla/pull/3582)).
+- Added `login` command to login into an Argilla server ([#3600](https://github.com/argilla-io/argilla/pull/3600)).
+- Added `logout` command to logout from an Argilla server ([#3605](https://github.com/argilla-io/argilla/pull/3605)).
+- Added `DELETE /api/v1/suggestions/{suggestion_id}` endpoint to delete a suggestion given its ID ([#3617](https://github.com/argilla-io/argilla/pull/3617)).
+- Added `DELETE /api/v1/records/{record_id}/suggestions` endpoint to delete several suggestions linked to the same record given their IDs ([#3617](https://github.com/argilla-io/argilla/pull/3617)).
+- Added `response_status` param to `GET /api/v1/datasets/{dataset_id}/records` to be able to filter by `response_status` as previously included for `GET /api/v1/me/datasets/{dataset_id}/records` ([#3613](https://github.com/argilla-io/argilla/pull/3613)).
+- Added `list` classmethod to `ArgillaMixin` to be used as `FeedbackDataset.list()`, also including the `workspace` to list from as arg ([#3619](https://github.com/argilla-io/argilla/pull/3619)).
+- Added `filter_by` method in `RemoteFeedbackDataset` to filter based on `response_status` ([#3610](https://github.com/argilla-io/argilla/pull/3610)).
+- Added `list_workspaces` function (to be used as `rg.list_workspaces`, but `Workspace.list` is preferred) to list all the workspaces from an user in Argilla ([#3641](https://github.com/argilla-io/argilla/pull/3641)).
+- Added `list_datasets` function (to be used as `rg.list_datasets`) to list the `TextClassification`, `TokenClassification`, and `Text2Text` datasets in Argilla ([#3638](https://github.com/argilla-io/argilla/pull/3638)).
+- Added `RemoteSuggestionSchema` to manage suggestions in Argilla, including the `delete` method to delete suggestios from Argilla via `DELETE /api/v1/suggestions/{suggestion_id}` ([#3651](https://github.com/argilla-io/argilla/pull/3651)).
+- Added `delete_suggestions` to `RemoteFeedbackRecord` to remove suggestions from Argilla via `DELETE /api/v1/records/{record_id}/suggestions` ([#3651](https://github.com/argilla-io/argilla/pull/3651)).
+
+### Changed
+
+- Changed `Optional label for * mark for required question` ([#3608](https://github.com/argilla-io/argilla/pull/3608))
+- Updated `RemoteFeedbackDataset.delete_records` to use batch delete records endpoint ([#3580](https://github.com/argilla-io/argilla/pull/3580)).
+- Included `allowed_for_roles` for some `RemoteFeedbackDataset`, `RemoteFeedbackRecords`, and `RemoteFeedbackRecord` methods that are only allowed for users with roles `owner` and `admin` ([#3601](https://github.com/argilla-io/argilla/pull/3601)).
+- Renamed `ArgillaToFromMixin` to `ArgillaMixin` ([#3619](https://github.com/argilla-io/argilla/pull/3619)).
+- Move `users` CLI app under `database` CLI app ([#3593](https://github.com/argilla-io/argilla/pull/3593)).
+- Move server `Enum` classes to `argilla.server.enums` module ([#3620](https://github.com/argilla-io/argilla/pull/3620)).
+
+### Fixed
+
+- Fixed `Filter by workspace in breadcrumbs` ([#3577](https://github.com/argilla-io/argilla/pull/3577))
+- Fixed `Filter by workspace in datasets table` ([#3604](https://github.com/argilla-io/argilla/pull/3604))
+- Fixed `Query search highlight` for Text2Text and TextClassification ([#3621](https://github.com/argilla-io/argilla/pull/3621))
+- Fixed `RatingQuestion.values` validation to raise a `ValidationError` when values are out of range i.e. [1, 10] ([#3626](https://github.com/argilla-io/argilla/pull/3626)).
+
+### Removed
+
+- Removed `multi_task_text_token_classification` from `TaskType` as not used ([#3640](https://github.com/argilla-io/argilla/pull/3640)).
+- Removed `argilla_id` in favor of `id` from `RemoteFeedbackDataset` ([#3663](https://github.com/argilla-io/argilla/pull/3663)).
+- Removed `fetch_records` from `RemoteFeedbackDataset` as now the records are lazily fetched from Argilla ([#3663](https://github.com/argilla-io/argilla/pull/3663)).
+- Removed `push_to_argilla` from `RemoteFeedbackDataset`, as it just works when calling it through a `FeedbackDataset` locally, as now the updates of the remote datasets are automatically pushed to Argilla ([#3663](https://github.com/argilla-io/argilla/pull/3663)).
+- Removed `set_suggestions` in favor of `update(suggestions=...)` for both `FeedbackRecord` and `RemoteFeedbackRecord`, as all the updates of any "updateable" attribute of a record will go through `update` instead ([#3663](https://github.com/argilla-io/argilla/pull/3663)).
+- Remove unused `owner` attribute for client Dataset data model ([#3665](https://github.com/argilla-io/argilla/pull/3665))
+
+## [1.14.1](https://github.com/argilla-io/argilla/compare/v1.14.0...v1.14.1)
+
+### Fixed
+
+- Fixed PostgreSQL database not being updated after `begin_nested` because of missing `commit` ([#3567](https://github.com/argilla-io/argilla/pull/3567)).
+
+### Fixed
+
+- Fixed `settings` could not be provided when updating a `rating` or `ranking` question ([#3552](https://github.com/argilla-io/argilla/pull/3552)).
+
+## [1.14.0](https://github.com/argilla-io/argilla/compare/v1.13.3...v1.14.0)
+
+### Added
+
+- Added `PATCH /api/v1/fields/{field_id}` endpoint to update the field title and markdown settings ([#3421](https://github.com/argilla-io/argilla/pull/3421)).
+- Added `PATCH /api/v1/datasets/{dataset_id}` endpoint to update dataset name and guidelines ([#3402](https://github.com/argilla-io/argilla/pull/3402)).
+- Added `PATCH /api/v1/questions/{question_id}` endpoint to update question title, description and some settings (depending on the type of question) ([#3477](https://github.com/argilla-io/argilla/pull/3477)).
+- Added `DELETE /api/v1/records/{record_id}` endpoint to remove a record given its ID ([#3337](https://github.com/argilla-io/argilla/pull/3337)).
+- Added `pull` method in `RemoteFeedbackDataset` (a `FeedbackDataset` pushed to Argilla) to pull all the records from it and return it as a local copy as a `FeedbackDataset` ([#3465](https://github.com/argilla-io/argilla/pull/3465)).
+- Added `delete` method in `RemoteFeedbackDataset` (a `FeedbackDataset` pushed to Argilla) ([#3512](https://github.com/argilla-io/argilla/pull/3512)).
+- Added `delete_records` method in `RemoteFeedbackDataset`, and `delete` method in `RemoteFeedbackRecord` to delete records from Argilla ([#3526](https://github.com/argilla-io/argilla/pull/3526)).
+
+### Changed
+
+- Improved efficiency of weak labeling when dataset contains vectors ([#3444](https://github.com/argilla-io/argilla/pull/3444)).
+- Added `ArgillaDatasetMixin` to detach the Argilla-related functionality from the `FeedbackDataset` ([#3427](https://github.com/argilla-io/argilla/pull/3427))
+- Moved `FeedbackDataset`-related `pydantic.BaseModel` schemas to `argilla.client.feedback.schemas` instead, to be better structured and more scalable and maintainable ([#3427](https://github.com/argilla-io/argilla/pull/3427))
+- Update CLI to use database async connection ([#3450](https://github.com/argilla-io/argilla/pull/3450)).
+- Limit rating questions values to the positive range [1, 10] ([#3451](https://github.com/argilla-io/argilla/issues/3451)).
+- Updated `POST /api/users` endpoint to be able to provide a list of workspace names to which the user should be linked to ([#3462](https://github.com/argilla-io/argilla/pull/3462)).
+- Updated Python client `User.create` method to be able to provide a list of workspace names to which the user should be linked to ([#3462](https://github.com/argilla-io/argilla/pull/3462)).
+- Updated `GET /api/v1/me/datasets/{dataset_id}/records` endpoint to allow getting records matching one of the response statuses provided via query param ([#3359](https://github.com/argilla-io/argilla/pull/3359)).
+- Updated `POST /api/v1/me/datasets/{dataset_id}/records` endpoint to allow searching records matching one of the response statuses provided via query param ([#3359](https://github.com/argilla-io/argilla/pull/3359)).
+- Updated `SearchEngine.search` method to allow searching records matching one of the response statuses provided ([#3359](https://github.com/argilla-io/argilla/pull/3359)).
+- After calling `FeedbackDataset.push_to_argilla`, the methods `FeedbackDataset.add_records` and `FeedbackRecord.set_suggestions` will automatically call Argilla with no need of calling `push_to_argilla` explicitly ([#3465](https://github.com/argilla-io/argilla/pull/3465)).
+- Now calling `FeedbackDataset.push_to_huggingface` dumps the `responses` as a `List[Dict[str, Any]]` instead of `Sequence` to make it more readable via 🤗`datasets` ([#3539](https://github.com/argilla-io/argilla/pull/3539)).
+
+### Fixed
+
+- Fixed issue with `bool` values and `default` from Jinja2 while generating the HuggingFace `DatasetCard` from `argilla_template.md` ([#3499](https://github.com/argilla-io/argilla/pull/3499)).
+- Fixed `DatasetConfig.from_yaml` which was failing when calling `FeedbackDataset.from_huggingface` as the UUIDs cannot be deserialized automatically by `PyYAML`, so UUIDs are neither dumped nor loaded anymore ([#3502](https://github.com/argilla-io/argilla/pull/3502)).
+- Fixed an issue that didn't allow the Argilla server to work behind a proxy ([#3543](https://github.com/argilla-io/argilla/pull/3543)).
+- `TextClassificationSettings` and `TokenClassificationSettings` labels are properly parsed to strings both in the Python client and in the backend endpoint ([#3495](https://github.com/argilla-io/argilla/issues/3495)).
+- Fixed `PUT /api/v1/datasets/{dataset_id}/publish` to check whether at least one field and question has `required=True` ([#3511](https://github.com/argilla-io/argilla/pull/3511)).
+- Fixed `FeedbackDataset.from_huggingface` as `suggestions` were being lost when there were no `responses` ([#3539](https://github.com/argilla-io/argilla/pull/3539)).
+- Fixed `QuestionSchema` and `FieldSchema` not validating `name` attribute ([#3550](https://github.com/argilla-io/argilla/pull/3550)).
+
+### Deprecated
+
+- After calling `FeedbackDataset.push_to_argilla`, calling `push_to_argilla` again won't do anything since the dataset is already pushed to Argilla ([#3465](https://github.com/argilla-io/argilla/pull/3465)).
+- After calling `FeedbackDataset.push_to_argilla`, calling `fetch_records` won't do anything since the records are lazily fetched from Argilla ([#3465](https://github.com/argilla-io/argilla/pull/3465)).
+- After calling `FeedbackDataset.push_to_argilla`, the Argilla ID is no longer stored in the attribute/property `argilla_id` but in `id` instead ([#3465](https://github.com/argilla-io/argilla/pull/3465)).
+
+## [1.13.3](https://github.com/argilla-io/argilla/compare/v1.13.2...v1.13.3)
+
+### Fixed
+
+- Fixed `ModuleNotFoundError` caused because the `argilla.utils.telemetry` module used in the `ArgillaTrainer` was importing an optional dependency not installed by default ([#3471](https://github.com/argilla-io/argilla/pull/3471)).
+- Fixed `ImportError` caused because the `argilla.client.feedback.config` module was importing `pyyaml` optional dependency not installed by default ([#3471](https://github.com/argilla-io/argilla/pull/3471)).
+
+## [1.13.2](https://github.com/argilla-io/argilla/compare/v1.13.1...v1.13.2)
+
+### Fixed
+
+- The `suggestion_type_enum` ENUM data type created in PostgreSQL didn't have any value ([#3445](https://github.com/argilla-io/argilla/pull/3445)).
+
+## [1.13.1](https://github.com/argilla-io/argilla/compare/v1.13.0...v1.13.1)
+
+### Fixed
+
+- Fix database migration for PostgreSQL (See [#3438](https://github.com/argilla-io/argilla/pull/3438))
+
+## [1.13.0](https://github.com/argilla-io/argilla/compare/v1.12.1...v1.13.0)
+
+### Added
+
+- Added `GET /api/v1/users/{user_id}/workspaces` endpoint to list the workspaces to which a user belongs ([#3308](https://github.com/argilla-io/argilla/pull/3308) and [#3343](https://github.com/argilla-io/argilla/pull/3343)).
+- Added `HuggingFaceDatasetMixin` for internal usage, to detach the `FeedbackDataset` integrations from the class itself, and use Mixins instead ([#3326](https://github.com/argilla-io/argilla/pull/3326)).
+- Added `GET /api/v1/records/{record_id}/suggestions` API endpoint to get the list of suggestions for the responses associated to a record ([#3304](https://github.com/argilla-io/argilla/pull/3304)).
+- Added `POST /api/v1/records/{record_id}/suggestions` API endpoint to create a suggestion for a response associated to a record ([#3304](https://github.com/argilla-io/argilla/pull/3304)).
+- Added support for `RankingQuestionStrategy`, `RankingQuestionUnification` and the `.for_text_classification` method for the `TrainingTaskMapping` ([#3364](https://github.com/argilla-io/argilla/pull/3364))
+- Added `PUT /api/v1/records/{record_id}/suggestions` API endpoint to create or update a suggestion for a response associated to a record ([#3304](https://github.com/argilla-io/argilla/pull/3304) & [3391](https://github.com/argilla-io/argilla/pull/3391)).
+- Added `suggestions` attribute to `FeedbackRecord`, and allow adding and retrieving suggestions from the Python client ([#3370](https://github.com/argilla-io/argilla/pull/3370))
+- Added `allowed_for_roles` Python decorator to check whether the current user has the required role to access the decorated function/method for `User` and `Workspace` ([#3383](https://github.com/argilla-io/argilla/pull/3383))
+- Added API and Python Client support for workspace deletion (Closes [#3260](https://github.com/argilla-io/argilla/issues/3260))
+- Added `GET /api/v1/me/workspaces` endpoint to list the workspaces of the current active user ([#3390](https://github.com/argilla-io/argilla/pull/3390))
+
+### Changed
+
+- Updated output payload for `GET /api/v1/datasets/{dataset_id}/records`, `GET /api/v1/me/datasets/{dataset_id}/records`, `POST /api/v1/me/datasets/{dataset_id}/records/search` endpoints to include the suggestions of the records based on the value of the `include` query parameter ([#3304](https://github.com/argilla-io/argilla/pull/3304)).
+- Updated `POST /api/v1/datasets/{dataset_id}/records` input payload to add suggestions ([#3304](https://github.com/argilla-io/argilla/pull/3304)).
+- The `POST /api/datasets/:dataset-id/:task/bulk` endpoints don't create the dataset if does not exists (Closes [#3244](https://github.com/argilla-io/argilla/issues/3244))
+- Added Telemetry support for `ArgillaTrainer` (closes [#3325](https://github.com/argilla-io/argilla/issues/3325))
+- `User.workspaces` is no longer an attribute but a property, and is calling `list_user_workspaces` to list all the workspace names for a given user ID ([#3334](https://github.com/argilla-io/argilla/pull/3334))
+- Renamed `FeedbackDatasetConfig` to `DatasetConfig` and export/import from YAML as default instead of JSON (just used internally on `push_to_huggingface` and `from_huggingface` methods of `FeedbackDataset`) ([#3326](https://github.com/argilla-io/argilla/pull/3326)).
+- The protected metadata fields support other than textual info - existing datasets must be reindex. See [docs](https://docs.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html#elasticsearch) for more detail (Closes [#3332](https://github.com/argilla-io/argilla/issues/3332)).
+- Updated `Dockerfile` parent image from `python:3.9.16-slim` to `python:3.10.12-slim` ([#3425](https://github.com/argilla-io/argilla/pull/3425)).
+- Updated `quickstart.Dockerfile` parent image from `elasticsearch:8.5.3` to `argilla/argilla-server:${ARGILLA_VERSION}` ([#3425](https://github.com/argilla-io/argilla/pull/3425)).
+
+### Removed
+
+- Removed support to non-prefixed environment variables. All valid env vars start with `ARGILLA_` (See [#3392](https://github.com/argilla-io/argilla/pull/3392)).
+
+### Fixed
+
+- Fixed `GET /api/v1/me/datasets/{dataset_id}/records` endpoint returning always the responses for the records even if `responses` was not provided via the `include` query parameter ([#3304](https://github.com/argilla-io/argilla/pull/3304)).
+- Values for protected metadata fields are not truncated (Closes [#3331](https://github.com/argilla-io/argilla/issues/3331)).
+- Big number ids are properly rendered in UI (Closes [#3265](https://github.com/argilla-io/argilla/issues/3265))
+- Fixed `ArgillaDatasetCard` to include the values/labels for all the existing questions ([#3366](https://github.com/argilla-io/argilla/pull/3265))
+
+### Deprecated
+
+- Integer support for record id in text classification, token classification and text2text datasets.
+
+## [1.12.1](https://github.com/argilla-io/argilla/compare/v1.12.0...v1.12.1)
+
+### Fixed
+
+- Using `rg.init` with default `argilla` user skips setting the default workspace if not available. (Closes [#3340](https://github.com/argilla-io/argilla/issues/3340))
+- Resolved wrong import structure for `ArgillaTrainer` and `TrainingTaskMapping` (Closes [#3345](https://github.com/argilla-io/argilla/issues/3345))
+- Pin pydantic dependency to version < 2 (Closes [3348](https://github.com/argilla-io/argilla/issues/3348))
 
 ## [1.12.0](https://github.com/argilla-io/argilla/compare/v1.11.0...v1.12.0)
 
@@ -35,6 +255,10 @@ These are the section headers that we use:
 - Added `Ranking` component in feedback task question form ([#3177](https://github.com/argilla-io/argilla/pull/3177) & [#3246](https://github.com/argilla-io/argilla/pull/3246)).
 - Added `FeedbackDataset.prepare_for_training` method for generaring a framework-specific dataset with the responses provided for `RatingQuestion`, `LabelQuestion` and `MultiLabelQuestion` ([#3151](https://github.com/argilla-io/argilla/pull/3151)).
 - Added `ArgillaSpaCyTransformersTrainer` class for supporting the training with `spacy-transformers` ([#3256](https://github.com/argilla-io/argilla/pull/3256)).
+
+#### Docs
+
+- Added instructions for how to run the Argilla frontend in the developer docs ([#3314](https://github.com/argilla-io/argilla/pull/3314)).
 
 ### Changed
 
@@ -64,6 +288,7 @@ These are the section headers that we use:
 - Modified styling of error code outputs in notebooks ([#3270](https://github.com/argilla-io/argilla/pull/3270)).
 - Added ElasticSearch and OpenSearch versions ([#3280](https://github.com/argilla-io/argilla/pull/3280)).
 - Removed template notebook from table of contents ([#3271](https://github.com/argilla-io/argilla/pull/3271)).
+- Fixed tutorials with `pip install argilla` to not use older versions of the package ([#3282](https://github.com/argilla-io/argilla/pull/3282)).
 
 ### Added
 
@@ -102,11 +327,10 @@ These are the section headers that we use:
 - Move `ArgillaDatasetCard` import under `@requires_version` decorator, so that the `ImportError` on `huggingface_hub` is handled properly ([#3174](https://github.com/argilla-io/argilla/pull/3174))
 - Allow flow `FeedbackDataset.from_argilla` -> `FeedbackDataset.push_to_argilla` under different dataset names and/or workspaces ([#3192](https://github.com/argilla-io/argilla/issues/3192))
 
-### Docs
+#### Docs
 
 - Resolved typos in the docs ([#3240](https://github.com/argilla-io/argilla/pull/3240)).
 - Fixed mention of master branch ([#3254](https://github.com/argilla-io/argilla/pull/3254)).
-
 
 ## [1.9.0](https://github.com/argilla-io/argilla/compare/v1.8.0...v1.9.0)
 
@@ -120,6 +344,7 @@ These are the section headers that we use:
 - Added `POST /api/v1/me/datasets/{dataset_id}/records/search` endpoint ([#3068](https://github.com/argilla-io/argilla/pull/3068)).
 - Added new components in feedback task Question form: MultiLabel ([#3064](https://github.com/argilla-io/argilla/pull/3064)) and SingleLabel ([#3016](https://github.com/argilla-io/argilla/pull/3016)).
 - Added docstrings to the `pydantic.BaseModel`s defined at `argilla/client/feedback/schemas.py` ([#3137](https://github.com/argilla-io/argilla/pull/3137))
+- Added the information about executing tests in the developer documentation ([#3143]).
 
 ### Changed
 

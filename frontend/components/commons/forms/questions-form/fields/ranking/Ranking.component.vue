@@ -1,12 +1,15 @@
 <template>
   <div class="wrapper">
     <QuestionHeaderComponent
-      :title="title"
-      :isRequired="isRequired"
-      :tooltipMessage="description"
+      :question="question"
+      :showSuggestion="showSuggestion"
     />
-
-    <DndSelectionComponent :ranking="ranking" @on-reorder="onChanged" />
+    <DndSelectionComponent
+      :ranking="ranking"
+      @on-reorder="onChanged"
+      :isFocused="isFocused"
+      @on-focus="onFocus"
+    />
   </div>
 </template>
 
@@ -16,46 +19,39 @@ import { adaptQuestionsToSlots } from "./ranking-adapter";
 export default {
   name: "RankingComponent",
   props: {
-    title: {
-      type: String,
+    question: {
+      type: Object,
       required: true,
     },
-    isRequired: {
+    showSuggestion: {
       type: Boolean,
-      default: false,
+      default: () => false,
     },
-    description: {
-      type: String,
-      default: "",
+    isFocused: {
+      type: Boolean,
+      default: () => false,
     },
-    options: {
-      type: Array,
-      required: true,
-    },
-  },
-  model: {
-    prop: "options",
-    event: "on-change",
   },
   data() {
     return {
-      ranking: adaptQuestionsToSlots({ options: this.options }),
+      options: this.question.answer.values,
     };
   },
   computed: {
-    optionsHasAllResponsesWithRank() {
-      return this.options.every((option) => option.rank);
+    ranking() {
+      return adaptQuestionsToSlots({ options: this.options });
     },
   },
   methods: {
     onChanged(newQuestionRanked) {
-      this.$emit(
-        "on-change",
-        this.options.map((option) => ({
-          ...option,
-          rank: newQuestionRanked.getRanking(option),
-        }))
-      );
+      this.question.answer.values.forEach((option) => {
+        option.rank = newQuestionRanked.getRanking(option);
+      });
+
+      this.options = this.question.answer.values;
+    },
+    onFocus() {
+      this.$emit("on-focus");
     },
   },
 };
@@ -65,6 +61,6 @@ export default {
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: $base-space;
 }
 </style>

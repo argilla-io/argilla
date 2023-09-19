@@ -24,12 +24,22 @@
 | [🎼 Cheatsheet](/getting_started/cheatsheet)                                    | Brief **code snippets** for our main functionalities              |
 | [🔧 Installation](/getting_started/installation/deployments/deployments)        | **Everything deployment**: Docker, Kubernetes, Cloud and way more |
 | [⚙️ Configuration](/getting_started/installation/configurations/configurations)  | User management and **deployment tweaking**                       |
-| [💥 LLMs](/guides/llms/conceptual_guides/conceptual_guides)                     | Generative AI, **ChatGPT and friends**                            |
-| [🦮 Guides](/guides/log_load_and_prepare_data)                                  | **Conceptual overview** of our main functionalities               |
+| [💥 Concepts about LLMs](/conceptual_guides/llm/llm)                            | Generative AI, **ChatGPT and friends**                            |
+| [🦮 Practical Guides](/practical_guides/practical_guides)                       | **Conceptual overview** of our main functionalities               |
 | [🧗‍♀️ Tutorials](/tutorials/tutorials)                                            | Specific **applied end-to-end examples**                          |
 | [🏷️ References](/reference/python/index)                                        | Itemized information and **API docs**                             |
 | [🏘️ Community](/community/contributing)                                         | Everything about for **developers and contributing**              |
 | [🗺️ Roadmap](https://github.com/orgs/argilla-io/projects/10/views/1)            | Our **future plans**                                              |
+
+## 🛠️ Project Architecture
+
+Argilla is built on 5 core components:
+
+- **Python SDK**: A Python SDK which is installable with `pip install argilla`. To interact with the Argilla Server and the Argilla UI. It provides an API to manage the data, configuration and annotation workflows.
+- **FastAPI Server**: The core of Argilla is a *Python FastAPI* server that manages the data, by pre-processing it and storing it in the vector database. Also, it stores application information in the relational database. It provides a REST API to interact with the data from the Python SDK and the Argilla UI. It also provides a web interface to visualize the data.
+- **Relational Database**: A relational database to store the metadata of the records and the annotations. *SQLite* is used as the default built-in option and is deployed separately with the Argilla Server but a separate *PostgreSQL* can be used too.
+- **Vector Database**: A vector database to store the records data and perform scalable vector similarity searches and basic document searches. We currently support *ElasticSearch* and *AWS OpenSearch* and they can be deployed as separate Docker images.
+- **Vue.js UI**: A web application to visualize and annotate your data, users and teams. It is built with *Vue.js* and is directly deployed alongside the Argilla Server within our Argilla Docker image.
 
 ## 📏 Principles
 
@@ -43,7 +53,7 @@
 
 ## 🫱🏾‍🫲🏼 Contribute
 
-We love contributors and have launched a [collaboration with JustDiggit](https://argilla.io/blog/introducing-argilla-community-growers) to hand out our very own bunds and help the re-greening of sub-Saharan Africa. To help our community with the creation of contributions, we have created our [developer](https://docs.argilla.io/en/latest/community/developer_docs.html) and [contributor](https://docs.argilla.io/en/latest/community/contributing.html) docs. Additionally, you can always [schedule a meeting](https://calendly.com/argilla-office-hours/meeting-with-david-from-argilla-30m) with our Developer Advocacy team so they can get you up to speed.
+We love contributors and have launched a [collaboration with JustDiggit](https://argilla.io/blog/introducing-argilla-community-growers) to hand out our very own bunds and help the re-greening of sub-Saharan Africa. To help our community with the creation of contributions, we have created our [developer](https://docs.argilla.io/en/latest/community/developer_docs.html) and [contributor](https://docs.argilla.io/en/latest/community/contributing.html) docs. Additionally, you can always [schedule a meeting](https://calendly.com/argilla-office-hours/30min) with our Developer Advocacy team so they can get you up to speed.
 
 ## 🥇 Contributors
 

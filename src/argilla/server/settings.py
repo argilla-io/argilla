@@ -18,6 +18,8 @@ Common environment vars / settings
 """
 import logging
 import os
+import re
+import warnings
 from pathlib import Path
 from typing import List, Optional
 from urllib.parse import urlparse
@@ -125,9 +127,34 @@ class Settings(BaseSettings):
 
         return base_url
 
-    @validator("database_url", always=True)
-    def set_database_url_default(cls, database_url: str, values: dict) -> str:
-        return database_url or f"sqlite:///{os.path.join(values['home_path'], 'argilla.db')}?check_same_thread=False"
+    @validator("database_url", pre=True, always=True)
+    def set_database_url(cls, database_url: str, values: dict) -> str:
+        if not database_url:
+            home_path = values.get("home_path")
+            sqlite_file = os.path.join(home_path, "argilla.db")
+            return f"sqlite+aiosqlite:///{sqlite_file}?check_same_thread=False"
+
+        if "sqlite" in database_url:
+            regex = re.compile(r"sqlite(?!\+aiosqlite)")
+            if regex.match(database_url):
+                warnings.warn(
+                    "From version 1.14.0, Argilla will use `aiosqlite` as default SQLite driver. The protocol in the"
+                    " provided database URL has been automatically replaced from `sqlite` to `sqlite+aiosqlite`."
+                    " Please, update your database URL to use `sqlite+aiosqlite` protocol."
+                )
+                return re.sub(regex, "sqlite+aiosqlite", database_url)
+
+        if "postgresql" in database_url:
+            regex = re.compile(r"postgresql(?!\+asyncpg)(\+psycopg2)?")
+            if regex.match(database_url):
+                warnings.warn(
+                    "From version 1.14.0, Argilla will use `asyncpg` as default PostgreSQL driver. The protocol in the"
+                    " provided database URL has been automatically replaced from `postgresql` to `postgresql+asyncpg`."
+                    " Please, update your database URL to use `postgresql+asyncpg` protocol."
+                )
+                return re.sub(regex, "postgresql+asyncpg", database_url)
+
+        return database_url
 
     @root_validator(skip_on_failure=True)
     def create_home_path(cls, values):
@@ -165,19 +192,6 @@ class Settings(BaseSettings):
             return index_name.replace("<NAMESPACE>", "")
         return index_name.replace("<NAMESPACE>", f".{ns}")
 
-    @property
-    def database_url_async(self) -> str:
-        if self.database_url.startswith("sqlite:///"):
-            return self.database_url.replace("sqlite:///", "sqlite+aiosqlite:///")
-
-        if self.database_url.startswith("postgresql://"):
-            return self.database_url.replace("postgresql://", "postgresql+asyncpg://")
-
-        if self.database_url.startswith("mysql://"):
-            return self.database_url.replace("mysql://", "mysql+aiomysql://")
-
-        raise ValueError(f"Unsupported database url: '{self.database_url}'")
-
     def obfuscated_elasticsearch(self) -> str:
         """Returns configured elasticsearch url obfuscating the provided password, if any"""
         parsed = urlparse(self.elasticsearch)
@@ -186,34 +200,7 @@ class Settings(BaseSettings):
         return self.elasticsearch
 
     class Config:
-        # TODO: include a common prefix for all argilla env vars.
         env_prefix = "ARGILLA_"
-        fields = {
-            # TODO(@frascuchon): Remove in 0.20.0
-            "elasticsearch": {
-                "env": ["ELASTICSEARCH", f"{env_prefix}ELASTICSEARCH"],
-            },
-            "elasticsearch_ssl_verify": {
-                "env": [
-                    "ELASTICSEARCH_SSL_VERIFY",
-                    f"{env_prefix}ELASTICSEARCH_SSL_VERIFY",
-                ]
-            },
-            "cors_origins": {"env": ["CORS_ORIGINS", f"{env_prefix}CORS_ORIGINS"]},
-            "docs_enabled": {"env": ["DOCS_ENABLED", f"{env_prefix}DOCS_ENABLED"]},
-            "es_records_index_shards": {
-                "env": [
-                    "ES_RECORDS_INDEX_SHARDS",
-                    f"{env_prefix}ES_RECORDS_INDEX_SHARDS",
-                ]
-            },
-            "es_records_index_replicas": {
-                "env": [
-                    "ES_RECORDS_INDEX_REPLICAS",
-                    f"{env_prefix}ES_RECORDS_INDEX_SHARDS",
-                ]
-            },
-        }
 
 
 settings = Settings()

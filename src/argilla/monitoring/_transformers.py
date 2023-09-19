@@ -173,11 +173,7 @@ class TextClassificationMonitor(HuggingFaceMonitor):
 
 
 def huggingface_monitor(
-    pl: Pipeline,
-    api: Api,
-    dataset: str,
-    sample_rate: float,
-    log_interval: float,
+    pl: Pipeline, api: Api, dataset: str, sample_rate: float, log_interval: float
 ) -> Optional[Pipeline]:
     if isinstance(pl, TextClassificationPipeline):
         return TextClassificationMonitor(

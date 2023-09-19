@@ -20,7 +20,7 @@ function mountTextSpanTooltip() {
 }
 
 describe("TextSpanTooltip", () => {
-  let spy = jest.spyOn(console, "error");
+  const spy = jest.spyOn(console, "error");
   afterEach(() => spy.mockReset());
 
   test("renders properly", () => {

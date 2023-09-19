@@ -15,7 +15,7 @@ All you need to take into account is:
 
 * Argilla creates an index template for these indices, so you may provide related template privileges to this ES role.
 
-Argilla uses the `ELASTICSEARCH` environment variable to set the ES connection.
+Argilla uses the `ARGILLA_ELASTICSEARCH` environment variable to set the ES connection.
 
 :::{note}
 Argilla supports ElasticSearch versions 8.8, 8.5, 8.0, and 7.17.
@@ -45,7 +45,7 @@ and then provide the analyzer name using the specific environment variable.
 
 ## Reindex data
 
-Sometimes updates require reindexing our dataset metrics and Elasticsearch, therefore we devised some [short documentation](../../guides/log_load_and_prepare_data) to show you how to do this from our Python client.
+Sometimes updates require reindexing our dataset metrics and Elasticsearch, therefore we devised some [short documentation](/practical_guides/update_dataset) to show you how to do this from our Python client.
 
 ## Backups using snapshots
 

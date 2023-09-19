@@ -6,8 +6,8 @@
 ```{grid-item-card} Python
 :link: python.md
 
-- package extras
-- install from `develop`
+- Install extras
+- Install from `develop`
 ```
 ```{grid-item-card} Docker
 :link: docker.md
@@ -18,7 +18,7 @@
 ```{grid-item-card} Docker Quickstart
 :link: docker.md
 
-- A combined docker image
+- A combined Docker image
 - Environment Variables
 ```
 ```{grid-item-card} Docker-compose

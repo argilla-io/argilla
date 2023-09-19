@@ -16,12 +16,8 @@
 from datasets import Dataset, DatasetDict
 
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
-from argilla.client.feedback.training.schemas import (
-    TrainingTaskMappingForTextClassification,
-)
-from argilla.training.transformers import (
-    ArgillaTransformersTrainer as ArgillaTransformersTrainerV1,
-)
+from argilla.client.feedback.training.schemas import TrainingTaskForQuestionAnswering, TrainingTaskForTextClassification
+from argilla.training.transformers import ArgillaTransformersTrainer as ArgillaTransformersTrainerV1
 
 
 class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSkeleton):
@@ -31,12 +27,14 @@ class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSke
 
         import torch
         from transformers import (
+            AutoModelForQuestionAnswering,
             AutoModelForSequenceClassification,
             set_seed,
         )
 
-        self._transformers_model = None
-        self._transformers_tokenizer = None
+        model = kwargs.get("model", None)
+        self._transformers_model = model if model and not isinstance(model, str) else None
+        self._transformers_tokenizer = kwargs.get("tokenizer", None)
         self._pipeline = None
 
         self.device = "cpu"
@@ -61,9 +59,13 @@ class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSke
         else:
             raise NotImplementedError(f"We do not support {type(self._dataset)} yet.")
 
-        if isinstance(self._task_mapping, TrainingTaskMappingForTextClassification):
+        if isinstance(self._task, TrainingTaskForTextClassification):
             self._model_class = AutoModelForSequenceClassification
+        elif isinstance(self._task, TrainingTaskForQuestionAnswering):
+            self._model_class = AutoModelForQuestionAnswering
         else:
-            raise NotImplementedError(f"ArgillaTransformersTrainer does not support {type(self._task_mapping)} yet.")
+            raise NotImplementedError(
+                f"ArgillaTransformersTrainer does not support {self._task.__class__.__name__} yet."
+            )
 
         self.init_training_args()

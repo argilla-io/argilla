@@ -1,32 +1,48 @@
 <template>
   <div class="edition-user-info">
     <div class="form-group circle-and-role">
-      <span v-circle="{ size: 'MEDIUM' }" v-html="userNameFirstChar" />
-      <div class="user-role" v-text="userRole" />
+      <span v-circle="{ size: 'MEDIUM' }">
+        {{ userInfo.username.slice(0, 2) }}
+      </span>
+      <BaseBadge class="--capitalized" :text="userInfo.role" />
     </div>
 
     <div class="form-group user-first_name">
-      <h2
-        class="--heading5 --semibold description__title"
-        v-text="'Username'"
-      />
-      <p class="--body1 description__text" v-text="username" />
+      <h2 class="--heading5 --medium description__title">Username</h2>
+      <p class="--body1 description__text" v-text="userInfo.username" />
     </div>
 
     <div class="form-group user-first_name">
-      <h2 class="--heading5 --semibold description__title" v-text="'Name'" />
-      <p class="--body1 description__text" v-text="firstName" />
+      <h2 class="--heading5 --medium description__title">Name</h2>
+      <p class="--body1 description__text" v-text="userInfo.first_name" />
     </div>
 
     <div class="form-group user-last_name">
-      <h2 class="--heading5 --semibold description__title" v-text="'Surname'" />
-      <p class="--body1 description__text" v-text="lastName" />
+      <h2 class="--heading5 --medium description__title">Surname</h2>
+      <p
+        class="--body1 description__text"
+        v-if="userInfo.last_name"
+        v-text="userInfo.last_name"
+      />
+      <p class="--body1 description__text" v-else>-</p>
+    </div>
+
+    <div class="form-group">
+      <h2 class="--heading5 --medium description__title">Workspaces</h2>
+      <div class="workspaces" v-if="userInfo.workspaces.length">
+        <BaseBadge
+          v-for="workspace in userInfo.workspaces"
+          :key="workspace"
+          :text="workspace"
+          @on-click="goToWorkspace(workspace)"
+        />
+      </div>
+      <p v-else class="--body1 description__text">-</p>
     </div>
   </div>
 </template>
 
 <script>
-import { cloneDeep } from "lodash";
 export default {
   name: "EditionUserInfoComponent",
   props: {
@@ -35,21 +51,9 @@ export default {
       required: true,
     },
   },
-  created() {
-    this.userInfoCloned = cloneDeep(this.userInfo);
-    this.username = this.userInfoCloned.username;
-    this.firstName = this.userInfoCloned.first_name;
-    this.lastName = this.userInfoCloned.last_name ?? "-";
-  },
-  computed: {
-    userName() {
-      return this.userInfoCloned.username;
-    },
-    userNameFirstChar() {
-      return this.userName.slice(0, 2);
-    },
-    userRole() {
-      return this.$options.filters.capitalize(this.userInfoCloned.role);
+  methods: {
+    goToWorkspace(workspace) {
+      this.$router.push(`/datasets?workspaces=${workspace}`);
     },
   },
 };
@@ -63,15 +67,11 @@ export default {
   }
 }
 
-.user-role {
-  border: 1px solid rgba(0, 0, 0, 0.37);
-  border-radius: 10px;
-  color: rgba(0, 0, 0, 0.6);
-  font-size: 12px;
-  font-size: 0.75rem;
-  line-height: 12px;
-  line-height: 0.75rem;
-  padding: 4px;
+.workspaces {
+  gap: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  width: 90%;
 }
 
 .circle-and-role {

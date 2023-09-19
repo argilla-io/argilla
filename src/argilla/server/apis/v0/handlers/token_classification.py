@@ -15,15 +15,9 @@
 
 from fastapi import APIRouter, Depends, Query, Security
 
-from argilla.server.apis.v0.handlers import (
-    metrics,
-    token_classification_dataset_settings,
-)
+from argilla.server.apis.v0.handlers import metrics, token_classification_dataset_settings
 from argilla.server.apis.v0.models.commons.model import BulkResponse
-from argilla.server.apis.v0.models.commons.params import (
-    CommonTaskHandlerDependencies,
-    RequestPagination,
-)
+from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies, RequestPagination
 from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationAggregations,
     TokenClassificationBulkRequest,
@@ -35,17 +29,11 @@ from argilla.server.apis.v0.models.token_classification import (
 from argilla.server.apis.v0.validators.token_classification import DatasetValidator
 from argilla.server.commons.config import TasksFactory
 from argilla.server.commons.models import TaskType
-from argilla.server.errors import EntityNotFoundError
 from argilla.server.models import User
-from argilla.server.schemas.datasets import CreateDatasetRequest
 from argilla.server.security import auth
 from argilla.server.services.datasets import DatasetsService
-from argilla.server.services.tasks.token_classification import (
-    TokenClassificationService,
-)
-from argilla.server.services.tasks.token_classification.metrics import (
-    TokenClassificationMetrics,
-)
+from argilla.server.services.tasks.token_classification import TokenClassificationService
+from argilla.server.services.tasks.token_classification.metrics import TokenClassificationMetrics
 from argilla.server.services.tasks.token_classification.model import (
     ServiceTokenClassificationQuery,
     ServiceTokenClassificationRecord,
@@ -54,7 +42,7 @@ from argilla.server.services.tasks.token_classification.model import (
 
 def configure_router():
     task_type = TaskType.token_classification
-    base_endpoint = f"/{{name}}/{task_type}"
+    base_endpoint = f"/{{name}}/{task_type.value}"
 
     TasksFactory.register_task(
         task_type=task_type,

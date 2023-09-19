@@ -1,6 +1,6 @@
 import { shallowMount } from "@vue/test-utils";
 import RecordTokenClassificationComponent from "./RecordTokenClassification";
-import "@/plugins/filters";
+import "@/plugins/plugins/filters";
 
 jest.mock("@/models/globalLabel.queries", () => ({
   getAllLabelsByDatasetId: () => [

@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="search-area"
-    :class="{ '--focused': isFocused || value }"
-    @click="focusInSearch"
-  >
+  <div class="search-area" @click="focusInSearch">
     <BaseIconWithBadge
       ref="iconSearchRef"
       class="search-area__icon --search"
@@ -13,20 +9,24 @@
       badge-vertical-position="top"
       badge-horizontal-position="right"
       badge-border-color="white"
+      tabindex="-1"
+      aria-hidden="true"
     />
     <input
+      id="searchLabel"
       class="search-input"
       type="text"
       :value="value"
       :ref="searchRef"
       :placeholder="placeholder"
-      @focus="isFocused = true"
-      @blur="isFocused = false"
       @input="$emit('input', $event.target.value)"
+      @keydown.shift.enter.exact="looseFocus"
       @keydown.shift.backspace.exact="looseFocus"
       @keydown.shift.space.exact="looseFocus"
-      @keydown.arrow-right.stop=""
-      @keydown.arrow-left.stop=""
+      @keydown.ctrl.arrow-right.exact.prevent=""
+      @keydown.meta.arrow-right.exact.prevent=""
+      @keydown.ctrl.arrow-left.exact.prevent=""
+      @keydown.meta.arrow-left.exact.prevent=""
       @keydown.delete.exact.stop=""
       @keydown.enter.exact.stop=""
     />
@@ -48,11 +48,6 @@
 <script>
 export default {
   name: "SearchLabelComponent",
-  data() {
-    return {
-      isFocused: false,
-    };
-  },
   props: {
     value: {
       type: String,
@@ -67,12 +62,17 @@ export default {
       default: () => "",
     },
   },
+  computed: {
+    searchInputRef() {
+      return this.$refs[this.searchRef];
+    },
+  },
   methods: {
     looseFocus() {
-      this.$refs[this.searchRef].blur();
+      this.searchInputRef.blur();
     },
     focusInSearch() {
-      this.$refs[this.searchRef].focus();
+      this.searchInputRef.focus();
     },
     resetValue() {
       this.value.length && this.$emit("input", "");
@@ -89,20 +89,23 @@ export default {
   width: 14.5em;
   padding: 0 $base-space;
   border: 1px solid $black-10;
-  border-radius: 20px;
+  border-radius: $border-radius-l;
+  background: palette(white);
   overflow: hidden;
-  box-shadow: $shadow-300;
   transition: all 0.2s ease-out;
+  &:focus-within {
+    border-color: $primary-color;
+    box-shadow: $shadow-300;
+  }
   &:hover {
-    box-shadow: $shadow-400;
     transition: all 0.2s ease-in;
   }
   &__icon {
     flex-shrink: 0;
     padding: 0;
     background: transparent;
-    width: 18px;
-    height: 18px;
+    width: $base-space * 2;
+    height: $base-space * 2;
     transition: none;
     &.--search {
       cursor: default;
@@ -114,16 +117,14 @@ export default {
   }
   &.--focused {
     border-color: $primary-color;
-    box-shadow: $shadow-300;
   }
 }
 
 .search-input {
-  height: 28px;
+  height: 26px;
   width: 100%;
   border: none;
-  border-radius: 10px;
-  line-height: 28px;
+  @include font-size(13px);
   &:focus-visible {
     outline: 0;
   }

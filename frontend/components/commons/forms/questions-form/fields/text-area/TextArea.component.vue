@@ -1,27 +1,34 @@
 <template>
   <div class="wrapper">
     <QuestionHeaderComponent
-      :title="title"
-      :isRequired="isRequired"
-      :tooltipMessage="description"
+      :question="question"
+      :showSuggestion="showSuggestion"
     />
-
-    <div class="container" :class="isFocused ? '--focused' : null">
+    <div
+      class="container"
+      ref="container"
+      :class="classes"
+      @focus="onFocus"
+      :tabindex="isEditionModeActive ? '-1' : '0'"
+      @keydown.enter.exact.prevent="onEditMode"
+    >
       <RenderMarkdownBaseComponent
-        v-if="useMarkdown && !isFocused"
+        v-if="question.settings.use_markdown && !isEditionModeActive"
         class="textarea--markdown"
-        :markdown="value"
-        @click.native="setFocus(true)"
+        :markdown="question.answer.value"
+        @click.native="onFocus"
       />
       <ContentEditableFeedbackTask
         v-else
         class="textarea"
-        :annotationEnabled="true"
-        :annotations="[]"
-        :defaultText="value"
-        :placeholder="placeholder"
+        :value="question.answer.value"
+        :originalValue="question.answer.originalValue"
+        :placeholder="question.settings.placeholder"
+        :isFocused="isFocused"
+        :isEditionModeActive="isEditionModeActive"
         @change-text="onChangeTextArea"
-        @on-change-focus="setFocus"
+        @on-change-focus="onChangeFocus"
+        @on-exit-edition-mode="onExitEditionMode"
       />
     </div>
   </div>
@@ -31,51 +38,78 @@
 export default {
   name: "TextAreaComponent",
   props: {
-    title: {
-      type: String,
+    question: {
+      type: Object,
       required: true,
     },
-    value: {
-      type: String,
-      default: () => "",
-    },
-    placeholder: {
-      type: String,
-      default: () => "",
-    },
-    isRequired: {
+    showSuggestion: {
       type: Boolean,
       default: () => false,
     },
-    description: {
-      type: String,
-      default: () => "",
-    },
-    useMarkdown: {
+    isFocused: {
       type: Boolean,
       default: () => false,
     },
   },
   data: () => {
     return {
-      isFocused: false,
+      isEditionModeActive: false,
+      isExitedFromEditionModeWithKeyboard: false,
     };
   },
-  model: {
-    prop: "value",
-    event: "on-change-value",
+  watch: {
+    isFocused: {
+      immediate: true,
+      handler(newValue) {
+        this.isEditionModeActive = newValue;
+      },
+    },
   },
   methods: {
+    onEditMode() {
+      if (this.isExitedFromEditionModeWithKeyboard) {
+        this.isEditionModeActive = true;
+      }
+    },
+    onExitEditionMode() {
+      this.$refs.container.focus();
+      this.isEditionModeActive = false;
+      this.isExitedFromEditionModeWithKeyboard = true;
+    },
     onChangeTextArea(newText) {
       const isAnyText = newText?.length;
-      this.$emit("on-change-value", isAnyText ? newText : "");
 
-      if (this.isRequired) {
+      this.question.answer.value = isAnyText ? newText : "";
+
+      if (this.question.isRequired) {
         this.$emit("on-error", !isAnyText);
       }
     },
-    setFocus(status) {
-      this.isFocused = status;
+    onChangeFocus(isFocus) {
+      this.isEditionModeActive = isFocus;
+
+      if (isFocus) {
+        this.$emit("on-focus");
+      }
+    },
+    onFocus(event) {
+      if (event.defaultPrevented) return;
+
+      this.isEditionModeActive = true;
+      this.isExitedFromEditionModeWithKeyboard = false;
+    },
+  },
+  computed: {
+    classes() {
+      if (this.isEditionModeActive) {
+        return "--editing";
+      }
+
+      if (this.isFocused && this.isExitedFromEditionModeWithKeyboard) {
+        return "--focus";
+      }
+
+      return null;
     },
   },
 };
@@ -85,7 +119,7 @@ export default {
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: $base-space;
 }
 
 .container {
@@ -94,8 +128,12 @@ export default {
   border: 1px solid $black-20;
   border-radius: $border-radius-s;
   min-height: 10em;
-  &.--focused {
+  background: palette(white);
+  &.--editing {
     border-color: $primary-color;
+  }
+  &.--focus {
+    outline: 2px solid $primary-color;
   }
   .content--exploration-mode & {
     border: none;
@@ -107,9 +145,8 @@ export default {
   display: flex;
   flex: 0 0 100%;
   &--markdown {
-    display: flex;
+    display: inline;
     flex: 1;
-    flex-direction: column;
     padding: $base-space;
   }
 }
