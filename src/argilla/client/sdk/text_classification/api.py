@@ -18,16 +18,8 @@ import httpx
 
 from argilla.client.sdk._helpers import build_typed_response
 from argilla.client.sdk.client import AuthenticatedClient
-from argilla.client.sdk.commons.api import (
-    build_data_response,
-    build_list_response,
-    build_param_dict,
-)
-from argilla.client.sdk.commons.models import (
-    ErrorMessage,
-    HTTPValidationError,
-    Response,
-)
+from argilla.client.sdk.commons.api import build_list_response
+from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
 from argilla.client.sdk.text_classification.models import (
     LabelingRule,
     LabelingRuleMetricsSummary,
@@ -37,9 +29,7 @@ from argilla.client.sdk.text_classification.models import (
 
 
 def add_dataset_labeling_rule(
-    client: AuthenticatedClient,
-    name: str,
-    rule: LabelingRule,
+    client: AuthenticatedClient, name: str, rule: LabelingRule
 ) -> Response[Union[LabelingRule, HTTPValidationError, ErrorMessage]]:
     url = "{}/api/datasets/{name}/TextClassification/labeling/rules".format(client.base_url, name=name)
 
@@ -55,9 +45,7 @@ def add_dataset_labeling_rule(
 
 
 def update_dataset_labeling_rule(
-    client: AuthenticatedClient,
-    name: str,
-    rule: LabelingRule,
+    client: AuthenticatedClient, name: str, rule: LabelingRule
 ) -> Response[Union[HTTPValidationError, ErrorMessage]]:
     url = "{}/api/datasets/TextClassification/{name}/labeling/rules/{query}".format(
         client.base_url, name=name, query=rule.query
@@ -75,9 +63,7 @@ def update_dataset_labeling_rule(
 
 
 def delete_dataset_labeling_rule(
-    client: AuthenticatedClient,
-    name: str,
-    rule: LabelingRule,
+    client: AuthenticatedClient, name: str, rule: LabelingRule
 ) -> Response[Union[LabelingRule, HTTPValidationError, ErrorMessage]]:
     url = "{}/api/datasets/TextClassification/{name}/labeling/rules/{query}".format(
         client.base_url, name=name, query=rule.query
@@ -92,8 +78,7 @@ def delete_dataset_labeling_rule(
 
 
 def fetch_dataset_labeling_rules(
-    client: AuthenticatedClient,
-    name: str,
+    client: AuthenticatedClient, name: str
 ) -> Response[Union[List[LabelingRule], HTTPValidationError, ErrorMessage]]:
     url = "{}/api/datasets/TextClassification/{name}/labeling/rules".format(client.base_url, name=name)
 
@@ -108,10 +93,7 @@ def fetch_dataset_labeling_rules(
 
 
 def dataset_rule_metrics(
-    client: AuthenticatedClient,
-    name: str,
-    query: str,
-    label: str,
+    client: AuthenticatedClient, name: str, query: str, label: str
 ) -> Response[Union[LabelingRuleMetricsSummary, HTTPValidationError, ErrorMessage]]:
     url = "{}/api/datasets/TextClassification/{name}/labeling/rules/{query}/metrics?label={label}".format(
         client.base_url, name=name, query=query, label=label

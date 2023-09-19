@@ -17,18 +17,9 @@
 
 import { Database } from "@vuex-orm/core";
 
-import { FeedbackDataset } from "@/models/feedback-task-model/feedback-dataset/FeedbackDataset.model";
-import { DatasetQuestion } from "@/models/feedback-task-model/dataset-question/DatasetQuestion.model";
-import { DatasetMetric } from "@/models/feedback-task-model/dataset-metric/DatasetMetric.model";
-import { DatasetField } from "@/models/feedback-task-model/dataset-field/DatasetField.model";
-import { DatasetFilter } from "@/models/feedback-task-model/dataset-filter/DatasetFilter.model";
-import { Record } from "@/models/feedback-task-model/record/Record.model";
-import { RecordField } from "@/models/feedback-task-model/record-field/RecordField.model";
-import { RecordResponse } from "@/models/feedback-task-model/record-response/RecordResponse.model";
 import { Pagination, DatasetViewSettings } from "@/models/DatasetViewSettings";
 import { Notification } from "@/models/Notifications";
 import { AnnotationProgress } from "@/models/AnnotationProgress";
-import { AppInfo } from "@/models/AppInfo";
 import { ObservationDataset } from "@/models/Dataset";
 import { Text2TextDataset } from "@/models/Text2Text";
 import { TextClassificationDataset } from "@/models/TextClassification";
@@ -37,7 +28,6 @@ import { GlobalLabel } from "@/models/GlobalLabel.model";
 import { Vector } from "@/models/Vector";
 import { RefRecord } from "@/models/RefRecord";
 
-import info from "@/database/modules/info";
 import datasets from "@/database/modules/datasets";
 
 import text_classification from "@/database/modules/text_classification";
@@ -47,19 +37,10 @@ import notifications from "@/database/modules/notifications";
 
 const database = new Database();
 
-database.register(FeedbackDataset);
-database.register(DatasetQuestion);
-database.register(DatasetMetric);
-database.register(DatasetField);
-database.register(DatasetFilter);
-database.register(Record);
-database.register(RecordField);
-database.register(RecordResponse);
 database.register(DatasetViewSettings);
 database.register(Pagination);
 database.register(AnnotationProgress);
 database.register(Notification, notifications);
-database.register(AppInfo, info);
 database.register(ObservationDataset, datasets);
 database.register(Text2TextDataset);
 database.register(TextClassificationDataset, text_classification);

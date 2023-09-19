@@ -24,4 +24,6 @@ python:
     -  method: pip
        path: .
        extra_requirements:
+       - server
+       - postgresql
        - listeners

@@ -18,12 +18,9 @@ from uuid import UUID
 import httpx
 
 from argilla.client.sdk.commons.errors_handler import handle_response_error
-from argilla.client.sdk.commons.models import (
-    ErrorMessage,
-    HTTPValidationError,
-    Response,
-)
-from argilla.client.sdk.workspaces.models import WorkspaceModel, WorkspaceUserModel
+from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
+from argilla.client.sdk.users.models import UserModel
+from argilla.client.sdk.workspaces.models import WorkspaceModel
 
 
 def list_workspaces(client: httpx.Client) -> Response[Union[List[WorkspaceModel], ErrorMessage, HTTPValidationError]]:
@@ -41,13 +38,9 @@ def list_workspaces(client: httpx.Client) -> Response[Union[List[WorkspaceModel]
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = [WorkspaceModel(**workspace) for workspace in response.json()]
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = [WorkspaceModel(**workspace) for workspace in response.json()]
+        return response_obj
     return handle_response_error(response)
 
 
@@ -69,19 +62,15 @@ def create_workspace(
     response = client.post(url=url, json={"name": name})
 
     if response.status_code == 200:
-        parsed_response = WorkspaceModel(**response.json())
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = WorkspaceModel(**response.json())
+        return response_obj
     return handle_response_error(response)
 
 
 def list_workspace_users(
     client: httpx.Client, id: UUID
-) -> Response[Union[List[WorkspaceUserModel], ErrorMessage, HTTPValidationError]]:
+) -> Response[Union[List[UserModel], ErrorMessage, HTTPValidationError]]:
     """Sends a request to `GET /api/workspaces/{id}/users` to list all the users in the workspace.
 
     Args:
@@ -90,26 +79,22 @@ def list_workspace_users(
 
     Returns:
         A Response object with the parsed response, containing a `parsed` attribute with the
-        parsed response if the request was successful, which is a list of `WorkspaceUserModel` objects.
+        parsed response if the request was successful, which is a list of `UserModel` objects.
     """
     url = f"/api/workspaces/{id}/users"
 
     response = client.get(url=url)
 
     if response.status_code == 200:
-        parsed_response = [WorkspaceUserModel(**workspace) for workspace in response.json()]
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = [UserModel(**user) for user in response.json()]
+        return response_obj
     return handle_response_error(response)
 
 
 def create_workspace_user(
     client: httpx.Client, id: UUID, user_id: UUID
-) -> Response[Union[WorkspaceUserModel, ErrorMessage, HTTPValidationError]]:
+) -> Response[Union[UserModel, ErrorMessage, HTTPValidationError]]:
     """Sends a request to `POST /api/workspaces/{id}/users/{user_id}` to add a new user to the workspace.
 
     Args:
@@ -119,26 +104,22 @@ def create_workspace_user(
 
     Returns:
         A Response object with the parsed response, containing a `parsed` attribute with the
-        parsed response if the request was successful, which is a `WorkspaceUserModel` object.
+        parsed response if the request was successful, which is a `UserModel` object.
     """
     url = f"/api/workspaces/{id}/users/{user_id}"
 
     response = client.post(url=url)
 
     if response.status_code == 200:
-        parsed_response = WorkspaceUserModel(**response.json())
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = UserModel(**response.json())
+        return response_obj
     return handle_response_error(response)
 
 
 def delete_workspace_user(
     client: httpx.Client, id: UUID, user_id: UUID
-) -> Response[Union[WorkspaceUserModel, ErrorMessage, HTTPValidationError]]:
+) -> Response[Union[UserModel, ErrorMessage, HTTPValidationError]]:
     """Sends a request to `DELETE /api/workspaces/{id}/users/{user_id}` to remove a user from the workspace.
 
     Args:
@@ -148,18 +129,14 @@ def delete_workspace_user(
 
     Returns:
         A Response object with the parsed response, containing a `parsed` attribute with the
-        parsed response if the request was successful, which is a `WorkspaceUserModel` object.
+        parsed response if the request was successful, which is a `UserModel` object.
     """
     url = f"/api/workspaces/{id}/users/{user_id}"
 
     response = client.delete(url=url)
 
     if response.status_code == 200:
-        parsed_response = WorkspaceUserModel(**response.json())
-        return Response(
-            status_code=response.status_code,
-            content=response.content,
-            headers=response.headers,
-            parsed=parsed_response,
-        )
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = UserModel(**response.json())
+        return response_obj
     return handle_response_error(response)

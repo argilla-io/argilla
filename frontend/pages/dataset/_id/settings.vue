@@ -1,138 +1,71 @@
 <template>
-  <HeaderAndTopAndTwoColumns v-if="!$fetchState.error && !$fetchState.pending">
+  <BaseLoading v-if="isLoadingDataset" />
+  <HeaderAndOneColumn v-else>
     <template v-slot:header>
       <HeaderFeedbackTaskComponent
-        v-if="datasetName && workspace"
         :datasetId="datasetId"
         :breadcrumbs="breadcrumbs"
       />
     </template>
-    <template v-slot:top>
-      <TopDatasetSettingsFeedbackTaskContent :datasetId="datasetId" />
+    <template v-slot:center>
+      <div class="settings__wrapper">
+        <TopDatasetSettingsFeedbackTaskContent
+          :datasetId="datasetId"
+          class="settings__header"
+          :separator="!isAdminOrOwnerRole"
+        />
+        <SettingsInfoReadOnly
+          v-if="!isAdminOrOwnerRole"
+          :settings="datasetSetting"
+        />
+        <BaseTabsAndContent
+          v-else
+          :tabs="tabs"
+          tab-size="large"
+          class="settings__tabs-content"
+        >
+          <template v-slot="{ currentComponent }">
+            <component
+              :is="currentComponent"
+              :key="currentComponent"
+              :settings="datasetSetting"
+            />
+          </template>
+        </BaseTabsAndContent>
+      </div>
     </template>
-    <template v-slot:left>
-      <LeftDatasetSettingsFeedbackTaskContent :datasetId="datasetId" />
-    </template>
-    <template v-slot:right>
-      <div class="right-content"></div>
-    </template>
-  </HeaderAndTopAndTwoColumns>
+  </HeaderAndOneColumn>
 </template>
 
 <script>
-import HeaderAndTopAndTwoColumns from "@/layouts/HeaderAndTopAndTwoColumns";
-import {
-  upsertFeedbackDataset,
-  getFeedbackDatasetNameById,
-  getFeedbackDatasetWorkspaceNameById,
-} from "@/models/feedback-task-model/feedback-dataset/feedbackDataset.queries";
+import HeaderAndOneColumn from "@/layouts/HeaderAndOneColumn";
+import { useDatasetSettingViewModel } from "./useDatasetSettingViewModel";
 
-const TYPE_OF_FEEDBACK = Object.freeze({
-  ERROR_FETCHING_DATASET_INFO: "ERROR_FETCHING_DATASET_INFO",
-  ERROR_FETCHING_WORKSPACE_INFO: "ERROR_FETCHING_WORKSPACE_INFO",
-});
 export default {
-  name: "SettingsPage",
+  name: "SettingPage",
   components: {
-    HeaderAndTopAndTwoColumns,
+    HeaderAndOneColumn,
   },
-  computed: {
-    datasetId() {
-      return this.$route.params.id;
-    },
-    datasetName() {
-      return getFeedbackDatasetNameById(this.datasetId);
-    },
-    workspace() {
-      return getFeedbackDatasetWorkspaceNameById(this.datasetId);
-    },
-    breadcrumbs() {
-      return [
-        { link: { name: "datasets" }, name: "Home" },
-        {
-          link: { path: `/datasets?workspace=${this.workspace}` },
-          name: this.workspace,
-        },
-        {
-          link: {
-            name: "dataset-id-annotation-mode",
-            params: { id: this.datasetId },
-          },
-          name: this.datasetName,
-        },
-        {
-          link: null,
-          name: "settings",
-        },
-      ];
-    },
-  },
-  async fetch() {
-    try {
-      // 1- fetch dataset info
-      const dataset = await this.getDatasetInfo(this.datasetId);
-
-      // 2- fetch workspace info
-      const workspace = await this.getWorkspaceInfo(dataset.workspace_id);
-
-      // 3- insert in ORM
-      upsertFeedbackDataset({ ...dataset, workspace_name: workspace });
-    } catch (err) {
-      this.manageErrorIfFetchNotWorking(err);
-    }
-  },
-  methods: {
-    async getDatasetInfo(datasetId) {
-      try {
-        const { data } = await this.$axios.get(`/v1/datasets/${datasetId}`);
-
-        return data;
-      } catch (err) {
-        throw {
-          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_DATASET_INFO,
-        };
-      }
-    },
-    async getWorkspaceInfo(workspaceId) {
-      try {
-        const { data: responseWorkspace } = await this.$axios.get(
-          `/v1/workspaces/${workspaceId}`
-        );
-
-        const { name } = responseWorkspace || { name: null };
-
-        return name;
-      } catch (err) {
-        throw {
-          response: TYPE_OF_FEEDBACK.ERROR_FETCHING_WORKSPACE_INFO,
-        };
-      }
-    },
-    manageErrorIfFetchNotWorking({ response }) {
-      this.initErrorNotification(response);
-      this.$router.push("/");
-    },
-    initErrorNotification(response) {
-      let message = "";
-      switch (response) {
-        case TYPE_OF_FEEDBACK.ERROR_FETCHING_DATASET_INFO:
-          message = `Can't get dataset info for dataset_id: ${this.datasetId}`;
-          break;
-        case TYPE_OF_FEEDBACK.ERROR_FETCHING_WORKSPACE_INFO:
-          message = `Can't get workspace info for dataset_id: ${this.datasetId}`;
-          break;
-        default:
-          message = `There was an error on fetching dataset info and workspace info. Please try again`;
-      }
-
-      const paramsForNotitification = {
-        message,
-        numberOfChars: message.length,
-        type: "error",
-      };
-
-      Notification.dispatch("notify", paramsForNotitification);
-    },
+  setup() {
+    return useDatasetSettingViewModel();
   },
 };
 </script>
+
+<styles lang="scss" scoped>
+.settings {
+  &__wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  &__tabs {
+    &-content {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+    }
+  }
+}
+</styles>

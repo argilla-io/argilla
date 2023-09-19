@@ -17,12 +17,10 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 
-from argilla.server.commons.telemetry import TelemetryClient, get_telemetry_client
 from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_async_db
-from argilla.server.enums import ResponseStatusFilter
+from argilla.server.enums import RecordInclude, ResponseStatusFilter
 from argilla.server.models import Dataset as DatasetModel
 from argilla.server.models import ResponseStatus, User
 from argilla.server.policies import DatasetPolicyV1, authorize
@@ -30,6 +28,7 @@ from argilla.server.schemas.v1.datasets import (
     Dataset,
     DatasetCreate,
     Datasets,
+    DatasetUpdate,
     Field,
     FieldCreate,
     Fields,
@@ -38,28 +37,26 @@ from argilla.server.schemas.v1.datasets import (
     QuestionCreate,
     Questions,
     Record,
-    RecordInclude,
     Records,
     RecordsCreate,
     SearchRecord,
     SearchRecordsQuery,
     SearchRecordsResult,
 )
-from argilla.server.search_engine import (
-    SearchEngine,
-    UserResponseStatusFilter,
-    get_search_engine,
-)
+from argilla.server.search_engine import SearchEngine, UserResponseStatusFilter, get_search_engine
 from argilla.server.security import auth
+from argilla.server.utils import parse_uuids
+from argilla.utils.telemetry import TelemetryClient, get_telemetry_client
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
 LIST_DATASET_RECORDS_LIMIT_LTE = 1000
+DELETE_DATASET_RECORDS_LIMIT = 100
 
 router = APIRouter(tags=["datasets"])
 
 
 async def _get_dataset(
-    db: Session, dataset_id: UUID, with_fields: bool = False, with_questions: bool = False
+    db: AsyncSession, dataset_id: UUID, with_fields: bool = False, with_questions: bool = False
 ) -> DatasetModel:
     dataset = await datasets.get_dataset_by_id(db, dataset_id, with_fields=with_fields, with_questions=with_questions)
     if not dataset:
@@ -74,24 +71,25 @@ async def _get_dataset(
 async def list_current_user_datasets(
     *,
     db: AsyncSession = Depends(get_async_db),
+    workspace_id: Optional[UUID] = None,
     current_user: User = Security(auth.get_current_user),
 ):
-    await authorize(current_user, DatasetPolicyV1.list)
+    await authorize(current_user, DatasetPolicyV1.list(workspace_id))
 
-    if current_user.is_owner:
-        dataset_list = await datasets.list_datasets(db)
-        return Datasets(items=dataset_list)
-
-    await current_user.awaitable_attrs.datasets
-    return Datasets(items=current_user.datasets)
+    if not workspace_id:
+        if current_user.is_owner:
+            dataset_list = await datasets.list_datasets(db)
+        else:
+            await current_user.awaitable_attrs.datasets
+            dataset_list = current_user.datasets
+    else:
+        dataset_list = await datasets.list_datasets_by_workspace_id(db, workspace_id)
+    return Datasets(items=dataset_list)
 
 
 @router.get("/datasets/{dataset_id}/fields", response_model=Fields)
 async def list_dataset_fields(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    dataset_id: UUID,
-    current_user: User = Security(auth.get_current_user),
+    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
     dataset = await _get_dataset(db, dataset_id, with_fields=True)
 
@@ -102,10 +100,7 @@ async def list_dataset_fields(
 
 @router.get("/datasets/{dataset_id}/questions", response_model=Questions)
 async def list_dataset_questions(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    dataset_id: UUID,
-    current_user: User = Security(auth.get_current_user),
+    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
     dataset = await _get_dataset(db, dataset_id, with_questions=True)
 
@@ -119,8 +114,8 @@ async def list_current_user_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     dataset_id: UUID,
-    include: List[RecordInclude] = Query([]),
-    response_status: Optional[ResponseStatusFilter] = Query(None),
+    include: List[RecordInclude] = Query([], description="Relationships to include in the response"),
+    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
@@ -129,8 +124,14 @@ async def list_current_user_dataset_records(
 
     await authorize(current_user, DatasetPolicyV1.get(dataset))
 
-    records = await datasets.list_records_by_dataset_id_and_user_id(
-        db, dataset_id, current_user.id, include=include, response_status=response_status, offset=offset, limit=limit
+    records = await datasets.list_records_by_dataset_id(
+        db,
+        dataset_id,
+        current_user.id,
+        include=include,
+        response_statuses=response_statuses,
+        offset=offset,
+        limit=limit,
     )
 
     return Records(items=records)
@@ -141,26 +142,26 @@ async def list_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     dataset_id: UUID,
-    include: Optional[List[RecordInclude]] = Query([]),
+    include: List[RecordInclude] = Query([], description="Relationships to include in the response"),
+    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
 ):
     dataset = await _get_dataset(db, dataset_id)
 
-    await authorize(current_user, DatasetPolicyV1.list_dataset_records_will_all_responses(dataset))
+    await authorize(current_user, DatasetPolicyV1.list_dataset_records_with_all_responses(dataset))
 
-    records = await datasets.list_records_by_dataset_id(db, dataset_id, include=include, offset=offset, limit=limit)
+    records = await datasets.list_records_by_dataset_id(
+        db, dataset_id, include=include, response_statuses=response_statuses, offset=offset, limit=limit
+    )
 
     return Records(items=records)
 
 
 @router.get("/datasets/{dataset_id}", response_model=Dataset)
 async def get_dataset(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    dataset_id: UUID,
-    current_user: User = Security(auth.get_current_user),
+    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
     dataset = await _get_dataset(db, dataset_id)
 
@@ -171,10 +172,7 @@ async def get_dataset(
 
 @router.get("/me/datasets/{dataset_id}/metrics", response_model=Metrics)
 async def get_current_user_dataset_metrics(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    dataset_id: UUID,
-    current_user: User = Security(auth.get_current_user),
+    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
     dataset = await _get_dataset(db, dataset_id)
 
@@ -301,6 +299,34 @@ async def create_dataset_records(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
 
+@router.delete("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_dataset_records(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+    ids: str = Query(..., description="A comma separated list with the IDs of the records to be removed"),
+):
+    dataset = await _get_dataset(db, dataset_id)
+
+    await authorize(current_user, DatasetPolicyV1.delete_records(dataset))
+
+    record_ids = parse_uuids(ids)
+    num_records = len(record_ids)
+
+    if num_records == 0:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No record IDs provided")
+
+    if num_records > DELETE_DATASET_RECORDS_LIMIT:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Cannot delete more than {DELETE_DATASET_RECORDS_LIMIT} records at once",
+        )
+
+    await datasets.delete_records(db, search_engine, dataset, record_ids)
+
+
 @router.post(
     "/me/datasets/{dataset_id}/records/search",
     status_code=status.HTTP_200_OK,
@@ -315,7 +341,7 @@ async def search_dataset_records(
     dataset_id: UUID,
     query: SearchRecordsQuery,
     include: List[RecordInclude] = Query([]),
-    response_status: Optional[ResponseStatusFilter] = Query(None),
+    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = Query(0, ge=0),
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
@@ -333,8 +359,8 @@ async def search_dataset_records(
         )
 
     user_response_status_filter = None
-    if response_status:
-        user_response_status_filter = UserResponseStatusFilter(user=current_user, status=response_status)
+    if response_statuses:
+        user_response_status_filter = UserResponseStatusFilter(user=current_user, statuses=response_statuses)
 
     search_responses = await search_engine.search(
         dataset=dataset,
@@ -374,7 +400,7 @@ async def publish_dataset(
     telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
-):
+) -> DatasetModel:
     dataset = await _get_dataset(db, dataset_id, with_fields=True, with_questions=True)
 
     await authorize(current_user, DatasetPolicyV1.publish(dataset))
@@ -397,7 +423,7 @@ async def publish_dataset(
 async def delete_dataset(
     *,
     db: AsyncSession = Depends(get_async_db),
-    search_engine=Depends(get_search_engine),
+    search_engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -408,3 +434,18 @@ async def delete_dataset(
     await datasets.delete_dataset(db, search_engine, dataset=dataset)
 
     return dataset
+
+
+@router.patch("/datasets/{dataset_id}", response_model=Dataset)
+async def update_dataset(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    dataset_id: UUID,
+    dataset_update: DatasetUpdate,
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = await _get_dataset(db, dataset_id)
+
+    await authorize(current_user, DatasetPolicyV1.update(dataset))
+
+    return await datasets.update_dataset(db, dataset=dataset, dataset_update=dataset_update)

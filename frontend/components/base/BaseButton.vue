@@ -43,7 +43,7 @@
   <button
     v-else
     :class="buttonClasses"
-    tabindex="0"
+    :tabindex="tabIndex"
     :loading="loading"
     :type="type"
     :disabled="disabled"
@@ -57,6 +57,10 @@
 export default {
   name: "BaseButton",
   props: {
+    tabIndex: {
+      type: Number,
+      default: 0,
+    },
     href: String,
     target: String,
     rel: String,
@@ -121,16 +125,16 @@ export default {
   padding: 12px 24px;
   transition: all 0.4s $cb-normal;
   cursor: pointer;
-  &:focus {
-    outline: 0;
-  }
-  &::-moz-focus-inner {
-    border: 0;
-  }
   &[disabled] {
     opacity: 0.5;
     cursor: default;
     pointer-events: none;
+  }
+  &:focus {
+    outline: 2px solid $primary-color;
+  }
+  &:focus:not(:focus-visible) {
+    outline: none;
   }
 }
 .button {
@@ -265,8 +269,8 @@ export default {
     &:hover,
     &:active,
     &.active {
-      color: $danger;
-      border-color: $danger;
+      color: darken($danger, 10%);
+      border-color: darken($danger, 10%);
     }
   }
   &.light {

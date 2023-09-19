@@ -43,10 +43,7 @@ def get_default_args(fn) -> dict:
     return default_args
 
 
-def filter_allowed_args(
-    func,
-    **kwargs,
-):
+def filter_allowed_args(func, **kwargs):
     """
     It takes a function and a dictionary of arguments, and returns a dictionary of arguments that are
     allowed by the function

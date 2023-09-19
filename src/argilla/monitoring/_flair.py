@@ -79,11 +79,7 @@ class FlairMonitor(BaseMonitor):
 
 
 def flair_monitor(
-    pl: SequenceTagger,
-    api: Api,
-    dataset: str,
-    sample_rate: float,
-    log_interval: float,
+    pl: SequenceTagger, api: Api, dataset: str, sample_rate: float, log_interval: float
 ) -> Optional[SequenceTagger]:
     return FlairMonitor(
         pl,

@@ -1,7 +1,6 @@
 <template>
   <PaginationComponent
     v-if="hasRecords"
-    :key="hasRecords"
     :currentPage="currentPage"
     @on-click-next="onPaginate(goToNextPage)"
     @on-click-prev="onPaginate(goToPrevPage)"
@@ -11,8 +10,7 @@
 <script>
 import { isNil } from "lodash";
 import { Notification } from "@/models/Notifications";
-import { isAnyRecordByDatasetId } from "@/models/feedback-task-model/record/record.queries";
-import { LABEL_PROPERTIES } from "@/components/feedback-task/feedbackTask.properties";
+import { usePaginationFeedbackTaskViewModel } from "./usePaginationFeedbackTaskViewModel";
 
 export default {
   name: "PaginationFeedbackTaskComponent",
@@ -43,7 +41,7 @@ export default {
       }
     },
     hasRecords() {
-      return isAnyRecordByDatasetId(this.datasetId);
+      return this.records.hasRecordsToAnnotate;
     },
   },
   methods: {
@@ -67,10 +65,10 @@ export default {
     showNotificationBeforePaginate(eventToFire) {
       // TODO - move logic to show notification in RecordFeedbackAndQuestionnaire component
       Notification.dispatch("notify", {
-        message: "Your changes will be lost if you move to another page",
+        message: this.$t("changes_no_submit"),
+        buttonText: this.$t("button.ignore_and_continue"),
         numberOfChars: 500,
         type: "warning",
-        buttonText: LABEL_PROPERTIES.CONTINUE,
         async onClick() {
           eventToFire();
         },
@@ -87,6 +85,10 @@ export default {
   destroyed() {
     this.$root.$off("are-responses-untouched");
     this.$root.$off("go-to-page");
+    Notification.dispatch("clear");
+  },
+  setup() {
+    return usePaginationFeedbackTaskViewModel();
   },
 };
 </script>

@@ -17,7 +17,7 @@
 
 <template>
   <div v-if="options.length">
-    <BaseDropdown :visible="dropdownIsvisible" @visibility="onVisibility">
+    <BaseDropdown :visible="dropdownIsVisible" @visibility="onVisibility">
       <span slot="dropdown-header">
         <BaseButton class="selected-option" :class="currentOptionId">
           {{ currentOptionName }}
@@ -25,12 +25,17 @@
         </BaseButton>
       </span>
       <span slot="dropdown-content">
-        <ul class="options">
+        <ul class="options" role="radiogroup">
           <li
             v-for="{ id, name } in options"
             class="option"
             :class="id"
             :key="id"
+            tabindex="0"
+            :aria-checked="id"
+            role="radio"
+            @keydown.space="changeOption(id)"
+            @keydown.enter="changeOption(id)"
           >
             <BaseRadioButton
               class="option__radio"
@@ -39,6 +44,8 @@
               :model="id"
               :value="selectedOption"
               @change="changeOption(id)"
+              tabindex="-1"
+              aria-hidden="true"
               >{{ name }}</BaseRadioButton
             >
           </li>
@@ -62,7 +69,7 @@ export default {
   },
   data() {
     return {
-      dropdownIsvisible: false,
+      dropdownIsVisible: false,
     };
   },
   model: {
@@ -82,11 +89,11 @@ export default {
   },
   methods: {
     onVisibility(value) {
-      this.dropdownIsvisible = value;
+      this.dropdownIsVisible = value;
     },
     changeOption(id) {
       this.$emit("change", id);
-      this.dropdownIsvisible = false;
+      this.dropdownIsVisible = false;
     },
     getRadioColor(status) {
       switch (status) {
@@ -96,7 +103,6 @@ export default {
           return "#B6B9FF";
         case "submitted":
           return "#3E5CC9";
-        default:
       }
     },
   },
@@ -117,23 +123,32 @@ $selector-width: 160px;
 .option {
   padding: $base-space;
   border-radius: $border-radius;
+  &:focus {
+    outline: none;
+  }
   &.discarded {
-    &:hover {
+    &:hover,
+    &:focus-within {
       background: #f2f2f2;
     }
   }
   &.submitted {
-    &:hover {
+    &:hover,
+    &:focus-within {
       background: #ebf3ff;
     }
   }
   &.pending {
-    &:hover {
+    &:hover,
+    &:focus-within {
       background: #eeeeff;
     }
   }
   &__radio {
     margin: 0;
+    &:focus {
+      outline: none;
+    }
   }
 }
 .button.selected-option {

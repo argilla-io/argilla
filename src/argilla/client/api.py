@@ -12,23 +12,20 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import asyncio
-import logging
 import warnings
 from asyncio import Future
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from argilla.client.client import Argilla
 from argilla.client.datasets import Dataset
-from argilla.client.models import (  # TODO Remove TextGenerationRecord
-    BulkResponse,
-    Record,
-)
+from argilla.client.models import BulkResponse, Record  # TODO Remove TextGenerationRecord
 from argilla.client.sdk.commons import errors
+from argilla.client.sdk.datasets.models import Dataset as DatasetModel
 from argilla.client.sdk.v1.datasets.api import list_datasets as list_datasets_api_v1
+from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 from argilla.client.sdk.workspaces.api import list_workspaces as list_workspaces_api_v0
-
-_LOGGER = logging.getLogger(__name__)
 
 Api = Argilla  # Backward compatibility
 
@@ -45,7 +42,7 @@ class ArgillaSingleton:
         return cls._INSTANCE
 
     @classmethod
-    def clear(cls):
+    def clear(cls) -> None:
         cls._INSTANCE = None
 
     @classmethod
@@ -76,11 +73,13 @@ def init(
     workspace: Optional[str] = None,
     timeout: int = 60,
     extra_headers: Optional[Dict[str, str]] = None,
-):
+) -> None:
     """Init the Python client.
 
-    We will automatically init a default client for you when calling other client methods.
-    The arguments provided here will overwrite your corresponding environment variables.
+    If this function is called with `api_url=None` and `api_key=None` and no values have been set for the environment
+    variables `ARGILLA_API_URL` and `ARGILLA_API_KEY`, then the local credentials stored by a previous call to `argilla
+    login` command will be used. If local credentials are not found, then `api_url` and `api_key` will fallback to the
+    default values.
 
     Args:
         api_url: Address of the REST API. If `None` (default) and the env variable ``ARGILLA_API_URL`` is not set,
@@ -101,7 +100,6 @@ def init(
         >>> headers = {"X-Client-id":"id","X-Secret":"secret"}
         >>> rg.init(api_url="http://localhost:9090", api_key="4AkeAPIk3Y", extra_headers=headers)
     """
-
     ArgillaSingleton.init(
         api_url=api_url,
         api_key=api_key,
@@ -266,7 +264,7 @@ def load(
     batch_size: int = 250,
     include_vectors: bool = True,
     include_metrics: bool = True,
-    as_pandas=None,
+    as_pandas: Optional[bool] = None,
 ) -> Dataset:
     """Loads a argilla dataset.
 
@@ -281,7 +279,7 @@ def load(
         limit: The number of records to retrieve.
         sort: The fields on which to sort [(<field_name>, 'asc|decs')].
         id_from: If provided, starts gathering the records starting from that Record.
-            As the Records returned with the load method are sorted by ID, ´id_from´
+            As the Records returned with the load method are sorted by ID, `id_from`
             can be used to load using batches.
         batch_size: If provided, load `batch_size` samples per request. A lower batch
             size may help avoid timeouts.
@@ -291,7 +289,6 @@ def load(
             By default, this parameter is set to `True`, meaning that metrics will be included.
         as_pandas: DEPRECATED! To get a pandas DataFrame do
             ``rg.load('my_dataset').to_pandas()``.
-
 
     Returns:
         A argilla dataset.
@@ -340,11 +337,7 @@ def load(
         raise e
 
 
-def copy(
-    dataset: str,
-    name_of_copy: str,
-    workspace: str = None,
-):
+def copy(dataset: str, name_of_copy: str, workspace: Optional[str] = None) -> None:
     """
     Creates a copy of a dataset including its tags and metadata
 
@@ -358,14 +351,14 @@ def copy(
         >>> rg.copy("my_dataset", name_of_copy="new_dataset")
         >>> rg.load("new_dataset")
     """
-    return ArgillaSingleton.get().copy(
+    ArgillaSingleton.get().copy(
         dataset=dataset,
         name_of_copy=name_of_copy,
         workspace=workspace,
     )
 
 
-def delete(name: str, workspace: Optional[str] = None):
+def delete(name: str, workspace: Optional[str] = None) -> None:
     """
     Deletes a dataset.
 
@@ -427,7 +420,7 @@ def delete_records(
     )
 
 
-def set_workspace(workspace: str):
+def set_workspace(workspace: str) -> None:
     """Sets the active workspace.
 
     Args:
@@ -443,6 +436,39 @@ def get_workspace() -> str:
         The name of the active workspace as a string.
     """
     return ArgillaSingleton.get().get_workspace()
+
+
+def list_workspaces() -> List[WorkspaceModel]:
+    """Lists all the available workspaces for the current user.
+
+    Returns:
+        A list of `WorkspaceModel` objects, containing the workspace
+        attributes: name, id, created_at, and updated_at.
+    """
+    warnings.warn(
+        "`Workspace.list` is recommended over `list_workspaces`, since you can easily"
+        " access the workspaces as a list of `Workspace` objects with their attributes"
+        " and methods.",
+        UserWarning,
+        stacklevel=1,
+    )
+    return ArgillaSingleton.get().list_workspaces()
+
+
+def list_datasets(workspace: Optional[str] = None) -> List[DatasetModel]:
+    """Lists all the available datasets for the current user in Argilla.
+
+    Args:
+        workspace: If provided, list datasets from that workspace only. Note that
+            the workspace must exist in advance, otherwise a HTTP 400 error will be
+            raised.
+
+    Returns:
+        A list of `DatasetModel` objects, containing the dataset
+        attributes: tags, metadata, name, id, task, owner, workspace, created_at,
+        and last_updated.
+    """
+    return ArgillaSingleton.get().list_datasets(workspace=workspace)
 
 
 def active_client() -> Argilla:

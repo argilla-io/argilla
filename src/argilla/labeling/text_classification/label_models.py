@@ -21,7 +21,7 @@ import numpy as np
 
 from argilla import DatasetForTextClassification, TextClassificationRecord
 from argilla.labeling.text_classification.weak_labels import WeakLabels, WeakMultiLabels
-from argilla.utils.dependency import requires_version
+from argilla.utils.dependency import requires_dependencies
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class TieBreakPolicy(Enum):
     @classmethod
     def _missing_(cls, value):
         raise ValueError(
-            f"{value} is not a valid {cls.__name__}, please select one of" f" {list(cls._value2member_map_.keys())}"
+            f"{value} is not a valid {cls.__name__}, please select one of {list(cls._value2member_map_.keys())}"
         )
 
 
@@ -311,7 +311,7 @@ class MajorityVoter(LabelModel):
 
         return records_with_prediction
 
-    @requires_version("scikit-learn")
+    @requires_dependencies("scikit-learn")
     def score(
         self,
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
@@ -438,7 +438,7 @@ class MajorityVoter(LabelModel):
         return annotation, prediction
 
 
-@requires_version("snorkel")
+@requires_dependencies("snorkel")
 class Snorkel(LabelModel):
     """The label model by `Snorkel <https://github.com/snorkel-team/snorkel/>`__.
 
@@ -606,7 +606,7 @@ class Snorkel(LabelModel):
 
         return DatasetForTextClassification(records_with_prediction)
 
-    @requires_version("scikit-learn")
+    @requires_dependencies("scikit-learn")
     def score(
         self,
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",
@@ -676,8 +676,7 @@ class Snorkel(LabelModel):
         )
 
 
-@requires_version("flyingsquid")
-@requires_version("pgmpy")
+@requires_dependencies(["flyingsquid", "pgmpy"])
 class FlyingSquid(LabelModel):
     """The label model by `FlyingSquid <https://github.com/HazyResearch/flyingsquid>`__.
 
@@ -874,7 +873,7 @@ class FlyingSquid(LabelModel):
 
         return probas
 
-    @requires_version("scikit-learn")
+    @requires_dependencies("scikit-learn")
     def score(
         self,
         tie_break_policy: Union[TieBreakPolicy, str] = "abstain",

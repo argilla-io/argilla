@@ -16,18 +16,18 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request, Security
+from fastapi import APIRouter, Depends, HTTPException, Request, Security, status
 from pydantic import parse_obj_as
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla.server import models
-from argilla.server.commons import telemetry
 from argilla.server.contexts import accounts
 from argilla.server.database import get_async_db
 from argilla.server.errors import EntityAlreadyExistsError, EntityNotFoundError
 from argilla.server.policies import UserPolicy, authorize
 from argilla.server.security import auth
 from argilla.server.security.model import User, UserCreate
+from argilla.utils import telemetry
 
 router = APIRouter(tags=["users"])
 
@@ -95,8 +95,12 @@ async def create_user(
     if user is not None:
         raise EntityAlreadyExistsError(name=user_create.username, type=User)
 
-    user = await accounts.create_user(db, user_create)
+    try:
+        user = await accounts.create_user(db, user_create)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
 
+    await user.awaitable_attrs.workspaces
     return User.from_orm(user)
 
 

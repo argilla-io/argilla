@@ -20,11 +20,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from argilla.server.models import User, Workspace, WorkspaceUser
-from argilla.server.security.model import (
-    UserCreate,
-    WorkspaceCreate,
-    WorkspaceUserCreate,
-)
+from argilla.server.security.model import UserCreate, WorkspaceCreate, WorkspaceUserCreate
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -40,24 +36,21 @@ async def get_workspace_user_by_workspace_id_and_user_id(
 
 
 async def create_workspace_user(db: "AsyncSession", workspace_user_create: WorkspaceUserCreate) -> WorkspaceUser:
-    workspace_user = WorkspaceUser(
+    workspace_user = await WorkspaceUser.create(
+        db,
         workspace_id=workspace_user_create.workspace_id,
         user_id=workspace_user_create.user_id,
     )
-    db.add(workspace_user)
-    await db.commit()
     await db.refresh(workspace_user, attribute_names=["workspace", "user"])
     return workspace_user
 
 
 async def delete_workspace_user(db: "AsyncSession", workspace_user: WorkspaceUser) -> WorkspaceUser:
-    await db.delete(workspace_user)
-    await db.commit()
-    return workspace_user
+    return await workspace_user.delete(db)
 
 
 async def get_workspace_by_id(db: "AsyncSession", workspace_id: UUID) -> Workspace:
-    return await db.get(Workspace, workspace_id)
+    return await Workspace.read(db, id=workspace_id)
 
 
 async def get_workspace_by_name(db: "AsyncSession", workspace_name: str) -> Union[Workspace, None]:
@@ -70,22 +63,26 @@ async def list_workspaces(db: "AsyncSession") -> List[Workspace]:
     return result.scalars().all()
 
 
+async def list_workspaces_by_user_id(db: "AsyncSession", user_id: UUID) -> List[Workspace]:
+    result = await db.execute(
+        select(Workspace)
+        .join(WorkspaceUser)
+        .filter(WorkspaceUser.user_id == user_id)
+        .order_by(Workspace.inserted_at.asc())
+    )
+    return result.scalars().all()
+
+
 async def create_workspace(db: "AsyncSession", workspace_create: WorkspaceCreate) -> Workspace:
-    workspace = Workspace(name=workspace_create.name)
-    db.add(workspace)
-    await db.commit()
-    await db.refresh(workspace)
-    return workspace
+    return await Workspace.create(db, schema=workspace_create)
 
 
 async def delete_workspace(db: "AsyncSession", workspace: Workspace):
-    await db.delete(workspace)
-    await db.commit()
-    return workspace
+    return await workspace.delete(db)
 
 
-async def get_user_by_id(db: Session, user_id: UUID) -> Union[User, None]:
-    return await db.get(User, user_id)
+async def get_user_by_id(db: "AsyncSession", user_id: UUID) -> Union[User, None]:
+    return await User.read(db, id=user_id)
 
 
 def get_user_by_username_sync(db: Session, username: str) -> Union[User, None]:
@@ -112,23 +109,36 @@ async def list_users(db: "AsyncSession") -> List[User]:
 
 
 async def create_user(db: "AsyncSession", user_create: UserCreate) -> User:
-    user = User(
-        first_name=user_create.first_name,
-        last_name=user_create.last_name,
-        username=user_create.username,
-        role=user_create.role,
-        password_hash=hash_password(user_create.password),
-    )
-    db.add(user)
+    async with db.begin_nested():
+        user = await User.create(
+            db,
+            first_name=user_create.first_name,
+            last_name=user_create.last_name,
+            username=user_create.username,
+            role=user_create.role,
+            password_hash=hash_password(user_create.password),
+            autocommit=False,
+        )
+
+        if user_create.workspaces:
+            for workspace_name in user_create.workspaces:
+                workspace = await get_workspace_by_name(db, workspace_name)
+                if not workspace:
+                    raise ValueError(f"Workspace '{workspace_name}' does not exist")
+                await WorkspaceUser.create(
+                    db,
+                    workspace_id=workspace.id,
+                    user_id=user.id,
+                    autocommit=False,
+                )
+
     await db.commit()
-    await user.awaitable_attrs.workspaces
+
     return user
 
 
 async def delete_user(db: "AsyncSession", user: User) -> User:
-    await db.delete(user)
-    await db.commit()
-    return user
+    return await user.delete(db)
 
 
 async def authenticate_user(db: Session, username: str, password: str):
@@ -142,9 +152,9 @@ async def authenticate_user(db: Session, username: str, password: str):
         _CRYPT_CONTEXT.dummy_verify()
 
 
-def hash_password(password: str):
+def hash_password(password: str) -> str:
     return _CRYPT_CONTEXT.hash(password)
 
 
-def verify_password(password: str, password_hash: str):
+def verify_password(password: str, password_hash: str) -> bool:
     return _CRYPT_CONTEXT.verify(password, password_hash)

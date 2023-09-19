@@ -1,18 +1,30 @@
 <template>
   <div class="title-area --body1">
-    <span v-text="title" v-optional-field="!isRequired" />
-
+    <span
+      class="suggestion-info"
+      v-text="question.title"
+      v-required-field="{ show: question.isRequired, color: 'red' }"
+      v-prefix-star="{
+        enabled: showSuggestion,
+        show: question.matchSuggestion,
+        tooltip: 'This question contains a suggestion',
+      }"
+    />
     <BaseIconWithBadge
       class="icon-info"
       v-if="showIcon"
       icon="info"
-      :id="`${title}QuestionHeader`"
+      :id="`${question.id}QuestionHeader`"
       :show-badge="false"
       iconColor="#acacac"
       badge-vertical-position="top"
       badge-horizontal-position="right"
       badge-border-color="white"
-      v-tooltip="{ content: tooltipMessage, backgroundColor: '#FFF' }"
+      v-tooltip="{
+        content: tooltipMessage,
+        open: openTooltip,
+        backgroundColor: '#FFF',
+      }"
     />
   </div>
 </template>
@@ -22,23 +34,36 @@ import "assets/icons/info";
 export default {
   name: "QuestionHeader",
   props: {
-    title: {
-      type: String,
+    question: {
+      type: Object,
       required: true,
     },
-    tooltipMessage: {
-      type: String,
-      default: () => "",
-    },
-    isRequired: {
+    showSuggestion: {
       type: Boolean,
       default: () => false,
     },
   },
+  data() {
+    return {
+      tooltipMessage: this.question.description,
+      openTooltip: false,
+      timer: null,
+    };
+  },
   computed: {
     showIcon() {
-      // TODO - move this to the template to after reviewing the jest.config
-      return this.tooltipMessage?.length ? true : false;
+      return !!this.question.description?.length;
+    },
+  },
+  watch: {
+    "question.description"() {
+      if (this.timer) clearTimeout(this.timer);
+      this.openTooltip = true;
+      this.tooltipMessage = this.question.description;
+
+      this.timer = setTimeout(() => {
+        this.openTooltip = false;
+      }, 2000);
     },
   },
 };
@@ -61,6 +86,7 @@ export default {
 
 span {
   word-break: break-word;
+  line-height: 1.2em;
 }
 
 .icon-info {
@@ -69,7 +95,6 @@ span {
   height: 20px;
   margin: 0;
   padding: 0;
-  overflow: inherit;
   vertical-align: middle;
   &[data-title] {
     position: relative;
@@ -78,6 +103,16 @@ span {
     &:after {
       margin-top: 0;
     }
+  }
+}
+:deep([data-title]):hover {
+  position: relative;
+  cursor: pointer;
+  @extend %has-tooltip--top;
+  &:after {
+    transform: none;
+    right: auto;
+    left: -1.5em;
   }
 }
 </style>

@@ -118,7 +118,7 @@ export default {
       },
     },
     additionalInfo: {
-      inmediate: true,
+      immediate: true,
       handler(newValue) {
         this.localAdditionalInfo = newValue;
       },
@@ -163,7 +163,7 @@ export default {
   }
   &.active {
     border: 1px solid $primary-color;
-    box-shadow: $shadow-300;
+    box-shadow: none;
   }
   &__icon.button {
     display: flex;

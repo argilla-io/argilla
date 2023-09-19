@@ -19,10 +19,8 @@ from pydantic import Field
 from argilla.server.services.metrics import ServiceBaseMetric, ServicePythonMetric
 from argilla.server.services.metrics.models import CommonTasksMetrics
 from argilla.server.services.search.model import ServiceRecordsQuery
-from argilla.server.services.tasks.text_classification.model import (
-    ServiceTextClassificationRecord,
-)
-from argilla.utils.dependency import requires_version
+from argilla.server.services.tasks.text_classification.model import ServiceTextClassificationRecord
+from argilla.utils.dependency import requires_dependencies
 
 
 class F1Metric(ServicePythonMetric):
@@ -37,7 +35,7 @@ class F1Metric(ServicePythonMetric):
 
     multi_label: bool = False
 
-    @requires_version("scikit-learn")
+    @requires_dependencies("scikit-learn")
     def apply(self, records: Iterable[ServiceTextClassificationRecord]) -> Any:
         from sklearn.metrics import precision_recall_fscore_support
 

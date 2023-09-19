@@ -19,21 +19,18 @@ from typing import List, Union
 from argilla.client.models import TextClassificationRecord
 from argilla.training.transformers import ArgillaTransformersTrainer
 from argilla.training.utils import get_default_args
-from argilla.utils.dependency import require_version
+from argilla.utils.dependency import require_dependencies
 
 
 class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
     _logger = logging.getLogger("ArgillaSetFitTrainer")
     _logger.setLevel(logging.INFO)
 
-    require_version("torch")
-    require_version("datasets")
-    require_version("transformers")
-    require_version("setfit>=0.6")
-
     def __init__(self, *args, **kwargs):
+        require_dependencies(["torch", "datasets", "transformers", "setfit>=0.6"])
         if kwargs.get("model") is None and "model" in kwargs:
             kwargs["model"] = "all-MiniLM-L6-v2"
+            self._logger.warning(f"No model defined. Using the default model {kwargs['model']}.")
         self.multi_target_strategy = None
         self._column_mapping = None
         super().__init__(*args, **kwargs)

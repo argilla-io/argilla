@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" @keydown="keyboardHandler">
     <div class="component-header" v-if="showSearch || showCollapseButton">
       <div class="left-header">
         <SearchLabelComponent
@@ -39,20 +39,24 @@
     >
       <div
         class="input-button"
-        v-for="option in visibleOptions"
+        v-for="(option, index) in visibleOptions"
         :key="option.id"
+        @keydown.enter.prevent
       >
         <input
+          ref="options"
           type="checkbox"
           :name="option.text"
           :id="option.id"
-          v-model="option.is_selected"
+          v-model="option.isSelected"
           @change="onSelect(option)"
+          @focus="onFocus"
+          @keydown.tab="expandLabelsOnTab(index)"
         />
         <label
           class="label-text cursor-pointer"
           :class="{
-            'label-active': option.is_selected,
+            'label-active': option.isSelected,
             square: multiple,
             round: !multiple,
           }"
@@ -69,7 +73,8 @@
 <script>
 // NOTE - this threshold is used to show the search filter component for component from questionForm component
 const OPTIONS_THRESHOLD_TO_ENABLE_SEARCH = 3;
-
+import "assets/icons/chevron-down";
+import "assets/icons/chevron-up";
 export default {
   name: "LabelSelectionComponent",
   props: {
@@ -93,6 +98,10 @@ export default {
       type: Boolean,
       default: () => false,
     },
+    isFocused: {
+      type: Boolean,
+      default: () => false,
+    },
   },
   model: {
     prop: "options",
@@ -107,6 +116,22 @@ export default {
   created() {
     this.searchRef = `${this.componentId}SearchFilterRef`;
   },
+  watch: {
+    isFocused: {
+      immediate: true,
+      handler(newValue) {
+        if (newValue) {
+          this.$nextTick(() => {
+            const options = this.$refs?.options;
+            if (options.some((o) => o.contains(document.activeElement))) {
+              return;
+            }
+            options[0].focus();
+          });
+        }
+      },
+    },
+  },
   computed: {
     filteredOptions() {
       return this.options.filter((option) =>
@@ -118,7 +143,7 @@ export default {
     remainingVisibleOptions() {
       return this.filteredOptions
         .slice(this.maxOptionsToShowBeforeCollapse)
-        .filter((option) => option.is_selected);
+        .filter((option) => option.isSelected);
     },
     visibleOptions() {
       if (this.maxOptionsToShowBeforeCollapse === -1 || this.isExpanded)
@@ -155,21 +180,49 @@ export default {
     },
   },
   methods: {
-    onSelect({ id, is_selected }) {
-      if (this.multiple) return;
-      else {
-        this.options.forEach((option) => {
-          if (option.id === id) {
-            option.is_selected = is_selected;
-          } else {
-            option.is_selected = false;
-          }
-          return option;
-        });
+    keyboardHandler($event) {
+      if (
+        $event.key === "Tab" ||
+        $event.shiftKey ||
+        $event.ctrlKey ||
+        $event.metaKey
+      )
+        return;
+
+      if (!this.$refs.searchComponentRef) return;
+
+      const isSearchActive =
+        document.activeElement === this.$refs.searchComponentRef.searchInputRef;
+      if (isSearchActive) return;
+
+      if ($event.code == "Space") {
+        $event.preventDefault();
+        document.activeElement.click();
+        return;
       }
+
+      this.$refs.searchComponentRef.focusInSearch();
+    },
+    onSelect({ id, isSelected }) {
+      if (this.multiple) return;
+
+      this.options.forEach((option) => {
+        option.isSelected = option.id === id ? isSelected : false;
+      });
     },
     toggleShowLess() {
       this.isExpanded = !this.isExpanded;
+    },
+    onFocus() {
+      this.$emit("on-focus");
+    },
+    expandLabelsOnTab(index) {
+      if (!this.showCollapseButton) {
+        return;
+      }
+      if (index === this.maxOptionsToShowBeforeCollapse - 1) {
+        this.isExpanded = true;
+      }
     },
   },
 };
@@ -227,10 +280,10 @@ export default {
   display: block;
   width: 100%;
   height: 32px;
+  min-width: 50px;
   max-width: 200px;
+  text-align: center;
   padding-inline: 12px;
-  box-shadow: 0;
-  border-radius: 50em;
   background: palette(purple, 800);
   color: palette(purple, 200);
   line-height: 32px;
@@ -239,24 +292,42 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  border-radius: $border-radius-rounded;
   &:not(.label-active):hover {
     background: darken(palette(purple, 800), 8%);
   }
 }
 
 .round {
-  border-radius: 50em;
+  border-radius: $border-radius-rounded;
 }
 .square {
-  border-radius: 5px;
+  border-radius: $border-radius-s;
 }
 
 input[type="checkbox"] {
-  display: none;
+  @extend %visuallyhidden;
+  &:focus {
+    & + .label-text {
+      outline: 2px solid $primary-color;
+    }
+  }
+}
+.input-button:not(:first-of-type) {
+  input[type="checkbox"] {
+    &:focus:not(:focus-visible) {
+      & + .label-text {
+        outline: none;
+        &.label-active {
+          outline: none;
+        }
+      }
+    }
+  }
 }
 .label-active {
   color: white;
-  background: #4c4ea3;
+  background: palette(purple, 200);
 }
 .no-result {
   display: block;

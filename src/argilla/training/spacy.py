@@ -21,7 +21,7 @@ from pydantic import BaseModel
 
 from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.base import ArgillaTrainerSkeleton
-from argilla.utils.dependency import require_version
+from argilla.utils.dependency import require_dependencies
 
 __all__ = ["ArgillaSpaCyTrainer", "ArgillaSpaCyTransformersTrainer"]
 
@@ -29,8 +29,6 @@ __all__ = ["ArgillaSpaCyTrainer", "ArgillaSpaCyTransformersTrainer"]
 class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaSpaCyTrainer")
     _logger.setLevel(logging.INFO)
-
-    require_version("spacy")
 
     def __init__(
         self,
@@ -71,14 +69,18 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
             NotImplementedError: If the `record_class` is not supported or if the
                 `init_training_args` method has not been implemented.
         """
+        require_dependencies("spacy")
         super().__init__(*args, **kwargs)
         import spacy
 
         self._nlp = None
         self._model = model
 
-        self.config = {}
+        if self._model is None:
+            self._model = "en_core_web_sm"
+            self._logger.warning(f"No model defined. Using the default model {self._model}.")
 
+        self.config = {}
         if self._record_class == TokenClassificationRecord:
             self._column_mapping = {
                 "text": "text",
@@ -112,13 +114,13 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
 
         if self.use_gpu:
             try:
-                require_version("torch")
+                require_dependencies("torch")
                 self.has_torch = True
             except Exception:
                 self.has_torch = False
 
             try:
-                require_version("tensorflow")
+                require_dependencies("tensorflow")
                 self.has_tensorflow = True
             except Exception:
                 self.has_tensorflow = False
@@ -174,7 +176,7 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
         """Train the pipeline using `spaCy`.
 
         Args:
-            path: A `str` with the path to save the trained pipeline. Defaults to None.
+            output_dir: A `str` with the path to save the trained pipeline. Defaults to None.
         """
         from spacy.training.initialize import init_nlp
         from spacy.training.loop import train as train_nlp
@@ -267,21 +269,25 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
 
 class ArgillaSpaCyTrainer(_ArgillaSpaCyTrainerBase):
     def __init__(self, freeze_tok2vec: bool = False, **kwargs) -> None:
-        """Initialize the `ArgillaSpaCyTrainer` class.
+        """
+        Initialize the ArgillaSpaCyTrainer class.
 
         Args:
-            freeze_tok2vec: A `bool` indicating whether to freeze the `tok2vec` weights
-                during the training. Defaults to False.
-            **kwargs: The `ArgillaSpaCyTrainerBase` arguments.
+            freeze_tok2vec: A flag indicating whether to freeze the tok2vec weights
+                during training. Defaults to False.
+            **kwargs: Additional arguments for ArgillaSpaCyTrainerBase.
 
         Examples:
             >>> from argilla import ArgillaSpaCyTrainer
-            >>> trainer = ArgillaSpaCyTrainer(
+            >>> trainer = ArgillaSpaCyTrainer(freeze_tok2vec=True)
         """
         self.freeze_tok2vec = freeze_tok2vec
         super().__init__(**kwargs)
 
     def init_training_args(self) -> None:
+        """
+        This method is used to generate the `spacy` configuration file, which is used to train
+        """
         from spacy.cli.init_config import init_config
 
         # We generate the config with GPU just when we are using `spacy-transformers`,
@@ -318,9 +324,6 @@ class ArgillaSpaCyTrainer(_ArgillaSpaCyTrainerBase):
 
 
 class ArgillaSpaCyTransformersTrainer(_ArgillaSpaCyTrainerBase):
-    require_version("spacy>=3.5.3")  # Required to generate the `spacy-transformers` configuration
-    require_version("spacy-transformers")
-
     def __init__(self, update_transformer: bool = True, **kwargs) -> None:
         """Initialize the `ArgillaSpaCyTransformersTrainer` class.
 
@@ -329,10 +332,16 @@ class ArgillaSpaCyTransformersTrainer(_ArgillaSpaCyTrainerBase):
                 weights during the training. Defaults to True.
             **kwargs: The `ArgillaSpaCyTrainerBase` arguments.
         """
+        require_dependencies(
+            ["spacy>=3.5.3", "spacy-transformers"]  # Required to generate the `spacy-transformers` configuration
+        )
         self.update_transformer = update_transformer
         super().__init__(**kwargs)
 
     def init_training_args(self) -> None:
+        """
+        This method is used to generate the `spacy` configuration file, which is used to train
+        """
         from spacy.cli.init_config import init_config
 
         # We generate the config with GPU just when we are using `spacy-transformers`,

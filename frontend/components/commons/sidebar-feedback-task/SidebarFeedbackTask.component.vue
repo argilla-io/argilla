@@ -1,23 +1,22 @@
 <template>
   <div class="sidebar__container">
     <SidebarFeedbackTaskPanel v-if="isPanelVisible" @close-panel="closePanel">
-      <FeedbackTaskProgress
-        v-if="getProgressComponentName === 'FeedbackTaskProgress'"
-        :userIdToShowMetrics="userId"
-      />
+      <HelpShortcut v-if="currentPanel === 'help-shortcut'" />
+      <FeedbackTaskProgress v-else-if="currentPanel === 'metrics'" />
     </SidebarFeedbackTaskPanel>
     <SidebarFeedbackTask
       @on-click-sidebar-action="onClickSidebarAction"
       :sidebar-items="sidebarItems"
-      :active-buttons="[currentMetric, currentMode]"
-      :expanded-component="currentMetric"
+      :active-buttons="[currentPanel, currentMode]"
+      :expanded-component="currentPanel"
     />
   </div>
 </template>
 
 <script>
-import { SIDEBAR_GROUP } from "@/models/feedback-task-model/dataset-filter/datasetFilter.queries";
-import { isDatasetExistsByDatasetIdAndUserId } from "@/models/feedback-task-model/dataset-metric/datasetMetric.queries";
+import "assets/icons/progress";
+import "assets/icons/refresh";
+import "assets/icons/shortcuts";
 
 export default {
   props: {
@@ -27,46 +26,13 @@ export default {
     },
   },
   data: () => ({
-    currentMetric: null,
+    currentPanel: null,
     currentMode: "annotate",
+    isPanelVisible: false,
   }),
-  computed: {
-    userId() {
-      return this.$auth.user.id;
-    },
-    isDatasetMetrics() {
-      return isDatasetExistsByDatasetIdAndUserId({
-        userId: this.userId,
-        datasetId: this.datasetId,
-      });
-    },
-    getProgressComponentName() {
-      return (
-        this.sidebarItems.metrics.buttons.find(
-          ({ id }) => id === this.currentMetric
-        )?.component || null
-      );
-    },
-    isPanelVisible() {
-      return !!this.currentMetric;
-    },
-  },
   created() {
     this.sidebarItems = {
-      // TODO - Hidden for MVP
-      // mode: {
-      //   buttonType: "non-expandable",
-      //   buttons: [
-      //     {
-      //       id: "annotate",
-      //       tooltip: "Hand labeling",
-      //       icon: "hand-labeling",
-      //       action: "change-view-mode",
-      //       relatedMetrics: ["progress", "stats"],
-      //     },
-      //   ],
-      // },
-      metrics: {
+      firstGroup: {
         buttonType: "expandable",
         buttons: [
           {
@@ -79,7 +45,7 @@ export default {
           },
         ],
       },
-      refresh: {
+      secondGroup: {
         buttonType: "default",
         buttons: [
           {
@@ -92,34 +58,49 @@ export default {
           },
         ],
       },
+      bottomGroup: {
+        buttonType: "expandable",
+        buttons: [
+          {
+            id: "help-shortcut",
+            tooltip: "Shortcuts",
+            icon: "shortcuts",
+            action: "show-help",
+            type: "custom-expandable",
+            component: "HelpShortcut",
+          },
+        ],
+      },
     };
   },
   methods: {
     onClickSidebarAction(group, info) {
       switch (group.toUpperCase()) {
-        case SIDEBAR_GROUP.METRICS:
-          this.toggleMetrics(info);
+        case "FIRSTGROUP":
+          this.togglePanel(info);
           break;
-        case SIDEBAR_GROUP.MODE:
-          console.log("change-view-mode", info);
-          break;
-        case SIDEBAR_GROUP.REFRESH:
+        case "SECONDGROUP":
           this.$emit("refresh");
+          break;
+        case "BOTTOMGROUP":
+          this.togglePanel(info);
           break;
         default:
           console.warn(info);
       }
     },
-    toggleMetrics(panelContent) {
-      if (!this.isDatasetMetrics) return;
+    togglePanel(panelContent) {
+      this.currentPanel =
+        this.currentPanel !== panelContent ? panelContent : null;
 
-      this.currentMetric =
-        this.currentMetric !== panelContent ? panelContent : null;
-      $nuxt.$emit("on-sidebar-toggle-metrics", !!this.currentMetric);
+      this.isPanelVisible = !!this.currentPanel;
+
+      $nuxt.$emit("on-sidebar-toggle-panel", this.isPanelVisible);
     },
     closePanel() {
-      this.currentMetric = null;
-      $nuxt.$emit("on-sidebar-toggle-metrics", null);
+      this.isPanelVisible = false;
+      this.currentPanel = null;
+      $nuxt.$emit("on-sidebar-toggle-panel", null);
     },
   },
 };

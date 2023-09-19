@@ -18,9 +18,7 @@ from typing import Dict, List, Optional, Union
 from pydantic import BaseModel, Field, validator
 
 from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
-from argilla.client.models import (
-    TokenClassificationRecord as ClientTokenClassificationRecord,
-)
+from argilla.client.models import TokenClassificationRecord as ClientTokenClassificationRecord
 from argilla.client.sdk.commons.models import (
     MACHINE_NAME,
     BaseAnnotation,

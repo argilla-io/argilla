@@ -238,7 +238,7 @@ export default {
       this.visibleSentence = this.predictions[this.predictionNumber]?.text;
     },
     async onTextChanged(newText) {
-      let status = this.currentAnnotation === newText ? "Default" : "Edited";
+      const status = this.currentAnnotation === newText ? "Default" : "Edited";
       this.visibleSentence = newText;
       await this.updateRecords({
         dataset: this.getText2TextDataset(),
@@ -267,7 +267,7 @@ export default {
       }
     },
     async onValidate() {
-      let newS = {
+      const newS = {
         score: 1,
         text: this.record.sentenceForAnnotation || null,
       };

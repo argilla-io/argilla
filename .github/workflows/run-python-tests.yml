@@ -3,6 +3,10 @@ name: Run Argilla python tests
 on:
   workflow_call:
     inputs:
+      runsOn:
+        required: false
+        type: string
+        default: extended-runner
       pytestArgs:
         description: "Provide extra args to pytest command line"
         required: true
@@ -11,17 +15,16 @@ on:
         required: false
         type: string
         default: coverage
-      searchEngine:
-        description: "Backend search engine to use. Available values are 'elasticsearch' and 'opensearch'."
-        default: elasticsearch
+      searchEngineDockerImage:
+        description: "The name of the Docker image of the search engine to use."
+        default: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
         required: false
         type: string
-      searchEngineVersion:
-        description: "Backend search engine version to use. This value must be aligned to the 'search_engine' input value."
+      searchEngineDockerEnv:
+        description: "The name of the Docker image of the search engine to use."
+        default: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
         required: false
-        default: 8.8
-        type: number
-
+        type: string
 env:
   # Increase this value to reset cache if etc/example-environment.yml has not changed
   CACHE_NUMBER:  5
@@ -29,15 +32,21 @@ env:
 jobs:
   run-python-tests:
     name: Argilla python tests
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runsOn }}
+    services:
+      search_engine:
+        image: ${{ inputs.searchEngineDockerImage }}
+        ports:
+          - 9200:9200
+        env: ${{ fromJson(inputs.searchEngineDockerEnv) }}
     defaults:
       run:
         shell: bash -l {0}
     env:
-      COVERAGE_REPORT: ${{ inputs.coverageReport }}-${{ inputs.searchEngine }}-${{ inputs.searchEngineVersion }}
+      COVERAGE_REPORT: ${{ inputs.coverageReport }}
     steps:
       - name: Checkout Code 🛎
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Conda Env 🐍
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -68,17 +77,6 @@ jobs:
         env:
           HF_HUB_ACCESS_TOKEN: ${{ secrets.HF_HUB_ACCESS_TOKEN }}
         run: echo "Enable HF access token"
-      # TODO: Review and use github action services section instead. See https://docs.github.com/en/actions/using-containerized-services/about-service-containers#creating-service-containers
-      - name: Setup ElasticSearch 🔎
-        if: inputs.searchEngine == 'elasticsearch'
-        uses: ankane/setup-elasticsearch@v1
-        with:
-          elasticsearch-version: ${{ inputs.searchEngineVersion }}
-      - name: Setup OpenSearch 🔎
-        if: inputs.searchEngine == 'opensearch'
-        uses: ankane/setup-opensearch@v1
-        with:
-          opensearch-version: ${{ inputs.searchEngineVersion }}
       - name: Run tests 📈
         run: |
           pip install -e ".[server,listeners]"

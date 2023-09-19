@@ -5,10 +5,11 @@ Monitoring
 
 Here we describe the available monitors in Argilla:
 
-- Base Monitor: Internal mechanism to queue and log monitored predictions
-- ArgillaLogHTTPMiddleware: Asgi middleware to monitor API endpoints
-- Framework Monitors: Monitors to wrap around common NLP inference frameworks
+- :ref:`python ref base_monitor`: Internal mechanism to queue and log monitored predictions
+- :ref:`python ref argilla_log_http_middleware`: Asgi middleware to monitor API endpoints
+- :ref:`python ref framework_monitors`:  Monitors to wrap around common NLP inference frameworks
 
+.. _python ref base_monitor:
 
 Base Monitor
 ------------
@@ -16,11 +17,15 @@ Base Monitor
 .. automodule:: argilla.monitoring.base
    :members:
 
+.. _python ref argilla_log_http_middleware:
+
 ArgillaLogHTTPMiddleware
 ------------------------
 
 .. automodule:: argilla.monitoring.asgi
    :members:
+
+.. _python ref framework_monitors:
 
 Framework Monitors
 ------------------

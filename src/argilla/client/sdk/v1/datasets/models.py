@@ -14,6 +14,7 @@
 #  limitations under the License.
 
 from datetime import datetime
+from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
@@ -32,20 +33,42 @@ class FeedbackDatasetModel(BaseModel):
 
 class FeedbackRankingValueModel(BaseModel):
     value: StrictStr
-    rank: conint(ge=1)
+    rank: Optional[conint(ge=1)] = None
 
 
 class FeedbackValueModel(BaseModel):
     value: Union[StrictStr, StrictInt, List[str], List[FeedbackRankingValueModel]]
 
 
+class FeedbackResponseStatus(str, Enum):
+    draft = "draft"
+    submitted = "submitted"
+    discarded = "discarded"
+
+
+class FeedbackResponseStatusFilter(str, Enum):
+    draft = "draft"
+    missing = "missing"  # not a status as-is, used as a filter to indicate no response
+    submitted = "submitted"
+    discarded = "discarded"
+
+
 class FeedbackResponseModel(BaseModel):
     id: UUID
     values: Dict[str, FeedbackValueModel]
-    status: Literal["submitted", "discarded"]  # API also contains "missing", but it's just a filter-status
+    status: FeedbackResponseStatus
     user_id: UUID
     inserted_at: datetime
     updated_at: datetime
+
+
+class FeedbackSuggestionModel(BaseModel):
+    id: UUID
+    question_id: UUID
+    type: Optional[Literal["human", "model"]] = None
+    score: Optional[float] = None
+    value: Any
+    agent: Optional[str] = None
 
 
 class FeedbackItemModel(BaseModel):
@@ -54,6 +77,7 @@ class FeedbackItemModel(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
     external_id: Optional[str] = None
     responses: Optional[List[FeedbackResponseModel]] = []
+    suggestions: Optional[List[FeedbackSuggestionModel]] = []
     inserted_at: datetime
     updated_at: datetime
 
@@ -81,3 +105,20 @@ class FeedbackQuestionModel(BaseModel):
     settings: Dict[str, Any]
     inserted_at: datetime
     updated_at: datetime
+
+
+class FeedbackSuggestionModel(BaseModel):
+    id: UUID
+    question_id: UUID
+    type: Optional[Literal["human", "model"]] = None
+    score: Optional[float] = None
+    value: Any
+    agent: Optional[str] = None
+
+
+class FeedbackRecordsMetricsModel(BaseModel):
+    count: int
+
+
+class FeedbackMetricsModel(BaseModel):
+    records: FeedbackRecordsMetricsModel

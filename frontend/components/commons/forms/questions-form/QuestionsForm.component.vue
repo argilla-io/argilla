@@ -1,14 +1,32 @@
 <template>
   <form
-    :key="renderForm"
     class="questions-form"
-    :class="{ '--edited-form': !isFormUntouched }"
+    :class="{
+      '--focused-form': isFormTouched || (formHasFocus && interactionCount > 1),
+    }"
     @submit.prevent="onSubmit"
+    v-click-outside="onClickOutside"
+    @click="focusOnFirstQuestionFromOutside"
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
+        <div class="draft">
+          <p v-if="draftSaving">
+            <svgicon color="#0000005e" name="refresh" />
+            {{ $t("saving") }}
+          </p>
+          <p v-else-if="record.isDraft">
+            {{ $t("saved") }}
+            <BaseDate
+              class="tooltip"
+              :date="record.updatedAt"
+              format="date-relative-now"
+              :updateEverySecond="10"
+            />
+          </p>
+        </div>
         <p class="questions-form__title --heading5 --medium">
-          Submit your feedback
+          {{ $t("submit-your-feedback") }}
         </p>
         <p class="questions-form__guidelines-link">
           Read the
@@ -22,63 +40,21 @@
           </NuxtLink>
         </p>
       </div>
-      <div class="form-group" v-for="input in inputs" :key="input.id">
-        <TextAreaComponent
-          v-if="input.component_type === COMPONENT_TYPE.FREE_TEXT"
-          :title="input.question"
-          :placeholder="input.placeholder"
-          v-model="input.options[0].value"
-          :useMarkdown="input.settings.use_markdown"
-          :isRequired="input.is_required"
-          :description="input.description"
-          @on-error="onError"
-        />
 
-        <SingleLabelComponent
-          v-if="input.component_type === COMPONENT_TYPE.SINGLE_LABEL"
-          :questionId="input.id"
-          :title="input.question"
-          v-model="input.options"
-          :isRequired="input.is_required"
-          :description="input.description"
-          :visibleOptions="input.settings.visible_options"
-        />
-
-        <MultiLabelComponent
-          v-if="input.component_type === COMPONENT_TYPE.MULTI_LABEL"
-          :questionId="input.id"
-          :title="input.question"
-          v-model="input.options"
-          :isRequired="input.is_required"
-          :description="input.description"
-          :visibleOptions="input.settings.visible_options"
-        />
-
-        <RatingComponent
-          v-if="input.component_type === COMPONENT_TYPE.RATING"
-          :title="input.question"
-          v-model="input.options"
-          :isRequired="input.is_required"
-          :description="input.description"
-          @on-error="onError"
-        />
-
-        <RankingComponent
-          v-if="input.component_type === COMPONENT_TYPE.RANKING"
-          :title="input.question"
-          :isRequired="input.is_required"
-          :description="input.description"
-          v-model="input.options"
-        />
-      </div>
+      <QuestionsComponent
+        :questions="record.questions"
+        :showSuggestion="record.isPending || record.isDraft"
+        :autofocusPosition="autofocusPosition"
+        @on-focus="updateQuestionAutofocus"
+      />
     </div>
     <div class="footer-form">
       <div class="footer-form__left-footer">
         <BaseButton
           type="button"
-          ref="clearButton"
           class="primary text"
           @click.prevent="onClear"
+          :title="$t('shortcuts.questions_form.clear')"
         >
           <span v-text="'Clear'" />
         </BaseButton>
@@ -86,20 +62,18 @@
       <div class="footer-form__right-area">
         <BaseButton
           type="button"
-          ref="discardButton"
           class="primary outline"
           @on-click="onDiscard"
-          :disabled="isRecordDiscarded"
+          :disabled="record.isDiscarded"
+          :title="$t('shortcuts.questions_form.discard')"
         >
           <span v-text="'Discard'" />
         </BaseButton>
         <BaseButton
-          ref="submitButton"
           type="submit"
-          name="submitButton"
-          value="submitButton"
           class="primary"
-          :disabled="disableSubmitButton"
+          :disabled="isSubmitButtonDisabled"
+          :title="$t('shortcuts.questions_form.submit')"
         >
           <span v-text="'Submit'" />
         </BaseButton>
@@ -110,24 +84,9 @@
 
 <script>
 import "assets/icons/external-link";
-import { isEqual, cloneDeep } from "lodash";
-import { Notification } from "@/models/Notifications";
-import { COMPONENT_TYPE } from "@/components/feedback-task/feedbackTask.properties";
-import {
-  getOptionsOfQuestionByDatasetIdAndQuestionName,
-  getComponentTypeOfQuestionByDatasetIdAndQuestionName,
-} from "@/models/feedback-task-model/dataset-question/datasetQuestion.queries";
-import {
-  getRecordIndexByRecordId,
-  updateRecordStatusByRecordId,
-  RECORD_STATUS,
-  RESPONSE_STATUS_FOR_API,
-} from "@/models/feedback-task-model/record/record.queries";
-import {
-  getRecordResponsesIdByRecordId,
-  upsertRecordResponses,
-  deleteRecordResponsesByUserIdAndResponseId,
-} from "@/models/feedback-task-model/record-response/recordResponse.queries";
+import "assets/icons/refresh";
+
+import { useQuestionFormViewModel } from "./useQuestionsFormViewModel";
 
 export default {
   name: "QuestionsFormComponent",
@@ -136,438 +95,148 @@ export default {
       type: String,
       required: true,
     },
-    recordId: {
-      type: String,
-      required: true,
-    },
-    recordStatus: {
-      type: String,
-      required: true,
-    },
-    initialInputs: {
-      type: Array,
+    record: {
+      type: Object,
       required: true,
     },
   },
   data() {
     return {
-      inputs: [],
-      renderForm: 0,
-      isError: false,
+      isFormTouched: false,
+      autofocusPosition: 0,
+      interactionCount: 0,
+      userComesFromOutside: false,
     };
   },
+  setup() {
+    return useQuestionFormViewModel();
+  },
   computed: {
-    userId() {
-      return this.$auth.user.id;
+    formHasFocus() {
+      return this.autofocusPosition || this.autofocusPosition == 0;
     },
-    recordIdIndex() {
-      return getRecordIndexByRecordId(this.recordId);
-    },
-    responseId() {
-      return getRecordResponsesIdByRecordId({
-        userId: this.userId,
-        recordId: this.recordId,
-      });
-    },
-    isFormUntouched() {
-      return isEqual(this.initialInputs, this.inputs);
+    numberOfQuestions() {
+      return this.record.questions.length;
     },
     questionAreCompletedCorrectly() {
-      const requiredQuestionsAreCompletedCorrectly = this.inputs
-        .filter((input) => input.is_required)
-        .every((input) => {
-          if (input.component_type === COMPONENT_TYPE.FREE_TEXT) {
-            return input.options[0]?.value.trim() != "";
-          }
-
-          if (input.component_type === COMPONENT_TYPE.RANKING) {
-            return input.options.every((option) => option.rank);
-          }
-
-          return input.options.some((option) => option.is_selected);
-        });
-
-      const optionalQuestionsCompletedAreCorrectlyEntered = this.inputs
-        .filter((input) => !input.is_required)
-        .every((input) => {
-          if (input.component_type === COMPONENT_TYPE.RANKING) {
-            return (
-              !input.options.some((option) => option.rank) ||
-              input.options.every((option) => option.rank)
-            );
-          }
-
-          return true;
-        });
-
-      return (
-        requiredQuestionsAreCompletedCorrectly &&
-        optionalQuestionsCompletedAreCorrectlyEntered
-      );
+      return this.record.questionAreCompletedCorrectly();
     },
-    isRecordDiscarded() {
-      return this.recordStatus === RECORD_STATUS.DISCARDED;
-    },
-    isRecordSubmitted() {
-      return this.recordStatus === RECORD_STATUS.SUBMITTED;
-    },
-    disableSubmitButton() {
-      if (this.isRecordSubmitted)
-        return this.isFormUntouched || !this.questionAreCompletedCorrectly;
+    isSubmitButtonDisabled() {
+      if (this.record.isSubmitted)
+        return !this.isFormTouched || !this.questionAreCompletedCorrectly;
 
       return !this.questionAreCompletedCorrectly;
     },
-    currentInputsWithNoResponses() {
-      return this.inputs.filter((input) => {
-        if (
-          input.component_type === COMPONENT_TYPE.RATING ||
-          input.component_type === COMPONENT_TYPE.SINGLE_LABEL ||
-          input.component_type === COMPONENT_TYPE.MULTI_LABEL
-        ) {
-          return input.options.every((option) => !option.is_selected);
-        }
-
-        if (input.component_type === COMPONENT_TYPE.RANKING) {
-          return input.options.every((option) => !option.rank);
-        }
-
-        if (input.component_type === COMPONENT_TYPE.FREE_TEXT) {
-          return !input.options[0]?.value.trim();
-        }
-      });
-    },
   },
   watch: {
-    isFormUntouched(isFormUntouched) {
-      this.emitIsQuestionsFormUntouched(isFormUntouched);
+    isFormTouched(isFormTouched) {
+      if (this.record.isSubmitted)
+        this.emitIsQuestionsFormTouched(isFormTouched);
+    },
+    record: {
+      deep: true,
+      immediate: true,
+      handler() {
+        if (this.record.isModified) this.saveDraft(this.record);
+
+        this.isFormTouched = this.record.isModified;
+      },
     },
   },
   created() {
-    this.COMPONENT_TYPE = COMPONENT_TYPE;
-    this.onReset();
+    this.record.initialize();
   },
   mounted() {
-    document.addEventListener("keydown", this.onPressKeyboardShortCut);
+    document.addEventListener("keydown", this.handleGlobalKeys);
   },
   destroyed() {
-    this.emitIsQuestionsFormUntouched(true); // NOTE - ensure that on destroy, all parents and siblings have the flag well reinitiate
-    document.removeEventListener("keydown", this.onPressKeyboardShortCut);
+    this.emitIsQuestionsFormTouched(false);
+
+    document.removeEventListener("keydown", this.handleGlobalKeys);
   },
   methods: {
-    onPressKeyboardShortCut({ code, shiftKey }) {
+    focusOnFirstQuestionFromOutside(event) {
+      if (!this.userComesFromOutside) return;
+      if (event.srcElement.id || event.srcElement.getAttribute("for")) return;
+
+      this.userComesFromOutside = false;
+      this.focusOnFirstQuestion(event);
+    },
+    focusOnFirstQuestion(event) {
+      event.preventDefault();
+      this.updateQuestionAutofocus(0);
+    },
+    onClickOutside() {
+      this.autofocusPosition = null;
+      this.userComesFromOutside = true;
+    },
+    handleGlobalKeys(event) {
+      const { code, shiftKey, ctrlKey, metaKey } = event;
+
+      if (code == "Tab" && this.userComesFromOutside) {
+        this.focusOnFirstQuestionFromOutside(event);
+
+        return;
+      }
+
       switch (code) {
+        case "KeyS": {
+          if (ctrlKey || metaKey) {
+            event.preventDefault();
+            event.stopPropagation();
+            this.onSaveDraftImmediately();
+          }
+          break;
+        }
         case "Enter": {
-          const elem = this.$refs.submitButton.$el;
-          elem.click();
+          if (shiftKey) this.onSubmit();
           break;
         }
         case "Space": {
-          const elem = this.$refs.clearButton.$el;
-          shiftKey && elem.click();
+          if (shiftKey) {
+            event.preventDefault(); // TODO: Review this line
+            this.onClear();
+          }
           break;
         }
         case "Backspace": {
-          const elem = this.$refs.discardButton.$el;
-          elem.click();
+          if (shiftKey) this.onDiscard();
           break;
         }
         default:
       }
     },
-
-    async sendBackendRequest(responseValues) {
-      try {
-        let responseData = null;
-        if (this.responseId) {
-          responseData = await this.updateResponseValues(
-            this.responseId,
-            responseValues
-          );
-        } else {
-          responseData = await this.createRecordResponses(
-            this.recordId,
-            responseValues
-          );
-        }
-        const { data: updatedResponses } = responseData;
-
-        if (updatedResponses) {
-          this.updateResponsesInOrm({
-            record_id: this.recordId,
-            ...updatedResponses,
-          });
-        }
-      } catch (error) {
-        console.log(error);
-
-        const message = "There was a problem to save the response";
-
-        this.showNotificationComponent(message, "error");
-      }
-    },
     async onDiscard() {
-      try {
-        const responseValues = this.factoryInputsToResponseValues();
+      if (this.record.isDiscarded) return;
 
-        await this.sendBackendRequest({
-          status: RESPONSE_STATUS_FOR_API.DISCARDED,
-          values: responseValues,
-        });
+      await this.discard(this.record);
 
-        await updateRecordStatusByRecordId(
-          this.recordId,
-          RECORD_STATUS.DISCARDED
-        );
-
-        this.$emit("on-discard-responses");
-
-        // TODO - reset only when we know that we fetch and computed all the necessary records data
-        this.onReset();
-      } catch (error) {
-        console.log(error);
-      }
+      this.$emit("on-discard-responses");
     },
     async onSubmit() {
-      if (!this.questionAreCompletedCorrectly) {
-        this.isError = true;
+      if (this.isSubmitButtonDisabled) return;
 
-        return;
-      }
+      await this.submit(this.record);
 
-      try {
-        const responseValues = this.factoryInputsToResponseValues();
-
-        await this.sendBackendRequest({
-          status: RESPONSE_STATUS_FOR_API.SUBMITTED,
-          values: responseValues,
-        });
-
-        await updateRecordStatusByRecordId(
-          this.recordId,
-          RECORD_STATUS.SUBMITTED
-        );
-
-        this.$emit("on-submit-responses");
-
-        // TODO - reset only when we know that we fetch and computed all the necessary records data
-        this.onReset();
-      } catch (error) {
-        console.log(error);
-      }
+      this.$emit("on-submit-responses");
     },
     async onClear() {
-      try {
-        const responseData =
-          this.responseId &&
-          (await this.deleteResponsesByResponseId(this.responseId));
+      await this.clear(this.record);
+    },
+    async onSaveDraftImmediately() {
+      await this.saveDraftImmediately(this.record);
+    },
+    emitIsQuestionsFormTouched(isFormTouched) {
+      this.$emit("on-question-form-touched", isFormTouched);
 
-        await deleteRecordResponsesByUserIdAndResponseId(
-          this.userId,
-          responseData?.data?.id
-        );
-
-        // NOTE - onClear event => the status change to PENDING
-        await updateRecordStatusByRecordId(
-          this.recordId,
-          RECORD_STATUS.PENDING
-        );
-
-        this.$emit("on-clear-responses");
-        this.onReset();
-      } catch (err) {
-        console.log(err);
-      }
+      this.$root.$emit("are-responses-untouched", !isFormTouched);
     },
-    onReset() {
-      this.inputs = cloneDeep(this.initialInputs);
-      this.isError = false;
-      this.renderForm++;
-    },
-    onError(isError) {
-      if (isError) {
-        this.isError = true;
-      } else {
-        this.isError = false;
-      }
-    },
-    async deleteResponsesByResponseId(responseId) {
-      return await this.$axios.delete(`/v1/responses/${responseId}`);
-    },
-    async updateResponsesInOrm(responsesFromApi) {
-      const newResponseToUpsertInOrm =
-        this.formatResponsesApiForOrm(responsesFromApi);
-
-      await upsertRecordResponses(newResponseToUpsertInOrm);
-    },
-    async updateResponseValues(responseId, responseByQuestionName) {
-      return await this.$axios.put(
-        `/v1/responses/${responseId}`,
-        JSON.parse(JSON.stringify(responseByQuestionName))
+    updateQuestionAutofocus(index) {
+      this.interactionCount++;
+      this.autofocusPosition = Math.min(
+        this.numberOfQuestions - 1,
+        Math.max(0, index)
       );
-    },
-    async createRecordResponses(recordId, responseByQuestionName) {
-      return await this.$axios.post(
-        `/v1/records/${recordId}/responses`,
-        JSON.parse(JSON.stringify(responseByQuestionName))
-      );
-    },
-    formatResponsesApiForOrm(responsesFromApi) {
-      const formattedRecordResponsesForOrm = [];
-      if (responsesFromApi.values) {
-        // TODO - simplify if/else by one loop
-        if (Object.keys(responsesFromApi.values).length === 0) {
-          // IF responses.value  is an empty object, init formatted responses with questions data
-          this.inputs.forEach(
-            ({ question: questionName, options: questionOptions }) => {
-              formattedRecordResponsesForOrm.push({
-                id: responsesFromApi.id,
-                question_name: questionName,
-                options: questionOptions,
-                record_id: responsesFromApi.record_id,
-                user_id: responsesFromApi.user_id ?? null,
-              });
-            }
-          );
-        } else {
-          // ELSE responses.value is not an empty object, init formatted responses with questions data and corresponding responses
-
-          // TODO - remove both loop with only one loop over the form object ( this.inputs)
-          // 1/ push formatted object corresponding to recordResponse which have been remove from api
-          this.currentInputsWithNoResponses.forEach((input) => {
-            formattedRecordResponsesForOrm.push({
-              id: responsesFromApi.id,
-              question_name: input.name,
-              options: input.options,
-              record_id: this.recordId,
-              user_id: this.userId,
-            });
-          });
-
-          // 2/ loop over the responseFromApi
-          Object.entries(responsesFromApi.values).map(
-            ([questionName, newResponse]) => {
-              const componentType =
-                getComponentTypeOfQuestionByDatasetIdAndQuestionName(
-                  this.datasetId,
-                  questionName
-                );
-              let formattedOptions =
-                getOptionsOfQuestionByDatasetIdAndQuestionName(
-                  this.datasetId,
-                  questionName
-                );
-
-              switch (componentType) {
-                case COMPONENT_TYPE.MULTI_LABEL:
-                case COMPONENT_TYPE.SINGLE_LABEL:
-                case COMPONENT_TYPE.RATING:
-                case COMPONENT_TYPE.RANKING:
-                  formattedOptions = formattedOptions.map((option) => {
-                    const currentOptionsFromForm = this.inputs.find(
-                      (input) => input.name === questionName
-                    )?.options;
-                    const currentOption = currentOptionsFromForm.find(
-                      (currentOption) => currentOption.id === option.id
-                    );
-
-                    return {
-                      ...currentOption,
-                    };
-                  });
-                  break;
-                case COMPONENT_TYPE.FREE_TEXT:
-                  formattedOptions = [
-                    {
-                      id: formattedOptions[0].id,
-                      value: newResponse.value,
-                    },
-                  ];
-                  break;
-                default:
-                  console.log(`The component type ${componentType} is unknown`);
-                  return;
-              }
-
-              formattedRecordResponsesForOrm.push({
-                id: responsesFromApi.id,
-                question_name: questionName,
-                user_id: responsesFromApi.user_id,
-                record_id: responsesFromApi.record_id,
-                options: formattedOptions,
-              });
-            }
-          );
-        }
-      }
-      return formattedRecordResponsesForOrm;
-    },
-    factoryInputsToResponseValues() {
-      let responseByQuestionName = {};
-
-      this.inputs.forEach((input) => {
-        switch (input.component_type) {
-          case COMPONENT_TYPE.MULTI_LABEL: {
-            const selectedOptions =
-              input.options?.filter((option) => option.is_selected) ?? false;
-
-            if (selectedOptions?.length) {
-              responseByQuestionName[input.name] = {
-                value: selectedOptions.map((option) => option.value),
-              };
-            }
-            break;
-          }
-          case COMPONENT_TYPE.SINGLE_LABEL:
-          case COMPONENT_TYPE.RATING: {
-            const selectedOption =
-              input.options?.find((option) => option.is_selected) ?? false;
-
-            if (selectedOption) {
-              responseByQuestionName[input.name] = {
-                value: selectedOption.value,
-              };
-            }
-            break;
-          }
-          case COMPONENT_TYPE.FREE_TEXT: {
-            const text = input.options[0]?.value.trim();
-
-            if (text) {
-              responseByQuestionName[input.name] = {
-                value: text,
-              };
-            }
-
-            break;
-          }
-          case COMPONENT_TYPE.RANKING: {
-            if (input.options.some((o) => !o.rank)) return;
-
-            responseByQuestionName[input.name] = {
-              value: input.options,
-            };
-
-            break;
-          }
-          default:
-            console.log(
-              `The component type ${input.component_type} is unknown, the response can't be save`
-            );
-        }
-      });
-      return responseByQuestionName;
-    },
-    showNotificationComponent(message, typeOfToast) {
-      Notification.dispatch("notify", {
-        message,
-        numberOfChars: message.length,
-        type: typeOfToast,
-      });
-    },
-    emitIsQuestionsFormUntouched(isFormUntouched) {
-      this.$emit("on-question-form-touched", !isFormUntouched);
-      // TODO: Once notifications are centralized in one single point, we can remove this.
-      this.$root.$emit("are-responses-untouched", isFormUntouched);
     },
   },
 };
@@ -582,7 +251,8 @@ export default {
   min-width: 0;
   justify-content: space-between;
   border-radius: $border-radius-m;
-  box-shadow: $shadow;
+  border: 1px solid transparent;
+  background: palette(white);
   &__header {
     align-items: baseline;
   }
@@ -598,19 +268,35 @@ export default {
       color: $black-37;
       outline: 0;
       text-decoration: none;
-      &:hover {
+      &:hover,
+      &:focus {
         text-decoration: underline;
       }
     }
   }
   &__content {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: $base-space * 4;
     padding: $base-space * 3;
     overflow: auto;
+    scroll-behavior: smooth;
   }
-  &.--edited-form {
+
+  &.--pending {
+    border-color: transparent;
+    &:not(.--focused-form) {
+      box-shadow: $shadow;
+    }
+  }
+  &.--discarded {
+    border-color: #c3c3c3;
+  }
+  &.--submitted {
+    border-color: $primary-color;
+  }
+  &.--focused-form {
     border-color: palette(brown);
   }
 }
@@ -631,7 +317,44 @@ export default {
   }
 }
 
-.error-message {
-  color: $danger;
+.draft {
+  position: absolute;
+  right: $base-space * 2;
+  top: $base-space;
+  user-select: none;
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  align-items: center;
+  margin: 0;
+  @include font-size(12px);
+  color: $black-37;
+  font-weight: 500;
+  p {
+    margin: 0;
+    &:hover {
+      .tooltip {
+        opacity: 1;
+        height: auto;
+        width: auto;
+        overflow: visible;
+      }
+    }
+  }
+  .tooltip {
+    opacity: 0;
+    height: auto;
+    width: 0;
+    @extend %tooltip;
+    top: 50%;
+    transform: translateY(-50%);
+    right: calc(100% + 10px);
+    overflow: hidden;
+    &:before {
+      position: absolute;
+      @extend %triangle-right;
+      left: 100%;
+    }
+  }
 }
 </style>

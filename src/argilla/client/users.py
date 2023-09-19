@@ -22,14 +22,19 @@ from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
     BaseClientError,
     NotFoundApiError,
+    ValidationApiError,
 )
 from argilla.client.sdk.users import api as users_api
-from argilla.client.sdk.users.models import UserCreateModel, UserModel, UserRole
+from argilla.client.sdk.users.models import UserModel, UserRole
+from argilla.client.sdk.v1.users import api as users_api_v1
+from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
+from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
     import httpx
 
     from argilla.client.sdk.client import AuthenticatedClient
+    from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 
 
 class User:
@@ -42,14 +47,13 @@ class User:
         id: the ID of the user to be managed. Defaults to None.
 
     Attributes:
-        __client: the `httpx.Client` initialized to interact with the Argilla API.
+        _client: the `httpx.Client` initialized to interact with the Argilla API.
         id: the ID of the user.
         username: the username of the user.
         first_name: the first name of the user.
         last_name: the last name of the user. Defaults to None.
         full_name: the full name of the user. Defaults to None.
         role: the role of the user.
-        workspaces: the list of workspaces the user is linked to. Defaults to None.
         api_key: the API key of the user.
         inserted_at: the datetime when the user was created.
         updated_at: the datetime when the user was last updated.
@@ -58,17 +62,16 @@ class User:
         >>> from argilla import rg
         >>> user = rg.User.from_name("my-user") # or `User.from_id("...")`
         >>> print(user)
-        User(id='...', username='my-user', first_name='Luke', last_name="Skywalker', full_name='Luke Skywalker', role='annotator', workspaces=['my-workspace'], api_key='...', inserted_at=datetime.datetime(2021, 8, 31, 10, 0, 0), updated_at=datetime.datetime(2021, 8, 31, 10, 0, 0))
+        User(id='...', username='my-user', role='annotator', first_name='Luke', last_name="Skywalker', full_name='Luke Skywalker', role='annotator', api_key='...', inserted_at=datetime.datetime(2021, 8, 31, 10, 0, 0), updated_at=datetime.datetime(2021, 8, 31, 10, 0, 0))
     """
 
-    __client: "httpx.Client"
+    _client: "httpx.Client"  # Required to be able to use `allowed_for_roles` decorator
     username: str
     id: UUID
     first_name: str
     last_name: Optional[str]
     full_name: Optional[str]
     role: UserRole
-    workspaces: Optional[List[str]]
     api_key: str
     inserted_at: datetime
     updated_at: datetime
@@ -106,12 +109,51 @@ class User:
             error_msg += f" As the `name` argument is not None, you should use `User.from_name('{name}')` instead."
         raise Exception(error_msg)
 
+    @property
+    def workspaces(self) -> Optional[List["WorkspaceModel"]]:
+        """Returns the workspace names the current user is linked to.
+
+        Returns:
+            A list of `WorkspaceModel` the current user is linked to.
+        """
+        connected_user = users_api.whoami_httpx(self._client).parsed
+        if connected_user.role == UserRole.owner:
+            return users_api_v1.list_user_workspaces(self._client, self.id).parsed
+        return workspaces_api_v1.list_workspaces_me(self._client).parsed
+
+    @property
+    def is_owner(self) -> bool:
+        """Returns whether the current user is an owner or not.
+
+        Returns:
+            A boolean indicating whether the current user is an owner or not.
+        """
+        return self.role == UserRole.owner
+
+    @property
+    def is_admin(self) -> bool:
+        """Returns whether the current user is an admin or not.
+
+        Returns:
+            A boolean indicating whether the current user is an admin or not.
+        """
+        return self.role == UserRole.admin
+
+    @property
+    def is_annotator(self) -> bool:
+        """Returns whether the current user is an annotator or not.
+
+        Returns:
+            A boolean indicating whether the current user is an annotator or not.
+        """
+        return self.role == UserRole.annotator
+
     def __repr__(self) -> str:
         return (
             f"User(id={self.id}, username={self.username}, role={self.role},"
-            f" workspaces={self.workspaces}, api_key={self.api_key},"
-            f" first_name={self.first_name}, last_name={self.last_name}, role={self.role},"
-            f" inserted_at={self.inserted_at}, updated_at={self.updated_at})"
+            f" api_key={self.api_key}, first_name={self.first_name},"
+            f" last_name={self.last_name}, inserted_at={self.inserted_at},"
+            f" updated_at={self.updated_at})"
         )
 
     @staticmethod
@@ -125,11 +167,13 @@ class User:
         except Exception as e:
             raise RuntimeError(f"The `rg.active_client()` is not available or not respoding.") from e
 
+    @allowed_for_roles(roles=[UserRole.owner])
     def delete(self) -> None:
         """Deletes the user from Argilla.
 
         Raises:
-            BaseClientError: if the user cannot be deleted from Argilla.
+            ValueError: if the user doesn't exist in Argilla.
+            RuntimeError: if the user cannot be deleted from Argilla.
 
         Examples:
             >>> from argilla import rg
@@ -137,7 +181,7 @@ class User:
             >>> user.delete()
         """
         try:
-            users_api.delete_user(self.__client, user_id=self.id)
+            users_api.delete_user(self._client, user_id=self.id)
         except NotFoundApiError as e:
             raise ValueError(
                 f"User with username=`{self.username}` doesn't exist in Argilla, so please"
@@ -150,20 +194,45 @@ class User:
     def __new_instance(cls, client: Optional["httpx.Client"] = None, user: Optional["UserModel"] = None) -> "User":
         """Returns a new `User` instance."""
         instance = cls.__new__(cls)
-        instance.__client = client or cls.__active_client()
+        instance._client = client or cls.__active_client()
         if isinstance(user, UserModel):
-            instance.__dict__.update(user.dict())
+            instance.__dict__.update(user.dict(exclude={"workspaces"}))
         return instance
 
     @classmethod
+    @allowed_for_roles(roles=[UserRole.owner])
     def create(
         cls,
         username: str,
-        password: Union[str, UUID],
+        password: str,
+        *,
         first_name: Optional[str] = None,
         last_name: Optional[str] = None,
         role: Optional[UserRole] = None,
+        workspaces: Optional[List[str]] = None,
     ) -> "User":
+        """Creates a new user in Argilla.
+
+        Args:
+            username: the username of the user to be created.
+            password: the password of the user to be created.
+            first_name: the first name of the user to be created. Defaults to None.
+            last_name: the last name of the user to be created. Defaults to None.
+            role: the role of the user to be created. Defaults to None.
+            workspaces: a list of workspace names the user to be created is linked to. Defaults to None.
+
+        Returns:
+            A new `User` instance.
+
+        Raises:
+            KeyError: if the user already exists in Argilla.
+            ValueError: if the provided parameters are not valid.
+            RuntimeError: if the user cannot be created in Argilla.
+
+        Examples:
+            >>> from argilla import rg
+            >>> user = rg.User.create("my-user", "my-password", role="admin")
+        """
         if not first_name:
             warnings.warn(
                 "Since the `first_name` hasn't been provided, it will be set to the same value as the `username`."
@@ -177,24 +246,30 @@ class User:
         try:
             user = users_api.create_user(
                 client,
-                **UserCreateModel(
-                    username=username,
-                    password=str(password),
-                    first_name=first_name,
-                    last_name=last_name,
-                    role=role,
-                ).dict(),
+                username=username,
+                password=password,
+                first_name=first_name,
+                last_name=last_name,
+                role=role,
+                workspaces=workspaces,
             ).parsed
             return cls.__new_instance(client, user)
         except AlreadyExistsApiError as e:
-            raise ValueError(
+            raise KeyError(
                 f"User with username=`{username}` already exists in Argilla, so please"
                 " make sure that the name you provided is a unique one."
+            ) from e
+        except ValidationApiError as e:
+            response = e.ctx["response"]
+            raise ValueError(
+                f"User with username=`{username}` cannot be created in Argilla, as"
+                f" the provided data is not valid. Please, check the following error: {response}"
             ) from e
         except BaseClientError as e:
             raise RuntimeError(f"Error while creating user with username=`{username}` in Argilla.") from e
 
     @classmethod
+    @allowed_for_roles(roles=[UserRole.owner])
     def from_id(cls, id: UUID) -> "User":
         """Gets an existing user from Argilla by its ID.
 
@@ -227,6 +302,7 @@ class User:
             raise RuntimeError(f"Error while retrieving user with id=`{id}` from Argilla.") from e
 
     @classmethod
+    @allowed_for_roles(roles=[UserRole.owner])
     def from_name(cls, name: str) -> "User":
         """Gets an existing user from Argilla by its name.
 
@@ -286,6 +362,7 @@ class User:
             raise RuntimeError("Error while retrieving the current user from Argilla.") from e
 
     @classmethod
+    @allowed_for_roles(roles=[UserRole.owner])
     def list(cls) -> Iterator["User"]:
         """Lists all the users in Argilla.
 

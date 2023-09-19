@@ -14,7 +14,8 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Type, TypeVar, cast
+from enum import Enum
+from typing import Any, Dict, List, Optional, Type, TypeVar, Union, cast
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -23,19 +24,10 @@ from argilla.server.contexts import accounts
 from argilla.server.daos.datasets import BaseDatasetSettingsDB, DatasetsDAO
 from argilla.server.daos.models.datasets import BaseDatasetDB
 from argilla.server.database import get_async_db
-from argilla.server.errors import (
-    EntityAlreadyExistsError,
-    EntityNotFoundError,
-    ForbiddenOperationError,
-    WrongTaskError,
-)
+from argilla.server.errors import EntityAlreadyExistsError, EntityNotFoundError, ForbiddenOperationError, WrongTaskError
 from argilla.server.models import User, Workspace
-from argilla.server.policies import (
-    DatasetPolicy,
-    DatasetSettingsPolicy,
-    is_authorized,
-)
-from argilla.server.schemas.datasets import CreateDatasetRequest, Dataset
+from argilla.server.policies import DatasetPolicy, DatasetSettingsPolicy, is_authorized
+from argilla.server.schemas.v0.datasets import CreateDatasetRequest, Dataset
 
 
 class ServiceBaseDataset(BaseDatasetDB):
@@ -90,7 +82,7 @@ class DatasetsService:
         name: str,
         workspace: str,
         as_dataset_class: Type[ServiceDataset] = ServiceBaseDataset,
-        task: Optional[str] = None,
+        task: Optional[Union[str, Enum]] = None,
     ) -> ServiceDataset:
         found_dataset = self.__dao__.find_by_name(name=name, workspace=workspace, as_dataset_class=as_dataset_class)
 

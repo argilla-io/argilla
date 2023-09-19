@@ -38,9 +38,9 @@ You can set following environment variables to further configure your server and
 
 - `ARGILLA_BASE_URL`: If you want to launch the Argilla server in a specific base path other than /, you should set up this environment variable. This can be useful when running Argilla behind a proxy that adds a prefix path to route the service (Default: "/").
 
-- `CORS_ORIGINS`: List of host patterns for CORS origin access.
+- `ARGILLA_CORS_ORIGINS`: List of host patterns for CORS origin access.
 
-- `DOCS_ENABLED`: If False, disables openapi docs endpoint at */api/docs*.
+- `ARGILLA_DOCS_ENABLED`: If False, disables openapi docs endpoint at */api/docs*.
 
 - `ARGILLA_ENABLE_TELEMETRY`: If False, disables telemetry for usage metrics.
 

@@ -20,10 +20,10 @@ from datasets import DatasetDict
 
 from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.base import ArgillaTrainerSkeleton
-from argilla.utils.dependency import require_version
+from argilla.utils.dependency import require_dependencies
 
 
-class AutoTrainMixIn:
+class AutoTrainMixin:
     def prepare_dataset(self, data_dict: Optional[dict] = {}) -> None:
         """
         This function prepares a dataset for autotrain using a dictionary of data and specific column
@@ -104,7 +104,7 @@ class AutoTrainMixIn:
         return job_params
 
 
-class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainMixIn):
+class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainMixin):
     _logger = logging.getLogger("ArgillaAutoTrainTrainer")
     _logger.setLevel(logging.INFO)
 
@@ -114,8 +114,7 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainMixIn):
     except KeyError:
         raise KeyError("Please set the `AUTOTRAIN_USERNAME` and `HF_AUTH_TOKEN` environment variables.")
 
-    require_version("autotrain-advanced")
-    require_version("datasets")
+    require_dependencies(["autotrain-advanced", "datasets"])
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -128,6 +127,7 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainMixIn):
 
         if self._model is None:
             self._model = "bert-base-uncased"
+            self._logger.warning(f"No model defined. Using the default model {self._model}.")
 
         data_dict = {}
         self._num_samples = 0

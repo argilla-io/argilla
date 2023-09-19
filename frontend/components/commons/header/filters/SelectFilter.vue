@@ -134,7 +134,7 @@ export default {
       if (text === undefined) {
         return sortedOptions;
       }
-      let filtered = sortedOptions.filter(([id]) =>
+      const filtered = sortedOptions.filter(([id]) =>
         id.toLowerCase().match(text.toLowerCase())
       );
       return filtered;

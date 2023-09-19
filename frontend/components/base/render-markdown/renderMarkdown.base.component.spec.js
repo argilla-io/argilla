@@ -7,6 +7,11 @@ const options = {
   propsData: {
     markdown: "# example<script><TABLE> \n\n",
   },
+  directives: {
+    "copy-code"() {
+      // copy code directive related to copy button
+    },
+  },
 };
 
 const spyCleanMarkdownMethod = jest.spyOn(

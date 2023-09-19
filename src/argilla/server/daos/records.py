@@ -23,11 +23,7 @@ from argilla.server.daos.backend.base import ClosedIndexError, IndexNotFoundErro
 from argilla.server.daos.backend.generic_elastic import PaginatedSortInfo
 from argilla.server.daos.backend.search.model import BaseRecordsQuery, SortableField
 from argilla.server.daos.models.datasets import DatasetDB
-from argilla.server.daos.models.records import (
-    DaoRecordsSearch,
-    DaoRecordsSearchResults,
-    RecordDB,
-)
+from argilla.server.daos.models.records import DaoRecordsSearch, DaoRecordsSearchResults, RecordDB
 from argilla.server.errors import ClosedDatasetError, MissingDatasetRecordsError
 
 

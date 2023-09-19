@@ -44,6 +44,8 @@ if _TYPE_CHECKING:
         delete_records,
         get_workspace,
         init,
+        list_datasets,
+        list_workspaces,
         load,
         log,
         log_async,
@@ -64,6 +66,7 @@ if _TYPE_CHECKING:
         TokenClassificationRecord,
     )
     from argilla.client.users import User
+    from argilla.client.utils import server_info
     from argilla.client.workspaces import Workspace
     from argilla.datasets import (
         TextClassificationSettings,
@@ -118,6 +121,8 @@ _import_structure = {
         "log_async",
         "set_workspace",
         "active_client",
+        "list_datasets",
+        "list_workspaces",
     ],
     "client.models": [
         "Text2TextRecord",
@@ -134,6 +139,7 @@ _import_structure = {
         "read_pandas",
     ],
     "client.users": ["User"],
+    "client.utils": ["server_info"],
     "client.workspaces": ["Workspace"],
     "monitoring.model_monitor": ["monitor"],
     "listeners.listener": [

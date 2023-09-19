@@ -18,15 +18,11 @@ import logging
 import re
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from argilla.client.models import (
-    Record,
-    TextClassificationRecord,
-    TokenClassificationRecord,
-)
+from argilla.client.models import Record, TextClassificationRecord, TokenClassificationRecord
 from argilla.monitoring.base import BaseMonitor
-from argilla.utils.dependency import require_version
+from argilla.utils.dependency import require_dependencies
 
-require_version("starlette>=0.13.0")
+require_dependencies("starlette>=0.13.0")
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response, StreamingResponse

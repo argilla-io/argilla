@@ -1,47 +1,11 @@
 <template>
-  <div class="training-snippets">
+  <div>
     <base-spinner v-if="$fetchState.pending" />
-    <div v-else-if="!$fetchState.error" class="snippet__container">
-      <BaseTabs
-        v-if="snippetsTabs.length"
-        class="training-snippets__tabs"
-        :tabs="sortedSnippetsTabs"
-        :active-tab="visibleTab"
-        @change-tab="getSelectedLibrary"
-      />
-      <transition v-if="snippet" name="fade" mode="out-in" appear>
-        {{ visibleTab }}
-        <div class="snippet" :key="visibleTab.id" v-if="visibleTab">
-          <h1 v-if="snippetAttributes.title" class="snippet__title --heading5">
-            {{ snippetAttributes.title }}
-          </h1>
-          <h2
-            v-if="snippetAttributes.description"
-            class="snippet__description --body2"
-          >
-            {{ snippetAttributes.description }}
-          </h2>
-          <BaseRenderHtml v-if="parsedSnippet" :html="parsedSnippet" />
-          <div class="library__buttons" v-if="snippetAttributes.links">
-            <p class="library__section__title">Links</p>
-            <base-button
-              v-for="(button, index) in snippetAttributes.links"
-              :key="index"
-              class="library__button primary small text"
-              :href="button.linkLink"
-              target="_blank"
-              >{{ button.linkText }}</base-button
-            >
-          </div>
-        </div>
-      </transition>
-    </div>
+    <documentation-viewer class="dataset-training" v-else :content="content" />
   </div>
 </template>
 
 <script>
-//TODO - ceate new component for feedback task
-import { cloneDeep } from "lodash";
 export default {
   props: {
     datasetTask: {
@@ -59,156 +23,72 @@ export default {
   },
   data() {
     return {
-      selectedComponent: null,
-      currentTaskLibraries: [],
+      content: {
+        tabs: [],
+      },
     };
   },
   async fetch() {
-    const libraries = this.getLibraries();
-    this.getCurrentTaskLibraries(libraries).forEach(async (library) => {
-      const newLib = await libraries(library);
-      this.currentTaskLibraries.push(newLib);
-    });
-  },
-  created() {
-    this.datasetTaskCloned = cloneDeep(this.datasetTask);
-  },
-  computed: {
-    sortedSnippetsTabs() {
-      return this.snippetsTabs.sort();
-    },
-    visibleTab() {
-      return this.selectedComponent || this.snippetsTabs[0] || null;
-    },
-    snippetsTabs() {
-      return this.currentTaskLibraries.map((library) => {
-        return this.getLibrary(library?.attributes?.title);
+    const libraries = await this.getLibraries();
+
+    for (const library of libraries) {
+      this.content.tabs.push({
+        id: library.attributes.title.trim().toLowerCase(),
+        name: library.attributes.title,
+        markdown: this.replaceValues(library.body),
+        ...library.attributes,
       });
-    },
-    task() {
-      switch (this.datasetTaskCloned) {
-        case "TextClassification":
-          return "text-classification";
-        case "TokenClassification":
-          return "token-classification";
-        case "Text2Text":
-          return "text2text";
-        case "FeedbackTask":
-          return "feedback-task";
-      }
-    },
-    parsedSnippet() {
-      const docElement = new DOMParser().parseFromString(
-        this.snippet.html,
-        "text/html"
-      ).documentElement;
-      const preBlocks = docElement.getElementsByTagName("pre");
-      for (let i = 0; i < preBlocks.length; i++) {
-        const code = preBlocks[i].innerText;
-        preBlocks[i].innerHTML = `<base-code code='${code}'></base-code>`;
-      }
-      const html = docElement.getElementsByTagName("body")[0].innerHTML;
-      const htmlWithVariables = html
-        .replace("<my_dataset_name>", this.datasetName)
-        .replace("<my_workspace_name>", this.workspaceName);
-      return `<div>${htmlWithVariables}</div>`;
-    },
-    snippetAttributes() {
-      return this.snippet?.attributes;
-    },
-    snippet() {
-      return (
-        this.currentTaskLibraries.find(
-          (library) => library.attributes.title === this.visibleTab.name
-        ) || {}
-      );
-    },
+    }
   },
   methods: {
-    getCurrentTaskLibraries(libraries) {
-      return (
-        libraries?.keys().filter((library) => library.includes(this.task)) || []
-      );
-    },
-    getSelectedLibrary(id) {
-      this.selectedComponent = this.snippetsTabs.find(
-        (snippet) => snippet.id === id
-      );
-    },
-    getLibrary(name) {
-      return {
-        id: name.trim().toLowerCase(),
-        name,
-      };
+    replaceValues(markdown) {
+      return markdown
+        .replace("<my_dataset_name>", this.datasetName)
+        .replace("<my_workspace_name>", this.workspaceName);
     },
     getLibraries() {
-      let libraries = null;
+      const getCurrentTaskLibraries = (libraries, task) => {
+        return (
+          libraries?.keys().filter((library) => library.includes(task)) ?? []
+        );
+      };
+
+      const tasks = {
+        TextClassification: "text-classification",
+        TokenClassification: "token-classification",
+        Text2Text: "text2text",
+        FeedbackTask: "feedback-task",
+      };
+
       try {
-        libraries = require.context(
+        const libraries = require.context(
           `../../../../docs/_source/_common/snippets/training`,
           true,
           /^[^_]+\.md$/,
           "lazy"
         );
+
+        return Promise.all(
+          getCurrentTaskLibraries(libraries, tasks[this.datasetTask]).map(
+            (library) => libraries(library)
+          )
+        );
       } catch (e) {
         console.log(e);
       }
-      return libraries;
+
+      return [];
     },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-.training-snippets {
+.dataset-training {
   min-width: 800px;
-  &__tabs.tabs {
-    margin: 0 -2.5em 2em;
-    padding: 0 2.5em;
-  }
 }
-
-.snippet {
-  margin: 0 -2.5em;
-  padding: 0 2.5em;
+:deep(.snippet) {
   max-height: calc(100vh - 240px);
   overflow: auto;
-  @extend %hide-scrollbar;
-  &__container {
-    width: 800px;
-  }
-  &__code {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  &__description {
-    font-weight: normal;
-    margin-bottom: $base-space * 2;
-  }
-  :deep(em) {
-    color: $black-54;
-  }
-}
-.library {
-  &__buttons {
-    display: flex;
-    flex-direction: column;
-    gap: $base-space;
-    margin-top: $base-space * 3;
-  }
-  &__button {
-    display: inline-flex;
-    padding: 0;
-    @include line-height(16px);
-  }
-  &__section {
-    &__title {
-      margin-bottom: $base-space;
-      color: $black-54;
-      font-weight: 600;
-      @include font-size(15px);
-    }
-  }
 }
 </style>
