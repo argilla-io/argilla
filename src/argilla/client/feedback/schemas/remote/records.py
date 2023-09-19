@@ -13,12 +13,12 @@
 #  limitations under the License.
 
 import warnings
-from typing import Any, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
-import httpx
 from pydantic import BaseModel, Field
 
+from argilla.client.api import active_client
 from argilla.client.feedback.schemas.records import FeedbackRecord, SuggestionSchema
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
@@ -26,13 +26,19 @@ from argilla.client.sdk.v1.records import api as records_api_v1
 from argilla.client.sdk.v1.suggestions import api as suggestions_api_v1
 from argilla.client.utils import allowed_for_roles
 
+if TYPE_CHECKING:
+    import httpx
+
+    from argilla.client.sdk.v1.datasets.models import FeedbackSuggestionModel
+    from argilla.client.sdk.v1.records.models import FeedbackItemModel
+
 
 class RemoteClient(BaseModel):
-    client: httpx.Client
+    client: "httpx.Client"
 
     # TODO(alvarobartt): here to be able to use the `allowed_for_roles` decorator
     @property
-    def _client(self) -> httpx.Client:
+    def _client(self) -> "httpx.Client":
         return self.client
 
     class Config:
@@ -51,6 +57,34 @@ class RemoteSuggestionSchema(SuggestionSchema, RemoteClient):
             suggestions_api_v1.delete_suggestion(client=self.client, id=self.id)
         except Exception as e:
             raise RuntimeError(f"Failed to delete suggestion with ID `{self.id}` from Argilla.") from e
+
+    def to_local(self) -> "SuggestionSchema":
+        """Converts the `RemoteSuggestionSchema` to a `SuggestionSchema`."""
+        return SuggestionSchema(
+            question_name=self.question_name,
+            type=self.type,
+            score=self.score,
+            value=self.value,
+            agent=self.agent,
+        )
+
+    @classmethod
+    def from_api(
+        cls,
+        payload: "FeedbackSuggestionModel",
+        question_id_to_name: Dict[UUID, str],
+        client: Optional["httpx.Client"] = None,
+    ) -> "RemoteSuggestionSchema":
+        return RemoteSuggestionSchema(
+            client=client or active_client().http_client.httpx,
+            id=payload.id,
+            question_id=payload.question_id,
+            question_name=question_id_to_name[payload.question_id],
+            type=payload.type,
+            score=payload.score,
+            value=payload.value,
+            agent=payload.agent,
+        )
 
     class Config:
         validate_assignment = True
@@ -258,6 +292,35 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteClient):
         except Exception as e:
             raise RuntimeError(f"Failed to delete record with ID `{self.id}` from Argilla.") from e
         return FeedbackRecord(**response.parsed.dict(exclude={"id", "inserted_at", "updated_at"}, exclude_none=True))
+
+    def to_local(self) -> "FeedbackRecord":
+        """Converts the `RemoteFeedbackRecord` to a `FeedbackRecord`."""
+        return FeedbackRecord(
+            fields=self.fields,
+            responses=self.responses,
+            suggestions=[suggestion.to_local() for suggestion in self.suggestions],
+            metadata=self.metadata,
+            external_id=self.external_id,
+        )
+
+    @classmethod
+    def from_api(
+        cls, payload: "FeedbackItemModel", question_id_to_name: Optional[Dict[UUID, str]] = None
+    ) -> "RemoteFeedbackRecord":
+        return RemoteFeedbackRecord(
+            id=payload.id,
+            fields=payload.fields,
+            responses=[response.dict(include={"user_id", "values", "status"}) for response in payload.responses]
+            if payload.responses
+            else [],
+            suggestions=[
+                RemoteSuggestionSchema.from_api(suggestion, question_id_to_name) for suggestion in payload.suggestions
+            ]
+            if payload.suggestions
+            else [],
+            metadata=payload.metadata if payload.metadata else {},
+            external_id=payload.external_id if payload.external_id else None,
+        )
 
     class Config:
         validate_assignment = True
