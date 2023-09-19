@@ -2197,11 +2197,10 @@ class TestSuiteDatasets:
             "inserted_at": vector_settings.inserted_at.isoformat(),
             "updated_at": vector_settings.updated_at.isoformat(),
         }
-        # TODO: uncomment once PR with search engine merged
-        # if dataset_status == DatasetStatus.draft:
-        #     mock_search_engine.configure_index_vectors.assert_not_called()
-        # else:
-        #     mock_search_engine.configure_index_vectors.assert_called_once_with(vector_settings)
+        if dataset_status == DatasetStatus.draft:
+            mock_search_engine.configure_index_vectors.assert_not_called()
+        else:
+            mock_search_engine.configure_index_vectors.assert_called_once_with(vector_settings)
 
     @pytest.mark.parametrize(
         "payload",

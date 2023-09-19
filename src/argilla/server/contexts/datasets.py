@@ -231,16 +231,8 @@ async def get_vector_settings_by_name_and_dataset_id(
 
 
 async def delete_vector_settings(db: "AsyncSession", vector_settings: VectorSettings) -> VectorSettings:
-    async with db.begin_nested():
-        vector_settings = await vector_settings.delete(db)
-
-        if vector_settings.dataset.is_ready:
-            # TODO: call search engine to remove it
-            pass
-
-    await db.commit()
-
-    return vector_settings
+    # TODO: for now the search engine does not allow to delete vector settings
+    return await vector_settings.delete(db)
 
 
 async def create_vector_settings(
@@ -257,8 +249,8 @@ async def create_vector_settings(
         )
 
         if dataset.is_ready:
-            # TODO: call `search_engine.configure_index_vectors` once PR merged
-            pass
+            await db.flush([vector_settings])
+            await search_engine.configure_index_vectors(vector_settings)
 
     await db.commit()
 
