@@ -12,11 +12,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from pydantic import BaseModel
 
 from argilla.client.feedback.schemas.fields import TextField
+
+if TYPE_CHECKING:
+    from argilla.client.sdk.v1.datasets.models import FeedbackFieldModel
 
 
 class RemoteFieldSchema(BaseModel):
@@ -27,4 +31,13 @@ class RemoteFieldSchema(BaseModel):
 
 
 class RemoteTextField(TextField, RemoteFieldSchema):
-    pass
+    @classmethod
+    def from_api(cls, payload: "FeedbackFieldModel") -> "RemoteTextField":
+        return RemoteTextField(
+            id=payload.id,
+            name=payload.name,
+            title=payload.title,
+            required=payload.required,
+            type="text",
+            use_markdown=payload.settings["use_markdown"],
+        )
