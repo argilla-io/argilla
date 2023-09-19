@@ -63,6 +63,17 @@ class FieldSchema(BaseModel):
         """
         raise NotImplementedError
 
+    def to_server_payload(self) -> Dict[str, Any]:
+        """Method that will be used to create the payload that will be sent to Argilla
+        to create a field in the `FeedbackDataset`.
+        """
+        payload = {}
+        payload["name"] = self.name
+        payload["title"] = self.title
+        payload["required"] = self.required
+        payload["settings"] = self.server_settings
+        return payload
+
 
 class TextField(FieldSchema):
     """Schema for the `FeedbackDataset` text fields, which are the ones that will

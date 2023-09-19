@@ -73,6 +73,18 @@ class QuestionSchema(BaseModel):
         """
         raise NotImplementedError
 
+    def to_server_payload(self) -> Dict[str, Any]:
+        """Method that will be used to create the payload that will be sent to Argilla
+        to create a field in the `FeedbackDataset`.
+        """
+        payload = {}
+        payload["name"] = self.name
+        payload["title"] = self.title
+        payload["description"] = self.description
+        payload["required"] = self.required
+        payload["settings"] = self.server_settings
+        return payload
+
 
 class TextQuestion(QuestionSchema):
     """Schema for the `FeedbackDataset` text questions, which are the ones that will
