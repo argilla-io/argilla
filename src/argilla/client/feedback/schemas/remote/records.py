@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Tuple, Union
 from uuid import UUID
 
 import httpx
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from argilla.client.feedback.schemas.records import FeedbackRecord, SuggestionSchema
 from argilla.client.sdk.users.models import UserRole
@@ -27,32 +27,37 @@ from argilla.client.sdk.v1.suggestions import api as suggestions_api_v1
 from argilla.client.utils import allowed_for_roles
 
 
-class RemoteSuggestionSchema(SuggestionSchema):
+class RemoteClient(BaseModel):
     client: httpx.Client
-    id: UUID
-    question_id: UUID
 
     # TODO(alvarobartt): here to be able to use the `allowed_for_roles` decorator
     @property
     def _client(self) -> httpx.Client:
         return self.client
 
+    class Config:
+        arbitrary_types_allowed = True
+        exclude = {"client"}
+
+
+class RemoteSuggestionSchema(SuggestionSchema, RemoteClient):
+    id: UUID
+    question_id: UUID
+
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def delete(self) -> None:
         """Deletes the `RemoteSuggestionSchema` from Argilla."""
         try:
-            suggestions_api_v1.delete_suggestion(client=self._client, id=self.id)
+            suggestions_api_v1.delete_suggestion(client=self.client, id=self.id)
         except Exception as e:
             raise RuntimeError(f"Failed to delete suggestion with ID `{self.id}` from Argilla.") from e
 
     class Config:
-        arbitrary_types_allowed = True
         validate_assignment = True
         allow_mutation = False
-        exclude = {"client"}
 
 
-class RemoteFeedbackRecord(FeedbackRecord):
+class RemoteFeedbackRecord(FeedbackRecord, RemoteClient):
     """Schema for the records of a `RemoteFeedbackDataset`.
 
     Note this schema shouldn't be instantiated directly, but just internally by the
@@ -69,18 +74,12 @@ class RemoteFeedbackRecord(FeedbackRecord):
             question. Defaults to an empty list.
     """
 
-    client: httpx.Client
     name2id: Dict[str, UUID]
 
     id: UUID
     suggestions: Union[Tuple[RemoteSuggestionSchema], List[RemoteSuggestionSchema]] = Field(
         default_factory=tuple, allow_mutation=False
     )
-
-    # TODO(alvarobartt): here to be able to use the `allowed_for_roles` decorator
-    @property
-    def _client(self) -> httpx.Client:
-        return self.client
 
     def __update_suggestions(
         self,
@@ -115,7 +114,7 @@ class RemoteFeedbackRecord(FeedbackRecord):
                 if "question_id" not in suggestion or not suggestion["question_id"]:
                     suggestion["question_id"] = self.name2id[suggestion["question_name"]]
                 if "id" in suggestion:
-                    suggestion = RemoteSuggestionSchema(client=self._client, **suggestion)
+                    suggestion = RemoteSuggestionSchema(client=self.client, **suggestion)
                 else:
                     suggestion = SuggestionSchema(**suggestion)
 
@@ -168,10 +167,10 @@ class RemoteFeedbackRecord(FeedbackRecord):
             elif isinstance(suggestion, RemoteSuggestionSchema):
                 exclude = {"client", "id", "question_name"}
             pushed_suggestion = datasets_api_v1.set_suggestion(
-                client=self._client, record_id=self.id, **suggestion.dict(exclude_none=True, exclude=exclude)
+                client=self.client, record_id=self.id, **suggestion.dict(exclude_none=True, exclude=exclude)
             )
             existing_suggestions[suggestion.question_name] = RemoteSuggestionSchema(
-                client=self._client,
+                client=self.client,
                 question_name=suggestion.question_name,
                 **pushed_suggestion.parsed.dict(exclude_none=True),
             )
@@ -236,7 +235,7 @@ class RemoteFeedbackRecord(FeedbackRecord):
 
         try:
             records_api_v1.delete_suggestions(
-                client=self._client, id=self.id, suggestion_ids=[suggestion.id for suggestion in delete_suggestions]
+                client=self.client, id=self.id, suggestion_ids=[suggestion.id for suggestion in delete_suggestions]
             )
             self.__dict__["suggestions"] = tuple(existing_suggestions.values())
         except Exception as e:
@@ -255,12 +254,11 @@ class RemoteFeedbackRecord(FeedbackRecord):
             PermissionError: if the user does not have either `owner` or `admin` role.
         """
         try:
-            response = records_api_v1.delete_record(client=self._client, id=self.id)
+            response = records_api_v1.delete_record(client=self.client, id=self.id)
         except Exception as e:
             raise RuntimeError(f"Failed to delete record with ID `{self.id}` from Argilla.") from e
         return FeedbackRecord(**response.parsed.dict(exclude={"id", "inserted_at", "updated_at"}, exclude_none=True))
 
     class Config:
-        arbitrary_types_allowed = True
         validate_assignment = True
-        exclude = {"_unified_responses", "client", "name2id"}
+        exclude = {"_unified_responses", "name2id"}
