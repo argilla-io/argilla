@@ -234,6 +234,13 @@ async def _refresh_dataset(dataset: Dataset):
     await dataset.awaitable_attrs.vectors_settings
 
 
+async def _refresh_records(*records:List[Record]):
+    for record in records:
+        await record.awaitable_attrs.vectors
+        await record.awaitable_attrs.responses
+        await record.awaitable_attrs.dataset
+
+
 @pytest.mark.asyncio
 @pytest.mark.skipif(not server_settings.search_engine == "elasticsearch", reason="Running on elasticsearch engine")
 class TestSuiteElasticSearchEngine:
@@ -718,6 +725,46 @@ class TestSuiteElasticSearchEngine:
 
         assert responses.total == 1
         assert responses.items[0].record_id == selected_record.id
+
+    async def test_refresh_index(self, elasticsearch_engine: ElasticSearchEngine, opensearch: OpenSearch):
+        text_field = await TextFieldFactory.create()
+        dataset = await DatasetFactory.create(fields=[text_field])
+
+        await _refresh_dataset(dataset)
+
+        await elasticsearch_engine.create_index(dataset)
+
+        new_field = await TextFieldFactory.create(dataset=dataset)
+        records = await RecordFactory.create_batch(
+            10,
+            fields={text_field.name: "Text field value", new_field.name: "New text field value"},
+            dataset=dataset,
+        )
+
+        await _refresh_dataset(dataset)
+        await _refresh_records(*records)
+
+        with pytest.raises(Exception):
+            await elasticsearch_engine.add_records(dataset, records)
+
+        await elasticsearch_engine.refresh_index(dataset)
+        await elasticsearch_engine.add_records(dataset, records)
+
+        index_name = index_name_for_dataset(dataset)
+        assert opensearch.indices.exists(index=index_name)
+
+        index = opensearch.indices.get(index=index_name)[index_name]
+        assert index["mappings"] == {
+            "dynamic": "strict",
+            "dynamic_templates": [
+                {"status_responses": {"mapping": {"type": "keyword"}, "path_match": "responses.*.status"}}
+            ],
+            "properties": {
+                "id": {"type": "keyword"},
+                "fields": {"properties": {field.name: {"type": "text"} for field in dataset.fields}},
+                "responses": {"type": "object", "dynamic": "true"},
+            },
+        }
 
     async def _configure_record_responses(
         self, opensearch: OpenSearch, dataset: Dataset, response_status: List[ResponseStatusFilter], user: User

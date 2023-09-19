@@ -51,11 +51,8 @@ AsyncSessionLocal = async_sessionmaker(autocommit=False, expire_on_commit=False,
 
 
 async def get_async_db() -> Generator["AsyncSession", None, None]:
-    try:
-        db: "AsyncSession" = AsyncSessionLocal()
+    async with AsyncSessionLocal() as db:
         yield db
-    finally:
-        await db.close()
 
 
 def database_url_sync() -> str:

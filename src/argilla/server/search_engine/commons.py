@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
-from abc import abstractmethod
+from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID
 
@@ -84,7 +84,7 @@ def _mapping_for_field(field: Field) -> dict:
 
 
 @dataclasses.dataclass
-class BaseElasticAndOpenSearchEngine(SearchEngine):
+class BaseElasticAndOpenSearchEngine(SearchEngine, metaclass=ABCMeta):
     """
     Since both ElasticSearch and OpenSearch engines implementations share a lot of code,
     this class create an abstraction for the commons part of the code, letting each child
@@ -195,6 +195,21 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         return await self._process_search_response(response, threshold)
 
+    async def refresh_index(self, dataset: Dataset):
+        mappings = self._configure_index_mappings_update(dataset)
+        settings = self._configure_index_settings_update()
+
+        index_name = index_name_for_dataset(dataset)
+
+        try:
+            await self._close_index_request(index_name)
+            await self._put_index_settings_request(index_name, settings)
+        finally:
+            await self._open_index_request(index_name)
+
+        await self._put_index_mapping_request(index_name=index_name, mappings=mappings)
+        await self._update_by_query_request(index_name)
+
     async def delete_record_response(self, response: Response):
         record = response.record
         index_name = await self._get_index_or_raise(record.dataset)
@@ -207,7 +222,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         index = await self._get_index_or_raise(vector_settings.dataset)
 
         mappings = self._mapping_for_vector_settings(vector_settings)
-        await self.put_index_mapping_request(index, mappings)
+        await self._put_index_mapping_request(index, mappings)
 
     async def search(
         self,
@@ -235,7 +250,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         return await self._process_search_response(response)
 
-    def _configure_index_mappings(self, dataset) -> dict:
+    def _configure_index_mappings(self, dataset: Dataset) -> dict:
         return {
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic.html#dynamic-parameters
             "dynamic": "strict",
@@ -248,6 +263,17 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
                 **self._mapping_for_fields(dataset.fields),
             },
         }
+
+    def _configure_index_mappings_update(self, dataset: Dataset):
+        creation_mappings = self._configure_index_mappings(dataset)
+
+        return creation_mappings["properties"]
+
+    def _configure_index_settings_update(self) -> dict:
+        creation_settings = self._configure_index_settings()
+        creation_settings.pop("number_of_shards")
+
+        return creation_settings
 
     async def _process_search_response(
         self, response: dict, score_threshold: Optional[float] = None
@@ -351,7 +377,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
     @abstractmethod
     def _configure_index_settings(self) -> dict:
-        """Defines settings configuration for the index. Depending on which backend is used, this may differ"""
+        """Defines settings configuration for index creation. Depending on which backend is used, this may differ"""
         pass
 
     @abstractmethod
@@ -390,12 +416,12 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         pass
 
     @abstractmethod
-    async def put_index_mapping_request(self, index: str, mappings: dict):
+    async def _put_index_mapping_request(self, index_name: str, mappings: dict):
         """Executes request for index mapping (partial) update"""
         pass
 
     @abstractmethod
-    async def _index_search_request(self, index: str, query: dict, size: int, from_: int) -> dict:
+    async def _index_search_request(self, index_name: str, query: dict, size: int, from_: int) -> dict:
         """Executes request for search documents on a index"""
         pass
 
@@ -407,4 +433,24 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     @abstractmethod
     async def _bulk_op_request(self, actions: List[Dict[str, Any]]):
         """Executes request for bulk operations"""
+        pass
+
+    @abstractmethod
+    async def _put_index_settings_request(self, index_name, settings):
+        """Executes request for index settings update"""
+        pass
+
+    @abstractmethod
+    async def _open_index_request(self, index_name: str):
+        """Executes request for open an index"""
+        pass
+
+    @abstractmethod
+    async def _close_index_request(self, index_name: str):
+        """Executes request for close an index"""
+        pass
+
+    @abstractmethod
+    async def _update_by_query_request(self, index_name: str, query: Optional[dict] = None):
+        """Executes request for update index documents by query"""
         pass

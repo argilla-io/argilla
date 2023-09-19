@@ -57,20 +57,6 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
     async def close(self):
         await self.client.close()
 
-    def _configure_index_mappings(self, dataset) -> dict:
-        return {
-            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic.html#dynamic-parameters
-            "dynamic": "strict",
-            "dynamic_templates": self._dynamic_templates_for_question_responses(dataset.questions),
-            "properties": {
-                # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
-                "id": {"type": "keyword"},
-                "responses": {"dynamic": True, "type": "object"},
-                **self._mapping_for_vectors_settings(dataset.vectors_settings),
-                **self._mapping_for_fields(dataset.fields),
-            },
-        }
-
     def _configure_index_settings(self):
         return {
             "index.knn": False,
@@ -119,12 +105,12 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
     async def _update_document_request(self, index_name: str, id: str, body: dict):
         await self.client.update(index=index_name, id=id, body=body)
 
-    async def put_index_mapping_request(self, index: str, mappings: dict):
-        await self.client.indices.put_mapping(index=index, body={"properties": mappings})
+    async def _put_index_mapping_request(self, index_name: str, mappings: dict):
+        await self.client.indices.put_mapping(index=index_name, body={"properties": mappings})
 
-    async def _index_search_request(self, index: str, query: dict, size: int, from_: int):
+    async def _index_search_request(self, index_name: str, query: dict, size: int, from_: int):
         return await self.client.search(
-            index=index,
+            index=index_name,
             body={"query": query},
             from_=from_,
             size=size,
@@ -140,3 +126,17 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
         _, errors = await helpers.async_bulk(client=self.client, actions=actions, raise_on_error=False)
         if errors:
             raise RuntimeError(errors)
+
+    async def _put_index_settings_request(self, index_name: str, settings: dict):
+        await self.client.indices.put_settings(index=index_name, body=settings)
+
+    async def _open_index_request(self, index_name: str):
+        await self.client.indices.open(index=index_name, wait_for_active_shards=self.es_number_of_shards)
+
+    async def _close_index_request(self, index_name: str):
+        await self.client.indices.close(
+            index=index_name, ignore_unavailable=True, wait_for_active_shards=self.es_number_of_shards
+        )
+
+    async def _update_by_query_request(self, index_name: str, query: Optional[dict] = None):
+        await self.client.update_by_query(index=index_name, body={"query": query or {}}, slices="auto")

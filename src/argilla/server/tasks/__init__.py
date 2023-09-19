@@ -11,3 +11,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from argilla.server.tasks.base import background_tasks, BackgroundTasks
+
+
+def get_background_tasks() -> BackgroundTasks:
+    return background_tasks

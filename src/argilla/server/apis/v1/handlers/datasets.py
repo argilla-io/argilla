@@ -45,6 +45,9 @@ from argilla.server.schemas.v1.datasets import (
 )
 from argilla.server.search_engine import SearchEngine, UserResponseStatusFilter, get_search_engine
 from argilla.server.security import auth
+from argilla.server.settings import settings
+from argilla.server.tasks import get_background_tasks
+from argilla.server.tasks.base import BackgroundTasks, IPCBackgroundTasksExecutor
 from argilla.server.utils import parse_uuids
 from argilla.utils.telemetry import TelemetryClient, get_telemetry_client
 
@@ -449,3 +452,20 @@ async def update_dataset(
     await authorize(current_user, DatasetPolicyV1.update(dataset))
 
     return await datasets.update_dataset(db, dataset=dataset, dataset_update=dataset_update)
+
+
+@router.post("/datasets/{dataset_id}/refresh-search")
+async def refresh_search(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    dataset_id: UUID,
+    background_tasks: BackgroundTasks = Depends(get_background_tasks),
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = await _get_dataset(db, dataset_id)
+
+    background_tasks.execute(
+        "refresh-search-engine-index",
+        engine=settings.search_engine,
+        dataset_id=dataset_id,
+    )

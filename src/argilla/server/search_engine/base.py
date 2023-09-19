@@ -112,6 +112,10 @@ class SearchEngine(metaclass=ABCMeta):
         pass
 
     @abstractmethod
+    async def refresh_index(self, dataset: Dataset):
+        pass
+
+    @abstractmethod
     async def add_records(self, dataset: Dataset, records: Iterable[Record]):
         pass
 

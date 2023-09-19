@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import Any, AsyncGenerator, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from elasticsearch8 import AsyncElasticsearch, helpers
 
@@ -22,7 +22,10 @@ from argilla.server.search_engine import (
     SearchEngine,
     UserResponseStatusFilter,
 )
-from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine, field_name_for_vector_settings
+from argilla.server.search_engine.commons import (
+    BaseElasticAndOpenSearchEngine,
+    field_name_for_vector_settings,
+)
 from argilla.server.settings import settings
 
 
@@ -77,7 +80,7 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
                 "index": True,
                 # can similarity property also be part of config @frascuchon ?
                 # relates vector search similarity metric
-                "similarity": "l2_norm",  ## default value regarding the knn best practices es documentation
+                "similarity": "l2_norm",  # default value regarding the knn best practices es documentation
             }
         }
 
@@ -110,12 +113,15 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
     async def _update_document_request(self, index_name: str, id: str, body: dict):
         await self.client.update(index=index_name, id=id, **body)
 
-    async def put_index_mapping_request(self, index: str, mappings: dict):
-        await self.client.indices.put_mapping(index=index, properties=mappings)
+    async def _put_index_settings_request(self, index_name: str, settings: dict):
+        await self.client.indices.put_settings(index=index_name, settings=settings)
 
-    async def _index_search_request(self, index: str, query: dict, size: int, from_: int):
+    async def _put_index_mapping_request(self, index_name: str, mappings: dict):
+        await self.client.indices.put_mapping(index=index_name, properties=mappings)
+
+    async def _index_search_request(self, index_name: str, query: dict, size: int, from_: int):
         return await self.client.search(
-            index=index,
+            index=index_name,
             query=query,
             from_=from_,
             size=size,
@@ -131,3 +137,14 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
         _, errors = await helpers.async_bulk(client=self.client, actions=actions, raise_on_error=False)
         if errors:
             raise RuntimeError(errors)
+
+    async def _open_index_request(self, index_name: str):
+        await self.client.indices.open(index=index_name, wait_for_active_shards=self.es_number_of_shards)
+
+    async def _close_index_request(self, index_name: str):
+        await self.client.indices.close(
+            index=index_name, ignore_unavailable=True, wait_for_active_shards=self.es_number_of_shards
+        )
+
+    async def _update_by_query_request(self, index_name: str, query: Optional[dict] = None):
+        await self.client.update_by_query(index=index_name, query=query, slices="auto")
