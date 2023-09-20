@@ -18,6 +18,11 @@ export abstract class QuestionAnswer {
     this.fill(answer);
   }
 
+  forceComplete(answer: Answer) {
+    this.answer = answer;
+    this.fill(answer);
+  }
+
   protected abstract fill(answer: Answer);
   abstract clear();
   abstract get isValid(): boolean;
