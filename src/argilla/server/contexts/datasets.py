@@ -31,10 +31,12 @@ from argilla.server.models import (
     ResponseStatus,
     ResponseValue,
     Suggestion,
+    Vector,
     VectorSettings,
 )
 from argilla.server.models.suggestions import SuggestionCreateWithRecordId
 from argilla.server.schemas.v1.datasets import DatasetCreate, FieldCreate, QuestionCreate, RecordsCreate
+from argilla.server.schemas.v1.datasets import VectorSettings as VectorSettingsSchema
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
 from argilla.server.search_engine import SearchEngine
@@ -389,7 +391,7 @@ async def create_records(
                     user = await accounts.get_user_by_id(db, response.user_id)
                     if not user:
                         raise ValueError(
-                            f"Provided user_id={response.user_id!r} for response at position {i} and record at "
+                            f"Provided user_id={str(response.user_id)} for response at position {i} of record at "
                             f"position {record_i} does not exist"
                         )
                     users.append(user.id)
@@ -413,7 +415,7 @@ async def create_records(
                     question = await get_question_by_id(db, suggestion.question_id)
                     if not question:
                         raise ValueError(
-                            f"Provided question_id={suggestion.question_id!r} for suggestion at position {i} and "
+                            f"Provided question_id={str(suggestion.question_id)} for suggestion at position {i} of "
                             f"record at position {record_i} does not exist"
                         )
                     question_settings = question.parsed_settings
@@ -436,14 +438,42 @@ async def create_records(
                     )
                 )
 
+        if record_create.vectors:
+            vectors_settings: Dict[UUID, VectorSettingsSchema] = {}
+            for i, vector in enumerate(record_create.vectors):
+                vector_settings = vectors_settings.get(vector.vector_settings_id, None)
+
+                if not vector_settings:
+                    vector_settings = await get_vector_settings_by_id(db, vector.vector_settings_id)
+                    if not vector_settings:
+                        raise ValueError(
+                            f"Provided vector_settings_id={str(vector.vector_settings_id)} for vector at position {i} of "
+                            f"record at position {record_i} does not exist"
+                        )
+                    vector_settings = VectorSettingsSchema.from_orm(vector_settings)
+                    vectors_settings[vector.vector_settings_id] = vector_settings
+
+                try:
+                    vector_settings.check_vector(vector)
+                except ValueError as e:
+                    raise ValueError(
+                        f"Provided vector at position {i} and record at position {record_i} is not valid: {e}"
+                    ) from e
+
+                record.vectors.append(Vector(value=vector.value, vector_settings_id=vector.vector_settings_id))
+
         records.append(record)
 
     async with db.begin_nested():
         db.add_all(records)
         await db.flush(records)
+        vectors = []
         for record in records:
             await record.awaitable_attrs.responses
+            vectors.extend(await record.awaitable_attrs.vectors)
         await search_engine.add_records(dataset, records)
+        if vectors:
+            await search_engine.set_records_vectors(dataset, vectors)
 
     await db.commit()
 

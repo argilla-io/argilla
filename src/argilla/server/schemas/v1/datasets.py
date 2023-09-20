@@ -337,6 +337,11 @@ class VectorSettings(BaseModel):
     class Config:
         orm_mode = True
 
+    def check_vector(self, vector: "VectorCreate") -> None:
+        num_elements = len(vector.value)
+        if num_elements != self.dimensions:
+            raise ValueError(f"vector must have {self.dimensions} elements, got {num_elements} elements")
+
 
 class VectorsSettings(BaseModel):
     items: List[VectorSettings]
@@ -377,6 +382,11 @@ class Response(BaseModel):
         orm_mode = True
 
 
+class Vector(BaseModel):
+    vector_settings_id: UUID
+    value: List[float]
+
+
 class RecordGetterDict(GetterDict):
     def get(self, key: str, default: Any) -> Any:
         if key == "metadata":
@@ -397,6 +407,7 @@ class Record(BaseModel):
     # response: Optional[Response]
     responses: Optional[List[Response]]
     suggestions: Optional[List[Suggestion]]
+    vectors: Optional[List[Vector]]
     inserted_at: datetime
     updated_at: datetime
 
@@ -427,27 +438,38 @@ UserResponseCreate = Annotated[
 ]
 
 
+class VectorCreate(BaseModel):
+    vector_settings_id: UUID
+    value: List[float] = PydanticField(..., min_items=1)
+
+
 class RecordCreate(BaseModel):
     fields: Dict[str, Any]
     metadata: Optional[Dict[str, Any]]
     external_id: Optional[str]
     responses: Optional[List[UserResponseCreate]]
     suggestions: Optional[List[SuggestionCreate]]
+    vectors: Optional[List[VectorCreate]]
 
     @validator("responses")
-    def check_user_id_is_unique(cls, values):
-        user_ids = []
+    def check_user_id_is_unique(cls, responses: List[UserResponseCreate]) -> List[UserResponseCreate]:
+        ids = {response.user_id for response in responses}
+        if len(ids) != len(responses):
+            raise ValueError("'responses' contains several responses for the same 'user_id'")
+        return responses
 
-        for value in values:
-            if value.user_id in user_ids:
-                raise ValueError(f"Responses contains several responses for the same user_id: {str(value.user_id)!r}")
-            user_ids.append(value.user_id)
-
-        return values
+    @validator("vectors")
+    def check_vector_settings_id_is_unique(cls, vectors: List[VectorCreate]) -> List[VectorCreate]:
+        ids = {vector.vector_settings_id for vector in vectors}
+        if len(ids) != len(vectors):
+            raise ValueError("'vectors' contains several items associated to the same 'vector_settings_id'")
+        return vectors
 
 
 class RecordsCreate(BaseModel):
-    items: conlist(item_type=RecordCreate, min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
+    items: List[RecordCreate] = PydanticField(
+        ..., min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS
+    )
 
 
 class TextQuery(BaseModel):

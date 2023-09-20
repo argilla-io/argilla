@@ -70,8 +70,8 @@ def index_name_for_dataset(dataset: Dataset):
     return f"rg.{dataset.id}"
 
 
-def field_name_for_vector_settings(vector_settings: VectorSettings) -> str:
-    return f"vectors.{vector_settings.id}"
+def field_name_for_vector_settings(vector_settings_id: UUID) -> str:
+    return f"vectors.{vector_settings_id}"
 
 
 def _mapping_for_field(field: Field) -> dict:
@@ -154,7 +154,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
                 "_op_type": "update",
                 "_id": vector.record_id,
                 "_index": index_name,
-                "doc": {field_name_for_vector_settings(vector.vector_settings): vector.value},
+                "doc": {field_name_for_vector_settings(vector.vector_settings_id): vector.value},
             }
             for vector in vectors
         ]
