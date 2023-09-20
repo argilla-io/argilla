@@ -36,9 +36,7 @@
   </div>
 </template>
 <script>
-import RenderMarkdownBaseComponent from "../render-markdown/RenderMarkdown.base.component.vue";
 export default {
-  components: { RenderMarkdownBaseComponent },
   props: {
     content: {
       type: Object,
@@ -108,3 +106,4 @@ export default {
   }
 }
 </style>
+../base-render-markdown/RenderMarkdown.base.component.vue

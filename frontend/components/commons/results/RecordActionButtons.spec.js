@@ -1,6 +1,6 @@
 import { shallowMount } from "@vue/test-utils";
 import RecordActionButtons from "./RecordActionButtons";
-import BaseButton from "@/components/base/BaseButton";
+import BaseButton from "@/components/base/base-button/BaseButton";
 
 let wrapper = null;
 const options = {
