@@ -67,12 +67,12 @@ class FieldSchema(BaseModel):
         """Method that will be used to create the payload that will be sent to Argilla
         to create a field in the `FeedbackDataset`.
         """
-        payload = {}
-        payload["name"] = self.name
-        payload["title"] = self.title
-        payload["required"] = self.required
-        payload["settings"] = self.server_settings
-        return payload
+        return {
+            "name": self.name,
+            "title": self.title,
+            "required": self.required,
+            "settings": self.server_settings,
+        }
 
 
 class TextField(FieldSchema):
@@ -95,7 +95,7 @@ class TextField(FieldSchema):
 
     @property
     def server_settings(self) -> Dict[str, Any]:
-        settings = {}
-        settings["type"] = self.type
-        settings["use_markdown"] = self.use_markdown or False
-        return settings
+        return {
+            "type": self.type,
+            "use_markdown": self.use_markdown,
+        }

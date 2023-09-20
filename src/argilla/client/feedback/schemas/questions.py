@@ -77,13 +77,13 @@ class QuestionSchema(BaseModel):
         """Method that will be used to create the payload that will be sent to Argilla
         to create a field in the `FeedbackDataset`.
         """
-        payload = {}
-        payload["name"] = self.name
-        payload["title"] = self.title
-        payload["description"] = self.description
-        payload["required"] = self.required
-        payload["settings"] = self.server_settings
-        return payload
+        return {
+            "name": self.name,
+            "title": self.title,
+            "description": self.description,
+            "required": self.required,
+            "settings": self.server_settings,
+        }
 
 
 class TextQuestion(QuestionSchema):
@@ -106,10 +106,10 @@ class TextQuestion(QuestionSchema):
 
     @property
     def server_settings(self) -> Dict[str, Any]:
-        settings = {}
-        settings["type"] = self.type
-        settings["use_markdown"] = self.use_markdown or False
-        return settings
+        return {
+            "type": self.type,
+            "use_markdown": self.use_markdown,
+        }
 
 
 class RatingQuestion(QuestionSchema, LabelMappingMixin):
@@ -133,10 +133,10 @@ class RatingQuestion(QuestionSchema, LabelMappingMixin):
 
     @property
     def server_settings(self) -> Dict[str, Any]:
-        settings = {}
-        settings["type"] = self.type
-        settings["options"] = [{"value": value} for value in self.values]
-        return settings
+        return {
+            "type": self.type,
+            "options": [{"value": value} for value in self.values],
+        }
 
 
 UndefinedType = Literal["undefined"]
