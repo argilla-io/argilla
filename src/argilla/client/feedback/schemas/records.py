@@ -200,7 +200,6 @@ class FeedbackRecord(BaseModel):
     class Config:
         extra = Extra.forbid
         validate_assignment = True
-        exclude = {"_unified_responses"}
 
     @validator("suggestions", always=True)
     def normalize_suggestions(cls, values: Any) -> Tuple:
