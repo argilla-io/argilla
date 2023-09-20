@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING, Any, Optional, Type
 from packaging.version import parse as parse_version
 
 from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
-from argilla.client.feedback.schemas import FeedbackRecord
+from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.types import AllowedQuestionTypes
 from argilla.utils.dependency import requires_dependencies
 

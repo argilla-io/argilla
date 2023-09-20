@@ -20,7 +20,7 @@ from argilla.client.feedback.dataset.mixins import ArgillaMixin, UnificationMixi
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas import FeedbackRecord
+    from argilla.client.feedback.schemas.records import FeedbackRecord
 
 
 class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
