@@ -8,7 +8,7 @@ You can add unlimited users to Argilla datasets so it can be seamlessly used to 
 
 The following figure illustrates the steps to collect feedback from a team of labelers and perform supervised fine-tuning. The steps are: **configure the dataset**, **add records**, **labelers write demonstrations**, **prepare the dataset**, and **fine-tune the SFT model**.
 
-<img src="/_static/images/llms/sft.svg" alt="Demonstration collection for SFT" style="display:block;margin-left:auto;margin-right:auto;">
+<img src="../../_static/images/llms/sft.svg" alt="Demonstration collection for SFT" style="display:block;margin-left:auto;margin-right:auto;">
 
 :::{note}
 The following sections give a detailed, conceptual description of the above steps. For a hands-on practical introduction, go directly to the How-to Guides or Examples section.
