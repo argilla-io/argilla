@@ -13,22 +13,20 @@
 #  limitations under the License.
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Optional, Type
+from typing import Optional, Type
 from uuid import UUID
 
+import httpx
 from pydantic import BaseModel
-
-if TYPE_CHECKING:
-    import httpx
 
 
 class RemoteSchema(BaseModel):
-    id: UUID
-    client: Optional["httpx.Client"] = None
+    id: Optional[UUID] = None
+    client: Optional[httpx.Client] = None
 
     # TODO(alvarobartt): here to be able to use the `allowed_for_roles` decorator
     @property
-    def _client(self) -> Optional["httpx.Client"]:
+    def _client(self) -> Optional[httpx.Client]:
         return self.client
 
     class Config:
@@ -42,8 +40,8 @@ class RemoteSchema(BaseModel):
         """
         raise NotImplementedError
 
-    @abstractmethod
     @classmethod
+    @abstractmethod
     def from_api(cls) -> Type["RemoteSchema"]:
         """Abstract method to be implemented by subclasses to convert the API payload
         into a remote schema."""
