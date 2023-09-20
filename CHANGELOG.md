@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Changed
+
+- Updated `Dockerfile` to use multi stage build ([#3221](https://github.com/argilla-io/argilla/pull/3221) and [#3793](https://github.com/argilla-io/argilla/pull/3793)).
+
 ## [1.16.0](https://github.com/argilla-io/argilla/compare/v1.15.1...v1.16.0)
 
 ### Added
