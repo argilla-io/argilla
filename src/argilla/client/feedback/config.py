@@ -14,7 +14,7 @@
 
 import re
 import warnings
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 try:
     from typing import Annotated
@@ -31,16 +31,29 @@ except ImportError:
         " so you can run `pip install pyyaml`."
     )
 
-from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+from argilla.client.feedback.schemas.remote.shared import RemoteSchema
+from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes, AllowedRemoteFieldTypes
 
 
 class DatasetConfig(BaseModel):
-    fields: List[AllowedFieldTypes]
+    fields: Union[List[AllowedFieldTypes], List[AllowedRemoteFieldTypes]]
     questions: List[Annotated[AllowedQuestionTypes, Field(..., discriminator="type")]]
     guidelines: Optional[str] = None
 
+    def dict(self) -> Dict[str, Any]:
+        return {
+            "fields": [
+                field.to_local().dict() if isinstance(field, RemoteSchema) else field.dict() for field in self.fields
+            ],
+            "questions": [
+                question.to_local().dict() if isinstance(question, RemoteSchema) else question.dict()
+                for question in self.questions
+            ],
+            "guidelines": self.guidelines,
+        }
+
     def to_yaml(self) -> str:
-        return dump(self.dict(exclude={"fields": {"__all__": {"id"}}, "questions": {"__all__": {"id"}}}))
+        return dump(self.dict())
 
     @classmethod
     def from_yaml(cls, yaml: str) -> "DatasetConfig":
