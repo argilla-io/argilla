@@ -328,4 +328,5 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
             else [],
             metadata=payload.metadata if payload.metadata else {},
             external_id=payload.external_id if payload.external_id else None,
+            question_name_to_id={value: key for key, value in question_id_to_name.items()},
         )
