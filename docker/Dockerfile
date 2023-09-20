@@ -24,6 +24,12 @@ ENV USERS_DB=/config/.users.yml
 ENV UVICORN_PORT=6900
 
 RUN useradd -ms /bin/bash worker
+
+# Create argilla volume
+RUN mkdir -p "$ARGILLA_HOME_PATH" && \
+  chown worker:worker "$ARGILLA_HOME_PATH"
+VOLUME $ARGILLA_HOME_PATH
+
 COPY scripts/start_argilla_server.sh /home/worker
 COPY --chown=worker:worker --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
