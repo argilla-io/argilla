@@ -12,16 +12,15 @@ export abstract class QuestionAnswer {
   constructor(public readonly type: QuestionType) {}
 
   complete(answer: Answer) {
+    if (this.answer) return;
+
     this.answer = answer;
     this.fill(answer);
   }
 
-  completeWithSuggestions(suggestion: Suggestion) {
-    if (this.answer) return;
-    if (!suggestion) return;
-
-    this.answer = suggestion;
-    this.fill(suggestion);
+  forceComplete(answer: Answer) {
+    this.answer = answer;
+    this.fill(answer);
   }
 
   protected abstract fill(answer: Answer);
