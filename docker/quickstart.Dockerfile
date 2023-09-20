@@ -5,9 +5,9 @@ FROM argilla/argilla-server:${ARGILLA_VERSION}
 USER root
 
 RUN apt-get update && apt-get install -y \
-    apt-transport-https \
-    gnupg \
-    wget
+  apt-transport-https \
+  gnupg \
+  wget
 
 # Install Elasticsearch signing key
 RUN wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
@@ -20,33 +20,28 @@ COPY scripts/* /
 COPY quickstart.requirements.txt /packages/requirements.txt
 
 RUN \
-    # Indicate that this is a quickstart deployment
-    echo -e "{  \"deployment\":  \"quickstart\" }" > /usr/local/lib/python3.10/site-packages/argilla/server/static/deployment.json && \
-    # Create an user to run the Argilla server and Elasticsearch
-    useradd -ms /bin/bash argilla && \
-    # Create a directory where Elasticsearch and Argilla will store their data
-    mkdir /data && \
-    # Install Elasticsearch and configure it
-    apt-get update && apt-get install -y elasticsearch=8.8.2 && \
-    chown -R argilla:argilla /usr/share/elasticsearch /etc/elasticsearch /var/lib/elasticsearch /var/log/elasticsearch && \
-    chown argilla:argilla /etc/default/elasticsearch && \
-    # Install quickstart image dependencies
-    pip install -r /packages/requirements.txt && \
-    chmod +x /start_quickstart_argilla.sh && \
-    # Give ownership of the data directory to the argilla user
-    chown -R argilla:argilla /data && \
-    # Clean up
-    apt-get remove -y wget gnupg && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm -rf /packages
+  # Indicate that this is a quickstart deployment
+  echo -e "{  \"deployment\":  \"quickstart\" }" > /opt/venv/lib/python3.10/site-packages/argilla/server/static/deployment.json && \
+  # Create a directory where Elasticsearch and Argilla will store their data
+  mkdir /data && \
+  # Install Elasticsearch and configure it
+  apt-get update && apt-get install -y elasticsearch=8.8.2 && \
+  chown -R worker:worker /usr/share/elasticsearch /etc/elasticsearch /var/lib/elasticsearch /var/log/elasticsearch && \
+  chown worker:worker /etc/default/elasticsearch && \
+  # Install quickstart image dependencies
+  pip install -r /packages/requirements.txt && \
+  chmod +x /start_quickstart_argilla.sh && \
+  # Give ownership of the data directory to the argilla user
+  chown -R worker:worker /data && \
+  # Clean up
+  apt-get remove -y wget gnupg && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/* && \
+  rm -rf /packages
 
 COPY config/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
 
-# echo -e "{  \"deployment\":  \"quickstart\" }" \
-# > /usr/local/lmib/python/dist-packages/argilla/server/static/deployment.json
-
-USER argilla
+USER worker
 
 ENV ELASTIC_CONTAINER=true
 
