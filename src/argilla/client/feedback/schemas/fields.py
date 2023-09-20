@@ -86,7 +86,7 @@ class TextField(FieldSchema):
         >>> TextField(name="text_field", title="Text Field")
     """
 
-    type: Literal[FieldTypes.text] = Field(FieldTypes.text, allow_mutation=False)
+    type: Literal[FieldTypes.text] = Field(FieldTypes.text.value, allow_mutation=False)
     use_markdown: bool = False
 
     @property

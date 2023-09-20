@@ -93,7 +93,7 @@ class TextQuestion(QuestionSchema):
         >>> TextQuestion(name="text_question", title="Text Question")
     """
 
-    type: Literal[QuestionTypes.text] = Field(QuestionTypes.text, allow_mutation=False)
+    type: Literal[QuestionTypes.text] = Field(QuestionTypes.text.value, allow_mutation=False)
     use_markdown: bool = False
 
     @property
@@ -120,7 +120,7 @@ class RatingQuestion(QuestionSchema, LabelMappingMixin):
         >>> RatingQuestion(name="rating_question", title="Rating Question", values=[1, 2, 3, 4, 5])
     """
 
-    type: Literal[QuestionTypes.rating] = Field(QuestionTypes.rating, allow_mutation=False)
+    type: Literal[QuestionTypes.rating] = Field(QuestionTypes.rating.value, allow_mutation=False)
     values: List[int] = Field(..., unique_items=True, ge=1, le=10, min_items=2)
 
     @property
@@ -226,7 +226,7 @@ class LabelQuestion(_LabelQuestion):
         >>> LabelQuestion(name="label_question", title="Label Question", labels=["label_1", "label_2"])
     """
 
-    type: Literal[QuestionTypes.label_selection] = Field(QuestionTypes.label_selection, allow_mutation=False)
+    type: Literal[QuestionTypes.label_selection] = Field(QuestionTypes.label_selection.value, allow_mutation=False)
 
 
 class MultiLabelQuestion(_LabelQuestion):
@@ -250,7 +250,7 @@ class MultiLabelQuestion(_LabelQuestion):
     """
 
     type: Literal[QuestionTypes.multi_label_selection] = Field(
-        QuestionTypes.multi_label_selection, allow_mutation=False
+        QuestionTypes.multi_label_selection.value, allow_mutation=False
     )
 
 
@@ -273,7 +273,7 @@ class RankingQuestion(QuestionSchema, LabelMappingMixin):
         >>> RankingQuestion(name="ranking_question", title="Ranking Question", labels=["label_1", "label_2"])
     """
 
-    type: Literal[QuestionTypes.ranking] = Field(QuestionTypes.ranking, allow_mutation=False)
+    type: Literal[QuestionTypes.ranking] = Field(QuestionTypes.ranking.value, allow_mutation=False)
     values: Union[conlist(str, unique_items=True, min_items=2), Dict[str, str]]
 
     @validator("values", always=True)
