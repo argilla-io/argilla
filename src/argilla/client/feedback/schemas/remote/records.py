@@ -16,7 +16,7 @@ import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from argilla.client.api import active_client
 from argilla.client.feedback.schemas.records import FeedbackRecord, ResponseSchema, SuggestionSchema
@@ -112,7 +112,7 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
             question. Defaults to an empty list.
     """
 
-    question_name_to_id: Optional[Dict[str, UUID]] = None
+    question_name_to_id: Optional[Dict[str, UUID]] = Field(..., exclude=True, repr=False)
 
     responses: List[RemoteResponseSchema] = Field(default_factory=list)
     suggestions: Union[Tuple[RemoteSuggestionSchema], List[RemoteSuggestionSchema]] = Field(
@@ -121,7 +121,6 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
 
     class Config:
         validate_assignment = True
-        exclude = {"_unified_responses", "question_name_to_id"}
 
     def __update_suggestions(
         self,
