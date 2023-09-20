@@ -21,8 +21,9 @@ from typing import TYPE_CHECKING, Any, Optional, Type
 from packaging.version import parse as parse_version
 
 from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
+from argilla.client.feedback.schemas.enums import QuestionTypes
 from argilla.client.feedback.schemas.records import FeedbackRecord
-from argilla.client.feedback.schemas.types import AllowedQuestionTypes
+from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
@@ -58,9 +59,9 @@ class HuggingFaceDatasetMixin:
         hf_dataset, hf_features = {}, {}
 
         for field in dataset.fields:
-            if field.settings["type"] not in FIELD_TYPE_TO_PYTHON_TYPE.keys():
+            if field.type not in FIELD_TYPE_TO_PYTHON_TYPE.keys():
                 raise ValueError(
-                    f"Field {field.name} has an unsupported type: {field.settings['type']}, for the moment"
+                    f"Field {field.name} has an unsupported type: {field.type}, for the moment"
                     f" only the following types are supported: {list(FIELD_TYPE_TO_PYTHON_TYPE.keys())}"
                 )
             hf_features[field.name] = Value(dtype="string", id="field")
@@ -68,19 +69,19 @@ class HuggingFaceDatasetMixin:
                 hf_dataset[field.name] = []
 
         for question in dataset.questions:
-            if question.settings["type"] in ["text", "label_selection"]:
+            if question.type in [QuestionTypes.text, QuestionTypes.label_selection]:
                 value = Value(dtype="string", id="question")
-            elif question.settings["type"] == "rating":
+            elif question.type == QuestionTypes.rating:
                 value = Value(dtype="int32", id="question")
-            elif question.settings["type"] == "ranking":
+            elif question.type == QuestionTypes.ranking:
                 value = Sequence({"rank": Value(dtype="uint8"), "value": Value(dtype="string")}, id="question")
-            elif question.settings["type"] in "multi_label_selection":
+            elif question.type in QuestionTypes.multi_label_selection:
                 value = Sequence(Value(dtype="string"), id="question")
             else:
                 raise ValueError(
-                    f"Question {question.name} is of type `{type(question).__name__}`,"
+                    f"Question {question.name} is of type `{question.type}`,"
                     " for the moment only the following question types are supported:"
-                    f" `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}`."
+                    f" `{'`, `'.join([arg.value for arg in QuestionTypes])}`."
                 )
 
             hf_features[question.name] = [
@@ -128,7 +129,7 @@ class HuggingFaceDatasetMixin:
                             "value": None,
                             "status": response.status.value if hasattr(response.status, "value") else response.status,
                         }
-                        if question.settings["type"] == "ranking":
+                        if question.type == QuestionTypes.ranking:
                             value = [r.dict() for r in response.values[question.name].value]
                         else:
                             value = response.values[question.name].value
@@ -172,7 +173,7 @@ class HuggingFaceDatasetMixin:
             **kwargs: the kwargs to pass to `datasets.Dataset.push_to_hub`.
         """
         import huggingface_hub
-        from huggingface_hub import DatasetCardData, HfApi
+        from huggingface_hub import HfApi
 
         # https://github.com/argilla-io/argilla/issues/3468
         from argilla.client.feedback.config import DatasetConfig
@@ -212,10 +213,20 @@ class HuggingFaceDatasetMixin:
             )
 
         if generate_card:
+            from huggingface_hub import DatasetCardData
+
             from argilla.client.feedback.integrations.huggingface.card import (
                 ArgillaDatasetCard,
                 size_categories_parser,
             )
+
+            sample_argilla_record = self.records[0]
+            sample_argilla_record = (
+                sample_argilla_record.to_local()
+                if isinstance(sample_argilla_record, RemoteFeedbackRecord)
+                else sample_argilla_record
+            )
+            sample_huggingface_record = hfds[0]
 
             card = ArgillaDatasetCard.from_template(
                 card_data=DatasetCardData(
@@ -226,18 +237,8 @@ class HuggingFaceDatasetMixin:
                 argilla_fields=self.fields,
                 argilla_questions=self.questions,
                 argilla_guidelines=self.guidelines,
-                argilla_record=json.loads(
-                    self.records[0].json(
-                        exclude={
-                            "client": ...,
-                            "id": ...,
-                            "name2id": ...,
-                            "suggestions": {"__all__": {"id", "client"}},
-                        },
-                        exclude_none=True,
-                    )
-                ),
-                huggingface_record=hfds[0],
+                argilla_record=json.loads(sample_argilla_record.json()),
+                huggingface_record=sample_huggingface_record,
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
 
@@ -385,7 +386,7 @@ class HuggingFaceDatasetMixin:
                             }
                         value = response["value"]
                         if value is not None:
-                            if question.settings["type"] == "ranking":
+                            if question.type == QuestionTypes.ranking:
                                 value = [{"rank": r, "value": v} for r, v in zip(value["rank"], value["value"])]
                             responses[user_id or "user_without_id"]["values"].update({question.name: {"value": value}})
 
