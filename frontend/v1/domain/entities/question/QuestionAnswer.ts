@@ -17,8 +17,8 @@ export abstract class QuestionAnswer {
   }
 
   completeWithSuggestions(suggestion: Suggestion) {
-    if (suggestion) return;
     if (this.answer) return;
+    if (!suggestion) return;
 
     this.answer = suggestion;
     this.fill(suggestion);
