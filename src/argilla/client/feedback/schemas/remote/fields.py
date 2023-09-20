@@ -46,6 +46,5 @@ class RemoteTextField(TextField, RemoteFieldSchema):
             name=payload.name,
             title=payload.title,
             required=payload.required,
-            type="text",
             use_markdown=payload.settings["use_markdown"],
         )
