@@ -14,7 +14,7 @@
 
 from abc import abstractproperty
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Literal, Optional
 
 from pydantic import BaseModel, Extra, Field, validator
 
@@ -90,7 +90,7 @@ class TextField(FieldSchema):
         >>> TextField(name="text_field", title="Text Field")
     """
 
-    type: FieldTypes = Field(FieldTypes.text, allow_mutation=False)
+    type: Literal[FieldTypes.text] = Field(FieldTypes.text, allow_mutation=False)
     use_markdown: bool = False
 
     @property
