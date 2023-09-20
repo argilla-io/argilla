@@ -37,6 +37,15 @@ class RemoteQuestionSchema(BaseModel):
 
 
 class RemoteTextQuestion(TextQuestion, RemoteQuestionSchema):
+    def to_local(self) -> TextQuestion:
+        return TextQuestion(
+            name=self.name,
+            title=self.title,
+            description=self.description,
+            required=self.required,
+            use_markdown=self.use_markdown,
+        )
+
     @classmethod
     def from_api(cls, payload: "FeedbackQuestionModel") -> "RemoteTextQuestion":
         return RemoteTextQuestion(
@@ -50,6 +59,15 @@ class RemoteTextQuestion(TextQuestion, RemoteQuestionSchema):
 
 
 class RemoteRatingQuestion(RatingQuestion, RemoteQuestionSchema):
+    def to_local(self) -> RatingQuestion:
+        return RatingQuestion(
+            name=self.name,
+            title=self.title,
+            description=self.description,
+            required=self.required,
+            values=self.values,
+        )
+
     @classmethod
     def from_api(cls, payload: "FeedbackQuestionModel") -> "RemoteRatingQuestion":
         return RemoteRatingQuestion(
@@ -70,6 +88,16 @@ def _parse_options_from_api(payload: "FeedbackQuestionModel") -> Union[List[str]
 
 
 class RemoteLabelQuestion(LabelQuestion, RemoteQuestionSchema):
+    def to_local(self) -> LabelQuestion:
+        return LabelQuestion(
+            name=self.name,
+            title=self.title,
+            description=self.description,
+            required=self.required,
+            labels=self.labels,
+            visible_labels=self.visible_labels,
+        )
+
     @classmethod
     def from_api(cls, payload: "FeedbackQuestionModel") -> "RemoteLabelQuestion":
         return RemoteLabelQuestion(
@@ -84,6 +112,16 @@ class RemoteLabelQuestion(LabelQuestion, RemoteQuestionSchema):
 
 
 class RemoteMultiLabelQuestion(MultiLabelQuestion, RemoteQuestionSchema):
+    def to_local(self) -> MultiLabelQuestion:
+        return MultiLabelQuestion(
+            name=self.name,
+            title=self.title,
+            description=self.description,
+            required=self.required,
+            labels=self.labels,
+            visible_labels=self.visible_labels,
+        )
+
     @classmethod
     def from_api(cls, payload: "FeedbackQuestionModel") -> "RemoteLabelQuestion":
         return RemoteMultiLabelQuestion(
@@ -98,6 +136,15 @@ class RemoteMultiLabelQuestion(MultiLabelQuestion, RemoteQuestionSchema):
 
 
 class RemoteRankingQuestion(RankingQuestion, RemoteQuestionSchema):
+    def to_local(self) -> RankingQuestion:
+        return RankingQuestion(
+            name=self.name,
+            title=self.title,
+            description=self.description,
+            required=self.required,
+            values=self.values,
+        )
+
     @classmethod
     def from_api(cls, payload: "FeedbackQuestionModel") -> "RemoteLabelQuestion":
         return RemoteRankingQuestion(

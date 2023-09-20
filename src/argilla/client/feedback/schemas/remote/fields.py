@@ -31,6 +31,14 @@ class RemoteFieldSchema(BaseModel):
 
 
 class RemoteTextField(TextField, RemoteFieldSchema):
+    def to_local(self) -> TextField:
+        return TextField(
+            name=self.name,
+            title=self.title,
+            required=self.required,
+            use_markdown=self.use_markdown,
+        )
+
     @classmethod
     def from_api(cls, payload: "FeedbackFieldModel") -> "RemoteTextField":
         return RemoteTextField(
