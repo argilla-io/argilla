@@ -386,6 +386,9 @@ class Vector(BaseModel):
     vector_settings_id: UUID
     value: List[float]
 
+    class Config:
+        orm_mode = True
+
 
 class RecordGetterDict(GetterDict):
     def get(self, key: str, default: Any) -> Any:
@@ -394,6 +397,8 @@ class RecordGetterDict(GetterDict):
         if key == "responses" and "responses" not in self._obj.__dict__:
             return default
         if key == "suggestions" and "suggestions" not in self._obj.__dict__:
+            return default
+        if key == "vectors" and "vectors" not in self._obj.__dict__:
             return default
         return super().get(key, default)
 
@@ -453,16 +458,24 @@ class RecordCreate(BaseModel):
 
     @validator("responses")
     def check_user_id_is_unique(cls, responses: List[UserResponseCreate]) -> List[UserResponseCreate]:
-        ids = {response.user_id for response in responses}
-        if len(ids) != len(responses):
-            raise ValueError("'responses' contains several responses for the same 'user_id'")
+        users_ids = []
+        for response in responses:
+            if response.user_id in users_ids:
+                raise ValueError(
+                    f"'responses' contains several responses for the same 'user_id': {str(response.user_id)}"
+                )
+            users_ids.append(response.user_id)
         return responses
 
     @validator("vectors")
     def check_vector_settings_id_is_unique(cls, vectors: List[VectorCreate]) -> List[VectorCreate]:
-        ids = {vector.vector_settings_id for vector in vectors}
-        if len(ids) != len(vectors):
-            raise ValueError("'vectors' contains several items associated to the same 'vector_settings_id'")
+        vectors_settings_ids = []
+        for vector in vectors:
+            if vector.vector_settings_id in vectors_settings_ids:
+                raise ValueError(
+                    f"'vectors' contains several vectors for the same 'vector_settings_id': {str(vector.vector_settings_id)}"
+                )
+            vectors_settings_ids.append(vector.vector_settings_id)
         return vectors
 
 

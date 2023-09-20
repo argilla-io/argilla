@@ -23,7 +23,6 @@ from argilla.server.apis.v1.handlers.datasets import LIST_DATASET_RECORDS_LIMIT_
 from argilla.server.enums import DatasetStatus, RecordInclude, ResponseStatusFilter
 from argilla.server.models import (
     Dataset,
-    DatasetStatus,
     Field,
     Question,
     Record,
@@ -32,6 +31,7 @@ from argilla.server.models import (
     Suggestion,
     User,
     UserRole,
+    Vector,
     VectorSettings,
     Workspace,
 )
@@ -2311,7 +2311,8 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         await TextFieldFactory.create(name="input", dataset=dataset)
         await TextFieldFactory.create(name="output", dataset=dataset)
-
+        vector_settings_a = await VectorSettingsFactory.create(dataset=dataset, dimensions=384)
+        vector_settings_b = await VectorSettingsFactory.create(dataset=dataset, dimensions=768)
         question_a = await TextQuestionFactory.create(name="input_ok", dataset=dataset)
         question_b = await TextQuestionFactory.create(name="output_ok", dataset=dataset)
 
@@ -2340,10 +2341,26 @@ class TestSuiteDatasets:
                             "value": "yes",
                         },
                     ],
+                    "vectors": [
+                        {
+                            "vector_settings_id": str(vector_settings_a.id),
+                            "value": [0.1] * 384,
+                        },
+                        {
+                            "vector_settings_id": str(vector_settings_b.id),
+                            "value": [0.1] * 768,
+                        },
+                    ],
                 },
                 {
                     "fields": {"input": "Say Hello", "output": "Hi"},
                     "suggestions": [{"question_id": str(question_a.id), "value": "no"}],
+                    "vectors": [
+                        {
+                            "vector_settings_id": str(vector_settings_a.id),
+                            "value": [0.1] * 384,
+                        }
+                    ],
                 },
                 {
                     "fields": {"input": "Say Pello", "output": "Hello World"},
@@ -2386,9 +2403,12 @@ class TestSuiteDatasets:
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 5
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 4
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 3
+        assert (await db.execute(select(func.count(Vector.id)))).scalar() == 3
 
         records = (await db.execute(select(Record))).scalars().all()
+        vectors = (await db.execute(select(Vector))).scalars().all()
         mock_search_engine.add_records.assert_called_once_with(dataset, records)
+        mock_search_engine.set_records_vectors.assert_called_once_with(dataset, vectors)
 
         test_telemetry.assert_called_once_with(
             action="DatasetRecordsCreated", data={"records": len(records_json["items"])}
@@ -2525,7 +2545,7 @@ class TestSuiteDatasets:
             f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
         )
 
-        assert response.status_code == 422, response.json()
+        assert response.status_code == 422
         assert response.json() == {
             "detail": {
                 "code": "argilla.api.errors::ValidationError",
@@ -2533,7 +2553,7 @@ class TestSuiteDatasets:
                     "errors": [
                         {
                             "loc": ["body", "items", 0, "responses"],
-                            "msg": f"Responses contains several responses for the same user_id: {str(owner.id)!r}",
+                            "msg": f"'responses' contains several responses for the same 'user_id': {str(owner.id)}",
                             "type": "value_error",
                         }
                     ],
@@ -2661,6 +2681,89 @@ class TestSuiteDatasets:
         assert response.status_code == 422
         assert response.json() == {"detail": "Error: found fields values for non configured fields: ['output']"}
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
+
+    async def test_create_dataset_records_with_not_valid_vector(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        await TextQuestionFactory.create(name="input_ok", dataset=dataset)
+        vector_settings = await VectorSettingsFactory.create(dataset=dataset, dimensions=1024)
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {"input": "Say Hello"},
+                        "vectors": [{"vector_settings_id": str(vector_settings.id), "value": [1.0, 2.0, 3.0, 4.0]}],
+                    },
+                ]
+            },
+        )
+
+        assert response.status_code == 422
+
+    async def test_create_dataset_records_with_non_existent_vector_settings_id(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        await TextFieldFactory.create(name="input", dataset=dataset)
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {"input": "Say Hello"},
+                        "vectors": [{"vector_settings_id": str(uuid4()), "value": [1.0, 2.0, 3.0, 4.0]}],
+                    },
+                ]
+            },
+        )
+
+        assert response.status_code == 422
+
+    async def test_create_dataset_records_with_duplicated_vector_settings_id(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        await TextFieldFactory.create(name="input", dataset=dataset)
+        vector_settings = await VectorSettingsFactory.create(dataset=dataset, dimensions=4)
+        vector_settings_id = str(vector_settings.id)
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {"input": "Say Hello"},
+                        "vectors": [
+                            {"vector_settings_id": vector_settings_id, "value": [1.0, 2.0, 3.0, 4.0]},
+                            {"vector_settings_id": vector_settings_id, "value": [1.0, 2.0, 3.0, 4.0]},
+                        ],
+                    },
+                ]
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": {
+                "code": "argilla.api.errors::ValidationError",
+                "params": {
+                    "errors": [
+                        {
+                            "loc": ["body", "items", 0, "vectors"],
+                            "msg": f"'vectors' contains several vectors for the same 'vector_settings_id': {vector_settings_id}",
+                            "type": "value_error",
+                        }
+                    ]
+                },
+            }
+        }
 
     async def test_create_dataset_records_with_index_error(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, db: "AsyncSession", owner_auth_header: dict
