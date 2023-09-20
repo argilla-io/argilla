@@ -357,6 +357,9 @@ async def list_records_by_dataset_id(
     if RecordInclude.suggestions in include:
         query = query.options(joinedload(Record.suggestions))
 
+    if RecordInclude.vectors in include:
+        query = query.options(joinedload(Record.vectors))
+
     query = query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
     result = await db.execute(query)
     return result.unique().scalars().all()

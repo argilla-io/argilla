@@ -51,6 +51,7 @@ class UserRole(str, Enum):
 class RecordInclude(str, Enum):
     responses = "responses"
     suggestions = "suggestions"
+    vectors = "vectors"
 
 
 class QuestionType(str, Enum):
