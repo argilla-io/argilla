@@ -16,7 +16,8 @@ RUN wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmo
 RUN echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | tee /etc/apt/sources.list.d/elastic-8.x.list
 
 # Copy Argilla distribution files
-COPY scripts/* /
+COPY scripts/start_quickstart_argilla.sh /home/worker
+COPY scripts/load_data.py /home/worker
 COPY quickstart.requirements.txt /packages/requirements.txt
 
 RUN \
@@ -30,7 +31,7 @@ RUN \
   chown worker:worker /etc/default/elasticsearch && \
   # Install quickstart image dependencies
   pip install -r /packages/requirements.txt && \
-  chmod +x /start_quickstart_argilla.sh && \
+  chmod +x /home/worker/start_quickstart_argilla.sh && \
   # Give ownership of the data directory to the argilla user
   chown -R worker:worker /data && \
   # Clean up
@@ -63,4 +64,4 @@ ENV UVICORN_PORT=6900
 
 ENV ES_JAVA_OPTS=-'Xms512m -Xmx512m'
 
-CMD ["/start_quickstart_argilla.sh"]
+CMD ["/bin/bash", "start_quickstart_argilla.sh"]
