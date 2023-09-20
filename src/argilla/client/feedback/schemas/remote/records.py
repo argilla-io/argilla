@@ -20,6 +20,7 @@ from pydantic import BaseModel, Field
 
 from argilla.client.api import active_client
 from argilla.client.feedback.schemas.records import FeedbackRecord, ResponseSchema, SuggestionSchema
+from argilla.client.feedback.schemas.remote.shared import RemoteSchema
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.sdk.v1.records import api as records_api_v1
@@ -33,22 +34,12 @@ if TYPE_CHECKING:
     from argilla.client.sdk.v1.records.models import FeedbackItemModel
 
 
-class RemoteClient(BaseModel):
-    client: "httpx.Client"
-
-    # TODO(alvarobartt): here to be able to use the `allowed_for_roles` decorator
-    @property
-    def _client(self) -> "httpx.Client":
-        return self.client
+class RemoteSuggestionSchema(SuggestionSchema, RemoteSchema):
+    question_id: UUID
 
     class Config:
-        arbitrary_types_allowed = True
-        exclude = {"client"}
-
-
-class RemoteSuggestionSchema(SuggestionSchema, RemoteClient):
-    id: UUID
-    question_id: UUID
+        validate_assignment = True
+        allow_mutation = False
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def delete(self) -> None:
@@ -86,12 +77,8 @@ class RemoteSuggestionSchema(SuggestionSchema, RemoteClient):
             agent=payload.agent,
         )
 
-    class Config:
-        validate_assignment = True
-        allow_mutation = False
 
-
-class RemoteResponseSchema(ResponseSchema):
+class RemoteResponseSchema(ResponseSchema, RemoteSchema):
     def to_local(self) -> "ResponseSchema":
         """Converts the `RemoteResponseSchema` to a `ResponseSchema`."""
         return ResponseSchema(
@@ -109,30 +96,32 @@ class RemoteResponseSchema(ResponseSchema):
         )
 
 
-class RemoteFeedbackRecord(FeedbackRecord, RemoteClient):
+class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
     """Schema for the records of a `RemoteFeedbackDataset`.
 
     Note this schema shouldn't be instantiated directly, but just internally by the
     `RemoteFeedbackDataset` class when fetching records from Argilla.
 
     Args:
-        client: The Argilla client to use to push the record to Argilla. Is shared with
-            the `RemoteFeedbackDataset` that created this record.
         question_name_to_id: A dictionary that maps the question names to their corresponding IDs.
-        id: The ID of the record in Argilla. Defaults to None, and is automatically
-            fulfilled internally once the record is pushed to Argilla.
+        responses: A list of `RemoteResponseSchema` that contains the responses for the
+            current record in Argilla. Every response is linked to only one user. Defaults
+            to an empty list.
         suggestions: A list of `RemoteSuggestionSchema` that contains the suggestions
             for the current record in Argilla. Every suggestion is linked to only one
             question. Defaults to an empty list.
     """
 
-    id: UUID
-    question_name_to_id: Dict[str, UUID]
+    question_name_to_id: Optional[Dict[str, UUID]] = None
 
     responses: List[RemoteResponseSchema] = Field(default_factory=list)
     suggestions: Union[Tuple[RemoteSuggestionSchema], List[RemoteSuggestionSchema]] = Field(
         default_factory=tuple, allow_mutation=False
     )
+
+    class Config:
+        validate_assignment = True
+        exclude = {"_unified_responses", "question_name_to_id"}
 
     def __update_suggestions(
         self,
@@ -215,17 +204,15 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteClient):
                 new_suggestions[suggestion.question_name] = suggestion
 
         for suggestion in new_suggestions.values():
-            if isinstance(suggestion, SuggestionSchema):
-                exclude = {"question_name"}
-            elif isinstance(suggestion, RemoteSuggestionSchema):
-                exclude = {"client", "id", "question_name"}
+            if isinstance(suggestion, RemoteSuggestionSchema):
+                suggestion = suggestion.to_local()
             pushed_suggestion = datasets_api_v1.set_suggestion(
-                client=self.client, record_id=self.id, **suggestion.dict(exclude_none=True, exclude=exclude)
+                client=self.client, record_id=self.id, **suggestion.to_server_payload()
             )
-            existing_suggestions[suggestion.question_name] = RemoteSuggestionSchema(
+            existing_suggestions[suggestion.question_name] = RemoteSuggestionSchema.from_api(
+                payload=pushed_suggestion.parsed,
+                question_id_to_name={value: key for key, value in self.question_name_to_id},
                 client=self.client,
-                question_name=suggestion.question_name,
-                **pushed_suggestion.parsed.dict(exclude_none=True),
             )
 
         self.__dict__["suggestions"] = tuple(existing_suggestions.values())
@@ -310,7 +297,9 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteClient):
             response = records_api_v1.delete_record(client=self.client, id=self.id)
         except Exception as e:
             raise RuntimeError(f"Failed to delete record with ID `{self.id}` from Argilla.") from e
-        return FeedbackRecord(**response.parsed.dict(exclude={"id", "inserted_at", "updated_at"}, exclude_none=True))
+        return RemoteFeedbackRecord.from_api(
+            payload=response.parsed, question_id_to_name={value: key for key, value in self.question_name_to_id.items()}
+        ).to_local()
 
     def to_local(self) -> "FeedbackRecord":
         """Converts the `RemoteFeedbackRecord` to a `FeedbackRecord`."""
@@ -340,7 +329,3 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteClient):
             metadata=payload.metadata if payload.metadata else {},
             external_id=payload.external_id if payload.external_id else None,
         )
-
-    class Config:
-        validate_assignment = True
-        exclude = {"_unified_responses", "question_name_to_id"}

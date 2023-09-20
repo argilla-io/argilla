@@ -13,9 +13,6 @@
 #  limitations under the License.
 
 from typing import TYPE_CHECKING, Dict, List, Union
-from uuid import UUID
-
-from pydantic import BaseModel
 
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
@@ -24,19 +21,13 @@ from argilla.client.feedback.schemas.questions import (
     RatingQuestion,
     TextQuestion,
 )
+from argilla.client.feedback.schemas.remote.shared import RemoteSchema
 
 if TYPE_CHECKING:
     from argilla.client.sdk.v1.datasets.models import FeedbackQuestionModel
 
 
-class RemoteQuestionSchema(BaseModel):
-    id: UUID
-
-    class Config:
-        allow_mutation = False
-
-
-class RemoteTextQuestion(TextQuestion, RemoteQuestionSchema):
+class RemoteTextQuestion(TextQuestion, RemoteSchema):
     def to_local(self) -> TextQuestion:
         return TextQuestion(
             name=self.name,
@@ -57,7 +48,7 @@ class RemoteTextQuestion(TextQuestion, RemoteQuestionSchema):
         )
 
 
-class RemoteRatingQuestion(RatingQuestion, RemoteQuestionSchema):
+class RemoteRatingQuestion(RatingQuestion, RemoteSchema):
     def to_local(self) -> RatingQuestion:
         return RatingQuestion(
             name=self.name,
@@ -85,7 +76,7 @@ def _parse_options_from_api(payload: "FeedbackQuestionModel") -> Union[List[str]
         return {label["value"]: label["text"] for label in payload.settings["options"]}
 
 
-class RemoteLabelQuestion(LabelQuestion, RemoteQuestionSchema):
+class RemoteLabelQuestion(LabelQuestion, RemoteSchema):
     def to_local(self) -> LabelQuestion:
         return LabelQuestion(
             name=self.name,
@@ -108,7 +99,7 @@ class RemoteLabelQuestion(LabelQuestion, RemoteQuestionSchema):
         )
 
 
-class RemoteMultiLabelQuestion(MultiLabelQuestion, RemoteQuestionSchema):
+class RemoteMultiLabelQuestion(MultiLabelQuestion, RemoteSchema):
     def to_local(self) -> MultiLabelQuestion:
         return MultiLabelQuestion(
             name=self.name,
@@ -131,7 +122,7 @@ class RemoteMultiLabelQuestion(MultiLabelQuestion, RemoteQuestionSchema):
         )
 
 
-class RemoteRankingQuestion(RankingQuestion, RemoteQuestionSchema):
+class RemoteRankingQuestion(RankingQuestion, RemoteSchema):
     def to_local(self) -> RankingQuestion:
         return RankingQuestion(
             name=self.name,

@@ -13,24 +13,15 @@
 #  limitations under the License.
 
 from typing import TYPE_CHECKING
-from uuid import UUID
-
-from pydantic import BaseModel
 
 from argilla.client.feedback.schemas.fields import TextField
+from argilla.client.feedback.schemas.remote.shared import RemoteSchema
 
 if TYPE_CHECKING:
     from argilla.client.sdk.v1.datasets.models import FeedbackFieldModel
 
 
-class RemoteFieldSchema(BaseModel):
-    id: UUID
-
-    class Config:
-        allow_mutation = False
-
-
-class RemoteTextField(TextField, RemoteFieldSchema):
+class RemoteTextField(TextField, RemoteSchema):
     def to_local(self) -> TextField:
         return TextField(
             name=self.name,
