@@ -144,7 +144,7 @@ On this page, you can access the settings of a specific dataset and make mod
 
 ### Feedback Task
 
-![Dataset page](/_static/reference/webapp/pages-dataset_settings.png)
+![Dataset page](/_static/reference/webapp/pages-dataset_settings_feedback.png)
 
 #### Info
 
@@ -164,7 +164,7 @@ You can delete your dataset. Be careful this action is irreversible.
 
 ### Other Tasks
 
-![Dataset page](/_static/reference/webapp/pages-dataset_settings_feedback.png)
+![Dataset page](/_static/reference/webapp/pages-dataset_settings.png)
 
 You can access this page by clicking on the settings icon next to the user icon inside of the Dataset view.
 

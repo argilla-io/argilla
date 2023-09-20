@@ -3,7 +3,7 @@ title: Transformers
 description: The ArgillaTransformersTrainer leverages the features of transformers to train programmatically with Argilla.
 links:
   - linkText: Argilla docs
-    linkLink: https://docs.argilla.io/en/latest/guides/train_a_model.html
+    linkLink: https://docs.argilla.io/en/latest/practical_guides/fine_tune.html#text-classification
   - linkText: Transformers docs
     linkLink: https://huggingface.co/docs/transformers/training
 ---

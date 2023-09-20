@@ -37,7 +37,7 @@ An Argilla user composed of the following attributes:
 
 ### Python client
 
-The `User` class in the Python client gives developers with `owner` role the ability to create and manage users in Argilla. Check the [User - Python Reference](../reference/python/python_users.rst) to see the attributes, arguments, and methods of the `User` class.
+The `User` class in the Python client gives developers with `owner` role the ability to create and manage users in Argilla. Check the [User - Python Reference](/reference/python/python_users.rst) to see the attributes, arguments, and methods of the `User` class.
 
 ## How to guide
 
@@ -47,27 +47,30 @@ To connect to an old Argilla instance (`<1.3.0`) using newer clients, you should
 
 ### Get the current active `User`
 
+You can get the current active user in Argilla using the `me` classmethod in the `User` class. Note that the `me` method will return the active user as specified via the credentials provided via `rg.init`. Also, it is possible [set this information using environment variables](/getting_started/installation/configurations/server_configuration.html#client), which allows for skipping `rg,init`.
+
 ::::{tab-set}
 
 :::{tab-item} CLI
-After logging in, you can get the current active user in Argilla using the `whoami` command.
 
 ```bash
 argilla login --api-url http://localhost:6900
 argilla whoami
 ```
+
 :::
 
 :::{tab-item} Python client
-You can get the current active user in Argilla using the `me` classmethod in the `User` class. Note that the `me` method will return the active user as specified via the credentials provided via `rg.init`.
 
 ```python
+
 import argilla as rg
 
 rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
 user = rg.User.me()
 ```
+
 :::
 
 ::::
@@ -88,6 +91,7 @@ So for example, to create a new user with `admin` role and member of `ws1` and `
 ```bash
 argilla users create --username new-user --first-name New --last-name User --role admin --workspace ws1 --workspace ws2
 ```
+
 :::
 
 :::{tab-item} Python client
@@ -107,6 +111,7 @@ user = rg.User.create(
     workspaces=["ws1", "ws2"]
 )
 ```
+
 :::
 
 ::::
@@ -118,6 +123,7 @@ You can change the assigned role for an existing user using the database connect
 ```bash
 argilla server database users update argilla --role owner
 ```
+
 ```bash
 User 'argilla' successfully updated:
 • role: 'admin' -> 'owner'
@@ -166,6 +172,7 @@ You can assign a user to a workspace using the `add-user` command in the `worksp
 ```bash
 argilla workspace --name ws1 add-user nick
 ```
+
 :::
 
 :::{tab-item} Python client
@@ -187,6 +194,7 @@ user = rg.User.create(
 workspace = rg.Workspace.create(name="ws")
 workspace.add_user(user.id)
 ```
+
 :::
 
 ::::
@@ -206,6 +214,7 @@ You can list all the existing users in Argilla using the `list` command in the `
 ```bash
 argilla users list
 ```
+
 :::
 
 :::{tab-item} Python client
@@ -219,6 +228,7 @@ rg.init(api_url="<API_URL>", api_key="<OWNER_API_KEY>")
 
 users = rg.User.list()
 ```
+
 :::
 
 ::::
@@ -238,6 +248,7 @@ You can delete an existing user in Argilla using the `delete` command in the `us
 ```bash
 argilla users --username existing-user delete
 ```
+
 :::
 
 :::{tab-item} Python client
@@ -252,6 +263,7 @@ rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 user = rg.User.from_name("existing-user")
 user.delete()
 ```
+
 :::
 
 ::::
@@ -304,7 +316,7 @@ export ARGILLA_LOCAL_AUTH_USERS_DB_FILE=/path/to/.users.yml
 argilla server database users migrate
 ```
 
-```
+```bash
 Starting users migration process using file '.users.yml'
 Migrating User with username 'john'
 Migrating User with username 'tanya'

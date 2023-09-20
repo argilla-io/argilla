@@ -3,7 +3,7 @@ title: spaCy
 description: The ArgillaSpacyTrainer leverages the features of spaCy to train programmatically with Argilla.
 links:
   - linkText: Argilla docs
-    linkLink: https://docs.argilla.io/en/latest/guides/train_a_model.html
+    linkLink: https://docs.argilla.io/en/practical_guides/fine_tune.html#token-classification
   - linkText: spaCy docs
     linkLink: https://spacy.io/usage/training
 ---

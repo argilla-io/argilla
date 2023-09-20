@@ -18,17 +18,7 @@
         v-text="sanitizedCurrentValue"
         @focus="setFocus(true)"
         @blur="setFocus(false)"
-        @keydown.shift.enter.stop=""
-        @keydown.shift.backspace.stop=""
-        @keydown.shift.space.stop=""
-        @keydown.shift.arrow-up.stop=""
-        @keydown.shift.arrow-down.stop=""
-        @keydown.ctrl.arrow-right.stop=""
-        @keydown.meta.arrow-right.stop=""
-        @keydown.ctrl.arrow-left.stop=""
-        @keydown.meta.arrow-left.stop=""
-        @keydown.delete.stop=""
-        @keydown.enter.stop=""
+        @keydown.stop=""
         @keydown.esc.exact="exitEditionMode"
         @paste="pastePlainText"
       />
@@ -58,7 +48,7 @@ export default {
     },
     isEditionModeActive: {
       type: Boolean,
-      required: true,
+      default: () => false,
     },
   },
   data: () => {
@@ -101,7 +91,9 @@ export default {
     reset() {
       this.currentValue = this.value;
       this.sanitizedCurrentValue = " ";
-      this.sanitizedCurrentValue = this.currentValue;
+      this.$nextTick(() => {
+        this.sanitizedCurrentValue = this.currentValue;
+      });
     },
     exitEditionMode() {
       this.$refs.text.blur();

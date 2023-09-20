@@ -152,6 +152,7 @@ def test_value_schema(schema_kwargs: Dict[str, Any]) -> None:
     "schema_kwargs",
     [
         {"value": "question-1", "rank": 1},
+        {"value": "question-1", "rank": None},
     ],
 )
 def test_ranking_value_schema(schema_kwargs: Dict[str, Any]) -> None:

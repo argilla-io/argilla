@@ -40,7 +40,7 @@ class RankingValueSchema(BaseModel):
     """
 
     value: StrictStr
-    rank: conint(ge=1)
+    rank: Optional[conint(ge=1)] = None
 
 
 class ValueSchema(BaseModel):
