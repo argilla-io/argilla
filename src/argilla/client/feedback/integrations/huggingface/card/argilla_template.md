@@ -68,14 +68,14 @@ The **fields** are the dataset records themselves, for the moment just text fiel
 
 | Field Name | Title | Type | Required | Markdown |
 | ---------- | ----- | ---- | -------- | -------- |
-{% for field in argilla_fields %}| {{ field.name }} | {{ field.title }} | {{ field.type.value }} | {{ field.required }} | {{ field.use_markdown }} |
+{% for field in argilla_fields %}| {{ field.name }} | {{ field.title }} | {{ field.type }} | {{ field.required }} | {{ field.use_markdown }} |
 {% endfor %}
 
 The **questions** are the questions that will be asked to the annotators. They can be of different types, such as rating, text, label_selection, multi_label_selection, or ranking.
 
 | Question Name | Title | Type | Required | Description | Values/Labels |
 | ------------- | ----- | ---- | -------- | ----------- | ------------- |
-{% for question in argilla_questions %}| {{ question.name }} | {{ question.title }} | {{ question.type.value }} | {{ question.required }} | {{ question.description | default("N/A", true) }} | {% if question.type in ["rating", "label_selection", "multi_label_selection", "ranking"] %}{% if question.type in ["rating", "ranking"] %}{{ question.values | list }}{% else %}{{ question.labels | list }}{% endif %}{% else %}N/A{% endif %} |
+{% for question in argilla_questions %}| {{ question.name }} | {{ question.title }} | {{ question.type }} | {{ question.required }} | {{ question.description | default("N/A", true) }} | {% if question.type in ["rating", "label_selection", "multi_label_selection", "ranking"] %}{% if question.type in ["rating", "ranking"] %}{{ question.values | list }}{% else %}{{ question.labels | list }}{% endif %}{% else %}N/A{% endif %} |
 {% endfor %}
 
 **✨ NEW** Additionally, we also have **suggestions**, which are linked to the existing questions, and so on, named appending "-suggestion" and "-suggestion-metadata" to those, containing the value/s of the suggestion and its metadata, respectively. So on, the possible values are the same as in the table above.
@@ -102,15 +102,15 @@ Among the dataset fields, we differentiate between the following:
 
 * **Fields:** These are the dataset records themselves, for the moment just text fields are suppported. These are the ones that will be used to provide responses to the questions.
     {% for field in argilla_fields %}
-    * {% if field.required == false %}(optional) {% endif %}**{{ field.name }}** is of type `{{ field.type.value }}`.{% endfor %}
+    * {% if field.required == false %}(optional) {% endif %}**{{ field.name }}** is of type `{{ field.type }}`.{% endfor %}
 
 * **Questions:** These are the questions that will be asked to the annotators. They can be of different types, such as `RatingQuestion`, `TextQuestion`, `LabelQuestion`, `MultiLabelQuestion`, and `RankingQuestion`.
     {% for question in argilla_questions %}
-    * {% if question.required == false %}(optional) {% endif %}**{{ question.name }}** is of type `{{ question.type.value }}`{% if question.type in ["rating", "label_selection", "multi_label_selection", "ranking"] %} with the following allowed values {% if question.type in ["rating", "ranking"] %}{{ question.values | list }}{% else %}{{ question.labels | list }}{% endif %}{% endif %}{% if question.description %}, and description "{{ question.description }}"{% endif %}.{% endfor %}
+    * {% if question.required == false %}(optional) {% endif %}**{{ question.name }}** is of type `{{ question.type }}`{% if question.type in ["rating", "label_selection", "multi_label_selection", "ranking"] %} with the following allowed values {% if question.type in ["rating", "ranking"] %}{{ question.values | list }}{% else %}{{ question.labels | list }}{% endif %}{% endif %}{% if question.description %}, and description "{{ question.description }}"{% endif %}.{% endfor %}
 
 * **✨ NEW** **Suggestions:** As of Argilla 1.13.0, the suggestions have been included to provide the annotators with suggestions to ease or assist during the annotation process. Suggestions are linked to the existing questions, are always optional, and contain not just the suggestion itself, but also the metadata linked to it, if applicable.
     {% for question in argilla_questions %}
-    * (optional) **{{ question.name }}-suggestion** is of type `{{ question.type.value }}`{% if question.type in ["rating", "label_selection", "multi_label_selection", "ranking"] %} with the following allowed values {% if question.type in ["rating", "ranking"] %}{{ question.values | list }}{% else %}{{ question.labels | list }}{% endif %}{% endif %}.{% endfor %}
+    * (optional) **{{ question.name }}-suggestion** is of type `{{ question.type }}`{% if question.type in ["rating", "label_selection", "multi_label_selection", "ranking"] %} with the following allowed values {% if question.type in ["rating", "ranking"] %}{{ question.values | list }}{% else %}{{ question.labels | list }}{% endif %}{% endif %}.{% endfor %}
 
 Additionally, we also have one more field which is optional and is the following:
 
