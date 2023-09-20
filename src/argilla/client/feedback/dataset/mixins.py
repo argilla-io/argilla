@@ -205,7 +205,7 @@ class ArgillaMixin:
             else:
                 raise ValueError(
                     f"Field '{field.name}' is not a supported field in the current Python package version,"
-                    f" supported field types are: `{', '.join([arg.value for arg in FieldTypes])}`."
+                    f" supported field types are: `{'`, `'.join([arg.value for arg in FieldTypes])}`."
                 )
             fields.append(field)
         return fields
@@ -227,7 +227,7 @@ class ArgillaMixin:
             else:
                 raise ValueError(
                     f"Question '{question.name}' is not a supported question in the current Python package"
-                    f" version, supported question types are: `{', '.join([arg.value for arg in QuestionTypes])}`."
+                    f" version, supported question types are: `{'`, `'.join([arg.value for arg in QuestionTypes])}`."
                 )
             questions.append(question)
         return questions
