@@ -23,21 +23,22 @@ ENV DEFAULT_USER_API_KEY=argilla.apikey
 ENV USERS_DB=/config/.users.yml
 ENV UVICORN_PORT=6900
 
-RUN useradd -ms /bin/bash worker
+RUN useradd -ms /bin/bash argilla
 
 # Create argilla volume
 RUN mkdir -p "$ARGILLA_HOME_PATH" && \
-  chown worker:worker "$ARGILLA_HOME_PATH"
+  chown argilla:argilla "$ARGILLA_HOME_PATH"
 VOLUME $ARGILLA_HOME_PATH
 
-COPY scripts/start_argilla_server.sh /home/worker
-COPY --chown=worker:worker --from=builder /opt/venv /opt/venv
+COPY scripts/start_argilla_server.sh /home/argilla
+# Destination folder must be the same as the builder one. Otherwise installed script won't work (since the installation fixes the path inside the script)
+COPY --chown=argilla:argilla --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-WORKDIR /home/worker
+WORKDIR /home/argilla
 RUN chmod +x start_argilla_server.sh
 
-USER worker
+USER argilla
 
 # Exposing ports
 EXPOSE 6900

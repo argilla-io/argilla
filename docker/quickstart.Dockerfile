@@ -16,8 +16,8 @@ RUN wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmo
 RUN echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | tee /etc/apt/sources.list.d/elastic-8.x.list
 
 # Copy Argilla distribution files
-COPY scripts/start_quickstart_argilla.sh /home/worker
-COPY scripts/load_data.py /home/worker
+COPY scripts/start_quickstart_argilla.sh /home/argilla
+COPY scripts/load_data.py /home/argilla
 COPY quickstart.requirements.txt /packages/requirements.txt
 
 RUN \
@@ -27,13 +27,13 @@ RUN \
   mkdir /data && \
   # Install Elasticsearch and configure it
   apt-get update && apt-get install -y elasticsearch=8.8.2 && \
-  chown -R worker:worker /usr/share/elasticsearch /etc/elasticsearch /var/lib/elasticsearch /var/log/elasticsearch && \
-  chown worker:worker /etc/default/elasticsearch && \
+  chown -R argilla:argilla /usr/share/elasticsearch /etc/elasticsearch /var/lib/elasticsearch /var/log/elasticsearch && \
+  chown argilla:argilla /etc/default/elasticsearch && \
   # Install quickstart image dependencies
   pip install -r /packages/requirements.txt && \
-  chmod +x /home/worker/start_quickstart_argilla.sh && \
+  chmod +x /home/argilla/start_quickstart_argilla.sh && \
   # Give ownership of the data directory to the argilla user
-  chown -R worker:worker /data && \
+  chown -R argilla:argilla /data && \
   # Clean up
   apt-get remove -y wget gnupg && \
   apt-get clean && \
@@ -42,7 +42,7 @@ RUN \
 
 COPY config/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
 
-USER worker
+USER argilla
 
 ENV ELASTIC_CONTAINER=true
 
