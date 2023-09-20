@@ -374,6 +374,7 @@ async def create_records(
         raise ValueError("Records cannot be created for a non published dataset")
 
     records = []
+    vectors = []
     for record_i, record_create in enumerate(records_create.items):
         validate_record_fields(dataset, fields=record_create.fields)
 
@@ -460,17 +461,18 @@ async def create_records(
                         f"Provided vector at position {i} and record at position {record_i} is not valid: {e}"
                     ) from e
 
-                record.vectors.append(Vector(value=vector.value, vector_settings_id=vector.vector_settings_id))
+                vector = Vector(value=vector.value, vector_settings_id=vector.vector_settings_id)
+
+                record.vectors.append(vector)
+                vectors.append(vector)
 
         records.append(record)
 
     async with db.begin_nested():
         db.add_all(records)
         await db.flush(records)
-        vectors = []
         for record in records:
             await record.awaitable_attrs.responses
-            vectors.extend(await record.awaitable_attrs.vectors)
         await search_engine.add_records(dataset, records)
         if vectors:
             await search_engine.set_records_vectors(dataset, vectors)
