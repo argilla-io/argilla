@@ -75,6 +75,10 @@ class ResponseSchema(BaseModel):
     values: Dict[str, ValueSchema]
     status: ResponseStatus = ResponseStatus.submitted
 
+    class Config:
+        extra = Extra.forbid
+        validate_assignment = True
+
     @validator("user_id", always=True)
     def user_id_must_have_value(cls, v):
         if not v:
@@ -84,9 +88,6 @@ class ResponseSchema(BaseModel):
                 " it will be automatically set to the active `user_id`.",
             )
         return v
-
-    class Config:
-        extra = Extra.forbid
 
 
 class SuggestionSchema(BaseModel):
@@ -118,6 +119,10 @@ class SuggestionSchema(BaseModel):
     value: Any
     agent: Optional[str] = None
 
+    class Config:
+        extra = Extra.forbid
+        validate_assignment = True
+
     def to_server_payload(self, question_name_to_id: Dict[str, UUID]) -> Dict[str, Any]:
         """Method that will be used to create the payload that will be sent to Argilla
         to create a `SuggestionSchema` for a `FeedbackRecord`."""
@@ -131,9 +136,6 @@ class SuggestionSchema(BaseModel):
         if self.agent:
             payload["agent"] = self.agent
         return payload
-
-    class Config:
-        extra = Extra.forbid
 
 
 class FeedbackRecord(BaseModel):
@@ -195,6 +197,11 @@ class FeedbackRecord(BaseModel):
 
     _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default_factory=dict)
 
+    class Config:
+        extra = Extra.forbid
+        validate_assignment = True
+        exclude = {"_unified_responses"}
+
     @validator("suggestions", always=True)
     def normalize_suggestions(cls, values: Any) -> Tuple:
         if not isinstance(values, tuple):
@@ -241,8 +248,3 @@ class FeedbackRecord(BaseModel):
         if self.external_id:
             payload["external_id"] = self.external_id
         return payload
-
-    class Config:
-        extra = Extra.forbid
-        validate_assignment = True
-        exclude = {"_unified_responses"}
