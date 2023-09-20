@@ -20,11 +20,10 @@ from tqdm import trange
 from argilla.client.api import ArgillaSingleton
 from argilla.client.feedback.constants import PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-from argilla.client.feedback.schemas.fields import FieldTypes
+from argilla.client.feedback.schemas.enums import FieldTypes, QuestionTypes
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
-    QuestionTypes,
     RankingQuestion,
     RatingQuestion,
     TextQuestion,

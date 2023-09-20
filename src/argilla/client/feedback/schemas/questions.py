@@ -14,21 +14,13 @@
 
 import warnings
 from abc import abstractproperty
-from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Extra, Field, conint, conlist, validator
 
+from argilla.client.feedback.schemas.enums import QuestionTypes
 from argilla.client.feedback.schemas.utils import LabelMappingMixin
 from argilla.client.feedback.schemas.validators import title_must_have_value
-
-
-class QuestionTypes(str, Enum):
-    text = "text"
-    rating = "rating"
-    label_selection = "label_selection"
-    multi_label_selection = "multi_label_selection"
-    ranking = "ranking"
 
 
 class QuestionSchema(BaseModel):

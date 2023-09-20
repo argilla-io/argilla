@@ -12,10 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.feedback.schemas.enums import FieldTypes
+from enum import Enum
 
-FETCHING_BATCH_SIZE = 250
-PUSHING_BATCH_SIZE = 32
-DELETE_DATASET_RECORDS_MAX_NUMBER = 100
 
-FIELD_TYPE_TO_PYTHON_TYPE = {FieldTypes.text: str}
+class FieldTypes(str, Enum):
+    text = "text"
+
+
+class QuestionTypes(str, Enum):
+    text = "text"
+    rating = "rating"
+    label_selection = "label_selection"
+    multi_label_selection = "multi_label_selection"
+    ranking = "ranking"

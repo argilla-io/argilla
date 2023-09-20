@@ -13,16 +13,12 @@
 #  limitations under the License.
 
 from abc import abstractproperty
-from enum import Enum
 from typing import Any, Dict, Literal, Optional
 
 from pydantic import BaseModel, Extra, Field, validator
 
+from argilla.client.feedback.schemas.enums import FieldTypes
 from argilla.client.feedback.schemas.validators import title_must_have_value
-
-
-class FieldTypes(str, Enum):
-    text = "text"
 
 
 class FieldSchema(BaseModel):
