@@ -42,6 +42,9 @@ from argilla.server.schemas.v1.datasets import (
     SearchRecord,
     SearchRecordsQuery,
     SearchRecordsResult,
+    VectorSettings,
+    VectorSettingsCreate,
+    VectorsSettings,
 )
 from argilla.server.search_engine import SearchEngine, UserResponseStatusFilter, get_search_engine
 from argilla.server.security import auth
@@ -56,9 +59,19 @@ router = APIRouter(tags=["datasets"])
 
 
 async def _get_dataset(
-    db: AsyncSession, dataset_id: UUID, with_fields: bool = False, with_questions: bool = False
+    db: AsyncSession,
+    dataset_id: UUID,
+    with_fields: bool = False,
+    with_questions: bool = False,
+    with_vectors_settings: bool = False,
 ) -> DatasetModel:
-    dataset = await datasets.get_dataset_by_id(db, dataset_id, with_fields=with_fields, with_questions=with_questions)
+    dataset = await datasets.get_dataset_by_id(
+        db,
+        dataset_id,
+        with_fields=with_fields,
+        with_questions=with_questions,
+        with_vectors_settings=with_vectors_settings,
+    )
     if not dataset:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -107,6 +120,17 @@ async def list_dataset_questions(
     await authorize(current_user, DatasetPolicyV1.get(dataset))
 
     return Questions(items=dataset.questions)
+
+
+@router.get("/datasets/{dataset_id}/vectors-settings", response_model=VectorsSettings)
+async def list_dataset_vector_settings(
+    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
+):
+    dataset = await _get_dataset(db, dataset_id, with_vectors_settings=True)
+
+    await authorize(current_user, DatasetPolicyV1.get(dataset))
+
+    return VectorsSettings(items=dataset.vectors_settings)
 
 
 @router.get("/me/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
@@ -276,6 +300,37 @@ async def create_dataset_question(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
 
+@router.post(
+    "/datasets/{dataset_id}/vectors-settings", status_code=status.HTTP_201_CREATED, response_model=VectorSettings
+)
+async def create_dataset_vector_settings(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
+    dataset_id: UUID,
+    vector_settings_create: VectorSettingsCreate,
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = await _get_dataset(db, dataset_id)
+
+    await authorize(current_user, DatasetPolicyV1.create_vector_settings(dataset))
+
+    if await datasets.get_vector_settings_by_name_and_dataset_id(db, vector_settings_create.name, dataset_id):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Vector settings with name `{vector_settings_create.name}` already exists for dataset with id"
+            f" `{dataset_id}`",
+        )
+
+    try:
+        vector_settings = await datasets.create_vector_settings(
+            db, search_engine, dataset=dataset, vector_settings_create=vector_settings_create
+        )
+        return vector_settings
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+
+
 @router.post("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
 async def create_dataset_records(
     *,
@@ -401,7 +456,7 @@ async def publish_dataset(
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ) -> DatasetModel:
-    dataset = await _get_dataset(db, dataset_id, with_fields=True, with_questions=True)
+    dataset = await _get_dataset(db, dataset_id, with_fields=True, with_questions=True, with_vectors_settings=True)
 
     await authorize(current_user, DatasetPolicyV1.publish(dataset))
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.

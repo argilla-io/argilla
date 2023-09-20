@@ -16,6 +16,12 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added `POST /api/v1/datasets/{dataset_id}/vectors-settings` endpoint for creating vector settings for a dataset ([#3776](https://github.com/argilla-io/argilla/pull/3776)).
+- Added `GET /api/v1/datasets/{dataset_id}/vectors-settings` endpoint for listing the vectors settings for a dataset ([#3776](https://github.com/argilla-io/argilla/pull/3776)).
+- Added `POST /api/v1/vectors-settings/{vector_settings_id}` endpoint for deleting a vector settings ([#3776](https://github.com/argilla-io/argilla/pull/3776)).
+
 ## [1.16.0](https://github.com/argilla-io/argilla/compare/v1.15.1...v1.16.0)
 
 ### Added
