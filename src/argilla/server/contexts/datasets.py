@@ -43,6 +43,7 @@ from argilla.server.security.model import User
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
+    from argilla.server.models.questions import QuestionSettings
     from argilla.server.schemas.v1.datasets import DatasetUpdate, VectorSettingsCreate
     from argilla.server.schemas.v1.fields import FieldUpdate
     from argilla.server.schemas.v1.questions import QuestionUpdate
@@ -371,7 +372,7 @@ async def create_records(
         raise ValueError("Records cannot be created for a non published dataset")
 
     records = []
-    for record_create in records_create.items:
+    for record_i, record_create in enumerate(records_create.items):
         validate_record_fields(dataset, fields=record_create.fields)
 
         record = Record(
@@ -382,10 +383,16 @@ async def create_records(
         )
 
         if record_create.responses:
-            for response in record_create.responses:
-                # TODO(gabrielmbmb): the result of this query should be cached
-                if not await accounts.get_user_by_id(db, response.user_id):
-                    raise ValueError(f"Provided user_id: {response.user_id!r} is not a valid user id")
+            users: List[UUID] = []
+            for i, response in enumerate(record_create.responses):
+                if response.user_id not in users:
+                    user = await accounts.get_user_by_id(db, response.user_id)
+                    if not user:
+                        raise ValueError(
+                            f"Provided user_id={response.user_id!r} for response at position {i} and record at "
+                            f"position {record_i} does not exist"
+                        )
+                    users.append(user.id)
 
                 validate_response_values(dataset, values=response.values, status=response.status)
 
@@ -398,13 +405,26 @@ async def create_records(
                 )
 
         if record_create.suggestions:
-            for suggestion in record_create.suggestions:
-                # TODO(gabrielmbmb): the result of this query should be cached
-                question = await get_question_by_id(db, suggestion.question_id)
-                if not question:
-                    raise ValueError(f"Provided question_id: {suggestion.question_id!r} is not a valid question id")
+            questions_settings: Dict[UUID, "QuestionSettings"] = {}
+            for i, suggestion in enumerate(record_create.suggestions):
+                question_settings = questions_settings.get(suggestion.question_id, None)
 
-                question.parsed_settings.check_response(suggestion)
+                if not question_settings:
+                    question = await get_question_by_id(db, suggestion.question_id)
+                    if not question:
+                        raise ValueError(
+                            f"Provided question_id={suggestion.question_id!r} for suggestion at position {i} and "
+                            f"record at position {record_i} does not exist"
+                        )
+                    question_settings = question.parsed_settings
+                    questions_settings[suggestion.question_id] = question_settings
+
+                try:
+                    question_settings.check_response(suggestion)
+                except ValueError as e:
+                    raise ValueError(
+                        f"Provided suggestion at position {i} for record at position {record_i} is not valid: {e}"
+                    ) from e
 
                 record.suggestions.append(
                     Suggestion(
