@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import datetime
 import inspect
 
 import factory
@@ -212,6 +212,8 @@ class RecordFactory(BaseFactory):
     }
     external_id = factory.Sequence(lambda n: f"external-id-{n}")
     dataset = factory.SubFactory(DatasetFactory)
+
+    inserted_at = factory.Sequence(lambda n: datetime.datetime.utcnow() + datetime.timedelta(seconds=n))
 
 
 class ResponseFactory(BaseFactory):
