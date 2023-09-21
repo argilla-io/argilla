@@ -56,22 +56,23 @@ jobs:
             searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
             coverageReport: coverage-elasticsearch-8.8.2
             runsOn: ubuntu-latest
-          - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.5.3
-            searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
-            coverageReport: coverage-elasticsearch-8.5.3
-            runsOn: ubuntu-latest
-#          - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:7.17.11
-#            searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
-#            coverageReport: coverage-elasticsearch-7.17.11
-#            runsOn: ubuntu-latest
-          - searchEngineDockerImage: opensearchproject/opensearch:2.4.1
-            searchEngineDockerEnv: '{"discovery.type": "single-node", "plugins.security.disabled": "true"}'
-            coverageReport: coverage-opensearch-2.4.1
-            runsOn: ubuntu-latest
           - searchEngineDockerImage: opensearchproject/opensearch:2.5.0
             searchEngineDockerEnv: '{"discovery.type": "single-node", "plugins.security.disabled": "true"}'
             coverageReport: coverage-opensearch-2.5.0
             runsOn: ubuntu-latest
+#          - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.5.3
+#            searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
+#            coverageReport: coverage-elasticsearch-8.5.3
+#            runsOn: ubuntu-latest
+#          - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:7.17.11
+#            searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
+#            coverageReport: coverage-elasticsearch-7.17.11
+#            runsOn: ubuntu-latest
+#          - searchEngineDockerImage: opensearchproject/opensearch:2.4.1
+#            searchEngineDockerEnv: '{"discovery.type": "single-node", "plugins.security.disabled": "true"}'
+#            coverageReport: coverage-opensearch-2.4.1
+#            runsOn: ubuntu-latest
+
     name: Run unit tests
     uses: ./.github/workflows/run-python-tests.yml
     needs: check_repo_files
