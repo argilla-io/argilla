@@ -67,8 +67,8 @@ class RemoteSuggestionSchema(SuggestionSchema, RemoteSchema):
         client: Optional["httpx.Client"] = None,
     ) -> "RemoteSuggestionSchema":
         return RemoteSuggestionSchema(
-            client=client or active_client().http_client.httpx,
             id=payload.id,
+            client=client,
             question_id=payload.question_id,
             question_name=question_id_to_name[payload.question_id],
             type=payload.type,
@@ -312,10 +312,14 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
 
     @classmethod
     def from_api(
-        cls, payload: "FeedbackItemModel", question_id_to_name: Optional[Dict[UUID, str]] = None
+        cls,
+        payload: "FeedbackItemModel",
+        question_id_to_name: Optional[Dict[UUID, str]] = None,
+        client: Optional["httpx.Client"] = None,
     ) -> "RemoteFeedbackRecord":
         return RemoteFeedbackRecord(
             id=payload.id,
+            client=client,
             fields=payload.fields,
             responses=[RemoteResponseSchema.from_api(response) for response in payload.responses]
             if payload.responses
