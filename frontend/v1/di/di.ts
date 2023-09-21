@@ -9,6 +9,7 @@ import {
   QuestionRepository,
   FieldRepository,
   MetricsRepository,
+  MetadataRepository,
 } from "@/v1/infrastructure/repositories";
 
 import { useDataset } from "@/v1/infrastructure/storage/DatasetStorage";
@@ -30,6 +31,7 @@ import { GetDatasetSettingsUseCase } from "@/v1/domain/usecases/dataset-setting/
 import { UpdateQuestionSettingUseCase } from "@/v1/domain/usecases/dataset-setting/update-question-setting-use-case";
 import { UpdateFieldSettingUseCase } from "@/v1/domain/usecases/dataset-setting/update-field-setting-use-case";
 import { UpdateDatasetSettingUseCase } from "@/v1/domain/usecases/dataset-setting/update-dataset-setting-use-case";
+import { GetMetadataFiltersUseCase } from "@/v1/domain/usecases/get-metadata-filters-use-case";
 
 export const loadDependencyContainer = (context: Context) => {
   const useAxios = () => context.$axios;
@@ -96,6 +98,10 @@ export const loadDependencyContainer = (context: Context) => {
 
     register(UpdateDatasetSettingUseCase)
       .withDependency(DatasetRepository)
+      .build(),
+
+    register(GetMetadataFiltersUseCase)
+      .withDependency(MetadataRepository)
       .build(),
   ];
 
