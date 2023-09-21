@@ -157,11 +157,11 @@ def test_remote_suggestion_schema_from_api(payload: FeedbackSuggestionModel) -> 
 )
 def test_remote_response_schema(schema_kwargs: Dict[str, Any], server_payload: Dict[str, Any]) -> None:
     response = RemoteResponseSchema(**schema_kwargs)
-    assert response.dict(exclude={"id", "client"}) == server_payload
+    assert response.to_server_payload() == server_payload
 
     local_response = response.to_local()
     assert isinstance(local_response, ResponseSchema)
-    assert local_response.dict() == server_payload
+    assert local_response.to_server_payload() == server_payload
 
 
 @pytest.mark.parametrize(
@@ -194,11 +194,11 @@ def test_remote_response_schema(schema_kwargs: Dict[str, Any], server_payload: D
 )
 def test_remote_response_schema_from_api(payload: FeedbackResponseModel) -> None:
     response = RemoteResponseSchema.from_api(payload)
-    assert response.dict(exclude={"id", "client"}) == payload.dict(exclude={"id", "inserted_at", "updated_at"})
+    assert response.to_server_payload() == payload.dict(exclude={"id", "inserted_at", "updated_at"})
 
     local_response = response.to_local()
     assert isinstance(local_response, ResponseSchema)
-    assert local_response.dict() == payload.dict(exclude={"id", "inserted_at", "updated_at"})
+    assert local_response.to_server_payload() == payload.dict(exclude={"id", "inserted_at", "updated_at"})
 
 
 @pytest.mark.parametrize(

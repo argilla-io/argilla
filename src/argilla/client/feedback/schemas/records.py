@@ -89,6 +89,15 @@ class ResponseSchema(BaseModel):
             )
         return v
 
+    def to_server_payload(self) -> Dict[str, Any]:
+        """Method that will be used to create the payload that will be sent to Argilla
+        to create a `ResponseSchema` for a `FeedbackRecord`."""
+        return {
+            "user_id": self.user_id,
+            "values": {question_name: value.dict() for question_name, value in self.values.items()},
+            "status": self.status.value if hasattr(self.status, "value") else self.status,
+        }
+
 
 class SuggestionSchema(BaseModel):
     """Schema for the suggestions for the questions related to the record.
@@ -237,7 +246,7 @@ class FeedbackRecord(BaseModel):
         payload = {}
         payload["fields"] = self.fields
         if self.responses:
-            payload["responses"] = [response.dict(exclude={"id", "client"}) for response in self.responses]
+            payload["responses"] = [response.to_server_payload() for response in self.responses]
         if self.suggestions and question_name_to_id:
             payload["suggestions"] = [
                 suggestion.to_server_payload(question_name_to_id) for suggestion in self.suggestions
