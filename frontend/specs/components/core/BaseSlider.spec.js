@@ -1,5 +1,5 @@
 import { mount } from "@vue/test-utils";
-import BaseSlider from "@/components/base/BaseSlider";
+import BaseSlider from "@/components/base/base-slider/BaseSlider";
 
 function mountBaseSlider() {
   return mount(BaseSlider, {
