@@ -77,6 +77,7 @@ from tests.factories import (
     TextFieldFactory,
     TextQuestionFactory,
     UserFactory,
+    VectorFactory,
     VectorSettingsFactory,
     WorkspaceFactory,
 )
@@ -2299,16 +2300,17 @@ class TestSuiteDatasets:
 
         assert response.status_code == 401
 
+    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_create_dataset_records(
         self,
         async_client: "AsyncClient",
         mock_search_engine: SearchEngine,
         test_telemetry: MagicMock,
         db: "AsyncSession",
-        owner: User,
-        owner_auth_header: dict,
+        role: UserRole,
     ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
         await TextFieldFactory.create(name="input", dataset=dataset)
         await TextFieldFactory.create(name="output", dataset=dataset)
         vector_settings_a = await VectorSettingsFactory.create(dataset=dataset, dimensions=384)
@@ -2325,7 +2327,7 @@ class TestSuiteDatasets:
                         {
                             "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
                             "status": "submitted",
-                            "user_id": str(owner.id),
+                            "user_id": str(user.id),
                         }
                     ],
                     "suggestions": [
@@ -2369,7 +2371,7 @@ class TestSuiteDatasets:
                         {
                             "values": {"input_ok": {"value": "no"}, "output_ok": {"value": "no"}},
                             "status": "submitted",
-                            "user_id": str(owner.id),
+                            "user_id": str(user.id),
                         }
                     ],
                 },
@@ -2379,7 +2381,7 @@ class TestSuiteDatasets:
                         {
                             "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "no"}},
                             "status": "discarded",
-                            "user_id": str(owner.id),
+                            "user_id": str(user.id),
                         }
                     ],
                 },
@@ -2387,7 +2389,7 @@ class TestSuiteDatasets:
                     "fields": {"input": "Say Hello", "output": "Say Hello"},
                     "responses": [
                         {
-                            "user_id": str(owner.id),
+                            "user_id": str(user.id),
                             "status": "discarded",
                         }
                     ],
@@ -2396,7 +2398,7 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: user.api_key}, json=records_json
         )
 
         assert response.status_code == 204, response.json()
@@ -2765,6 +2767,33 @@ class TestSuiteDatasets:
             }
         }
 
+    async def test_create_dataset_records_with_vector_settings_id_from_another_dataset(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        await TextFieldFactory.create(name="input", dataset=dataset)
+        await VectorSettingsFactory.create(dataset=dataset, dimensions=4)
+
+        # another dataset
+        vector_settings = await VectorSettingsFactory.create(dimensions=4)
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {"input": "Say Hello"},
+                        "vectors": [
+                            {"vector_settings_id": str(vector_settings.id), "value": [1.0, 2.0, 3.0, 4.0]},
+                        ],
+                    },
+                ]
+            },
+        )
+
+        assert response.status_code == 422
+
     async def test_create_dataset_records_with_index_error(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, db: "AsyncSession", owner_auth_header: dict
     ):
@@ -2808,86 +2837,6 @@ class TestSuiteDatasets:
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
-    async def test_create_dataset_records_as_admin(
-        self,
-        async_client: "AsyncClient",
-        mock_search_engine: "SearchEngine",
-        db: "AsyncSession",
-        test_telemetry: MagicMock,
-    ):
-        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
-        admin = await AdminFactory.create(workspaces=[dataset.workspace])
-
-        await TextFieldFactory.create(name="input", dataset=dataset)
-        await TextFieldFactory.create(name="output", dataset=dataset)
-
-        await TextQuestionFactory.create(name="input_ok", dataset=dataset)
-        await TextQuestionFactory.create(name="output_ok", dataset=dataset)
-
-        records_json = {
-            "items": [
-                {
-                    "fields": {"input": "Say Hello", "output": "Hello"},
-                    "external_id": "1",
-                    "responses": [
-                        {
-                            "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
-                            "status": "submitted",
-                            "user_id": str(admin.id),
-                        }
-                    ],
-                },
-                {
-                    "fields": {"input": "Say Hello", "output": "Hi"},
-                },
-                {
-                    "fields": {"input": "Say Pello", "output": "Hello World"},
-                    "external_id": "3",
-                    "responses": [
-                        {
-                            "values": {"input_ok": {"value": "no"}, "output_ok": {"value": "no"}},
-                            "status": "submitted",
-                            "user_id": str(admin.id),
-                        }
-                    ],
-                },
-                {
-                    "fields": {"input": "Say Hello", "output": "Good Morning"},
-                    "responses": [
-                        {
-                            "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "no"}},
-                            "status": "discarded",
-                            "user_id": str(admin.id),
-                        }
-                    ],
-                },
-                {
-                    "fields": {"input": "Say Hello", "output": "Say Hello"},
-                    "responses": [
-                        {
-                            "user_id": str(admin.id),
-                            "status": "discarded",
-                        }
-                    ],
-                },
-            ]
-        }
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: admin.api_key}, json=records_json
-        )
-
-        assert response.status_code == 204, response.json()
-        assert (await db.execute(select(func.count(Record.id)))).scalar() == 5
-        assert (await db.execute(select(func.count(Response.id)))).scalar() == 4
-
-        records = (await db.execute(select(Record))).scalars().all()
-        mock_search_engine.add_records.assert_called_once_with(dataset, records)
-
-        test_telemetry.assert_called_once_with(
-            action="DatasetRecordsCreated", data={"records": len(records_json["items"])}
-        )
-
     async def test_create_dataset_records_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
         annotator = await AnnotatorFactory.create()
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
@@ -2916,6 +2865,31 @@ class TestSuiteDatasets:
         assert response.status_code == 403
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
+
+    async def test_create_dataset_records_as_admin_from_another_workspace(self, async_client: "AsyncClient"):
+        admin = await AdminFactory.create()
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        records_json = {
+            "items": [
+                {
+                    "fields": {"input": "Say Hello", "ouput": "Hello"},
+                    "external_id": "1",
+                    "response": {
+                        "values": {
+                            "input_ok": {"value": "yes"},
+                            "output_ok": {"value": "yes"},
+                        },
+                        "status": "submitted",
+                    },
+                },
+            ],
+        }
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: admin.api_key}, json=records_json
+        )
+
+        assert response.status_code == 403
 
     async def test_create_dataset_records_with_submitted_response(
         self, async_client: "AsyncClient", db: "AsyncSession", owner: User, owner_auth_header: dict
@@ -3188,6 +3162,143 @@ class TestSuiteDatasets:
         assert response.status_code == 404
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
+
+    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+    async def test_create_or_replace_dataset_vectors(
+        self, async_client: "AsyncClient", db: "AsyncSession", role: UserRole
+    ):
+        dataset = await DatasetFactory.create()
+        user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
+        vector_settings_a = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        vector_settings_b = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        record_a = await RecordFactory.create(dataset=dataset)
+        record_b = await RecordFactory.create(dataset=dataset)
+        record_c = await RecordFactory.create(dataset=dataset)
+        await VectorFactory.create(
+            dataset=dataset, vector_settings=vector_settings_a, record=record_a, value=[1, 2, 3, 4, 5]
+        )
+
+        response = await async_client.put(
+            f"/api/v1/datasets/{dataset.id}/vectors",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            json={
+                "items": [
+                    {
+                        "record_id": str(record_a.id),
+                        "vector_settings_id": str(vector_settings_a.id),
+                        "value": [5, 6, 7, 8, 9],
+                    },
+                    {
+                        "record_id": str(record_b.id),
+                        "vector_settings_id": str(vector_settings_a.id),
+                        "value": [100, 101, 102, 103, 104],
+                    },
+                    {
+                        "record_id": str(record_c.id),
+                        "vector_settings_id": str(vector_settings_b.id),
+                        "value": [200, 201, 202, 203, 204],
+                    },
+                ]
+            },
+        )
+
+        assert response.status_code == 204
+        assert (await db.execute(select(func.count(Vector.id)))).scalar() == 3
+        vector_a, vector_b, vector_c = (await db.execute(select(Vector))).scalars().all()
+        assert (
+            vector_a.record_id == record_a.id
+            and vector_a.vector_settings_id == vector_settings_a.id
+            and vector_a.dataset_id == dataset.id
+            and vector_a.value == [5, 6, 7, 8, 9]
+        )
+        assert (
+            vector_b.record_id == record_b.id
+            and vector_b.vector_settings_id == vector_settings_a.id
+            and vector_a.dataset_id == dataset.id
+            and vector_b.value == [100, 101, 102, 103, 104]
+        )
+        assert (
+            vector_c.record_id == record_c.id
+            and vector_c.vector_settings_id == vector_settings_b.id
+            and vector_a.dataset_id == dataset.id
+            and vector_c.value == [200, 201, 202, 203, 204]
+        )
+
+    async def test_create_or_replace_dataset_vectors_with_invalid_vector(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        vector_settings = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        record = await RecordFactory.create(dataset=dataset)
+
+        response = await async_client.put(
+            f"/api/v1/datasets/{dataset.id}/vectors",
+            headers=owner_auth_header,
+            json={
+                "items": [{"record_id": str(record.id), "vector_settings_id": str(vector_settings.id), "value": [1]}]
+            },
+        )
+
+        assert response.status_code == 422
+
+    async def test_create_or_replace_dataset_vectors_with_non_existent_vector_settings(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record = await RecordFactory.create(dataset=dataset)
+
+        response = await async_client.put(
+            f"/api/v1/datasets/{dataset.id}/vectors",
+            headers=owner_auth_header,
+            json={
+                "items": [{"record_id": str(record.id), "vector_settings_id": str(uuid4()), "value": [1, 2, 3, 4, 5]}]
+            },
+        )
+
+        assert response.status_code == 422
+
+    async def test_create_or_replace_dataset_vectors_with_vector_settings_id_from_another_dataset(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record = await RecordFactory.create(dataset=dataset)
+
+        # Create vector settings in another dataset
+        vector_settings = await VectorSettingsFactory.create(dimensions=5)
+
+        response = await async_client.put(
+            f"/api/v1/datasets/{dataset.id}/vectors",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "record_id": str(record.id),
+                        "vector_settings_id": str(vector_settings.id),
+                        "value": [1, 2, 3, 4, 5],
+                    }
+                ]
+            },
+        )
+
+        assert response.status_code == 422
+
+    async def test_create_or_replace_dataset_vectors_with_non_existent_record(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        vector_settings = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+
+        response = await async_client.put(
+            f"/api/v1/datasets/{dataset.id}/vectors",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {"record_id": str(uuid4()), "vector_settings_id": str(vector_settings.id), "value": [1, 2, 3, 4, 5]}
+                ]
+            },
+        )
+
+        assert response.status_code == 422
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_delete_dataset_records(
