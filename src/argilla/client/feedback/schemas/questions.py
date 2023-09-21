@@ -16,7 +16,7 @@ import warnings
 from abc import abstractproperty
 from typing import Any, Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel, Extra, Field, conint, conlist, validator
+from pydantic import BaseModel, Extra, Field, conint, conlist, root_validator, validator
 
 from argilla.client.feedback.schemas.enums import QuestionTypes
 from argilla.client.feedback.schemas.utils import LabelMappingMixin
@@ -162,16 +162,10 @@ class _LabelQuestion(QuestionSchema, LabelMappingMixin):
             assert len(set(v.values())) == len(v.values()), "ensure this dict has unique values"
         return v
 
-    @property
-    def server_settings(self) -> Dict[str, Any]:
-        settings = {}
-        settings["type"] = self.type
-        if isinstance(self.labels, dict):
-            settings["options"] = [{"value": key, "text": value} for key, value in self.labels.items()]
-        elif isinstance(self.labels, list):
-            settings["options"] = [{"value": label, "text": label} for label in self.labels]
-        if self.visible_labels == UNDEFINED:
-            if len(self.labels) > 20:
+    @root_validator(skip_on_failure=True)
+    def visible_labels_must_be_valid(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        if values.get("visible_labels") == UNDEFINED:
+            if len(values.get("labels")) > 20:
                 warnings.warn(
                     "Since `visible_labels` has not been provided and the total number"
                     " of labels is greater than 20, `visible_labels` will be set to `20`.",
@@ -182,8 +176,8 @@ class _LabelQuestion(QuestionSchema, LabelMappingMixin):
             else:
                 visible_labels = None
         else:
-            visible_labels = self.visible_labels
-            total_labels = len(self.labels)
+            visible_labels = values.get("visible_labels")
+            total_labels = len(values.get("labels"))
             if visible_labels and visible_labels > total_labels:
                 if total_labels >= 3:
                     warnings.warn(
@@ -195,14 +189,24 @@ class _LabelQuestion(QuestionSchema, LabelMappingMixin):
                     visible_labels = total_labels
                 else:
                     warnings.warn(
-                        f"`labels={self.labels}` has less than 3 labels, so `visible_labels`"
+                        f"`labels={values.get('labels')}` has less than 3 labels, so `visible_labels`"
                         " will be set to `None`, which means that all the labels will be visible.",
                         UserWarning,
                         stacklevel=1,
                     )
                     visible_labels = None
-        self.visible_labels = visible_labels
-        settings["visible_options"] = visible_labels
+        values["visible_labels"] = visible_labels
+        return values
+
+    @property
+    def server_settings(self) -> Dict[str, Any]:
+        settings = {}
+        settings["type"] = self.type
+        if isinstance(self.labels, dict):
+            settings["options"] = [{"value": key, "text": value} for key, value in self.labels.items()]
+        elif isinstance(self.labels, list):
+            settings["options"] = [{"value": label, "text": label} for label in self.labels]
+        settings["visible_options"] = self.visible_labels
         return settings
 
 
