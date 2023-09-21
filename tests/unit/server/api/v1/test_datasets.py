@@ -3823,3 +3823,53 @@ class TestSuiteDatasets:
 
         assert response.status_code == 404
         assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 1
+
+    async def test_refresh_dataset(
+        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.post(f"/api/v1/datasets/{dataset.id}/refresh", headers=owner_auth_header)
+
+        assert response.status_code == 204, response.json()
+
+        mock_search_engine.refresh_index.assert_called_once_with(dataset)
+
+    async def test_refresh_dataset_for_annotator(self, async_client: "AsyncClient"):
+        workspace = await WorkspaceFactory.create()
+        annotator = await AnnotatorFactory.create(workspaces=[workspace])
+
+        dataset = await DatasetFactory.create(workspace=workspace)
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/refresh", headers={API_KEY_HEADER_NAME: annotator.api_key}
+        )
+        assert response.status_code == 403
+
+    async def test_refresh_dataset_for_admin(self, async_client: "AsyncClient"):
+        workspace = await WorkspaceFactory.create()
+        admin = await AdminFactory.create(workspaces=[workspace])
+
+        dataset = await DatasetFactory.create(workspace=workspace)
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/refresh", headers={API_KEY_HEADER_NAME: admin.api_key}
+        )
+        assert response.status_code == 204
+
+    @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
+    async def test_refresh_dataset_without_authorization(self, async_client: "AsyncClient", role: UserRole):
+        user = await UserFactory.create(role=role)
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/refresh", headers={API_KEY_HEADER_NAME: user.api_key}
+        )
+        assert response.status_code == 403
+
+    async def test_refresh_dataset_with_non_existent_dataset(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        await DatasetFactory.create()
+
+        response = await async_client.post(f"/api/v1/datasets/{uuid4()}/refresh", headers=owner_auth_header)
+
+        assert response.status_code == 404
