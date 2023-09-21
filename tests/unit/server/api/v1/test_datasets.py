@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import time
 from datetime import datetime
 from typing import TYPE_CHECKING, List, Optional, Tuple, Type, Union
 from unittest.mock import ANY, MagicMock
@@ -757,7 +757,7 @@ class TestSuiteDatasets:
                 fields={"input": "input_b", "output": "output_b"}, metadata_={"unit": "test"}, dataset=dataset
             ),
             await RecordFactory.create(
-                fields={"input": "input_c", "output": "output_c"}, dataset=dataset, inserted_at=datetime.utcnow()
+                fields={"input": "input_c", "output": "output_c"}, dataset=dataset
             ),
         ]
 
