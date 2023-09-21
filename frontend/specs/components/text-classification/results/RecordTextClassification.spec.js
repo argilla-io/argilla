@@ -1,5 +1,5 @@
 import { mount } from "@vue/test-utils";
-import Component from "@/components/text-classifier/results/RecordTextClassification";
+import Component from "@/components/text-classification/results/RecordTextClassification";
 
 import { TextClassificationRecord } from "@/models/TextClassification";
 

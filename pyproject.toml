@@ -49,7 +49,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 server = [
     # Basic dependencies
-    "fastapi >= 0.75,< 0.89",
+    "fastapi >= 0.103.1",
     "opensearch-py ~= 2.0.0",
     "elasticsearch8[async] ~= 8.7.0",
     "uvicorn[standard] >= 0.15.0,< 0.21.0",
@@ -82,7 +82,7 @@ postgresql = [
     # If we're on macOS, then install `psycopg2-binary` instead
     "psycopg2-binary ~= 2.9.5; sys_platform == 'darwin'",
     # Async PostgreSQL
-    "asyncpg >=0.27.0"
+    "asyncpg >=0.27.0",
 ]
 listeners = ["schedule ~= 1.1.0", "prodict ~= 0.8.0"]
 integrations = [
@@ -93,7 +93,8 @@ integrations = [
     # TODO: some backward comp. problems introduced in 0.5.0. 0.13 does not match with setfit
     "huggingface_hub >= 0.5.0,< 0.13",
     # Version 0.12 fixes a known installation issue related to `sentencepiece` and `tokenizers`, more at https://github.com/flairNLP/flair/issues/3129
-    "flair >= 0.12.2",  # Version 0.12.2 relaxes the `huggingface_hub` dependency
+    # Version 0.12.2 relaxes the `huggingface_hub` dependency
+    "flair >= 0.12.2",
     "faiss-cpu",
     "flyingsquid",
     "pgmpy",
@@ -104,11 +105,12 @@ integrations = [
     "transformers[torch] >= 4.30.0",
     "evaluate",
     "seqeval",
+    "sentence-transformers",
     "setfit",
     "span_marker",
-    "openai",
+    "openai>=0.27.10",
     "peft",
-    "trl>=0.5.0"
+    "trl>=0.5.0",
 ]
 tests = [
     "pytest",
@@ -123,6 +125,9 @@ homepage = "https://www.argilla.io"
 documentation = "https://docs.argilla.io"
 repository = "https://github.com/argilla-io/argilla"
 
+[project.scripts]
+argilla = "argilla.cli.app:app"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
@@ -130,7 +135,9 @@ where = ["src"]
 version = { attr = "argilla.__version__" }
 
 [tool.setuptools.package-data]
-"argilla.client.feedback.integrations.huggingface.card" = ["argilla_template.md"]
+"argilla.client.feedback.integrations.huggingface.card" = [
+    "argilla_template.md",
+]
 
 [tool.pytest.ini_options]
 log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"

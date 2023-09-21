@@ -14,6 +14,7 @@
 
 import os
 import textwrap
+import warnings
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, List, Optional, Union
 
@@ -26,6 +27,7 @@ os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
 if TYPE_CHECKING:
     import spacy
+    from transformers import PreTrainedModel, PreTrainedTokenizer
 
     from argilla.client.feedback.dataset import FeedbackDataset
 
@@ -37,7 +39,8 @@ class ArgillaTrainer(ArgillaTrainerV1):
         task: TrainingTaskTypes,
         framework: Framework,
         lang: Optional["spacy.Language"] = None,
-        model: Optional[str] = None,
+        model: Optional[Union[str, "PreTrainedModel"]] = None,
+        tokenizer: Optional["PreTrainedTokenizer"] = None,
         train_size: Optional[float] = None,
         seed: Optional[int] = None,
         gpu_id: Optional[int] = -1,
@@ -50,11 +53,14 @@ class ArgillaTrainer(ArgillaTrainerV1):
             dataset: the dataset to be used for training.
             task: the training data to be used for training.
             framework: the framework to use for training. Currently, "transformers", "setfit", "spacy", "peft",
-                "openai", "span_marker" and "trl" are supported.
+                "openai", "span_marker", "trl" and "sentence-transformers" are supported.
             lang: the spaCy language model to use for training, just required when `framework="spacy"`.
                 Defaults to None, but it will be set to `spacy.blank("en")` if not specified.
-            model: name or path to the baseline model to be used. If not specified will set to a good default
+            model: name or path to the baseline model to be used, or a transformers PreTrainedModel instance
+                if the framework is "transformers", "peft" or "trl". If not specified will set to a good default
                 per framework, if applicable. Defaults to None.
+            tokenizer: a transformers PreTrainedTokenizer instance to tokenize the text. Only used with the
+                "transformers", "peft" or "trl" frameworks.
             train_size: the size of the training set. If not specified, the entire dataset will be used for training,
                 which may be an issue if `framework="spacy"` as it requires a validation set. Defaults to None.
             seed: the random seed to ensure reproducibility. Defaults to None.
@@ -69,6 +75,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
         self._task = task
         self._seed = seed  # split is used for train-test-split and should therefore be fixed
         self._model = model
+        self._tokenizer = tokenizer
 
         self._prepared_data = self._dataset.prepare_for_training(
             framework=framework,
@@ -80,6 +87,11 @@ class ArgillaTrainer(ArgillaTrainerV1):
 
         if isinstance(framework, str):
             framework = Framework(framework)
+
+        if tokenizer and framework not in (Framework.TRANSFORMERS, Framework.PEFT, Framework.TRL):
+            warnings.warn(
+                f"Passing a tokenizer is not supported for the {framework} framework.", UserWarning, stacklevel=2
+            )
 
         if framework is Framework.SETFIT:
             if not isinstance(task, TrainingTaskForTextClassification):
@@ -102,6 +114,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 prepared_data=self._prepared_data,
                 seed=self._seed,
                 model=self._model,
+                tokenizer=self._tokenizer,
             )
         elif framework is Framework.PEFT:
             from argilla.client.feedback.training.frameworks.peft import ArgillaPeftTrainer
@@ -112,6 +125,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 prepared_data=self._prepared_data,
                 seed=self._seed,
                 model=self._model,
+                tokenizer=self._tokenizer,
             )
         elif framework is Framework.SPACY:
             from argilla.client.feedback.training.frameworks.spacy import ArgillaSpaCyTrainer
@@ -166,6 +180,20 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 prepared_data=self._prepared_data,
                 seed=self._seed,
                 model=self._model,
+                tokenizer=self._tokenizer,
+            )
+        elif framework is Framework.SENTENCE_TRANSFORMERS:
+            from argilla.client.feedback.training.frameworks.sentence_transformers import (
+                ArgillaSentenceTransformersTrainer,
+            )
+
+            self._trainer = ArgillaSentenceTransformersTrainer(
+                dataset=self._dataset,
+                task=self._task,
+                prepared_data=self._prepared_data,
+                seed=self._seed,
+                model=self._model,
+                **framework_kwargs,  # cross_encoder
             )
         else:
             raise NotImplementedError(f"{framework} is not a valid framework.")
@@ -263,7 +291,7 @@ class ArgillaTrainerSkeleton(ABC):
         """
 
     @abstractmethod
-    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
+    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs) -> None:
         """
         Predicts the label of the text.
         """

@@ -8,7 +8,7 @@ The Dolly original dataset contained a lot of reference indicators such as "[1]"
 
 :::{tab-item} Original
 
-```bash
+```
 ### Instruction
 When did Virgin Australia start operating?
 
@@ -22,11 +22,12 @@ The airline has since grown to directly serve 32 cities in Australia, from hubs 
 ### Response:
 Virgin Australia commenced services on 31 August 2000 as Virgin Blue, with two aircraft on a single route.
 ```
+
 :::
 
 :::{tab-item} Corrected
 
-```bash
+```
 ### Instruction
 When did Virgin Australia start operating?
 

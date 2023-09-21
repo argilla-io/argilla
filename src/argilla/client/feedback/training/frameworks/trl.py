@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import logging
-from typing import TYPE_CHECKING, Dict, List, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
 from argilla.client.feedback.training.schemas import (
@@ -23,10 +23,11 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForSFT,
 )
 from argilla.training.utils import filter_allowed_args
-from argilla.utils.dependency import require_version
+from argilla.utils.dependency import require_dependencies
 
 if TYPE_CHECKING:
     import transformers
+    from transformers import PreTrainedModel, PreTrainedTokenizer
     from trl import PPOConfig
 
     from argilla.client.feedback.dataset import FeedbackDataset
@@ -71,9 +72,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
     _logger = logging.getLogger("ArgillaTRLTrainer")
     _logger.setLevel(logging.INFO)
 
-    require_version("transformers")
-    require_version("torch")
-    require_version("trl>=0.5.0")
+    require_dependencies(["transformers", "torch", "trl>=0.5.0"])
 
     def __init__(
         self,
@@ -85,7 +84,8 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
             TrainingTaskForDPO,
         ],
         prepared_data=None,
-        model: str = None,
+        model: Optional[Union[str, "PreTrainedModel"]] = None,
+        tokenizer: Optional["PreTrainedTokenizer"] = None,
         seed: int = None,
     ) -> None:
         super().__init__(dataset=dataset, task=task, prepared_data=prepared_data, model=model, seed=seed)
@@ -93,8 +93,8 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         from datasets import DatasetDict
         from transformers import set_seed
 
-        self._transformers_model = None
-        self._transformers_tokenizer = None
+        self._transformers_model = model if not isinstance(model, str) else None
+        self._transformers_tokenizer = tokenizer
         self.device = "cpu"
         if torch.backends.mps.is_available():
             self.device = "mps"
@@ -186,9 +186,13 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         elif isinstance(self._task, TrainingTaskForRM):
             auto_model_class = AutoModelForSequenceClassification
 
-        self._transformers_model: PreTrainedModel = auto_model_class.from_pretrained(self._model)
-        self._transformers_tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(self._model)
-        self._transformers_tokenizer.pad_token = self._transformers_tokenizer.eos_token
+        if self._transformers_model is None:
+            self._transformers_model: PreTrainedModel = auto_model_class.from_pretrained(self._model)
+        if self._transformers_tokenizer is None:
+            self._transformers_tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(
+                self._transformers_model.config.name_or_path
+            )
+            self._transformers_tokenizer.pad_token_id = self._transformers_tokenizer.eos_token_id
         self._transformers_model.config.pad_token_id = self._transformers_tokenizer.pad_token_id
 
         if isinstance(self._task, (TrainingTaskForPPO, TrainingTaskForDPO)):

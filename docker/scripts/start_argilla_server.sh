@@ -19,7 +19,7 @@ fi
 
 # Check for ARGILLA_BASE_URL and add --root-path if present
 if [ -n "$ARGILLA_BASE_URL" ]; then
-	uvicorn argilla:app --host "0.0.0.0" --root-path "$ARGILLA_BASE_URL"
+	python -m uvicorn argilla:app --host "0.0.0.0" --root-path "$ARGILLA_BASE_URL"
 else
-	uvicorn argilla:app --host "0.0.0.0"
+	python -m uvicorn argilla:app --host "0.0.0.0"
 fi

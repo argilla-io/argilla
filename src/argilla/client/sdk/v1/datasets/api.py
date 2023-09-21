@@ -132,19 +132,28 @@ def publish_dataset(
 
 def list_datasets(
     client: httpx.Client,
-) -> Response[Union[List[FeedbackDatasetModel], ErrorMessage, HTTPValidationError]]:
-    """Sends a GET request to `/api/v1/datasets` endpoint to retrieve a list of `FeedbackTask` datasets.
+    workspace_id: Optional[UUID] = None,
+) -> Response[Union[list, List[FeedbackDatasetModel], ErrorMessage, HTTPValidationError]]:
+    """Sends a GET request to `/api/v1/me/datasets` endpoint to retrieve a list of
+    `FeedbackTask` datasets filtered by `workspace_id` if applicable.
 
     Args:
         client: the authenticated Argilla client to be used to send the request to the API.
+        workspace_id: the id of the workspace to filter the datasets by. Note that the user
+            should either be owner or have access to the workspace. Defaults to None.
 
     Returns:
         A `Response` object containing a `parsed` attribute with the parsed response if the
-        request was successful, which is a list of `FeedbackDatasetModel`.
+        request was successful, which is a list of `FeedbackDatasetModel` if any, otherwise
+        it will contain an empty list.
     """
     url = "/api/v1/me/datasets"
 
-    response = client.get(url=url)
+    params = {}
+    if workspace_id is not None:
+        params["workspace_id"] = str(workspace_id)
+
+    response = client.get(url=url, params=params)
 
     if response.status_code == 200:
         response_obj = Response.from_httpx_response(response)

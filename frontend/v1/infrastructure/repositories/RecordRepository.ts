@@ -4,7 +4,7 @@ import {
   BackedRecords,
   BackendAnswerCombinations,
   BackendResponse,
-  BackendResponseStatus,
+  BackendRecordStatus,
   Response,
 } from "../types";
 import { RecordAnswer } from "@/v1/domain/entities/record/RecordAnswer";
@@ -64,9 +64,15 @@ export class RecordRepository {
     return this.createRecordResponse(record, "submitted");
   }
 
+  saveDraft(record: Record): Promise<RecordAnswer> {
+    if (record.answer) return this.updateRecordResponse(record, "draft");
+
+    return this.createRecordResponse(record, "draft");
+  }
+
   private async updateRecordResponse(
     record: Record,
-    status: BackendResponseStatus
+    status: BackendRecordStatus
   ) {
     try {
       const request = this.createRequest(status, record.questions);
@@ -76,7 +82,7 @@ export class RecordRepository {
         request
       );
 
-      return new RecordAnswer(data.id, data.status, data.values);
+      return new RecordAnswer(data.id, status, data.values, data.updated_at);
     } catch (error) {
       throw {
         response: RECORD_API_ERRORS.ERROR_UPDATING_RECORD_RESPONSE,
@@ -86,7 +92,7 @@ export class RecordRepository {
 
   private async createRecordResponse(
     record: Record,
-    status: BackendResponseStatus
+    status: BackendRecordStatus
   ) {
     try {
       const request = this.createRequest(status, record.questions);
@@ -96,7 +102,12 @@ export class RecordRepository {
         request
       );
 
-      return new RecordAnswer(data.id, data.status, data.values);
+      return new RecordAnswer(
+        data.id,
+        data.status,
+        data.values,
+        data.updated_at
+      );
     } catch (error) {
       throw {
         response: RECORD_API_ERRORS.ERROR_CREATING_RECORD_RESPONSE,
@@ -170,15 +181,19 @@ export class RecordRepository {
   }
 
   private createRequest(
-    status: BackendResponseStatus,
+    status: BackendRecordStatus,
     questions: Question[]
-  ): Omit<BackendResponse, "id"> {
+  ): Omit<BackendResponse, "id" | "updated_at"> {
     const values = {} as BackendAnswerCombinations;
 
-    questions.forEach((question) => {
-      if (question.answer.isValid)
+    questions
+      .filter(
+        (question) =>
+          question.answer.isValid || question.answer.isPartiallyValid
+      )
+      .forEach((question) => {
         values[question.name] = { value: question.answer.valuesAnswered };
-    });
+      });
 
     return {
       status,
@@ -196,6 +211,8 @@ export class RecordRepository {
     params.append("offset", offset);
     params.append("limit", howMany.toString());
     params.append("response_status", backendStatus);
+
+    if (backendStatus === "missing") params.append("response_status", "draft");
 
     return params;
   }
