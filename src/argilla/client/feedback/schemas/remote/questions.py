@@ -111,7 +111,7 @@ class RemoteMultiLabelQuestion(MultiLabelQuestion, RemoteSchema):
         )
 
     @classmethod
-    def from_api(cls, payload: "FeedbackQuestionModel") -> "RemoteLabelQuestion":
+    def from_api(cls, payload: "FeedbackQuestionModel") -> "RemoteMultiLabelQuestion":
         return RemoteMultiLabelQuestion(
             id=payload.id,
             name=payload.name,
@@ -133,7 +133,7 @@ class RemoteRankingQuestion(RankingQuestion, RemoteSchema):
         )
 
     @classmethod
-    def from_api(cls, payload: "FeedbackQuestionModel") -> "RemoteLabelQuestion":
+    def from_api(cls, payload: "FeedbackQuestionModel") -> "RemoteRankingQuestion":
         return RemoteRankingQuestion(
             id=payload.id,
             name=payload.name,
