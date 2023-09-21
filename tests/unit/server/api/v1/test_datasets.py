@@ -3300,6 +3300,19 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
 
+    async def test_create_or_replace_dataset_vectors_with_dataset_with_no_vectors_settings(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.put(
+            f"/api/v1/datasets/{dataset.id}/vectors",
+            headers=owner_auth_header,
+            json={"items": [{"record_id": str(uuid4()), "vector_settings_id": str(uuid4()), "value": [1, 2, 3, 4, 5]}]},
+        )
+
+        assert response.status_code == 422
+
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_delete_dataset_records(
         self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, role: UserRole

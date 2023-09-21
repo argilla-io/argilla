@@ -392,9 +392,15 @@ async def create_or_replace_vectors(
     vectors_create: VectorsCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset(db, dataset_id)
+    dataset = await _get_dataset(db, dataset_id, with_vectors_settings=True)
 
     await authorize(current_user, DatasetPolicyV1.create_vectors(dataset))
+
+    if not dataset.vectors_settings:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Cannot create vectors for dataset without vector settings",
+        )
 
     try:
         await datasets.upsert_vectors(db, search_engine, dataset, vectors_create)
