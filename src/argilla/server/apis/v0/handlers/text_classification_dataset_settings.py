@@ -25,17 +25,17 @@ from argilla.server.services.datasets import DatasetsService
 
 
 def configure_router(router: APIRouter):
-    task = TaskType.text_classification
-    base_endpoint = f"/{task}/{{name}}/settings"
-    new_base_endpoint = f"/{{name}}/{task}/settings"
+    task_type = TaskType.text_classification
+    base_endpoint = f"/{task_type.value}/{{name}}/settings"
+    new_base_endpoint = f"/{{name}}/{task_type.value}/settings"
 
     @deprecate_endpoint(
         path=base_endpoint,
         new_path=new_base_endpoint,
         router_method=router.get,
-        name=f"get_dataset_settings_for_{task}",
-        operation_id=f"get_dataset_settings_for_{task}",
-        description=f"Get the {task} dataset settings",
+        name=f"get_dataset_settings_for_{task_type.value}",
+        operation_id=f"get_dataset_settings_for_{task_type.value}",
+        description=f"Get the {task_type.value} dataset settings",
         response_model_exclude_none=True,
         response_model=TextClassificationSettings,
     )
@@ -49,7 +49,7 @@ def configure_router(router: APIRouter):
             user=current_user,
             name=name,
             workspace=ws_params.workspace,
-            task=task,
+            task=task_type,
         )
 
         settings = await datasets.get_settings(
@@ -59,14 +59,14 @@ def configure_router(router: APIRouter):
 
     @router.patch(
         path=new_base_endpoint,
-        name=f"save_dataset_settings_for_{task}",
-        operation_id=f"save_dataset_settings_for_{task}",
-        description=f"Save the {task} dataset settings",
+        name=f"save_dataset_settings_for_{task_type.value}",
+        operation_id=f"save_dataset_settings_for_{task_type.value}",
+        description=f"Save the {task_type.value} dataset settings",
         response_model_exclude_none=True,
         response_model=TextClassificationSettings,
     )
     async def save_settings(
-        request: TextClassificationSettings = Body(..., description=f"The {task} dataset settings"),
+        request: TextClassificationSettings = Body(..., description=f"The {task_type.value} dataset settings"),
         name: str = DATASET_NAME_PATH_PARAM,
         ws_params: CommonTaskHandlerDependencies = Depends(),
         datasets: DatasetsService = Depends(DatasetsService.get_instance),
@@ -76,7 +76,7 @@ def configure_router(router: APIRouter):
         found_ds = await datasets.find_by_name(
             user=current_user,
             name=name,
-            task=task,
+            task=task_type,
             workspace=ws_params.workspace,
         )
         await validator.validate_dataset_settings(user=current_user, dataset=found_ds, settings=request)
@@ -90,18 +90,18 @@ def configure_router(router: APIRouter):
     # TODO: This will be remove in next iteration
     router.put(
         path=base_endpoint,
-        name=f"old_save_dataset_settings_for_{task}",
-        operation_id=f"old_save_dataset_settings_for_{task}",
-        description=f"Save the {task} dataset settings",
+        name=f"old_save_dataset_settings_for_{task_type.value}",
+        operation_id=f"old_save_dataset_settings_for_{task_type.value}",
+        description=f"Save the {task_type.value} dataset settings",
         deprecated=True,
         response_model_exclude_none=True,
         response_model=TextClassificationSettings,
     )(save_settings)
     router.put(
         path=new_base_endpoint,
-        name=f"new_save_dataset_settings_for_{task}_put",
-        operation_id=f"new_save_dataset_settings_for_{task}_put",
-        description=f"Save the {task} dataset settings",
+        name=f"new_save_dataset_settings_for_{task_type.value}_put",
+        operation_id=f"new_save_dataset_settings_for_{task_type.value}_put",
+        description=f"Save the {task_type.value} dataset settings",
         deprecated=True,
         response_model_exclude_none=True,
         response_model=TextClassificationSettings,
@@ -111,9 +111,9 @@ def configure_router(router: APIRouter):
         path=base_endpoint,
         new_path=new_base_endpoint,
         router_method=router.delete,
-        operation_id=f"delete_{task}_settings",
-        name=f"delete_{task}_settings",
-        description=f"Delete {task} dataset settings",
+        operation_id=f"delete_{task_type.value}_settings",
+        name=f"delete_{task_type.value}_settings",
+        description=f"Delete {task_type.value} dataset settings",
     )
     async def delete_settings(
         name: str = DATASET_NAME_PATH_PARAM,
@@ -124,7 +124,7 @@ def configure_router(router: APIRouter):
         found_ds = await datasets.find_by_name(
             user=user,
             name=name,
-            task=task,
+            task=task_type,
             workspace=ws_params.workspace,
         )
 

@@ -16,14 +16,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import (
-    BaseModel,
-    PositiveInt,
-    conlist,
-    constr,
-    root_validator,
-    validator,
-)
+from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
 from pydantic.utils import GetterDict
 
@@ -59,12 +52,17 @@ QUESTION_CREATE_TITLE_MAX_LENGTH = 500
 QUESTION_CREATE_DESCRIPTION_MIN_LENGTH = 1
 QUESTION_CREATE_DESCRIPTION_MAX_LENGTH = 1000
 
+VECTOR_SETTINGS_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH = 1
+VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH = 200
+VECTOR_SETTINGS_CREATE_DESCRIPTION_MIN_LENGTH = 1
+VECTOR_SETTINGS_CREATE_DESCRIPTION_MAX_LENGTH = 1000
+
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 10
 
 RATING_LOWER_VALUE_ALLOWED = 1
 RATING_UPPER_VALUE_ALLOWED = 10
-
 
 VALUE_TEXT_OPTION_VALUE_MIN_LENGTH = 1
 VALUE_TEXT_OPTION_VALUE_MAX_LENGTH = 200
@@ -75,9 +73,9 @@ VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH = 1000
 
 LABEL_SELECTION_OPTIONS_MIN_ITEMS = 2
 LABEL_SELECTION_OPTIONS_MAX_ITEMS = 250
+LABEL_SELECTION_MIN_VISIBLE_OPTIONS = 3
 
 RANKING_OPTIONS_MIN_ITEMS = 2
-
 
 RECORDS_CREATE_MIN_ITEMS = 1
 RECORDS_CREATE_MAX_ITEMS = 1000
@@ -251,7 +249,19 @@ class LabelSelectionQuestionSettingsCreate(UniqueValuesCheckerMixin):
         min_items=LABEL_SELECTION_OPTIONS_MIN_ITEMS,
         max_items=LABEL_SELECTION_OPTIONS_MAX_ITEMS,
     )
-    visible_options: Optional[PositiveInt] = None
+    visible_options: Optional[int] = PydanticField(None, ge=LABEL_SELECTION_MIN_VISIBLE_OPTIONS)
+
+    @root_validator
+    def check_visible_options_value(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        visible_options = values.get("visible_options")
+        if visible_options is not None:
+            num_options = len(values["options"])
+            if visible_options > num_options:
+                raise ValueError(
+                    "The value for 'visible_options' must be less or equal to the number of items in 'options'"
+                    f" ({num_options})"
+                )
+        return values
 
 
 class MultiLabelSelectionQuestionSettingsCreate(LabelSelectionQuestionSettingsCreate):
@@ -314,6 +324,37 @@ class QuestionCreate(BaseModel):
     ]
     required: Optional[bool]
     settings: QuestionSettingsCreate
+
+
+class VectorSettings(BaseModel):
+    id: UUID
+    name: str
+    dimensions: int
+    description: Optional[str] = None
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class VectorsSettings(BaseModel):
+    items: List[VectorSettings]
+
+
+class VectorSettingsCreate(BaseModel):
+    name: str = PydanticField(
+        ...,
+        regex=VECTOR_SETTINGS_CREATE_NAME_REGEX,
+        min_length=VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH,
+        max_length=VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
+    )
+    dimensions: PositiveInt
+    description: Optional[str] = PydanticField(
+        None,
+        min_length=VECTOR_SETTINGS_CREATE_DESCRIPTION_MIN_LENGTH,
+        max_length=VECTOR_SETTINGS_CREATE_DESCRIPTION_MAX_LENGTH,
+    )
 
 
 class ResponseValue(BaseModel):

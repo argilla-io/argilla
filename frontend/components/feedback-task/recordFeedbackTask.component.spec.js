@@ -14,12 +14,21 @@ const TextFieldComponentStub = {
   props: ["title", "fieldText", "useMarkdown"],
 };
 
+const $route = {
+  query: {
+    _search: "",
+  },
+};
+
 describe("RecordFeedbackTaskComponent", () => {
   it("render the component with ONE textFieldComponent", () => {
     const options = {
       stubs: {
         StatusTag: StatusTagComponentStub,
         TextFieldComponent: TextFieldComponentStub,
+      },
+      mocks: {
+        $route,
       },
       propsData: {
         recordStatus: "PENDING",
@@ -44,6 +53,9 @@ describe("RecordFeedbackTaskComponent", () => {
       stubs: {
         StatusTag: StatusTagComponentStub,
         TextFieldComponent: TextFieldComponentStub,
+      },
+      mocks: {
+        $route,
       },
       propsData: {
         recordStatus: "PENDING",

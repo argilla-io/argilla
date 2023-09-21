@@ -20,7 +20,7 @@ from uuid import UUID, uuid4
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v1.handlers.datasets import LIST_DATASET_RECORDS_LIMIT_DEFAULT
-from argilla.server.enums import RecordInclude, ResponseStatusFilter
+from argilla.server.enums import DatasetStatus, RecordInclude, ResponseStatusFilter
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
@@ -32,6 +32,7 @@ from argilla.server.models import (
     Suggestion,
     User,
     UserRole,
+    VectorSettings,
     Workspace,
 )
 from argilla.server.schemas.v1.datasets import (
@@ -49,6 +50,8 @@ from argilla.server.schemas.v1.datasets import (
     VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH,
     VALUE_TEXT_OPTION_TEXT_MAX_LENGTH,
     VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
+    VECTOR_SETTINGS_CREATE_DESCRIPTION_MAX_LENGTH,
+    VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
 )
 from argilla.server.search_engine import (
     SearchEngine,
@@ -74,6 +77,7 @@ from tests.factories import (
     TextFieldFactory,
     TextQuestionFactory,
     UserFactory,
+    VectorSettingsFactory,
     WorkspaceFactory,
 )
 
@@ -418,6 +422,51 @@ class TestSuiteDatasets:
         response = await async_client.get(f"/api/v1/datasets/{uuid4()}/questions", headers=owner_auth_header)
 
         assert response.status_code == 404
+
+    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+    async def test_list_dataset_vectors_settings(self, async_client: "AsyncClient", role: UserRole):
+        dataset = await DatasetFactory.create()
+        vectors_settings = await VectorSettingsFactory.create_batch(size=3, dataset=dataset)
+        user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
+
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/vectors-settings", headers={API_KEY_HEADER_NAME: user.api_key}
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "items": [
+                {
+                    "id": str(vector_settings.id),
+                    "name": vector_settings.name,
+                    "dimensions": vector_settings.dimensions,
+                    "description": vector_settings.description,
+                    "inserted_at": vector_settings.inserted_at.isoformat(),
+                    "updated_at": vector_settings.updated_at.isoformat(),
+                }
+                for vector_settings in vectors_settings
+            ]
+        }
+
+    @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
+    async def test_list_dataset_vector_settings_as_user_from_another_workspace(
+        self, async_client: "AsyncClient", role: UserRole
+    ):
+        dataset = await DatasetFactory.create()
+        annotator = await UserFactory.create(role=role)
+
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/vectors-settings", headers={API_KEY_HEADER_NAME: annotator.api_key}
+        )
+
+        assert response.status_code == 403
+
+    async def test_list_dataset_vectors_settings_without_authentication(self, async_client: "AsyncClient"):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.get(f"/api/v1/datasets/{dataset.id}/vectors-settings")
+
+        assert response.status_code == 401
 
     async def test_list_dataset_records(self, async_client: "AsyncClient", owner_auth_header: dict):
         dataset = await DatasetFactory.create()
@@ -1639,20 +1688,19 @@ class TestSuiteDatasets:
                 {
                     "type": "label_selection",
                     "options": [
-                        {"value": "positive", "text": "Positive", "description": "Texts with positive sentiment"},
-                        {"value": "negative", "text": "Negative", "description": "Texts with negative sentiment"},
-                        {"value": "neutral", "text": "Neutral", "description": "Texts with neutral sentiment"},
+                        {"value": "positive", "text": "Positive", "description": "Text with a positive sentiment"},
+                        {"value": "negative", "text": "Negative", "description": "Text with a negative sentiment"},
+                        {"value": "neutral", "text": "Neutral", "description": "Text with a neutral sentiment"},
                     ],
-                    "visible_options": 10,
                 },
                 {
                     "type": "label_selection",
                     "options": [
-                        {"value": "positive", "text": "Positive", "description": "Texts with positive sentiment"},
-                        {"value": "negative", "text": "Negative", "description": "Texts with negative sentiment"},
-                        {"value": "neutral", "text": "Neutral", "description": "Texts with neutral sentiment"},
+                        {"value": "positive", "text": "Positive", "description": "Text with a positive sentiment"},
+                        {"value": "negative", "text": "Negative", "description": "Text with a negative sentiment"},
+                        {"value": "neutral", "text": "Neutral", "description": "Text with a neutral sentiment"},
                     ],
-                    "visible_options": 10,
+                    "visible_options": None,
                 },
             ),
             (
@@ -1663,6 +1711,7 @@ class TestSuiteDatasets:
                         {"value": "negative", "text": "Negative"},
                         {"value": "neutral", "text": "Neutral"},
                     ],
+                    "visible_options": 3,
                 },
                 {
                     "type": "label_selection",
@@ -1671,7 +1720,7 @@ class TestSuiteDatasets:
                         {"value": "negative", "text": "Negative", "description": None},
                         {"value": "neutral", "text": "Neutral", "description": None},
                     ],
-                    "visible_options": None,
+                    "visible_options": 3,
                 },
             ),
             (
@@ -2050,6 +2099,24 @@ class TestSuiteDatasets:
                 ],
             },
             {
+                "type": "label_selection",
+                "options": [
+                    {"value": "a", "text": "a", "description": "a"},
+                    {"value": "b", "text": "b", "description": "b"},
+                    {"value": "b", "text": "b", "description": "b"},
+                ],
+                "visible_options": 2,
+            },
+            {
+                "type": "label_selection",
+                "options": [
+                    {"value": "a", "text": "a", "description": "a"},
+                    {"value": "b", "text": "b", "description": "b"},
+                    {"value": "b", "text": "b", "description": "b"},
+                ],
+                "visible_options": 5,
+            },
+            {
                 "type": "ranking",
                 "options": [
                     {"value": "a", "text": "a", "description": "a"},
@@ -2092,6 +2159,145 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
+
+    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+    @pytest.mark.parametrize("dataset_status", [DatasetStatus.draft, DatasetStatus.ready])
+    async def test_create_dataset_vector_settings(
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        mock_search_engine: SearchEngine,
+        role: UserRole,
+        dataset_status: DatasetStatus,
+    ):
+        dataset = await DatasetFactory.create(status=dataset_status)
+        user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+        vector_settings_json = {
+            "name": "vectors-for-semantic-search",
+            "dimensions": 384,
+            "description": "Vectors generated with sentence-transformers/all-MiniLM-L6-v2",
+        }
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/vectors-settings",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            json=vector_settings_json,
+        )
+
+        response_json = response.json()
+
+        assert response.status_code == 201
+        vector_settings = await db.get(VectorSettings, UUID(response_json["id"]))
+        assert response_json == {
+            "id": str(vector_settings.id),
+            "name": "vectors-for-semantic-search",
+            "dimensions": 384,
+            "description": "Vectors generated with sentence-transformers/all-MiniLM-L6-v2",
+            "inserted_at": vector_settings.inserted_at.isoformat(),
+            "updated_at": vector_settings.updated_at.isoformat(),
+        }
+        if dataset_status == DatasetStatus.draft:
+            mock_search_engine.configure_index_vectors.assert_not_called()
+        else:
+            mock_search_engine.configure_index_vectors.assert_called_once_with(vector_settings)
+
+    @pytest.mark.parametrize(
+        "payload",
+        [
+            {"name": "", "dimensions": 5},
+            {"name": "a" * (VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH + 1), "dimensions": 5},
+            {"name": " invalid", "dimensions": 5},
+            {"name": "vectors", "dimensions": 5, "description": ""},
+            {
+                "name": "vectors",
+                "dimensions": 5,
+                "description": "a" * (VECTOR_SETTINGS_CREATE_DESCRIPTION_MAX_LENGTH + 1),
+            },
+            {"name": "vectors", "dimensions": 0, "description": "vectors"},
+            {"name": "vectors", "dimensions": -1, "description": "vectors"},
+        ],
+    )
+    async def test_create_dataset_vector_settings_with_invalid_settings(
+        self, async_client: "AsyncClient", owner_auth_header: dict, payload: dict
+    ):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/vectors-settings", headers=owner_auth_header, json=payload
+        )
+
+        assert response.status_code == 422
+
+    async def test_create_dataset_vector_settings_with_existent_name(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        vector_settings = await VectorSettingsFactory.create(name="vectors")
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{vector_settings.dataset_id}/vectors-settings",
+            headers=owner_auth_header,
+            json={"name": "vectors", "dimensions": 384},
+        )
+
+        assert response.status_code == 409
+
+    async def test_create_dataset_vector_settings_with_non_existent_dataset_id(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        response = await async_client.post(
+            f"/api/v1/datasets/{uuid4()}/vectors-settings",
+            headers=owner_auth_header,
+            json={"name": "vectors", "dimensions": 384},
+        )
+
+        assert response.status_code == 404
+
+    async def test_create_dataset_vector_settings_as_annotator(self, async_client: "AsyncClient"):
+        dataset = await DatasetFactory.create()
+        annotator = await AnnotatorFactory.create(workspaces=[dataset.workspace])
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/vectors-settings",
+            headers={API_KEY_HEADER_NAME: annotator.api_key},
+            json={
+                "name": "vectors-for-search",
+                "dimensions": 384,
+                "description": "Vectors generated with sentence-transformers/all-MiniLM-L6-v2",
+            },
+        )
+
+        assert response.status_code == 403
+
+    async def test_create_dataset_vector_settings_as_admin_from_different_workspace(self, async_client: "AsyncClient"):
+        dataset = await DatasetFactory.create()
+        admin = await AdminFactory.create()
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/vectors-settings",
+            headers={API_KEY_HEADER_NAME: admin.api_key},
+            json={
+                "name": "vectors-for-search",
+                "dimensions": 384,
+                "description": "Vectors generated with sentence-transformers/all-MiniLM-L6-v2",
+            },
+        )
+
+        assert response.status_code == 403
+
+    async def test_create_dataset_vector_settings_without_authentication(self, async_client: "AsyncClient"):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/vectors-settings",
+            json={
+                "name": "vectors-for-search",
+                "dimensions": 384,
+                "description": "Vectors generated with sentence-transformers/all-MiniLM-L6-v2",
+            },
+        )
+
+        assert response.status_code == 401
 
     async def test_create_dataset_records(
         self,

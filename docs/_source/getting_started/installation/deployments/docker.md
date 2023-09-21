@@ -67,7 +67,7 @@ But you can customize this by setting the `ARGILLA_ELASTICSEARCH` environment va
 docker run --network argilla-net -p 6900:6900 -e "ARGILLA_ELASTICSEARCH=http://elasticsearch-for-argilla:9200" --name argilla argilla/argilla-server
 ```
 :::{note}
-By default, telemetry is enabled. This helps us to improve our product. For more info about the metrics and disabling them check [telemetry](../../../reference/telemetry.md).
+By default, telemetry is enabled. This helps us to improve our product. For more info about the metrics and disabling them check [telemetry](/reference/telemetry.md).
 
 :::
 

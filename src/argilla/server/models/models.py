@@ -114,6 +114,12 @@ class Vector(DatabaseModel):
     vector_settings: Mapped["VectorSettings"] = relationship(back_populates="vectors")
     record: Mapped["Record"] = relationship(back_populates="vectors")
 
+    def __repr__(self) -> str:
+        return (
+            f"Vector(id={self.id}, vector_settings_id={self.vector_settings_id}, record_id={self.record_id}, "
+            f"inserted_at={self.inserted_at}, updated_at={self.updated_at})"
+        )
+
 
 class VectorSettings(DatabaseModel):
     __tablename__ = "vectors_settings"
@@ -132,6 +138,12 @@ class VectorSettings(DatabaseModel):
     )
 
     __table_args__ = (UniqueConstraint("name", "dataset_id", name="vector_settings_name_dataset_id_uq"),)
+
+    def __repr__(self) -> str:
+        return (
+            f"VectorSettings(id={self.id}, name={self.name}, dimensions={self.dimensions}, "
+            f"dataset_id={self.dataset_id}, inserted_at={self.inserted_at}, updated_at={self.updated_at})"
+        )
 
 
 class Record(DatabaseModel):

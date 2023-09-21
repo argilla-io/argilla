@@ -18,20 +18,25 @@
         </BaseActionTooltip>
       </div>
       <div class="content-area --body1">
-        <div v-if="!useMarkdown" v-text="fieldText" />
-        <RenderMarkdownBaseComponent v-else :markdown="fieldText" />
+        <div v-if="!useMarkdown" v-html="text" />
+        <RenderMarkdownBaseComponent v-else :markdown="text" />
       </div>
     </div>
   </transition>
 </template>
 
 <script>
+import { useTextFieldViewModel } from "./useTextFieldViewModel";
 export default {
   name: "TextFieldComponent",
   props: {
     title: {
       type: String,
       required: true,
+    },
+    stringToHighlight: {
+      type: String,
+      default: "",
     },
     fieldText: {
       type: String,
@@ -41,6 +46,9 @@ export default {
       type: Boolean,
       default: false,
     },
+  },
+  setup(props) {
+    return useTextFieldViewModel(props);
   },
 };
 </script>
