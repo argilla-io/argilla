@@ -12,11 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import copy
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, exists, func, or_, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
@@ -40,12 +40,14 @@ from argilla.server.schemas.v1.datasets import (
     FieldCreate,
     QuestionCreate,
     RecordsCreate,
+    ResponseValueCreate,
     VectorCreate,
+    VectorCreateWithRecordIdAndDatasetId,
     VectorsCreate,
 )
 from argilla.server.schemas.v1.datasets import VectorSettings as VectorSettingsSchema
 from argilla.server.schemas.v1.records import ResponseCreate
-from argilla.server.schemas.v1.responses import ResponseUpdate
+from argilla.server.schemas.v1.responses import ResponseUpdate, ResponseValueUpdate
 from argilla.server.search_engine import SearchEngine
 from argilla.server.security.model import User
 
@@ -227,10 +229,13 @@ async def delete_question(db: "AsyncSession", question: Question) -> Question:
     return await question.delete(db)
 
 
-async def get_vector_settings_by_id(db: "AsyncSession", vector_settings_id: UUID) -> Union[VectorSettings, None]:
-    result = await db.execute(
-        select(VectorSettings).filter_by(id=vector_settings_id).options(selectinload(VectorSettings.dataset))
-    )
+async def get_vector_settings_by_id(
+    db: "AsyncSession", vector_settings_id: UUID, dataset_id: Optional[UUID] = None
+) -> Union[VectorSettings, None]:
+    filters = [VectorSettings.id == vector_settings_id]
+    if dataset_id:
+        filters.append(VectorSettings.dataset_id == dataset_id)
+    result = await db.execute(select(VectorSettings).where(*filters).options(selectinload(VectorSettings.dataset)))
     return result.scalar_one_or_none()
 
 
@@ -277,6 +282,13 @@ async def get_record_by_id(
         query = query.options(selectinload(Record.suggestions))
     result = await db.execute(query)
     return result.scalar_one_or_none()
+
+
+async def record_exists(db: "AsyncSession", record_id: UUID, dataset_id: Optional[UUID] = None) -> bool:
+    filters = [Record.id == record_id]
+    if dataset_id:
+        filters.append(Record.dataset_id == dataset_id)
+    return await db.scalar(select(exists().where(*filters)))
 
 
 async def delete_record(db: "AsyncSession", search_engine: "SearchEngine", record: Record) -> Record:
@@ -377,8 +389,45 @@ async def count_records_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> i
     return result.scalar()
 
 
+async def validate_user(db: "AsyncSession", user_id: UUID, users_ids: Optional[Set[UUID]]) -> Set[UUID]:
+    if not users_ids:
+        users_ids = set()
+
+    if user_id not in users_ids:
+        if not await accounts.user_exists(db, user_id):
+            raise ValueError(f"user_id={str(user_id)} does not exist")
+        users_ids.add(user_id)
+
+    return users_ids
+
+
+async def validate_suggestion(
+    db: "AsyncSession",
+    suggestion: "SuggestionCreate",
+    questions_settings: Optional[Dict[UUID, "QuestionSettings"]] = None,
+) -> Dict[UUID, "QuestionSettings"]:
+    if not questions_settings:
+        questions_settings = {}
+
+    question_settings = questions_settings.get(suggestion.question_id, None)
+
+    if not question_settings:
+        question = await get_question_by_id(db, suggestion.question_id)
+        if not question:
+            raise ValueError(f"question_id={str(suggestion.question_id)} does not exist")
+        question_settings = question.parsed_settings
+        questions_settings[suggestion.question_id] = question_settings
+
+    question_settings.check_response(suggestion)
+
+    return questions_settings
+
+
 async def validate_vector(
-    db: "AsyncSession", vector: VectorCreate, vectors_settings: Optional[Dict[UUID, VectorSettingsSchema]] = None
+    db: "AsyncSession",
+    dataset_id: UUID,
+    vector: VectorCreate,
+    vectors_settings: Optional[Dict[UUID, VectorSettingsSchema]] = None,
 ) -> Dict[UUID, VectorSettingsSchema]:
     if vectors_settings is None:
         vectors_settings = {}
@@ -386,9 +435,11 @@ async def validate_vector(
     vector_settings = vectors_settings.get(vector.vector_settings_id, None)
 
     if not vector_settings:
-        vector_settings = await get_vector_settings_by_id(db, vector.vector_settings_id)
+        vector_settings = await get_vector_settings_by_id(db, vector.vector_settings_id, dataset_id)
         if not vector_settings:
-            raise ValueError(f"Provided vector_settings_id={str(vector.vector_settings_id)} does not exist")
+            raise ValueError(
+                f"vector_settings_id={str(vector.vector_settings_id)} does not exist for dataset_id={str(dataset_id)}"
+            )
         vector_settings = VectorSettingsSchema.from_orm(vector_settings)
         vectors_settings[vector.vector_settings_id] = vector_settings
 
@@ -416,18 +467,15 @@ async def create_records(
         )
 
         if record_create.responses:
-            users: List[UUID] = []
+            users_ids: Set[UUID] = set()
             for i, response in enumerate(record_create.responses):
-                if response.user_id not in users:
-                    user = await accounts.get_user_by_id(db, response.user_id)
-                    if not user:
-                        raise ValueError(
-                            f"Provided user_id={str(response.user_id)} for response at position {i} of record at "
-                            f"position {record_i} does not exist"
-                        )
-                    users.append(user.id)
-
-                validate_response_values(dataset, values=response.values, status=response.status)
+                try:
+                    users_ids = await validate_user(db, response.user_id, users_ids)
+                    validate_response_values(dataset, values=response.values, status=response.status)
+                except ValueError as e:
+                    raise ValueError(
+                        f"Provided response at position {i} of record at position {record_i} is not valid: {e}"
+                    ) from e
 
                 record.responses.append(
                     Response(
@@ -440,20 +488,8 @@ async def create_records(
         if record_create.suggestions:
             questions_settings: Dict[UUID, "QuestionSettings"] = {}
             for i, suggestion in enumerate(record_create.suggestions):
-                question_settings = questions_settings.get(suggestion.question_id, None)
-
-                if not question_settings:
-                    question = await get_question_by_id(db, suggestion.question_id)
-                    if not question:
-                        raise ValueError(
-                            f"Provided question_id={str(suggestion.question_id)} for suggestion at position {i} of "
-                            f"record at position {record_i} does not exist"
-                        )
-                    question_settings = question.parsed_settings
-                    questions_settings[suggestion.question_id] = question_settings
-
                 try:
-                    question_settings.check_response(suggestion)
+                    questions_settings = await validate_suggestion(db, suggestion, questions_settings)
                 except ValueError as e:
                     raise ValueError(
                         f"Provided suggestion at position {i} for record at position {record_i} is not valid: {e}"
@@ -473,13 +509,13 @@ async def create_records(
             vectors_settings: Dict[UUID, VectorSettingsSchema] = {}
             for i, vector in enumerate(record_create.vectors):
                 try:
-                    vectors_settings = await validate_vector(db, vector, vectors_settings)
+                    vectors_settings = await validate_vector(db, dataset.id, vector, vectors_settings)
                 except ValueError as e:
                     raise ValueError(
                         f"Provided vector at position {i} of record at position {record_i} is not valid: {e}"
                     ) from e
 
-                vector = Vector(value=vector.value, vector_settings_id=vector.vector_settings_id)
+                vector = Vector(value=vector.value, dataset_id=dataset.id, vector_settings_id=vector.vector_settings_id)
 
                 record.vectors.append(vector)
                 vectors.append(vector)
@@ -581,10 +617,14 @@ async def delete_response(db: "AsyncSession", search_engine: SearchEngine, respo
     return response
 
 
-def validate_response_values(dataset: Dataset, values: Dict[str, ResponseValue], status: ResponseStatus):
+def validate_response_values(
+    dataset: Dataset,
+    values: Union[Dict[str, ResponseValueCreate], Dict[str, ResponseValueUpdate], None],
+    status: ResponseStatus,
+):
     if not values:
         if status != ResponseStatus.discarded:
-            raise ValueError("Missing response values")
+            raise ValueError("missing response values")
         return
 
     values_copy = copy.copy(values or {})
@@ -594,14 +634,14 @@ def validate_response_values(dataset: Dataset, values: Dict[str, ResponseValue],
             and status == ResponseStatus.submitted
             and not (question.name in values and values_copy.get(question.name))
         ):
-            raise ValueError(f"Missing required question: {question.name!r}")
+            raise ValueError(f"missing question with name={question.name}")
 
         question_response = values_copy.pop(question.name, None)
         if question_response:
             question.parsed_settings.check_response(question_response, status)
 
     if values_copy:
-        raise ValueError(f"Error: found responses for non configured questions: {list(values_copy.keys())!r}")
+        raise ValueError(f"found responses for non configured questions: {list(values_copy.keys())!r}")
 
 
 def validate_record_fields(dataset: Dataset, fields: Dict[str, Any]):
@@ -660,16 +700,30 @@ async def upsert_vectors(
     db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, vectors_create: VectorsCreate
 ) -> List[Vector]:
     vectors_settings: Dict[UUID, VectorSettingsSchema] = {}
+    records_ids: Set[UUID] = set()
     for i, vector in enumerate(vectors_create.items):
+        # Check provided record exists
+        if vector.record_id not in records_ids:
+            if not await record_exists(db, record_id=vector.record_id, dataset_id=dataset.id):
+                raise ValueError(
+                    f"Provided record_id={str(vector.record_id)} at position {i} does not exist for "
+                    f"dataset_id={str(dataset.id)}"
+                )
+            records_ids.add(vector.record_id)
+
+        # Check provided vector settings exists and that the value is valid for the settings
         try:
-            vectors_settings = await validate_vector(db, vector, vectors_settings)
+            vectors_settings = await validate_vector(db, dataset.id, vector, vectors_settings)
         except ValueError as e:
             raise ValueError(f"Provided vector at position {i} is not valid: {e}") from e
 
     async with db.begin_nested():
         vectors = await Vector.upsert_many(
             db,
-            objects=vectors_create.items,
+            objects=[
+                VectorCreateWithRecordIdAndDatasetId(dataset_id=dataset.id, **vector.dict())
+                for vector in vectors_create.items
+            ],
             constraints=[Vector.record_id, Vector.vector_settings_id],
             autocommit=False,
         )

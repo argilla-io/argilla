@@ -452,6 +452,10 @@ class VectorCreateWithRecordId(VectorCreate):
     record_id: UUID
 
 
+class VectorCreateWithRecordIdAndDatasetId(VectorCreateWithRecordId):
+    dataset_id: UUID
+
+
 class VectorsCreate(BaseModel):
     items: List[VectorCreateWithRecordId]
 
