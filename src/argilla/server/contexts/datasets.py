@@ -35,7 +35,14 @@ from argilla.server.models import (
     VectorSettings,
 )
 from argilla.server.models.suggestions import SuggestionCreateWithRecordId
-from argilla.server.schemas.v1.datasets import DatasetCreate, FieldCreate, QuestionCreate, RecordsCreate
+from argilla.server.schemas.v1.datasets import (
+    DatasetCreate,
+    FieldCreate,
+    QuestionCreate,
+    RecordsCreate,
+    VectorCreate,
+    VectorsCreate,
+)
 from argilla.server.schemas.v1.datasets import VectorSettings as VectorSettingsSchema
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
@@ -370,6 +377,26 @@ async def count_records_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> i
     return result.scalar()
 
 
+async def validate_vector(
+    db: "AsyncSession", vector: VectorCreate, vectors_settings: Optional[Dict[UUID, VectorSettingsSchema]] = None
+) -> Dict[UUID, VectorSettingsSchema]:
+    if vectors_settings is None:
+        vectors_settings = {}
+
+    vector_settings = vectors_settings.get(vector.vector_settings_id, None)
+
+    if not vector_settings:
+        vector_settings = await get_vector_settings_by_id(db, vector.vector_settings_id)
+        if not vector_settings:
+            raise ValueError(f"Provided vector_settings_id={str(vector.vector_settings_id)} does not exist")
+        vector_settings = VectorSettingsSchema.from_orm(vector_settings)
+        vectors_settings[vector.vector_settings_id] = vector_settings
+
+    vector_settings.check_vector(vector)
+
+    return vectors_settings
+
+
 async def create_records(
     db: "AsyncSession", search_engine: SearchEngine, dataset: Dataset, records_create: RecordsCreate
 ):
@@ -445,23 +472,11 @@ async def create_records(
         if record_create.vectors:
             vectors_settings: Dict[UUID, VectorSettingsSchema] = {}
             for i, vector in enumerate(record_create.vectors):
-                vector_settings = vectors_settings.get(vector.vector_settings_id, None)
-
-                if not vector_settings:
-                    vector_settings = await get_vector_settings_by_id(db, vector.vector_settings_id)
-                    if not vector_settings:
-                        raise ValueError(
-                            f"Provided vector_settings_id={str(vector.vector_settings_id)} for vector at position {i} of "
-                            f"record at position {record_i} does not exist"
-                        )
-                    vector_settings = VectorSettingsSchema.from_orm(vector_settings)
-                    vectors_settings[vector.vector_settings_id] = vector_settings
-
                 try:
-                    vector_settings.check_vector(vector)
+                    vectors_settings = await validate_vector(db, vector, vectors_settings)
                 except ValueError as e:
                     raise ValueError(
-                        f"Provided vector at position {i} and record at position {record_i} is not valid: {e}"
+                        f"Provided vector at position {i} of record at position {record_i} is not valid: {e}"
                     ) from e
 
                 vector = Vector(value=vector.value, vector_settings_id=vector.vector_settings_id)
@@ -639,3 +654,28 @@ async def get_suggestion_by_id(db: "AsyncSession", suggestion_id: "UUID") -> Uni
 
 async def delete_suggestion(db: "AsyncSession", suggestion: Suggestion) -> Suggestion:
     return await suggestion.delete(db)
+
+
+async def upsert_vectors(
+    db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, vectors_create: VectorsCreate
+) -> List[Vector]:
+    vectors_settings: Dict[UUID, VectorSettingsSchema] = {}
+    for i, vector in enumerate(vectors_create.items):
+        try:
+            vectors_settings = await validate_vector(db, vector, vectors_settings)
+        except ValueError as e:
+            raise ValueError(f"Provided vector at position {i} is not valid: {e}") from e
+
+    async with db.begin_nested():
+        vectors = await Vector.upsert_many(
+            db,
+            objects=vectors_create.items,
+            constraints=[Vector.record_id, Vector.vector_settings_id],
+            autocommit=False,
+        )
+
+        await search_engine.set_records_vectors(dataset, vectors)
+
+    await db.commit()
+
+    return vectors

@@ -448,6 +448,14 @@ class VectorCreate(BaseModel):
     value: List[float] = PydanticField(..., min_items=1)
 
 
+class VectorCreateWithRecordId(VectorCreate):
+    record_id: UUID
+
+
+class VectorsCreate(BaseModel):
+    items: List[VectorCreateWithRecordId]
+
+
 class RecordCreate(BaseModel):
     fields: Dict[str, Any]
     metadata: Optional[Dict[str, Any]]
