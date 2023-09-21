@@ -756,9 +756,7 @@ class TestSuiteDatasets:
             await RecordFactory.create(
                 fields={"input": "input_b", "output": "output_b"}, metadata_={"unit": "test"}, dataset=dataset
             ),
-            await RecordFactory.create(
-                fields={"input": "input_c", "output": "output_c"}, dataset=dataset
-            ),
+            await RecordFactory.create(fields={"input": "input_c", "output": "output_c"}, dataset=dataset),
         ]
 
         responses = [
