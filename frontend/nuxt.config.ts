@@ -82,6 +82,7 @@ const config: NuxtConfig = {
       path: "~/components",
       pattern: "**/*.vue",
       pathPrefix: false,
+      level: 1,
     },
   ],
 

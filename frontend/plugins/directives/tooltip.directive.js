@@ -67,41 +67,45 @@ Vue.directive("tooltip", {
         width
       );
 
-      // NOTE - add the tooltip to the element and add event listenner to the close icon
+      // NOTE - add the tooltip to the element and add event listener to the close icon
       element.appendChild(tooltip);
       element.textWrapper = textWrapper;
       closeIcon = document.getElementById(tooltipCloseIconId);
     }
 
-    // NOTE - init function for event listeners. Needs to be passed throw 'element' object to be able to destroy them on unbind
-    element.clickOnTooltipElementEvent = (event) => {
-      if (tooltip.getAttribute("tooltip-visible") === "true") {
-        element.clickOnClose(event);
-      } else {
-        tooltip.style.display = "flex";
-        tooltip.setAttribute("tooltip-visible", "true");
-        elementOffset = initElementOffset(element);
-        tooltip = initTooltipPosition(
-          tooltip,
-          tooltipPosition,
-          elementOffset,
-          width
-        );
-      }
+    element.openTooltip = () => {
+      tooltip.style.display = "flex";
+      tooltip.setAttribute("tooltip-visible", "true");
+      elementOffset = initElementOffset(element);
+      tooltip = initTooltipPosition(
+        tooltip,
+        tooltipPosition,
+        elementOffset,
+        width
+      );
     };
 
-    element.clickOnClose = (event) => {
-      // NOTE - stop propagation to not fire element.clickOnTooltipElement()
-      event?.stopPropagation();
+    element.closeTooltip = () => {
       tooltip.style.display = "none";
       tooltip.setAttribute("tooltip-visible", "false");
     };
 
+    element.clickOnTooltipElementEvent = () => {
+      if (tooltip.getAttribute("tooltip-visible") === "true") {
+        return element.closeTooltip();
+      }
+
+      element.openTooltip();
+    };
+
+    element.clickOnClose = (event) => {
+      event.stopPropagation();
+      element.closeTooltip();
+    };
+
     element.clickOutsideEvent = function (event) {
-      // NOTE - here we check if the click event is outside the element or it's children
       if (!(element == event.target || element.contains(event.target))) {
-        tooltip.style.display = "none";
-        tooltip.setAttribute("tooltip-visible", "false");
+        element.closeTooltip();
       }
     };
     element.scrollInParent = function () {
@@ -136,9 +140,9 @@ Vue.directive("tooltip", {
     element.textWrapper.innerText = binding?.value.content;
 
     if (binding?.value.open) {
-      element.clickOnTooltipElementEvent();
+      element.openTooltip();
     } else {
-      element.clickOnClose();
+      element.closeTooltip();
     }
   },
 });
