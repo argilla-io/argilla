@@ -1,5 +1,5 @@
 import Vue from "vue";
-import BaseCodeVue from "~/components/base/BaseCode.vue";
+import BaseCodeVue from "~/components/base/base-code/BaseCode.vue";
 
 Vue.directive("copy-code", {
   bind: (el, _, node) => {

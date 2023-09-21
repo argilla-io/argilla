@@ -38,7 +38,7 @@ python -m argilla server database users create \
 	--workspace "$ARGILLA_WORKSPACE"
 
 # Load data
-python /load_data.py "$OWNER_API_KEY" "$LOAD_DATASETS" &
+python load_data.py "$OWNER_API_KEY" "$LOAD_DATASETS" &
 
 # Start Argilla
 echo "Starting Argilla"
