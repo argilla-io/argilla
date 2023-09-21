@@ -18,7 +18,6 @@ from uuid import UUID
 
 from pydantic import Field
 
-from argilla.client.api import active_client
 from argilla.client.feedback.schemas.records import FeedbackRecord, ResponseSchema, SuggestionSchema
 from argilla.client.feedback.schemas.remote.shared import RemoteSchema
 from argilla.client.sdk.users.models import UserRole
