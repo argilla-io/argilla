@@ -509,18 +509,16 @@ async def update_dataset(
     return await datasets.update_dataset(db, dataset=dataset, dataset_update=dataset_update)
 
 
-@router.post("/datasets/{dataset_id}/refresh-search")
+@router.post("/datasets/{dataset_id}/refresh", status_code=status.HTTP_204_NO_CONTENT)
 async def refresh_search(
     *,
     db: AsyncSession = Depends(get_async_db),
     dataset_id: UUID,
-    background_tasks: BackgroundTasks = Depends(get_background_tasks),
+    search_engine: SearchEngine = Depends(get_search_engine),
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset(db, dataset_id)
+    dataset = await _get_dataset(db, dataset_id, with_questions=True, with_fields=True, with_vectors_settings=True)
 
-    background_tasks.execute(
-        "refresh-search-engine-index",
-        engine=settings.search_engine,
-        dataset_id=dataset_id,
-    )
+    await authorize(current_user, DatasetPolicyV1.refresh_search(dataset))
+
+    await search_engine.refresh_index(dataset)
