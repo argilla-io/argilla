@@ -12,12 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from datetime import datetime
 from typing import Any, Dict
+from uuid import uuid4
 
 import pytest
 from argilla.client.feedback.schemas.enums import FieldTypes
-from argilla.client.feedback.schemas.fields import TextField
-from pydantic import ValidationError
+from argilla.client.feedback.schemas.remote.fields import RemoteTextField, TextField
+from argilla.client.sdk.v1.datasets.models import FeedbackFieldModel
 
 
 @pytest.mark.parametrize(
@@ -41,21 +43,44 @@ from pydantic import ValidationError
         ),
     ],
 )
-def test_text_field(schema_kwargs: Dict[str, Any], server_payload: Dict[str, Any]) -> None:
-    text_field = TextField(**schema_kwargs)
+def test_remote_text_field(schema_kwargs: Dict[str, Any], server_payload: Dict[str, Any]) -> None:
+    text_field = RemoteTextField(**schema_kwargs)
     assert text_field.type == FieldTypes.text
     assert text_field.server_settings == server_payload["settings"]
     assert text_field.to_server_payload() == server_payload
 
+    local_text_field = text_field.to_local()
+    assert isinstance(local_text_field, TextField)
+    assert local_text_field.type == FieldTypes.text
+    assert local_text_field.server_settings == server_payload["settings"]
+    assert local_text_field.to_server_payload() == server_payload
+
 
 @pytest.mark.parametrize(
-    "schema_kwargs, exception_cls, exception_message",
+    "payload",
     [
-        ({"name": "a b"}, ValidationError, r"name\n  string does not match regex"),
-        ({}, ValidationError, r"name\n  field required"),
-        ({"name": "a", "type": "other"}, ValidationError, r"type\n  unexpected value; permitted: <FieldTypes"),
+        FeedbackFieldModel(
+            id=uuid4(),
+            name="a",
+            title="A",
+            required=True,
+            settings={"type": "text", "use_markdown": False},
+            inserted_at=datetime.now(),
+            updated_at=datetime.now(),
+        ),
+        FeedbackFieldModel(
+            id=uuid4(),
+            name="b",
+            title="B",
+            required=False,
+            settings={"type": "text", "use_markdown": True},
+            inserted_at=datetime.now(),
+            updated_at=datetime.now(),
+        ),
     ],
 )
-def test_text_field_errors(schema_kwargs: Dict[str, Any], exception_cls: Any, exception_message: str) -> None:
-    with pytest.raises(exception_cls, match=exception_message):
-        TextField(**schema_kwargs)
+def test_remote_text_field_from_api(payload: FeedbackFieldModel) -> None:
+    text_field = RemoteTextField.from_api(payload)
+    assert text_field.type == FieldTypes.text
+    assert text_field.server_settings == payload.settings
+    assert text_field.to_server_payload() == payload.dict(exclude={"id", "inserted_at", "updated_at"})
