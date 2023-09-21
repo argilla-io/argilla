@@ -108,11 +108,25 @@ class Vector(DatabaseModel):
     __tablename__ = "vectors"
 
     value: Mapped[List[Any]] = mapped_column(JSON)
-    record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id", ondelete="CASCADE"), index=True)
-    vector_settings_id: Mapped[UUID] = mapped_column(ForeignKey("vectors_settings.id", ondelete="CASCADE"), index=True)
+    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"))
+    record_id: Mapped[UUID] = mapped_column(
+        ForeignKey("records.id", ondelete="CASCADE"),
+        index=True,
+    )
+    vector_settings_id: Mapped[UUID] = mapped_column(
+        ForeignKey("vectors_settings.id", ondelete="CASCADE"),
+        index=True,
+    )
 
-    vector_settings: Mapped["VectorSettings"] = relationship(back_populates="vectors")
-    record: Mapped["Record"] = relationship(back_populates="vectors")
+    dataset: Mapped["Dataset"] = relationship(back_populates="vectors")
+    record: Mapped["Record"] = relationship(
+        back_populates="vectors",
+        primaryjoin="and_(Vector.record_id==Record.id, Vector.dataset_id==Record.dataset_id)",
+    )
+    vector_settings: Mapped["VectorSettings"] = relationship(
+        back_populates="vectors",
+        primaryjoin="and_(Vector.vector_settings_id==VectorSettings.id, Vector.dataset_id==VectorSettings.dataset_id)",
+    )
 
     __table_args__ = (
         UniqueConstraint("record_id", "vector_settings_id", name="vector_record_id_vector_settings_id_uq"),
@@ -255,6 +269,12 @@ class Dataset(DatabaseModel):
         cascade="all, delete-orphan",
         passive_deletes=True,
         order_by=VectorSettings.inserted_at.asc(),
+    )
+    vectors: Mapped[List["Vector"]] = relationship(
+        back_populates="dataset",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Vector.inserted_at.asc(),
     )
 
     __table_args__ = (UniqueConstraint("name", "workspace_id", name="dataset_name_workspace_id_uq"),)
