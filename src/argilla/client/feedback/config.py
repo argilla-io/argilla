@@ -36,21 +36,9 @@ from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQues
 
 
 class DatasetConfig(BaseModel):
-    fields: Union[List[AllowedFieldTypes], List[AllowedRemoteFieldTypes]]
+    fields: List[AllowedFieldTypes]
     questions: List[Annotated[AllowedQuestionTypes, Field(..., discriminator="type")]]
     guidelines: Optional[str] = None
-
-    def dict(self) -> Dict[str, Any]:
-        return {
-            "fields": [
-                field.to_local().dict() if isinstance(field, RemoteSchema) else field.dict() for field in self.fields
-            ],
-            "questions": [
-                question.to_local().dict() if isinstance(question, RemoteSchema) else question.dict()
-                for question in self.questions
-            ],
-            "guidelines": self.guidelines,
-        }
 
     def to_yaml(self) -> str:
         return dump(self.dict())

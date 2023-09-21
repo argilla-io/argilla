@@ -24,6 +24,7 @@ from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas.enums import QuestionTypes
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
+from argilla.client.feedback.schemas.remote.shared import RemoteSchema
 from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
@@ -195,10 +196,16 @@ class HuggingFaceDatasetMixin:
         hfds.push_to_hub(repo_id, *args, **kwargs)
 
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
+            local_fields = []
+            for field in self.fields:
+                local_fields.append(field.to_local() if isinstance(field, RemoteSchema) else field)
+            local_questions = []
+            for question in self.questions:
+                local_questions.append(question.to_local() if isinstance(question, RemoteSchema) else question)
             f.write(
                 DatasetConfig(
-                    fields=self.fields,
-                    questions=self.questions,
+                    fields=local_fields,
+                    questions=local_questions,
                     guidelines=self.guidelines,
                 ).to_yaml()
             )
