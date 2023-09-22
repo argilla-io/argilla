@@ -116,6 +116,7 @@ $metadata-filter-width: 300px;
   }
   &__categories {
     padding: $base-space;
+    background: $black-4;
   }
   :deep(.dropdown__content) {
     right: auto;
