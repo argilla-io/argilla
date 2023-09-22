@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import copy
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
@@ -24,13 +24,13 @@ from argilla.server.enums import DatasetStatus, RecordInclude, ResponseStatusFil
 from argilla.server.models import (
     Dataset,
     Field,
+    MetadataProperty,
     Question,
     Record,
     Response,
     ResponseStatus,
     ResponseValue,
     Suggestion,
-    MetadataProperty,
 )
 from argilla.server.models.suggestions import SuggestionCreateWithRecordId
 from argilla.server.schemas.v1.datasets import (

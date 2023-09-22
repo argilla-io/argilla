@@ -16,7 +16,8 @@ from datetime import datetime
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Field as PydanticField, conlist, constr, root_validator, validator
+from pydantic import BaseModel, conlist, constr, root_validator, validator
+from pydantic import Field as PydanticField
 from pydantic.utils import GetterDict
 
 from argilla.server.schemas.base import UpdateSchema
@@ -28,7 +29,7 @@ try:
 except ImportError:
     from typing_extensions import Annotated
 
-from argilla.server.enums import FieldType, DatasetStatus, MetadataPropertyType
+from argilla.server.enums import DatasetStatus, FieldType, MetadataPropertyType
 from argilla.server.models import QuestionSettings, QuestionType, ResponseStatus
 
 DATASET_NAME_REGEX = r"^(?!-|_)[a-zA-Z0-9-_ ]+$"
@@ -461,9 +462,9 @@ class MetadataProperty(BaseModel):
     inserted_at: datetime
     updated_at: datetime
 
-
     class Config:
         orm_mode = True
+
 
 class MetadataProperties(BaseModel):
     items: List[MetadataProperty]

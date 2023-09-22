@@ -246,6 +246,7 @@ class MetadataPropertyFactory(BaseFactory):
     description = "Metadata property description"
     dataset = factory.SubFactory(DatasetFactory)
 
+
 class TermsMetadataPropertyFactory(MetadataPropertyFactory):
     type = MetadataPropertyType.terms
     settings = {"type": MetadataPropertyType.terms}
