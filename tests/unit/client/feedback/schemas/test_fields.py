@@ -51,9 +51,9 @@ def test_text_field(schema_kwargs: Dict[str, Any], server_payload: Dict[str, Any
 @pytest.mark.parametrize(
     "schema_kwargs, exception_cls, exception_message",
     [
-        ({"name": "a b"}, ValidationError, r"name\n  string does not match regex"),
-        ({}, ValidationError, r"name\n  field required"),
-        ({"name": "a", "type": "other"}, ValidationError, r"type\n  unexpected value; permitted: <FieldTypes"),
+        ({"name": "a b"}, ValidationError, "name\n  string does not match regex"),
+        ({}, ValidationError, "name\n  field required"),
+        ({"name": "a", "type": "other"}, ValidationError, "type\n  unexpected value; permitted: <FieldTypes"),
     ],
 )
 def test_text_field_errors(schema_kwargs: Dict[str, Any], exception_cls: Any, exception_message: str) -> None:
