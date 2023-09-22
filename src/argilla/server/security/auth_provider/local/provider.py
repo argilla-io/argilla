@@ -27,7 +27,6 @@ from argilla.server.database import get_async_db
 from argilla.server.errors import UnauthorizedError
 from argilla.server.models import User
 from argilla.server.security.auth_provider.base import AuthProvider, api_key_header
-
 from argilla.server.settings import settings
 
 from .settings import Settings

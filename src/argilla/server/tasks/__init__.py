@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 from argilla.server.tasks.base import BackgroundTasks, IPCBackgroundTasksExecutor
-
 from argilla.server.tasks.refresh_search_index import refresh_search_index
 
 _background_tasks = None
