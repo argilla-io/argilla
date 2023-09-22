@@ -322,7 +322,8 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
             if payload.responses
             else [],
             suggestions=[
-                RemoteSuggestionSchema.from_api(suggestion, question_id_to_name) for suggestion in payload.suggestions
+                RemoteSuggestionSchema.from_api(suggestion, question_id_to_name=question_id_to_name, client=client)
+                for suggestion in payload.suggestions
             ]
             if payload.suggestions
             else [],
