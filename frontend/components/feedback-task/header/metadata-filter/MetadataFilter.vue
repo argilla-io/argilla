@@ -99,7 +99,7 @@ $metadata-filter-width: 300px;
 .metadata-filter {
   &__container {
     display: block;
-    min-width: $metadata-filter-width;
+    width: $metadata-filter-width;
   }
   &__header {
     display: flex;
@@ -110,10 +110,10 @@ $metadata-filter-width: 300px;
     cursor: pointer;
   }
   &__content {
-    padding: $base-space * 2;
+    padding: $base-space;
   }
   &__categories {
-    padding: $base-space * 2;
+    padding: $base-space;
   }
   :deep(.dropdown__content) {
     right: auto;
