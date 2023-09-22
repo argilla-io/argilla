@@ -157,9 +157,9 @@ export default {
       });
     },
     async metadataToFilterWith(newValue) {
-      if (newValue) {
-        const metadataSearchQuery = newValue.convertToRouteParam();
-        debugger;
+      const metadataSearchQuery = newValue.convertToRouteParam();
+
+      if (metadataSearchQuery) {
         return await this.$router.push({
           path: this.$route.path,
           query: {
