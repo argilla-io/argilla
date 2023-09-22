@@ -7,7 +7,6 @@ import {
   BackendRecordStatus,
   Response,
 } from "../types";
-import { MetadataFilterQueryParam } from "../types/metadata";
 import { RecordAnswer } from "@/v1/domain/entities/record/RecordAnswer";
 import { Record } from "@/v1/domain/entities/record/Record";
 import { Question } from "@/v1/domain/entities/question/Question";
@@ -28,7 +27,7 @@ export class RecordRepository {
     howMany: number,
     status: string,
     searchText: string,
-    metadata: MetadataFilterQueryParam[] = []
+    metadata: string[]
   ): Promise<BackedRecords> {
     if (searchText?.length)
       return this.getRecordsByText(
@@ -129,7 +128,7 @@ export class RecordRepository {
     fromRecord: number,
     howMany: number,
     status: string,
-    metadata: MetadataFilterQueryParam[]
+    metadata: string[]
   ): Promise<BackedRecords> {
     try {
       const url = `/v1/me/datasets/${datasetId}/records`;
@@ -157,7 +156,7 @@ export class RecordRepository {
     howMany: number,
     status: string,
     searchText: string,
-    metadata: MetadataFilterQueryParam[]
+    metadata: string[]
   ): Promise<BackedRecords> {
     try {
       const url = `/v1/me/datasets/${datasetId}/records/search`;
@@ -216,7 +215,7 @@ export class RecordRepository {
     fromRecord: number,
     howMany: number,
     status: string,
-    metadata: MetadataFilterQueryParam[]
+    metadata: string[]
   ) {
     const offset = `${fromRecord - 1}`;
     const backendStatus = status === "pending" ? "missing" : status;
@@ -230,8 +229,8 @@ export class RecordRepository {
 
     if (backendStatus === "missing") params.append("response_status", "draft");
 
-    metadata?.forEach(({ name, value }) => {
-      params.append("metadata", `${name}:${value}`);
+    metadata?.forEach((query) => {
+      params.append("metadata", query);
     });
 
     return params;

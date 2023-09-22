@@ -1,3 +1,5 @@
+import { Metadata } from "../../metadata/Metadata";
+
 export const metadataMocked = [
   {
     id: "1",
@@ -25,3 +27,13 @@ export const metadataMocked = [
     },
   },
 ];
+
+export const createMetadataMock = () =>
+  metadataMocked.map((metadata) => {
+    return new Metadata(
+      metadata.id,
+      metadata.name,
+      metadata.description,
+      metadata.settings
+    );
+  });

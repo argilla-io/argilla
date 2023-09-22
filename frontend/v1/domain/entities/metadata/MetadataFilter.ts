@@ -11,7 +11,26 @@ export class MetadataFilter {
     return this.metadata.find((cat) => cat.name === category);
   }
 
-  convertToQueryParams() {
+  convertToRouteParam() {
+    return this.toQueryParams().map((metadata) => {
+      return `${metadata.name}:${metadata.value}`;
+    });
+  }
+
+  completeByRouteParams(params: string) {
+    if (!params) return;
+
+    const metadataFilter = params.split("+").map((metadata) => {
+      const [name, value] = metadata.split(":");
+      return { name, value };
+    });
+
+    metadataFilter.forEach(({ name, value }) => {
+      this.findByCategory(name)?.completeMetadata(value);
+    });
+  }
+
+  private toQueryParams() {
     return this.metadata.map((m) => {
       return {
         name: m.name,
@@ -19,23 +38,6 @@ export class MetadataFilter {
           ? m.selectedOptions.map((s) => s.label).join(",")
           : "TBD",
       };
-    });
-  }
-
-  convertToRouteParam() {
-    return this.convertToQueryParams().map((metadata) => {
-      return `${metadata.name}:${metadata.value}`;
-    });
-  }
-
-  completeByRouteParams(params: string) {
-    const metadataFilter = params.split("+").map((metadata) => {
-      const [name, value] = metadata.split(":");
-      return { name, value };
-    });
-
-    metadataFilter.forEach(({ name, value }) => {
-      this.findByCategory(name).completeMetadata(value);
     });
   }
 }

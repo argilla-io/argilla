@@ -1,4 +1,21 @@
-export interface MetadataFilterQueryParam {
+interface MetadataTermsSettings {
+  type: "terms";
+  values?: string[];
+}
+interface MetadataIntegerSettings {
+  type: "integer";
+}
+
+interface MetadataFloatSettings {
+  type: "float";
+}
+
+export interface BackendMetadata {
+  id: string;
   name: string;
-  value: string | string[];
+  description: string;
+  settings:
+    | MetadataTermsSettings
+    | MetadataIntegerSettings
+    | MetadataFloatSettings;
 }

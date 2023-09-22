@@ -1,30 +1,8 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
-import { Response } from "../types";
+import { BackendMetadata, Response } from "../types";
 const RECORD_API_ERRORS = {
   ERROR_FETCHING_METADATA: "ERROR_FETCHING_METADATA",
 };
-
-interface MetadataTermsSettings {
-  type: "terms";
-  values?: string[];
-}
-interface MetadataIntegerSettings {
-  type: "integer";
-}
-
-interface MetadataFloatSettings {
-  type: "float";
-}
-
-interface BackendMetadata {
-  id: string;
-  name: string;
-  description: string;
-  settings:
-    | MetadataTermsSettings
-    | MetadataIntegerSettings
-    | MetadataFloatSettings;
-}
 
 export class MetadataRepository {
   constructor(private readonly axios: NuxtAxiosInstance) {}
