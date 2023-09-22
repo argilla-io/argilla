@@ -1,20 +1,29 @@
 <template>
-  <div class="labels-selector">
+  <div
+    class="labels-selector"
+    @keyup.enter="includePreselectedOption"
+    @keyup.up="preselectPreviousOption"
+    @keyup.down="preselectNextOption"
+  >
     <MetadataLabelsSelectorSearch
       v-model="searchText"
       placeholder="Filter by..."
       :selected-options="metadata.selectedOptions"
     />
-
-    <BaseCheckbox
-      class="labels-selector__item"
-      v-for="option in labelsFilteredBySearchText"
-      :key="option.label"
-      :value="option.selected"
-      v-model="option.selected"
-    >
-      {{ option.label }}
-    </BaseCheckbox>
+    <div class="labels-selector__items">
+      <BaseCheckbox
+        class="labels-selector__item"
+        :class="
+          index === optionIndex ? 'labels-selector__item--highlighted' : null
+        "
+        v-for="(option, index) in labelsFilteredBySearchText"
+        :key="option.label"
+        :value="option.selected"
+        v-model="option.selected"
+      >
+        {{ option.label }}
+      </BaseCheckbox>
+    </div>
   </div>
 </template>
 <script>
@@ -28,19 +37,92 @@ export default {
   data: () => {
     return {
       searchText: "",
+      optionIndex: 0,
     };
+  },
+  watch: {
+    searchText() {
+      this.optionIndex = 0;
+    },
   },
   computed: {
     labelsFilteredBySearchText() {
       return this.metadata.filterByText(this.searchText);
+    },
+    activedSearchWithResults() {
+      return this.searchText && this.labelsFilteredBySearchText.length;
+    },
+  },
+  methods: {
+    includePreselectedOption() {
+      if (!this.activedSearchWithResults) {
+        return;
+      }
+      this.toggleSelectedOption(
+        this.labelsFilteredBySearchText[this.optionIndex]
+      );
+    },
+    removeSelectedOption(option) {
+      option.selected = false;
+    },
+    includeSelectedOption(option) {
+      option.selected = true;
+    },
+    toggleSelectedOption(option) {
+      if (option.selected) {
+        this.removeSelectedOption(option);
+      } else {
+        this.includeSelectedOption(option);
+      }
+    },
+    labelIsHighlighted(index) {
+      return this.activedSearchWithResults && index === 0;
+    },
+    preselectNextOption() {
+      this.optionIndex === this.metadata.options.length - 1
+        ? (this.optionIndex = 0)
+        : this.optionIndex++;
+    },
+    preselectPreviousOption() {
+      this.optionIndex === 0
+        ? (this.optionIndex = this.metadata.options.length - 1)
+        : this.optionIndex--;
     },
   },
 };
 </script>
 <style lang="scss" scoped>
 .labels-selector {
+  $this: &;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: $base-space;
+  &__items {
+    max-height: 200px;
+    overflow: scroll;
+    margin-top: $base-space;
+    &:hover {
+      #{$this}__item--highlighted:not(:hover) {
+        background: none;
+      }
+    }
+  }
   &__item {
     display: flex;
+    padding: calc($base-space / 2) $base-space;
+    border-radius: $border-radius;
+    &--highlighted,
+    &:hover {
+      background: $black-4;
+    }
+    :deep(.checkbox-container) {
+      background: none !important;
+      border: 0 !important;
+    }
+    :deep(.checkbox-container .svg-icon) {
+      fill: grey;
+      min-width: 16px;
+    }
   }
 }
 </style>

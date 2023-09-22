@@ -1,7 +1,7 @@
 <template>
   <div class="badge">
-    <p class="badge__text" v-if="!clickable" v-html="text" />
-    <BaseButton class="badge__text" @click="onClick" v-else>{{
+    <p class="badge__text" v-if="!clickable" v-html="text" :title="text" />
+    <BaseButton class="badge__text" @click="onClick" :title="text" v-else>{{
       text
     }}</BaseButton>
     <BaseButton v-if="clearable" class="badge__close-button" @click="onClear()">
@@ -52,6 +52,7 @@ export default {
   display: flex;
   align-items: center;
   gap: $base-space;
+  min-width: 0;
   padding: calc($base-space / 2) $base-space;
   border: 1px solid $black-37;
   border-radius: $border-radius-rounded;
@@ -59,7 +60,11 @@ export default {
   @include font-size(12px);
   @include line-height(12px);
   &__text {
+    width: auto;
     margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   &__close-button {
     padding: 0;
