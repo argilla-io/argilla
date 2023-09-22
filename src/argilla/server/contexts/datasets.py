@@ -29,7 +29,6 @@ from argilla.server.models import (
     Record,
     Response,
     ResponseStatus,
-    ResponseValue,
     Suggestion,
     Vector,
     VectorSettings,
@@ -55,7 +54,7 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
     from argilla.server.models.questions import QuestionSettings
-    from argilla.server.schemas.v1.datasets import DatasetUpdate, VectorSettingsCreate
+    from argilla.server.schemas.v1.datasets import DatasetUpdate, RecordIncludeParam, VectorSettingsCreate
     from argilla.server.schemas.v1.fields import FieldUpdate
     from argilla.server.schemas.v1.questions import QuestionUpdate
     from argilla.server.schemas.v1.suggestions import SuggestionCreate
@@ -316,19 +315,32 @@ async def get_records_by_ids(
     db: "AsyncSession",
     dataset_id: UUID,
     record_ids: List[UUID],
-    include: List[RecordInclude] = [],
+    include: Optional["RecordIncludeParam"] = None,
     user_id: Optional[UUID] = None,
 ) -> List[Record]:
     query = select(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(record_ids))
-    if RecordInclude.responses in include:
-        if user_id:
+
+    if include is not None:
+        if include.relationships is not None:
+            if RecordInclude.responses in include.relationships:
+                if user_id:
+                    query = query.outerjoin(
+                        Response, and_(Response.record_id == Record.id, Response.user_id == user_id)
+                    ).options(contains_eager(Record.responses))
+                else:
+                    query = query.options(joinedload(Record.responses))
+
+            if RecordInclude.suggestions in include.relationships:
+                query = query.options(joinedload(Record.suggestions))
+
+            if RecordInclude.vectors in include.relationships:
+                query = query.options(joinedload(Record.vectors))
+
+        if include.vectors is not None:
             query = query.outerjoin(
-                Response, and_(Response.record_id == Record.id, Response.user_id == user_id)
-            ).options(contains_eager(Record.responses))
-        else:
-            query = query.options(joinedload(Record.responses))
-    if RecordInclude.suggestions in include:
-        query = query.options(joinedload(Record.suggestions))
+                Vector, and_(Vector.record_id == Record.id, Vector.vector_settings_id.in_(include.vectors))
+            ).options(contains_eager(Record.vectors))
+
     result = await db.execute(query)
     return result.unique().scalars().all()
 
@@ -337,7 +349,7 @@ async def list_records_by_dataset_id(
     db: "AsyncSession",
     dataset_id: UUID,
     user_id: Optional[UUID] = None,
-    include: List[RecordInclude] = [],
+    include: Optional["RecordIncludeParam"] = None,
     response_statuses: List[ResponseStatusFilter] = [],
     offset: int = 0,
     limit: int = LIST_RECORDS_LIMIT,
@@ -370,14 +382,21 @@ async def list_records_by_dataset_id(
     if response_status_filter_expressions:
         query = query.filter(or_(*response_status_filter_expressions))
 
-    if RecordInclude.responses in include:
-        query = query.options(contains_eager(Record.responses))
+    if include is not None:
+        if include.relationships is not None:
+            if RecordInclude.responses in include.relationships:
+                query = query.options(contains_eager(Record.responses))
 
-    if RecordInclude.suggestions in include:
-        query = query.options(joinedload(Record.suggestions))
+            if RecordInclude.suggestions in include.relationships:
+                query = query.options(joinedload(Record.suggestions))
 
-    if RecordInclude.vectors in include:
-        query = query.options(joinedload(Record.vectors))
+            if RecordInclude.vectors in include.relationships:
+                query = query.options(joinedload(Record.vectors))
+
+        if include.vectors is not None:
+            query = query.outerjoin(
+                Vector, and_(Vector.record_id == Record.id, Vector.vector_settings_id.in_(include.vectors))
+            ).options(contains_eager(Record.vectors))
 
     query = query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
     result = await db.execute(query)

@@ -16,10 +16,12 @@ from datetime import datetime
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
+from fastapi import HTTPException
 from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
 from pydantic.utils import GetterDict
 
+from argilla.server.enums import RecordInclude
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
 from argilla.server.search_engine import StringQuery
@@ -513,3 +515,27 @@ class SearchRecord(BaseModel):
 class SearchRecordsResult(BaseModel):
     items: List[SearchRecord]
     total: int = 0
+
+
+class RecordIncludeParam(BaseModel):
+    relationships: Optional[List[RecordInclude]] = PydanticField(None, alias="keys")
+    vectors: Optional[List[UUID]] = PydanticField(None, alias="vectors")
+
+    @root_validator
+    def check(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        relationships = values.get("relationships")
+        if not relationships:
+            return values
+
+        import pdb
+
+        vectors = values.get("vectors")
+        if vectors is not None and len(vectors) > 0 and RecordInclude.vectors in relationships:
+            # TODO: once we have a exception handler for ValueError in v1, remove HTTPException
+            # raise ValueError("Cannot include both 'vectors' and 'relationships' in the same request")
+            raise HTTPException(
+                status_code=422,
+                detail="'include' query param cannot have both 'vectors' and 'vectors:vector_settings_id_1,vectors_settings_id_2,...'",
+            )
+
+        return values

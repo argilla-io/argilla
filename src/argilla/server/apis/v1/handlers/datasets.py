@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Type
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
@@ -37,6 +37,7 @@ from argilla.server.schemas.v1.datasets import (
     QuestionCreate,
     Questions,
     Record,
+    RecordIncludeParam,
     Records,
     RecordsCreate,
     SearchRecord,
@@ -49,7 +50,7 @@ from argilla.server.schemas.v1.datasets import (
 )
 from argilla.server.search_engine import SearchEngine, UserResponseStatusFilter, get_search_engine
 from argilla.server.security import auth
-from argilla.server.utils import parse_uuids
+from argilla.server.utils import parse_query_param, parse_uuids
 from argilla.utils.telemetry import TelemetryClient, get_telemetry_client
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
@@ -134,12 +135,17 @@ async def list_dataset_vector_settings(
     return VectorsSettings(items=dataset.vectors_settings)
 
 
+parse_include_param = parse_query_param(
+    name="include", help="Relationships to include in the response", model=RecordIncludeParam
+)
+
+
 @router.get("/me/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
 async def list_current_user_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     dataset_id: UUID,
-    include: List[RecordInclude] = Query([], description="Relationships to include in the response"),
+    include: RecordIncludeParam = Depends(parse_include_param),
     response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
@@ -167,7 +173,7 @@ async def list_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     dataset_id: UUID,
-    include: List[RecordInclude] = Query([], description="Relationships to include in the response"),
+    include: Optional[RecordIncludeParam] = Depends(parse_include_param),
     response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
@@ -421,7 +427,7 @@ async def search_dataset_records(
     telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     query: SearchRecordsQuery,
-    include: List[RecordInclude] = Query([]),
+    include: Optional[RecordIncludeParam] = Depends(parse_include_param),
     response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = Query(0, ge=0),
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
