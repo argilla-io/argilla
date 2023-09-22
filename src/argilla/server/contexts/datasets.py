@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import copy
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
@@ -20,10 +20,9 @@ from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
-from argilla.server.enums import RecordInclude, ResponseStatusFilter
+from argilla.server.enums import DatasetStatus, RecordInclude, ResponseStatusFilter
 from argilla.server.models import (
     Dataset,
-    DatasetStatus,
     Field,
     Question,
     Record,
@@ -31,9 +30,16 @@ from argilla.server.models import (
     ResponseStatus,
     ResponseValue,
     Suggestion,
+    MetadataProperty,
 )
 from argilla.server.models.suggestions import SuggestionCreateWithRecordId
-from argilla.server.schemas.v1.datasets import DatasetCreate, FieldCreate, QuestionCreate, RecordsCreate
+from argilla.server.schemas.v1.datasets import (
+    DatasetCreate,
+    FieldCreate,
+    MetadataPropertyCreate,
+    QuestionCreate,
+    RecordsCreate,
+)
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
 from argilla.server.search_engine import SearchEngine
@@ -51,7 +57,11 @@ LIST_RECORDS_LIMIT = 20
 
 
 async def get_dataset_by_id(
-    db: "AsyncSession", dataset_id: UUID, with_fields: bool = False, with_questions: bool = False
+    db: "AsyncSession",
+    dataset_id: UUID,
+    with_fields: bool = False,
+    with_questions: bool = False,
+    with_metadata_properties: bool = False,
 ) -> Dataset:
     query = select(Dataset).filter_by(id=dataset_id)
     options = []
@@ -59,6 +69,8 @@ async def get_dataset_by_id(
         options.append(selectinload(Dataset.fields))
     if with_questions:
         options.append(selectinload(Dataset.questions))
+    if with_metadata_properties:
+        options.append(selectinload(Dataset.metadata_properties))
     if options:
         query = query.options(*options)
     result = await db.execute(query)
@@ -183,6 +195,13 @@ async def get_question_by_name_and_dataset_id(db: "AsyncSession", name: str, dat
     return result.scalar_one_or_none()
 
 
+async def get_metadata_property_by_name_and_dataset_id(
+    db: "AsyncSession", name: str, dataset_id: UUID
+) -> Union[MetadataProperty, None]:
+    result = await db.execute(select(MetadataProperty).filter_by(name=name, dataset_id=dataset_id))
+    return result.scalar_one_or_none()
+
+
 async def create_question(db: "AsyncSession", dataset: Dataset, question_create: QuestionCreate) -> Question:
     if dataset.is_ready:
         raise ValueError("Question cannot be created for a published dataset")
@@ -196,6 +215,20 @@ async def create_question(db: "AsyncSession", dataset: Dataset, question_create:
         settings=question_create.settings.dict(),
         dataset_id=dataset.id,
     )
+
+
+async def create_metadata_property(
+    db: "AsyncSession", dataset: Dataset, metadata_prop_create: MetadataPropertyCreate
+) -> MetadataProperty:
+    metadata_property = await MetadataProperty.create(
+        db,
+        name=metadata_prop_create.name,
+        type=metadata_prop_create.settings.type,
+        description=metadata_prop_create.description,
+        settings=metadata_prop_create.settings.dict(),
+        dataset_id=dataset.id,
+    )
+    return metadata_property
 
 
 async def update_question(db: "AsyncSession", question: Question, question_update: "QuestionUpdate") -> Question:
