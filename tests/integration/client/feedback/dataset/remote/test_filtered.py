@@ -20,7 +20,8 @@ import pytest
 from argilla.client import api
 from argilla.client.feedback.dataset.local import FeedbackDataset
 from argilla.client.feedback.dataset.remote.filtered import FilteredRemoteFeedbackDataset, FilteredRemoteFeedbackRecords
-from argilla.client.feedback.schemas.records import FeedbackRecord, RemoteFeedbackRecord
+from argilla.client.feedback.schemas.records import FeedbackRecord
+from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
 from argilla.client.workspaces import Workspace
