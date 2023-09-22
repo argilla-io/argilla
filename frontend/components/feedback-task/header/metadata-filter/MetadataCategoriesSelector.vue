@@ -6,7 +6,7 @@
       searchRef="metadataSearch"
     />
     <ul class="category__list">
-      <li v-for="category in categoriesFilteredBySearchtext" :key="category">
+      <li v-for="category in categoriesFilteredBySearchText" :key="category">
         <BaseButton @on-click="selectCategory(category)">{{
           category
         }}</BaseButton>
@@ -28,7 +28,7 @@ export default {
     };
   },
   computed: {
-    categoriesFilteredBySearchtext() {
+    categoriesFilteredBySearchText() {
       return this.categories.filter((cat) =>
         cat.toLowerCase().includes(this.searchText.toLowerCase())
       );

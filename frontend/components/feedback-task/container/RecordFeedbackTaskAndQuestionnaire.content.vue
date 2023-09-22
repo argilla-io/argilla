@@ -127,25 +127,59 @@ export default {
       });
     },
     async recordStatusToFilterWith(newValue) {
-      // TODO - regroup in a common watcher hover filterParams computed
       await this.$router.push({
         path: this.$route.path,
         query: {
           ...this.$route.query,
           _status: newValue,
-          _search: this.searchTextToFilterWith,
           _page: this.currentPage,
         },
       });
     },
     async searchTextToFilterWith(newValue) {
-      // TODO - regroup in a common watcher hover filterParams computed
-      await this.$router.push({
+      if (newValue)
+        return await this.$router.push({
+          path: this.$route.path,
+          query: {
+            ...this.$route.query,
+            _search: newValue,
+            _page: this.currentPage,
+          },
+        });
+      const { _search, ...rest } = this.$route.query;
+
+      return await this.$router.push({
         path: this.$route.path,
         query: {
-          ...this.$route.query,
-          _search: newValue,
-          _status: this.recordStatusToFilterWith,
+          ...rest,
+          _page: this.currentPage,
+        },
+      });
+    },
+    async metadataToFilterWith(newValue) {
+      if (newValue) {
+        const metadataSearchQuery = newValue.map((m) => {
+          return `${m.name}:${
+            m.isTerms ? m.selectedOptions.map((s) => s.label).join("|") : "X"
+          }`;
+        });
+
+        return await this.$router.push({
+          path: this.$route.path,
+          query: {
+            ...this.$route.query,
+            _metadata: metadataSearchQuery.join(","),
+            _page: this.currentPage,
+          },
+        });
+      }
+
+      const { _metadata, ...rest } = this.$route.query;
+
+      return await this.$router.push({
+        path: this.$route.path,
+        query: {
+          ...rest,
           _page: this.currentPage,
         },
       });

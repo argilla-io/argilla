@@ -69,7 +69,6 @@ export default {
         this.$router.replace({
           query: {
             ...this.$route.query,
-            _search: "",
             _page: 1,
             _status: RECORD_STATUS.PENDING.toLowerCase(),
           },
