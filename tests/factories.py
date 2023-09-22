@@ -252,6 +252,16 @@ class TermsMetadataPropertyFactory(MetadataPropertyFactory):
     settings = {"type": MetadataPropertyType.terms}
 
 
+class IntegerMetadataPropertyFactory(MetadataPropertyFactory):
+    type = MetadataPropertyType.integer
+    settings = {"type": MetadataPropertyType.integer}
+
+
+class FloatMetadataPropertyFactory(MetadataPropertyFactory):
+    type = MetadataPropertyType.float
+    settings = {"type": MetadataPropertyType.float}
+
+
 class QuestionFactory(BaseFactory):
     class Meta:
         model = Question

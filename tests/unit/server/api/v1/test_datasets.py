@@ -68,6 +68,8 @@ from tests.factories import (
     AnnotatorFactory,
     DatasetFactory,
     FieldFactory,
+    FloatMetadataPropertyFactory,
+    IntegerMetadataPropertyFactory,
     LabelSelectionQuestionFactory,
     MultiLabelSelectionQuestionFactory,
     QuestionFactory,
@@ -421,6 +423,105 @@ class TestSuiteDatasets:
         await DatasetFactory.create()
 
         response = await async_client.get(f"/api/v1/datasets/{uuid4()}/questions", headers=owner_auth_header)
+
+        assert response.status_code == 404
+
+    async def test_list_dataset_metadata_properties(self, async_client: "AsyncClient", owner_auth_header: dict):
+        dataset = await DatasetFactory.create()
+
+        terms_property = await TermsMetadataPropertyFactory.create(name="terms", dataset=dataset)
+        integer_property = await IntegerMetadataPropertyFactory.create(name="integer", dataset=dataset)
+        float_property = await FloatMetadataPropertyFactory.create(name="float", dataset=dataset)
+
+        await TermsMetadataPropertyFactory.create()
+        await IntegerMetadataPropertyFactory.create()
+        await FloatMetadataPropertyFactory.create()
+
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "items": [
+                {
+                    "id": str(terms_property.id),
+                    "name": "terms",
+                    "description": terms_property.description,
+                    "settings": {"type": "terms"},
+                    "inserted_at": terms_property.inserted_at.isoformat(),
+                    "updated_at": terms_property.updated_at.isoformat(),
+                },
+                {
+                    "id": str(integer_property.id),
+                    "name": "integer",
+                    "description": integer_property.description,
+                    "settings": {"type": "integer"},
+                    "inserted_at": integer_property.inserted_at.isoformat(),
+                    "updated_at": integer_property.updated_at.isoformat(),
+                },
+                {
+                    "id": str(float_property.id),
+                    "name": "float",
+                    "description": float_property.description,
+                    "settings": {"type": "float"},
+                    "inserted_at": float_property.inserted_at.isoformat(),
+                    "updated_at": float_property.updated_at.isoformat(),
+                },
+            ]
+        }
+
+    async def test_list_dataset_metadata_properties_without_authentication(self, async_client: "AsyncClient"):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.get(f"/api/v1/datasets/{dataset.id}/metadata-properties")
+
+        assert response.status_code == 401
+
+    @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
+    async def test_list_dataset_metadata_properties_as_restricted_user(
+        self, async_client: "AsyncClient", role: UserRole
+    ):
+        dataset = await DatasetFactory.create()
+        user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
+
+        await TermsMetadataPropertyFactory.create(name="terms-property", dataset=dataset)
+        await IntegerMetadataPropertyFactory.create(name="integer-property", dataset=dataset)
+        await TermsMetadataPropertyFactory.create()
+        await IntegerMetadataPropertyFactory.create()
+
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers={API_KEY_HEADER_NAME: user.api_key}
+        )
+
+        assert response.status_code == 200
+
+        response_body = response.json()
+        assert [metadata_property["name"] for metadata_property in response_body["items"]] == [
+            "terms-property",
+            "integer-property",
+        ]
+
+    @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
+    async def test_list_dataset_metadata_properties_as_restricted_user_from_different_workspace(
+        self, async_client: "AsyncClient", role: UserRole
+    ):
+        dataset = await DatasetFactory.create()
+        workspace = await WorkspaceFactory.create()
+        user = await UserFactory.create(workspaces=[workspace], role=role)
+
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers={API_KEY_HEADER_NAME: user.api_key}
+        )
+
+        assert response.status_code == 403
+
+    async def test_list_dataset_metadata_properties_with_nonexistent_dataset_id(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        await DatasetFactory.create()
+
+        response = await async_client.get(f"/api/v1/datasets/{uuid4()}/metadata-properties", headers=owner_auth_header)
 
         assert response.status_code == 404
 
