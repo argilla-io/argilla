@@ -7,8 +7,12 @@
       <span slot="dropdown-header">
         <BaseButton>Metadata</BaseButton>
       </span>
-      <span slot="dropdown-content" class="metadata-filter__container">
-        <metadataCategoriesSelector
+      <span
+        slot="dropdown-content"
+        class="metadata-filter__container"
+        v-if="!!metadataFilters"
+      >
+        <MetadataCategoriesSelector
           class="metadata-filter__categories"
           :categories="metadataCategoriesName"
           v-if="!visibleCategory"
@@ -73,9 +77,7 @@ export default {
       this.selectMetadataCategory(null);
     },
     selectMetadataCategory(category) {
-      this.visibleCategory = this.metadataFilters.find(
-        (cat) => cat.name === category
-      );
+      this.visibleCategory = this.metadataFilters.findByCategory(category);
     },
     applyFilter() {
       this.visibleDropdown = false;
@@ -85,7 +87,7 @@ export default {
   },
   computed: {
     metadataCategoriesName() {
-      return this.metadataFilters.map((cat) => cat.name);
+      return this.metadataFilters.categories;
     },
   },
   mounted() {
