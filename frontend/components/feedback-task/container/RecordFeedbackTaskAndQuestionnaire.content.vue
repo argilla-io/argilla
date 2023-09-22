@@ -115,17 +115,16 @@ export default {
       );
     }
 
+    this.updateTotalRecordsLabel();
     this.fetching = false;
   },
   watch: {
     async currentPage(newValue) {
-      // TODO - regroup in a common watcher hover filterParams computed
       await this.$router.push({
         path: this.$route.path,
         query: {
           ...this.$route.query,
           _page: newValue,
-          _status: this.recordStatusToFilterWith,
         },
       });
     },
@@ -202,45 +201,29 @@ export default {
     this.$root.$on("metadata-filter-changed", this.onMetadataFilterChanged);
   },
   methods: {
-    async applyStatusFilter(status) {
-      this.recordStatusToFilterWith = status;
-      this.currentPage = 1;
-
-      await this.$fetch();
-
-      this.checkAndEmitTotalRecords();
-    },
-    async applySearchFilter(searchFilter) {
-      this.searchTextToFilterWith = searchFilter;
-      this.currentPage = 1;
-
-      await this.$fetch();
-
-      this.checkAndEmitTotalRecords();
-    },
-    async applyMetadataFilter(metadata) {
-      this.metadataToFilterWith = metadata;
-      this.currentPage = 1;
-
-      await this.$fetch();
-
-      this.checkAndEmitTotalRecords();
-    },
     emitResetStatusFilter() {
       this.$root.$emit("reset-status-filter");
     },
     emitResetSearchFilter() {
       this.$root.$emit("reset-search-filter");
     },
-    checkAndEmitTotalRecords() {
+    emitResetMetadataFilter() {
+      this.$root.$emit("reset-metadata-filter");
+    },
+    updateTotalRecordsLabel() {
       if (this.searchTextToFilterWith?.length)
         return this.$root.$emit("total-records", this.records.total);
 
       this.$root.$emit("total-records", null);
     },
     async onSearchFilterChanged(newSearchValue) {
-      const localApplySearchFilter = this.applySearchFilter;
-      const localEmitResetSearchFilter = this.emitResetSearchFilter;
+      const self = this;
+      const onFilter = () => {
+        this.searchTextToFilterWith = newSearchValue;
+        this.currentPage = 1;
+
+        this.$fetch();
+      };
 
       if (
         this.questionFormTouched &&
@@ -252,24 +235,26 @@ export default {
           numberOfChars: 500,
           type: "warning",
           async onClick() {
-            await localApplySearchFilter(newSearchValue);
+            onFilter();
           },
           onClose() {
-            localEmitResetSearchFilter();
+            self.emitResetSearchFilter();
           },
         });
       }
 
-      if (newSearchValue !== this.searchFilterFromQuery)
-        return await this.applySearchFilter(newSearchValue);
+      if (newSearchValue !== this.searchFilterFromQuery) return onFilter();
     },
     async onStatusFilterChanged(newStatus) {
-      if (this.recordStatusToFilterWith === newStatus) {
-        return;
-      }
+      if (this.recordStatusToFilterWith === newStatus) return;
 
-      const localApplyStatusFilter = this.applyStatusFilter;
-      const localEmitResetStatusFilter = this.emitResetStatusFilter;
+      const self = this;
+      const onFilter = () => {
+        this.recordStatusToFilterWith = newStatus;
+        this.currentPage = 1;
+
+        this.$fetch();
+      };
 
       if (this.questionFormTouched) {
         Notification.dispatch("notify", {
@@ -278,18 +263,31 @@ export default {
           numberOfChars: 500,
           type: "warning",
           async onClick() {
-            await localApplyStatusFilter(newStatus);
+            onFilter();
           },
           onClose() {
-            localEmitResetStatusFilter();
+            self.emitResetStatusFilter();
           },
         });
       } else {
-        await this.applyStatusFilter(newStatus);
+        onFilter();
       }
     },
     async onMetadataFilterChanged(metadata) {
+      const hasOtherFilter = metadata.some(
+        (e) => !this.metadataFilterFromQuery.includes(e)
+      );
+
+      if (!hasOtherFilter) return;
+
       const self = this;
+
+      const onFilter = () => {
+        this.metadataToFilterWith = metadata;
+        this.currentPage = 1;
+
+        this.$fetch();
+      };
 
       if (this.questionFormTouched) {
         return Notification.dispatch("notify", {
@@ -298,15 +296,15 @@ export default {
           numberOfChars: 500,
           type: "warning",
           async onClick() {
-            await self.applyMetadataFilter(metadata);
+            onFilter();
           },
           onClose() {
-            //TODO:
+            self.emitResetMetadataFilter();
           },
         });
       }
 
-      await this.applyMetadataFilter(metadata);
+      onFilter();
     },
     onQuestionFormTouched(isTouched) {
       this.questionFormTouched = isTouched;

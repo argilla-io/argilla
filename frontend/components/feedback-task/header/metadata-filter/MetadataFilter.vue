@@ -71,6 +71,12 @@ export default {
       selectedOptions: [],
     };
   },
+  created() {
+    this.$root.$on("reset-metadata-filter", this.completeByRouteParams);
+  },
+  destroyed() {
+    this.$root.$off("reset-metadata-filter");
+  },
   methods: {
     onMetadataToggleVisibility(value) {
       this.visibleDropdown = value;

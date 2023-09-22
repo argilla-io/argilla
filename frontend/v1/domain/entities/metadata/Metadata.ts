@@ -49,4 +49,10 @@ export class Metadata {
       this.value = Number(value);
     }
   }
+
+  clear(): void {
+    if (this.isTerms) return this.options.forEach((o) => (o.selected = false));
+
+    this.value = null;
+  }
 }

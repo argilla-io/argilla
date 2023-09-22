@@ -17,7 +17,9 @@ export class MetadataFilter {
     });
   }
 
-  completeByRouteParams(params: string) {
+  completeByRouteParams(params = "") {
+    this.metadata.forEach((m) => m.clear());
+
     if (!params) return;
 
     const metadataFilter = params.split("+").map((metadata) => {

@@ -10,12 +10,18 @@ export const useMetadataFilterViewModel = () => {
   const filterMetaDataUseCase = useResolve(GetMetadataFiltersUseCase);
 
   const getMetadataFilters = async (datasetId: string) => {
-    const filters = await filterMetaDataUseCase.execute(datasetId);
+    metadataFilters.value = await filterMetaDataUseCase.execute(datasetId);
 
-    filters.completeByRouteParams(router.value.query._metadata as string);
-
-    metadataFilters.value = filters;
+    completeByRouteParams();
   };
 
-  return { metadataFilters, getMetadataFilters };
+  const completeByRouteParams = () => {
+    if (!metadataFilters.value) return;
+
+    metadataFilters.value.completeByRouteParams(
+      router.value.query._metadata as string
+    );
+  };
+
+  return { metadataFilters, getMetadataFilters, completeByRouteParams };
 };
