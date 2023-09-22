@@ -4,6 +4,7 @@ class OptionForFilter {
 }
 
 export class Metadata {
+  public value: number; // TBD: For integer of float
   public options: OptionForFilter[];
   constructor(
     private id: string,
@@ -36,5 +37,16 @@ export class Metadata {
     return this.options.filter((option) =>
       option.label.toLowerCase().includes(text.toLowerCase())
     );
+  }
+
+  public completeMetadata(value: string) {
+    if (this.isTerms) {
+      value.split(",").forEach((label) => {
+        const option = this.options.find((option) => option.label === label);
+        if (option) option.selected = true;
+      });
+    } else {
+      this.value = Number(value);
+    }
   }
 }

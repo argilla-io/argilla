@@ -27,4 +27,15 @@ export class MetadataFilter {
       return `${metadata.name}:${metadata.value}`;
     });
   }
+
+  completeByRouteParams(params: string) {
+    const metadataFilter = params.split("+").map((metadata) => {
+      const [name, value] = metadata.split(":");
+      return { name, value };
+    });
+
+    metadataFilter.forEach(({ name, value }) => {
+      this.findByCategory(name).completeMetadata(value);
+    });
+  }
 }
