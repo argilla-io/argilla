@@ -20,6 +20,7 @@
         :key="option.label"
         :value="option.selected"
         v-model="option.selected"
+        @mouseover.native="optionIndex = index"
       >
         {{ option.label }}
       </BaseCheckbox>
@@ -49,18 +50,16 @@ export default {
     labelsFilteredBySearchText() {
       return this.metadata.filterByText(this.searchText);
     },
-    activedSearchWithResults() {
-      return this.searchText && this.labelsFilteredBySearchText.length;
-    },
   },
   methods: {
     includePreselectedOption() {
-      if (!this.activedSearchWithResults) {
+      if (!this.labelsFilteredBySearchText.length) {
         return;
       }
       this.toggleSelectedOption(
         this.labelsFilteredBySearchText[this.optionIndex]
       );
+      this.optionIndex = 0;
     },
     removeSelectedOption(option) {
       option.selected = false;
@@ -101,18 +100,12 @@ export default {
     max-height: 200px;
     overflow: scroll;
     margin-top: $base-space;
-    &:hover {
-      #{$this}__item--highlighted:not(:hover) {
-        background: none;
-      }
-    }
   }
   &__item {
     display: flex;
     padding: calc($base-space / 2) $base-space;
     border-radius: $border-radius;
-    &--highlighted,
-    &:hover {
+    &--highlighted {
       background: $black-4;
     }
     :deep(.checkbox-container) {
