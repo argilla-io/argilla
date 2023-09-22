@@ -77,6 +77,9 @@ export default {
     searchFilterFromQuery() {
       return this.$route.query?._search ?? "";
     },
+    metadataFilterFromQuery() {
+      return this.$route.query?._metadata?.split("+") ?? [];
+    },
     pageFromQuery() {
       const { _page } = this.$route.query;
       return isNil(_page) ? 1 : +_page;
@@ -156,15 +159,13 @@ export default {
         },
       });
     },
-    async metadataToFilterWith(newValue) {
-      const metadataSearchQuery = newValue.convertToRouteParam();
-
-      if (metadataSearchQuery) {
+    async metadataToFilterWith(newValue = []) {
+      if (newValue.length) {
         return await this.$router.push({
           path: this.$route.path,
           query: {
             ...this.$route.query,
-            _metadata: metadataSearchQuery.join("+"),
+            _metadata: newValue.join("+"),
             _page: this.currentPage,
           },
         });
@@ -184,6 +185,7 @@ export default {
   created() {
     this.recordStatusToFilterWith = this.statusFilterFromQuery;
     this.searchTextToFilterWith = this.searchFilterFromQuery;
+    this.metadataToFilterWith = this.metadataFilterFromQuery;
     this.currentPage = this.pageFromQuery;
 
     this.loadMetrics(this.datasetId);

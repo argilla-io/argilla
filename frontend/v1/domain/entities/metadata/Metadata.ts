@@ -4,7 +4,7 @@ class OptionForFilter {
 }
 
 export class Metadata {
-  public value: number; // TBD: For integer of float
+  public value?: number; // TBD: For integer of float
   public options: OptionForFilter[];
   constructor(
     private id: string,

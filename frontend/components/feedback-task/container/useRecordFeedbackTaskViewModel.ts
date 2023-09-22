@@ -17,7 +17,7 @@ export const useRecordFeedbackTaskViewModel = () => {
     page: number,
     status: string,
     searchText: string,
-    metadataFilter: any
+    metadataFilter: string[]
   ) => {
     await getRecords.execute(
       datasetId,

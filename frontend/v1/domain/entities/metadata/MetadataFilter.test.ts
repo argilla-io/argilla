@@ -34,16 +34,27 @@ describe("MetadataFilter ", () => {
   });
 
   describe("Convert to Router Parameter", () => {
-    test("should return the router params for answered filters", () => {
+    test("should return the router params for answered filters for terms", () => {
       const metadataFilter = new MetadataFilter(createMetadataMock());
       metadataFilter.findByCategory("split").completeMetadata("test,train");
       const routerParams = metadataFilter.convertToRouteParam();
 
-      expect(routerParams).toEqual([
-        "split:test,train",
-        "loss:TBD",
-        "float:TBD",
-      ]);
+      expect(routerParams).toEqual(["split:test,train"]);
+    });
+
+    test("should return the router params for answered filters for numbers", () => {
+      const metadataFilter = new MetadataFilter(createMetadataMock());
+      metadataFilter.findByCategory("loss").completeMetadata("0.50");
+      const routerParams = metadataFilter.convertToRouteParam();
+
+      expect(routerParams).toEqual(["loss:0.5"]);
+    });
+
+    test("should return the router params for answered filters", () => {
+      const metadataFilter = new MetadataFilter(createMetadataMock());
+      const routerParams = metadataFilter.convertToRouteParam();
+
+      expect(routerParams).toEqual([]);
     });
   });
 
