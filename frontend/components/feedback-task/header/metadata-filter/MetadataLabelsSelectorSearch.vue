@@ -2,10 +2,10 @@
   <div class="search-area">
     <FilterBadge
       class="search-area__badge"
-      v-for="label in selectedLabels"
-      :key="label"
-      :text="label"
-      @on-clear="removeSelectedLabel(label)"
+      v-for="option in selectedOptions"
+      :key="option.label"
+      :text="option.label"
+      @on-clear="removeSelectedLabel(option)"
     ></FilterBadge>
     <input
       id="searchLabel"
@@ -29,7 +29,7 @@ export default {
       type: String,
       default: "",
     },
-    selectedLabels: {
+    selectedOptions: {
       type: Array,
     },
   },
@@ -40,8 +40,8 @@ export default {
     onInput($event) {
       this.$emit("input", $event.target.value);
     },
-    removeSelectedLabel(label) {
-      this.$emit("remove-label", label);
+    removeSelectedLabel(option) {
+      option.selected = false;
     },
   },
 };

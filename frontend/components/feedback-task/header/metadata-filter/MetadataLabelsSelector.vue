@@ -3,31 +3,26 @@
     <MetadataLabelsSelectorSearch
       v-model="searchText"
       placeholder="Filter by..."
-      :selected-labels="selectedLabels"
+      :selected-options="selectedOptions"
       @remove-label="removeSelectedLabel"
     />
+
     <BaseCheckbox
       class="labels-selector__item"
-      v-for="label in labelsFilteredBySearchText"
-      :key="label"
-      :id="label"
-      :ref="label"
-      v-model="selected"
-      :value="label"
+      v-for="option in labelsFilteredBySearchText"
+      :key="option.label"
+      :value="option.selected"
+      v-model="option.selected"
     >
-      {{ label }}
+      {{ option.label }}
     </BaseCheckbox>
   </div>
 </template>
 <script>
 export default {
   props: {
-    labels: {
-      type: Array,
-      required: true,
-    },
-    selectedLabels: {
-      type: Array,
+    metadata: {
+      type: Object,
       required: true,
     },
   },
@@ -36,29 +31,15 @@ export default {
       searchText: "",
     };
   },
-  model: {
-    prop: "selectedLabels",
-    event: "input",
-  },
   computed: {
-    selected: {
-      get() {
-        return this.selectedLabels;
-      },
-      set(newValue) {
-        this.$emit("input", newValue);
-      },
+    selectedOptions() {
+      return this.metadata.options.filter((option) => option.selected);
     },
     labelsFilteredBySearchText() {
-      return this.labels.filter((label) =>
-        label.toLowerCase().includes(this.searchText.toLowerCase())
+      console.log(this.metadata);
+      return this.metadata.options.filter((option) =>
+        option.label.toLowerCase().includes(this.searchText.toLowerCase())
       );
-    },
-  },
-  methods: {
-    removeSelectedLabel(label) {
-      const selectedLabels = this.selectedLabels.filter((l) => l !== label);
-      this.$emit("input", selectedLabels);
     },
   },
 };

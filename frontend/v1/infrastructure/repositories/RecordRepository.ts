@@ -26,7 +26,8 @@ export class RecordRepository {
     fromRecord: number,
     howMany: number,
     status: string,
-    searchText: string
+    searchText: string,
+    metadata: { name: string; value: string[] | string | number }[]
   ): Promise<BackedRecords> {
     if (searchText?.length)
       return this.getRecordsByText(
@@ -34,10 +35,17 @@ export class RecordRepository {
         fromRecord,
         howMany,
         status,
-        searchText
+        searchText,
+        metadata
       );
 
-    return this.getRecordsDatasetId(datasetId, fromRecord, howMany, status);
+    return this.getRecordsDatasetId(
+      datasetId,
+      fromRecord,
+      howMany,
+      status,
+      metadata
+    );
   }
 
   async deleteRecordResponse(record: Record) {
@@ -120,7 +128,7 @@ export class RecordRepository {
     fromRecord: number,
     howMany: number,
     status: string,
-    metadata: { name: string; value: unknown }[]
+    metadata: { name: string; value: string[] | string | number }[]
   ): Promise<BackedRecords> {
     try {
       const url = `/v1/me/datasets/${datasetId}/records`;
@@ -148,7 +156,7 @@ export class RecordRepository {
     howMany: number,
     status: string,
     searchText: string,
-    metadata: { name: string; value: unknown }[]
+    metadata: { name: string; value: string[] | string | number }[]
   ): Promise<BackedRecords> {
     try {
       const url = `/v1/me/datasets/${datasetId}/records/search`;

@@ -34,7 +34,8 @@ export class GetRecordsToAnnotateUseCase {
       fromRecord,
       howMany,
       status,
-      searchText
+      searchText,
+      []
     );
     const getQuestions = this.questionRepository.getQuestions(datasetId);
     const getFields = this.fieldRepository.getFields(datasetId);

@@ -10,7 +10,7 @@
     <span class="filters__component">
       <StatusFilter :options="statusOptions" v-model="selectedStatus" />
     </span>
-    <MetadataFilter />
+    <MetadataFilter :datasetId="datasetId" />
   </div>
 </template>
 

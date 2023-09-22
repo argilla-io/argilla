@@ -1,6 +1,8 @@
+import { Metadata } from "../../metadata/Metadata";
+
 export const metadataMocked = [
   {
-    id: 1,
+    id: "1",
     name: "split",
     description: "The split of the record",
     settings: {
@@ -9,7 +11,7 @@ export const metadataMocked = [
     },
   },
   {
-    id: 2,
+    id: "2",
     name: "loss",
     description: "The training loss affecting the records",
     settings: {
@@ -17,7 +19,7 @@ export const metadataMocked = [
     },
   },
   {
-    id: 3,
+    id: "3",
     name: "float",
     description: "The training loss affecting the records",
     settings: {

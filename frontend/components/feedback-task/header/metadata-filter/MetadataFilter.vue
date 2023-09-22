@@ -25,14 +25,18 @@
           <div class="metadata-filter__content">
             <transition name="fade" appear>
               <MetadataLabelsSelector
-                v-if="visibleCategory.settings.type === 'terms'"
-                :labels="visibleCategory.settings.values"
-                v-model="selectedOptions"
+                v-if="visibleCategory.isTerms"
+                :metadata="visibleCategory"
               />
 
-              <div v-else-if="visibleCategory.settings.type === 'float'">
+              <div v-else-if="visibleCategory.isFloat">
                 {{ visibleCategory.settings }}
               </div>
+
+              <div v-else-if="visibleCategory.isInteger">
+                {{ visibleCategory.settings }}
+              </div>
+
               <div v-else>{{ visibleCategory.settings }}</div>
             </transition>
             <BaseButton class="primary small full-width" @on-click="applyFilter"
@@ -46,9 +50,16 @@
 </template>
 
 <script>
-import { metadataMocked } from "@/v1/domain/entities/__mocks__/metadata/mock.ts";
+import { useMetadataFilterViewModel } from "./useMetadataFilterViewModel";
 import "assets/icons/chevron-left";
+
 export default {
+  props: {
+    datasetId: {
+      type: String,
+      required: true,
+    },
+  },
   data() {
     return {
       visibleDropdown: false,
@@ -67,7 +78,6 @@ export default {
       );
     },
     applyFilter() {
-      console.log("filter applied");
       this.visibleDropdown = false;
     },
   },
@@ -76,8 +86,11 @@ export default {
       return this.metadataFilters.map((cat) => cat.name);
     },
   },
-  created() {
-    this.metadataFilters = metadataMocked;
+  mounted() {
+    this.getMetadataFilters(this.datasetId);
+  },
+  setup() {
+    return useMetadataFilterViewModel();
   },
 };
 </script>
