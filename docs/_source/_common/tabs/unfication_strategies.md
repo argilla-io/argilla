@@ -3,7 +3,7 @@
 :::{tab-item} LabelQuestion
 
 ```python
-from argilla import RatingQuestionStrategy, FeedbackDataset
+from argilla import LabelQuestionStrategy, FeedbackDataset
 
 dataset = FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
@@ -22,7 +22,7 @@ dataset.records[0].unified_responses
 :::{tab-item} MultiLabelQuestion
 
 ```python
-from argilla import RatingQuestionStrategy, FeedbackDataset
+from argilla import MultiLabelQuestionStrategy, FeedbackDataset
 
 dataset = FeedbackDataset.from_huggingface(
     repo_id="argilla/stackoverflow_feedback_demo"
