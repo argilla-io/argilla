@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import re
 from collections import defaultdict
 from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 from uuid import UUID
@@ -28,6 +29,8 @@ def parse_uuids(uuids_str: str) -> List[UUID]:
 
 
 T = TypeVar("T", bound=BaseModel)
+
+PARAM_REGEX = re.compile(r"^(\w+)(?:(?::|,)(\w+))*$")
 
 
 def parse_query_param(
@@ -66,9 +69,16 @@ def parse_query_param(
 
         parsed_params = defaultdict(list)
         for value in param_values:
+            if not PARAM_REGEX.match(value):
+                raise HTTPException(
+                    status_code=422,
+                    detail="'include' query parameter must be of the form 'key1,key2,key3:value1,value2,value3'",
+                )
+
             parts = value.split(":")
             if len(parts) == 1:
-                parsed_params["keys"].append(parts[0])
+                parts = parts[0].split(",")
+                parsed_params["keys"].extend(parts)
             else:
                 key = parts[0]
                 values = parts[1].split(",")
