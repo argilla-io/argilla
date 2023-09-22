@@ -61,10 +61,10 @@ export default {
       if (!this.labelsFilteredBySearchText.length) {
         return;
       }
-      this.preselectionIndex = 0;
       this.toggleSelectedOption(
         this.labelsFilteredBySearchText[this.preselectionIndex]
       );
+      this.preselectionIndex = 0;
     },
     removeSelectedOption(option) {
       option.selected = false;
