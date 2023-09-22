@@ -1,5 +1,3 @@
-import { Metadata } from "../../metadata/Metadata";
-
 export const metadataMocked = [
   {
     id: "1",
