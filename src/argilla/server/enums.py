@@ -61,7 +61,7 @@ class QuestionType(str, Enum):
     ranking = "ranking"
 
 
-class MetadataType(str, Enum):
+class MetadataPropertyType(str, Enum):
     terms = "terms"  # Textual types with a fixed value list
     integer = "integer"  # Integer values
     float = "float"  # Decimal values

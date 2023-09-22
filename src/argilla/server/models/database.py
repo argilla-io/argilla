@@ -22,7 +22,7 @@ from sqlalchemy import Enum as SAEnum
 from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from argilla.server.enums import DatasetStatus, MetadataType, ResponseStatus, SuggestionType, UserRole
+from argilla.server.enums import DatasetStatus, MetadataPropertyType, ResponseStatus, SuggestionType, UserRole
 from argilla.server.models.base import DatabaseModel
 from argilla.server.models.questions import QuestionSettings
 
@@ -185,7 +185,7 @@ class MetadataProperty(DatabaseModel):
     __tablename__ = "metadata_properties"
 
     name: Mapped[str] = mapped_column(Text, index=True)
-    type: Mapped[MetadataType] = mapped_column(Text)
+    type: Mapped[MetadataPropertyType] = mapped_column(Text)
     description: Mapped[str] = mapped_column(Text, nullable=True)
     settings: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSON), default={})
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
