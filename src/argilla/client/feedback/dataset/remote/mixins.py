@@ -78,7 +78,9 @@ class ArgillaRecordsMixin:
             fetched_records = self._fetch_records(offset=offset, limit=limit)
             records.extend(
                 [
-                    RemoteFeedbackRecord.from_api(record, question_id_to_name=self._question_id_to_name)
+                    RemoteFeedbackRecord.from_api(
+                        record, question_id_to_name=self._question_id_to_name, client=self._client
+                    )
                     for record in fetched_records.items
                 ]
             )
@@ -93,7 +95,9 @@ class ArgillaRecordsMixin:
         while True:
             batch = self._fetch_records(offset=FETCHING_BATCH_SIZE * current_batch, limit=FETCHING_BATCH_SIZE)
             for record in batch.items:
-                yield RemoteFeedbackRecord.from_api(record, question_id_to_name=self._question_id_to_name)
+                yield RemoteFeedbackRecord.from_api(
+                    record, question_id_to_name=self._question_id_to_name, client=self._client
+                )
             current_batch += 1
 
             if len(batch.items) < FETCHING_BATCH_SIZE:
