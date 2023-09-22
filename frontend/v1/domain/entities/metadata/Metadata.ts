@@ -27,4 +27,14 @@ export class Metadata {
   public get isFloat() {
     return this.settings.type === "float";
   }
+
+  public get selectedOptions(): OptionForFilter[] {
+    return this.options.filter((option) => option.selected);
+  }
+
+  public filterByText(text: string) {
+    return this.options.filter((option) =>
+      option.label.toLowerCase().includes(text.toLowerCase())
+    );
+  }
 }

@@ -3,7 +3,7 @@
     <MetadataLabelsSelectorSearch
       v-model="searchText"
       placeholder="Filter by..."
-      :selected-options="selectedOptions"
+      :selected-options="metadata.selectedOptions"
     />
 
     <BaseCheckbox
@@ -31,13 +31,8 @@ export default {
     };
   },
   computed: {
-    selectedOptions() {
-      return this.metadata.options.filter((option) => option.selected);
-    },
     labelsFilteredBySearchText() {
-      return this.metadata.options.filter((option) =>
-        option.label.toLowerCase().includes(this.searchText.toLowerCase())
-      );
+      return this.metadata.filterByText(this.searchText);
     },
   },
 };
