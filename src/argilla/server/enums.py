@@ -59,3 +59,9 @@ class QuestionType(str, Enum):
     label_selection = "label_selection"
     multi_label_selection = "multi_label_selection"
     ranking = "ranking"
+
+
+class MetadataPropertyType(str, Enum):
+    terms = "terms"  # Textual types with a fixed value list
+    integer = "integer"  # Integer values
+    float = "float"  # Decimal values
