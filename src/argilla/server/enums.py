@@ -62,6 +62,6 @@ class QuestionType(str, Enum):
 
 
 class MetadataType(str, Enum):
-    terms = "terms" # Textual types with a fixed value list
-    integer = "integer" # Integer values
-    float = "float" # Decimal values
+    terms = "terms"  # Textual types with a fixed value list
+    integer = "integer"  # Integer values
+    float = "float"  # Decimal values

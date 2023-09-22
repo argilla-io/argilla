@@ -17,7 +17,8 @@ from typing import Any, List, Optional
 from uuid import UUID
 
 from pydantic import parse_obj_as
-from sqlalchemy import Enum as SAEnum, ForeignKey, JSON, Text, UniqueConstraint, and_
+from sqlalchemy import JSON, ForeignKey, Text, UniqueConstraint, and_
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
