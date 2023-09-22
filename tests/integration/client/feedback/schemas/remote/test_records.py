@@ -70,7 +70,6 @@ class TestSuiteRemoteFeedbackRecord:
         assert all(record.suggestions == () for record in remote_records)
 
         suggestion = SuggestionSchema(
-            question_id=question.id,
             question_name=question.name,
             value="suggestion",
         )
