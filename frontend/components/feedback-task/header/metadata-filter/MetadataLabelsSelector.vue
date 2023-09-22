@@ -14,13 +14,15 @@
       <BaseCheckbox
         class="labels-selector__item"
         :class="
-          index === optionIndex ? 'labels-selector__item--highlighted' : null
+          index === preselectionIndex
+            ? 'labels-selector__item--highlighted'
+            : null
         "
         v-for="(option, index) in labelsFilteredBySearchText"
         :key="option.label"
         :value="option.selected"
         v-model="option.selected"
-        @mouseover.native="optionIndex = index"
+        @mouseover.native="preselectionIndex = index"
       >
         {{ option.label }}
       </BaseCheckbox>
@@ -38,17 +40,20 @@ export default {
   data: () => {
     return {
       searchText: "",
-      optionIndex: 0,
+      preselectionIndex: 0,
     };
   },
   watch: {
     searchText() {
-      this.optionIndex = 0;
+      this.preselectionIndex = 0;
     },
   },
   computed: {
     labelsFilteredBySearchText() {
       return this.metadata.filterByText(this.searchText);
+    },
+    optionsLength() {
+      return this.metadata.options.length;
     },
   },
   methods: {
@@ -56,10 +61,10 @@ export default {
       if (!this.labelsFilteredBySearchText.length) {
         return;
       }
+      this.preselectionIndex = 0;
       this.toggleSelectedOption(
-        this.labelsFilteredBySearchText[this.optionIndex]
+        this.labelsFilteredBySearchText[this.preselectionIndex]
       );
-      this.optionIndex = 0;
     },
     removeSelectedOption(option) {
       option.selected = false;
@@ -78,21 +83,20 @@ export default {
       return this.activedSearchWithResults && index === 0;
     },
     preselectNextOption() {
-      this.optionIndex === this.metadata.options.length - 1
-        ? (this.optionIndex = 0)
-        : this.optionIndex++;
+      this.preselectionIndex === this.optionsLength - 1
+        ? (this.preselectionIndex = 0)
+        : this.preselectionIndex++;
     },
     preselectPreviousOption() {
-      this.optionIndex === 0
-        ? (this.optionIndex = this.metadata.options.length - 1)
-        : this.optionIndex--;
+      this.preselectionIndex === 0
+        ? (this.preselectionIndex = this.optionsLength - 1)
+        : this.preselectionIndex--;
     },
   },
 };
 </script>
 <style lang="scss" scoped>
 .labels-selector {
-  $this: &;
   display: flex;
   flex-direction: column;
   margin-bottom: $base-space;
