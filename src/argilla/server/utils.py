@@ -67,7 +67,7 @@ def parse_query_param(
         if param_values is None:
             return None
 
-        parsed_params = defaultdict(list)
+        parsed_params = defaultdict(set)
         for value in param_values:
             if not PARAM_REGEX.match(value):
                 raise HTTPException(
@@ -78,11 +78,11 @@ def parse_query_param(
             parts = value.split(":")
             if len(parts) == 1:
                 parts = parts[0].split(",")
-                parsed_params["keys"].extend(parts)
+                parsed_params["keys"].update(parts)
             else:
                 key = parts[0]
                 values = parts[1].split(",")
-                parsed_params[key] = values
+                parsed_params[key] = set(values)
 
         if model is not None:
             return model(**parsed_params)
