@@ -5,7 +5,7 @@
       v-for="option in selectedOptions"
       :key="option.label"
       :text="option.label"
-      @on-clear="removeSelectedLabel(option)"
+      @on-clear="removeSelectedOption(option)"
     ></FilterBadge>
     <input
       id="searchLabel"
@@ -40,7 +40,7 @@ export default {
     onInput($event) {
       this.$emit("input", $event.target.value);
     },
-    removeSelectedLabel(option) {
+    removeSelectedOption(option) {
       option.selected = false;
     },
   },

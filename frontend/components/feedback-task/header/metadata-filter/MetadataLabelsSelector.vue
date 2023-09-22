@@ -4,7 +4,6 @@
       v-model="searchText"
       placeholder="Filter by..."
       :selected-options="selectedOptions"
-      @remove-label="removeSelectedLabel"
     />
 
     <BaseCheckbox
@@ -36,7 +35,6 @@ export default {
       return this.metadata.options.filter((option) => option.selected);
     },
     labelsFilteredBySearchText() {
-      console.log(this.metadata);
       return this.metadata.options.filter((option) =>
         option.label.toLowerCase().includes(this.searchText.toLowerCase())
       );
