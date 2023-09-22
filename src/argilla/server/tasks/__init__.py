@@ -11,12 +11,17 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from argilla.server.tasks.base import BackgroundTasks, IPCBackgroundTasksExecutor
 
-from argilla.server.errors import ForbiddenOperationError
-from argilla.server.security.model import User
+from argilla.server.tasks.refresh_search_index import refresh_search_index
+
+_background_tasks = None
 
 
-def validate_is_super_user(user: User, message: str = None):
-    """Common validation to ensure the current user is a admin/superuser"""
-    if not user.is_superuser():
-        raise ForbiddenOperationError(message or "Only admin users can apply this change")
+def get_background_tasks() -> BackgroundTasks:
+    global _background_tasks
+
+    if not _background_tasks:
+        _background_tasks = BackgroundTasks(IPCBackgroundTasksExecutor())
+
+    return _background_tasks

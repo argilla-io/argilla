@@ -17,8 +17,10 @@
 This module configures the api routes under /api prefix, and
 set the required security dependencies if api security is enabled
 """
+from typing import List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, FastAPI
+from fastapi.exceptions import RequestValidationError
 
 from argilla.server.apis.v0.handlers import (
     datasets,
@@ -27,48 +29,97 @@ from argilla.server.apis.v0.handlers import (
     records,
     records_search,
     records_update,
+    security,
     text2text,
     text_classification,
     token_classification,
     users,
     workspaces,
 )
-from argilla.server.apis.v1.handlers import datasets as datasets_v1
-from argilla.server.apis.v1.handlers import fields as fields_v1
-from argilla.server.apis.v1.handlers import questions as questions_v1
-from argilla.server.apis.v1.handlers import records as records_v1
-from argilla.server.apis.v1.handlers import responses as responses_v1
-from argilla.server.apis.v1.handlers import suggestions as suggestions_v1
-from argilla.server.apis.v1.handlers import users as users_v1
-from argilla.server.apis.v1.handlers import workspaces as workspaces_v1
-from argilla.server.errors.base_errors import __ALL__
+from argilla.server.apis.v1.handlers import (
+    datasets as datasets_v1,
+    fields as fields_v1,
+    questions as questions_v1,
+    records as records_v1,
+    responses as responses_v1,
+    suggestions as suggestions_v1,
+    users as users_v1,
+    workspaces as workspaces_v1,
+)
+from argilla.server.errors import (
+    APIErrorHandler,
+    BadRequestError,
+    ClosedDatasetError,
+    EntityAlreadyExistsError,
+    EntityNotFoundError,
+    ForbiddenOperationError,
+    InvalidTextSearchError,
+    MissingInputParamError,
+    UnauthorizedError,
+    ValidationError,
+    WrongTaskError,
+)
 
-api_router = APIRouter(responses={error.HTTP_STATUS: error.api_documentation() for error in __ALL__})
+
+def configure_api_v0(parent: FastAPI):
+    return _configure_api_app(
+        parent,
+        router_list=[
+            users.router,
+            workspaces.router,
+            datasets.router,
+            info.router,
+            metrics.router,
+            records.router,
+            records_search.router,
+            records_update.router,
+            text_classification.router,
+            token_classification.router,
+            text2text.router,
+            security.router,
+        ],
+    )
 
 
-dependencies = []
+def configure_api_v1(parent: FastAPI):
+    return _configure_api_app(
+        parent,
+        router_list=[
+            datasets_v1.router,
+            fields_v1.router,
+            questions_v1.router,
+            records_v1.router,
+            responses_v1.router,
+            users_v1.router,
+            workspaces_v1.router,
+            suggestions_v1.router,
+        ],
+    )
 
-for router in [
-    users.router,
-    workspaces.router,
-    datasets.router,
-    info.router,
-    metrics.router,
-    records.router,
-    records_search.router,
-    records_update.router,
-    text_classification.router,
-    token_classification.router,
-    text2text.router,
-]:
-    api_router.include_router(router, dependencies=dependencies)
 
-# API v1
-api_router.include_router(datasets_v1.router, prefix="/v1")
-api_router.include_router(fields_v1.router, prefix="/v1")
-api_router.include_router(questions_v1.router, prefix="/v1")
-api_router.include_router(records_v1.router, prefix="/v1")
-api_router.include_router(responses_v1.router, prefix="/v1")
-api_router.include_router(users_v1.router, prefix="/v1")
-api_router.include_router(workspaces_v1.router, prefix="/v1")
-api_router.include_router(suggestions_v1.router, prefix="/v1")
+def _configure_api_exceptions(api: FastAPI):
+    """Configures fastapi exception handlers"""
+    api.exception_handler(Exception)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(EntityNotFoundError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(UnauthorizedError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(ForbiddenOperationError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(EntityAlreadyExistsError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(ClosedDatasetError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(ValidationError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(AssertionError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(WrongTaskError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(MissingInputParamError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(RequestValidationError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(InvalidTextSearchError)(APIErrorHandler.common_exception_handler)
+    api.exception_handler(BadRequestError)(APIErrorHandler.common_exception_handler)
+
+
+def _configure_api_app(parent: FastAPI, router_list: List[APIRouter]):
+    api = FastAPI(dependency_overrides_provider=parent)
+
+    for router in router_list:
+        api.include_router(router)
+
+    _configure_api_exceptions(api)
+
+    return api

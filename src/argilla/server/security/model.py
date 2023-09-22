@@ -1,54 +1,16 @@
-#  coding=utf-8
-#  Copyright 2021-present, the Recognai S.L. team.
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-import re
-import uuid
 from datetime import datetime
 from typing import Any, List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field, constr, root_validator, validator
+from pydantic import BaseModel, Field, constr
 from pydantic.utils import GetterDict
 
 from argilla._constants import ES_INDEX_REGEX_PATTERN
-from argilla.server.errors import BadRequestError, EntityNotFoundError
-from argilla.server.models import UserRole
-
-WORKSPACE_NAME_REGEX = ES_INDEX_REGEX_PATTERN
+from argilla.server.enums import UserRole
 
 USER_USERNAME_REGEX = ES_INDEX_REGEX_PATTERN
 USER_PASSWORD_MIN_LENGTH = 8
 USER_PASSWORD_MAX_LENGTH = 100
-
-
-class WorkspaceUserCreate(BaseModel):
-    user_id: UUID
-    workspace_id: UUID
-
-
-class Workspace(BaseModel):
-    id: UUID
-    name: str
-    inserted_at: datetime
-    updated_at: datetime
-
-    class Config:
-        orm_mode = True
-
-
-class WorkspaceCreate(BaseModel):
-    name: constr(regex=WORKSPACE_NAME_REGEX, min_length=1)
 
 
 class UserCreate(BaseModel):
@@ -89,8 +51,23 @@ class User(BaseModel):
         getter_dict = UserGetter
 
 
-class Token(BaseModel):
-    """Token response model"""
+WORKSPACE_NAME_REGEX = ES_INDEX_REGEX_PATTERN
 
-    access_token: str
-    token_type: str = "bearer"
+
+class WorkspaceUserCreate(BaseModel):
+    user_id: UUID
+    workspace_id: UUID
+
+
+class Workspace(BaseModel):
+    id: UUID
+    name: str
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class WorkspaceCreate(BaseModel):
+    name: constr(regex=WORKSPACE_NAME_REGEX, min_length=1)

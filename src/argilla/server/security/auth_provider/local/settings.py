@@ -42,11 +42,6 @@ class Settings(BaseSettings):
     token_api_url: str = "/api/security/token"
     users_db_file: str = ".users.yml"
 
-    @property
-    def public_oauth_token_url(self):
-        """The final public token url used for openapi doc setup"""
-        return f"{server_settings.base_url}{helpers.remove_prefix(self.token_api_url,'/')}"
-
     class Config:
         env_prefix = "ARGILLA_LOCAL_AUTH_"
 

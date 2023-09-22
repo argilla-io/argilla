@@ -28,10 +28,9 @@ from pathlib import Path
 import backoff
 from brotli_asgi import BrotliMiddleware
 from fastapi import FastAPI
-from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
-from pydantic import ConfigError, ValidationError
+from pydantic import ConfigError
 
 from argilla import __version__ as argilla_version
 from argilla._constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
@@ -43,21 +42,8 @@ from argilla.server.daos.backend.base import GenericSearchError
 from argilla.server.daos.datasets import DatasetsDAO
 from argilla.server.daos.records import DatasetRecordsDAO
 from argilla.server.database import get_async_db
-from argilla.server.errors import (
-    APIErrorHandler,
-    BadRequestError,
-    ClosedDatasetError,
-    EntityAlreadyExistsError,
-    EntityNotFoundError,
-    ForbiddenOperationError,
-    InvalidTextSearchError,
-    MissingInputParamError,
-    UnauthorizedError,
-    WrongTaskError,
-)
 from argilla.server.models import User
-from argilla.server.routes import api_router
-from argilla.server.security import auth
+from argilla.server.routes import configure_api_v0, configure_api_v1
 from argilla.server.settings import settings
 from argilla.server.static_rewrite import RewriteStaticFiles
 
@@ -78,26 +64,10 @@ def configure_middleware(app: FastAPI):
     app.add_middleware(BrotliMiddleware, minimum_size=512, quality=7)
 
 
-def configure_api_exceptions(api: FastAPI):
-    """Configures fastapi exception handlers"""
-    api.exception_handler(Exception)(APIErrorHandler.common_exception_handler)
-    api.exception_handler(EntityNotFoundError)(APIErrorHandler.common_exception_handler)
-    api.exception_handler(UnauthorizedError)(APIErrorHandler.common_exception_handler)
-    api.exception_handler(ForbiddenOperationError)(APIErrorHandler.common_exception_handler)
-    api.exception_handler(EntityAlreadyExistsError)(APIErrorHandler.common_exception_handler)
-    api.exception_handler(ClosedDatasetError)(APIErrorHandler.common_exception_handler)
-    api.exception_handler(ValidationError)(APIErrorHandler.common_exception_handler)
-    api.exception_handler(AssertionError)(APIErrorHandler.common_exception_handler)
-    api.exception_handler(WrongTaskError)(APIErrorHandler.common_exception_handler)
-    api.exception_handler(MissingInputParamError)(APIErrorHandler.common_exception_handler)
-    api.exception_handler(RequestValidationError)(APIErrorHandler.common_exception_handler)
-    api.exception_handler(InvalidTextSearchError)(APIErrorHandler.common_exception_handler)
-    api.exception_handler(BadRequestError)(APIErrorHandler.common_exception_handler)
-
-
 def configure_api_router(app: FastAPI):
     """Configures and set the api router to app"""
-    app.include_router(api_router, prefix="/api")
+    app.mount("/api/v1", configure_api_v0(app))
+    app.mount("/api", configure_api_v1(app))
 
 
 def configure_app_statics(app: FastAPI):
@@ -185,11 +155,6 @@ def configure_storage(app: FastAPI):
         _setup_elasticsearch()
 
 
-def configure_app_security(app: FastAPI):
-    if hasattr(auth, "router"):
-        app.include_router(auth.router)
-
-
 def configure_app_logging(app: FastAPI):
     """Configure app logging using"""
     app.on_event("startup")(configure_logging)
@@ -241,41 +206,29 @@ def configure_database(app: FastAPI):
                 _log_default_user_warning()
 
 
-argilla_app = FastAPI(
-    title="Argilla",
-    description="Argilla API",
-    # Disable default openapi configuration
-    openapi_url="/api/docs/spec.json",
-    docs_url="/api/docs" if settings.docs_enabled else None,
-    redoc_url=None,
-    version=str(argilla_version),
-)
+def configure_api_redirects(app: FastAPI):
+    @app.get("/docs", include_in_schema=False)
+    async def redirect_docs():
+        return RedirectResponse(url=f"{settings.base_url}api/docs")
+
+    @app.get("/api", include_in_schema=False)
+    async def redirect_api():
+        return RedirectResponse(url=f"{settings.base_url}api/docs")
 
 
-@argilla_app.get("/docs", include_in_schema=False)
-async def redirect_docs():
-    return RedirectResponse(url=f"{settings.base_url}api/docs")
+def configure_app() -> FastAPI:
+    app = FastAPI(title="Argilla", description="Argilla API", docs_url=None, version=str(argilla_version))
+
+    configure_app_logging(app)
+    configure_database(app)
+    configure_storage(app)
+    configure_telemetry(app)
+    configure_middleware(app)
+    configure_api_router(app)
+    configure_api_redirects(app)
+    configure_app_statics(app)
+
+    return app
 
 
-@argilla_app.get("/api", include_in_schema=False)
-async def redirect_api():
-    return RedirectResponse(url=f"{settings.base_url}api/docs")
-
-
-app = FastAPI(docs_url=None)
-app.mount("/", argilla_app)
-
-configure_app_logging(app)
-configure_database(app)
-configure_storage(app)
-configure_telemetry(app)
-
-for app_configure in [
-    configure_app_logging,
-    configure_middleware,
-    configure_api_exceptions,
-    configure_app_security,
-    configure_api_router,
-    configure_app_statics,
-]:
-    app_configure(argilla_app)
+app = configure_app()

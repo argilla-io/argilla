@@ -12,24 +12,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import abc
-from abc import abstractmethod
-from typing import Optional
 
-from fastapi import Depends
-from fastapi.security import APIKeyHeader, SecurityScopes
-
-from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.models import User
-
-api_key_header = APIKeyHeader(name=API_KEY_HEADER_NAME, auto_error=False)
+from pydantic import BaseModel
 
 
-class AuthProvider(abc.ABC):
-    """Base class for auth provider"""
+class Token(BaseModel):
+    """Token response model"""
 
-    @abstractmethod
-    async def get_current_user(
-        self, security_scopes: SecurityScopes, api_key: Optional[str] = Depends(api_key_header), **kwargs
-    ) -> User:
-        pass
+    access_token: str
+    token_type: str = "bearer"

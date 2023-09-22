@@ -21,17 +21,26 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, Se
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from argilla.server import helpers
 from argilla.server.contexts import accounts
 from argilla.server.database import get_async_db
 from argilla.server.errors import UnauthorizedError
 from argilla.server.models import User
 from argilla.server.security.auth_provider.base import AuthProvider, api_key_header
-from argilla.server.security.model import Token
+
+from argilla.server.settings import settings
 
 from .settings import Settings
-from .settings import settings as local_security
 
-_oauth2_scheme = OAuth2PasswordBearer(tokenUrl=local_security.public_oauth_token_url, auto_error=False)
+SECURITY_TOKEN_PATH = "/security/token"
+
+
+def public_oauth_token_url():
+    """The final public token url used for openapi doc setup"""
+    return f"{settings.base_url}api{SECURITY_TOKEN_PATH}"
+
+
+_oauth2_scheme = OAuth2PasswordBearer(tokenUrl=public_oauth_token_url(), auto_error=False)
 
 
 class LocalAuthProvider(AuthProvider):
@@ -40,23 +49,8 @@ class LocalAuthProvider(AuthProvider):
         self.settings = settings
 
         # TODO: maybe it's better if we move this endpoint to apis/v0/handlers
-        @self.router.post(
-            settings.token_api_url,
-            response_model=Token,
-            operation_id="login_for_access_token",
-        )
-        async def login_for_access_token(
-            db: AsyncSession = Depends(get_async_db),
-            form_data: OAuth2PasswordRequestForm = Depends(),
-        ) -> Token:
-            user = await accounts.authenticate_user(db, form_data.username, form_data.password)
-            if not user:
-                raise UnauthorizedError()
-            access_token_expires = timedelta(minutes=self.settings.token_expiration_in_minutes)
-            access_token = self._create_access_token(user.username, expires_delta=access_token_expires)
-            return Token(access_token=access_token)
 
-    def _create_access_token(self, username: str, expires_delta: Optional[timedelta] = None) -> str:
+    def create_access_token(self, username: str) -> str:
         """
         Creates an access token
 
@@ -71,17 +65,13 @@ class LocalAuthProvider(AuthProvider):
         -------
             An access token string
         """
-        to_encode = {
-            "sub": username,
-        }
-        if expires_delta:
+        to_encode = {"sub": username}
+
+        if self.settings.token_expiration_in_minutes is not None:
+            expires_delta = timedelta(minutes=self.settings.token_expiration_in_minutes)
             to_encode["exp"] = datetime.utcnow() + expires_delta
 
-        return jwt.encode(
-            to_encode,
-            self.settings.secret_key,
-            algorithm=self.settings.algorithm,
-        )
+        return jwt.encode(to_encode, self.settings.secret_key, algorithm=self.settings.algorithm)
 
     async def fetch_token_user(self, db: AsyncSession, token: str) -> Optional[User]:
         """
@@ -97,15 +87,13 @@ class LocalAuthProvider(AuthProvider):
             An User instance if a valid token was provided. None otherwise
         """
         try:
-            payload = jwt.decode(
-                token,
-                self.settings.secret_key,
-                algorithms=[self.settings.algorithm],
-            )
+            payload = jwt.decode(token, self.settings.secret_key, algorithms=[self.settings.algorithm])
             username: str = payload.get("sub")
+
             if username:
                 user = await accounts.get_user_by_username(db, username)
                 return user
+
         except JWTError:
             return None
 
