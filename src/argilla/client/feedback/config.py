@@ -14,7 +14,7 @@
 
 import re
 import warnings
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional
 
 try:
     from typing import Annotated
@@ -31,8 +31,7 @@ except ImportError:
         " so you can run `pip install pyyaml`."
     )
 
-from argilla.client.feedback.schemas.remote.shared import RemoteSchema
-from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes, AllowedRemoteFieldTypes
+from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 
 class DatasetConfig(BaseModel):

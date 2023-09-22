@@ -151,16 +151,12 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
 
         for suggestion in suggestions:
             if isinstance(suggestion, dict):
-                if "question_id" not in suggestion or not suggestion["question_id"]:
-                    suggestion["question_id"] = self.question_name_to_id[suggestion["question_name"]]
                 if "id" in suggestion:
+                    if "question_id" not in suggestion or not suggestion["question_id"]:
+                        suggestion["question_id"] = self.question_name_to_id[suggestion["question_name"]]
                     suggestion = RemoteSuggestionSchema(client=self.client, **suggestion)
                 else:
                     suggestion = SuggestionSchema(**suggestion)
-
-            if isinstance(suggestion, SuggestionSchema):
-                if not suggestion.question_id:
-                    suggestion.question_id = self.question_name_to_id[suggestion.question_name]
 
             if suggestion.question_name in new_suggestions:
                 warnings.warn(
@@ -205,11 +201,13 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
             if isinstance(suggestion, RemoteSuggestionSchema):
                 suggestion = suggestion.to_local()
             pushed_suggestion = datasets_api_v1.set_suggestion(
-                client=self.client, record_id=self.id, **suggestion.to_server_payload()
+                client=self.client,
+                record_id=self.id,
+                **suggestion.to_server_payload(question_name_to_id=self.question_name_to_id),
             )
             existing_suggestions[suggestion.question_name] = RemoteSuggestionSchema.from_api(
                 payload=pushed_suggestion.parsed,
-                question_id_to_name={value: key for key, value in self.question_name_to_id},
+                question_id_to_name={value: key for key, value in self.question_name_to_id.items()},
                 client=self.client,
             )
 

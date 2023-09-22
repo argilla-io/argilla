@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
     from argilla.client.feedback.dataset.local import FeedbackDataset
     from argilla.client.feedback.schemas.records import FeedbackRecord
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
     from argilla.client.workspaces import Workspace
 
@@ -103,8 +103,8 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
         workspace: "Workspace",
         created_at: datetime,
         updated_at: datetime,
-        fields: List["AllowedFieldTypes"],
-        questions: List["AllowedQuestionTypes"],
+        fields: List["AllowedRemoteFieldTypes"],
+        questions: List["AllowedRemoteQuestionTypes"],
         guidelines: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
