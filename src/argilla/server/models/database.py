@@ -17,14 +17,27 @@ from typing import Any, List, Optional
 from uuid import UUID
 
 from pydantic import parse_obj_as
-from sqlalchemy import JSON, ForeignKey, Text, UniqueConstraint, and_
-from sqlalchemy import Enum as SAEnum
+from sqlalchemy import Enum as SAEnum, ForeignKey, JSON, Text, UniqueConstraint, and_
 from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from argilla.server.enums import DatasetStatus, ResponseStatus, SuggestionType, UserRole
+from argilla.server.enums import DatasetStatus, MetadataType, ResponseStatus, SuggestionType, UserRole
 from argilla.server.models.base import DatabaseModel
 from argilla.server.models.questions import QuestionSettings
+
+# Include here the data model ref to be accessible for automatic alembic migration scripts
+__all__ = [
+    "Dataset",
+    "Field",
+    "Question",
+    "Record",
+    "Response",
+    "Suggestion",
+    "User",
+    "Workspace",
+    "WorkspaceUser",
+    "MetadataProperty",
+]
 
 _USER_API_KEY_BYTES_LENGTH = 80
 
@@ -167,6 +180,27 @@ class Question(DatabaseModel):
         )
 
 
+class MetadataProperty(DatabaseModel):
+    __tablename__ = "metadata_properties"
+
+    name: Mapped[str] = mapped_column(Text, index=True)
+    type: Mapped[MetadataType] = mapped_column(Text)
+    description: Mapped[str] = mapped_column(Text, nullable=True)
+    settings: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSON), default={})
+    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
+
+    dataset: Mapped["Dataset"] = relationship(back_populates="metadata_properties")
+
+    __table_args__ = (UniqueConstraint("name", "dataset_id", name="metadata_property_name_dataset_id_uq"),)
+
+    def __repr__(self):
+        return (
+            f"MetadataProperty(id={str(self.id)!r}, name={self.name!r}, type={self.type!r}, "
+            f"dataset_id={str(self.dataset_id)!r}, "
+            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
+
+
 DatasetStatusEnum = SAEnum(DatasetStatus, name="dataset_status_enum")
 
 
@@ -196,6 +230,12 @@ class Dataset(DatabaseModel):
         cascade="all, delete-orphan",
         passive_deletes=True,
         order_by=Record.inserted_at.asc(),
+    )
+    metadata_properties: Mapped[List["MetadataProperty"]] = relationship(
+        back_populates="dataset",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=MetadataProperty.inserted_at.asc(),
     )
 
     __table_args__ = (UniqueConstraint("name", "workspace_id", name="dataset_name_workspace_id_uq"),)
