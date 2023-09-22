@@ -79,6 +79,8 @@ export default {
     },
     applyFilter() {
       this.visibleDropdown = false;
+
+      this.$root.$emit("metadata-filter-changed", this.metadataFilters);
     },
   },
   computed: {
