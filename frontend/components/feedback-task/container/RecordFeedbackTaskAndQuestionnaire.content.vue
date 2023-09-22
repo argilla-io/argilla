@@ -158,17 +158,13 @@ export default {
     },
     async metadataToFilterWith(newValue) {
       if (newValue) {
-        const metadataSearchQuery = newValue.map((m) => {
-          return `${m.name}:${
-            m.isTerms ? m.selectedOptions.map((s) => s.label).join("|") : "X"
-          }`;
-        });
-
+        const metadataSearchQuery = newValue.convertToRouteParam();
+        debugger;
         return await this.$router.push({
           path: this.$route.path,
           query: {
             ...this.$route.query,
-            _metadata: metadataSearchQuery.join(","),
+            _metadata: metadataSearchQuery.join("+"),
             _page: this.currentPage,
           },
         });

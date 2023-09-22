@@ -5,6 +5,7 @@ import { Suggestion } from "../entities/question/Suggestion";
 import { IRecordStorage } from "../services/IRecordStorage";
 import { Records } from "../entities/record/Records";
 import { RecordAnswer } from "../entities/record/RecordAnswer";
+import { MetadataFilter } from "../entities/metadata/MetadataFilter";
 import {
   RecordRepository,
   QuestionRepository,
@@ -24,7 +25,7 @@ export class GetRecordsToAnnotateUseCase {
     page: number,
     status: string,
     searchText: string,
-    metadataFilter: any
+    metadataFilter: MetadataFilter
   ): Promise<void> {
     const savedRecords = this.recordsStorage.get();
 
@@ -36,7 +37,7 @@ export class GetRecordsToAnnotateUseCase {
       howMany,
       status,
       searchText,
-      metadataFilter
+      metadataFilter?.convertToQueryParams()
     );
     const getQuestions = this.questionRepository.getQuestions(datasetId);
     const getFields = this.fieldRepository.getFields(datasetId);
