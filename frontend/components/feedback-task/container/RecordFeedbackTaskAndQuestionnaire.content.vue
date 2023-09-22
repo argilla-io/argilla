@@ -48,6 +48,7 @@ export default {
       questionFormTouched: false,
       recordStatusToFilterWith: null,
       searchTextToFilterWith: null,
+      metadataToFilterWith: null,
       currentPage: null,
       fetching: false,
     };
@@ -91,7 +92,8 @@ export default {
       this.datasetId,
       this.currentPage,
       this.recordStatusToFilterWith,
-      this.searchTextToFilterWith
+      this.searchTextToFilterWith,
+      this.metadataToFilterWith
     );
 
     const isRecordExistForCurrentPage = this.records.existsRecordOn(
@@ -105,7 +107,8 @@ export default {
         this.datasetId,
         this.currentPage,
         this.recordStatusToFilterWith,
-        this.searchTextToFilterWith
+        this.searchTextToFilterWith,
+        this.metadataToFilterWith
       );
     }
 
@@ -164,29 +167,32 @@ export default {
     });
     this.$root.$on("status-filter-changed", this.onStatusFilterChanged);
     this.$root.$on("search-filter-changed", this.onSearchFilterChanged);
+    this.$root.$on("metadata-filter-changed", this.onMetadataFilterChanged);
   },
   methods: {
     async applyStatusFilter(status) {
-      this.currentPage = 1;
       this.recordStatusToFilterWith = status;
+      this.currentPage = 1;
 
       await this.$fetch();
 
-      this.checkAndEmitTotalRecords({
-        searchFilter: this.searchTextToFilterWith,
-        value: this.records.total,
-      });
+      this.checkAndEmitTotalRecords();
     },
     async applySearchFilter(searchFilter) {
-      this.currentPage = 1;
       this.searchTextToFilterWith = searchFilter;
+      this.currentPage = 1;
 
       await this.$fetch();
 
-      this.checkAndEmitTotalRecords({
-        searchFilter,
-        value: this.records.total,
-      });
+      this.checkAndEmitTotalRecords();
+    },
+    async applyMetadataFilter(metadata) {
+      this.metadataToFilterWith = metadata;
+      this.currentPage = 1;
+
+      await this.$fetch();
+
+      this.checkAndEmitTotalRecords();
     },
     emitResetStatusFilter() {
       this.$root.$emit("reset-status-filter");
@@ -194,12 +200,11 @@ export default {
     emitResetSearchFilter() {
       this.$root.$emit("reset-search-filter");
     },
-    checkAndEmitTotalRecords({ searchFilter, value }) {
-      if (searchFilter?.length) {
-        this.$root.$emit("total-records", value);
-      } else {
-        this.$root.$emit("total-records", null);
-      }
+    checkAndEmitTotalRecords() {
+      if (this.searchTextToFilterWith?.length)
+        return this.$root.$emit("total-records", this.records.total);
+
+      this.$root.$emit("total-records", null);
     },
     async onSearchFilterChanged(newSearchValue) {
       const localApplySearchFilter = this.applySearchFilter;
@@ -251,6 +256,26 @@ export default {
         await this.applyStatusFilter(newStatus);
       }
     },
+    async onMetadataFilterChanged(metadata) {
+      const self = this;
+
+      if (this.questionFormTouched) {
+        return Notification.dispatch("notify", {
+          message: this.$t("changes_no_submit"),
+          buttonText: this.$t("button.ignore_and_continue"),
+          numberOfChars: 500,
+          type: "warning",
+          async onClick() {
+            await self.applyMetadataFilter(metadata);
+          },
+          onClose() {
+            //TODO:
+          },
+        });
+      }
+
+      await this.applyMetadataFilter(metadata);
+    },
     onQuestionFormTouched(isTouched) {
       this.questionFormTouched = isTouched;
     },
@@ -266,7 +291,8 @@ export default {
           this.datasetId,
           newPage,
           this.recordStatusToFilterWith,
-          this.searchTextToFilterWith
+          this.searchTextToFilterWith,
+          this.metadataToFilterWith
         );
 
         isNextRecordExist = this.records.existsRecordOn(newPage);
@@ -293,6 +319,7 @@ export default {
     this.$root.$off("go-to-prev-page");
     this.$root.$off("status-filter-changed");
     this.$root.$off("search-filter-changed");
+    this.$root.$off("metadata-filter-changed");
     Notification.dispatch("clear");
   },
   setup() {
