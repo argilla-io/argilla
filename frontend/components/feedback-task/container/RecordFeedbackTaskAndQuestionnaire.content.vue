@@ -120,65 +120,21 @@ export default {
   },
   watch: {
     async currentPage(newValue) {
-      await this.$router.push({
-        path: this.$route.path,
-        query: {
-          ...this.$route.query,
-          _page: newValue,
-        },
-      });
+      await this.routes.addQueryParam("_page", newValue);
     },
     async recordStatusToFilterWith(newValue) {
-      await this.$router.push({
-        path: this.$route.path,
-        query: {
-          ...this.$route.query,
-          _status: newValue,
-          _page: this.currentPage,
-        },
-      });
+      await this.routes.addQueryParam("_status", newValue);
     },
     async searchTextToFilterWith(newValue) {
-      if (newValue)
-        return await this.$router.push({
-          path: this.$route.path,
-          query: {
-            ...this.$route.query,
-            _search: newValue,
-            _page: this.currentPage,
-          },
-        });
-      const { _search, ...rest } = this.$route.query;
+      if (newValue) return await this.routes.addQueryParam("_search", newValue);
 
-      return await this.$router.push({
-        path: this.$route.path,
-        query: {
-          ...rest,
-          _page: this.currentPage,
-        },
-      });
+      await this.routes.removeQueryParam("_search");
     },
     async metadataToFilterWith(newValue = []) {
-      if (newValue.length) {
-        return await this.$router.push({
-          path: this.$route.path,
-          query: {
-            ...this.$route.query,
-            _metadata: newValue.join("+"),
-            _page: this.currentPage,
-          },
-        });
-      }
+      if (newValue.length)
+        return await this.routes.addQueryParam("_metadata", newValue.join("+"));
 
-      const { _metadata, ...rest } = this.$route.query;
-
-      return await this.$router.push({
-        path: this.$route.path,
-        query: {
-          ...rest,
-          _page: this.currentPage,
-        },
-      });
+      await this.routes.removeQueryParam("_metadata");
     },
   },
   created() {
@@ -274,9 +230,9 @@ export default {
       }
     },
     async onMetadataFilterChanged(metadata) {
-      const hasOtherFilter = metadata.some(
-        (e) => !this.metadataFilterFromQuery.includes(e)
-      );
+      const hasOtherFilter =
+        metadata.length !== this.metadataFilterFromQuery.length ||
+        metadata.some((e) => !this.metadataFilterFromQuery.includes(e));
 
       if (!hasOtherFilter) return;
 
