@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List, Optional
+from typing import List, Optional, Union
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_async_db
-from argilla.server.enums import RecordInclude, ResponseStatusFilter
+from argilla.server.enums import MetadataPropertyType, RecordInclude, ResponseStatusFilter
 from argilla.server.models import Dataset as DatasetModel
 from argilla.server.models import ResponseStatus, User
 from argilla.server.policies import DatasetPolicyV1, authorize
@@ -35,6 +35,7 @@ from argilla.server.schemas.v1.datasets import (
     MetadataProperties,
     MetadataProperty,
     MetadataPropertyCreate,
+    MetadataQueryParams,
     Metrics,
     Question,
     QuestionCreate,
@@ -47,6 +48,7 @@ from argilla.server.schemas.v1.datasets import (
     SearchRecordsResult,
 )
 from argilla.server.search_engine import SearchEngine, UserResponseStatusFilter, get_search_engine
+from argilla.server.search_engine.base import FloatMetadataFilter, IntegerMetadataFilter, TermsMetadataFilter
 from argilla.server.security import auth
 from argilla.server.utils import parse_uuids
 from argilla.utils.telemetry import TelemetryClient, get_telemetry_client
@@ -340,7 +342,7 @@ async def create_dataset_records(
     records_create: RecordsCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset(db, dataset_id, with_fields=True, with_questions=True)
+    dataset = await _get_dataset(db, dataset_id, with_fields=True, with_questions=True, with_metadata_properties=True)
 
     await authorize(current_user, DatasetPolicyV1.create_records(dataset))
 
@@ -394,6 +396,7 @@ async def search_dataset_records(
     telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     query: SearchRecordsQuery,
+    metadata: MetadataQueryParams = Depends(),
     include: List[RecordInclude] = Query([]),
     response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = Query(0, ge=0),
@@ -411,14 +414,34 @@ async def search_dataset_records(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Field `{search_engine_query.text.field}` not found in dataset `{dataset_id}`.",
         )
+    metadata_filters = []
+    for metadata_param in metadata.metadata_parsed:
+        metadata_property = await datasets.get_metadata_property_by_name_and_dataset_id(
+            db, name=metadata_param.name, dataset_id=dataset_id
+        )
+        if metadata_property is None:
+            continue  # won't fail on unknown metadata filter name
+
+        if metadata_property.type == MetadataPropertyType.terms:
+            metadata_filter_class = TermsMetadataFilter
+        elif metadata_property.type == MetadataPropertyType.integer:
+            metadata_filter_class = IntegerMetadataFilter
+        elif metadata_property.type == MetadataPropertyType.float:
+            metadata_filter_class = FloatMetadataFilter
+        else:
+            raise RuntimeError(f"Not found filter for type {metadata_property.type}")
+
+        metadata_filters.append(metadata_filter_class.from_string(metadata_property, metadata_param.value))
 
     user_response_status_filter = None
     if response_statuses:
+        # TODO(@frascuchon): user response and status responses should be split into different filter types
         user_response_status_filter = UserResponseStatusFilter(user=current_user, statuses=response_statuses)
 
     search_responses = await search_engine.search(
         dataset=dataset,
-        query=search_engine_query,
+        query=search_engine_query.text,
+        metadata_filters=metadata_filters,
         user_response_status_filter=user_response_status_filter,
         offset=offset,
         limit=limit,
@@ -455,7 +478,7 @@ async def publish_dataset(
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ) -> DatasetModel:
-    dataset = await _get_dataset(db, dataset_id, with_fields=True, with_questions=True)
+    dataset = await _get_dataset(db, dataset_id, with_fields=True, with_questions=True, with_metadata_properties=True)
 
     await authorize(current_user, DatasetPolicyV1.publish(dataset))
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
