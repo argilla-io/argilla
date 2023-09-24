@@ -54,11 +54,10 @@ from argilla.server.schemas.v1.datasets import (
     VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
 )
 from argilla.server.search_engine import (
-    Query,
     SearchEngine,
     SearchResponseItem,
     SearchResponses,
-    TextQuery,
+    StringQuery,
     UserResponseStatusFilter,
 )
 from sqlalchemy import func, select
@@ -3299,12 +3298,7 @@ class TestSuiteDatasets:
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
-            query=Query(
-                text=TextQuery(
-                    q="Hello",
-                    field="input",
-                )
-            ),
+            query=StringQuery(q="Hello", field="input"),
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
@@ -3377,12 +3371,7 @@ class TestSuiteDatasets:
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
-            query=Query(
-                text=TextQuery(
-                    q="Hello",
-                    field="input",
-                )
-            ),
+            query=StringQuery(q="Hello", field="input"),
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
@@ -3489,7 +3478,7 @@ class TestSuiteDatasets:
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
-            query=Query(text=TextQuery(q="Hello", field="input")),
+            query=StringQuery(q="Hello", field="input"),
             user_response_status_filter=UserResponseStatusFilter(user=owner, statuses=[ResponseStatusFilter.submitted]),
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
@@ -3518,9 +3507,11 @@ class TestSuiteDatasets:
             params={"offset": 0, "limit": 5},
         )
 
+        assert response.status_code == 200
+
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
-            query=Query(text=TextQuery(q="Hello", field="input")),
+            query=StringQuery(q="Hello", field="input"),
             user_response_status_filter=None,
             offset=0,
             limit=5,
