@@ -11,9 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import AsyncGenerator, List, TYPE_CHECKING, Union
-
-from sqlalchemy.orm import Session
+from typing import TYPE_CHECKING, AsyncGenerator, List, Union
 
 from argilla.server.enums import ResponseStatusFilter
 from argilla.server.models import User
@@ -23,6 +21,8 @@ from argilla.server.search_engine import (
 )
 from argilla.server.search_engine.commons import index_name_for_dataset
 from argilla.server.settings import settings as server_settings
+from sqlalchemy.orm import Session
+
 from tests.factories import (
     LabelSelectionQuestionFactory,
     MultiLabelSelectionQuestionFactory,
@@ -604,7 +604,6 @@ class TestSuiteElasticSearchEngine:
 
         results = opensearch.get(index=index_name, id=record.id)
         assert results["_source"]["responses"] == {}
-
 
     async def _configure_record_responses(
         self, opensearch: OpenSearch, dataset: Dataset, response_status: List[ResponseStatusFilter], user: User
