@@ -111,24 +111,26 @@ class ArgillaMixin:
         question_name_to_id: Dict[str, UUID],
         show_progress: bool = True,
     ) -> None:
-        if len(self.records) > 0:
-            for i in trange(
-                0, len(self.records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=show_progress
-            ):
-                try:
-                    datasets_api_v1.add_records(
-                        client=client,
-                        id=id,
-                        records=[
-                            record.to_server_payload(question_name_to_id=question_name_to_id)
-                            for record in self.records[i : i + PUSHING_BATCH_SIZE]
-                        ],
-                    )
-                except Exception as e:
-                    self.__delete_dataset(client=client, id=id)
-                    raise Exception(
-                        f"Failed while adding the records to the `FeedbackDataset` in Argilla with exception: {e}"
-                    ) from e
+        if len(self.records) == 0:
+            return
+
+        for i in trange(
+            0, len(self.records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=show_progress
+        ):
+            try:
+                datasets_api_v1.add_records(
+                    client=client,
+                    id=id,
+                    records=[
+                        record.to_server_payload(question_name_to_id=question_name_to_id)
+                        for record in self.records[i : i + PUSHING_BATCH_SIZE]
+                    ],
+                )
+            except Exception as e:
+                self.__delete_dataset(client=client, id=id)
+                raise Exception(
+                    f"Failed while adding the records to the `FeedbackDataset` in Argilla with exception: {e}"
+                ) from e
 
     def push_to_argilla(
         self: "FeedbackDataset",
