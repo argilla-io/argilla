@@ -29,7 +29,7 @@ from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     FloatMetadataProperty,
-    IntMetadataProperty,
+    IntegerMetadataProperty,
     LabelQuestion,
     MultiLabelQuestion,
     RankingQuestion,
@@ -65,7 +65,7 @@ __all__ = [
     "TextField",
     "TextQuestion",
     "ValueSchema",
-    "IntMetadataProperty",
+    "IntegerMetadataProperty",
     "FloatMetadataProperty",
     "TermsMetadataProperty",
 ]

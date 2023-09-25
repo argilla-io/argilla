@@ -16,7 +16,7 @@ from argilla.client.feedback.schemas.enums import FieldTypes, QuestionTypes
 from argilla.client.feedback.schemas.fields import FieldSchema, TextField
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
-    IntMetadataProperty,
+    IntegerMetadataProperty,
     TermsMetadataProperty,
 )
 from argilla.client.feedback.schemas.questions import (
@@ -41,7 +41,7 @@ __all__ = [
     "FieldSchema",
     "TextField",
     "FloatMetadataProperty",
-    "IntMetadataProperty",
+    "IntegerMetadataProperty",
     "TermsMetadataProperty",
     "LabelQuestion",
     "MultiLabelQuestion",

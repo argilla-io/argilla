@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, List
 
 import pytest
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
-from argilla.client.feedback.schemas import IntMetadataProperty, RatingQuestion, TextField, TextQuestion
+from argilla.client.feedback.schemas import IntegerMetadataProperty, RatingQuestion, TextField, TextQuestion
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
@@ -162,7 +162,7 @@ def test_init_wrong_metadata(
             fields=feedback_dataset_fields,
             questions=feedback_dataset_questions,
             metadata_properties=[
-                IntMetadataProperty(name="metadata-property-1"),
-                IntMetadataProperty(name="metadata-property-1"),
+                IntegerMetadataProperty(name="metadata-property-1"),
+                IntegerMetadataProperty(name="metadata-property-1"),
             ],
         )

@@ -29,6 +29,11 @@ from argilla.client.feedback.schemas.questions import (
     TextQuestion,
 )
 from argilla.client.feedback.schemas.remote.fields import RemoteTextField
+from argilla.client.feedback.schemas.remote.metadata import (
+    RemoteFloatMetadataProperty,
+    RemoteIntegerMetadataProperty,
+    RemoteTermsMetadataProperty,
+)
 from argilla.client.feedback.schemas.remote.questions import (
     RemoteLabelQuestion,
     RemoteMultiLabelQuestion,
@@ -142,11 +147,11 @@ class ArgillaMixin:
         metadata_property: "FeedbackMetadataPropertyModel",
     ) -> "AllowedRemoteMetadataPropertyTypes":
         if metadata_property.settings["type"] == MetadataPropertyTypes.terms:
-            metadata_property = None
+            metadata_property = RemoteTermsMetadataProperty.from_api(metadata_property)
         elif metadata_property.settings["type"] == MetadataPropertyTypes.integer:
-            metadata_property = None
+            metadata_property = RemoteIntegerMetadataProperty.from_api(metadata_property)
         elif metadata_property.settings["type"] == MetadataPropertyTypes.float:
-            metadata_property = None
+            metadata_property = RemoteFloatMetadataProperty.from_api(metadata_property)
         else:
             raise ValueError(
                 f"Metadata property '{metadata_property.name}' is not a supported metadata property in the current"

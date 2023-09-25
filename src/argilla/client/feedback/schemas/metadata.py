@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Extra, Field, root_validator, validator
 
-from argilla.client.feedback.schemas.enums import MetadataFieldTypes
+from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
 from argilla.client.feedback.schemas.validators import validate_numeric_metadata_property_bounds
 
 TERMS_METADATA_PROPERTY_MIN_VALUES = 2
@@ -27,7 +27,7 @@ class MetadataPropertySchema(BaseModel, ABC):
     name: str = Field(..., regex=r"^(?=.*[a-z0-9])[a-z0-9_-]+$")
     description: Optional[str] = None
     visible_for_annotators: bool = True
-    type: MetadataFieldTypes = Field(..., allow_mutation=False)
+    type: MetadataPropertyTypes = Field(..., allow_mutation=False)
 
     class Config:
         validate_assignment = True
@@ -48,7 +48,7 @@ class MetadataPropertySchema(BaseModel, ABC):
 
 
 class TermsMetadataProperty(MetadataPropertySchema):
-    type: MetadataFieldTypes = MetadataFieldTypes.terms
+    type: MetadataPropertyTypes = MetadataPropertyTypes.terms
     values: List[str] = Field(..., min_items=TERMS_METADATA_PROPERTY_MIN_VALUES)
 
     @validator("values")
@@ -64,8 +64,8 @@ class TermsMetadataProperty(MetadataPropertySchema):
         return {"type": self.type, "values": self.values}
 
 
-class IntMetadataProperty(MetadataPropertySchema):
-    type: MetadataFieldTypes = MetadataFieldTypes.integer
+class IntegerMetadataProperty(MetadataPropertySchema):
+    type: MetadataPropertyTypes = MetadataPropertyTypes.integer
     gt: Optional[int] = None
     lt: Optional[int] = None
 
@@ -83,7 +83,7 @@ class IntMetadataProperty(MetadataPropertySchema):
 
 
 class FloatMetadataProperty(MetadataPropertySchema):
-    type: MetadataFieldTypes = MetadataFieldTypes.float
+    type: MetadataPropertyTypes = MetadataPropertyTypes.float
     gt: Optional[float] = None
     lt: Optional[float] = None
 

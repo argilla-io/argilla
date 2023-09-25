@@ -15,8 +15,12 @@
 from typing import Any, Dict
 
 import pytest
-from argilla.client.feedback.schemas.enums import MetadataFieldTypes
-from argilla.client.feedback.schemas.metadata import FloatMetadataProperty, IntMetadataProperty, TermsMetadataProperty
+from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
+from argilla.client.feedback.schemas.metadata import (
+    FloatMetadataProperty,
+    IntegerMetadataProperty,
+    TermsMetadataProperty,
+)
 from pydantic import ValidationError
 
 
@@ -45,7 +49,7 @@ from pydantic import ValidationError
 )
 def test_terms_metadata_property(schema_kwargs: Dict[str, Any], server_payload: Dict[str, Any]) -> None:
     metadata_property = TermsMetadataProperty(**schema_kwargs)
-    assert metadata_property.type == MetadataFieldTypes.terms
+    assert metadata_property.type == MetadataPropertyTypes.terms
     assert metadata_property.server_settings == server_payload["settings"]
     assert metadata_property.to_server_payload() == server_payload
 
@@ -115,8 +119,8 @@ def test_terms_metadata_property_errors(
     ],
 )
 def test_int_metadata_property(schema_kwargs: Dict[str, Any], server_payload: Dict[str, Any]) -> None:
-    metadata_property = IntMetadataProperty(**schema_kwargs)
-    assert metadata_property.type == MetadataFieldTypes.integer
+    metadata_property = IntegerMetadataProperty(**schema_kwargs)
+    assert metadata_property.type == MetadataPropertyTypes.integer
     assert metadata_property.server_settings == server_payload["settings"]
     assert metadata_property.to_server_payload() == server_payload
 
@@ -141,7 +145,7 @@ def test_int_metadata_property_errors(
     schema_kwargs: Dict[str, Any], exception_cls: Any, exception_message: str
 ) -> None:
     with pytest.raises(exception_cls, match=exception_message):
-        IntMetadataProperty(**schema_kwargs)
+        IntegerMetadataProperty(**schema_kwargs)
 
 
 @pytest.mark.parametrize(
@@ -182,7 +186,7 @@ def test_int_metadata_property_errors(
 )
 def test_float_metadata_property(schema_kwargs: Dict[str, Any], server_payload: Dict[str, Any]) -> None:
     metadata_property = FloatMetadataProperty(**schema_kwargs)
-    assert metadata_property.type == MetadataFieldTypes.float
+    assert metadata_property.type == MetadataPropertyTypes.float
     assert metadata_property.server_settings == server_payload["settings"]
     assert metadata_property.to_server_payload() == server_payload
 

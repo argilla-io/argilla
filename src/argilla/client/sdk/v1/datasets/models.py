@@ -111,6 +111,8 @@ class FeedbackMetadataPropertyModel(BaseModel):
     id: UUID
     name: str
     description: Optional[str] = None
+    # TODO: uncomment when the API is ready
+    # visible_for_annotators: bool
     settings: Dict[str, Any]
     inserted_at: datetime
     updated_at: datetime

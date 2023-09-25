@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from abc import abstractmethod
-from typing import Optional, Type
+from typing import Optional
 from uuid import UUID
 
 import httpx
@@ -42,7 +42,7 @@ class RemoteSchema(BaseModel):
 
     @classmethod
     @abstractmethod
-    def from_api(cls) -> Type["RemoteSchema"]:
+    def from_api(cls) -> "RemoteSchema":
         """Abstract method to be implemented by subclasses to convert the API payload
         into a remote schema."""
         raise NotImplementedError

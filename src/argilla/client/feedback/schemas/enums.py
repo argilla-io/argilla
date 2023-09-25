@@ -27,7 +27,7 @@ class QuestionTypes(str, Enum):
     ranking = "ranking"
 
 
-class MetadataFieldTypes(str, Enum):
+class MetadataPropertyTypes(str, Enum):
     terms = "terms"
     integer = "integer"
     float = "float"
