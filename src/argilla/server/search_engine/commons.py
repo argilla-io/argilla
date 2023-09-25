@@ -94,15 +94,19 @@ def _mapping_for_field(field: Field) -> dict:
         raise ValueError(f"Index configuration for field of type {field_type} cannot be generated")
 
 
+def _mapping_key_for_metadata_property(metadata_property: MetadataProperty) -> str:
+    return f"metadata.{metadata_property.id}"
+
+
 def _mapping_for_metadata_property(metadata_property: MetadataProperty) -> dict:
     property_type = metadata_property.settings["type"]
 
     if property_type == MetadataPropertyType.terms:
-        return {f"metadata.{metadata_property.id}": {"type": "keyword"}}
+        return {_mapping_key_for_metadata_property(metadata_property): {"type": "keyword"}}
     elif property_type == MetadataPropertyType.integer:
-        return {f"metadata.{metadata_property.id}": {"type": "long"}}
+        return {_mapping_key_for_metadata_property(metadata_property): {"type": "long"}}
     elif property_type == MetadataPropertyType.float:
-        return {f"metadata.{metadata_property.id}": {"type": "float"}}
+        return {_mapping_key_for_metadata_property(metadata_property): {"type": "float"}}
     else:
         raise ValueError(f"Index configuration for metadata property of type {property_type} cannot be generated")
 
@@ -188,7 +192,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     async def search(
         self,
         dataset: Dataset,
-        query: Union[StringQuery, str],
+        query: Optional[Union[StringQuery, str]] = None,
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
         offset: int = 0,
@@ -200,11 +204,9 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             query = StringQuery(q=query)
 
         text_query = self._text_query_builder(dataset, text=query)
-
         bool_query = {"must": [text_query]}
 
         query_filters = []
-
         if metadata_filters:
             query_filters.extend(self._build_metadata_filters(metadata_filters))
         if user_response_status_filter and user_response_status_filter.statuses:
@@ -248,7 +250,9 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         return SearchResponses(items=items, total=total)
 
     @staticmethod
-    def _text_query_builder(dataset: Dataset, text: StringQuery) -> dict:
+    def _text_query_builder(dataset: Dataset, text: Optional[StringQuery] = None) -> dict:
+        if text is None:
+            return {"match_all": {}}
         if not text.field:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html
             field_names = [
@@ -316,23 +320,22 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     def _build_metadata_filters(self, metadata_filters: List[MetadataFilter]) -> List[Dict[str, Any]]:
         filters = []
         for metadata_property_filter in metadata_filters:
+            metadata_property = metadata_property_filter.metadata_property
             if isinstance(metadata_property_filter, TermsMetadataFilter):
                 query_filter = {
-                    "terms": {
-                        f"metadata.{metadata_property_filter.metadata_property.id}": metadata_property_filter.values
-                    }
+                    "terms": {_mapping_key_for_metadata_property(metadata_property): metadata_property_filter.values}
                 }
             elif isinstance(metadata_property_filter, (IntegerMetadataFilter, FloatMetadataFilter)):
                 query = {}
 
-                if metadata_property_filter.low:
+                if metadata_property_filter.low is not None:
                     query["gte"] = metadata_property_filter.low
-                if metadata_property_filter.high:
+                if metadata_property_filter.high is not None:
                     query["lte"] = metadata_property_filter.high
 
-                query_filter = {"range": {f"metadata.{metadata_property_filter.metadata_property.id}": query}}
+                query_filter = {"range": {_mapping_key_for_metadata_property(metadata_property): query}}
             else:
-                raise ValueError(f"Wrong metadata property type {metadata_property_filter.metadata_property.type}")
+                raise ValueError(f"Wrong metadata property type {metadata_property.type}")
             filters.append(query_filter)
         return filters
 
