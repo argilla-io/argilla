@@ -34,3 +34,14 @@ def title_must_have_value(cls: "BaseModel", v: Optional[str], values: Dict[str, 
             # If `name` has a value, then capitalize it and return it as the `title`
             return name.capitalize()
     return v
+
+
+def validate_numeric_metadata_property_bounds(cls: "BaseModel", values: Dict[str, Any]) -> Dict[str, Any]:
+    name = values.get("name")
+    lt = values.get("lt")
+    gt = values.get("gt")
+
+    if lt is not None and gt is not None and lt <= gt:
+        raise ValueError(f"`{cls.__name__}` with name={name} cannot have `lt` less than `gt`")
+
+    return values

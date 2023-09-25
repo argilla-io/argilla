@@ -109,6 +109,9 @@ _import_structure = {
         "TextField",
         "TextQuestion",
         "ValueSchema",
+        "IntMetadataProperty",
+        "FloatMetadataProperty",
+        "TermsMetadataProperty",
     ],
     "client.api": [
         "copy",

@@ -25,3 +25,9 @@ class QuestionTypes(str, Enum):
     label_selection = "label_selection"
     multi_label_selection = "multi_label_selection"
     ranking = "ranking"
+
+
+class MetadataFieldTypes(str, Enum):
+    terms = "terms"
+    integer = "integer"
+    float = "float"

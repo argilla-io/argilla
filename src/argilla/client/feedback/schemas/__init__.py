@@ -14,6 +14,11 @@
 
 from argilla.client.feedback.schemas.enums import FieldTypes, QuestionTypes
 from argilla.client.feedback.schemas.fields import FieldSchema, TextField
+from argilla.client.feedback.schemas.metadata import (
+    FloatMetadataProperty,
+    IntMetadataProperty,
+    TermsMetadataProperty,
+)
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
@@ -31,19 +36,22 @@ from argilla.client.feedback.schemas.records import (
 )
 
 __all__ = [
-    "RatingQuestion",
-    "TextQuestion",
+    "FieldTypes",
+    "QuestionTypes",
+    "FieldSchema",
+    "TextField",
+    "FloatMetadataProperty",
+    "IntMetadataProperty",
+    "TermsMetadataProperty",
     "LabelQuestion",
     "MultiLabelQuestion",
-    "RankingQuestion",
     "QuestionSchema",
-    "QuestionTypes",
+    "RankingQuestion",
+    "RatingQuestion",
+    "TextQuestion",
     "FeedbackRecord",
-    "SuggestionSchema",
-    "ResponseSchema",
-    "ValueSchema",
     "RankingValueSchema",
-    "TextField",
-    "FieldSchema",
-    "FieldTypes",
+    "ResponseSchema",
+    "SuggestionSchema",
+    "ValueSchema",
 ]

@@ -15,6 +15,7 @@
 from typing import Union
 
 from argilla.client.feedback.schemas.fields import TextField
+from argilla.client.feedback.schemas.metadata import FloatMetadataProperty, IntMetadataProperty, TermsMetadataProperty
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
@@ -37,3 +38,4 @@ AllowedQuestionTypes = Union[TextQuestion, RatingQuestion, LabelQuestion, MultiL
 AllowedRemoteQuestionTypes = Union[
     RemoteTextQuestion, RemoteRatingQuestion, RemoteLabelQuestion, RemoteMultiLabelQuestion, RemoteRankingQuestion
 ]
+AllowedMetadataPropertyTypes = Union[TermsMetadataProperty, FloatMetadataProperty, IntMetadataProperty]
