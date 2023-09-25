@@ -22,6 +22,7 @@
         v-model.number="sliderValues[0]"
         :min="min"
         :max="max"
+        :step="step"
       />
       <input
         class="range__slider"
@@ -30,6 +31,7 @@
         v-model.number="sliderValues[1]"
         :min="min"
         :max="max"
+        :step="step"
       />
     </div>
   </div>
@@ -44,11 +46,11 @@ export default {
     },
     max: {
       type: Number,
-      default: 10,
+      default: 1,
     },
     sliderValues: {
       type: Array,
-      default: () => [0, 10],
+      default: () => [0, 1],
     },
   },
   watch: {
@@ -78,6 +80,9 @@ export default {
     },
     sliderTo() {
       return this.sliderValues[1];
+    },
+    step() {
+      return this.max / 100;
     },
   },
   methods: {

@@ -39,7 +39,7 @@
               />
 
               <div v-else-if="visibleCategory.isFloat">
-                <BaseRangeMultipleSlider :min="0" :max="10" />
+                <BaseRangeMultipleSlider :min="0" :max="1" />
                 {{ visibleCategory.settings }}
               </div>
 
