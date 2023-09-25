@@ -197,7 +197,7 @@ class SearchEngine(metaclass=ABCMeta):
     async def search(
         self,
         dataset: Dataset,
-        query: Union[StringQuery, str],
+        query: Optional[Union[StringQuery, str]] = None,
         # TODO(@frascuchon): The search records method should receive a generic list of filters
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
