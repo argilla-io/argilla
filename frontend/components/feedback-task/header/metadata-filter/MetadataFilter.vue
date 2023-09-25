@@ -5,7 +5,12 @@
       @visibility="onMetadataToggleVisibility"
     >
       <span slot="dropdown-header">
-        <BaseButton>Metadata</BaseButton>
+        <MetadataButton
+          :badges="appliedCategories"
+          :active-badge="visibleCategoryName"
+          @click-on-badge="openCategoryFilter"
+          @click-on-clear="removeCategoryFilters"
+        />
       </span>
       <span
         slot="dropdown-content"
@@ -34,6 +39,7 @@
               />
 
               <div v-else-if="visibleCategory.isFloat">
+                <BaseRangeMultipleSlider :min="0" :max="10" />
                 {{ visibleCategory.settings }}
               </div>
 
@@ -93,10 +99,37 @@ export default {
         this.metadataFilters.convertToRouteParam()
       );
     },
+    openCategoryFilter(category, e) {
+      e.stopPropagation();
+      this.visibleDropdown = this.visibleDropdown ? false : true;
+      this.selectMetadataCategory(category);
+    },
+    removeCategoryFilters(category, e) {
+      e.stopPropagation();
+      const clickedCategory = this.metadataFilters.metadata.find(
+        (f) => f.name === category
+      );
+      if (clickedCategory.isTerms) {
+        this.metadataFilters.metadata
+          .find((f) => f.name === category)
+          .options.map((opt) => (opt.selected = false));
+      }
+
+      this.applyFilter();
+    },
   },
   computed: {
     metadataCategoriesName() {
       return this.metadataFilters.categories;
+    },
+    metadataFilterFromQuery() {
+      return this.$route.query?._metadata?.split("+") ?? [];
+    },
+    appliedCategories() {
+      return this.metadataFilterFromQuery.map((m) => m.split(":")[0]);
+    },
+    visibleCategoryName() {
+      return (this.visibleDropdown && this.visibleCategory?.name) || null;
     },
   },
   mounted() {
@@ -127,7 +160,8 @@ $metadata-filter-width: 300px;
   }
   &__categories {
     padding: $base-space;
-    background: $black-4;
+    background: palette(white);
+    border-radius: $border-radius;
   }
   :deep(.dropdown__content) {
     right: auto;
