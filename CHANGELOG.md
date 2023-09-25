@@ -16,6 +16,11 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added new endpoint `POST /api/v1/datasets/:dataset_id/metadata-properties` for dataset metadata property creation ([#3813](https://github.com/argilla-io/argilla/pull/3813))
+- Added new endpoint `GET /api/v1/datasets/:dataset_id/metadata-properties` for listing dataset metadata property ([#3813](https://github.com/argilla-io/argilla/pull/3813))
+
 ### Changed
 
 - Updated `Dockerfile` to use multi stage build ([#3221](https://github.com/argilla-io/argilla/pull/3221) and [#3793](https://github.com/argilla-io/argilla/pull/3793)).
