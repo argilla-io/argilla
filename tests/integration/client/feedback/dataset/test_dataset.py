@@ -26,7 +26,7 @@ from argilla.client.feedback.schemas import (
     TextField,
     TextQuestion,
 )
-from argilla.client.feedback.schemas.records import RemoteSuggestionSchema
+from argilla.client.feedback.schemas.remote.records import RemoteSuggestionSchema
 from argilla.client.feedback.training.schemas import TrainingTask
 from argilla.client.models import Framework
 
@@ -288,7 +288,6 @@ def test_add_records(
         "status": "submitted",
     }
     assert dataset.records[1].suggestions[0].dict() == {
-        "question_id": None,
         "question_name": "question-1",
         "value": "answer",
         "type": None,
@@ -446,11 +445,11 @@ async def test_copy_dataset_in_argilla(
 
     same_dataset_copy = FeedbackDataset.from_argilla("copy-dataset")
     assert same_dataset_copy.id != same_dataset.id
-    assert [field.dict(exclude={"id"}) for field in same_dataset_copy.fields] == [
-        field.dict(exclude={"id"}) for field in dataset.fields
+    assert [field.to_local() for field in same_dataset_copy.fields] == [
+        field.to_local() for field in same_dataset.fields
     ]
-    assert [question.dict(exclude={"id"}) for question in same_dataset_copy.questions] == [
-        question.dict(exclude={"id"}) for question in dataset.questions
+    assert [question.to_local() for question in same_dataset_copy.questions] == [
+        question.to_local() for question in same_dataset.questions
     ]
 
 
@@ -528,7 +527,7 @@ async def test_update_dataset_records_in_argilla(
                 },
             ]
         )
-    with pytest.raises(TypeError, match='"suggestions" has allow_mutation set to False and cannot be assigned'):
+    with pytest.raises(TypeError, match='"RemoteFeedbackRecord" is immutable and does not support item assignment'):
         record.suggestions = [
             {
                 "question_name": "question-1",

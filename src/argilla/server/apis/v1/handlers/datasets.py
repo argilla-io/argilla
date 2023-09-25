@@ -65,7 +65,7 @@ async def _get_dataset(
     dataset_id: UUID,
     with_fields: bool = False,
     with_questions: bool = False,
-    with_metadata_properties=False,
+    with_metadata_properties: bool = False,
 ) -> DatasetModel:
     dataset = await datasets.get_dataset_by_id(
         db,
@@ -298,6 +298,36 @@ async def create_dataset_question(
     try:
         question = await datasets.create_question(db, dataset, question_create)
         return question
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+
+
+@router.post(
+    "/datasets/{dataset_id}/metadata-properties", status_code=status.HTTP_201_CREATED, response_model=MetadataProperty
+)
+async def create_dataset_metadata_property(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    dataset_id: UUID,
+    metadata_prop_create: MetadataPropertyCreate,
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = await _get_dataset(db, dataset_id)
+
+    await authorize(current_user, DatasetPolicyV1.create_metadata_property(dataset))
+
+    if await datasets.get_metadata_property_by_name_and_dataset_id(db, metadata_prop_create.name, dataset_id):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Metadata property with name `{metadata_prop_create.name}` "
+            f"already exists for dataset with id `{dataset_id}`",
+        )
+
+    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
+    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
+    try:
+        metadata_property = await datasets.create_metadata_property(db, dataset, metadata_prop_create)
+        return metadata_property
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 

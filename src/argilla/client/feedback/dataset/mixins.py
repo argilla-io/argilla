@@ -20,15 +20,22 @@ from tqdm import trange
 from argilla.client.api import ArgillaSingleton
 from argilla.client.feedback.constants import PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-from argilla.client.feedback.schemas import (
+from argilla.client.feedback.schemas.enums import FieldTypes, QuestionTypes
+from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
     RankingQuestion,
     RatingQuestion,
-    TextField,
     TextQuestion,
 )
-from argilla.client.feedback.schemas.types import AllowedQuestionTypes
+from argilla.client.feedback.schemas.remote.fields import RemoteTextField
+from argilla.client.feedback.schemas.remote.questions import (
+    RemoteLabelQuestion,
+    RemoteMultiLabelQuestion,
+    RemoteRankingQuestion,
+    RemoteRatingQuestion,
+    RemoteTextQuestion,
+)
 from argilla.client.feedback.unification import (
     LabelQuestionStrategy,
     MultiLabelQuestionStrategy,
@@ -45,12 +52,11 @@ if TYPE_CHECKING:
 
     from argilla.client.client import Argilla as ArgillaClient
     from argilla.client.feedback.dataset.local import FeedbackDataset
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes
+    from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel
 
 
 class ArgillaMixin:
-    # TODO(alvarobartt): remove when `delete` is implemented
     def __delete_dataset(self: "FeedbackDataset", client: "httpx.Client", id: UUID) -> None:
         try:
             datasets_api_v1.delete_dataset(client=client, id=id)
@@ -59,13 +65,12 @@ class ArgillaMixin:
                 f"Failed while deleting the `FeedbackDataset` with ID '{id}' from Argilla with" f" exception: {e}"
             ) from e
 
-    def __add_fields(self: "FeedbackDataset", client: "httpx.Client", id: UUID) -> List["AllowedFieldTypes"]:
+    def __add_fields(self: "FeedbackDataset", client: "httpx.Client", id: UUID) -> List["AllowedRemoteFieldTypes"]:
         fields = []
         for field in self._fields:
             try:
-                new_field = datasets_api_v1.add_field(client=client, id=id, field=field.dict(exclude={"id"})).parsed
-                field.id = new_field.id
-                fields.append(field)
+                new_field = datasets_api_v1.add_field(client=client, id=id, field=field.to_server_payload()).parsed
+                fields.append(new_field)
             except Exception as e:
                 self.__delete_dataset(client=client, id=id)
                 raise Exception(
@@ -74,15 +79,16 @@ class ArgillaMixin:
                 ) from e
         return fields
 
-    def __add_questions(self: "FeedbackDataset", client: "httpx.Client", id: UUID) -> List["AllowedQuestionTypes"]:
+    def __add_questions(
+        self: "FeedbackDataset", client: "httpx.Client", id: UUID
+    ) -> List["AllowedRemoteQuestionTypes"]:
         questions = []
         for question in self._questions:
             try:
                 new_question = datasets_api_v1.add_question(
-                    client=client, id=id, question=question.dict(exclude={"id"})
+                    client=client, id=id, question=question.to_server_payload()
                 ).parsed
-                question.id = new_question.id
-                questions.append(question)
+                questions.append(new_question)
             except Exception as e:
                 self.__delete_dataset(client=client, id=id)
                 raise Exception(
@@ -102,24 +108,24 @@ class ArgillaMixin:
         self: "FeedbackDataset",
         client: "httpx.Client",
         id: UUID,
-        question_mapping: Dict[str, UUID],
+        question_name_to_id: Dict[str, UUID],
         show_progress: bool = True,
     ) -> None:
+        if len(self.records) == 0:
+            return
+
         for i in trange(
             0, len(self.records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=show_progress
         ):
             try:
-                records = []
-                for record in self.records[i : i + PUSHING_BATCH_SIZE]:
-                    if record.suggestions:
-                        for suggestion in record.suggestions:
-                            suggestion.question_id = question_mapping[suggestion.question_name]
-                    records.append(
-                        record.dict(
-                            exclude={"id": ..., "suggestions": {"__all__": {"question_name"}}}, exclude_none=True
-                        )
-                    )
-                datasets_api_v1.add_records(client=client, id=id, records=records)
+                datasets_api_v1.add_records(
+                    client=client,
+                    id=id,
+                    records=[
+                        record.to_server_payload(question_name_to_id=question_name_to_id)
+                        for record in self.records[i : i + PUSHING_BATCH_SIZE]
+                    ],
+                )
             except Exception as e:
                 self.__delete_dataset(client=client, id=id)
                 raise Exception(
@@ -172,12 +178,12 @@ class ArgillaMixin:
         fields = self.__add_fields(client=httpx_client, id=argilla_id)
 
         questions = self.__add_questions(client=httpx_client, id=argilla_id)
-        question_name2id = {question.name: question.id for question in questions}
+        question_name_to_id = {question.name: question.id for question in questions}
 
         self.__publish_dataset(client=httpx_client, id=argilla_id)
 
         self.__push_records(
-            client=httpx_client, id=argilla_id, show_progress=show_progress, question_mapping=question_name2id
+            client=httpx_client, id=argilla_id, show_progress=show_progress, question_name_to_id=question_name_to_id
         )
 
         return RemoteFeedbackDataset(
@@ -193,49 +199,37 @@ class ArgillaMixin:
         )
 
     @staticmethod
-    def __get_fields(client: "httpx.Client", id: UUID) -> List["AllowedFieldTypes"]:
+    def __get_fields(client: "httpx.Client", id: UUID) -> List["AllowedRemoteFieldTypes"]:
         fields = []
         for field in datasets_api_v1.get_fields(client=client, id=id).parsed:
-            base_field = field.dict(include={"id", "name", "title", "required"})
-            if field.settings["type"] == "text":
-                field = TextField(**base_field, use_markdown=field.settings["use_markdown"])
+            if field.settings["type"] == FieldTypes.text:
+                field = RemoteTextField.from_api(field)
             else:
                 raise ValueError(
                     f"Field '{field.name}' is not a supported field in the current Python package version,"
-                    " supported field types are: `TextField`."
+                    f" supported field types are: `{'`, `'.join([arg.value for arg in FieldTypes])}`."
                 )
             fields.append(field)
         return fields
 
     @staticmethod
-    def __get_questions(client: "httpx.Client", id: UUID) -> List["AllowedQuestionTypes"]:
+    def __get_questions(client: "httpx.Client", id: UUID) -> List["AllowedRemoteQuestionTypes"]:
         questions = []
         for question in datasets_api_v1.get_questions(client=client, id=id).parsed:
-            question_dict = question.dict(include={"id", "name", "title", "description", "required"})
-            if question.settings["type"] == "rating":
-                question = RatingQuestion(**question_dict, values=[v["value"] for v in question.settings["options"]])
-            elif question.settings["type"] == "text":
-                question = TextQuestion(**question_dict, use_markdown=question.settings["use_markdown"])
-            elif question.settings["type"] in ["label_selection", "multi_label_selection", "ranking"]:
-                if all([label["value"] == label["text"] for label in question.settings["options"]]):
-                    labels = [label["value"] for label in question.settings["options"]]
-                else:
-                    labels = {label["value"]: label["text"] for label in question.settings["options"]}
-
-                if question.settings["type"] == "label_selection":
-                    question = LabelQuestion(
-                        **question_dict, labels=labels, visible_labels=question.settings["visible_options"]
-                    )
-                elif question.settings["type"] == "multi_label_selection":
-                    question = MultiLabelQuestion(
-                        **question_dict, labels=labels, visible_labels=question.settings["visible_options"]
-                    )
-                elif question.settings["type"] == "ranking":
-                    question = RankingQuestion(**question_dict, values=labels)
+            if question.settings["type"] == QuestionTypes.rating:
+                question = RemoteRatingQuestion.from_api(question)
+            elif question.settings["type"] == QuestionTypes.text:
+                question = RemoteTextQuestion.from_api(question)
+            elif question.settings["type"] == QuestionTypes.label_selection:
+                question = RemoteLabelQuestion.from_api(question)
+            elif question.settings["type"] == QuestionTypes.multi_label_selection:
+                question = RemoteMultiLabelQuestion.from_api(question)
+            elif question.settings["type"] == QuestionTypes.ranking:
+                question = RemoteRankingQuestion.from_api(question)
             else:
                 raise ValueError(
                     f"Question '{question.name}' is not a supported question in the current Python package"
-                    f" version, supported question types are: `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}`."
+                    f" version, supported question types are: `{'`, `'.join([arg.value for arg in QuestionTypes])}`."
                 )
             questions.append(question)
         return questions

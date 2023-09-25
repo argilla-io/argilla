@@ -48,9 +48,7 @@ def test_dataset_config_yaml(
     from_yaml_config = DatasetConfig.from_yaml(to_yaml_config)
     assert isinstance(from_yaml_config, DatasetConfig)
     assert from_yaml_config.fields == feedback_dataset_fields
-    assert all(field.id is None for field in from_yaml_config.fields)
     assert from_yaml_config.questions == feedback_dataset_questions
-    assert all(question.id is None for question in from_yaml_config.questions)
     assert from_yaml_config.guidelines == feedback_dataset_guidelines
 
 
