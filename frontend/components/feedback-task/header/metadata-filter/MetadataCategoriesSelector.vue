@@ -9,7 +9,8 @@
     <ul class="category__list">
       <li v-for="category in categoriesFilteredBySearchText" :key="category">
         <BaseButton @on-click="selectCategory(category)" class="category__item"
-          >{{ category }} <svgicon name="chevron-right" width="8" height="8"
+          ><span>{{ category }}</span>
+          <svgicon name="chevron-right" width="8" height="8"
         /></BaseButton>
       </li>
     </ul>
@@ -53,11 +54,16 @@ export default {
     max-height: 200px;
   }
   &__item {
-    padding: $base-space;
     width: 100%;
+    padding: $base-space;
     justify-content: space-between;
     border-radius: $border-radius;
     font-weight: 500;
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     &:hover {
       background: $black-4;
     }

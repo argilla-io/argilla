@@ -6,7 +6,7 @@
     ]"
     :is="renderComponent"
     @click="onClick($event)"
-    >{{ text }}
+    ><span class="badge__text">{{ text }}</span>
     <BaseButton
       v-if="clearable"
       class="badge__close-button"
@@ -15,8 +15,8 @@
       <svgicon
         class="badge__close-button__icon"
         name="close"
-        width="12"
-        height="12"
+        width="14"
+        height="14"
     /></BaseButton>
   </component>
 </template>
@@ -79,9 +79,6 @@ $badgeBorderActiveColor: palette(purple, 200);
   background-color: $badgeBgColor;
   color: $badgeColor;
   font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   @include font-size(12px);
   @include line-height(12px);
   &--clickable {
@@ -95,12 +92,17 @@ $badgeBorderActiveColor: palette(purple, 200);
     background-color: darken($badgeBgColor, 5%);
     border: 1px solid $badgeBorderActiveColor;
   }
+  &__text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   &__close-button {
     padding: 0;
     flex-shrink: 0;
     border-radius: 0;
     &__icon {
-      min-width: 12px;
+      min-width: 14px;
       color: $badgeColor;
       &:hover {
         color: darken($badgeColor, 90%);

@@ -4,7 +4,7 @@
     <svgicon v-else name="filter" width="16" height="16" />
     <div class="metadata-button__badges" v-if="badges.length">
       <FilterBadge
-        class="badge"
+        class="metadata-button__badge"
         :active-badge="activeBadge === badge"
         v-for="badge in visibleBadges"
         :key="badge"
@@ -109,6 +109,9 @@ export default {
     &__collapsed {
       position: relative;
     }
+  }
+  &__badge :deep(.badge__text) {
+    max-width: 140px;
   }
   &__button {
     padding: 0;

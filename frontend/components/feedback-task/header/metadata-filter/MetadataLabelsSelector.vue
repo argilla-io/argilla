@@ -116,6 +116,11 @@ export default {
       background: none !important;
       border: 0 !important;
     }
+    :deep(label) {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     :deep(.checkbox-container .svg-icon) {
       fill: grey;
       min-width: 16px;
