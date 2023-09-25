@@ -63,7 +63,7 @@ export default {
     }
   }
   &__search {
-    width: 100%;
+    min-width: 100%;
   }
 }
 </style>
