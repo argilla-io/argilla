@@ -144,6 +144,7 @@ autodoc_mock_imports = [
     "sentence_transformers",
     "torch",
     "transformers",
+    "autotrain",
     "evaluate",
     "seqeval",
     "setfit",

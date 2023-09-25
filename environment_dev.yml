@@ -55,6 +55,7 @@ dependencies:
       - peft
       - trl>=0.5.0
       - sentence-transformers
+      - autotrain-advanced>=0.6.32
       - rich!=13.1.0
       # install Argilla in editable mode
       - -e .[server,listeners]

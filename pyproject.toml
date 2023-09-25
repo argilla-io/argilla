@@ -109,6 +109,7 @@ integrations = [
     "setfit",
     "span_marker",
     "openai>=0.27.10",
+    "autotrain-advanced>=0.6.32",
     "peft",
     "trl>=0.5.0",
 ]
