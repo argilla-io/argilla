@@ -20,7 +20,8 @@ from tqdm import trange
 from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.remote.base import RemoteFeedbackDatasetBase, RemoteFeedbackRecordsBase
 from argilla.client.feedback.dataset.remote.filtered import FilteredRemoteFeedbackDataset
-from argilla.client.feedback.schemas.records import FeedbackRecord, RemoteFeedbackRecord
+from argilla.client.feedback.schemas.records import FeedbackRecord
+from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
@@ -31,7 +32,7 @@ if TYPE_CHECKING:
 
     import httpx
 
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
     from argilla.client.workspaces import Workspace
 
@@ -82,18 +83,13 @@ class RemoteFeedbackRecords(RemoteFeedbackRecordsBase):
         for i in trange(
             0, len(records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=not show_progress
         ):
-            records_batch = []
-            for record in records[i : i + PUSHING_BATCH_SIZE]:
-                if record.suggestions:
-                    for suggestion in record.suggestions:
-                        suggestion.question_id = self.__question_name2id[suggestion.question_name]
-                records_batch.append(
-                    record.dict(exclude={"id": ..., "suggestions": {"__all__": {"question_name"}}}, exclude_none=True)
-                )
             datasets_api_v1.add_records(
                 client=self._client,
                 id=self._dataset.id,
-                records=records_batch,
+                records=[
+                    record.to_server_payload(self._question_name_to_id)
+                    for record in records[i : i + PUSHING_BATCH_SIZE]
+                ],
             )
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
@@ -132,8 +128,8 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         workspace: "Workspace",
         created_at: datetime,
         updated_at: datetime,
-        fields: List["AllowedFieldTypes"],
-        questions: List["AllowedQuestionTypes"],
+        fields: List["AllowedRemoteFieldTypes"],
+        questions: List["AllowedRemoteQuestionTypes"],
         guidelines: Optional[str] = None,
     ) -> None:
         super().__init__(

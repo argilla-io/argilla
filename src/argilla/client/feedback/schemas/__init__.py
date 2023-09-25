@@ -12,12 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.feedback.schemas.fields import FieldSchema, FieldTypes, TextField
+from argilla.client.feedback.schemas.enums import FieldTypes, QuestionTypes
+from argilla.client.feedback.schemas.fields import FieldSchema, TextField
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
     QuestionSchema,
-    QuestionTypes,
     RankingQuestion,
     RatingQuestion,
     TextQuestion,
