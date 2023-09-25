@@ -63,7 +63,7 @@ async def _get_dataset(
     dataset_id: UUID,
     with_fields: bool = False,
     with_questions: bool = False,
-    with_metadata_properties=False,
+    with_metadata_properties: bool = False,
 ) -> DatasetModel:
     dataset = await datasets.get_dataset_by_id(
         db,
