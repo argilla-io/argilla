@@ -39,3 +39,4 @@ AllowedRemoteQuestionTypes = Union[
     RemoteTextQuestion, RemoteRatingQuestion, RemoteLabelQuestion, RemoteMultiLabelQuestion, RemoteRankingQuestion
 ]
 AllowedMetadataPropertyTypes = Union[TermsMetadataProperty, FloatMetadataProperty, IntMetadataProperty]
+AllowedRemoteMetadataPropertyTypes = None

@@ -20,7 +20,11 @@ from argilla.client.feedback.dataset.mixins import ArgillaMixin, UnificationMixi
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.records import FeedbackRecord
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.schemas.types import (
+        AllowedFieldTypes,
+        AllowedMetadataPropertyTypes,
+        AllowedQuestionTypes,
+    )
 
 
 class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
@@ -29,14 +33,21 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
         *,
         fields: List["AllowedFieldTypes"],
         questions: List["AllowedQuestionTypes"],
+        metadata_properties: Optional[List["AllowedMetadataPropertyTypes"]] = None,
         guidelines: Optional[str] = None,
+        extra_metadata_allowed: bool = True,
     ) -> None:
         """Initializes a `FeedbackDataset` instance locally.
 
         Args:
             fields: contains the fields that will define the schema of the records in the dataset.
             questions: contains the questions that will be used to annotate the dataset.
+            metadata_properties: contains the metadata properties that will be indexed
+                and could be used to filter the dataset. Defaults to `None`.
             guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
+            extra_metadata_allowed: whether to allow to include metadata properties that
+                have not been defined in the `metadata` argument, and thus will not be
+                indexed. Defaults to `True`.
 
         Raises:
             TypeError: if `fields` is not a list of `FieldSchema`.
@@ -80,10 +91,33 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
             ...             labels=["category-1", "category-2", "category-3"],
             ...         ),
             ...     ],
+            ...     metadata_properties=[
+            ...         rg.TermsMetadataProperty(
+            ...             name="metadata-property-1",
+            ...             values=["a", "b", "c"]
+            ...         ),
+            ...         rg.IntMetadataProperty(
+            ...             name="metadata-property-2",
+            ...             gt=0,
+            ...             lt=10,
+            ...         ),
+            ...         rg.FloatMetadataProperty(
+            ...             name="metadata-property-2",
+            ...             gt=-10.0,
+            ...             lt=10.0,
+            ...         ),
+            ...     ],
             ...     guidelines="These are the annotation guidelines.",
+            ...     extra_metadata_allowed=False,
             ... )
         """
-        super().__init__(fields=fields, questions=questions, guidelines=guidelines)
+        super().__init__(
+            fields=fields,
+            questions=questions,
+            metadata_properties=metadata_properties,
+            guidelines=guidelines,
+            extra_metadata_allowed=extra_metadata_allowed,
+        )
 
         self._records = []
 
