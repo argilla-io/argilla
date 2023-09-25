@@ -20,7 +20,7 @@ from tqdm import trange
 from argilla.client.api import ArgillaSingleton
 from argilla.client.feedback.constants import PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-from argilla.client.feedback.schemas.enums import FieldTypes, QuestionTypes
+from argilla.client.feedback.schemas.enums import FieldTypes, MetadataPropertyTypes, QuestionTypes
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
@@ -57,7 +57,12 @@ if TYPE_CHECKING:
         AllowedRemoteMetadataPropertyTypes,
         AllowedRemoteQuestionTypes,
     )
-    from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel
+    from argilla.client.sdk.v1.datasets.models import (
+        FeedbackDatasetModel,
+        FeedbackFieldModel,
+        FeedbackMetadataPropertyModel,
+        FeedbackQuestionModel,
+    )
 
 
 class ArgillaMixin:
@@ -69,12 +74,23 @@ class ArgillaMixin:
                 f"Failed while deleting the `FeedbackDataset` with ID '{id}' from Argilla with" f" exception: {e}"
             ) from e
 
+    @staticmethod
+    def _parse_to_remote_field(field: "FeedbackFieldModel") -> "AllowedRemoteFieldTypes":
+        if field.settings["type"] == FieldTypes.text:
+            field = RemoteTextField.from_api(field)
+        else:
+            raise ValueError(
+                f"Field '{field.name}' is not a supported field in the current Python package version,"
+                f" supported field types are: `{'`, `'.join([arg.value for arg in FieldTypes])}`."
+            )
+        return field
+
     def __add_fields(self: "FeedbackDataset", client: "httpx.Client", id: UUID) -> List["AllowedRemoteFieldTypes"]:
         fields = []
         for field in self._fields:
             try:
                 new_field = datasets_api_v1.add_field(client=client, id=id, field=field.to_server_payload()).parsed
-                fields.append(new_field)
+                fields.append(ArgillaMixin._parse_to_remote_field(new_field))
             except Exception as e:
                 self.__delete_dataset(client=client, id=id)
                 raise Exception(
@@ -82,6 +98,26 @@ class ArgillaMixin:
                     f" exception: {e}"
                 ) from e
         return fields
+
+    @staticmethod
+    def _parse_to_remote_question(question: "FeedbackQuestionModel") -> "AllowedRemoteQuestionTypes":
+        if question.settings["type"] == QuestionTypes.rating:
+            question = RemoteRatingQuestion.from_api(question)
+        elif question.settings["type"] == QuestionTypes.text:
+            question = RemoteTextQuestion.from_api(question)
+        elif question.settings["type"] == QuestionTypes.label_selection:
+            question = RemoteLabelQuestion.from_api(question)
+        elif question.settings["type"] == QuestionTypes.multi_label_selection:
+            question = RemoteMultiLabelQuestion.from_api(question)
+        elif question.settings["type"] == QuestionTypes.ranking:
+            question = RemoteRankingQuestion.from_api(question)
+        else:
+            raise ValueError(
+                f"Question '{question.name}' is not a supported question in the current Python package"
+                f" version, supported question types are: `{'`, `'.join([arg.value for arg in QuestionTypes])}`."
+            )
+
+        return question
 
     def __add_questions(
         self: "FeedbackDataset", client: "httpx.Client", id: UUID
@@ -92,7 +128,7 @@ class ArgillaMixin:
                 new_question = datasets_api_v1.add_question(
                     client=client, id=id, question=question.to_server_payload()
                 ).parsed
-                questions.append(new_question)
+                questions.append(ArgillaMixin._parse_to_remote_question(new_question))
             except Exception as e:
                 self.__delete_dataset(client=client, id=id)
                 raise Exception(
@@ -100,6 +136,25 @@ class ArgillaMixin:
                     f" exception: {e}"
                 ) from e
         return questions
+
+    @staticmethod
+    def _parse_to_remote_metadata_property(
+        metadata_property: "FeedbackMetadataPropertyModel",
+    ) -> "AllowedRemoteMetadataPropertyTypes":
+        if metadata_property.settings["type"] == MetadataPropertyTypes.terms:
+            metadata_property = None
+        elif metadata_property.settings["type"] == MetadataPropertyTypes.integer:
+            metadata_property = None
+        elif metadata_property.settings["type"] == MetadataPropertyTypes.float:
+            metadata_property = None
+        else:
+            raise ValueError(
+                f"Metadata property '{metadata_property.name}' is not a supported metadata property in the current"
+                " Python package version, supported field types are: "
+                f"`{'`, `'.join([arg.value for arg in FieldTypes])}`."
+            )
+
+        return metadata_property
 
     def __add_metadata_properties(
         self: "FeedbackDataset", client: "httpx.Client", id: UUID
@@ -113,7 +168,7 @@ class ArgillaMixin:
                 new_metadata_property = datasets_api_v1.add_metadata_property(
                     client=client, id=id, metadata_property=metadata_property.to_server_payload()
                 ).parsed
-                metadata_properties.append(new_metadata_property)
+                metadata_properties.append(ArgillaMixin._parse_to_remote_metadata_property(new_metadata_property))
             except Exception as e:
                 self.__delete_dataset(client=client, id=id)
                 raise Exception(
@@ -230,36 +285,14 @@ class ArgillaMixin:
     def __get_fields(client: "httpx.Client", id: UUID) -> List["AllowedRemoteFieldTypes"]:
         fields = []
         for field in datasets_api_v1.get_fields(client=client, id=id).parsed:
-            if field.settings["type"] == FieldTypes.text:
-                field = RemoteTextField.from_api(field)
-            else:
-                raise ValueError(
-                    f"Field '{field.name}' is not a supported field in the current Python package version,"
-                    f" supported field types are: `{'`, `'.join([arg.value for arg in FieldTypes])}`."
-                )
-            fields.append(field)
+            fields.append(ArgillaMixin._parse_to_remote_field(field))
         return fields
 
     @staticmethod
     def __get_questions(client: "httpx.Client", id: UUID) -> List["AllowedRemoteQuestionTypes"]:
         questions = []
         for question in datasets_api_v1.get_questions(client=client, id=id).parsed:
-            if question.settings["type"] == QuestionTypes.rating:
-                question = RemoteRatingQuestion.from_api(question)
-            elif question.settings["type"] == QuestionTypes.text:
-                question = RemoteTextQuestion.from_api(question)
-            elif question.settings["type"] == QuestionTypes.label_selection:
-                question = RemoteLabelQuestion.from_api(question)
-            elif question.settings["type"] == QuestionTypes.multi_label_selection:
-                question = RemoteMultiLabelQuestion.from_api(question)
-            elif question.settings["type"] == QuestionTypes.ranking:
-                question = RemoteRankingQuestion.from_api(question)
-            else:
-                raise ValueError(
-                    f"Question '{question.name}' is not a supported question in the current Python package"
-                    f" version, supported question types are: `{'`, `'.join([arg.value for arg in QuestionTypes])}`."
-                )
-            questions.append(question)
+            questions.append(ArgillaMixin._parse_to_remote_question(question))
         return questions
 
     @classmethod
