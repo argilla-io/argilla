@@ -13,7 +13,7 @@
 #  limitations under the License.
 import time
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Tuple, Type, Union
+from typing import Any, TYPE_CHECKING, List, Optional, Tuple, Type, Union
 from unittest.mock import ANY, MagicMock
 from uuid import UUID, uuid4
 
@@ -54,10 +54,14 @@ from argilla.server.schemas.v1.datasets import (
     VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
 )
 from argilla.server.search_engine import (
+    FloatMetadataFilter,
+    IntegerMetadataFilter,
+    MetadataFilter,
     SearchEngine,
     SearchResponseItem,
     SearchResponses,
     StringQuery,
+    TermsMetadataFilter,
     UserResponseStatusFilter,
 )
 from sqlalchemy import func, select
@@ -70,6 +74,7 @@ from tests.factories import (
     FloatMetadataPropertyFactory,
     IntegerMetadataPropertyFactory,
     LabelSelectionQuestionFactory,
+    MetadataPropertyFactory,
     MultiLabelSelectionQuestionFactory,
     QuestionFactory,
     RatingQuestionFactory,
@@ -3299,6 +3304,7 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=StringQuery(q="Hello", field="input"),
+            metadata_filters=[],
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
@@ -3331,6 +3337,60 @@ class TestSuiteDatasets:
             ],
             "total": 2,
         }
+
+    @pytest.mark.parametrize(
+        ("property_config", "wrong_value"),
+        [
+            ({"name": "terms_prop", "type": "terms"}, None),
+            ({"name": "terms_prop", "type": "terms"}, "terms_prop"),
+            ({"name": "terms_prop", "type": "terms"}, "terms_prop:"),
+            ({"name": "terms_prop", "type": "terms"}, "wrong-value"),
+            ({"name": "integer_prop", "type": "integer"}, None),
+            ({"name": "integer_prop", "type": "integer"}, "integer_prop"),
+            ({"name": "integer_prop", "type": "integer"}, "integer_prop:"),
+            ({"name": "integer_prop", "type": "integer"}, "integer_prop:{}"),
+            ({"name": "integer_prop", "type": "integer"}, "wrong-value"),
+            ({"name": "float_prop", "type": "float"}, None),
+            ({"name": "float_prop", "type": "float"}, "float_prop"),
+            ({"name": "float_prop", "type": "float"}, "float_prop:"),
+            ({"name": "float_prop", "type": "float"}, "float_prop:{}"),
+            ({"name": "float_prop", "type": "float"}, "wrong-value"),
+        ],
+    )
+    async def test_search_dataset_records_with_wrong_metadata_filter_values(
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner: User,
+        owner_auth_header: dict,
+        property_config: dict,
+        wrong_value: str,
+    ):
+        workspace = await WorkspaceFactory.create()
+        dataset, _, records, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
+
+        await MetadataPropertyFactory.create(
+            **property_config, settings={"type": property_config["type"]}, dataset=dataset
+        )
+
+        mock_search_engine.search.return_value = SearchResponses(
+            items=[
+                SearchResponseItem(record_id=records[0].id, score=14.2),
+                SearchResponseItem(record_id=records[1].id, score=12.2),
+            ],
+            total=2,
+        )
+
+        params = {"metadata": [wrong_value]}
+
+        query_json = {"query": {"text": {"q": "Hello"}}}
+        response = await async_client.post(
+            f"/api/v1/me/datasets/{dataset.id}/records/search",
+            params=params,
+            headers=owner_auth_header,
+            json=query_json,
+        )
+        assert response.status_code == 422, response.json()
 
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin, UserRole.owner])
     @pytest.mark.parametrize(
@@ -3372,6 +3432,7 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=StringQuery(q="Hello", field="input"),
+            metadata_filters=[],
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
@@ -3479,6 +3540,7 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=StringQuery(q="Hello", field="input"),
+            metadata_filters=[],
             user_response_status_filter=UserResponseStatusFilter(user=owner, statuses=[ResponseStatusFilter.submitted]),
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
@@ -3512,6 +3574,7 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=StringQuery(q="Hello", field="input"),
+            metadata_filters=[],
             user_response_status_filter=None,
             offset=0,
             limit=5,

@@ -13,10 +13,13 @@
 #  limitations under the License.
 from typing import TYPE_CHECKING, AsyncGenerator, List, Union
 
-from argilla.server.enums import ResponseStatusFilter
+from argilla.server.enums import MetadataPropertyType, ResponseStatusFilter
 from argilla.server.models import Record, User
 from argilla.server.search_engine import (
+    FloatMetadataFilter,
+    IntegerMetadataFilter,
     StringQuery,
+    TermsMetadataFilter,
     UserResponseStatusFilter,
 )
 from argilla.server.search_engine.commons import index_name_for_dataset
@@ -97,6 +100,11 @@ async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine, op
             await TextFieldFactory.create(name="text"),
             await TextFieldFactory.create(name="label"),
         ],
+        metadata_properties=[
+            await TermsMetadataPropertyFactory.create(name="label"),
+            await IntegerMetadataPropertyFactory.create(name="textId"),
+            await FloatMetadataPropertyFactory.create(name="seq_float"),
+        ],
         questions=[text_question, rating_question],
     )
 
@@ -109,6 +117,7 @@ async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine, op
             await RecordFactory.create(
                 dataset=dataset,
                 fields={"textId": "00000", "text": "My card payment had the wrong exchange rate", "label": "negative"},
+                metadata_={"label": None, "textId": "00000", "seq_float": 0.13},
                 responses=[],
             ),
             await RecordFactory.create(
@@ -118,6 +127,7 @@ async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine, op
                     "text": "I believe that a card payment I made was cancelled.",
                     "label": "neutral",
                 },
+                metadata_={"label": "neutral", "textId": "00001", "seq_float": 0.343},
                 responses=[],
             ),
             await RecordFactory.create(
@@ -127,6 +137,7 @@ async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine, op
                     "text": "I tried to make a payment with my card and it was declined.",
                     "label": "negative",
                 },
+                metadata_={"label": "negative", "textId": "00002", "seq_float": 1.123},
                 responses=[],
             ),
             await RecordFactory.create(
@@ -136,6 +147,7 @@ async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine, op
                     "text": "My credit card was declined when I tried to make a payment.",
                     "label": "negative",
                 },
+                metadata_={"label": "negative", "textId": "00003", "seq_float": 12.13},
                 responses=[],
             ),
             await RecordFactory.create(
@@ -145,6 +157,7 @@ async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine, op
                     "text": "I made a successful payment towards my mortgage loan earlier today.",
                     "label": "positive",
                 },
+                metadata_={"label": "positive", "textId": "00004", "seq_float": -120.13},
                 responses=[],
             ),
             await RecordFactory.create(
@@ -154,6 +167,7 @@ async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine, op
                     "text": "Please confirm the receipt of my payment for the credit card bill due on the 15th.",
                     "label": "neutral",
                 },
+                metadata_={"label": "neutral", "textId": "00005", "seq_float": -149.13},
                 responses=[],
             ),
             await RecordFactory.create(
@@ -163,11 +177,17 @@ async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine, op
                     "text": "Why was I charged for getting cash?",
                     "label": "neutral",
                 },
+                metadata_={"label": "neutral", "textId": "00006", "seq_float": 200.13},
                 responses=[],
             ),
             await RecordFactory.create(
                 dataset=dataset,
-                fields={"textId": "00007", "text": "Why was I charged for getting cash?", "label": "neutral"},
+                fields={
+                    "textId": "00007",
+                    "text": "Why was I charged for getting cash?",
+                    "label": "neutral",
+                },
+                metadata_={"label": "neutral", "textId": "00007", "seq_float": 20020.13},
                 responses=[],
             ),
             await RecordFactory.create(
@@ -178,11 +198,14 @@ async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine, op
                     " please tell me why? I need the cash back now.",
                     "label": "negative",
                 },
+                metadata_={"label": "negative", "textId": "00008", "seq_float": 120020.13},
                 responses=[],
             ),
         ],
     )
     await dataset.awaitable_attrs.records
+
+    opensearch.indices.refresh(index=index_name_for_dataset(dataset))
 
     return dataset
 
@@ -433,8 +456,6 @@ class TestSuiteOpenSearchEngine:
         query: Union[str, StringQuery],
         expected_items: int,
     ):
-        opensearch.indices.refresh(index=index_name_for_dataset(test_banking_sentiment_dataset))
-
         result = await opensearch_engine.search(test_banking_sentiment_dataset, query=query)
 
         assert len(result.items) == expected_items
@@ -478,6 +499,48 @@ class TestSuiteOpenSearchEngine:
             query=StringQuery(q="payment"),
             user_response_status_filter=UserResponseStatusFilter(user=user, statuses=statuses),
         )
+        assert len(result.items) == expected_items
+        assert result.total == expected_items
+
+    @pytest.mark.parametrize(
+        ("metadata_filters_config", "expected_items"),
+        [
+            ([{"name": "label", "values": ["neutral"]}], 4),
+            ([{"name": "label", "values": ["positive"]}], 1),
+            ([{"name": "label", "values": ["neutral", "positive"]}], 5),
+            ([{"name": "textId", "low": 3, "high": 4}], 2),
+            ([{"name": "textId", "low": 3, "high": 3}], 1),
+            ([{"name": "textId", "low": 3}], 6),
+            ([{"name": "textId", "high": 4}], 5),
+            ([{"name": "seq_float", "low": 0.0, "high": 12.03}], 3),
+            ([{"name": "seq_float", "low": 0.13, "high": 0.13}], 1),
+            ([{"name": "seq_float", "low": 0.0}], 7),
+            ([{"name": "seq_float", "high": 12.03}], 5),
+        ],
+    )
+    async def test_search_with_metadata_filter(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset: Dataset,
+        metadata_filters_config: List[dict],
+        expected_items: int,
+    ):
+        metadata_filters = []
+        for metadata_filter_config in metadata_filters_config:
+            name = metadata_filter_config.pop("name")
+            for metadata_property in test_banking_sentiment_dataset.metadata_properties:
+                if name == metadata_property.name:
+                    if metadata_property.type == MetadataPropertyType.terms:
+                        filter_cls = TermsMetadataFilter
+                    elif metadata_property.type == MetadataPropertyType.integer:
+                        filter_cls = IntegerMetadataFilter
+                    else:
+                        filter_cls = FloatMetadataFilter
+                    metadata_filters.append(filter_cls(metadata_property, **metadata_filter_config))
+                    break
+        opensearch.indices.get(index_name_for_dataset(test_banking_sentiment_dataset))
+        result = await opensearch_engine.search(test_banking_sentiment_dataset, metadata_filters=metadata_filters)
         assert len(result.items) == expected_items
         assert result.total == expected_items
 
