@@ -50,7 +50,7 @@ ds = load_dataset("{{ repo_id }}")
 
 ### Supported Tasks and Leaderboards
 
-This dataset can contain [multiple fields, questions and responses](https://docs.argilla.io/en/v1.16.0/conceptual_guides/data_model.html#feedback-dataset) so it can be used for different NLP tasks, depending on the configuration. The dataset structure is described in the [Dataset Structure section](#dataset-structure).
+This dataset can contain [multiple fields, questions and responses](https://docs.argilla.io/en/latest/conceptual_guides/data_model.html#feedback-dataset) so it can be used for different NLP tasks, depending on the configuration. The dataset structure is described in the [Dataset Structure section](#dataset-structure).
 
 There are no leaderboards associated with this dataset.
 
