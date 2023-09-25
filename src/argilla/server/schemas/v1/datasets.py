@@ -490,6 +490,7 @@ class MetadataQueryParams(BaseModel):
 class TextQuery(BaseModel):
     text: StringQuery
 
+
 class SearchRecordsQuery(BaseModel):
     query: TextQuery
 
