@@ -16,6 +16,7 @@ import pytest
 from argilla.client.client import Argilla
 from argilla.client.sdk.v1.datasets.api import (
     add_field,
+    add_metadata_property,
     add_question,
     add_records,
     create_dataset,
@@ -212,6 +213,25 @@ async def test_add_question(role: UserRole) -> None:
             "description": "test_description",
             "required": True,
             "settings": {"type": "text"},
+        },
+    )
+    assert response.status_code == 201
+
+
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+@pytest.mark.asyncio
+async def test_add_metadata_property(role: UserRole) -> None:
+    dataset = await DatasetFactory.create()
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+    api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
+    response = add_metadata_property(
+        client=api.client.httpx,
+        id=dataset.id,
+        metadata_property={
+            "name": "test_metadata_property",
+            "description": "test_description",
+            "settings": {"type": "terms", "values": ["a", "b", "c"]},
         },
     )
     assert response.status_code == 201

@@ -23,6 +23,7 @@ from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError,
 from argilla.client.sdk.v1.datasets.models import (
     FeedbackDatasetModel,
     FeedbackFieldModel,
+    FeedbackMetadataPropertyModel,
     FeedbackMetricsModel,
     FeedbackQuestionModel,
     FeedbackRecordsModel,
@@ -354,6 +355,8 @@ def add_question(
 
     Args:
         client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to add the question to.
+        question: the question to be added to the dataset.
 
     Returns:
         A `Response` object containing a `parsed` attribute with the parsed response if the
@@ -366,6 +369,32 @@ def add_question(
     if response.status_code == 201:
         response_obj = Response.from_httpx_response(response)
         response_obj.parsed = FeedbackQuestionModel(**response.json())
+        return response_obj
+    return handle_response_error(response)
+
+
+def add_metadata_property(
+    client: httpx.Client, id: UUID, metadata_property: Dict[str, Any]
+) -> Response[Union[FeedbackMetadataPropertyModel, ErrorMessage, HTTPValidationError]]:
+    """Sends a POST request to `/api/v1/datasets/{id}/metadata-properties` endpoint to
+    add a metadata property to the `FeedbackDataset`.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to add the metadata property to.
+        metadata_property: the metadata property to be added to the dataset.
+
+    Returns:
+        A `Response` object containing a `parsed` attribute with the parsed response if the
+        request was successful, which is a `FeedbackMetadataPropertyModel`.
+    """
+    url = f"/api/v1/datasets/{id}/metadata-properties"
+
+    response = client.post(url=url, json=metadata_property)
+
+    if response.status_code == 201:
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = FeedbackMetadataPropertyModel(**response.json())
         return response_obj
     return handle_response_error(response)
 

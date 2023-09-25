@@ -107,6 +107,15 @@ class FeedbackQuestionModel(BaseModel):
     updated_at: datetime
 
 
+class FeedbackMetadataPropertyModel(BaseModel):
+    id: UUID
+    name: str
+    description: Optional[str] = None
+    settings: Dict[str, Any]
+    inserted_at: datetime
+    updated_at: datetime
+
+
 class FeedbackRecordsMetricsModel(BaseModel):
     count: int
 

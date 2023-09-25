@@ -52,7 +52,11 @@ if TYPE_CHECKING:
 
     from argilla.client.client import Argilla as ArgillaClient
     from argilla.client.feedback.dataset.local import FeedbackDataset
-    from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
+    from argilla.client.feedback.schemas.types import (
+        AllowedRemoteFieldTypes,
+        AllowedRemoteMetadataPropertyTypes,
+        AllowedRemoteQuestionTypes,
+    )
     from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel
 
 
@@ -96,6 +100,27 @@ class ArgillaMixin:
                     f" exception: {e}"
                 ) from e
         return questions
+
+    def __add_metadata_properties(
+        self: "FeedbackDataset", client: "httpx.Client", id: UUID
+    ) -> Union[List["AllowedRemoteMetadataPropertyTypes"], None]:
+        if not self._metadata_properties:
+            return None
+
+        metadata_properties = []
+        for metadata_property in self._metadata_properties:
+            try:
+                new_metadata_property = datasets_api_v1.add_metadata_property(
+                    client=client, id=id, metadata_property=metadata_property.to_server_payload()
+                ).parsed
+                metadata_properties.append(new_metadata_property)
+            except Exception as e:
+                self.__delete_dataset(client=client, id=id)
+                raise Exception(
+                    f"Failed while adding the metadata property '{metadata_property.name}' to the `FeedbackDataset` in"
+                    f" Argilla with exception: {e}"
+                ) from e
+        return metadata_properties
 
     def __publish_dataset(self: "FeedbackDataset", client: "httpx.Client", id: UUID) -> None:
         try:
@@ -180,6 +205,8 @@ class ArgillaMixin:
         questions = self.__add_questions(client=httpx_client, id=argilla_id)
         question_name_to_id = {question.name: question.id for question in questions}
 
+        metadata_properties = self.__add_metadata_properties(client=httpx_client, id=argilla_id)
+
         self.__publish_dataset(client=httpx_client, id=argilla_id)
 
         self.__push_records(
@@ -195,6 +222,7 @@ class ArgillaMixin:
             updated_at=new_dataset.updated_at,
             fields=fields,
             questions=questions,
+            metadata_properties=metadata_properties,
             guidelines=self.guidelines,
         )
 
