@@ -13,7 +13,7 @@
 #  limitations under the License.
 import time
 from datetime import datetime
-from typing import Any, TYPE_CHECKING, List, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Type, Union
 from unittest.mock import ANY, MagicMock
 from uuid import UUID, uuid4
 
