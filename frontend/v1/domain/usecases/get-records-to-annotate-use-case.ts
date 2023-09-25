@@ -5,7 +5,6 @@ import { Suggestion } from "../entities/question/Suggestion";
 import { IRecordStorage } from "../services/IRecordStorage";
 import { Records } from "../entities/record/Records";
 import { RecordAnswer } from "../entities/record/RecordAnswer";
-import { MetadataFilter } from "../entities/metadata/MetadataFilter";
 import {
   RecordRepository,
   QuestionRepository,
