@@ -15,10 +15,11 @@ import datetime
 import inspect
 
 import factory
-from argilla.server.enums import FieldType
+from argilla.server.enums import FieldType, MetadataPropertyType
 from argilla.server.models import (
     Dataset,
     Field,
+    MetadataProperty,
     Question,
     QuestionType,
     Record,
@@ -235,6 +236,30 @@ class FieldFactory(BaseFactory):
 
 class TextFieldFactory(FieldFactory):
     settings = {"type": FieldType.text.value, "use_markdown": False}
+
+
+class MetadataPropertyFactory(BaseFactory):
+    class Meta:
+        model = MetadataProperty
+
+    name = factory.Sequence(lambda n: f"metadata-property-{n}")
+    description = "Metadata property description"
+    dataset = factory.SubFactory(DatasetFactory)
+
+
+class TermsMetadataPropertyFactory(MetadataPropertyFactory):
+    type = MetadataPropertyType.terms
+    settings = {"type": MetadataPropertyType.terms}
+
+
+class IntegerMetadataPropertyFactory(MetadataPropertyFactory):
+    type = MetadataPropertyType.integer
+    settings = {"type": MetadataPropertyType.integer}
+
+
+class FloatMetadataPropertyFactory(MetadataPropertyFactory):
+    type = MetadataPropertyType.float
+    settings = {"type": MetadataPropertyType.float}
 
 
 class QuestionFactory(BaseFactory):

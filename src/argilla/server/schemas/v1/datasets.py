@@ -29,8 +29,8 @@ try:
 except ImportError:
     from typing_extensions import Annotated
 
-from argilla.server.enums import FieldType
-from argilla.server.models import DatasetStatus, QuestionSettings, QuestionType, ResponseStatus
+from argilla.server.enums import DatasetStatus, FieldType, MetadataPropertyType
+from argilla.server.models import QuestionSettings, QuestionType, ResponseStatus
 
 DATASET_NAME_REGEX = r"^(?!-|_)[a-zA-Z0-9-_ ]+$"
 DATASET_NAME_MIN_LENGTH = 1
@@ -51,6 +51,12 @@ QUESTION_CREATE_TITLE_MIN_LENGTH = 1
 QUESTION_CREATE_TITLE_MAX_LENGTH = 500
 QUESTION_CREATE_DESCRIPTION_MIN_LENGTH = 1
 QUESTION_CREATE_DESCRIPTION_MAX_LENGTH = 1000
+
+METADATA_PROPERTY_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH = 1
+METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH = 50
+METADATA_PROPERTY_CREATE_DESCRIPTION_MIN_LENGTH = 1
+METADATA_PROPERTY_CREATE_DESCRIPTION_MAX_LENGTH = 1000
 
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 10
@@ -413,6 +419,55 @@ class RecordCreate(BaseModel):
 
 class RecordsCreate(BaseModel):
     items: conlist(item_type=RecordCreate, min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
+
+
+class TermsMetadataProperty(BaseModel):
+    type: Literal[MetadataPropertyType.terms]
+
+
+class IntegerMetadataProperty(BaseModel):
+    type: Literal[MetadataPropertyType.integer]
+
+
+class FloatMetadataProperty(BaseModel):
+    type: Literal[MetadataPropertyType.float]
+
+
+MetadataPropertySettings = Annotated[
+    Union[TermsMetadataProperty, IntegerMetadataProperty, FloatMetadataProperty],
+    PydanticField(..., discriminator="type"),
+]
+
+
+class MetadataPropertyCreate(BaseModel):
+    name: constr(
+        regex=METADATA_PROPERTY_CREATE_NAME_REGEX,
+        min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
+        max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
+    )
+    description: Optional[
+        constr(
+            min_length=METADATA_PROPERTY_CREATE_DESCRIPTION_MIN_LENGTH,
+            max_length=METADATA_PROPERTY_CREATE_DESCRIPTION_MAX_LENGTH,
+        )
+    ] = None
+    settings: MetadataPropertySettings
+
+
+class MetadataProperty(BaseModel):
+    id: UUID
+    name: str
+    description: Optional[str] = None
+    settings: MetadataPropertySettings
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class MetadataProperties(BaseModel):
+    items: List[MetadataProperty]
 
 
 class SearchRecordsQuery(BaseModel):
