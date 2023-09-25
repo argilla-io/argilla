@@ -23,7 +23,7 @@ from argilla.client.feedback.schemas import (
     FeedbackRecord,
     FieldSchema,
 )
-from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+from argilla.client.feedback.schemas.types import AllowedQuestionTypes
 from argilla.client.feedback.training.schemas import (
     TrainingTaskForChatCompletion,
     TrainingTaskForDPO,
@@ -42,6 +42,12 @@ from argilla.utils.dependency import require_dependencies, requires_dependencies
 if TYPE_CHECKING:
     from datasets import Dataset
 
+    from argilla.client.feedback.schemas.types import (
+        AllowedFieldTypes,
+        AllowedRemoteFieldTypes,
+        AllowedRemoteQuestionTypes,
+    )
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -52,8 +58,8 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
     def __init__(
         self,
         *,
-        fields: List[AllowedFieldTypes],
-        questions: List[AllowedQuestionTypes],
+        fields: Union[List["AllowedFieldTypes"], List["AllowedRemoteFieldTypes"]],
+        questions: Union[List["AllowedQuestionTypes"], List["AllowedRemoteQuestionTypes"]],
         guidelines: Optional[str] = None,
     ) -> None:
         """Initializes a `FeedbackDatasetBase` instance locally.
@@ -134,11 +140,11 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         return self._guidelines
 
     @property
-    def fields(self) -> List[AllowedFieldTypes]:
+    def fields(self) -> Union[List["AllowedFieldTypes"], List["AllowedRemoteFieldTypes"]]:
         """Returns the fields that define the schema of the records in the dataset."""
         return self._fields
 
-    def field_by_name(self, name: str) -> AllowedFieldTypes:
+    def field_by_name(self, name: str) -> Union["AllowedFieldTypes", "AllowedRemoteFieldTypes"]:
         """Returns the field by name if it exists. Othewise a `ValueError` is raised.
 
         Args:
@@ -156,11 +162,11 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         )
 
     @property
-    def questions(self) -> List[AllowedQuestionTypes]:
+    def questions(self) -> Union[List[AllowedQuestionTypes], List["AllowedRemoteQuestionTypes"]]:
         """Returns the questions that will be used to annotate the dataset."""
         return self._questions
 
-    def question_by_name(self, name: str) -> AllowedQuestionTypes:
+    def question_by_name(self, name: str) -> Union[AllowedQuestionTypes, "AllowedRemoteQuestionTypes"]:
         """Returns the question by name if it exists. Othewise a `ValueError` is raised.
 
         Args:

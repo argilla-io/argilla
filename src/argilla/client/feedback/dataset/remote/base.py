@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Any, Dict, Generic, Iterator, List, Optional, 
 
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
-from argilla.client.feedback.schemas.records import RemoteFeedbackRecord, RemoteSuggestionSchema
+from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.utils import allowed_for_roles
 
@@ -30,8 +30,8 @@ if TYPE_CHECKING:
 
     from argilla.client.feedback.dataset.local import FeedbackDataset
     from argilla.client.feedback.schemas.records import FeedbackRecord
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
-    from argilla.client.sdk.v1.datasets.models import FeedbackItemModel, FeedbackRecordsModel
+    from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
+    from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
     from argilla.client.workspaces import Workspace
 
 
@@ -57,8 +57,8 @@ class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
         self._dataset = dataset
         self._client = self._dataset._client  # Required to be able to use `allowed_for_roles` decorator
 
-        self.__question_id2name = {question.id: question.name for question in self._dataset.questions}
-        self.__question_name2id = {value: key for key, value in self.__question_id2name.items()}
+        self._question_id_to_name = {question.id: question.name for question in self._dataset.questions}
+        self._question_name_to_id = {value: key for key, value in self._question_id_to_name.items()}
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def __repr__(self) -> str:
@@ -73,31 +73,6 @@ class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
             stacklevel=1,
         )
         return f"[{','.join([str(record) for record in self][:2])}, ...]"
-
-    def _parse_record(self, record: "FeedbackItemModel") -> RemoteFeedbackRecord:
-        """Parses a `FeedbackItemModel` into a `RemoteFeedbackRecord`."""
-        suggestions = []
-        if record.suggestions is not None:
-            for suggestion in record.suggestions:
-                suggestions.append(
-                    RemoteSuggestionSchema(
-                        client=self._client,
-                        question_name=self.__question_id2name[suggestion.question_id],
-                        **suggestion.dict(),
-                    )
-                )
-        record = record.dict(
-            exclude={
-                "inserted_at": ...,
-                "updated_at": ...,
-                "responses": {"__all__": {"id", "inserted_at", "updated_at"}},
-                "suggestions": ...,
-            },
-            exclude_none=True,
-        )
-        return RemoteFeedbackRecord(
-            client=self._client, name2id=self.__question_name2id, suggestions=suggestions, **record
-        )
 
     @abstractmethod
     def __len__(self) -> int:
@@ -128,8 +103,8 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
         workspace: "Workspace",
         created_at: datetime,
         updated_at: datetime,
-        fields: List["AllowedFieldTypes"],
-        questions: List["AllowedQuestionTypes"],
+        fields: List["AllowedRemoteFieldTypes"],
+        questions: List["AllowedRemoteQuestionTypes"],
         guidelines: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
@@ -159,7 +134,9 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
             TypeError: if `guidelines` is not None and not a string.
             ValueError: if `guidelines` is an empty string.
         """
-        super().__init__(fields=fields, questions=questions, guidelines=guidelines)
+        self._fields = fields
+        self._questions = questions
+        self._guidelines = guidelines
 
         self._client = client  # Required to be able to use `allowed_for_roles` decorator
         self._id = id
@@ -285,17 +262,6 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
             guidelines=self.guidelines,
         )
         instance.add_records(
-            records=[
-                record.dict(
-                    exclude={
-                        "id": ...,
-                        "client": ...,
-                        "name2id": ...,
-                        "suggestions": {"__all__": {"client", "id", "question_id"}},
-                    },
-                    exclude_none=True,
-                )
-                for record in self._records
-            ],
+            records=[record.to_local() for record in self._records],
         )
         return instance

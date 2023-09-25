@@ -24,8 +24,9 @@ if TYPE_CHECKING:
     import httpx
 
     from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-    from argilla.client.feedback.schemas.records import FeedbackRecord, RemoteFeedbackRecord
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.schemas.records import FeedbackRecord
+    from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
+    from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
     from argilla.client.workspaces import Workspace
 
@@ -72,8 +73,8 @@ class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeed
         workspace: "Workspace",
         created_at: datetime,
         updated_at: datetime,
-        fields: List["AllowedFieldTypes"],
-        questions: List["AllowedQuestionTypes"],
+        fields: List["AllowedRemoteFieldTypes"],
+        questions: List["AllowedRemoteQuestionTypes"],
         guidelines: Optional[str] = None,
         filters: Dict[str, Any] = {},
     ) -> None:

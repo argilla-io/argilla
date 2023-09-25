@@ -40,12 +40,18 @@ class DatasetConfig(BaseModel):
     guidelines: Optional[str] = None
 
     def to_yaml(self) -> str:
-        return dump(self.dict(exclude={"fields": {"__all__": {"id"}}, "questions": {"__all__": {"id"}}}))
+        return dump(self.dict())
 
     @classmethod
     def from_yaml(cls, yaml: str) -> "DatasetConfig":
         yaml = re.sub(r"(\n\s*|)id: !!python/object:uuid\.UUID\s+int: \d+", "", yaml)
-        return cls(**load(yaml, Loader=SafeLoader))
+        yaml = load(yaml, Loader=SafeLoader)
+        # Here for backwards compatibility
+        for field in yaml["fields"]:
+            field.pop("settings", None)
+        for question in yaml["questions"]:
+            question.pop("settings", None)
+        return cls(**yaml)
 
 
 # TODO(alvarobartt): here for backwards compatibility, remove in 1.14.0
