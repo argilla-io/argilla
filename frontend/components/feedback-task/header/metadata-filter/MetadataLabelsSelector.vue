@@ -106,9 +106,11 @@ export default {
     margin-top: $base-space;
   }
   &__item {
-    display: flex;
-    padding: calc($base-space / 2) $base-space;
-    border-radius: $border-radius;
+    &.re-checkbox {
+      display: flex;
+      padding: calc($base-space / 2) $base-space;
+      border-radius: $border-radius;
+    }
     &--highlighted {
       background: $black-4;
     }
@@ -121,7 +123,7 @@ export default {
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    :deep(.checkbox-container .svg-icon) {
+    &.re-checkbox :deep(.checkbox-container .svg-icon) {
       fill: grey;
       min-width: 16px;
     }
