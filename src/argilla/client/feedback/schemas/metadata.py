@@ -92,7 +92,6 @@ class TermsMetadataProperty(MetadataPropertySchema):
 
     @property
     def server_settings(self) -> Dict[str, Any]:
-        # TODO: add `values` once with now the naming in the backend
         return {"type": self.type, "values": self.values}
 
 
@@ -104,30 +103,29 @@ class IntegerMetadataProperty(MetadataPropertySchema):
     Args:
         name: The name of the metadata property.
         description: A description of the metadata property. Defaults to `None`.
-        gt: The lower bound of the integer value. If not provided, then no lower bound
-            check will be applied. Defaults to `None`.
-        lt: The upper bound of the integer value. If not provided, then no upper bound
-            check will be applied. Defaults to `None`.
+        min: The lower bound of the integer value. If not provided, then no lower bound
+            check will be applied.
+        max: The upper bound of the integer value. If not provided, then no upper bound
+            check will be applied.
 
     Examples:
         >>> from argilla.client.feedback.schemas.metadata import IntegerMetadataProperty
-        >>> IntegerMetadataProperty(name="day", gt=0, lt=31)
+        >>> IntegerMetadataProperty(name="day", min=0, max=31)
     """
 
     type: MetadataPropertyTypes = MetadataPropertyTypes.integer
-    gt: Optional[int] = None
-    lt: Optional[int] = None
+    min: int
+    max: int
 
     _bounds_validator = root_validator(allow_reuse=True)(validate_numeric_metadata_property_bounds)
 
     @property
     def server_settings(self) -> Dict[str, Any]:
-        # TODO: add `lt` and `gt` once with the naming in the backend
         settings: Dict[str, Any] = {"type": self.type.value}
-        if self.gt is not None:
-            settings["gt"] = self.gt
-        if self.lt is not None:
-            settings["lt"] = self.lt
+        if self.min is not None:
+            settings["min"] = self.min
+        if self.max is not None:
+            settings["max"] = self.max
         return settings
 
 
@@ -139,28 +137,27 @@ class FloatMetadataProperty(MetadataPropertySchema):
     Args:
         name: The name of the metadata property.
         description: A description of the metadata property. Defaults to `None`.
-        gt: The lower bound of the float value. If not provided, then no lower bound
-            check will be applied. Defaults to `None`.
-        lt: The upper bound of the float value. If not provided, then no upper bound
-            check will be applied. Defaults to `None`.
+        min: The lower bound of the float value. If not provided, then no lower bound
+            check will be applied.
+        max: The upper bound of the float value. If not provided, then no upper bound
+            check will be applied.
 
     Examples:
         >>> from argilla.client.feedback.schemas.metadata import FloatMetadataProperty
-        >>> FloatMetadataProperty(name="price", gt=0.0, lt=100.0)
+        >>> FloatMetadataProperty(name="price", min=0.0, max=100.0)
     """
 
     type: MetadataPropertyTypes = MetadataPropertyTypes.float
-    gt: Optional[float] = None
-    lt: Optional[float] = None
+    min: float
+    max: float
 
     _bounds_validator = root_validator(allow_reuse=True)(validate_numeric_metadata_property_bounds)
 
     @property
     def server_settings(self) -> Dict[str, Any]:
-        # TODO: add `lt` and `gt` once with the naming in the backend
         settings: Dict[str, Any] = {"type": self.type.value}
-        if self.gt is not None:
-            settings["gt"] = self.gt
-        if self.lt is not None:
-            settings["lt"] = self.lt
+        if self.min is not None:
+            settings["min"] = self.min
+        if self.max is not None:
+            settings["max"] = self.max
         return settings

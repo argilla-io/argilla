@@ -162,7 +162,7 @@ def test_init_wrong_metadata_properties(
             fields=feedback_dataset_fields,
             questions=feedback_dataset_questions,
             metadata_properties=[
-                IntegerMetadataProperty(name="metadata-property-1"),
-                IntegerMetadataProperty(name="metadata-property-1"),
+                IntegerMetadataProperty(name="metadata-property-1", min=0, max=10),
+                IntegerMetadataProperty(name="metadata-property-1", min=0, max=10),
             ],
         )

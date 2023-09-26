@@ -30,7 +30,8 @@ class RemoteTermsMetadataProperty(TermsMetadataProperty, RemoteSchema):
         return TermsMetadataProperty(
             name=self.name,
             description=self.description,
-            visible_for_annotators=self.visible_for_annotators,
+            # TODO: uncomment once API is ready
+            # visible_for_annotators=self.visible_for_annotators,
             values=self.values,
         )
 
@@ -51,8 +52,8 @@ class RemoteIntegerMetadataProperty(IntegerMetadataProperty, RemoteSchema):
             name=self.name,
             description=self.description,
             # visible_for_annotators=self.visible_for_annotators,
-            gt=self.gt,
-            lt=self.lt,
+            min=self.min,
+            max=self.max,
         )
 
     @classmethod
@@ -60,9 +61,10 @@ class RemoteIntegerMetadataProperty(IntegerMetadataProperty, RemoteSchema):
         return RemoteIntegerMetadataProperty(
             name=payload.name,
             description=payload.description,
+            # TODO: uncomment once API is ready
             # visible_for_annotators=payload.visible_for_annotators,
-            gt=payload.settings.get("gt"),
-            lt=payload.settings.get("lt"),
+            min=payload.settings.get("min"),
+            max=payload.settings.get("max"),
         )
 
 
@@ -72,8 +74,8 @@ class RemoteFloatMetadataProperty(FloatMetadataProperty, RemoteSchema):
             name=self.name,
             description=self.description,
             visible_for_annotators=self.visible_for_annotators,
-            gt=self.gt,
-            lt=self.lt,
+            min=self.min,
+            max=self.max,
         )
 
     @classmethod
@@ -81,7 +83,8 @@ class RemoteFloatMetadataProperty(FloatMetadataProperty, RemoteSchema):
         return RemoteFloatMetadataProperty(
             name=payload.name,
             description=payload.description,
+            # TODO: uncomment once API is ready
             # visible_for_annotators=payload.visible_for_annotators,
-            gt=payload.settings.get("gt"),
-            lt=payload.settings.get("lt"),
+            min=payload.settings.get("min"),
+            max=payload.settings.get("max"),
         )
