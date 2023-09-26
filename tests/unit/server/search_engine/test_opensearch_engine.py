@@ -539,10 +539,23 @@ class TestSuiteOpenSearchEngine:
                         filter_cls = FloatMetadataFilter
                     metadata_filters.append(filter_cls(metadata_property, **metadata_filter_config))
                     break
-        opensearch.indices.get(index_name_for_dataset(test_banking_sentiment_dataset))
+
         result = await opensearch_engine.search(test_banking_sentiment_dataset, metadata_filters=metadata_filters)
         assert len(result.items) == expected_items
         assert result.total == expected_items
+
+    async def test_search_with_no_query(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset: Dataset,
+    ):
+        result = await opensearch_engine.search(test_banking_sentiment_dataset)
+        assert len(result.items) == len(test_banking_sentiment_dataset.records)
+        assert result.total == len(test_banking_sentiment_dataset.records)
+
+        result_scores = set([item.score for item in result.items])
+        assert result_scores == {1.0}
 
     async def test_search_with_response_status_filter_does_not_affect_the_result_scores(
         self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch, test_banking_sentiment_dataset: Dataset
