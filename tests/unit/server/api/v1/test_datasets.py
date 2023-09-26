@@ -445,7 +445,7 @@ class TestSuiteDatasets:
             f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header
         )
 
-        assert response.status_code == 200
+        assert response.status_code == 200, response.json()
         assert response.json() == {
             "items": [
                 {
@@ -3355,37 +3355,37 @@ class TestSuiteDatasets:
             ),
             (
                 {"name": "integer_prop", "type": "integer"},
-                '{"from": 10, "to": 20}',
+                '{"ge": 10, "le": 20}',
                 IntegerMetadataFilter,
                 dict(low=10, high=20),
             ),
             (
                 {"name": "integer_prop", "type": "integer"},
-                '{"from": 20}',
+                '{"ge": 20}',
                 IntegerMetadataFilter,
                 dict(low=20, high=None),
             ),
             (
                 {"name": "integer_prop", "type": "integer"},
-                '{"to": 20}',
+                '{"le": 20}',
                 IntegerMetadataFilter,
                 dict(low=None, high=20),
             ),
             (
                 {"name": "float_prop", "type": "float"},
-                '{"from": -1.30, "to": 23.23}',
+                '{"ge": -1.30, "le": 23.23}',
                 FloatMetadataFilter,
                 dict(low=-1.30, high=23.23),
             ),
             (
                 {"name": "float_prop", "type": "float"},
-                '{"from": 23.23}',
+                '{"ge": 23.23}',
                 FloatMetadataFilter,
                 dict(low=23.23, high=None),
             ),
             (
                 {"name": "float_prop", "type": "float"},
-                '{"to": 11.32}',
+                '{"le": 11.32}',
                 FloatMetadataFilter,
                 dict(low=None, high=11.32),
             ),

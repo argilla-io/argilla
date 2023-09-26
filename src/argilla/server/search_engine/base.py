@@ -81,8 +81,8 @@ class IntegerMetadataFilter(MetadataFilter):
     high: Optional[int] = None
 
     class RangeModel(BaseModel):
-        from_: Optional[int] = Field(alias="from")
-        to: Optional[int]
+        ge: Optional[int]
+        le: Optional[int]
 
     def __post_init__(self):
         if self.low is None and self.high is None:
@@ -91,7 +91,7 @@ class IntegerMetadataFilter(MetadataFilter):
     @classmethod
     def from_string(cls, metadata_property: MetadataProperty, string: str) -> "IntegerMetadataFilter":
         model = cls.RangeModel.parse_raw(string)
-        return cls(metadata_property, model.from_, model.to)
+        return cls(metadata_property, low=model.ge, high=model.le)
 
 
 # TODO: transform to `pydantic.BaseModel`
@@ -101,8 +101,8 @@ class FloatMetadataFilter(MetadataFilter):
     high: Optional[float] = None
 
     class RangeModel(BaseModel):
-        from_: Optional[float] = Field(alias="from")
-        to: Optional[float]
+        ge: Optional[float]
+        le: Optional[float]
 
     def __post_init__(self):
         if self.low is None and self.high is None:
@@ -111,7 +111,7 @@ class FloatMetadataFilter(MetadataFilter):
     @classmethod
     def from_string(cls, metadata_property: MetadataProperty, string: str) -> "FloatMetadataFilter":
         model = cls.RangeModel.parse_raw(string)
-        return cls(metadata_property, model.from_, model.to)
+        return cls(metadata_property, low=model.ge, high=model.le)
 
 
 @dataclasses.dataclass
