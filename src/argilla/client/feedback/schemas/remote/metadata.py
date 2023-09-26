@@ -41,8 +41,7 @@ class RemoteTermsMetadataProperty(TermsMetadataProperty, RemoteSchema):
             description=payload.description,
             # TODO: uncomment once API is ready
             # visible_for_annotators=payload.visible_for_annotators,
-            # values=payload.settings.get("values"),
-            values=["this", "is", "a", "mock"],
+            values=payload.settings.get("values"),
         )
 
 
