@@ -3,8 +3,8 @@ class OptionForFilter {
   constructor(public readonly label: string) {}
 }
 interface RangeValue {
-  from: number;
-  to: number;
+  ge: number;
+  le: number;
 }
 
 export class Metadata {
@@ -23,8 +23,8 @@ export class Metadata {
       });
     } else {
       this.value = {
-        from: this.settings.min,
-        to: this.settings.max,
+        ge: this.settings.min,
+        le: this.settings.max,
       };
     }
   }
@@ -44,8 +44,8 @@ export class Metadata {
   public get isAnswered(): boolean {
     return this.isTerms
       ? this.selectedOptions.length > 0
-      : this.value.from !== this.settings.min ||
-          this.value.to !== this.settings.max;
+      : this.value.ge !== this.settings.min ||
+          this.value.le !== this.settings.max;
   }
 
   public get selectedOptions(): OptionForFilter[] {
@@ -66,12 +66,12 @@ export class Metadata {
       });
     } else {
       try {
-        const { from, to } = JSON.parse(value);
-        this.value.from = from;
-        this.value.to = to;
+        const { ge, le } = JSON.parse(value);
+        this.value.ge = ge;
+        this.value.le = le;
       } catch (error) {
-        this.value.from = this.settings.min;
-        this.value.to = this.settings.max;
+        this.value.ge = this.settings.min;
+        this.value.le = this.settings.max;
       }
     }
   }
@@ -79,7 +79,7 @@ export class Metadata {
   clear(): void {
     if (this.isTerms) return this.options.forEach((o) => (o.selected = false));
 
-    this.value.from = this.settings.min;
-    this.value.to = this.settings.max;
+    this.value.ge = this.settings.min;
+    this.value.le = this.settings.max;
   }
 }

@@ -15,13 +15,13 @@ export default {
   },
   data() {
     return {
-      sliderValues: [this.metadata.value.from, this.metadata.value.to],
+      sliderValues: [this.metadata.value.ge, this.metadata.value.le],
     };
   },
   watch: {
     sliderValues() {
-      this.metadata.value.from = this.sliderValues[0];
-      this.metadata.value.to = this.sliderValues[1];
+      this.metadata.value.ge = this.sliderValues[0];
+      this.metadata.value.le = this.sliderValues[1];
     },
   },
 };

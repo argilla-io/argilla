@@ -76,11 +76,11 @@ describe("MetadataFilter ", () => {
       const metadataFilter = new MetadataFilter(createMetadataMock());
       metadataFilter
         .findByCategory("loss")
-        .completeMetadata(JSON.stringify({ from: 10, to: 20 }));
+        .completeMetadata(JSON.stringify({ ge: 10, le: 20 }));
       const routerParams = metadataFilter.convertToRouteParam();
 
       // eslint-disable-next-line quotes
-      expect(routerParams).toEqual(['loss:{"from":10,"to":20}']);
+      expect(routerParams).toEqual(['loss:{"ge":10,"le":20}']);
     });
 
     test("should return the router params for answered filters", () => {
@@ -96,7 +96,7 @@ describe("MetadataFilter ", () => {
       const metadataFilter = new MetadataFilter(createMetadataMock());
       metadataFilter.completeByRouteParams(
         // eslint-disable-next-line quotes
-        'split:test,train+loss:{"from":10,"to":20}+float:{"from":0.5,"to":0.6}'
+        'split:test,train+loss:{"ge":10,"le":20}+float:{"ge":0.5,"le":0.6}'
       );
 
       expect(
@@ -105,13 +105,13 @@ describe("MetadataFilter ", () => {
           .selectedOptions.map((option) => option.label)
       ).toEqual(["test", "train"]);
       expect(metadataFilter.findByCategory("loss").value).toEqual({
-        from: 10,
-        to: 20,
+        ge: 10,
+        le: 20,
       });
 
       expect(metadataFilter.findByCategory("float").value).toEqual({
-        from: 0.5,
-        to: 0.6,
+        ge: 0.5,
+        le: 0.6,
       });
     });
 
@@ -142,8 +142,8 @@ describe("MetadataFilter ", () => {
       metadataFilter.completeByRouteParams("loss:invalid");
 
       expect(metadataFilter.findByCategory("loss").value).toEqual({
-        from: 0,
-        to: 2,
+        ge: 0,
+        le: 2,
       });
     });
   });

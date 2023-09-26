@@ -71,9 +71,9 @@ describe("Metadata", () => {
     });
     test("should complete the metadata when is integer", () => {
       const metadata = createMetadataInteger();
-      metadata.completeMetadata(JSON.stringify({ from: 10, to: 20 }));
+      metadata.completeMetadata(JSON.stringify({ ge: 10, le: 20 }));
 
-      expect(metadata.value).toEqual({ from: 10, to: 20 });
+      expect(metadata.value).toEqual({ ge: 10, le: 20 });
     });
   });
 
@@ -90,10 +90,10 @@ describe("Metadata", () => {
 
     test("should clear the metadata when is integer set the settings max and min values", () => {
       const metadata = createMetadataInteger();
-      metadata.completeMetadata(JSON.stringify({ from: 10, to: 20 }));
+      metadata.completeMetadata(JSON.stringify({ ge: 10, le: 20 }));
       metadata.clear();
 
-      expect(metadata.value).toEqual({ from: 0, to: 2 });
+      expect(metadata.value).toEqual({ ge: 0, le: 2 });
     });
   });
 });
