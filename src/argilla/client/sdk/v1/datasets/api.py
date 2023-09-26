@@ -373,6 +373,31 @@ def add_question(
     return handle_response_error(response)
 
 
+def get_metadata_properties(
+    client: httpx.Client, id: UUID
+) -> Response[Union[List[FeedbackMetadataPropertyModel], ErrorMessage, HTTPValidationError]]:
+    """Sends a GET request to `/api/v1/datasets/{id}/metadata-properties` endpoint to
+    retrieve a list of `FeedbackDataset` metadata properties.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to retrieve the metadata properties from.
+
+    Returns:
+        A `Response` object containing a `parsed` attribute with the parsed response if the
+        request was successful, which is a list of `FeedbackMetadataPropertyModel`.
+    """
+    url = f"/api/v1/datasets/{id}/metadata-properties"
+
+    response = client.get(url=url)
+
+    if response.status_code == 200:
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = [FeedbackMetadataPropertyModel(**item) for item in response.json()["items"]]
+        return response_obj
+    return handle_response_error(response)
+
+
 def add_metadata_property(
     client: httpx.Client, id: UUID, metadata_property: Dict[str, Any]
 ) -> Response[Union[FeedbackMetadataPropertyModel, ErrorMessage, HTTPValidationError]]:

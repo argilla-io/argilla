@@ -23,6 +23,7 @@ from argilla.client.sdk.v1.datasets.api import (
     delete_dataset,
     get_dataset,
     get_fields,
+    get_metadata_properties,
     get_metrics,
     get_questions,
     get_records,
@@ -34,6 +35,7 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackDatasetModel,
     FeedbackFieldModel,
     FeedbackItemModel,
+    FeedbackMetadataPropertyModel,
     FeedbackMetricsModel,
     FeedbackQuestionModel,
     FeedbackRecordsModel,
@@ -43,8 +45,11 @@ from argilla.server.models import DatasetStatus, UserRole
 
 from tests.factories import (
     DatasetFactory,
+    FloatMetadataPropertyFactory,
+    IntegerMetadataPropertyFactory,
     RatingQuestionFactory,
     RecordFactory,
+    TermsMetadataPropertyFactory,
     TextFieldFactory,
     UserFactory,
     WorkspaceFactory,
@@ -218,6 +223,23 @@ async def test_add_question(role: UserRole) -> None:
     assert response.status_code == 201
 
 
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner, UserRole.annotator])
+@pytest.mark.asyncio
+async def test_get_questions(role: UserRole) -> None:
+    text_field = await TextFieldFactory.create()
+    rating_question = await RatingQuestionFactory.create()
+    dataset = await DatasetFactory.create(fields=[text_field], questions=[rating_question])
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+    api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
+    response = get_questions(client=api.client.httpx, id=dataset.id)
+
+    assert response.status_code == 200
+    assert isinstance(response.parsed, list)
+    assert len(response.parsed) > 0
+    assert isinstance(response.parsed[0], FeedbackQuestionModel)
+
+
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
 async def test_add_metadata_property(role: UserRole) -> None:
@@ -237,21 +259,21 @@ async def test_add_metadata_property(role: UserRole) -> None:
     assert response.status_code == 201
 
 
-@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner, UserRole.annotator])
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
-async def test_get_questions(role: UserRole) -> None:
-    text_field = await TextFieldFactory.create()
-    rating_question = await RatingQuestionFactory.create()
-    dataset = await DatasetFactory.create(fields=[text_field], questions=[rating_question])
+async def test_get_metadata_properties(role: UserRole) -> None:
+    dataset = await DatasetFactory.create()
     user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+    await TermsMetadataPropertyFactory.create(dataset=dataset)
+    await IntegerMetadataPropertyFactory.create(dataset=dataset)
+    await FloatMetadataPropertyFactory.create(dataset=dataset)
 
     api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
-    response = get_questions(client=api.client.httpx, id=dataset.id)
-
+    response = get_metadata_properties(client=api.client.httpx, id=dataset.id)
     assert response.status_code == 200
     assert isinstance(response.parsed, list)
-    assert len(response.parsed) > 0
-    assert isinstance(response.parsed[0], FeedbackQuestionModel)
+    assert len(response.parsed) == 3
+    assert isinstance(response.parsed[0], FeedbackMetadataPropertyModel)
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])

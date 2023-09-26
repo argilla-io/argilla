@@ -300,6 +300,13 @@ class ArgillaMixin:
             questions.append(ArgillaMixin._parse_to_remote_question(question))
         return questions
 
+    @staticmethod
+    def __get_metadata_properties(client: "httpx.Client", id: UUID) -> List["AllowedRemoteMetadataPropertiesTypes"]:
+        metadata_properties = []
+        for metadata_prop in datasets_api_v1.get_metadata_properties(client=client, id=id).parsed:
+            metadata_properties.append(ArgillaMixin._parse_to_remote_metadata_property(metadata_prop))
+        return metadata_properties
+
     @classmethod
     def from_argilla(
         cls: Type["FeedbackDataset"],
@@ -346,6 +353,7 @@ class ArgillaMixin:
 
         fields = cls.__get_fields(client=httpx_client, id=existing_dataset.id)
         questions = cls.__get_questions(client=httpx_client, id=existing_dataset.id)
+        metadata_properties = cls.__get_metadata_properties(client=httpx_client, id=existing_dataset.id)
 
         return RemoteFeedbackDataset(
             client=httpx_client,
@@ -356,7 +364,10 @@ class ArgillaMixin:
             updated_at=existing_dataset.updated_at,
             fields=fields,
             questions=questions,
+            metadata_properties=metadata_properties,
             guidelines=existing_dataset.guidelines or None,
+            # TODO: uncomment once we support in the API
+            # allow_extra_metadata=existing_dataset.allow_extra_metadata,
         )
 
     @classmethod
