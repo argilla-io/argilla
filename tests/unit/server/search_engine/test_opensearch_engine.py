@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import Optional, TYPE_CHECKING, Any, AsyncGenerator, List, Union
+from typing import TYPE_CHECKING, Any, AsyncGenerator, List, Optional, Union
 
 from argilla.server.enums import MetadataPropertyType, ResponseStatus, ResponseStatusFilter
 from argilla.server.models import Record, User
@@ -558,7 +558,6 @@ class TestSuiteOpenSearchEngine:
         statuses: List[ResponseStatusFilter],
         expected_items: int,
     ):
-
         await self._configure_record_responses(opensearch, test_banking_sentiment_dataset, statuses, expected_items)
 
         result = await opensearch_engine.search(
