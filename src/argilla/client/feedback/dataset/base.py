@@ -23,7 +23,7 @@ from argilla.client.feedback.schemas import (
     FeedbackRecord,
     FieldSchema,
 )
-from argilla.client.feedback.schemas.types import AllowedQuestionTypes
+from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes, AllowedQuestionTypes
 from argilla.client.feedback.training.schemas import (
     TrainingTaskForChatCompletion,
     TrainingTaskForDPO,
@@ -45,6 +45,7 @@ if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import (
         AllowedFieldTypes,
         AllowedRemoteFieldTypes,
+        AllowedRemoteMetadataPropertyTypes,
         AllowedRemoteQuestionTypes,
     )
 
@@ -60,13 +61,20 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         *,
         fields: Union[List["AllowedFieldTypes"], List["AllowedRemoteFieldTypes"]],
         questions: Union[List["AllowedQuestionTypes"], List["AllowedRemoteQuestionTypes"]],
+        metadata_properties: Optional[
+            Union[List["AllowedMetadataPropertyTypes"], List["AllowedRemoteMetadataPropertyTypes"]]
+        ] = None,
         guidelines: Optional[str] = None,
+        # TODO: uncomment once ready in the API
+        # extra_metadata_allowed: bool = True,
     ) -> None:
         """Initializes a `FeedbackDatasetBase` instance locally.
 
         Args:
             fields: contains the fields that will define the schema of the records in the dataset.
             questions: contains the questions that will be used to annotate the dataset.
+            metadata_properties: contains the metadata properties that will be indexed
+                and could be used to filter the dataset. Defaults to `None`.
             guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
 
         Raises:
@@ -117,6 +125,22 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             raise ValueError("At least one question in `questions` must be required (`required=True`).")
         self._questions = questions
 
+        if metadata_properties is not None:
+            unique_names = set()
+            for metadata_property in metadata_properties:
+                if not isinstance(metadata_property, AllowedMetadataPropertyTypes.__args__):
+                    raise TypeError(
+                        f"Expected `metadata_properties` to be a list of"
+                        f" `{'`, `'.join([arg.__name__ for arg in AllowedMetadataPropertyTypes.__args__])}` got a"
+                        f" metadata property in the list with type type {type(metadata_property)} instead"
+                    )
+                if metadata_property.name in unique_names:
+                    raise ValueError(
+                        f"Expected `metadata_properties` to have unique names, got '{metadata_property.name}' twice instead."
+                    )
+                unique_names.add(metadata_property.name)
+        self._metadata_properties = metadata_properties
+
         if guidelines is not None:
             if not isinstance(guidelines, str):
                 raise TypeError(
@@ -127,6 +151,8 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                     "Expected `guidelines` to be either None (default) or a non-empty string, minimum length is 1."
                 )
         self._guidelines = guidelines
+        # TODO: uncomment once ready in the API
+        # self._extra_metadata_allowed = extra_metadata_allowed
 
     @property
     @abstractproperty

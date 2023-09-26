@@ -30,7 +30,11 @@ if TYPE_CHECKING:
 
     from argilla.client.feedback.dataset.local import FeedbackDataset
     from argilla.client.feedback.schemas.records import FeedbackRecord
-    from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
+    from argilla.client.feedback.schemas.types import (
+        AllowedRemoteFieldTypes,
+        AllowedRemoteMetadataPropertyTypes,
+        AllowedRemoteQuestionTypes,
+    )
     from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
     from argilla.client.workspaces import Workspace
 
@@ -105,7 +109,10 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
         updated_at: datetime,
         fields: List["AllowedRemoteFieldTypes"],
         questions: List["AllowedRemoteQuestionTypes"],
+        metadata_properties: Optional[List["AllowedRemoteMetadataPropertyTypes"]] = None,
         guidelines: Optional[str] = None,
+        # TODO: uncomment once supported by the API
+        # allow_extra_metadata: bool = False,
         **kwargs: Any,
     ) -> None:
         """Initializes a `RemoteFeedbackDataset` instance in Argilla.
@@ -123,6 +130,8 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
             updated_at: contains the datetime when the dataset was last updated in Argilla.
             fields: contains the fields that will define the schema of the records in the dataset.
             questions: contains the questions that will be used to annotate the dataset.
+            metadata_properties: contains the metadata properties that will be indexed
+                and could be used to filter the dataset. Defaults to `None`.
             guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
 
         Raises:
@@ -136,7 +145,10 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
         """
         self._fields = fields
         self._questions = questions
+        self._metadata_properties = metadata_properties
         self._guidelines = guidelines
+        # TODO: uncomment once supported by the API
+        # self._allow_extra_metadata = allow_extra_metadata
 
         self._client = client  # Required to be able to use `allowed_for_roles` decorator
         self._id = id

@@ -32,7 +32,11 @@ if TYPE_CHECKING:
 
     import httpx
 
-    from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
+    from argilla.client.feedback.schemas.types import (
+        AllowedRemoteFieldTypes,
+        AllowedRemoteMetadataPropertyTypes,
+        AllowedRemoteQuestionTypes,
+    )
     from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
     from argilla.client.workspaces import Workspace
 
@@ -130,7 +134,10 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         updated_at: datetime,
         fields: List["AllowedRemoteFieldTypes"],
         questions: List["AllowedRemoteQuestionTypes"],
+        metadata_properties: Optional[List["AllowedRemoteMetadataPropertyTypes"]] = None,
         guidelines: Optional[str] = None,
+        # TODO: uncomment once supported by the API
+        # allow_extra_metadata: bool = False,
     ) -> None:
         super().__init__(
             client=client,
@@ -141,7 +148,10 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             updated_at=updated_at,
             fields=fields,
             questions=questions,
+            metadata_properties=metadata_properties,
             guidelines=guidelines,
+            # TODO: uncomment once supported by the API
+            # allow_extra_metadata=allow_extra_metadata,
         )
 
     def filter_by(

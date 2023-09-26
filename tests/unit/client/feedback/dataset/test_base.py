@@ -16,11 +16,7 @@ from typing import TYPE_CHECKING, List
 
 import pytest
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
-from argilla.client.feedback.schemas import (
-    RatingQuestion,
-    TextField,
-    TextQuestion,
-)
+from argilla.client.feedback.schemas import IntegerMetadataProperty, RatingQuestion, TextField, TextQuestion
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
@@ -144,5 +140,29 @@ def test_init_wrong_questions(
             questions=[
                 TextQuestion(name="question-1", required=True),
                 TextQuestion(name="question-1", required=True),
+            ],
+        )
+
+
+def test_init_wrong_metadata_properties(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+) -> None:
+    with pytest.raises(TypeError, match="Expected `metadata_properties` to be a list"):
+        FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=feedback_dataset_fields,
+            questions=feedback_dataset_questions,
+            metadata_properties=["wrong type"],
+        )
+    with pytest.raises(ValueError, match="Expected `metadata_properties` to have unique names"):
+        FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=feedback_dataset_fields,
+            questions=feedback_dataset_questions,
+            metadata_properties=[
+                IntegerMetadataProperty(name="metadata-property-1"),
+                IntegerMetadataProperty(name="metadata-property-1"),
             ],
         )
