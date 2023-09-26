@@ -7,14 +7,14 @@
   >
     <MetadataLabelsSelectorSearch
       v-model="searchText"
-      placeholder="Filter by..."
+      :placeholder="$t('filterBy')"
       :selected-options="metadata.selectedOptions"
     />
     <div class="labels-selector__items">
       <BaseCheckbox
         class="labels-selector__item"
         :class="
-          index === preselectionIndex
+          index === preSelectionIndex
             ? 'labels-selector__item--highlighted'
             : null
         "
@@ -22,7 +22,7 @@
         :key="option.label"
         :value="option.selected"
         v-model="option.selected"
-        @mouseover.native="preselectionIndex = index"
+        @mouseover.native="preSelectionIndex = index"
       >
         {{ option.label }}
       </BaseCheckbox>
@@ -40,12 +40,12 @@ export default {
   data: () => {
     return {
       searchText: "",
-      preselectionIndex: 0,
+      preSelectionIndex: 0,
     };
   },
   watch: {
     searchText() {
-      this.preselectionIndex = 0;
+      this.preSelectionIndex = 0;
     },
   },
   computed: {
@@ -58,39 +58,26 @@ export default {
   },
   methods: {
     includePreselectedOption() {
-      if (!this.labelsFilteredBySearchText.length) {
-        return;
-      }
+      if (!this.labelsFilteredBySearchText.length) return;
+
       this.toggleSelectedOption(
-        this.labelsFilteredBySearchText[this.preselectionIndex]
+        this.labelsFilteredBySearchText[this.preSelectionIndex]
       );
-      this.preselectionIndex = 0;
-    },
-    removeSelectedOption(option) {
-      option.selected = false;
-    },
-    includeSelectedOption(option) {
-      option.selected = true;
+
+      this.preSelectionIndex = 0;
     },
     toggleSelectedOption(option) {
-      if (option.selected) {
-        this.removeSelectedOption(option);
-      } else {
-        this.includeSelectedOption(option);
-      }
-    },
-    labelIsHighlighted(index) {
-      return this.activedSearchWithResults && index === 0;
+      option.selected = !option.selected;
     },
     preselectNextOption() {
-      this.preselectionIndex === this.optionsLength - 1
-        ? (this.preselectionIndex = 0)
-        : this.preselectionIndex++;
+      this.preSelectionIndex === this.optionsLength - 1
+        ? (this.preSelectionIndex = 0)
+        : this.preSelectionIndex++;
     },
     preselectPreviousOption() {
-      this.preselectionIndex === 0
-        ? (this.preselectionIndex = this.optionsLength - 1)
-        : this.preselectionIndex--;
+      this.preSelectionIndex === 0
+        ? (this.preSelectionIndex = this.optionsLength - 1)
+        : this.preSelectionIndex--;
     },
   },
 };

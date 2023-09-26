@@ -2,7 +2,7 @@
   <div>
     <SearchLabelComponent
       v-model="searchText"
-      placeholder="Filter by..."
+      :placeholder="$t('filterBy')"
       searchRef="metadataSearch"
       class="category__search"
     />
