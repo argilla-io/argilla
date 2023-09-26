@@ -16,7 +16,7 @@ import dataclasses
 import re
 from abc import ABCMeta, abstractmethod
 from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator, Dict, Iterable, List, Optional, Union
+from typing import Any, AsyncGenerator, Dict, Iterable, List, Literal, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -26,7 +26,6 @@ from argilla.server.models import Dataset, MetadataProperty, Record, Response, U
 
 __all__ = [
     "SearchEngine",
-    "UserResponse",
     "StringQuery",
     "MetadataFilter",
     "TermsMetadataFilter",
@@ -35,12 +34,8 @@ __all__ = [
     "UserResponseStatusFilter",
     "SearchResponseItem",
     "SearchResponses",
+    "SortBy",
 ]
-
-
-class UserResponse(BaseModel):
-    values: Optional[Dict[str, Any]]
-    status: ResponseStatus
 
 
 @dataclasses.dataclass
@@ -124,6 +119,14 @@ class SearchResponses:
     total: int = 0
 
 
+class SortBy(BaseModel):
+    field: Union[MetadataProperty, Literal["inserted_at"], Literal["updated_at"]]
+    order: Union[Literal["asc"], Literal["desc"]] = "asc"
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
 class SearchEngine(metaclass=ABCMeta):
     registered_classes = {}
 
@@ -203,5 +206,6 @@ class SearchEngine(metaclass=ABCMeta):
         metadata_filters: Optional[List[MetadataFilter]] = None,
         offset: int = 0,
         limit: int = 100,
+        sort_by: List[SortBy] = None,
     ) -> SearchResponses:
         pass

@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
+import datetime
 from abc import abstractmethod
 from typing import Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID
@@ -38,11 +39,16 @@ from argilla.server.search_engine.base import (
     SearchEngine,
     SearchResponseItem,
     SearchResponses,
+    SortBy,
     StringQuery,
     TermsMetadataFilter,
-    UserResponse,
     UserResponseStatusFilter,
 )
+
+
+class UserResponse(BaseModel):
+    values: Optional[Dict[str, Any]]
+    status: ResponseStatus
 
 
 class SearchDocumentGetter(GetterDict):
@@ -75,6 +81,9 @@ class SearchDocument(BaseModel):
 
     metadata: Optional[Dict[str, Any]] = None
     responses: Optional[Dict[str, UserResponse]]
+
+    inserted_at: datetime.datetime
+    updated_at: datetime.datetime
 
     class Config:
         orm_mode = True
@@ -197,6 +206,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         metadata_filters: Optional[List[MetadataFilter]] = None,
         offset: int = 0,
         limit: int = 100,
+        sort_by: List[SortBy] = None,
     ) -> SearchResponses:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html
 
@@ -217,7 +227,9 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         query = {"bool": bool_query}
         index = await self._get_index_or_raise(dataset)
 
-        response = await self._index_search_request(index, query=query, size=limit, from_=offset)
+        sort = self._build_sort_configuration(sort_by)
+        response = await self._index_search_request(index, query=query, size=limit, from_=offset, sort=sort)
+
         return await self._process_search_response(response)
 
     def _configure_index_mappings(self, dataset: Dataset) -> dict:
@@ -228,6 +240,8 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             "properties": {
                 # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
                 "id": {"type": "keyword"},
+                "inserted_at": {"type": "date_nanos"},
+                "updated_at": {"type": "date_nanos"},
                 "responses": {"dynamic": True, "type": "object"},
                 # metadata properties without mappings will be ignored
                 "metadata": {"dynamic": False, "type": "object"},
@@ -357,6 +371,17 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         return {"bool": {"should": filters, "minimum_should_match": 1}}
 
+    def _build_sort_configuration(self, sort_by: List[SortBy]) -> Optional[str]:
+        if not sort_by:
+            return None
+
+        sort_config = []
+        for sort in sort_by:
+            if isinstance(sort.field, str):
+                sort_config.append(f"{sort.field}:{sort.order}")
+
+        return ",".join(sort_config)
+
     @abstractmethod
     def _configure_index_settings(self) -> dict:
         """Defines settings configuration for the index. Depending on which backend is used, this may differ"""
@@ -383,7 +408,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         pass
 
     @abstractmethod
-    async def _index_search_request(self, index: str, query: dict, size: int, from_: int) -> dict:
+    async def _index_search_request(self, index: str, query: dict, size: int, from_: int, sort: str = None) -> dict:
         """Executes request for search documents on a index"""
         pass
 
