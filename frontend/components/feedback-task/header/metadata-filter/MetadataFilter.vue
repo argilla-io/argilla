@@ -11,7 +11,7 @@
         <MetadataButton
           :is-active="visibleDropdown"
           :badges="appliedCategoriesFilters"
-          :active-badge="visibleCategoryName"
+          :active-badge="visibleCategory?.name"
           @click-on-badge="openCategoryFilter"
           @click-on-clear="removeCategoryFilters"
         />
@@ -81,7 +81,7 @@ export default {
   methods: {
     onMetadataToggleVisibility(value) {
       this.visibleDropdown = value;
-      this.selectMetadataCategory(null);
+      this.visibleCategory = null;
     },
     selectMetadataCategory(category) {
       this.visibleCategory = this.metadataFilters.findByCategory(category);
@@ -96,13 +96,14 @@ export default {
 
       this.appliedCategoriesFilters = this.metadataFilters.filteredCategories;
     },
-    openCategoryFilter(category, e) {
-      e.stopPropagation();
-      this.visibleDropdown = category !== this.visibleCategoryName;
+    openCategoryFilter(category) {
+      this.visibleDropdown = this.visibleDropdown
+        ? category !== this.visibleCategory?.name
+        : true;
+
       this.selectMetadataCategory(category);
     },
-    removeCategoryFilters(category, e) {
-      e.stopPropagation();
+    removeCategoryFilters(category) {
       this.metadataFilters.findByCategory(category).clear();
       this.applyFilter();
     },
@@ -110,9 +111,6 @@ export default {
   computed: {
     metadataCategoriesName() {
       return this.metadataFilters.categories;
-    },
-    visibleCategoryName() {
-      return this.visibleCategory?.name;
     },
   },
   async mounted() {

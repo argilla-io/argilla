@@ -29,7 +29,7 @@
         <FilterTooltip v-if="visibleTooltip">
           <FilterBadge
             class="badge"
-            v-for="badge in collapsedbadges"
+            v-for="badge in collapsedBadges"
             :key="badge"
             :text="badge"
             @on-click="onClickOnBadge(badge, $event)"
@@ -76,7 +76,7 @@ export default {
     visibleBadges() {
       return this.badges.slice(0, this.maxVisibleBadges);
     },
-    collapsedbadges() {
+    collapsedBadges() {
       return this.badges.slice(this.maxVisibleBadges, this.badges.length);
     },
     isButtonActive() {
@@ -84,11 +84,15 @@ export default {
     },
   },
   methods: {
-    onClickOnBadge(badge, $event) {
-      this.$emit("click-on-badge", badge, $event);
+    onClickOnBadge(badge, e) {
+      e.stopPropagation();
+
+      this.$emit("click-on-badge", badge, e);
     },
-    onClickOnClear(badge, $event) {
-      this.$emit("click-on-clear", badge, $event);
+    onClickOnClear(badge, e) {
+      e.stopPropagation();
+
+      this.$emit("click-on-clear", badge, e);
     },
     toggleTooltip(e) {
       e.stopPropagation();

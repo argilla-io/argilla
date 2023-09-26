@@ -102,7 +102,7 @@ export default {
   margin-bottom: $base-space;
   &__items {
     max-height: 200px;
-    overflow: scroll;
+    overflow: auto;
     margin-top: $base-space;
   }
   &__item {
