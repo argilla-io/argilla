@@ -26,6 +26,24 @@ export const metadataMocked = [
       type: "float",
     },
   },
+  {
+    id: "4",
+    name: "split_2",
+    description: "The split of the record",
+    settings: {
+      type: "terms",
+      values: ["test", "train", "validation"],
+    },
+  },
+  {
+    id: "5",
+    name: "split_3",
+    description: "The split of the record",
+    settings: {
+      type: "terms",
+      values: ["test", "train", "validation"],
+    },
+  },
 ];
 
 export const createMetadataMock = () =>
