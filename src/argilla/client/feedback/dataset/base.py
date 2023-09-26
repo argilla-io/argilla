@@ -254,10 +254,6 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         if self._fields_schema is None:
             self._fields_schema = generate_pydantic_schema(self.fields)
 
-        if self._metatada_fields_schema is None:
-            # TODO: generate metatada field schema to validate values
-            pass
-
         for record in records:
             try:
                 self._fields_schema.parse_obj(record.fields)
