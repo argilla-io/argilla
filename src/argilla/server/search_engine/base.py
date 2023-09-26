@@ -73,7 +73,7 @@ class TermsMetadataFilter(MetadataFilter):
     def from_string(cls, metadata_property: MetadataProperty, string: str) -> "MetadataFilter":
         return cls(metadata_property=metadata_property, values=string.split(","))
 
-TODO: transform to `pydantic.BaseModel`
+# TODO: transform to `pydantic.BaseModel`
 @dataclasses.dataclass
 class IntegerMetadataFilter(MetadataFilter):
     low: Optional[int] = None
