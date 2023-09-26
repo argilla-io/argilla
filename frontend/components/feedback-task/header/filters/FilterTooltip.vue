@@ -9,7 +9,6 @@ export default {
   props: {
     text: {
       type: String,
-      required: true,
     },
   },
   data() {
@@ -48,6 +47,7 @@ $triangle-size: 6px;
   background: palette(white);
   border-radius: $border-radius;
   box-shadow: $shadow;
+  z-index: 4;
   &:before {
     position: absolute;
     top: -$triangle-size;
