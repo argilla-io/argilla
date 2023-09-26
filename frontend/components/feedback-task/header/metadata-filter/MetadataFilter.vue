@@ -1,5 +1,8 @@
 <template>
-  <div class="metadata-filter">
+  <div
+    class="metadata-filter"
+    v-if="!!metadataFilters && metadataFilters.hasFilters"
+  >
     <BaseDropdown
       :visible="visibleDropdown"
       @visibility="onMetadataToggleVisibility"

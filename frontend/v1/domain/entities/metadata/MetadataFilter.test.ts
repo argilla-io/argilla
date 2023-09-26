@@ -120,4 +120,19 @@ describe("MetadataFilter ", () => {
       ).toEqual([]);
     });
   });
+
+  describe("Has Filters", () => {
+    test("should return true if there is filters", () => {
+      const metadataFilter = new MetadataFilter(createMetadataMock());
+      metadataFilter.completeByRouteParams("split:test,train");
+
+      expect(metadataFilter.hasFilters).toBeTruthy();
+    });
+
+    test("should return false if there is no filters", () => {
+      const metadataFilter = new MetadataFilter([]);
+
+      expect(metadataFilter.hasFilters).toBeFalsy();
+    });
+  });
 });

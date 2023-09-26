@@ -3,6 +3,10 @@ import { Metadata } from "./Metadata";
 export class MetadataFilter {
   constructor(private readonly metadata: Metadata[]) {}
 
+  get hasFilters() {
+    return this.metadata.length > 0;
+  }
+
   get categories() {
     return this.metadata.map((cat) => cat.name);
   }
