@@ -1,16 +1,16 @@
 <template>
   <div class="filters">
-    <span class="filters__component">
-      <SearchBarBase
-        v-model="searchInput"
-        :placeholder="'Introduce a query'"
-        :additionalInfo="additionalInfoForSearchComponent"
-      />
-    </span>
-    <span class="filters__component">
-      <StatusFilter :options="statusOptions" v-model="selectedStatus" />
-    </span>
+    <SearchBarBase
+      v-model="searchInput"
+      :placeholder="'Introduce a query'"
+      :additionalInfo="additionalInfoForSearchComponent"
+    />
     <MetadataFilter :datasetId="datasetId" />
+    <StatusFilter
+      class="filters__status"
+      :options="statusOptions"
+      v-model="selectedStatus"
+    />
   </div>
 </template>
 
@@ -96,7 +96,11 @@ export default {
   flex-wrap: wrap;
   gap: $base-space * 2;
   align-items: center;
+  width: 100%;
   padding: $base-space * 2 0;
+  &__status {
+    margin-left: auto;
+  }
 }
 .search-area {
   width: clamp(300px, 30vw, 800px);
