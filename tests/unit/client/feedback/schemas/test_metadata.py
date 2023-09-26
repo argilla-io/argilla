@@ -65,12 +65,7 @@ def test_terms_metadata_property(schema_kwargs: Dict[str, Any], server_payload: 
         (
             {"name": "terms-metadata-property", "values": []},
             ValidationError,
-            "1 validation error for TermsMetadataProperty\nvalues\n  ensure this value has at least 2 items",
-        ),
-        (
-            {"name": "terms-metadata-property", "values": ["just-one"]},
-            ValidationError,
-            "1 validation error for TermsMetadataProperty\nvalues\n  ensure this value has at least 2 items",
+            "1 validation error for TermsMetadataProperty\nvalues\n  ensure this value has at least 1 items",
         ),
         (
             {"name": "terms-metadata-property", "values": ["a", "a"]},
