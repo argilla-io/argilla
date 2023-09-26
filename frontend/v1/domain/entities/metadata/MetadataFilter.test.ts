@@ -33,6 +33,30 @@ describe("MetadataFilter ", () => {
     });
   });
 
+  describe("FilteredCategories", () => {
+    test("should return the categories", () => {
+      const metadataFilter = new MetadataFilter(createMetadataMock());
+      const categories = metadataFilter.filteredCategories;
+
+      expect(categories).toEqual([]);
+    });
+
+    test("should return empty array if there is no metadata", () => {
+      const metadataFilter = new MetadataFilter([]);
+      const categories = metadataFilter.filteredCategories;
+
+      expect(categories).toEqual([]);
+    });
+
+    test("should return the categories with selected options", () => {
+      const metadataFilter = new MetadataFilter(createMetadataMock());
+      metadataFilter.findByCategory("split").completeMetadata("test,train");
+      const categories = metadataFilter.filteredCategories;
+
+      expect(categories).toEqual(["split"]);
+    });
+  });
+
   describe("Convert to Router Parameter", () => {
     test("should return the router params for answered filters for terms", () => {
       const metadataFilter = new MetadataFilter(createMetadataMock());

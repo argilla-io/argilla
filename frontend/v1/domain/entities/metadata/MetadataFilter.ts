@@ -7,6 +7,10 @@ export class MetadataFilter {
     return this.metadata.map((cat) => cat.name);
   }
 
+  get filteredCategories() {
+    return this.getFilterSelected().map((cat) => cat.name);
+  }
+
   findByCategory(category: string) {
     return this.metadata.find((cat) => cat.name === category);
   }
@@ -32,16 +36,20 @@ export class MetadataFilter {
     });
   }
 
+  private getFilterSelected() {
+    return this.metadata.filter((m) =>
+      m.isTerms ? m.selectedOptions.length > 0 : !!m.value
+    );
+  }
+
   private toQueryParams() {
-    return this.metadata
-      .filter((m) => (m.isTerms ? m.selectedOptions.length > 0 : !!m.value))
-      .map((m) => {
-        return {
-          name: m.name,
-          value: m.isTerms
-            ? m.selectedOptions.map((s) => s.label).join(",")
-            : m.value,
-        };
-      });
+    return this.getFilterSelected().map((m) => {
+      return {
+        name: m.name,
+        value: m.isTerms
+          ? m.selectedOptions.map((s) => s.label).join(",")
+          : m.value,
+      };
+    });
   }
 }

@@ -6,7 +6,7 @@
     >
       <span slot="dropdown-header">
         <MetadataButton
-          :badges="appliedCategories"
+          :badges="appliedCategoriesFilters"
           :active-badge="visibleCategoryName"
           @click-on-badge="openCategoryFilter"
           @click-on-clear="removeCategoryFilters"
@@ -75,6 +75,7 @@ export default {
       visibleDropdown: false,
       visibleCategory: null,
       selectedOptions: [],
+      appliedCategoriesFilters: [],
     };
   },
   created() {
@@ -98,6 +99,8 @@ export default {
         "metadata-filter-changed",
         this.metadataFilters.convertToRouteParam()
       );
+
+      this.appliedCategoriesFilters = this.metadataFilters.filteredCategories;
     },
     openCategoryFilter(category, e) {
       e.stopPropagation();
@@ -114,18 +117,14 @@ export default {
     metadataCategoriesName() {
       return this.metadataFilters.categories;
     },
-    metadataFilterFromQuery() {
-      return this.$route.query?._metadata?.split("+") ?? [];
-    },
-    appliedCategories() {
-      return this.metadataFilterFromQuery.map((m) => m.split(":")[0]);
-    },
     visibleCategoryName() {
       return (this.visibleDropdown && this.visibleCategory?.name) || null;
     },
   },
-  mounted() {
-    this.getMetadataFilters(this.datasetId);
+  async mounted() {
+    await this.getMetadataFilters(this.datasetId);
+
+    this.appliedCategoriesFilters = this.metadataFilters.filteredCategories;
   },
   setup() {
     return useMetadataFilterViewModel();

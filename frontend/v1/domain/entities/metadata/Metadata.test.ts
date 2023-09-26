@@ -71,4 +71,24 @@ describe("Metadata", () => {
       expect(metadata.value).toEqual(10);
     });
   });
+
+  describe("Clear", () => {
+    test("should clear the metadata when is terms", () => {
+      const metadata = createMetadataTerms();
+      metadata.completeMetadata("test,train");
+      metadata.clear();
+
+      expect(metadata.selectedOptions.map((option) => option.label)).toEqual(
+        []
+      );
+    });
+
+    test("should clear the metadata when is integer", () => {
+      const metadata = createMetadataInteger();
+      metadata.completeMetadata("10");
+      metadata.clear();
+
+      expect(metadata.value).toEqual(null);
+    });
+  });
 });
