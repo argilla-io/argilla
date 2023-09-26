@@ -2222,9 +2222,14 @@ class TestSuiteDatasets:
     @pytest.mark.parametrize(
         ("settings", "expected_settings"),
         [
-            ({"type": "terms"}, {"type": "terms"}),
-            ({"type": "integer"}, {"type": "integer"}),
-            ({"type": "float"}, {"type": "float"}),
+            ({"type": "terms", "values": ["a"]}, {"type": "terms", "values": ["a"]}),
+            ({"type": "terms", "values": ["a", "b", "c"]}, {"type": "terms", "values": ["a", "b", "c", "d", "e"]}),
+            ({"type": "integer", "min": 2}, {"type": "integer", "min": 2}),
+            ({"type": "integer", "max": 10}, {"type": "integer", "max": 10}),
+            ({"type": "integer", "min": 2, "max": 10}, {"type": "integer", "min": 2, "max": 10}),
+            ({"type": "float", "min": 2}, {"type": "float", "min": 2}),
+            ({"type": "float", "max": 10}, {"type": "float", "max": 10}),
+            ({"type": "float", "min": 2, "max": 10}, {"type": "float", "min": 2, "max": 10}),
         ],
     )
     async def test_create_dataset_metadata_property(
@@ -2297,7 +2302,15 @@ class TestSuiteDatasets:
 
     @pytest.mark.parametrize(
         "settings",
-        [None, {}, {"type": "wrong-type"}, {"type": None}],
+        [
+            None,
+            {},
+            {"type": "wrong-type"},
+            {"type": None},
+            {"type": "terms", "values": []},
+            {"type": "integer", "min": 5, "max": 2},
+            {"type": "float", "min": 2.0, "max": 5.0},
+        ],
     )
     async def test_create_dataset_metadata_property_with_invalid_settings(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, settings: dict

@@ -427,16 +427,16 @@ NT = TypeVar("NT", int, float)
 
 
 class NumericMetadataProperty(GenericModel, Generic[NT]):
-    gt: Optional[NT] = None
-    lt: Optional[NT] = None
+    min: Optional[NT] = None
+    max: Optional[NT] = None
 
     @root_validator
     def check_bounds(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        gt = values.get("gt")
-        lt = values.get("lt")
+        min = values.get("min")
+        max = values.get("max")
 
-        if gt is not None and lt is not None and gt >= lt:
-            raise ValueError(f"'gt' ({gt}) must be lower than 'lt' ({lt})")
+        if min is not None and max is not None and min >= max:
+            raise ValueError(f"'min' ({min}) must be lower than 'max' ({max})")
 
         return values
 
@@ -482,14 +482,14 @@ class TermsMetadataProperty(BaseModel):
 
 class IntegerMetadataProperty(BaseModel):
     type: Literal[MetadataPropertyType.integer]
-    gt: Optional[int] = None
-    lt: Optional[int] = None
+    min: Optional[int] = None
+    max: Optional[int] = None
 
 
 class FloatMetadataProperty(BaseModel):
     type: Literal[MetadataPropertyType.float]
-    gt: Optional[float] = None
-    lt: Optional[float] = None
+    min: Optional[float] = None
+    max: Optional[float] = None
 
 
 MetadataPropertySettings = Annotated[
