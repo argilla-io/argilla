@@ -151,7 +151,8 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                     "Expected `guidelines` to be either None (default) or a non-empty string, minimum length is 1."
                 )
         self._guidelines = guidelines
-        self._extra_metadata_allowed = extra_metadata_allowed
+        # TODO: uncomment once ready in the API
+        # self._extra_metadata_allowed = extra_metadata_allowed
 
     @property
     @abstractproperty
