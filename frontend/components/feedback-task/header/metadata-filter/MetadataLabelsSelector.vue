@@ -91,9 +91,6 @@ export default {
         this.includeSelectedOption(option);
       }
     },
-    labelIsHighlighted(index) {
-      return this.activedSearchWithResults && index === 0;
-    },
     preselectNextOption() {
       this.preselectionIndex === this.optionsLength - 1
         ? (this.preselectionIndex = 0)
