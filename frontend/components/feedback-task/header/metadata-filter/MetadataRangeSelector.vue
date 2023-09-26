@@ -3,6 +3,7 @@
     :min="metadata.settings.min"
     :max="metadata.settings.max"
     :sliderValues="sliderValues"
+    :step="step"
   />
 </template>
 <script>
@@ -16,6 +17,9 @@ export default {
   data() {
     return {
       sliderValues: [this.metadata.value.ge, this.metadata.value.le],
+      step: this.metadata.isInteger
+        ? parseInt(this.metadata.settings.max / 100)
+        : this.metadata.settings.max / 100,
     };
   },
   watch: {

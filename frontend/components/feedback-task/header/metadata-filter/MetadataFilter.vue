@@ -118,6 +118,13 @@ export default {
       return this.metadataFilters.categories;
     },
   },
+  watch: {
+    visibleDropdown() {
+      if (this.visibleDropdown) {
+        this.updateFiltersFromQueryParams();
+      }
+    },
+  },
   async mounted() {
     await this.getMetadataFilters(this.datasetId);
 
