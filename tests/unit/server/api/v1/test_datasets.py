@@ -452,7 +452,7 @@ class TestSuiteDatasets:
                     "id": str(terms_property.id),
                     "name": "terms",
                     "description": terms_property.description,
-                    "settings": {"type": "terms"},
+                    "settings": {"type": "terms", "values": ["a", "b", "c"]},
                     "inserted_at": terms_property.inserted_at.isoformat(),
                     "updated_at": terms_property.updated_at.isoformat(),
                 },
@@ -460,7 +460,7 @@ class TestSuiteDatasets:
                     "id": str(integer_property.id),
                     "name": "integer",
                     "description": integer_property.description,
-                    "settings": {"type": "integer"},
+                    "settings": {"type": "integer", "min": None, "max": None},
                     "inserted_at": integer_property.inserted_at.isoformat(),
                     "updated_at": integer_property.updated_at.isoformat(),
                 },
@@ -468,7 +468,7 @@ class TestSuiteDatasets:
                     "id": str(float_property.id),
                     "name": "float",
                     "description": float_property.description,
-                    "settings": {"type": "float"},
+                    "settings": {"type": "float", "min": None, "max": None},
                     "inserted_at": float_property.inserted_at.isoformat(),
                     "updated_at": float_property.updated_at.isoformat(),
                 },
@@ -2223,12 +2223,15 @@ class TestSuiteDatasets:
         ("settings", "expected_settings"),
         [
             ({"type": "terms", "values": ["a"]}, {"type": "terms", "values": ["a"]}),
-            ({"type": "terms", "values": ["a", "b", "c"]}, {"type": "terms", "values": ["a", "b", "c", "d", "e"]}),
-            ({"type": "integer", "min": 2}, {"type": "integer", "min": 2}),
-            ({"type": "integer", "max": 10}, {"type": "integer", "max": 10}),
+            (
+                {"type": "terms", "values": ["a", "b", "c", "d", "e"]},
+                {"type": "terms", "values": ["a", "b", "c", "d", "e"]},
+            ),
+            ({"type": "integer", "min": 2}, {"type": "integer", "min": 2, "max": None}),
+            ({"type": "integer", "max": 10}, {"type": "integer", "min": None, "max": 10}),
             ({"type": "integer", "min": 2, "max": 10}, {"type": "integer", "min": 2, "max": 10}),
-            ({"type": "float", "min": 2}, {"type": "float", "min": 2}),
-            ({"type": "float", "max": 10}, {"type": "float", "max": 10}),
+            ({"type": "float", "min": 2}, {"type": "float", "min": 2, "max": None}),
+            ({"type": "float", "max": 10}, {"type": "float", "min": None, "max": 10}),
             ({"type": "float", "min": 2, "max": 10}, {"type": "float", "min": 2, "max": 10}),
         ],
     )
@@ -2265,7 +2268,7 @@ class TestSuiteDatasets:
         workspace = await WorkspaceFactory.create()
         admin = await AdminFactory.create(workspaces=[workspace])
         dataset = await DatasetFactory.create(workspace=workspace)
-        metadata_property_json = {"name": "name", "settings": {"type": "terms"}}
+        metadata_property_json = {"name": "name", "settings": {"type": "terms", "values": ["a", "b", "c"]}}
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties",
@@ -2280,7 +2283,11 @@ class TestSuiteDatasets:
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": "name", "description": "description", "settings": {"type": "terms"}}
+        metadata_property_json = {
+            "name": "name",
+            "description": "description",
+            "settings": {"type": "terms", "values": ["a", "b", "c"]},
+        }
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
@@ -2295,7 +2302,7 @@ class TestSuiteDatasets:
             "id": str(UUID(response_body["id"])),
             "name": "name",
             "description": "description",
-            "settings": {"type": "terms"},
+            "settings": {"type": "terms", "values": ["a", "b", "c"]},
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
@@ -2309,7 +2316,7 @@ class TestSuiteDatasets:
             {"type": None},
             {"type": "terms", "values": []},
             {"type": "integer", "min": 5, "max": 2},
-            {"type": "float", "min": 2.0, "max": 5.0},
+            {"type": "float", "min": 5.0, "max": 2.0},
         ],
     )
     async def test_create_dataset_metadata_property_with_invalid_settings(
@@ -2332,7 +2339,7 @@ class TestSuiteDatasets:
         admin = await AdminFactory.create(workspaces=[workspace])
 
         dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": "name", "settings": {"type": "terms"}}
+        metadata_property_json = {"name": "name", "settings": {"type": "terms", "values": ["a", "b", "c"]}}
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties",
@@ -2346,7 +2353,7 @@ class TestSuiteDatasets:
     async def test_create_dataset_metadata_property_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
         annotator = await AnnotatorFactory.create()
         dataset = await DatasetFactory.create()
-        question_json = {"name": "name", "settings": {"type": "terms"}}
+        question_json = {"name": "name", "settings": {"type": "terms", "values": ["a", "b", "c"]}}
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties",
@@ -2387,7 +2394,7 @@ class TestSuiteDatasets:
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         metadata_property = await TermsMetadataPropertyFactory.create(name="name")
-        metadata_property_json = {"name": "name", "settings": {"type": "terms"}}
+        metadata_property_json = {"name": "name", "settings": {"type": "terms", "values": ["a", "b", "c"]}}
 
         response = await async_client.post(
             f"/api/v1/datasets/{metadata_property.dataset.id}/metadata-properties",
