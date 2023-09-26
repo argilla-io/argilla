@@ -59,9 +59,6 @@ export default {
     this.$refs.search.focus();
   },
   methods: {
-    resetValue() {
-      this.value.length && this.$emit("input", "");
-    },
     onInput($event) {
       this.$emit("input", $event.target.value);
     },
