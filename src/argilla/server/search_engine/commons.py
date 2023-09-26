@@ -45,6 +45,8 @@ from argilla.server.search_engine.base import (
     UserResponseStatusFilter,
 )
 
+ALL_RESPONSES_FIELD = "all_responses"
+
 
 class UserResponse(BaseModel):
     values: Optional[Dict[str, Any]]
@@ -243,6 +245,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
                 "responses": {"dynamic": True, "type": "object"},
+                ALL_RESPONSES_FIELD: {"type": "keyword"},  # To add all users responses
                 # metadata properties without mappings will be ignored
                 "metadata": {"dynamic": False, "type": "object"},
                 **self._mapping_for_fields(dataset.fields),
@@ -294,7 +297,12 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     def _dynamic_templates_for_question_responses(self, questions: List[Question]) -> List[dict]:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic-templates.html
         return [
-            {"status_responses": {"path_match": "responses.*.status", "mapping": {"type": "keyword"}}},
+            {
+                "status_responses": {
+                    "path_match": "responses.*.status",
+                    "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_FIELD},
+                }
+            },
             *[
                 {
                     f"{question.name}_responses": {
@@ -354,20 +362,22 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         return filters
 
     def _build_response_status_filter(self, status_filter: UserResponseStatusFilter) -> Dict[str, Any]:
-        user_response_field = f"responses.{status_filter.user.username}"
+        if status_filter.user is None:
+            response_field = ALL_RESPONSES_FIELD
+        else:
+            response_field = f"responses.{status_filter.user.username}.status"
 
+        filters = []
         statuses = [
             ResponseStatus(status).value for status in status_filter.statuses if status != ResponseStatusFilter.missing
         ]
-
-        filters = []
         if ResponseStatusFilter.missing in status_filter.statuses:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
-            filters.append({"bool": {"must_not": {"exists": {"field": user_response_field}}}})
+            filters.append({"bool": {"must_not": {"exists": {"field": response_field}}}})
 
         if statuses:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html
-            filters.append({"terms": {f"{user_response_field}.status": statuses}})
+            filters.append({"terms": {response_field: statuses}})
 
         return {"bool": {"should": filters, "minimum_should_match": 1}}
 

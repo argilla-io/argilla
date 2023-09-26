@@ -46,8 +46,8 @@ class StringQuery:
 
 @dataclasses.dataclass
 class UserResponseStatusFilter:
-    user: User
     statuses: List[ResponseStatusFilter]
+    user: Optional[User] = None
 
 
 @dataclasses.dataclass
