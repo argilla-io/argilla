@@ -46,9 +46,6 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
             metadata_properties: contains the metadata properties that will be indexed
                 and could be used to filter the dataset. Defaults to `None`.
             guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
-            extra_metadata_allowed: whether to allow to include metadata properties that
-                have not been defined in the `metadata` argument, and thus will not be
-                indexed. Defaults to `True`.
 
         Raises:
             TypeError: if `fields` is not a list of `FieldSchema`.
@@ -109,7 +106,6 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
             ...         ),
             ...     ],
             ...     guidelines="These are the annotation guidelines.",
-            ...     extra_metadata_allowed=False,
             ... )
         """
         super().__init__(
