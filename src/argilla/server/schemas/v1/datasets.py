@@ -483,7 +483,7 @@ class MetadataQueryParams(BaseModel):
     metadata: List[str] = PydanticField(Query([], regex=r"^(\w+):(.+(,(.+))*)$"))
 
     @property
-    def metadata_parsed(self):
+    def metadata_parsed(self) -> List[MetadataParsedQueryParam]:
         return [MetadataParsedQueryParam(q) for q in self.metadata]
 
 
