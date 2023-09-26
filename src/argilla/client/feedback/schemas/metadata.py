@@ -104,9 +104,9 @@ class IntegerMetadataProperty(MetadataPropertySchema):
         name: The name of the metadata property.
         description: A description of the metadata property. Defaults to `None`.
         min: The lower bound of the integer value. If not provided, then no lower bound
-            check will be applied. Defaults to `None`.
+            check will be applied.
         max: The upper bound of the integer value. If not provided, then no upper bound
-            check will be applied. Defaults to `None`.
+            check will be applied.
 
     Examples:
         >>> from argilla.client.feedback.schemas.metadata import IntegerMetadataProperty
@@ -114,8 +114,8 @@ class IntegerMetadataProperty(MetadataPropertySchema):
     """
 
     type: MetadataPropertyTypes = MetadataPropertyTypes.integer
-    min: Optional[int] = None
-    max: Optional[int] = None
+    min: int
+    max: int
 
     _bounds_validator = root_validator(allow_reuse=True)(validate_numeric_metadata_property_bounds)
 
@@ -138,9 +138,9 @@ class FloatMetadataProperty(MetadataPropertySchema):
         name: The name of the metadata property.
         description: A description of the metadata property. Defaults to `None`.
         min: The lower bound of the float value. If not provided, then no lower bound
-            check will be applied. Defaults to `None`.
+            check will be applied.
         max: The upper bound of the float value. If not provided, then no upper bound
-            check will be applied. Defaults to `None`.
+            check will be applied.
 
     Examples:
         >>> from argilla.client.feedback.schemas.metadata import FloatMetadataProperty
@@ -148,8 +148,8 @@ class FloatMetadataProperty(MetadataPropertySchema):
     """
 
     type: MetadataPropertyTypes = MetadataPropertyTypes.float
-    min: Optional[float] = None
-    max: Optional[float] = None
+    min: float
+    max: float
 
     _bounds_validator = root_validator(allow_reuse=True)(validate_numeric_metadata_property_bounds)
 

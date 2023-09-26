@@ -84,37 +84,38 @@ def test_terms_metadata_property_errors(
 @pytest.mark.parametrize(
     "schema_kwargs, server_payload",
     [
-        (
-            {"name": "a", "description": "b"},
-            {
-                "name": "a",
-                "description": "b",
-                # "visible_for_annotators": True,
-                "settings": {"type": "integer"},
-            },
-        ),
-        (
-            {
-                "name": "a",
-                # "visible_for_annotators": False,
-                "max": 5,
-            },
-            {
-                "name": "a",
-                "description": None,
-                # "visible_for_annotators": False,
-                "settings": {"type": "integer", "max": 5},
-            },
-        ),
-        (
-            {"name": "a", "min": 5},
-            {
-                "name": "a",
-                "description": None,
-                # "visible_for_annotators": True,
-                "settings": {"type": "integer", "min": 5},
-            },
-        ),
+        # TODO: uncomment this unit tests case once min and max are optional
+        # (
+        #     {"name": "a", "description": "b"},
+        #     {
+        #         "name": "a",
+        #         "description": "b",
+        #         # "visible_for_annotators": True,
+        #         "settings": {"type": "integer"},
+        #     },
+        # ),
+        # (
+        #     {
+        #         "name": "a",
+        #         # "visible_for_annotators": False,
+        #         "max": 5,
+        #     },
+        #     {
+        #         "name": "a",
+        #         "description": None,
+        #         # "visible_for_annotators": False,
+        #         "settings": {"type": "integer", "max": 5},
+        #     },
+        # ),
+        # (
+        #     {"name": "a", "min": 5},
+        #     {
+        #         "name": "a",
+        #         "description": None,
+        #         # "visible_for_annotators": True,
+        #         "settings": {"type": "integer", "min": 5},
+        #     },
+        # ),
         (
             {"name": "a", "min": 5, "max": 10},
             {
@@ -138,6 +139,16 @@ def test_integer_metadata_property(schema_kwargs: Dict[str, Any], server_payload
     [
         ({"name": "a b"}, ValidationError, "name\n  string does not match regex"),
         (
+            {"name": "integer-metadata-property", "min": 5},
+            ValidationError,
+            "1 validation error for IntegerMetadataProperty\nmax\n  field required",
+        ),
+        (
+            {"name": "integer-metadata-property", "max": 5},
+            ValidationError,
+            "1 validation error for IntegerMetadataProperty\nmin\n  field required",
+        ),
+        (
             {"name": "int-metadata-property", "min": 5, "max": 5},
             ValidationError,
             "1 validation error for IntegerMetadataProperty\n__root__\n  `IntegerMetadataProperty` with name=int-metadata-property cannot have `max` less than `min`",
@@ -159,37 +170,38 @@ def test_integer_metadata_property_errors(
 @pytest.mark.parametrize(
     "schema_kwargs, server_payload",
     [
-        (
-            {"name": "a", "description": "b"},
-            {
-                "name": "a",
-                "description": "b",
-                # "visible_for_annotators": True,
-                "settings": {"type": "float"},
-            },
-        ),
-        (
-            {
-                "name": "a",
-                # "visible_for_annotators": False,
-                "max": 5.0,
-            },
-            {
-                "name": "a",
-                "description": None,
-                # "visible_for_annotators": False,
-                "settings": {"type": "float", "max": 5.0},
-            },
-        ),
-        (
-            {"name": "a", "min": 5.0},
-            {
-                "name": "a",
-                "description": None,
-                # "visible_for_annotators": True,
-                "settings": {"type": "float", "min": 5.0},
-            },
-        ),
+        # TODO: uncomment this unit tests case once min and max are optional
+        # (
+        #     {"name": "a", "description": "b"},
+        #     {
+        #         "name": "a",
+        #         "description": "b",
+        #         # "visible_for_annotators": True,
+        #         "settings": {"type": "float"},
+        #     },
+        # ),
+        # (
+        #     {
+        #         "name": "a",
+        #         # "visible_for_annotators": False,
+        #         "max": 5.0,
+        #     },
+        #     {
+        #         "name": "a",
+        #         "description": None,
+        #         # "visible_for_annotators": False,
+        #         "settings": {"type": "float", "max": 5.0},
+        #     },
+        # ),
+        # (
+        #     {"name": "a", "min": 5.0},
+        #     {
+        #         "name": "a",
+        #         "description": None,
+        #         # "visible_for_annotators": True,
+        #         "settings": {"type": "float", "min": 5.0},
+        #     },
+        # ),
         (
             {"name": "a", "min": 5.0, "max": 10.0},
             {
@@ -212,6 +224,16 @@ def test_float_metadata_property(schema_kwargs: Dict[str, Any], server_payload: 
     "schema_kwargs, exception_cls, exception_message",
     [
         ({"name": "a b"}, ValidationError, "name\n  string does not match regex"),
+        (
+            {"name": "float-metadata-property", "min": 5.0},
+            ValidationError,
+            "1 validation error for FloatMetadataProperty\nmax\n  field required",
+        ),
+        (
+            {"name": "float-metadata-property", "max": 5.0},
+            ValidationError,
+            "1 validation error for FloatMetadataProperty\nmin\n  field required",
+        ),
         (
             {"name": "float-metadata-property", "min": 5.0, "max": 5.0},
             ValidationError,
