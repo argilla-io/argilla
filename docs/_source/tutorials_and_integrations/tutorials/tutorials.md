@@ -90,6 +90,12 @@ Learn how to use the `snorkel` library to perform weak supervision for NER.
 
 Learn how to use the `sentence-transformers` and `snorkel` to do weak supervision for text classification with semantic search.
 ```
+```{grid-item-card} 🔗 Few-Shot Token Classification Suggestions with spacy-llm
+:link: other_datasets/labelling-tokenclassification-using-spacy-llm.html
+
+Learn how to use the `spacy-llm` library to do few-shot token classification.
+
+```
 ````
 <!--
 ```{toctree}
@@ -108,4 +114,5 @@ other_datasets/label_data_with_semantic_search
 other_datasets/label_errors_cleanlab
 other_datasets/weak_supervision_ner
 other_datasets/weak_supervision_text_classification_semantic_search
+other_datasets/labelling-tokenclassification-using-spacy-llm
 ``` -->
