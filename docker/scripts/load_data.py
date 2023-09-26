@@ -164,6 +164,7 @@ class LoadDatasets:
     @staticmethod
     def load_mock_dataset_for_filter_metadata():
         import random
+
         import argilla as rg
 
         dataset = rg.FeedbackDataset.from_huggingface("argilla/oasst_response_quality", split="train")
