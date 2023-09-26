@@ -20,7 +20,7 @@ from pydantic import BaseModel, Extra, Field, root_validator, validator
 from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
 from argilla.client.feedback.schemas.validators import validate_numeric_metadata_property_bounds
 
-TERMS_METADATA_PROPERTY_MIN_VALUES = 2
+TERMS_METADATA_PROPERTY_MIN_VALUES = 1
 
 
 class MetadataPropertySchema(BaseModel, ABC):
