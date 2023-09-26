@@ -124,7 +124,7 @@ export default {
       text-overflow: ellipsis;
     }
     &.re-checkbox :deep(.checkbox-container .svg-icon) {
-      fill: grey;
+      fill: $primary-color;
       min-width: 16px;
     }
   }

@@ -9,6 +9,7 @@
     >
       <span slot="dropdown-header">
         <MetadataButton
+          :is-active="visibleDropdown"
           :badges="appliedCategoriesFilters"
           :active-badge="visibleCategoryName"
           @click-on-badge="openCategoryFilter"
@@ -31,7 +32,7 @@
             class="metadata-filter__header"
             @click="selectMetadataCategory(null)"
           >
-            <svgicon name="chevron-left" width="8" height="8" />
+            <svgicon name="chevron-left" width="12" height="12" />
             <strong v-text="visibleCategory.name" />
           </div>
           <div class="metadata-filter__content">
@@ -135,7 +136,7 @@ $metadata-filter-width: 300px;
     display: flex;
     gap: $base-space;
     align-items: center;
-    background: $black-4;
+    justify-content: right;
     padding: $base-space $base-space * 2;
     cursor: pointer;
   }
@@ -146,6 +147,9 @@ $metadata-filter-width: 300px;
     padding: $base-space;
     background: palette(white);
     border-radius: $border-radius;
+  }
+  :deep(.dropdown__header) {
+    background: none;
   }
   :deep(.dropdown__content) {
     right: auto;

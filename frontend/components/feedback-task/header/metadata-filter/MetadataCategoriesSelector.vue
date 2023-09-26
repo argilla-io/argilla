@@ -10,7 +10,7 @@
       <li v-for="category in categoriesFilteredBySearchText" :key="category">
         <BaseButton @on-click="selectCategory(category)" class="category__item"
           ><span>{{ category }}</span>
-          <svgicon name="chevron-right" width="8" height="8"
+          <svgicon name="chevron-right" width="10" height="10"
         /></BaseButton>
       </li>
     </ul>

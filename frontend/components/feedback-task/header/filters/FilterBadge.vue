@@ -71,7 +71,7 @@ $badgeBorderActiveColor: palette(purple, 200);
   display: flex;
   align-items: center;
   gap: $base-space * 1.3;
-  min-width: 0;
+  max-width: 220px;
   margin: 0;
   padding: calc($base-space / 2) $base-space;
   border: 1px solid $badgeBorderColor;
