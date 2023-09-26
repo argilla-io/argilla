@@ -48,8 +48,10 @@ class DatasetConfig(BaseModel):
         yaml = load(yaml, Loader=SafeLoader)
         # Here for backwards compatibility
         for field in yaml["fields"]:
+            field.pop("id", None)
             field.pop("settings", None)
         for question in yaml["questions"]:
+            question.pop("id", None)
             question.pop("settings", None)
         return cls(**yaml)
 
