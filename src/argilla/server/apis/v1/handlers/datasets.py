@@ -48,8 +48,15 @@ from argilla.server.schemas.v1.datasets import (
     SearchRecordsQuery,
     SearchRecordsResult,
 )
-from argilla.server.search_engine import SearchEngine, UserResponseStatusFilter, get_search_engine
-from argilla.server.search_engine.base import FloatMetadataFilter, IntegerMetadataFilter, TermsMetadataFilter
+from argilla.server.search_engine import (
+    FloatMetadataFilter,
+    IntegerMetadataFilter,
+    SearchEngine,
+    SortBy,
+    TermsMetadataFilter,
+    UserResponseStatusFilter,
+    get_search_engine,
+)
 from argilla.server.security import auth
 from argilla.server.utils import parse_uuids
 from argilla.utils.telemetry import TelemetryClient, get_telemetry_client
@@ -157,13 +164,13 @@ async def list_current_user_dataset_records(
         metadata_filters = await _build_metadata_filters(db, dataset, metadata.metadata_parsed)
         response_status_filter = await _build_response_status_filter_for_search(response_statuses, user=current_user)
 
-        # TODO(@frascuchon): Sort-by `inserted_at` support
         search_responses = await search_engine.search(
             dataset=dataset,
             metadata_filters=metadata_filters,
             user_response_status_filter=response_status_filter,
             offset=offset,
             limit=limit,
+            sort_by=[SortBy(field="inserted_at")],
         )
 
         record_ids = [response.record_id for response in search_responses.items]
@@ -204,13 +211,13 @@ async def list_dataset_records(
         metadata_filters = await _build_metadata_filters(db, dataset, metadata.metadata_parsed)
         response_status_filter = await _build_response_status_filter_for_search(response_statuses)
 
-        # TODO(@frascuchon): Sort-by `inserted_at` support
         search_responses = await search_engine.search(
             dataset=dataset,
             metadata_filters=metadata_filters,
             user_response_status_filter=response_status_filter,
             offset=offset,
             limit=limit,
+            sort_by=[SortBy(field="inserted_at")],
         )
 
         record_ids = [response.record_id for response in search_responses.items]

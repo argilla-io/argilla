@@ -11,13 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import TYPE_CHECKING, AsyncGenerator, List, Union
+from typing import TYPE_CHECKING, Any, AsyncGenerator, List, Union
 
 from argilla.server.enums import MetadataPropertyType, ResponseStatusFilter
 from argilla.server.models import Record, User
 from argilla.server.search_engine import (
     FloatMetadataFilter,
     IntegerMetadataFilter,
+    SortBy,
     StringQuery,
     TermsMetadataFilter,
     UserResponseStatusFilter,
@@ -254,6 +255,8 @@ class TestSuiteOpenSearchEngine:
             ],
             "properties": {
                 "id": {"type": "keyword"},
+                "inserted_at": {"type": "date_nanos"},
+                "updated_at": {"type": "date_nanos"},
                 "responses": {"dynamic": "true", "type": "object"},
                 "metadata": {"dynamic": "false", "type": "object"},
             },
@@ -285,6 +288,8 @@ class TestSuiteOpenSearchEngine:
             ],
             "properties": {
                 "id": {"type": "keyword"},
+                "inserted_at": {"type": "date_nanos"},
+                "updated_at": {"type": "date_nanos"},
                 "fields": {"properties": {field.name: {"type": "text"} for field in dataset.fields}},
                 "responses": {"type": "object", "dynamic": "true"},
                 "metadata": {"dynamic": "false", "type": "object"},
@@ -322,6 +327,8 @@ class TestSuiteOpenSearchEngine:
             ],
             "properties": {
                 "id": {"type": "keyword"},
+                "inserted_at": {"type": "date_nanos"},
+                "updated_at": {"type": "date_nanos"},
                 "fields": {"properties": {"field": {"type": "text"}}},
                 "responses": {"type": "object", "dynamic": "true"},
                 "metadata": {
@@ -366,6 +373,8 @@ class TestSuiteOpenSearchEngine:
             "dynamic": "strict",
             "properties": {
                 "id": {"type": "keyword"},
+                "inserted_at": {"type": "date_nanos"},
+                "updated_at": {"type": "date_nanos"},
                 "responses": {"dynamic": "true", "type": "object"},
                 "metadata": {"dynamic": "false", "type": "object"},
             },
@@ -595,6 +604,35 @@ class TestSuiteOpenSearchEngine:
         records = sorted(dataset_for_pagination.records, key=lambda r: r.id)
         assert [record.id for record in records[offset : offset + limit]] == [item.record_id for item in results.items]
 
+    @pytest.mark.parametrize(
+        ("sort_by"),
+        [
+            SortBy(field="inserted_at"),
+            SortBy(field="updated_at"),
+            SortBy(field="inserted_at", order="desc"),
+            SortBy(field="updated_at", order="desc"),
+        ],
+    )
+    async def test_search_with_sort_by(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset: Dataset,
+        sort_by: SortBy,
+    ):
+        def _local_sort_by(record: Record) -> Any:
+            if isinstance(sort_by.field, str):
+                return getattr(record, sort_by.field)
+            return record.metadata_[sort_by.field.name]
+
+        results = await opensearch_engine.search(test_banking_sentiment_dataset, sort_by=[sort_by])
+
+        records = test_banking_sentiment_dataset.records
+        if sort_by:
+            records = sorted(records, key=_local_sort_by, reverse=sort_by.order == "desc")
+
+        assert [item.record_id for item in results.items] == [record.id for record in records]
+
     async def test_add_records(self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch):
         text_fields = await TextFieldFactory.create_batch(5)
         dataset = await DatasetFactory.create(fields=text_fields, questions=[])
@@ -615,7 +653,15 @@ class TestSuiteOpenSearchEngine:
 
         es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
         assert es_docs == [
-            {"id": str(record.id), "fields": record.fields, "metadata": {}, "responses": {}} for record in records
+            {
+                "id": str(record.id),
+                "fields": record.fields,
+                "inserted_at": record.inserted_at.isoformat(),
+                "updated_at": record.updated_at.isoformat(),
+                "metadata": {},
+                "responses": {},
+            }
+            for record in records
         ]
 
     async def test_add_records_with_metadata(self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch):
@@ -644,6 +690,8 @@ class TestSuiteOpenSearchEngine:
             {
                 "id": str(record.id),
                 "fields": record.fields,
+                "inserted_at": record.inserted_at.isoformat(),
+                "updated_at": record.updated_at.isoformat(),
                 "responses": {},
                 "metadata": {
                     str(metadata_prop.id): record.metadata_[metadata_prop.name] for metadata_prop in metadata_properties
