@@ -7,6 +7,7 @@
         :min="min"
         :max="max"
       />
+      <span class="range__separator" />
       <input
         type="number"
         v-model.number="sliderValues[1]"
@@ -114,6 +115,7 @@ export default {
     display: flex;
     flex-direction: column;
     width: 100%;
+    padding: $base-space;
   }
   &__control {
     position: relative;
@@ -122,9 +124,10 @@ export default {
   &__inputs {
     display: flex;
     justify-content: space-between;
-    margin-bottom: $base-space * 2;
+    align-items: center;
+    margin-bottom: $base-space * 3;
     input {
-      width: 100px;
+      width: 110px;
       height: $base-space * 4;
       padding: $base-space;
       border: 1px solid $black-10;
@@ -147,6 +150,11 @@ export default {
       z-index: 1;
       height: 6px;
     }
+  }
+  &__separator {
+    height: 1px;
+    width: $base-space * 3;
+    background: $black-10;
   }
 }
 
