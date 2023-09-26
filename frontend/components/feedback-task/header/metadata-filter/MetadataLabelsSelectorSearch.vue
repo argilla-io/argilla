@@ -16,13 +16,26 @@
       type="text"
       autocomplete="off"
       :value="value"
-      :placeholder="placeholder"
+      :placeholder="selectedOptions.length ? '' : placeholder"
       @input="onInput($event)"
     />
+    <BaseButton
+      v-if="selectedOptions.length"
+      class="search-area__close-button"
+      @click="removeAll"
+      title="Clear all"
+    >
+      <svgicon
+        class="search-area__close-button__icon"
+        name="close"
+        width="10"
+        height="10"
+    /></BaseButton>
   </div>
 </template>
 
 <script>
+import "assets/icons/close";
 export default {
   props: {
     value: {
@@ -52,6 +65,11 @@ export default {
     onInput($event) {
       this.$emit("input", $event.target.value);
     },
+    removeAll() {
+      this.selectedOptions.forEach((opt) => {
+        this.removeSelectedOption(opt);
+      });
+    },
     removeSelectedOption(option) {
       option.selected = false;
     },
@@ -61,6 +79,7 @@ export default {
 
 <style lang="scss" scoped>
 .search-area {
+  position: relative;
   display: flex;
   flex-direction: column;
   padding: 0 $base-space;
@@ -81,6 +100,9 @@ export default {
     gap: calc($base-space / 2);
     flex-wrap: wrap;
     padding-top: $base-space;
+    & ~ .search-area__input {
+      min-height: 30px;
+    }
   }
   &__input {
     height: 26px;
@@ -92,6 +114,20 @@ export default {
     }
     @include input-placeholder {
       color: $black-37;
+    }
+  }
+  &__close-button {
+    position: absolute;
+    top: $base-space;
+    right: $base-space;
+    padding: calc($base-space / 2);
+    background: $black-37;
+    border-radius: $border-radius-rounded;
+    &:hover {
+      background: $black-54;
+    }
+    &__icon {
+      color: palette(white);
     }
   }
 }
