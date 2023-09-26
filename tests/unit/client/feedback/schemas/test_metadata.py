@@ -97,31 +97,31 @@ def test_terms_metadata_property_errors(
             {
                 "name": "a",
                 # "visible_for_annotators": False,
-                "lt": 5,
+                "max": 5,
             },
             {
                 "name": "a",
                 "description": None,
                 # "visible_for_annotators": False,
-                "settings": {"type": "integer", "lt": 5},
+                "settings": {"type": "integer", "max": 5},
             },
         ),
         (
-            {"name": "a", "gt": 5},
+            {"name": "a", "min": 5},
             {
                 "name": "a",
                 "description": None,
                 # "visible_for_annotators": True,
-                "settings": {"type": "integer", "gt": 5},
+                "settings": {"type": "integer", "min": 5},
             },
         ),
         (
-            {"name": "a", "gt": 5, "lt": 10},
+            {"name": "a", "min": 5, "max": 10},
             {
                 "name": "a",
                 "description": None,
                 # "visible_for_annotators": True,
-                "settings": {"type": "integer", "gt": 5, "lt": 10},
+                "settings": {"type": "integer", "min": 5, "max": 10},
             },
         ),
     ],
@@ -138,14 +138,14 @@ def test_integer_metadata_property(schema_kwargs: Dict[str, Any], server_payload
     [
         ({"name": "a b"}, ValidationError, "name\n  string does not match regex"),
         (
-            {"name": "int-metadata-property", "lt": 5, "gt": 5},
+            {"name": "int-metadata-property", "min": 5, "max": 5},
             ValidationError,
-            "1 validation error for IntegerMetadataProperty\n__root__\n  `IntegerMetadataProperty` with name=int-metadata-property cannot have `lt` less than `gt`",
+            "1 validation error for IntegerMetadataProperty\n__root__\n  `IntegerMetadataProperty` with name=int-metadata-property cannot have `max` less than `min`",
         ),
         (
-            {"name": "int-metadata-property", "lt": 5, "gt": 6},
+            {"name": "int-metadata-property", "min": 6, "max": 6},
             ValidationError,
-            "1 validation error for IntegerMetadataProperty\n__root__\n  `IntegerMetadataProperty` with name=int-metadata-property cannot have `lt` less than `gt`",
+            "1 validation error for IntegerMetadataProperty\n__root__\n  `IntegerMetadataProperty` with name=int-metadata-property cannot have `max` less than `min`",
         ),
     ],
 )
@@ -172,31 +172,31 @@ def test_integer_metadata_property_errors(
             {
                 "name": "a",
                 # "visible_for_annotators": False,
-                "lt": 5.0,
+                "max": 5.0,
             },
             {
                 "name": "a",
                 "description": None,
                 # "visible_for_annotators": False,
-                "settings": {"type": "float", "lt": 5.0},
+                "settings": {"type": "float", "max": 5.0},
             },
         ),
         (
-            {"name": "a", "gt": 5.0},
+            {"name": "a", "min": 5.0},
             {
                 "name": "a",
                 "description": None,
                 # "visible_for_annotators": True,
-                "settings": {"type": "float", "gt": 5.0},
+                "settings": {"type": "float", "min": 5.0},
             },
         ),
         (
-            {"name": "a", "gt": 5.0, "lt": 10.0},
+            {"name": "a", "min": 5.0, "max": 10.0},
             {
                 "name": "a",
                 "description": None,
                 # "visible_for_annotators": True,
-                "settings": {"type": "float", "gt": 5.0, "lt": 10.0},
+                "settings": {"type": "float", "min": 5.0, "max": 10.0},
             },
         ),
     ],
@@ -213,14 +213,14 @@ def test_float_metadata_property(schema_kwargs: Dict[str, Any], server_payload: 
     [
         ({"name": "a b"}, ValidationError, "name\n  string does not match regex"),
         (
-            {"name": "float-metadata-property", "lt": 5.0, "gt": 5.0},
+            {"name": "float-metadata-property", "min": 5.0, "max": 5.0},
             ValidationError,
-            "1 validation error for FloatMetadataProperty\n__root__\n  `FloatMetadataProperty` with name=float-metadata-property cannot have `lt` less than `gt`",
+            "1 validation error for FloatMetadataProperty\n__root__\n  `FloatMetadataProperty` with name=float-metadata-property cannot have `max` less than `min`",
         ),
         (
-            {"name": "float-metadata-property", "lt": 5.0, "gt": 6.0},
+            {"name": "float-metadata-property", "min": 6.0, "max": 5.0},
             ValidationError,
-            "1 validation error for FloatMetadataProperty\n__root__\n  `FloatMetadataProperty` with name=float-metadata-property cannot have `lt` less than `gt`",
+            "1 validation error for FloatMetadataProperty\n__root__\n  `FloatMetadataProperty` with name=float-metadata-property cannot have `max` less than `min`",
         ),
     ],
 )
