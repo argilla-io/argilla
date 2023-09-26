@@ -27,6 +27,7 @@ from tests.factories import (
     DatasetFactory,
     RecordFactory,
     ResponseFactory,
+    TermsMetadataPropertyFactory,
     TextFieldFactory,
     TextQuestionFactory,
     UserFactory,
@@ -108,6 +109,7 @@ class TestRemoteFeedbackDataset:
         await TextFieldFactory.create(dataset=dataset, required=True)
         await TextQuestionFactory.create(dataset=dataset, required=True)
         await RecordFactory.create_batch(dataset=dataset, size=10)
+        await TermsMetadataPropertyFactory.create_batch(dataset=dataset, size=10)
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
         api.init(api_key=user.api_key)
@@ -122,6 +124,7 @@ class TestRemoteFeedbackDataset:
         await TextFieldFactory.create(dataset=dataset, required=True)
         await TextQuestionFactory.create(dataset=dataset, required=True)
         await RecordFactory.create_batch(dataset=dataset, size=10)
+        await TermsMetadataPropertyFactory.create_batch(dataset=dataset, size=10)
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
         api.init(api_key=user.api_key)
@@ -136,6 +139,7 @@ class TestRemoteFeedbackDataset:
         await TextFieldFactory.create(dataset=dataset, required=True)
         await TextQuestionFactory.create(dataset=dataset, required=True)
         await RecordFactory.create_batch(dataset=dataset, size=10)
+        await TermsMetadataPropertyFactory.create_batch(dataset=dataset, size=10)
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
         api.init(api_key=user.api_key)

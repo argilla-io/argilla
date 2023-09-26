@@ -144,7 +144,7 @@ def test_init_wrong_questions(
         )
 
 
-def test_init_wrong_metadata(
+def test_init_wrong_metadata_properties(
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
