@@ -51,6 +51,7 @@ from argilla.server.schemas.v1.datasets import (
 from argilla.server.search_engine import (
     FloatMetadataFilter,
     IntegerMetadataFilter,
+    MetadataFilter,
     SearchEngine,
     SortBy,
     TermsMetadataFilter,
@@ -538,7 +539,7 @@ async def search_dataset_records(
 
 async def _build_metadata_filters(
     db: "AsyncSession", dataset: Dataset, parsed_metadata: List[MetadataParsedQueryParam]
-):
+) -> List["MetadataFilter"]:
     try:
         metadata_filters = []
         for metadata_param in parsed_metadata:
