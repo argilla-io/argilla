@@ -16,10 +16,13 @@
       ></FilterBadge>
       <div
         class="metadata-button__badges__collapsed"
-        v-click-outside="onClickOutside"
+        v-if="badges.length > maxVisibleBadges"
+        v-click-outside="{
+          events: ['mousedown'],
+          handler: onClickOutside,
+        }"
       >
         <BaseBadge
-          v-if="badges.length > maxVisibleBadges"
           :text="`+ ${badges.length - maxVisibleBadges}`"
           @on-click="toggleTooltip"
         />
@@ -82,7 +85,7 @@ export default {
     },
     toggleTooltip(e) {
       e.stopPropagation();
-      this.visibleTooltip = this.visibleTooltip ? false : true;
+      this.visibleTooltip = !this.visibleTooltip;
     },
     onClickOutside() {
       this.visibleTooltip = false;

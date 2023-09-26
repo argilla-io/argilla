@@ -107,7 +107,11 @@ export default {
     },
     openCategoryFilter(category, e) {
       e.stopPropagation();
-      this.visibleDropdown = !this.visibleDropdown;
+      if (category === this.visibleCategoryName) {
+        this.visibleDropdown = false;
+      } else {
+        this.visibleDropdown = true;
+      }
       this.selectMetadataCategory(category);
     },
     removeCategoryFilters(category, e) {
