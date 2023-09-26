@@ -11,11 +11,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import dataclasses
 from datetime import datetime
 from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
+from fastapi import Query
 from pydantic import BaseModel, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
 from pydantic.generics import GenericModel
@@ -23,7 +24,7 @@ from pydantic.utils import GetterDict
 
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
-from argilla.server.search_engine import Query
+from argilla.server.search_engine import StringQuery
 
 try:
     from typing import Annotated
@@ -513,8 +514,28 @@ class MetadataProperties(BaseModel):
     items: List[MetadataProperty]
 
 
+class MetadataParsedQueryParam:
+    def __init__(self, string: str):
+        k, *v = string.split(":", maxsplit=1)
+
+        self.name: str = k
+        self.value: str = "".join(v).strip()
+
+
+class MetadataQueryParams(BaseModel):
+    metadata: List[str] = PydanticField(Query([], regex=r"^(\w+):(.+(,(.+))*)$"))
+
+    @property
+    def metadata_parsed(self) -> List[MetadataParsedQueryParam]:
+        return [MetadataParsedQueryParam(q) for q in self.metadata]
+
+
+class TextQuery(BaseModel):
+    text: StringQuery
+
+
 class SearchRecordsQuery(BaseModel):
-    query: Query
+    query: TextQuery
 
 
 class SearchRecord(BaseModel):
