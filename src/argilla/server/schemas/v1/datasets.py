@@ -13,11 +13,12 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
 from pydantic import BaseModel, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
+from pydantic.generics import GenericModel
 from pydantic.utils import GetterDict
 
 from argilla.server.schemas.base import UpdateSchema
@@ -64,7 +65,6 @@ RATING_OPTIONS_MAX_ITEMS = 10
 RATING_LOWER_VALUE_ALLOWED = 1
 RATING_UPPER_VALUE_ALLOWED = 10
 
-
 VALUE_TEXT_OPTION_VALUE_MIN_LENGTH = 1
 VALUE_TEXT_OPTION_VALUE_MAX_LENGTH = 200
 VALUE_TEXT_OPTION_TEXT_MIN_LENGTH = 1
@@ -78,6 +78,7 @@ LABEL_SELECTION_MIN_VISIBLE_OPTIONS = 3
 
 RANKING_OPTIONS_MIN_ITEMS = 2
 
+TERMS_METADATA_PROPERTY_MIN_VALUES = 1
 
 RECORDS_CREATE_MIN_ITEMS = 1
 RECORDS_CREATE_MAX_ITEMS = 1000
@@ -421,37 +422,79 @@ class RecordsCreate(BaseModel):
     items: conlist(item_type=RecordCreate, min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
 
 
+NT = TypeVar("NT", int, float)
+
+
+class NumericMetadataProperty(GenericModel, Generic[NT]):
+    gt: Optional[NT] = None
+    lt: Optional[NT] = None
+
+    @root_validator
+    def check_bounds(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        gt = values.get("gt")
+        lt = values.get("lt")
+
+        if gt is not None and lt is not None and gt >= lt:
+            raise ValueError(f"'gt' ({gt}) must be lower than 'lt' ({lt})")
+
+        return values
+
+
+class TermsMetadataPropertyCreate(BaseModel):
+    type: Literal[MetadataPropertyType.terms]
+    values: List[str] = PydanticField(..., min_items=TERMS_METADATA_PROPERTY_MIN_VALUES)
+
+
+class IntegerMetadataPropertyCreate(NumericMetadataProperty[int]):
+    type: Literal[MetadataPropertyType.integer]
+
+
+class FloatMetadataPropertyCreate(NumericMetadataProperty[float]):
+    type: Literal[MetadataPropertyType.float]
+
+
+MetadataPropertySettingsCreate = Annotated[
+    Union[TermsMetadataPropertyCreate, IntegerMetadataPropertyCreate, FloatMetadataPropertyCreate],
+    PydanticField(..., discriminator="type"),
+]
+
+
+class MetadataPropertyCreate(BaseModel):
+    name: str = PydanticField(
+        ...,
+        regex=METADATA_PROPERTY_CREATE_NAME_REGEX,
+        min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
+        max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
+    )
+    description: Optional[str] = PydanticField(
+        None,
+        min_length=METADATA_PROPERTY_CREATE_DESCRIPTION_MIN_LENGTH,
+        max_length=METADATA_PROPERTY_CREATE_DESCRIPTION_MAX_LENGTH,
+    )
+    settings: MetadataPropertySettingsCreate
+
+
 class TermsMetadataProperty(BaseModel):
     type: Literal[MetadataPropertyType.terms]
+    values: List[str]
 
 
 class IntegerMetadataProperty(BaseModel):
     type: Literal[MetadataPropertyType.integer]
+    gt: Optional[int] = None
+    lt: Optional[int] = None
 
 
 class FloatMetadataProperty(BaseModel):
     type: Literal[MetadataPropertyType.float]
+    gt: Optional[float] = None
+    lt: Optional[float] = None
 
 
 MetadataPropertySettings = Annotated[
     Union[TermsMetadataProperty, IntegerMetadataProperty, FloatMetadataProperty],
     PydanticField(..., discriminator="type"),
 ]
-
-
-class MetadataPropertyCreate(BaseModel):
-    name: constr(
-        regex=METADATA_PROPERTY_CREATE_NAME_REGEX,
-        min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
-        max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
-    )
-    description: Optional[
-        constr(
-            min_length=METADATA_PROPERTY_CREATE_DESCRIPTION_MIN_LENGTH,
-            max_length=METADATA_PROPERTY_CREATE_DESCRIPTION_MAX_LENGTH,
-        )
-    ] = None
-    settings: MetadataPropertySettings
 
 
 class MetadataProperty(BaseModel):
