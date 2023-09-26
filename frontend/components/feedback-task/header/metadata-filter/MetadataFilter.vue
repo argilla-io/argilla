@@ -16,14 +16,14 @@
         />
       </span>
       <span
+        v-if="!!metadataFilters"
         slot="dropdown-content"
         class="metadata-filter__container"
-        v-if="!!metadataFilters"
       >
         <MetadataCategoriesSelector
+          v-if="!visibleCategory"
           class="metadata-filter__categories"
           :categories="metadataCategoriesName"
-          v-if="!visibleCategory"
           @select-category="selectMetadataCategory"
         />
         <template v-else>
@@ -35,16 +35,13 @@
             <strong v-text="visibleCategory.name" />
           </div>
           <div class="metadata-filter__content">
-            <transition name="fade" appear>
-              <MetadataLabelsSelector
-                v-if="visibleCategory.isTerms"
-                :metadata="visibleCategory"
-              />
-
-              <div v-else>
-                <MetadataRangeSelector :metadata="visibleCategory" />
-              </div>
-            </transition>
+            <MetadataLabelsSelector
+              v-if="visibleCategory.isTerms"
+              :metadata="visibleCategory"
+            />
+            <div v-else>
+              <MetadataRangeSelector :metadata="visibleCategory" />
+            </div>
             <BaseButton class="primary small full-width" @on-click="applyFilter"
               >Filter</BaseButton
             >
@@ -100,11 +97,7 @@ export default {
     },
     openCategoryFilter(category, e) {
       e.stopPropagation();
-      if (category === this.visibleCategoryName) {
-        this.visibleDropdown = false;
-      } else {
-        this.visibleDropdown = true;
-      }
+      this.visibleDropdown = category !== this.visibleCategoryName;
       this.selectMetadataCategory(category);
     },
     removeCategoryFilters(category, e) {
@@ -118,7 +111,7 @@ export default {
       return this.metadataFilters.categories;
     },
     visibleCategoryName() {
-      return (this.visibleDropdown && this.visibleCategory?.name) || null;
+      return this.visibleCategory?.name;
     },
   },
   async mounted() {
