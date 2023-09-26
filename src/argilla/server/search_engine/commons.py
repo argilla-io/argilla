@@ -45,7 +45,7 @@ from argilla.server.search_engine.base import (
     UserResponseStatusFilter,
 )
 
-ALL_RESPONSES_FIELD = "all_responses"
+ALL_RESPONSES_STATUSES_FIELD = "all_responses_statuses"
 
 
 class UserResponse(BaseModel):
@@ -245,7 +245,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
                 "responses": {"dynamic": True, "type": "object"},
-                ALL_RESPONSES_FIELD: {"type": "keyword"},  # To add all users responses
+                ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},  # To add all users responses
                 # metadata properties without mappings will be ignored
                 "metadata": {"dynamic": False, "type": "object"},
                 **self._mapping_for_fields(dataset.fields),
@@ -300,7 +300,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             {
                 "status_responses": {
                     "path_match": "responses.*.status",
-                    "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_FIELD},
+                    "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_STATUSES_FIELD},
                 }
             },
             *[
@@ -363,7 +363,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
     def _build_response_status_filter(self, status_filter: UserResponseStatusFilter) -> Dict[str, Any]:
         if status_filter.user is None:
-            response_field = ALL_RESPONSES_FIELD
+            response_field = ALL_RESPONSES_STATUSES_FIELD
         else:
             response_field = f"responses.{status_filter.user.username}.status"
 

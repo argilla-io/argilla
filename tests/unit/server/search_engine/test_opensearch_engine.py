@@ -11,9 +11,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import TYPE_CHECKING, Any, AsyncGenerator, List, Optional, Union
+from typing import Any, AsyncGenerator, List, Optional, TYPE_CHECKING, Union
 
-from argilla.server.enums import MetadataPropertyType, ResponseStatus, ResponseStatusFilter
+from opensearchpy import RequestError
+from sqlalchemy.orm import Session
+
+from argilla.server.enums import MetadataPropertyType, ResponseStatusFilter
 from argilla.server.models import Record, User
 from argilla.server.search_engine import (
     FloatMetadataFilter,
@@ -23,11 +26,8 @@ from argilla.server.search_engine import (
     TermsMetadataFilter,
     UserResponseStatusFilter,
 )
-from argilla.server.search_engine.commons import index_name_for_dataset
+from argilla.server.search_engine.commons import ALL_RESPONSES_STATUSES_FIELD, index_name_for_dataset
 from argilla.server.settings import settings as server_settings
-from opensearchpy import RequestError
-from sqlalchemy.orm import Session
-
 from tests.factories import (
     FloatMetadataPropertyFactory,
     IntegerMetadataPropertyFactory,
@@ -253,7 +253,7 @@ class TestSuiteOpenSearchEngine:
             "dynamic_templates": [
                 {
                     "status_responses": {
-                        "mapping": {"type": "keyword", "copy_to": "all_responses"},
+                        "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_STATUSES_FIELD},
                         "path_match": "responses.*.status",
                     }
                 }
@@ -262,7 +262,7 @@ class TestSuiteOpenSearchEngine:
                 "id": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
-                "all_responses": {"type": "keyword"},
+                ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
                 "responses": {"dynamic": "true", "type": "object"},
                 "metadata": {"dynamic": "false", "type": "object"},
             },
@@ -292,7 +292,7 @@ class TestSuiteOpenSearchEngine:
             "dynamic_templates": [
                 {
                     "status_responses": {
-                        "mapping": {"type": "keyword", "copy_to": "all_responses"},
+                        "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_STATUSES_FIELD},
                         "path_match": "responses.*.status",
                     }
                 }
@@ -301,7 +301,7 @@ class TestSuiteOpenSearchEngine:
                 "id": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
-                "all_responses": {"type": "keyword"},
+                ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
                 "fields": {"properties": {field.name: {"type": "text"} for field in dataset.fields}},
                 "responses": {"type": "object", "dynamic": "true"},
                 "metadata": {"dynamic": "false", "type": "object"},
@@ -337,7 +337,7 @@ class TestSuiteOpenSearchEngine:
             "dynamic_templates": [
                 {
                     "status_responses": {
-                        "mapping": {"type": "keyword", "copy_to": "all_responses"},
+                        "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_STATUSES_FIELD},
                         "path_match": "responses.*.status",
                     }
                 }
@@ -346,7 +346,7 @@ class TestSuiteOpenSearchEngine:
                 "id": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
-                "all_responses": {"type": "keyword"},
+                ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
                 "fields": {"properties": {"field": {"type": "text"}}},
                 "responses": {"type": "object", "dynamic": "true"},
                 "metadata": {
@@ -393,14 +393,14 @@ class TestSuiteOpenSearchEngine:
                 "id": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
-                "all_responses": {"type": "keyword"},
+                ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
                 "responses": {"dynamic": "true", "type": "object"},
                 "metadata": {"dynamic": "false", "type": "object"},
             },
             "dynamic_templates": [
                 {
                     "status_responses": {
-                        "mapping": {"type": "keyword", "copy_to": "all_responses"},
+                        "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_STATUSES_FIELD},
                         "path_match": "responses.*.status",
                     }
                 },
@@ -526,7 +526,7 @@ class TestSuiteOpenSearchEngine:
         user = await UserFactory.create()
 
         await self._configure_record_responses(
-            opensearch, test_banking_sentiment_dataset, statuses, user, expected_items
+            opensearch, test_banking_sentiment_dataset, statuses, expected_items, user
         )
 
         result = await opensearch_engine.search(
@@ -630,13 +630,13 @@ class TestSuiteOpenSearchEngine:
 
         all_statuses = [ResponseStatusFilter.missing, ResponseStatusFilter.draft, ResponseStatusFilter.discarded]
         await self._configure_record_responses(
-            opensearch, test_banking_sentiment_dataset, all_statuses, user, len(test_banking_sentiment_dataset.records)
+            opensearch, test_banking_sentiment_dataset, all_statuses, len(test_banking_sentiment_dataset.records), user
         )
 
         no_filter_results = await opensearch_engine.search(
-            test_banking_sentiment_dataset,
-            query=StringQuery(q="payment"),
+            test_banking_sentiment_dataset, query=StringQuery(q="payment")
         )
+
         results = await opensearch_engine.search(
             test_banking_sentiment_dataset,
             query=StringQuery(q="payment"),
@@ -829,7 +829,7 @@ class TestSuiteOpenSearchEngine:
             "properties": {
                 response.user.username: {
                     "properties": {
-                        "status": {"type": "keyword", "copy_to": ["all_responses"]},
+                        "status": {"type": "keyword", "copy_to": [ALL_RESPONSES_STATUSES_FIELD]},
                         "values": {"properties": {question.name: {"index": False, "type": "text"}}},
                     }
                 }
