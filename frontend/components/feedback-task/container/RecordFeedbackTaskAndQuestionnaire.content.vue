@@ -120,19 +120,29 @@ export default {
   },
   watch: {
     async currentPage(newValue) {
-      await this.routes.addQueryParam("_page", newValue);
+      await this.routes.addQueryParam({ key: "_page", value: newValue });
     },
     async recordStatusToFilterWith(newValue) {
-      await this.routes.addQueryParam("_status", newValue);
+      await this.routes.addQueryParam(
+        { key: "_page", value: this.currentPage },
+        { key: "_status", value: newValue }
+      );
     },
     async searchTextToFilterWith(newValue) {
-      if (newValue) return await this.routes.addQueryParam("_search", newValue);
+      if (newValue)
+        return await this.routes.addQueryParam(
+          { key: "_page", value: this.currentPage },
+          { key: "_search", value: newValue }
+        );
 
       await this.routes.removeQueryParam("_search");
     },
     async metadataToFilterWith(newValue = []) {
       if (newValue.length)
-        return await this.routes.addQueryParam("_metadata", newValue.join("+"));
+        return await this.routes.addQueryParam(
+          { key: "_page", value: this.currentPage },
+          { key: "_metadata", value: newValue.join("+") }
+        );
 
       await this.routes.removeQueryParam("_metadata");
     },
@@ -172,7 +182,7 @@ export default {
 
       this.$root.$emit("total-records", null);
     },
-    async onSearchFilterChanged(newSearchValue) {
+    onSearchFilterChanged(newSearchValue) {
       const self = this;
       const onFilter = () => {
         this.searchTextToFilterWith = newSearchValue;
@@ -201,7 +211,7 @@ export default {
 
       if (newSearchValue !== this.searchFilterFromQuery) return onFilter();
     },
-    async onStatusFilterChanged(newStatus) {
+    onStatusFilterChanged(newStatus) {
       if (this.recordStatusToFilterWith === newStatus) return;
 
       const self = this;
@@ -229,7 +239,7 @@ export default {
         onFilter();
       }
     },
-    async onMetadataFilterChanged(metadata) {
+    onMetadataFilterChanged(metadata) {
       const hasOtherFilter =
         metadata.length !== this.metadataFilterFromQuery.length ||
         metadata.some((e) => !this.metadataFilterFromQuery.includes(e));

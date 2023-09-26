@@ -43,10 +43,17 @@ export const useRoutes = () => {
     router.push({ path: `/${ROUTES.datasets}` });
   };
 
-  const addQueryParam = async (key: KindOfParam, value: string) => {
-    const newQuery = {
-      [key]: value,
-    };
+  const addQueryParam = async (
+    ...params: { key: KindOfParam; value: string }[]
+  ) => {
+    let newQuery = {};
+
+    params.forEach(({ key, value }) => {
+      newQuery = {
+        ...newQuery,
+        [key]: value,
+      };
+    });
 
     await router.push({
       path: route.value.path,
