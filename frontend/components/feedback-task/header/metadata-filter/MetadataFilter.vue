@@ -134,7 +134,7 @@ $metadata-filter-width: 300px;
     display: flex;
     gap: $base-space;
     align-items: center;
-    justify-content: right;
+    justify-content: space-between;
     padding: $base-space $base-space * 2;
     cursor: pointer;
   }
@@ -146,7 +146,7 @@ $metadata-filter-width: 300px;
     background: palette(white);
     border-radius: $border-radius;
   }
-  :deep(.dropdown__header) {
+  :deep(.dropdown__header:hover) {
     background: none;
   }
   :deep(.dropdown__content) {
