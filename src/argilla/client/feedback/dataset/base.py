@@ -65,7 +65,8 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             Union[List["AllowedMetadataPropertyTypes"], List["AllowedRemoteMetadataPropertyTypes"]]
         ] = None,
         guidelines: Optional[str] = None,
-        extra_metadata_allowed: bool = True,
+        # TODO: uncomment once ready in the API
+        # extra_metadata_allowed: bool = True,
     ) -> None:
         """Initializes a `FeedbackDatasetBase` instance locally.
 
@@ -75,9 +76,6 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             metadata_properties: contains the metadata properties that will be indexed
                 and could be used to filter the dataset. Defaults to `None`.
             guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
-            extra_metadata_allowed: whether to allow to include metadata properties that
-                have not been defined in the `metadata` argument, and thus will not be
-                indexed. Defaults to `True`.
 
         Raises:
             TypeError: if `fields` is not a list of `FieldSchema`.
