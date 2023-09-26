@@ -32,16 +32,20 @@ from pydantic import ValidationError
             {
                 "name": "a",
                 "description": "b",
-                "visible_for_annotators": True,
+                # "visible_for_annotators": True,
                 "settings": {"type": "terms", "values": ["a", "b", "c"]},
             },
         ),
         (
-            {"name": "a", "visible_for_annotators": False, "values": ["a", "b", "c"]},
+            {
+                "name": "a",
+                # "visible_for_annotators": False,
+                "values": ["a", "b", "c"],
+            },
             {
                 "name": "a",
                 "description": None,
-                "visible_for_annotators": False,
+                # "visible_for_annotators": False,
                 "settings": {"type": "terms", "values": ["a", "b", "c"]},
             },
         ),
@@ -87,14 +91,23 @@ def test_terms_metadata_property_errors(
     [
         (
             {"name": "a", "description": "b"},
-            {"name": "a", "description": "b", "visible_for_annotators": True, "settings": {"type": "integer"}},
+            {
+                "name": "a",
+                "description": "b",
+                # "visible_for_annotators": True,
+                "settings": {"type": "integer"},
+            },
         ),
         (
-            {"name": "a", "visible_for_annotators": False, "lt": 5},
+            {
+                "name": "a",
+                # "visible_for_annotators": False,
+                "lt": 5,
+            },
             {
                 "name": "a",
                 "description": None,
-                "visible_for_annotators": False,
+                # "visible_for_annotators": False,
                 "settings": {"type": "integer", "lt": 5},
             },
         ),
@@ -103,7 +116,7 @@ def test_terms_metadata_property_errors(
             {
                 "name": "a",
                 "description": None,
-                "visible_for_annotators": True,
+                # "visible_for_annotators": True,
                 "settings": {"type": "integer", "gt": 5},
             },
         ),
@@ -112,13 +125,13 @@ def test_terms_metadata_property_errors(
             {
                 "name": "a",
                 "description": None,
-                "visible_for_annotators": True,
+                # "visible_for_annotators": True,
                 "settings": {"type": "integer", "gt": 5, "lt": 10},
             },
         ),
     ],
 )
-def test_int_metadata_property(schema_kwargs: Dict[str, Any], server_payload: Dict[str, Any]) -> None:
+def test_integer_metadata_property(schema_kwargs: Dict[str, Any], server_payload: Dict[str, Any]) -> None:
     metadata_property = IntegerMetadataProperty(**schema_kwargs)
     assert metadata_property.type == MetadataPropertyTypes.integer
     assert metadata_property.server_settings == server_payload["settings"]
@@ -132,16 +145,16 @@ def test_int_metadata_property(schema_kwargs: Dict[str, Any], server_payload: Di
         (
             {"name": "int-metadata-property", "lt": 5, "gt": 5},
             ValidationError,
-            "1 validation error for IntMetadataProperty\n__root__\n  `IntMetadataProperty` with name=int-metadata-property cannot have `lt` less than `gt`",
+            "1 validation error for IntegerMetadataProperty\n__root__\n  `IntegerMetadataProperty` with name=int-metadata-property cannot have `lt` less than `gt`",
         ),
         (
             {"name": "int-metadata-property", "lt": 5, "gt": 6},
             ValidationError,
-            "1 validation error for IntMetadataProperty\n__root__\n  `IntMetadataProperty` with name=int-metadata-property cannot have `lt` less than `gt`",
+            "1 validation error for IntegerMetadataProperty\n__root__\n  `IntegerMetadataProperty` with name=int-metadata-property cannot have `lt` less than `gt`",
         ),
     ],
 )
-def test_int_metadata_property_errors(
+def test_integer_metadata_property_errors(
     schema_kwargs: Dict[str, Any], exception_cls: Any, exception_message: str
 ) -> None:
     with pytest.raises(exception_cls, match=exception_message):
@@ -153,14 +166,23 @@ def test_int_metadata_property_errors(
     [
         (
             {"name": "a", "description": "b"},
-            {"name": "a", "description": "b", "visible_for_annotators": True, "settings": {"type": "float"}},
+            {
+                "name": "a",
+                "description": "b",
+                # "visible_for_annotators": True,
+                "settings": {"type": "float"},
+            },
         ),
         (
-            {"name": "a", "visible_for_annotators": False, "lt": 5.0},
+            {
+                "name": "a",
+                # "visible_for_annotators": False,
+                "lt": 5.0,
+            },
             {
                 "name": "a",
                 "description": None,
-                "visible_for_annotators": False,
+                # "visible_for_annotators": False,
                 "settings": {"type": "float", "lt": 5.0},
             },
         ),
@@ -169,7 +191,7 @@ def test_int_metadata_property_errors(
             {
                 "name": "a",
                 "description": None,
-                "visible_for_annotators": True,
+                # "visible_for_annotators": True,
                 "settings": {"type": "float", "gt": 5.0},
             },
         ),
@@ -178,7 +200,7 @@ def test_int_metadata_property_errors(
             {
                 "name": "a",
                 "description": None,
-                "visible_for_annotators": True,
+                # "visible_for_annotators": True,
                 "settings": {"type": "float", "gt": 5.0, "lt": 10.0},
             },
         ),
