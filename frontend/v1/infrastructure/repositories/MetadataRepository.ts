@@ -9,7 +9,7 @@ export class MetadataRepository {
 
   async getMetadataFilters(datasetId: string) {
     try {
-      const url = `/v1/me/datasets/${datasetId}/metadata`;
+      const url = `/v1/me/datasets/${datasetId}/metadata-properties`;
 
       const { data } = await this.axios.get<Response<BackendMetadata[]>>(url);
 

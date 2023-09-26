@@ -31,7 +31,7 @@ export class MetadataFilter {
     if (!params) return;
 
     const metadataFilter = params.split("+").map((metadata) => {
-      const [name, value] = metadata.split(":");
+      const [name, value] = metadata.split(/:(.*)/s);
       return { name, value };
     });
 
@@ -41,9 +41,7 @@ export class MetadataFilter {
   }
 
   private getFilterSelected() {
-    return this.metadata.filter((m) =>
-      m.isTerms ? m.selectedOptions.length > 0 : !!m.value
-    );
+    return this.metadata.filter((m) => m.isAnswered);
   }
 
   private toQueryParams() {
@@ -52,7 +50,7 @@ export class MetadataFilter {
         name: m.name,
         value: m.isTerms
           ? m.selectedOptions.map((s) => s.label).join(",")
-          : m.value,
+          : JSON.stringify(m.value),
       };
     });
   }

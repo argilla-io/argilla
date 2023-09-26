@@ -3,6 +3,8 @@ import { Metadata } from "./Metadata";
 const createMetadataInteger = () =>
   new Metadata("1", "split", "The split of the record", {
     type: "integer",
+    min: 0,
+    max: 2,
   });
 const createMetadataTerms = () =>
   new Metadata("1", "split", "The split of the record", {
@@ -12,6 +14,8 @@ const createMetadataTerms = () =>
 const createMetadataFloat = () =>
   new Metadata("1", "split", "The split of the record", {
     type: "float",
+    min: 0.1,
+    max: 3.76,
   });
 
 describe("Metadata", () => {
@@ -67,8 +71,9 @@ describe("Metadata", () => {
     });
     test("should complete the metadata when is integer", () => {
       const metadata = createMetadataInteger();
-      metadata.completeMetadata("10");
-      expect(metadata.value).toEqual(10);
+      metadata.completeMetadata(JSON.stringify({ from: 10, to: 20 }));
+
+      expect(metadata.value).toEqual({ from: 10, to: 20 });
     });
   });
 
@@ -83,12 +88,12 @@ describe("Metadata", () => {
       );
     });
 
-    test("should clear the metadata when is integer", () => {
+    test("should clear the metadata when is integer set the settings max and min values", () => {
       const metadata = createMetadataInteger();
-      metadata.completeMetadata("10");
+      metadata.completeMetadata(JSON.stringify({ from: 10, to: 20 }));
       metadata.clear();
 
-      expect(metadata.value).toEqual(null);
+      expect(metadata.value).toEqual({ from: 0, to: 2 });
     });
   });
 });

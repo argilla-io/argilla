@@ -16,6 +16,8 @@ export const metadataMocked = [
     description: "The training loss affecting the records",
     settings: {
       type: "integer",
+      min: 0,
+      max: 2,
     },
   },
   {
@@ -24,6 +26,8 @@ export const metadataMocked = [
     description: "The training loss affecting the records",
     settings: {
       type: "float",
+      min: 0.1,
+      max: 3.76,
     },
   },
   {

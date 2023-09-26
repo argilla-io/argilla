@@ -2,19 +2,31 @@ class OptionForFilter {
   public selected = false;
   constructor(public readonly label: string) {}
 }
+interface RangeValue {
+  from: number;
+  to: number;
+}
 
 export class Metadata {
-  public value?: number; // TBD: For integer of float
+  public value: RangeValue;
   public options: OptionForFilter[];
+
   constructor(
     private id: string,
     public name: string,
     private description: string,
-    private settings: any
+    public settings: any
   ) {
-    this.options = this.settings.values?.map((value: string) => {
-      return new OptionForFilter(value);
-    });
+    if (this.isTerms) {
+      this.options = this.settings.values.map((value: string) => {
+        return new OptionForFilter(value);
+      });
+    } else {
+      this.value = {
+        from: this.settings.min,
+        to: this.settings.max,
+      };
+    }
   }
 
   public get isTerms() {
@@ -27,6 +39,13 @@ export class Metadata {
 
   public get isFloat() {
     return this.settings.type === "float";
+  }
+
+  public get isAnswered(): boolean {
+    return this.isTerms
+      ? this.selectedOptions.length > 0
+      : this.value.from !== this.settings.min ||
+          this.value.to !== this.settings.max;
   }
 
   public get selectedOptions(): OptionForFilter[] {
@@ -46,13 +65,21 @@ export class Metadata {
         if (option) option.selected = true;
       });
     } else {
-      this.value = Number(value);
+      try {
+        const { from, to } = JSON.parse(value);
+        this.value.from = from;
+        this.value.to = to;
+      } catch (error) {
+        this.value.from = this.settings.min;
+        this.value.to = this.settings.max;
+      }
     }
   }
 
   clear(): void {
     if (this.isTerms) return this.options.forEach((o) => (o.selected = false));
 
-    this.value = null;
+    this.value.from = this.settings.min;
+    this.value.to = this.settings.max;
   }
 }

@@ -41,16 +41,9 @@
                 :metadata="visibleCategory"
               />
 
-              <div v-else-if="visibleCategory.isFloat">
-                <BaseRangeMultipleSlider :min="0" :max="1" />
-                {{ visibleCategory.settings }}
+              <div v-else>
+                <MetadataRangeSelector :metadata="visibleCategory" />
               </div>
-
-              <div v-else-if="visibleCategory.isInteger">
-                {{ visibleCategory.settings }}
-              </div>
-
-              <div v-else>{{ visibleCategory.settings }}</div>
             </transition>
             <BaseButton class="primary small full-width" @on-click="applyFilter"
               >Filter</BaseButton
