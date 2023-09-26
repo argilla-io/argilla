@@ -78,54 +78,9 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             TypeError: if `guidelines` is not None and not a string.
             ValueError: if `guidelines` is an empty string.
         """
-        if not isinstance(fields, list):
-            raise TypeError(f"Expected `fields` to be a list, got {type(fields)} instead.")
-
-        any_required = False
-        unique_names = set()
-        for field in fields:
-            if not isinstance(field, FieldSchema):
-                raise TypeError(f"Expected `fields` to be a list of `FieldSchema`, got {type(field)} instead.")
-            if field.name in unique_names:
-                raise ValueError(f"Expected `fields` to have unique names, got {field.name} twice instead.")
-            unique_names.add(field.name)
-            if not any_required and field.required:
-                any_required = True
-        if not any_required:
-            raise ValueError("At least one `FieldSchema` in `fields` must be required (`required=True`).")
         self._fields = fields
-        self._fields_schema = None
-
-        if not isinstance(questions, list):
-            raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
-
-        any_required = False
-        unique_names = set()
-        for question in questions:
-            if not isinstance(question, AllowedQuestionTypes.__args__):
-                raise TypeError(
-                    "Expected `questions` to be a list of"
-                    f" `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}` got a"
-                    f" question in the list with type {type(question)} instead."
-                )
-            if question.name in unique_names:
-                raise ValueError(f"Expected `questions` to have unique names, got {question.name} twice instead.")
-            unique_names.add(question.name)
-            if not any_required and question.required:
-                any_required = True
-        if not any_required:
-            raise ValueError("At least one question in `questions` must be required (`required=True`).")
+        self._fields_schema = generate_pydantic_schema(self.fields)
         self._questions = questions
-
-        if guidelines is not None:
-            if not isinstance(guidelines, str):
-                raise TypeError(
-                    f"Expected `guidelines` to be either None (default) or a string, got {type(guidelines)} instead."
-                )
-            if len(guidelines) < 1:
-                raise ValueError(
-                    "Expected `guidelines` to be either None (default) or a non-empty string, minimum length is 1."
-                )
         self._guidelines = guidelines
 
     @property
