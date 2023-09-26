@@ -11,10 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import Any, AsyncGenerator, List, Optional, TYPE_CHECKING, Union
-
-from opensearchpy import RequestError
-from sqlalchemy.orm import Session
+from typing import TYPE_CHECKING, Any, AsyncGenerator, List, Optional, Union
 
 from argilla.server.enums import MetadataPropertyType, ResponseStatusFilter
 from argilla.server.models import Record, User
@@ -28,6 +25,9 @@ from argilla.server.search_engine import (
 )
 from argilla.server.search_engine.commons import ALL_RESPONSES_STATUSES_FIELD, index_name_for_dataset
 from argilla.server.settings import settings as server_settings
+from opensearchpy import RequestError
+from sqlalchemy.orm import Session
+
 from tests.factories import (
     FloatMetadataPropertyFactory,
     IntegerMetadataPropertyFactory,
