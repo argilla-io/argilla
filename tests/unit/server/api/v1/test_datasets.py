@@ -60,6 +60,7 @@ from argilla.server.search_engine import (
     SearchEngine,
     SearchResponseItem,
     SearchResponses,
+    SortBy,
     StringQuery,
     TermsMetadataFilter,
     UserResponseStatusFilter,
@@ -837,6 +838,7 @@ class TestSuiteDatasets:
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
+            sort_by=[SortBy(field="inserted_at")],
         )
 
     @pytest.mark.parametrize(
@@ -1316,6 +1318,7 @@ class TestSuiteDatasets:
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
+            sort_by=[SortBy(field="inserted_at")],
         )
 
     @pytest.mark.parametrize("response_status_filter", ["missing", "discarded", "submitted", "draft"])
