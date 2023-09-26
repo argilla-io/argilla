@@ -47,6 +47,14 @@ export default {
     searchText() {
       this.preselectionIndex = 0;
     },
+    metadataOptions: {
+      handler: function () {
+        if (this.searchText.length) {
+          this.searchText = "";
+        }
+      },
+      deep: true,
+    },
   },
   computed: {
     labelsFilteredBySearchText() {
@@ -54,6 +62,9 @@ export default {
     },
     optionsLength() {
       return this.metadata.options.length;
+    },
+    metadataOptions() {
+      return this.metadata.options;
     },
   },
   methods: {
@@ -68,6 +79,7 @@ export default {
     },
     removeSelectedOption(option) {
       option.selected = false;
+      console.log("searchtext", this.searchText);
     },
     includeSelectedOption(option) {
       option.selected = true;
