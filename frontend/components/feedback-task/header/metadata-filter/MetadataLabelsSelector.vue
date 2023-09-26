@@ -47,6 +47,14 @@ export default {
     searchText() {
       this.preSelectionIndex = 0;
     },
+    metadataOptions: {
+      handler: function () {
+        if (this.searchText.length) {
+          this.searchText = "";
+        }
+      },
+      deep: true,
+    },
   },
   computed: {
     labelsFilteredBySearchText() {
@@ -54,6 +62,9 @@ export default {
     },
     optionsLength() {
       return this.metadata.options.length;
+    },
+    metadataOptions() {
+      return this.metadata.options;
     },
   },
   methods: {
