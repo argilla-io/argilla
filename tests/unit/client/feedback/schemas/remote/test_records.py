@@ -303,7 +303,7 @@ def test_remote_feedback_record(schema_kwargs: Dict[str, Any], server_payload: D
         ),
     ],
 )
-def test_remote_suggestion_schema_from_api(payload: FeedbackItemModel) -> None:
+def test_remote_feedback_record_schema_from_api(payload: FeedbackItemModel) -> None:
     record = RemoteFeedbackRecord.from_api(
         payload, question_id_to_name={payload.suggestions[0].question_id: "question-1"}
     )
