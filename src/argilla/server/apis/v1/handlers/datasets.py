@@ -161,21 +161,16 @@ async def list_current_user_dataset_records(
     await authorize(current_user, DatasetPolicyV1.get(dataset))
 
     if metadata.metadata_parsed:
-        metadata_filters = await _build_metadata_filters(db, dataset, metadata.metadata_parsed)
-        response_status_filter = await _build_response_status_filter_for_search(response_statuses, user=current_user)
-
-        search_responses = await search_engine.search(
+        records = await _filter_records_using_search_engine(
+            db,
+            search_engine,
             dataset=dataset,
-            metadata_filters=metadata_filters,
-            user_response_status_filter=response_status_filter,
-            offset=offset,
+            parsed_metadata=metadata.metadata_parsed,
             limit=limit,
-            sort_by=[SortBy(field="inserted_at")],
-        )
-
-        record_ids = [response.record_id for response in search_responses.items]
-        records = await datasets.get_records_by_ids(
-            db=db, dataset_id=dataset_id, record_ids=record_ids, include=include
+            offset=offset,
+            user=current_user,
+            response_statuses=response_statuses,
+            include=include,
         )
     else:
         records = await datasets.list_records_by_dataset_id(
@@ -189,6 +184,34 @@ async def list_current_user_dataset_records(
         )
 
     return Records(items=records)
+
+
+async def _filter_records_using_search_engine(
+    db: "AsyncSession",
+    search_engine: "SearchEngine",
+    dataset: Dataset,
+    parsed_metadata: List[MetadataParsedQueryParam],
+    limit: int,
+    offset: int,
+    user: Optional[User] = None,
+    response_statuses: Optional[List[ResponseStatusFilter]] = None,
+    include: Optional[List[RecordInclude]] = None,
+):
+    metadata_filters = await _build_metadata_filters(db, dataset, parsed_metadata)
+    response_status_filter = await _build_response_status_filter_for_search(response_statuses, user=user)
+
+    search_responses = await search_engine.search(
+        dataset=dataset,
+        metadata_filters=metadata_filters,
+        user_response_status_filter=response_status_filter,
+        offset=offset,
+        limit=limit,
+        sort_by=[SortBy(field="inserted_at")],
+    )
+
+    record_ids = [response.record_id for response in search_responses.items]
+
+    return await datasets.get_records_by_ids(db=db, dataset_id=dataset.id, record_ids=record_ids, include=include)
 
 
 @router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
@@ -208,21 +231,15 @@ async def list_dataset_records(
 
     await authorize(current_user, DatasetPolicyV1.list_dataset_records_with_all_responses(dataset))
     if metadata.metadata_parsed:
-        metadata_filters = await _build_metadata_filters(db, dataset, metadata.metadata_parsed)
-        response_status_filter = await _build_response_status_filter_for_search(response_statuses)
-
-        search_responses = await search_engine.search(
+        records = await _filter_records_using_search_engine(
+            db,
+            search_engine,
             dataset=dataset,
-            metadata_filters=metadata_filters,
-            user_response_status_filter=response_status_filter,
-            offset=offset,
+            parsed_metadata=metadata.metadata_parsed,
             limit=limit,
-            sort_by=[SortBy(field="inserted_at")],
-        )
-
-        record_ids = [response.record_id for response in search_responses.items]
-        records = await datasets.get_records_by_ids(
-            db=db, dataset_id=dataset_id, record_ids=record_ids, include=include
+            offset=offset,
+            response_statuses=response_statuses,
+            include=include,
         )
     else:
         records = await datasets.list_records_by_dataset_id(
