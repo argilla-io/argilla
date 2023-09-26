@@ -129,6 +129,8 @@ def test_remote_suggestion_schema_from_api(payload: FeedbackSuggestionModel) -> 
                     "question-4": {"value": [{"value": "a", "rank": 1}, {"value": "b", "rank": 2}]},
                 },
                 "status": "submitted",
+                "inserted_at": datetime.now(),
+                "updated_at": datetime.now(),
             },
             {
                 "user_id": UUID("00000000-0000-0000-0000-000000000000"),
@@ -146,6 +148,8 @@ def test_remote_suggestion_schema_from_api(payload: FeedbackSuggestionModel) -> 
                 "user_id": UUID("00000000-0000-0000-0000-000000000000"),
                 "values": {"question-1": {"value": "a"}},
                 "status": "draft",
+                "inserted_at": datetime.now(),
+                "updated_at": datetime.now(),
             },
             {
                 "user_id": UUID("00000000-0000-0000-0000-000000000000"),
@@ -213,6 +217,8 @@ def test_remote_response_schema_from_api(payload: FeedbackResponseModel) -> None
                     {
                         "values": {"question-1": {"value": "This is the first answer"}, "question-2": {"value": 5}},
                         "status": "submitted",
+                        "inserted_at": datetime.now(),
+                        "updated_at": datetime.now(),
                     },
                 ],
                 "suggestions": [
@@ -318,7 +324,7 @@ def test_remote_feedback_record_schema_from_api(payload: FeedbackItemModel) -> N
         }
     ) == payload.dict(
         exclude={
-            "responses": {"__all__": {"id", "inserted_at", "updated_at"}},
+            "responses": {"__all__": {"id"}},
             "suggestions": ...,
             "inserted_at": ...,
             "updated_at": ...,
