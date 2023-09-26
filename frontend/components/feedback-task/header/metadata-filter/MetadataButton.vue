@@ -1,6 +1,8 @@
 <template>
   <div :class="badges.length ? 'metadata-button--active' : 'metadata-button'">
-    <BaseButton v-if="!badges.length">Metadata</BaseButton>
+    <BaseButton class="metadata-button__button" v-if="!badges.length"
+      >Metadata</BaseButton
+    >
     <svgicon v-else name="filter" width="16" height="16" />
     <div class="metadata-button__badges" v-if="badges.length">
       <FilterBadge
@@ -95,7 +97,7 @@ export default {
   gap: $base-space;
   align-items: center;
   height: $base-space * 5;
-  padding: $base-space;
+  padding: $base-space $base-space * 2;
   border-radius: $border-radius;
   cursor: pointer;
   &:hover,
@@ -113,7 +115,7 @@ export default {
   &__badge :deep(.badge__text) {
     max-width: 140px;
   }
-  &__button {
+  &__button.button {
     padding: 0;
   }
 }
