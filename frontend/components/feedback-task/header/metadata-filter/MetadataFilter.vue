@@ -73,7 +73,7 @@ export default {
     };
   },
   created() {
-    this.$root.$on("reset-metadata-filter", this.completeByRouteParams);
+    this.$root.$on("reset-metadata-filter", this.updateFiltersFromQueryParams);
   },
   destroyed() {
     this.$root.$off("reset-metadata-filter");
@@ -107,16 +107,28 @@ export default {
       this.metadataFilters.findByCategory(category).clear();
       this.applyFilter();
     },
+    updateFiltersFromQueryParams() {
+      this.completeByRouteParams();
+
+      this.appliedCategoriesFilters = this.metadataFilters.filteredCategories;
+    },
   },
   computed: {
     metadataCategoriesName() {
       return this.metadataFilters.categories;
     },
   },
+  watch: {
+    visibleDropdown() {
+      if (this.visibleDropdown) {
+        this.updateFiltersFromQueryParams();
+      }
+    },
+  },
   async mounted() {
     await this.getMetadataFilters(this.datasetId);
 
-    this.appliedCategoriesFilters = this.metadataFilters.filteredCategories;
+    this.updateFiltersFromQueryParams();
   },
   setup() {
     return useMetadataFilterViewModel();

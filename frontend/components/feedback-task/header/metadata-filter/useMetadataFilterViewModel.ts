@@ -11,8 +11,6 @@ export const useMetadataFilterViewModel = () => {
 
   const getMetadataFilters = async (datasetId: string) => {
     metadataFilters.value = await filterMetaDataUseCase.execute(datasetId);
-
-    completeByRouteParams();
   };
 
   const completeByRouteParams = () => {

@@ -53,6 +53,10 @@ export default {
       type: Array,
       default: () => [0, 1],
     },
+    step: {
+      type: Number,
+      default: () => this.max / 100,
+    },
   },
   watch: {
     sliderFrom(newValue) {
@@ -81,9 +85,6 @@ export default {
     },
     sliderTo() {
       return this.sliderValues[1];
-    },
-    step() {
-      return this.max / 100;
     },
   },
   methods: {
