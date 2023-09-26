@@ -47,7 +47,7 @@ class MetadataPropertySchema(BaseModel, ABC):
 
     class Config:
         validate_assignment = True
-        extra = Extra.forbid
+        extra = Extra.ignore
         exclude = {"type"}
 
     @abstractproperty

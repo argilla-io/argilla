@@ -49,7 +49,7 @@ class FieldSchema(BaseModel):
 
     class Config:
         validate_assignment = True
-        extra = Extra.forbid
+        extra = Extra.ignore
         exclude = {"type"}
 
     @abstractproperty
