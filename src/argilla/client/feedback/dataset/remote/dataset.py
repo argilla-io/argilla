@@ -136,7 +136,8 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         questions: List["AllowedRemoteQuestionTypes"],
         metadata_properties: Optional[List["AllowedRemoteMetadataPropertyTypes"]] = None,
         guidelines: Optional[str] = None,
-        allow_extra_metadata: bool = False,
+        # TODO: uncomment once supported by the API
+        # allow_extra_metadata: bool = False,
     ) -> None:
         super().__init__(
             client=client,
@@ -149,7 +150,8 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             questions=questions,
             metadata_properties=metadata_properties,
             guidelines=guidelines,
-            allow_extra_metadata=allow_extra_metadata,
+            # TODO: uncomment once supported by the API
+            # allow_extra_metadata=allow_extra_metadata,
         )
 
     def filter_by(
