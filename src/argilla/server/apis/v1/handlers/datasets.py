@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List, Optional
+from typing import List, Optional, Union
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
@@ -483,6 +483,29 @@ async def search_dataset_records(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Field `{search_engine_query.text.field}` not found in dataset `{dataset_id}`.",
+        )
+    try:
+        metadata_filters = []
+        for metadata_param in metadata.metadata_parsed:
+            metadata_property = await datasets.get_metadata_property_by_name_and_dataset_id(
+                db, name=metadata_param.name, dataset_id=dataset_id
+            )
+            if metadata_property is None:
+                continue  # won't fail on unknown metadata filter name
+
+            if metadata_property.type == MetadataPropertyType.terms:
+                metadata_filter_class = TermsMetadataFilter
+            elif metadata_property.type == MetadataPropertyType.integer:
+                metadata_filter_class = IntegerMetadataFilter
+            elif metadata_property.type == MetadataPropertyType.float:
+                metadata_filter_class = FloatMetadataFilter
+            else:
+                raise RuntimeError(f"Not found filter for type {metadata_property.type}")
+
+            metadata_filters.append(metadata_filter_class.from_string(metadata_property, metadata_param.value))
+    except ValueError as ex:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Cannot parse metadata filters: {ex}"
         )
 
     metadata_filters = await _build_metadata_filters(db, dataset, metadata.metadata_parsed)

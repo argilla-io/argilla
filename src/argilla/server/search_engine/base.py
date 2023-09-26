@@ -74,6 +74,7 @@ class TermsMetadataFilter(MetadataFilter):
         return cls(metadata_property=metadata_property, values=string.split(","))
 
 
+# TODO: transform to `pydantic.BaseModel`
 @dataclasses.dataclass
 class IntegerMetadataFilter(MetadataFilter):
     low: Optional[int] = None
@@ -93,6 +94,7 @@ class IntegerMetadataFilter(MetadataFilter):
         return cls(metadata_property, model.from_, model.to)
 
 
+# TODO: transform to `pydantic.BaseModel`
 @dataclasses.dataclass
 class FloatMetadataFilter(MetadataFilter):
     low: Optional[float] = None
