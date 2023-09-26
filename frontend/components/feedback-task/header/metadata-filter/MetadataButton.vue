@@ -1,5 +1,5 @@
 <template>
-  <div :class="badges.length ? 'metadata-button--active' : 'metadata-button'">
+  <div :class="isButtonActive ? 'metadata-button--active' : 'metadata-button'">
     <BaseButton class="metadata-button__button" v-if="!badges.length"
       >Metadata</BaseButton
     >
@@ -41,8 +41,8 @@
     <svgicon
       class="metadata-button__chevron"
       name="chevron-down"
-      width="12"
-      height="12"
+      width="16"
+      height="16"
     />
   </div>
 </template>
@@ -62,6 +62,10 @@ export default {
     maxVisibleBadges: {
       default: 2,
     },
+    isActive: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -74,6 +78,9 @@ export default {
     },
     collapsedbadges() {
       return this.badges.slice(this.maxVisibleBadges, this.badges.length);
+    },
+    isButtonActive() {
+      return this.isActive || !!this.badges.length;
     },
   },
   methods: {
@@ -102,6 +109,8 @@ export default {
   height: $base-space * 5;
   padding: $base-space $base-space * 2;
   border-radius: $border-radius;
+  background: none;
+  transition: background-color 0.2s ease;
   cursor: pointer;
   &:hover,
   &--active {
