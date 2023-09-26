@@ -161,6 +161,36 @@ class LoadDatasets:
 
         dataset.push_to_argilla(name=repo_id.split("/")[-1])
 
+    @staticmethod
+    def load_mock_dataset_for_filter_metadata():
+        import random
+        import argilla as rg
+
+        dataset = rg.FeedbackDataset.from_huggingface("argilla/oasst_response_quality", split="train")
+
+        records = dataset.records[:400]
+
+        for record in records:
+            record.metadata.update(
+                {
+                    "terms-prop": random.choice("abc"),
+                    "int-prop": random.randint(-10, 100),
+                    "float-prop": random.uniform(0, 100),
+                }
+            )
+        meta_ds = rg.FeedbackDataset(
+            fields=dataset.fields,
+            questions=dataset.questions,
+            metadata_properties=[
+                rg.TermsMetadataProperty(name="terms-prop", values=["a", "b", "c"]),
+                rg.IntegerMetadataProperty(name="int-prop", min=-10, max=100),
+                rg.FloatMetadataProperty(name="float-prop", min=0.0, max=100),
+            ],
+        )
+
+        meta_ds.add_records(records)
+        meta_ds.push_to_argilla("dataset-with-metadata-properties")
+
 
 if __name__ == "__main__":
     API_KEY = sys.argv[1]
@@ -169,11 +199,14 @@ if __name__ == "__main__":
     if LOAD_DATASETS.lower() == "none":
         print("No datasets will be loaded")
     else:
+        load_datasets = LOAD_DATASETS.lower().strip()
         while True:
             try:
                 response = requests.get("http://0.0.0.0:6900/")
                 if response.status_code == 200:
                     ld = LoadDatasets(API_KEY)
+
+                    ld.load_mock_dataset_for_filter_metadata()
 
                     ld.load_feedback_dataset_from_huggingface(
                         repo_id="argilla/databricks-dolly-15k-curated-en",
@@ -200,6 +233,7 @@ if __name__ == "__main__":
                             split="train",
                             samples=100,
                         )
+
             except requests.exceptions.ConnectionError:
                 pass
             except Exception as e:
