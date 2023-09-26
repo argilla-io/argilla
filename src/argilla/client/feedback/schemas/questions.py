@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import warnings
-from abc import abstractproperty
+from abc import ABC, abstractproperty
 from typing import Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Extra, Field, conint, conlist, root_validator, validator
@@ -23,7 +23,7 @@ from argilla.client.feedback.schemas.utils import LabelMappingMixin
 from argilla.client.feedback.schemas.validators import title_must_have_value
 
 
-class QuestionSchema(BaseModel):
+class QuestionSchema(BaseModel, ABC):
     """Base schema for the `FeedbackDataset` questions. Which means that all the questions
     in the dataset will have at least these fields.
 
@@ -63,7 +63,7 @@ class QuestionSchema(BaseModel):
         """Abstract property that should be implemented by the classes that inherit from
         this one, and that will be used to create the `FeedbackDataset` in Argilla.
         """
-        raise NotImplementedError
+        return {}
 
     def to_server_payload(self) -> Dict[str, Any]:
         """Method that will be used to create the payload that will be sent to Argilla
