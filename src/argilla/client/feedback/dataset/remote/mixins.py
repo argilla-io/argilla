@@ -85,6 +85,8 @@ class ArgillaRecordsMixin:
         records = []
         for offset, limit in zip(offsets, limits):
             fetched_records = self._fetch_records(offset=offset, limit=limit)
+            if len(fetched_records.items) == 0:
+                break
             records.extend(
                 [
                     RemoteFeedbackRecord.from_api(
@@ -92,6 +94,10 @@ class ArgillaRecordsMixin:
                     )
                     for record in fetched_records.items
                 ]
+            )
+        if len(records) == 0:
+            raise RuntimeError(
+                "No records were found in the dataset in Argilla for the given index(es) and/or filter(s) if any."
             )
         return records[0] if isinstance(key, int) else records
 
@@ -103,6 +109,8 @@ class ArgillaRecordsMixin:
         current_batch = 0
         while True:
             batch = self._fetch_records(offset=FETCHING_BATCH_SIZE * current_batch, limit=FETCHING_BATCH_SIZE)
+            if len(batch.items) == 0:
+                break
             for record in batch.items:
                 yield RemoteFeedbackRecord.from_api(
                     record, question_id_to_name=self._question_id_to_name, client=self._client
