@@ -94,7 +94,16 @@ export default {
         this.metadataFilters.convertToRouteParam()
       );
 
-      this.appliedCategoriesFilters = this.metadataFilters.filteredCategories;
+      const newCategoryFilters = this.metadataFilters.filteredCategories.filter(
+        (category) => !this.appliedCategoriesFilters.includes(category)
+      );
+      if (newCategoryFilters.length) {
+        newCategoryFilters.forEach((f) => {
+          this.appliedCategoriesFilters.push(f);
+        });
+      } else {
+        this.appliedCategoriesFilters = this.metadataFilters.filteredCategories;
+      }
     },
     openCategoryFilter(category) {
       this.visibleDropdown = this.visibleDropdown
