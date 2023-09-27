@@ -5,15 +5,27 @@
     }}</BaseButton>
     <svgicon v-else :name="iconName" width="16" height="16" />
     <div class="filter-button__badges" v-if="badges.length">
-      <FilterBadge
-        class="filter-button__badge"
-        :active-badge="activeBadge === badge && isActive"
-        v-for="badge in visibleBadges"
-        :key="badge"
-        :text="badge"
-        @on-click="onClickOnBadge(badge, $event)"
-        @on-clear="onClickOnClear(badge, $event)"
-      ></FilterBadge>
+      <template v-if="clickable">
+        <FilterBadge
+          class="filter-button__badge"
+          :active-badge="activeBadge === badge && isActive"
+          v-for="badge in visibleBadges"
+          :key="badge"
+          :text="badge"
+          @on-click="onClickOnBadge(badge, $event)"
+          @on-clear="onClickOnClear(badge, $event)"
+        ></FilterBadge>
+      </template>
+      <template v-else>
+        <FilterBadge
+          class="filter-button__badge"
+          :active-badge="activeBadge === badge && isActive"
+          v-for="badge in visibleBadges"
+          :key="badge"
+          :text="badge"
+          @on-clear="onClickOnClear(badge, $event)"
+        ></FilterBadge>
+      </template>
       <div
         class="filter-button__badges__collapsed"
         v-if="badges.length > maxVisibleBadges"
@@ -79,6 +91,7 @@ export default {
   data() {
     return {
       visibleTooltip: false,
+      clickable: false,
     };
   },
   computed: {
@@ -110,6 +123,11 @@ export default {
     onClickOutside() {
       this.visibleTooltip = false;
     },
+  },
+  mounted() {
+    if (this.$listeners["click-on-badge"]) {
+      this.clickable = true;
+    }
   },
 };
 </script>

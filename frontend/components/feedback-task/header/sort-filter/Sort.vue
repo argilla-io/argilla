@@ -8,14 +8,15 @@
         <FilterButton
           button-name="Sort"
           icon-name="sort"
+          :badges="appliedSortCategories"
           @click-on-clear="clearSortCategory"
         />
       </span>
       <span slot="dropdown-content" class="sort-filter__container">
-        <SortCategoriesSelector
-          v-if="!categoriesSelected.length"
+        <SortCategoriesList
+          v-if="!selectedSortingItems.length"
           class="sort-filter__selector"
-          :categories="nonSelectedCategories"
+          :categories="nonSelectedSortingItems"
           @include-category="includeSortCategory"
         />
         <SortSelector
@@ -41,15 +42,19 @@ export default {
   },
   data() {
     return {
+      appliedSortCategories: [],
       visibleDropdown: false,
     };
   },
   computed: {
-    nonSelectedCategories() {
+    nonSelectedSortingItems() {
       return this.metadataSort.noSelected;
     },
-    categoriesSelected() {
+    selectedSortingItems() {
       return this.metadataSort.selected;
+    },
+    selectedCategories() {
+      return this.selectedSortingItems.map((i) => i.name);
     },
   },
   methods: {
@@ -61,12 +66,25 @@ export default {
     },
     clearSortCategory(category) {
       this.metadataSort.unselect(category);
+
+      this.applySort();
     },
     applySort() {
       this.$root.$emit(
         "sort-changed",
-        this.categoriesSelected.map((c) => `metadata.${c.name}:${c.sort}`) //Todo order by priority
+        this.selectedSortingItems.map((c) => `metadata.${c.name}:${c.sort}`)
       );
+
+      const newSortBy = this.selectedCategories.filter(
+        (category) => !this.appliedSortCategories.includes(category)
+      );
+      if (newSortBy.length) {
+        newSortBy.forEach((f) => {
+          this.appliedSortCategories.push(f);
+        });
+      } else {
+        this.appliedSortCategories = this.selectedCategories;
+      }
     },
   },
   setup(props) {

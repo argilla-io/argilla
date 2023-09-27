@@ -1,20 +1,31 @@
 <template>
   <div class="sort-selector">
-    <p v-for="category in selectedCategories" :key="category.name">
-      <BaseButton
-        class="sort-selector__close-button"
-        @click="onClear(category.name)"
-      >
-        <svgicon
-          class="sort-selector__close-button__icon"
-          name="close"
-          width="14"
-          height="14" /></BaseButton
-      >{{ category.name }}
-    </p>
-    <BaseButton class="secondary small light sort-selector__add-button"
-      >+ Add another field</BaseButton
+    <SortSelectorItem
+      v-for="category in selectedSortingItems"
+      :key="category.name"
+      :category="category"
+      :available-categories="nonSelectedSortingItems"
+      @clear-category="onClear(category.name)"
+      @change-sort-direction="onChangeSortDirection(category.name)"
+      @replace-sort-category="onReplaceSortCategory(category.name)"
+    />
+    <BaseDropdown
+      :visible="visibleDropdown"
+      @visibility="onToggleVisibility"
+      v-if="nonSelectedSortingItems.length"
     >
+      <span slot="dropdown-header">
+        <BaseButton class="secondary small light sort-selector__add-button"
+          >+ Add another field</BaseButton
+        >
+      </span>
+      <span slot="dropdown-content">
+        <SortCategoriesList
+          :categories="nonSelectedSortingItems"
+          @include-category="includeSortCategory"
+        ></SortCategoriesList>
+      </span>
+    </BaseDropdown>
     <BaseButton
       class="primary small full-width sort-selector__button"
       @on-click="applySorting"
@@ -26,21 +37,48 @@
 export default {
   props: {
     sortingItems: {
-      type: Array,
+      type: Object,
       required: true,
     },
   },
+  data() {
+    return {
+      visibleDropdown: false,
+    };
+  },
   computed: {
-    selectedCategories() {
-      return this.sortingItems.filter((i) => i.selected);
+    nonSelectedSortingItems() {
+      return this.sortingItems.nonSelected.map((f) => f.name);
+    },
+    selectedSortingItems() {
+      return this.sortingItems.selected;
     },
   },
   methods: {
+    onToggleVisibility(value) {
+      this.visibleDropdown = value;
+    },
+    includeSortCategory(categoryName) {
+      this.sortingItems.select(categoryName);
+
+      this.visibleDropdown = false;
+    },
     applySorting() {
       this.$emit("apply-sort");
     },
-    onClear(category) {
-      this.sortingItems.find((item) => item.name === category).selected = false;
+    onClear(categoryName) {
+      this.sortingItems.unselect(categoryName);
+    },
+    onChangeSortDirection(categoryName) {
+      this.sortingItems.find((item) => item.name === categoryName).sort =
+        this.sortingItems.find((item) => item.name === categoryName).sort ===
+        "asc"
+          ? "desc"
+          : "asc";
+    },
+    onReplaceSortCategory(categoryName) {
+      this.includeSortCategory(categoryName);
+      this.$emit("replace-category-name");
     },
   },
 };

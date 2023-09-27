@@ -2,6 +2,7 @@ import { Metadata } from "./Metadata";
 
 class MetadataSort {
   public selected = false;
+  public sort = "asc";
   constructor(private metadata: Metadata | { name: string }) {}
 
   get name() {
