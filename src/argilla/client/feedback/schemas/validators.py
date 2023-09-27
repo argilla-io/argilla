@@ -52,6 +52,9 @@ def validate_numeric_metadata_filter_bounds(cls: "BaseModel", values: Dict[str, 
     le = values.get("le")
     ge = values.get("ge")
 
+    if le is None and ge is None:
+        raise ValueError(f"`{cls.__name__}` with name={name} must have at least one of `le` or `ge`")
+
     if le is not None and ge is not None and le >= ge:
         raise ValueError(f"`{cls.__name__}` with name={name} cannot have `ge` less than `le`")
 
