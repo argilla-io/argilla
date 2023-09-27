@@ -98,7 +98,7 @@ class TermsMetadataProperty(MetadataPropertySchema):
         return {"type": self.type, "values": self.values}
 
 
-class NumericMetadataProperty:
+class _NumericMetadataPropertySchema(MetadataPropertySchema):
     min: Optional[Union[int, float]] = None
     max: Optional[Union[int, float]] = None
 
@@ -114,7 +114,7 @@ class NumericMetadataProperty:
         return settings
 
 
-class IntegerMetadataProperty(NumericMetadataProperty, MetadataPropertySchema):
+class IntegerMetadataProperty(_NumericMetadataPropertySchema):
     """Schema for the `FeedbackDataset` metadata properties of type `integer`. This kind
     of metadata property will be used for filtering the metadata of a record based on
     an integer value to which `min` and `max` filters can be applied.
@@ -137,7 +137,7 @@ class IntegerMetadataProperty(NumericMetadataProperty, MetadataPropertySchema):
     max: Optional[int] = None
 
 
-class FloatMetadataProperty(NumericMetadataProperty, MetadataPropertySchema):
+class FloatMetadataProperty(_NumericMetadataPropertySchema):
     """Schema for the `FeedbackDataset` metadata properties of type `float`. This kind
     of metadata property will be used for filtering the metadata of a record based on
     an float value to which `min` and `max` filters can be applied.
@@ -190,7 +190,7 @@ class TermsMetadataFilter(MetadataFilterSchema):
         return {"values": self.values}
 
 
-class NumericMetadataFilter:
+class _NumericMetadataFilterSchema(MetadataFilterSchema):
     le: Optional[Union[int, float]] = None
     ge: Optional[Union[int, float]] = None
 
@@ -206,13 +206,13 @@ class NumericMetadataFilter:
         return settings
 
 
-class IntegerMetadataFilter(NumericMetadataFilter, MetadataFilterSchema):
+class IntegerMetadataFilter(_NumericMetadataFilterSchema):
     type: MetadataPropertyTypes = MetadataPropertyTypes.integer
     le: Optional[int] = None
     ge: Optional[int] = None
 
 
-class FloatMetadataFilter(NumericMetadataFilter, MetadataFilterSchema):
+class FloatMetadataFilter(_NumericMetadataFilterSchema):
     type: MetadataPropertyTypes = MetadataPropertyTypes.float
     le: Optional[float] = None
     ge: Optional[float] = None
