@@ -208,7 +208,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         metadata_filters: Optional[List[MetadataFilter]] = None,
         offset: int = 0,
         limit: int = 100,
-        sort_by: List[SortBy] = None,
+        sort_by: Optional[List[SortBy]] = None,
     ) -> SearchResponses:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html
 
@@ -216,7 +216,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             query = StringQuery(q=query)
 
         text_query = self._text_query_builder(dataset, text=query)
-        bool_query = {"must": [text_query]}
+        bool_query: Dict[str, Any] = {"must": [text_query]}
 
         query_filters = []
         if metadata_filters:
@@ -226,11 +226,11 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         if query_filters:
             bool_query["filter"] = {"bool": {"should": query_filters, "minimum_should_match": "100%"}}
 
-        query = {"bool": bool_query}
+        _query = {"bool": bool_query}
         index = await self._get_index_or_raise(dataset)
 
         sort = self._build_sort_configuration(sort_by)
-        response = await self._index_search_request(index, query=query, size=limit, from_=offset, sort=sort)
+        response = await self._index_search_request(index, query=_query, size=limit, from_=offset, sort=sort)
 
         return await self._process_search_response(response)
 
@@ -381,14 +381,17 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         return {"bool": {"should": filters, "minimum_should_match": 1}}
 
-    def _build_sort_configuration(self, sort_by: List[SortBy]) -> Optional[str]:
+    def _build_sort_configuration(self, sort_by: Optional[List[SortBy]] = None) -> Optional[str]:
         if not sort_by:
             return None
 
         sort_config = []
         for sort in sort_by:
-            if isinstance(sort.field, str):
-                sort_config.append(f"{sort.field}:{sort.order}")
+            if isinstance(sort.field, MetadataProperty):
+                sort_field_name = _mapping_key_for_metadata_property(sort.field)
+            else:
+                sort_field_name = sort.field
+            sort_config.append(f"{sort_field_name}:{sort.order}")
 
         return ",".join(sort_config)
 
@@ -418,7 +421,9 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         pass
 
     @abstractmethod
-    async def _index_search_request(self, index: str, query: dict, size: int, from_: int, sort: str = None) -> dict:
+    async def _index_search_request(
+        self, index: str, query: dict, size: int, from_: int, sort: Optional[str] = None
+    ) -> dict:
         """Executes request for search documents on a index"""
         pass
 

@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
@@ -41,13 +41,13 @@ from argilla.server.schemas.v1.datasets import (
     Question,
     QuestionCreate,
     Questions,
-    Record,
     Records,
     RecordsCreate,
     SearchRecord,
     SearchRecordsQuery,
     SearchRecordsResult,
 )
+from argilla.server.schemas.v1.datasets import Record as RecordSchema
 from argilla.server.search_engine import (
     FloatMetadataFilter,
     IntegerMetadataFilter,
@@ -59,8 +59,12 @@ from argilla.server.search_engine import (
     get_search_engine,
 )
 from argilla.server.security import auth
-from argilla.server.utils import parse_uuids
+from argilla.server.utils import parse_query_param, parse_uuids
 from argilla.utils.telemetry import TelemetryClient, get_telemetry_client
+
+if TYPE_CHECKING:
+    from argilla.server.models import Record
+    from argilla.server.schemas.v1.datasets import StringQuery
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
 LIST_DATASET_RECORDS_LIMIT_LTE = 1000
@@ -89,6 +93,128 @@ async def _get_dataset(
             detail=f"Dataset with id `{dataset_id}` not found",
         )
     return dataset
+
+
+async def _build_metadata_filters(
+    db: "AsyncSession", dataset: Dataset, parsed_metadata: List[MetadataParsedQueryParam]
+) -> List["MetadataFilter"]:
+    try:
+        metadata_filters = []
+        for metadata_param in parsed_metadata:
+            metadata_property = await datasets.get_metadata_property_by_name_and_dataset_id(
+                db, name=metadata_param.name, dataset_id=dataset.id
+            )
+            if metadata_property is None:
+                continue  # won't fail on unknown metadata filter name
+
+            if metadata_property.type == MetadataPropertyType.terms:
+                metadata_filter_class = TermsMetadataFilter
+            elif metadata_property.type == MetadataPropertyType.integer:
+                metadata_filter_class = IntegerMetadataFilter
+            elif metadata_property.type == MetadataPropertyType.float:
+                metadata_filter_class = FloatMetadataFilter
+            else:
+                raise ValueError(f"Not found filter for type {metadata_property.type}")
+
+            metadata_filters.append(metadata_filter_class.from_string(metadata_property, metadata_param.value))
+    except ValueError as ex:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Cannot parse provided metadata filters: {ex}"
+        )
+    return metadata_filters
+
+
+async def _build_response_status_filter_for_search(
+    response_statuses: Optional[List[ResponseStatusFilter]] = None, user: Optional[User] = None
+) -> Optional[UserResponseStatusFilter]:
+    user_response_status_filter = None
+
+    if response_statuses:
+        # TODO(@frascuchon): user response and status responses should be split into different filter types
+        user_response_status_filter = UserResponseStatusFilter(user=user, statuses=response_statuses)
+
+    return user_response_status_filter
+
+
+async def _build_sort_by(
+    db: "AsyncSession", dataset: Dataset, sort_by_query_param: Optional[Dict[str, str]] = None
+) -> Union[List[SortBy], None]:
+    if sort_by_query_param is None:
+        return None
+
+    sorts_by = []
+    for sort_field, sort_order in sort_by_query_param.items():
+        if sort_field not in ["inserted_at", "updated_at"]:
+            metadata_property = await datasets.get_metadata_property_by_name_and_dataset_id(
+                db, name=sort_field, dataset_id=dataset.id
+            )
+            if not metadata_property:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Provided metadata property in 'sort_by' query param '{sort_field}' not found in dataset with '{dataset.id}'",
+                )
+            field = metadata_property
+        else:
+            field = sort_field
+
+        sorts_by.append(SortBy(field=field, order=sort_order or "asc"))
+
+    return sorts_by
+
+
+async def _get_search_responses(
+    db: "AsyncSession",
+    search_engine: "SearchEngine",
+    dataset: Dataset,
+    parsed_metadata: List[MetadataParsedQueryParam],
+    limit: int,
+    offset: int,
+    query: Optional["StringQuery"] = None,
+    user: Optional[User] = None,
+    response_statuses: Optional[List[ResponseStatusFilter]] = None,
+    sort_by_query_param: Optional[Dict[str, str]] = None,
+):
+    metadata_filters = await _build_metadata_filters(db, dataset, parsed_metadata)
+    response_status_filter = await _build_response_status_filter_for_search(response_statuses, user=user)
+    sort_by = await _build_sort_by(db, dataset, sort_by_query_param)
+
+    return await search_engine.search(
+        dataset=dataset,
+        query=query,
+        metadata_filters=metadata_filters,
+        user_response_status_filter=response_status_filter,
+        offset=offset,
+        limit=limit,
+        sort_by=sort_by,
+    )
+
+
+async def _filter_records_using_search_engine(
+    db: "AsyncSession",
+    search_engine: "SearchEngine",
+    dataset: Dataset,
+    parsed_metadata: List[MetadataParsedQueryParam],
+    limit: int,
+    offset: int,
+    user: Optional[User] = None,
+    response_statuses: Optional[List[ResponseStatusFilter]] = None,
+    include: Optional[List[RecordInclude]] = None,
+    sort_by_query_param: Optional[Dict[str, str]] = None,
+) -> List["Record"]:
+    search_responses = await _get_search_responses(
+        db=db,
+        search_engine=search_engine,
+        dataset=dataset,
+        parsed_metadata=parsed_metadata,
+        limit=limit,
+        offset=offset,
+        user=user,
+        response_statuses=response_statuses,
+        sort_by_query_param=sort_by_query_param,
+    )
+
+    record_ids = [response.record_id for response in search_responses.items]
+    return await datasets.get_records_by_ids(db=db, dataset_id=dataset.id, record_ids=record_ids, include=include)
 
 
 @router.get("/me/datasets", response_model=Datasets)
@@ -144,6 +270,16 @@ async def list_dataset_metadata_properties(
     return MetadataProperties(items=dataset.metadata_properties)
 
 
+parse_sort_by_query_param = parse_query_param(
+    name="sort_by",
+    description=(
+        "The field used to sort the records. Expected format is `field` or `field:{asc,desc}`, where `field`"
+        " can be 'inserted_at', 'updated_at' or the name of a metadata property"
+    ),
+    max_values_per_key=1,
+)
+
+
 @router.get("/me/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
 async def list_current_user_dataset_records(
     *,
@@ -151,6 +287,7 @@ async def list_current_user_dataset_records(
     search_engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     metadata: MetadataQueryParams = Depends(),
+    sort_by_query_param: Optional[Dict[str, str]] = Depends(parse_sort_by_query_param),
     include: List[RecordInclude] = Query([], description="Relationships to include in the response"),
     response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = 0,
@@ -161,7 +298,7 @@ async def list_current_user_dataset_records(
 
     await authorize(current_user, DatasetPolicyV1.get(dataset))
 
-    if metadata.metadata_parsed:
+    if metadata.metadata_parsed or sort_by_query_param:
         records = await _filter_records_using_search_engine(
             db,
             search_engine,
@@ -172,6 +309,7 @@ async def list_current_user_dataset_records(
             user=current_user,
             response_statuses=response_statuses,
             include=include,
+            sort_by_query_param=sort_by_query_param,
         )
     else:
         records = await datasets.list_records_by_dataset_id(
@@ -187,34 +325,6 @@ async def list_current_user_dataset_records(
     return Records(items=records)
 
 
-async def _filter_records_using_search_engine(
-    db: "AsyncSession",
-    search_engine: "SearchEngine",
-    dataset: Dataset,
-    parsed_metadata: List[MetadataParsedQueryParam],
-    limit: int,
-    offset: int,
-    user: Optional[User] = None,
-    response_statuses: Optional[List[ResponseStatusFilter]] = None,
-    include: Optional[List[RecordInclude]] = None,
-):
-    metadata_filters = await _build_metadata_filters(db, dataset, parsed_metadata)
-    response_status_filter = await _build_response_status_filter_for_search(response_statuses, user=user)
-
-    search_responses = await search_engine.search(
-        dataset=dataset,
-        metadata_filters=metadata_filters,
-        user_response_status_filter=response_status_filter,
-        offset=offset,
-        limit=limit,
-        sort_by=[SortBy(field="inserted_at")],
-    )
-
-    record_ids = [response.record_id for response in search_responses.items]
-
-    return await datasets.get_records_by_ids(db=db, dataset_id=dataset.id, record_ids=record_ids, include=include)
-
-
 @router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
 async def list_dataset_records(
     *,
@@ -222,16 +332,19 @@ async def list_dataset_records(
     search_engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     metadata: MetadataQueryParams = Depends(),
+    sort_by_query_param: Optional[Dict[str, str]] = Depends(parse_sort_by_query_param),
     include: List[RecordInclude] = Query([], description="Relationships to include in the response"),
     response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
 ):
+    print(sort_by_query_param)
     dataset = await _get_dataset(db, dataset_id)
 
     await authorize(current_user, DatasetPolicyV1.list_dataset_records_with_all_responses(dataset))
-    if metadata.metadata_parsed:
+
+    if metadata.metadata_parsed or sort_by_query_param:
         records = await _filter_records_using_search_engine(
             db,
             search_engine,
@@ -241,6 +354,7 @@ async def list_dataset_records(
             offset=offset,
             response_statuses=response_statuses,
             include=include,
+            sort_by_query_param=sort_by_query_param,
         )
     else:
         records = await datasets.list_records_by_dataset_id(
@@ -462,6 +576,7 @@ async def search_dataset_records(
     dataset_id: UUID,
     query: SearchRecordsQuery,
     metadata: MetadataQueryParams = Depends(),
+    sort_by_query_param: Optional[Dict[str, str]] = Depends(parse_sort_by_query_param),
     include: List[RecordInclude] = Query([]),
     response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = Query(0, ge=0),
@@ -479,40 +594,18 @@ async def search_dataset_records(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Field `{search_engine_query.text.field}` not found in dataset `{dataset_id}`.",
         )
-    try:
-        metadata_filters = []
-        for metadata_param in metadata.metadata_parsed:
-            metadata_property = await datasets.get_metadata_property_by_name_and_dataset_id(
-                db, name=metadata_param.name, dataset_id=dataset_id
-            )
-            if metadata_property is None:
-                continue  # won't fail on unknown metadata filter name
 
-            if metadata_property.type == MetadataPropertyType.terms:
-                metadata_filter_class = TermsMetadataFilter
-            elif metadata_property.type == MetadataPropertyType.integer:
-                metadata_filter_class = IntegerMetadataFilter
-            elif metadata_property.type == MetadataPropertyType.float:
-                metadata_filter_class = FloatMetadataFilter
-            else:
-                raise RuntimeError(f"Not found filter for type {metadata_property.type}")
-
-            metadata_filters.append(metadata_filter_class.from_string(metadata_property, metadata_param.value))
-    except ValueError as ex:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Cannot parse metadata filters: {ex}"
-        )
-
-    metadata_filters = await _build_metadata_filters(db, dataset, metadata.metadata_parsed)
-    user_response_status_filter = await _build_response_status_filter_for_search(response_statuses, user=current_user)
-
-    search_responses = await search_engine.search(
+    search_responses = await _get_search_responses(
+        db=db,
+        search_engine=search_engine,
         dataset=dataset,
         query=search_engine_query.text,
-        metadata_filters=metadata_filters,
-        user_response_status_filter=user_response_status_filter,
-        offset=offset,
+        parsed_metadata=metadata.metadata_parsed,
         limit=limit,
+        offset=offset,
+        user=current_user,
+        response_statuses=response_statuses,
+        sort_by_query_param=sort_by_query_param,
     )
 
     record_id_score_map = {
@@ -529,53 +622,12 @@ async def search_dataset_records(
 
     for record in records:
         record_id_score_map[record.id]["search_record"] = SearchRecord(
-            record=Record.from_orm(record), query_score=record_id_score_map[record.id]["query_score"]
+            record=RecordSchema.from_orm(record), query_score=record_id_score_map[record.id]["query_score"]
         )
 
     return SearchRecordsResult(
         items=[record["search_record"] for record in record_id_score_map.values()], total=search_responses.total
     )
-
-
-async def _build_metadata_filters(
-    db: "AsyncSession", dataset: Dataset, parsed_metadata: List[MetadataParsedQueryParam]
-) -> List["MetadataFilter"]:
-    try:
-        metadata_filters = []
-        for metadata_param in parsed_metadata:
-            metadata_property = await datasets.get_metadata_property_by_name_and_dataset_id(
-                db, name=metadata_param.name, dataset_id=dataset.id
-            )
-            if metadata_property is None:
-                continue  # won't fail on unknown metadata filter name
-
-            if metadata_property.type == MetadataPropertyType.terms:
-                metadata_filter_class = TermsMetadataFilter
-            elif metadata_property.type == MetadataPropertyType.integer:
-                metadata_filter_class = IntegerMetadataFilter
-            elif metadata_property.type == MetadataPropertyType.float:
-                metadata_filter_class = FloatMetadataFilter
-            else:
-                raise ValueError(f"Not found filter for type {metadata_property.type}")
-
-            metadata_filters.append(metadata_filter_class.from_string(metadata_property, metadata_param.value))
-    except ValueError as ex:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Cannot parse provided metadata filters: {ex}"
-        )
-    return metadata_filters
-
-
-async def _build_response_status_filter_for_search(
-    response_statuses: List[ResponseStatusFilter], user: Optional[User] = None
-) -> Optional[UserResponseStatusFilter]:
-    user_response_status_filter = None
-
-    if response_statuses:
-        # TODO(@frascuchon): user response and status responses should be split into different filter types
-        user_response_status_filter = UserResponseStatusFilter(user=user, statuses=response_statuses)
-
-    return user_response_status_filter
 
 
 @router.put("/datasets/{dataset_id}/publish", response_model=Dataset)

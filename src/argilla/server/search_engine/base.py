@@ -208,6 +208,6 @@ class SearchEngine(metaclass=ABCMeta):
         metadata_filters: Optional[List[MetadataFilter]] = None,
         offset: int = 0,
         limit: int = 100,
-        sort_by: List[SortBy] = None,
+        sort_by: Optional[List[SortBy]] = None,
     ) -> SearchResponses:
         pass
