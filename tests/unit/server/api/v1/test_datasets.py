@@ -2491,6 +2491,25 @@ class TestSuiteDatasets:
 
         mock_search_engine.configure_metadata_property.assert_called_once_with(created_metadata_property)
 
+    async def test_create_dataset_metadata_property_with_dataset_ready_and_search_engine_error(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, db: "AsyncSession", owner_auth_header: dict
+    ):
+        mock_search_engine.configure_metadata_property.side_effect = ValueError("MOCK")
+
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        metadata_property_json = {
+            "name": "name",
+            "settings": {"type": "terms", "values": ["valueA", "valueB", "valueC"]},
+        }
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
+        )
+
+        assert response.status_code == 422
+        assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
+
+
     async def test_create_dataset_metadata_property_as_admin(self, async_client: "AsyncClient", db: "AsyncSession"):
         workspace = await WorkspaceFactory.create()
         admin = await AdminFactory.create(workspaces=[workspace])
