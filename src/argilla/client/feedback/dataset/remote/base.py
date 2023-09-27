@@ -93,7 +93,7 @@ class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
         pass
 
     @abstractmethod
-    def delete(self,records: List[RemoteFeedbackRecord]) -> None:
+    def delete(self, records: List[RemoteFeedbackRecord]) -> None:
         pass
 
 
