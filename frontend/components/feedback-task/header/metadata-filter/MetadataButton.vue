@@ -120,6 +120,8 @@ export default {
   &--active {
     background: $black-4;
     @extend .metadata-button;
+  }
+  &--active {
     &:hover {
       background: $black-6;
     }
