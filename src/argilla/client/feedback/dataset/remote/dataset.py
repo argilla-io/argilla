@@ -157,6 +157,7 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
 
     def filter_by(
         self,
+        *,
         response_status: Optional[Union[FeedbackResponseStatusFilter, List[FeedbackResponseStatusFilter]]] = None,
         metadata_filters: Optional[Union["MetadataFilters", List["MetadataFilters"]]] = None,
     ) -> FilteredRemoteFeedbackDataset:
@@ -178,10 +179,10 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             raise ValueError("At least one of `response_status` or `metadata_filters` must be provided.")
         if response_status and not isinstance(response_status, list):
             response_status = [response_status]
-        if metadata_filters:
-            if not isinstance(metadata_filters, list):
-                metadata_filters = [metadata_filters]
-            metadata_filters = [metadata_filter.query_string for metadata_filter in metadata_filters]
+        if metadata_filters and not isinstance(metadata_filters, list):
+            metadata_filters = [metadata_filters]
+
+        #  accessing records later
         return FilteredRemoteFeedbackDataset(
             client=self._client,
             id=self.id,
@@ -192,12 +193,8 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             fields=self.fields,
             questions=self.questions,
             guidelines=self.guidelines,
-            filters={
-                "response_status": [status.value if hasattr(status, "value") else status for status in response_status]
-                if response_status
-                else None,
-                "metadata_filters": metadata_filters if metadata_filters else None,
-            },
+            response_status=response_status,
+            metadata_filters=metadata_filters,
         )
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])

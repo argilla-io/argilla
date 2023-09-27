@@ -13,9 +13,10 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
 
 from argilla.client.feedback.dataset.remote.base import RemoteFeedbackDatasetBase, RemoteFeedbackRecordsBase
+from argilla.client.feedback.schemas.metadata import MetadataFilters
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 
 if TYPE_CHECKING:
@@ -27,15 +28,30 @@ if TYPE_CHECKING:
     from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
     from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
-    from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
+    from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel, FeedbackResponseStatusFilter
     from argilla.client.workspaces import Workspace
 
 
 class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase):
-    def __init__(self, dataset: "RemoteFeedbackDataset", filters: Dict[str, Any]) -> None:
+    def __init__(
+        self,
+        dataset: "RemoteFeedbackDataset",
+        response_status: Optional[List["FeedbackResponseStatusFilter"]] = None,
+        metadata_filters: Optional[List["MetadataFilters"]] = None,
+    ) -> None:
         super().__init__(dataset=dataset)
 
-        self._filters = filters
+        self._response_status = (
+            [
+                status.value if hasattr(status, "value") else FeedbackResponseStatusFilter(status).value
+                for status in response_status
+            ]
+            if response_status
+            else None
+        )
+        self._metadata_filters = (
+            [metadata_filter.query_string for metadata_filter in metadata_filters] if metadata_filters else None
+        )
 
     def __len__(self) -> None:
         raise NotImplementedError("`__len__` does not work for filtered datasets.")
@@ -47,8 +63,8 @@ class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase):
             id=self._dataset.id,
             offset=offset,
             limit=limit,
-            response_status=self._filters.get("response_status", None),
-            metadata_filters=self._filters.get("metadata_filters", None),
+            response_status=self._response_status,
+            metadata_filters=self._metadata_filters,
         ).parsed
 
     def add(
@@ -77,7 +93,8 @@ class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeed
         fields: List["AllowedRemoteFieldTypes"],
         questions: List["AllowedRemoteQuestionTypes"],
         guidelines: Optional[str] = None,
-        filters: Dict[str, Any] = {},
+        response_status: Optional[List["FeedbackResponseStatusFilter"]] = None,
+        metadata_filters: Optional[List["MetadataFilters"]] = None,
     ) -> None:
         super().__init__(
             client=client,
@@ -90,7 +107,8 @@ class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeed
             questions=questions,
             guidelines=guidelines,
             # kwargs
-            filters=filters,
+            response_status=response_status,
+            metadata_filters=metadata_filters,
         )
 
     def delete(self) -> None:
