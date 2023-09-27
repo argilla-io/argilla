@@ -13,15 +13,14 @@
 #  limitations under the License.
 
 import dataclasses
-import re
 from abc import ABCMeta, abstractmethod
 from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator, Dict, Iterable, List, Literal, Optional, Union
+from typing import Any, AsyncGenerator, Iterable, List, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from argilla.server.enums import ResponseStatus, ResponseStatusFilter
+from argilla.server.enums import ResponseStatusFilter, SortOrder
 from argilla.server.models import Dataset, MetadataProperty, Record, Response, User
 
 __all__ = [
@@ -123,7 +122,7 @@ class SearchResponses:
 
 class SortBy(BaseModel):
     field: Union[MetadataProperty, Literal["inserted_at"], Literal["updated_at"]]
-    order: Union[Literal["asc"], Literal["desc"]] = "asc"
+    order: SortOrder = SortOrder.asc
 
     class Config:
         arbitrary_types_allowed = True
