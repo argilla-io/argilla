@@ -195,7 +195,7 @@ def get_records(
         params["response_status"] = response_status
 
     if metadata_filters is not None:
-        params["metadata"] = metadata_filters
+        params["metadata"] = [str(metadata_filter).replace("'", '"') for metadata_filter in metadata_filters]
 
     response = client.get(url=url, params=params)
 
