@@ -304,6 +304,35 @@ async def test_get_records(role: UserRole) -> None:
     assert FeedbackItemModel(**response.parsed.items[0].dict())
 
 
+@pytest.mark.parametrize("role", [UserRole.admin])  # , UserRole.owner])
+@pytest.mark.asyncio
+async def test_get_records_using_metadata_filters(role: UserRole) -> None:
+    dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+    terms_metadata = await TermsMetadataPropertyFactory.create(dataset=dataset)
+    integer_metadata = await IntegerMetadataPropertyFactory.create(dataset=dataset)
+    float_metadata = await FloatMetadataPropertyFactory.create(dataset=dataset)
+    await RecordFactory.create(
+        dataset=dataset, metadata_={terms_metadata.name: "a", integer_metadata.name: 1, float_metadata.name: 1.0}
+    )
+    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+    api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
+    response = get_records(
+        client=api.http_client.httpx,
+        id=dataset.id,
+        metadata_filters=[
+            f"{terms_metadata.name}:a",
+            f'{integer_metadata.name}:{{"le": 0, "ge": 10}}',
+            f'{float_metadata.name}:{{"le": 0.0, "ge": 10.0}}',
+        ],
+    )
+
+    assert response.status_code == 200
+    assert isinstance(response.parsed, FeedbackRecordsModel)
+    assert len(response.parsed.items) > 0
+    assert FeedbackItemModel(**response.parsed.items[0].dict())
+
+
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
 async def test_add_suggestion(role: UserRole) -> None:
