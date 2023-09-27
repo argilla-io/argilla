@@ -3,14 +3,14 @@
     <div class="range__inputs">
       <input
         type="number"
-        v-model.number="sliderValues[0]"
+        v-model.number.lazy="sliderValues[0]"
         :min="min"
         :max="max"
       />
       <span class="range__separator" />
       <input
         type="number"
-        v-model.number="sliderValues[1]"
+        v-model.number.lazy="sliderValues[1]"
         :min="min"
         :max="max"
       />
