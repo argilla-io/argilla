@@ -304,7 +304,7 @@ async def test_get_records(role: UserRole) -> None:
     assert FeedbackItemModel(**response.parsed.items[0].dict())
 
 
-@pytest.mark.parametrize("role", [UserRole.admin])  # , UserRole.owner])
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
 async def test_get_records_using_metadata_filters(role: UserRole) -> None:
     dataset = await DatasetFactory.create(status=DatasetStatus.ready)
