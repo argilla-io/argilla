@@ -68,7 +68,7 @@ def test_parse_query_param_with_base_model() -> None:
         (
             {"max_values_per_key": 2},
             ["key1:value1,value2,value3"],
-            "'unit-test' query parameter must contain at most 2 values per comma-separated key",
+            "'unit-test' query parameter must contain at most 2 values per comma-separated key. 'key1' has 3 values.",
         ),
     ],
 )

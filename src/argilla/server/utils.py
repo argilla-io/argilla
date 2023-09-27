@@ -138,7 +138,10 @@ def parse_query_param(
                 if num_values > max_values_per_key:
                     raise HTTPException(
                         status_code=422,
-                        detail=f"'{name}' query parameter must contain at most {max_values_per_key} values per comma-separated key",
+                        detail=(
+                            f"'{name}' query parameter must contain at most {max_values_per_key} values per"
+                            f" comma-separated key. '{key}' has {num_values} values."
+                        ),
                     )
 
                 if num_values == 1:
