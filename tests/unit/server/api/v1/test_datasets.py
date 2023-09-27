@@ -2439,7 +2439,9 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Wrong value found for field 'output'. Expected 'str', found 'int'"}
+        assert response.json() == {
+            "detail": "Wrong value found for required field 'output'. Expected 'str', found 'int'"
+        }
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     async def test_create_dataset_records_with_extra_fields(
