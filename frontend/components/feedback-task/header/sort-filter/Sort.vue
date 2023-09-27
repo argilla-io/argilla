@@ -70,11 +70,13 @@ export default {
       this.applySort();
     },
     applySort() {
+      this.onSortToggleVisibility(false);
       this.$root.$emit("sort-changed", this.metadataSort.convertToRouteParam());
 
       const newSortBy = this.selectedCategories.filter(
         (category) => !this.appliedSortCategories.includes(category)
       );
+
       if (newSortBy.length) {
         newSortBy.forEach((f) => {
           this.appliedSortCategories.push(f);
