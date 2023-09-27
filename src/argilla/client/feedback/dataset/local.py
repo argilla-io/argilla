@@ -22,6 +22,8 @@ if TYPE_CHECKING:
     from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
+from argilla.client.feedback.schemas.records import FeedbackRecord
+
 
 class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin, TaskTemplateMixin):
     def __init__(
