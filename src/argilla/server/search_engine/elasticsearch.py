@@ -79,14 +79,14 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
     async def put_index_mapping_request(self, index: str, mappings: dict):
         await self.client.indices.put_mapping(index=index, properties=mappings)
 
-    async def _index_search_request(self, index: str, query: dict, size: int, from_: int):
+    async def _index_search_request(self, index: str, query: dict, size: int, from_: int, sort: str = None):
         return await self.client.search(
             index=index,
             query=query,
             from_=from_,
             size=size,
             source=False,
-            sort="_score:desc,id:asc",
+            sort=sort or "_score:desc,id:asc",
             track_total_hits=True,
         )
 

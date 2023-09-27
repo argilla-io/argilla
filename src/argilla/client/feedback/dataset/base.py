@@ -209,6 +209,12 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             f" {', '.join(q.name for q in self._questions)}"
         )
 
+    @property
+    def metadata_properties(
+        self,
+    ) -> Union[List["AllowedMetadataPropertyTypes"], List["AllowedRemoteMetadataPropertyTypes"]]:
+        return self._metadata_properties
+
     def _parse_records(
         self, records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]]
     ) -> List[FeedbackRecord]:

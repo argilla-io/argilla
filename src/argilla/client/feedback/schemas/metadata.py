@@ -18,7 +18,10 @@ from typing import Any, Dict, List, Optional, Union
 from pydantic import BaseModel, Extra, Field, root_validator, validator
 
 from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
-from argilla.client.feedback.schemas.validators import validate_numeric_metadata_property_bounds
+from argilla.client.feedback.schemas.validators import (
+    validate_numeric_metadata_filter_bounds,
+    validate_numeric_metadata_property_bounds,
+)
 
 TERMS_METADATA_PROPERTY_MIN_VALUES = 1
 
@@ -47,7 +50,7 @@ class MetadataPropertySchema(BaseModel, ABC):
 
     class Config:
         validate_assignment = True
-        extra = Extra.forbid
+        extra = Extra.ignore
         exclude = {"type"}
 
     @abstractproperty
@@ -92,67 +95,69 @@ class TermsMetadataProperty(MetadataPropertySchema):
 
     @property
     def server_settings(self) -> Dict[str, Any]:
-        # TODO: add `values` once with now the naming in the backend
         return {"type": self.type, "values": self.values}
 
 
 class NumericMetadataProperty:
-    gt: Optional[Union[int, float]] = None
-    lt: Optional[Union[int, float]] = None
+    min: Optional[Union[int, float]] = None
+    max: Optional[Union[int, float]] = None
 
     _bounds_validator = root_validator(allow_reuse=True)(validate_numeric_metadata_property_bounds)
 
     @property
     def server_settings(self) -> Dict[str, Any]:
-        # TODO: add `lt` and `gt` once with the naming in the backend
         settings: Dict[str, Any] = {"type": self.type.value}
-        if self.gt is not None:
-            settings["gt"] = self.gt
-        if self.lt is not None:
-            settings["lt"] = self.lt
+        if self.min is not None:
+            settings["min"] = self.min
+        if self.max is not None:
+            settings["max"] = self.max
         return settings
 
 
 class IntegerMetadataProperty(NumericMetadataProperty, MetadataPropertySchema):
     """Schema for the `FeedbackDataset` metadata properties of type `integer`. This kind
     of metadata property will be used for filtering the metadata of a record based on
-    an integer value to which `gt` and `lt` filters can be applied.
+    an integer value to which `min` and `max` filters can be applied.
 
     Args:
         name: The name of the metadata property.
         description: A description of the metadata property. Defaults to `None`.
-        gt: The lower bound of the integer value. If not provided, then no lower bound
-            check will be applied. Defaults to `None`.
-        lt: The upper bound of the integer value. If not provided, then no upper bound
-            check will be applied. Defaults to `None`.
+        min: The lower bound of the integer value. If not provided, then no lower bound
+            check will be applied.
+        max: The upper bound of the integer value. If not provided, then no upper bound
+            check will be applied.
 
     Examples:
         >>> from argilla.client.feedback.schemas.metadata import IntegerMetadataProperty
-        >>> IntegerMetadataProperty(name="day", gt=0, lt=31)
+        >>> IntegerMetadataProperty(name="day", min=0, max=31)
     """
 
     type: MetadataPropertyTypes = MetadataPropertyTypes.integer
+    min: Optional[int] = None
+    max: Optional[int] = None
 
 
 class FloatMetadataProperty(NumericMetadataProperty, MetadataPropertySchema):
     """Schema for the `FeedbackDataset` metadata properties of type `float`. This kind
     of metadata property will be used for filtering the metadata of a record based on
-    an float value to which `gt` and `lt` filters can be applied.
+    an float value to which `min` and `max` filters can be applied.
 
     Args:
         name: The name of the metadata property.
         description: A description of the metadata property. Defaults to `None`.
-        gt: The lower bound of the float value. If not provided, then no lower bound
-            check will be applied. Defaults to `None`.
-        lt: The upper bound of the float value. If not provided, then no upper bound
-            check will be applied. Defaults to `None`.
+        min: The lower bound of the float value. If not provided, then no lower bound
+            check will be applied.
+        max: The upper bound of the float value. If not provided, then no upper bound
+            check will be applied.
 
     Examples:
         >>> from argilla.client.feedback.schemas.metadata import FloatMetadataProperty
-        >>> FloatMetadataProperty(name="price", gt=0.0, lt=100.0)
+        >>> FloatMetadataProperty(name="price", min=0.0, max=100.0)
     """
 
     type: MetadataPropertyTypes = MetadataPropertyTypes.float
+    min: Optional[float] = None
+    max: Optional[float] = None
 
 
 class MetadataFilterSchema(BaseModel, ABC):
@@ -186,22 +191,31 @@ class TermsMetadataFilter(MetadataFilterSchema):
 
 
 class NumericMetadataFilter:
-    gt: Optional[int] = None
-    lt: Optional[int] = None
+    le: Optional[Union[int, float]] = None
+    ge: Optional[Union[int, float]] = None
 
-    _bounds_validator = root_validator(allow_reuse=True)(validate_numeric_metadata_property_bounds)
+    _bounds_validator = root_validator(allow_reuse=True)(validate_numeric_metadata_filter_bounds)
 
     @property
     def server_settings(self) -> Dict[str, Any]:
-        return {"gt": self.gt, "lt": self.lt}
+        settings: Dict[str, Any] = {"type": self.type.value}
+        if self.le is not None:
+            settings["le"] = self.le
+        if self.ge is not None:
+            settings["ge"] = self.ge
+        return settings
 
 
 class IntegerMetadataFilter(NumericMetadataFilter, MetadataFilterSchema):
     type: MetadataPropertyTypes = MetadataPropertyTypes.integer
+    le: Optional[int] = None
+    ge: Optional[int] = None
 
 
 class FloatMetadataFilter(NumericMetadataFilter, MetadataFilterSchema):
     type: MetadataPropertyTypes = MetadataPropertyTypes.float
+    le: Optional[float] = None
+    ge: Optional[float] = None
 
 
 MetadataFilters = Union[TermsMetadataFilter, IntegerMetadataFilter, FloatMetadataFilter]

@@ -144,6 +144,7 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
             ValueError: if `guidelines` is an empty string.
         """
         self._fields = fields
+        self._fields_schema = None
         self._questions = questions
         self._metadata_properties = metadata_properties
         self._guidelines = guidelines

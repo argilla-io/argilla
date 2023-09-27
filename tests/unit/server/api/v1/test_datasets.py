@@ -60,6 +60,7 @@ from argilla.server.search_engine import (
     SearchEngine,
     SearchResponseItem,
     SearchResponses,
+    SortBy,
     StringQuery,
     TermsMetadataFilter,
     UserResponseStatusFilter,
@@ -445,14 +446,14 @@ class TestSuiteDatasets:
             f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header
         )
 
-        assert response.status_code == 200
+        assert response.status_code == 200, response.json()
         assert response.json() == {
             "items": [
                 {
                     "id": str(terms_property.id),
                     "name": "terms",
                     "description": terms_property.description,
-                    "settings": {"type": "terms"},
+                    "settings": {"type": "terms", "values": ["a", "b", "c"]},
                     "inserted_at": terms_property.inserted_at.isoformat(),
                     "updated_at": terms_property.updated_at.isoformat(),
                 },
@@ -460,7 +461,7 @@ class TestSuiteDatasets:
                     "id": str(integer_property.id),
                     "name": "integer",
                     "description": integer_property.description,
-                    "settings": {"type": "integer"},
+                    "settings": {"type": "integer", "min": None, "max": None},
                     "inserted_at": integer_property.inserted_at.isoformat(),
                     "updated_at": integer_property.updated_at.isoformat(),
                 },
@@ -468,7 +469,7 @@ class TestSuiteDatasets:
                     "id": str(float_property.id),
                     "name": "float",
                     "description": float_property.description,
-                    "settings": {"type": "float"},
+                    "settings": {"type": "float", "min": None, "max": None},
                     "inserted_at": float_property.inserted_at.isoformat(),
                     "updated_at": float_property.updated_at.isoformat(),
                 },
@@ -743,6 +744,102 @@ class TestSuiteDatasets:
     ):
         for record in await RecordFactory.create_batch(size=num_records, dataset=dataset):
             await ResponseFactory.create(record=record, user=user, values=response_values, status=response_status)
+
+    @pytest.mark.parametrize(
+        ("property_config", "param_value", "expected_filter_class", "expected_filter_args"),
+        [
+            (
+                {"name": "terms_prop", "type": "terms"},
+                "value",
+                TermsMetadataFilter,
+                dict(values=["value"]),
+            ),
+            (
+                {"name": "terms_prop", "type": "terms"},
+                "value1,value2",
+                TermsMetadataFilter,
+                dict(values=["value1", "value2"]),
+            ),
+            (
+                {"name": "integer_prop", "type": "integer"},
+                '{"ge": 10, "le": 20}',
+                IntegerMetadataFilter,
+                dict(low=10, high=20),
+            ),
+            (
+                {"name": "integer_prop", "type": "integer"},
+                '{"ge": 20}',
+                IntegerMetadataFilter,
+                dict(low=20, high=None),
+            ),
+            (
+                {"name": "integer_prop", "type": "integer"},
+                '{"le": 20}',
+                IntegerMetadataFilter,
+                dict(low=None, high=20),
+            ),
+            (
+                {"name": "float_prop", "type": "float"},
+                '{"ge": -1.30, "le": 23.23}',
+                FloatMetadataFilter,
+                dict(low=-1.30, high=23.23),
+            ),
+            (
+                {"name": "float_prop", "type": "float"},
+                '{"ge": 23.23}',
+                FloatMetadataFilter,
+                dict(low=23.23, high=None),
+            ),
+            (
+                {"name": "float_prop", "type": "float"},
+                '{"le": 11.32}',
+                FloatMetadataFilter,
+                dict(low=None, high=11.32),
+            ),
+        ],
+    )
+    async def test_list_dataset_records_with_metadata_filter(
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner: User,
+        owner_auth_header: dict,
+        property_config: dict,
+        param_value: str,
+        expected_filter_class: Type[MetadataFilter],
+        expected_filter_args: dict,
+    ):
+        workspace = await WorkspaceFactory.create()
+        dataset, _, records, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
+
+        metadata_property = await MetadataPropertyFactory.create(
+            **property_config, settings={"type": property_config["type"]}, dataset=dataset
+        )
+
+        mock_search_engine.search.return_value = SearchResponses(
+            total=2,
+            items=[
+                SearchResponseItem(record_id=records[0].id, score=14.2),
+                SearchResponseItem(record_id=records[1].id, score=12.2),
+            ],
+        )
+
+        query_params = {"metadata": [f"{metadata_property.name}:{param_value}"]}
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/records",
+            params=query_params,
+            headers=owner_auth_header,
+        )
+        assert response.status_code == 200, response.json()
+
+        mock_search_engine.search.assert_called_once_with(
+            dataset=dataset,
+            metadata_filters=[expected_filter_class(metadata_property, **expected_filter_args)],
+            user_response_status_filter=None,
+            offset=0,
+            limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
+            sort_by=[SortBy(field="inserted_at")],
+        )
 
     @pytest.mark.parametrize(
         "response_status_filter", ["missing", "discarded", "submitted", "draft", ["submitted", "draft"]]
@@ -1127,6 +1224,102 @@ class TestSuiteDatasets:
 
         response_body = response.json()
         assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
+
+    @pytest.mark.parametrize(
+        ("property_config", "param_value", "expected_filter_class", "expected_filter_args"),
+        [
+            (
+                {"name": "terms_prop", "type": "terms"},
+                "value",
+                TermsMetadataFilter,
+                dict(values=["value"]),
+            ),
+            (
+                {"name": "terms_prop", "type": "terms"},
+                "value1,value2",
+                TermsMetadataFilter,
+                dict(values=["value1", "value2"]),
+            ),
+            (
+                {"name": "integer_prop", "type": "integer"},
+                '{"ge": 10, "le": 20}',
+                IntegerMetadataFilter,
+                dict(low=10, high=20),
+            ),
+            (
+                {"name": "integer_prop", "type": "integer"},
+                '{"ge": 20}',
+                IntegerMetadataFilter,
+                dict(low=20, high=None),
+            ),
+            (
+                {"name": "integer_prop", "type": "integer"},
+                '{"le": 20}',
+                IntegerMetadataFilter,
+                dict(low=None, high=20),
+            ),
+            (
+                {"name": "float_prop", "type": "float"},
+                '{"ge": -1.30, "le": 23.23}',
+                FloatMetadataFilter,
+                dict(low=-1.30, high=23.23),
+            ),
+            (
+                {"name": "float_prop", "type": "float"},
+                '{"ge": 23.23}',
+                FloatMetadataFilter,
+                dict(low=23.23, high=None),
+            ),
+            (
+                {"name": "float_prop", "type": "float"},
+                '{"le": 11.32}',
+                FloatMetadataFilter,
+                dict(low=None, high=11.32),
+            ),
+        ],
+    )
+    async def test_list_current_user_dataset_records_with_metadata_filter(
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner: User,
+        owner_auth_header: dict,
+        property_config: dict,
+        param_value: str,
+        expected_filter_class: Type[MetadataFilter],
+        expected_filter_args: dict,
+    ):
+        workspace = await WorkspaceFactory.create()
+        dataset, _, records, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
+
+        metadata_property = await MetadataPropertyFactory.create(
+            **property_config, settings={"type": property_config["type"]}, dataset=dataset
+        )
+
+        mock_search_engine.search.return_value = SearchResponses(
+            total=2,
+            items=[
+                SearchResponseItem(record_id=records[0].id, score=14.2),
+                SearchResponseItem(record_id=records[1].id, score=12.2),
+            ],
+        )
+
+        query_params = {"metadata": [f"{metadata_property.name}:{param_value}"]}
+        response = await async_client.get(
+            f"/api/v1/me/datasets/{dataset.id}/records",
+            params=query_params,
+            headers=owner_auth_header,
+        )
+        assert response.status_code == 200, response.json()
+
+        mock_search_engine.search.assert_called_once_with(
+            dataset=dataset,
+            metadata_filters=[expected_filter_class(metadata_property, **expected_filter_args)],
+            user_response_status_filter=None,
+            offset=0,
+            limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
+            sort_by=[SortBy(field="inserted_at")],
+        )
 
     @pytest.mark.parametrize("response_status_filter", ["missing", "discarded", "submitted", "draft"])
     async def test_list_current_user_dataset_records_with_response_status_filter(
@@ -2222,9 +2415,17 @@ class TestSuiteDatasets:
     @pytest.mark.parametrize(
         ("settings", "expected_settings"),
         [
-            ({"type": "terms"}, {"type": "terms"}),
-            ({"type": "integer"}, {"type": "integer"}),
-            ({"type": "float"}, {"type": "float"}),
+            ({"type": "terms", "values": ["a"]}, {"type": "terms", "values": ["a"]}),
+            (
+                {"type": "terms", "values": ["a", "b", "c", "d", "e"]},
+                {"type": "terms", "values": ["a", "b", "c", "d", "e"]},
+            ),
+            ({"type": "integer", "min": 2}, {"type": "integer", "min": 2, "max": None}),
+            ({"type": "integer", "max": 10}, {"type": "integer", "min": None, "max": 10}),
+            ({"type": "integer", "min": 2, "max": 10}, {"type": "integer", "min": 2, "max": 10}),
+            ({"type": "float", "min": 2}, {"type": "float", "min": 2, "max": None}),
+            ({"type": "float", "max": 10}, {"type": "float", "min": None, "max": 10}),
+            ({"type": "float", "min": 2, "max": 10}, {"type": "float", "min": 2, "max": 10}),
         ],
     )
     async def test_create_dataset_metadata_property(
@@ -2260,7 +2461,7 @@ class TestSuiteDatasets:
         workspace = await WorkspaceFactory.create()
         admin = await AdminFactory.create(workspaces=[workspace])
         dataset = await DatasetFactory.create(workspace=workspace)
-        metadata_property_json = {"name": "name", "settings": {"type": "terms"}}
+        metadata_property_json = {"name": "name", "settings": {"type": "terms", "values": ["a", "b", "c"]}}
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties",
@@ -2275,7 +2476,11 @@ class TestSuiteDatasets:
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": "name", "description": "description", "settings": {"type": "terms"}}
+        metadata_property_json = {
+            "name": "name",
+            "description": "description",
+            "settings": {"type": "terms", "values": ["a", "b", "c"]},
+        }
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
@@ -2290,14 +2495,22 @@ class TestSuiteDatasets:
             "id": str(UUID(response_body["id"])),
             "name": "name",
             "description": "description",
-            "settings": {"type": "terms"},
+            "settings": {"type": "terms", "values": ["a", "b", "c"]},
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
 
     @pytest.mark.parametrize(
         "settings",
-        [None, {}, {"type": "wrong-type"}, {"type": None}],
+        [
+            None,
+            {},
+            {"type": "wrong-type"},
+            {"type": None},
+            {"type": "terms", "values": []},
+            {"type": "integer", "min": 5, "max": 2},
+            {"type": "float", "min": 5.0, "max": 2.0},
+        ],
     )
     async def test_create_dataset_metadata_property_with_invalid_settings(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, settings: dict
@@ -2319,7 +2532,7 @@ class TestSuiteDatasets:
         admin = await AdminFactory.create(workspaces=[workspace])
 
         dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": "name", "settings": {"type": "terms"}}
+        metadata_property_json = {"name": "name", "settings": {"type": "terms", "values": ["a", "b", "c"]}}
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties",
@@ -2333,7 +2546,7 @@ class TestSuiteDatasets:
     async def test_create_dataset_metadata_property_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
         annotator = await AnnotatorFactory.create()
         dataset = await DatasetFactory.create()
-        question_json = {"name": "name", "settings": {"type": "terms"}}
+        question_json = {"name": "name", "settings": {"type": "terms", "values": ["a", "b", "c"]}}
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties",
@@ -2374,7 +2587,7 @@ class TestSuiteDatasets:
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         metadata_property = await TermsMetadataPropertyFactory.create(name="name")
-        metadata_property_json = {"name": "name", "settings": {"type": "terms"}}
+        metadata_property_json = {"name": "name", "settings": {"type": "terms", "values": ["a", "b", "c"]}}
 
         response = await async_client.post(
             f"/api/v1/datasets/{metadata_property.dataset.id}/metadata-properties",
@@ -3355,37 +3568,37 @@ class TestSuiteDatasets:
             ),
             (
                 {"name": "integer_prop", "type": "integer"},
-                '{"from": 10, "to": 20}',
+                '{"ge": 10, "le": 20}',
                 IntegerMetadataFilter,
                 dict(low=10, high=20),
             ),
             (
                 {"name": "integer_prop", "type": "integer"},
-                '{"from": 20}',
+                '{"ge": 20}',
                 IntegerMetadataFilter,
                 dict(low=20, high=None),
             ),
             (
                 {"name": "integer_prop", "type": "integer"},
-                '{"to": 20}',
+                '{"le": 20}',
                 IntegerMetadataFilter,
                 dict(low=None, high=20),
             ),
             (
                 {"name": "float_prop", "type": "float"},
-                '{"from": -1.30, "to": 23.23}',
+                '{"ge": -1.30, "le": 23.23}',
                 FloatMetadataFilter,
                 dict(low=-1.30, high=23.23),
             ),
             (
                 {"name": "float_prop", "type": "float"},
-                '{"from": 23.23}',
+                '{"ge": 23.23}',
                 FloatMetadataFilter,
                 dict(low=23.23, high=None),
             ),
             (
                 {"name": "float_prop", "type": "float"},
-                '{"to": 11.32}',
+                '{"le": 11.32}',
                 FloatMetadataFilter,
                 dict(low=None, high=11.32),
             ),

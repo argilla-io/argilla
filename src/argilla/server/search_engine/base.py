@@ -16,7 +16,7 @@ import dataclasses
 import re
 from abc import ABCMeta, abstractmethod
 from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator, Dict, Iterable, List, Optional, Union
+from typing import Any, AsyncGenerator, Dict, Iterable, List, Literal, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -26,7 +26,6 @@ from argilla.server.models import Dataset, MetadataProperty, Record, Response, U
 
 __all__ = [
     "SearchEngine",
-    "UserResponse",
     "StringQuery",
     "MetadataFilter",
     "TermsMetadataFilter",
@@ -35,12 +34,8 @@ __all__ = [
     "UserResponseStatusFilter",
     "SearchResponseItem",
     "SearchResponses",
+    "SortBy",
 ]
-
-
-class UserResponse(BaseModel):
-    values: Optional[Dict[str, Any]]
-    status: ResponseStatus
 
 
 @dataclasses.dataclass
@@ -51,8 +46,8 @@ class StringQuery:
 
 @dataclasses.dataclass
 class UserResponseStatusFilter:
-    user: User
     statuses: List[ResponseStatusFilter]
+    user: Optional[User] = None
 
 
 @dataclasses.dataclass
@@ -81,8 +76,8 @@ class IntegerMetadataFilter(MetadataFilter):
     high: Optional[int] = None
 
     class RangeModel(BaseModel):
-        from_: Optional[int] = Field(alias="from")
-        to: Optional[int]
+        ge: Optional[int]
+        le: Optional[int]
 
     def __post_init__(self):
         if self.low is None and self.high is None:
@@ -91,7 +86,7 @@ class IntegerMetadataFilter(MetadataFilter):
     @classmethod
     def from_string(cls, metadata_property: MetadataProperty, string: str) -> "IntegerMetadataFilter":
         model = cls.RangeModel.parse_raw(string)
-        return cls(metadata_property, model.from_, model.to)
+        return cls(metadata_property, low=model.ge, high=model.le)
 
 
 # TODO: transform to `pydantic.BaseModel`
@@ -101,8 +96,8 @@ class FloatMetadataFilter(MetadataFilter):
     high: Optional[float] = None
 
     class RangeModel(BaseModel):
-        from_: Optional[float] = Field(alias="from")
-        to: Optional[float]
+        ge: Optional[float]
+        le: Optional[float]
 
     def __post_init__(self):
         if self.low is None and self.high is None:
@@ -111,7 +106,7 @@ class FloatMetadataFilter(MetadataFilter):
     @classmethod
     def from_string(cls, metadata_property: MetadataProperty, string: str) -> "FloatMetadataFilter":
         model = cls.RangeModel.parse_raw(string)
-        return cls(metadata_property, model.from_, model.to)
+        return cls(metadata_property, low=model.ge, high=model.le)
 
 
 @dataclasses.dataclass
@@ -124,6 +119,14 @@ class SearchResponseItem:
 class SearchResponses:
     items: List[SearchResponseItem]
     total: int = 0
+
+
+class SortBy(BaseModel):
+    field: Union[MetadataProperty, Literal["inserted_at"], Literal["updated_at"]]
+    order: Union[Literal["asc"], Literal["desc"]] = "asc"
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class SearchEngine(metaclass=ABCMeta):
@@ -199,11 +202,12 @@ class SearchEngine(metaclass=ABCMeta):
     async def search(
         self,
         dataset: Dataset,
-        query: Union[StringQuery, str],
+        query: Optional[Union[StringQuery, str]] = None,
         # TODO(@frascuchon): The search records method should receive a generic list of filters
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
         offset: int = 0,
         limit: int = 100,
+        sort_by: List[SortBy] = None,
     ) -> SearchResponses:
         pass

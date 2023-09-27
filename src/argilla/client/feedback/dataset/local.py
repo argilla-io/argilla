@@ -106,7 +106,6 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
             ...         ),
             ...     ],
             ...     guidelines="These are the annotation guidelines.",
-            ...     extra_metadata_allowed=False,
             ... )
         """
         super().__init__(

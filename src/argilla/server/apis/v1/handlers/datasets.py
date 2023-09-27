@@ -32,6 +32,7 @@ from argilla.server.schemas.v1.datasets import (
     Field,
     FieldCreate,
     Fields,
+    MetadataParsedQueryParam,
     MetadataProperties,
     MetadataProperty,
     MetadataPropertyCreate,
@@ -47,8 +48,16 @@ from argilla.server.schemas.v1.datasets import (
     SearchRecordsQuery,
     SearchRecordsResult,
 )
-from argilla.server.search_engine import SearchEngine, UserResponseStatusFilter, get_search_engine
-from argilla.server.search_engine.base import FloatMetadataFilter, IntegerMetadataFilter, TermsMetadataFilter
+from argilla.server.search_engine import (
+    FloatMetadataFilter,
+    IntegerMetadataFilter,
+    MetadataFilter,
+    SearchEngine,
+    SortBy,
+    TermsMetadataFilter,
+    UserResponseStatusFilter,
+    get_search_engine,
+)
 from argilla.server.security import auth
 from argilla.server.utils import parse_uuids
 from argilla.utils.telemetry import TelemetryClient, get_telemetry_client
@@ -139,7 +148,9 @@ async def list_dataset_metadata_properties(
 async def list_current_user_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
+    metadata: MetadataQueryParams = Depends(),
     include: List[RecordInclude] = Query([], description="Relationships to include in the response"),
     response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = 0,
@@ -150,24 +161,67 @@ async def list_current_user_dataset_records(
 
     await authorize(current_user, DatasetPolicyV1.get(dataset))
 
-    records = await datasets.list_records_by_dataset_id(
-        db,
-        dataset_id,
-        current_user.id,
-        include=include,
-        response_statuses=response_statuses,
-        offset=offset,
-        limit=limit,
-    )
+    if metadata.metadata_parsed:
+        records = await _filter_records_using_search_engine(
+            db,
+            search_engine,
+            dataset=dataset,
+            parsed_metadata=metadata.metadata_parsed,
+            limit=limit,
+            offset=offset,
+            user=current_user,
+            response_statuses=response_statuses,
+            include=include,
+        )
+    else:
+        records = await datasets.list_records_by_dataset_id(
+            db,
+            dataset_id,
+            current_user.id,
+            include=include,
+            response_statuses=response_statuses,
+            offset=offset,
+            limit=limit,
+        )
 
     return Records(items=records)
+
+
+async def _filter_records_using_search_engine(
+    db: "AsyncSession",
+    search_engine: "SearchEngine",
+    dataset: Dataset,
+    parsed_metadata: List[MetadataParsedQueryParam],
+    limit: int,
+    offset: int,
+    user: Optional[User] = None,
+    response_statuses: Optional[List[ResponseStatusFilter]] = None,
+    include: Optional[List[RecordInclude]] = None,
+):
+    metadata_filters = await _build_metadata_filters(db, dataset, parsed_metadata)
+    response_status_filter = await _build_response_status_filter_for_search(response_statuses, user=user)
+
+    search_responses = await search_engine.search(
+        dataset=dataset,
+        metadata_filters=metadata_filters,
+        user_response_status_filter=response_status_filter,
+        offset=offset,
+        limit=limit,
+        sort_by=[SortBy(field="inserted_at")],
+    )
+
+    record_ids = [response.record_id for response in search_responses.items]
+
+    return await datasets.get_records_by_ids(db=db, dataset_id=dataset.id, record_ids=record_ids, include=include)
 
 
 @router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
 async def list_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
+    metadata: MetadataQueryParams = Depends(),
     include: List[RecordInclude] = Query([], description="Relationships to include in the response"),
     response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = 0,
@@ -177,10 +231,21 @@ async def list_dataset_records(
     dataset = await _get_dataset(db, dataset_id)
 
     await authorize(current_user, DatasetPolicyV1.list_dataset_records_with_all_responses(dataset))
-
-    records = await datasets.list_records_by_dataset_id(
-        db, dataset_id, include=include, response_statuses=response_statuses, offset=offset, limit=limit
-    )
+    if metadata.metadata_parsed:
+        records = await _filter_records_using_search_engine(
+            db,
+            search_engine,
+            dataset=dataset,
+            parsed_metadata=metadata.metadata_parsed,
+            limit=limit,
+            offset=offset,
+            response_statuses=response_statuses,
+            include=include,
+        )
+    else:
+        records = await datasets.list_records_by_dataset_id(
+            db, dataset_id, include=include, response_statuses=response_statuses, offset=offset, limit=limit
+        )
 
     return Records(items=records)
 
@@ -438,10 +503,8 @@ async def search_dataset_records(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Cannot parse metadata filters: {ex}"
         )
 
-    user_response_status_filter = None
-    if response_statuses:
-        # TODO(@frascuchon): user response and status responses should be split into different filter types
-        user_response_status_filter = UserResponseStatusFilter(user=current_user, statuses=response_statuses)
+    metadata_filters = await _build_metadata_filters(db, dataset, metadata.metadata_parsed)
+    user_response_status_filter = await _build_response_status_filter_for_search(response_statuses, user=current_user)
 
     search_responses = await search_engine.search(
         dataset=dataset,
@@ -472,6 +535,47 @@ async def search_dataset_records(
     return SearchRecordsResult(
         items=[record["search_record"] for record in record_id_score_map.values()], total=search_responses.total
     )
+
+
+async def _build_metadata_filters(
+    db: "AsyncSession", dataset: Dataset, parsed_metadata: List[MetadataParsedQueryParam]
+) -> List["MetadataFilter"]:
+    try:
+        metadata_filters = []
+        for metadata_param in parsed_metadata:
+            metadata_property = await datasets.get_metadata_property_by_name_and_dataset_id(
+                db, name=metadata_param.name, dataset_id=dataset.id
+            )
+            if metadata_property is None:
+                continue  # won't fail on unknown metadata filter name
+
+            if metadata_property.type == MetadataPropertyType.terms:
+                metadata_filter_class = TermsMetadataFilter
+            elif metadata_property.type == MetadataPropertyType.integer:
+                metadata_filter_class = IntegerMetadataFilter
+            elif metadata_property.type == MetadataPropertyType.float:
+                metadata_filter_class = FloatMetadataFilter
+            else:
+                raise ValueError(f"Not found filter for type {metadata_property.type}")
+
+            metadata_filters.append(metadata_filter_class.from_string(metadata_property, metadata_param.value))
+    except ValueError as ex:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Cannot parse provided metadata filters: {ex}"
+        )
+    return metadata_filters
+
+
+async def _build_response_status_filter_for_search(
+    response_statuses: List[ResponseStatusFilter], user: Optional[User] = None
+) -> Optional[UserResponseStatusFilter]:
+    user_response_status_filter = None
+
+    if response_statuses:
+        # TODO(@frascuchon): user response and status responses should be split into different filter types
+        user_response_status_filter = UserResponseStatusFilter(user=user, statuses=response_statuses)
+
+    return user_response_status_filter
 
 
 @router.put("/datasets/{dataset_id}/publish", response_model=Dataset)

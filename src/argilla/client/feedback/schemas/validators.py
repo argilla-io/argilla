@@ -38,10 +38,21 @@ def title_must_have_value(cls: "BaseModel", v: Optional[str], values: Dict[str, 
 
 def validate_numeric_metadata_property_bounds(cls: "BaseModel", values: Dict[str, Any]) -> Dict[str, Any]:
     name = values.get("name")
-    lt = values.get("lt")
-    gt = values.get("gt")
+    min = values.get("min")
+    max = values.get("max")
 
-    if lt is not None and gt is not None and lt <= gt:
-        raise ValueError(f"`{cls.__name__}` with name={name} cannot have `lt` less than `gt`")
+    if min is not None and max is not None and min >= max:
+        raise ValueError(f"`{cls.__name__}` with name={name} cannot have `max` less than `min`")
+
+    return values
+
+
+def validate_numeric_metadata_filter_bounds(cls: "BaseModel", values: Dict[str, Any]) -> Dict[str, Any]:
+    name = values.get("name")
+    le = values.get("le")
+    ge = values.get("ge")
+
+    if le is not None and ge is not None and le >= ge:
+        raise ValueError(f"`{cls.__name__}` with name={name} cannot have `ge` less than `le`")
 
     return values

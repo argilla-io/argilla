@@ -11,18 +11,19 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import TYPE_CHECKING, AsyncGenerator, List, Union
+from typing import TYPE_CHECKING, Any, AsyncGenerator, List, Optional, Union
 
 from argilla.server.enums import MetadataPropertyType, ResponseStatusFilter
 from argilla.server.models import Record, User
 from argilla.server.search_engine import (
     FloatMetadataFilter,
     IntegerMetadataFilter,
+    SortBy,
     StringQuery,
     TermsMetadataFilter,
     UserResponseStatusFilter,
 )
-from argilla.server.search_engine.commons import index_name_for_dataset
+from argilla.server.search_engine.commons import ALL_RESPONSES_STATUSES_FIELD, index_name_for_dataset
 from argilla.server.settings import settings as server_settings
 from opensearchpy import RequestError
 from sqlalchemy.orm import Session
@@ -250,10 +251,18 @@ class TestSuiteOpenSearchEngine:
         assert index["mappings"] == {
             "dynamic": "strict",
             "dynamic_templates": [
-                {"status_responses": {"mapping": {"type": "keyword"}, "path_match": "responses.*.status"}}
+                {
+                    "status_responses": {
+                        "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_STATUSES_FIELD},
+                        "path_match": "responses.*.status",
+                    }
+                }
             ],
             "properties": {
                 "id": {"type": "keyword"},
+                "inserted_at": {"type": "date_nanos"},
+                "updated_at": {"type": "date_nanos"},
+                ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
                 "responses": {"dynamic": "true", "type": "object"},
                 "metadata": {"dynamic": "false", "type": "object"},
             },
@@ -281,10 +290,18 @@ class TestSuiteOpenSearchEngine:
         assert index["mappings"] == {
             "dynamic": "strict",
             "dynamic_templates": [
-                {"status_responses": {"mapping": {"type": "keyword"}, "path_match": "responses.*.status"}}
+                {
+                    "status_responses": {
+                        "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_STATUSES_FIELD},
+                        "path_match": "responses.*.status",
+                    }
+                }
             ],
             "properties": {
                 "id": {"type": "keyword"},
+                "inserted_at": {"type": "date_nanos"},
+                "updated_at": {"type": "date_nanos"},
+                ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
                 "fields": {"properties": {field.name: {"type": "text"} for field in dataset.fields}},
                 "responses": {"type": "object", "dynamic": "true"},
                 "metadata": {"dynamic": "false", "type": "object"},
@@ -318,10 +335,18 @@ class TestSuiteOpenSearchEngine:
         assert index["mappings"] == {
             "dynamic": "strict",
             "dynamic_templates": [
-                {"status_responses": {"mapping": {"type": "keyword"}, "path_match": "responses.*.status"}}
+                {
+                    "status_responses": {
+                        "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_STATUSES_FIELD},
+                        "path_match": "responses.*.status",
+                    }
+                }
             ],
             "properties": {
                 "id": {"type": "keyword"},
+                "inserted_at": {"type": "date_nanos"},
+                "updated_at": {"type": "date_nanos"},
+                ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
                 "fields": {"properties": {"field": {"type": "text"}}},
                 "responses": {"type": "object", "dynamic": "true"},
                 "metadata": {
@@ -366,11 +391,19 @@ class TestSuiteOpenSearchEngine:
             "dynamic": "strict",
             "properties": {
                 "id": {"type": "keyword"},
+                "inserted_at": {"type": "date_nanos"},
+                "updated_at": {"type": "date_nanos"},
+                ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
                 "responses": {"dynamic": "true", "type": "object"},
                 "metadata": {"dynamic": "false", "type": "object"},
             },
             "dynamic_templates": [
-                {"status_responses": {"mapping": {"type": "keyword"}, "path_match": "responses.*.status"}},
+                {
+                    "status_responses": {
+                        "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_STATUSES_FIELD},
+                        "path_match": "responses.*.status",
+                    }
+                },
                 *[
                     config
                     for question in text_questions
@@ -492,13 +525,46 @@ class TestSuiteOpenSearchEngine:
     ):
         user = await UserFactory.create()
 
-        await self._configure_record_responses(opensearch, test_banking_sentiment_dataset, statuses, user)
+        await self._configure_record_responses(
+            opensearch, test_banking_sentiment_dataset, statuses, expected_items, user
+        )
 
         result = await opensearch_engine.search(
             test_banking_sentiment_dataset,
             query=StringQuery(q="payment"),
             user_response_status_filter=UserResponseStatusFilter(user=user, statuses=statuses),
         )
+        assert len(result.items) == expected_items
+        assert result.total == expected_items
+
+    @pytest.mark.parametrize(
+        "statuses, expected_items",
+        [
+            ([], 9),
+            ([ResponseStatusFilter.missing], 3),
+            ([ResponseStatusFilter.draft], 5),
+            ([ResponseStatusFilter.submitted], 3),
+            ([ResponseStatusFilter.discarded], 2),
+            ([ResponseStatusFilter.missing, ResponseStatusFilter.draft], 5),
+            ([ResponseStatusFilter.submitted, ResponseStatusFilter.discarded], 3),
+            ([ResponseStatusFilter.missing, ResponseStatusFilter.draft, ResponseStatusFilter.discarded], 4),
+        ],
+    )
+    async def test_search_with_response_status_filter_with_no_user(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset: Dataset,
+        statuses: List[ResponseStatusFilter],
+        expected_items: int,
+    ):
+        await self._configure_record_responses(opensearch, test_banking_sentiment_dataset, statuses, expected_items)
+
+        result = await opensearch_engine.search(
+            test_banking_sentiment_dataset,
+            user_response_status_filter=UserResponseStatusFilter(statuses=statuses, user=None),
+        )
+
         assert len(result.items) == expected_items
         assert result.total == expected_items
 
@@ -539,10 +605,23 @@ class TestSuiteOpenSearchEngine:
                         filter_cls = FloatMetadataFilter
                     metadata_filters.append(filter_cls(metadata_property, **metadata_filter_config))
                     break
-        opensearch.indices.get(index_name_for_dataset(test_banking_sentiment_dataset))
+
         result = await opensearch_engine.search(test_banking_sentiment_dataset, metadata_filters=metadata_filters)
         assert len(result.items) == expected_items
         assert result.total == expected_items
+
+    async def test_search_with_no_query(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset: Dataset,
+    ):
+        result = await opensearch_engine.search(test_banking_sentiment_dataset)
+        assert len(result.items) == len(test_banking_sentiment_dataset.records)
+        assert result.total == len(test_banking_sentiment_dataset.records)
+
+        result_scores = set([item.score for item in result.items])
+        assert result_scores == {1.0}
 
     async def test_search_with_response_status_filter_does_not_affect_the_result_scores(
         self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch, test_banking_sentiment_dataset: Dataset
@@ -550,17 +629,20 @@ class TestSuiteOpenSearchEngine:
         user = await UserFactory.create()
 
         all_statuses = [ResponseStatusFilter.missing, ResponseStatusFilter.draft, ResponseStatusFilter.discarded]
-        await self._configure_record_responses(opensearch, test_banking_sentiment_dataset, all_statuses, user)
+        await self._configure_record_responses(
+            opensearch, test_banking_sentiment_dataset, all_statuses, len(test_banking_sentiment_dataset.records), user
+        )
 
         no_filter_results = await opensearch_engine.search(
-            test_banking_sentiment_dataset,
-            query=StringQuery(q="payment"),
+            test_banking_sentiment_dataset, query=StringQuery(q="payment")
         )
+
         results = await opensearch_engine.search(
             test_banking_sentiment_dataset,
             query=StringQuery(q="payment"),
             user_response_status_filter=UserResponseStatusFilter(user=user, statuses=all_statuses),
         )
+
         assert len(no_filter_results.items) == len(results.items)
         assert no_filter_results.total == results.total
         assert [item.score for item in no_filter_results.items] == [item.score for item in results.items]
@@ -582,6 +664,35 @@ class TestSuiteOpenSearchEngine:
         records = sorted(dataset_for_pagination.records, key=lambda r: r.id)
         assert [record.id for record in records[offset : offset + limit]] == [item.record_id for item in results.items]
 
+    @pytest.mark.parametrize(
+        ("sort_by"),
+        [
+            SortBy(field="inserted_at"),
+            SortBy(field="updated_at"),
+            SortBy(field="inserted_at", order="desc"),
+            SortBy(field="updated_at", order="desc"),
+        ],
+    )
+    async def test_search_with_sort_by(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset: Dataset,
+        sort_by: SortBy,
+    ):
+        def _local_sort_by(record: Record) -> Any:
+            if isinstance(sort_by.field, str):
+                return getattr(record, sort_by.field)
+            return record.metadata_[sort_by.field.name]
+
+        results = await opensearch_engine.search(test_banking_sentiment_dataset, sort_by=[sort_by])
+
+        records = test_banking_sentiment_dataset.records
+        if sort_by:
+            records = sorted(records, key=_local_sort_by, reverse=sort_by.order == "desc")
+
+        assert [item.record_id for item in results.items] == [record.id for record in records]
+
     async def test_add_records(self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch):
         text_fields = await TextFieldFactory.create_batch(5)
         dataset = await DatasetFactory.create(fields=text_fields, questions=[])
@@ -602,7 +713,15 @@ class TestSuiteOpenSearchEngine:
 
         es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
         assert es_docs == [
-            {"id": str(record.id), "fields": record.fields, "metadata": {}, "responses": {}} for record in records
+            {
+                "id": str(record.id),
+                "fields": record.fields,
+                "inserted_at": record.inserted_at.isoformat(),
+                "updated_at": record.updated_at.isoformat(),
+                "metadata": {},
+                "responses": {},
+            }
+            for record in records
         ]
 
     async def test_add_records_with_metadata(self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch):
@@ -631,6 +750,8 @@ class TestSuiteOpenSearchEngine:
             {
                 "id": str(record.id),
                 "fields": record.fields,
+                "inserted_at": record.inserted_at.isoformat(),
+                "updated_at": record.updated_at.isoformat(),
                 "responses": {},
                 "metadata": {
                     str(metadata_prop.id): record.metadata_[metadata_prop.name] for metadata_prop in metadata_properties
@@ -708,7 +829,7 @@ class TestSuiteOpenSearchEngine:
             "properties": {
                 response.user.username: {
                     "properties": {
-                        "status": {"type": "keyword"},
+                        "status": {"type": "keyword", "copy_to": [ALL_RESPONSES_STATUSES_FIELD]},
                         "values": {"properties": {question.name: {"index": False, "type": "text"}}},
                     }
                 }
@@ -750,20 +871,47 @@ class TestSuiteOpenSearchEngine:
         assert results["_source"]["responses"] == {}
 
     async def _configure_record_responses(
-        self, opensearch: OpenSearch, dataset: Dataset, response_status: List[ResponseStatusFilter], user: User
+        self,
+        opensearch: OpenSearch,
+        dataset: Dataset,
+        response_status: List[ResponseStatusFilter],
+        number_of_answered_records: int,
+        user: Optional[User] = None,
     ):
         index_name = index_name_for_dataset(dataset)
-        another_user = await UserFactory.create()
+
+        all_statuses = [
+            ResponseStatusFilter.draft,
+            ResponseStatusFilter.missing,
+            ResponseStatusFilter.discarded,
+            ResponseStatusFilter.submitted,
+        ]
+        selected_records = dataset.records[:number_of_answered_records]
+        rest_of_the_records = dataset.records[number_of_answered_records:]
 
         # Create two responses with the same status (one in each record)
         for i, status in enumerate(response_status):
-            if status == ResponseStatusFilter.missing:
-                continue
-            offset = i * 2
-            for record in dataset.records[offset : offset + 2]:
-                users_responses = {
-                    f"{user.username}.status": status.value,
-                    f"{another_user.username}.status": status.value,
-                }
-                opensearch.update(index_name, id=record.id, body={"doc": {"responses": users_responses}})
+            if status != ResponseStatusFilter.missing:
+                await self._update_records_responses(opensearch, index_name, selected_records, status, user)
+
+        for status in all_statuses:
+            if status not in response_status and status != ResponseStatusFilter.missing:
+                await self._update_records_responses(opensearch, index_name, rest_of_the_records, status, user)
+
         opensearch.indices.refresh(index=index_name)
+
+    async def _update_records_responses(
+        self,
+        opensearch: OpenSearch,
+        index_name: str,
+        records: List[Record],
+        status: ResponseStatusFilter,
+        user: Optional[User] = None,
+    ):
+        another_user = await UserFactory.create()
+
+        for record in records:
+            users_responses = {f"{another_user.username}.status": status.value}
+            if user:
+                users_responses.update({f"{user.username}.status": status.value})
+            opensearch.update(index_name, id=record.id, body={"doc": {"responses": users_responses}})
