@@ -22,8 +22,17 @@ export default {
   },
   watch: {
     sliderValues() {
-      this.metadata.value.ge = this.parse(this.sliderValues[0] ?? 0);
-      this.metadata.value.le = this.parse(this.sliderValues[1] ?? 0);
+      this.metadata.value.ge = this.parse(this.sliderValues[0]);
+      this.metadata.value.le = this.parse(this.sliderValues[1]);
+
+      if (!this.metadata.value.ge) {
+        this.metadata.value.ge = this.sliderValues[0] =
+          this.metadata.settings.min;
+      }
+      if (!this.metadata.value.le) {
+        this.metadata.value.le = this.sliderValues[1] =
+          this.metadata.settings.max;
+      }
     },
   },
   methods: {
