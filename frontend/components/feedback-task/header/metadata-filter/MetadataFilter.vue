@@ -61,8 +61,8 @@ import "assets/icons/chevron-left";
 
 export default {
   props: {
-    datasetId: {
-      type: String,
+    metadata: {
+      type: Array,
       required: true,
     },
   },
@@ -136,13 +136,11 @@ export default {
       }
     },
   },
-  async mounted() {
-    await this.getMetadataFilters(this.datasetId);
-
+  mounted() {
     this.updateFiltersFromQueryParams();
   },
-  setup() {
-    return useMetadataFilterViewModel();
+  setup(props) {
+    return useMetadataFilterViewModel(props);
   },
 };
 </script>

@@ -2,16 +2,15 @@
   <div class="sort-categories">
     <SearchLabelComponent
       v-model="searchText"
-      placeholder="Filter by..."
+      :placeholder="$t('filterBy')"
       class="sort-categories__search"
-      serarchRef="sortFilter"
     />
     <ul class="sort-categories__list">
       <li v-for="category in categoriesFilteredBySearchText" :key="category">
         <BaseButton
           @on-click="includeCategory(category)"
           class="sort-categories__item"
-          ><span>{{ category }}</span></BaseButton
+          ><span>{{ category.name }}</span></BaseButton
         >
       </li>
     </ul>
@@ -33,7 +32,7 @@ export default {
   computed: {
     categoriesFilteredBySearchText() {
       return this.categories.filter((cat) =>
-        cat.toLowerCase().includes(this.searchText.toLowerCase())
+        cat.name.toLowerCase().includes(this.searchText.toLowerCase())
       );
     },
   },

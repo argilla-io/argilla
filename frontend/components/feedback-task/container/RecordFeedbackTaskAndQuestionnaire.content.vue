@@ -82,7 +82,7 @@ export default {
       return this.$route.query?._metadata?.split("+") ?? [];
     },
     sortByFromQuery() {
-      return this.$route.query?._sort.split(",") ?? [];
+      return this.$route.query?._sort?.split(",") ?? [];
     },
     pageFromQuery() {
       const { _page } = this.$route.query;

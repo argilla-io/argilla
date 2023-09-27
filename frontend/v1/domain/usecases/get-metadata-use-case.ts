@@ -1,14 +1,13 @@
 import { Metadata } from "../entities/metadata/Metadata";
-import { MetadataFilter } from "../entities/metadata/MetadataFilter";
 import { MetadataRepository } from "~/v1/infrastructure/repositories/MetadataRepository";
 
-export class GetMetadataFiltersUseCase {
+export class GetMetadataUseCase {
   constructor(private readonly metadataRepository: MetadataRepository) {}
 
-  async execute(datasetId: string): Promise<MetadataFilter> {
+  async execute(datasetId: string): Promise<Metadata[]> {
     const filters = await this.metadataRepository.getMetadataFilters(datasetId);
 
-    const metadataFilters = filters.map((metadata) => {
+    const datasetsMetadata = filters.map((metadata) => {
       return new Metadata(
         metadata.id,
         metadata.name,
@@ -17,6 +16,6 @@ export class GetMetadataFiltersUseCase {
       );
     });
 
-    return new MetadataFilter(metadataFilters);
+    return datasetsMetadata;
   }
 }

@@ -8,7 +8,6 @@
         <FilterButton
           button-name="Sort"
           icon-name="sort"
-          :badges="appliedSortFilters"
           @click-on-clear="clearSortCategory"
         />
       </span>
@@ -21,7 +20,7 @@
         />
         <SortSelector
           v-else
-          :sorting-items="sortingItems"
+          :sorting-items="metadataSort"
           @clear-category="clearSortCategory"
           @apply-sort="applySort"
         />
@@ -31,29 +30,26 @@
 </template>
 
 <script>
+import { useSortRecords } from "./useSortRecords";
+
 export default {
   props: {
-    datasetId: {
-      type: String,
+    metadata: {
+      type: Array,
       required: true,
     },
   },
   data() {
     return {
       visibleDropdown: false,
-      sortingItems: [
-        { name: "lorem", sort: "asc", selected: false },
-        { name: "lorem1", sort: "asc", selected: false },
-        { name: "lorem2", sort: "asc", selected: true },
-      ],
     };
   },
   computed: {
     nonSelectedCategories() {
-      return this.sortingItems.filter((f) => !f.selected).map((f) => f.name);
+      return this.metadataSort.noSelected;
     },
     categoriesSelected() {
-      return this.sortingItems.filter((i) => i.selected);
+      return this.metadataSort.selected;
     },
   },
   methods: {
@@ -61,10 +57,10 @@ export default {
       this.visibleDropdown = value;
     },
     includeSortCategory(category) {
-      this.sortingItems.find((item) => item.name === category).selected = true;
+      this.metadataSort.select(category);
     },
     clearSortCategory(category) {
-      this.sortingItems.find((item) => item.name === category).selected = false;
+      this.metadataSort.unselect(category);
     },
     applySort() {
       this.$root.$emit(
@@ -72,6 +68,9 @@ export default {
         this.categoriesSelected.map((c) => `metadata.${c.name}:${c.sort}`) //Todo order by priority
       );
     },
+  },
+  setup(props) {
+    return useSortRecords(props);
   },
 };
 </script>

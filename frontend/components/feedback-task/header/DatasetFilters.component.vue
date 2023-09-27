@@ -5,17 +5,18 @@
       :placeholder="'Introduce a query'"
       :additionalInfo="additionalInfoForSearchComponent"
     />
-    <MetadataFilter :datasetId="datasetId" />
-    <Sort :datasetId="datasetId" />
-    <StatusFilter
-      class="filters__status"
-      :options="statusOptions"
-      v-model="selectedStatus"
+    <MetadataFilter
+      v-if="!!datasetsMetadata.length"
+      :metadata="datasetsMetadata"
     />
+    <Sort v-if="!!datasetsMetadata.length" :metadata="datasetsMetadata" />
+    <StatusFilter class="filters__status" v-model="selectedStatus" />
   </div>
 </template>
 
 <script>
+import { useDatasetsFiltersViewModel } from "./useDatasetsFiltersViewModel";
+
 export default {
   name: "DatasetFiltersComponent",
   props: {
@@ -30,6 +31,12 @@ export default {
       searchInput: null,
       totalRecords: null,
     };
+  },
+  setup() {
+    return useDatasetsFiltersViewModel();
+  },
+  mounted() {
+    this.loadMetadata(this.datasetId);
   },
   beforeMount() {
     this.selectedStatus = this.selectedStatus ?? this.statusFromRoute;
@@ -66,22 +73,6 @@ export default {
     searchInput(searchInput) {
       this.$root.$emit("search-filter-changed", searchInput);
     },
-  },
-  created() {
-    this.statusOptions = [
-      {
-        id: "pending",
-        name: "Pending",
-      },
-      {
-        id: "submitted",
-        name: "Submitted",
-      },
-      {
-        id: "discarded",
-        name: "Discarded",
-      },
-    ];
   },
   beforeDestroy() {
     this.$root.$off("reset-status-filter");
