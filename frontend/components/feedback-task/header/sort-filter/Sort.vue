@@ -20,10 +20,10 @@
           @include-category="includeSortCategory"
         />
         <SortSelector
+          v-else
           :sorting-items="sortingItems"
           @clear-category="clearSortCategory"
           @apply-sort="applySort"
-          v-else
         />
       </span>
     </BaseDropdown>
@@ -67,12 +67,11 @@ export default {
       this.sortingItems.find((item) => item.name === category).selected = false;
     },
     applySort() {
-      console.log("applied!");
+      this.$root.$emit(
+        "sort-changed",
+        this.categoriesSelected.map((c) => `metadata.${c.name}:${c.sort}`) //Todo order by priority
+      );
     },
-  },
-  async mounted() {
-    // await this.getSortFilters(this.datasetId);
-    // this.appliedSortFilters = this.sortFilters.filteredCategories;
   },
 };
 </script>

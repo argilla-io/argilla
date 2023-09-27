@@ -24,7 +24,8 @@ export class GetRecordsToAnnotateUseCase {
     page: number,
     status: string,
     searchText: string,
-    metadataFilter: string[]
+    metadataFilter: string[],
+    sortBy: string[]
   ): Promise<void> {
     const savedRecords = this.recordsStorage.get();
 
@@ -36,7 +37,8 @@ export class GetRecordsToAnnotateUseCase {
       howMany,
       status,
       searchText,
-      metadataFilter
+      metadataFilter,
+      sortBy
     );
     const getQuestions = this.questionRepository.getQuestions(datasetId);
     const getFields = this.fieldRepository.getFields(datasetId);
