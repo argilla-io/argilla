@@ -494,9 +494,14 @@ def validate_record_fields(dataset: Dataset, fields: Dict[str, Any]):
             raise ValueError(f"Missing required value for field: {field.name!r}")
 
         value = fields_copy.pop(field.name, None)
-        if not isinstance(value, str):
+        if field.required and not isinstance(value, str):
             raise ValueError(
-                f"Wrong value found for field {field.name!r}. Expected {str.__name__!r}, found {type(value).__name__!r}"
+                f"Wrong value found for required field {field.name!r}. Expected {str.__name__!r}, found {type(value).__name__!r}"
+            )
+
+        if not field.required and (value is not None and not isinstance(value, str)):
+            raise ValueError(
+                f"Wrong value found for optional field {field.name!r}. Expected either {str.__name__!r} or None, found {type(value).__name__!r}"
             )
 
     if fields_copy:
