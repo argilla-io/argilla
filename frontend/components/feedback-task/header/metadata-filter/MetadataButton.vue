@@ -120,6 +120,9 @@ export default {
   &--active {
     background: $black-4;
     @extend .metadata-button;
+    &:hover {
+      background: $black-6;
+    }
   }
   &__badges {
     display: flex;

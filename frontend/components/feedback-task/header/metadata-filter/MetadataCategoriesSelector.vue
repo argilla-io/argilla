@@ -58,11 +58,12 @@ export default {
     padding: $base-space;
     justify-content: space-between;
     border-radius: $border-radius;
-    font-weight: 500;
+    font-weight: 400;
     span {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      @include line-height(16px);
     }
     &:hover {
       background: $black-4;

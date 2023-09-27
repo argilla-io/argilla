@@ -43,7 +43,9 @@
             <div v-else>
               <MetadataRangeSelector :metadata="visibleCategory" />
             </div>
-            <BaseButton class="primary small full-width" @on-click="applyFilter"
+            <BaseButton
+              class="metadata-filter__button primary small full-width"
+              @on-click="applyFilter"
               >Filter</BaseButton
             >
           </div>
@@ -158,6 +160,9 @@ $metadata-filter-width: 300px;
     justify-content: space-between;
     padding: $base-space $base-space * 2;
     cursor: pointer;
+    &:hover {
+      background: $black-4;
+    }
   }
   &__content {
     padding: $base-space;
@@ -166,6 +171,9 @@ $metadata-filter-width: 300px;
     padding: $base-space;
     background: palette(white);
     border-radius: $border-radius;
+  }
+  &__button.button {
+    padding: 10px;
   }
   :deep(.dropdown__header:hover) {
     background: none;
