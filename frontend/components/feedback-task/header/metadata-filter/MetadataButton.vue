@@ -7,7 +7,7 @@
     <div class="metadata-button__badges" v-if="badges.length">
       <FilterBadge
         class="metadata-button__badge"
-        :active-badge="activeBadge === badge"
+        :active-badge="activeBadge === badge && isActive"
         v-for="badge in visibleBadges"
         :key="badge"
         :text="badge"
