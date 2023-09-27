@@ -144,6 +144,9 @@ export default {
     display: flex;
     flex-direction: column;
     gap: calc($base-space / 2);
+    .badge {
+      margin-right: auto;
+    }
   }
 }
 </styles>
