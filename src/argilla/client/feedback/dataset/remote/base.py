@@ -87,11 +87,13 @@ class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
         pass
 
     @abstractmethod
-    def add(self) -> None:
+    def add(
+        self, records: Union["FeedbackRecord", Dict[str, Any], List[Union["FeedbackRecord", Dict[str, Any]]]], **kwargs
+    ) -> None:
         pass
 
     @abstractmethod
-    def delete(self) -> None:
+    def delete(self,records: List[RemoteFeedbackRecord]) -> None:
         pass
 
 
