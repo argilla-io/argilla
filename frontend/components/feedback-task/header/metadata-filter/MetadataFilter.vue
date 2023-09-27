@@ -32,8 +32,8 @@
             class="metadata-filter__header"
             @click="selectMetadataCategory(null)"
           >
-            <svgicon name="chevron-left" width="12" height="12" />
             <strong v-text="visibleCategory.name" />
+            <svgicon name="chevron-left" width="12" height="12" />
           </div>
           <div class="metadata-filter__content">
             <MetadataLabelsSelector
