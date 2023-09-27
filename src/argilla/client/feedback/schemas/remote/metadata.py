@@ -30,7 +30,7 @@ class RemoteTermsMetadataProperty(TermsMetadataProperty, RemoteSchema):
         return TermsMetadataProperty(
             name=self.name,
             description=self.description,
-            visible_for_annotators=self.visible_for_annotators,
+            # visible_for_annotators=self.visible_for_annotators,
             values=self.values,
         )
 
