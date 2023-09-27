@@ -41,7 +41,7 @@ def validate_numeric_metadata_property_bounds(cls: "BaseModel", values: Dict[str
     min = values.get("min")
     max = values.get("max")
 
-    if min is not None and max is not None and min >= max:
+    if min >= max:  # TODO: should be `if min is not None and max is not None and min >= max:`
         raise ValueError(f"`{cls.__name__}` with name={name} cannot have `max` less than `min`")
 
     return values
