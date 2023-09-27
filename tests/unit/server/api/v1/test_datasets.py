@@ -2507,7 +2507,7 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 422
-        assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
+        assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 0
 
     async def test_create_dataset_metadata_property_as_admin(self, async_client: "AsyncClient", db: "AsyncSession"):
         workspace = await WorkspaceFactory.create()
