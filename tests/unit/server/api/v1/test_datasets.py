@@ -2506,6 +2506,32 @@ class TestSuiteDatasets:
         await db.refresh(dataset, attribute_names=["records"])
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 3
 
+    async def test_create_dataset_records_with_wrong_optional_fields(
+        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        await FieldFactory.create(name="input", dataset=dataset)
+        await FieldFactory.create(name="output", dataset=dataset, required=False)
+        await TextQuestionFactory.create(name="input_ok", dataset=dataset)
+        await TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+        records_json = {
+            "items": [
+                {
+                    "fields": {"input": "text-input", "output": 1},
+                },
+            ]
+        }
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+        )
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": "Wrong value found for optional field 'output'. Expected either 'str' or None, found 'int'"
+        }
+        assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
+
     async def test_create_dataset_records_with_index_error(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, db: "AsyncSession", owner_auth_header: dict
     ):
