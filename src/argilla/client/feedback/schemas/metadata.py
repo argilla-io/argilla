@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from abc import ABC, abstractproperty
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Extra, Field, root_validator, validator
 
@@ -96,7 +96,24 @@ class TermsMetadataProperty(MetadataPropertySchema):
         return {"type": self.type, "values": self.values}
 
 
-class IntegerMetadataProperty(MetadataPropertySchema):
+class NumericMetadataProperty:
+    gt: Optional[Union[int, float]] = None
+    lt: Optional[Union[int, float]] = None
+
+    _bounds_validator = root_validator(allow_reuse=True)(validate_numeric_metadata_property_bounds)
+
+    @property
+    def server_settings(self) -> Dict[str, Any]:
+        # TODO: add `lt` and `gt` once with the naming in the backend
+        settings: Dict[str, Any] = {"type": self.type.value}
+        if self.gt is not None:
+            settings["gt"] = self.gt
+        if self.lt is not None:
+            settings["lt"] = self.lt
+        return settings
+
+
+class IntegerMetadataProperty(MetadataPropertySchema, NumericMetadataProperty):
     """Schema for the `FeedbackDataset` metadata properties of type `integer`. This kind
     of metadata property will be used for filtering the metadata of a record based on
     an integer value to which `gt` and `lt` filters can be applied.
@@ -115,23 +132,9 @@ class IntegerMetadataProperty(MetadataPropertySchema):
     """
 
     type: MetadataPropertyTypes = MetadataPropertyTypes.integer
-    gt: Optional[int] = None
-    lt: Optional[int] = None
-
-    _bounds_validator = root_validator(allow_reuse=True)(validate_numeric_metadata_property_bounds)
-
-    @property
-    def server_settings(self) -> Dict[str, Any]:
-        # TODO: add `lt` and `gt` once with the naming in the backend
-        settings: Dict[str, Any] = {"type": self.type.value}
-        if self.gt is not None:
-            settings["gt"] = self.gt
-        if self.lt is not None:
-            settings["lt"] = self.lt
-        return settings
 
 
-class FloatMetadataProperty(MetadataPropertySchema):
+class FloatMetadataProperty(MetadataPropertySchema, NumericMetadataProperty):
     """Schema for the `FeedbackDataset` metadata properties of type `float`. This kind
     of metadata property will be used for filtering the metadata of a record based on
     an float value to which `gt` and `lt` filters can be applied.
@@ -150,17 +153,55 @@ class FloatMetadataProperty(MetadataPropertySchema):
     """
 
     type: MetadataPropertyTypes = MetadataPropertyTypes.float
-    gt: Optional[float] = None
-    lt: Optional[float] = None
+
+
+class MetadataFilterSchema(BaseModel, ABC):
+    name: str = Field(..., regex=r"^(?=.*[a-z0-9])[a-z0-9_-]+$")
+    type: MetadataPropertyTypes = Field(..., allow_mutation=False)
+
+    class Config:
+        validate_assignment = True
+        extra = Extra.forbid
+        exclude = {"type"}
+
+    @abstractproperty
+    def server_settings(self) -> Dict[str, Any]:
+        return {}
+
+
+class TermsMetadataFilter(MetadataFilterSchema):
+    type: MetadataPropertyTypes = MetadataPropertyTypes.terms
+    values: List[str] = Field(..., min_items=TERMS_METADATA_PROPERTY_MIN_VALUES)
+
+    @validator("values")
+    def check_values(cls, terms_values: List[str], values: Dict[str, Any]) -> List[str]:
+        if len(set(terms_values)) != len(terms_values):
+            name = values.get("name")
+            raise ValueError(f"`TermsMetadataFilter` with name={name} cannot have repeated `values`")
+        return terms_values
+
+    @property
+    def server_settings(self) -> Dict[str, Any]:
+        return {"values": self.values}
+
+
+class NumericMetadataFilter:
+    gt: Optional[int] = None
+    lt: Optional[int] = None
 
     _bounds_validator = root_validator(allow_reuse=True)(validate_numeric_metadata_property_bounds)
 
     @property
     def server_settings(self) -> Dict[str, Any]:
-        # TODO: add `lt` and `gt` once with the naming in the backend
-        settings: Dict[str, Any] = {"type": self.type.value}
-        if self.gt is not None:
-            settings["gt"] = self.gt
-        if self.lt is not None:
-            settings["lt"] = self.lt
-        return settings
+        return {"gt": self.gt, "lt": self.lt}
+
+
+class IntegerMetadataFilter(MetadataFilterSchema, NumericMetadataFilter):
+    type: MetadataPropertyTypes = MetadataPropertyTypes.integer
+
+
+class FloatMetadataFilter(MetadataFilterSchema, NumericMetadataFilter):
+    type: MetadataPropertyTypes = MetadataPropertyTypes.float
+
+
+MetadataFilters = Union[TermsMetadataFilter, IntegerMetadataFilter, FloatMetadataFilter]
