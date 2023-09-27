@@ -24,6 +24,7 @@ from argilla.client.feedback.schemas.validators import (
 )
 
 TERMS_METADATA_PROPERTY_MIN_VALUES = 1
+TERMS_METADATA_FILTER_MIN_VALUES = 1
 
 
 class MetadataPropertySchema(BaseModel, ABC):
@@ -76,7 +77,7 @@ class TermsMetadataProperty(MetadataPropertySchema):
         name: The name of the metadata property.
         description: A description of the metadata property. Defaults to `None`.
         values: A list of possible values for the metadata property. It must contain
-            at least two values.
+            at least one value.
 
     Examples:
         >>> from argilla.client.feedback.schemas.metadata import TermsMetadataProperty
@@ -99,8 +100,23 @@ class TermsMetadataProperty(MetadataPropertySchema):
 
 
 class _NumericMetadataPropertySchema(MetadataPropertySchema):
-    min: Optional[Union[int, float]] = None
-    max: Optional[Union[int, float]] = None
+    """Protected schema for the numeric `FeedbackDataset` metadata properties.
+
+    Args:
+        name: The name of the metadata property.
+        description: A description of the metadata property. Defaults to `None`.
+        min: The lower bound of the numeric value. Must be provided and be lower than
+            the `max` value.
+        max: The upper bound of the numeric value. Must be provided and be greater
+            than the `min` value.
+
+    Disclaimer:
+        You should not use this class directly, but instead use the classes that inherit
+        from this one.
+    """
+
+    min: Union[int, float]  # TODO: should be `Optional[Union[int, float]] = None`
+    max: Union[int, float]  # TODO: should be `Optional[Union[int, float]] = None`
 
     _bounds_validator = root_validator(allow_reuse=True)(validate_numeric_metadata_property_bounds)
 
@@ -122,10 +138,10 @@ class IntegerMetadataProperty(_NumericMetadataPropertySchema):
     Args:
         name: The name of the metadata property.
         description: A description of the metadata property. Defaults to `None`.
-        min: The lower bound of the integer value. If not provided, then no lower bound
-            check will be applied.
-        max: The upper bound of the integer value. If not provided, then no upper bound
-            check will be applied.
+        min: The lower bound of the integer value. Must be provided, and be lower than
+            the `max` value.
+        max: The upper bound of the integer value. Must be provided, and be greater than
+            the `min` value.
 
     Examples:
         >>> from argilla.client.feedback.schemas.metadata import IntegerMetadataProperty
@@ -133,8 +149,8 @@ class IntegerMetadataProperty(_NumericMetadataPropertySchema):
     """
 
     type: MetadataPropertyTypes = MetadataPropertyTypes.integer
-    min: Optional[int] = None
-    max: Optional[int] = None
+    min: int  # TODO: should be `Optional[int] = None`
+    max: int  # TODO: should be `Optional[int] = None`
 
 
 class FloatMetadataProperty(_NumericMetadataPropertySchema):
@@ -145,10 +161,10 @@ class FloatMetadataProperty(_NumericMetadataPropertySchema):
     Args:
         name: The name of the metadata property.
         description: A description of the metadata property. Defaults to `None`.
-        min: The lower bound of the float value. If not provided, then no lower bound
-            check will be applied.
-        max: The upper bound of the float value. If not provided, then no upper bound
-            check will be applied.
+        min: The lower bound of the float value. Must be provided, and be lower than
+            the `max` value.
+        max: The upper bound of the float value. Must be provided, and be greater than
+            the `min` value.
 
     Examples:
         >>> from argilla.client.feedback.schemas.metadata import FloatMetadataProperty
@@ -156,11 +172,25 @@ class FloatMetadataProperty(_NumericMetadataPropertySchema):
     """
 
     type: MetadataPropertyTypes = MetadataPropertyTypes.float
-    min: Optional[float] = None
-    max: Optional[float] = None
+    min: float  # TODO: should be `Optional[float] = None`
+    max: float  # TODO: should be `Optional[float] = None`
 
 
 class MetadataFilterSchema(BaseModel, ABC):
+    """Base schema for the `FeedbackDataset` metadata filters.
+
+    Args:
+        name: The name of the metadata property.
+        type: The type of the metadata property. A value should be set for this
+            attribute in the class inheriting from this one to be able to use a
+            discriminated union based on the `type` field.
+
+    Disclaimer:
+        You should not use this class directly, but instead use the classes that inherit
+        from this one, as they will have the `type` field already defined, and ensured
+        to be supported by Argilla.
+    """
+
     name: str = Field(..., regex=r"^(?=.*[a-z0-9])[a-z0-9_-]+$")
     type: MetadataPropertyTypes = Field(..., allow_mutation=False)
 
@@ -175,8 +205,22 @@ class MetadataFilterSchema(BaseModel, ABC):
 
 
 class TermsMetadataFilter(MetadataFilterSchema):
+    """Schema for the `FeedbackDataset` metadata filters of type `terms`. This kind
+    of metadata filter will be used for filtering the metadata of a record based on
+    a list of possible terms or values.
+
+    Args:
+        name: The name of the metadata property.
+        values: A list of possible values for the metadata property. It must contain
+            at least two values.
+
+    Examples:
+        >>> from argilla.client.feedback.schemas.metadata import TermsMetadataFilter
+        >>> TermsMetadataFilter(name="color", values=["red", "blue", "green"])
+    """
+
     type: MetadataPropertyTypes = MetadataPropertyTypes.terms
-    values: List[str] = Field(..., min_items=TERMS_METADATA_PROPERTY_MIN_VALUES)
+    values: List[str] = Field(..., min_items=TERMS_METADATA_FILTER_MIN_VALUES)
 
     @validator("values")
     def check_values(cls, terms_values: List[str], values: Dict[str, Any]) -> List[str]:
@@ -191,6 +235,21 @@ class TermsMetadataFilter(MetadataFilterSchema):
 
 
 class _NumericMetadataFilterSchema(MetadataFilterSchema):
+    """Protected schema for the numeric `FeedbackDataset` metadata filters.
+
+    Note:
+        At least one of the `le` or `ge` attributes must be provided.
+
+    Args:
+        name: The name of the metadata property.
+        le: The upper bound of the numeric value. Defaults to `None`.
+        ge: The lower bound of the numeric value. Defaults to `None`.
+
+    Disclaimer:
+        You should not use this class directly, but instead use the classes that inherit
+        from this one.
+    """
+
     le: Optional[Union[int, float]] = None
     ge: Optional[Union[int, float]] = None
 
@@ -207,12 +266,50 @@ class _NumericMetadataFilterSchema(MetadataFilterSchema):
 
 
 class IntegerMetadataFilter(_NumericMetadataFilterSchema):
+    """Schema for the `FeedbackDataset` metadata filters of type `integer`. This kind
+    of metadata filter will be used for filtering the metadata of a record based on
+    an integer value to which `le` and `ge` filters can be applied.
+
+    Note:
+        At least one of the `le` or `ge` attributes must be provided.
+
+    Args:
+        name: The name of the metadata property.
+        le: The upper bound of the integer value. Defaults to `None`.
+        ge: The lower bound of the integer value. Defaults to `None`.
+
+    Examples:
+        >>> from argilla.client.feedback.schemas.metadata import IntegerMetadataFilter
+        >>> IntegerMetadataFilter(name="day", le=15)
+        >>> IntegerMetadataFilter(name="day", ge=15)
+        >>> IntegerMetadataFilter(name="day", le=15, ge=10)
+    """
+
     type: MetadataPropertyTypes = MetadataPropertyTypes.integer
     le: Optional[int] = None
     ge: Optional[int] = None
 
 
 class FloatMetadataFilter(_NumericMetadataFilterSchema):
+    """Schema for the `FeedbackDataset` metadata filters of type `float`. This kind
+    of metadata filter will be used for filtering the metadata of a record based on
+    an float value to which `le` and `ge` filters can be applied.
+
+    Note:
+        At least one of the `le` or `ge` attributes must be provided.
+
+    Args:
+        name: The name of the metadata property.
+        le: The upper bound of the float value. Defaults to `None`.
+        ge: The lower bound of the float value. Defaults to `None`.
+
+    Examples:
+        >>> from argilla.client.feedback.schemas.metadata import FloatMetadataFilter
+        >>> FloatMetadataFilter(name="price", le=15.0)
+        >>> FloatMetadataFilter(name="price", ge=15.0)
+        >>> FloatMetadataFilter(name="price", le=15.0, ge=10.0)
+    """
+
     type: MetadataPropertyTypes = MetadataPropertyTypes.float
     le: Optional[float] = None
     ge: Optional[float] = None
