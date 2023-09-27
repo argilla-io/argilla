@@ -16,24 +16,26 @@
       />
     </div>
     <div class="range__control">
-      <input
-        class="range__slider"
-        ref="from"
-        type="range"
-        v-model.number="sliderValues[0]"
-        :min="min"
-        :max="max"
-        :step="step"
-      />
-      <input
-        class="range__slider"
-        ref="to"
-        type="range"
-        v-model.number="sliderValues[1]"
-        :min="min"
-        :max="max"
-        :step="step"
-      />
+      <div class="range__track" ref="track">
+        <input
+          class="range__slider"
+          ref="from"
+          type="range"
+          v-model.number="sliderValues[0]"
+          :min="min"
+          :max="max"
+          :step="step"
+        />
+        <input
+          class="range__slider"
+          ref="to"
+          type="range"
+          v-model.number="sliderValues[1]"
+          :min="min"
+          :max="max"
+          :step="step"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -92,7 +94,7 @@ export default {
       const rangeDistance = this.max - this.min;
       const fromPosition = this.sliderFrom - this.min;
       const toPosition = this.sliderTo - this.min;
-      this.$refs.to.style.background = `linear-gradient(
+      this.$refs.track.style.background = `linear-gradient(
       to right,
       #ccc 0%,
       #ccc ${(fromPosition / rangeDistance) * 100}%,
@@ -122,6 +124,11 @@ export default {
     position: relative;
     min-height: $base-space * 4;
   }
+  &__track {
+    border-radius: 15px;
+    height: 6px;
+    background: $black-10;
+  }
   &__inputs {
     display: flex;
     justify-content: space-between;
@@ -145,7 +152,7 @@ export default {
     outline: none;
     border-radius: 15px;
     height: 6px;
-    background: $black-10;
+    background: none;
     pointer-events: none;
     &:first-of-type {
       z-index: 1;
