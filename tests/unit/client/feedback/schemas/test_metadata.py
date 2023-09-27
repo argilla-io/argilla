@@ -17,8 +17,11 @@ from typing import Any, Dict
 import pytest
 from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
 from argilla.client.feedback.schemas.metadata import (
+    FloatMetadataFilter,
     FloatMetadataProperty,
+    IntegerMetadataFilter,
     IntegerMetadataProperty,
+    TermsMetadataFilter,
     TermsMetadataProperty,
 )
 from pydantic import ValidationError
@@ -251,3 +254,124 @@ def test_float_metadata_property_errors(
 ) -> None:
     with pytest.raises(exception_cls, match=exception_message):
         FloatMetadataProperty(**schema_kwargs)
+
+
+@pytest.mark.parametrize(
+    "schema_kwargs, query_string",
+    [
+        ({"name": "name", "values": ["a"]}, "name:a"),
+        ({"name": "name-with-hyphen", "values": ["a", "b"]}, "name-with-hyphen:a,b"),
+        ({"name": "name_with_underscore", "values": ["a", "b", "c"]}, "name_with_underscore:a,b,c"),
+    ],
+)
+def test_terms_metadata_filter(schema_kwargs: Dict[str, Any], query_string: str) -> None:
+    metadata_filter = TermsMetadataFilter(**schema_kwargs)
+    assert metadata_filter.type == MetadataPropertyTypes.terms
+    assert metadata_filter.query_string == query_string
+
+
+@pytest.mark.parametrize(
+    "schema_kwargs, exception_cls, exception_message",
+    [
+        ({"name": "a b"}, ValidationError, "name\n  string does not match regex"),
+        (
+            {"name": "terms-metadata-filter", "values": []},
+            ValidationError,
+            "1 validation error for TermsMetadataFilter\nvalues\n  ensure this value has at least 1 items",
+        ),
+        (
+            {"name": "terms-metadata-filter", "values": ["a", "a"]},
+            ValidationError,
+            "1 validation error for TermsMetadataFilter\nvalues\n  `TermsMetadataFilter` with name=terms-metadata-filter cannot have repeated `values`",
+        ),
+    ],
+)
+def test_terms_metadata_filter_errors(
+    schema_kwargs: Dict[str, Any], exception_cls: Any, exception_message: str
+) -> None:
+    with pytest.raises(exception_cls, match=exception_message):
+        TermsMetadataFilter(**schema_kwargs)
+
+
+@pytest.mark.parametrize(
+    "schema_kwargs, query_string",
+    [
+        ({"name": "name", "le": 5}, 'name:{"le": 5}'),
+        ({"name": "name", "ge": 5}, 'name:{"ge": 5}'),
+        ({"name": "name", "le": 1, "ge": 5}, 'name:{"le": 1, "ge": 5}'),
+    ],
+)
+def test_integer_metadata_filter(schema_kwargs: Dict[str, Any], query_string: str) -> None:
+    metadata_filter = IntegerMetadataFilter(**schema_kwargs)
+    assert metadata_filter.type == MetadataPropertyTypes.integer
+    assert metadata_filter.query_string == query_string
+
+
+@pytest.mark.parametrize(
+    "schema_kwargs, exception_cls, exception_message",
+    [
+        ({"name": "a b"}, ValidationError, "name\n  string does not match regex"),
+        (
+            {"name": "integer-metadata-filter"},
+            ValueError,
+            "1 validation error for IntegerMetadataFilter\n__root__\n  `IntegerMetadataFilter` with name=integer-metadata-filter must have at least one of `le` or `ge`",
+        ),
+        (
+            {"name": "int-metadata-filter", "le": 5, "ge": 5},
+            ValidationError,
+            "1 validation error for IntegerMetadataFilter\n__root__\n  `IntegerMetadataFilter` with name=int-metadata-filter cannot have `ge` less than `le`",
+        ),
+        (
+            {"name": "int-metadata-filter", "le": 6, "ge": 5},
+            ValidationError,
+            "1 validation error for IntegerMetadataFilter\n__root__\n  `IntegerMetadataFilter` with name=int-metadata-filter cannot have `ge` less than `le`",
+        ),
+    ],
+)
+def test_integer_metadata_filter_errors(
+    schema_kwargs: Dict[str, Any], exception_cls: Any, exception_message: str
+) -> None:
+    with pytest.raises(exception_cls, match=exception_message):
+        IntegerMetadataFilter(**schema_kwargs)
+
+
+@pytest.mark.parametrize(
+    "schema_kwargs, query_string",
+    [
+        ({"name": "name", "le": 5.0}, 'name:{"le": 5.0}'),
+        ({"name": "name", "ge": 5.0}, 'name:{"ge": 5.0}'),
+        ({"name": "name", "le": 1.0, "ge": 5.0}, 'name:{"le": 1.0, "ge": 5.0}'),
+    ],
+)
+def test_float_metadata_filter(schema_kwargs: Dict[str, Any], query_string: str) -> None:
+    metadata_filter = FloatMetadataFilter(**schema_kwargs)
+    assert metadata_filter.type == MetadataPropertyTypes.float
+    assert metadata_filter.query_string == query_string
+
+
+@pytest.mark.parametrize(
+    "schema_kwargs, exception_cls, exception_message",
+    [
+        ({"name": "a b"}, ValidationError, "name\n  string does not match regex"),
+        (
+            {"name": "float-metadata-filter"},
+            ValueError,
+            "1 validation error for FloatMetadataFilter\n__root__\n  `FloatMetadataFilter` with name=float-metadata-filter must have at least one of `le` or `ge`",
+        ),
+        (
+            {"name": "float-metadata-filter", "le": 5.0, "ge": 5.0},
+            ValidationError,
+            "1 validation error for FloatMetadataFilter\n__root__\n  `FloatMetadataFilter` with name=float-metadata-filter cannot have `ge` less than `le`",
+        ),
+        (
+            {"name": "float-metadata-filter", "le": 6.0, "ge": 5.0},
+            ValidationError,
+            "1 validation error for FloatMetadataFilter\n__root__\n  `FloatMetadataFilter` with name=float-metadata-filter cannot have `ge` less than `le`",
+        ),
+    ],
+)
+def test_float_metadata_filter_errors(
+    schema_kwargs: Dict[str, Any], exception_cls: Any, exception_message: str
+) -> None:
+    with pytest.raises(exception_cls, match=exception_message):
+        FloatMetadataFilter(**schema_kwargs)
