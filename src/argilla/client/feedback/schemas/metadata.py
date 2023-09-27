@@ -113,7 +113,7 @@ class NumericMetadataProperty:
         return settings
 
 
-class IntegerMetadataProperty(MetadataPropertySchema, NumericMetadataProperty):
+class IntegerMetadataProperty(NumericMetadataProperty, MetadataPropertySchema):
     """Schema for the `FeedbackDataset` metadata properties of type `integer`. This kind
     of metadata property will be used for filtering the metadata of a record based on
     an integer value to which `gt` and `lt` filters can be applied.
@@ -134,7 +134,7 @@ class IntegerMetadataProperty(MetadataPropertySchema, NumericMetadataProperty):
     type: MetadataPropertyTypes = MetadataPropertyTypes.integer
 
 
-class FloatMetadataProperty(MetadataPropertySchema, NumericMetadataProperty):
+class FloatMetadataProperty(NumericMetadataProperty, MetadataPropertySchema):
     """Schema for the `FeedbackDataset` metadata properties of type `float`. This kind
     of metadata property will be used for filtering the metadata of a record based on
     an float value to which `gt` and `lt` filters can be applied.
@@ -196,11 +196,11 @@ class NumericMetadataFilter:
         return {"gt": self.gt, "lt": self.lt}
 
 
-class IntegerMetadataFilter(MetadataFilterSchema, NumericMetadataFilter):
+class IntegerMetadataFilter(NumericMetadataFilter, MetadataFilterSchema):
     type: MetadataPropertyTypes = MetadataPropertyTypes.integer
 
 
-class FloatMetadataFilter(MetadataFilterSchema, NumericMetadataFilter):
+class FloatMetadataFilter(NumericMetadataFilter, MetadataFilterSchema):
     type: MetadataPropertyTypes = MetadataPropertyTypes.float
 
 
