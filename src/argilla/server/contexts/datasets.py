@@ -228,6 +228,7 @@ async def create_metadata_property(
             description=metadata_prop_create.description,
             settings=metadata_prop_create.settings.dict(),
             dataset_id=dataset.id,
+            autocommit=False,
         )
         if dataset.is_ready:
             await search_engine.configure_metadata_property(metadata_property)
