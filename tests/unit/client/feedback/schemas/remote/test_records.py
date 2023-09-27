@@ -207,7 +207,7 @@ def test_remote_response_schema_from_api(payload: FeedbackResponseModel) -> None
         (
             {
                 "id": UUID("00000000-0000-0000-0000-000000000000"),
-                "fields": {"text": "This is the first record", "label": "positive"},
+                "fields": {"text": "This is the first record", "label": "positive", "optional": None},
                 "metadata": {"first": True, "nested": {"more": "stuff"}},
                 "responses": [
                     {
