@@ -14,11 +14,34 @@ As of Argilla 1.11.0 the default pool of users in the quickstart contains also a
 
 A user in Argilla is an authorized person who can access the UI and use the Python client and CLI in a running Argilla instance.
 
-We differentiate between three types of users depending on their role:
+We differentiate between three types of users depending on their role, permissions and needs: `owner`, `admin`, `annotator`.
 
-- **Owner**: The owner is the user who created the Argilla instance. It has full access to all workspaces and can create new users and workspaces.
-- **Admin**: An admin user can only access the workspaces it has been assigned to. Admin users can manage datasets on assigned workspaces.
-- **Annotator**: As admin users, an annotator user can only access the workspaces it has been assigned to. Annotator users can only annotate datasets on assigned workspaces.
+### Owner
+
+The owner is the root user who created the Argilla instance. When working with Argilla, it is very useful to work with workspaces. So, the owner has full access to all workspaces and their options:
+
+- **Workspace management**: It can create and delete a workspace.
+- **User management**: It can create a new user, update its information, assign a workspace to a user, and delete a user. It can also list all of them and search for a specific user by its name or ID.
+- **Dataset management**: It can create, configure, update, and delete datasets. It can also delete the current FeedbackDataset from Argilla.
+- **Annotation**: It can annotate datasets in the Argilla UI.
+- **Feedback**: It can provide feedback with the Argilla UI.
+
+### Admin
+
+An admin user can only access the workspaces it has been assigned to and cannot assign other users to it. An admin user has the following permissions:
+
+- **Dataset management**: It can create, configure, update, and delete datasets (including FeedbackDataset) only on assigned workspaces.
+- **Annotation**: It can annotate datasets in the assigned workspaces via the Argilla UI.
+- **Feedback**: It can provide feedback with the Argilla UI.
+
+## Annotator
+
+An annotator user is limited to accessing only the datasets assigned to it within the workspace. It has have two specific permissions:
+
+- **Annotation**: It can annotate datasets in the Argilla UI.
+- **Feedback**: It can provide feedback with the Argilla UI.
+
+![user_roles_schema](../../../_static/images/installation/user_management/user_roles.png)
 
 An Argilla user composed of the following attributes:
 
