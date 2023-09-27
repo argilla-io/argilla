@@ -273,6 +273,7 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
             fields=self.fields,
             questions=self.questions,
             guidelines=self.guidelines,
+            metadata_properties=self.metadata_properties,
         )
         instance.add_records(
             records=[record.to_local() for record in self._records],
