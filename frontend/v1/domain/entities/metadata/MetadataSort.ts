@@ -27,17 +27,17 @@ export class MetadataSortList {
   }
 
   select(category: string) {
-    const found = this.metadataSorts.find((m) => m.name === category);
+    const found = this.findByCategory(category);
     if (found) found.selected = true;
   }
 
   unselect(category: string) {
-    const found = this.metadataSorts.find((m) => m.name === category);
+    const found = this.findByCategory(category);
     if (found) found.selected = false;
   }
 
   toggleSort(category: string) {
-    const found = this.metadataSorts.find((m) => m.name === category);
+    const found = this.findByCategory(category);
     if (found) found.sort = found.sort === "asc" ? "desc" : "asc";
   }
 
@@ -52,11 +52,15 @@ export class MetadataSortList {
 
     sortParams.forEach((sortParam) => {
       const [name, sort] = sortParam.split(":");
-      const found = this.metadataSorts.find((m) => m.name === name);
+      const found = this.findByCategory(name);
       if (found) {
         found.selected = true;
         found.sort = sort as "asc" | "desc";
       }
     });
+  }
+
+  private findByCategory(category: string) {
+    return this.metadataSorts.find((m) => m.name === category);
   }
 }
