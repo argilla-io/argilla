@@ -133,6 +133,7 @@ export default {
   }
   &__button.button {
     padding: 0;
+    border-radius: 0;
   }
   &__tooltip {
     display: flex;
