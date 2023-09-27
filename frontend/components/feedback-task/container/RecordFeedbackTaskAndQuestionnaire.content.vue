@@ -301,7 +301,7 @@ export default {
       if (!sortWasChanged) return;
 
       const onFilter = () => {
-        this.sortBy = [...sort, "metadata.loss:desc"];
+        this.sortBy = sort;
         this.currentPage = 1;
 
         this.$fetch();
