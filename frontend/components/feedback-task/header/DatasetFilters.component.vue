@@ -6,6 +6,7 @@
       :additionalInfo="additionalInfoForSearchComponent"
     />
     <MetadataFilter :datasetId="datasetId" />
+    <Sort :datasetId="datasetId" />
     <StatusFilter
       class="filters__status"
       :options="statusOptions"
