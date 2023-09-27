@@ -170,7 +170,7 @@ class MetadataFilterSchema(BaseModel, ABC):
         exclude = {"type"}
 
     @abstractproperty
-    def server_settings(self) -> Dict[str, Any]:
+    def server_settings(self) -> Union[str, Dict[str, Any]]:
         return {}
 
 
@@ -186,8 +186,8 @@ class TermsMetadataFilter(MetadataFilterSchema):
         return terms_values
 
     @property
-    def server_settings(self) -> Dict[str, Any]:
-        return {"values": self.values}
+    def server_settings(self) -> str:
+        return ",".join(self.values)
 
 
 class _NumericMetadataFilterSchema(MetadataFilterSchema):
