@@ -8,15 +8,15 @@
         <FilterButton
           button-name="Sort"
           icon-name="sort"
-          :badges="appliedSortFilters"
+          :badges="appliedSortCategories"
           @click-on-clear="clearSortCategory"
         />
       </span>
       <span slot="dropdown-content" class="sort-filter__container">
-        <SortCategoriesSelector
-          v-if="!categoriesSelected.length"
+        <SortCategoriesList
+          v-if="!selectedSortingItems.length"
           class="sort-filter__selector"
-          :categories="nonSelectedCategories"
+          :categories="nonSelectedSortingItems"
           @include-category="includeSortCategory"
         />
         <SortSelector
@@ -40,20 +40,24 @@ export default {
   },
   data() {
     return {
+      appliedSortCategories: [],
       visibleDropdown: false,
       sortingItems: [
         { name: "lorem", sort: "asc", selected: false },
         { name: "lorem1", sort: "asc", selected: false },
-        { name: "lorem2", sort: "asc", selected: true },
+        { name: "lorem2", sort: "desc", selected: true },
       ],
     };
   },
   computed: {
-    nonSelectedCategories() {
+    nonSelectedSortingItems() {
       return this.sortingItems.filter((f) => !f.selected).map((f) => f.name);
     },
-    categoriesSelected() {
+    selectedSortingItems() {
       return this.sortingItems.filter((i) => i.selected);
+    },
+    selectedCategories() {
+      return this.selectedSortingItems.map((i) => i.name);
     },
   },
   methods: {
@@ -65,12 +69,24 @@ export default {
     },
     clearSortCategory(category) {
       this.sortingItems.find((item) => item.name === category).selected = false;
+      this.applySort();
     },
     applySort() {
       this.$root.$emit(
         "sort-changed",
-        this.categoriesSelected.map((c) => `metadata.${c.name}:${c.sort}`) //Todo order by priority
+        this.selectedSortingItems.map((c) => `metadata.${c.name}:${c.sort}`) //Todo order by priority
       );
+
+      const newSortBy = this.selectedCategories.filter(
+        (category) => !this.appliedSortCategories.includes(category)
+      );
+      if (newSortBy.length) {
+        newSortBy.forEach((f) => {
+          this.appliedSortCategories.push(f);
+        });
+      } else {
+        this.appliedSortCategories = this.selectedCategories;
+      }
     },
   },
 };

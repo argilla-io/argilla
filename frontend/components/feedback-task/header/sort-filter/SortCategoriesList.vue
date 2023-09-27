@@ -4,7 +4,7 @@
       v-model="searchText"
       placeholder="Filter by..."
       class="sort-categories__search"
-      serarchRef="sortFilter"
+      searchRef="sortFilter"
     />
     <ul class="sort-categories__list">
       <li v-for="category in categoriesFilteredBySearchText" :key="category">
