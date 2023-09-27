@@ -96,7 +96,7 @@ class ArgillaRecordsMixin:
                 ]
             )
         if len(records) == 0:
-            raise RuntimeError(
+            raise IndexError(
                 "No records were found in the dataset in Argilla for the given index(es) and/or filter(s) if any."
             )
         return records[0] if isinstance(key, int) else records
