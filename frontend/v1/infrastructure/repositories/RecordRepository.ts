@@ -26,7 +26,8 @@ export class RecordRepository {
     fromRecord: number,
     howMany: number,
     status: string,
-    searchText: string
+    searchText: string,
+    metadata: string[]
   ): Promise<BackedRecords> {
     if (searchText?.length)
       return this.getRecordsByText(
@@ -34,10 +35,17 @@ export class RecordRepository {
         fromRecord,
         howMany,
         status,
-        searchText
+        searchText,
+        metadata
       );
 
-    return this.getRecordsDatasetId(datasetId, fromRecord, howMany, status);
+    return this.getRecordsDatasetId(
+      datasetId,
+      fromRecord,
+      howMany,
+      status,
+      metadata
+    );
   }
 
   async deleteRecordResponse(record: Record) {
@@ -119,12 +127,13 @@ export class RecordRepository {
     datasetId: string,
     fromRecord: number,
     howMany: number,
-    status: string
+    status: string,
+    metadata: string[]
   ): Promise<BackedRecords> {
     try {
       const url = `/v1/me/datasets/${datasetId}/records`;
 
-      const params = this.createParams(fromRecord, howMany, status);
+      const params = this.createParams(fromRecord, howMany, status, metadata);
 
       const { data } = await this.axios.get<Response<BackedRecord[]>>(url, {
         params,
@@ -146,7 +155,8 @@ export class RecordRepository {
     fromRecord: number,
     howMany: number,
     status: string,
-    searchText: string
+    searchText: string,
+    metadata: string[]
   ): Promise<BackedRecords> {
     try {
       const url = `/v1/me/datasets/${datasetId}/records/search`;
@@ -161,7 +171,7 @@ export class RecordRepository {
         })
       );
 
-      const params = this.createParams(fromRecord, howMany, status);
+      const params = this.createParams(fromRecord, howMany, status, metadata);
 
       const { data } = await this.axios.post(url, body, { params });
 
@@ -201,7 +211,12 @@ export class RecordRepository {
     };
   }
 
-  private createParams(fromRecord: number, howMany: number, status: string) {
+  private createParams(
+    fromRecord: number,
+    howMany: number,
+    status: string,
+    metadata: string[]
+  ) {
     const offset = `${fromRecord - 1}`;
     const backendStatus = status === "pending" ? "missing" : status;
     const params = new URLSearchParams();
@@ -213,6 +228,10 @@ export class RecordRepository {
     params.append("response_status", backendStatus);
 
     if (backendStatus === "missing") params.append("response_status", "draft");
+
+    metadata?.forEach((query) => {
+      params.append("metadata", query);
+    });
 
     return params;
   }
