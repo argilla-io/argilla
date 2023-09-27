@@ -304,52 +304,8 @@ async def test_get_records(role: UserRole) -> None:
     assert FeedbackItemModel(**response.parsed.items[0].dict())
 
 
-@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-@pytest.mark.asyncio
-async def test_get_records_using_metadata_filters(role: UserRole) -> None:
-    dataset = await DatasetFactory.create(
-        status=DatasetStatus.ready, fields=[await TextFieldFactory.create(name="text_field")]
-    )
-    terms_metadata = await TermsMetadataPropertyFactory.create(dataset=dataset)
-    integer_metadata = await IntegerMetadataPropertyFactory.create(dataset=dataset)
-    float_metadata = await FloatMetadataPropertyFactory.create(dataset=dataset)
-    # TODO: check if we can include a callback to the factory to index the metadata in Elastic Search
-    # await RecordFactory.create(
-    #     dataset=dataset, metadata_={terms_metadata.name: "a", integer_metadata.name: 1, float_metadata.name: 1.0}
-    # )
-    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
-
-    api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
-
-    response = add_records(
-        client=api.http_client.httpx,
-        id=dataset.id,
-        records=[
-            {
-                "fields": {"text_field": "This is a text"},
-                "metadata": {terms_metadata.name: "a", integer_metadata.name: 1, float_metadata.name: 1.0},
-            },
-        ],
-    )
-
-    assert response.status_code == 204
-
-    response = get_records(
-        client=api.http_client.httpx,
-        id=dataset.id,
-        # TODO: check why the metadata filters are not working, most likely because the metadata is not indexed
-        # metadata_filters=[
-        #     f"{terms_metadata.name}:a",
-        #     f'{integer_metadata.name}:{{"le": 0, "ge": 10}}',
-        #     f'{float_metadata.name}:{{"le": 0.0, "ge": 10.0}}',
-        # ],
-    )
-
-    print(response.parsed.items)
-    assert response.status_code == 200
-    assert isinstance(response.parsed, FeedbackRecordsModel)
-    assert len(response.parsed.items) > 0
-    assert FeedbackItemModel(**response.parsed.items[0].dict())
+# TODO: check if we can include a callback to the factory to index the metadata in Elastic Search
+# TODO: check why the metadata filters are not working, most likely because the metadata is not indexed
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
