@@ -70,10 +70,7 @@ export default {
       this.applySort();
     },
     applySort() {
-      this.$root.$emit(
-        "sort-changed",
-        this.selectedSortingItems.map((c) => `metadata.${c.name}:${c.sort}`)
-      );
+      this.$root.$emit("sort-changed", this.metadataSort.convertToRouteParam());
 
       const newSortBy = this.selectedCategories.filter(
         (category) => !this.appliedSortCategories.includes(category)
@@ -86,6 +83,14 @@ export default {
         this.appliedSortCategories = this.selectedCategories;
       }
     },
+    updateFiltersFromQueryParams() {
+      this.completeByRouteParams();
+
+      this.appliedSortCategories = this.selectedCategories;
+    },
+  },
+  mounted() {
+    this.updateFiltersFromQueryParams();
   },
   setup(props) {
     return useSortRecords(props);

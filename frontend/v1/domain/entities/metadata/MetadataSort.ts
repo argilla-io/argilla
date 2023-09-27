@@ -40,4 +40,23 @@ export class MetadataSortList {
     const found = this.metadataSorts.find((m) => m.name === category);
     if (found) found.sort = found.sort === "asc" ? "desc" : "asc";
   }
+
+  convertToRouteParam(): string[] {
+    return this.selected.map((c) => `metadata.${c.name}:${c.sort}`);
+  }
+
+  completeByRouteParams(sort: string) {
+    if (!sort) return;
+
+    const sortParams = sort.replaceAll("metadata.", "").split(",");
+
+    sortParams.forEach((sortParam) => {
+      const [name, sort] = sortParam.split(":");
+      const found = this.metadataSorts.find((m) => m.name === name);
+      if (found) {
+        found.selected = true;
+        found.sort = sort as "asc" | "desc";
+      }
+    });
+  }
 }
