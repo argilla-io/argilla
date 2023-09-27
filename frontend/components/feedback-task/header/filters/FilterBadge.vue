@@ -80,7 +80,6 @@ $badgeBorderActiveColor: palette(purple, 200);
   color: $badgeColor;
   font-weight: 500;
   @include font-size(12px);
-  @include line-height(12px);
   &--clickable {
     @extend .badge;
     &:not(.badge--active):hover {
