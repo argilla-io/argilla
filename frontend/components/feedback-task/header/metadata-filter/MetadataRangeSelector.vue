@@ -17,15 +17,18 @@ export default {
   data() {
     return {
       sliderValues: [this.metadata.value.ge, this.metadata.value.le],
-      step: this.metadata.isInteger
-        ? parseInt(this.metadata.settings.max / 100)
-        : this.metadata.settings.max / 100,
+      step: this.metadata.isInteger ? 1 : 0.01,
     };
   },
   watch: {
     sliderValues() {
-      this.metadata.value.ge = this.sliderValues[0];
-      this.metadata.value.le = this.sliderValues[1];
+      this.metadata.value.ge = this.parse(this.sliderValues[0] ?? 0);
+      this.metadata.value.le = this.parse(this.sliderValues[1] ?? 0);
+    },
+  },
+  methods: {
+    parse(value) {
+      return this.metadata.isInteger ? parseInt(value) : parseFloat(value);
     },
   },
 };
