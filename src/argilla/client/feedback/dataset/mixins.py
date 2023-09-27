@@ -21,6 +21,7 @@ from argilla.client.api import ArgillaSingleton
 from argilla.client.feedback.constants import PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 from argilla.client.feedback.schemas.enums import FieldTypes, QuestionTypes
+from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
@@ -379,3 +380,105 @@ class UnificationMixin:
                 raise ValueError(f"Question {question} is not supported yet")
 
         strategy.unify_responses(self.records, question)
+
+
+class TaskTemplateMixin:
+    """
+    Mixin to add task template functionality to a `FeedbackDataset`.
+    The NLP tasks covered are:
+    task:
+        "question_answering"
+        "text_classification"
+        "token_classification"
+        "summarization"
+        "translation"
+        "supervised-fine-tuning"
+        "conversational"
+        "retrieval-augmented-generation"
+        "sentence-similarity"
+    """
+
+    @classmethod
+    def for_question_answering(cls: Type["FeedbackDataset"], use_markdown: bool = False) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for question answering tasks.
+        To add items to your dataset, use the "add_item" method.
+
+        Args:
+            use_markdown: Set this parameter to True if you want to use markdown in your dataset
+
+        Returns:
+            A `FeedbackDataset` object for question answering containing "context", "question" and optionally "answers" fields
+        """
+        return cls(
+            fields=[
+                TextField(name="question", use_markdown=use_markdown),
+                TextField(name="context", use_markdown=use_markdown),
+            ],
+            questions=[
+                TextQuestion(
+                    name="answer",
+                    description="Answer the question. Note that the answer must exactly be in the context.",
+                )
+            ],
+            guidelines="This is a question answering dataset ... ",
+        )
+
+    @classmethod
+    def for_text_classification(
+        cls: Type["FeedbackDataset"], labels: List[str], multi_label: bool = False
+    ) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for text classification tasks.
+        To add items to your dataset, use the "add_item" method.
+
+        Args:
+            labels: A list of labels for your dataset
+            multi_label: Set this parameter to True if you want to add multiple labels to your dataset
+
+        Returns:
+            A `FeedbackDataset` object for text classification containing "text" and "label" fields
+        """
+        return cls(
+            fields=[
+                TextField(name="text"),
+            ],
+            questions=[
+                LabelQuestion(name="label", labels=labels, description="Choose one of the labels.")
+                if not multi_label
+                else MultiLabelQuestion(name="label", labels=labels, description="Choose one or more of the labels.")
+            ],
+            guidelines="This is a text classification dataset ... ",
+        )
+
+    @classmethod
+    def for_supervised_fine_tuning(cls: Type["FeedbackDataset"], context: bool = True) -> "FeedbackDataset":
+        return cls(
+            fields=[
+                TextField(name="instruction"),
+                TextField(name="context"),
+            ]
+            if context
+            else [
+                TextField(name="instruction"),
+            ],
+            questions=[TextQuestion(name="response")],
+        )
+
+    @classmethod
+    def for_sentence_similarity(cls: Type["FeedbackDataset"], create_owna) -> "FeedbackDataset":
+        return cls(
+            fields=[
+                TextField(name="sentence1"),
+                TextField(name="sentence2"),
+            ],
+            questions=[RatingQuestion(name="similarity", values=[0, 1])],
+        )
+        # return cls(
+        #     fields=[
+        #         TextField(name="sentence1"),
+        #     ],
+        #     questions=[
+        #         TextQuestion(name="sentence2")
+        #     ]
+        # )
