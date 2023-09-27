@@ -17,7 +17,7 @@ from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
 from fastapi import HTTPException, Query
-from pydantic import BaseModel, conlist, constr, root_validator, validator
+from pydantic import BaseModel, Extra, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
 from pydantic.generics import GenericModel
 from pydantic.utils import GetterDict
@@ -528,6 +528,42 @@ class MetadataQueryParams(BaseModel):
     @property
     def metadata_parsed(self) -> List[MetadataParsedQueryParam]:
         return [MetadataParsedQueryParam(q) for q in self.metadata]
+
+
+class SortByQueryParam(BaseModel):
+    keys: Optional[List[str]] = None
+
+    class Config:
+        extra = Extra.allow
+
+    @root_validator
+    def check_sort_by_params(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        if values.get("keys") is not None:
+            return values
+
+        valid_sort_order = ["asc", "desc"]
+        for key, value in values.items():
+            if key == "keys":
+                continue
+            if value not in valid_sort_order:
+                # TODO: raise `ValueError` instead once we have specific global exception handlers for V1
+                valid_sort_order_string = ", ".join([f"'{sort}'" for sort in valid_sort_order])
+                raise HTTPException(
+                    status_code=422,
+                    detail=(
+                        f"'sort_by' query parameter got '{key}' with invalid value '{value}', valid values are:"
+                        f" {valid_sort_order_string}"
+                    ),
+                )
+
+        return values
+
+    @property
+    def parsed(self) -> Dict[str, str]:
+        if self.keys is not None:
+            return {key: "asc" for key in self.keys}
+
+        return self.dict(exclude={"keys"})
 
 
 class TextQuery(BaseModel):

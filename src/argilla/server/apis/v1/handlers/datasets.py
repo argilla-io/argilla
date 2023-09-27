@@ -17,6 +17,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing_extensions import Annotated
 
 from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_async_db
@@ -46,6 +47,7 @@ from argilla.server.schemas.v1.datasets import (
     SearchRecord,
     SearchRecordsQuery,
     SearchRecordsResult,
+    SortByQueryParam,
 )
 from argilla.server.schemas.v1.datasets import Record as RecordSchema
 from argilla.server.search_engine import (
@@ -165,7 +167,7 @@ async def _build_sort_by(
 async def _get_search_responses(
     db: "AsyncSession",
     search_engine: "SearchEngine",
-    dataset: Dataset,
+    dataset: DatasetModel,
     parsed_metadata: List[MetadataParsedQueryParam],
     limit: int,
     offset: int,
@@ -270,14 +272,20 @@ async def list_dataset_metadata_properties(
     return MetadataProperties(items=dataset.metadata_properties)
 
 
-parse_sort_by_query_param = parse_query_param(
-    name="sort_by",
-    description=(
-        "The field used to sort the records. Expected format is `field` or `field:{asc,desc}`, where `field`"
-        " can be 'inserted_at', 'updated_at' or the name of a metadata property"
+SortByQueryParamParsed = Annotated[
+    SortByQueryParam,
+    Depends(
+        parse_query_param(
+            name="sort_by",
+            description=(
+                "The field used to sort the records. Expected format is `field` or `field:{asc,desc}`, where `field`"
+                " can be 'inserted_at', 'updated_at' or the name of a metadata property"
+            ),
+            max_values_per_key=1,
+            model=SortByQueryParam,
+        )
     ),
-    max_values_per_key=1,
-)
+]
 
 
 @router.get("/me/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
@@ -287,7 +295,7 @@ async def list_current_user_dataset_records(
     search_engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     metadata: MetadataQueryParams = Depends(),
-    sort_by_query_param: Optional[Dict[str, str]] = Depends(parse_sort_by_query_param),
+    sort_by_query_param: SortByQueryParamParsed,
     include: List[RecordInclude] = Query([], description="Relationships to include in the response"),
     response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = 0,
@@ -309,7 +317,7 @@ async def list_current_user_dataset_records(
             user=current_user,
             response_statuses=response_statuses,
             include=include,
-            sort_by_query_param=sort_by_query_param,
+            sort_by_query_param=sort_by_query_param.parsed,
         )
     else:
         records = await datasets.list_records_by_dataset_id(
@@ -332,14 +340,13 @@ async def list_dataset_records(
     search_engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     metadata: MetadataQueryParams = Depends(),
-    sort_by_query_param: Optional[Dict[str, str]] = Depends(parse_sort_by_query_param),
+    sort_by_query_param: SortByQueryParamParsed,
     include: List[RecordInclude] = Query([], description="Relationships to include in the response"),
     response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
     current_user: User = Security(auth.get_current_user),
 ):
-    print(sort_by_query_param)
     dataset = await _get_dataset(db, dataset_id)
 
     await authorize(current_user, DatasetPolicyV1.list_dataset_records_with_all_responses(dataset))
@@ -354,7 +361,7 @@ async def list_dataset_records(
             offset=offset,
             response_statuses=response_statuses,
             include=include,
-            sort_by_query_param=sort_by_query_param,
+            sort_by_query_param=sort_by_query_param.parsed,
         )
     else:
         records = await datasets.list_records_by_dataset_id(
@@ -576,7 +583,7 @@ async def search_dataset_records(
     dataset_id: UUID,
     query: SearchRecordsQuery,
     metadata: MetadataQueryParams = Depends(),
-    sort_by_query_param: Optional[Dict[str, str]] = Depends(parse_sort_by_query_param),
+    sort_by_query_param: SortByQueryParamParsed,
     include: List[RecordInclude] = Query([]),
     response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = Query(0, ge=0),
@@ -605,7 +612,7 @@ async def search_dataset_records(
         offset=offset,
         user=current_user,
         response_statuses=response_statuses,
-        sort_by_query_param=sort_by_query_param,
+        sort_by_query_param=sort_by_query_param.parsed,
     )
 
     record_id_score_map = {
