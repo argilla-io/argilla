@@ -179,10 +179,9 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         if response_status and not isinstance(response_status, list):
             response_status = [response_status]
         if metadata_filters:
-            metadata_filters = [metadata_filters] if not isinstance(metadata_filters, list) else metadata_filters
-            metadata_filters = [
-                f"{metadata_filter.name}:{metadata_filter.server_settings}" for metadata_filter in metadata_filters
-            ]
+            if not isinstance(metadata_filters, list):
+                metadata_filters = [metadata_filters]
+            metadata_filters = [metadata_filter.query_string for metadata_filter in metadata_filters]
         return FilteredRemoteFeedbackDataset(
             client=self._client,
             id=self.id,

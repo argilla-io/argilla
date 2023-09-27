@@ -170,8 +170,8 @@ class MetadataFilterSchema(BaseModel, ABC):
         exclude = {"type"}
 
     @abstractproperty
-    def server_settings(self) -> Union[str, Dict[str, Any]]:
-        return {}
+    def query_string(self) -> str:
+        return ""
 
 
 class TermsMetadataFilter(MetadataFilterSchema):
@@ -186,8 +186,8 @@ class TermsMetadataFilter(MetadataFilterSchema):
         return terms_values
 
     @property
-    def server_settings(self) -> str:
-        return ",".join(self.values)
+    def query_string(self) -> str:
+        return f"{self.name}:{','.join(self.values)}"
 
 
 class _NumericMetadataFilterSchema(MetadataFilterSchema):
@@ -197,13 +197,13 @@ class _NumericMetadataFilterSchema(MetadataFilterSchema):
     _bounds_validator = root_validator(allow_reuse=True)(validate_numeric_metadata_filter_bounds)
 
     @property
-    def server_settings(self) -> Dict[str, Any]:
-        settings: Dict[str, Any] = {"type": self.type.value}
+    def query_string(self) -> str:
+        filter_params = {}
         if self.le is not None:
-            settings["le"] = self.le
+            filter_params["le"] = self.le
         if self.ge is not None:
-            settings["ge"] = self.ge
-        return settings
+            filter_params["ge"] = self.ge
+        return f"{self.name}:{filter_params}".replace("'", '"')
 
 
 class IntegerMetadataFilter(_NumericMetadataFilterSchema):
