@@ -4,9 +4,13 @@
       v-model="searchText"
       :placeholder="$t('filterBy')"
       class="sort-categories__search"
+      searchRef="sortFilter"
     />
     <ul class="sort-categories__list">
-      <li v-for="category in categoriesFilteredBySearchText" :key="category">
+      <li
+        v-for="category in categoriesFilteredBySearchText"
+        :key="category.name"
+      >
         <BaseButton
           @on-click="includeCategory(category)"
           class="sort-categories__item"
@@ -38,7 +42,7 @@ export default {
   },
   methods: {
     includeCategory(category) {
-      this.$emit("include-category", category);
+      this.$emit("include-category", category.name);
     },
   },
 };

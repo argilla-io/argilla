@@ -48,7 +48,7 @@ export default {
   },
   computed: {
     nonSelectedSortingItems() {
-      return this.sortingItems.nonSelected.map((f) => f.name);
+      return this.sortingItems.noSelected;
     },
     selectedSortingItems() {
       return this.sortingItems.selected;
@@ -70,14 +70,11 @@ export default {
       this.sortingItems.unselect(categoryName);
     },
     onChangeSortDirection(categoryName) {
-      this.sortingItems.find((item) => item.name === categoryName).sort =
-        this.sortingItems.find((item) => item.name === categoryName).sort ===
-        "asc"
-          ? "desc"
-          : "asc";
+      this.sortingItems.toggleSort(categoryName);
     },
     onReplaceSortCategory(categoryName) {
       this.includeSortCategory(categoryName);
+
       this.$emit("replace-category-name");
     },
   },

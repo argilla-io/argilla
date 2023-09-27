@@ -2,7 +2,7 @@ import { Metadata } from "./Metadata";
 
 class MetadataSort {
   public selected = false;
-  public sort = "asc";
+  public sort: "asc" | "desc" = "asc";
   constructor(private metadata: Metadata | { name: string }) {}
 
   get name() {
@@ -26,13 +26,18 @@ export class MetadataSortList {
     return this.metadataSorts.filter((metadataSort) => !metadataSort.selected);
   }
 
-  select(metadata: string) {
-    const found = this.metadataSorts.find((m) => m.name === metadata);
+  select(category: string) {
+    const found = this.metadataSorts.find((m) => m.name === category);
     if (found) found.selected = true;
   }
 
-  unselect(metadata: string) {
-    const found = this.metadataSorts.find((m) => m.name === metadata);
+  unselect(category: string) {
+    const found = this.metadataSorts.find((m) => m.name === category);
     if (found) found.selected = false;
+  }
+
+  toggleSort(category: string) {
+    const found = this.metadataSorts.find((m) => m.name === category);
+    if (found) found.sort = found.sort === "asc" ? "desc" : "asc";
   }
 }
