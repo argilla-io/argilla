@@ -41,7 +41,7 @@ An annotator user is limited to accessing only the datasets assigned to it withi
 - **Annotation**: It can annotate datasets in the Argilla UI.
 - **Feedback**: It can provide feedback with the Argilla UI.
 
-![user_roles_schema](../../../_static/images/installation/user_management/user_roles.png)
+![user_roles_schema](/_static/images/installation/user_management/user_roles.png)
 
 An Argilla user is composed of the following attributes:
 
