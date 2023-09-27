@@ -236,8 +236,6 @@ async def create_metadata_property(
     return metadata_property
 
 
-
-
 async def update_question(db: "AsyncSession", question: Question, question_update: "QuestionUpdate") -> Question:
     params = question_update.dict(exclude_unset=True)
     return await question.update(db, **params)
