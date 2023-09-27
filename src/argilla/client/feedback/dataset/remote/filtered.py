@@ -47,7 +47,8 @@ class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase):
             id=self._dataset.id,
             offset=offset,
             limit=limit,
-            **self._filters,
+            response_status=self._filters.get("response_status", None),
+            metadata_filters=self._filters.get("metadata_filters", None),
         ).parsed
 
     def add(

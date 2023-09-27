@@ -32,6 +32,7 @@ if TYPE_CHECKING:
 
     import httpx
 
+    from argilla.client.feedback.schemas.metadata import MetadataFilters
     from argilla.client.feedback.schemas.types import (
         AllowedRemoteFieldTypes,
         AllowedRemoteMetadataPropertyTypes,
@@ -155,7 +156,9 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         )
 
     def filter_by(
-        self, response_status: Union[FeedbackResponseStatusFilter, List[FeedbackResponseStatusFilter]]
+        self,
+        response_status: Optional[Union[FeedbackResponseStatusFilter, List[FeedbackResponseStatusFilter]]] = None,
+        metadata_filters: Optional[Union["MetadataFilters", List["MetadataFilters"]]] = None,
     ) -> FilteredRemoteFeedbackDataset:
         """Filters the current `RemoteFeedbackDataset` based on the `response_status` of
         the responses of the records in Argilla. This method creates a new class instance
@@ -163,13 +166,23 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
 
         Args:
             response_status: the response status/es to filter the dataset by. Can be
-                one of: draft, pending, submitted, and discarded.
+                one of: draft, pending, submitted, and discarded. Defaults to `None`.
+            metadata_filters: the metadata filters to filter the dataset by. Can be
+                one of: `TermsMetadataFilter`, `IntegerMetadataFilter`, and
+                `FloatMetadataFilter`. Defaults to `None`.
 
         Returns:
             A new instance of `FilteredRemoteFeedbackDataset` with the given filters.
         """
-        if not isinstance(response_status, list):
+        if not response_status and not metadata_filters:
+            raise ValueError("At least one of `response_status` or `metadata_filters` must be provided.")
+        if response_status and not isinstance(response_status, list):
             response_status = [response_status]
+        if metadata_filters:
+            metadata_filters = [metadata_filters] if not isinstance(metadata_filters, list) else metadata_filters
+            metadata_filters = [
+                f"{metadata_filter.name}:{metadata_filter.server_settings}" for metadata_filter in metadata_filters
+            ]
         return FilteredRemoteFeedbackDataset(
             client=self._client,
             id=self.id,
@@ -182,6 +195,9 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             guidelines=self.guidelines,
             filters={
                 "response_status": [status.value if hasattr(status, "value") else status for status in response_status]
+                if response_status
+                else None,
+                "metadata_filters": metadata_filters if metadata_filters else None,
             },
         )
 
