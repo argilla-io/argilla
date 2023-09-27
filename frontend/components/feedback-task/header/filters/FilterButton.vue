@@ -1,12 +1,12 @@
 <template>
-  <div :class="isButtonActive ? 'metadata-button--active' : 'metadata-button'">
-    <BaseButton class="metadata-button__button" v-if="!badges.length"
-      >Metadata</BaseButton
-    >
-    <svgicon v-else name="filter" width="16" height="16" />
-    <div class="metadata-button__badges" v-if="badges.length">
+  <div :class="isButtonActive ? 'filter-button--active' : 'filter-button'">
+    <BaseButton class="filter-button__button" v-if="!badges.length">{{
+      buttonName
+    }}</BaseButton>
+    <svgicon v-else :name="iconName" width="16" height="16" />
+    <div class="filter-button__badges" v-if="badges.length">
       <FilterBadge
-        class="metadata-button__badge"
+        class="filter-button__badge"
         :active-badge="activeBadge === badge && isActive"
         v-for="badge in visibleBadges"
         :key="badge"
@@ -15,7 +15,7 @@
         @on-clear="onClickOnClear(badge, $event)"
       ></FilterBadge>
       <div
-        class="metadata-button__badges__collapsed"
+        class="filter-button__badges__collapsed"
         v-if="badges.length > maxVisibleBadges"
         v-click-outside="{
           events: ['mousedown'],
@@ -39,7 +39,7 @@
       </div>
     </div>
     <svgicon
-      class="metadata-button__chevron"
+      class="filter-button__chevron"
       name="chevron-down"
       width="16"
       height="16"
@@ -50,8 +50,17 @@
 <script>
 import "assets/icons/chevron-down";
 import "assets/icons/filter";
+import "assets/icons/sort";
 export default {
   props: {
+    buttonName: {
+      type: String,
+      required: true,
+    },
+    iconName: {
+      type: String,
+      required: true,
+    },
     badges: {
       type: Array,
       default: [],
@@ -106,7 +115,7 @@ export default {
 </script>
 
 <styles lang="scss" scoped>
-.metadata-button {
+.filter-button {
   display: flex;
   gap: $base-space;
   align-items: center;
@@ -119,7 +128,7 @@ export default {
   &:hover,
   &--active {
     background: $black-4;
-    @extend .metadata-button;
+    @extend .filter-button;
   }
   &__badges {
     display: flex;
