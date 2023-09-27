@@ -106,7 +106,7 @@ export default {
   &__item {
     &.re-checkbox {
       display: flex;
-      padding: calc($base-space / 2) $base-space;
+      padding: 6px $base-space;
       border-radius: $border-radius;
     }
     &--highlighted {

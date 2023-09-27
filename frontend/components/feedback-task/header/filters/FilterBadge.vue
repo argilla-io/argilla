@@ -73,14 +73,14 @@ $badgeBorderActiveColor: palette(purple, 200);
   gap: $base-space * 1.3;
   max-width: 220px;
   margin: 0;
-  padding: calc($base-space / 2) $base-space;
+  padding: 2px $base-space;
   border: 1px solid $badgeBorderColor;
   border-radius: $border-radius-rounded;
   background-color: $badgeBgColor;
   color: $badgeColor;
   font-weight: 500;
   @include font-size(12px);
-  @include line-height(12px);
+  @include line-height(16px);
   &--clickable {
     @extend .badge;
     &:not(.badge--active):hover {

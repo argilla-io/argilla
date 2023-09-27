@@ -38,7 +38,7 @@
           :text="`+ ${badges.length - maxVisibleBadges}`"
           @on-click="toggleTooltip"
         />
-        <FilterTooltip v-if="visibleTooltip">
+        <FilterTooltip v-if="visibleTooltip" class="metadata-button__tooltip">
           <FilterBadge
             class="badge"
             v-for="badge in collapsedBadges"
@@ -148,6 +148,11 @@ export default {
     background: $black-4;
     @extend .filter-button;
   }
+  &--active {
+    &:hover {
+      background: $black-6;
+    }
+  }
   &__badges {
     display: flex;
     gap: calc($base-space / 2);
@@ -160,6 +165,15 @@ export default {
   }
   &__button.button {
     padding: 0;
+    border-radius: 0;
+  }
+  &__tooltip {
+    display: flex;
+    flex-direction: column;
+    gap: calc($base-space / 2);
+    .badge {
+      margin-right: auto;
+    }
   }
 }
 </styles>
