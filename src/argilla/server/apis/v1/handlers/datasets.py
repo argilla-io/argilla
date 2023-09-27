@@ -373,6 +373,7 @@ async def create_dataset_question(
 async def create_dataset_metadata_property(
     *,
     db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     metadata_prop_create: MetadataPropertyCreate,
     current_user: User = Security(auth.get_current_user),
@@ -391,7 +392,7 @@ async def create_dataset_metadata_property(
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
     # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
-        metadata_property = await datasets.create_metadata_property(db, dataset, metadata_prop_create)
+        metadata_property = await datasets.create_metadata_property(db, search_engine, dataset, metadata_prop_create)
         return metadata_property
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
