@@ -451,7 +451,54 @@ class TaskTemplateMixin:
                 if not multi_label
                 else MultiLabelQuestion(name="label", labels=labels, description="Choose one or more of the labels.")
             ],
-            guidelines="This is a text classification dataset ... ",
+            guidelines="This is a text classification dataset that contains texts and labels. Please classify the texts by selecting the correct labels."
+            if multi_label
+            else "This is a text classification dataset that contains texts and labels. Please classify the texts by selecting the correct label.",
+        )
+
+    @classmethod
+    def for_summarization(cls: Type["FeedbackDataset"], use_markdown: bool = False) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for summarization tasks.
+        To add items to your dataset, use the "add_item" method.
+
+        Args:
+            None
+
+        Returns:
+            A `FeedbackDataset` object for summarization containing "text" field and a TextQuestion named "summary"
+        """
+        return cls(
+            fields=[
+                TextField(name="text", use_markdown=use_markdown),
+            ],
+            questions=[TextQuestion(name="summary", description="Write a summary of the text.")],
+            guidelines="This is a summarization dataset that contains texts. Please summarize the text in the text field.",
+        )
+
+    @classmethod
+    def for_translation(
+        cls: Type["FeedbackDataset"], labels: bool = False, use_markdown: bool = False
+    ) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for translation tasks.
+        To add items to your dataset, use the "add_item" method.
+
+        Args:
+            labels: Set this parameter to True if you want to add labels to your dataset
+
+        Returns:
+            A `FeedbackDataset` object for translation containing "text" field and a TextQuestion named "translation"
+        """
+        return cls(
+            fields=[TextField(name="text", use_markdown=use_markdown)],
+            questions=[
+                TextQuestion(name="translation", description="Translate the text.")
+                if not labels
+                else TextQuestion(name="translation", description="Translate the text."),
+                LabelQuestion(name="label", labels=labels, description="Choose one of the labels."),
+            ],
+            guidelines="This is a translation dataset that contains texts. Please translate the text in the text field.",
         )
 
     @classmethod
@@ -478,90 +525,15 @@ class TaskTemplateMixin:
             else [
                 TextField(name="instruction", use_markdown=use_markdown),
             ],
-            questions=[TextQuestion(name="response")],
+            questions=[TextQuestion(name="response", description="Write the response to the instruction.")],
+            guidelines="This is a supervised fine-tuning dataset that contains instructions and contexts. Please write the response to the instruction in the response field."
+            if context
+            else "This is a supervised fine-tuning dataset that contains instructions. Please write the response to the instruction in the response field.",
         )
 
     @classmethod
-    def for_sentence_similarity(cls: Type["FeedbackDataset"]) -> "FeedbackDataset":
-        """
-        You can use this method to create a basic dataset for sentence similarity tasks.
-        To add items to your dataset, use the "add_item" method.
-
-        Args:
-            None
-
-        Returns:
-            A `FeedbackDataset` object for sentence similarity containing "sentence1" and "sentence2" fields and a RatingQuestion named "similarity"
-        """
-        return cls(
-            fields=[
-                TextField(name="sentence1"),
-                TextField(name="sentence2"),
-            ],
-            questions=[RatingQuestion(name="similarity", values=[1, 2, 3, 4, 5])],
-        )
-
-    @classmethod
-    def for_summarization(cls: Type["FeedbackDataset"]) -> "FeedbackDataset":
-        """
-        You can use this method to create a basic dataset for summarization tasks.
-        To add items to your dataset, use the "add_item" method.
-
-        Args:
-            None
-
-        Returns:
-            A `FeedbackDataset` object for summarization containing "text" field and a TextQuestion named "summary"
-        """
-        return cls(
-            fields=[
-                TextField(name="text"),
-            ],
-            questions=[TextQuestion(name="summary")],
-        )
-
-    @classmethod
-    def for_translation(cls: Type["FeedbackDataset"], labels: bool = False) -> "FeedbackDataset":
-        """
-        You can use this method to create a basic dataset for translation tasks.
-        To add items to your dataset, use the "add_item" method.
-
-        Args:
-            labels: Set this parameter to True if you want to add labels to your dataset
-
-        Returns:
-            A `FeedbackDataset` object for translation containing "text" field and a TextQuestion named "translation"
-        """
-        return cls(
-            fields=[TextField(name="text")],
-            questions=[
-                TextQuestion(name="translation") if not labels else TextQuestion(name="translation"),
-                LabelQuestion(name="labels", labels=labels),
-            ],
-        )
-
-    @classmethod
-    def for_conversational(cls: Type["FeedbackDataset"], system_prompt: bool = False) -> "FeedbackDataset":
-        """
-        You can use this method to create a basic dataset for conversational tasks.
-        To add items to your dataset, use the "add_item" method.
-
-        Args:
-            system_prompt: Set this parameter to True if you want to add system prompt to your dataset
-
-        Returns:
-            A `FeedbackDataset` object for conversational containing "context" and optional "system_prompt" field and a TextQuestion named "response"
-        """
-        return cls(
-            fields=[TextField(name="system_prompt", title="System Prompt"), TextField(name="context")]
-            if system_prompt
-            else [TextField(name="context")],
-            questions=[TextQuestion(name="response")],
-        )
-
-    @classmethod
-    def for_retrieval_augmented_generation(
-        cls: Type["FeedbackDataset"], retrieval_source: bool = False
+    def for_conversational(
+        cls: Type["FeedbackDataset"], system_prompt: bool = False, use_markdown: bool = False
     ) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for conversational tasks.
@@ -575,13 +547,116 @@ class TaskTemplateMixin:
         """
         return cls(
             fields=[
-                TextField(name="query"),
-                TextField(name="retrieved_document", title="Retrieved Document"),
-                TextField(name="retrieval_source", title="Retrieval Source"),
+                TextField(name="system_prompt", title="System Prompt", use_markdown=use_markdown),
+                TextField(name="context", use_markdown=use_markdown),
+            ]
+            if system_prompt
+            else [TextField(name="context", use_markdown=use_markdown)],
+            questions=[TextQuestion(name="response", description="Write the response to the context.")],
+            guidelines="This is a conversational dataset that contains contexts and system prompts. Please write the response to the context in the response field."
+            if system_prompt
+            else "This is a conversational dataset that contains contexts. Please write the response to the context in the response field.",
+        )
+
+    @classmethod
+    def for_retrieval_augmented_generation(
+        cls: Type["FeedbackDataset"], retrieval_source: bool = False, use_markdown: bool = False
+    ) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for conversational tasks.
+        To add items to your dataset, use the "add_item" method.
+
+        Args:
+            system_prompt: Set this parameter to True if you want to add system prompt to your dataset
+
+        Returns:
+            A `FeedbackDataset` object for conversational containing "context" and optional "system_prompt" field and a TextQuestion named "response"
+        """
+        return cls(
+            fields=[
+                TextField(name="query", use_markdown=use_markdown),
+                TextField(name="retrieved_document", title="Retrieved Document", use_markdown=use_markdown),
+                TextField(name="retrieval_source", title="Retrieval Source", use_markdown=use_markdown),
             ]
             if retrieval_source
-            else [TextField(name="query"), TextField(name="retrieved_document", title="Retrieved Document")],
-            questions=[TextQuestion(name="response")],
+            else [
+                TextField(name="query", use_markdown=use_markdown),
+                TextField(name="retrieved_document", title="Retrieved Document", use_markdown=use_markdown),
+            ],
+            questions=[TextQuestion(name="response", description="Write the response to the query.")],
+            guidelines="This is a retrieval augmented generation dataset that contains queries and retrieved documents. Please write the response to the query in the response field by using the retrieved document.",
+        )
+
+    @classmethod
+    def for_sentence_similarity(cls: Type["FeedbackDataset"], use_markdown: bool = False) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for sentence similarity tasks.
+        To add items to your dataset, use the "add_item" method.
+
+        Args:
+            None
+
+        Returns:
+            A `FeedbackDataset` object for sentence similarity containing "sentence1" and "sentence2" fields and a RatingQuestion named "similarity"
+        """
+        return cls(
+            fields=[
+                TextField(name="sentence1", use_markdown=use_markdown),
+                TextField(name="sentence2", use_markdown=use_markdown),
+            ],
+            questions=[
+                RatingQuestion(
+                    name="similarity",
+                    values=[1, 2, 3, 4, 5],
+                    description="Rate the similarity between the two sentences.",
+                )
+            ],
+            guidelines="This is a sentence similarity dataset that contains two sentences. Please rate the similarity between the two sentences.",
+        )
+
+    @classmethod
+    def for_preference(cls: Type["FeedbackDataset"], use_markdown: bool = False) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for preference tasks.
+        To add items to your dataset, use the "add_item" method.
+
+        Args:
+            use_markdown: Set this parameter to True if you want to use markdown in your dataset
+
+        Returns:
+            A `FeedbackDataset` object for preference containing "context", "option1" and "option2" fields and a LabelQuestion named "preference"
+        """
+        return cls(
+            fields=[
+                TextField(name="context", use_markdown=use_markdown),
+                TextField(name="option1", use_markdown=use_markdown),
+                TextField(name="option2", use_markdown=use_markdown),
+            ],
+            questions=[
+                LabelQuestion(name="preference", labels=["option1", "option2"], description="Choose your preference.")
+            ],
+            guidelines="This is a preference dataset that contains contexts and options. Please choose the option that you would prefer in the given context.",
+        )
+
+    @classmethod
+    def for_instruction(cls: Type["FeedbackDataset"], use_markdown: bool = False) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for instruction tasks.
+        To add items to your dataset, use the "add_item" method.
+
+        Args:
+            use_markdown: Set this parameter to True if you want to use markdown in your dataset
+
+        Returns:
+            A `FeedbackDataset` object for instruction containing "instruction", "input" and "output" fields and a TextQuestion named "response"
+        """
+        return cls(
+            fields=[
+                TextField(name="instruction", use_markdown=use_markdown),
+                TextField(name="input", use_markdown=use_markdown, required=False),
+            ],
+            questions=[TextQuestion(name="response", description="Write the response to the instruction.")],
+            guidelines="This is an instruction dataset that contains instructions. Please write the response to the instruction in the response field.",
         )
 
     # ADD ITEM
