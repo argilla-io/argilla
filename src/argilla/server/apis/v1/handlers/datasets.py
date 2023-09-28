@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
@@ -162,7 +162,7 @@ async def list_current_user_dataset_records(
     await authorize(current_user, DatasetPolicyV1.get(dataset))
 
     if metadata.metadata_parsed:
-        records = await _filter_records_using_search_engine(
+        records, total = await _filter_records_using_search_engine(
             db,
             search_engine,
             dataset=dataset,
@@ -174,6 +174,8 @@ async def list_current_user_dataset_records(
             include=include,
         )
     else:
+        # TODO(@frascuchon): Compute also total for this case
+        total = None
         records = await datasets.list_records_by_dataset_id(
             db,
             dataset_id,
@@ -184,7 +186,7 @@ async def list_current_user_dataset_records(
             limit=limit,
         )
 
-    return Records(items=records)
+    return Records(items=records, total=total)
 
 
 async def _filter_records_using_search_engine(
@@ -197,7 +199,7 @@ async def _filter_records_using_search_engine(
     user: Optional[User] = None,
     response_statuses: Optional[List[ResponseStatusFilter]] = None,
     include: Optional[List[RecordInclude]] = None,
-):
+) -> Tuple[List[Record], int]:
     metadata_filters = await _build_metadata_filters(db, dataset, parsed_metadata)
     response_status_filter = await _build_response_status_filter_for_search(response_statuses, user=user)
 
@@ -212,7 +214,10 @@ async def _filter_records_using_search_engine(
 
     record_ids = [response.record_id for response in search_responses.items]
 
-    return await datasets.get_records_by_ids(db=db, dataset_id=dataset.id, record_ids=record_ids, include=include)
+    return (
+        await datasets.get_records_by_ids(db=db, dataset_id=dataset.id, record_ids=record_ids, include=include),
+        search_responses.total,
+    )
 
 
 @router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
@@ -232,7 +237,7 @@ async def list_dataset_records(
 
     await authorize(current_user, DatasetPolicyV1.list_dataset_records_with_all_responses(dataset))
     if metadata.metadata_parsed:
-        records = await _filter_records_using_search_engine(
+        records, total = await _filter_records_using_search_engine(
             db,
             search_engine,
             dataset=dataset,
@@ -243,11 +248,12 @@ async def list_dataset_records(
             include=include,
         )
     else:
+        total = None
         records = await datasets.list_records_by_dataset_id(
             db, dataset_id, include=include, response_statuses=response_statuses, offset=offset, limit=limit
         )
 
-    return Records(items=records)
+    return Records(items=records, total=total)
 
 
 @router.get("/datasets/{dataset_id}", response_model=Dataset)

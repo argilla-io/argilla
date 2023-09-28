@@ -545,6 +545,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 200
         assert response.json() == {
+            "total": None,
             "items": [
                 {
                     "id": str(record_a.id),
@@ -830,7 +831,10 @@ class TestSuiteDatasets:
             params=query_params,
             headers=owner_auth_header,
         )
-        assert response.status_code == 200, response.json()
+        assert response.status_code == 200
+
+        response_json = response.json()
+        assert response_json["total"] == 2
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
@@ -1031,6 +1035,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 200
         assert response.json() == {
+            "total": None,
             "items": [
                 {
                     "id": str(record_a.id),
@@ -1085,6 +1090,7 @@ class TestSuiteDatasets:
         )
 
         expected = {
+            "total": None,
             "items": [
                 {
                     "id": str(record_a.id),
@@ -1310,7 +1316,10 @@ class TestSuiteDatasets:
             params=query_params,
             headers=owner_auth_header,
         )
-        assert response.status_code == 200, response.json()
+        assert response.status_code == 200
+
+        response_json = response.json()
+        assert response_json["total"] == 2
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
