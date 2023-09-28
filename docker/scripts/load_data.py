@@ -163,38 +163,6 @@ class LoadDatasets:
         dataset.push_to_argilla(name=repo_id.split("/")[-1])
 
     @staticmethod
-    def load_mock_dataset_for_filter_metadata():
-        print("Loading Mock dataset for metadata properties test")
-        import random
-
-        import argilla as rg
-
-        dataset = rg.FeedbackDataset.from_huggingface("argilla/oasst_response_quality", split="train")
-
-        records = dataset.records[:400]
-
-        for record in records:
-            record.metadata.update(
-                {
-                    "terms-prop": random.choice("abc"),
-                    "int-prop": random.randint(-10, 100),
-                    "float-prop": random.uniform(0, 100),
-                }
-            )
-        meta_ds = rg.FeedbackDataset(
-            fields=dataset.fields,
-            questions=dataset.questions,
-            metadata_properties=[
-                rg.TermsMetadataProperty(name="terms-prop", values=["a", "b", "c"]),
-                rg.IntegerMetadataProperty(name="int-prop", min=-10, max=100),
-                rg.FloatMetadataProperty(name="float-prop", min=0.0, max=100),
-            ],
-        )
-
-        meta_ds.add_records(records)
-        meta_ds.push_to_argilla("dataset-with-metadata-properties")
-
-    @staticmethod
     def build_error_analysis_record(
         row: pd.Series, legacy: bool = False
     ) -> Union[rg.FeedbackRecord, rg.TextClassificationRecord]:
