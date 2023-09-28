@@ -273,7 +273,7 @@ def load(
         workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
             env variable ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
         query: An ElasticSearch query with the `query string
-            syntax <https://www.elastic.co/guide/en/elasticsearch/reference/7.10/query-dsl-query-string-query.html#query-string-syntax>`_
+            syntax <https://argilla.readthedocs.io/en/stable/guides/queries.html>`_
         vector: Vector configuration for a semantic search
         ids: If provided, load dataset records with given ids.
         limit: The number of records to retrieve.

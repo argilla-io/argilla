@@ -52,6 +52,6 @@ Additionally, we report the usage of integration for our Python library:
 
 * `ArgillaTrainer` framework usage and NLP task-type.
 
-For transparency, you can inspect the source code where this is performed [here](https://github.com/argilla-io/argilla/blob/main/src/argilla/utils/telemetry.py).
+For transparency, you can inspect the source code where this is performed [here](https://github.com/argilla-io/argilla/blob/main/src/argilla/server/commons/telemetry.py#L53).
 
 If you have any doubts, don't hesitate to join our [Slack channel](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g) or open a GitHub issue. We'd be very happy to discuss how we can improve this.
