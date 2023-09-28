@@ -3203,6 +3203,49 @@ class TestSuiteDatasets:
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
+    @pytest.mark.parametrize(
+        "record_json",
+        [
+            {"fields": {"input": "text-input", "output": "text-output"}},
+            {"fields": {"input": "text-input", "output": None}},
+            {"fields": {"input": "text-input"}},
+        ],
+    )
+    async def test_create_dataset_records_with_optional_fields(
+        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, record_json: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await FieldFactory.create(name="input", dataset=dataset)
+        await FieldFactory.create(name="output", dataset=dataset, required=False)
+
+        records_json = {"items": [record_json]}
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+        )
+
+        assert response.status_code == 204, response.json()
+        await db.refresh(dataset, attribute_names=["records"])
+        assert (await db.execute(select(func.count(Record.id)))).scalar() == 1
+
+    async def test_create_dataset_records_with_wrong_optional_fields(
+        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await FieldFactory.create(name="input", dataset=dataset)
+        await FieldFactory.create(name="output", dataset=dataset, required=False)
+
+        records_json = {"items": [{"fields": {"input": "text-input", "output": 1}}]}
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+        )
+        assert response.status_code == 422
+        assert response.json() == {"detail": "Wrong value found for field 'output'. Expected 'str', found 'int'"}
+        assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
+
     async def test_create_dataset_records_with_discarded_response(
         self,
         async_client: "AsyncClient",

@@ -20,6 +20,12 @@ import pytest
 from argilla.client import api
 from argilla.client.feedback.dataset.local import FeedbackDataset
 from argilla.client.feedback.dataset.remote.filtered import FilteredRemoteFeedbackDataset, FilteredRemoteFeedbackRecords
+from argilla.client.feedback.schemas.metadata import (
+    FloatMetadataFilter,
+    IntegerMetadataFilter,
+    MetadataFilters,
+    TermsMetadataFilter,
+)
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserRole
@@ -49,7 +55,7 @@ class TestFilteredRemoteFeedbackDataset:
             [FeedbackResponseStatusFilter.discarded, FeedbackResponseStatusFilter.submitted],
         ],
     )
-    async def test_filter_by(
+    async def test_filter_by_response_status(
         self, role: UserRole, status: Union[FeedbackResponseStatusFilter, List[FeedbackResponseStatusFilter]]
     ) -> None:
         dataset = await DatasetFactory.create()
@@ -64,6 +70,8 @@ class TestFilteredRemoteFeedbackDataset:
         assert isinstance(filtered_dataset, FilteredRemoteFeedbackDataset)
         assert isinstance(filtered_dataset.records, FilteredRemoteFeedbackRecords)
         assert all([isinstance(record, RemoteFeedbackRecord) for record in filtered_dataset.records])
+
+    # TODO: check why the metadata filters are not working from the tests, most likely because the metadata is not indexed
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     @pytest.mark.parametrize(

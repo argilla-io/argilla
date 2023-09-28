@@ -51,6 +51,7 @@ class RemoteIntegerMetadataProperty(IntegerMetadataProperty, RemoteSchema):
         return IntegerMetadataProperty(
             name=self.name,
             description=self.description,
+            # TODO: uncomment once API is ready
             # visible_for_annotators=self.visible_for_annotators,
             min=self.min,
             max=self.max,
@@ -73,7 +74,8 @@ class RemoteFloatMetadataProperty(FloatMetadataProperty, RemoteSchema):
         return FloatMetadataProperty(
             name=self.name,
             description=self.description,
-            visible_for_annotators=self.visible_for_annotators,
+            # TODO: uncomment once API is ready
+            # visible_for_annotators=self.visible_for_annotators,
             min=self.min,
             max=self.max,
         )
