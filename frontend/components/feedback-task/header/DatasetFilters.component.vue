@@ -86,7 +86,7 @@ export default {
 <style lang="scss" scoped>
 .filters {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: $base-space * 2;
   align-items: center;
   width: 100%;
@@ -94,12 +94,14 @@ export default {
   &__total-records {
     @include font-size(13px);
     color: $black-37;
+    flex-shrink: 0;
   }
   &__status {
     margin-left: auto;
   }
 }
 .search-area {
-  width: clamp(300px, 30vw, 800px);
+  width: clamp(200px, 25vw, 600px);
+  min-width: 200px;
 }
 </style>
