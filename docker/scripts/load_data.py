@@ -168,9 +168,13 @@ class LoadDatasets:
     ) -> Union[rg.FeedbackRecord, rg.TextClassificationRecord]:
         fields = {
             "user-message-1": row["HumanMessage1"],
-            "llm-output": f"```json\n{row['llm_output']}\n```",
-            "ai-message": row["AIMessage"],
-            "function-message": row["FunctionMessage"],
+            "llm-output": row["llm_output"]
+            if not row["llm_output"].__contains__("```json")
+            else row["llm_output"].replace("'", '"'),
+            "ai-message": (f"```json\n{row['AIMessage']}\n```" if not legacy else row["AIMessage"]).replace("'", '"'),
+            "function-message": (f"```json\n{row['FunctionMessage']}\n```" if not legacy else row["AIMessage"]).replace(
+                "'", '"'
+            ),
             "system-message": "You are an AI assistant name ACME",
             "langsmith-url": f"https://smith.langchain.com/o/{row['parent_id']}",
         }
