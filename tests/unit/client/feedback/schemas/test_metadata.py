@@ -298,7 +298,7 @@ def test_terms_metadata_filter_errors(
     [
         ({"name": "name", "le": 5}, 'name:{"le": 5}'),
         ({"name": "name", "ge": 5}, 'name:{"ge": 5}'),
-        ({"name": "name", "le": 1, "ge": 5}, 'name:{"le": 1, "ge": 5}'),
+        ({"name": "name", "le": 5, "ge": 1}, 'name:{"le": 5, "ge": 1}'),
         ({"name": "name", "le": 5, "ge": 5}, 'name:{"le": 5, "ge": 5}'),
     ],
 )
@@ -318,9 +318,9 @@ def test_integer_metadata_filter(schema_kwargs: Dict[str, Any], query_string: st
             "1 validation error for IntegerMetadataFilter\n__root__\n  `IntegerMetadataFilter` with name=int-metadata-filter must have at least one of `le` or `ge`",
         ),
         (
-            {"name": "int-metadata-filter", "le": 6, "ge": 5},
+            {"name": "int-metadata-filter", "le": 5, "ge": 6},
             ValidationError,
-            "1 validation error for IntegerMetadataFilter\n__root__\n  `IntegerMetadataFilter` with name=int-metadata-filter cannot have `ge` less than `le`",
+            "1 validation error for IntegerMetadataFilter\n__root__\n  `IntegerMetadataFilter` with name=int-metadata-filter cannot have `le` less than `ge`",
         ),
     ],
 )
@@ -336,7 +336,7 @@ def test_integer_metadata_filter_errors(
     [
         ({"name": "name", "le": 5.0}, 'name:{"le": 5.0}'),
         ({"name": "name", "ge": 5.0}, 'name:{"ge": 5.0}'),
-        ({"name": "name", "le": 1.0, "ge": 5.0}, 'name:{"le": 1.0, "ge": 5.0}'),
+        ({"name": "name", "ge": 1.0, "le": 5.0}, 'name:{"le": 5.0, "ge": 1.0}'),
         ({"name": "name", "le": 5.0, "ge": 5.0}, 'name:{"le": 5.0, "ge": 5.0}'),
     ],
 )
@@ -356,9 +356,9 @@ def test_float_metadata_filter(schema_kwargs: Dict[str, Any], query_string: str)
             "1 validation error for FloatMetadataFilter\n__root__\n  `FloatMetadataFilter` with name=float-metadata-filter must have at least one of `le` or `ge`",
         ),
         (
-            {"name": "float-metadata-filter", "le": 6.0, "ge": 5.0},
+            {"name": "float-metadata-filter", "le": 5.0, "ge": 6.0},
             ValidationError,
-            "1 validation error for FloatMetadataFilter\n__root__\n  `FloatMetadataFilter` with name=float-metadata-filter cannot have `ge` less than `le`",
+            "1 validation error for FloatMetadataFilter\n__root__\n  `FloatMetadataFilter` with name=float-metadata-filter cannot have `le` less than `ge`",
         ),
     ],
 )

@@ -71,7 +71,8 @@ if TYPE_CHECKING:
 
 
 class ArgillaMixin:
-    def __delete_dataset(self: "FeedbackDataset", client: "httpx.Client", id: UUID) -> None:
+    @staticmethod
+    def __delete_dataset(client: "httpx.Client", id: UUID) -> None:
         try:
             datasets_api_v1.delete_dataset(client=client, id=id)
         except Exception as e:
@@ -97,7 +98,7 @@ class ArgillaMixin:
                 new_field = datasets_api_v1.add_field(client=client, id=id, field=field.to_server_payload()).parsed
                 fields.append(ArgillaMixin._parse_to_remote_field(new_field))
             except Exception as e:
-                self.__delete_dataset(client=client, id=id)
+                ArgillaMixin.__delete_dataset(client=client, id=id)
                 raise Exception(
                     f"Failed while adding the field '{field.name}' to the `FeedbackDataset` in Argilla with"
                     f" exception: {e}"
@@ -135,7 +136,7 @@ class ArgillaMixin:
                 ).parsed
                 questions.append(ArgillaMixin._parse_to_remote_question(new_question))
             except Exception as e:
-                self.__delete_dataset(client=client, id=id)
+                ArgillaMixin.__delete_dataset(client=client, id=id)
                 raise Exception(
                     f"Failed while adding the question '{question.name}' to the `FeedbackDataset` in Argilla with"
                     f" exception: {e}"
@@ -175,18 +176,19 @@ class ArgillaMixin:
                 ).parsed
                 metadata_properties.append(ArgillaMixin._parse_to_remote_metadata_property(new_metadata_property))
             except Exception as e:
-                self.__delete_dataset(client=client, id=id)
+                ArgillaMixin.__delete_dataset(client=client, id=id)
                 raise Exception(
                     f"Failed while adding the metadata property '{metadata_property.name}' to the `FeedbackDataset` in"
                     f" Argilla with exception: {e}"
                 ) from e
         return metadata_properties
 
-    def __publish_dataset(self: "FeedbackDataset", client: "httpx.Client", id: UUID) -> None:
+    @staticmethod
+    def __publish_dataset(client: "httpx.Client", id: UUID) -> None:
         try:
             datasets_api_v1.publish_dataset(client=client, id=id)
         except Exception as e:
-            self.__delete_dataset(client=client, id=id)
+            ArgillaMixin.__delete_dataset(client=client, id=id)
             raise Exception(f"Failed while publishing the `FeedbackDataset` in Argilla with exception: {e}") from e
 
     def __push_records(
@@ -212,13 +214,13 @@ class ArgillaMixin:
                     ],
                 )
             except Exception as e:
-                self.__delete_dataset(client=client, id=id)
+                ArgillaMixin.__delete_dataset(client=client, id=id)
                 raise Exception(
                     f"Failed while adding the records to the `FeedbackDataset` in Argilla with exception: {e}"
                 ) from e
 
     def push_to_argilla(
-        self: "FeedbackDataset",
+        self: Union["FeedbackDataset", "ArgillaMixin"],
         name: str,
         workspace: Optional[Union[str, Workspace]] = None,
         show_progress: bool = False,
@@ -267,7 +269,7 @@ class ArgillaMixin:
 
         metadata_properties = self.__add_metadata_properties(client=httpx_client, id=argilla_id)
 
-        self.__publish_dataset(client=httpx_client, id=argilla_id)
+        ArgillaMixin.__publish_dataset(client=httpx_client, id=argilla_id)
 
         self.__push_records(
             client=httpx_client, id=argilla_id, show_progress=show_progress, question_name_to_id=question_name_to_id
@@ -351,9 +353,9 @@ class ArgillaMixin:
                 )
             )
 
-        fields = cls.__get_fields(client=httpx_client, id=existing_dataset.id)
-        questions = cls.__get_questions(client=httpx_client, id=existing_dataset.id)
-        metadata_properties = cls.__get_metadata_properties(client=httpx_client, id=existing_dataset.id)
+        fields = ArgillaMixin.__get_fields(client=httpx_client, id=existing_dataset.id)
+        questions = ArgillaMixin.__get_questions(client=httpx_client, id=existing_dataset.id)
+        metadata_properties = ArgillaMixin.__get_metadata_properties(client=httpx_client, id=existing_dataset.id)
 
         return RemoteFeedbackDataset(
             client=httpx_client,
@@ -411,8 +413,8 @@ class ArgillaMixin:
                 workspace=workspace if workspace is not None else Workspace.from_id(dataset.workspace_id),
                 created_at=dataset.inserted_at,
                 updated_at=dataset.updated_at,
-                fields=cls.__get_fields(client=httpx_client, id=dataset.id),
-                questions=cls.__get_questions(client=httpx_client, id=dataset.id),
+                fields=ArgillaMixin.__get_fields(client=httpx_client, id=dataset.id),
+                questions=ArgillaMixin.__get_questions(client=httpx_client, id=dataset.id),
                 guidelines=dataset.guidelines or None,
             )
             for dataset in datasets
@@ -421,7 +423,7 @@ class ArgillaMixin:
 
 class UnificationMixin:
     def unify_responses(
-        self,
+        self: "FeedbackDataset",
         question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
         strategy: Union[
             str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy, RankingQuestionStrategy
