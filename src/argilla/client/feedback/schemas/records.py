@@ -196,7 +196,7 @@ class FeedbackRecord(BaseModel):
 
     """
 
-    fields: Dict[str, Optional[str]]
+    fields: Dict[str, Union[str, None]]
     metadata: Dict[str, Any] = Field(default_factory=dict)
     responses: List[ResponseSchema] = Field(default_factory=list)
     suggestions: Union[Tuple[SuggestionSchema], List[SuggestionSchema]] = Field(
