@@ -77,9 +77,14 @@ export default {
         (category) => !this.appliedSortCategories.includes(category)
       );
 
+      let unselectedAppliedSortCategories = this.appliedSortCategories.filter(
+        (category) => this.selectedCategories.includes(category)
+      );
+
       if (newSortBy.length) {
         newSortBy.forEach((f) => {
-          this.appliedSortCategories.push(f);
+          unselectedAppliedSortCategories.push(f);
+          this.appliedSortCategories = unselectedAppliedSortCategories;
         });
       } else {
         this.appliedSortCategories = this.selectedCategories;
