@@ -66,6 +66,18 @@ def parse_query_param(
         }
         ```
 
+    or, if `group_keys_without_values` is set to `False`:
+
+        ```python
+        {
+            "key1": None,
+            "key2": None,
+            "key3": None,
+            "key4": None,
+            "key5": ["value1", "value2", "value3"]
+        }
+        ```
+
     In addition, if a `pydantic.BaseModel` is provided, the dictionary is parsed into an instance of that model:
 
         ```python
