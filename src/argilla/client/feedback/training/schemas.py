@@ -1485,9 +1485,8 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
     def __repr__(self) -> str:
         return (
             f"{self.__class__.__name__}"
-            f"\n\t texts={self.text.name}"
-            f"\n\t label={self.label.question.name}"
-            f"\n\t multi_label={self.__multi_label__}"
+            f"\n\t texts={self.texts.name if self.texts else None}"
+            f"\n\t label={self.label.question.name if self.label else None}"
             f"\n\t all_labels={self.__all_labels__}"
             f"\n\t formatting_funct={self.formatting_func}"
         )
