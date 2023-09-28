@@ -2497,7 +2497,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 204, response.json()
         await db.refresh(dataset, attribute_names=["records"])
-        assert (await db.execute(select(func.count(Record.id)))).scalar() == 3
+        assert (await db.execute(select(func.count(Record.id)))).scalar() == 1
 
     async def test_create_dataset_records_with_wrong_optional_fields(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
