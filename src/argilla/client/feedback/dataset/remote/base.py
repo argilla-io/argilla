@@ -279,7 +279,7 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
         )
         records = [record.to_local() for record in self._records]
 
-        if records:
+        if len(records) > 0:
             instance.add_records(records=records)
 
         return instance
