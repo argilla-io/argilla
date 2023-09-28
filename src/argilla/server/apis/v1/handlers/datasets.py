@@ -21,7 +21,7 @@ from typing_extensions import Annotated
 
 from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_async_db
-from argilla.server.enums import MetadataPropertyType, RecordInclude, ResponseStatusFilter
+from argilla.server.enums import MetadataPropertyType, RecordInclude, ResponseStatusFilter, SortOrder
 from argilla.server.models import Dataset as DatasetModel
 from argilla.server.models import ResponseStatus, User
 from argilla.server.policies import DatasetPolicyV1, authorize
@@ -47,7 +47,6 @@ from argilla.server.schemas.v1.datasets import (
     SearchRecord,
     SearchRecordsQuery,
     SearchRecordsResult,
-    SortByQueryParam,
 )
 from argilla.server.schemas.v1.datasets import Record as RecordSchema
 from argilla.server.search_engine import (
@@ -139,6 +138,9 @@ async def _build_response_status_filter_for_search(
     return user_response_status_filter
 
 
+_VALID_SORT_VALUES = tuple(sort.value for sort in SortOrder)
+
+
 async def _build_sort_by(
     db: "AsyncSession", dataset: Dataset, sort_by_query_param: Optional[Dict[str, str]] = None
 ) -> Union[List[SortBy], None]:
@@ -154,11 +156,23 @@ async def _build_sort_by(
             if not metadata_property:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail=f"Provided metadata property in 'sort_by' query param '{sort_field}' not found in dataset with '{dataset.id}'",
+                    detail=(
+                        f"Provided metadata property in 'sort_by' query param '{sort_field}' not found in dataset with"
+                        f" '{dataset.id}'"
+                    ),
                 )
             field = metadata_property
         else:
             field = sort_field
+
+        if sort_order not in _VALID_SORT_VALUES:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=(
+                    f"Provided sort order in 'sort_by' query param '{sort_order}' for field '{sort_field}' is not"
+                    " valid."
+                ),
+            )
 
         sorts_by.append(SortBy(field=field, order=sort_order or "asc"))
 
@@ -277,7 +291,7 @@ async def list_dataset_metadata_properties(
 
 
 SortByQueryParamParsed = Annotated[
-    SortByQueryParam,
+    Dict[str, str],
     Depends(
         parse_query_param(
             name="sort_by",
@@ -286,7 +300,7 @@ SortByQueryParamParsed = Annotated[
                 " can be 'inserted_at', 'updated_at' or the name of a metadata property"
             ),
             max_values_per_key=1,
-            model=SortByQueryParam,
+            group_keys_without_values=False,
         )
     ),
 ]
@@ -367,7 +381,7 @@ async def list_dataset_records(
             offset=offset,
             response_statuses=response_statuses,
             include=include,
-            sort_by_query_param=sort_by_query_param.parsed,
+            sort_by_query_param=sort_by_query_param,
         )
     else:
         total = None
