@@ -16,11 +16,12 @@ import sys
 import time
 from typing import Union
 
-import argilla as rg
 import pandas as pd
 import requests
-from argilla.labeling.text_classification import Rule, add_rules
 from datasets import load_dataset
+
+import argilla as rg
+from argilla.labeling.text_classification import Rule, add_rules
 
 
 class LoadDatasets:
@@ -217,7 +218,7 @@ class LoadDatasets:
             rg.TermsMetadataProperty(name="correctness-langsmith", values=df.correctness_langsmith.unique().tolist()),
             rg.TermsMetadataProperty(name="model-name", values=df.model_name.unique().tolist()),
             rg.FloatMetadataProperty(name="temperature", min=df.temperature.min(), max=df.temperature.max()),
-            rg.IntegerMetadataFilter(name="max-tokens", min=df.max_tokens.min(), max=df.max_tokens.max()),
+            rg.IntegerMetadataProperty(name="max-tokens", min=df.max_tokens.min(), max=df.max_tokens.max()),
             rg.FloatMetadataProperty(name="cpu-user", min=df.cpu_time_user.min(), max=df.cpu_time_user.max()),
             rg.FloatMetadataProperty(name="cpu-system", min=df.cpu_time_system.min(), max=df.cpu_time_system.max()),
             rg.TermsMetadataProperty(name="library-version", values=df.library_version.unique().tolist()),
