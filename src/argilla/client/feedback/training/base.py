@@ -93,6 +93,13 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 f"Passing a tokenizer is not supported for the {framework} framework.", UserWarning, stacklevel=2
             )
 
+        # Save the model_card arguments if given by the user
+        # TODO(plaguss): document properly the special argument name
+        if model_card_kwargs := framework_kwargs.pop("model_card_kwargs", None):
+            self.model_card_kwargs = model_card_kwargs
+        else:
+            self.model_card_kwargs = {}
+
         if framework is Framework.SETFIT:
             if not isinstance(task, TrainingTaskForTextClassification):
                 raise NotImplementedError(f"{Framework.SETFIT} only supports `TextClassification` tasks.")
@@ -245,6 +252,43 @@ class ArgillaTrainer(ArgillaTrainerV1):
           A list of predictions or Argilla records.
         """
         return self._trainer.predict(text=text, as_argilla_records=False, **kwargs)
+
+    def save(self, output_dir: str, generate_card: bool = False) -> None:
+        """
+        Saves the model to the specified path and optionally generates a `ModelCard` at the same `output_dir`.
+
+        Args:
+            output_dir: The path to the directory where the model will be saved.
+            generate_card: Whether to generate a model card of the `ArgillaTrainer` for the HuggingFace Hub. Defaults
+                to `False`.
+        """
+        super().save(output_dir)
+
+        if generate_card:
+            self.generate_model_card(output_dir)
+
+    def generate_model_card(self, output_dir: str) -> str:
+        """Generate and return a model card string based on the model card data.
+
+        Args:
+            card_data_kwargs:
+                Extra arguments provided by the user when creating the `ArgillaTrainer` like the license
+                or language/s.
+
+        Returns:
+            model_card: The model card string.
+        """
+        from argilla.client.feedback.integrations.huggingface.card import ArgillaModelCard
+
+        model_card = ArgillaModelCard.from_template(
+            card_data=self._trainer.model_card_data(**self.model_card_kwargs),
+            template_path=ArgillaModelCard.default_template_path,
+        )
+        from pathlib import Path
+
+        model_card_path = Path(output_dir) / "MODEL_CARD.md"
+        model_card.save(model_card_path)
+        self._logger.info(f"Model card generated at: {model_card_path}")
 
 
 class ArgillaTrainerSkeleton(ABC):
