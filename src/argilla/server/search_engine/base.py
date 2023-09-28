@@ -13,15 +13,15 @@
 #  limitations under the License.
 
 import dataclasses
-import re
 from abc import ABCMeta, abstractmethod
 from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator, Dict, Iterable, List, Literal, Optional, Union
+from typing import Any, AsyncGenerator, ClassVar, Dict, Generic, Iterable, List, Literal, Optional, Type, TypeVar, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, root_validator
+from pydantic.generics import GenericModel
 
-from argilla.server.enums import ResponseStatus, ResponseStatusFilter
+from argilla.server.enums import MetadataPropertyType, ResponseStatusFilter
 from argilla.server.models import Dataset, MetadataProperty, Record, Response, User
 
 __all__ = [
@@ -35,24 +35,31 @@ __all__ = [
     "SearchResponseItem",
     "SearchResponses",
     "SortBy",
+    "MetadataMetrics",
+    "TermsMetadataMetrics",
+    "IntegerMetadataMetrics",
+    "FloatMetadataMetrics",
 ]
 
 
-@dataclasses.dataclass
-class StringQuery:
+class StringQuery(BaseModel):
     q: str
     field: Optional[str] = None
 
 
-@dataclasses.dataclass
-class UserResponseStatusFilter:
+class UserResponseStatusFilter(BaseModel):
     statuses: List[ResponseStatusFilter]
     user: Optional[User] = None
 
+    class Config:
+        arbitrary_types_allowed = True
 
-@dataclasses.dataclass
-class MetadataFilter:
+
+class MetadataFilter(BaseModel):
     metadata_property: MetadataProperty
+
+    class Config:
+        arbitrary_types_allowed = True
 
     @classmethod
     @abstractmethod
@@ -60,7 +67,6 @@ class MetadataFilter:
         pass
 
 
-@dataclasses.dataclass
 class TermsMetadataFilter(MetadataFilter):
     values: List[str]
 
@@ -69,54 +75,53 @@ class TermsMetadataFilter(MetadataFilter):
         return cls(metadata_property=metadata_property, values=string.split(","))
 
 
-# TODO: transform to `pydantic.BaseModel`
-@dataclasses.dataclass
-class IntegerMetadataFilter(MetadataFilter):
-    low: Optional[int] = None
-    high: Optional[int] = None
-
-    class RangeModel(BaseModel):
-        ge: Optional[int]
-        le: Optional[int]
-
-    def __post_init__(self):
-        if self.low is None and self.high is None:
-            raise ValueError("One of `low` or `high` value must be provided")
-
-    @classmethod
-    def from_string(cls, metadata_property: MetadataProperty, string: str) -> "IntegerMetadataFilter":
-        model = cls.RangeModel.parse_raw(string)
-        return cls(metadata_property, low=model.ge, high=model.le)
+NT = TypeVar("NT", int, float)
 
 
-# TODO: transform to `pydantic.BaseModel`
-@dataclasses.dataclass
-class FloatMetadataFilter(MetadataFilter):
-    low: Optional[float] = None
-    high: Optional[float] = None
+class _RangeModel(GenericModel, Generic[NT]):
+    ge: Optional[NT]
+    le: Optional[NT]
 
-    class RangeModel(BaseModel):
-        ge: Optional[float]
-        le: Optional[float]
 
-    def __post_init__(self):
-        if self.low is None and self.high is None:
-            raise ValueError("One of `low` or `high` value must be provided")
+class NumericMetadataFilter(GenericModel, Generic[NT], MetadataFilter):
+    low: Optional[NT] = None
+    high: Optional[NT] = None
+
+    _range_model: ClassVar[Type[_RangeModel]]
+
+    @root_validator
+    def check_bounds(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        low = values.get("low")
+        high = values.get("high")
+
+        if low is None and high is None:
+            raise ValueError("One of 'low' or 'high' values must be specified")
+
+        if low is not None and high is not None and low > high:
+            raise ValueError(f"'low' ({low}) must be lower or equal than 'high' ({high})")
+
+        return values
 
     @classmethod
-    def from_string(cls, metadata_property: MetadataProperty, string: str) -> "FloatMetadataFilter":
-        model = cls.RangeModel.parse_raw(string)
-        return cls(metadata_property, low=model.ge, high=model.le)
+    def from_string(cls, metadata_property: MetadataProperty, string: str) -> "NumericMetadataFilter":
+        model = cls._range_model.parse_raw(string)
+        return cls(metadata_property=metadata_property, low=model.ge, high=model.le)
 
 
-@dataclasses.dataclass
-class SearchResponseItem:
+class IntegerMetadataFilter(NumericMetadataFilter[int]):
+    _range_model = _RangeModel[int]
+
+
+class FloatMetadataFilter(NumericMetadataFilter[float]):
+    _range_model = _RangeModel[float]
+
+
+class SearchResponseItem(BaseModel):
     record_id: UUID
     score: Optional[float]
 
 
-@dataclasses.dataclass
-class SearchResponses:
+class SearchResponses(BaseModel):
     items: List[SearchResponseItem]
     total: int = 0
 
@@ -127,6 +132,32 @@ class SortBy(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+
+
+class TermsMetadataMetrics(BaseModel):
+    class TermCount(BaseModel):
+        term: str
+        count: int
+
+    type: Literal[MetadataPropertyType.terms] = Field(MetadataPropertyType.terms, const=True)
+    total: int
+    values: List[TermCount] = Field(default_factory=list)
+
+
+class NumericMetadataMetrics(GenericModel, Generic[NT]):
+    min: Optional[NT]
+    max: Optional[NT]
+
+
+class IntegerMetadataMetrics(NumericMetadataMetrics[int]):
+    type: Literal[MetadataPropertyType.integer] = Field(MetadataPropertyType.integer, const=True)
+
+
+class FloatMetadataMetrics(NumericMetadataMetrics[float]):
+    type: Literal[MetadataPropertyType.float] = Field(MetadataPropertyType.float, const=True)
+
+
+MetadataMetrics = Union[TermsMetadataMetrics, IntegerMetadataMetrics, FloatMetadataMetrics]
 
 
 class SearchEngine(metaclass=ABCMeta):
@@ -210,4 +241,8 @@ class SearchEngine(metaclass=ABCMeta):
         limit: int = 100,
         sort_by: List[SortBy] = None,
     ) -> SearchResponses:
+        pass
+
+    @abstractmethod
+    async def compute_metrics_for(self, metadata_property: MetadataProperty) -> MetadataMetrics:
         pass

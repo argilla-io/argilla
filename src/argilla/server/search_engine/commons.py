@@ -34,14 +34,18 @@ from argilla.server.models import (
 )
 from argilla.server.search_engine.base import (
     FloatMetadataFilter,
+    FloatMetadataMetrics,
     IntegerMetadataFilter,
+    IntegerMetadataMetrics,
     MetadataFilter,
+    MetadataMetrics,
     SearchEngine,
     SearchResponseItem,
     SearchResponses,
     SortBy,
     StringQuery,
     TermsMetadataFilter,
+    TermsMetadataMetrics,
     UserResponseStatusFilter,
 )
 
@@ -122,6 +126,15 @@ def _mapping_for_metadata_property(metadata_property: MetadataProperty) -> dict:
         raise ValueError(f"Index configuration for metadata property of type {property_type} cannot be generated")
 
 
+def _aggregation_for_metadata_property(metadata_property: MetadataProperty) -> dict:
+    if metadata_property.type == MetadataPropertyType.terms:
+        return {f"{metadata_property.id}": {"terms": {"field": _mapping_key_for_metadata_property(metadata_property)}}}
+    if metadata_property.type in [MetadataPropertyType.integer, MetadataPropertyType.float]:
+        return {f"{metadata_property.id}": {"stats": {"field": _mapping_key_for_metadata_property(metadata_property)}}}
+    else:
+        raise ValueError(f"Cannot process request for metadata property {metadata_property}")
+
+
 @dataclasses.dataclass
 class BaseElasticAndOpenSearchEngine(SearchEngine):
     """
@@ -137,6 +150,12 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
     The rest of the code will be shared by both implementation
     """
+
+    es_number_of_shards: int
+    es_number_of_replicas: int
+
+    # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-settings.html#search-settings-max-buckets
+    max_terms_size: int = 2 ^ 14
 
     async def create_index(self, dataset: Dataset):
         settings = self._configure_index_settings()
@@ -234,6 +253,47 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         return await self._process_search_response(response)
 
+    async def compute_metrics_for(self, metadata_property: MetadataProperty) -> MetadataMetrics:
+        index_name = await self._get_index_or_raise(metadata_property.dataset)
+
+        if metadata_property.type == MetadataPropertyType.terms:
+            return await self._metrics_for_terms_property(index_name, metadata_property)
+
+        if metadata_property.type in [MetadataPropertyType.float, MetadataPropertyType.integer]:
+            return await self._metrics_for_numeric_property(index_name, metadata_property)
+
+    async def _metrics_for_numeric_property(self, index_name, metadata_property):
+        field_name = _mapping_key_for_metadata_property(metadata_property)
+
+        # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-stats-aggregation.html
+        aggregation_name = "numeric_stats"
+        stats_agg = {aggregation_name: {"stats": {"field": field_name}}}
+
+        response = await self._index_search_request(index_name, query={"match_all": {}}, aggregations=stats_agg, size=0)
+        stats = response["aggregations"][aggregation_name]
+
+        metrics_class = (
+            IntegerMetadataMetrics if metadata_property.type == MetadataPropertyType.integer else FloatMetadataMetrics
+        )
+
+        return metrics_class(min=stats["min"], max=stats["max"])
+
+    async def _metrics_for_terms_property(
+        self, index_name: str, metadata_property: MetadataProperty, query: Optional[dict] = None
+    ) -> TermsMetadataMetrics:
+        field_name = _mapping_key_for_metadata_property(metadata_property)
+        query = query or {"match_all": {}}
+
+        total_terms = await self.__value_count_aggregation(index_name, field_name=field_name, query=query)
+        if total_terms == 0:
+            return TermsMetadataMetrics(total=total_terms)
+
+        terms_buckets = await self.__terms_aggregation(index_name, field_name=field_name, query=query, size=total_terms)
+        terms_values = [
+            TermsMetadataMetrics.TermCount(term=bucket["key"], count=bucket["doc_count"]) for bucket in terms_buckets
+        ]
+        return TermsMetadataMetrics(total=total_terms, values=terms_values)
+
     def _configure_index_mappings(self, dataset: Dataset) -> dict:
         return {
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic.html#dynamic-parameters
@@ -289,6 +349,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
     def _mapping_for_metadata_properties(self, metadata_properties: List[MetadataProperty]) -> dict:
         mappings = {}
+
         for metadata_property in metadata_properties:
             mappings.update(_mapping_for_metadata_property(metadata_property))
 
@@ -392,6 +453,22 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         return ",".join(sort_config)
 
+    async def __terms_aggregation(self, index_name: str, field_name: str, query: dict, size: int) -> List[dict]:
+        aggregation_name = "terms_agg"
+
+        terms_agg = {aggregation_name: {"terms": {"field": field_name, "size": min(size, self.max_terms_size)}}}
+
+        response = await self._index_search_request(index_name, query=query, aggregations=terms_agg, size=0)
+        return response["aggregations"][aggregation_name]["buckets"]
+
+    async def __value_count_aggregation(self, index_name: str, field_name: str, query: dict) -> int:
+        aggregation_name = "count_values"
+
+        value_count_agg = {aggregation_name: {"value_count": {"field": field_name}}}
+
+        response = await self._index_search_request(index_name, query=query, aggregations=value_count_agg, size=0)
+        return response["aggregations"][aggregation_name]["value"]
+
     @abstractmethod
     def _configure_index_settings(self) -> dict:
         """Defines settings configuration for the index. Depending on which backend is used, this may differ"""
@@ -418,7 +495,15 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         pass
 
     @abstractmethod
-    async def _index_search_request(self, index: str, query: dict, size: int, from_: int, sort: str = None) -> dict:
+    async def _index_search_request(
+        self,
+        index: str,
+        query: dict,
+        size: Optional[int] = None,
+        from_: Optional[int] = None,
+        sort: str = None,
+        aggregations: Optional[dict] = None,
+    ) -> dict:
         """Executes request for search documents on a index"""
         pass
 
