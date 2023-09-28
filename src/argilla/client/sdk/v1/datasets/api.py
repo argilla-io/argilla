@@ -242,7 +242,8 @@ def add_records(
             if isinstance(response.get("user_id"), UUID):
                 response["user_id"] = str(response.get("user_id"))
             cleaned_responses.append(response)
-        record["responses"] = cleaned_responses
+        if len(cleaned_responses) > 0:
+            record["responses"] = cleaned_responses
 
         for suggestion in record.get("suggestions", []):
             if isinstance(suggestion.get("question_id"), UUID):
