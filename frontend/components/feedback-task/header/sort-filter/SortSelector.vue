@@ -12,6 +12,7 @@
     <BaseDropdown
       :visible="visibleDropdown"
       @visibility="onToggleVisibility"
+      class="sort-selector__dropdown"
       v-if="nonSelectedSortingItems.length"
     >
       <span slot="dropdown-header">
@@ -83,9 +84,15 @@ export default {
 
 <style lang="scss" scoped>
 .sort-selector {
+  display: flex;
+  flex-direction: column;
+  gap: $base-space;
   padding: $base-space;
-  &__add-button {
-    margin-bottom: $base-space * 2;
+  &__button {
+    margin-top: $base-space * 2;
+  }
+  &__dropdown {
+    margin-left: 36px;
   }
 }
 </style>

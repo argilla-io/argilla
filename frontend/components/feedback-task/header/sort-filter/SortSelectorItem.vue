@@ -10,9 +10,18 @@
         width="14"
         height="14"
     /></BaseButton>
-    <BaseDropdown :visible="visibleDropdown" @visibility="onToggleVisibility">
-      <span slot="dropdown-header">
-        {{ category.name }}
+    <BaseDropdown
+      :visible="visibleDropdown"
+      @visibility="onToggleVisibility"
+      class="sort-selector-item__dropdown"
+    >
+      <span slot="dropdown-header" class="sort-selector-item__dropdown__header">
+        <span
+          class="sort-selector-item__dropdown__header__text"
+          title="category.name"
+          v-text="category.name"
+        />
+        <svgicon width="12" height="12" name="chevron-down" />
       </span>
       <span slot="dropdown-content">
         <SortCategoriesList
@@ -27,8 +36,8 @@
       @click="$emit('change-sort-direction')"
     >
       <svgicon
-        width="24"
-        height="24"
+        width="16"
+        height="16"
         :name="category.sort === 'asc' ? 'arrow-up' : 'arrow-down'"
       />
     </BaseButton>
@@ -39,6 +48,7 @@
 import "assets/icons/close";
 import "assets/icons/arrow-up";
 import "assets/icons/arrow-down";
+import "assets/icons/chevron-down";
 export default {
   props: {
     category: {
@@ -67,6 +77,36 @@ export default {
 .sort-selector-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: $base-space;
+  &__dropdown {
+    width: 100%;
+    min-width: 0;
+    &__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: $base-space;
+      border: 1px solid $black-10;
+      border-radius: $border-radius;
+      cursor: pointer;
+      &__text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .svg-icon {
+        flex-shrink: 0;
+      }
+    }
+  }
+  &__close-button {
+    flex-shrink: 0;
+    padding: $base-space;
+  }
+  &__direction {
+    flex-shrink: 0;
+    padding: $base-space;
+  }
 }
 </style>

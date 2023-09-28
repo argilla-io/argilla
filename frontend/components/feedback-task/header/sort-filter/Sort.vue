@@ -100,7 +100,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$sort-filter-width: 300px;
+$sort-filter-width: 312px;
 .sort-filter {
   &__container {
     display: block;
