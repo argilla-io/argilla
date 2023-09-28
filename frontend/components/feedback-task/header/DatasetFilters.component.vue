@@ -1,17 +1,23 @@
 <template>
   <div class="filters">
-    <SearchBarBase v-model="searchInput" :placeholder="'Introduce a query'" />
-    <MetadataFilter :datasetId="datasetId" />
-    <p class="filters__total-records">{{ totalRecordsInfo }}</p>
-    <StatusFilter
-      class="filters__status"
-      :options="statusOptions"
-      v-model="selectedStatus"
+    <SearchBarBase
+      v-model="searchInput"
+      :placeholder="'Introduce a query'"
+      :additionalInfo="additionalInfoForSearchComponent"
     />
+    <MetadataFilter
+      v-if="!!datasetsMetadata.length"
+      :metadata="datasetsMetadata"
+    />
+    <Sort v-if="!!datasetsMetadata.length" :metadata="datasetsMetadata" />
+    <p class="filters__total-records">{{ totalRecordsInfo }}</p>
+    <StatusFilter class="filters__status" v-model="selectedStatus" />
   </div>
 </template>
 
 <script>
+import { useDatasetsFiltersViewModel } from "./useDatasetsFiltersViewModel";
+
 export default {
   name: "DatasetFiltersComponent",
   props: {
@@ -26,6 +32,12 @@ export default {
       searchInput: null,
       totalRecords: null,
     };
+  },
+  setup() {
+    return useDatasetsFiltersViewModel();
+  },
+  mounted() {
+    this.loadMetadata(this.datasetId);
   },
   beforeMount() {
     this.selectedStatus = this.selectedStatus ?? this.statusFromRoute;
@@ -63,22 +75,6 @@ export default {
       this.$root.$emit("search-filter-changed", searchInput);
     },
   },
-  created() {
-    this.statusOptions = [
-      {
-        id: "pending",
-        name: "Pending",
-      },
-      {
-        id: "submitted",
-        name: "Submitted",
-      },
-      {
-        id: "discarded",
-        name: "Discarded",
-      },
-    ];
-  },
   beforeDestroy() {
     this.$root.$off("reset-status-filter");
     this.$root.$off("reset-search-filter");
@@ -90,7 +86,7 @@ export default {
 <style lang="scss" scoped>
 .filters {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: $base-space * 2;
   align-items: center;
   width: 100%;
@@ -98,12 +94,14 @@ export default {
   &__total-records {
     @include font-size(13px);
     color: $black-37;
+    flex-shrink: 0;
   }
   &__status {
     margin-left: auto;
   }
 }
 .search-area {
-  width: clamp(300px, 30vw, 800px);
+  width: clamp(200px, 25vw, 600px);
+  min-width: 200px;
 }
 </style>

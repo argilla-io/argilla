@@ -28,7 +28,8 @@ export class RecordRepository {
     howMany: number,
     status: string,
     searchText: string,
-    metadata: string[]
+    metadata: string[],
+    sortBy: string[]
   ): Promise<BackedRecords> {
     if (searchText?.length)
       return this.getRecordsByText(
@@ -37,7 +38,8 @@ export class RecordRepository {
         howMany,
         status,
         searchText,
-        metadata
+        metadata,
+        sortBy
       );
 
     return this.getRecordsDatasetId(
@@ -45,7 +47,8 @@ export class RecordRepository {
       fromRecord,
       howMany,
       status,
-      metadata
+      metadata,
+      sortBy
     );
   }
 
@@ -129,12 +132,19 @@ export class RecordRepository {
     fromRecord: number,
     howMany: number,
     status: string,
-    metadata: string[]
+    metadata: string[],
+    sortBy: string[]
   ): Promise<BackedRecords> {
     try {
       const url = `/v1/me/datasets/${datasetId}/records`;
 
-      const params = this.createParams(fromRecord, howMany, status, metadata);
+      const params = this.createParams(
+        fromRecord,
+        howMany,
+        status,
+        metadata,
+        sortBy
+      );
 
       const { data } = await this.axios.get<ResponseWithTotal<BackedRecord[]>>(
         url,
@@ -161,7 +171,8 @@ export class RecordRepository {
     howMany: number,
     status: string,
     searchText: string,
-    metadata: string[]
+    metadata: string[],
+    sortBy: string[]
   ): Promise<BackedRecords> {
     try {
       const url = `/v1/me/datasets/${datasetId}/records/search`;
@@ -176,7 +187,13 @@ export class RecordRepository {
         })
       );
 
-      const params = this.createParams(fromRecord, howMany, status, metadata);
+      const params = this.createParams(
+        fromRecord,
+        howMany,
+        status,
+        metadata,
+        sortBy
+      );
 
       const { data } = await this.axios.post<
         ResponseWithTotal<BackendSearchRecords[]>
@@ -222,7 +239,8 @@ export class RecordRepository {
     fromRecord: number,
     howMany: number,
     status: string,
-    metadata: string[]
+    metadata: string[],
+    sortBy: string[]
   ) {
     const offset = `${fromRecord - 1}`;
     const backendStatus = status === "pending" ? "missing" : status;
@@ -238,6 +256,10 @@ export class RecordRepository {
 
     metadata?.forEach((query) => {
       params.append("metadata", query);
+    });
+
+    sortBy?.forEach((sort) => {
+      params.append("sort_by", sort);
     });
 
     return params;

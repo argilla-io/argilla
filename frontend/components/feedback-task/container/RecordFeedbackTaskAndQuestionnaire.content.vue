@@ -49,6 +49,7 @@ export default {
       recordStatusToFilterWith: null,
       searchTextToFilterWith: null,
       metadataToFilterWith: null,
+      sortBy: null,
       currentPage: null,
       fetching: false,
     };
@@ -80,6 +81,9 @@ export default {
     metadataFilterFromQuery() {
       return this.$route.query?._metadata?.split("+") ?? [];
     },
+    sortByFromQuery() {
+      return this.$route.query?._sort?.split(",") ?? [];
+    },
     pageFromQuery() {
       const { _page } = this.$route.query;
       return isNil(_page) ? 1 : +_page;
@@ -96,7 +100,8 @@ export default {
       this.currentPage,
       this.recordStatusToFilterWith,
       this.searchTextToFilterWith,
-      this.metadataToFilterWith
+      this.metadataToFilterWith,
+      this.sortBy
     );
 
     const isRecordExistForCurrentPage = this.records.existsRecordOn(
@@ -111,7 +116,8 @@ export default {
         this.currentPage,
         this.recordStatusToFilterWith,
         this.searchTextToFilterWith,
-        this.metadataToFilterWith
+        this.metadataToFilterWith,
+        this.sortBy
       );
     }
 
@@ -146,11 +152,21 @@ export default {
 
       await this.routes.removeQueryParam("_metadata");
     },
+    async sortBy(newValue = []) {
+      if (newValue.length)
+        return await this.routes.addQueryParam(
+          { key: "_page", value: this.currentPage },
+          { key: "_sort", value: newValue.join(",") }
+        );
+
+      await this.routes.removeQueryParam("_sort");
+    },
   },
   created() {
     this.recordStatusToFilterWith = this.statusFilterFromQuery;
     this.searchTextToFilterWith = this.searchFilterFromQuery;
     this.metadataToFilterWith = this.metadataFilterFromQuery;
+    this.sortBy = this.sortByFromQuery;
     this.currentPage = this.pageFromQuery;
 
     this.loadMetrics(this.datasetId);
@@ -165,6 +181,7 @@ export default {
     this.$root.$on("status-filter-changed", this.onStatusFilterChanged);
     this.$root.$on("search-filter-changed", this.onSearchFilterChanged);
     this.$root.$on("metadata-filter-changed", this.onMetadataFilterChanged);
+    this.$root.$on("sort-changed", this.onSortChanged);
   },
   methods: {
     emitResetStatusFilter() {
@@ -175,6 +192,9 @@ export default {
     },
     emitResetMetadataFilter() {
       this.$root.$emit("reset-metadata-filter");
+    },
+    emitResetSort() {
+      this.$root.$emit("reset-sort");
     },
     updateTotalRecordsLabel() {
       if (
@@ -275,6 +295,38 @@ export default {
 
       onFilter();
     },
+    onSortChanged(sort) {
+      const self = this;
+      const sortWasChanged =
+        sort.length !== this.sortBy.length ||
+        sort.some((e) => !this.sortBy.includes(e));
+
+      if (!sortWasChanged) return;
+
+      const onFilter = () => {
+        this.sortBy = sort;
+        this.currentPage = 1;
+
+        this.$fetch();
+      };
+
+      if (this.questionFormTouched) {
+        return Notification.dispatch("notify", {
+          message: this.$t("changes_no_submit"),
+          buttonText: this.$t("button.ignore_and_continue"),
+          numberOfChars: 500,
+          type: "warning",
+          async onClick() {
+            onFilter();
+          },
+          onClose() {
+            self.emitResetSort();
+          },
+        });
+      }
+
+      onFilter();
+    },
     onQuestionFormTouched(isTouched) {
       this.questionFormTouched = isTouched;
     },
@@ -291,7 +343,8 @@ export default {
           newPage,
           this.recordStatusToFilterWith,
           this.searchTextToFilterWith,
-          this.metadataToFilterWith
+          this.metadataToFilterWith,
+          this.sortBy
         );
 
         isNextRecordExist = this.records.existsRecordOn(newPage);
@@ -320,6 +373,7 @@ export default {
     this.$root.$off("status-filter-changed");
     this.$root.$off("search-filter-changed");
     this.$root.$off("metadata-filter-changed");
+    this.$root.$off("reset-metadata-filter");
     Notification.dispatch("clear");
   },
   setup() {
