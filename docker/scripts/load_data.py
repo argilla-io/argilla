@@ -255,10 +255,8 @@ if __name__ == "__main__":
                 response = requests.get("http://0.0.0.0:6900/")
                 if response.status_code == 200:
                     ld = LoadDatasets(API_KEY)
-                    # TODO(@frascuchon): Remove these datasets creation
                     ld.load_error_analysis()
                     ld.load_error_analysis_textcat_version()
-                    # END
                     ld.load_feedback_dataset_from_huggingface(
                         repo_id="argilla/databricks-dolly-15k-curated-en",
                         split="train",
