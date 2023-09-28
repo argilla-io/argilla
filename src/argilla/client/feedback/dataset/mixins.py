@@ -477,9 +477,7 @@ class TaskTemplateMixin:
         )
 
     @classmethod
-    def for_translation(
-        cls: Type["FeedbackDataset"], labels: bool = False, use_markdown: bool = False
-    ) -> "FeedbackDataset":
+    def for_translation(cls: Type["FeedbackDataset"], use_markdown: bool = False) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for translation tasks.
         To add items to your dataset, use the "add_item" method.
@@ -492,12 +490,7 @@ class TaskTemplateMixin:
         """
         return cls(
             fields=[TextField(name="text", use_markdown=use_markdown)],
-            questions=[
-                TextQuestion(name="translation", description="Translate the text.")
-                if not labels
-                else TextQuestion(name="translation", description="Translate the text."),
-                LabelQuestion(name="label", labels=labels, description="Choose one of the labels."),
-            ],
+            questions=[TextQuestion(name="translation", description="Translate the text.")],
             guidelines="This is a translation dataset that contains texts. Please translate the text in the text field.",
         )
 
@@ -560,26 +553,20 @@ class TaskTemplateMixin:
 
     @classmethod
     def for_retrieval_augmented_generation(
-        cls: Type["FeedbackDataset"], retrieval_source: bool = False, use_markdown: bool = False
+        cls: Type["FeedbackDataset"], use_markdown: bool = False
     ) -> "FeedbackDataset":
         """
-        You can use this method to create a basic dataset for conversational tasks.
+        You can use this method to create a basic dataset for retrieval augmented generation tasks.
         To add items to your dataset, use the "add_item" method.
 
         Args:
-            system_prompt: Set this parameter to True if you want to add system prompt to your dataset
+            None
 
         Returns:
-            A `FeedbackDataset` object for conversational containing "context" and optional "system_prompt" field and a TextQuestion named "response"
+            A `FeedbackDataset` object for retrieval augmented generation containing "query" and "retrieved_document" fields and a TextQuestion named "response"
         """
         return cls(
             fields=[
-                TextField(name="query", use_markdown=use_markdown),
-                TextField(name="retrieved_document", title="Retrieved Document", use_markdown=use_markdown),
-                TextField(name="retrieval_source", title="Retrieval Source", use_markdown=use_markdown),
-            ]
-            if retrieval_source
-            else [
                 TextField(name="query", use_markdown=use_markdown),
                 TextField(name="retrieved_document", title="Retrieved Document", use_markdown=use_markdown),
             ],
@@ -636,27 +623,6 @@ class TaskTemplateMixin:
                 LabelQuestion(name="preference", labels=["option1", "option2"], description="Choose your preference.")
             ],
             guidelines="This is a preference dataset that contains contexts and options. Please choose the option that you would prefer in the given context.",
-        )
-
-    @classmethod
-    def for_instruction(cls: Type["FeedbackDataset"], use_markdown: bool = False) -> "FeedbackDataset":
-        """
-        You can use this method to create a basic dataset for instruction tasks.
-        To add items to your dataset, use the "add_item" method.
-
-        Args:
-            use_markdown: Set this parameter to True if you want to use markdown in your dataset
-
-        Returns:
-            A `FeedbackDataset` object for instruction containing "instruction", "input" and "output" fields and a TextQuestion named "response"
-        """
-        return cls(
-            fields=[
-                TextField(name="instruction", use_markdown=use_markdown),
-                TextField(name="input", use_markdown=use_markdown, required=False),
-            ],
-            questions=[TextQuestion(name="response", description="Write the response to the instruction.")],
-            guidelines="This is an instruction dataset that contains instructions. Please write the response to the instruction in the response field.",
         )
 
     # ADD ITEM
