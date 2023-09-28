@@ -5,27 +5,17 @@
     }}</BaseButton>
     <svgicon v-else :name="iconName" width="16" height="16" />
     <div class="filter-button__badges" v-if="badges.length">
-      <template v-if="clickable">
-        <FilterBadge
-          class="filter-button__badge"
-          :active-badge="activeBadge === badge && isActive"
-          v-for="badge in visibleBadges"
-          :key="badge"
-          :text="badge"
-          @on-click="onClickOnBadge(badge, $event)"
-          @on-clear="onClickOnClear(badge, $event)"
-        ></FilterBadge>
-      </template>
-      <template v-else>
-        <FilterBadge
-          class="filter-button__badge"
-          :active-badge="activeBadge === badge && isActive"
-          v-for="badge in visibleBadges"
-          :key="badge"
-          :text="badge"
-          @on-clear="onClickOnClear(badge, $event)"
-        ></FilterBadge>
-      </template>
+      <FilterBadge
+        class="filter-button__badge"
+        :active-badge="activeBadge === badge && isActive"
+        v-for="(badge, index) in visibleBadges"
+        :key="badge"
+        :text="`${badge} ${
+          badgesCustomText.length ? badgesCustomText[index] : ''
+        }`"
+        @on-click="clickable ? onClickOnBadge(badge, $event) : null"
+        @on-clear="onClickOnClear(badge, $event)"
+      ></FilterBadge>
       <div
         class="filter-button__badges__collapsed"
         v-if="badges.length > maxVisibleBadges"
@@ -35,16 +25,20 @@
         }"
       >
         <BaseBadge
-          :text="`+ ${badges.length - maxVisibleBadges}`"
+          :text="`${collapsedBadgeText} ${badges.length - maxVisibleBadges}`"
           @on-click="toggleTooltip"
         />
         <FilterTooltip v-if="visibleTooltip" class="metadata-button__tooltip">
           <FilterBadge
             class="badge"
-            v-for="badge in collapsedBadges"
+            v-for="(badge, index) in collapsedBadges"
             :key="badge"
-            :text="badge"
-            @on-click="onClickOnBadge(badge, $event)"
+            :text="`${badge} ${
+              badgesCustomText.length ? badgesCustomText[index] : ''
+            }`"
+            @on-click="
+              clickable ? onClickOnBadge(badge, $event) : onClickOutside($event)
+            "
             @on-clear="onClickOnClear(badge, $event)"
           ></FilterBadge>
         </FilterTooltip>
@@ -75,7 +69,15 @@ export default {
     },
     badges: {
       type: Array,
-      default: [],
+      default: () => [],
+    },
+    badgesCustomText: {
+      type: Array,
+      default: () => [],
+    },
+    collapsedBadgeText: {
+      type: String,
+      default: "+",
     },
     activeBadge: {
       type: String,
