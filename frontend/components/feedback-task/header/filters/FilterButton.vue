@@ -25,7 +25,7 @@
         }"
       >
         <BaseBadge :text="collapsedButtonText" @on-click="toggleTooltip" />
-        <FilterTooltip v-if="visibleTooltip" class="metadata-button__tooltip">
+        <FilterTooltip v-if="visibleTooltip" class="filter-button__tooltip">
           <FilterBadge
             class="badge"
             v-for="(badge, index) in collapsedBadges"
