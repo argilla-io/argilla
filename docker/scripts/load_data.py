@@ -16,12 +16,11 @@ import sys
 import time
 from typing import Union
 
+import argilla as rg
 import pandas as pd
 import requests
-from datasets import load_dataset
-
-import argilla as rg
 from argilla.labeling.text_classification import Rule, add_rules
+from datasets import load_dataset
 
 
 class LoadDatasets:
