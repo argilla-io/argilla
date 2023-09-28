@@ -13,16 +13,20 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import TYPE_CHECKING, List
+from typing import List, TYPE_CHECKING
 from uuid import UUID
 
 import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from argilla import FeedbackRecord
 from argilla.client import api
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.workspaces import Workspace
-
+from argilla.server.models import User as ServerUser
 from tests.factories import (
     DatasetFactory,
     RecordFactory,
@@ -151,3 +155,31 @@ class TestRemoteFeedbackDataset:
         assert isinstance(remote_dataset.url, str)
         assert isinstance(remote_dataset.created_at, datetime)
         assert isinstance(remote_dataset.updated_at, datetime)
+
+    async def test_pull_without_results(
+        self,
+        argilla_user: ServerUser,
+        feedback_dataset_guidelines: str,
+        feedback_dataset_fields: List[AllowedFieldTypes],
+        feedback_dataset_questions: List[AllowedQuestionTypes],
+        feedback_dataset_records: List[FeedbackRecord],
+        db: AsyncSession,
+    ) -> None:
+
+        api.active_api()
+        api.init(api_key=argilla_user.api_key)
+
+        dataset = FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=feedback_dataset_fields,
+            questions=feedback_dataset_questions,
+        )
+        dataset.push_to_argilla(name="test-dataset")
+
+        await db.refresh(argilla_user, attribute_names=["datasets"])
+
+        same_dataset = FeedbackDataset.from_argilla("test-dataset")
+        local_copy = same_dataset.pull()
+
+        assert local_copy is not None
+        assert local_copy.records == []
