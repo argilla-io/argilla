@@ -288,7 +288,6 @@ if __name__ == "__main__":
                 if response.status_code == 200:
                     ld = LoadDatasets(API_KEY)
                     # TODO(@frascuchon): Remove these datasets creation
-                    ld.load_mock_dataset_for_filter_metadata()
                     ld.load_error_analysis()
                     ld.load_error_analysis_textcat_version()
                     # END
