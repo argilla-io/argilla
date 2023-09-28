@@ -335,7 +335,7 @@ async def list_current_user_dataset_records(
             user=current_user,
             response_statuses=response_statuses,
             include=include,
-            sort_by_query_param=sort_by_query_param.parsed,
+            sort_by_query_param=sort_by_query_param or {"inserted_at": "asc"},
         )
     else:
         # TODO(@frascuchon): Compute also total for this case
@@ -381,7 +381,7 @@ async def list_dataset_records(
             offset=offset,
             response_statuses=response_statuses,
             include=include,
-            sort_by_query_param=sort_by_query_param,
+            sort_by_query_param=sort_by_query_param or {"inserted_at": "asc"},
         )
     else:
         total = None
@@ -633,7 +633,7 @@ async def search_dataset_records(
         offset=offset,
         user=current_user,
         response_statuses=response_statuses,
-        sort_by_query_param=sort_by_query_param.parsed,
+        sort_by_query_param=sort_by_query_param,
     )
 
     record_id_score_map = {
