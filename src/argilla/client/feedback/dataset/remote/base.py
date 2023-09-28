@@ -87,11 +87,13 @@ class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
         pass
 
     @abstractmethod
-    def add(self) -> None:
+    def add(
+        self, records: Union["FeedbackRecord", Dict[str, Any], List[Union["FeedbackRecord", Dict[str, Any]]]], **kwargs
+    ) -> None:
         pass
 
     @abstractmethod
-    def delete(self) -> None:
+    def delete(self, records: List[RemoteFeedbackRecord]) -> None:
         pass
 
 
@@ -273,6 +275,7 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
             fields=self.fields,
             questions=self.questions,
             guidelines=self.guidelines,
+            metadata_properties=self.metadata_properties,
         )
         instance.add_records(
             records=[record.to_local() for record in self._records],

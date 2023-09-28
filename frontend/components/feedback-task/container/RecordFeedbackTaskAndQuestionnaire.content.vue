@@ -48,6 +48,7 @@ export default {
       questionFormTouched: false,
       recordStatusToFilterWith: null,
       searchTextToFilterWith: null,
+      metadataToFilterWith: null,
       currentPage: null,
       fetching: false,
     };
@@ -76,6 +77,9 @@ export default {
     searchFilterFromQuery() {
       return this.$route.query?._search ?? "";
     },
+    metadataFilterFromQuery() {
+      return this.$route.query?._metadata?.split("+") ?? [];
+    },
     pageFromQuery() {
       const { _page } = this.$route.query;
       return isNil(_page) ? 1 : +_page;
@@ -91,7 +95,8 @@ export default {
       this.datasetId,
       this.currentPage,
       this.recordStatusToFilterWith,
-      this.searchTextToFilterWith
+      this.searchTextToFilterWith,
+      this.metadataToFilterWith
     );
 
     const isRecordExistForCurrentPage = this.records.existsRecordOn(
@@ -105,52 +110,47 @@ export default {
         this.datasetId,
         this.currentPage,
         this.recordStatusToFilterWith,
-        this.searchTextToFilterWith
+        this.searchTextToFilterWith,
+        this.metadataToFilterWith
       );
     }
 
+    this.updateTotalRecordsLabel();
     this.fetching = false;
   },
   watch: {
     async currentPage(newValue) {
-      // TODO - regroup in a common watcher hover filterParams computed
-      await this.$router.push({
-        path: this.$route.path,
-        query: {
-          ...this.$route.query,
-          _page: newValue,
-          _status: this.recordStatusToFilterWith,
-        },
-      });
+      await this.routes.addQueryParam({ key: "_page", value: newValue });
     },
     async recordStatusToFilterWith(newValue) {
-      // TODO - regroup in a common watcher hover filterParams computed
-      await this.$router.push({
-        path: this.$route.path,
-        query: {
-          ...this.$route.query,
-          _status: newValue,
-          _search: this.searchTextToFilterWith,
-          _page: this.currentPage,
-        },
-      });
+      await this.routes.addQueryParam(
+        { key: "_page", value: this.currentPage },
+        { key: "_status", value: newValue }
+      );
     },
     async searchTextToFilterWith(newValue) {
-      // TODO - regroup in a common watcher hover filterParams computed
-      await this.$router.push({
-        path: this.$route.path,
-        query: {
-          ...this.$route.query,
-          _search: newValue,
-          _status: this.recordStatusToFilterWith,
-          _page: this.currentPage,
-        },
-      });
+      if (newValue)
+        return await this.routes.addQueryParam(
+          { key: "_page", value: this.currentPage },
+          { key: "_search", value: newValue }
+        );
+
+      await this.routes.removeQueryParam("_search");
+    },
+    async metadataToFilterWith(newValue = []) {
+      if (newValue.length)
+        return await this.routes.addQueryParam(
+          { key: "_page", value: this.currentPage },
+          { key: "_metadata", value: newValue.join("+") }
+        );
+
+      await this.routes.removeQueryParam("_metadata");
     },
   },
   created() {
     this.recordStatusToFilterWith = this.statusFilterFromQuery;
     this.searchTextToFilterWith = this.searchFilterFromQuery;
+    this.metadataToFilterWith = this.metadataFilterFromQuery;
     this.currentPage = this.pageFromQuery;
 
     this.loadMetrics(this.datasetId);
@@ -164,46 +164,32 @@ export default {
     });
     this.$root.$on("status-filter-changed", this.onStatusFilterChanged);
     this.$root.$on("search-filter-changed", this.onSearchFilterChanged);
+    this.$root.$on("metadata-filter-changed", this.onMetadataFilterChanged);
   },
   methods: {
-    async applyStatusFilter(status) {
-      this.currentPage = 1;
-      this.recordStatusToFilterWith = status;
-
-      await this.$fetch();
-
-      this.checkAndEmitTotalRecords({
-        searchFilter: this.searchTextToFilterWith,
-        value: this.records.total,
-      });
-    },
-    async applySearchFilter(searchFilter) {
-      this.currentPage = 1;
-      this.searchTextToFilterWith = searchFilter;
-
-      await this.$fetch();
-
-      this.checkAndEmitTotalRecords({
-        searchFilter,
-        value: this.records.total,
-      });
-    },
     emitResetStatusFilter() {
       this.$root.$emit("reset-status-filter");
     },
     emitResetSearchFilter() {
       this.$root.$emit("reset-search-filter");
     },
-    checkAndEmitTotalRecords({ searchFilter, value }) {
-      if (searchFilter?.length) {
-        this.$root.$emit("total-records", value);
-      } else {
-        this.$root.$emit("total-records", null);
-      }
+    emitResetMetadataFilter() {
+      this.$root.$emit("reset-metadata-filter");
     },
-    async onSearchFilterChanged(newSearchValue) {
-      const localApplySearchFilter = this.applySearchFilter;
-      const localEmitResetSearchFilter = this.emitResetSearchFilter;
+    updateTotalRecordsLabel() {
+      if (this.searchTextToFilterWith?.length)
+        return this.$root.$emit("total-records", this.records.total);
+
+      this.$root.$emit("total-records", null);
+    },
+    onSearchFilterChanged(newSearchValue) {
+      const self = this;
+      const onFilter = () => {
+        this.searchTextToFilterWith = newSearchValue;
+        this.currentPage = 1;
+
+        this.$fetch();
+      };
 
       if (
         this.questionFormTouched &&
@@ -215,24 +201,26 @@ export default {
           numberOfChars: 500,
           type: "warning",
           async onClick() {
-            await localApplySearchFilter(newSearchValue);
+            onFilter();
           },
           onClose() {
-            localEmitResetSearchFilter();
+            self.emitResetSearchFilter();
           },
         });
       }
 
-      if (newSearchValue !== this.searchFilterFromQuery)
-        return await this.applySearchFilter(newSearchValue);
+      if (newSearchValue !== this.searchFilterFromQuery) return onFilter();
     },
-    async onStatusFilterChanged(newStatus) {
-      if (this.recordStatusToFilterWith === newStatus) {
-        return;
-      }
+    onStatusFilterChanged(newStatus) {
+      if (this.recordStatusToFilterWith === newStatus) return;
 
-      const localApplyStatusFilter = this.applyStatusFilter;
-      const localEmitResetStatusFilter = this.emitResetStatusFilter;
+      const self = this;
+      const onFilter = () => {
+        this.recordStatusToFilterWith = newStatus;
+        this.currentPage = 1;
+
+        this.$fetch();
+      };
 
       if (this.questionFormTouched) {
         Notification.dispatch("notify", {
@@ -241,15 +229,48 @@ export default {
           numberOfChars: 500,
           type: "warning",
           async onClick() {
-            await localApplyStatusFilter(newStatus);
+            onFilter();
           },
           onClose() {
-            localEmitResetStatusFilter();
+            self.emitResetStatusFilter();
           },
         });
       } else {
-        await this.applyStatusFilter(newStatus);
+        onFilter();
       }
+    },
+    onMetadataFilterChanged(metadata) {
+      const hasOtherFilter =
+        metadata.length !== this.metadataFilterFromQuery.length ||
+        metadata.some((e) => !this.metadataFilterFromQuery.includes(e));
+
+      if (!hasOtherFilter) return;
+
+      const self = this;
+
+      const onFilter = () => {
+        this.metadataToFilterWith = metadata;
+        this.currentPage = 1;
+
+        this.$fetch();
+      };
+
+      if (this.questionFormTouched) {
+        return Notification.dispatch("notify", {
+          message: this.$t("changes_no_submit"),
+          buttonText: this.$t("button.ignore_and_continue"),
+          numberOfChars: 500,
+          type: "warning",
+          async onClick() {
+            onFilter();
+          },
+          onClose() {
+            self.emitResetMetadataFilter();
+          },
+        });
+      }
+
+      onFilter();
     },
     onQuestionFormTouched(isTouched) {
       this.questionFormTouched = isTouched;
@@ -266,7 +287,8 @@ export default {
           this.datasetId,
           newPage,
           this.recordStatusToFilterWith,
-          this.searchTextToFilterWith
+          this.searchTextToFilterWith,
+          this.metadataToFilterWith
         );
 
         isNextRecordExist = this.records.existsRecordOn(newPage);
@@ -293,6 +315,7 @@ export default {
     this.$root.$off("go-to-prev-page");
     this.$root.$off("status-filter-changed");
     this.$root.$off("search-filter-changed");
+    this.$root.$off("metadata-filter-changed");
     Notification.dispatch("clear");
   },
   setup() {

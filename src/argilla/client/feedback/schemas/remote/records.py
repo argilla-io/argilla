@@ -173,8 +173,8 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
                 comparable_suggestion = suggestion.dict(include={"question_name", "type", "score", "value", "agent"})
                 if any(
                     [
-                        comparable_suggestion == suggestion.dict(include=comparable_fields)
-                        for suggestion in existing_suggestions.values()
+                        comparable_suggestion == suggestion_.dict(include=comparable_fields)
+                        for suggestion_ in existing_suggestions.values()
                     ]
                 ):
                     warnings.warn(

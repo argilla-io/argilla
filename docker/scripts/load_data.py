@@ -163,6 +163,7 @@ class LoadDatasets:
 
     @staticmethod
     def load_mock_dataset_for_filter_metadata():
+        print("Loading Mock dataset for metadata properties test")
         import random
 
         import argilla as rg
@@ -192,6 +193,71 @@ class LoadDatasets:
         meta_ds.add_records(records)
         meta_ds.push_to_argilla("dataset-with-metadata-properties")
 
+    @staticmethod
+    def load_meta7():
+        print("Loading Meta 7 dataset")
+        df = pd.read_csv(
+            "https://raw.githubusercontent.com/argilla-io/dataset_examples/main/synthetic_data_1000_records.csv"
+        )
+        df["llm_output"] = df["llm_output"].str.replace("'", '"')
+
+        fields = [
+            rg.TextField(name="user-message-1", use_markdown=True),
+            rg.TextField(name="llm-output", use_markdown=True),
+            rg.TextField(name="ai-message", use_markdown=True, required=False),
+            rg.TextField(name="function-message", use_markdown=True, required=False),
+            rg.TextField(name="system-message", use_markdown=True, required=False),
+            rg.TextField(name="langsmith-url", use_markdown=True, required=False),
+        ]
+
+        questions = [
+            rg.MultiLabelQuestion(
+                name="issue",
+                title="Please categorize the record:",
+                labels=["follow-up needed", "reviewed", "no-repro", "not-helpful", "empty-response", "critical"],
+            ),
+            rg.TextQuestion(name="note", title="Leave a note to describe the issue:", required=False),
+        ]
+
+        metadata = [
+            rg.TermsMetadataProperty(name="correctness-langsmith", values=df.correctness_langsmith.unique().tolist()),
+            rg.TermsMetadataProperty(name="model-name", values=df.model_name.unique().tolist()),
+            rg.FloatMetadataProperty(name="temperature", min=df.temperature.min(), max=df.temperature.max()),
+            rg.FloatMetadataProperty(name="max-tokens", min=df.max_tokens.min(), max=df.max_tokens.max()),
+            rg.FloatMetadataProperty(name="cpu-user", min=df.cpu_time_user.min(), max=df.cpu_time_user.max()),
+            rg.FloatMetadataProperty(name="cpu-system", min=df.cpu_time_system.min(), max=df.cpu_time_system.max()),
+            rg.TermsMetadataProperty(name="library-version", values=df.library_version.unique().tolist()),
+        ]
+
+        def build_record(row):
+            fields = {
+                "user-message-1": row["HumanMessage1"],
+                "llm-output": f"```json\n{row.llm_output}\n```",
+                "ai-message": row["AIMessage"],
+                "function-message": row["FunctionMessage"],
+                "system-message": "You are an AI assistant name ACME",
+                "langsmith-url": f"https://smith.langchain.com/o/{row.parent_id}",
+            }
+            metadata = {
+                "correctness-langsmith": row["correctness_langsmith"],
+                "model-name": row["model_name"],
+                "temperature": row["temperature"],
+                "max-tokens": row["max_tokens"],
+                "cpu-user": row["cpu_time_user"],
+                "cpu-system": row["cpu_time_system"],
+                "library-version": row["library_version"],
+            }
+
+            return rg.FeedbackRecord(fields=fields, metadata=metadata)
+
+        records = [build_record(r) for i, r in df.iterrows()]
+
+        dataset = rg.FeedbackDataset(fields=fields, questions=questions, metadata_properties=metadata)
+
+        dataset.add_records(records[0:100])
+
+        dataset.push_to_argilla(name="meta7", workspace="admin")
+
 
 if __name__ == "__main__":
     API_KEY = sys.argv[1]
@@ -206,9 +272,10 @@ if __name__ == "__main__":
                 response = requests.get("http://0.0.0.0:6900/")
                 if response.status_code == 200:
                     ld = LoadDatasets(API_KEY)
-
+                    # TODO(@frascuchon): Remove these datasets creation
                     ld.load_mock_dataset_for_filter_metadata()
-
+                    ld.load_meta7()
+                    # END TODO
                     ld.load_feedback_dataset_from_huggingface(
                         repo_id="argilla/databricks-dolly-15k-curated-en",
                         split="train",

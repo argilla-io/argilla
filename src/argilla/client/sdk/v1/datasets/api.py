@@ -169,6 +169,7 @@ def get_records(
     offset: int = 0,
     limit: int = 50,
     response_status: Optional[List[FeedbackResponseStatusFilter]] = None,
+    metadata_filters: Optional[List[str]] = None,
 ) -> Response[Union[FeedbackRecordsModel, ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/v1/datasets/{id}/records` endpoint to retrieve a
     list of `FeedbackTask` records.
@@ -180,6 +181,7 @@ def get_records(
         limit: the limit to be used in the pagination. Defaults to 50.
         response_status: the status of the responses to be retrieved. Can either be
             `draft`, `missing`, `discarded`, or `submitted`. Defaults to None.
+        metadata_filters: the metadata filters to be applied to the records. Defaults to None.
 
     Returns:
         A `Response` object containing a `parsed` attribute with the parsed response if the
@@ -191,6 +193,9 @@ def get_records(
 
     if response_status is not None:
         params["response_status"] = response_status
+
+    if metadata_filters is not None:
+        params["metadata"] = metadata_filters
 
     response = client.get(url=url, params=params)
 

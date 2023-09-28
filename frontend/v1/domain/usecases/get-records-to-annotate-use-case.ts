@@ -23,7 +23,8 @@ export class GetRecordsToAnnotateUseCase {
     datasetId: string,
     page: number,
     status: string,
-    searchText: string
+    searchText: string,
+    metadataFilter: string[]
   ): Promise<void> {
     const savedRecords = this.recordsStorage.get();
 
@@ -34,7 +35,8 @@ export class GetRecordsToAnnotateUseCase {
       fromRecord,
       howMany,
       status,
-      searchText
+      searchText,
+      metadataFilter
     );
     const getQuestions = this.questionRepository.getQuestions(datasetId);
     const getFields = this.fieldRepository.getFields(datasetId);

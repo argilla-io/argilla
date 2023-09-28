@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
@@ -67,6 +67,7 @@ from argilla.utils.telemetry import TelemetryClient, get_telemetry_client
 if TYPE_CHECKING:
     from argilla.server.models import Record
     from argilla.server.schemas.v1.datasets import StringQuery
+    from argilla.server.search_engine.base import SearchResponses
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
 LIST_DATASET_RECORDS_LIMIT_LTE = 1000
@@ -175,7 +176,7 @@ async def _get_search_responses(
     user: Optional[User] = None,
     response_statuses: Optional[List[ResponseStatusFilter]] = None,
     sort_by_query_param: Optional[Dict[str, str]] = None,
-):
+) -> "SearchResponses":
     metadata_filters = await _build_metadata_filters(db, dataset, parsed_metadata)
     response_status_filter = await _build_response_status_filter_for_search(response_statuses, user=user)
     sort_by = await _build_sort_by(db, dataset, sort_by_query_param)
@@ -202,7 +203,7 @@ async def _filter_records_using_search_engine(
     response_statuses: Optional[List[ResponseStatusFilter]] = None,
     include: Optional[List[RecordInclude]] = None,
     sort_by_query_param: Optional[Dict[str, str]] = None,
-) -> List["Record"]:
+) -> Tuple[List["Record"], int]:
     search_responses = await _get_search_responses(
         db=db,
         search_engine=search_engine,
@@ -216,7 +217,10 @@ async def _filter_records_using_search_engine(
     )
 
     record_ids = [response.record_id for response in search_responses.items]
-    return await datasets.get_records_by_ids(db=db, dataset_id=dataset.id, record_ids=record_ids, include=include)
+    return (
+        await datasets.get_records_by_ids(db=db, dataset_id=dataset.id, record_ids=record_ids, include=include),
+        search_responses.total,
+    )
 
 
 @router.get("/me/datasets", response_model=Datasets)
@@ -307,7 +311,7 @@ async def list_current_user_dataset_records(
     await authorize(current_user, DatasetPolicyV1.get(dataset))
 
     if metadata.metadata_parsed or sort_by_query_param:
-        records = await _filter_records_using_search_engine(
+        records, total = await _filter_records_using_search_engine(
             db,
             search_engine,
             dataset=dataset,
@@ -320,6 +324,8 @@ async def list_current_user_dataset_records(
             sort_by_query_param=sort_by_query_param.parsed,
         )
     else:
+        # TODO(@frascuchon): Compute also total for this case
+        total = None
         records = await datasets.list_records_by_dataset_id(
             db,
             dataset_id,
@@ -330,7 +336,7 @@ async def list_current_user_dataset_records(
             limit=limit,
         )
 
-    return Records(items=records)
+    return Records(items=records, total=total)
 
 
 @router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
@@ -352,7 +358,7 @@ async def list_dataset_records(
     await authorize(current_user, DatasetPolicyV1.list_dataset_records_with_all_responses(dataset))
 
     if metadata.metadata_parsed or sort_by_query_param:
-        records = await _filter_records_using_search_engine(
+        records, total = await _filter_records_using_search_engine(
             db,
             search_engine,
             dataset=dataset,
@@ -364,11 +370,12 @@ async def list_dataset_records(
             sort_by_query_param=sort_by_query_param.parsed,
         )
     else:
+        total = None
         records = await datasets.list_records_by_dataset_id(
             db, dataset_id, include=include, response_statuses=response_statuses, offset=offset, limit=limit
         )
 
-    return Records(items=records)
+    return Records(items=records, total=total)
 
 
 @router.get("/datasets/{dataset_id}", response_model=Dataset)

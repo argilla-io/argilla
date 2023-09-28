@@ -1,15 +1,13 @@
 <template>
   <div class="filters">
-    <span class="filters__component">
-      <SearchBarBase
-        v-model="searchInput"
-        :placeholder="'Introduce a query'"
-        :additionalInfo="additionalInfoForSearchComponent"
-      />
-    </span>
-    <span class="filters__component">
-      <StatusFilter :options="statusOptions" v-model="selectedStatus" />
-    </span>
+    <SearchBarBase v-model="searchInput" :placeholder="'Introduce a query'" />
+    <MetadataFilter :datasetId="datasetId" />
+    <p class="filters__total-records">{{ totalRecordsInfo }}</p>
+    <StatusFilter
+      class="filters__status"
+      :options="statusOptions"
+      v-model="selectedStatus"
+    />
   </div>
 </template>
 
@@ -44,7 +42,7 @@ export default {
     });
   },
   computed: {
-    additionalInfoForSearchComponent() {
+    totalRecordsInfo() {
       if (!this.totalRecords || this.totalRecords === 0) return null;
 
       if (this.totalRecords === 1) return `${this.totalRecords} record`;
@@ -95,7 +93,15 @@ export default {
   flex-wrap: wrap;
   gap: $base-space * 2;
   align-items: center;
+  width: 100%;
   padding: $base-space * 2 0;
+  &__total-records {
+    @include font-size(13px);
+    color: $black-37;
+  }
+  &__status {
+    margin-left: auto;
+  }
 }
 .search-area {
   width: clamp(300px, 30vw, 800px);
