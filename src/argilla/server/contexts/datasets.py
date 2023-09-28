@@ -498,7 +498,6 @@ def validate_record_fields(dataset: Dataset, fields: Dict[str, Any]):
             raise ValueError(
                 f"Wrong value found for field {field.name!r}. Expected {str.__name__!r}, found {type(value).__name__!r}"
             )
-            )
 
     if fields_copy:
         raise ValueError(f"Error: found fields values for non configured fields: {list(fields_copy.keys())!r}")
