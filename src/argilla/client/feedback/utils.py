@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel
 
 
-def generate_pydantic_schema(fields: List[FieldSchema], name: Optional[str] = "FieldsSchema") -> BaseModel:
+def generate_pydantic_schema_for_fields(fields: List[FieldSchema], name: Optional[str] = "FieldsSchema") -> BaseModel:
     """Generates a `pydantic.BaseModel` schema from a list of `FieldSchema` objects to validate
     the fields of a `FeedbackDataset` object before inserting them.
 
@@ -45,12 +45,12 @@ def generate_pydantic_schema(fields: List[FieldSchema], name: Optional[str] = "F
 
     Examples:
         >>> from argilla.client.feedback.schemas import TextField
-        >>> from argilla.client.feedback.dataset import generate_pydantic_schema
+        >>> from argilla.client.feedback.dataset import generate_pydantic_schema_for_fields
         >>> fields = [
         ...     TextField(name="text", required=True),
         ...     TextField(name="label", required=True),
         ... ]
-        >>> FieldsSchema = generate_pydantic_schema(fields)
+        >>> FieldsSchema = generate_pydantic_schema_for_fields(fields)
         >>> FieldsSchema(text="Hello", label="World")
         FieldsSchema(text='Hello', label='World')
     """

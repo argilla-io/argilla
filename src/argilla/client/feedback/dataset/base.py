@@ -35,7 +35,7 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForTextClassification,
     TrainingTaskTypes,
 )
-from argilla.client.feedback.utils import generate_pydantic_schema
+from argilla.client.feedback.utils import generate_pydantic_schema_for_fields
 from argilla.client.models import Framework
 from argilla.utils.dependency import require_dependencies, requires_dependencies
 
@@ -258,7 +258,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             ValueError: if the `fields` schema does not match the `FeedbackRecord.fields` schema.
         """
         if self._fields_schema is None:
-            self._fields_schema = generate_pydantic_schema(self.fields)
+            self._fields_schema = generate_pydantic_schema_for_fields(self.fields)
 
         for record in records:
             try:
