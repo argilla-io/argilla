@@ -14,6 +14,9 @@ on:
       - "main"
       - "develop"
       - "releases/**"
+    # TODO: remove this after generating demo tags
+    tags:
+      - "**"
   pull_request:
     branches:
       - "main"
