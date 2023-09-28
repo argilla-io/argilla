@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import warnings
 from datetime import datetime
 from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
 
@@ -53,7 +53,13 @@ class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase):
         )
 
     def __len__(self) -> None:
-        raise NotImplementedError("`__len__` does not work for filtered datasets.")
+        warnings.warn(
+            "The `records` of a filtered dataset in Argilla are being lazily loaded"
+            " and len computation may add undesirable extra computation. You can fetch"
+            "records using\n`ds.pull()`\nor iterate over results to know the length of the result:\n"
+            "`records = [r for r in ds.records]\n",
+            stacklevel=1,
+        )
 
     def _fetch_records(self, offset: int, limit: int) -> "FeedbackRecordsModel":
         """Fetches a batch of records from Argilla."""
