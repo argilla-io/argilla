@@ -7,7 +7,9 @@
       :available-categories="nonSelectedSortingItems"
       @clear-category="onClear(category.name)"
       @change-sort-direction="onChangeSortDirection(category.name)"
-      @replace-sort-category="onReplaceSortCategory(category.name)"
+      @replace-sort-category="
+        onReplaceSortCategory(category.name, ...arguments)
+      "
     />
     <BaseDropdown
       :visible="visibleDropdown"
@@ -69,14 +71,17 @@ export default {
     },
     onClear(categoryName) {
       this.sortingItems.unselect(categoryName);
+      if (!this.selectedSortingItems.length) {
+        this.applySorting();
+      }
     },
     onChangeSortDirection(categoryName) {
       this.sortingItems.toggleSort(categoryName);
     },
-    onReplaceSortCategory(categoryName) {
-      this.includeSortCategory(categoryName);
-
-      this.$emit("replace-category-name");
+    onReplaceSortCategory(categoryName, newCategoryName) {
+      this.sortingItems.unselect(categoryName);
+      this.sortingItems.select(newCategoryName);
+      this.visibleDropdown = false;
     },
   },
 };

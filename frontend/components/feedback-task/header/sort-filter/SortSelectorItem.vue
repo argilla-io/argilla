@@ -26,7 +26,7 @@
       <span slot="dropdown-content">
         <SortCategoriesList
           :categories="availableCategories"
-          @include-category="changeCategoryName"
+          @include-category="replaceCategory"
         ></SortCategoriesList>
       </span>
     </BaseDropdown>
@@ -67,8 +67,9 @@ export default {
     onToggleVisibility(value) {
       this.visibleDropdown = value;
     },
-    changeCategoryName() {
-      console.log("change selected category name");
+    replaceCategory(newCategoryName) {
+      this.$emit("replace-sort-category", newCategoryName);
+      this.visibleDropdown = false;
     },
   },
 };
