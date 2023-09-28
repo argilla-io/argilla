@@ -225,7 +225,7 @@ class LoadDatasets:
 
         dataset = rg.FeedbackDataset(fields=fields, questions=questions, metadata_properties=metadata)
         dataset.add_records(records=[LoadDatasets.build_error_analysis_record(row) for _, row in df.iterrows()])
-        dataset.push_to_argilla(name="error-analysis-with-feedback-alpha", workspace="admin")
+        dataset.push_to_argilla(name="error-analysis-with-feedback-alpha")
 
     @staticmethod
     def load_error_analysis_textcat_version():
