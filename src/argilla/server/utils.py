@@ -40,6 +40,7 @@ def parse_query_param(
     max_keys: Optional[int] = None,
     max_values_per_key: Optional[int] = None,
     model: Optional[Type[T]] = None,
+    group_keys_without_values: bool = True,
     **kwargs: Any,
 ) -> Callable[[Optional[List[str]]], Union[Dict[str, Any], T, None]]:
     """Generates a function that can be used as a FastAPI dependency (`fastapi.Depends`) and that parses the values of
@@ -102,7 +103,7 @@ def parse_query_param(
         if isinstance(param_values, str):
             param_values = [param_values]
 
-        parsed_params = defaultdict(list)
+        parsed_params: Dict[str, Any] = defaultdict(list)
         for value in param_values:
             if not PARAM_REGEX.match(value):
                 raise HTTPException(
@@ -111,9 +112,14 @@ def parse_query_param(
                 )
 
             parts = value.split(":")
-            if len(parts) == 1:
+            num_parts = len(parts)
+            if num_parts == 1:
                 parts = parts[0].split(",")
-                parsed_params["keys"].extend(parts)
+                if group_keys_without_values:
+                    parsed_params["keys"].extend(parts)
+                else:
+                    for part in parts:
+                        parsed_params[part] = None
             else:
                 key = parts[0]
                 values = parts[1].split(",")
