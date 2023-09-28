@@ -50,14 +50,14 @@ For quick experimentation, you can jump directly into the next section. If you w
 Once Argilla is running, you can use the UI with the Direct URL you'll find in the "Embed this Space" option (top right). You'll see a URL like this: `https://dvilasuero-argilla-setfit.hf.space`. This URL gives you access to a full-screen, stable Argilla instance, and is the `api_url` for reading and writing datasets using the Argilla Python library.
 
 :::{warning}
-In order to obtain a HF Space direct URL, the space must be set the space to "public" and you can find direct URL in "Embed this Space" menu.
+In order to obtain an HF Space direct URL, the space must be set the space to "public" and you can find the direct URL in the "Embed this Space" menu.
 :::
 
 ![HF_Space_Direct_URL](/_static/reference/webapp/HF_Space_Direct_URL.png)
 
 ### Create your first dataset
 
-If everything went well, you are ready to use the Argilla Python client from an IDE such as Colab, Jupyter, or VS Code.
+If everything goes well, you are ready to use the Argilla Python client from an IDE such as Colab, Jupyter, or VS Code.
 
 If you want a quick step-by-step example, keep reading. If you want an end-to-end tutorial, go to this [tutorial and use Colab or Jupyter](https://docs.argilla.io/en/latest/tutorials/notebooks/training-textclassification-setfit-fewshot.html).
 
@@ -150,23 +150,23 @@ The template space has three users: `owner`, `admin` and `argilla`. The username
 The usernames, passwords, and API keys to upload, read, update, and delete datasets can be configured using the following secrets:
 
 - `OWNER_USERNAME`: The owner username to log in Argilla. The default owner username is `owner`. By setting up
-  a custom username you can use your own username to login into the app.
-- `OWNER_PASSWORD`: This sets a custom password for login into the app with the `owner` username. The default
-  password is `12345678`. By setting up a custom password you can use your own password to login into the app.
+  a custom username you can use your own username to log in to the app.
+- `OWNER_PASSWORD`: This sets a custom password to log in to the app with the `owner` username. The default
+  password is `12345678`. By setting up a custom password you can use your own password to log in to the app.
 - `OWNER_API_KEY`: Argilla provides a Python library to interact with the app (read, write, and update data, log model
   predictions, etc.). If you don't set this variable, the library and your app will use the default API key
   i.e. `owner.apikey`. If you want to secure your app for reading and writing data, we recommend you to set up this
   variable. The API key you choose can be any string of your choice and you can check an online generator if you like.
 - `ADMIN_USERNAME`: The admin username to log in Argilla. The default admin username is `admin`. By setting up
-  a custom username you can use your own username to login into the app.
-- `ADMIN_PASSWORD`: This sets a custom password for login into the app with the `admin` username. The default
-  password is `12345678`. By setting up a custom password you can use your own password to login into the app.
+  a custom username you can use your own username to log in to the app.
+- `ADMIN_PASSWORD`: This sets a custom password to log in to the app with the `admin` username. The default
+  password is `12345678`. By setting up a custom password you can use your own password to log in to the app.
 - `ADMIN_API_KEY`: Argilla provides a Python library to interact with the app (read, write, and update data, log model
   predictions, etc.). If you don't set this variable, the library and your app will use the default API key
   i.e. `admin.apikey`. If you want to secure your app for reading and writing data, we recommend you to set up this
   variable. The API key you choose can be any string of your choice and you can check an online generator if you like.
-- `ANNOTATOR_USERNAME`: The annotator username to login in Argilla. The default annotator username is `argilla`. By setting
-  up a custom username you can use your own username to login into the app.
+- `ANNOTATOR_USERNAME`: The annotator username to log in Argilla. The default annotator username is `argilla`. By setting
+  up a custom username you can use your own username to log in to the app.
 - `ANNOTATOR_PASSWORD`: This sets a custom password to log in to the app with the `argilla` username. The default password
   is `12345678`. By setting up a custom password you can use your own password to log in to the app.
 
