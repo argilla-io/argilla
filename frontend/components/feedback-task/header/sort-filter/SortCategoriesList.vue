@@ -67,6 +67,8 @@ export default {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      @include line-height(16px);
+      font-weight: 400;
     }
     &:hover {
       background: $black-4;
