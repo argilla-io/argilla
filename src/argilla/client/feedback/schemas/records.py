@@ -52,6 +52,10 @@ class ResponseStatus(str, Enum):
     discarded = "discarded"
 
 
+class ResponseStatusFilter(ResponseStatus):
+    missing = "missing"
+
+
 class ResponseSchema(BaseModel):
     """Schema for the `FeedbackRecord` response.
 
