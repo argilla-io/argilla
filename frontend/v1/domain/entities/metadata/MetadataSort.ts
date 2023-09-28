@@ -12,6 +12,7 @@ class MetadataSort {
 
 export class MetadataSortList {
   private metadataSorts: MetadataSort[];
+  private selectedCategories: MetadataSort[] = [];
   constructor(metadata: Metadata[] = []) {
     this.metadataSorts = metadata.map((metadata) => new MetadataSort(metadata));
     this.metadataSorts.push(new MetadataSort({ name: "inserted_at" }));
@@ -19,21 +20,50 @@ export class MetadataSortList {
   }
 
   get selected() {
-    return this.metadataSorts.filter((metadataSort) => metadataSort.selected);
+    return this.selectedCategories;
   }
 
   get noSelected() {
     return this.metadataSorts.filter((metadataSort) => !metadataSort.selected);
   }
 
+  get selectedCategoriesName() {
+    return this.selectedCategories.map((metadataSort) => metadataSort.name);
+  }
+
   select(category: string) {
     const found = this.findByCategory(category);
-    if (found) found.selected = true;
+    if (found) {
+      found.selected = true;
+      this.selectedCategories.push(found);
+    }
   }
 
   unselect(category: string) {
-    const found = this.findByCategory(category);
-    if (found) found.selected = false;
+    const indexOf = this.selectedCategories.findIndex(
+      (metadataSort) => metadataSort.name === category
+    );
+
+    if (indexOf > -1) {
+      this.selectedCategories[indexOf].selected = false;
+      this.selectedCategories.splice(indexOf, 1);
+    }
+  }
+
+  replace(category: string, newCategory: string) {
+    const oldCategory = this.findByCategory(category);
+    oldCategory.selected = false;
+
+    const newCategoryFound = this.findByCategory(newCategory);
+    newCategoryFound.selected = true;
+
+    const indexOf = this.selectedCategories.findIndex(
+      (metadataSort) => metadataSort.name === category
+    );
+
+    if (indexOf > -1) {
+      this.selectedCategories[indexOf] = newCategoryFound;
+    }
   }
 
   toggleSort(category: string) {
@@ -56,6 +86,8 @@ export class MetadataSortList {
       if (found) {
         found.selected = true;
         found.sort = sort as "asc" | "desc";
+
+        this.selectedCategories.push(found);
       }
     });
   }

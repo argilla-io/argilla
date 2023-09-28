@@ -53,9 +53,6 @@ export default {
     selectedSortingItems() {
       return this.metadataSort.selected;
     },
-    selectedCategories() {
-      return this.selectedSortingItems.map((i) => i.name);
-    },
   },
   methods: {
     onSortToggleVisibility(value) {
@@ -73,27 +70,12 @@ export default {
       this.onSortToggleVisibility(false);
       this.$root.$emit("sort-changed", this.metadataSort.convertToRouteParam());
 
-      const newSortBy = this.selectedCategories.filter(
-        (category) => !this.appliedSortCategories.includes(category)
-      );
-
-      let unselectedAppliedSortCategories = this.appliedSortCategories.filter(
-        (category) => this.selectedCategories.includes(category)
-      );
-
-      if (newSortBy.length) {
-        newSortBy.forEach((f) => {
-          unselectedAppliedSortCategories.push(f);
-          this.appliedSortCategories = unselectedAppliedSortCategories;
-        });
-      } else {
-        this.appliedSortCategories = this.selectedCategories;
-      }
+      this.appliedSortCategories = this.metadataSort.selectedCategoriesName;
     },
     updateFiltersFromQueryParams() {
       this.completeByRouteParams();
 
-      this.appliedSortCategories = this.selectedCategories;
+      this.appliedSortCategories = this.metadataSort.selectedCategoriesName;
     },
   },
   mounted() {

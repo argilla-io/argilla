@@ -79,8 +79,7 @@ export default {
       this.sortingItems.toggleSort(categoryName);
     },
     onReplaceSortCategory(categoryName, newCategoryName) {
-      this.sortingItems.unselect(categoryName);
-      this.sortingItems.select(newCategoryName);
+      this.sortingItems.replace(categoryName, newCategoryName);
       this.visibleDropdown = false;
     },
   },
