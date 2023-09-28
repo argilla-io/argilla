@@ -13,11 +13,12 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
 
 from argilla.client.feedback.dataset.remote.base import RemoteFeedbackDatasetBase, RemoteFeedbackRecordsBase
 from argilla.client.feedback.schemas.metadata import MetadataFilters
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
+from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel, FeedbackResponseStatusFilter
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -27,8 +28,6 @@ if TYPE_CHECKING:
     from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
     from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
-    from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
-    from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel, FeedbackResponseStatusFilter
     from argilla.client.workspaces import Workspace
 
 
