@@ -196,7 +196,7 @@ class FeedbackRecord(BaseModel):
 
     """
 
-    fields: Dict[str, str]
+    fields: Dict[str, Union[str, None]]
     metadata: Dict[str, Any] = Field(default_factory=dict)
     responses: List[ResponseSchema] = Field(default_factory=list)
     suggestions: Union[Tuple[SuggestionSchema], List[SuggestionSchema]] = Field(
@@ -244,7 +244,7 @@ class FeedbackRecord(BaseModel):
         to create a `FeedbackRecord` in the `FeedbackDataset`.
         """
         payload = {}
-        payload["fields"] = self.fields
+        payload["fields"] = {key: value for key, value in self.fields.items() if value is not None}
         if self.responses:
             payload["responses"] = [response.to_server_payload() for response in self.responses]
         if self.suggestions and question_name_to_id:
