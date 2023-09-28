@@ -35,13 +35,13 @@ from argilla.server.apis.v0.handlers import (
 )
 from argilla.server.apis.v1.handlers import datasets as datasets_v1
 from argilla.server.apis.v1.handlers import fields as fields_v1
+from argilla.server.apis.v1.handlers import metadata_properties as metadata_properties_v1
 from argilla.server.apis.v1.handlers import questions as questions_v1
 from argilla.server.apis.v1.handlers import records as records_v1
 from argilla.server.apis.v1.handlers import responses as responses_v1
 from argilla.server.apis.v1.handlers import suggestions as suggestions_v1
 from argilla.server.apis.v1.handlers import users as users_v1
 from argilla.server.apis.v1.handlers import workspaces as workspaces_v1
-from argilla.server.apis.v1.handlers import metadata_properties as metadata_properties_v1
 from argilla.server.errors.base_errors import __ALL__
 
 api_router = APIRouter(responses={error.HTTP_STATUS: error.api_documentation() for error in __ALL__})

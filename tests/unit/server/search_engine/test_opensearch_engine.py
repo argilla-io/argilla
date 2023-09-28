@@ -908,7 +908,8 @@ class TestSuiteOpenSearchEngine:
         assert metrics.dict() == expected_metrics
 
     @pytest.mark.parametrize(
-        ("property_type", "expected_metrics"), [
+        ("property_type", "expected_metrics"),
+        [
             (MetadataPropertyType.terms, {"total": 0, "values": []}),
             (MetadataPropertyType.integer, {"min": None, "max": None}),
             (MetadataPropertyType.float, {"min": None, "max": None}),
