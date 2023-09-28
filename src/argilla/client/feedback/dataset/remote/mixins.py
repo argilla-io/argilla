@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import warnings
 from typing import TYPE_CHECKING, Iterator, List, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
@@ -36,10 +37,17 @@ class ArgillaRecordsMixin:
         Returns:
             Either the record of the given index, or a list with the records at the given indexes.
         """
+        try:
+            num_records = len(self)
+        except NotImplementedError:
+            num_records = None
+            if not isinstance(key, int):
+                raise NotImplementedError(f"`key`={key} is not supported for this dataset. Only `int` is supported.")
+
         offsets = []
         limit = None
-        num_records = len(self)
-        if isinstance(key, slice):
+
+        if isinstance(key, slice) and num_records is not None:
             start, stop, step = key.indices(num_records)
             if step is not None and step != 1:
                 raise ValueError("When providing a `slice` just `step=None` or `step=1` are allowed.")
@@ -64,10 +72,11 @@ class ArgillaRecordsMixin:
                     offsets[-1] = stop - (stop % FETCHING_BATCH_SIZE) + 1
                     limits[-1] = (stop % FETCHING_BATCH_SIZE) - 1
         elif isinstance(key, int):
-            if key < 0:
-                key += num_records
-            if key < 0 or key >= num_records:
-                raise IndexError(f"Index {key} is out of range, dataset has {num_records} records.")
+            if num_records is not None:
+                if key < 0:
+                    key += num_records
+                if key < 0 or key >= num_records:
+                    raise IndexError(f"Index {key} is out of range, dataset has {num_records} records.")
             offsets = [key]
             limits = [1]
         else:
@@ -76,6 +85,8 @@ class ArgillaRecordsMixin:
         records = []
         for offset, limit in zip(offsets, limits):
             fetched_records = self._fetch_records(offset=offset, limit=limit)
+            if len(fetched_records.items) == 0:
+                break
             records.extend(
                 [
                     RemoteFeedbackRecord.from_api(
@@ -83,6 +94,10 @@ class ArgillaRecordsMixin:
                     )
                     for record in fetched_records.items
                 ]
+            )
+        if len(records) == 0:
+            raise IndexError(
+                "No records were found in the dataset in Argilla for the given index(es) and/or filter(s) if any."
             )
         return records[0] if isinstance(key, int) else records
 
@@ -94,6 +109,8 @@ class ArgillaRecordsMixin:
         current_batch = 0
         while True:
             batch = self._fetch_records(offset=FETCHING_BATCH_SIZE * current_batch, limit=FETCHING_BATCH_SIZE)
+            if len(batch.items) == 0:
+                break
             for record in batch.items:
                 yield RemoteFeedbackRecord.from_api(
                     record, question_id_to_name=self._question_id_to_name, client=self._client

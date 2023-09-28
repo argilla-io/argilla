@@ -10,6 +10,7 @@
       :metadata="datasetsMetadata"
     />
     <Sort v-if="!!datasetsMetadata.length" :metadata="datasetsMetadata" />
+    <p class="filters__total-records">{{ totalRecordsInfo }}</p>
     <StatusFilter class="filters__status" v-model="selectedStatus" />
   </div>
 </template>
@@ -53,7 +54,7 @@ export default {
     });
   },
   computed: {
-    additionalInfoForSearchComponent() {
+    totalRecordsInfo() {
       if (!this.totalRecords || this.totalRecords === 0) return null;
 
       if (this.totalRecords === 1) return `${this.totalRecords} record`;
@@ -90,6 +91,10 @@ export default {
   align-items: center;
   width: 100%;
   padding: $base-space * 2 0;
+  &__total-records {
+    @include font-size(13px);
+    color: $black-37;
+  }
   &__status {
     margin-left: auto;
   }

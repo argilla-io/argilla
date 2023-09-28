@@ -380,6 +380,8 @@ class Record(BaseModel):
 
 class Records(BaseModel):
     items: List[Record]
+    # TODO(@frascuchon): Make it required once fetch records without metadata filter computes also the total
+    total: Optional[int] = None
 
 
 class UserSubmittedResponseCreate(BaseModel):

@@ -197,7 +197,10 @@ export default {
       this.$root.$emit("reset-sort");
     },
     updateTotalRecordsLabel() {
-      if (this.searchTextToFilterWith?.length)
+      if (
+        this.searchTextToFilterWith?.length ||
+        this.metadataToFilterWith?.length
+      )
         return this.$root.$emit("total-records", this.records.total);
 
       this.$root.$emit("total-records", null);
@@ -357,6 +360,7 @@ export default {
         });
       }
 
+      this.updateTotalRecordsLabel();
       this.fetching = false;
     },
     goToNext() {
