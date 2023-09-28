@@ -9,7 +9,10 @@
           button-name="Sort"
           icon-name="sort"
           :badges="appliedSortCategories"
+          :badges-custom-text="appliedSortCategoriesDirection"
+          :show-button-name-in-collapsed-badge="true"
           @click-on-clear="clearSortCategory"
+          max-visible-badges="0"
         />
       </span>
       <span slot="dropdown-content" class="sort-filter__container">
@@ -52,6 +55,11 @@ export default {
     },
     selectedSortingItems() {
       return this.metadataSort.selected;
+    },
+    appliedSortCategoriesDirection() {
+      return this.metadataSort.selected.map((s) =>
+        s.sort === "asc" ? "↑" : "↓"
+      );
     },
   },
   methods: {

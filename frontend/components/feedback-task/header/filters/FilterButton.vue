@@ -24,10 +24,7 @@
           handler: onClickOutside,
         }"
       >
-        <BaseBadge
-          :text="`${collapsedBadgeText} ${badges.length - maxVisibleBadges}`"
-          @on-click="toggleTooltip"
-        />
+        <BaseBadge :text="collapsedButtonText" @on-click="toggleTooltip" />
         <FilterTooltip v-if="visibleTooltip" class="metadata-button__tooltip">
           <FilterBadge
             class="badge"
@@ -75,9 +72,9 @@ export default {
       type: Array,
       default: () => [],
     },
-    collapsedBadgeText: {
-      type: String,
-      default: "+",
+    showButtonNameInCollapsedBadge: {
+      type: Boolean,
+      default: false,
     },
     activeBadge: {
       type: String,
@@ -105,6 +102,11 @@ export default {
     },
     isButtonActive() {
       return this.isActive || !!this.badges.length;
+    },
+    collapsedButtonText() {
+      return this.showButtonNameInCollapsedBadge
+        ? `${this.buttonName} (${this.badges.length - this.maxVisibleBadges})`
+        : `+ ${this.badges.length - this.maxVisibleBadges}`;
     },
   },
   methods: {
