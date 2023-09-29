@@ -213,7 +213,27 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
     def metadata_properties(
         self,
     ) -> Union[List["AllowedMetadataPropertyTypes"], List["AllowedRemoteMetadataPropertyTypes"]]:
+        """Returns the metadata properties that will be indexed and could be used to filter the dataset."""
         return self._metadata_properties
+
+    def metadata_property_by_name(
+        self, name: str
+    ) -> Union["AllowedMetadataPropertyTypes", "AllowedRemoteMetadataPropertyTypes"]:
+        """Returns the metadata property by name if it exists. Othewise a `ValueError` is raised.
+
+        Args:
+            name: the name of the metadata property to return.
+
+        Raises:
+            ValueError: if the metadata property with the given name does not exist.
+        """
+        for metadata_property in self._metadata_properties:
+            if metadata_property.name == name:
+                return metadata_property
+        raise ValueError(
+            f"Metadata property with name='{name}' not found, available metadata property names are:"
+            f" {', '.join(m.name for m in self._metadata_properties)}"
+        )
 
     def _parse_records(
         self, records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]]
