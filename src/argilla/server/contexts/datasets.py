@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import copy
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
@@ -370,12 +370,15 @@ async def count_records_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> i
     return result.scalar()
 
 
+_EXTRA_METADATA_FLAG = "extra"
+
+
 async def validate_metadata(
     db: "AsyncSession",
     dataset: Dataset,
     metadata: Dict[str, Any],
     metadata_properties_settings: Optional[Dict[str, Union["MetadataPropertySettings", str]]] = None,
-) -> Dict[str, Union["MetadataPropertySettings", str]]:
+) -> Dict[str, Union["MetadataPropertySettings", Literal["extra"]]]:
     if metadata_properties_settings is None:
         metadata_properties_settings = {}
 
@@ -388,7 +391,7 @@ async def validate_metadata(
             # If metadata property does not exists but extra metadata is allowed, then we set a flag value to
             # avoid querying the database again
             if metadata_property is None and dataset.allow_extra_metadata:
-                metadata_property_settings = "extra"
+                metadata_property_settings = _EXTRA_METADATA_FLAG
                 metadata_properties_settings[name] = metadata_property_settings
             elif metadata_property is not None:
                 metadata_property_settings = metadata_property.parsed_settings
@@ -400,7 +403,7 @@ async def validate_metadata(
                 )
 
         # If metadata property is not found and extra metadata is allowed, then we skip the value validation
-        if metadata_property_settings == "extra":
+        if metadata_property_settings == _EXTRA_METADATA_FLAG:
             continue
 
         try:
@@ -418,7 +421,7 @@ async def create_records(
         raise ValueError("Records cannot be created for a non published dataset")
 
     # Cache dictionaries to avoid querying the database multiple times
-    metadata_properties_settings: Dict[str, Union["MetadataPropertySettings", str]] = {}
+    metadata_properties_settings: Dict[str, Union["MetadataPropertySettings", Literal["extra"]]] = {}
 
     records = []
     for record_i, record_create in enumerate(records_create.items):
