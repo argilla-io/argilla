@@ -488,7 +488,7 @@ class Argilla:
         Args:
             name: The dataset name.
             query: An ElasticSearch query with the `query string syntax
-                <https://docs.argilla.io/en/latest/guides/query_datasets.html>`_
+                <https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html>`_
             ids: If provided, deletes dataset records with given ids.
             discard_only: If `True`, matched records won't be deleted. Instead, they will be marked as `Discarded`
             discard_when_forbidden: Only super-user or dataset creator can delete records from a dataset.
@@ -533,7 +533,7 @@ class Argilla:
         Args:
             name: The dataset name.
             query: An ElasticSearch query with the `query string
-                syntax <https://www.elastic.co/guide/en/elasticsearch/reference/7.10/query-dsl-query-string-query.html#query-string-syntax>`_
+                syntax <https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html>`_
             vector: Vector configuration for a semantic search
             ids: If provided, load dataset records with given ids.
             limit: The number of records to retrieve.
