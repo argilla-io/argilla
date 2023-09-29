@@ -87,7 +87,7 @@ class NumericMetadataFilter(GenericModel, Generic[NT], MetadataFilter):
     low: Optional[NT] = None
     high: Optional[NT] = None
 
-    _range_model: ClassVar[Type[_RangeModel]]
+    _json_model: ClassVar[Type[_RangeModel]]
 
     @root_validator
     def check_bounds(cls, values: Dict[str, Any]) -> Dict[str, Any]:
@@ -104,16 +104,16 @@ class NumericMetadataFilter(GenericModel, Generic[NT], MetadataFilter):
 
     @classmethod
     def from_string(cls, metadata_property: MetadataProperty, string: str) -> "NumericMetadataFilter":
-        model = cls._range_model.parse_raw(string)
+        model = cls._json_model.parse_raw(string)
         return cls(metadata_property=metadata_property, low=model.ge, high=model.le)
 
 
 class IntegerMetadataFilter(NumericMetadataFilter[int]):
-    _range_model = _RangeModel[int]
+    _json_model = _RangeModel[int]
 
 
 class FloatMetadataFilter(NumericMetadataFilter[float]):
-    _range_model = _RangeModel[float]
+    _json_model = _RangeModel[float]
 
 
 class SearchResponseItem(BaseModel):
@@ -139,7 +139,7 @@ class TermsMetadataMetrics(BaseModel):
         term: str
         count: int
 
-    type: Literal[MetadataPropertyType.terms] = Field(MetadataPropertyType.terms, const=True)
+    type: MetadataPropertyType = Field(MetadataPropertyType.terms, const=True)
     total: int
     values: List[TermCount] = Field(default_factory=list)
 
@@ -150,11 +150,11 @@ class NumericMetadataMetrics(GenericModel, Generic[NT]):
 
 
 class IntegerMetadataMetrics(NumericMetadataMetrics[int]):
-    type: Literal[MetadataPropertyType.integer] = Field(MetadataPropertyType.integer, const=True)
+    type: MetadataPropertyType = Field(MetadataPropertyType.integer, const=True)
 
 
 class FloatMetadataMetrics(NumericMetadataMetrics[float]):
-    type: Literal[MetadataPropertyType.float] = Field(MetadataPropertyType.float, const=True)
+    type: MetadataPropertyType = Field(MetadataPropertyType.float, const=True)
 
 
 MetadataMetrics = Union[TermsMetadataMetrics, IntegerMetadataMetrics, FloatMetadataMetrics]
