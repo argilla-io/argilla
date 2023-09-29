@@ -533,7 +533,7 @@ class Argilla:
         Args:
             name: The dataset name.
             query: An ElasticSearch query with the `query string
-                syntax <https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html>`_
+                syntax </practical_guides/filter_dataset.md>`_
             vector: Vector configuration for a semantic search
             ids: If provided, load dataset records with given ids.
             limit: The number of records to retrieve.

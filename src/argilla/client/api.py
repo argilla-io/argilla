@@ -273,7 +273,7 @@ def load(
         workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
             env variable ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
         query: An ElasticSearch query with the `query string
-            syntax <https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html>`_
+            syntax </practical_guides/filter_dataset.md>`_
         vector: Vector configuration for a semantic search
         ids: If provided, load dataset records with given ids.
         limit: The number of records to retrieve.
@@ -389,7 +389,7 @@ def delete_records(
         workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
             env variable ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
         query: An ElasticSearch query with the `query string syntax
-            <https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html>`_
+            </practical_guides/filter_dataset.md>`_
         ids: If provided, deletes dataset records with given ids.
         discard_only: If `True`, matched records won't be deleted. Instead, they will be marked as `Discarded`
         discard_when_forbidden: Only super-user or dataset creator can delete records from a dataset.
