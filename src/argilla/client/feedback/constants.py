@@ -12,10 +12,17 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.feedback.schemas.enums import FieldTypes
+from typing import List
+
+from argilla.client.feedback.schemas.enums import FieldTypes, MetadataPropertyTypes
 
 FETCHING_BATCH_SIZE = 250
 PUSHING_BATCH_SIZE = 32
 DELETE_DATASET_RECORDS_MAX_NUMBER = 100
 
 FIELD_TYPE_TO_PYTHON_TYPE = {FieldTypes.text: str}
+METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE = {
+    MetadataPropertyTypes.terms: List[str],
+    MetadataPropertyTypes.integer: int,
+    MetadataPropertyTypes.float: float,
+}
