@@ -483,7 +483,6 @@ class TestSuiteDatasets:
 
         assert response.status_code == 401
 
-
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
     async def test_list_dataset_metadata_properties_as_restricted_user(
         self, async_client: "AsyncClient", role: UserRole
