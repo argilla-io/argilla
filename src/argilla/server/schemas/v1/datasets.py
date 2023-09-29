@@ -89,6 +89,7 @@ class Dataset(BaseModel):
     id: UUID
     name: str
     guidelines: Optional[str]
+    allow_extra_metadata: bool
     status: DatasetStatus
     workspace_id: UUID
     inserted_at: datetime
@@ -116,6 +117,7 @@ DatasetGuidelines = Annotated[
 class DatasetCreate(BaseModel):
     name: DatasetName
     guidelines: Optional[DatasetGuidelines]
+    allow_extra_metadata: bool = True
     workspace_id: UUID
 
 

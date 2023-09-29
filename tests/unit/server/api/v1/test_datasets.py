@@ -1594,7 +1594,12 @@ class TestSuiteDatasets:
 
     async def test_create_dataset(self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
         workspace = await WorkspaceFactory.create()
-        dataset_json = {"name": "name", "guidelines": "guidelines", "workspace_id": str(workspace.id)}
+        dataset_json = {
+            "name": "name",
+            "guidelines": "guidelines",
+            "allow_extra_metadata": False,
+            "workspace_id": str(workspace.id),
+        }
 
         response = await async_client.post("/api/v1/datasets", headers=owner_auth_header, json=dataset_json)
 
@@ -1609,6 +1614,7 @@ class TestSuiteDatasets:
             "id": str(UUID(response_body["id"])),
             "name": "name",
             "guidelines": "guidelines",
+            "allow_extra_metadata": False,
             "status": "draft",
             "workspace_id": str(workspace.id),
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),

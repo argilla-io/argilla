@@ -17,7 +17,7 @@ from typing import Any, List, Optional
 from uuid import UUID
 
 from pydantic import parse_obj_as
-from sqlalchemy import JSON, ForeignKey, Text, UniqueConstraint, and_
+from sqlalchemy import JSON, ForeignKey, Text, UniqueConstraint, and_, sql
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -211,6 +211,7 @@ class Dataset(DatabaseModel):
     name: Mapped[str] = mapped_column(index=True)
     guidelines: Mapped[Optional[str]] = mapped_column(Text)
     status: Mapped[DatasetStatus] = mapped_column(DatasetStatusEnum, default=DatasetStatus.draft, index=True)
+    allow_extra_metadata: Mapped[bool] = mapped_column(default=True, server_default=sql.true())
     workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
 
     workspace: Mapped["Workspace"] = relationship(back_populates="datasets")
