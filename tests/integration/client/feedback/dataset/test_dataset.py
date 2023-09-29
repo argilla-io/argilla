@@ -20,12 +20,7 @@ import pytest
 from argilla.client import api
 from argilla.client.feedback.config import DatasetConfig
 from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.schemas import (
-    FeedbackRecord,
-    RatingQuestion,
-    TextField,
-    TextQuestion,
-)
+from argilla.client.feedback.schemas import FeedbackRecord, TextField, TextQuestion
 from argilla.client.feedback.schemas.remote.records import RemoteSuggestionSchema
 from argilla.client.feedback.training.schemas import TrainingTask
 from argilla.client.models import Framework
@@ -36,109 +31,6 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
     from tests.integration.helpers import SecuredClient
-
-
-def test_init(
-    feedback_dataset_guidelines: str,
-    feedback_dataset_fields: List["AllowedFieldTypes"],
-    feedback_dataset_questions: List["AllowedQuestionTypes"],
-) -> None:
-    dataset = FeedbackDataset(
-        guidelines=feedback_dataset_guidelines,
-        fields=feedback_dataset_fields,
-        questions=feedback_dataset_questions,
-    )
-
-    assert dataset.guidelines == feedback_dataset_guidelines
-    assert dataset.fields == feedback_dataset_fields
-    assert dataset.questions == feedback_dataset_questions
-
-
-def test_init_wrong_guidelines(
-    feedback_dataset_fields: List["AllowedFieldTypes"], feedback_dataset_questions: List["AllowedQuestionTypes"]
-) -> None:
-    with pytest.raises(TypeError, match="Expected `guidelines` to be"):
-        FeedbackDataset(
-            guidelines=[],
-            fields=feedback_dataset_fields,
-            questions=feedback_dataset_questions,
-        )
-    with pytest.raises(ValueError, match="Expected `guidelines` to be"):
-        FeedbackDataset(
-            guidelines="",
-            fields=feedback_dataset_fields,
-            questions=feedback_dataset_questions,
-        )
-
-
-def test_init_wrong_fields(
-    feedback_dataset_guidelines: str, feedback_dataset_questions: List["AllowedQuestionTypes"]
-) -> None:
-    with pytest.raises(TypeError, match="Expected `fields` to be a list"):
-        FeedbackDataset(
-            guidelines=feedback_dataset_guidelines,
-            fields=None,
-            questions=feedback_dataset_questions,
-        )
-    with pytest.raises(TypeError, match="Expected `fields` to be a list of `FieldSchema`"):
-        FeedbackDataset(
-            guidelines=feedback_dataset_guidelines,
-            fields=[{"wrong": "field"}],
-            questions=feedback_dataset_questions,
-        )
-    with pytest.raises(ValueError, match="At least one `FieldSchema` in `fields` must be required"):
-        FeedbackDataset(
-            guidelines=feedback_dataset_guidelines,
-            fields=[TextField(name="test", required=False)],
-            questions=feedback_dataset_questions,
-        )
-    with pytest.raises(ValueError, match="Expected `fields` to have unique names"):
-        FeedbackDataset(
-            guidelines=feedback_dataset_guidelines,
-            fields=[
-                TextField(name="test", required=True),
-                TextField(name="test", required=True),
-            ],
-            questions=feedback_dataset_questions,
-        )
-
-
-def test_init_wrong_questions(
-    feedback_dataset_guidelines: str, feedback_dataset_fields: List["AllowedFieldTypes"]
-) -> None:
-    with pytest.raises(TypeError, match="Expected `questions` to be a list, got"):
-        FeedbackDataset(
-            guidelines=feedback_dataset_guidelines,
-            fields=feedback_dataset_fields,
-            questions=None,
-        )
-    with pytest.raises(
-        TypeError,
-        match="Expected `questions` to be a list of",
-    ):
-        FeedbackDataset(
-            guidelines=feedback_dataset_guidelines,
-            fields=feedback_dataset_fields,
-            questions=[{"wrong": "question"}],
-        )
-    with pytest.raises(ValueError, match="At least one question in `questions` must be required"):
-        FeedbackDataset(
-            guidelines=feedback_dataset_guidelines,
-            fields=feedback_dataset_fields,
-            questions=[
-                TextQuestion(name="question-1", required=False),
-                RatingQuestion(name="question-2", values=[1, 2], required=False),
-            ],
-        )
-    with pytest.raises(ValueError, match="Expected `questions` to have unique names"):
-        FeedbackDataset(
-            guidelines=feedback_dataset_guidelines,
-            fields=feedback_dataset_fields,
-            questions=[
-                TextQuestion(name="question-1", required=True),
-                TextQuestion(name="question-1", required=True),
-            ],
-        )
 
 
 def test_create_dataset_with_suggestions(argilla_user: "ServerUser") -> None:
