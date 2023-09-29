@@ -262,15 +262,13 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         if metadata_property.type in [MetadataPropertyType.float, MetadataPropertyType.integer]:
             return await self._metrics_for_numeric_property(index_name, metadata_property)
 
-    async def _metrics_for_numeric_property(self, index_name, metadata_property):
+    async def _metrics_for_numeric_property(
+        self, index_name: str, metadata_property: MetadataProperty, query: Optional[dict] = None
+    ) -> Union[IntegerMetadataMetrics, FloatMetadataMetrics]:
         field_name = _mapping_key_for_metadata_property(metadata_property)
+        query = query or {"match_all": {}}
 
-        # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-stats-aggregation.html
-        aggregation_name = "numeric_stats"
-        stats_agg = {aggregation_name: {"stats": {"field": field_name}}}
-
-        response = await self._index_search_request(index_name, query={"match_all": {}}, aggregations=stats_agg, size=0)
-        stats = response["aggregations"][aggregation_name]
+        stats = await self.__stats_aggregation(index_name, field_name, query)
 
         metrics_class = (
             IntegerMetadataMetrics if metadata_property.type == MetadataPropertyType.integer else FloatMetadataMetrics
@@ -468,6 +466,15 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         response = await self._index_search_request(index_name, query=query, aggregations=value_count_agg, size=0)
         return response["aggregations"][aggregation_name]["value"]
+
+    async def __stats_aggregation(self, index_name: str, field_name: str, query: dict) -> dict:
+        # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-stats-aggregation.html
+        aggregation_name = f"numeric_stats"
+
+        stats_agg = {aggregation_name: {"stats": {"field": field_name}}}
+
+        response = await self._index_search_request(index_name, query=query, aggregations=stats_agg, size=0)
+        return response["aggregations"][aggregation_name]
 
     @abstractmethod
     def _configure_index_settings(self) -> dict:
