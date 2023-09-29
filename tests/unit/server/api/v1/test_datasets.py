@@ -2677,6 +2677,58 @@ class TestSuiteDatasets:
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
 
+    async def test_create_dataset_metadata_property_with_dataset_ready(
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        mock_search_engine: "SearchEngine",
+        owner_auth_header: dict,
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        metadata_property_json = {
+            "name": "name",
+            "settings": {"type": "terms", "values": ["valueA", "valueB", "valueC"]},
+        }
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
+        )
+
+        assert response.status_code == 201
+        assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
+
+        response_body = response.json()
+        created_metadata_property = await db.get(MetadataProperty, UUID(response_body["id"]))
+
+        assert created_metadata_property
+        assert response_body == {
+            "id": str(UUID(response_body["id"])),
+            "description": None,
+            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
+            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+            **metadata_property_json,
+        }
+
+        mock_search_engine.configure_metadata_property.assert_called_once_with(created_metadata_property)
+
+    async def test_create_dataset_metadata_property_with_dataset_ready_and_search_engine_error(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, db: "AsyncSession", owner_auth_header: dict
+    ):
+        mock_search_engine.configure_metadata_property.side_effect = ValueError("MOCK")
+
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        metadata_property_json = {
+            "name": "name",
+            "settings": {"type": "terms", "values": ["valueA", "valueB", "valueC"]},
+        }
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
+        )
+
+        assert response.status_code == 422
+        assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 0
+
     async def test_create_dataset_metadata_property_as_admin(self, async_client: "AsyncClient", db: "AsyncSession"):
         workspace = await WorkspaceFactory.create()
         admin = await AdminFactory.create(workspaces=[workspace])
