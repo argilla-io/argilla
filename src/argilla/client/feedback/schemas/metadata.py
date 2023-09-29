@@ -13,10 +13,11 @@
 #  limitations under the License.
 
 from abc import ABC, abstractproperty
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel, Extra, Field, root_validator, validator
 
+from argilla.client.feedback.constants import METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
 from argilla.client.feedback.schemas.validators import (
     validate_numeric_metadata_filter_bounds,
@@ -67,6 +68,10 @@ class MetadataPropertySchema(BaseModel, ABC):
             "settings": self.server_settings,
         }
 
+    @abstractproperty
+    def _pydantic_field_with_validator(self) -> Tuple[Dict[str, Tuple[Any, ...]], Dict[str, Callable]]:
+        return ({}, {})
+
 
 class TermsMetadataProperty(MetadataPropertySchema):
     """Schema for the `FeedbackDataset` metadata properties of type `terms`. This kind
@@ -98,6 +103,19 @@ class TermsMetadataProperty(MetadataPropertySchema):
     def server_settings(self) -> Dict[str, Any]:
         return {"type": self.type, "values": self.values}
 
+    def _all_values_exist(self, introduced_value: str) -> None:
+        if introduced_value not in self.values:
+            raise ValueError(
+                f"Provided '{self.name}={introduced_value}' is not valid, only values in {self.values} are allowed."
+            )
+
+    @property
+    def _pydantic_field_with_validator(self) -> Tuple[Dict[str, Tuple[str, ...]], Dict[str, Callable]]:
+        return (
+            {self.name: (str, ...)},
+            {f"{self.name}_validator": validator(self.name, allow_reuse=True)(self._all_values_exist)},
+        )
+
 
 class _NumericMetadataPropertySchema(MetadataPropertySchema):
     """Protected schema for the numeric `FeedbackDataset` metadata properties.
@@ -128,6 +146,19 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
         if self.max is not None:
             settings["max"] = self.max
         return settings
+
+    def _value_in_bounds(self, provided_value: Union[int, float]) -> None:
+        if provided_value > self.max or provided_value < self.min:
+            raise ValueError(
+                f"Provided '{self.name}={provided_value}' is not valid, only values between {self.min} and {self.max} are allowed."
+            )
+
+    @property
+    def _pydantic_field_with_validator(self) -> Tuple[Dict[Union[int, float], Tuple[str, ...]], Dict[str, Callable]]:
+        return (
+            {self.name: (METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE[self.type], ...)},
+            {f"{self.name}_validator": validator(self.name, allow_reuse=True)(self._value_in_bounds)},
+        )
 
 
 class IntegerMetadataProperty(_NumericMetadataPropertySchema):
