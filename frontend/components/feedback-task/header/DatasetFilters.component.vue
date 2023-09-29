@@ -82,7 +82,7 @@ export default {
 <style lang="scss" scoped>
 .filters {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: $base-space * 2;
   align-items: center;
   width: 100%;
@@ -95,9 +95,8 @@ export default {
   &__status {
     margin-left: auto;
   }
-}
-.search-area {
-  width: clamp(200px, 25vw, 600px);
-  min-width: 200px;
+  .search-area {
+    width: clamp(200px, 25vw, 600px);
+  }
 }
 </style>

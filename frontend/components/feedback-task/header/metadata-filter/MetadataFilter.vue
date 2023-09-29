@@ -8,9 +8,7 @@
       @visibility="onMetadataToggleVisibility"
     >
       <span slot="dropdown-header">
-        <FilterButton
-          button-name="Metadata"
-          icon-name="filter"
+        <MetadataButton
           :is-active="visibleDropdown"
           :badges="appliedCategoriesFilters"
           :active-badge="visibleCategory?.name"

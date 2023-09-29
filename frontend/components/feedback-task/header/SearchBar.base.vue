@@ -147,7 +147,7 @@ export default {
 <style lang="scss" scoped>
 .search-area {
   display: flex;
-  min-width: 300px;
+  min-width: 200px;
   align-items: center;
   gap: $base-space * 1.5;
   padding: $base-space * 1.2 $base-space * 1.5;

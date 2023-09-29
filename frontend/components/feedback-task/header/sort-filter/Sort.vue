@@ -5,14 +5,9 @@
       @visibility="onSortToggleVisibility"
     >
       <span slot="dropdown-header">
-        <FilterButton
-          button-name="Sort"
-          icon-name="sort"
-          :badges="appliedSortCategories"
-          :badges-custom-text="appliedSortCategoriesDirection"
-          :show-button-name-in-collapsed-badge="true"
-          @click-on-clear="clearSortCategory"
-          max-visible-badges="0"
+        <SortButton
+          :is-active="visibleDropdown"
+          :active-sort-items="appliedSortCategories"
         />
       </span>
       <span slot="dropdown-content" class="sort-filter__container">
