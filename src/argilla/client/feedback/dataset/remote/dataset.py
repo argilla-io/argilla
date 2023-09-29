@@ -15,6 +15,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
+from pydantic import ValidationError
 from tqdm import trange
 
 from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, PUSHING_BATCH_SIZE
@@ -177,12 +178,36 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         """
         if not response_status and not metadata_filters:
             raise ValueError("At least one of `response_status` or `metadata_filters` must be provided.")
-        if response_status and not isinstance(response_status, list):
-            response_status = [response_status]
-        if metadata_filters and not isinstance(metadata_filters, list):
-            metadata_filters = [metadata_filters]
 
-        #  accessing records later
+        if response_status:
+            if not isinstance(response_status, list):
+                response_status = [response_status]
+            if not all(status in FeedbackResponseStatusFilter for status in response_status):
+                raise ValueError(
+                    f"Invalid `response_status={response_status}` provided, must be one"
+                    f" of: {[arg.value for arg in FeedbackResponseStatusFilter]}"
+                )
+
+        if metadata_filters:
+            if not isinstance(metadata_filters, list):
+                metadata_filters = [metadata_filters]
+            if not all(
+                metadata_filter in [metadata_property.name for metadata_property in self.metadata_properties]
+                for metadata_filter in metadata_filters
+            ):
+                raise ValueError(
+                    f"Invalid `metadata_filters={metadata_filters}` provided, must be one"
+                    f" of: {[metadata_property.name for metadata_property in self.metadata_properties]}"
+                )
+            for metadata_filter in metadata_filters:
+                metadata_property = self.metadata_property_by_name(name=metadata_filter.name)
+                try:
+                    metadata_property._validate_filter(metadata_filter=metadata_filter)
+                except ValidationError as e:
+                    raise ValueError(
+                        f"Invalid `metadata_filter={metadata_filter}` provided for `metadata_property={metadata_property.name}`."
+                    ) from e
+
         return FilteredRemoteFeedbackDataset(
             client=self._client,
             id=self.id,
