@@ -19,29 +19,35 @@ from pydantic import BaseModel, Extra, create_model
 from argilla.client.api import active_client
 from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
-from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.workspaces import Workspace
 
 if TYPE_CHECKING:
     import httpx
 
+    from argilla.client.feedback.schemas.types import (
+        AllowedFieldTypes,
+        AllowedMetadataPropertyTypes,
+        AllowedRemoteFieldTypes,
+        AllowedRemoteMetadataPropertyTypes,
+    )
     from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel
 
 
 def generate_pydantic_schema_for_fields(
-    fields: List[AllowedFieldTypes], name: Optional[str] = "FieldsSchema"
+    fields: List[Union["AllowedFieldTypes", "AllowedRemoteFieldTypes"]], name: Optional[str] = "FieldsSchema"
 ) -> BaseModel:
-    """Generates a `pydantic.BaseModel` schema from a list of `AllowedFieldTypes` objects to validate
-    the fields of a `FeedbackDataset` object before inserting them.
+    """Generates a `pydantic.BaseModel` schema from a list of `AllowedFieldTypes` or `AllowedRemoteFieldTypes`
+    objects to validate the fields of a `FeedbackDataset` or `RemoteFeedbackDataset` object, respectively,
+    before inserting them.
 
     Args:
-        fields: the list of `AllowedFieldTypes` objects to generate the schema from.
+        fields: the list of `AllowedFieldTypes` or `AllowedRemoteFieldTypes` objects to generate the schema from.
         name: the name of the `pydantic.BaseModel` schema to generate. Defaults to "FieldsSchema".
 
     Returns:
-        A `pydantic.BaseModel` schema to validate the fields of a `FeedbackDataset` object before
-        inserting them.
+        A `pydantic.BaseModel` schema to validate the fields of a `FeedbackDataset` or `RemoteFeedbackDataset`
+        object before inserting them.
 
     Raises:
         ValueError: if one of the fields has an unsupported type.
@@ -69,18 +75,21 @@ def generate_pydantic_schema_for_fields(
 
 
 def generate_pydantic_schema_for_metadata(
-    metadata_properties: List[AllowedMetadataPropertyTypes], name: Optional[str] = "MetadataSchema"
+    metadata_properties: List[Union["AllowedMetadataPropertyTypes", "AllowedRemoteMetadataPropertyTypes"]],
+    name: Optional[str] = "MetadataSchema",
 ) -> BaseModel:
-    """Generates a `pydantic.BaseModel` schema from a list of `AllowedMetadataPropertyTypes` objects to validate
-    the metadata of a `FeedbackDataset` object before inserting them.
+    """Generates a `pydantic.BaseModel` schema from a list of `AllowedMetadataPropertyTypes` or
+    `AllowedRemoteMetadataPropertyTypes` objects to validate the metadata of a `FeedbackDataset`
+    or `RemoteFeedbackDataset` object, respectively, before inserting them.
 
     Args:
-        metadata_properties: the list of `AllowedMetadataPropertyTypes` objects to generate the schema from.
+        metadata_properties: the list of `AllowedMetadataPropertyTypes` or `AllowedRemoteMetadataPropertyTypes`
+            objects to generate the schema from.
         name: the name of the `pydantic.BaseModel` schema to generate. Defaults to "MetadataSchema".
 
     Returns:
-        A `pydantic.BaseModel` schema to validate the metadata of a `FeedbackDataset` object before
-        inserting them.
+        A `pydantic.BaseModel` schema to validate the metadata of a `FeedbackDataset` or `RemoteFeedbackDataset`
+        object before inserting them.
 
     Raises:
         ValueError: if one of the metadata properties has an unsupported type.
