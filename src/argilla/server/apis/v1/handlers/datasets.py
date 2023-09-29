@@ -150,7 +150,9 @@ async def _build_sort_by(
 
     sorts_by = []
     for sort_field, sort_order in sort_by_query_param.items():
-        if sort_field not in _RECORD_SORT_FIELD_VALUES:
+        if sort_field in _RECORD_SORT_FIELD_VALUES:
+            field = sort_field
+        else:
             metadata_property = await datasets.get_metadata_property_by_name_and_dataset_id(
                 db, name=sort_field, dataset_id=dataset.id
             )
@@ -163,8 +165,6 @@ async def _build_sort_by(
                     ),
                 )
             field = metadata_property
-        else:
-            field = sort_field
 
         if sort_order not in _VALID_SORT_VALUES:
             raise HTTPException(
@@ -175,7 +175,7 @@ async def _build_sort_by(
                 ),
             )
 
-        sorts_by.append(SortBy(field=field, order=sort_order or "asc"))
+        sorts_by.append(SortBy(field=field, order=sort_order or SortOrder.asc.value))
 
     return sorts_by
 
