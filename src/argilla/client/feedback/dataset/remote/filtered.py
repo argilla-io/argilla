@@ -53,7 +53,7 @@ class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase):
             [metadata_filter.query_string for metadata_filter in metadata_filters] if metadata_filters else None
         )
 
-    def __len__(self) -> None:
+    def __len__(self) -> int:
         warnings.warn(
             "The `records` of a filtered dataset in Argilla are being lazily loaded"
             " and len computation may add undesirable extra computation. You can fetch"
@@ -61,6 +61,7 @@ class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase):
             "`records = [r for r in ds.records]\n",
             stacklevel=1,
         )
+        return 0
 
     def _fetch_records(self, offset: int, limit: int) -> "FeedbackRecordsModel":
         """Fetches a batch of records from Argilla."""

@@ -8,7 +8,9 @@
       @visibility="onMetadataToggleVisibility"
     >
       <span slot="dropdown-header">
-        <MetadataButton
+        <FilterButton
+          button-name="Metadata"
+          icon-name="filter"
           :is-active="visibleDropdown"
           :badges="appliedCategoriesFilters"
           :active-badge="visibleCategory?.name"
@@ -61,8 +63,8 @@ import "assets/icons/chevron-left";
 
 export default {
   props: {
-    datasetId: {
-      type: String,
+    metadata: {
+      type: Array,
       required: true,
     },
   },
@@ -136,13 +138,11 @@ export default {
       }
     },
   },
-  async mounted() {
-    await this.getMetadataFilters(this.datasetId);
-
+  mounted() {
     this.updateFiltersFromQueryParams();
   },
-  setup() {
-    return useMetadataFilterViewModel();
+  setup(props) {
+    return useMetadataFilterViewModel(props);
   },
 };
 </script>

@@ -1,17 +1,15 @@
 import { useRoute } from "@nuxtjs/composition-api";
-import { useResolve } from "ts-injecty";
 import { ref } from "vue-demi";
+import { Metadata } from "~/v1/domain/entities/metadata/Metadata";
 import { MetadataFilter } from "~/v1/domain/entities/metadata/MetadataFilter";
-import { GetMetadataFiltersUseCase } from "~/v1/domain/usecases/get-metadata-filters-use-case";
 
-export const useMetadataFilterViewModel = () => {
+export const useMetadataFilterViewModel = ({
+  metadata,
+}: {
+  metadata: Metadata[];
+}) => {
   const router = useRoute();
-  const metadataFilters = ref<MetadataFilter>();
-  const filterMetaDataUseCase = useResolve(GetMetadataFiltersUseCase);
-
-  const getMetadataFilters = async (datasetId: string) => {
-    metadataFilters.value = await filterMetaDataUseCase.execute(datasetId);
-  };
+  const metadataFilters = ref<MetadataFilter>(new MetadataFilter(metadata));
 
   const completeByRouteParams = () => {
     if (!metadataFilters.value) return;
@@ -21,5 +19,5 @@ export const useMetadataFilterViewModel = () => {
     );
   };
 
-  return { metadataFilters, getMetadataFilters, completeByRouteParams };
+  return { metadataFilters, completeByRouteParams };
 };

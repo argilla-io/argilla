@@ -1,45 +1,48 @@
 <template>
-  <div :class="isButtonActive ? 'metadata-button--active' : 'metadata-button'">
-    <BaseButton class="metadata-button__button" v-if="!badges.length"
-      >Metadata</BaseButton
-    >
-    <svgicon v-else name="filter" width="16" height="16" />
-    <div class="metadata-button__badges" v-if="badges.length">
+  <div :class="isButtonActive ? 'filter-button--active' : 'filter-button'">
+    <BaseButton class="filter-button__button" v-if="!badges.length">{{
+      buttonName
+    }}</BaseButton>
+    <svgicon v-else :name="iconName" width="16" height="16" />
+    <div class="filter-button__badges" v-if="badges.length">
       <FilterBadge
-        class="metadata-button__badge"
+        class="filter-button__badge"
         :active-badge="activeBadge === badge && isActive"
-        v-for="badge in visibleBadges"
+        v-for="(badge, index) in visibleBadges"
         :key="badge"
-        :text="badge"
-        @on-click="onClickOnBadge(badge, $event)"
+        :text="`${badge} ${
+          badgesCustomText.length ? badgesCustomText[index] : ''
+        }`"
+        @on-click="clickable ? onClickOnBadge(badge, $event) : null"
         @on-clear="onClickOnClear(badge, $event)"
       ></FilterBadge>
       <div
-        class="metadata-button__badges__collapsed"
+        class="filter-button__badges__collapsed"
         v-if="badges.length > maxVisibleBadges"
         v-click-outside="{
           events: ['mousedown'],
           handler: onClickOutside,
         }"
       >
-        <BaseBadge
-          :text="`+ ${badges.length - maxVisibleBadges}`"
-          @on-click="toggleTooltip"
-        />
-        <FilterTooltip v-if="visibleTooltip" class="metadata-button__tooltip">
+        <BaseBadge :text="collapsedButtonText" @on-click="toggleTooltip" />
+        <FilterTooltip v-if="visibleTooltip" class="filter-button__tooltip">
           <FilterBadge
             class="badge"
-            v-for="badge in collapsedBadges"
+            v-for="(badge, index) in collapsedBadges"
             :key="badge"
-            :text="badge"
-            @on-click="onClickOnBadge(badge, $event)"
+            :text="`${badge} ${
+              badgesCustomText.length ? badgesCustomText[index] : ''
+            }`"
+            @on-click="
+              clickable ? onClickOnBadge(badge, $event) : onClickOutside($event)
+            "
             @on-clear="onClickOnClear(badge, $event)"
           ></FilterBadge>
         </FilterTooltip>
       </div>
     </div>
     <svgicon
-      class="metadata-button__chevron"
+      class="filter-button__chevron"
       name="chevron-down"
       width="16"
       height="16"
@@ -50,11 +53,28 @@
 <script>
 import "assets/icons/chevron-down";
 import "assets/icons/filter";
+import "assets/icons/sort";
 export default {
   props: {
+    buttonName: {
+      type: String,
+      required: true,
+    },
+    iconName: {
+      type: String,
+      required: true,
+    },
     badges: {
       type: Array,
-      default: [],
+      default: () => [],
+    },
+    badgesCustomText: {
+      type: Array,
+      default: () => [],
+    },
+    showButtonNameInCollapsedBadge: {
+      type: Boolean,
+      default: false,
     },
     activeBadge: {
       type: String,
@@ -70,6 +90,7 @@ export default {
   data() {
     return {
       visibleTooltip: false,
+      clickable: false,
     };
   },
   computed: {
@@ -81,6 +102,11 @@ export default {
     },
     isButtonActive() {
       return this.isActive || !!this.badges.length;
+    },
+    collapsedButtonText() {
+      return this.showButtonNameInCollapsedBadge
+        ? `${this.buttonName} (${this.badges.length - this.maxVisibleBadges})`
+        : `+ ${this.badges.length - this.maxVisibleBadges}`;
     },
   },
   methods: {
@@ -102,11 +128,16 @@ export default {
       this.visibleTooltip = false;
     },
   },
+  mounted() {
+    if (this.$listeners["click-on-badge"]) {
+      this.clickable = true;
+    }
+  },
 };
 </script>
 
 <styles lang="scss" scoped>
-.metadata-button {
+.filter-button {
   display: flex;
   gap: $base-space;
   align-items: center;
@@ -119,7 +150,7 @@ export default {
   &:hover,
   &--active {
     background: $black-4;
-    @extend .metadata-button;
+    @extend .filter-button;
   }
   &--active {
     &:hover {

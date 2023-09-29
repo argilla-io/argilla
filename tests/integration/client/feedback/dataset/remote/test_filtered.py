@@ -28,9 +28,12 @@ from argilla.client.feedback.schemas.metadata import (
 )
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
+from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
 from argilla.client.workspaces import Workspace
+from argilla.server.models import User
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.factories import (
     DatasetFactory,
@@ -70,6 +73,34 @@ class TestFilteredRemoteFeedbackDataset:
         assert isinstance(filtered_dataset, FilteredRemoteFeedbackDataset)
         assert isinstance(filtered_dataset.records, FilteredRemoteFeedbackRecords)
         assert all([isinstance(record, RemoteFeedbackRecord) for record in filtered_dataset.records])
+
+    async def test_filter_by_response_status_without_results(
+        self,
+        argilla_user: User,
+        feedback_dataset_guidelines: str,
+        feedback_dataset_fields: List[AllowedFieldTypes],
+        feedback_dataset_questions: List[AllowedQuestionTypes],
+        feedback_dataset_records: List[FeedbackRecord],
+        db: AsyncSession,
+    ) -> None:
+        api.active_api()
+        api.init(api_key=argilla_user.api_key)
+
+        dataset = FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=feedback_dataset_fields,
+            questions=feedback_dataset_questions,
+        )
+        dataset.add_records(records=feedback_dataset_records)
+        dataset.push_to_argilla(name="test-dataset")
+
+        await db.refresh(argilla_user, attribute_names=["datasets"])
+
+        same_dataset = FeedbackDataset.from_argilla("test-dataset")
+        filtered_dataset = same_dataset.filter_by(response_status=FeedbackResponseStatusFilter.draft).pull()
+
+        assert filtered_dataset is not None
+        assert filtered_dataset.records == []
 
     # TODO: check why the metadata filters are not working from the tests, most likely because the metadata is not indexed
 

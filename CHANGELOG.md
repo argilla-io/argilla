@@ -23,10 +23,17 @@ These are the section headers that we use:
 - Added `TermsMetadataProperty`, `IntegerMetadataProperty` and `FloatMetadataProperty` classes allowing to define metadata properties for a `FeedbackDataset` ([#3818](https://github.com/argilla-io/argilla/pull/3818)).
 - Added `metadata_filters` to `filter_by` method in `RemoteFeedbackDataset` to filter based on metadata i.e. `TermsMetadataFilter`, `IntegerMetadataFilter`, and `FloatMetadataFilter` ([#3834](https://github.com/argilla-io/argilla/pull/3834)).
 - Added a validation layer for both `metadata_properties` and `metadata_filters` in their schemas and as part of the `add_records` and `filter_by` methods, respectively ([#3860](https://github.com/argilla-io/argilla/pull/3860)).
+- Added `sort_by` query parameter to listing records endpoints that allows to sort the records by `inserted_at`, `updated_at` or metadata property ([#3843](https://github.com/argilla-io/argilla/pull/3843)).
 
 ### Changed
 
 - Updated `Dockerfile` to use multi stage build ([#3221](https://github.com/argilla-io/argilla/pull/3221) and [#3793](https://github.com/argilla-io/argilla/pull/3793)).
+
+### Fixed
+
+- Fixed allow pull datasets without records ([#3851](https://github.com/argilla-io/argilla/pull/3851))
+- Updated active learning for text classification notebooks to pass ids of type int to `TextClassificationRecord` ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
+- Fixed record fields validation that was preventing from logging records with optional fields (i.e. `required=True`) when the field value was `None` ([#3846](https://github.com/argilla-io/argilla/pull/3846)).
 
 ## [1.16.0](https://github.com/argilla-io/argilla/compare/v1.15.1...v1.16.0)
 
