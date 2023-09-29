@@ -5,10 +5,10 @@
     :show-icon="!!activeSortItemsCounter"
     :is-button-active="isButtonActive"
   >
-    <BaseBadge
-      class="sort-button__badge"
+    <span
+      class="sort-button__text"
       v-if="activeSortItemsCounter"
-      :text="`Sort (${activeSortItemsCounter})`"
+      v-text="`Sort (${activeSortItemsCounter})`"
     />
   </FilterButton>
 </template>
@@ -38,12 +38,9 @@ export default {
 </script>
 <style lang="scss" scoped>
 .sort-button {
-  &__badge {
-    max-width: 140px;
-    background: $black-4;
-    border: none;
+  &__text {
+    @include font-size(13px);
     font-weight: 500;
-    @include line-height(16px);
   }
 }
 </style>

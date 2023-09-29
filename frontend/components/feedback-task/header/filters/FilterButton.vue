@@ -46,7 +46,7 @@ export default {
   align-items: center;
   width: max-content;
   height: $base-space * 5;
-  padding: $base-space $base-space * 2;
+  padding: $base-space 12px;
   border-radius: $border-radius;
   background: none;
   transition: background-color 0.2s ease;

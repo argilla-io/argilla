@@ -14,7 +14,6 @@
     <BaseDropdown
       :visible="visibleDropdown"
       @visibility="onToggleVisibility"
-      class="sort-selector__dropdown"
       v-if="nonSelectedSortingItems.length"
     >
       <span slot="dropdown-header">
@@ -94,9 +93,6 @@ export default {
   padding: $base-space;
   &__button {
     margin-top: $base-space * 2;
-  }
-  &__dropdown {
-    margin-left: 36px;
   }
 }
 </style>

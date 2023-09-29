@@ -1,15 +1,5 @@
 <template>
   <div class="sort-selector-item">
-    <BaseButton
-      class="sort-selector-item__close-button"
-      @click="$emit('clear-category')"
-    >
-      <svgicon
-        class="sort-selector-item__close-button__icon"
-        name="close"
-        width="14"
-        height="14"
-    /></BaseButton>
     <BaseDropdown
       :visible="visibleDropdown"
       @visibility="onToggleVisibility"
@@ -32,7 +22,7 @@
     </BaseDropdown>
     <BaseButton
       title="sort direction"
-      class="sort-selector-item__direction secondary light"
+      class="sort-selector-item__direction secondary clear"
       @click="$emit('change-sort-direction')"
     >
       <svgicon
@@ -41,6 +31,16 @@
         :name="category.sort === 'asc' ? 'arrow-up' : 'arrow-down'"
       />
     </BaseButton>
+    <BaseButton
+      class="sort-selector-item__close-button secondary clear"
+      @click="$emit('clear-category')"
+    >
+      <svgicon
+        class="sort-selector-item__close-button__icon"
+        name="close"
+        width="14"
+        height="14"
+    /></BaseButton>
   </div>
 </template>
 
