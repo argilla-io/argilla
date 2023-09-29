@@ -424,7 +424,9 @@ class RecordCreate(BaseModel):
 
 
 class RecordsCreate(BaseModel):
-    items: conlist(item_type=RecordCreate, min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
+    items: List[RecordCreate] = PydanticField(
+        ..., min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS
+    )
 
 
 NT = TypeVar("NT", int, float)

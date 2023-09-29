@@ -24,6 +24,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from argilla.server.enums import DatasetStatus, MetadataPropertyType, ResponseStatus, SuggestionType, UserRole
 from argilla.server.models.base import DatabaseModel
+from argilla.server.models.metadata_properties import MetadataPropertySettings
 from argilla.server.models.questions import QuestionSettings
 
 # Include here the data model ref to be accessible for automatic alembic migration scripts
@@ -193,6 +194,10 @@ class MetadataProperty(DatabaseModel):
     dataset: Mapped["Dataset"] = relationship(back_populates="metadata_properties")
 
     __table_args__ = (UniqueConstraint("name", "dataset_id", name="metadata_property_name_dataset_id_uq"),)
+
+    @property
+    def parsed_settings(self) -> MetadataPropertySettings:
+        return parse_obj_as(MetadataPropertySettings, self.settings)
 
     def __repr__(self):
         return (
