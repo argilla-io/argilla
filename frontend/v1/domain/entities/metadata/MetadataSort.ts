@@ -67,7 +67,7 @@ export class MetadataSortList {
     );
 
     if (indexOf > -1) {
-      this.selectedCategories[indexOf] = newCategoryFound;
+      this.selectedCategories.splice(indexOf, 1, newCategoryFound);
     }
   }
 

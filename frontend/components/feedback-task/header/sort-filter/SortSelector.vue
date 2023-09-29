@@ -12,12 +12,12 @@
       "
     />
     <BaseDropdown
+      v-if="nonSelectedSortingItems.length"
       :visible="visibleDropdown"
       @visibility="onToggleVisibility"
-      v-if="nonSelectedSortingItems.length"
     >
       <span slot="dropdown-header">
-        <BaseButton class="secondary small light sort-selector__add-button"
+        <BaseButton class="secondary small light"
           >+ Add another field</BaseButton
         >
       </span>
