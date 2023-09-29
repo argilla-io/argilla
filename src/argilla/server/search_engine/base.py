@@ -15,12 +15,12 @@
 import dataclasses
 from abc import ABCMeta, abstractmethod
 from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator, Iterable, List, Literal, Optional, Union
+from typing import AsyncGenerator, Iterable, List, Literal, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel
 
-from argilla.server.enums import ResponseStatusFilter, SortOrder
+from argilla.server.enums import RecordSortField, ResponseStatusFilter, SortOrder
 from argilla.server.models import Dataset, MetadataProperty, Record, Response, User
 
 __all__ = [
@@ -121,7 +121,7 @@ class SearchResponses:
 
 
 class SortBy(BaseModel):
-    field: Union[MetadataProperty, Literal["inserted_at"], Literal["updated_at"]]
+    field: Union[MetadataProperty, RecordSortField]
     order: SortOrder = SortOrder.asc
 
     class Config:

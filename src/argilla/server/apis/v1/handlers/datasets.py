@@ -21,7 +21,7 @@ from typing_extensions import Annotated
 
 from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_async_db
-from argilla.server.enums import MetadataPropertyType, RecordInclude, ResponseStatusFilter, SortOrder
+from argilla.server.enums import MetadataPropertyType, RecordInclude, RecordSortField, ResponseStatusFilter, SortOrder
 from argilla.server.models import Dataset as DatasetModel
 from argilla.server.models import ResponseStatus, User
 from argilla.server.policies import DatasetPolicyV1, authorize
@@ -138,6 +138,7 @@ async def _build_response_status_filter_for_search(
     return user_response_status_filter
 
 
+_RECORD_SORT_FIELD_VALUES = tuple(field.value for field in RecordSortField)
 _VALID_SORT_VALUES = tuple(sort.value for sort in SortOrder)
 
 
@@ -149,7 +150,7 @@ async def _build_sort_by(
 
     sorts_by = []
     for sort_field, sort_order in sort_by_query_param.items():
-        if sort_field not in ["inserted_at", "updated_at"]:
+        if sort_field not in _RECORD_SORT_FIELD_VALUES:
             metadata_property = await datasets.get_metadata_property_by_name_and_dataset_id(
                 db, name=sort_field, dataset_id=dataset.id
             )
@@ -158,7 +159,7 @@ async def _build_sort_by(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                     detail=(
                         f"Provided metadata property in 'sort_by' query param '{sort_field}' not found in dataset with"
-                        f" '{dataset.id}'"
+                        f" '{dataset.id}'."
                     ),
                 )
             field = metadata_property
@@ -335,7 +336,7 @@ async def list_current_user_dataset_records(
             user=current_user,
             response_statuses=response_statuses,
             include=include,
-            sort_by_query_param=sort_by_query_param or {"inserted_at": "asc"},
+            sort_by_query_param=sort_by_query_param or {RecordSortField.inserted_at.value: "asc"},
         )
     else:
         # TODO(@frascuchon): Compute also total for this case
@@ -381,7 +382,7 @@ async def list_dataset_records(
             offset=offset,
             response_statuses=response_statuses,
             include=include,
-            sort_by_query_param=sort_by_query_param or {"inserted_at": "asc"},
+            sort_by_query_param=sort_by_query_param or {RecordSortField.inserted_at.value: "asc"},
         )
     else:
         total = None

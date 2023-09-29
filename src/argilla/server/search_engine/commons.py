@@ -21,7 +21,7 @@ from uuid import UUID
 from pydantic import BaseModel
 from pydantic.utils import GetterDict
 
-from argilla.server.enums import FieldType, MetadataPropertyType, ResponseStatusFilter
+from argilla.server.enums import FieldType, MetadataPropertyType, RecordSortField, ResponseStatusFilter
 from argilla.server.models import (
     Dataset,
     Field,
@@ -242,8 +242,8 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             "properties": {
                 # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
                 "id": {"type": "keyword"},
-                "inserted_at": {"type": "date_nanos"},
-                "updated_at": {"type": "date_nanos"},
+                RecordSortField.inserted_at.value: {"type": "date_nanos"},
+                RecordSortField.updated_at.value: {"type": "date_nanos"},
                 "responses": {"dynamic": True, "type": "object"},
                 ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},  # To add all users responses
                 # metadata properties without mappings will be ignored
