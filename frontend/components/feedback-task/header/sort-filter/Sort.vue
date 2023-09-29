@@ -51,11 +51,6 @@ export default {
     selectedSortingItems() {
       return this.metadataSort.selected;
     },
-    appliedSortCategoriesDirection() {
-      return this.metadataSort.selected.map((s) =>
-        s.sort === "asc" ? "↑" : "↓"
-      );
-    },
   },
   methods: {
     onSortToggleVisibility(value) {
