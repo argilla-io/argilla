@@ -14,11 +14,10 @@
     <BaseDropdown
       v-if="nonSelectedSortingItems.length"
       :visible="visibleDropdown"
-      @visibility="onToggleVisibility"
     >
       <span slot="dropdown-header">
-        <BaseButton class="secondary small light"
-          >+ Add another field</BaseButton
+        <BaseButton class="secondary small light" @click="onToggleVisibility">
+          + Add another field</BaseButton
         >
       </span>
       <span slot="dropdown-content">
@@ -28,11 +27,6 @@
         ></SortCategoriesList>
       </span>
     </BaseDropdown>
-    <BaseButton
-      class="primary small full-width sort-selector__button"
-      @on-click="applySorting"
-      >Sort</BaseButton
-    >
   </div>
 </template>
 <script>
@@ -57,8 +51,8 @@ export default {
     },
   },
   methods: {
-    onToggleVisibility(value) {
-      this.visibleDropdown = value;
+    onToggleVisibility() {
+      this.visibleDropdown = !this.visibleDropdown;
     },
     includeSortCategory(categoryName) {
       this.sortingItems.select(categoryName);
@@ -91,8 +85,5 @@ export default {
   flex-direction: column;
   gap: $base-space;
   padding: $base-space;
-  &__button {
-    margin-top: $base-space * 2;
-  }
 }
 </style>

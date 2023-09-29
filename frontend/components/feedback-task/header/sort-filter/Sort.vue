@@ -66,6 +66,10 @@ export default {
     },
     applySort() {
       this.onSortToggleVisibility(false);
+
+      this.sort();
+    },
+    sort() {
       this.$root.$emit("sort-changed", this.metadataSort.convertToRouteParam());
 
       this.appliedSortCategories = this.metadataSort.selectedCategoriesName;
@@ -78,9 +82,21 @@ export default {
   },
   watch: {
     visibleDropdown() {
-      if (this.visibleDropdown) {
-        this.updateFiltersFromQueryParams();
+      if (!this.visibleDropdown) {
+        this.debounce.stop();
+
+        this.sort();
       }
+    },
+    "metadataSort.selected": {
+      deep: true,
+      async handler() {
+        this.debounce.stop();
+
+        await this.debounce.wait();
+
+        this.sort();
+      },
     },
   },
   mounted() {

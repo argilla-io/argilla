@@ -124,6 +124,13 @@ export default {
     },
   },
   watch: {
+    visibleDropdown() {
+      if (!this.visibleDropdown) {
+        this.debounce.stop();
+
+        this.filter();
+      }
+    },
     "metadataFilters.categories": {
       deep: true,
       async handler() {
