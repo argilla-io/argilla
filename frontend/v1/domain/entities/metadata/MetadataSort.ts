@@ -1,12 +1,21 @@
 import { Metadata } from "./Metadata";
 
+type SortOptions = "asc" | "desc";
+
+interface HardcodeMetadata {
+  name: string;
+}
+
 class MetadataSort {
-  public selected = false;
-  public sort: "asc" | "desc" = "asc";
-  constructor(private metadata: Metadata | { name: string }) {}
+  public sort: SortOptions = "asc";
+  constructor(private metadata: Metadata | HardcodeMetadata) {}
 
   get name() {
     return this.metadata.name;
+  }
+
+  toggleSort() {
+    this.sort = this.sort === "asc" ? "desc" : "asc";
   }
 }
 
@@ -24,7 +33,9 @@ export class MetadataSortList {
   }
 
   get noSelected() {
-    return this.metadataSorts.filter((metadataSort) => !metadataSort.selected);
+    return this.metadataSorts.filter(
+      (metadata) => !this.selectedCategories.includes(metadata)
+    );
   }
 
   get selectedCategoriesName() {
@@ -34,7 +45,6 @@ export class MetadataSortList {
   select(category: string) {
     const found = this.findByCategory(category);
     if (found) {
-      found.selected = true;
       this.selectedCategories.push(found);
     }
   }
@@ -45,17 +55,12 @@ export class MetadataSortList {
     );
 
     if (indexOf > -1) {
-      this.selectedCategories[indexOf].selected = false;
       this.selectedCategories.splice(indexOf, 1);
     }
   }
 
   replace(category: string, newCategory: string) {
-    const oldCategory = this.findByCategory(category);
-    oldCategory.selected = false;
-
     const newCategoryFound = this.findByCategory(newCategory);
-    newCategoryFound.selected = true;
 
     const indexOf = this.selectedCategories.findIndex(
       (metadataSort) => metadataSort.name === category
@@ -67,15 +72,12 @@ export class MetadataSortList {
   }
 
   clear() {
-    this.selectedCategories.forEach((metadataSort) => {
-      metadataSort.selected = false;
-    });
     this.selectedCategories = [];
   }
 
   toggleSort(category: string) {
     const found = this.findByCategory(category);
-    if (found) found.sort = found.sort === "asc" ? "desc" : "asc";
+    if (found) found.toggleSort();
   }
 
   convertToRouteParam(): string[] {
@@ -84,6 +86,7 @@ export class MetadataSortList {
 
   completeByRouteParams(sort: string) {
     this.clear();
+
     if (!sort) return;
 
     const sortParams = sort.replaceAll("metadata.", "").split(",");
@@ -92,8 +95,7 @@ export class MetadataSortList {
       const [name, sort] = sortParam.split(":");
       const found = this.findByCategory(name);
       if (found) {
-        found.selected = true;
-        found.sort = sort as "asc" | "desc";
+        found.sort = sort as SortOptions;
 
         this.selectedCategories.push(found);
       }

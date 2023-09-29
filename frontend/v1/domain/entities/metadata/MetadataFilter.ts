@@ -14,14 +14,14 @@ class MetadataFilter {
   public options: OptionForFilter[];
 
   constructor(private metadata: Metadata) {
-    if (this.metadata.isTerms) {
-      this.options = this.metadata.settings.values.map((value: string) => {
+    if (this.isTerms) {
+      this.options = this.settings.values.map((value: string) => {
         return { selected: false, label: value };
       });
     } else {
       this.value = {
-        ge: this.metadata.settings.min,
-        le: this.metadata.settings.max,
+        ge: this.settings.min,
+        le: this.settings.max,
       };
     }
   }
@@ -34,6 +34,10 @@ class MetadataFilter {
     return this.metadata.isTerms;
   }
 
+  get settings() {
+    return this.metadata.settings;
+  }
+
   public filterByText(text: string) {
     return this.options.filter((option) =>
       option.label.toLowerCase().includes(text.toLowerCase())
@@ -41,10 +45,10 @@ class MetadataFilter {
   }
 
   public get isAnswered(): boolean {
-    return this.metadata.isTerms
+    return this.isTerms
       ? this.selectedOptions.length > 0
-      : this.value.ge !== this.metadata.settings.min ||
-          this.value.le !== this.metadata.settings.max;
+      : this.value.ge !== this.settings.min ||
+          this.value.le !== this.settings.max;
   }
 
   public get selectedOptions(): OptionForFilter[] {
@@ -52,7 +56,7 @@ class MetadataFilter {
   }
 
   public completeMetadata(value: string) {
-    if (this.metadata.isTerms) {
+    if (this.isTerms) {
       value.split(",").forEach((label) => {
         const option = this.options.find((option) => option.label === label);
         if (option) option.selected = true;
@@ -63,18 +67,17 @@ class MetadataFilter {
         this.value.ge = ge;
         this.value.le = le;
       } catch (error) {
-        this.value.ge = this.metadata.settings.min;
-        this.value.le = this.metadata.settings.max;
+        this.value.ge = this.settings.min;
+        this.value.le = this.settings.max;
       }
     }
   }
 
   clear(): void {
-    if (this.metadata.isTerms)
-      return this.options.forEach((o) => (o.selected = false));
+    if (this.isTerms) return this.options.forEach((o) => (o.selected = false));
 
-    this.value.ge = this.metadata.settings.min;
-    this.value.le = this.metadata.settings.max;
+    this.value.ge = this.settings.min;
+    this.value.le = this.settings.max;
   }
 }
 
