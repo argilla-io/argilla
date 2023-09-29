@@ -13,7 +13,7 @@
 #  limitations under the License.
 import time
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
 from unittest.mock import ANY, MagicMock
 from uuid import UUID, uuid4
 
@@ -110,6 +110,7 @@ class TestSuiteDatasets:
                     "id": str(dataset_a.id),
                     "name": "dataset-a",
                     "guidelines": None,
+                    "allow_extra_metadata": True,
                     "status": "draft",
                     "workspace_id": str(dataset_a.workspace_id),
                     "inserted_at": dataset_a.inserted_at.isoformat(),
@@ -119,6 +120,7 @@ class TestSuiteDatasets:
                     "id": str(dataset_b.id),
                     "name": "dataset-b",
                     "guidelines": "guidelines",
+                    "allow_extra_metadata": True,
                     "status": "draft",
                     "workspace_id": str(dataset_b.workspace_id),
                     "inserted_at": dataset_b.inserted_at.isoformat(),
@@ -128,6 +130,7 @@ class TestSuiteDatasets:
                     "id": str(dataset_c.id),
                     "name": "dataset-c",
                     "guidelines": None,
+                    "allow_extra_metadata": True,
                     "status": "ready",
                     "workspace_id": str(dataset_c.workspace_id),
                     "inserted_at": dataset_c.inserted_at.isoformat(),
@@ -1449,6 +1452,7 @@ class TestSuiteDatasets:
             "id": str(dataset.id),
             "name": "dataset",
             "guidelines": None,
+            "allow_extra_metadata": True,
             "status": "draft",
             "workspace_id": str(dataset.workspace_id),
             "inserted_at": dataset.inserted_at.isoformat(),
@@ -2472,58 +2476,6 @@ class TestSuiteDatasets:
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
 
-    async def test_create_dataset_metadata_property_with_dataset_ready(
-        self,
-        async_client: "AsyncClient",
-        db: "AsyncSession",
-        mock_search_engine: "SearchEngine",
-        owner_auth_header: dict,
-    ):
-        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
-        metadata_property_json = {
-            "name": "name",
-            "settings": {"type": "terms", "values": ["valueA", "valueB", "valueC"]},
-        }
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
-        )
-
-        assert response.status_code == 201
-        assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
-
-        response_body = response.json()
-        created_metadata_property = await db.get(MetadataProperty, UUID(response_body["id"]))
-
-        assert created_metadata_property
-        assert response_body == {
-            "id": str(UUID(response_body["id"])),
-            "description": None,
-            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
-            **metadata_property_json,
-        }
-
-        mock_search_engine.configure_metadata_property.assert_called_once_with(created_metadata_property)
-
-    async def test_create_dataset_metadata_property_with_dataset_ready_and_search_engine_error(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, db: "AsyncSession", owner_auth_header: dict
-    ):
-        mock_search_engine.configure_metadata_property.side_effect = ValueError("MOCK")
-
-        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
-        metadata_property_json = {
-            "name": "name",
-            "settings": {"type": "terms", "values": ["valueA", "valueB", "valueC"]},
-        }
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
-        )
-
-        assert response.status_code == 422
-        assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 0
-
     async def test_create_dataset_metadata_property_as_admin(self, async_client: "AsyncClient", db: "AsyncSession"):
         workspace = await WorkspaceFactory.create()
         admin = await AdminFactory.create(workspaces=[workspace])
@@ -2698,6 +2650,10 @@ class TestSuiteDatasets:
         question_a = await TextQuestionFactory.create(name="input_ok", dataset=dataset)
         question_b = await TextQuestionFactory.create(name="output_ok", dataset=dataset)
 
+        await TermsMetadataPropertyFactory.create(name="terms-metadata")
+        await IntegerMetadataPropertyFactory.create(name="integer-metadata")
+        await FloatMetadataPropertyFactory.create(name="float-metadata")
+
         records_json = {
             "items": [
                 {
@@ -2723,10 +2679,18 @@ class TestSuiteDatasets:
                             "value": "yes",
                         },
                     ],
+                    "metadata": {
+                        "terms-metadata": "a",
+                        "integer-metadata": 1,
+                        "float-metadata": 1.1,
+                    },
                 },
                 {
                     "fields": {"input": "Say Hello", "output": "Hi"},
                     "suggestions": [{"question_id": str(question_a.id), "value": "no"}],
+                    "metadata": {
+                        "terms-metadata": "a",
+                    },
                 },
                 {
                     "fields": {"input": "Say Pello", "output": "Hello World"},
@@ -3095,6 +3059,99 @@ class TestSuiteDatasets:
         assert response.json() == {"detail": "Wrong value found for field 'output'. Expected 'str', found 'int'"}
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
+    @pytest.mark.parametrize(
+        "MetadataPropertyFactoryType, settings, value",
+        [
+            (TermsMetadataPropertyFactory, {"values": ["a", "b", "c"]}, "z"),
+            (IntegerMetadataPropertyFactory, {"min": 0, "max": 10}, -1),
+            (FloatMetadataPropertyFactory, {"min": 0.0, "max": 10.0}, -1.0),
+        ],
+    )
+    async def test_create_dataset_records_with_not_valid_metadata_values(
+        self,
+        async_client: "AsyncClient",
+        owner_auth_header: dict,
+        MetadataPropertyFactoryType: Type[MetadataPropertyFactory],
+        settings: Dict[str, Any],
+        value: Any,
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        await TextFieldFactory.create(name="completion", dataset=dataset)
+        await TextQuestionFactory.create(name="corrected", dataset=dataset)
+        await MetadataPropertyFactoryType.create(name="metadata-property", dataset=dataset, settings=settings)
+
+        records_json = {
+            "items": [
+                {
+                    "fields": {"completion": "text-input"},
+                    "metadata": {"metadata-property": value},
+                }
+            ]
+        }
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+        )
+
+        assert response.status_code == 422
+        assert (
+            "Provided metadata for record at position 0 is not valid: 'metadata-property' metadata property validation failed"
+            in response.json()["detail"]
+        )
+
+    async def test_create_dataset_records_with_extra_metadata_allowed(
+        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready, allow_extra_metadata=True)
+        await TextFieldFactory.create(name="completion", dataset=dataset)
+        await TextQuestionFactory.create(name="corrected", dataset=dataset)
+        await TermsMetadataPropertyFactory.create(name="terms-metadata")
+
+        records_json = {
+            "items": [
+                {
+                    "fields": {"completion": "text-input"},
+                    "metadata": {"terms-metadata": "a", "extra": {"this": {"is": "extra metadata"}}},
+                }
+            ]
+        }
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+        )
+
+        assert response.status_code == 204
+
+        record = (await db.execute(select(Record))).scalar()
+        assert record.metadata_ == {"terms-metadata": "a", "extra": {"this": {"is": "extra metadata"}}}
+
+    async def test_create_dataset_records_with_extra_metadata_not_allowed(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready, allow_extra_metadata=False)
+        await TextFieldFactory.create(name="completion", dataset=dataset)
+        await TextQuestionFactory.create(name="corrected", dataset=dataset)
+
+        records_json = {
+            "items": [
+                {
+                    "fields": {"completion": "text-input"},
+                    "metadata": {"not-defined-metadata-property": "unit-test"},
+                }
+            ]
+        }
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+        )
+
+        assert response.status_code == 422
+        assert (
+            "Provided metadata for record at position 0 is not valid: 'not-defined-metadata-property' metadata"
+            f" property does not exists for dataset '{dataset.id}' and extra metadata is not allowed for this dataset"
+            == response.json()["detail"]
+        )
+
     async def test_create_dataset_records_with_index_error(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, db: "AsyncSession", owner_auth_header: dict
     ):
@@ -3309,49 +3366,6 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
-        assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
-
-    @pytest.mark.parametrize(
-        "record_json",
-        [
-            {"fields": {"input": "text-input", "output": "text-output"}},
-            {"fields": {"input": "text-input", "output": None}},
-            {"fields": {"input": "text-input"}},
-        ],
-    )
-    async def test_create_dataset_records_with_optional_fields(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, record_json: dict
-    ):
-        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
-
-        await FieldFactory.create(name="input", dataset=dataset)
-        await FieldFactory.create(name="output", dataset=dataset, required=False)
-
-        records_json = {"items": [record_json]}
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
-        )
-
-        assert response.status_code == 204, response.json()
-        await db.refresh(dataset, attribute_names=["records"])
-        assert (await db.execute(select(func.count(Record.id)))).scalar() == 1
-
-    async def test_create_dataset_records_with_wrong_optional_fields(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
-    ):
-        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
-
-        await FieldFactory.create(name="input", dataset=dataset)
-        await FieldFactory.create(name="output", dataset=dataset, required=False)
-
-        records_json = {"items": [{"fields": {"input": "text-input", "output": 1}}]}
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
-        )
-        assert response.status_code == 422
-        assert response.json() == {"detail": "Wrong value found for field 'output'. Expected 'str', found 'int'"}
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     async def test_create_dataset_records_with_discarded_response(
@@ -4252,6 +4266,7 @@ class TestSuiteDatasets:
             "id": str(dataset.id),
             "name": name,
             "guidelines": guidelines,
+            "allow_extra_metadata": True,
             "status": "ready",
             "workspace_id": str(dataset.workspace_id),
             "inserted_at": dataset.inserted_at.isoformat(),
