@@ -7,10 +7,20 @@
       class="category__search"
     />
     <ul class="category__list">
-      <li v-for="category in categoriesFilteredBySearchText" :key="category">
-        <BaseButton @on-click="selectCategory(category)" class="category__item"
-          ><span>{{ category }}</span>
-          <svgicon name="chevron-right" width="10" height="10"
+      <li
+        v-for="category in categoriesFilteredBySearchText"
+        :key="category.name"
+      >
+        <BaseButton
+          @on-click="selectCategory(category)"
+          class="category__item"
+          :disabled="!category.hasValues"
+          ><span>{{ category.name }}</span>
+          <svgicon
+            v-if="category.hasValues"
+            name="chevron-right"
+            width="10"
+            height="10"
         /></BaseButton>
       </li>
     </ul>
@@ -33,13 +43,13 @@ export default {
   computed: {
     categoriesFilteredBySearchText() {
       return this.categories.filter((cat) =>
-        cat.toLowerCase().includes(this.searchText.toLowerCase())
+        cat.name.toLowerCase().includes(this.searchText.toLowerCase())
       );
     },
   },
   methods: {
     selectCategory(category) {
-      this.$emit("select-category", category);
+      this.$emit("select-category", category.name);
     },
   },
 };

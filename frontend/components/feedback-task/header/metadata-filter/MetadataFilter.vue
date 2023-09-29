@@ -24,7 +24,7 @@
         <MetadataCategoriesSelector
           v-if="!visibleCategory"
           class="metadata-filter__categories"
-          :categories="metadataCategoriesName"
+          :categories="metadataFilters.categories"
           @select-category="selectMetadataCategory"
         />
         <template v-else>
@@ -122,11 +122,6 @@ export default {
       this.completeByRouteParams();
 
       this.appliedCategoriesFilters = this.metadataFilters.filteredCategories;
-    },
-  },
-  computed: {
-    metadataCategoriesName() {
-      return this.metadataFilters.categories;
     },
   },
   watch: {

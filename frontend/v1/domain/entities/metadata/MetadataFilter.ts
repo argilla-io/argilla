@@ -38,6 +38,15 @@ class MetadataFilter {
     return this.metadata.settings;
   }
 
+  get hasValues() {
+    if (this.isTerms) return this.options.length > 0;
+
+    return (
+      (this.value.ge === 0 || !!this.value.ge) &&
+      (this.value.le === 0 || !!this.value.le)
+    );
+  }
+
   public filterByText(text: string) {
     return this.options.filter((option) =>
       option.label.toLowerCase().includes(text.toLowerCase())
@@ -92,7 +101,7 @@ export class MetadataFilterList {
   }
 
   get categories() {
-    return this.metadata.map((cat) => cat.name);
+    return this.metadata;
   }
 
   get filteredCategories() {
