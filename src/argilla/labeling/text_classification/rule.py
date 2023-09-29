@@ -25,7 +25,7 @@ class Rule:
     """A rule (labeling function) in form of an ElasticSearch query.
 
     Args:
-        query: An ElasticSearch query with the `query string syntax <https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html>`_.
+        query: An ElasticSearch query with the `query string syntax </practical_guides/filter_dataset.md>`_.
         label: The label associated to the query. Can also be a list of labels.
         name: An optional name for the rule to be used as identifier in the
             `argilla.labeling.text_classification.WeakLabels` class. By default, we will use the ``query`` string.
