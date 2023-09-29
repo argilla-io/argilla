@@ -36,6 +36,11 @@
             @on-click="onClickOnBadge(badge, $event)"
             @on-clear="onClickOnClear(badge, $event)"
           ></FilterBadge>
+          <BaseButton
+            class="secondary full-width small clear metadata-button__tooltip__button"
+            @on-click.stop="onClearAll"
+            >Clear all</BaseButton
+          >
         </FilterTooltip>
       </div>
     </div>
@@ -89,6 +94,11 @@ export default {
 
       this.$emit("click-on-clear", badge, e);
     },
+    onClearAll() {
+      this.badges.forEach((badge) => {
+        this.$emit("click-on-clear", badge);
+      });
+    },
     toggleTooltip(e) {
       e.stopPropagation();
       this.visibleTooltip = !this.visibleTooltip;
@@ -117,6 +127,9 @@ export default {
     gap: calc($base-space / 2);
     .badge {
       margin-right: auto;
+    }
+    &__button {
+      margin: $base-space auto 0 auto;
     }
   }
 }
