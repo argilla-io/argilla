@@ -35,7 +35,7 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForTextClassification,
     TrainingTaskTypes,
 )
-from argilla.client.feedback.utils import generate_pydantic_schema_for_fields
+from argilla.client.feedback.utils import generate_pydantic_schema_for_fields, generate_pydantic_schema_for_metadata
 from argilla.client.models import Framework
 from argilla.utils.dependency import require_dependencies, requires_dependencies
 
@@ -260,6 +260,13 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         if self._fields_schema is None:
             self._fields_schema = generate_pydantic_schema_for_fields(self.fields)
 
+        # TODO: this is here to avoid conflicts with other PRs
+        if not hasattr(self, "_metadata_schema"):
+            self._metadata_schema = None
+
+        if self._metadata_schema is None:
+            self._metadata_schema = generate_pydantic_schema_for_metadata(self.metadata_properties)
+
         for record in records:
             try:
                 self._fields_schema.parse_obj(record.fields)
@@ -267,6 +274,14 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                 raise ValueError(
                     f"`FeedbackRecord.fields` does not match the expected schema, with exception: {e}"
                 ) from e
+
+            if record.metadata is not None and self.metadata_properties is not None:
+                try:
+                    self._metadata_schema.parse_obj(record.metadata)
+                except ValidationError as e:
+                    raise ValueError(
+                        f"`FeedbackRecord.metadata` does not match the expected schema, with exception: {e}"
+                    ) from e
 
     def _parse_and_validate_records(
         self,
