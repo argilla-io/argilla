@@ -66,6 +66,13 @@ export class MetadataSortList {
     }
   }
 
+  clear() {
+    this.selectedCategories.forEach((metadataSort) => {
+      metadataSort.selected = false;
+    });
+    this.selectedCategories = [];
+  }
+
   toggleSort(category: string) {
     const found = this.findByCategory(category);
     if (found) found.sort = found.sort === "asc" ? "desc" : "asc";
@@ -76,6 +83,7 @@ export class MetadataSortList {
   }
 
   completeByRouteParams(sort: string) {
+    this.clear();
     if (!sort) return;
 
     const sortParams = sort.replaceAll("metadata.", "").split(",");

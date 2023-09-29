@@ -86,6 +86,13 @@ export default {
       this.appliedSortCategories = this.metadataSort.selectedCategoriesName;
     },
   },
+  watch: {
+    visibleDropdown() {
+      if (this.visibleDropdown) {
+        this.updateFiltersFromQueryParams();
+      }
+    },
+  },
   mounted() {
     this.updateFiltersFromQueryParams();
   },
