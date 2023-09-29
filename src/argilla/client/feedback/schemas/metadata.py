@@ -15,7 +15,17 @@
 from abc import ABC, abstractmethod, abstractproperty
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-from pydantic import BaseModel, Extra, Field, ValidationError, root_validator, validator
+from pydantic import (
+    BaseModel,
+    Extra,
+    Field,
+    StrictFloat,
+    StrictInt,
+    StrictStr,
+    ValidationError,
+    root_validator,
+    validator,
+)
 
 from argilla.client.feedback.constants import METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
@@ -114,9 +124,9 @@ class TermsMetadataProperty(MetadataPropertySchema):
             )
 
     @property
-    def _pydantic_field_with_validator(self) -> Tuple[Dict[str, Tuple[str, ...]], Dict[str, Callable]]:
+    def _pydantic_field_with_validator(self) -> Tuple[Dict[str, Tuple[StrictStr, ...]], Dict[str, Callable]]:
         return (
-            {self.name: (str, ...)},
+            {self.name: (METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE[self.type], ...)},
             {f"{self.name}_validator": validator(self.name, allow_reuse=True)(self._all_values_exist)},
         )
 
@@ -164,7 +174,9 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
             )
 
     @property
-    def _pydantic_field_with_validator(self) -> Tuple[Dict[Union[int, float], Tuple[str, ...]], Dict[str, Callable]]:
+    def _pydantic_field_with_validator(
+        self,
+    ) -> Tuple[Dict[Union[StrictInt, StrictFloat], Tuple[str, ...]], Dict[str, Callable]]:
         return (
             {self.name: (METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE[self.type], ...)},
             {f"{self.name}_validator": validator(self.name, allow_reuse=True)(self._value_in_bounds)},
