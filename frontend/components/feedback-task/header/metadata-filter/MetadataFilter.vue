@@ -43,11 +43,6 @@
             <div v-else>
               <MetadataRangeSelector :metadata="visibleCategory" />
             </div>
-            <BaseButton
-              class="metadata-filter__button primary small full-width"
-              @on-click="applyFilter"
-              >Filter</BaseButton
-            >
           </div>
         </template>
       </span>
@@ -91,6 +86,9 @@ export default {
     applyFilter() {
       this.visibleDropdown = false;
 
+      this.filter();
+    },
+    filter() {
       this.$root.$emit(
         "metadata-filter-changed",
         this.metadataFilters.convertToRouteParam()
@@ -116,6 +114,7 @@ export default {
     },
     removeCategoryFilters(category) {
       this.metadataFilters.findByCategory(category).clear();
+
       this.applyFilter();
     },
     updateFiltersFromQueryParams() {
@@ -125,10 +124,15 @@ export default {
     },
   },
   watch: {
-    visibleDropdown() {
-      if (this.visibleDropdown) {
-        this.updateFiltersFromQueryParams();
-      }
+    "metadataFilters.categories": {
+      deep: true,
+      async handler() {
+        this.debounce.stop();
+
+        await this.debounce.wait();
+
+        this.filter();
+      },
     },
   },
   mounted() {

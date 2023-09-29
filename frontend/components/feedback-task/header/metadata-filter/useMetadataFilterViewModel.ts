@@ -2,6 +2,7 @@ import { useRoute } from "@nuxtjs/composition-api";
 import { ref } from "vue-demi";
 import { Metadata } from "~/v1/domain/entities/metadata/Metadata";
 import { MetadataFilterList } from "~/v1/domain/entities/metadata/MetadataFilter";
+import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
 
 export const useMetadataFilterViewModel = ({
   metadata,
@@ -9,6 +10,7 @@ export const useMetadataFilterViewModel = ({
   metadata: Metadata[];
 }) => {
   const router = useRoute();
+  const debounce = useDebounce(1000);
   const metadataFilters = ref<MetadataFilterList>(
     new MetadataFilterList(metadata)
   );
@@ -21,5 +23,5 @@ export const useMetadataFilterViewModel = ({
     );
   };
 
-  return { metadataFilters, completeByRouteParams };
+  return { metadataFilters, completeByRouteParams, debounce };
 };

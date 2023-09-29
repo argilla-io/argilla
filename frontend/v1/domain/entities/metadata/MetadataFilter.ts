@@ -104,8 +104,12 @@ export class MetadataFilterList {
     return this.metadata;
   }
 
+  get filtered() {
+    return this.metadata.filter((m) => m.isAnswered);
+  }
+
   get filteredCategories() {
-    return this.getFilterSelected().map((cat) => cat.name);
+    return this.filtered.map((cat) => cat.name);
   }
 
   findByCategory(category: string) {
@@ -133,12 +137,8 @@ export class MetadataFilterList {
     });
   }
 
-  private getFilterSelected() {
-    return this.metadata.filter((m) => m.isAnswered);
-  }
-
   private toQueryParams() {
-    return this.getFilterSelected().map((m) => {
+    return this.filtered.map((m) => {
       return {
         name: m.name,
         value: m.isTerms
