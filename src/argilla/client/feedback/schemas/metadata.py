@@ -124,9 +124,9 @@ class TermsMetadataProperty(MetadataPropertySchema):
             )
 
     @property
-    def _pydantic_field_with_validator(self) -> Tuple[Dict[str, Tuple[StrictStr, ...]], Dict[str, Callable]]:
+    def _pydantic_field_with_validator(self) -> Tuple[Dict[str, Tuple[StrictStr, None]], Dict[str, Callable]]:
         return (
-            {self.name: (METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE[self.type], ...)},
+            {self.name: (METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE[self.type], None)},
             {f"{self.name}_validator": validator(self.name, allow_reuse=True)(self._all_values_exist)},
         )
 
@@ -176,9 +176,9 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
     @property
     def _pydantic_field_with_validator(
         self,
-    ) -> Tuple[Dict[Union[StrictInt, StrictFloat], Tuple[str, ...]], Dict[str, Callable]]:
+    ) -> Tuple[Dict[Union[StrictInt, StrictFloat], Tuple[str, None]], Dict[str, Callable]]:
         return (
-            {self.name: (METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE[self.type], ...)},
+            {self.name: (METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE[self.type], None)},
             {f"{self.name}_validator": validator(self.name, allow_reuse=True)(self._value_in_bounds)},
         )
 
