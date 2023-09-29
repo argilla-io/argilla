@@ -286,10 +286,14 @@ async def get_records_by_ids(
     db: "AsyncSession",
     dataset_id: UUID,
     record_ids: List[UUID],
-    include: List[RecordInclude] = [],
+    include: Optional[List[RecordInclude]] = None,
     user_id: Optional[UUID] = None,
 ) -> List[Record]:
+    if include is None:
+        include = []
+
     query = select(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(record_ids))
+
     if RecordInclude.responses in include:
         if user_id:
             query = query.outerjoin(
@@ -297,10 +301,18 @@ async def get_records_by_ids(
             ).options(contains_eager(Record.responses))
         else:
             query = query.options(joinedload(Record.responses))
+
     if RecordInclude.suggestions in include:
         query = query.options(joinedload(Record.suggestions))
+
     result = await db.execute(query)
-    return result.unique().scalars().all()
+    records = result.unique().scalars().all()
+
+    # Preserver the order of the `record_ids` list
+    record_order_map = {record.id: record for record in records}
+    ordered_records = [record_order_map[record_id] for record_id in record_ids]
+
+    return ordered_records
 
 
 async def list_records_by_dataset_id(

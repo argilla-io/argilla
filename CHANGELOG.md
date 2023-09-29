@@ -22,6 +22,7 @@ These are the section headers that we use:
 - Added new endpoint `GET /api/v1/datasets/:dataset_id/metadata-properties` for listing dataset metadata property ([#3813](https://github.com/argilla-io/argilla/pull/3813))
 - Added `TermsMetadataProperty`, `IntegerMetadataProperty` and `FloatMetadataProperty` classes allowing to define metadata properties for a `FeedbackDataset` ([#3818](https://github.com/argilla-io/argilla/pull/3818)).
 - Added `metadata_filters` to `filter_by` method in `RemoteFeedbackDataset` to filter based on metadata i.e. `TermsMetadataFilter`, `IntegerMetadataFilter`, and `FloatMetadataFilter` ([#3834](https://github.com/argilla-io/argilla/pull/3834)).
+- Added `sort_by` query parameter to listing records endpoints that allows to sort the records by `inserted_at`, `updated_at` or metadata property ([#3843](https://github.com/argilla-io/argilla/pull/3843)).
 
 ### Changed
 
