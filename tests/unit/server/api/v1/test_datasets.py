@@ -483,6 +483,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 401
 
+
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
     async def test_list_dataset_metadata_properties_as_restricted_user(
         self, async_client: "AsyncClient", role: UserRole
@@ -838,7 +839,7 @@ class TestSuiteDatasets:
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
-            metadata_filters=[expected_filter_class(metadata_property, **expected_filter_args)],
+            metadata_filters=[expected_filter_class(metadata_property=metadata_property, **expected_filter_args)],
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
@@ -1323,7 +1324,7 @@ class TestSuiteDatasets:
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
-            metadata_filters=[expected_filter_class(metadata_property, **expected_filter_args)],
+            metadata_filters=[expected_filter_class(metadata_property=metadata_property, **expected_filter_args)],
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
@@ -3746,7 +3747,7 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=StringQuery(q="Hello", field="input"),
-            metadata_filters=[expected_filter_class(metadata_property, **expected_filter_args)],
+            metadata_filters=[expected_filter_class(metadata_property=metadata_property, **expected_filter_args)],
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
