@@ -1,4 +1,3 @@
-import { filter } from "vue/types/umd";
 import { createMetadataMock } from "../__mocks__/metadata/mock";
 import { MetadataFilterList } from "./MetadataFilter";
 
