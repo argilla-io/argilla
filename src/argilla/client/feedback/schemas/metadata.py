@@ -12,10 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from abc import ABC, abstractproperty
+from abc import ABC, abstractmethod, abstractproperty
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-from pydantic import BaseModel, Extra, Field, root_validator, validator
+from pydantic import BaseModel, Extra, Field, ValidationError, root_validator, validator
 
 from argilla.client.feedback.constants import METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
@@ -72,6 +72,10 @@ class MetadataPropertySchema(BaseModel, ABC):
     def _pydantic_field_with_validator(self) -> Tuple[Dict[str, Tuple[Any, ...]], Dict[str, Callable]]:
         return ({}, {})
 
+    @abstractmethod
+    def _validate_filter(self, metadata_filter: "MetadataFilters") -> None:
+        pass
+
 
 class TermsMetadataProperty(MetadataPropertySchema):
     """Schema for the `FeedbackDataset` metadata properties of type `terms`. This kind
@@ -116,6 +120,12 @@ class TermsMetadataProperty(MetadataPropertySchema):
             {f"{self.name}_validator": validator(self.name, allow_reuse=True)(self._all_values_exist)},
         )
 
+    def _validate_filter(self, metadata_filter: "TermsMetadataFilter") -> None:
+        if not all(value in self.values for value in metadata_filter.values):
+            raise ValidationError(
+                f"Provided 'values={metadata_filter.values}' is not valid, only values in {self.values} are allowed."
+            )
+
 
 class _NumericMetadataPropertySchema(MetadataPropertySchema):
     """Protected schema for the numeric `FeedbackDataset` metadata properties.
@@ -159,6 +169,16 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
             {self.name: (METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE[self.type], ...)},
             {f"{self.name}_validator": validator(self.name, allow_reuse=True)(self._value_in_bounds)},
         )
+
+    def _validate_filter(self, metadata_filter: Union["IntegerMetadataFilter", "FloatMetadataFilter"]) -> None:
+        if metadata_filter.ge is not None and not (self.max >= metadata_filter.ge >= self.min):
+            raise ValidationError(
+                f"Provided 'ge={metadata_filter.ge}' is not valid, only values between {self.min} and {self.max} are allowed."
+            )
+        if metadata_filter.le is not None and not (self.max >= metadata_filter.le >= self.min):
+            raise ValidationError(
+                f"Provided 'le={metadata_filter.le}' is not valid, only values between {self.min} and {self.max} are allowed."
+            )
 
 
 class IntegerMetadataProperty(_NumericMetadataPropertySchema):
