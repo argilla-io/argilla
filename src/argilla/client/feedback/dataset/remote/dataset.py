@@ -182,7 +182,7 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         if response_status:
             if not isinstance(response_status, list):
                 response_status = [response_status]
-            if not all(status in FeedbackResponseStatusFilter for status in response_status):
+            if not all(status in [arg.value for arg in FeedbackResponseStatusFilter] for status in response_status):
                 raise ValueError(
                     f"Invalid `response_status={response_status}` provided, must be one"
                     f" of: {[arg.value for arg in FeedbackResponseStatusFilter]}"
