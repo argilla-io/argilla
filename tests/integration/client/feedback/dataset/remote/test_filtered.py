@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import random
 from datetime import datetime
 from typing import List, Union
 from uuid import UUID
@@ -20,6 +21,12 @@ import pytest
 from argilla.client import api
 from argilla.client.feedback.dataset.local import FeedbackDataset
 from argilla.client.feedback.dataset.remote.filtered import FilteredRemoteFeedbackDataset, FilteredRemoteFeedbackRecords
+from argilla.client.feedback.schemas.metadata import (
+    FloatMetadataFilter,
+    IntegerMetadataFilter,
+    MetadataFilters,
+    TermsMetadataFilter,
+)
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
@@ -31,8 +38,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.factories import (
     DatasetFactory,
+    FloatMetadataPropertyFactory,
+    IntegerMetadataPropertyFactory,
     RecordFactory,
     ResponseFactory,
+    TermsMetadataPropertyFactory,
     TextFieldFactory,
     TextQuestionFactory,
     UserFactory,
@@ -64,6 +74,53 @@ class TestFilteredRemoteFeedbackDataset:
         api.init(api_key=user.api_key)
         remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
         filtered_dataset = remote_dataset.filter_by(response_status=status)
+        assert isinstance(filtered_dataset, FilteredRemoteFeedbackDataset)
+        assert isinstance(filtered_dataset.records, FilteredRemoteFeedbackRecords)
+        assert all([isinstance(record, RemoteFeedbackRecord) for record in filtered_dataset.records])
+
+    @pytest.mark.parametrize(
+        "metadata_filters",
+        [
+            TermsMetadataFilter(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataFilter(name="integer-metadata", le=5),
+            IntegerMetadataFilter(name="integer-metadata", ge=5),
+            FloatMetadataFilter(name="float-metadata", ge=5.0),
+            FloatMetadataFilter(name="float-metadata", le=5.0),
+        ],
+    )
+    async def test_filter_by_metadata(
+        self, owner: User, metadata_filters: Union[MetadataFilters, List[MetadataFilters]]
+    ) -> None:
+        dataset = await DatasetFactory.create(status="ready")
+        await TextFieldFactory.create(dataset=dataset, name="text", required=True)
+        await TextQuestionFactory.create(dataset=dataset, required=True)
+        await TermsMetadataPropertyFactory.create(
+            dataset=dataset, name="terms-metadata", settings={"type": "terms", "values": ["a", "b", "c"]}
+        )
+        await IntegerMetadataPropertyFactory.create(
+            dataset=dataset, name="integer-metadata", settings={"type": "integer", "min": 0, "max": 10}
+        )
+        await FloatMetadataPropertyFactory.create(
+            dataset=dataset, name="float-metadata", settings={"type": "float", "min": 0, "max": 10}
+        )
+
+        api.init(api_key=owner.api_key)
+        remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
+        remote_dataset.add_records(
+            [
+                FeedbackRecord(
+                    fields={"text": "text"},
+                    metadata={
+                        "terms-metadata": random.choice(["a", "b", "c"]),
+                        "integer-metadata": random.randint(0, 10),
+                        "float-metadata": random.uniform(0, 10),
+                    },
+                )
+                for _ in range(100)
+            ]
+        )
+
+        filtered_dataset = remote_dataset.filter_by(metadata_filters=metadata_filters)
         assert isinstance(filtered_dataset, FilteredRemoteFeedbackDataset)
         assert isinstance(filtered_dataset.records, FilteredRemoteFeedbackRecords)
         assert all([isinstance(record, RemoteFeedbackRecord) for record in filtered_dataset.records])
