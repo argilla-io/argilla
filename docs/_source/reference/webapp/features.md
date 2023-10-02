@@ -260,7 +260,7 @@ The search bar in Argilla is driven by Elasticsearch's powerful [query string sy
 
 It allows you to perform simple fuzzy searches of words and phrases, or complex queries taking full advantage of Argilla's data model.
 
-Check out the [query guide](/practical_guides/filter_dataset.md) for a comprehensive guide on how to search in the Argilla UI.
+Check out the [query guide](/practical_guides/filter_dataset) for a comprehensive guide on how to search in the Argilla UI.
 
 ## Filter Records
 
@@ -269,7 +269,7 @@ For example, you can filter records by their predictions, by a specific metadata
 The filters are available in all [modes](dataset.md#modes) of the UI.
 
 ```{hint}
-You can also filter the records through the search bar by means of [queries](/practical_guides/filter_dataset.md).
+You can also filter the records through the search bar by means of [queries](/practical_guides/filter_dataset).
 ```
 
 ```{note}

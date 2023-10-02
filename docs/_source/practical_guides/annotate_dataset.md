@@ -183,7 +183,7 @@ The search bar in Argilla is driven by Elasticsearch's powerful [query string sy
 
 It allows you to perform simple fuzzy searches of words and phrases, or complex queries taking full advantage of Argilla's data model.
 
-Check out our guide for [filtering and querying datasets](/practical_guides/filter_dataset.md) for a comprehensive guide on how to search in the Argilla UI.
+Check out our guide for [filtering and querying datasets](/practical_guides/filter_dataset) for a comprehensive guide on how to search in the Argilla UI.
 
 #### Semantic search
 

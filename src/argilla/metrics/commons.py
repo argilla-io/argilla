@@ -26,7 +26,7 @@ def text_length(name: str, query: Optional[str] = None) -> MetricSummary:
         name:
             The dataset name.
         query:
-            An ElasticSearch query with the [query string syntax](/practical_guides/filter_dataset.md)
+            An ElasticSearch query with the [query string syntax](/practical_guides/filter_dataset)
 
     Returns:
         The text length metric summary
@@ -52,7 +52,7 @@ def records_status(name: str, query: Optional[str] = None) -> MetricSummary:
         name:
             The dataset name.
         query:
-            An ElasticSearch query with the [query string syntax](/practical_guides/filter_dataset.md)
+            An ElasticSearch query with the [query string syntax](/practical_guides/filter_dataset)
 
     Returns:
         The status distribution  metric summary
@@ -78,7 +78,7 @@ def keywords(name: str, query: Optional[str] = None, size: int = 20) -> MetricSu
         name:
             The dataset name.
         query:
-            An ElasticSearch query with the [query string syntax](/practical_guides/filter_dataset.md)
+            An ElasticSearch query with the [query string syntax](/practical_guides/filter_dataset)
         size:
             The number of kewords to retrieve. Default to `20`
 
