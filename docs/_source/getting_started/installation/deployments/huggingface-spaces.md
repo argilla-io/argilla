@@ -87,7 +87,7 @@ rg.init(api_url="[your_space_url]", api_key="admin.apikey")
 rg.log(rg.read_datasets(dataset, task="TextClassification"), name="bankingapp_sentiment")
 ```
 
-Congrats! You now have a dataset available from the Argilla UI to start browsing and labeling. In the code above, we've used one of the many integrations with Hugging Face libraries, which let you [read hundreds of datasets](https://docs.argilla.io/en/latest/guides/features/datasets.html#Importing-a-Dataset) available on the Hub.
+Congrats! You now have a dataset available from the Argilla UI to start browsing and labeling. In the code above, we've used one of the many integrations with Hugging Face libraries, which let you read hundreds of datasets available on the Hub.
 
 ### Data labeling and model training
 
