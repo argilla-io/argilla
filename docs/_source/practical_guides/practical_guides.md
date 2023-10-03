@@ -38,12 +38,12 @@ Learn to use Argilla's UI and its features.
 ```{grid-item-card} 🌊 Simplify annotation with machine feedback workflow
 :link: annotation_workflows/annotation_workflows.html
 
-Use things active learning, weak supervision, semantic search and job scheduling.
+Use things like active learning, weak supervision, semantic search, and job scheduling.
 ```
 ```{grid-item-card} 📊 Collect responses and metrics
 :link: collect_responses.html
 
-Collect responses, get metrics and solve disagreements.
+Collect responses, get metrics, and solve disagreements.
 ```
 ```{grid-item-card} 📥 Export a dataset
 :link: export_dataset.html
