@@ -249,15 +249,13 @@ class TransformersModelCardData(TransformersModelCardDataBase):
             elif self.task_type == "for_question_answering":
                 training_task_args = (
                     f'question=dataset.field_by_name("{self.task.question.name}"), '
-                    f"context=dataset.field_by_name({self.task.context.name}), "
-                    f"answer=dataset.question_by_name({self.task.answer.name})"
+                    f'context=dataset.field_by_name("{self.task.context.name}"), '
+                    f'answer=dataset.question_by_name("{self.task.answer.name}")'
                 )
             else:
                 raise NotImplementedError(f"Transformer doesn't have this `task_type` implemented: `{self.task_type}`")
 
-        return task_call + self._template_task_call.format(
-            task_type=self.task_type, training_task_args=training_task_args
-        )
+        return task_call + TEMPLATE_TASK_CALL.format(task_type=self.task_type, training_task_args=training_task_args)
 
 
 @dataclass
