@@ -13,11 +13,15 @@
 #  limitations under the License.
 
 import logging
+from typing import TYPE_CHECKING
 
 from argilla.client.feedback.training.frameworks.transformers import ArgillaTransformersTrainer
 from argilla.client.models import TextClassificationRecord
 from argilla.training.setfit import ArgillaSetFitTrainer as ArgillaSetFitTrainerV1
 from argilla.utils.dependency import require_dependencies
+
+if TYPE_CHECKING:
+    from argilla.client.feedback.integrations.huggingface.card import SetFitModelCardData
 
 
 class ArgillaSetFitTrainer(ArgillaSetFitTrainerV1, ArgillaTransformersTrainer):
@@ -43,3 +47,21 @@ class ArgillaSetFitTrainer(ArgillaSetFitTrainerV1, ArgillaTransformersTrainer):
             self.multi_target_strategy = None
             self._column_mapping = {"text": "text", "label": "label"}
         self.init_training_args()
+
+    def model_card_data(self, **card_data_kwargs) -> "SetFitModelCardData":
+        """
+        Generate the card data to be used for the `ArgillaModelCard`.
+
+        Args:
+            card_data_kwargs: Extra arguments provided by the user when creating the `ArgillaTrainer`.
+
+        Returns:
+            SetFitModelCardData: Container for the data to be written on the `ArgillaModelCard`.
+        """
+        from argilla.client.feedback.integrations.huggingface.card import SetFitModelCardData
+
+        return SetFitModelCardData(
+            model_name=self._model,
+            task=self._task,
+            **card_data_kwargs,
+        )
