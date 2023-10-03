@@ -24,7 +24,7 @@ questions = [
         name="response_ranking",
         title="Order the responses based on their accuracy and helpfulness:",
         required=True,
-        values={"response-1": "Response 1", "response-2", "Response 2"} # or ["response-1", "response-2"]
+        values={"response-1": "Response 1", "response-2": "Response 2"} # or ["response-1", "response-2"]
     )
 ]
 ```
