@@ -14,7 +14,7 @@
 
 from ._dataset_card import ArgillaDatasetCard
 from ._parser import size_categories_parser
-from .model_card import ArgillaModelCard, FrameworkCardData, SentenceTransformerCardData
+from .model_card import ArgillaModelCard, FrameworkCardData, SentenceTransformerCardData, TransformersModelCardData
 
 __all__ = [
     "ArgillaDatasetCard",
@@ -22,4 +22,5 @@ __all__ = [
     "ArgillaModelCard",
     "FrameworkCardData",
     "SentenceTransformerCardData",
+    "TransformersModelCardData",
 ]
