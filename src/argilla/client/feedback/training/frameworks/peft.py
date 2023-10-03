@@ -12,11 +12,33 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import TYPE_CHECKING
 
 from argilla.client.feedback.training.frameworks.transformers import ArgillaTransformersTrainer
 from argilla.training.peft import ArgillaPeftTrainer as ArgillaPeftTrainerV1
+
+if TYPE_CHECKING:
+    from argilla.client.feedback.integrations.huggingface.card import PeftModelCardData
 
 
 class ArgillaPeftTrainer(ArgillaPeftTrainerV1, ArgillaTransformersTrainer):
     def __init__(self, *args, **kwargs):
         ArgillaTransformersTrainer.__init__(self, *args, **kwargs)
+
+    def model_card_data(self, **card_data_kwargs) -> "PeftModelCardData":
+        """
+        Generate the card data to be used for the `ArgillaModelCard`.
+
+        Args:
+            card_data_kwargs: Extra arguments provided by the user when creating the `ArgillaTrainer`.
+
+        Returns:
+            PeftModelCardData: Container for the data to be written on the `ArgillaModelCard`.
+        """
+        from argilla.client.feedback.integrations.huggingface.card import PeftModelCardData
+
+        return PeftModelCardData(
+            model_name=self._model,
+            task=self._task,
+            **card_data_kwargs,
+        )

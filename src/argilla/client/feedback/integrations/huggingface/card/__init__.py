@@ -17,6 +17,7 @@ from ._parser import size_categories_parser
 from .model_card import (
     ArgillaModelCard,
     FrameworkCardData,
+    PeftModelCardData,
     SentenceTransformerCardData,
     SetFitModelCardData,
     TransformersModelCardData,
@@ -30,4 +31,5 @@ __all__ = [
     "SentenceTransformerCardData",
     "TransformersModelCardData",
     "SetFitModelCardData",
+    "PeftModelCardData",
 ]
