@@ -20,6 +20,8 @@ from .model_card import (
     PeftModelCardData,
     SentenceTransformerCardData,
     SetFitModelCardData,
+    SpacyModelCardData,
+    SpacyTransformersModelCardData,
     TransformersModelCardData,
 )
 
@@ -32,4 +34,6 @@ __all__ = [
     "TransformersModelCardData",
     "SetFitModelCardData",
     "PeftModelCardData",
+    "SpacyModelCardData",
+    "SpacyTransformersModelCardData",
 ]

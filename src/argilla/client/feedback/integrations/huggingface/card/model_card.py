@@ -142,7 +142,7 @@ class FrameworkCardData(CardData):
         }
 
         if self.framework_kwargs:
-            kwargs["framework_kwargs"] = f"framework_kwargs={str(self.framework_kwargs)}"
+            kwargs["framework_kwargs"] = str(self.framework_kwargs)
 
         if extra_kwargs := self._to_dict():
             kwargs.update(**extra_kwargs)
@@ -162,6 +162,7 @@ class SpacyModelCardDataBase(FrameworkCardData):
     task_type: str = "for_text_classification"
     lang: Optional["spacy.Language"] = None
     gpu_id: Optional[int] = -1
+    optimize: Literal["efficiency", "accuracy"] = "efficiency"
 
     def _trainer_task_call(self) -> str:
         task_call = ""
@@ -171,13 +172,12 @@ class SpacyModelCardDataBase(FrameworkCardData):
             task_call += getsource(formatting_func) + "\n"
             training_task_args = "formatting_func=formatting_func"
         else:
-            training_task_args = (
-                f"text=dataset.field_by_name({self.task.texts}){f', label=dataset.question_by_name({self.task.label})'}"
-            )
+            text = f'dataset.field_by_name("{self.task.text.name}")'
+            training_task_args = f'text={text}, label=dataset.question_by_name("{self.task.label.question.name}")'
         return task_call + TEMPLATE_TASK_CALL.format(task_type=self.task_type, training_task_args=training_task_args)
 
     def _to_dict(self) -> Dict[str, str]:
-        return {"gpu_id": self.gpu_id, "lang": self.lang}
+        return {"gpu_id": self.gpu_id, "lang": self.lang, "optimize": self.optimize}
 
 
 @dataclass
@@ -194,7 +194,7 @@ class SpacyModelCardData(SpacyModelCardDataBase):
 
 
 @dataclass
-class SpacyTransformersModelCardData(FrameworkCardData):
+class SpacyTransformersModelCardData(SpacyModelCardDataBase):
     framework: Framework = Framework("spacy-transformers")
     update_transformer: bool = True
 
@@ -219,9 +219,7 @@ class TransformersModelCardDataBase(FrameworkCardData):
             training_task_args = "formatting_func=formatting_func"
         else:
             text = f'dataset.field_by_name("{self.task.text.name}")'
-            training_task_args = (
-                f'text=dataset.field_by_name({text}), label=dataset.question_by_name("{self.task.label.question.name}")'
-            )
+            training_task_args = f'text={text}, label=dataset.question_by_name("{self.task.label.question.name}")'
         return task_call + TEMPLATE_TASK_CALL.format(task_type=self.task_type, training_task_args=training_task_args)
 
     def _to_dict(self) -> Dict[str, str]:

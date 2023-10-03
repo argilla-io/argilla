@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import logging
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from typing_extensions import Literal
 
@@ -23,6 +23,9 @@ from argilla.training.spacy import ArgillaSpaCyTrainer as ArgillaSpaCyTrainerV1
 from argilla.training.spacy import ArgillaSpaCyTransformersTrainer as ArgillaSpaCyTransformersTrainerV1
 from argilla.training.spacy import _ArgillaSpaCyTrainerBase as _ArgillaSpaCyTrainerBaseV1
 from argilla.utils.dependency import require_dependencies
+
+if TYPE_CHECKING:
+    from argilla.client.feedback.integrations.huggingface.card import SpacyModelCardData, SpacyTransformersModelCardData
 
 
 class _ArgillaSpaCyTrainerBase(_ArgillaSpaCyTrainerBaseV1, ArgillaTrainerSkeleton):
@@ -150,6 +153,27 @@ class ArgillaSpaCyTrainer(ArgillaSpaCyTrainerV1, _ArgillaSpaCyTrainerBase):
         self.freeze_tok2vec = freeze_tok2vec
         _ArgillaSpaCyTrainerBase.__init__(self, **kwargs)
 
+    def model_card_data(self, **card_data_kwargs) -> "SpacyModelCardData":
+        """
+        Generate the card data to be used for the `ArgillaModelCard`.
+
+        Args:
+            card_data_kwargs: Extra arguments provided by the user when creating the `ArgillaTrainer`.
+
+        Returns:
+            SpacyModelCardData: Container for the data to be written on the `ArgillaModelCard`.
+        """
+        from argilla.client.feedback.integrations.huggingface.card import SpacyModelCardData
+
+        return SpacyModelCardData(
+            model_name=self._model,
+            task=self._task,
+            lang=self.language,
+            gpu_id=self.gpu_id,
+            framework_kwargs={"optimize": self.optimize, "freeze_tok2vec": self.freeze_tok2vec},
+            **card_data_kwargs,
+        )
+
 
 class ArgillaSpaCyTransformersTrainer(ArgillaSpaCyTransformersTrainerV1, _ArgillaSpaCyTrainerBase):
     def __init__(self, update_transformer: bool = True, **kwargs) -> None:
@@ -162,3 +186,24 @@ class ArgillaSpaCyTransformersTrainer(ArgillaSpaCyTransformersTrainerV1, _Argill
         """
         self.update_transformer = update_transformer
         _ArgillaSpaCyTrainerBase.__init__(self, **kwargs)
+
+    def model_card_data(self, **card_data_kwargs) -> "SpacyTransformersModelCardData":
+        """
+        Generate the card data to be used for the `ArgillaModelCard`.
+
+        Args:
+            card_data_kwargs: Extra arguments provided by the user when creating the `ArgillaTrainer`.
+
+        Returns:
+            SpacyTransformersModelCardData: Container for the data to be written on the `ArgillaModelCard`.
+        """
+        from argilla.client.feedback.integrations.huggingface.card import SpacyTransformersModelCardData
+
+        return SpacyTransformersModelCardData(
+            model_name=self._model,
+            task=self._task,
+            lang=self.language,
+            gpu_id=self.gpu_id,
+            framework_kwargs={"optimize": self.optimize, "update_transformer": self.update_transformer},
+            **card_data_kwargs,
+        )
