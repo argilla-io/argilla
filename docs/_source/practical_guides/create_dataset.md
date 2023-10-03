@@ -134,7 +134,7 @@ If you are using a public dataset, remember to always check the license to make 
 ```python
 from datasets import load_dataset
 
-# load and inspect a dataset from the Hugging Face Hub
+# Load and inspect a dataset from the Hugging Face Hub
 hf_dataset = load_dataset('databricks/databricks-dolly-15k', split='train')
 df = hf_dataset.to_pandas()
 df
