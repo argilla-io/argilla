@@ -80,12 +80,12 @@ fig.show()
 
 
 ```{hint}
-If you feel that the disagreement between annotators is too high, especially for questions that aren"t as subjective, this is a good sign that you should review your annotation guidelines and/or the questions and options.
+If you feel that the disagreement between annotators is too high, especially for questions that aren't as subjective, this is a good sign that you should review your annotation guidelines and/or the questions and options.
 ```
 
 ### Unifying Disagreements
 
-In this section, we explore some techniques you can use to solve disagreements in the responses. These are not the only possible techniques and you should choose them carefully according to the needs of your project and annotation team. Even though there are many ways in which you can unify responses, we offer support for some of them out-of-the box.
+In this section, we explore some techniques you can use to solve disagreements in the responses. These are not the only possible techniques and you should choose them carefully according to the needs of your project and annotation team. Even though there are many ways in which you can unify responses, we offer support for some of them out-of-the-box.
 
 #### Code
 
@@ -94,7 +94,7 @@ You can unify responses by using a `FeedbackDataset` in combination with a `Ques
 ```{include} /_common/tabs/unfication_strategies.md
 ```
 
-Once you have unified your responses, you will have a dataset that's ready for [fine-tuning](fine_tune.ipynb). Remember to save your unified dataset following one of the methods explained in [Export a Feedback Dataset](export_dataset.ipynb).
+Once you have unified your responses, you will have a dataset that's ready for [fine-tuning](fine_tune.md). Remember to save your unified dataset following one of the methods explained in [Export a Feedback Dataset](export_dataset.md).
 
 #### Strategies
 
@@ -103,12 +103,12 @@ Once you have unified your responses, you will have a dataset that's ready for [
 * *Majority vote (single-label questions)*: Labels can be aggregated using the most popular option, for which you will need to have at least 3 submitted responses. In the case of a tie, you can break it by choosing a random option.
 * *Majority vote (multi-label questions)*: If you are aggregating labels from a multi-label question, it would be more correct to calculate the majority vote per label. That means that for each label you need to check whether the majority of the annotators selected that specific label or not.
 * *Weighted majority vote*: You may decide to give some of your annotators more weight than others when aggregating labels so that their decisions count more than others. Some reasons to consider a weighted majority might be: because some annotators tend to have better agreement with ground truth annotations, they are experts or they represent the demographic target for specific questions. If you want to choose this option, first calculate a score from 0 to 1 for each annotator, then apply these weights to their responses. Finally, sum all the values and choose the option with the highest score.
-* *Train with disagreements*: If your labels are meant to solve highly subjective tasks, like sentiment analysis or abusive language detection, you may want to consider other options that preserve the natural disagreement between annotators during training. This is specially helpful to avoid diluting the feedback of minorities within your annotation team. If you want to learn more about this approach, we recommend checking the different methods discussed in [Davani et al. (2021)](https://arxiv.org/pdf/2110.05719.pdf).
+* *Train with disagreements*: If your labels are meant to solve highly subjective tasks, like sentiment analysis or abusive language detection, you may want to consider other options that preserve the natural disagreement between annotators during training. This is especially helpful to avoid diluting the feedback of minorities within your annotation team. If you want to learn more about this approach, we recommend checking the different methods discussed in [Davani et al. (2021)](https://arxiv.org/pdf/2110.05719.pdf).
 
 ##### For numerical values: `RankingQuestion` and `RatingQuestion`
 
 * *Majority vote*: If a record has more than 2 submitted responses, you can take the most popular value (for `RankingQuestion`s the most popular rank, for `RatingQuestion`s the most popular rating) as the final score. In the case of a tie, you can break it by choosing a random option or the lowest / highest score.
-* *Weighted majority vote*: As explained [above](#for-labels-labelquestion-and-multilabelquestion), you may want to weight the responses of different annotators. In that case, calculate a score from 0 to 1 for each annotator, then apply these weights to their responses. Finally, sum all the values and choose the option with the highest score.
+* *Weighted majority vote*: As explained [above](#for-labels-labelquestion-and-multilabelquestion), you may want to weigh the responses of different annotators. In that case, calculate a score from 0 to 1 for each annotator, then apply these weights to their responses. Finally, sum all the values and choose the option with the highest score.
 * *Mean score*: For this technique, you can take all responses and calculate the mean score.
 * *Lowest / highest score*: Depending on how the question is formulated, you can take the `max` or `min` value.
 
@@ -125,7 +125,7 @@ Once you have unified your responses, you will have a dataset that's ready for [
 ```{include} /_common/other_datasets.md
 ```
 
-This guide gives you a brief introduction to Argilla Metrics. Argilla Metrics enable you to perform fine-grained analyses of your models and training datasets. Argilla Metrics are inspired by a a number of seminal works such as [Explainaboard](http://explainaboard.nlpedia.ai/).
+This guide gives you a brief introduction to Argilla Metrics. Argilla Metrics enables you to perform fine-grained analyses of your models and training datasets. Argilla Metrics are inspired by a number of seminal works such as [Explainaboard](https://github.com/neulab/explainaBoard).
 
 The main goal is to make it easier to build more robust models and training data, going beyond single-number metrics (e.g., F1).
 
@@ -138,14 +138,14 @@ from argilla import metrics
 ```
 
 ```{note}
-This feature is experimental, you can expect some changes in the Python API. Please report on Github any issue you encounter.
+This feature is experimental, you can expect some changes in the Python API. Please report any issue you encounter on Github.
 ````
 
 ```{note}
 Verify you have already installed Jupyter Widgets in order to properly visualize the plots. See https://ipywidgets.readthedocs.io/en/latest/user_install.html
 ````
 
-For running this guide you need to install the following dependencies:
+To run this guide, you need to install the following dependencies:
 
 ```python
 %pip install datasets spacy plotly -qqq
@@ -301,7 +301,7 @@ top_k_mentions(
 
 ![Top-k annotated entities](/_static/images/guides/metrics/top_k_annotated_entities.png)
 
-From the above we see we can quickly detect an annotation issue: double quotes `"` are most of the time tagged as `O` (no entity) but in some cases (~60 examples) are tagged as beginning of entities like ORG or MISC, which is likely a hand-labeling error, including the quotes inside the entity span.
+From the above, we see we can quickly detect an annotation issue: double quotes `"` are most of the time tagged as `O` (no entity) but in some cases (~60 examples) are tagged as the beginning of entities like ORG or MISC, which is likely a hand-labeling error, including the quotes inside the entity span.
 
 ```python
 from argilla.metrics.token_classification import *
