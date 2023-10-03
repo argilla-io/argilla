@@ -153,7 +153,7 @@ The next step is to create records following Argilla's `FeedbackRecord` format. 
 - `responses` (optional): A list of all responses to a record. You will only need to add them if your dataset already has some annotated records. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered. Also make sure to include `user_id`s in case you're planning to add more than one response for the same question, as only one `user_id` can be None, later to be replaced by the current active `user_id`, while the rest will be discarded otherwise.
 
 ```python
-# create a single Feedback Record
+# Create a single Feedback Record
 record = rg.FeedbackRecord(
     fields={
         "question": "Why can camels survive long without water?",
@@ -173,7 +173,7 @@ records = [rg.FeedbackRecord(fields={"question": record["instruction"], "answer"
 Now, we simply add our records to the dataset we configured [above](#configure-the-dataset):
 
 ```python
-#add records to the dataset
+# Add records to the dataset
 dataset.add_records(records)
 ```
 
@@ -552,7 +552,7 @@ rg.log(records=rec, name="my_dataset")
 ```python
 import argilla as rg
 
-record = rg.TokenClassificationRecord(
+rec = rg.TokenClassificationRecord(
     text="Michael is a professor at Harvard",
     tokens=["Michael", "is", "a", "professor", "at", "Harvard"],
     prediction=[("NAME", 0, 7, 0.75), ("LOC", 26, 33, 0.8)],
@@ -569,7 +569,7 @@ rg.log(records=rec, name="my_dataset")
 ```python
 import argilla as rg
 
-record = rg.Text2TextRecord(
+rec = rg.Text2TextRecord(
     text="A giant giant spider is discovered... how much does he make in a year?",
     prediction=["He has 3*4 trees. So he has 12*5=60 apples."],
 )
@@ -627,7 +627,7 @@ In this case, we expect a `List[Tuple[str, int, int, float]]` as the prediction,
 ```python
 import argilla as rg
 
-record = rg.TokenClassificationRecord(
+rec = rg.TokenClassificationRecord(
     text=...,
     tokens=...,
     prediction=[("label_1", 0, 7, 0.75), ("label_2", 26, 33, 0.8)],
@@ -644,7 +644,7 @@ In this case, we expect a `List[str]` as the prediction.
 ```python
 import argilla as rg
 
-record = rg.Text2TextRecord(
+rec = rg.Text2TextRecord(
     text=...,
     prediction=["He has 3*4 trees. So he has 12*5=60 apples."],
 )
@@ -703,7 +703,7 @@ In this case, we expect a `List[Tuple[str, int, int]]` as the annotation, where 
 ```python
 import argilla as rg
 
-record = rg.TokenClassificationRecord(
+rec = rg.TokenClassificationRecord(
     text=...,
     tokens=...,
     annotation=[("label_1", 0, 7), ("label_2", 26, 33)],
@@ -721,7 +721,7 @@ In this case, we expect a `str` as the annotation.
 ```python
 import argilla as rg
 
-record = rg.Text2TextRecord(
+rec = rg.Text2TextRecord(
     text=...,
     annotation="He has 3*4 trees. So he has 12*5=60 apples.",
 )
