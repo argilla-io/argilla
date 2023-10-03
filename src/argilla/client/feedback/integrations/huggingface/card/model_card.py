@@ -220,7 +220,7 @@ class TransformersModelCardDataBase(FrameworkCardData):
         else:
             text = f'dataset.field_by_name("{self.task.text.name}")'
             training_task_args = (
-                f"text=dataset.field_by_name({text}), label=dataset.question_by_name({self.task.label.question.name})"
+                f'text=dataset.field_by_name({text}), label=dataset.question_by_name("{self.task.label.question.name}")'
             )
         return task_call + TEMPLATE_TASK_CALL.format(task_type=self.task_type, training_task_args=training_task_args)
 
@@ -261,6 +261,7 @@ class TransformersModelCardData(TransformersModelCardDataBase):
 @dataclass
 class SetFitModelCardData(TransformersModelCardDataBase):
     framework: Framework = Framework("setfit")
+    tags: Optional[List[str]] = field(default_factory=lambda: ["text-classification", "setfit", "argilla"])
 
 
 @dataclass
