@@ -1,22 +1,22 @@
 # Telemetry
 Argilla uses telemetry to report anonymous usage and error information. As an open-source software, this type of information is important to improve and understand how the product is used.
 
-## How to opt-out
-You can opt-out of telemetry reporting using the `ENV` variable `ARGILLA_ENABLE_TELEMETRY` before launching the server. Setting this variable to `0` will completely disable telemetry reporting.
+## How to opt out
+You can opt out of telemetry reporting using the `ENV` variable `ARGILLA_ENABLE_TELEMETRY` before launching the server. Setting this variable to `0` will completely disable telemetry reporting.
 
-If you are a Linux/MacOs users you should run:
+If you are a Linux/MacOs user, you should run:
 
 ```bash
 export ARGILLA_ENABLE_TELEMETRY=0
 ```
 
-If you are Windows users you should run:
+If you are a Windows user, you should run:
 
 ```bash
 set ARGILLA_ENABLE_TELEMETRY=0
 ```
 
-To opt-in again, you can set the variable to `1`.
+To opt in again, you can set the variable to `1`.
 
 ## Why reporting telemetry
 Anonymous telemetry information enables us to continuously improve the product and detect recurring problems to better serve all users. We collect aggregated information about general usage and errors. We do NOT collect any information on users' data records, datasets, or metadata information.
@@ -52,6 +52,6 @@ Additionally, we report the usage of integration for our Python library:
 
 * `ArgillaTrainer` framework usage and NLP task-type.
 
-For transparency, you can inspect the source code where this is performed [here](https://github.com/argilla-io/argilla/blob/main/src/argilla/server/commons/telemetry.py#L53).
+For transparency, you can inspect the source code where this is performed [here](https://github.com/argilla-io/argilla/blob/main/src/argilla/utils/telemetry.py).
 
 If you have any doubts, don't hesitate to join our [Slack channel](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g) or open a GitHub issue. We'd be very happy to discuss how we can improve this.

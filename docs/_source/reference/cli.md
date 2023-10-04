@@ -15,8 +15,8 @@ argilla users create --help
 
 ## Login
 
-The `argilla login` command is used to store the local credentials of an user, with the main purpose of reusing these credentials
-to automatically authenticate in the Argilla server to run other commands or Python scripts that uses Argilla.
+The `argilla login` command is used to store the local credentials of a user, with the main purpose of reusing these credentials
+to automatically authenticate in the Argilla server to run other commands or Python scripts that use Argilla.
 
 ```sh
 argilla login --api-url http://localhost:6900
@@ -36,14 +36,14 @@ argilla logout
 ```
 
 :::{note}
-The `logout` will try to connect to the Argilla server before removing the stored credentials. If for some reason,
+The `logout` will try to connect to the Argilla server before removing the stored credentials. If, for some reason,
 the Argilla server is not available but you still want to remove the stored credentials, the `--force` option can
 be used.
 :::
 
 ## Whoami
 
-The `argilla whoami` command prints the information (username, workspaces, API Key, etc) of the logged-in user.
+The `argilla whoami` command prints the information (username, workspaces, API Key, etc.) of the logged-in user.
 
 ```sh
 argilla whoami
@@ -52,7 +52,7 @@ argilla whoami
 ## Info
 
 The `argilla info` command prints the versions of the Python client, Argilla server and ElasticSearch server used and that might
-be usefull for debugging purposes or reporting an issue.
+be useful for debugging purposes or reporting an issue.
 
 ```sh
 argilla info
@@ -62,9 +62,9 @@ argilla info
 
 The `argilla users` group of commands offers basic operations for managing the users of the connected Argilla server.
 
-### Create an user
+### Create a user
 
-The `argilla users create` command allows to easily create a new user from the command line. The command will prompt for the
+The `argilla users create` command allows you to easily create a new user from the command line. The command will prompt for the
 username and password of the new user, but the following options can be provided:
 
 - `--username`: The username of the new user.
@@ -79,9 +79,9 @@ to multiple workspaces.
 argilla users create --username joe --first-name Joe --last-name Doe --role admin --workspace workspace1 --workspace workspace2
 ```
 
-### Delete an user
+### Delete a user
 
-The `argilla users delete` command allows to easily delete an existing user from the command line providing the username of the
+The `argilla users delete` command allows you to easily delete an existing user from the command line by providing the username of the
 user to delete.
 
 ```sh
@@ -91,7 +91,7 @@ argilla users delete joe
 ### List users
 
 The `argilla users list` command shows the list of the registered users in the Argilla server. Optionally, the `--workspace`
-option can be provided to show only the users that belongs to a specific workspace.
+option can be provided to show only the users that belong to a specific workspace.
 
 ```sh
 argilla users list
@@ -100,12 +100,12 @@ argilla users list
 ## Workspaces
 
 The `argilla workspaces` group of commands offers basic operations for managing the workspaces of the connected Argilla server.
-The commands of this group that performs an operation in a specific workspace requires the `--name` option to be provided to
+The commands of this group that perform an operation in a specific workspace require the `--name` option to be provided to
 specify the workspace where the operation will be performed.
 
 ### Create a workspace
 
-The `argilla workspaces create` command allows to easily create a new workspace from the command line.
+The `argilla workspaces create` command allows you to easily create a new workspace from the command line.
 
 ```sh
 argilla workspaces create my-new-workspace
@@ -113,7 +113,7 @@ argilla workspaces create my-new-workspace
 
 ### Add user to workspace
 
-The `argilla workspaces add-user` command allows to add an user to a workspace providing the username of the user and the name of the workspace.
+The `argilla workspaces add-user` command allows you to add a user to a workspace by providing the username of the user and the name of the workspace.
 
 ```sh
 argilla workspaces --name my-workspace add-user joe
@@ -121,7 +121,7 @@ argilla workspaces --name my-workspace add-user joe
 
 ### Delete use from workspace
 
-The `argilla workspaces delete-user` command allows to delete an user from a workspace providing the username of the user and the name of the workspace.
+The `argilla workspaces delete-user` command allows you to delete a user from a workspace by providing the username of the user and the name of the workspace.
 
 ```sh
 argilla workspaces --name my-workspace delete-user joe
@@ -138,13 +138,13 @@ argilla workspaces list
 ## Datasets
 
 The `argilla datasets` group of commands offers basic operations for managing the datasets stored in the connected Argilla server.
-The commands of this group that performs an operation in a specific dataset requires the `--name` option to be provided and optionally
+The commands of this group that perform an operation in a specific dataset require the `--name` option to be provided and optionally
 the `--workspace` option to specify the workspace where the dataset is stored. If the `--workspace` option is not provided, then the
 workspace stored in the local credentials will be used.
 
 ### Delete a dataset
 
-The `argilla datasets delete` command allows to remove a `FeedbackDataset` from the Argilla server providing the name of the
+The `argilla datasets delete` command allows you to remove a `FeedbackDataset` from the Argilla server by providing the name of the
 dataset and optionally the workspace where the dataset is stored.
 
 ```sh
@@ -155,7 +155,7 @@ argilla datasets --name my-dataset --workspace my-workspace delete
 
 The `argilla datasets list` shows the list of the datasets stored in the Argilla server. The following options can be provided:
 
-- `--workspace`: The name of the workspace which datasets will be listed. If not provided, all the datasets of all the workspaces
+- `--workspace`: The name of the workspace from which the datasets will be listed. If not provided, all the datasets from all the workspaces
 will be listed.
 - `--type`: The type of datasets to be listed. Two possible values: `feedback` and `other` (for `TextClassification`, `TokenClassification` and `Text2Text` datasets).
 
@@ -175,8 +175,8 @@ This group of commands will only be available if Argilla was installed with the 
 
 The `argilla server start` command will start the Argilla server blocking the current terminal. The following options can be provided:
 
-- `--host`: The host where the Argilla server will be binded. Default value is `0.0.0.0`.
-- `--port`: The port where the Argilla server will be binded. Default value is `6900`.
+- `--host`: The host where the Argilla server will be bound. Default value is `0.0.0.0`.
+- `--port`: The port where the Argilla server will be bound. Default value is `6900`.
 - `--access-log/--no-access-log`: Enable/disable the server access log. Default value is `True`.
 
 ### Database management
@@ -189,9 +189,9 @@ The `argilla server database` group of commands offers functionality for managin
 ### User management using the database connection
 
 The `argilla server database users` group of commands offers functionality for managing the users of the Argilla server. To do so,
-the `argilla server database users` commands uses the database connection instead of the Argilla API, so these commands will have
+the `argilla server database users` commands use the database connection instead of the Argilla API, so these commands will have
 to get executed from a machine that has access to the database. To set the URL of the database that will be used by the commands,
-check [SQLite and PostgreSQL](/getting_started/installation/configurations/server_configuration.html#sqlite-and-postgresql) section.
+check [SQLite and PostgreSQL](/getting_started/installation/configurations/server_configuration.md#sqlite-and-postgresql) section.
 
 - `argilla server database users create`: creates a new user in the Argilla server database.
 - `argilla server database users create_default`: creates the default users in the Argilla server database.
