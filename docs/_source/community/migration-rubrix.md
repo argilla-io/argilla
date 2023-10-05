@@ -5,7 +5,7 @@ If you have already running a Rubrix server and want to upgrade to the new Argil
 ## Python module and command
 
 The module now is called `argilla` instead of `rubrix`, but the rest of the code remains fully compatible, so
-if you have to updgrade some codebase, you should just replace the line:
+if you have to upgrade some codebase, you should just replace the line:
 
 `import rubrix...`
 
@@ -46,7 +46,7 @@ For indices containing the dataset records, the new name convention is `ar.datas
 
 ## Enable migration process
 
-By default, the new Argilla server won't check if datasets from a previous Rubrix instance exists.
+By default, the new Argilla server won't check if datasets from a previous Rubrix instance exist.
 
 If you want the new Argilla Server to detect previous Rubrix datasets and make them accessible into your Argilla Server instance you can set the `ARGILLA_ENABLE_MIGRATION` like this before starting the Argilla server:
 
