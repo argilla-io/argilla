@@ -11,7 +11,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+#
+import re
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
@@ -26,6 +27,7 @@ from argilla.server.models import Dataset as DatasetModel
 from argilla.server.models import ResponseStatus, User
 from argilla.server.policies import DatasetPolicyV1, authorize
 from argilla.server.schemas.v1.datasets import (
+    METADATA_PROPERTY_CREATE_NAME_REGEX,
     Dataset,
     DatasetCreate,
     Datasets,
@@ -140,6 +142,7 @@ async def _build_response_status_filter_for_search(
 
 _RECORD_SORT_FIELD_VALUES = tuple(field.value for field in RecordSortField)
 _VALID_SORT_VALUES = tuple(sort.value for sort in SortOrder)
+_METADATA_PROPERTY_SORT_BY_REGEX = re.compile(r"^metadata\.(?P<name>(?=.*[a-z0-9])[a-z0-9_-]+)$")
 
 
 async def _build_sort_by(
@@ -153,20 +156,32 @@ async def _build_sort_by(
         if sort_field in _RECORD_SORT_FIELD_VALUES:
             field = sort_field
         else:
+            match = _METADATA_PROPERTY_SORT_BY_REGEX.match(sort_field)
+            if not match:
+                valid_sort_fields = ", ".join(f"'{sort_field}'" for sort_field in _RECORD_SORT_FIELD_VALUES)
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=(
+                        f"Provided sort field in 'sort_by' query param '{sort_field}' is not valid. It must be either"
+                        f" {valid_sort_fields} or `metadata.metadata-property-name`"
+                    ),
+                )
+
+            metadata_property_name = match.group("name")
             metadata_property = await datasets.get_metadata_property_by_name_and_dataset_id(
-                db, name=sort_field, dataset_id=dataset.id
+                db, name=metadata_property_name, dataset_id=dataset.id
             )
             if not metadata_property:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                     detail=(
-                        f"Provided metadata property in 'sort_by' query param '{sort_field}' not found in dataset with"
-                        f" '{dataset.id}'."
+                        f"Provided metadata property in 'sort_by' query param '{metadata_property_name}' not found in"
+                        f" dataset with '{dataset.id}'."
                     ),
                 )
             field = metadata_property
 
-        if sort_order not in _VALID_SORT_VALUES:
+        if sort_order is not None and sort_order not in _VALID_SORT_VALUES:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=(
