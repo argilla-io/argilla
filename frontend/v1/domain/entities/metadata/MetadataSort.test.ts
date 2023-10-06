@@ -91,6 +91,17 @@ describe("MetadataSort ", () => {
 
       expect(param).toEqual(["metadata.loss:desc", "metadata.split:asc"]);
     });
+
+    test("should be able to convert to router params for record sort", () => {
+      const metadataSort = new MetadataSortList(createMetadataMock());
+      metadataSort.select("loss");
+      metadataSort.select("inserted_at");
+      metadataSort.toggleSort("loss");
+
+      const param = metadataSort.convertToRouteParam();
+
+      expect(param).toEqual(["metadata.loss:desc", "inserted_at:asc"]);
+    });
   });
 
   describe("Complete by Route Params", () => {
@@ -104,6 +115,16 @@ describe("MetadataSort ", () => {
       expect(metadataSort.selected[0].sort).toEqual("desc");
       expect(metadataSort.selected[1].name).toEqual("split");
       expect(metadataSort.selected[1].sort).toEqual("asc");
+    });
+
+    test("should be able to complete record sort", () => {
+      const metadataSort = new MetadataSortList(createMetadataMock());
+      metadataSort.completeByRouteParams("metadata.loss:desc,inserted_at:desc");
+
+      expect(metadataSort.selected[0].name).toEqual("loss");
+      expect(metadataSort.selected[0].sort).toEqual("desc");
+      expect(metadataSort.selected[1].name).toEqual("inserted_at");
+      expect(metadataSort.selected[1].sort).toEqual("desc");
     });
   });
 });
