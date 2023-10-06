@@ -140,6 +140,9 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                     )
                 unique_names.add(metadata_property.name)
         self._metadata_properties = metadata_properties
+        self._metadata_properties_mapping = {
+            metadata_property.name: metadata_property for metadata_property in self._metadata_properties
+        }
 
         if guidelines is not None:
             if not isinstance(guidelines, str):
@@ -225,15 +228,15 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             name: the name of the metadata property to return.
 
         Raises:
-            ValueError: if the metadata property with the given name does not exist.
+            KeyError: if the metadata property with the given name does not exist.
         """
-        for metadata_property in self._metadata_properties:
-            if metadata_property.name == name:
-                return metadata_property
-        raise ValueError(
-            f"Metadata property with name='{name}' not found, available metadata property names are:"
-            f" {', '.join(m.name for m in self._metadata_properties)}"
-        )
+        try:
+            return self._metadata_properties_mapping[name]
+        except KeyError:
+            raise KeyError(
+                f"Metadata property with name='{name}' not found, available metadata property names are:"
+                f" {', '.join(self._metadata_properties_mapping.keys())}"
+            )
 
     def _parse_records(
         self, records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]]

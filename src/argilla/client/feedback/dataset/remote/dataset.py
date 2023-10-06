@@ -192,12 +192,11 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             if not isinstance(metadata_filters, list):
                 metadata_filters = [metadata_filters]
             if not all(
-                metadata_filter.name in [metadata_property.name for metadata_property in self.metadata_properties]
-                for metadata_filter in metadata_filters
+                metadata_filter.name in self._metadata_properties_mapping.keys() for metadata_filter in metadata_filters
             ):
                 raise ValueError(
                     f"Invalid `metadata_filters=[{', '.join(metadata_filter.name for metadata_filter in metadata_filters)}`"
-                    f" provided, must be one of: {[metadata_property.name for metadata_property in self.metadata_properties]}"
+                    f" provided, must be one of: {self._metadata_properties_mapping.keys()}"
                 )
             for metadata_filter in metadata_filters:
                 metadata_property = self.metadata_property_by_name(name=metadata_filter.name)
