@@ -60,8 +60,6 @@ class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase):
             " and len computation may add undesirable extra computation. You can fetch"
             "records using\n`ds.pull()`\nor iterate over results to know the length of the result:\n"
             "`records = [r for r in ds.records]\n",
-            UserWarning,
-            stacklevel=1,
         )
 
     def _fetch_records(self, offset: int, limit: int) -> "FeedbackRecordsModel":
