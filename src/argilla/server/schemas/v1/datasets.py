@@ -11,13 +11,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import dataclasses
+
 from datetime import datetime
 from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
-from fastapi import Query
-from pydantic import BaseModel, conlist, constr, root_validator, validator
+from fastapi import HTTPException, Query
+from pydantic import BaseModel, Extra, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
 from pydantic.generics import GenericModel
 from pydantic.utils import GetterDict
@@ -31,7 +31,7 @@ try:
 except ImportError:
     from typing_extensions import Annotated
 
-from argilla.server.enums import DatasetStatus, FieldType, MetadataPropertyType
+from argilla.server.enums import DatasetStatus, FieldType, MetadataPropertyType, SortOrder
 from argilla.server.models import QuestionSettings, QuestionType, ResponseStatus
 
 DATASET_NAME_REGEX = r"^(?!-|_)[a-zA-Z0-9-_ ]+$"
