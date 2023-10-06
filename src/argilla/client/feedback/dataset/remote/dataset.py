@@ -191,6 +191,11 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         if metadata_filters:
             if not isinstance(metadata_filters, list):
                 metadata_filters = [metadata_filters]
+            # TODO(alvarobartt): remove this when https://github.com/argilla-io/argilla/pull/3829 is merged
+            if not hasattr(self, "_metadata_properties_mapping") or self._metadata_properties_mapping is None:
+                self._metadata_properties_mapping = {
+                    metadata_property.name: metadata_property for metadata_property in self._metadata_properties
+                }
             if not all(
                 metadata_filter.name in self._metadata_properties_mapping.keys() for metadata_filter in metadata_filters
             ):

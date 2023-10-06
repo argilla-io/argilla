@@ -140,9 +140,6 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                     )
                 unique_names.add(metadata_property.name)
         self._metadata_properties = metadata_properties
-        self._metadata_properties_mapping = {
-            metadata_property.name: metadata_property for metadata_property in self._metadata_properties
-        }
 
         if guidelines is not None:
             if not isinstance(guidelines, str):
@@ -230,6 +227,11 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         Raises:
             KeyError: if the metadata property with the given name does not exist.
         """
+        # TODO(alvarobartt): remove this when https://github.com/argilla-io/argilla/pull/3829 is merged
+        if not hasattr(self, "_metadata_properties_mapping") or self._metadata_properties_mapping is None:
+            self._metadata_properties_mapping = {
+                metadata_property.name: metadata_property for metadata_property in self._metadata_properties
+            }
         try:
             return self._metadata_properties_mapping[name]
         except KeyError:
