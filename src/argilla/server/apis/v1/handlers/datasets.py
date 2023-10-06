@@ -155,18 +155,7 @@ async def _build_sort_by(
     for sort_field, sort_order in sort_by_query_param.items():
         if sort_field in _RECORD_SORT_FIELD_VALUES:
             field = sort_field
-        else:
-            match = _METADATA_PROPERTY_SORT_BY_REGEX.match(sort_field)
-            if not match:
-                valid_sort_fields = ", ".join(f"'{sort_field}'" for sort_field in _RECORD_SORT_FIELD_VALUES)
-                raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail=(
-                        f"Provided sort field in 'sort_by' query param '{sort_field}' is not valid. It must be either"
-                        f" {valid_sort_fields} or `metadata.metadata-property-name`"
-                    ),
-                )
-
+        elif (match := _METADATA_PROPERTY_SORT_BY_REGEX.match(sort_field)) is not None:
             metadata_property_name = match.group("name")
             metadata_property = await datasets.get_metadata_property_by_name_and_dataset_id(
                 db, name=metadata_property_name, dataset_id=dataset.id
@@ -180,6 +169,15 @@ async def _build_sort_by(
                     ),
                 )
             field = metadata_property
+        else:
+            valid_sort_fields = ", ".join(f"'{sort_field}'" for sort_field in _RECORD_SORT_FIELD_VALUES)
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=(
+                    f"Provided sort field in 'sort_by' query param '{sort_field}' is not valid. It must be either"
+                    f" {valid_sort_fields} or `metadata.metadata-property-name`"
+                ),
+            )
 
         if sort_order is not None and sort_order not in _VALID_SORT_VALUES:
             raise HTTPException(
