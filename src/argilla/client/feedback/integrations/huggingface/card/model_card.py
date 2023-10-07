@@ -112,6 +112,7 @@ class FrameworkCardData(CardData):
     framework_kwargs: Dict[str, Any] = field(default_factory=dict)
     task: Optional[TrainingTaskTypes] = None
     task_type: Optional[TaskTypes] = None
+    output_dir: str = field(default="text_classification_model")
     version: Dict[str, str] = field(
         default_factory=lambda: {
             "python": python_version(),
@@ -128,6 +129,14 @@ class FrameworkCardData(CardData):
         """
         pass
 
+    def _predict_call(self) -> str:
+        """Generates the call to the `predict` method, for the models that implement it.
+
+        Returns:
+            A sample call to the predict method according to the type of model.
+        """
+        pass
+
     def _to_dict(self) -> Dict[str, str]:
         """Write this method to insert variables pertaining to a special framework only."""
         return {}
@@ -139,6 +148,7 @@ class FrameworkCardData(CardData):
         kwargs = {
             "framework": self.framework.value,
             "trainer_task_call": self._trainer_task_call(),
+            "predict_call": self._predict_call(),
         }
 
         if self.framework_kwargs:
@@ -176,6 +186,9 @@ class SpacyModelCardDataBase(FrameworkCardData):
             training_task_args = f'text={text}, label=dataset.question_by_name("{self.task.label.question.name}")'
         return task_call + TEMPLATE_TASK_CALL.format(task_type=self.task_type, training_task_args=training_task_args)
 
+    def _predict_call(self) -> str:
+        return 'trainer.predict("This is awesome!")'
+
     def _to_dict(self) -> Dict[str, str]:
         return {"gpu_id": self.gpu_id, "lang": self.lang, "optimize": self.optimize}
 
@@ -209,6 +222,7 @@ class SpacyTransformersModelCardData(SpacyModelCardDataBase):
 class TransformersModelCardDataBase(FrameworkCardData):
     task_type: str = "for_text_classification"
     tokenizer: "PreTrainedTokenizer" = ""
+    output_dir: str = field(default="text_classification_model")
 
     def _trainer_task_call(self) -> str:
         task_call = ""
@@ -221,6 +235,9 @@ class TransformersModelCardDataBase(FrameworkCardData):
             text = f'dataset.field_by_name("{self.task.text.name}")'
             training_task_args = f'text={text}, label=dataset.question_by_name("{self.task.label.question.name}")'
         return task_call + TEMPLATE_TASK_CALL.format(task_type=self.task_type, training_task_args=training_task_args)
+
+    def _predict_call(self) -> str:
+        return 'trainer.predict("This is awesome!")'
 
     def _to_dict(self) -> Dict[str, str]:
         return {"tokenizer": self.tokenizer}
@@ -255,6 +272,26 @@ class TransformersModelCardData(TransformersModelCardDataBase):
 
         return task_call + TEMPLATE_TASK_CALL.format(task_type=self.task_type, training_task_args=training_task_args)
 
+    def _predict_call(self) -> str:
+        if self.task_type == "for_text_classification":
+            return super()._predict_call()
+        elif self.task_type == "for_question_answering":
+            from textwrap import dedent
+
+            return dedent(
+                f"""\
+                # This type of model has no `predict` method implemented from argilla, but can be done using the underlying library
+
+                from transformers import pipeline
+
+                qa_model = pipeline("question-answering", model="{self.output_dir}")
+                question = "Where do I live?"
+                context = "My name is Merve and I live in İstanbul."
+                qa_model(question = question, context = context)"""
+            )
+        else:
+            raise NotImplementedError(f"`task_type` not implemented: `{self.task_type}`")
+
 
 @dataclass
 class SetFitModelCardData(TransformersModelCardDataBase):
@@ -284,9 +321,13 @@ class PeftModelCardData(TransformersModelCardDataBase):
 class OpenAIModelCardData(FrameworkCardData):
     framework: Framework = Framework("openai")
     task_type: str = "for_chat_completion"
+    output_dir: str = field(default="chat_completion_model")
 
     def _trainer_task_call(self) -> str:
         return _formatting_func_call(self.task.formatting_func, self.task_type)
+
+    def _predict_call(self) -> str:
+        raise NotImplementedError("To be done")
 
 
 @dataclass
@@ -298,15 +339,100 @@ class TRLModelCardData(FrameworkCardData):
         "for_proximal_policy_optimization",
         "for_direct_preference_optimization",
     ]
+    output_dir: str = field(default="")
 
     def _trainer_task_call(self) -> str:
         return _formatting_func_call(self.task.formatting_func, self.task_type)
+
+    def _predict_call(self) -> str:
+        from textwrap import dedent
+
+        predict_call = "# This type of model has no `predict` method implemented from argilla, but can be done using the underlying library\n"
+        if self.task_type == "for_supervised_fine_tuning":
+            return predict_call + dedent(
+                f"""\
+                from transformers import GenerationConfig, AutoTokenizer, GPT2LMHeadModel
+
+                def generate(model_id: str, instruction: str, context: str = "") -> str:
+                    model = GPT2LMHeadModel.from_pretrained(model_id)
+                    tokenizer = AutoTokenizer.from_pretrained(model_id)
+
+                    inputs = template.format(
+                        instruction=instruction,
+                        context=context,
+                        response="",
+                    ).strip()
+
+                    encoding = tokenizer([inputs], return_tensors="pt")
+                    outputs = model.generate(
+                        **encoding,
+                        generation_config=GenerationConfig(
+                            max_new_tokens=32,
+                            min_new_tokens=12,
+                            pad_token_id=tokenizer.pad_token_id,
+                            eos_token_id=tokenizer.eos_token_id,
+                        ),
+                    )
+                    return tokenizer.decode(outputs[0])
+
+                generate("{self.output_dir}", "Is a toad a frog?")"""
+            )
+        elif self.task_type == "for_reward_modelling":
+            return predict_call + dedent(
+                f"""\
+                from transformers import AutoTokenizer, AutoModelForSequenceClassification
+                import torch
+
+                model = AutoModelForSequenceClassification.from_pretrained("{self.output_dir}")
+                tokenizer = AutoTokenizer.from_pretrained("{self.output_dir}")
+
+                def get_score(model, tokenizer, text):
+                    # Tokenize the input sequences
+                    inputs = tokenizer(text, truncation=True, padding="max_length", max_length=512, return_tensors="pt")
+
+                    # Perform forward pass
+                    with torch.no_grad():
+                        outputs = model(**inputs)
+
+                    # Extract the logits
+                    return outputs.logits[0, 0].item()
+
+                # Example usage
+                example = template.format(instruction="your prompt", context="your context", response="response")
+
+                score = get_score(model, tokenizer, example)
+                print(score)"""
+            )
+        elif (self.task_type == "for_proximal_policy_optimization") or (
+            self.task_type == "for_direct_preference_optimization"
+        ):
+            return predict_call + dedent(
+                f"""\
+                from transformers import AutoModelForCausalLM, AutoTokenizer
+
+                model = AutoModelForCausalLM.from_pretrained("{self.output_dir}")
+                tokenizer = AutoTokenizer.from_pretrained("{self.output_dir}")
+                tokenizer.pad_token = tokenizer.eos_token
+
+                inputs = template.format(
+                    instruction="your prompt",
+                    context="your context",
+                    response=""
+                ).strip()
+                encoding = tokenizer([inputs], return_tensors="pt")
+                outputs = model.generate(**encoding, max_new_tokens=30)
+                output_text = tokenizer.decode(outputs[0])
+                print(output_text)"""
+            )
+        else:
+            raise NotImplementedError(f"Transformer doesn't have this `task_type` implemented: `{self.task_type}`")
 
 
 @dataclass
 class SentenceTransformerCardData(FrameworkCardData):
     framework: Framework = Framework("sentence-transformers")
     task_type: TaskTypes = "for_sentence_similarity"
+    output_dir: str = field(default="sentence_similarity_model")
     tags: Optional[List[str]] = field(
         default_factory=lambda: ["sentence-similarity", "sentence-transformers", "argilla"]
     )
@@ -323,6 +449,20 @@ class SentenceTransformerCardData(FrameworkCardData):
             texts = ", ".join([f'dataset.field_by_name("{text.name}")' for text in self.task.texts])
             training_task_args = f"texts=[{texts}]{f', label=dataset.question_by_name({self.task.label.question.name})' if self.task.label else ''}"
         return task_call + TEMPLATE_TASK_CALL.format(task_type=self.task_type, training_task_args=training_task_args)
+
+    def _predict_call(self) -> str:
+        from textwrap import dedent
+
+        return dedent(
+            """\
+            trainer.predict(
+                [
+                    ["Machine learning is so easy.", "Deep learning is so straightforward."],
+                    ["Machine learning is so easy.", "This is so difficult, like rocket science."],
+                    ["Machine learning is so easy.", "I can't believe how much I struggled with this."]
+                ]
+            )"""
+        )
 
     def _to_dict(self) -> Dict[str, str]:
         if cross_encoder := self.cross_encoder:

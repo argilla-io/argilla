@@ -39,7 +39,13 @@ trainer.update_config(
     # The non default hyperparameters will be filled here
 )
 
-trainer.train(output_dir="output_dir")
+trainer.train(output_dir={{ output_dir }})
+```
+
+You can test the type of predictions of this model like so:
+
+```python
+{{ predict_call }}
 ```
 
 ## Model Details
