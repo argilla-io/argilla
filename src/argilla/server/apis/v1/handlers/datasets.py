@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-#
+
 import re
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 from uuid import UUID
@@ -27,7 +27,6 @@ from argilla.server.models import Dataset as DatasetModel
 from argilla.server.models import ResponseStatus, User
 from argilla.server.policies import DatasetPolicyV1, authorize
 from argilla.server.schemas.v1.datasets import (
-    METADATA_PROPERTY_CREATE_NAME_REGEX,
     Dataset,
     DatasetCreate,
     Datasets,
