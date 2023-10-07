@@ -84,28 +84,28 @@ class _RangeModel(GenericModel, Generic[NT]):
 
 
 class NumericMetadataFilter(GenericModel, Generic[NT], MetadataFilter):
-    low: Optional[NT] = None
-    high: Optional[NT] = None
+    ge: Optional[NT] = None
+    le: Optional[NT] = None
 
     _json_model: ClassVar[Type[_RangeModel]]
 
     @root_validator
     def check_bounds(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        low = values.get("low")
-        high = values.get("high")
+        ge = values.get("ge")
+        le = values.get("le")
 
-        if low is None and high is None:
-            raise ValueError("One of 'low' or 'high' values must be specified")
+        if ge is None and le is None:
+            raise ValueError("One of 'ge' or 'le' values must be specified")
 
-        if low is not None and high is not None and low > high:
-            raise ValueError(f"'low' ({low}) must be lower or equal than 'high' ({high})")
+        if ge is not None and le is not None and ge > le:
+            raise ValueError(f"'ge' ({ge}) must be lower or equal than 'le' ({le})")
 
         return values
 
     @classmethod
     def from_string(cls, metadata_property: MetadataProperty, string: str) -> "NumericMetadataFilter":
         model = cls._json_model.parse_raw(string)
-        return cls(metadata_property=metadata_property, low=model.ge, high=model.le)
+        return cls(metadata_property=metadata_property, ge=model.ge, le=model.le)
 
 
 class IntegerMetadataFilter(NumericMetadataFilter[int]):

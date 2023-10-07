@@ -409,10 +409,10 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             elif isinstance(metadata_property_filter, (IntegerMetadataFilter, FloatMetadataFilter)):
                 query = {}
 
-                if metadata_property_filter.low is not None:
-                    query["gte"] = metadata_property_filter.low
-                if metadata_property_filter.high is not None:
-                    query["lte"] = metadata_property_filter.high
+                if metadata_property_filter.ge is not None:
+                    query["gte"] = metadata_property_filter.ge
+                if metadata_property_filter.le is not None:
+                    query["lte"] = metadata_property_filter.le
 
                 query_filter = {"range": {_mapping_key_for_metadata_property(metadata_property): query}}
             else:
