@@ -37,8 +37,9 @@ from pydantic import BaseModel, Field
         ({"max_keys": 1}, ["key1:value1,value2,value3"], {"key": "key1", "value": ["value1", "value2", "value3"]}),
         ({"max_keys": 1, "max_values_per_key": 1}, ["key1:value1"], {"key": "key1", "value": "value1"}),
         ({"max_values_per_key": 1}, ["key1:value1", "key2:value2"], {"key1": "value1", "key2": "value2"}),
-        ({"max_values_per_key": 1}, ["key1", "key2"], {"key1": None, "key2": None}),
+        ({"max_values_per_key": 1, "group_keys_without_values": False}, ["key1", "key2"], {"key1": None, "key2": None}),
         ({"group_keys_without_values": False}, ["key1,key2,key3"], {"key1": None, "key2": None, "key3": None}),
+        ({"group_keys_without_values": True}, ["key1,key2,key3"], {"keys": ["key1", "key2", "key3"]}),
     ],
 )
 def test_parse_query_param(config: Dict[str, Any], params: List[str], expected: Dict[str, Set[str]]) -> None:
