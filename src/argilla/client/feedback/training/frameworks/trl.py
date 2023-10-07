@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     from trl import PPOConfig
 
     from argilla.client.feedback.dataset import FeedbackDataset
+    from argilla.client.feedback.integrations.huggingface.card import TRLModelCardData
 
 
 class PPOArgs:
@@ -387,3 +388,38 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
             for key, val in arg_dict_single.items():
                 formatted_string.append(f"{key}: {val}")
         return "\n".join(formatted_string)
+
+    def model_card_data(self, **card_data_kwargs) -> "TRLModelCardData":
+        """
+        Generate the card data to be used for the `ArgillaModelCard`.
+
+        Args:
+            card_data_kwargs: Extra arguments provided by the user when creating the `ArgillaTrainer`.
+
+        Returns:
+            TRLModelCardData: Container for the data to be written on the `ArgillaModelCard`.
+        """
+        from argilla.client.feedback.integrations.huggingface.card import TRLModelCardData
+
+        if isinstance(self._task, TrainingTaskForSFT):
+            task_type = "for_supervised_fine_tuning"
+            tags = ["supervised-fine-tuning"]
+        elif isinstance(self._task, TrainingTaskForRM):
+            task_type = "for_reward_modeling"
+            tags = ["reward-modeling"]
+        elif isinstance(self._task, TrainingTaskForPPO):
+            task_type = "for_proximal_policy_optimization"
+            tags = ["proximal-policy-optimization", "ppo"]
+        elif isinstance(self._task, TrainingTaskForDPO):
+            task_type = "for_direct_preference_optimization"
+            tags = ["direct-preference-optimization", "dpo"]
+
+        tags += ["TRL", "argilla"]
+
+        return TRLModelCardData(
+            model_name=self._model,
+            task=self._task,
+            task_type=task_type,
+            tags=tags,
+            **card_data_kwargs,
+        )
