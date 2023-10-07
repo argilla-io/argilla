@@ -322,7 +322,7 @@ class Datasets(AbstractApi):
         try:
             with api_compatibility(self, min_version="1.4"):
                 self.http_client.patch(
-                    f"{self._API_PREFIX}/{dataset.name}/{dataset.task.value}/settings",
+                    f"{self._API_PREFIX}/{dataset.name}/{dataset.task.value}/settings?workspace={dataset.workspace}",
                     json=settings_.dict(),
                 )
         except ApiCompatibilityError:
