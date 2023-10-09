@@ -122,7 +122,7 @@ jobs:
     if: needs.deployable_check.outputs.isDeployable == 'true'
     secrets: inherit
 
-  build_server_docker_image:
+  build_server_docker_image_linux_amd64:
     name: Build Argilla server docker image
     uses: ./.github/workflows/build-push-docker.yml
     needs:
@@ -138,22 +138,60 @@ jobs:
       image-name: argilla/argilla-server
       dockerfile: docker/Dockerfile
       readme: README.md
-      platforms: linux/amd64,linux/arm64
+      platforms: linux/amd64
     secrets: inherit
 
-  build_quickstart_docker_image:
-    name: Build Argilla quickstart docker image
+  build_server_docker_image_linux_arm64:
+    name: Build Argilla server docker image
     uses: ./.github/workflows/build-push-docker.yml
-    needs: build_server_docker_image
+    needs:
+      - build_python_package
+      - run_unit_tests
     if: |
       !cancelled() &&
-      needs.build_server_docker_image.result == 'success'
+      github.event_name == 'release' &&
+      needs.build_python_package.result == 'success' &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
+    with:
+      download-python-package: true
+      image-name: argilla/argilla-server
+      dockerfile: docker/Dockerfile
+      readme: README.md
+      platforms: linux/arm64
+    secrets: inherit
+
+  build_quickstart_docker_image_amd64:
+    name: Build Argilla quickstart docker image
+    uses: ./.github/workflows/build-push-docker.yml
+    needs: build_server_docker_image_linux_amd64
+    if: |
+      !cancelled() &&
+      needs.build_server_docker_image_linux_amd64.result == 'success'
     with:
       download-python-package: false
       image-name: argilla/argilla-quickstart
       dockerfile: docker/quickstart.Dockerfile
       readme: docker/quickstart.README.md
-      platforms: linux/amd64,linux/arm64
+      platforms: linux/amd64
+      build-args: |
+        ARGILLA_VERSION=${{ needs.build_server_docker_image.outputs.version }}
+    secrets: inherit
+
+  build_quickstart_docker_image_arm64:
+    name: Build Argilla quickstart docker image
+    uses: ./.github/workflows/build-push-docker.yml
+    needs: build_server_docker_image_linux_arm64
+    if: |
+      !cancelled() &&
+      github.event_name == 'release' &&
+      needs.build_server_docker_image_linux_arm64.result == 'success'
+    with:
+      download-python-package: false
+      image-name: argilla/argilla-quickstart
+      dockerfile: docker/quickstart.Dockerfile
+      readme: docker/quickstart.README.md
+      platforms: linux/arm64
       build-args: |
         ARGILLA_VERSION=${{ needs.build_server_docker_image.outputs.version }}
     secrets: inherit
