@@ -203,7 +203,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
 
     def train(self, output_dir: str = None) -> None:
         """
-        We create a openai.FineTune object from a pretrained model, and send data to finetune it.
+        We create an openai.FineTune object from a pre-trained model, and send data to finetune it.
         """
 
         import openai
@@ -336,7 +336,7 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
 
     def save(self, *arg, **kwargs) -> None:
         """
-        The function saves the model to the path specified, and also saves the label2id and id2label
+        The function saves the model to the path specified and also saves the label2id and id2label
         dictionaries to the same path
 
         Args:

@@ -3,7 +3,7 @@
 Listeners
 =========
 
-Here we describe the Argilla listeners capabilities
+Here we describe the Argilla listeners capabilities:
 
 .. automodule:: argilla.listeners
    :members: listener, RGDatasetListener, Metrics, RGListenerContext, Search
