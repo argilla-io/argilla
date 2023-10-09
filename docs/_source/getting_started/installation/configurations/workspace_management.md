@@ -1,9 +1,9 @@
 # Workspace Management
 
-This guide explains how setup and manage the workspaces in Argilla via the Python client.
+This guide explains how to set up and manage the workspaces in Argilla via the Python client.
 
 :::{note}
-The `Workspace` class for workspace management has been included as of the Argilla 1.11.0 release, and is not available in previous versions. But you will be able to use it with older Argilla instances, from 1.6.0 onwards, the only difference will be that the main role is now `owner` instead of `admin`.
+The `Workspace` class for workspace management has been included as of the Argilla 1.11.0 release and is not available in previous versions. But you will be able to use it with older Argilla instances, from 1.6.0 onwards, the only difference will be that the main role is now `owner` instead of `admin`.
 :::
 
 ## Workspace Model
@@ -12,7 +12,7 @@ A workspace is a "space" inside your Argilla instance where authorized users can
 
 If you're an owner, you can assign users to workspaces, either when you create a new user, or using the method `add_user` from the `Workspace` class.
 
-An `owner` has full access to the workspace, and can assign other users to it; while the `admin` role can only access the workspace, but cannot assign other users to it; and the `annotator` role can only access their assigned datasets in the workspace they belong to and annotate it via the UI.
+An `owner` has full access to the workspace, and can assign other users to it while the `admin` role can only access the workspace but cannot assign other users to it, and the `annotator` role can only access their assigned datasets in the workspace they belong to and annotate it via the UI.
 
 An Argilla workspace is composed of the following attributes:
 
@@ -25,7 +25,7 @@ An Argilla workspace is composed of the following attributes:
 
 ### Python client
 
-The `Workspace` class in the Python client gives developers with `owner` role the ability to create and manage workspaces in Argilla, and the users that belong to them. Check the [Workspace - Python Reference](../reference/python/python_workspaces.rst) to see the attributes, arguments, and methods of the `Workspace` class.
+The `Workspace` class in the Python client gives developers with `owner` role the ability to create and manage workspaces in Argilla, and the users that belong to them. Check the [Workspace - Python Reference](/reference/python/python_workspaces.rst) to see the attributes, arguments, and methods of the `Workspace` class.
 
 The `Workspace` class in Argilla is composed of the following attributes:
 
@@ -100,7 +100,7 @@ for workspace in workspaces:
 
 #### Python client
 
-You can get a workspace by its name using the `from_name` method. It must exist in advance in Argilla, otherwise an exception will be raised.
+You can get a workspace by its name using the `from_name` method. It must exist in advance in Argilla, otherwise, an exception will be raised.
 
 ```python
 import argilla as rg
@@ -114,7 +114,7 @@ workspace = rg.Workspace.from_name("new-workspace")
 
 #### Python client
 
-Additionally, if you know the `id` of the workspace, you can get it directly using the `from_id` method. It must exist in advance in Argilla, otherwise an exception will be raised.
+Additionally, if you know the `id` of the workspace, you can get it directly using the `from_id` method. It must exist in advance in Argilla, otherwise, an exception will be raised.
 
 :::{note}
 The `id` of a workspace is a UUID, and it is generated automatically when you create a new workspace.
@@ -177,7 +177,7 @@ workspace.delete_user("<USER_ID>")
 You can also delete a workspace using the Python client.
 
 :::{note}
-To delete a workspace, no dataset can be linked to it. If workspace contains any dataset, deletion will fail.
+To delete a workspace, no dataset can be linked to it. If the workspace contains any dataset, deletion will fail.
 :::
 
 ```python
