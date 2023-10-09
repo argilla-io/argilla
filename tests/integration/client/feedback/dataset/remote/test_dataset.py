@@ -43,6 +43,29 @@ if TYPE_CHECKING:
 
 @pytest.mark.asyncio
 class TestRemoteFeedbackDataset:
+    @pytest.mark.parametrize(
+        "record",
+        [
+            FeedbackRecord(fields={"required": "Hello world!"}, metadata={}),
+            FeedbackRecord(fields={"required": "Hello world!", "optional": "Bye world!"}, metadata={}),
+            FeedbackRecord(fields={"required": "Hello world!"}, metadata={"terms-metadata": "a"}),
+            FeedbackRecord(fields={"required": "Hello world!"}, metadata={"unrelated-metadata": "unrelated-value"}),
+        ],
+    )
+    async def test_add_records(self, owner: "User", record: FeedbackRecord) -> None:
+        dataset = await DatasetFactory.create(status="ready")
+        await TextFieldFactory.create(dataset=dataset, name="required", required=True)
+        await TextFieldFactory.create(dataset=dataset, name="optional", required=False)
+        await TextQuestionFactory.create(dataset=dataset, required=True)
+        await TermsMetadataPropertyFactory.create(
+            dataset=dataset, name="terms-metadata", settings={"type": "terms", "values": ["a", "b", "c"]}
+        )
+
+        api.init(api_key=owner.api_key)
+        remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
+        remote_dataset.add_records([record])
+        assert len(remote_dataset.records) == 1
+
     @pytest.mark.parametrize("statuses", [["draft", "discarded", "submitted"]])
     async def test_from_argilla_with_responses(self, owner: "User", statuses: List[str]) -> None:
         dataset = await DatasetFactory.create()

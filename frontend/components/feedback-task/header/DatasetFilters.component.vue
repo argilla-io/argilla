@@ -1,10 +1,6 @@
 <template>
   <div class="filters">
-    <SearchBarBase
-      v-model="searchInput"
-      :placeholder="'Introduce a query'"
-      :additionalInfo="additionalInfoForSearchComponent"
-    />
+    <SearchBarBase v-model="searchInput" :placeholder="'Introduce a query'" />
     <MetadataFilter
       v-if="!!datasetsMetadata.length"
       :metadata="datasetsMetadata"

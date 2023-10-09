@@ -11,13 +11,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import dataclasses
+
 from datetime import datetime
 from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
-from fastapi import Query
-from pydantic import BaseModel, conlist, constr, root_validator, validator
+from fastapi import HTTPException, Query
+from pydantic import BaseModel, Extra, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
 from pydantic.generics import GenericModel
 from pydantic.utils import GetterDict
@@ -31,7 +31,7 @@ try:
 except ImportError:
     from typing_extensions import Annotated
 
-from argilla.server.enums import DatasetStatus, FieldType, MetadataPropertyType
+from argilla.server.enums import DatasetStatus, FieldType, MetadataPropertyType, SortOrder
 from argilla.server.models import QuestionSettings, QuestionType, ResponseStatus
 
 DATASET_NAME_REGEX = r"^(?!-|_)[a-zA-Z0-9-_ ]+$"
@@ -89,6 +89,7 @@ class Dataset(BaseModel):
     id: UUID
     name: str
     guidelines: Optional[str]
+    allow_extra_metadata: bool
     status: DatasetStatus
     workspace_id: UUID
     inserted_at: datetime
@@ -116,6 +117,7 @@ DatasetGuidelines = Annotated[
 class DatasetCreate(BaseModel):
     name: DatasetName
     guidelines: Optional[DatasetGuidelines]
+    allow_extra_metadata: bool = True
     workspace_id: UUID
 
 
@@ -422,7 +424,9 @@ class RecordCreate(BaseModel):
 
 
 class RecordsCreate(BaseModel):
-    items: conlist(item_type=RecordCreate, min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
+    items: List[RecordCreate] = PydanticField(
+        ..., min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS
+    )
 
 
 NT = TypeVar("NT", int, float)

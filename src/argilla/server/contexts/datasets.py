@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import copy
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
@@ -48,6 +48,7 @@ from argilla.server.security.model import User
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
+    from argilla.server.models import MetadataPropertySettings
     from argilla.server.schemas.v1.datasets import DatasetUpdate
     from argilla.server.schemas.v1.fields import FieldUpdate
     from argilla.server.schemas.v1.questions import QuestionUpdate
@@ -101,6 +102,7 @@ async def create_dataset(db: "AsyncSession", dataset_create: DatasetCreate):
         db,
         name=dataset_create.name,
         guidelines=dataset_create.guidelines,
+        allow_extra_metadata=dataset_create.allow_extra_metadata,
         workspace_id=dataset_create.workspace_id,
     )
 
@@ -218,16 +220,22 @@ async def create_question(db: "AsyncSession", dataset: Dataset, question_create:
 
 
 async def create_metadata_property(
-    db: "AsyncSession", dataset: Dataset, metadata_prop_create: MetadataPropertyCreate
+    db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, metadata_prop_create: MetadataPropertyCreate
 ) -> MetadataProperty:
-    metadata_property = await MetadataProperty.create(
-        db,
-        name=metadata_prop_create.name,
-        type=metadata_prop_create.settings.type,
-        description=metadata_prop_create.description,
-        settings=metadata_prop_create.settings.dict(),
-        dataset_id=dataset.id,
-    )
+    async with db.begin_nested():
+        metadata_property = await MetadataProperty.create(
+            db,
+            name=metadata_prop_create.name,
+            type=metadata_prop_create.settings.type,
+            description=metadata_prop_create.description,
+            settings=metadata_prop_create.settings.dict(),
+            dataset_id=dataset.id,
+            autocommit=False,
+        )
+        if dataset.is_ready:
+            await search_engine.configure_metadata_property(metadata_property)
+
+    await db.commit()
     return metadata_property
 
 
@@ -280,10 +288,14 @@ async def get_records_by_ids(
     db: "AsyncSession",
     dataset_id: UUID,
     record_ids: List[UUID],
-    include: List[RecordInclude] = [],
+    include: Optional[List[RecordInclude]] = None,
     user_id: Optional[UUID] = None,
 ) -> List[Record]:
+    if include is None:
+        include = []
+
     query = select(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(record_ids))
+
     if RecordInclude.responses in include:
         if user_id:
             query = query.outerjoin(
@@ -291,10 +303,18 @@ async def get_records_by_ids(
             ).options(contains_eager(Record.responses))
         else:
             query = query.options(joinedload(Record.responses))
+
     if RecordInclude.suggestions in include:
         query = query.options(joinedload(Record.suggestions))
+
     result = await db.execute(query)
-    return result.unique().scalars().all()
+    records = result.unique().scalars().all()
+
+    # Preserver the order of the `record_ids` list
+    record_order_map = {record.id: record for record in records}
+    ordered_records = [record_order_map[record_id] for record_id in record_ids]
+
+    return ordered_records
 
 
 async def list_records_by_dataset_id(
@@ -350,14 +370,61 @@ async def count_records_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> i
     return result.scalar()
 
 
+_EXTRA_METADATA_FLAG = "extra"
+
+
+async def validate_metadata(
+    db: "AsyncSession",
+    dataset: Dataset,
+    metadata: Dict[str, Any],
+    metadata_properties_settings: Optional[Dict[str, Union["MetadataPropertySettings", str]]] = None,
+) -> Dict[str, Union["MetadataPropertySettings", Literal["extra"]]]:
+    if metadata_properties_settings is None:
+        metadata_properties_settings = {}
+
+    for name, value in metadata.items():
+        metadata_property_settings = metadata_properties_settings.get(name)
+
+        if metadata_property_settings is None:
+            metadata_property = await get_metadata_property_by_name_and_dataset_id(db, name=name, dataset_id=dataset.id)
+
+            # If metadata property does not exists but extra metadata is allowed, then we set a flag value to
+            # avoid querying the database again
+            if metadata_property is None and dataset.allow_extra_metadata:
+                metadata_property_settings = _EXTRA_METADATA_FLAG
+                metadata_properties_settings[name] = metadata_property_settings
+            elif metadata_property is not None:
+                metadata_property_settings = metadata_property.parsed_settings
+                metadata_properties_settings[name] = metadata_property_settings
+            else:
+                raise ValueError(
+                    f"'{name}' metadata property does not exists for dataset '{dataset.id}' and extra metadata is"
+                    " not allowed for this dataset"
+                )
+
+        # If metadata property is not found and extra metadata is allowed, then we skip the value validation
+        if metadata_property_settings == _EXTRA_METADATA_FLAG:
+            continue
+
+        try:
+            metadata_property_settings.check_metadata(value)
+        except ValueError as e:
+            raise ValueError(f"'{name}' metadata property validation failed because {e}") from e
+
+    return metadata_properties_settings
+
+
 async def create_records(
     db: "AsyncSession", search_engine: SearchEngine, dataset: Dataset, records_create: RecordsCreate
 ):
     if not dataset.is_ready:
         raise ValueError("Records cannot be created for a non published dataset")
 
+    # Cache dictionaries to avoid querying the database multiple times
+    metadata_properties_settings: Dict[str, Union["MetadataPropertySettings", Literal["extra"]]] = {}
+
     records = []
-    for record_create in records_create.items:
+    for record_i, record_create in enumerate(records_create.items):
         validate_record_fields(dataset, fields=record_create.fields)
 
         record = Record(
@@ -401,6 +468,17 @@ async def create_records(
                         question_id=suggestion.question_id,
                     )
                 )
+
+        if record_create.metadata:
+            try:
+                metadata_properties_settings = await validate_metadata(
+                    db,
+                    dataset=dataset,
+                    metadata=record_create.metadata,
+                    metadata_properties_settings=metadata_properties_settings,
+                )
+            except ValueError as e:
+                raise ValueError(f"Provided metadata for record at position {record_i} is not valid: {e}") from e
 
         records.append(record)
 
