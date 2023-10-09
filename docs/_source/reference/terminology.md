@@ -28,11 +28,11 @@ All steps that we directly or in-directly cover within the `MLOps lifecycle`.
 
 Main task categories that we cover within the `NLP landscape`.
 
-| Terminology | Description                                                                                                                                                              |
+| Terminology | .Description                                                                                                                                                              |
 | :--- |:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 📕📗 TextClassification      | Assigning predefined category labels to `texts`. This contains sub-tasks like detecting sentiment, semantic similarity, and multi-label classification.                   |
-| 🈴🈯️ TokenClassification      | Assigning predefined category labels to `words and phrases within texts` . This contains sub-tasks like Named Entity Recognition (NER) and Part-Of-Speech Tagging (POS). |
-| 👨🏽💬 Text2Text       | Generating a `text` based on an input `text`.  This contains sub-tasks like machine translation, and paraphrase generation.                                              |
+| 🈴🈯️ TokenClassification      | Assigning predefined category labels to `words and phrases within texts`. This contains sub-tasks like Named Entity Recognition (NER) and Part-Of-Speech Tagging (POS). |
+| 👨🏽💬 Text2Text       | Generating a `text` based on an input `text`.  This contains sub-tasks like machine translation and paraphrase generation.                                              |
 
 ## Techniques
 
