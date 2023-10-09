@@ -123,7 +123,7 @@ jobs:
     secrets: inherit
 
   build_server_docker_image_linux_amd64:
-    name: Build Argilla server docker image
+    name: Build Argilla server docker image linux/amd64
     uses: ./.github/workflows/build-push-docker.yml
     needs:
       - build_python_package
@@ -142,7 +142,7 @@ jobs:
     secrets: inherit
 
   build_server_docker_image_linux_arm64:
-    name: Build Argilla server docker image
+    name: Build Argilla server docker image linux/arm64
     uses: ./.github/workflows/build-push-docker.yml
     needs:
       - build_python_package
@@ -161,8 +161,8 @@ jobs:
       platforms: linux/arm64
     secrets: inherit
 
-  build_quickstart_docker_image_amd64:
-    name: Build Argilla quickstart docker image
+  build_quickstart_docker_image_linux_amd64:
+    name: Build Argilla quickstart docker image linux/amd64
     uses: ./.github/workflows/build-push-docker.yml
     needs: build_server_docker_image_linux_amd64
     if: |
@@ -178,8 +178,8 @@ jobs:
         ARGILLA_VERSION=${{ needs.build_server_docker_image.outputs.version }}
     secrets: inherit
 
-  build_quickstart_docker_image_arm64:
-    name: Build Argilla quickstart docker image
+  build_quickstart_docker_image_linux_arm64:
+    name: Build Argilla quickstart docker image linux/arm64
     uses: ./.github/workflows/build-push-docker.yml
     needs: build_server_docker_image_linux_arm64
     if: |
@@ -199,14 +199,14 @@ jobs:
   deploy_environment:
     name: Deploy branch environment
     uses: ./.github/workflows/deploy-environment.yml
-    needs: build_quickstart_docker_image
+    needs: build_quickstart_docker_image_linux_amd64
     if: |
       !cancelled() &&
-      needs.build_quickstart_docker_image.result == 'success' &&
+      needs.build_quickstart_docker_image_linux_amd64.result == 'success' &&
       github.event_name == 'pull_request' && github.event.pull_request.draft == false
     with:
       image-name: argilla/argilla-quickstart
-      image-version: ${{ needs.build_quickstart_docker_image.outputs.version }}
+      image-version: ${{ needs.build_quickstart_docker_image_linux_amd64.outputs.version }}
     secrets: inherit
 
   # This job will upload a Python Package using Twine when a release is created
@@ -218,7 +218,7 @@ jobs:
     if: ${{ github.event_name == 'release' }}
     needs:
       - run_integration_tests
-      - build_quickstart_docker_image
+      - build_quickstart_docker_image_linux_arm64
     defaults:
       run:
         shell: bash -l {0}

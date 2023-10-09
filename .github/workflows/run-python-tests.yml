@@ -25,9 +25,6 @@ on:
         default: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
         required: false
         type: string
-env:
-  # Increase this value to reset cache if etc/example-environment.yml has not changed
-  CACHE_NUMBER:  5
 
 jobs:
   run-python-tests:
@@ -47,40 +44,33 @@ jobs:
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v3
-      - name: Setup Conda Env 🐍
-        uses: conda-incubator/setup-miniconda@v2
+
+      - uses: actions/setup-python@v4
         with:
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          use-mamba: true
-          activate-environment: argilla
-      - name: Get date for conda cache
-        id: get-date
-        run: echo "::set-output name=today::$(/bin/date -u '+%Y%m%d')"
-        shell: bash
-      - name: Cache Conda env
-        uses: actions/cache@v3
+          python-version: '3.8'
+
+      - uses: actions/cache@v3
         id: cache
         with:
-          path: ${{ env.CONDA }}/envs
-          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
-      - name: Update environment
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}-test
+
+      - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: mamba env update -n argilla -f environment_dev.yml
-      - name: Cache pip 👜
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .[server,postgresql,tests,integrations]
+
       - name: Set huggingface hub credentials
         if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/releases')
         env:
           HF_HUB_ACCESS_TOKEN: ${{ secrets.HF_HUB_ACCESS_TOKEN }}
         run: echo "Enable HF access token"
+
       - name: Run tests 📈
         run: |
-          pip install -e ".[server,listeners]"
-          pytest --cov=argilla --cov-report=xml:${{ env.COVERAGE_REPORT }}.xml ${{ inputs.pytestArgs }}
+          python -m pytest --cov=argilla --cov-report=xml:${{ env.COVERAGE_REPORT }}.xml ${{ inputs.pytestArgs }}
+
       - name: Upload coverage report artifact
         uses: actions/upload-artifact@v3
         with:
