@@ -303,7 +303,7 @@ class ArgillaMixin:
         return questions
 
     @staticmethod
-    def __get_metadata_properties(client: "httpx.Client", id: UUID) -> List["AllowedRemoteMetadataPropertiesTypes"]:
+    def __get_metadata_properties(client: "httpx.Client", id: UUID) -> List["AllowedRemoteMetadataPropertyTypes"]:
         metadata_properties = []
         for metadata_prop in datasets_api_v1.get_metadata_properties(client=client, id=id).parsed:
             metadata_properties.append(ArgillaMixin._parse_to_remote_metadata_property(metadata_prop))
