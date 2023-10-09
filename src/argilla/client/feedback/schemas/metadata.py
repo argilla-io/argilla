@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from abc import ABC, abstractmethod, abstractproperty
+from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from pydantic import (
@@ -65,9 +65,10 @@ class MetadataPropertySchema(BaseModel, ABC):
         extra = Extra.ignore
         exclude = {"type"}
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def server_settings(self) -> Dict[str, Any]:
-        return {}
+        ...
 
     def to_server_payload(self) -> Dict[str, Any]:
         return {
@@ -78,9 +79,10 @@ class MetadataPropertySchema(BaseModel, ABC):
             "settings": self.server_settings,
         }
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def _pydantic_field_with_validator(self) -> Tuple[Dict[str, Tuple[Any, ...]], Dict[str, Callable]]:
-        return ({}, {})
+        ...
 
     @abstractmethod
     def _validate_filter(self, metadata_filter: "MetadataFilters") -> None:
@@ -262,9 +264,10 @@ class MetadataFilterSchema(BaseModel, ABC):
         extra = Extra.forbid
         exclude = {"type"}
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def query_string(self) -> str:
-        return ""
+        ...
 
 
 class TermsMetadataFilter(MetadataFilterSchema):
