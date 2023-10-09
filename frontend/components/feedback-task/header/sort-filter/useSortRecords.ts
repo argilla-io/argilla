@@ -8,7 +8,7 @@ import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
 export const useSortRecords = ({ metadata }: { metadata: Metadata[] }) => {
   const { getValue } = useFeatureToggle();
 
-  const debounce = useDebounce(getValue("sort-delay", "integer") ?? 1500);
+  const debounce = useDebounce(getValue("sort-delay", "integer") ?? 500);
   const router = useRoute();
   const metadataSort = ref<MetadataSortList>(new MetadataSortList(metadata));
 

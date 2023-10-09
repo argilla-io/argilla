@@ -13,7 +13,7 @@ export const useMetadataFilterViewModel = ({
   const { getValue } = useFeatureToggle();
   const router = useRoute();
   const debounce = useDebounce(
-    getValue("metadata-filter-delay", "integer") ?? 1000
+    getValue("metadata-filter-delay", "integer") ?? 500
   );
   const metadataFilters = ref<MetadataFilterList>(
     new MetadataFilterList(metadata)

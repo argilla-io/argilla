@@ -60,7 +60,7 @@ export default {
       return this.$route.query?._status;
     },
     searchFromRoute() {
-      return this.$route.query?._search;
+      return this.$route.query?._search ?? null;
     },
   },
   watch: {

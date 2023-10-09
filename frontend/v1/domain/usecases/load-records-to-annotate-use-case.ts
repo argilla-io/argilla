@@ -11,7 +11,9 @@ import {
   FieldRepository,
 } from "@/v1/infrastructure/repositories";
 
-export class GetRecordsToAnnotateUseCase {
+export type LoadRecordsMode = "append" | "replace";
+
+export class LoadRecordsToAnnotateUseCase {
   constructor(
     private readonly recordRepository: RecordRepository,
     private readonly questionRepository: QuestionRepository,
@@ -20,6 +22,7 @@ export class GetRecordsToAnnotateUseCase {
   ) {}
 
   async execute(
+    mode: LoadRecordsMode,
     datasetId: string,
     page: number,
     status: string,
@@ -109,6 +112,10 @@ export class GetRecordsToAnnotateUseCase {
 
     const records = new Records(recordsToAnnotate, recordsFromBackend.total);
 
-    this.recordsStorage.add(records);
+    if (mode === "append") {
+      this.recordsStorage.append(records);
+    } else {
+      this.recordsStorage.replace(records);
+    }
   }
 }
