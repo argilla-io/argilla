@@ -49,7 +49,7 @@ async def test_create_records_for_text_classification_with_multi_label(async_cli
 
     response = await async_client.post(
         f"/api/datasets",
-        json={"name": dataset, "task": TaskType.text_classification, "workspace": argilla_user.username},
+        json={"name": dataset, "task": TaskType.text_classification.value, "workspace": argilla_user.username},
         params=workspace_query_params,
     )
     assert response.status_code == 200

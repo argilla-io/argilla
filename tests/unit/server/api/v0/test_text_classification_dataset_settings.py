@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 async def create_dataset(client: "AsyncClient", name: str, workspace_name: str):
     response = await client.post(
         "/api/datasets",
-        json={"name": name, "workspace": workspace_name, "task": TaskType.text_classification},
+        json={"name": name, "workspace": workspace_name, "task": TaskType.text_classification.value},
     )
     assert response.status_code == 200
 
@@ -40,7 +40,7 @@ async def delete_dataset(client: "AsyncClient", name: str, workspace_name: str):
 
 async def create_settings(async_client: "AsyncClient", name: str, workspace_name: str, labels: Optional[list] = None):
     response = await async_client.put(
-        f"/api/datasets/{TaskType.text_classification}/{name}/settings",
+        f"/api/datasets/{TaskType.text_classification.value}/{name}/settings",
         json={"label_schema": {"labels": labels or ["Label1", "Label2"]}},
         params={"workspace": workspace_name},
     )
@@ -49,14 +49,14 @@ async def create_settings(async_client: "AsyncClient", name: str, workspace_name
 
 async def fetch_settings(async_client: "AsyncClient", name: str, workspace_name: str):
     response = await async_client.get(
-        f"/api/datasets/{TaskType.text_classification}/{name}/settings", params={"workspace": workspace_name}
+        f"/api/datasets/{TaskType.text_classification.value}/{name}/settings", params={"workspace": workspace_name}
     )
     return response
 
 
 async def log_some_data(async_client: "AsyncClient", name: str, workspace_name: str):
     response = await async_client.post(
-        f"/api/datasets/{name}/TextClassification:bulk",
+        f"/api/datasets/{name}/{TaskType.text_classification.value}:bulk",
         json={
             "records": [
                 {
@@ -120,7 +120,7 @@ async def test_delete_settings(async_client: "AsyncClient", argilla_user: User):
     assert response.status_code == 200
 
     response = await async_client.delete(
-        f"/api/datasets/{TaskType.text_classification}/{name}/settings", params={"workspace": workspace}
+        f"/api/datasets/{TaskType.text_classification.value}/{name}/settings", params={"workspace": workspace}
     )
     assert response.status_code == 200
 
@@ -200,13 +200,13 @@ async def test_save_settings_as_annotator(async_client: "AsyncClient", owner_aut
 
     response = await async_client.post(
         "/api/datasets",
-        json={"name": dataset_name, "task": task, "workspace": workspace_name},
+        json={"name": dataset_name, "task": task.value, "workspace": workspace_name},
         headers=owner_auth_header,
     )
     assert response.status_code == 200
 
     response = await async_client.put(
-        f"/api/datasets/{dataset_name}/{task}/settings?workspace={workspace_name}",
+        f"/api/datasets/{dataset_name}/{task.value}/settings?workspace={workspace_name}",
         json={"label_schema": {"labels": ["Label1", "Label2"]}},
         headers={API_KEY_HEADER_NAME: annotator.api_key},
     )
@@ -232,13 +232,13 @@ async def test_delete_settings_as_annotator(async_client: "AsyncClient", owner_a
 
     response = await async_client.post(
         "/api/datasets",
-        json={"name": dataset_name, "task": task, "workspace": workspace_name},
+        json={"name": dataset_name, "task": task.value, "workspace": workspace_name},
         headers=owner_auth_header,
     )
     assert response.status_code == 200
 
     response = await async_client.delete(
-        f"/api/datasets/{dataset_name}/{task}/settings?workspace={workspace_name}",
+        f"/api/datasets/{dataset_name}/{task.value}/settings?workspace={workspace_name}",
         headers={API_KEY_HEADER_NAME: annotator.api_key},
     )
 
@@ -263,13 +263,13 @@ async def test_get_settings_as_annotator(async_client: "AsyncClient", owner_auth
 
     response = await async_client.post(
         "/api/datasets",
-        json={"name": dataset_name, "task": task, "workspace": workspace_name},
+        json={"name": dataset_name, "task": task.value, "workspace": workspace_name},
         headers=owner_auth_header,
     )
     assert response.status_code == 200
 
     response = await async_client.put(
-        f"/api/datasets/{dataset_name}/{task}/settings?workspace={workspace_name}",
+        f"/api/datasets/{dataset_name}/{task.value}/settings?workspace={workspace_name}",
         json={"label_schema": {"labels": ["Label1", "Label2"]}},
         headers=owner_auth_header,
     )

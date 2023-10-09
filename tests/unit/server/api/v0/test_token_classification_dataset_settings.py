@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
 async def create_dataset(client: "AsyncClient", name: str, workspace_name: str):
     response = await client.post(
-        "/api/datasets", json={"name": name, "workspace": workspace_name, f"task": TaskType.token_classification}
+        "/api/datasets", json={"name": name, "workspace": workspace_name, f"task": TaskType.token_classification.value}
     )
     assert response.status_code == 200
 
@@ -37,7 +37,7 @@ async def delete_dataset(client: "AsyncClient", name: str, workspace_name: str):
 
 async def create_settings(async_client: "AsyncClient", name: str, workspace_name: str, labels: Optional[list] = None):
     response = await async_client.put(
-        f"/api/datasets/{TaskType.token_classification}/{name}/settings",
+        f"/api/datasets/{TaskType.token_classification.value}/{name}/settings",
         json={"label_schema": {"labels": labels or ["Label1", "Label2"]}},
         params={"workspace": workspace_name},
     )
@@ -46,20 +46,20 @@ async def create_settings(async_client: "AsyncClient", name: str, workspace_name
 
 async def fetch_settings(async_client: "AsyncClient", name: str, workspace_name: str):
     return await async_client.get(
-        f"/api/datasets/{TaskType.token_classification}/{name}/settings", params={"workspace": workspace_name}
+        f"/api/datasets/{TaskType.token_classification.value}/{name}/settings", params={"workspace": workspace_name}
     )
 
 
 async def delete_dataset_settings(async_client: "AsyncClient", name: str, workspace_name: str):
     response = await async_client.delete(
-        f"/api/datasets/{TaskType.token_classification}/{name}/settings", params={"workspace": workspace_name}
+        f"/api/datasets/{TaskType.token_classification.value}/{name}/settings", params={"workspace": workspace_name}
     )
     assert response.status_code == 200
 
 
 async def log_some_data(async_client: "AsyncClient", name: str, workspace_name: str):
     response = await async_client.post(
-        f"/api/datasets/{name}/TokenClassification:bulk",
+        f"/api/datasets/{name}/{TaskType.token_classification.value}:bulk",
         json={
             "records": [
                 {
