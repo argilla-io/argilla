@@ -339,9 +339,7 @@ async def list_current_user_dataset_records(
             sort_by_query_param=sort_by_query_param or {RecordSortField.inserted_at.value: "asc"},
         )
     else:
-        # TODO(@frascuchon): Compute also total for this case
-        total = None
-        records = await datasets.list_records_by_dataset_id(
+        records, total = await datasets.list_records_by_dataset_id(
             db,
             dataset_id,
             current_user.id,
@@ -385,8 +383,7 @@ async def list_dataset_records(
             sort_by_query_param=sort_by_query_param or {RecordSortField.inserted_at.value: "asc"},
         )
     else:
-        total = None
-        records = await datasets.list_records_by_dataset_id(
+        records, total = await datasets.list_records_by_dataset_id(
             db, dataset_id, include=include, response_statuses=response_statuses, offset=offset, limit=limit
         )
 
