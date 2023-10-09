@@ -184,13 +184,13 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
                 self._metadata_properties_mapping = {
                     metadata_property.name: metadata_property for metadata_property in self._metadata_properties
                 }
-            if not all(
+            if any(
                 metadata_property.name in self._metadata_properties_mapping.keys()
                 for metadata_property in metadata_properties
             ):
                 raise ValueError(
-                    f"Invalid `metadata_properties=[{', '.join(metadata_property.name for metadata_property in metadata_properties)}`"
-                    f" provided, must be one of: {self._metadata_properties_mapping.keys()}"
+                    f"Invalid `metadata_properties=[{', '.join(metadata_property.name for metadata_property in metadata_properties)}]`"
+                    f" provided as already exist. Current `metadata_properties` are: {list(self._metadata_properties_mapping.keys())}"
                 )
         for metadata_property in metadata_properties:
             try:
