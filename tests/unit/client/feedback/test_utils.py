@@ -154,7 +154,6 @@ def test_generate_pydantic_schema_for_remote_metadata(
     assert RemoteMetadataSchema(**validation_data).dict() == validation_data
 
 
-
 @pytest.mark.parametrize(
     "metadata_properties, validation_data, ExceptionCls, exception_msg",
     [
