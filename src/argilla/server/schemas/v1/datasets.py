@@ -449,7 +449,7 @@ class NumericMetadataProperty(GenericModel, Generic[NT]):
 
 class TermsMetadataPropertyCreate(BaseModel):
     type: Literal[MetadataPropertyType.terms]
-    values: List[str] = PydanticField(..., min_items=TERMS_METADATA_PROPERTY_MIN_VALUES)
+    values: Optional[List[str]] = PydanticField(None, min_items=TERMS_METADATA_PROPERTY_MIN_VALUES)
 
 
 class IntegerMetadataPropertyCreate(NumericMetadataProperty[int]):
@@ -483,7 +483,7 @@ class MetadataPropertyCreate(BaseModel):
 
 class TermsMetadataProperty(BaseModel):
     type: Literal[MetadataPropertyType.terms]
-    values: List[str]
+    values: Optional[List[str]] = None
 
 
 class IntegerMetadataProperty(BaseModel):

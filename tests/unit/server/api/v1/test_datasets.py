@@ -2667,14 +2667,17 @@ class TestSuiteDatasets:
     @pytest.mark.parametrize(
         ("settings", "expected_settings"),
         [
+            ({"type": "terms"}, {"type": "terms", "values": None}),
             ({"type": "terms", "values": ["a"]}, {"type": "terms", "values": ["a"]}),
             (
                 {"type": "terms", "values": ["a", "b", "c", "d", "e"]},
                 {"type": "terms", "values": ["a", "b", "c", "d", "e"]},
             ),
+            ({"type": "integer"}, {"type": "integer", "min": None, "max": None}),
             ({"type": "integer", "min": 2}, {"type": "integer", "min": 2, "max": None}),
             ({"type": "integer", "max": 10}, {"type": "integer", "min": None, "max": 10}),
             ({"type": "integer", "min": 2, "max": 10}, {"type": "integer", "min": 2, "max": 10}),
+            ({"type": "float"}, {"type": "float", "min": None, "max": None}),
             ({"type": "float", "min": 2}, {"type": "float", "min": 2, "max": None}),
             ({"type": "float", "max": 10}, {"type": "float", "min": None, "max": 10}),
             ({"type": "float", "min": 2, "max": 10}, {"type": "float", "min": 2, "max": 10}),
