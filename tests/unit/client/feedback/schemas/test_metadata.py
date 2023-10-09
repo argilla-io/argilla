@@ -24,41 +24,56 @@ from argilla.client.feedback.schemas.metadata import (
     TermsMetadataFilter,
     TermsMetadataProperty,
 )
-from pydantic import ValidationError
+from pydantic import ValidationError, create_model
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, server_payload",
+    "schema_kwargs, server_payload, metadata_filter, metadata_property_to_validate",
     [
         (
-            {"name": "a", "description": "b", "values": ["a", "b", "c"]},
+            {"name": "terms-metadata", "description": "b", "values": ["a", "b", "c"]},
             {
-                "name": "a",
+                "name": "terms-metadata",
                 "description": "b",
                 # "visible_for_annotators": True,
                 "settings": {"type": "terms", "values": ["a", "b", "c"]},
             },
+            TermsMetadataFilter(name="terms-metadata", values=["a", "b", "c"]),
+            {"terms-metadata": "a"},
         ),
         (
             {
-                "name": "a",
+                "name": "terms-metadata",
                 # "visible_for_annotators": False,
                 "values": ["a", "b", "c"],
             },
             {
-                "name": "a",
+                "name": "terms-metadata",
                 "description": None,
                 # "visible_for_annotators": False,
                 "settings": {"type": "terms", "values": ["a", "b", "c"]},
             },
+            TermsMetadataFilter(name="terms-metadata", values=["a", "b", "c"]),
+            {"terms-metadata": "a"},
         ),
     ],
 )
-def test_terms_metadata_property(schema_kwargs: Dict[str, Any], server_payload: Dict[str, Any]) -> None:
+def test_terms_metadata_property(
+    schema_kwargs: Dict[str, Any],
+    server_payload: Dict[str, Any],
+    metadata_filter: TermsMetadataFilter,
+    metadata_property_to_validate: Dict[str, str],
+) -> None:
     metadata_property = TermsMetadataProperty(**schema_kwargs)
     assert metadata_property.type == MetadataPropertyTypes.terms
     assert metadata_property.server_settings == server_payload["settings"]
     assert metadata_property.to_server_payload() == server_payload
+
+    metadata_property._validate_filter(metadata_filter=metadata_filter)  # ValidationError not raised
+
+    metadata_field, metadata_validator = metadata_property._pydantic_field_with_validator
+    MetadataModel = create_model("MetadataModel", **metadata_field, __validators__=metadata_validator)
+    assert MetadataModel(**metadata_property_to_validate)
 
 
 @pytest.mark.parametrize(
@@ -85,7 +100,7 @@ def test_terms_metadata_property_errors(
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, server_payload",
+    "schema_kwargs, server_payload, metadata_filter, metadata_property_to_validate",
     [
         # TODO: uncomment this unit tests case once min and max are optional
         # (
@@ -120,21 +135,34 @@ def test_terms_metadata_property_errors(
         #     },
         # ),
         (
-            {"name": "a", "min": 5, "max": 10},
+            {"name": "int-metadata", "min": 5, "max": 10},
             {
-                "name": "a",
+                "name": "int-metadata",
                 "description": None,
                 # "visible_for_annotators": True,
                 "settings": {"type": "integer", "min": 5, "max": 10},
             },
+            IntegerMetadataFilter(name="int-metadata", le=10, ge=5),
+            {"int-metadata": 7},
         ),
     ],
 )
-def test_integer_metadata_property(schema_kwargs: Dict[str, Any], server_payload: Dict[str, Any]) -> None:
+def test_integer_metadata_property(
+    schema_kwargs: Dict[str, Any],
+    server_payload: Dict[str, Any],
+    metadata_filter: IntegerMetadataFilter,
+    metadata_property_to_validate: Dict[str, str],
+) -> None:
     metadata_property = IntegerMetadataProperty(**schema_kwargs)
     assert metadata_property.type == MetadataPropertyTypes.integer
     assert metadata_property.server_settings == server_payload["settings"]
     assert metadata_property.to_server_payload() == server_payload
+
+    metadata_property._validate_filter(metadata_filter=metadata_filter)  # ValidationError not raised
+
+    metadata_field, metadata_validator = metadata_property._pydantic_field_with_validator
+    MetadataModel = create_model("MetadataModel", **metadata_field, __validators__=metadata_validator)
+    assert MetadataModel(**metadata_property_to_validate)
 
 
 @pytest.mark.parametrize(
@@ -171,7 +199,7 @@ def test_integer_metadata_property_errors(
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, server_payload",
+    "schema_kwargs, server_payload, metadata_filter, metadata_property_to_validate",
     [
         # TODO: uncomment this unit tests case once min and max are optional
         # (
@@ -206,21 +234,34 @@ def test_integer_metadata_property_errors(
         #     },
         # ),
         (
-            {"name": "a", "min": 5.0, "max": 10.0},
+            {"name": "float-metadata", "min": 5.0, "max": 10.0},
             {
-                "name": "a",
+                "name": "float-metadata",
                 "description": None,
                 # "visible_for_annotators": True,
                 "settings": {"type": "float", "min": 5.0, "max": 10.0},
             },
+            FloatMetadataFilter(name="float-metadata", le=10.0, ge=5.0),
+            {"float-metadata": 7.5},
         ),
     ],
 )
-def test_float_metadata_property(schema_kwargs: Dict[str, Any], server_payload: Dict[str, Any]) -> None:
+def test_float_metadata_property(
+    schema_kwargs: Dict[str, Any],
+    server_payload: Dict[str, Any],
+    metadata_filter: FloatMetadataFilter,
+    metadata_property_to_validate: Dict[str, str],
+) -> None:
     metadata_property = FloatMetadataProperty(**schema_kwargs)
     assert metadata_property.type == MetadataPropertyTypes.float
     assert metadata_property.server_settings == server_payload["settings"]
     assert metadata_property.to_server_payload() == server_payload
+
+    metadata_property._validate_filter(metadata_filter=metadata_filter)  # ValidationError not raised
+
+    metadata_field, metadata_validator = metadata_property._pydantic_field_with_validator
+    MetadataModel = create_model("MetadataModel", **metadata_field, __validators__=metadata_validator)
+    assert MetadataModel(**metadata_property_to_validate)
 
 
 @pytest.mark.parametrize(

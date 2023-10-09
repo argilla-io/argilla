@@ -15,6 +15,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
+from pydantic import ValidationError
 from tqdm import trange
 
 from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, PUSHING_BATCH_SIZE
@@ -177,12 +178,40 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         """
         if not response_status and not metadata_filters:
             raise ValueError("At least one of `response_status` or `metadata_filters` must be provided.")
-        if response_status and not isinstance(response_status, list):
-            response_status = [response_status]
-        if metadata_filters and not isinstance(metadata_filters, list):
-            metadata_filters = [metadata_filters]
 
-        #  accessing records later
+        if response_status:
+            if not isinstance(response_status, list):
+                response_status = [response_status]
+            if not all(status in [arg.value for arg in FeedbackResponseStatusFilter] for status in response_status):
+                raise ValueError(
+                    f"Invalid `response_status={response_status}` provided, must be one"
+                    f" of: {[arg.value for arg in FeedbackResponseStatusFilter]}"
+                )
+
+        if metadata_filters:
+            if not isinstance(metadata_filters, list):
+                metadata_filters = [metadata_filters]
+            # TODO(alvarobartt): remove this when https://github.com/argilla-io/argilla/pull/3829 is merged
+            if not hasattr(self, "_metadata_properties_mapping") or self._metadata_properties_mapping is None:
+                self._metadata_properties_mapping = {
+                    metadata_property.name: metadata_property for metadata_property in self._metadata_properties
+                }
+            if not all(
+                metadata_filter.name in self._metadata_properties_mapping.keys() for metadata_filter in metadata_filters
+            ):
+                raise ValueError(
+                    f"Invalid `metadata_filters=[{', '.join(metadata_filter.name for metadata_filter in metadata_filters)}`"
+                    f" provided, must be one of: {self._metadata_properties_mapping.keys()}"
+                )
+            for metadata_filter in metadata_filters:
+                metadata_property = self.metadata_property_by_name(name=metadata_filter.name)
+                try:
+                    metadata_property._validate_filter(metadata_filter=metadata_filter)
+                except ValidationError as e:
+                    raise ValueError(
+                        f"Invalid `metadata_filter={metadata_filter}` provided for `metadata_property={metadata_property.name}`."
+                    ) from e
+
         return FilteredRemoteFeedbackDataset(
             client=self._client,
             id=self.id,

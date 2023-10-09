@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
     from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
+    from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
     from argilla.client.workspaces import Workspace
 
 
@@ -52,15 +53,14 @@ class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase):
             [metadata_filter.query_string for metadata_filter in metadata_filters] if metadata_filters else None
         )
 
-    def __len__(self) -> int:
-        warnings.warn(
+    def __len__(self) -> None:
+        # TODO: Replace with API call once ready!
+        raise NotImplementedError(
             "The `records` of a filtered dataset in Argilla are being lazily loaded"
             " and len computation may add undesirable extra computation. You can fetch"
             "records using\n`ds.pull()`\nor iterate over results to know the length of the result:\n"
             "`records = [r for r in ds.records]\n",
-            stacklevel=1,
         )
-        return 0
 
     def _fetch_records(self, offset: int, limit: int) -> "FeedbackRecordsModel":
         """Fetches a batch of records from Argilla."""

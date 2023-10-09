@@ -35,7 +35,7 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForTextClassification,
     TrainingTaskTypes,
 )
-from argilla.client.feedback.utils import generate_pydantic_schema
+from argilla.client.feedback.utils import generate_pydantic_schema_for_fields, generate_pydantic_schema_for_metadata
 from argilla.client.models import Framework
 from argilla.utils.dependency import require_dependencies, requires_dependencies
 
@@ -213,7 +213,32 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
     def metadata_properties(
         self,
     ) -> Union[List["AllowedMetadataPropertyTypes"], List["AllowedRemoteMetadataPropertyTypes"]]:
+        """Returns the metadata properties that will be indexed and could be used to filter the dataset."""
         return self._metadata_properties
+
+    def metadata_property_by_name(
+        self, name: str
+    ) -> Union["AllowedMetadataPropertyTypes", "AllowedRemoteMetadataPropertyTypes"]:
+        """Returns the metadata property by name if it exists. Othewise a `ValueError` is raised.
+
+        Args:
+            name: the name of the metadata property to return.
+
+        Raises:
+            KeyError: if the metadata property with the given name does not exist.
+        """
+        # TODO(alvarobartt): remove this when https://github.com/argilla-io/argilla/pull/3829 is merged
+        if not hasattr(self, "_metadata_properties_mapping") or self._metadata_properties_mapping is None:
+            self._metadata_properties_mapping = {
+                metadata_property.name: metadata_property for metadata_property in self._metadata_properties
+            }
+        try:
+            return self._metadata_properties_mapping[name]
+        except KeyError:
+            raise KeyError(
+                f"Metadata property with name='{name}' not found, available metadata property names are:"
+                f" {', '.join(self._metadata_properties_mapping.keys())}"
+            )
 
     def _parse_records(
         self, records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]]
@@ -258,7 +283,14 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             ValueError: if the `fields` schema does not match the `FeedbackRecord.fields` schema.
         """
         if self._fields_schema is None:
-            self._fields_schema = generate_pydantic_schema(self.fields)
+            self._fields_schema = generate_pydantic_schema_for_fields(self.fields)
+
+        # TODO: this is here to avoid conflicts with other PRs
+        if not hasattr(self, "_metadata_schema"):
+            self._metadata_schema = None
+
+        if self._metadata_schema is None and self.metadata_properties is not None:
+            self._metadata_schema = generate_pydantic_schema_for_metadata(self.metadata_properties)
 
         for record in records:
             try:
@@ -267,6 +299,14 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                 raise ValueError(
                     f"`FeedbackRecord.fields` does not match the expected schema, with exception: {e}"
                 ) from e
+
+            if record.metadata is not None and self.metadata_properties is not None:
+                try:
+                    self._metadata_schema.parse_obj(record.metadata)
+                except ValidationError as e:
+                    raise ValueError(
+                        f"`FeedbackRecord.metadata` does not match the expected schema, with exception: {e}"
+                    ) from e
 
     def _parse_and_validate_records(
         self,
