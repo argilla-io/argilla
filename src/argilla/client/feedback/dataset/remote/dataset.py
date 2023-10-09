@@ -35,6 +35,7 @@ if TYPE_CHECKING:
 
     from argilla.client.feedback.schemas.metadata import MetadataFilters
     from argilla.client.feedback.schemas.types import (
+        AllowedMetadataPropertyTypes,
         AllowedRemoteFieldTypes,
         AllowedRemoteMetadataPropertyTypes,
         AllowedRemoteQuestionTypes,
@@ -155,6 +156,52 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             # TODO: uncomment once supported by the API
             # allow_extra_metadata=allow_extra_metadata,
         )
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def add_metadata_properties(self, metadata_properties: List["AllowedMetadataPropertyTypes"]) -> None:
+        """Adds new `metadata_properties` to the current `FeedbackDataset` in Argilla.
+
+        Note:
+            Existing `FeedbackRecord`s if any will remain unchanged if those contain metadata
+            named the same way as any of the following properties, but added before the
+            `metadata_properties` were added.
+
+        Args:
+            metadata_properties: the metadata properties to add to the current `FeedbackDataset`
+                in Argilla.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+            RuntimeError: if the `metadata_properties` cannot be added to the current
+                `FeedbackDataset` in Argilla.
+        """
+        if not isinstance(metadata_properties, list):
+            metadata_properties = [metadata_properties]
+
+        # TODO(alvarobartt): remove this when https://github.com/argilla-io/argilla/pull/3829 is merged
+        if not hasattr(self, "_metadata_properties_mapping") or self._metadata_properties_mapping is None:
+            self._metadata_properties_mapping = {
+                metadata_property.name: metadata_property for metadata_property in self._metadata_properties
+            }
+        if not all(
+            metadata_property.name in self._metadata_properties_mapping.keys()
+            for metadata_property in metadata_properties
+        ):
+            raise ValueError(
+                f"Invalid `metadata_properties=[{', '.join(metadata_property.name for metadata_property in metadata_properties)}`"
+                f" provided, must be one of: {self._metadata_properties_mapping.keys()}"
+            )
+        for metadata_property in metadata_properties:
+            try:
+                datasets_api_v1.add_metadata_property(
+                    client=self._client,
+                    id=self.id,
+                    metadata_property=metadata_property.to_server_payload(),
+                )
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed while adding the `metadata_property={metadata_property}` to the current `FeedbackDataset` in Argilla with exception: {e}"
+                ) from e
 
     def filter_by(
         self,
