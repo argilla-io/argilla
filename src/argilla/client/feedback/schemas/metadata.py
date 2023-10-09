@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Generic, List, Optional, Tuple, TypeVar, Union
 
 from pydantic import (
     BaseModel,
@@ -26,6 +26,7 @@ from pydantic import (
     root_validator,
     validator,
 )
+from pydantic.generics import GenericModel
 
 from argilla.client.feedback.constants import METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
@@ -106,7 +107,7 @@ class TermsMetadataProperty(MetadataPropertySchema):
     """
 
     type: MetadataPropertyTypes = MetadataPropertyTypes.terms
-    values: List[str] = Field(..., min_items=TERMS_METADATA_PROPERTY_MIN_VALUES)
+    values: Optional[List[str]] = Field(None, min_items=TERMS_METADATA_PROPERTY_MIN_VALUES)
 
     @validator("values")
     def check_values(cls, terms_values: List[str], values: Dict[str, Any]) -> List[str]:
@@ -155,8 +156,8 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
         from this one.
     """
 
-    min: Union[int, float]  # TODO: should be `Optional[Union[int, float]] = None`
-    max: Union[int, float]  # TODO: should be `Optional[Union[int, float]] = None`
+    min: Optional[Union[int, float]] = None
+    max: Optional[Union[int, float]] = None
 
     _bounds_validator = root_validator(allow_reuse=True)(validate_numeric_metadata_property_bounds)
 
@@ -170,7 +171,7 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
         return settings
 
     def _value_in_bounds(self, provided_value: Union[int, float]) -> None:
-        if provided_value > self.max or provided_value < self.min:
+        if self.max and provided_value > self.max or self.min and provided_value < self.min:
             raise ValueError(
                 f"Provided '{self.name}={provided_value}' is not valid, only values between {self.min} and {self.max} are allowed."
             )
