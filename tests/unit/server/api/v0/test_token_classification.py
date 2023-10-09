@@ -12,10 +12,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import Callable
+
+from typing import TYPE_CHECKING, Callable
 
 import pytest
-from argilla import User
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v0.models.commons.model import BulkResponse, SortableField
 from argilla.server.apis.v0.models.token_classification import (
@@ -26,8 +26,12 @@ from argilla.server.apis.v0.models.token_classification import (
     TokenClassificationSearchResults,
 )
 from argilla.server.commons.models import TaskType
+from argilla.server.models import User
 
 from tests import SUPPORTED_VECTOR_SEARCH
+
+if TYPE_CHECKING:
+    from httpx import AsyncClient
 
 
 @pytest.mark.asyncio

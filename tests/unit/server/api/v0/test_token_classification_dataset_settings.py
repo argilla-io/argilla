@@ -11,11 +11,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 from typing import TYPE_CHECKING, Optional
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.client.api import delete
 from argilla.server.commons.models import TaskType
 from argilla.server.models import User
 
