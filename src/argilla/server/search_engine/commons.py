@@ -506,7 +506,13 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
     @abstractmethod
     async def _index_search_request(
-        self, index: str, query: dict, size: int, from_: int, sort: Optional[str] = None, aggregations: Optional[dict] = None,
+        self,
+        index: str,
+        query: dict,
+        size: int,
+        from_: int,
+        sort: Optional[str] = None,
+        aggregations: Optional[dict] = None,
     ) -> dict:
         """Executes request for search documents on a index"""
         pass
