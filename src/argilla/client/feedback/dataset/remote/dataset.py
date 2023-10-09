@@ -178,19 +178,20 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         if not isinstance(metadata_properties, list):
             metadata_properties = [metadata_properties]
 
-        # TODO(alvarobartt): remove this when https://github.com/argilla-io/argilla/pull/3829 is merged
-        if not hasattr(self, "_metadata_properties_mapping") or self._metadata_properties_mapping is None:
-            self._metadata_properties_mapping = {
-                metadata_property.name: metadata_property for metadata_property in self._metadata_properties
-            }
-        if not all(
-            metadata_property.name in self._metadata_properties_mapping.keys()
-            for metadata_property in metadata_properties
-        ):
-            raise ValueError(
-                f"Invalid `metadata_properties=[{', '.join(metadata_property.name for metadata_property in metadata_properties)}`"
-                f" provided, must be one of: {self._metadata_properties_mapping.keys()}"
-            )
+        if self._metadata_properties is not None:
+            # TODO(alvarobartt): remove this when https://github.com/argilla-io/argilla/pull/3829 is merged
+            if not hasattr(self, "_metadata_properties_mapping") or self._metadata_properties_mapping is None:
+                self._metadata_properties_mapping = {
+                    metadata_property.name: metadata_property for metadata_property in self._metadata_properties
+                }
+            if not all(
+                metadata_property.name in self._metadata_properties_mapping.keys()
+                for metadata_property in metadata_properties
+            ):
+                raise ValueError(
+                    f"Invalid `metadata_properties=[{', '.join(metadata_property.name for metadata_property in metadata_properties)}`"
+                    f" provided, must be one of: {self._metadata_properties_mapping.keys()}"
+                )
         for metadata_property in metadata_properties:
             try:
                 datasets_api_v1.add_metadata_property(
