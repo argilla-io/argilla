@@ -55,7 +55,7 @@ jobs:
           - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
             searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
             coverageReport: coverage-elasticsearch-8.8.2
-            runsOn: ubuntu-latest
+            runsOn: ubuntu-20.04
           # - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.0.1
           #   searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
           #   coverageReport: coverage-elasticsearch-8.0.1
