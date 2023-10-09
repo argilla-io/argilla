@@ -82,7 +82,7 @@ jobs:
           # ulimit to avoid segmentation fault
           ulimit -c unlimited
           pip install -e ".[server,listeners]"
-          pytest --cov=argilla --cov-report=xml:${{ env.COVERAGE_REPORT }}.xml ${{ inputs.pytestArgs }}
+          pytest --cov=argilla --cov-report=xml:${{ env.COVERAGE_REPORT }}.xml ${{ inputs.pytestArgs }} -vs
       - name: Upload coverage report artifact
         uses: actions/upload-artifact@v3
         with:
