@@ -27,7 +27,7 @@ on:
         type: string
 env:
   # Increase this value to reset cache if etc/example-environment.yml has not changed
-  CACHE_NUMBER:  5
+  CACHE_NUMBER: 5
 
 jobs:
   run-python-tests:
@@ -79,6 +79,8 @@ jobs:
         run: echo "Enable HF access token"
       - name: Run tests 📈
         run: |
+          # ulimit to avoid segmentation fault
+          ulimit -c unlimited
           pip install -e ".[server,listeners]"
           pytest --cov=argilla --cov-report=xml:${{ env.COVERAGE_REPORT }}.xml ${{ inputs.pytestArgs }}
       - name: Upload coverage report artifact
