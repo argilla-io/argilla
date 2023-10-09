@@ -20,7 +20,14 @@ import pytest
 from argilla.client import api
 from argilla.client.feedback.config import DatasetConfig
 from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.schemas import FeedbackRecord, TextField, TextQuestion
+from argilla.client.feedback.schemas.fields import TextField
+from argilla.client.feedback.schemas.metadata import (
+    FloatMetadataProperty,
+    IntegerMetadataProperty,
+    TermsMetadataProperty,
+)
+from argilla.client.feedback.schemas.questions import TextQuestion
+from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteSuggestionSchema
 from argilla.client.feedback.training.schemas import TrainingTask
 from argilla.client.models import Framework
@@ -215,6 +222,56 @@ def test_add_records(
     assert len(dataset[:2]) == 2
     assert len(dataset[1:2]) == 1
     assert len(dataset) == len(dataset.records)
+
+
+@pytest.mark.parametrize(
+    "record, exception_cls, exception_msg",
+    [
+        (FeedbackRecord(fields={}, metadata={}), ValueError, "required-field\n  field required"),
+        (
+            FeedbackRecord(fields={"optional-field": "text"}, metadata={}),
+            ValueError,
+            "required-field\n  field required",
+        ),
+        (
+            FeedbackRecord(fields={"required-field": "text"}, metadata={"terms-metadata": "d"}),
+            ValueError,
+            "terms-metadata\n  Provided 'terms-metadata=d' is not valid, only values in \['a', 'b', 'c'\] are allowed.",
+        ),
+        (
+            FeedbackRecord(fields={"required-field": "text"}, metadata={"int-metadata": 11}),
+            ValueError,
+            "int-metadata\n  Provided 'int-metadata=11' is not valid, only values between 0 and 10 are allowed.",
+        ),
+        (
+            FeedbackRecord(fields={"required-field": "text"}, metadata={"float-metadata": 11.0}),
+            ValueError,
+            "float-metadata\n  Provided 'float-metadata=11.0' is not valid, only values between 0.0 and 10.0 are allowed.",
+        ),
+    ],
+)
+def test_add_records_validation_error(
+    record: FeedbackRecord, exception_cls: Exception, exception_msg: str, argilla_user: "ServerUser"
+) -> None:
+    api.init(api_key=argilla_user.api_key)
+
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
+        questions=[TextQuestion(name="question", required=True)],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="int-metadata", min=0, max=10),
+            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+    )
+
+    remote_dataset = dataset.push_to_argilla(name="my-dataset")
+
+    with pytest.raises(exception_cls, match=exception_msg):
+        remote_dataset.add_records(record)
+
+    assert len(dataset.records) == 0
+    remote_dataset.delete()
 
 
 @pytest.mark.parametrize("format_as,expected_output", [("datasets", datasets.Dataset)])

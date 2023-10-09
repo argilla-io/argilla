@@ -17,8 +17,13 @@ from typing import TYPE_CHECKING, List
 import pytest
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.schemas.fields import TextField
-from argilla.client.feedback.schemas.metadata import IntegerMetadataProperty
+from argilla.client.feedback.schemas.metadata import (
+    FloatMetadataProperty,
+    IntegerMetadataProperty,
+    TermsMetadataProperty,
+)
 from argilla.client.feedback.schemas.questions import RatingQuestion, TextQuestion
+from argilla.client.feedback.schemas.records import FeedbackRecord
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
@@ -168,3 +173,74 @@ def test_init_wrong_metadata_properties(
                 IntegerMetadataProperty(name="metadata-property-1", min=0, max=10),
             ],
         )
+
+
+@pytest.mark.parametrize(
+    "record",
+    [
+        FeedbackRecord(fields={"required-field": "text"}, metadata={"nested-metadata": {"a": 1}}),
+        FeedbackRecord(
+            fields={"required-field": "text", "optional-field": "text"},
+            metadata={"int-metadata": 1, "float-metadata": 1.0},
+        ),
+        FeedbackRecord(
+            fields={"required-field": "text", "optional-field": None},
+            metadata={"terms-metadata": "a", "more-metadata": 3},
+        ),
+    ],
+)
+def test__parse_and_validate_records_validation(record: "FeedbackRecord") -> None:
+    dataset = TestFeedbackDataset(
+        fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
+        questions=[TextQuestion(name="question", required=True)],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="int-metadata", min=0, max=10),
+            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+    )
+    dataset._parse_and_validate_records(record)
+
+
+@pytest.mark.parametrize(
+    "record, exception_cls, exception_msg",
+    [
+        (FeedbackRecord(fields={}, metadata={}), ValueError, "required-field\n  field required"),
+        (
+            FeedbackRecord(fields={"optional-field": "text"}, metadata={}),
+            ValueError,
+            "required-field\n  field required",
+        ),
+        (
+            FeedbackRecord(fields={"required-field": "text"}, metadata={"terms-metadata": "d"}),
+            ValueError,
+            "terms-metadata\n  Provided 'terms-metadata=d' is not valid, only values in \['a', 'b', 'c'\] are allowed.",
+        ),
+        (
+            FeedbackRecord(fields={"required-field": "text"}, metadata={"int-metadata": 11}),
+            ValueError,
+            "int-metadata\n  Provided 'int-metadata=11' is not valid, only values between 0 and 10 are allowed.",
+        ),
+        (
+            FeedbackRecord(fields={"required-field": "text"}, metadata={"float-metadata": 11.0}),
+            ValueError,
+            "float-metadata\n  Provided 'float-metadata=11.0' is not valid, only values between 0.0 and 10.0 are allowed.",
+        ),
+    ],
+)
+def test__parse_and_validate_records_validation_error(
+    record: FeedbackRecord,
+    exception_cls: Exception,
+    exception_msg: str,
+) -> None:
+    dataset = TestFeedbackDataset(
+        fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
+        questions=[TextQuestion(name="question", required=True)],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="int-metadata", min=0, max=10),
+            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+    )
+    with pytest.raises(exception_cls, match=exception_msg):
+        dataset._parse_and_validate_records(record)
