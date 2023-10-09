@@ -373,8 +373,8 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         """
         Saves the model to the specified path.
         """
-        self._transformers_model.save_pretrained(output_dir)
-        self._transformers_tokenizer.save_pretrained(output_dir)
+        self._trainer.model.save_pretrained(output_dir)
+        self._trainer.tokenizer.save_pretrained(output_dir)
 
     def __repr__(self) -> str:
         formatted_string = []
