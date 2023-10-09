@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, Dict, List, Union
+from typing import TYPE_CHECKING, Dict, List, Type, Union
 
 import pytest
 from argilla.client.feedback.schemas.metadata import (
@@ -151,11 +151,12 @@ def test_generate_pydantic_schema_for_remote_metadata(
     RemoteMetadataSchema = generate_pydantic_schema_for_metadata(
         metadata_properties=metadata_properties, name="RemoteMetadataSchema"
     )
-    assert RemoteMetadataSchema(**validation_data)
+    assert RemoteMetadataSchema(**validation_data).dict() == validation_data
+
 
 
 @pytest.mark.parametrize(
-    "metadata_properties, validation_data, exception_cls, exception_msg",
+    "metadata_properties, validation_data, ExceptionCls, exception_msg",
     [
         (
             [RemoteTermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"])],
@@ -198,11 +199,11 @@ def test_generate_pydantic_schema_for_remote_metadata(
 def test_generate_pydantic_schema_for_remote_metadata_errors(
     metadata_properties: List["AllowedRemoteMetadataPropertyTypes"],
     validation_data: Dict[str, Union[str, int, float]],
-    exception_cls: Exception,
+    ExceptionCls: Type[Exception],
     exception_msg: str,
 ) -> None:
     RemoteMetadataSchema = generate_pydantic_schema_for_metadata(
         metadata_properties=metadata_properties, name="RemoteMetadataSchema"
     )
-    with pytest.raises(exception_cls, match=exception_msg):
+    with pytest.raises(ExceptionCls, match=exception_msg):
         RemoteMetadataSchema(**validation_data)
