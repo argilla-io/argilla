@@ -61,7 +61,7 @@ def test_logging_handler(mocker):
     handler.emit.assert_called()
 
 
-@pytest.mark.skip(reason="Failing temporally")
+@pytest.mark.skip(reason="Failing temporarily")
 def test_configure_logging_call():
     # Ensure that the root logger uses the ArgillaHandler (RichHandler if rich is installed),
     # whereas the other loggers do not have handlers
