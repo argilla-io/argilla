@@ -21,7 +21,7 @@ import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v1.handlers.datasets import LIST_DATASET_RECORDS_LIMIT_DEFAULT
 from argilla.server.daos.backend import query_helpers
-from argilla.server.enums import RecordInclude, ResponseStatusFilter
+from argilla.server.enums import RecordInclude, RecordSortField, ResponseStatusFilter, SortOrder
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
@@ -769,37 +769,37 @@ class TestSuiteDatasets:
                 {"name": "integer_prop", "type": "integer"},
                 '{"ge": 10, "le": 20}',
                 IntegerMetadataFilter,
-                dict(low=10, high=20),
+                dict(ge=10, le=20),
             ),
             (
                 {"name": "integer_prop", "type": "integer"},
                 '{"ge": 20}',
                 IntegerMetadataFilter,
-                dict(low=20, high=None),
+                dict(ge=20, high=None),
             ),
             (
                 {"name": "integer_prop", "type": "integer"},
                 '{"le": 20}',
                 IntegerMetadataFilter,
-                dict(low=None, high=20),
+                dict(ge=None, le=20),
             ),
             (
                 {"name": "float_prop", "type": "float"},
                 '{"ge": -1.30, "le": 23.23}',
                 FloatMetadataFilter,
-                dict(low=-1.30, high=23.23),
+                dict(ge=-1.30, le=23.23),
             ),
             (
                 {"name": "float_prop", "type": "float"},
                 '{"ge": 23.23}',
                 FloatMetadataFilter,
-                dict(low=23.23, high=None),
+                dict(ge=23.23, high=None),
             ),
             (
                 {"name": "float_prop", "type": "float"},
                 '{"le": 11.32}',
                 FloatMetadataFilter,
-                dict(low=None, high=11.32),
+                dict(ge=None, le=11.32),
             ),
         ],
     )
@@ -843,11 +843,11 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=None,
-            metadata_filters=[expected_filter_class(metadata_property, **expected_filter_args)],
+            metadata_filters=[expected_filter_class(metadata_property=metadata_property, **expected_filter_args)],
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
-            sort_by=[SortBy(field="inserted_at", order="asc")],
+            sort_by=[SortBy(field=RecordSortField.inserted_at)],
         )
 
     @pytest.mark.parametrize(
@@ -1369,37 +1369,37 @@ class TestSuiteDatasets:
                 {"name": "integer_prop", "type": "integer"},
                 '{"ge": 10, "le": 20}',
                 IntegerMetadataFilter,
-                dict(low=10, high=20),
+                dict(ge=10, le=20),
             ),
             (
                 {"name": "integer_prop", "type": "integer"},
                 '{"ge": 20}',
                 IntegerMetadataFilter,
-                dict(low=20, high=None),
+                dict(ge=20, le=None),
             ),
             (
                 {"name": "integer_prop", "type": "integer"},
                 '{"le": 20}',
                 IntegerMetadataFilter,
-                dict(low=None, high=20),
+                dict(ge=None, le=20),
             ),
             (
                 {"name": "float_prop", "type": "float"},
                 '{"ge": -1.30, "le": 23.23}',
                 FloatMetadataFilter,
-                dict(low=-1.30, high=23.23),
+                dict(ge=-1.30, le=23.23),
             ),
             (
                 {"name": "float_prop", "type": "float"},
                 '{"ge": 23.23}',
                 FloatMetadataFilter,
-                dict(low=23.23, high=None),
+                dict(ge=23.23, le=None),
             ),
             (
                 {"name": "float_prop", "type": "float"},
                 '{"le": 11.32}',
                 FloatMetadataFilter,
-                dict(low=None, high=11.32),
+                dict(ge=None, le=11.32),
             ),
         ],
     )
@@ -1443,11 +1443,11 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=None,
-            metadata_filters=[expected_filter_class(metadata_property, **expected_filter_args)],
+            metadata_filters=[expected_filter_class(metadata_property=metadata_property, **expected_filter_args)],
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
-            sort_by=[SortBy(field="inserted_at", order="asc")],
+            sort_by=[SortBy(field=RecordSortField.inserted_at)],
         )
 
     @pytest.mark.parametrize("response_status_filter", ["missing", "discarded", "submitted", "draft"])
@@ -4030,37 +4030,37 @@ class TestSuiteDatasets:
                 {"name": "integer_prop", "type": "integer"},
                 '{"ge": 10, "le": 20}',
                 IntegerMetadataFilter,
-                dict(low=10, high=20),
+                dict(ge=10, le=20),
             ),
             (
                 {"name": "integer_prop", "type": "integer"},
                 '{"ge": 20}',
                 IntegerMetadataFilter,
-                dict(low=20, high=None),
+                dict(ge=20, high=None),
             ),
             (
                 {"name": "integer_prop", "type": "integer"},
                 '{"le": 20}',
                 IntegerMetadataFilter,
-                dict(low=None, high=20),
+                dict(low=None, le=20),
             ),
             (
                 {"name": "float_prop", "type": "float"},
                 '{"ge": -1.30, "le": 23.23}',
                 FloatMetadataFilter,
-                dict(low=-1.30, high=23.23),
+                dict(ge=-1.30, le=23.23),
             ),
             (
                 {"name": "float_prop", "type": "float"},
                 '{"ge": 23.23}',
                 FloatMetadataFilter,
-                dict(low=23.23, high=None),
+                dict(ge=23.23, high=None),
             ),
             (
                 {"name": "float_prop", "type": "float"},
                 '{"le": 11.32}',
                 FloatMetadataFilter,
-                dict(low=None, high=11.32),
+                dict(low=None, le=11.32),
             ),
         ],
     )
@@ -4104,7 +4104,7 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=StringQuery(q="Hello", field="input"),
-            metadata_filters=[expected_filter_class(metadata_property, **expected_filter_args)],
+            metadata_filters=[expected_filter_class(metadata_property=metadata_property, **expected_filter_args)],
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
@@ -4527,7 +4527,7 @@ class TestSuiteDatasets:
             f"/api/v1/me/datasets/{uuid4()}/records/search", headers=owner_auth_header, json=query_json
         )
 
-        assert response.status_code == 404
+        assert response.status_code == 404, response.json()
 
     async def test_publish_dataset(
         self,

@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from opensearchpy import AsyncOpenSearch, helpers
 
@@ -25,10 +25,7 @@ from argilla.server.settings import settings
 @SearchEngine.register(engine_name="opensearch")
 @dataclasses.dataclass
 class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
-    config: Dict[str, Any]
-
-    es_number_of_shards: int
-    es_number_of_replicas: int
+    config: Dict[str, Any] = dataclasses.field(default_factory=dict)
 
     def __post_init__(self):
         self.client = AsyncOpenSearch(**self.config)
@@ -43,7 +40,7 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
             max_retries=5,
         )
         return cls(
-            config,
+            config=config,
             es_number_of_shards=settings.es_records_index_shards,
             es_number_of_replicas=settings.es_records_index_replicas,
         )
@@ -69,10 +66,22 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
     async def put_index_mapping_request(self, index: str, mappings: dict):
         await self.client.indices.put_mapping(index=index, body={"properties": mappings})
 
-    async def _index_search_request(self, index: str, query: dict, size: int, from_: int, sort: str = None):
+    async def _index_search_request(
+        self,
+        index: str,
+        query: dict,
+        size: Optional[int] = None,
+        from_: Optional[int] = None,
+        sort: str = None,
+        aggregations: Optional[dict] = None,
+    ) -> dict:
+        body = {"query": query}
+        if aggregations:
+            body["aggs"] = aggregations
+
         return await self.client.search(
             index=index,
-            body={"query": query},
+            body=body,
             from_=from_,
             size=size,
             _source=False,

@@ -274,7 +274,7 @@ class TestSuiteOpenSearchEngine:
         self,
         opensearch_engine: OpenSearchEngine,
         opensearch: OpenSearch,
-        db: Session,
+        db: "AsyncSession",
     ):
         text_fields = await TextFieldFactory.create_batch(5)
         dataset = await DatasetFactory.create(fields=text_fields)
@@ -312,7 +312,7 @@ class TestSuiteOpenSearchEngine:
         self,
         opensearch_engine: OpenSearchEngine,
         opensearch: OpenSearch,
-        db: Session,
+        db: "AsyncSession",
     ):
         text_field = await TextFieldFactory.create(name="field")
 
@@ -444,7 +444,7 @@ class TestSuiteOpenSearchEngine:
         }
 
     async def test_create_index_with_existing_index(
-        self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch, db: Session
+        self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch, db: "AsyncSession"
     ):
         dataset = await DatasetFactory.create()
 
@@ -574,14 +574,14 @@ class TestSuiteOpenSearchEngine:
             ([{"name": "label", "values": ["neutral"]}], 4),
             ([{"name": "label", "values": ["positive"]}], 1),
             ([{"name": "label", "values": ["neutral", "positive"]}], 5),
-            ([{"name": "textId", "low": 3, "high": 4}], 2),
-            ([{"name": "textId", "low": 3, "high": 3}], 1),
-            ([{"name": "textId", "low": 3}], 6),
-            ([{"name": "textId", "high": 4}], 5),
-            ([{"name": "seq_float", "low": 0.0, "high": 12.03}], 3),
-            ([{"name": "seq_float", "low": 0.13, "high": 0.13}], 1),
-            ([{"name": "seq_float", "low": 0.0}], 7),
-            ([{"name": "seq_float", "high": 12.03}], 5),
+            ([{"name": "textId", "ge": 3, "le": 4}], 2),
+            ([{"name": "textId", "ge": 3, "le": 3}], 1),
+            ([{"name": "textId", "ge": 3}], 6),
+            ([{"name": "textId", "le": 4}], 5),
+            ([{"name": "seq_float", "ge": 0.0, "le": 12.03}], 3),
+            ([{"name": "seq_float", "ge": 0.13, "le": 0.13}], 1),
+            ([{"name": "seq_float", "ge": 0.0}], 7),
+            ([{"name": "seq_float", "le": 12.03}], 5),
         ],
     )
     async def test_search_with_metadata_filter(
@@ -603,7 +603,7 @@ class TestSuiteOpenSearchEngine:
                         filter_cls = IntegerMetadataFilter
                     else:
                         filter_cls = FloatMetadataFilter
-                    metadata_filters.append(filter_cls(metadata_property, **metadata_filter_config))
+                    metadata_filters.append(filter_cls(metadata_property=metadata_property, **metadata_filter_config))
                     break
 
         result = await opensearch_engine.search(test_banking_sentiment_dataset, metadata_filters=metadata_filters)
@@ -840,7 +840,7 @@ class TestSuiteOpenSearchEngine:
         self,
         opensearch_engine: OpenSearchEngine,
         opensearch: OpenSearch,
-        db: Session,
+        db: "AsyncSession",
         test_banking_sentiment_dataset: Dataset,
     ):
         record = test_banking_sentiment_dataset.records[0]
@@ -869,6 +869,76 @@ class TestSuiteOpenSearchEngine:
 
         results = opensearch.get(index=index_name, id=record.id)
         assert results["_source"]["responses"] == {}
+
+    @pytest.mark.parametrize(
+        ("property_name", "expected_metrics"),
+        [
+            (
+                "label",
+                {
+                    "total": 8,
+                    "type": MetadataPropertyType.terms,
+                    "values": [
+                        {"count": 4, "term": "neutral"},
+                        {"count": 3, "term": "negative"},
+                        {"count": 1, "term": "positive"},
+                    ],
+                },
+            ),
+            ("textId", {"max": 8, "min": 0, "type": MetadataPropertyType.integer}),
+            ("seq_float", {"max": 120020.1328125, "min": -149.1300048828125, "type": MetadataPropertyType.float}),
+        ],
+    )
+    async def test_compute_metrics_for(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        db: "AsyncSession",
+        test_banking_sentiment_dataset: Dataset,
+        property_name: str,
+        expected_metrics: dict,
+    ):
+        for property in test_banking_sentiment_dataset.metadata_properties:
+            if property.name == property_name:
+                break
+
+        metrics = await opensearch_engine.compute_metrics_for(property)
+
+        assert metrics.type == property.type
+        assert metrics.dict() == expected_metrics
+
+    @pytest.mark.parametrize(
+        ("property_type", "expected_metrics"),
+        [
+            (MetadataPropertyType.terms, {"total": 0, "values": []}),
+            (MetadataPropertyType.integer, {"min": None, "max": None}),
+            (MetadataPropertyType.float, {"min": None, "max": None}),
+        ],
+    )
+    async def test_compute_metrics_for_missing_property(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        db: "AsyncSession",
+        property_type: MetadataPropertyType,
+        expected_metrics: dict,
+    ):
+        dataset = await DatasetFactory.create()
+
+        await _refresh_dataset(dataset)
+        await opensearch_engine.create_index(dataset)
+
+        if property_type == MetadataPropertyType.terms:
+            property = await TermsMetadataPropertyFactory.create(dataset=dataset)
+        elif property_type == MetadataPropertyType.integer:
+            property = await IntegerMetadataPropertyFactory.create(dataset=dataset)
+        elif property_type == MetadataPropertyType.float:
+            property = await FloatMetadataPropertyFactory.create(dataset=dataset)
+        else:
+            pytest.fail(f"Wrong property type {property_type}")
+
+        metrics = await opensearch_engine.compute_metrics_for(property)
+
+        assert metrics.dict() == {"type": property_type, **expected_metrics}
 
     async def _configure_record_responses(
         self,
