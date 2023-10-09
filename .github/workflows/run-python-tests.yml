@@ -69,6 +69,7 @@ jobs:
 
       - name: Run tests 📈
         run: |
+          ulimit -c unlimited
           python -m pytest --cov=argilla --cov-report=xml:${{ env.COVERAGE_REPORT }}.xml ${{ inputs.pytestArgs }}
 
       - name: Upload coverage report artifact
