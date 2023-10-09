@@ -95,7 +95,6 @@ jobs:
       - check_repo_files
       - run_unit_tests
     if: needs.check_repo_files.outputs.pythonChanges == 'true'
-    # continue-on-error: true
     with:
       runsOn: extended-runner
       coverageReport: coverage-extra

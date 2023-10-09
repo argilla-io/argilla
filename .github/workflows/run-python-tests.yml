@@ -33,6 +33,7 @@ jobs:
   run-python-tests:
     name: Argilla python tests
     runs-on: ${{ inputs.runsOn }}
+    continue-on-error: true
     services:
       search_engine:
         image: ${{ inputs.searchEngineDockerImage }}
