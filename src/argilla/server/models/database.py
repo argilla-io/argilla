@@ -17,13 +17,14 @@ from typing import Any, List, Optional
 from uuid import UUID
 
 from pydantic import parse_obj_as
-from sqlalchemy import JSON, ForeignKey, Text, UniqueConstraint, and_
+from sqlalchemy import JSON, ForeignKey, Text, UniqueConstraint, and_, sql
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from argilla.server.enums import DatasetStatus, MetadataPropertyType, ResponseStatus, SuggestionType, UserRole
 from argilla.server.models.base import DatabaseModel
+from argilla.server.models.metadata_properties import MetadataPropertySettings
 from argilla.server.models.questions import QuestionSettings
 
 # Include here the data model ref to be accessible for automatic alembic migration scripts
@@ -194,6 +195,10 @@ class MetadataProperty(DatabaseModel):
 
     __table_args__ = (UniqueConstraint("name", "dataset_id", name="metadata_property_name_dataset_id_uq"),)
 
+    @property
+    def parsed_settings(self) -> MetadataPropertySettings:
+        return parse_obj_as(MetadataPropertySettings, self.settings)
+
     def __repr__(self):
         return (
             f"MetadataProperty(id={str(self.id)!r}, name={self.name!r}, type={self.type!r}, "
@@ -210,6 +215,7 @@ class Dataset(DatabaseModel):
 
     name: Mapped[str] = mapped_column(index=True)
     guidelines: Mapped[Optional[str]] = mapped_column(Text)
+    allow_extra_metadata: Mapped[bool] = mapped_column(default=True, server_default=sql.true())
     status: Mapped[DatasetStatus] = mapped_column(DatasetStatusEnum, default=DatasetStatus.draft, index=True)
     workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
 

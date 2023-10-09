@@ -243,6 +243,15 @@ class MetadataPropertyFactory(BaseFactory):
     class Meta:
         model = MetadataProperty
 
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        default_settings = getattr(cls, "settings", {})
+        settings = kwargs.get("settings", {})
+        if settings:
+            default_settings.update(settings)
+            kwargs["settings"] = default_settings
+        return super()._create(model_class, *args, **kwargs)
+
     name = factory.Sequence(lambda n: f"metadata-property-{n}")
     description = "Metadata property description"
     dataset = factory.SubFactory(DatasetFactory)
