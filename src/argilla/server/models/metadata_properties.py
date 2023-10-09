@@ -16,6 +16,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Generic, List, Literal, Optional, TypeVar, Union
 
 from pydantic import BaseModel, Field
+from pydantic.generics import GenericModel
 
 from argilla.server.enums import MetadataPropertyType
 
@@ -50,7 +51,7 @@ class TermsMetadataPropertySettings(BaseMetadataPropertySettings):
 NT = TypeVar("NT", int, float)
 
 
-class NumericMetadataPropertySettings(BaseMetadataPropertySettings, Generic[NT]):
+class NumericMetadataPropertySettings(BaseMetadataPropertySettings, GenericModel, Generic[NT]):
     min: Optional[NT] = None
     max: Optional[NT] = None
 

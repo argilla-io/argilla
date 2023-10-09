@@ -2678,6 +2678,7 @@ class TestSuiteDatasets:
             ({"type": "float", "min": 2}, {"type": "float", "min": 2, "max": None}),
             ({"type": "float", "max": 10}, {"type": "float", "min": None, "max": 10}),
             ({"type": "float", "min": 2, "max": 10}, {"type": "float", "min": 2, "max": 10}),
+            ({"type": "float", "min": 0.3, "max": 1.0}, {"type": "float", "min": 0.3, "max": 1.0}),
         ],
     )
     async def test_create_dataset_metadata_property(
@@ -2935,9 +2936,9 @@ class TestSuiteDatasets:
         question_a = await TextQuestionFactory.create(name="input_ok", dataset=dataset)
         question_b = await TextQuestionFactory.create(name="output_ok", dataset=dataset)
 
-        await TermsMetadataPropertyFactory.create(name="terms-metadata")
-        await IntegerMetadataPropertyFactory.create(name="integer-metadata")
-        await FloatMetadataPropertyFactory.create(name="float-metadata")
+        await TermsMetadataPropertyFactory.create(name="terms-metadata", dataset=dataset)
+        await IntegerMetadataPropertyFactory.create(name="integer-metadata", dataset=dataset)
+        await FloatMetadataPropertyFactory.create(name="float-metadata", dataset=dataset)
 
         records_json = {
             "items": [
@@ -2967,7 +2968,7 @@ class TestSuiteDatasets:
                     "metadata": {
                         "terms-metadata": "a",
                         "integer-metadata": 1,
-                        "float-metadata": 1.1,
+                        "float-metadata": 1.2,
                     },
                 },
                 {
@@ -3274,15 +3275,9 @@ class TestSuiteDatasets:
 
         records_json = {
             "items": [
-                {
-                    "fields": {"input": "Say Hello", "output": "unexpected"},
-                },
-                {
-                    "fields": {"input": "Say Hello"},
-                },
-                {
-                    "fields": {"input": "Say Pello"},
-                },
+                {"fields": {"input": "Say Hello", "output": "unexpected"}},
+                {"fields": {"input": "Say Hello"}},
+                {"fields": {"input": "Say Pello"}},
             ]
         }
 
@@ -3347,9 +3342,49 @@ class TestSuiteDatasets:
     @pytest.mark.parametrize(
         "MetadataPropertyFactoryType, settings, value",
         [
+            (TermsMetadataPropertyFactory, {"values": ["a", "b", "c"]}, "c"),
+            (IntegerMetadataPropertyFactory, {"min": 0, "max": 10}, 5),
+            (FloatMetadataPropertyFactory, {"min": 0.0, "max": 1}, 0.5),
+            (FloatMetadataPropertyFactory, {"min": 0.3, "max": 0.5}, 0.35),
+            (FloatMetadataPropertyFactory, {"min": 0.3, "max": 0.9}, 0.89),
+        ],
+    )
+    async def test_create_dataset_records_metadata_values(
+        self,
+        async_client: "AsyncClient",
+        owner_auth_header: dict,
+        MetadataPropertyFactoryType: Type[MetadataPropertyFactory],
+        settings: Dict[str, Any],
+        value: Any,
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        await TextFieldFactory.create(name="completion", dataset=dataset)
+        await TextQuestionFactory.create(name="corrected", dataset=dataset)
+        await MetadataPropertyFactoryType.create(name="metadata-property", dataset=dataset, settings=settings)
+
+        records_json = {
+            "items": [
+                {
+                    "fields": {"completion": "text-input"},
+                    "metadata": {"metadata-property": value},
+                }
+            ]
+        }
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+        )
+
+        assert response.status_code == 204
+
+    @pytest.mark.parametrize(
+        "MetadataPropertyFactoryType, settings, value",
+        [
             (TermsMetadataPropertyFactory, {"values": ["a", "b", "c"]}, "z"),
             (IntegerMetadataPropertyFactory, {"min": 0, "max": 10}, -1),
             (FloatMetadataPropertyFactory, {"min": 0.0, "max": 10.0}, -1.0),
+            (FloatMetadataPropertyFactory, {"min": 0.3, "max": 0.9}, 0),
+            (FloatMetadataPropertyFactory, {"min": 0.3, "max": 0.9}, 0.91),
         ],
     )
     async def test_create_dataset_records_with_not_valid_metadata_values(
