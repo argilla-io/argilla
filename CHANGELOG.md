@@ -25,6 +25,7 @@ These are the section headers that we use:
 - Added new endpoint `GET /api/v1/metadata-properties/:metadata_property_id/metrics` to compute metrics for metadata properties ([#3856](https://github.com/argilla-io/argilla/pull/3856))
 - Added a validation layer for both `metadata_properties` and `metadata_filters` in their schemas and as part of the `add_records` and `filter_by` methods, respectively ([#3860](https://github.com/argilla-io/argilla/pull/3860)).
 - Added `sort_by` query parameter to listing records endpoints that allows to sort the records by `inserted_at`, `updated_at` or metadata property ([#3843](https://github.com/argilla-io/argilla/pull/3843)).
+- Added fields `inserted_at` and `updated_at` in `RemoteResponseSchema` ([#3822](https://github.com/argilla-io/argilla/pull/3822)).
 
 ### Changed
 
