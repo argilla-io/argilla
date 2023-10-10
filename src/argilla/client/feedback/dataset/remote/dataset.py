@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
     import httpx
 
-    from argilla.client.feedback.schemas.records import ResponseStatusFilter
+    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
     from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
     from argilla.client.workspaces import Workspace
