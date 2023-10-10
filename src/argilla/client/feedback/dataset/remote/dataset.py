@@ -177,7 +177,7 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             RuntimeError: if the `metadata_property` cannot be added to the current
                 `FeedbackDataset` in Argilla.
         """
-        super()._validate_metadata_property(metadata_property=metadata_property)
+        self._validate_metadata_property(metadata_property=metadata_property)
 
         try:
             metadata_property = datasets_api_v1.add_metadata_property(

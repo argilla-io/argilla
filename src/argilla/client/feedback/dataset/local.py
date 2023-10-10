@@ -199,7 +199,7 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
             TypeError: if `metadata_property` is not a `MetadataPropertySchema`.
             ValueError: if `metadata_property` is already in the dataset.
         """
-        super()._validate_metadata_property(metadata_property)
+        self._validate_metadata_property(metadata_property)
         self._metadata_properties.append(metadata_property)
         self._metadata_properties_mapping.update({metadata_property.name: metadata_property})
         return metadata_property
