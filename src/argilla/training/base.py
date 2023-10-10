@@ -331,6 +331,8 @@ class ArgillaTrainerSkeleton(ABC):
             self._id2label = None
         self._model = model
         self._seed = seed
+        self.model_kwargs = {}
+        self.trainer_kwargs = {}
 
     @abstractmethod
     def init_training_args(self):
@@ -367,3 +369,15 @@ class ArgillaTrainerSkeleton(ABC):
         """
         Saves the model to the specified path.
         """
+
+    def get_model_kwargs(self):
+        """
+        Returns the model kwargs.
+        """
+        return self.model_kwargs
+
+    def get_training_kwargs(self):
+        """
+        Returns the training kwargs.
+        """
+        return self.trainer_kwargs

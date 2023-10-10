@@ -111,40 +111,40 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         suffix: str = None,
         hyperparameters: dict = None,
     ) -> None:
-        self.model_kwargs = {}
+        self.trainer_kwargs = {}
 
-        self.model_kwargs["training_file"] = training_file
-        self.model_kwargs["validation_file"] = validation_file
-        self.model_kwargs["model"] = model
-        self.model_kwargs["suffix"] = suffix
+        self.trainer_kwargs["training_file"] = training_file
+        self.trainer_kwargs["validation_file"] = validation_file
+        self.trainer_kwargs["model"] = model
+        self.trainer_kwargs["suffix"] = suffix
 
         if self.__legacy:
             if isinstance(self._record_class, TextClassificationRecord):
-                self.model_kwargs["n_epochs"] = n_epochs or 4
+                self.trainer_kwargs["n_epochs"] = n_epochs or 4
             else:
-                self.model_kwargs["n_epochs"] = n_epochs or 2
-            self.model_kwargs["batch_size"] = batch_size
-            self.model_kwargs["learning_rate_multiplier"] = learning_rate_multiplier
-            self.model_kwargs["prompt_loss_weight"] = prompt_loss_weight
-            self.model_kwargs["compute_classification_metrics"] = compute_classification_metrics
-            self.model_kwargs["classification_n_classes"] = classification_n_classes
-            self.model_kwargs["classification_positive_class"] = classification_positive_class
-            self.model_kwargs["classification_betas"] = classification_betas
+                self.trainer_kwargs["n_epochs"] = n_epochs or 2
+            self.trainer_kwargs["batch_size"] = batch_size
+            self.trainer_kwargs["learning_rate_multiplier"] = learning_rate_multiplier
+            self.trainer_kwargs["prompt_loss_weight"] = prompt_loss_weight
+            self.trainer_kwargs["compute_classification_metrics"] = compute_classification_metrics
+            self.trainer_kwargs["classification_n_classes"] = classification_n_classes
+            self.trainer_kwargs["classification_positive_class"] = classification_positive_class
+            self.trainer_kwargs["classification_betas"] = classification_betas
 
             if isinstance(self._record_class, TextClassificationRecord) and self._eval_dataset:
                 label_schema = self._label_list
                 if len(label_schema) == 2:
-                    self.model_kwargs["classification_positive_class"] = label_schema[0]
-                    self.model_kwargs["compute_classification_metrics"] = True
+                    self.trainer_kwargs["classification_positive_class"] = label_schema[0]
+                    self.trainer_kwargs["compute_classification_metrics"] = True
                 else:
-                    self.model_kwargs["classification_n_classes"] = len(label_schema)
-                    self.model_kwargs["compute_classification_metrics"] = True
+                    self.trainer_kwargs["classification_n_classes"] = len(label_schema)
+                    self.trainer_kwargs["compute_classification_metrics"] = True
         else:
             if "hyperparameters":
-                self.model_kwargs["hyperparameters"] = hyperparameters
+                self.trainer_kwargs["hyperparameters"] = hyperparameters
             else:
-                self.model_kwargs["hyperparameters"] = {}
-                self.model_kwargs["hyperparameters"]["n_epochs"] = n_epochs or 1
+                self.trainer_kwargs["hyperparameters"] = {}
+                self.trainer_kwargs["hyperparameters"]["n_epochs"] = n_epochs or 1
 
     def update_config(
         self,
@@ -154,23 +154,23 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         Updates the `model_kwargs` dictionaries with the keyword
         arguments passed to the `update_config` function.
         """
-        self.model_kwargs.update(kwargs)
-        self.model_kwargs = filter_allowed_args(self.init_training_args, **self.model_kwargs)
+        self.trainer_kwargs.update(kwargs)
+        self.trainer_kwargs = filter_allowed_args(self.init_training_args, **self.trainer_kwargs)
 
         keys = []
-        for key, value in self.model_kwargs.items():
+        for key, value in self.trainer_kwargs.items():
             if value is None:
                 keys.append(key)
         for key in keys:
-            del self.model_kwargs[key]
+            del self.trainer_kwargs[key]
 
-        if "model" in self.model_kwargs:
-            self._model = self.model_kwargs["model"]
+        if "model" in self.trainer_kwargs:
+            self._model = self.trainer_kwargs["model"]
 
     def __repr__(self):
         formatted_string = []
         arg_dict = {
-            "'OpenAI.fine_tune'": self.model_kwargs,
+            "'OpenAI.fine_tune'": self.trainer_kwargs,
         }
         for arg_dict_key, arg_dict_single in arg_dict.items():
             formatted_string.append(arg_dict_key)
@@ -209,14 +209,18 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
         import openai
 
         if output_dir is not None:
-            self.model_kwargs["suffix"] = output_dir
+            self.trainer_kwargs["suffix"] = output_dir
 
-        if self._train_dataset is not None and self.model_kwargs["training_file"] is None:
-            self.model_kwargs["training_file"] = self.upload_dataset_to_openai(self._train_dataset, "data_train.jsonl")
-        if (self._eval_dataset is not None and self.model_kwargs["validation_file"] is None) and self.model_kwargs[
+        if self._train_dataset is not None and self.trainer_kwargs["training_file"] is None:
+            self.trainer_kwargs["training_file"] = self.upload_dataset_to_openai(
+                self._train_dataset, "data_train.jsonl"
+            )
+        if (self._eval_dataset is not None and self.trainer_kwargs["validation_file"] is None) and self.trainer_kwargs[
             "compute_classification_metrics"
         ]:
-            self.model_kwargs["validation_file"] = self.upload_dataset_to_openai(self._eval_dataset, "data_test.jsonl")
+            self.trainer_kwargs["validation_file"] = self.upload_dataset_to_openai(
+                self._eval_dataset, "data_test.jsonl"
+            )
 
         self.update_config()
 
@@ -225,10 +229,10 @@ class ArgillaOpenAITrainer(ArgillaTrainerSkeleton):
             try:
                 if self.__legacy:
                     response = openai.FineTune.create(
-                        **self.model_kwargs,
+                        **self.trainer_kwargs,
                     )
                 else:
-                    response = openai.FineTuningJob.create(**self.model_kwargs)
+                    response = openai.FineTuningJob.create(**self.trainer_kwargs)
                 started_training = True
             except Exception as e:
                 self._logger.warning(e)

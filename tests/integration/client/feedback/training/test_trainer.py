@@ -33,11 +33,11 @@ from argilla.client.feedback.schemas import (
     MultiLabelQuestion,
 )
 from argilla.client.feedback.training import ArgillaTrainer
-from argilla.client.feedback.training.schemas import (
+from argilla.client.feedback.training.schemas.base import (
+    QuestionAnsweringReturnTypes,
+    TextClassificationReturnTypes,
     TrainingTask,
-    TrainingTaskForQuestionAnsweringFormat,
     TrainingTaskForTextClassification,
-    TrainingTaskForTextClassificationFormat,
     TrainingTaskMapping,
     TrainingTaskMappingForTextClassification,
     TrainingTaskTypes,
@@ -197,7 +197,7 @@ def test_prepare_for_training_text_classification_with_formatting_func(
     with pytest.raises(
         ValueError,
         match=re.escape(
-            f"formatting_func must return {TrainingTaskForTextClassificationFormat.__annotations__['format']}, not <class 'dict'>"
+            f"formatting_func must return {TextClassificationReturnTypes.__annotations__['format']}, not <class 'dict'>"
         ),
     ):
         task = TrainingTask.for_text_classification(wrong_formatting_func)
@@ -248,7 +248,7 @@ def test_question_answering_with_formatting_func(
     with pytest.raises(
         ValueError,
         match=re.escape(
-            f"formatting_func must return {TrainingTaskForQuestionAnsweringFormat.__annotations__['format']}, not <class 'dict'>"
+            f"formatting_func must return {QuestionAnsweringReturnTypes.__annotations__['format']}, not <class 'dict'>"
         ),
     ):
         task = TrainingTask.for_question_answering(lambda x: {})

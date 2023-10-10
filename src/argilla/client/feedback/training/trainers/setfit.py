@@ -14,7 +14,7 @@
 
 import logging
 
-from argilla.client.feedback.training.frameworks.transformers import ArgillaTransformersTrainer
+from argilla.client.feedback.training.trainers.transformers import ArgillaTransformersTrainer
 from argilla.client.models import TextClassificationRecord
 from argilla.training.setfit import ArgillaSetFitTrainer as ArgillaSetFitTrainerV1
 from argilla.utils.dependency import require_dependencies

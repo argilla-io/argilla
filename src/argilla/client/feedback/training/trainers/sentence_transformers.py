@@ -15,8 +15,8 @@
 import logging
 from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
-from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
-from argilla.client.feedback.training.schemas import TrainingTaskForSentenceSimilarity
+from argilla.client.feedback.training.schemas.base import TrainingTaskForSentenceSimilarity
+from argilla.client.feedback.training.trainers.base import ArgillaTrainerSkeleton
 from argilla.training.utils import filter_allowed_args, get_default_args
 from argilla.utils.dependency import require_dependencies
 
@@ -183,7 +183,7 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
                     # the user the one selected is not allowed.
                     self.trainer_kwargs["evaluator"] = None
                     self._logger.warning(
-                        f"Currently only developed evaluators that implement `cls.from_input_examples` can be set."
+                        "Currently only developed evaluators that implement `cls.from_input_examples` can be set."
                     )
         else:
             if label:

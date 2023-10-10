@@ -189,7 +189,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
 
     def update_config(self, **kwargs):
         """
-        Updates the `setfit_model_kwargs` and `setfit_trainer_kwargs` dictionaries with the keyword
+        Updates the `model_kwargs` and `trainer_kwargs` dictionaries with the keyword
         arguments passed to the `update_config` function.
         """
         from transformers import TrainingArguments

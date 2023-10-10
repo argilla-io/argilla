@@ -17,10 +17,10 @@ from typing import TYPE_CHECKING, Callable, List, Union
 import pytest
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.records import FeedbackRecord
-from argilla.client.feedback.training.base import ArgillaTrainer
-from argilla.client.feedback.training.schemas import (
+from argilla.client.feedback.training.schemas.base import (
     TrainingTask,
 )
+from argilla.client.feedback.training.trainers.base import ArgillaTrainer
 from sentence_transformers import CrossEncoder, InputExample, SentenceTransformer
 
 from tests.integration.training.helpers import train_with_cleanup
@@ -261,7 +261,7 @@ def test_prepare_for_training_sentence_transformers_bad_format(
         match_start = r"^Datasets containing a `sentence`"
 
     with pytest.raises(ValueError, match=match_start):
-        trainer = ArgillaTrainer(
+        ArgillaTrainer(
             dataset=dataset,
             task=task,
             framework="sentence-transformers",

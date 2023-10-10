@@ -24,7 +24,7 @@ from argilla.client.feedback.schemas import (
     FieldSchema,
 )
 from argilla.client.feedback.schemas.types import AllowedQuestionTypes
-from argilla.client.feedback.training.schemas import (
+from argilla.client.feedback.training.schemas.base import (
     TrainingTaskForChatCompletion,
     TrainingTaskForDPO,
     TrainingTaskForPPO,

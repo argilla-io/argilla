@@ -15,13 +15,13 @@
 import logging
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
-from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
-from argilla.client.feedback.training.schemas import (
+from argilla.client.feedback.training.schemas.base import (
     TrainingTaskForDPO,
     TrainingTaskForPPO,
     TrainingTaskForRM,
     TrainingTaskForSFT,
 )
+from argilla.client.feedback.training.trainers.base import ArgillaTrainerSkeleton
 from argilla.training.utils import filter_allowed_args
 from argilla.utils.dependency import require_dependencies
 

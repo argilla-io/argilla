@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
+from argilla.client.feedback.training.trainers.base import ArgillaTrainerSkeleton
 from argilla.training.openai import ArgillaOpenAITrainer as ArgillaOpenAITrainerV1
 from argilla.utils.dependency import require_dependencies
 

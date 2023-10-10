@@ -52,23 +52,23 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
         # SetFit only: we get both the HuggingFace Hub args and the SetFit-specific args
         # We get the default args for `_from_pretrained` first to override the shared args
         # with the HuggingFace Hub specific args
-        self.setfit_model_kwargs = get_default_args(SetFitModel._from_pretrained)
-        self.setfit_model_kwargs.update(get_default_args(SetFitModel.from_pretrained))
+        self.model_kwargs = get_default_args(SetFitModel._from_pretrained)
+        self.model_kwargs.update(get_default_args(SetFitModel.from_pretrained))
 
         # Due to an inconsistency between `pretrained_model_name_or_path` with both `model_id` and `revision`
         # we pop both `model_id` and `revision`
-        self.setfit_model_kwargs.pop("model_id", None)
-        self.setfit_model_kwargs.pop("revision", None)
+        self.model_kwargs.pop("model_id", None)
+        self.model_kwargs.pop("revision", None)
 
-        self.setfit_model_kwargs["pretrained_model_name_or_path"] = self._model
-        self.setfit_model_kwargs["multi_target_strategy"] = self.multi_target_strategy
-        self.setfit_model_kwargs["device"] = self.device
+        self.model_kwargs["pretrained_model_name_or_path"] = self._model
+        self.model_kwargs["multi_target_strategy"] = self.multi_target_strategy
+        self.model_kwargs["device"] = self.device
 
-        self.setfit_trainer_kwargs = get_default_args(SetFitTrainer.__init__)
-        self.setfit_trainer_kwargs["column_mapping"] = self._column_mapping
-        self.setfit_trainer_kwargs["train_dataset"] = self._train_dataset
-        self.setfit_trainer_kwargs["eval_dataset"] = self._eval_dataset
-        self.setfit_trainer_kwargs["seed"] = self._seed
+        self.trainer_kwargs = get_default_args(SetFitTrainer.__init__)
+        self.trainer_kwargs["column_mapping"] = self._column_mapping
+        self.trainer_kwargs["train_dataset"] = self._train_dataset
+        self.trainer_kwargs["eval_dataset"] = self._eval_dataset
+        self.trainer_kwargs["seed"] = self._seed
 
         self._setfit_model = None
 
@@ -77,17 +77,17 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
         **kwargs,
     ) -> None:
         """
-        Updates the `setfit_model_kwargs` and `setfit_trainer_kwargs` dictionaries with the keyword
+        Updates the `model_kwargs` and `trainer_kwargs` dictionaries with the keyword
         arguments passed to the `update_config` function.
         """
-        self.setfit_model_kwargs.update((k, v) for k, v in kwargs.items() if k in self.setfit_model_kwargs)
-        self.setfit_trainer_kwargs.update((k, v) for k, v in kwargs.items() if k in self.setfit_trainer_kwargs)
+        self.model_kwargs.update((k, v) for k, v in kwargs.items() if k in self.model_kwargs)
+        self.trainer_kwargs.update((k, v) for k, v in kwargs.items() if k in self.trainer_kwargs)
 
     def __repr__(self):
         formatted_string = []
         arg_dict = {
-            "'SetFitModel'": self.setfit_model_kwargs,
-            "'SetFitTrainer'": self.setfit_trainer_kwargs,
+            "'SetFitModel'": self.model_kwargs,
+            "'SetFitTrainer'": self.trainer_kwargs,
         }
         for arg_dict_key, arg_dict_single in arg_dict.items():
             formatted_string.append(arg_dict_key)
@@ -102,9 +102,9 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
         """
         from setfit import SetFitModel, SetFitTrainer
 
-        self._setfit_model = SetFitModel.from_pretrained(**self.setfit_model_kwargs)
-        self.setfit_trainer_kwargs["model"] = self._setfit_model
-        self.__trainer = SetFitTrainer(**self.setfit_trainer_kwargs)
+        self._setfit_model = SetFitModel.from_pretrained(**self.model_kwargs)
+        self.trainer_kwargs["model"] = self._setfit_model
+        self.__trainer = SetFitTrainer(**self.trainer_kwargs)
         self.__trainer.train()
         if self._eval_dataset:
             self._metrics = self.__trainer.evaluate()
@@ -118,7 +118,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
     def init_model(self):
         from setfit import SetFitModel
 
-        self._setfit_model = SetFitModel.from_pretrained(**self.setfit_model_kwargs)
+        self._setfit_model = SetFitModel.from_pretrained(**self.model_kwargs)
 
     def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs):
         """

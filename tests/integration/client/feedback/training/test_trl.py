@@ -20,14 +20,14 @@ from typing import TYPE_CHECKING, Any, Dict, Iterator, List
 import pytest
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.records import FeedbackRecord
-from argilla.client.feedback.training.base import ArgillaTrainer
-from argilla.client.feedback.training.schemas import (
+from argilla.client.feedback.training.schemas.base import (
+    DPOReturnTypes,
+    PPOReturnTypes,
+    RMReturnTypes,
+    SFTReturnTypes,
     TrainingTask,
-    TrainingTaskForDPOFormat,
-    TrainingTaskForPPOFormat,
-    TrainingTaskForRMFormat,
-    TrainingTaskForSFTFormat,
 )
+from argilla.client.feedback.training.trainers.base import ArgillaTrainer
 from datasets import Dataset, DatasetDict
 from peft import LoraConfig, TaskType
 from transformers import AutoModelForCausalLM, AutoModelForSequenceClassification, AutoTokenizer
@@ -82,9 +82,7 @@ def test_prepare_for_training_sft(
             return f"### Text\n{sample['text']}"
         return None
 
-    try_wrong_format(
-        dataset=dataset, task=TrainingTask.for_supervised_fine_tuning, format_func=TrainingTaskForSFTFormat
-    )
+    try_wrong_format(dataset=dataset, task=TrainingTask.for_supervised_fine_tuning, format_func=SFTReturnTypes)
 
     task = TrainingTask.for_supervised_fine_tuning(formatting_func)
     train_dataset = dataset.prepare_for_training(framework=FRAMEWORK, task=task)
@@ -149,7 +147,7 @@ def test_prepare_for_training_rm(
             elif labels[0] == "c":
                 return [(sample["text"], sample["text"][5:10]), (sample["text"], sample["text"][:5])]
 
-    try_wrong_format(dataset=dataset, task=TrainingTask.for_reward_modeling, format_func=TrainingTaskForRMFormat)
+    try_wrong_format(dataset=dataset, task=TrainingTask.for_reward_modeling, format_func=RMReturnTypes)
 
     task = TrainingTask.for_reward_modeling(formatting_func)
     train_dataset = dataset.prepare_for_training(framework=FRAMEWORK, task=task)
@@ -207,9 +205,7 @@ def test_prepare_for_training_ppo(
     def formatting_func(sample: Dict[str, Any]):
         return sample["text"]
 
-    try_wrong_format(
-        dataset=dataset, task=TrainingTask.for_proximal_policy_optimization, format_func=TrainingTaskForPPOFormat
-    )
+    try_wrong_format(dataset=dataset, task=TrainingTask.for_proximal_policy_optimization, format_func=PPOReturnTypes)
 
     task = TrainingTask.for_proximal_policy_optimization(formatting_func=formatting_func)
     train_dataset = dataset.prepare_for_training(framework=FRAMEWORK, task=task)
@@ -284,9 +280,7 @@ def test_prepare_for_training_dpo(
                     (sample["text"][::-1], sample["text"], sample["text"][:5]),
                 ]
 
-    try_wrong_format(
-        dataset=dataset, task=TrainingTask.for_direct_preference_optimization, format_func=TrainingTaskForDPOFormat
-    )
+    try_wrong_format(dataset=dataset, task=TrainingTask.for_direct_preference_optimization, format_func=DPOReturnTypes)
 
     task = TrainingTask.for_direct_preference_optimization(formatting_func)
     train_dataset = dataset.prepare_for_training(framework=FRAMEWORK, task=task)

@@ -12,8 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.feedback.training.base import ArgillaTrainer
-from argilla.client.feedback.training.schemas import (
+from argilla.client.feedback.training.schemas.base import (
     TrainingTask,
     TrainingTaskForDPO,
     TrainingTaskForPPO,
@@ -23,6 +22,7 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskMapping,  # <- Deprecated
     TrainingTaskMappingForTextClassification,  # <- Deprecated
 )
+from argilla.client.feedback.training.trainers.base import ArgillaTrainer
 
 __all__ = [
     "ArgillaTrainer",

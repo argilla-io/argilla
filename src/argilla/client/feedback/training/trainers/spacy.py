@@ -17,7 +17,7 @@ from typing import Optional
 
 from typing_extensions import Literal
 
-from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
+from argilla.client.feedback.training.trainers.base import ArgillaTrainerSkeleton
 from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.spacy import ArgillaSpaCyTrainer as ArgillaSpaCyTrainerV1
 from argilla.training.spacy import ArgillaSpaCyTransformersTrainer as ArgillaSpaCyTransformersTrainerV1
@@ -76,7 +76,7 @@ class _ArgillaSpaCyTrainerBase(_ArgillaSpaCyTrainerBaseV1, ArgillaTrainerSkeleto
         self._nlp = None
         self._model = model
 
-        self.config = {}
+        self.trainer_kwargs = {}
 
         if self._record_class == TokenClassificationRecord:
             self._column_mapping = {

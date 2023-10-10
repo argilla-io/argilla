@@ -15,8 +15,11 @@
 
 from datasets import Dataset, DatasetDict
 
-from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
-from argilla.client.feedback.training.schemas import TrainingTaskForQuestionAnswering, TrainingTaskForTextClassification
+from argilla.client.feedback.training.schemas.base import (
+    TrainingTaskForQuestionAnswering,
+    TrainingTaskForTextClassification,
+)
+from argilla.client.feedback.training.trainers.base import ArgillaTrainerSkeleton
 from argilla.training.transformers import ArgillaTransformersTrainer as ArgillaTransformersTrainerV1
 
 

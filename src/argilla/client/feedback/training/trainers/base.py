@@ -19,7 +19,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from argilla.client.feedback.schemas.records import FeedbackRecord
-from argilla.client.feedback.training.schemas import TrainingTaskForTextClassification, TrainingTaskTypes
+from argilla.client.feedback.training.schemas.base import TrainingTaskForTextClassification, TrainingTaskTypes
 from argilla.client.models import Framework, TextClassificationRecord
 from argilla.training import ArgillaTrainer as ArgillaTrainerV1
 
@@ -96,7 +96,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
         if framework is Framework.SETFIT:
             if not isinstance(task, TrainingTaskForTextClassification):
                 raise NotImplementedError(f"{Framework.SETFIT} only supports `TextClassification` tasks.")
-            from argilla.client.feedback.training.frameworks.setfit import ArgillaSetFitTrainer
+            from argilla.client.feedback.training.trainers.setfit import ArgillaSetFitTrainer
 
             self._trainer = ArgillaSetFitTrainer(
                 dataset=self._dataset,
@@ -106,7 +106,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 model=self._model,
             )
         elif framework is Framework.TRANSFORMERS:
-            from argilla.client.feedback.training.frameworks.transformers import ArgillaTransformersTrainer
+            from argilla.client.feedback.training.trainers.transformers import ArgillaTransformersTrainer
 
             self._trainer = ArgillaTransformersTrainer(
                 dataset=self._dataset,
@@ -117,7 +117,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 tokenizer=self._tokenizer,
             )
         elif framework is Framework.PEFT:
-            from argilla.client.feedback.training.frameworks.peft import ArgillaPeftTrainer
+            from argilla.client.feedback.training.trainers.peft import ArgillaPeftTrainer
 
             self._trainer = ArgillaPeftTrainer(
                 dataset=self._dataset,
@@ -128,7 +128,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 tokenizer=self._tokenizer,
             )
         elif framework is Framework.SPACY:
-            from argilla.client.feedback.training.frameworks.spacy import ArgillaSpaCyTrainer
+            from argilla.client.feedback.training.trainers.spacy import ArgillaSpaCyTrainer
 
             self._trainer = ArgillaSpaCyTrainer(
                 dataset=self._dataset,
@@ -140,7 +140,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 framework_kwargs=framework_kwargs,  # freeze_tok2vec
             )
         elif framework is Framework.SPACY_TRANSFORMERS:
-            from argilla.client.feedback.training.frameworks.spacy import ArgillaSpaCyTransformersTrainer
+            from argilla.client.feedback.training.trainers.spacy import ArgillaSpaCyTransformersTrainer
 
             self._trainer = ArgillaSpaCyTransformersTrainer(
                 dataset=self._dataset,
@@ -152,7 +152,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 framework_kwargs=framework_kwargs,  # update_transformer
             )
         elif framework is Framework.OPENAI:
-            from argilla.client.feedback.training.frameworks.openai import ArgillaOpenAITrainer
+            from argilla.client.feedback.training.trainers.openai import ArgillaOpenAITrainer
 
             self._trainer = ArgillaOpenAITrainer(
                 dataset=self._dataset,
@@ -162,7 +162,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 model=self._model,
             )
         elif framework is Framework.SPAN_MARKER:
-            from argilla.client.feedback.training.frameworks.span_marker import ArgillaSpanMarkerTrainer
+            from argilla.client.feedback.training.trainers.span_marker import ArgillaSpanMarkerTrainer
 
             self._trainer = ArgillaSpanMarkerTrainer(
                 dataset=self._dataset,
@@ -172,7 +172,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 model=self._model,
             )
         elif framework is Framework.TRL:
-            from argilla.client.feedback.training.frameworks.trl import ArgillaTRLTrainer
+            from argilla.client.feedback.training.trainers.trl import ArgillaTRLTrainer
 
             self._trainer = ArgillaTRLTrainer(
                 dataset=self._dataset,
@@ -183,7 +183,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 tokenizer=self._tokenizer,
             )
         elif framework is Framework.SENTENCE_TRANSFORMERS:
-            from argilla.client.feedback.training.frameworks.sentence_transformers import (
+            from argilla.client.feedback.training.trainers.sentence_transformers import (
                 ArgillaSentenceTransformersTrainer,
             )
 
@@ -271,6 +271,8 @@ class ArgillaTrainerSkeleton(ABC):
             self._record_class = TextClassificationRecord  # TODO: dirty hack to inherit from original trainers
         else:
             self._record_class = FeedbackRecord
+        self.model_kwargs = {}
+        self.trainer_kwargs = {}
 
     @abstractmethod
     def init_training_args(self) -> None:
@@ -307,3 +309,15 @@ class ArgillaTrainerSkeleton(ABC):
         """
         Saves the model to the specified path.
         """
+
+    def get_model_kwargs(self):
+        """
+        Returns the model kwargs.
+        """
+        return self.model_kwargs
+
+    def get_training_kwargs(self):
+        """
+        Returns the training kwargs.
+        """
+        return self.trainer_kwargs

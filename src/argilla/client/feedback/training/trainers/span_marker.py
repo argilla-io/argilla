@@ -14,7 +14,7 @@
 
 from datasets import DatasetDict
 
-from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
+from argilla.client.feedback.training.trainers.base import ArgillaTrainerSkeleton
 from argilla.client.models import TokenClassificationRecord
 from argilla.training.span_marker import ArgillaSpanMarkerTrainer as ArgillaSpanMarkerTrainerV1
 

@@ -11,12 +11,3 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-
-from argilla.client.feedback.training.frameworks.transformers import ArgillaTransformersTrainer
-from argilla.training.peft import ArgillaPeftTrainer as ArgillaPeftTrainerV1
-
-
-class ArgillaPeftTrainer(ArgillaPeftTrainerV1, ArgillaTransformersTrainer):
-    def __init__(self, *args, **kwargs):
-        ArgillaTransformersTrainer.__init__(self, *args, **kwargs)
