@@ -240,7 +240,15 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                 f" {', '.join(self._metadata_properties_mapping.keys())}"
             )
 
-    def _validate_metadata_property(self, metadata_property: "AllowedMetadataPropertyTypes") -> None:
+    def _unique_metadata_property(self, metadata_property: "AllowedMetadataPropertyTypes") -> None:
+        """Checks whether the provided `metadata_property` already exists in the dataset.
+
+        Args:
+            metadata_property: the metadata property to validate.
+
+        Raises:
+            ValueError: if the `metadata_property` already exists in the dataset.
+        """
         if self.metadata_properties is not None:
             # TODO(alvarobartt): remove this when https://github.com/argilla-io/argilla/pull/3829 is merged
             if not hasattr(self, "_metadata_properties_mapping") or self._metadata_properties_mapping is None:

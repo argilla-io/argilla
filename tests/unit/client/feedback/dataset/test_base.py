@@ -258,7 +258,7 @@ def test__parse_and_validate_records_validation_error(
         FloatMetadataProperty(name="float-metadata-diff-name", min=0.0, max=10.0),
     ),
 )
-def test__validate_metadata_property(metadata_property: "AllowedMetadataPropertyTypes") -> None:
+def test__unique_metadata_property(metadata_property: "AllowedMetadataPropertyTypes") -> None:
     dataset = TestFeedbackDataset(
         fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
         questions=[TextQuestion(name="question", required=True)],
@@ -268,4 +268,4 @@ def test__validate_metadata_property(metadata_property: "AllowedMetadataProperty
             FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
         ],
     )
-    dataset._validate_metadata_property(metadata_property)
+    dataset._unique_metadata_property(metadata_property)
