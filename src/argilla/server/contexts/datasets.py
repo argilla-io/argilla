@@ -198,9 +198,7 @@ async def get_question_by_name_and_dataset_id(db: "AsyncSession", name: str, dat
 
 
 async def get_metadata_property_by_id(db: "AsyncSession", metadata_property_id: UUID) -> Union[MetadataProperty, None]:
-    result = await db.execute(select(MetadataProperty).filter_by(id=metadata_property_id))
-
-    return result.scalar_one_or_none()
+    return await MetadataProperty.read(db, id=metadata_property_id)
 
 
 async def get_metadata_property_by_name_and_dataset_id(
