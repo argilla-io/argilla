@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import warnings
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
@@ -78,6 +79,9 @@ class RemoteSuggestionSchema(SuggestionSchema, RemoteSchema):
 
 
 class RemoteResponseSchema(ResponseSchema, RemoteSchema):
+    inserted_at: datetime
+    updated_at: datetime
+
     def to_local(self) -> "ResponseSchema":
         """Converts the `RemoteResponseSchema` to a `ResponseSchema`."""
         return ResponseSchema(
@@ -92,6 +96,8 @@ class RemoteResponseSchema(ResponseSchema, RemoteSchema):
             user_id=payload.user_id,
             values=payload.values,
             status=payload.status,
+            inserted_at=payload.inserted_at,
+            updated_at=payload.updated_at,
         )
 
 

@@ -8,9 +8,7 @@
       @visibility="onMetadataToggleVisibility"
     >
       <span slot="dropdown-header">
-        <FilterButton
-          button-name="Metadata"
-          icon-name="filter"
+        <MetadataButton
           :is-active="visibleDropdown"
           :badges="appliedCategoriesFilters"
           :active-badge="visibleCategory?.name"
@@ -26,7 +24,7 @@
         <MetadataCategoriesSelector
           v-if="!visibleCategory"
           class="metadata-filter__categories"
-          :categories="metadataCategoriesName"
+          :categories="metadataFilters.categories"
           @select-category="selectMetadataCategory"
         />
         <template v-else>
@@ -45,11 +43,6 @@
             <div v-else>
               <MetadataRangeSelector :metadata="visibleCategory" />
             </div>
-            <BaseButton
-              class="metadata-filter__button primary small full-width"
-              @on-click="applyFilter"
-              >Filter</BaseButton
-            >
           </div>
         </template>
       </span>
@@ -93,6 +86,9 @@ export default {
     applyFilter() {
       this.visibleDropdown = false;
 
+      this.filter();
+    },
+    filter() {
       this.$root.$emit(
         "metadata-filter-changed",
         this.metadataFilters.convertToRouteParam()
@@ -118,6 +114,7 @@ export default {
     },
     removeCategoryFilters(category) {
       this.metadataFilters.findByCategory(category).clear();
+
       this.applyFilter();
     },
     updateFiltersFromQueryParams() {
@@ -126,16 +123,23 @@ export default {
       this.appliedCategoriesFilters = this.metadataFilters.filteredCategories;
     },
   },
-  computed: {
-    metadataCategoriesName() {
-      return this.metadataFilters.categories;
-    },
-  },
   watch: {
     visibleDropdown() {
-      if (this.visibleDropdown) {
-        this.updateFiltersFromQueryParams();
+      if (!this.visibleDropdown) {
+        this.debounce.stop();
+
+        this.filter();
       }
+    },
+    "metadataFilters.categories": {
+      deep: true,
+      async handler() {
+        this.debounce.stop();
+
+        await this.debounce.wait();
+
+        this.filter();
+      },
     },
   },
   mounted() {

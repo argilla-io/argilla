@@ -59,41 +59,4 @@ describe("Metadata", () => {
       expect(isFloat).toBe(false);
     });
   });
-
-  describe("Complete metadata", () => {
-    test("should complete the metadata when is terms", () => {
-      const metadata = createMetadataTerms();
-      metadata.completeMetadata("test,train");
-      expect(metadata.selectedOptions.map((option) => option.label)).toEqual([
-        "test",
-        "train",
-      ]);
-    });
-    test("should complete the metadata when is integer", () => {
-      const metadata = createMetadataInteger();
-      metadata.completeMetadata(JSON.stringify({ ge: 10, le: 20 }));
-
-      expect(metadata.value).toEqual({ ge: 10, le: 20 });
-    });
-  });
-
-  describe("Clear", () => {
-    test("should clear the metadata when is terms", () => {
-      const metadata = createMetadataTerms();
-      metadata.completeMetadata("test,train");
-      metadata.clear();
-
-      expect(metadata.selectedOptions.map((option) => option.label)).toEqual(
-        []
-      );
-    });
-
-    test("should clear the metadata when is integer set the settings max and min values", () => {
-      const metadata = createMetadataInteger();
-      metadata.completeMetadata(JSON.stringify({ ge: 10, le: 20 }));
-      metadata.clear();
-
-      expect(metadata.value).toEqual({ ge: 0, le: 2 });
-    });
-  });
 });

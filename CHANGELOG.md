@@ -25,7 +25,8 @@ These are the section headers that we use:
 - Added new endpoint `GET /api/v1/metadata-properties/:metadata_property_id/metrics` to compute metrics for metadata properties ([#3856](https://github.com/argilla-io/argilla/pull/3856))
 - Added a validation layer for both `metadata_properties` and `metadata_filters` in their schemas and as part of the `add_records` and `filter_by` methods, respectively ([#3860](https://github.com/argilla-io/argilla/pull/3860)).
 - Added `sort_by` query parameter to listing records endpoints that allows to sort the records by `inserted_at`, `updated_at` or metadata property ([#3843](https://github.com/argilla-io/argilla/pull/3843)).
-- New `DELETE /api/v1/metadata-properties/:metadata_property_id` endpoint allowing the deletion of a specific metadata property. ([#3911](https://github.com/argilla-io/argilla/pull/3911))
+- Added fields `inserted_at` and `updated_at` in `RemoteResponseSchema` ([#3822](https://github.com/argilla-io/argilla/pull/3822)).
+- New `DELETE /api/v1/metadata-properties/:metadata_property_id` endpoint allowing the deletion of a specific metadata property. ([#3911](https://github.com/argilla-io/argilla/pull/3911)).
 
 ### Changed
 
@@ -33,6 +34,7 @@ These are the section headers that we use:
 - Updated active learning for text classification notebooks to use the most recent small-text version ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
 - Changed argilla dataset name in the active learning for text classification notebooks to be consistent with the default names in the huggingface spaces ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
 - Updated `GET /api/v1/datasets/{dataset_id}/records`, `GET /api/v1/me/datasets/{dataset_id}/records` and `POST /api/v1/me/datasets/{dataset_id}/records/search` endpoints to return the `total` number of records ([#3848](https://github.com/argilla-io/argilla/pull/3848) & [#3903](https://github.com/argilla-io/argilla/pull/3903)).
+- Updated `FilteredRemoteFeedbackRecords.__len__` method to return the number of records matching the provided filters ([#3916](https://github.com/argilla-io/argilla/pull/3916)).
 
 ### Fixed
 

@@ -4,10 +4,14 @@ interface MetadataTermsSettings {
 }
 interface MetadataIntegerSettings {
   type: "integer";
+  min?: number;
+  max?: number;
 }
 
 interface MetadataFloatSettings {
   type: "float";
+  min?: number;
+  max?: number;
 }
 
 export interface BackendMetadata {
@@ -18,4 +22,13 @@ export interface BackendMetadata {
     | MetadataTermsSettings
     | MetadataIntegerSettings
     | MetadataFloatSettings;
+}
+
+export interface BackendMetadataMetric {
+  id: string;
+  type: "terms" | "integer" | "float";
+  total: number;
+  values: { term: string; count: number }[];
+  min?: number;
+  max?: number;
 }
