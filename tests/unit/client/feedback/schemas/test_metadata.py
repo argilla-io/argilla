@@ -36,7 +36,7 @@ from pydantic import ValidationError, create_model
                 "name": "terms-metadata",
                 "description": "b",
                 # "visible_for_annotators": True,
-                "settings": {"type": "terms", "values": None},
+                "settings": {"type": "terms"},
             },
             TermsMetadataFilter(name="terms-metadata", values=["a", "b", "c"]),
             {"terms-metadata": "a"},

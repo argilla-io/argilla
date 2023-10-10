@@ -124,7 +124,10 @@ class TermsMetadataProperty(MetadataPropertySchema):
 
     @property
     def server_settings(self) -> Dict[str, Any]:
-        return {"type": self.type, "values": self.values}
+        settings: Dict[str, Any] = {"type": self.type.value}
+        if self.values is not None:
+            settings["values"] = self.values
+        return settings
 
     def _all_values_exist(self, introduced_value: Optional[str] = None) -> str:
         if introduced_value is not None and self.values is not None and introduced_value not in self.values:
