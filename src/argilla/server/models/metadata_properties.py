@@ -41,10 +41,10 @@ class BaseMetadataPropertySettings(BaseModel, ABC):
 
 class TermsMetadataPropertySettings(BaseMetadataPropertySettings):
     type: Literal[MetadataPropertyType.terms]
-    values: List[str]
+    values: Optional[List[str]] = None
 
     def check_metadata(self, value: str) -> None:
-        if value not in self.values:
+        if self.values is not None and value not in self.values:
             raise ValueError(f"'{value}' is not an allowed term.")
 
 
