@@ -19,6 +19,7 @@ from pydantic import ValidationError
 from tqdm import trange
 
 from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, PUSHING_BATCH_SIZE
+from argilla.client.feedback.dataset.mixins import ArgillaMixin
 from argilla.client.feedback.dataset.remote.base import RemoteFeedbackDatasetBase, RemoteFeedbackRecordsBase
 from argilla.client.feedback.dataset.remote.filtered import FilteredRemoteFeedbackDataset
 from argilla.client.feedback.schemas.records import FeedbackRecord
@@ -158,51 +159,42 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         )
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def add_metadata_properties(self, metadata_properties: List["AllowedMetadataPropertyTypes"]) -> None:
-        """Adds new `metadata_properties` to the current `FeedbackDataset` in Argilla.
+    def add_metadata_property(
+        self, metadata_property: "AllowedMetadataPropertyTypes"
+    ) -> "AllowedRemoteMetadataPropertyTypes":
+        """Adds a new `metadata_property` to the current `FeedbackDataset` in Argilla.
 
         Note:
             Existing `FeedbackRecord`s if any will remain unchanged if those contain metadata
-            named the same way as any of the following properties, but added before the
-            `metadata_properties` were added.
+            named the same way as the `metadata_property`, but added before the
+            `metadata_property` was added.
 
         Args:
-            metadata_properties: the metadata properties to add to the current `FeedbackDataset`
+            metadata_property: the metadata property to add to the current `FeedbackDataset`
                 in Argilla.
 
         Raises:
             PermissionError: if the user does not have either `owner` or `admin` role.
-            RuntimeError: if the `metadata_properties` cannot be added to the current
+            RuntimeError: if the `metadata_property` cannot be added to the current
                 `FeedbackDataset` in Argilla.
         """
-        if not isinstance(metadata_properties, list):
-            metadata_properties = [metadata_properties]
+        super()._validate_metadata_property(metadata_property=metadata_property)
 
-        if self._metadata_properties is not None:
-            # TODO(alvarobartt): remove this when https://github.com/argilla-io/argilla/pull/3829 is merged
-            if not hasattr(self, "_metadata_properties_mapping") or self._metadata_properties_mapping is None:
-                self._metadata_properties_mapping = {
-                    metadata_property.name: metadata_property for metadata_property in self._metadata_properties
-                }
-            if any(
-                metadata_property.name in self._metadata_properties_mapping.keys()
-                for metadata_property in metadata_properties
-            ):
-                raise ValueError(
-                    f"Invalid `metadata_properties=[{', '.join(metadata_property.name for metadata_property in metadata_properties)}]`"
-                    f" provided as already exist. Current `metadata_properties` are: {list(self._metadata_properties_mapping.keys())}"
-                )
-        for metadata_property in metadata_properties:
-            try:
-                datasets_api_v1.add_metadata_property(
-                    client=self._client,
-                    id=self.id,
-                    metadata_property=metadata_property.to_server_payload(),
-                )
-            except Exception as e:
-                raise RuntimeError(
-                    f"Failed while adding the `metadata_property={metadata_property}` to the current `FeedbackDataset` in Argilla with exception: {e}"
-                ) from e
+        try:
+            metadata_property = datasets_api_v1.add_metadata_property(
+                client=self._client,
+                id=self.id,
+                metadata_property=metadata_property.to_server_payload(),
+            )
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed while adding the `metadata_property={metadata_property}` to the current `FeedbackDataset` in Argilla with exception: {e}"
+            ) from e
+
+        metadata_property = ArgillaMixin._parse_to_remote_metadata_property(metadata_property)
+        self._metadata_properties.append(metadata_property)
+        self._metadata_properties_mapping[metadata_property.name] = metadata_property
+        return metadata_property
 
     def filter_by(
         self,

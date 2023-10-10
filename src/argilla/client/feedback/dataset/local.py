@@ -186,3 +186,20 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
             self._records += records
         else:
             self._records = records
+
+    def add_metadata_property(
+        self, metadata_property: "AllowedMetadataPropertyTypes"
+    ) -> "AllowedMetadataPropertyTypes":
+        """Adds the given metadata property to the dataset.
+
+        Args:
+            metadata_property: the metadata property to add.
+
+        Raises:
+            TypeError: if `metadata_property` is not a `MetadataPropertySchema`.
+            ValueError: if `metadata_property` is already in the dataset.
+        """
+        super()._validate_metadata_property(metadata_property)
+        self._metadata_properties.append(metadata_property)
+        self._metadata_properties_mapping.update({metadata_property.name: metadata_property})
+        return metadata_property
