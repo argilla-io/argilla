@@ -26,7 +26,11 @@ from argilla.client.feedback.schemas.questions import RatingQuestion, TextQuesti
 from argilla.client.feedback.schemas.records import FeedbackRecord
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.schemas.types import (
+        AllowedFieldTypes,
+        AllowedMetadataPropertyTypes,
+        AllowedQuestionTypes,
+    )
 
 
 class TestFeedbackDataset(FeedbackDatasetBase):
@@ -244,3 +248,24 @@ def test__parse_and_validate_records_validation_error(
     )
     with pytest.raises(exception_cls, match=exception_msg):
         dataset._parse_and_validate_records(record)
+
+
+@pytest.mark.parametrize(
+    "metadata_property",
+    (
+        TermsMetadataProperty(name="terms-metadata-diff-name", values=["a", "b", "c"]),
+        IntegerMetadataProperty(name="int-metadata-diff-name", min=0, max=10),
+        FloatMetadataProperty(name="float-metadata-diff-name", min=0.0, max=10.0),
+    ),
+)
+def test__validate_metadata_property(metadata_property: "AllowedMetadataPropertyTypes") -> None:
+    dataset = TestFeedbackDataset(
+        fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
+        questions=[TextQuestion(name="question", required=True)],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="int-metadata", min=0, max=10),
+            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+    )
+    dataset._validate_metadata_property(metadata_property)
