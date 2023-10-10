@@ -233,7 +233,7 @@ async def create_metadata_property(
             autocommit=False,
         )
         if dataset.is_ready:
-            await search_engine.configure_metadata_property(metadata_property)
+            await search_engine.configure_metadata_property(dataset, metadata_property)
 
     await db.commit()
     return metadata_property
@@ -648,3 +648,10 @@ async def get_suggestion_by_id(db: "AsyncSession", suggestion_id: "UUID") -> Uni
 
 async def delete_suggestion(db: "AsyncSession", suggestion: Suggestion) -> Suggestion:
     return await suggestion.delete(db)
+
+
+async def get_metadata_property_by_id(db: "AsyncSession", metadata_property_id: UUID) -> Optional[MetadataProperty]:
+    result = await db.execute(
+        select(MetadataProperty).filter_by(id=metadata_property_id).options(selectinload(MetadataProperty.dataset))
+    )
+    return result.scalar_one_or_none()

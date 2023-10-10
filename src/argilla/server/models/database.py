@@ -206,6 +206,16 @@ class MetadataProperty(DatabaseModel):
             f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
 
+    @property
+    def is_visible(self) -> bool:
+        # TODO: implement logic
+        return True
+
+    @property
+    def is_visible_for_annotators(self) -> bool:
+        # TODO: implement logic
+        return True
+
 
 DatasetStatusEnum = SAEnum(DatasetStatus, name="dataset_status_enum")
 
