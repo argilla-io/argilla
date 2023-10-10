@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import copy
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
@@ -243,7 +243,7 @@ async def create_metadata_property(
             autocommit=False,
         )
         if dataset.is_ready:
-            await search_engine.configure_metadata_property(metadata_property)
+            await search_engine.configure_metadata_property(dataset, metadata_property)
 
     await db.commit()
     return metadata_property
@@ -335,7 +335,7 @@ async def list_records_by_dataset_id(
     response_statuses: List[ResponseStatusFilter] = [],
     offset: int = 0,
     limit: int = LIST_RECORDS_LIMIT,
-) -> List[Record]:
+) -> Tuple[List[Record], int]:
     response_statuses_ = [
         ResponseStatus(response_status)
         for response_status in response_statuses
@@ -350,7 +350,7 @@ async def list_records_by_dataset_id(
     if ResponseStatusFilter.missing in response_statuses:
         response_status_filter_expressions.append(Response.status.is_(None))
 
-    query = (
+    records_query = (
         select(Record)
         .filter(Record.dataset_id == dataset_id)
         .outerjoin(
@@ -362,17 +362,21 @@ async def list_records_by_dataset_id(
     )
 
     if response_status_filter_expressions:
-        query = query.filter(or_(*response_status_filter_expressions))
+        records_query = records_query.filter(or_(*response_status_filter_expressions))
 
     if RecordInclude.responses in include:
-        query = query.options(contains_eager(Record.responses))
+        records_query = records_query.options(contains_eager(Record.responses))
 
     if RecordInclude.suggestions in include:
-        query = query.options(joinedload(Record.suggestions))
+        records_query = records_query.options(joinedload(Record.suggestions))
 
-    query = query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
-    result = await db.execute(query)
-    return result.unique().scalars().all()
+    records_query = records_query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
+    result_records = await db.execute(records_query)
+
+    count_query = records_query.with_only_columns(func.count()).order_by(None).offset(None).limit(None)
+    result_count = await db.execute(count_query)
+
+    return result_records.unique().scalars().all(), result_count.scalar_one()
 
 
 async def count_records_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
@@ -658,3 +662,10 @@ async def get_suggestion_by_id(db: "AsyncSession", suggestion_id: "UUID") -> Uni
 
 async def delete_suggestion(db: "AsyncSession", suggestion: Suggestion) -> Suggestion:
     return await suggestion.delete(db)
+
+
+async def get_metadata_property_by_id(db: "AsyncSession", metadata_property_id: UUID) -> Optional[MetadataProperty]:
+    result = await db.execute(
+        select(MetadataProperty).filter_by(id=metadata_property_id).options(selectinload(MetadataProperty.dataset))
+    )
+    return result.scalar_one_or_none()

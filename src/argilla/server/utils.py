@@ -152,7 +152,7 @@ def parse_query_param(
                 if key == "keys":
                     continue
 
-                num_values = len(values)
+                num_values = len(values) if values is not None else 0
                 if num_values > max_values_per_key:
                     raise HTTPException(
                         status_code=422,

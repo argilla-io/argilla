@@ -12,10 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import re
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing_extensions import Annotated
 
@@ -140,6 +141,7 @@ async def _build_response_status_filter_for_search(
 
 _RECORD_SORT_FIELD_VALUES = tuple(field.value for field in RecordSortField)
 _VALID_SORT_VALUES = tuple(sort.value for sort in SortOrder)
+_METADATA_PROPERTY_SORT_BY_REGEX = re.compile(r"^metadata\.(?P<name>(?=.*[a-z0-9])[a-z0-9_-]+)$")
 
 
 async def _build_sort_by(
@@ -152,21 +154,31 @@ async def _build_sort_by(
     for sort_field, sort_order in sort_by_query_param.items():
         if sort_field in _RECORD_SORT_FIELD_VALUES:
             field = sort_field
-        else:
+        elif (match := _METADATA_PROPERTY_SORT_BY_REGEX.match(sort_field)) is not None:
+            metadata_property_name = match.group("name")
             metadata_property = await datasets.get_metadata_property_by_name_and_dataset_id(
-                db, name=sort_field, dataset_id=dataset.id
+                db, name=metadata_property_name, dataset_id=dataset.id
             )
             if not metadata_property:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                     detail=(
-                        f"Provided metadata property in 'sort_by' query param '{sort_field}' not found in dataset with"
-                        f" '{dataset.id}'."
+                        f"Provided metadata property in 'sort_by' query param '{metadata_property_name}' not found in"
+                        f" dataset with '{dataset.id}'."
                     ),
                 )
             field = metadata_property
+        else:
+            valid_sort_fields = ", ".join(f"'{sort_field}'" for sort_field in _RECORD_SORT_FIELD_VALUES)
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=(
+                    f"Provided sort field in 'sort_by' query param '{sort_field}' is not valid. It must be either"
+                    f" {valid_sort_fields} or `metadata.metadata-property-name`"
+                ),
+            )
 
-        if sort_order not in _VALID_SORT_VALUES:
+        if sort_order is not None and sort_order not in _VALID_SORT_VALUES:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=(
@@ -339,9 +351,7 @@ async def list_current_user_dataset_records(
             sort_by_query_param=sort_by_query_param or {RecordSortField.inserted_at.value: "asc"},
         )
     else:
-        # TODO(@frascuchon): Compute also total for this case
-        total = None
-        records = await datasets.list_records_by_dataset_id(
+        records, total = await datasets.list_records_by_dataset_id(
             db,
             dataset_id,
             current_user.id,
@@ -385,8 +395,7 @@ async def list_dataset_records(
             sort_by_query_param=sort_by_query_param or {RecordSortField.inserted_at.value: "asc"},
         )
     else:
-        total = None
-        records = await datasets.list_records_by_dataset_id(
+        records, total = await datasets.list_records_by_dataset_id(
             db, dataset_id, include=include, response_statuses=response_statuses, offset=offset, limit=limit
         )
 
