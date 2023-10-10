@@ -35,6 +35,7 @@ from argilla.server.apis.v0.handlers import (
 )
 from argilla.server.apis.v1.handlers import datasets as datasets_v1
 from argilla.server.apis.v1.handlers import fields as fields_v1
+from argilla.server.apis.v1.handlers import metadata_properties as metadata_properties_v1
 from argilla.server.apis.v1.handlers import questions as questions_v1
 from argilla.server.apis.v1.handlers import records as records_v1
 from argilla.server.apis.v1.handlers import responses as responses_v1
@@ -72,3 +73,4 @@ api_router.include_router(responses_v1.router, prefix="/v1")
 api_router.include_router(users_v1.router, prefix="/v1")
 api_router.include_router(workspaces_v1.router, prefix="/v1")
 api_router.include_router(suggestions_v1.router, prefix="/v1")
+api_router.include_router(metadata_properties_v1.router, prefix="/v1")

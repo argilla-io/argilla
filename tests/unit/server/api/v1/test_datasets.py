@@ -21,7 +21,7 @@ import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v1.handlers.datasets import LIST_DATASET_RECORDS_LIMIT_DEFAULT
 from argilla.server.daos.backend import query_helpers
-from argilla.server.enums import RecordInclude, ResponseStatusFilter
+from argilla.server.enums import RecordInclude, RecordSortField, ResponseStatusFilter, SortOrder
 from argilla.server.models import (
     Dataset,
     DatasetStatus,
@@ -769,37 +769,37 @@ class TestSuiteDatasets:
                 {"name": "integer_prop", "type": "integer"},
                 '{"ge": 10, "le": 20}',
                 IntegerMetadataFilter,
-                dict(low=10, high=20),
+                dict(ge=10, le=20),
             ),
             (
                 {"name": "integer_prop", "type": "integer"},
                 '{"ge": 20}',
                 IntegerMetadataFilter,
-                dict(low=20, high=None),
+                dict(ge=20, high=None),
             ),
             (
                 {"name": "integer_prop", "type": "integer"},
                 '{"le": 20}',
                 IntegerMetadataFilter,
-                dict(low=None, high=20),
+                dict(ge=None, le=20),
             ),
             (
                 {"name": "float_prop", "type": "float"},
                 '{"ge": -1.30, "le": 23.23}',
                 FloatMetadataFilter,
-                dict(low=-1.30, high=23.23),
+                dict(ge=-1.30, le=23.23),
             ),
             (
                 {"name": "float_prop", "type": "float"},
                 '{"ge": 23.23}',
                 FloatMetadataFilter,
-                dict(low=23.23, high=None),
+                dict(ge=23.23, high=None),
             ),
             (
                 {"name": "float_prop", "type": "float"},
                 '{"le": 11.32}',
                 FloatMetadataFilter,
-                dict(low=None, high=11.32),
+                dict(ge=None, le=11.32),
             ),
         ],
     )
@@ -843,11 +843,11 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=None,
-            metadata_filters=[expected_filter_class(metadata_property, **expected_filter_args)],
+            metadata_filters=[expected_filter_class(metadata_property=metadata_property, **expected_filter_args)],
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
-            sort_by=[SortBy(field="inserted_at", order="asc")],
+            sort_by=[SortBy(field=RecordSortField.inserted_at)],
         )
 
     @pytest.mark.parametrize(
@@ -919,18 +919,18 @@ class TestSuiteDatasets:
             [("updated_at", None)],
             [("updated_at", "asc")],
             [("updated_at", "desc")],
-            [("terms-metadata-property", None)],
-            [("terms-metadata-property", "asc")],
-            [("terms-metadata-property", "desc")],
+            [("metadata.terms-metadata-property", None)],
+            [("metadata.terms-metadata-property", "asc")],
+            [("metadata.terms-metadata-property", "desc")],
             [("inserted_at", "asc"), ("updated_at", "desc")],
             [("inserted_at", "desc"), ("updated_at", "asc")],
-            [("inserted_at", "asc"), ("terms-metadata-property", "desc")],
-            [("inserted_at", "desc"), ("terms-metadata-property", "asc")],
-            [("updated_at", "asc"), ("terms-metadata-property", "desc")],
-            [("updated_at", "desc"), ("terms-metadata-property", "asc")],
-            [("inserted_at", "asc"), ("updated_at", "desc"), ("terms-metadata-property", "asc")],
-            [("inserted_at", "desc"), ("updated_at", "asc"), ("terms-metadata-property", "desc")],
-            [("inserted_at", "asc"), ("updated_at", "asc"), ("terms-metadata-property", "desc")],
+            [("inserted_at", "asc"), ("metadata.terms-metadata-property", "desc")],
+            [("inserted_at", "desc"), ("metadata.terms-metadata-property", "asc")],
+            [("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
+            [("updated_at", "desc"), ("metadata.terms-metadata-property", "asc")],
+            [("inserted_at", "asc"), ("updated_at", "desc"), ("metadata.terms-metadata-property", "asc")],
+            [("inserted_at", "desc"), ("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
+            [("inserted_at", "asc"), ("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
         ],
     )
     async def test_list_dataset_records_with_sort_by(
@@ -947,7 +947,7 @@ class TestSuiteDatasets:
         expected_sorts_by = []
         for field, order in sorts:
             if field not in ("inserted_at", "updated_at"):
-                field = await TermsMetadataPropertyFactory.create(name=field, dataset=dataset)
+                field = await TermsMetadataPropertyFactory.create(name=field.split(".")[-1], dataset=dataset)
             expected_sorts_by.append(SortBy(field=field, order=order or "asc"))
 
         mock_search_engine.search.return_value = SearchResponses(
@@ -1000,12 +1000,28 @@ class TestSuiteDatasets:
 
         response = await async_client.get(
             f"/api/v1/datasets/{dataset.id}/records",
-            params={"sort_by": "i-do-not-exist:asc"},
+            params={"sort_by": "metadata.i-do-not-exist:asc"},
             headers=owner_auth_header,
         )
         assert response.status_code == 422
         assert response.json() == {
             "detail": f"Provided metadata property in 'sort_by' query param 'i-do-not-exist' not found in dataset with '{dataset.id}'."
+        }
+
+    async def test_list_dataset_records_with_sort_by_with_invalid_field(
+        self, async_client: "AsyncClient", owner: "User", owner_auth_header: dict
+    ):
+        workspace = await WorkspaceFactory.create()
+        dataset, _, _, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
+
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/records",
+            params={"sort_by": "not-valid"},
+            headers=owner_auth_header,
+        )
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": "Provided sort field in 'sort_by' query param 'not-valid' is not valid. It must be either 'inserted_at', 'updated_at' or `metadata.metadata-property-name`"
         }
 
     async def test_list_dataset_records_without_authentication(self, async_client: "AsyncClient"):
@@ -1353,37 +1369,37 @@ class TestSuiteDatasets:
                 {"name": "integer_prop", "type": "integer"},
                 '{"ge": 10, "le": 20}',
                 IntegerMetadataFilter,
-                dict(low=10, high=20),
+                dict(ge=10, le=20),
             ),
             (
                 {"name": "integer_prop", "type": "integer"},
                 '{"ge": 20}',
                 IntegerMetadataFilter,
-                dict(low=20, high=None),
+                dict(ge=20, le=None),
             ),
             (
                 {"name": "integer_prop", "type": "integer"},
                 '{"le": 20}',
                 IntegerMetadataFilter,
-                dict(low=None, high=20),
+                dict(ge=None, le=20),
             ),
             (
                 {"name": "float_prop", "type": "float"},
                 '{"ge": -1.30, "le": 23.23}',
                 FloatMetadataFilter,
-                dict(low=-1.30, high=23.23),
+                dict(ge=-1.30, le=23.23),
             ),
             (
                 {"name": "float_prop", "type": "float"},
                 '{"ge": 23.23}',
                 FloatMetadataFilter,
-                dict(low=23.23, high=None),
+                dict(ge=23.23, le=None),
             ),
             (
                 {"name": "float_prop", "type": "float"},
                 '{"le": 11.32}',
                 FloatMetadataFilter,
-                dict(low=None, high=11.32),
+                dict(ge=None, le=11.32),
             ),
         ],
     )
@@ -1427,11 +1443,11 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=None,
-            metadata_filters=[expected_filter_class(metadata_property, **expected_filter_args)],
+            metadata_filters=[expected_filter_class(metadata_property=metadata_property, **expected_filter_args)],
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
-            sort_by=[SortBy(field="inserted_at", order="asc")],
+            sort_by=[SortBy(field=RecordSortField.inserted_at)],
         )
 
     @pytest.mark.parametrize("response_status_filter", ["missing", "discarded", "submitted", "draft"])
@@ -1484,18 +1500,18 @@ class TestSuiteDatasets:
             [("updated_at", None)],
             [("updated_at", "asc")],
             [("updated_at", "desc")],
-            [("terms-metadata-property", None)],
-            [("terms-metadata-property", "asc")],
-            [("terms-metadata-property", "desc")],
+            [("metadata.terms-metadata-property", None)],
+            [("metadata.terms-metadata-property", "asc")],
+            [("metadata.terms-metadata-property", "desc")],
             [("inserted_at", "asc"), ("updated_at", "desc")],
             [("inserted_at", "desc"), ("updated_at", "asc")],
-            [("inserted_at", "asc"), ("terms-metadata-property", "desc")],
-            [("inserted_at", "desc"), ("terms-metadata-property", "asc")],
-            [("updated_at", "asc"), ("terms-metadata-property", "desc")],
-            [("updated_at", "desc"), ("terms-metadata-property", "asc")],
-            [("inserted_at", "asc"), ("updated_at", "desc"), ("terms-metadata-property", "asc")],
-            [("inserted_at", "desc"), ("updated_at", "asc"), ("terms-metadata-property", "desc")],
-            [("inserted_at", "asc"), ("updated_at", "asc"), ("terms-metadata-property", "desc")],
+            [("inserted_at", "asc"), ("metadata.terms-metadata-property", "desc")],
+            [("inserted_at", "desc"), ("metadata.terms-metadata-property", "asc")],
+            [("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
+            [("updated_at", "desc"), ("metadata.terms-metadata-property", "asc")],
+            [("inserted_at", "asc"), ("updated_at", "desc"), ("metadata.terms-metadata-property", "asc")],
+            [("inserted_at", "desc"), ("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
+            [("inserted_at", "asc"), ("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
         ],
     )
     async def test_list_current_user_dataset_records_with_sort_by(
@@ -1512,7 +1528,7 @@ class TestSuiteDatasets:
         expected_sorts_by = []
         for field, order in sorts:
             if field not in ("inserted_at", "updated_at"):
-                field = await TermsMetadataPropertyFactory.create(name=field, dataset=dataset)
+                field = await TermsMetadataPropertyFactory.create(name=field.split(".")[-1], dataset=dataset)
             expected_sorts_by.append(SortBy(field=field, order=order or "asc"))
 
         mock_search_engine.search.return_value = SearchResponses(
@@ -1567,12 +1583,28 @@ class TestSuiteDatasets:
 
         response = await async_client.get(
             f"/api/v1/me/datasets/{dataset.id}/records",
-            params={"sort_by": "i-do-not-exist:asc"},
+            params={"sort_by": "metadata.i-do-not-exist:asc"},
             headers=owner_auth_header,
         )
         assert response.status_code == 422
         assert response.json() == {
             "detail": f"Provided metadata property in 'sort_by' query param 'i-do-not-exist' not found in dataset with '{dataset.id}'."
+        }
+
+    async def test_list_current_user_dataset_records_with_sort_by_with_invalid_field(
+        self, async_client: "AsyncClient", owner: "User", owner_auth_header: dict
+    ):
+        workspace = await WorkspaceFactory.create()
+        dataset, _, _, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
+
+        response = await async_client.get(
+            f"/api/v1/me/datasets/{dataset.id}/records",
+            params={"sort_by": "not-valid"},
+            headers=owner_auth_header,
+        )
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": "Provided sort field in 'sort_by' query param 'not-valid' is not valid. It must be either 'inserted_at', 'updated_at' or `metadata.metadata-property-name`"
         }
 
     async def test_list_current_user_dataset_records_without_authentication(self, async_client: "AsyncClient"):
@@ -2646,6 +2678,7 @@ class TestSuiteDatasets:
             ({"type": "float", "min": 2}, {"type": "float", "min": 2, "max": None}),
             ({"type": "float", "max": 10}, {"type": "float", "min": None, "max": 10}),
             ({"type": "float", "min": 2, "max": 10}, {"type": "float", "min": 2, "max": 10}),
+            ({"type": "float", "min": 0.3, "max": 1.0}, {"type": "float", "min": 0.3, "max": 1.0}),
         ],
     )
     async def test_create_dataset_metadata_property(
@@ -2709,7 +2742,7 @@ class TestSuiteDatasets:
             **metadata_property_json,
         }
 
-        mock_search_engine.configure_metadata_property.assert_called_once_with(created_metadata_property)
+        mock_search_engine.configure_metadata_property.assert_called_once_with(dataset, created_metadata_property)
 
     async def test_create_dataset_metadata_property_with_dataset_ready_and_search_engine_error(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, db: "AsyncSession", owner_auth_header: dict
@@ -2903,9 +2936,9 @@ class TestSuiteDatasets:
         question_a = await TextQuestionFactory.create(name="input_ok", dataset=dataset)
         question_b = await TextQuestionFactory.create(name="output_ok", dataset=dataset)
 
-        await TermsMetadataPropertyFactory.create(name="terms-metadata")
-        await IntegerMetadataPropertyFactory.create(name="integer-metadata")
-        await FloatMetadataPropertyFactory.create(name="float-metadata")
+        await TermsMetadataPropertyFactory.create(name="terms-metadata", dataset=dataset)
+        await IntegerMetadataPropertyFactory.create(name="integer-metadata", dataset=dataset)
+        await FloatMetadataPropertyFactory.create(name="float-metadata", dataset=dataset)
 
         records_json = {
             "items": [
@@ -2935,7 +2968,7 @@ class TestSuiteDatasets:
                     "metadata": {
                         "terms-metadata": "a",
                         "integer-metadata": 1,
-                        "float-metadata": 1.1,
+                        "float-metadata": 1.2,
                     },
                 },
                 {
@@ -3242,15 +3275,9 @@ class TestSuiteDatasets:
 
         records_json = {
             "items": [
-                {
-                    "fields": {"input": "Say Hello", "output": "unexpected"},
-                },
-                {
-                    "fields": {"input": "Say Hello"},
-                },
-                {
-                    "fields": {"input": "Say Pello"},
-                },
+                {"fields": {"input": "Say Hello", "output": "unexpected"}},
+                {"fields": {"input": "Say Hello"}},
+                {"fields": {"input": "Say Pello"}},
             ]
         }
 
@@ -3315,9 +3342,49 @@ class TestSuiteDatasets:
     @pytest.mark.parametrize(
         "MetadataPropertyFactoryType, settings, value",
         [
+            (TermsMetadataPropertyFactory, {"values": ["a", "b", "c"]}, "c"),
+            (IntegerMetadataPropertyFactory, {"min": 0, "max": 10}, 5),
+            (FloatMetadataPropertyFactory, {"min": 0.0, "max": 1}, 0.5),
+            (FloatMetadataPropertyFactory, {"min": 0.3, "max": 0.5}, 0.35),
+            (FloatMetadataPropertyFactory, {"min": 0.3, "max": 0.9}, 0.89),
+        ],
+    )
+    async def test_create_dataset_records_metadata_values(
+        self,
+        async_client: "AsyncClient",
+        owner_auth_header: dict,
+        MetadataPropertyFactoryType: Type[MetadataPropertyFactory],
+        settings: Dict[str, Any],
+        value: Any,
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        await TextFieldFactory.create(name="completion", dataset=dataset)
+        await TextQuestionFactory.create(name="corrected", dataset=dataset)
+        await MetadataPropertyFactoryType.create(name="metadata-property", dataset=dataset, settings=settings)
+
+        records_json = {
+            "items": [
+                {
+                    "fields": {"completion": "text-input"},
+                    "metadata": {"metadata-property": value},
+                }
+            ]
+        }
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+        )
+
+        assert response.status_code == 204
+
+    @pytest.mark.parametrize(
+        "MetadataPropertyFactoryType, settings, value",
+        [
             (TermsMetadataPropertyFactory, {"values": ["a", "b", "c"]}, "z"),
             (IntegerMetadataPropertyFactory, {"min": 0, "max": 10}, -1),
             (FloatMetadataPropertyFactory, {"min": 0.0, "max": 10.0}, -1.0),
+            (FloatMetadataPropertyFactory, {"min": 0.3, "max": 0.9}, 0),
+            (FloatMetadataPropertyFactory, {"min": 0.3, "max": 0.9}, 0.91),
         ],
     )
     async def test_create_dataset_records_with_not_valid_metadata_values(
@@ -3998,37 +4065,37 @@ class TestSuiteDatasets:
                 {"name": "integer_prop", "type": "integer"},
                 '{"ge": 10, "le": 20}',
                 IntegerMetadataFilter,
-                dict(low=10, high=20),
+                dict(ge=10, le=20),
             ),
             (
                 {"name": "integer_prop", "type": "integer"},
                 '{"ge": 20}',
                 IntegerMetadataFilter,
-                dict(low=20, high=None),
+                dict(ge=20, high=None),
             ),
             (
                 {"name": "integer_prop", "type": "integer"},
                 '{"le": 20}',
                 IntegerMetadataFilter,
-                dict(low=None, high=20),
+                dict(low=None, le=20),
             ),
             (
                 {"name": "float_prop", "type": "float"},
                 '{"ge": -1.30, "le": 23.23}',
                 FloatMetadataFilter,
-                dict(low=-1.30, high=23.23),
+                dict(ge=-1.30, le=23.23),
             ),
             (
                 {"name": "float_prop", "type": "float"},
                 '{"ge": 23.23}',
                 FloatMetadataFilter,
-                dict(low=23.23, high=None),
+                dict(ge=23.23, high=None),
             ),
             (
                 {"name": "float_prop", "type": "float"},
                 '{"le": 11.32}',
                 FloatMetadataFilter,
-                dict(low=None, high=11.32),
+                dict(low=None, le=11.32),
             ),
         ],
     )
@@ -4072,7 +4139,7 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=StringQuery(q="Hello", field="input"),
-            metadata_filters=[expected_filter_class(metadata_property, **expected_filter_args)],
+            metadata_filters=[expected_filter_class(metadata_property=metadata_property, **expected_filter_args)],
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
@@ -4142,18 +4209,18 @@ class TestSuiteDatasets:
             [("updated_at", None)],
             [("updated_at", "asc")],
             [("updated_at", "desc")],
-            [("terms-metadata-property", None)],
-            [("terms-metadata-property", "asc")],
-            [("terms-metadata-property", "desc")],
+            [("metadata.terms-metadata-property", None)],
+            [("metadata.terms-metadata-property", "asc")],
+            [("metadata.terms-metadata-property", "desc")],
             [("inserted_at", "asc"), ("updated_at", "desc")],
             [("inserted_at", "desc"), ("updated_at", "asc")],
-            [("inserted_at", "asc"), ("terms-metadata-property", "desc")],
-            [("inserted_at", "desc"), ("terms-metadata-property", "asc")],
-            [("updated_at", "asc"), ("terms-metadata-property", "desc")],
-            [("updated_at", "desc"), ("terms-metadata-property", "asc")],
-            [("inserted_at", "asc"), ("updated_at", "desc"), ("terms-metadata-property", "asc")],
-            [("inserted_at", "desc"), ("updated_at", "asc"), ("terms-metadata-property", "desc")],
-            [("inserted_at", "asc"), ("updated_at", "asc"), ("terms-metadata-property", "desc")],
+            [("inserted_at", "asc"), ("metadata.terms-metadata-property", "desc")],
+            [("inserted_at", "desc"), ("metadata.terms-metadata-property", "asc")],
+            [("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
+            [("updated_at", "desc"), ("metadata.terms-metadata-property", "asc")],
+            [("inserted_at", "asc"), ("updated_at", "desc"), ("metadata.terms-metadata-property", "asc")],
+            [("inserted_at", "desc"), ("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
+            [("inserted_at", "asc"), ("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
         ],
     )
     async def test_search_dataset_records_with_sort_by(
@@ -4170,7 +4237,7 @@ class TestSuiteDatasets:
         expected_sorts_by = []
         for field, order in sorts:
             if field not in ("inserted_at", "updated_at"):
-                field = await TermsMetadataPropertyFactory.create(name=field, dataset=dataset)
+                field = await TermsMetadataPropertyFactory.create(name=field.split(".")[-1], dataset=dataset)
             expected_sorts_by.append(SortBy(field=field, order=order or "asc"))
 
         mock_search_engine.search.return_value = SearchResponses(
@@ -4235,13 +4302,32 @@ class TestSuiteDatasets:
 
         response = await async_client.post(
             f"/api/v1/me/datasets/{dataset.id}/records/search",
-            params={"sort_by": "i-do-not-exist:asc"},
+            params={"sort_by": "metadata.i-do-not-exist:asc"},
             headers=owner_auth_header,
             json=query_json,
         )
         assert response.status_code == 422
         assert response.json() == {
             "detail": f"Provided metadata property in 'sort_by' query param 'i-do-not-exist' not found in dataset with '{dataset.id}'."
+        }
+
+    async def test_search_dataset_records_with_sort_by_with_invalid_field(
+        self, async_client: "AsyncClient", owner: "User", owner_auth_header: dict
+    ):
+        workspace = await WorkspaceFactory.create()
+        dataset, _, _, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
+
+        query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
+
+        response = await async_client.post(
+            f"/api/v1/me/datasets/{dataset.id}/records/search",
+            params={"sort_by": "not-valid"},
+            headers=owner_auth_header,
+            json=query_json,
+        )
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": "Provided sort field in 'sort_by' query param 'not-valid' is not valid. It must be either 'inserted_at', 'updated_at' or `metadata.metadata-property-name`"
         }
 
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin, UserRole.owner])
@@ -4476,7 +4562,7 @@ class TestSuiteDatasets:
             f"/api/v1/me/datasets/{uuid4()}/records/search", headers=owner_auth_header, json=query_json
         )
 
-        assert response.status_code == 404
+        assert response.status_code == 404, response.json()
 
     async def test_publish_dataset(
         self,

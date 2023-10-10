@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from elasticsearch8 import AsyncElasticsearch, helpers
 
@@ -35,10 +35,7 @@ def _compute_num_candidates_from_k(k: int) -> int:
 @SearchEngine.register(engine_name="elasticsearch")
 @dataclasses.dataclass
 class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
-    config: Dict[str, Any]
-
-    es_number_of_shards: int
-    es_number_of_replicas: int
+    config: Dict[str, Any] = dataclasses.field(default_factory=dict)
 
     def __post_init__(self):
         self.client = AsyncElasticsearch(**self.config)
@@ -53,7 +50,7 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
             max_retries=5,
         )
         return cls(
-            config,
+            config=config,
             es_number_of_shards=settings.es_records_index_shards,
             es_number_of_replicas=settings.es_records_index_replicas,
         )
@@ -79,13 +76,22 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
     async def put_index_mapping_request(self, index: str, mappings: dict):
         await self.client.indices.put_mapping(index=index, properties=mappings)
 
-    async def _index_search_request(self, index: str, query: dict, size: int, from_: int, sort: str = None):
+    async def _index_search_request(
+        self,
+        index: str,
+        query: dict,
+        size: Optional[int] = None,
+        from_: Optional[int] = None,
+        sort: str = None,
+        aggregations: Optional[dict] = None,
+    ) -> dict:
         return await self.client.search(
             index=index,
             query=query,
             from_=from_,
             size=size,
             source=False,
+            aggregations=aggregations,
             sort=sort or "_score:desc,id:asc",
             track_total_hits=True,
         )
