@@ -38,14 +38,28 @@ if TYPE_CHECKING:
 @pytest.mark.asyncio
 class TestSuiteMetadataProperties:
     @pytest.mark.parametrize(
-        ("factory_class", "expected_metric"),
+        ("factory_class", "expected_metric", "expected_json"),
         [
             (
                 TermsMetadataPropertyFactory,
                 TermsMetadataMetrics(total=10, values=[TermsMetadataMetrics.TermCount(term="term", count=10)]),
+                {"type": "terms", "total": 10, "values": [{"term": "term", "count": 10}]},
             ),
-            (IntegerMetadataPropertyFactory, IntegerMetadataMetrics(min=10, max=100)),
-            (FloatMetadataPropertyFactory, FloatMetadataMetrics(min=10.3, max=11.32)),
+            (
+                IntegerMetadataPropertyFactory,
+                IntegerMetadataMetrics(min=10, max=100),
+                {"type": "integer", "min": 10, "max": 100},
+            ),
+            (
+                FloatMetadataPropertyFactory,
+                FloatMetadataMetrics(min=10.3, max=11.32),
+                {"type": "float", "min": 10.3, "max": 11.32},
+            ),
+            (
+                FloatMetadataPropertyFactory,
+                FloatMetadataMetrics(min=1.23456789, max=2.34567890),
+                {"type": "float", "min": 1.23457, "max": 2.34568},
+            ),
         ],
     )
     async def test_compute_metrics_for_metadata_property(
@@ -55,6 +69,7 @@ class TestSuiteMetadataProperties:
         owner_auth_header: dict,
         factory_class: Type[BaseFactory],
         expected_metric: "MetadataMetrics",
+        expected_json: dict,
     ):
         metadata_property = await factory_class.create()
 
@@ -65,7 +80,7 @@ class TestSuiteMetadataProperties:
         )
 
         assert response.status_code == 200
-        assert response.json() == expected_metric.dict()
+        assert response.json() == expected_json
 
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
     async def test_compute_metrics_for_metadata_property_for_non_owners(

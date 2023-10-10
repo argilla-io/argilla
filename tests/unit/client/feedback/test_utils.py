@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, Dict, List, Union
+from typing import TYPE_CHECKING, Dict, List, Type, Union
 
 import pytest
 from argilla.client.feedback.schemas.metadata import (
@@ -151,7 +151,7 @@ def test_generate_pydantic_schema_for_remote_metadata(
     RemoteMetadataSchema = generate_pydantic_schema_for_metadata(
         metadata_properties=metadata_properties, name="RemoteMetadataSchema"
     )
-    assert RemoteMetadataSchema(**validation_data)
+    assert RemoteMetadataSchema(**validation_data).dict() == validation_data
 
 
 @pytest.mark.parametrize(
@@ -198,7 +198,7 @@ def test_generate_pydantic_schema_for_remote_metadata(
 def test_generate_pydantic_schema_for_remote_metadata_errors(
     metadata_properties: List["AllowedRemoteMetadataPropertyTypes"],
     validation_data: Dict[str, Union[str, int, float]],
-    exception_cls: Exception,
+    exception_cls: Type[Exception],
     exception_msg: str,
 ) -> None:
     RemoteMetadataSchema = generate_pydantic_schema_for_metadata(

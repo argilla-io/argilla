@@ -318,7 +318,8 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                     self._metadata_schema.parse_obj(record.metadata)
                 except ValidationError as e:
                     raise ValueError(
-                        f"`FeedbackRecord.metadata` does not match the expected schema, with exception: {e}"
+                        f"`FeedbackRecord.metadata` {record.metadata} does not match the expected schema,"
+                        f" with exception: {e}"
                     ) from e
 
     def _parse_and_validate_records(

@@ -42,7 +42,7 @@ class RemoteTermsMetadataProperty(TermsMetadataProperty, RemoteSchema):
             description=payload.description,
             # TODO: uncomment once API is ready
             # visible_for_annotators=payload.visible_for_annotators,
-            values=payload.settings.get("values"),
+            values=payload.settings.get("values", None),
         )
 
 
@@ -64,8 +64,8 @@ class RemoteIntegerMetadataProperty(IntegerMetadataProperty, RemoteSchema):
             description=payload.description,
             # TODO: uncomment once API is ready
             # visible_for_annotators=payload.visible_for_annotators,
-            min=payload.settings.get("min"),
-            max=payload.settings.get("max"),
+            min=payload.settings.get("min", None),
+            max=payload.settings.get("max", None),
         )
 
 
@@ -87,6 +87,6 @@ class RemoteFloatMetadataProperty(FloatMetadataProperty, RemoteSchema):
             description=payload.description,
             # TODO: uncomment once API is ready
             # visible_for_annotators=payload.visible_for_annotators,
-            min=payload.settings.get("min"),
-            max=payload.settings.get("max"),
+            min=payload.settings.get("min", None),
+            max=payload.settings.get("max", None),
         )
