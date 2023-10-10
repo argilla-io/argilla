@@ -141,6 +141,24 @@ jobs:
       platforms: linux/amd64
     secrets: inherit
 
+  build_quickstart_docker_image_linux_amd64:
+    name: Build Argilla quickstart docker image linux/amd64
+    uses: ./.github/workflows/build-push-docker.yml
+    needs: build_server_docker_image_linux_amd64
+    if: |
+      !cancelled() &&
+      needs.build_server_docker_image_linux_amd64.result == 'success'
+    with:
+      download-python-package: false
+      image-name: argilla/argilla-quickstart
+      dockerfile: docker/quickstart.Dockerfile
+      readme: docker/quickstart.README.md
+      platforms: linux/amd64
+      build-args: |
+        ARGILLA_VERSION=${{ needs.build_server_docker_image.outputs.version }}
+    secrets: inherit
+
+  # Build of arm64 Docker images only when release, as we need QEMU virtualization and it's very slow
   build_server_docker_image_linux_arm64:
     name: Build Argilla server docker image linux/arm64
     uses: ./.github/workflows/build-push-docker.yml
@@ -161,23 +179,6 @@ jobs:
       platforms: linux/arm64
     secrets: inherit
 
-  build_quickstart_docker_image_linux_amd64:
-    name: Build Argilla quickstart docker image linux/amd64
-    uses: ./.github/workflows/build-push-docker.yml
-    needs: build_server_docker_image_linux_amd64
-    if: |
-      !cancelled() &&
-      needs.build_server_docker_image_linux_amd64.result == 'success'
-    with:
-      download-python-package: false
-      image-name: argilla/argilla-quickstart
-      dockerfile: docker/quickstart.Dockerfile
-      readme: docker/quickstart.README.md
-      platforms: linux/amd64
-      build-args: |
-        ARGILLA_VERSION=${{ needs.build_server_docker_image.outputs.version }}
-    secrets: inherit
-
   build_quickstart_docker_image_linux_arm64:
     name: Build Argilla quickstart docker image linux/arm64
     uses: ./.github/workflows/build-push-docker.yml
@@ -196,6 +197,7 @@ jobs:
         ARGILLA_VERSION=${{ needs.build_server_docker_image.outputs.version }}
     secrets: inherit
 
+  # Deploy preview environment per PR
   deploy_environment:
     name: Deploy branch environment
     uses: ./.github/workflows/deploy-environment.yml
@@ -225,22 +227,25 @@ jobs:
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v3
+
       - name: Download python package
         uses: actions/download-artifact@v2
         with:
           name: python-package
           path: dist
+
       - name: Publish Package to TestPyPI 🥪
         uses: pypa/gh-action-pypi-publish@master
         with:
           user: __token__
           password: ${{ secrets.AR_TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
+
       - name: Test Installing 🍿
         run: pip install --index-url https://test.pypi.org/simple --no-deps argilla==${GITHUB_REF#refs/*/v}
+
       - name: Publish Package to PyPI 🥩
         uses: pypa/gh-action-pypi-publish@master
         with:
           user: __token__
           password: ${{ secrets.AR_PYPI_API_TOKEN }}
-
