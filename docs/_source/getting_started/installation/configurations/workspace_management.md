@@ -1,4 +1,4 @@
-# Workspace Management
+# Workspace and Dataset Management
 
 This guide explains how to set up and manage the workspaces in Argilla via the Python client.
 
@@ -179,6 +179,9 @@ You can also delete a workspace using the Python client.
 :::{note}
 To delete a workspace, no dataset can be linked to it. If the workspace contains any dataset, deletion will fail.
 :::
+:::{note}
+You can refer to the [delete datasets](#delete-datasets) section below to clear a workspace before deleting it.
+:::
 
 ```python
 import argilla as rg
@@ -189,6 +192,24 @@ workspace = rg.Workspace.from_name("new-workspace")
 
 workspace.delete()
 ```
+## Dataset Model
+
+A dataset is a container of the "records" of your Argilla instance. It offers all the requirements for storing and managing the data. You can find more information about the concepts and structures of datasets [here](conceptual_guides/data_model.md#dataset).
+
+On the Argilla UI, you can see all the datasets you have created. A dataset is created within a workspace and it is only reachable via this specific workspace. Depending on the project, as you give access to `owner`, `admin` or `annotator`, you also specify which roles can reach each dataset.
+
+The attributes of a dataset are as follows:
+
+| Attribute | Type | Description |
+| --- | --- | --- |
+| `id` | `UUID` | The unique identifier of the dataset. |
+| `name` | `str` | The name of the dataset. |
+| `url` | `str` | The unique URL of the dataset. |
+| `fields` | `list` | The TextFields that the dataset contains. |
+| `questions` | `list` | The questions that the dataset contains. |
+| `guidelines` | `str` | The guidelines that the dataset has. |
+
+
 ## How to work with Datasets
 
 You can refer to the [CLI page](/reference/cli.md) for guidance on how to work with datasets on CLI.
@@ -201,7 +222,7 @@ To work with the datasets on Python, you need to log in to Argilla with `rg.init
 
 #### Python client
 
-You can list the datasets within a specific workspace with the `list()` function as seen below. To specify the workspace, you can use the `workspace` argument. Otherwise, it will list all the dataset in all workspaces.
+You can list the datasets within a specific workspace with the `list()` method as seen below. To specify the workspace, you can use the `workspace` argument. Otherwise, it will list all the datasets in all workspaces.
 
 ```python
 import argilla as rg
@@ -214,30 +235,14 @@ for dataset in dataset_list:
    print(dataset.name)
 ```
 
-As the `list()` function creates a list of `RemoteFeedbackDataset` objects, you can directly work each item of the list.
+As the `list()` method creates a list of `RemoteFeedbackDataset` objects, you can directly work each item of the list.
 
 ### Delete `Datasets`
 
 #### Python client
 
-You can delete any dataset by pulling it from the server by `from_argilla()` and calling the `delete()` function.
+You can delete any dataset by pulling it from the server by `from_argilla()` and calling the `delete()` method.
 
 ```python
 rg.FeedbackDataset.from_argilla("my_dataset", workspace="admin").delete()
-```
-
-### Further filtering for `Datasets`
-
-#### Python Client
-
-You can do further filtering and selections with the `list()` function and the FeedbackDataset features. You can then use each dataset object to perform `delete()` or other methods.
-
-Below, we first filter the datasets that have the context field in their `TextField`s and then, we add them to their proper list.
-
-```python
-datasets_with_context = []
-
-for dataset in dataset_list:
-    if "context" in [field.name for field in dataset.fields]:
-        datasets_with_context.append(dataset)
 ```
