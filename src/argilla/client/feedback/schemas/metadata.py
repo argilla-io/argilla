@@ -141,7 +141,7 @@ class TermsMetadataProperty(MetadataPropertySchema):
         )
 
     def _validate_filter(self, metadata_filter: "TermsMetadataFilter") -> None:
-        if not all(value in self.values for value in metadata_filter.values):
+        if self.values is not None and not all(value in self.values for value in metadata_filter.values):
             raise ValidationError(
                 f"Provided 'values={metadata_filter.values}' is not valid, only values in {self.values} are allowed."
             )
@@ -178,12 +178,22 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
         return settings
 
     def _value_in_bounds(self, provided_value: Optional[Union[int, float]]) -> Union[int, float]:
-        if provided_value is not None and (
-            (self.min is not None and self.min > provided_value) or (self.max is not None and self.max < provided_value)
-        ):
-            raise ValueError(
-                f"Provided '{self.name}={provided_value}' is not valid, only values between {self.min} and {self.max} are allowed."
-            )
+        if provided_value is not None:
+            if (self.min is not None and self.min > provided_value) or (
+                self.max is not None and self.max < provided_value
+            ):
+                if self.min is not None and self.max is not None:
+                    raise ValueError(
+                        f"Provided '{self.name}={provided_value}' is not valid, only values between {self.min} and {self.max} are allowed."
+                    )
+                if self.min is not None:
+                    raise ValueError(
+                        f"Provided '{self.name}={provided_value}' is not valid, only values over {self.min} are allowed."
+                    )
+                if self.max is not None:
+                    raise ValueError(
+                        f"Provided '{self.name}={provided_value}' is not valid, only values under {self.max} are allowed."
+                    )
         return provided_value
 
     @property
@@ -196,14 +206,25 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
         )
 
     def _validate_filter(self, metadata_filter: Union["IntegerMetadataFilter", "FloatMetadataFilter"]) -> None:
-        if metadata_filter.ge is not None and not (self.max >= metadata_filter.ge >= self.min):
-            raise ValidationError(
-                f"Provided 'ge={metadata_filter.ge}' is not valid, only values between {self.min} and {self.max} are allowed."
-            )
-        if metadata_filter.le is not None and not (self.max >= metadata_filter.le >= self.min):
-            raise ValidationError(
-                f"Provided 'le={metadata_filter.le}' is not valid, only values between {self.min} and {self.max} are allowed."
-            )
+        metadata_filter = metadata_filter.dict()
+        for allowed_arg in ["ge", "le"]:
+            if metadata_filter[allowed_arg] is not None:
+                if (
+                    self.max is not None
+                    and self.min is not None
+                    and not (self.max >= metadata_filter[allowed_arg] >= self.min)
+                ):
+                    raise ValidationError(
+                        f"Provided '{allowed_arg}={metadata_filter[allowed_arg]}' is not valid, only values between {self.min} and {self.max} are allowed."
+                    )
+                if self.max is not None and not (self.max >= metadata_filter[allowed_arg]):
+                    raise ValidationError(
+                        f"Provided '{allowed_arg}={metadata_filter[allowed_arg]}' is not valid, only values under {self.max} are allowed."
+                    )
+                if self.min is not None and not (self.min <= metadata_filter[allowed_arg]):
+                    raise ValidationError(
+                        f"Provided '{allowed_arg}={metadata_filter[allowed_arg]}' is not valid, only values over {self.min} are allowed."
+                    )
 
 
 class IntegerMetadataProperty(_NumericMetadataPropertySchema):
