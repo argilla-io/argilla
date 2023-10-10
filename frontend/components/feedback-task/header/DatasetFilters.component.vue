@@ -60,7 +60,7 @@ export default {
       return this.$route.query?._status;
     },
     searchFromRoute() {
-      return this.$route.query?._search;
+      return this.$route.query?._search ?? null;
     },
   },
   watch: {
@@ -95,9 +95,8 @@ export default {
   &__status {
     margin-left: auto;
   }
-}
-.search-area {
-  width: clamp(200px, 25vw, 600px);
-  min-width: 200px;
+  .search-area {
+    width: min(100%, 500px);
+  }
 }
 </style>

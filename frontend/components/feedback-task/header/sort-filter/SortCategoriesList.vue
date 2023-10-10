@@ -73,6 +73,9 @@ export default {
     &:hover {
       background: $black-4;
     }
+    &:focus {
+      outline: none;
+    }
   }
   &__search {
     min-width: 100%;
