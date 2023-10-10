@@ -55,7 +55,7 @@ jobs:
           - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
             searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
             coverageReport: coverage-elasticsearch-8.8.2
-            runsOn: ubuntu-20.04
+            runsOn: ubuntu-latest
           # - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.0.1
           #   searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
           #   coverageReport: coverage-elasticsearch-8.0.1
@@ -243,3 +243,4 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.AR_PYPI_API_TOKEN }}
+
