@@ -31,6 +31,17 @@ from pydantic import ValidationError, create_model
     "schema_kwargs, server_payload, metadata_filter, metadata_property_to_validate",
     [
         (
+            {"name": "terms-metadata", "description": "b"},
+            {
+                "name": "terms-metadata",
+                "description": "b",
+                # "visible_for_annotators": True,
+                "settings": {"type": "terms", "values": None},
+            },
+            TermsMetadataFilter(name="terms-metadata", values=["a", "b", "c"]),
+            {"terms-metadata": "a"},
+        ),
+        (
             {"name": "terms-metadata", "description": "b", "values": ["a", "b", "c"]},
             {
                 "name": "terms-metadata",
@@ -83,7 +94,7 @@ def test_terms_metadata_property(
         (
             {"name": "terms-metadata-property", "values": []},
             ValidationError,
-            "1 validation error for TermsMetadataProperty\nvalues\n  ensure this value has at least 1 items",
+            "1 validation error for TermsMetadataProperty\nvalues\n  `TermsMetadataProperty` with name=terms-metadata-property must have at least 1 `values`",
         ),
         (
             {"name": "terms-metadata-property", "values": ["a", "a"]},
@@ -102,38 +113,43 @@ def test_terms_metadata_property_errors(
 @pytest.mark.parametrize(
     "schema_kwargs, server_payload, metadata_filter, metadata_property_to_validate",
     [
-        # TODO: uncomment this unit tests case once min and max are optional
-        # (
-        #     {"name": "a", "description": "b"},
-        #     {
-        #         "name": "a",
-        #         "description": "b",
-        #         # "visible_for_annotators": True,
-        #         "settings": {"type": "integer"},
-        #     },
-        # ),
-        # (
-        #     {
-        #         "name": "a",
-        #         # "visible_for_annotators": False,
-        #         "max": 5,
-        #     },
-        #     {
-        #         "name": "a",
-        #         "description": None,
-        #         # "visible_for_annotators": False,
-        #         "settings": {"type": "integer", "max": 5},
-        #     },
-        # ),
-        # (
-        #     {"name": "a", "min": 5},
-        #     {
-        #         "name": "a",
-        #         "description": None,
-        #         # "visible_for_annotators": True,
-        #         "settings": {"type": "integer", "min": 5},
-        #     },
-        # ),
+        (
+            {"name": "int-metadata", "description": "b"},
+            {
+                "name": "int-metadata",
+                "description": "b",
+                # "visible_for_annotators": True,
+                "settings": {"type": "integer"},
+            },
+            IntegerMetadataFilter(name="int-metadata", le=10, ge=5),
+            {"int-metadata": 7},
+        ),
+        (
+            {
+                "name": "int-metadata",
+                # "visible_for_annotators": False,
+                "max": 5,
+            },
+            {
+                "name": "int-metadata",
+                "description": None,
+                # "visible_for_annotators": False,
+                "settings": {"type": "integer", "max": 5},
+            },
+            IntegerMetadataFilter(name="int-metadata", le=5, ge=0),
+            {"int-metadata": 3},
+        ),
+        (
+            {"name": "int-metadata", "min": 5},
+            {
+                "name": "int-metadata",
+                "description": None,
+                # "visible_for_annotators": True,
+                "settings": {"type": "integer", "min": 5},
+            },
+            IntegerMetadataFilter(name="int-metadata", le=10, ge=5),
+            {"int-metadata": 7},
+        ),
         (
             {"name": "int-metadata", "min": 5, "max": 10},
             {
@@ -170,16 +186,6 @@ def test_integer_metadata_property(
     [
         ({"name": "a b"}, ValidationError, "name\n  string does not match regex"),
         (
-            {"name": "integer-metadata-property", "min": 5},
-            ValidationError,
-            "1 validation error for IntegerMetadataProperty\nmax\n  field required",
-        ),
-        (
-            {"name": "integer-metadata-property", "max": 5},
-            ValidationError,
-            "1 validation error for IntegerMetadataProperty\nmin\n  field required",
-        ),
-        (
             {"name": "int-metadata-property", "min": 5, "max": 5},
             ValidationError,
             "1 validation error for IntegerMetadataProperty\n__root__\n  `IntegerMetadataProperty` with name=int-metadata-property cannot have `max` less or equal than `min`",
@@ -201,38 +207,43 @@ def test_integer_metadata_property_errors(
 @pytest.mark.parametrize(
     "schema_kwargs, server_payload, metadata_filter, metadata_property_to_validate",
     [
-        # TODO: uncomment this unit tests case once min and max are optional
-        # (
-        #     {"name": "a", "description": "b"},
-        #     {
-        #         "name": "a",
-        #         "description": "b",
-        #         # "visible_for_annotators": True,
-        #         "settings": {"type": "float"},
-        #     },
-        # ),
-        # (
-        #     {
-        #         "name": "a",
-        #         # "visible_for_annotators": False,
-        #         "max": 5.0,
-        #     },
-        #     {
-        #         "name": "a",
-        #         "description": None,
-        #         # "visible_for_annotators": False,
-        #         "settings": {"type": "float", "max": 5.0},
-        #     },
-        # ),
-        # (
-        #     {"name": "a", "min": 5.0},
-        #     {
-        #         "name": "a",
-        #         "description": None,
-        #         # "visible_for_annotators": True,
-        #         "settings": {"type": "float", "min": 5.0},
-        #     },
-        # ),
+        (
+            {"name": "float-metadata", "description": "b"},
+            {
+                "name": "float-metadata",
+                "description": "b",
+                # "visible_for_annotators": True,
+                "settings": {"type": "float"},
+            },
+            FloatMetadataFilter(name="float-metadata", le=10.0, ge=5.0),
+            {"float-metadata": 7.5},
+        ),
+        (
+            {
+                "name": "float-metadata",
+                # "visible_for_annotators": False,
+                "max": 5.0,
+            },
+            {
+                "name": "float-metadata",
+                "description": None,
+                # "visible_for_annotators": False,
+                "settings": {"type": "float", "max": 5.0},
+            },
+            FloatMetadataFilter(name="float-metadata", le=5.0, ge=0.0),
+            {"float-metadata": 2.5},
+        ),
+        (
+            {"name": "float-metadata", "min": 5.0},
+            {
+                "name": "float-metadata",
+                "description": None,
+                # "visible_for_annotators": True,
+                "settings": {"type": "float", "min": 5.0},
+            },
+            FloatMetadataFilter(name="float-metadata", le=10.0, ge=5.0),
+            {"float-metadata": 7.5},
+        ),
         (
             {"name": "float-metadata", "min": 5.0, "max": 10.0},
             {
@@ -268,16 +279,6 @@ def test_float_metadata_property(
     "schema_kwargs, exception_cls, exception_message",
     [
         ({"name": "a b"}, ValidationError, "name\n  string does not match regex"),
-        (
-            {"name": "float-metadata-property", "min": 5.0},
-            ValidationError,
-            "1 validation error for FloatMetadataProperty\nmax\n  field required",
-        ),
-        (
-            {"name": "float-metadata-property", "max": 5.0},
-            ValidationError,
-            "1 validation error for FloatMetadataProperty\nmin\n  field required",
-        ),
         (
             {"name": "float-metadata-property", "min": 5.0, "max": 5.0},
             ValidationError,
