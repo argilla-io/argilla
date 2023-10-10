@@ -81,7 +81,7 @@ jobs:
       searchEngineDockerEnv: ${{ matrix.searchEngineDockerEnv }}
       coverageReport: coverage
       runsOn: ${{ matrix.runsOn }}
-      pytestArgs: tests/unit/server/api/v1
+      pytestArgs: tests/unit
     secrets: inherit
 
   run_integration_tests:
