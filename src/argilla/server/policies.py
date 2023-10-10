@@ -368,6 +368,34 @@ class QuestionPolicyV1:
         return is_allowed
 
 
+class MetadataPropertyPolicyV1:
+    @classmethod
+    def compute_metrics(cls, metadata_property: MetadataProperty) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            if actor.is_owner:
+                return True
+
+            exists_workspace_user = await _exists_workspace_user_by_user_and_workspace_id(
+                actor, metadata_property.dataset.workspace_id
+            )
+
+            return (actor.is_admin and exists_workspace_user and metadata_property.is_visible) or (
+                actor.is_annotator and exists_workspace_user and metadata_property.is_visible_for_annotators
+            )
+
+        return is_allowed
+
+    @classmethod
+    def delete(cls, metadata_property: MetadataProperty) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (
+                actor.is_admin
+                and await _exists_workspace_user_by_user_and_workspace_id(actor, metadata_property.dataset.workspace_id)
+            )
+
+        return is_allowed
+
+
 class RecordPolicyV1:
     @classmethod
     def delete(cls, record: Record) -> PolicyAction:
@@ -459,24 +487,6 @@ class SuggestionPolicyV1:
             return actor.is_owner or (
                 actor.is_admin
                 and await _exists_workspace_user_by_user_and_workspace_id(actor, suggestion.record.dataset.workspace_id)
-            )
-
-        return is_allowed
-
-
-class MetadataPropertyPolicyV1:
-    @classmethod
-    def compute_metrics(cls, metadata_property: MetadataProperty) -> PolicyAction:
-        async def is_allowed(actor: User) -> bool:
-            if actor.is_owner:
-                return True
-
-            exists_workspace_user = await _exists_workspace_user_by_user_and_workspace_id(
-                actor, metadata_property.dataset.workspace_id
-            )
-
-            return (actor.is_admin and exists_workspace_user and metadata_property.is_visible) or (
-                actor.is_annotator and exists_workspace_user and metadata_property.is_visible_for_annotators
             )
 
         return is_allowed
