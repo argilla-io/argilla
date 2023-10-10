@@ -2742,7 +2742,7 @@ class TestSuiteDatasets:
             **metadata_property_json,
         }
 
-        mock_search_engine.configure_metadata_property.assert_called_once_with(created_metadata_property)
+        mock_search_engine.configure_metadata_property.assert_called_once_with(dataset, created_metadata_property)
 
     async def test_create_dataset_metadata_property_with_dataset_ready_and_search_engine_error(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, db: "AsyncSession", owner_auth_header: dict

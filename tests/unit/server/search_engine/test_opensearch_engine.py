@@ -724,6 +724,22 @@ class TestSuiteOpenSearchEngine:
             for record in records
         ]
 
+    async def test_configure_metadata_property(self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch):
+        dataset = await DatasetFactory.create()
+        await _refresh_dataset(dataset)
+
+        await opensearch_engine.create_index(dataset)
+
+        terms_property = await TermsMetadataPropertyFactory.create(name="terms")
+        await opensearch_engine.configure_metadata_property(dataset, terms_property)
+
+        index_name = index_name_for_dataset(dataset)
+        index = opensearch.indices.get(index=index_name)[index_name]
+        assert index["mappings"]["properties"]["metadata"] == {
+            "dynamic": "false",
+            "properties": {str(terms_property.id): {"type": "keyword"}},
+        }
+
     async def test_add_records_with_metadata(self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch):
         text_fields = await TextFieldFactory.create_batch(5)
         metadata_properties = await TermsMetadataPropertyFactory.create_batch(3)
