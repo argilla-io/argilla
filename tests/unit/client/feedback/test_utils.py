@@ -155,7 +155,7 @@ def test_generate_pydantic_schema_for_remote_metadata(
 
 
 @pytest.mark.parametrize(
-    "metadata_properties, validation_data, ExceptionCls, exception_msg",
+    "metadata_properties, validation_data, exception_cls, exception_msg",
     [
         (
             [RemoteTermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"])],
@@ -198,11 +198,11 @@ def test_generate_pydantic_schema_for_remote_metadata(
 def test_generate_pydantic_schema_for_remote_metadata_errors(
     metadata_properties: List["AllowedRemoteMetadataPropertyTypes"],
     validation_data: Dict[str, Union[str, int, float]],
-    ExceptionCls: Type[Exception],
+    exception_cls: Type[Exception],
     exception_msg: str,
 ) -> None:
     RemoteMetadataSchema = generate_pydantic_schema_for_metadata(
         metadata_properties=metadata_properties, name="RemoteMetadataSchema"
     )
-    with pytest.raises(ExceptionCls, match=exception_msg):
+    with pytest.raises(exception_cls, match=exception_msg):
         RemoteMetadataSchema(**validation_data)

@@ -173,7 +173,7 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
 
     def _value_in_bounds(self, provided_value: Optional[Union[int, float]]) -> Union[int, float]:
         if provided_value is not None and (
-            self.max and provided_value > self.max or self.min and provided_value < self.min
+            (self.min is not None and self.min > provided_value) or (self.max is not None and self.max < provided_value)
         ):
             raise ValueError(
                 f"Provided '{self.name}={provided_value}' is not valid, only values between {self.min} and {self.max} are allowed."
