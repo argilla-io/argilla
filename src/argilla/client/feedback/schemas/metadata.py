@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, Generic, List, Optional, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from pydantic import (
     BaseModel,
@@ -26,7 +26,6 @@ from pydantic import (
     root_validator,
     validator,
 )
-from pydantic.generics import GenericModel
 
 from argilla.client.feedback.constants import METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas.enums import MetadataPropertyTypes

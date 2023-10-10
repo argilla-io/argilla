@@ -195,7 +195,7 @@ class LoadDatasets:
         return rg.FeedbackRecord(fields=fields, metadata=metadata)
 
     @staticmethod
-    def load_error_analysis(with_settings_options: bool = True):
+    def load_error_analysis(with_metadata_property_options: bool = True):
         print("Loading Error Analysis dataset as a `FeedbackDataset` (Alpha)")
         df = pd.read_csv("https://raw.githubusercontent.com/argilla-io/dataset_examples/main/synthetic_data_v2.csv")
 
@@ -217,7 +217,7 @@ class LoadDatasets:
             rg.TextQuestion(name="note", title="Leave a note to describe the issue:", required=False),
         ]
 
-        dataset_name = "error-analysis-with-feedback-alpha"
+        dataset_name = "error-analysis-with-feedback"
 
         if with_settings_options:
             metadata = [
