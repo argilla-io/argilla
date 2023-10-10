@@ -119,11 +119,12 @@ class TermsMetadataProperty(MetadataPropertySchema):
     def server_settings(self) -> Dict[str, Any]:
         return {"type": self.type, "values": self.values}
 
-    def _all_values_exist(self, introduced_value: str) -> None:
+    def _all_values_exist(self, introduced_value: str) -> str:
         if introduced_value not in self.values:
             raise ValueError(
                 f"Provided '{self.name}={introduced_value}' is not valid, only values in {self.values} are allowed."
             )
+        return introduced_value
 
     @property
     def _pydantic_field_with_validator(self) -> Tuple[Dict[str, Tuple[StrictStr, None]], Dict[str, Callable]]:
@@ -169,18 +170,19 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
             settings["max"] = self.max
         return settings
 
-    def _value_in_bounds(self, provided_value: Union[int, float]) -> None:
+    def _value_in_bounds(self, provided_value: Union[int, float]) -> Union[int, float]:
         if provided_value > self.max or provided_value < self.min:
             raise ValueError(
                 f"Provided '{self.name}={provided_value}' is not valid, only values between {self.min} and {self.max} are allowed."
             )
+        return provided_value
 
     @property
     def _pydantic_field_with_validator(
         self,
     ) -> Tuple[Dict[Union[StrictInt, StrictFloat], Tuple[str, None]], Dict[str, Callable]]:
         return (
-            {self.name: (METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE[self.type], None)},
+            {self.name: (METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE[self.type], ...)},
             {f"{self.name}_validator": validator(self.name, allow_reuse=True)(self._value_in_bounds)},
         )
 
