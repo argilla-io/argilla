@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import warnings
-from abc import ABC, abstractproperty
+from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Extra, Field, conint, conlist, root_validator, validator
@@ -58,12 +58,13 @@ class QuestionSchema(BaseModel, ABC):
         extra = Extra.forbid
         exclude = {"type"}
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def server_settings(self) -> Dict[str, Any]:
         """Abstract property that should be implemented by the classes that inherit from
         this one, and that will be used to create the `FeedbackDataset` in Argilla.
         """
-        return {}
+        ...
 
     def to_server_payload(self) -> Dict[str, Any]:
         """Method that will be used to create the payload that will be sent to Argilla
