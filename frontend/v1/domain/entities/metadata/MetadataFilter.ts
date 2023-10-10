@@ -5,19 +5,20 @@ interface OptionForFilter {
   label: string;
 }
 interface RangeValue {
-  ge: number;
-  le: number;
+  ge?: number;
+  le?: number;
 }
 
 class MetadataFilter {
   public value: RangeValue;
-  public options: OptionForFilter[];
+  public options: OptionForFilter[] = [];
 
   constructor(private metadata: Metadata) {
     if (this.isTerms) {
-      this.options = this.settings.values.map((value: string) => {
-        return { selected: false, label: value };
-      });
+      this.options =
+        this.settings.values?.map((value: string) => {
+          return { selected: false, label: value };
+        }) ?? [];
     } else {
       this.value = {
         ge: this.settings.min,
@@ -41,10 +42,7 @@ class MetadataFilter {
   get hasValues() {
     if (this.isTerms) return this.options.length > 0;
 
-    return (
-      (this.value.ge === 0 || !!this.value.ge) &&
-      (this.value.le === 0 || !!this.value.le)
-    );
+    return this.value.ge !== null && this.value.le !== null;
   }
 
   public filterByText(text: string) {

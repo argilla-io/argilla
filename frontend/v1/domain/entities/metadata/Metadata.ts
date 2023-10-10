@@ -1,9 +1,16 @@
+interface MetadataSettings {
+  type: string;
+  values?: string[];
+  min?: number;
+  max?: number;
+}
+
 export class Metadata {
   constructor(
     private id: string,
     public name: string,
     private description: string,
-    public settings: any
+    public settings: MetadataSettings
   ) {}
 
   public get isTerms() {
