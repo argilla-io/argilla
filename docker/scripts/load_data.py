@@ -182,7 +182,7 @@ class LoadDatasets:
             "correctness-langsmith": row["correctness_langsmith"],
             "model-name": row["model_name"],
             "temperature": row["temperature"],
-            "max-tokens": row["max_tokens"],
+            "max-tokens": int(row["max_tokens"]),
             "cpu-user": row["cpu_time_user"],
             "cpu-system": row["cpu_time_system"],
             "library-version": row["library_version"],

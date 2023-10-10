@@ -164,9 +164,9 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         index_name = index_name_for_dataset(dataset)
         await self._create_index_request(index_name, mappings, settings)
 
-    async def configure_metadata_property(self, metadata_property: MetadataProperty):
+    async def configure_metadata_property(self, dataset: Dataset, metadata_property: MetadataProperty):
         mapping = _mapping_for_metadata_property(metadata_property)
-        index_name = await self._get_index_or_raise(metadata_property.dataset)
+        index_name = await self._get_index_or_raise(dataset)
 
         await self.put_index_mapping_request(index_name, mapping)
 

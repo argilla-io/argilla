@@ -209,7 +209,7 @@ class SearchEngine(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    async def configure_metadata_property(self, metadata_property: MetadataProperty):
+    async def configure_metadata_property(self, dataset: Dataset, metadata_property: MetadataProperty):
         pass
 
     @abstractmethod
