@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import TYPE_CHECKING
+
 import pytest
 from argilla.client.feedback.dataset.local import FeedbackDataset
 from argilla.client.feedback.schemas.fields import TextField
@@ -22,6 +24,9 @@ from argilla.client.feedback.schemas.metadata import (
 )
 from argilla.client.feedback.schemas.questions import TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
+
+if TYPE_CHECKING:
+    from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes
 
 
 @pytest.mark.parametrize(
@@ -94,3 +99,59 @@ def test_add_records_validation_error(record: FeedbackRecord, exception_cls: Exc
     with pytest.raises(exception_cls, match=exception_msg):
         dataset.add_records(record)
     assert len(dataset.records) == 0
+
+
+@pytest.mark.parametrize(
+    "metadata_property",
+    (
+        TermsMetadataProperty(name="new-terms-metadata"),
+        TermsMetadataProperty(name="new-terms-metadata", values=["a", "b", "c"]),
+        IntegerMetadataProperty(name="new-integer-metadata"),
+        IntegerMetadataProperty(name="new-integer-metadata", min=0, max=10),
+        FloatMetadataProperty(name="new-float-metadata"),
+        FloatMetadataProperty(name="new-float-metadata", min=0, max=10),
+    ),
+)
+def test_add_metadata_property(metadata_property: "AllowedMetadataPropertyTypes") -> None:
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
+        questions=[TextQuestion(name="question", required=True)],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="int-metadata", min=0, max=10),
+            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+    )
+
+    new_metadata_property = dataset.add_metadata_property(metadata_property)
+    assert new_metadata_property.name == metadata_property.name
+    assert len(dataset.metadata_properties) == 4
+
+
+@pytest.mark.parametrize(
+    "metadata_property",
+    (
+        TermsMetadataProperty(name="terms-metadata"),
+        TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+        IntegerMetadataProperty(name="int-metadata"),
+        IntegerMetadataProperty(name="int-metadata", min=0, max=10),
+        FloatMetadataProperty(name="float-metadata"),
+        FloatMetadataProperty(name="float-metadata", min=0, max=10),
+    ),
+)
+def test_add_metadata_property_errors(metadata_property: "AllowedMetadataPropertyTypes") -> None:
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
+        questions=[TextQuestion(name="question", required=True)],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="int-metadata", min=0, max=10),
+            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+    )
+
+    with pytest.raises(
+        ValueError, match=f"Invalid `metadata_property={metadata_property.name}` provided as already exist"
+    ):
+        _ = dataset.add_metadata_property(metadata_property)
+    assert len(dataset.metadata_properties) == 3
