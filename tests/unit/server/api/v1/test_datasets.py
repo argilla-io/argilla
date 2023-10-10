@@ -3346,6 +3346,7 @@ class TestSuiteDatasets:
         "MetadataPropertyFactoryType, settings, value",
         [
             (TermsMetadataPropertyFactory, {"values": ["a", "b", "c"]}, "c"),
+            (TermsMetadataPropertyFactory, {"values": None}, "c"),
             (IntegerMetadataPropertyFactory, {"min": 0, "max": 10}, 5),
             (FloatMetadataPropertyFactory, {"min": 0.0, "max": 1}, 0.5),
             (FloatMetadataPropertyFactory, {"min": 0.3, "max": 0.5}, 0.35),
