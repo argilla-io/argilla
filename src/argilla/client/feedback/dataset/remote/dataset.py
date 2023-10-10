@@ -184,7 +184,7 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
                 client=self._client,
                 id=self.id,
                 metadata_property=metadata_property.to_server_payload(),
-            )
+            ).parsed
         except Exception as e:
             raise RuntimeError(
                 f"Failed while adding the `metadata_property={metadata_property}` to the current `FeedbackDataset` in Argilla with exception: {e}"
