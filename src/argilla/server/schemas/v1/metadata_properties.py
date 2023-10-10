@@ -14,10 +14,12 @@
 
 from typing import Generic, List, Literal, Optional, TypeVar, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from pydantic.generics import GenericModel
 
 from argilla.server.enums import MetadataPropertyType
+
+FLOAT_METADATA_METRICS_PRECISION = 5
 
 try:
     from typing import Annotated
@@ -49,6 +51,12 @@ class IntegerMetadataMetrics(NumericMetadataMetrics[int]):
 
 class FloatMetadataMetrics(NumericMetadataMetrics[float]):
     type: Literal[MetadataPropertyType.float] = Field(MetadataPropertyType.float, const=True)
+
+    @validator("min", "max")
+    def round_result(cls, v: float):
+        if v is not None:
+            return round(v, FLOAT_METADATA_METRICS_PRECISION)
+        return v
 
 
 MetadataMetrics = Annotated[
