@@ -19,7 +19,6 @@ from pydantic import ValidationError
 from tqdm import trange
 
 from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, PUSHING_BATCH_SIZE
-from argilla.client.feedback.dataset.mixins import ArgillaMixin
 from argilla.client.feedback.dataset.remote.base import RemoteFeedbackDatasetBase, RemoteFeedbackRecordsBase
 from argilla.client.feedback.dataset.remote.filtered import FilteredRemoteFeedbackDataset
 from argilla.client.feedback.schemas.records import FeedbackRecord
@@ -190,6 +189,9 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             raise RuntimeError(
                 f"Failed while adding the `metadata_property={metadata_property}` to the current `FeedbackDataset` in Argilla with exception: {e}"
             ) from e
+
+        # TODO(alvarobartt): structure better the mixins to be able to easily reuse those, here to avoid circular imports
+        from argilla.client.feedback.dataset.mixins import ArgillaMixin
 
         metadata_property = ArgillaMixin._parse_to_remote_metadata_property(metadata_property)
         self._metadata_properties.append(metadata_property)
