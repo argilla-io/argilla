@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import json
 import re
 import warnings
 from typing import List, Optional
@@ -72,11 +73,40 @@ class DeprecatedDatasetConfig(BaseModel):
         return self.json()
 
     @classmethod
-    def from_json(cls, json: str) -> "DeprecatedDatasetConfig":
+    def from_json(cls, json_str: str) -> "DeprecatedDatasetConfig":
         warnings.warn(
             "`DatasetConfig` can just be loaded from YAML, so make sure that you are"
             " loading a YAML file instead of a JSON file. `DatasetConfig` will be dumped"
             " as YAML from now on, instead of JSON.",
             DeprecationWarning,
         )
-        return cls.parse_raw(json)
+        parsed_json = json.loads(json_str)
+        # Here for backwards compatibility
+        for field in parsed_json["fields"]:
+            # for 1.10.0, 1.9.0, and 1.8.0
+            field.pop("id", None)
+            field.pop("inserted_at", None)
+            field.pop("updated_at", None)
+            field["type"] = field["settings"]["type"]
+            if "use_markdown" in field["settings"]:
+                field["use_markdown"] = field["settings"]["use_markdown"]
+            # for 1.12.0 and 1.11.0
+            field.pop("settings", None)
+        for question in parsed_json["questions"]:
+            # for 1.10.0, 1.9.0, and 1.8.0
+            question.pop("id", None)
+            question.pop("inserted_at", None)
+            question.pop("updated_at", None)
+            question.update({"type": question["settings"]["type"]})
+            if question["type"] in ["rating", "ranking"]:
+                question["values"] = [option["value"] for option in question["settings"]["options"]]
+            elif question["type"] in ["label_selection", "multi_label_selection"]:
+                if all(option["value"] == option["text"] for option in question["settings"]["options"]):
+                    question["labels"] = [option["value"] for option in question["settings"]["options"]]
+                else:
+                    question["labels"] = {option["value"]: option["text"] for option in question["settings"]["options"]}
+                if "visible_labels" in question["settings"]:
+                    question["visible_labels"] = question["settings"]["visible_labels"]
+            # for 1.12.0 and 1.11.0
+            question.pop("settings", None)
+        return cls(**parsed_json)
