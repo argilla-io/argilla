@@ -219,7 +219,7 @@ class LoadDatasets:
 
         dataset_name = "error-analysis-with-feedback"
 
-        if with_settings_options:
+        if with_metadata_property_options:
             metadata = [
                 rg.TermsMetadataProperty(
                     name="correctness-langsmith", values=df.correctness_langsmith.unique().tolist()
@@ -274,7 +274,7 @@ if __name__ == "__main__":
                 response = requests.get("http://0.0.0.0:6900/")
                 if response.status_code == 200:
                     ld = LoadDatasets(API_KEY)
-                    ld.load_error_analysis(with_settings_options=False)
+                    ld.load_error_analysis(with_metadata_property_options=False)
                     ld.load_error_analysis()
                     ld.load_error_analysis_textcat_version()
                     ld.load_feedback_dataset_from_huggingface(
