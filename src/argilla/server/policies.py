@@ -23,6 +23,7 @@ from argilla.server.errors import ForbiddenOperationError
 from argilla.server.models import (
     Dataset,
     Field,
+    MetadataProperty,
     Question,
     Record,
     Response,
@@ -362,6 +363,18 @@ class QuestionPolicyV1:
             return actor.is_owner or (
                 actor.is_admin
                 and await _exists_workspace_user_by_user_and_workspace_id(actor, question.dataset.workspace_id)
+            )
+
+        return is_allowed
+
+
+class MetadataPropertyV1:
+    @classmethod
+    def delete(cls, metadata_property: MetadataProperty) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (
+                actor.is_admin
+                and await _exists_workspace_user_by_user_and_workspace_id(actor, metadata_property.dataset.workspace_id)
             )
 
         return is_allowed
