@@ -195,6 +195,9 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
         Args:
             metadata_property: the metadata property to add.
 
+        Returns:
+            The metadata property that was added.
+
         Raises:
             TypeError: if `metadata_property` is not a `MetadataPropertySchema`.
             ValueError: if `metadata_property` is already in the dataset.

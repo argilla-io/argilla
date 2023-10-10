@@ -172,6 +172,9 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             metadata_property: the metadata property to add to the current `FeedbackDataset`
                 in Argilla.
 
+        Returns:
+            The newly added `metadata_property` to the current `FeedbackDataset` in Argilla.
+
         Raises:
             PermissionError: if the user does not have either `owner` or `admin` role.
             RuntimeError: if the `metadata_property` cannot be added to the current

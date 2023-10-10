@@ -249,7 +249,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                 }
             if metadata_property.name in self._metadata_properties_mapping.keys():
                 raise ValueError(
-                    f"Invalid `metadata_property={metadata_property.name}` provided as already exist. Current"
+                    f"Invalid `metadata_property={metadata_property.name}` provided as it already exists. Current"
                     f" `metadata_properties` are: {list(self._metadata_properties_mapping.keys())}"
                 )
 
