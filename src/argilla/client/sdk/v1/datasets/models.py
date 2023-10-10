@@ -84,6 +84,7 @@ class FeedbackItemModel(BaseModel):
 
 class FeedbackRecordsModel(BaseModel):
     items: List[FeedbackItemModel]
+    total: int
 
 
 class FeedbackFieldModel(BaseModel):
