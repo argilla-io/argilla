@@ -107,13 +107,19 @@ class TermsMetadataProperty(MetadataPropertySchema):
     """
 
     type: MetadataPropertyTypes = MetadataPropertyTypes.terms
-    values: Optional[List[str]] = Field(None, min_items=TERMS_METADATA_PROPERTY_MIN_VALUES)
+    values: Optional[List[str]] = None
 
     @validator("values")
-    def check_values(cls, terms_values: List[str], values: Dict[str, Any]) -> List[str]:
-        if len(set(terms_values)) != len(terms_values):
-            name = values.get("name")
-            raise ValueError(f"`TermsMetadataProperty` with name={name} cannot have repeated `values`")
+    def check_values(cls, terms_values: Union[List[str], None], values: Dict[str, Any]) -> List[str]:
+        if terms_values is not None:
+            if len(terms_values) < TERMS_METADATA_PROPERTY_MIN_VALUES:
+                raise ValueError(
+                    f"`TermsMetadataProperty` with name={values.get('name')} must have at least {TERMS_METADATA_PROPERTY_MIN_VALUES} `values`"
+                )
+            if len(set(terms_values)) != len(terms_values):
+                raise ValueError(
+                    f"`TermsMetadataProperty` with name={values.get('name')} cannot have repeated `values`"
+                )
         return terms_values
 
     @property
@@ -121,7 +127,7 @@ class TermsMetadataProperty(MetadataPropertySchema):
         return {"type": self.type, "values": self.values}
 
     def _all_values_exist(self, introduced_value: Optional[str] = None) -> str:
-        if introduced_value is not None and introduced_value not in self.values:
+        if introduced_value is not None and self.values is not None and introduced_value not in self.values:
             raise ValueError(
                 f"Provided '{self.name}={introduced_value}' is not valid, only values in {self.values} are allowed."
             )
@@ -219,8 +225,8 @@ class IntegerMetadataProperty(_NumericMetadataPropertySchema):
     """
 
     type: MetadataPropertyTypes = MetadataPropertyTypes.integer
-    min: int  # TODO: should be `Optional[int] = None`
-    max: int  # TODO: should be `Optional[int] = None`
+    min: Optional[int] = None
+    max: Optional[int] = None
 
 
 class FloatMetadataProperty(_NumericMetadataPropertySchema):
@@ -242,8 +248,8 @@ class FloatMetadataProperty(_NumericMetadataPropertySchema):
     """
 
     type: MetadataPropertyTypes = MetadataPropertyTypes.float
-    min: float  # TODO: should be `Optional[float] = None`
-    max: float  # TODO: should be `Optional[float] = None`
+    min: Optional[float] = None
+    max: Optional[float] = None
 
 
 class MetadataFilterSchema(BaseModel, ABC):
