@@ -33,7 +33,7 @@ def tokens_length(name: str, query: Optional[str] = None, interval: int = 1) -> 
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax </practical_guides/filter_dataset>`_
+            `query string syntax <https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html>`_
         interval: The bins or bucket for result histogram
 
     Returns:
@@ -65,7 +65,7 @@ def token_frequency(name: str, query: Optional[str] = None, tokens: int = 1000) 
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax </practical_guides/filter_dataset>`_
+            `query string syntax <https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html>`_
         tokens: The top-k number of tokens to retrieve
 
     Returns:
@@ -94,7 +94,7 @@ def token_length(name: str, query: Optional[str] = None) -> MetricSummary:
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax </practical_guides/filter_dataset>`_
+            `query string syntax <https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html>`_
 
     Returns:
         The summary for token length distribution
@@ -133,7 +133,7 @@ def token_capitalness(name: str, query: Optional[str] = None) -> MetricSummary:
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax </practical_guides/filter_dataset>`_
+            `query string syntax <https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html>`_
 
     Returns:
         The summary for token length distribution
@@ -196,7 +196,7 @@ def mention_length(
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax </practical_guides/filter_dataset>`_
+            `query string syntax <https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html>`_
         level: The mention length level. Accepted values are "token" and "char"
         compute_for: Metric can be computed for annotations or predictions. Accepted values are
             ``Annotations`` and ``Predictions``. Defaults to ``Predictions``.
@@ -242,7 +242,7 @@ def entity_labels(
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax </practical_guides/filter_dataset>`_
+            `query string syntax <https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html>`_
         compute_for: Metric can be computed for annotations or predictions. Accepted values are
             ``Annotations`` and ``Predictions``. Default to ``Predictions``
         labels: The number of top entities to retrieve. Lower numbers will be better performants
@@ -281,7 +281,7 @@ def entity_density(
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax </practical_guides/filter_dataset>`_
+            `query string syntax <https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html>`_
         compute_for: Metric can be computed for annotations or predictions. Accepted values are
             ``Annotations`` and ``Predictions``. Default to ``Predictions``.
         interval: The interval for histogram. The entity density is defined in the range 0-1.
@@ -329,7 +329,7 @@ def entity_capitalness(
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax </practical_guides/filter_dataset>`_
+            `query string syntax <https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html>`_
         compute_for: Metric can be computed for annotations or predictions. Accepted values are
             ``Annotations`` and ``Predictions``. Default to ``Predictions``.
     Returns:
@@ -385,7 +385,7 @@ def top_k_mentions(
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax </practical_guides/filter_dataset>`_
+            `query string syntax <https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html>`_
         compute_for: Metric can be computed for annotations or predictions. Accepted values are
             ``Annotations`` and ``Predictions``. Default to ``Predictions``
         k: The number of mentions to retrieve.
@@ -445,7 +445,7 @@ def f1(name: str, query: Optional[str] = None) -> MetricSummary:
     Args:
         name: The dataset name.
         query: An ElasticSearch query with the
-            `query string syntax </practical_guides/filter_dataset>`_
+            `query string syntax <https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html>`_
 
     Returns:
         The F1 metric summary containing precision, recall and the F1 score (averaged and per label).
