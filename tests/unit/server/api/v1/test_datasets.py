@@ -549,7 +549,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 200
         assert response.json() == {
-            "total": None,
+            "total": 3,
             "items": [
                 {
                     "id": str(record_a.id),
@@ -1154,7 +1154,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 200
         assert response.json() == {
-            "total": None,
+            "total": 3,
             "items": [
                 {
                     "id": str(record_a.id),
@@ -1209,7 +1209,7 @@ class TestSuiteDatasets:
         )
 
         expected = {
-            "total": None,
+            "total": 3,
             "items": [
                 {
                     "id": str(record_a.id),
