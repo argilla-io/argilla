@@ -25,7 +25,7 @@ An Argilla workspace is composed of the following attributes:
 
 ### Python client
 
-The `Workspace` class in the Python client gives developers with `owner` role the ability to create and manage workspaces in Argilla, and the users that belong to them. Check the [Workspace - Python Reference](/reference/python/python_workspaces.rst) to see the attributes, arguments, and methods of the `Workspace` class..
+The `Workspace` class in the Python client gives developers with `owner` role the ability to create and manage workspaces in Argilla, and the users that belong to them. Check the [Workspace - Python Reference](/reference/python/python_workspaces.rst) to see the attributes, arguments, and methods of the `Workspace` class.
 
 The `Workspace` class in Argilla is composed of the following attributes:
 
