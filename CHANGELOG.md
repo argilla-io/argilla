@@ -16,9 +16,24 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added fields `inserted_at` and `updated_at` in `RemoteResponseSchema` ([#3822](https://github.com/argilla-io/argilla/pull/3822)).
+
 ### Changed
 
 - Updated `Dockerfile` to use multi stage build ([#3221](https://github.com/argilla-io/argilla/pull/3221) and [#3793](https://github.com/argilla-io/argilla/pull/3793)).
+- Updated active learning for text classification notebooks to use the most recent small-text version ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
+- Changed argilla dataset name in the active learning for text classification notebooks to be consistent with the default names in the huggingface spaces ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
+
+### Fixed
+
+- Updated active learning for text classification notebooks to pass ids of type int to `TextClassificationRecord` ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
+- Fixed record fields validation that was preventing from logging records with optional fields (i.e. `required=True`) when the field value was `None` ([#3846](https://github.com/argilla-io/argilla/pull/3846)).
+
+### Fixed
+
+- Fixed saving of models trained with `ArgillaTrainer` with a `peft_config` parameter. ([#3795](https://github.com/argilla-io/argilla/pull/3795))
 
 ## [1.16.0](https://github.com/argilla-io/argilla/compare/v1.15.1...v1.16.0)
 
