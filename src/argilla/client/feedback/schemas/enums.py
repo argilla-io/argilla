@@ -33,5 +33,8 @@ class ResponseStatus(str, Enum):
     discarded = "discarded"
 
 
-class ResponseStatusFilter(ResponseStatus):
+class ResponseStatusFilter(str, Enum):
+    draft = "draft"
+    submitted = "submitted"
+    discarded = "discarded"
     missing = "missing"
