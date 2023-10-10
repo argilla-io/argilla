@@ -29,13 +29,15 @@ from argilla.client.feedback.unification import (
 
 
 class TextClassificationDefaults(BaseModel):
-    text: TextField
-    label: Union[
-        RatingQuestionUnification,
-        LabelQuestionUnification,
-        MultiLabelQuestionUnification,
-        RankingQuestionUnification,
-    ]
+    text: Optional[TextField] = None
+    label: Optional[
+        Union[
+            RatingQuestionUnification,
+            LabelQuestionUnification,
+            MultiLabelQuestionUnification,
+            RankingQuestionUnification,
+        ]
+    ] = None
 
 
 class QuestionAnsweringDefaults(BaseModel):
@@ -45,5 +47,5 @@ class QuestionAnsweringDefaults(BaseModel):
 
 
 class SentenceSimilarityDefaults(BaseModel):
-    texts: Optional[List[TextField]]
-    label: Optional[Union[LabelQuestionUnification, RankingQuestionUnification]]
+    texts: Optional[List[TextField]] = None
+    label: Optional[Union[LabelQuestionUnification, RankingQuestionUnification]] = None

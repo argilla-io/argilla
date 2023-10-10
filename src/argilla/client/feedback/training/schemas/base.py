@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import logging
+import textwrap
 import types
 import warnings
 from abc import ABC
@@ -72,29 +73,27 @@ class TrainingData(ABC):
     _supported_frameworks_names: list = []
 
     @property
-    def defaults(self) -> BaseModel:
-        return self.defaults
-
-    @property
     def formatting_func_return_types(self) -> BaseModel:
         return self._formatting_func_return_types
 
     @property
-    def supported_frameworks_names(self) -> list:
-        return self._supported_frameworks_names
-
-    @property
-    def formatting_func(self) -> Callable:
-        return self.formatting_func
+    def supported_frameworks(self) -> List[Framework]:
+        return [Framework(name) for name in self._supported_frameworks_names]
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}" f"formatting_func={self.formatting_func}, "
+        return textwrap.dedent(
+            f"{self.__class__.__name__}" f"formatting_func:\n{self.formatting_func}, "
             if self.formatting_func
-            else "" f"defaults={self.defaults}), "
+            else "" f"defaults:\n{self.defaults}), "
             if self.defaults
             else ""
         )
+
+    def test_framework_support(self, framework: Union[str, Framework]):
+        if isinstance(framework, str):
+            framework = Framework(framework)
+        if framework not in self.supported_frameworks:
+            raise NotImplementedError(f"Framework {framework} is not supported for this {self.__class__}.")
 
     def _test_output_formatting_func(self, sample: Any):
         """
@@ -166,18 +165,49 @@ class TrainingData(ABC):
         df = df.dropna(how="any")
         return df.to_dict(orient="records")
 
-    @property
-    def supported_frameworks(self) -> List[Framework]:
-        return [Framework(name) for name in self.supported_frameworks_names]
-
-    def test_framework_support(self, framework: Union[str, Framework]):
-        if isinstance(framework, str):
-            framework = Framework(framework)
-        if framework not in self.supported_frameworks:
-            raise NotImplementedError(f"Framework {framework} is not supported for this {self.__class__}.")
-
     def _train_test_split(self, data: List[dict], train_size: float, seed: int) -> Tuple[List[dict], List[dict]]:
         """Overwritten by subclasses"""
+
+    def prepare_for_training(
+        self, framework: Framework, dataset: "FeedbackDataset", train_size: float, seed: int, lang: str
+    ) -> Any:
+        data = self._format_data(dataset)
+        if framework in [
+            Framework.TRANSFORMERS,
+            Framework.SETFIT,
+            Framework.SPAN_MARKER,
+            Framework.PEFT,
+        ]:
+            return self._prepare_for_training_with_transformers(
+                data=data, train_size=train_size, seed=seed, framework=framework
+            )
+        elif framework in [Framework.SPACY, Framework.SPACY_TRANSFORMERS]:
+            require_dependencies("spacy")
+            import spacy
+
+            if lang is None:
+                _LOGGER.warning("spaCy `lang` is not provided. Using `en`(English) as default language.")
+                lang = spacy.blank("en")
+            elif lang.isinstance(str):
+                if len(lang) == 2:
+                    lang = spacy.blank(lang)
+                else:
+                    lang = spacy.load(lang)
+            return self._prepare_for_training_with_spacy(data=data, train_size=train_size, seed=seed, lang=lang)
+        elif framework is Framework.SPARK_NLP:
+            return self._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
+        elif framework is Framework.OPENAI:
+            return self._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
+        elif framework is Framework.TRL:
+            return self._prepare_for_training_with_trl(data=data, train_size=train_size, seed=seed)
+        elif framework is Framework.TRLX:
+            return self._prepare_for_training_with_trlx(data=data, train_size=train_size, seed=seed)
+        elif framework is Framework.SENTENCE_TRANSFORMERS:
+            return self._prepare_for_training_with_sentence_transformers(data=data, train_size=train_size, seed=seed)
+        else:
+            raise NotImplementedError(
+                f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
+            )
 
     def _prepare_for_training_with_transformers(
         self, data: List[dict], train_size, seed: int, framework: Union[str, Framework]
@@ -307,7 +337,8 @@ class TrainingTask:
                     label = RankingQuestionUnification(**unification_kwargs)
                 else:
                     raise ValueError(f"Label type {type(label)} is not supported.")
-            return TrainingTaskForTextClassification(text=text, label=label)
+            defaults = TextClassificationDefaults(text=text, label=label)
+            return TrainingTaskForTextClassification(defaults=defaults)
 
     @classmethod
     def for_supervised_fine_tuning(
@@ -588,7 +619,8 @@ class TrainingTask:
             return TrainingTaskForSentenceSimilarity(formatting_func=formatting_func)
         else:
             if not label:
-                return TrainingTaskForSentenceSimilarity(texts=texts)
+                defaults = SentenceSimilarityDefaults(texts=texts)
+                return TrainingTaskForSentenceSimilarity(defaults=defaults)
 
             if isinstance(label, LabelQuestionUnification):
                 if label_strategy is not None:
@@ -605,7 +637,8 @@ class TrainingTask:
                     label = RankingQuestionUnification(**unification_kwargs)
                 else:
                     raise ValueError(f"Label type {type(label)} is not supported.")
-            return TrainingTaskForSentenceSimilarity(texts=texts, label=label)
+            defaults = SentenceSimilarityDefaults(texts=texts, label=label)
+            return TrainingTaskForSentenceSimilarity(defaults=defaults)
 
 
 class TrainingTaskForTextClassification(BaseModel, TrainingData):
@@ -645,7 +678,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
     """
 
     formatting_func: Optional[Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]] = None
-    defaults: Optional[TextClassificationDefaults] = None
+    defaults: Optional[TextClassificationDefaults] = TextClassificationDefaults()
     _formatting_func_return_types = TextClassificationReturnTypes
     _supported_frameworks_names = [
         "transformers",
@@ -656,16 +689,6 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
         "spark-nlp",
         "spacy-transformers",
     ]
-
-    text: Optional[TextField] = None
-    label: Optional[
-        Union[
-            RatingQuestionUnification,
-            LabelQuestionUnification,
-            MultiLabelQuestionUnification,
-            RankingQuestionUnification,
-        ]
-    ] = None
 
     @property
     def __multi_label__(self):
@@ -682,6 +705,14 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
     @property
     def __id2label__(self):
         return self.label.question.__id2label__
+
+    @property
+    def label(self):
+        return self.defaults.label
+
+    @property
+    def text(self):
+        return self.defaults.text
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, Any]]:
         if self.formatting_func is not None:
@@ -716,11 +747,11 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
 
             # infer label type from output custom formatting function
             if _multi_label:
-                self.label = MultiLabelQuestionUnification(
+                self.defaults.label = MultiLabelQuestionUnification(
                     question=MultiLabelQuestion(name="custom_func", labels=list(_all_labels))
                 )
             else:
-                self.label = LabelQuestionUnification(
+                self.defaults.label = LabelQuestionUnification(
                     question=LabelQuestion(name="custom_func", labels=list(_all_labels))
                 )
             return data
@@ -728,7 +759,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
             return super()._format_data(dataset)
 
     def unify_responses(self, responses: List[FeedbackRecord]):
-        self.label.strategy.unify_responses(responses=responses, field=self.label.question)
+        self.defaults.label.strategy.unify_responses(responses=responses, field=self.defaults.label.question)
 
     @requires_dependencies("scikit-learn")
     def _train_test_split(self, data: List[dict], train_size: float, seed: int) -> Tuple[List[dict], List[dict]]:
@@ -815,7 +846,6 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
                 db.add(doc)
             return db
 
-        isinstance(self.label.question, MultiLabelQuestion)
         if train_size != 1:
             train_data, test_data = self._train_test_split(data, train_size, seed)
             return _prepare(train_data), _prepare(test_data)
@@ -903,8 +933,8 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
 
     """
 
-    _formatting_func_return_types = SFTReturnTypes
     formatting_func: Callable[[Dict[str, Any]], Union[None, str, List[str], Iterator[str]]]
+    _formatting_func_return_types = SFTReturnTypes
     _supported_frameworks_names = ["trl"]
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
@@ -968,11 +998,11 @@ class TrainingTaskForRM(BaseModel, TrainingData):
         >>> dataset.prepare_for_training(framework="...", task=task)
     """
 
-    _formatting_func_return_types = RMReturnTypes
-    _supported_frameworks_names = ["trl"]
     formatting_func: Callable[
         [Dict[str, Any]], Union[None, Tuple[str, str], List[Tuple[str, str]], Iterator[Tuple[str, str]]]
     ]
+    _formatting_func_return_types = RMReturnTypes
+    _supported_frameworks_names = ["trl"]
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
         output = set()
@@ -1025,8 +1055,8 @@ class TrainingTaskForPPO(BaseModel, TrainingData):
         >>> dataset.prepare_for_training(framework="...", task=task)
     """
 
-    _formatting_func_return_types = PPOReturnTypes
     formatting_func: Callable[[Dict[str, Any]], Union[None, str, Iterator[str]]]
+    _formatting_func_return_types = PPOReturnTypes
     _supported_frameworks_names = ["trl"]
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
@@ -1090,8 +1120,8 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
         >>> dataset.prepare_for_training(framework="...", task=task)
     """
 
-    _formatting_func_return_types = DPOReturnTypes
     formatting_func: Callable[[Dict[str, Any]], Union[None, Tuple[str, str, str], Iterator[Tuple[str, str, str]]]]
+    _formatting_func_return_types = DPOReturnTypes
     _supported_frameworks_names = ["trl"]
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
@@ -1169,10 +1199,22 @@ class TrainingTaskForQuestionAnswering(BaseModel, TrainingData):
         >>> dataset.prepare_for_training(framework="...", task=task)
     """
 
-    formatting_func: Optional[Callable[[Dict[str, Any]], Union[None, str, Iterator[str]]]] = None
     defaults: Optional[QuestionAnsweringDefaults] = None
+    formatting_func: Optional[Callable[[Dict[str, Any]], Union[None, str, Iterator[str]]]] = None
     _formatting_func_return_types = QuestionAnsweringReturnTypes
     _supported_frameworks_names = ["transformers"]
+
+    @property
+    def question(self):
+        return self.defaults.question
+
+    @property
+    def context(self):
+        return self.defaults.context
+
+    @property
+    def answer(self):
+        return self.defaults.answer
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
         if self.formatting_func is not None:
@@ -1260,8 +1302,8 @@ class TrainingTaskForChatCompletion(BaseModel, TrainingData):
         >>> dataset.prepare_for_training(framework="...", task=task)
     """
 
-    _formatting_func_return_types = ChatCompletionReturnTypes
     formatting_func: Callable[[Dict[str, Any]], Union[None, Dict[str, str], Iterator[Dict[str, str]]]]
+    _formatting_func_return_types = ChatCompletionReturnTypes
     _supported_frameworks_names = ["openai"]
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
@@ -1344,32 +1386,38 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
         >>> dataset.prepare_for_training(framework="...", task=task)
     """
 
+    defaults: Optional[SentenceSimilarityDefaults] = SentenceSimilarityDefaults()
     formatting_func: Callable[
         [Dict[str, Any]],
         Union[
             None, Dict[str, Union[float, int]], Dict[str, str], List[Dict[str, Union[float, int]]], List[Dict[str, str]]
         ],
     ] = None
-    defaults: Optional[SentenceSimilarityDefaults] = None
     _formatting_func_return_types = SentenceSimilarityReturnTypes
     _supported_frameworks_names = ["sentence-transformers"]
-    texts: Optional[List[TextField]] = None
-    label: Optional[Union[LabelQuestionUnification, RankingQuestionUnification]] = None
 
     @property
     def __all_labels__(self):
-        if self.defaults.label:
-            return self.defaults.label.question.__all_labels__
+        if self.label:
+            return self.label.question.__all_labels__
 
     @property
     def __label2id__(self):
-        if self.defaults.label:
-            return self.defaults.label.question.__label2id__
+        if self.label:
+            return self.label.question.__label2id__
 
     @property
     def __id2label__(self):
-        if self.defaults.label:
-            return self.defaults.label.question.__id2label__
+        if self.label:
+            return self.label.question.__id2label__
+
+    @property
+    def label(self):
+        return self.defaults.label
+
+    @property
+    def texts(self):
+        return self.defaults.texts
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, Any]]:
         if self.formatting_func:
@@ -1403,7 +1451,7 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
             # NOTE: Maybe this post processing of the formatted data can be simplified
             # or directly done in super()._format_data(dataset).
             new_keys = {field.name: f"sentence-{i}" for i, field in enumerate(self.texts, start=1)}
-            if self.label:
+            if self.defaults.label:
                 new_keys.update({self.label.question.name: "label"})
 
             outputs = []

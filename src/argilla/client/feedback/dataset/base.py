@@ -37,7 +37,7 @@ from argilla.client.feedback.training.schemas.base import (
 )
 from argilla.client.feedback.utils import generate_pydantic_schema
 from argilla.client.models import Framework
-from argilla.utils.dependency import require_dependencies, requires_dependencies
+from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
     from datasets import Dataset
@@ -339,40 +339,4 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         ):
             raise ValueError(f"Training data {type(task)} is not supported yet")
 
-        data = task._format_data(self)
-        if framework in [
-            Framework.TRANSFORMERS,
-            Framework.SETFIT,
-            Framework.SPAN_MARKER,
-            Framework.PEFT,
-        ]:
-            return task._prepare_for_training_with_transformers(
-                data=data, train_size=train_size, seed=seed, framework=framework
-            )
-        elif framework in [Framework.SPACY, Framework.SPACY_TRANSFORMERS]:
-            require_dependencies("spacy")
-            import spacy
-
-            if lang is None:
-                _LOGGER.warning("spaCy `lang` is not provided. Using `en`(English) as default language.")
-                lang = spacy.blank("en")
-            elif lang.isinstance(str):
-                if len(lang) == 2:
-                    lang = spacy.blank(lang)
-                else:
-                    lang = spacy.load(lang)
-            return task._prepare_for_training_with_spacy(data=data, train_size=train_size, seed=seed, lang=lang)
-        elif framework is Framework.SPARK_NLP:
-            return task._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
-        elif framework is Framework.OPENAI:
-            return task._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
-        elif framework is Framework.TRL:
-            return task._prepare_for_training_with_trl(data=data, train_size=train_size, seed=seed)
-        elif framework is Framework.TRLX:
-            return task._prepare_for_training_with_trlx(data=data, train_size=train_size, seed=seed)
-        elif framework is Framework.SENTENCE_TRANSFORMERS:
-            return task._prepare_for_training_with_sentence_transformers(data=data, train_size=train_size, seed=seed)
-        else:
-            raise NotImplementedError(
-                f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
-            )
+        return task.prepare_for_training(framework=framework, dataset=self, train_size=train_size, seed=seed, lang=lang)
