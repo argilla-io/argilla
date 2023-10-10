@@ -240,6 +240,19 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                 f" {', '.join(self._metadata_properties_mapping.keys())}"
             )
 
+    def _validate_metadata_property(self, metadata_property: "AllowedMetadataPropertyTypes") -> None:
+        if self.metadata_properties is not None:
+            # TODO(alvarobartt): remove this when https://github.com/argilla-io/argilla/pull/3829 is merged
+            if not hasattr(self, "_metadata_properties_mapping") or self._metadata_properties_mapping is None:
+                self._metadata_properties_mapping = {
+                    metadata_property.name: metadata_property for metadata_property in self._metadata_properties
+                }
+            if metadata_property in self._metadata_properties_mapping.values():
+                raise ValueError(
+                    f"Invalid `metadata_property={metadata_property}` provided as already exist. Current"
+                    f" `metadata_properties` are: {list(self._metadata_properties_mapping.keys())}"
+                )
+
     def _parse_records(
         self, records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]]
     ) -> List[FeedbackRecord]:
