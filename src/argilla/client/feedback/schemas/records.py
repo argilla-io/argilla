@@ -258,20 +258,17 @@ class SortBy(BaseModel):
     field: Union[str, RecordSortField]
     order: Union[str, SortOrder] = SortOrder.asc
 
-    @validator("field")
-    def check_field_name(cls, field: Union[str, RecordSortField]) -> RecordSortField:
-        if isinstance(field, str) and field.startswith("metadata."):
-            return field
-        elif isinstance(field, str):
-            return RecordSortField(field)
-        return field
-
     @validator("field", pre=True)
-    def check_record_field(cls, field):
+    def check_field_name(cls, field: Union[str, RecordSortField]) -> Union[str, RecordSortField]:
         try:
             return RecordSortField(field)
-        except:
-            return field
+        except ValueError:
+            if field.startswith("metadata."):
+                return field
+            else:
+                raise ValueError(
+                    f"{field} is not a valid field name. Supported fields are: {RecordSortField} or metadata.*"
+                )
 
     @validator("order")
     def check_order(cls, order):

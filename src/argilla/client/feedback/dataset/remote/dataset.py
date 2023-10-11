@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import warnings
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
@@ -422,6 +422,8 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
 
         if len(records) > 0:
             instance.add_records(records=records)
+        else:
+            warnings.warn("The dataset is empty, so no records will be added to the local instance.")
 
         return instance
 
