@@ -34,6 +34,7 @@ if TYPE_CHECKING:
 
     from argilla.client.feedback.schemas.metadata import MetadataFilters
     from argilla.client.feedback.schemas.types import (
+        AllowedMetadataPropertyTypes,
         AllowedRemoteFieldTypes,
         AllowedRemoteMetadataPropertyTypes,
         AllowedRemoteQuestionTypes,
@@ -426,6 +427,50 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
             warnings.warn("The dataset is empty, so no records will be added to the local instance.")
 
         return instance
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def add_metadata_property(
+        self, metadata_property: "AllowedMetadataPropertyTypes"
+    ) -> "AllowedRemoteMetadataPropertyTypes":
+        """Adds a new `metadata_property` to the current `FeedbackDataset` in Argilla.
+
+        Note:
+            Existing `FeedbackRecord`s if any will remain unchanged if those contain metadata
+            named the same way as the `metadata_property`, but added before the
+            `metadata_property` was added.
+
+        Args:
+            metadata_property: the metadata property to add to the current `FeedbackDataset`
+                in Argilla.
+
+        Returns:
+            The newly added `metadata_property` to the current `FeedbackDataset` in Argilla.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+            RuntimeError: if the `metadata_property` cannot be added to the current
+                `FeedbackDataset` in Argilla.
+        """
+        self._unique_metadata_property(metadata_property=metadata_property)
+
+        try:
+            metadata_property = datasets_api_v1.add_metadata_property(
+                client=self._client,
+                id=self.id,
+                metadata_property=metadata_property.to_server_payload(),
+            ).parsed
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed while adding the `metadata_property={metadata_property}` to the current `FeedbackDataset` in Argilla with exception: {e}"
+            ) from e
+
+        # TODO(alvarobartt): structure better the mixins to be able to easily reuse those, here to avoid circular imports
+        from argilla.client.feedback.dataset.mixins import ArgillaMixin
+
+        metadata_property = ArgillaMixin._parse_to_remote_metadata_property(metadata_property)
+        self._metadata_properties.append(metadata_property)
+        self._metadata_properties_mapping[metadata_property.name] = metadata_property
+        return metadata_property
 
     def filter_by(
         self,
