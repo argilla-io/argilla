@@ -290,6 +290,7 @@ class ArgillaMixin:
             questions=questions,
             metadata_properties=metadata_properties,
             guidelines=self.guidelines,
+            allow_extra_metadata=self.allow_extra_metadata,
         )
 
     @staticmethod

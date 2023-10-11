@@ -21,6 +21,8 @@ from argilla import FeedbackRecord
 from argilla.client import api
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+from argilla.client.feedback.schemas.fields import TextField
+from argilla.client.feedback.schemas.questions import TextQuestion
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.workspaces import Workspace
@@ -65,6 +67,30 @@ class TestRemoteFeedbackDataset:
         remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
         remote_dataset.add_records([record])
         assert len(remote_dataset.records) == 1
+
+    async def test_from_argilla(self, owner: "User") -> None:
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="unit-test")
+        dataset = FeedbackDataset(
+            fields=[TextField(name="text")],
+            questions=[TextQuestion(name="question")],
+            guidelines="unit test guidelines",
+            allow_extra_metadata=False,
+        )
+
+        remote = dataset.push_to_argilla(name="unit-test-dataset", workspace="unit-test")
+
+        assert remote.name == "unit-test-dataset"
+        assert remote.workspace.name == workspace.name
+        assert remote.guidelines == "unit test guidelines"
+        assert remote.allow_extra_metadata is False
+
+        remote = FeedbackDataset.from_argilla(id=remote.id)
+
+        assert remote.name == "unit-test-dataset"
+        assert remote.workspace.name == workspace.name
+        assert remote.guidelines == "unit test guidelines"
+        assert remote.allow_extra_metadata is False
 
     @pytest.mark.parametrize("statuses", [["draft", "discarded", "submitted"]])
     async def test_from_argilla_with_responses(self, owner: "User", statuses: List[str]) -> None:
