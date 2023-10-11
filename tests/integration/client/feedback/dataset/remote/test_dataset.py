@@ -85,7 +85,7 @@ class TestRemoteFeedbackDataset:
             (IntegerMetadataProperty(name="new-integer-metadata"), RemoteIntegerMetadataProperty),
             (IntegerMetadataProperty(name="new-integer-metadata", min=0, max=10), RemoteIntegerMetadataProperty),
             (FloatMetadataProperty(name="new-float-metadata"), RemoteFloatMetadataProperty),
-            (FloatMetadataProperty(name="new-float-metadata", min=0, max=10), RemoteFloatMetadataProperty),
+            (FloatMetadataProperty(name="new-float-metadata", min=0.0, max=10.0), RemoteFloatMetadataProperty),
         ],
     )
     async def test_add_metadata_property(
@@ -95,8 +95,7 @@ class TestRemoteFeedbackDataset:
         remote_metadata_property_cls: "AllowedRemoteMetadataPropertyTypes",
     ) -> None:
         dataset = await DatasetFactory.create(status="ready")
-        await TextFieldFactory.create(dataset=dataset, name="required", required=True)
-        await TextFieldFactory.create(dataset=dataset, name="optional", required=False)
+        await TextFieldFactory.create(dataset=dataset, required=True)
         await TextQuestionFactory.create(dataset=dataset, required=True)
 
         api.init(api_key=owner.api_key)
@@ -105,6 +104,57 @@ class TestRemoteFeedbackDataset:
         assert isinstance(remote_metadata_property, remote_metadata_property_cls)
         assert remote_metadata_property.name == metadata_property.name
         assert remote_dataset.metadata_properties == [remote_metadata_property]
+
+    @pytest.mark.parametrize(
+        "metadata_properties, remote_metadata_properties_cls",
+        [
+            (
+                [
+                    TermsMetadataProperty(name="new-terms-metadata"),
+                    IntegerMetadataProperty(name="new-integer-metadata"),
+                    FloatMetadataProperty(name="new-float-metadata"),
+                ],
+                [
+                    RemoteTermsMetadataProperty,
+                    RemoteIntegerMetadataProperty,
+                    RemoteFloatMetadataProperty,
+                ],
+            ),
+            (
+                [
+                    TermsMetadataProperty(name="new-terms-metadata", values=["a", "b", "c"]),
+                    IntegerMetadataProperty(name="new-integer-metadata", min=0, max=10),
+                    FloatMetadataProperty(name="new-float-metadata", min=0.0, max=10.0),
+                ],
+                [
+                    RemoteTermsMetadataProperty,
+                    RemoteIntegerMetadataProperty,
+                    RemoteFloatMetadataProperty,
+                ],
+            ),
+        ],
+    )
+    async def test_add_metadata_property_sequential(
+        self,
+        owner: "User",
+        metadata_properties: List["AllowedMetadataPropertyTypes"],
+        remote_metadata_properties_cls: List["AllowedRemoteMetadataPropertyTypes"],
+    ) -> None:
+        dataset = await DatasetFactory.create(status="ready")
+        await TextFieldFactory.create(dataset=dataset, required=True)
+        await TextQuestionFactory.create(dataset=dataset, required=True)
+
+        api.init(api_key=owner.api_key)
+        remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
+        assert len(remote_dataset.metadata_properties) == 0
+
+        for idx, (metadata_property, remote_metadata_property_cls) in enumerate(
+            zip(metadata_properties, remote_metadata_properties_cls)
+        ):
+            remote_metadata_property = remote_dataset.add_metadata_property(metadata_property)
+            assert isinstance(remote_metadata_property, remote_metadata_property_cls)
+            assert remote_metadata_property.name == metadata_property.name
+            assert len(remote_dataset.metadata_properties) == (idx + 1)
 
     @pytest.mark.parametrize("statuses", [["draft", "discarded", "submitted"]])
     async def test_from_argilla_with_responses(self, owner: "User", statuses: List[str]) -> None:

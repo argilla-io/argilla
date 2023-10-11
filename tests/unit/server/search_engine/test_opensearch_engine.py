@@ -308,6 +308,33 @@ class TestSuiteOpenSearchEngine:
             },
         }
 
+    async def test_create_metadata_property(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        db: "AsyncSession",
+    ):
+        text_field = await TextFieldFactory.create(name="field")
+
+        terms_property = await TermsMetadataPropertyFactory.create(name="terms")
+        integer_property = await IntegerMetadataPropertyFactory.create(name="integer")
+        float_property = await FloatMetadataPropertyFactory.create(name="float")
+
+        metadata_properties = [terms_property, integer_property]
+
+        dataset = await DatasetFactory.create(fields=[text_field], metadata_properties=metadata_properties)
+
+        await _refresh_dataset(dataset)
+
+        await opensearch_engine.create_index(dataset)
+        await opensearch_engine.configure_metadata_property(dataset, float_property)
+
+        index_name = index_name_for_dataset(dataset)
+        assert opensearch.indices.exists(index=index_name)
+
+        index = opensearch.indices.get(index=index_name)[index_name]
+        assert index["mappings"]["properties"]["metadata"]["properties"][str(float_property.id)] == {"type": "float"}
+
     async def test_create_index_for_dataset_with_metadata_properties(
         self,
         opensearch_engine: OpenSearchEngine,

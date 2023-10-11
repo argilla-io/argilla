@@ -242,6 +242,7 @@ async def create_metadata_property(
             autocommit=False,
         )
         if dataset.is_ready:
+            await db.flush([metadata_property])
             await search_engine.configure_metadata_property(dataset, metadata_property)
 
     await db.commit()
