@@ -36,6 +36,8 @@ These are the section headers that we use:
 - Changed argilla dataset name in the active learning for text classification notebooks to be consistent with the default names in the huggingface spaces ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
 - Updated `GET /api/v1/datasets/{dataset_id}/records`, `GET /api/v1/me/datasets/{dataset_id}/records` and `POST /api/v1/me/datasets/{dataset_id}/records/search` endpoints to return the `total` number of records ([#3848](https://github.com/argilla-io/argilla/pull/3848) & [#3903](https://github.com/argilla-io/argilla/pull/3903)).
 - Updated `FilteredRemoteFeedbackRecords.__len__` method to return the number of records matching the provided filters ([#3916](https://github.com/argilla-io/argilla/pull/3916)).
+- Increase the default max result window for Elasticsearch created for Feedback datasets ([#3929](https://github.com/argilla-io/argilla/pull/)).
+- Force elastic index refresh after records creation ([#3929](https://github.com/argilla-io/argilla/pull/)).
 
 ### Fixed
 
