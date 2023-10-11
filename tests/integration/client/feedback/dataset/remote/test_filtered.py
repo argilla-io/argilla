@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import random
 from datetime import datetime
 from typing import List, Union
 from uuid import UUID
@@ -55,15 +54,15 @@ class TestFilteredRemoteFeedbackDataset:
     @pytest.mark.parametrize(
         "statuses, expected_num_records",
         [
-            ([FeedbackResponseStatusFilter.draft], 1),
-            ([FeedbackResponseStatusFilter.missing], 10),
-            ([FeedbackResponseStatusFilter.discarded], 1),
-            ([FeedbackResponseStatusFilter.submitted], 1),
-            ([FeedbackResponseStatusFilter.discarded, FeedbackResponseStatusFilter.submitted], 2),
+            ([ResponseStatusFilter.draft], 1),
+            ([ResponseStatusFilter.missing], 10),
+            ([ResponseStatusFilter.discarded], 1),
+            ([ResponseStatusFilter.submitted], 1),
+            ([ResponseStatusFilter.discarded, ResponseStatusFilter.submitted], 2),
         ],
     )
     async def test_filter_by_response_status(
-        self, role: UserRole, statuses: List[FeedbackResponseStatusFilter], expected_num_records: int
+        self, role: UserRole, statuses: List[ResponseStatusFilter], expected_num_records: int
     ) -> None:
         dataset = await DatasetFactory.create()
         await TextFieldFactory.create(dataset=dataset, required=True)
@@ -72,7 +71,7 @@ class TestFilteredRemoteFeedbackDataset:
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
         for status, record in zip(statuses, records):
-            if status != FeedbackResponseStatusFilter.missing:
+            if status != ResponseStatusFilter.missing:
                 await ResponseFactory.create(record=record, status=status)
 
         api.init(api_key=user.api_key)
@@ -159,7 +158,7 @@ class TestFilteredRemoteFeedbackDataset:
         await db.refresh(argilla_user, attribute_names=["datasets"])
 
         same_dataset = FeedbackDataset.from_argilla("test-dataset")
-        filtered_dataset = same_dataset.filter_by(response_status=FeedbackResponseStatusFilter.draft).pull()
+        filtered_dataset = same_dataset.filter_by(response_status=ResponseStatusFilter.draft).pull()
 
         assert filtered_dataset is not None
         assert filtered_dataset.records == []

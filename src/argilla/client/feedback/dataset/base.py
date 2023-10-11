@@ -105,7 +105,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             raise ValueError("At least one field in `fields` must be required (`required=True`).")
 
         self._fields = fields
-        self._fields_schema = generate_pydantic_schema(self.fields)
+        self._fields_schema = generate_pydantic_schema_for_fields(self.fields)
 
         if not isinstance(questions, list):
             raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
