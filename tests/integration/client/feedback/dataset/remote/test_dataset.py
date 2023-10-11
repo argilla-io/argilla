@@ -181,7 +181,7 @@ class TestRemoteFeedbackDataset:
         remote_dataset = FeedbackDataset.from_argilla(id=remote.id)
         remote_dataset.delete()
 
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match="Could not find a `FeedbackDataset` in Argilla"):
             FeedbackDataset.from_argilla(id=remote.id)
 
     @pytest.mark.parametrize("role", [UserRole.annotator])
