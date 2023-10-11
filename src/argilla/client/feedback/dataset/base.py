@@ -14,16 +14,16 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Literal, Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
-from pydantic import  ValidationError
+from pydantic import ValidationError
 
 from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     FieldSchema,
+    SortBy,
 )
-from argilla.client.feedback.schemas import SortBy
 from argilla.client.feedback.schemas.metadata import MetadataFilters
 from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes, AllowedQuestionTypes
 from argilla.client.feedback.training.schemas import (
@@ -32,8 +32,8 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForPPO,
     TrainingTaskForQuestionAnswering,
     TrainingTaskForRM,
-    TrainingTaskForSFT,
     TrainingTaskForSentenceSimilarity,
+    TrainingTaskForSFT,
     TrainingTaskForTextClassification,
     TrainingTaskTypes,
 )

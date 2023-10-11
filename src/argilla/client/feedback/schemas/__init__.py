@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from argilla.client.feedback.schemas.enums import FieldTypes, QuestionTypes, SortOrder, RecordSortField
+from argilla.client.feedback.schemas.enums import FieldTypes, QuestionTypes, RecordSortField, SortOrder
 from argilla.client.feedback.schemas.fields import FieldSchema, TextField
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataFilter,
@@ -33,9 +33,9 @@ from argilla.client.feedback.schemas.records import (
     FeedbackRecord,
     RankingValueSchema,
     ResponseSchema,
+    SortBy,
     SuggestionSchema,
     ValueSchema,
-    SortBy,
 )
 
 __all__ = [

@@ -86,15 +86,15 @@ if _TYPE_CHECKING:
         MultiLabelQuestion,
         RankingQuestion,
         RatingQuestion,
+        RecordSortField,
         ResponseSchema,
+        SortBy,
+        SortOrder,
         TermsMetadataFilter,
         TermsMetadataProperty,
         TextField,
         TextQuestion,
         ValueSchema,
-        SortBy,
-        SortOrder,
-        RecordSortField,
     )
     from argilla.listeners import Metrics, RGListenerContext, Search, listener
     from argilla.monitoring.model_monitor import monitor

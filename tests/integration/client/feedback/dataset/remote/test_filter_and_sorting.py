@@ -16,8 +16,6 @@ from typing import List, Union
 from uuid import UUID
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from argilla import SortBy, TextField, TextQuestion
 from argilla.client import api
 from argilla.client.feedback.dataset.local import FeedbackDataset
@@ -37,6 +35,8 @@ from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
 from argilla.client.workspaces import Workspace
 from argilla.server.models import User
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from tests.factories import (
     DatasetFactory,
     RecordFactory,
@@ -166,7 +166,9 @@ class TestFilteredRemoteFeedbackDataset:
 
         records = list(filtered_dataset.records)
 
-        another_filtered_dataset = remote.filter_by(metadata_filters=IntegerMetadataFilter(name="integer-metadata", le=5))
+        another_filtered_dataset = remote.filter_by(
+            metadata_filters=IntegerMetadataFilter(name="integer-metadata", le=5)
+        )
         other_records = list(another_filtered_dataset.records)
 
         assert records == other_records
