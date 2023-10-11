@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Iterable, List, Optional, Union
 
 import pytest
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
-from argilla.client.feedback.schemas.enums import RecordSortField, SortOrder
+from argilla.client.feedback.schemas.enums import RecordSortField, ResponseStatusFilter, SortOrder
 from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
@@ -40,7 +40,7 @@ class TestFeedbackDataset(FeedbackDatasetBase):
     def filter_by(
         self,
         *,
-        response_status: Optional[Union[FeedbackResponseStatusFilter, List[FeedbackResponseStatusFilter]]] = None,
+        response_status: Optional[Union[ResponseStatusFilter, List[ResponseStatusFilter]]] = None,
         metadata_filters: Optional[Union[MetadataFilters, List[MetadataFilters]]] = None,
     ) -> "TestFeedbackDataset":
         return self

@@ -12,15 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
+from typing import Any, Dict, Iterator, List, Optional, TYPE_CHECKING, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.mixins import ArgillaMixin, UnificationMixin
-from argilla.client.feedback.schemas.enums import RecordSortField, SortOrder
+from argilla.client.feedback.schemas.enums import RecordSortField, ResponseStatusFilter, SortOrder
 from argilla.client.feedback.schemas.metadata import MetadataFilters
 from argilla.client.feedback.schemas.types import AllowedQuestionTypes
-from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.records import FeedbackRecord
@@ -203,7 +202,7 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
     def filter_by(
         self,
         *,
-        response_status: Optional[Union[FeedbackResponseStatusFilter, List[FeedbackResponseStatusFilter]]] = None,
+        response_status: Optional[Union[ResponseStatusFilter, List[ResponseStatusFilter]]] = None,
         metadata_filters: Optional[Union[MetadataFilters, List[MetadataFilters]]] = None,
     ) -> "FeedbackDataset":
         warnings.warn(

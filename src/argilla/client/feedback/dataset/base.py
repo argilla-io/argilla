@@ -24,6 +24,7 @@ from argilla.client.feedback.schemas import (
     FieldSchema,
     SortBy,
 )
+from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.client.feedback.schemas.metadata import MetadataFilters
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes, AllowedQuestionTypes
 from argilla.client.feedback.training.schemas import (
@@ -258,7 +259,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
     def filter_by(
         self,
         *,
-        response_status: Optional[Union[FeedbackResponseStatusFilter, List[FeedbackResponseStatusFilter]]] = None,
+        response_status: Optional[Union[ResponseStatusFilter, List[ResponseStatusFilter]]] = None,
         metadata_filters: Optional[Union[MetadataFilters, List[MetadataFilters]]] = None,
     ) -> "FeedbackDatasetBase":
         """Filters the records in the dataset by the given filters."""

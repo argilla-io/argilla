@@ -47,7 +47,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
     def __init__(
         self,
         dataset: "RemoteFeedbackDataset",
-        response_status: Optional[Union["FeedbackResponseStatusFilter", List["FeedbackResponseStatusFilter"]]] = None,
+        response_status: Optional[Union[ResponseStatusFilter, List[ResponseStatusFilter]]] = None,
         metadata_filters: Optional[Union["MetadataFilters", List["MetadataFilters"]]] = None,
         sort_by: Optional[List[SortBy]] = None,
     ) -> None:
@@ -97,9 +97,9 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         return [metadata_filter for metadata_filter in self._metadata_filters]
 
     @property
-    def response_status(self) -> Optional[List[FeedbackResponseStatusFilter]]:
+    def response_status(self) -> Optional[List[ResponseStatusFilter]]:
         """Returns the response status filters that this `RemoteFeedbackRecords` is using."""
-        return [response_status for response_status in self._response_status]
+        return [ResponseStatusFilter(response_status) for response_status in self._response_status]
 
     @property
     def _client(self) -> "httpx.Client":
@@ -215,7 +215,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
     def copy_from(
         cls,
         new_ds: "RemoteFeedbackDataset",
-        response_status: Optional[Union["FeedbackResponseStatusFilter", List["FeedbackResponseStatusFilter"]]] = None,
+        response_status: Optional[Union[ResponseStatusFilter, List[ResponseStatusFilter]]] = None,
         metadata_filters: Optional[Union["MetadataFilters", List["MetadataFilters"]]] = None,
         sort_by: Optional[List[SortBy]] = None,
     ):
