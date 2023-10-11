@@ -57,12 +57,18 @@ class UserResponse(BaseModel):
     status: ResponseStatus
 
 
-def _build_metadata_field_payload(metadata: Dict[str, Any], dataset: Dataset) -> Dict[str, Any]:
+def _build_metadata_field_payload(
+    dataset: Dataset, metadata: Union[Dict[str, Any], None] = None
+) -> Union[Dict[str, Any], None]:
+    if metadata is None:
+        return None
+
     search_engine_metadata = {}
     for metadata_property in dataset.metadata_properties:
         value = metadata.get(metadata_property.name)
         if value is not None:
             search_engine_metadata[str(metadata_property.id)] = value
+
     return search_engine_metadata
 
 
@@ -77,7 +83,7 @@ class SearchDocumentGetter(GetterDict):
                 for response in self._obj.responses
             }
         elif key == "metadata":
-            return _build_metadata_field_payload(self._obj.metadata_, self._obj.dataset)
+            return _build_metadata_field_payload(self._obj.dataset, self._obj.metadata_)
 
         return super().get(key, default)
 
@@ -211,7 +217,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         await self._update_document_request(
             index_name,
             id=record.id,
-            body={"doc": {"metadata": _build_metadata_field_payload(record.metadata_, record.dataset)}},
+            body={"doc": {"metadata": _build_metadata_field_payload(record.dataset, record.metadata_)}},
         )
 
     async def delete_records(self, dataset: Dataset, records: Iterable[Record]):
