@@ -20,7 +20,7 @@ import httpx
 from pydantic import BaseModel
 
 
-class RemoteSchema(BaseModel):
+class RemoteSchema(BaseModel, ABC):
     id: Optional[UUID] = None
     client: Optional[httpx.Client] = None
 
@@ -38,11 +38,11 @@ class RemoteSchema(BaseModel):
         """Abstract method to be implemented by subclasses to convert the remote schema
         to a local one.
         """
-        raise NotImplementedError
+        ...
 
     @classmethod
     @abstractmethod
     def from_api(cls, payload: BaseModel) -> "RemoteSchema":
         """Abstract method to be implemented by subclasses to convert the API payload
         into a remote schema."""
-        raise NotImplementedError
+        ...

@@ -262,16 +262,18 @@ class ArgillaMixin:
         except Exception as e:
             raise Exception(f"Failed while creating the `FeedbackDataset` in Argilla with exception: {e}") from e
 
-        fields = self.__add_fields(client=httpx_client, id=argilla_id)
+        ArgillaMixin.__add_fields(client=httpx_client, id=argilla_id)
+        fields = ArgillaMixin.__get_fields(client=httpx_client, id=argilla_id)
 
-        questions = self.__add_questions(client=httpx_client, id=argilla_id)
+        ArgillaMixin.__add_questions(client=httpx_client, id=argilla_id)
+        questions = ArgillaMixin.__get_questions(client=httpx_client, id=argilla_id)
         question_name_to_id = {question.name: question.id for question in questions}
 
-        metadata_properties = self.__add_metadata_properties(client=httpx_client, id=argilla_id)
+        metadata_properties = ArgillaMixin.__add_metadata_properties(client=httpx_client, id=argilla_id)
 
         ArgillaMixin.__publish_dataset(client=httpx_client, id=argilla_id)
 
-        self.__push_records(
+        ArgillaMixin.__push_records(
             client=httpx_client, id=argilla_id, show_progress=show_progress, question_name_to_id=question_name_to_id
         )
 

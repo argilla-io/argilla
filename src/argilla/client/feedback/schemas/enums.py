@@ -41,3 +41,16 @@ class RecordSortField(str, Enum):
 class SortOrder(str, Enum):
     asc = "asc"
     desc = "desc"
+
+
+class ResponseStatus(str, Enum):
+    draft = "draft"
+    submitted = "submitted"
+    discarded = "discarded"
+
+
+class ResponseStatusFilter(str, Enum):
+    draft = "draft"
+    submitted = "submitted"
+    discarded = "discarded"
+    missing = "missing"

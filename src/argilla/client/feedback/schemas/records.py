@@ -13,13 +13,14 @@
 #  limitations under the License.
 
 import warnings
-from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, conint, validator
 
 from argilla.server.enums import RecordSortField, SortOrder
+
+from argilla.client.feedback.schemas.enums import ResponseStatus
 
 if TYPE_CHECKING:
     from argilla.client.feedback.unification import UnifiedValueSchema
@@ -48,12 +49,6 @@ class ValueSchema(BaseModel):
     value: Union[StrictStr, StrictInt, List[str], List[RankingValueSchema]]
 
 
-class ResponseStatus(str, Enum):
-    draft = "draft"
-    submitted = "submitted"
-    discarded = "discarded"
-
-
 class ResponseSchema(BaseModel):
     """Schema for the `FeedbackRecord` response.
 
@@ -74,7 +69,7 @@ class ResponseSchema(BaseModel):
     """
 
     user_id: Optional[UUID] = None
-    values: Dict[str, ValueSchema]
+    values: Union[Dict[str, ValueSchema], None]
     status: ResponseStatus = ResponseStatus.submitted
 
     class Config:
@@ -96,7 +91,9 @@ class ResponseSchema(BaseModel):
         to create a `ResponseSchema` for a `FeedbackRecord`."""
         return {
             "user_id": self.user_id,
-            "values": {question_name: value.dict() for question_name, value in self.values.items()},
+            "values": {question_name: value.dict() for question_name, value in self.values.items()}
+            if self.values is not None
+            else None,
             "status": self.status.value if hasattr(self.status, "value") else self.status,
         }
 
@@ -105,9 +102,7 @@ class SuggestionSchema(BaseModel):
     """Schema for the suggestions for the questions related to the record.
 
     Args:
-        question_id: ID of the question in Argilla. Defaults to None, and is automatically
-           fulfilled internally once the question is pushed to Argilla.
-        question_name: name of the question.
+        question_name: name of the question in the `FeedbackDataset`.
         type: type of the question. Defaults to None. Possible values are `model` or `human`.
         score: score of the suggestion. Defaults to None.
         value: value of the suggestion, which should match the type of the question.
@@ -286,4 +281,4 @@ class SortBy(BaseModel):
     @property
     def is_metadata_field(self) -> bool:
         """Returns whether the field is a metadata field."""
-        return self.field self.field.startswith("metadata.")
+        return self.field.startswith("metadata.")
