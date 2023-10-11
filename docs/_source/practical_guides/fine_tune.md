@@ -857,7 +857,7 @@ PPO requires a trained supervised fine-tuned model and reward model to work. Tak
 ```{include} /_common/dolly_dataset_info.md
 ```
 
-In the case of training an PPO, we then use the prompt and context data and correct the generated response from the SFT model by using the reward model. Hence, we will need to format the following `text`.
+In the case of training a PPO, we then use the prompt and context data and correct the generated response from the SFT model by using the reward model. Hence, we will need to format the following `text`.
 
 ```
 ### Instruction
@@ -980,7 +980,7 @@ print(output_text)
 
 ##### Background
 
-The [TRL](https://huggingface.co/docs/trl) library implements and alternative way to incorporate human feedback into an LLM which is called Direct Preference Optimization (DPO). This approach skips the step of training a separate reward model and directly uses the preference data during training as a measure for optimization of human feedback.
+The [TRL](https://huggingface.co/docs/trl) library implements an alternative way to incorporate human feedback into an LLM which is called Direct Preference Optimization (DPO). This approach skips the step of training a separate reward model and directly uses the preference data during training as a measure for optimization of human feedback.
 
 ```{note}
 DPO requires a trained supervised fine-tuned model to function. Take a look at the task outline above to train your own model.
@@ -1086,7 +1086,7 @@ print(output_text)
 
 ##### Background
 
-With the rise of chat-oriented models under OpenAI's ChatGPT, we have seen a lot of interest in the use of LLMs for chat-oriented tasks. The main difference between chat-oriented models and the other LLMs is that they are trained on a differently formatted dataset. Instead of using a dataset of prompts and responses, they are trained on a dataset of conversations. This allows them to generate responses that are more conversational. And, OpenAI does support fine-tuning LLMs for chat-completion use cases. More information at https://openai.com/blog/gpt-3-5-turbo-fine-tuning-and-api-updates.
+With the rise of chat-oriented models under OpenAI's ChatGPT, we have seen a lot of interest in the use of LLMs for chat-oriented tasks. The main difference between chat-oriented models and the other LLMs is that they are trained on a differently formatted dataset. Instead of using a dataset of prompts and responses, they are trained on a dataset of conversations. This allows them to generate more conversational responses. And, OpenAI does support fine-tuning LLMs for chat-completion use cases. More information at https://openai.com/blog/gpt-3-5-turbo-fine-tuning-and-api-updates.
 
 ::::{tab-set}
 
@@ -1148,7 +1148,7 @@ from argilla.feedback import TrainingTask
 from typing import Dict, Any, Iterator
 
 
-# adapation from LlamaIndex's TEXT_QA_PROMPT_TMPL_MSGS[1].content
+# Adaptation from LlamaIndex's TEXT_QA_PROMPT_TMPL_MSGS[1].content
 user_message_prompt ="""Context information is below.
 ---------------------
 {context_str}
@@ -1157,7 +1157,7 @@ Given the context information and not prior knowledge but keeping your Argilla C
 Query: {query_str}
 Answer:
 """
-# Adapation from LlamaIndex's TEXT_QA_SYSTEM_PROMPT
+# Adaptation from LlamaIndex's TEXT_QA_SYSTEM_PROMPT
 system_prompt = """You are an expert customer service assistant for the Argilla Cloud product that is trusted around the world.
 Always answer the query using the provided context information, and not prior knowledge.
 Some rules to follow:
@@ -1170,7 +1170,7 @@ def formatting_func(sample: dict) -> Union[Tuple[str, str, str, str], List[Tuple
     if sample["response"]:
         chat = str(uuid4())
         user_message = user_message_prompt.format(context_str=sample["context"], query_str=sample["user-message"])
-        yield [
+        return [
             (chat, "0", "system", system_prompt),
             (chat, "1", "user", user_message),
             (chat, "2", "assistant", sample["response"][0]["value"])
@@ -1196,7 +1196,7 @@ trainer.train(output_dir="chat-completion")
 
 **Inference**
 
-After training, we can directly use the model but we need to do so so, we need to use the `openai` framework. Therefore, we suggest taking a look at [their docs](https://platform.openai.com/docs/guides/fine-tuning/use-a-fine-tuned-model).
+After training, we can directly use the model and we'll use the `openai` framework. Therefore, we suggest taking a look at [their docs](https://platform.openai.com/docs/guides/fine-tuning/use-a-fine-tuned-model).
 
 ```python
 import openai
