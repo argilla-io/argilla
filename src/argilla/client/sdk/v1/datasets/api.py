@@ -35,7 +35,7 @@ from argilla.client.sdk.v1.datasets.models import (
 def create_dataset(
     client: httpx.Client,
     name: str,
-    workspace_id: Union[str,UUID],
+    workspace_id: Union[str, UUID],
     guidelines: Optional[str] = None,
     allow_extra_metadata: bool = True,
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
