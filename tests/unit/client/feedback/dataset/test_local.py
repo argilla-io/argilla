@@ -151,7 +151,7 @@ def test_add_metadata_property_errors(metadata_property: "AllowedMetadataPropert
     )
 
     with pytest.raises(
-        ValueError, match=f"Invalid `metadata_property={metadata_property.name}` provided as already exist"
+        ValueError, match=f"Invalid `metadata_property={metadata_property.name}` provided as it already exists"
     ):
         _ = dataset.add_metadata_property(metadata_property)
     assert len(dataset.metadata_properties) == 3
