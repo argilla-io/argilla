@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from abc import abstractproperty
+from abc import ABC, abstractmethod
 from typing import Any, Dict, Literal, Optional
 
 from pydantic import BaseModel, Extra, Field, validator
@@ -21,7 +21,7 @@ from argilla.client.feedback.schemas.enums import FieldTypes
 from argilla.client.feedback.schemas.validators import title_must_have_value
 
 
-class FieldSchema(BaseModel):
+class FieldSchema(BaseModel, ABC):
     """Base schema for the `FeedbackDataset` fields.
 
     Args:
@@ -52,12 +52,13 @@ class FieldSchema(BaseModel):
         extra = Extra.ignore
         exclude = {"type"}
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def server_settings(self) -> Dict[str, Any]:
         """Abstract property that should be implemented by the classes that inherit from
         this one, and that will be used to create the `FeedbackDataset` in Argilla.
         """
-        raise NotImplementedError
+        ...
 
     def to_server_payload(self) -> Dict[str, Any]:
         """Method that will be used to create the payload that will be sent to Argilla

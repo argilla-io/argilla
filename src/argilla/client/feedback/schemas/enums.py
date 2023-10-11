@@ -31,3 +31,16 @@ class MetadataPropertyTypes(str, Enum):
     terms = "terms"
     integer = "integer"
     float = "float"
+
+
+class ResponseStatus(str, Enum):
+    draft = "draft"
+    submitted = "submitted"
+    discarded = "discarded"
+
+
+class ResponseStatusFilter(str, Enum):
+    draft = "draft"
+    submitted = "submitted"
+    discarded = "discarded"
+    missing = "missing"

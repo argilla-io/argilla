@@ -21,11 +21,11 @@ from tqdm import trange
 from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.remote.base import RemoteFeedbackDatasetBase, RemoteFeedbackRecordsBase
 from argilla.client.feedback.dataset.remote.filtered import FilteredRemoteFeedbackDataset
+from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
-from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
 from argilla.client.sdk.v1.metadata_properties import api as metadata_properties_api_v1
 from argilla.client.utils import allowed_for_roles
 
@@ -245,7 +245,7 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
     def filter_by(
         self,
         *,
-        response_status: Optional[Union[FeedbackResponseStatusFilter, List[FeedbackResponseStatusFilter]]] = None,
+        response_status: Optional[Union[ResponseStatusFilter, List[ResponseStatusFilter]]] = None,
         metadata_filters: Optional[Union["MetadataFilters", List["MetadataFilters"]]] = None,
     ) -> FilteredRemoteFeedbackDataset:
         """Filters the current `RemoteFeedbackDataset` based on the `response_status` of
@@ -268,10 +268,10 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         if response_status:
             if not isinstance(response_status, list):
                 response_status = [response_status]
-            if not all(status in [arg.value for arg in FeedbackResponseStatusFilter] for status in response_status):
+            if not all(status in [arg.value for arg in ResponseStatusFilter] for status in response_status):
                 raise ValueError(
                     f"Invalid `response_status={response_status}` provided, must be one"
-                    f" of: {[arg.value for arg in FeedbackResponseStatusFilter]}"
+                    f" of: {[arg.value for arg in ResponseStatusFilter]}"
                 )
 
         if metadata_filters:
