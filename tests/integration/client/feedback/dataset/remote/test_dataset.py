@@ -17,7 +17,16 @@ from typing import TYPE_CHECKING, List
 from uuid import UUID
 
 import pytest
-from argilla import FeedbackRecord
+
+
+from argilla import (
+    FeedbackRecord,
+    FloatMetadataProperty,
+    IntegerMetadataProperty,
+    TermsMetadataProperty,
+    TextField,
+    TextQuestion,
+)
 from argilla.client import api
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
@@ -41,29 +50,40 @@ if TYPE_CHECKING:
     from argilla.client.sdk.users.models import UserModel as User
 
 
+@pytest.fixture()
+def test_dataset():
+    dataset = FeedbackDataset(
+        fields=[TextField(name="text"), TextField(name="optional", required=False)],
+        questions=[TextQuestion(name="question")],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="integer-metadata"),
+            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+    )
+    return dataset
+
+
 @pytest.mark.asyncio
 class TestRemoteFeedbackDataset:
     @pytest.mark.parametrize(
         "record",
         [
-            FeedbackRecord(fields={"required": "Hello world!"}, metadata={}),
-            FeedbackRecord(fields={"required": "Hello world!", "optional": "Bye world!"}, metadata={}),
-            FeedbackRecord(fields={"required": "Hello world!"}, metadata={"terms-metadata": "a"}),
-            FeedbackRecord(fields={"required": "Hello world!"}, metadata={"unrelated-metadata": "unrelated-value"}),
+            FeedbackRecord(fields={"text": "Hello world!"}, metadata={}),
+            FeedbackRecord(fields={"text": "Hello world!", "optional": "Bye world!"}, metadata={}),
+            FeedbackRecord(fields={"text": "Hello world!"}, metadata={"terms-metadata": "a"}),
+            FeedbackRecord(fields={"text": "Hello world!"}, metadata={"unrelated-metadata": "unrelated-value"}),
         ],
     )
-    async def test_add_records(self, owner: "User", record: FeedbackRecord) -> None:
-        dataset = await DatasetFactory.create(status="ready")
-        await TextFieldFactory.create(dataset=dataset, name="required", required=True)
-        await TextFieldFactory.create(dataset=dataset, name="optional", required=False)
-        await TextQuestionFactory.create(dataset=dataset, required=True)
-        await TermsMetadataPropertyFactory.create(
-            dataset=dataset, name="terms-metadata", settings={"type": "terms", "values": ["a", "b", "c"]}
-        )
-
+    async def test_add_records(self, owner: "User", test_dataset: FeedbackDataset, record: FeedbackRecord) -> None:
         api.init(api_key=owner.api_key)
-        remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
+        ws = Workspace.create(name="test-workspace")
+
+        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+
+        remote_dataset = FeedbackDataset.from_argilla(id=remote.id)
         remote_dataset.add_records([record])
+
         assert len(remote_dataset.records) == 1
 
     @pytest.mark.parametrize("statuses", [["draft", "discarded", "submitted"]])
@@ -83,38 +103,49 @@ class TestRemoteFeedbackDataset:
         )
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_delete_records(self, role: UserRole) -> None:
-        dataset = await DatasetFactory.create()
-        await TextFieldFactory.create(dataset=dataset, required=True)
-        await TextQuestionFactory.create(dataset=dataset, required=True)
-        await RecordFactory.create_batch(dataset=dataset, size=10)
-        user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+    async def test_delete_records(self, owner: "User", role: UserRole, test_dataset: FeedbackDataset) -> None:
+        user = await UserFactory.create(role=role)
 
-        api.init(api_key=user.api_key)
-        remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
-        remote_records = [record for record in remote_dataset.records]
+        api.init(api_key=owner.api_key)
+        ws = Workspace.create(name="test-workspace")
+        ws.add_user(user.id)
+
+        api.init(api_key=user.api_key, workspace=ws.name)
+
+        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        remote.add_records(
+            [
+                FeedbackRecord(fields={"text": "Hello world!"}),
+                FeedbackRecord(fields={"text": "Hello world!"}),
+            ]
+        )
+
+        remote_records = [record for record in remote.records]
         assert all(record.id for record in remote_records)
 
-        remote_dataset.delete_records(remote_records[0])
-        assert len(remote_dataset.records) == len(remote_records) - 1
+        remote.delete_records(remote_records[0])
+        assert len(remote.records) == len(remote_records) - 1
 
-        remote_dataset.delete_records(remote_records[1:])
-        assert len(remote_dataset.records) == 0
+        remote.delete_records(remote_records[1:])
+        assert len(remote.records) == 0
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_delete(self, role: UserRole) -> None:
-        dataset = await DatasetFactory.create()
-        await TextFieldFactory.create(dataset=dataset, required=True)
-        await TextQuestionFactory.create(dataset=dataset, required=True)
-        await RecordFactory.create_batch(dataset=dataset, size=10)
-        user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+    async def test_delete(self, owner: "User", test_dataset: FeedbackDataset, role: UserRole) -> None:
+        user = await UserFactory.create(role=role)
+
+        api.init(api_key=owner.api_key)
+
+        ws = Workspace.create(name="test-workspace")
+        ws.add_user(user.id)
 
         api.init(api_key=user.api_key)
-        remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
+        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        remote_dataset = FeedbackDataset.from_argilla(id=remote.id)
         remote_dataset.delete()
 
-        datasets = api.active_api().http_client.get("/api/v1/me/datasets")["items"]
-        assert not any(ds["name"] == remote_dataset.name for ds in datasets)
+        with pytest.raises(Exception):
+            FeedbackDataset.from_argilla(id=remote.id)
+
 
     @pytest.mark.parametrize("role", [UserRole.annotator])
     async def test_delete_not_allowed_role(self, role: UserRole) -> None:

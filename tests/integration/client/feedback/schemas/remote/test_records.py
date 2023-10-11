@@ -15,6 +15,15 @@
 from typing import TYPE_CHECKING
 
 import pytest
+
+from argilla import (
+    FloatMetadataProperty,
+    IntegerMetadataProperty,
+    TermsMetadataProperty,
+    TextField,
+    TextQuestion,
+    Workspace,
+)
 from argilla.client import api
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.records import FeedbackRecord, SuggestionSchema
@@ -34,18 +43,41 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 
+@pytest.fixture()
+def test_dataset():
+    dataset = FeedbackDataset(
+        fields=[TextField(name="text"), TextField(name="optional", required=False)],
+        questions=[TextQuestion(name="question")],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="integer-metadata"),
+            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+    )
+    return dataset
+
+
 @pytest.mark.asyncio
 class TestSuiteRemoteFeedbackRecord:
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_delete(self, role: UserRole) -> None:
-        dataset = await DatasetFactory.create()
-        await TextFieldFactory.create(dataset=dataset, required=True)
-        await TextQuestionFactory.create(dataset=dataset, required=True)
-        await RecordFactory.create_batch(dataset=dataset, size=10)
-        user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+    async def test_delete(self, owner: "User", test_dataset: FeedbackDataset, role: UserRole) -> None:
+        user = await UserFactory.create(role=role)
+
+        api.init(api_key=owner.api_key)
+
+        ws = Workspace.create(name="test-workspace")
+        ws.add_user(user.id)
 
         api.init(api_key=user.api_key)
-        remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
+        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        remote_dataset = FeedbackDataset.from_argilla(id=remote.id)
+        remote.add_records(
+            [
+                FeedbackRecord(fields={"text": "Hello world!"}),
+                FeedbackRecord(fields={"text": "Hello world!"}),
+            ]
+        )
+
         remote_records = [record for record in remote_dataset.records]
         assert all(isinstance(record, RemoteFeedbackRecord) for record in remote_records)
 

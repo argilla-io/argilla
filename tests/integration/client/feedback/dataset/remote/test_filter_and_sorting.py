@@ -19,7 +19,6 @@ import pytest
 from argilla import SortBy, TextField, TextQuestion
 from argilla.client import api
 from argilla.client.feedback.dataset.local import FeedbackDataset
-from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataFilter,
     FloatMetadataProperty,
