@@ -26,6 +26,8 @@ from sqlalchemy.orm import Session
 
 from tests.factories import (
     DatasetFactory,
+    FloatMetadataPropertyFactory,
+    IntegerMetadataPropertyFactory,
     LabelSelectionQuestionFactory,
     MultiLabelSelectionQuestionFactory,
     QuestionFactory,
@@ -34,6 +36,7 @@ from tests.factories import (
     RecordFactory,
     ResponseFactory,
     SuggestionFactory,
+    TermsMetadataPropertyFactory,
     TextQuestionFactory,
     UserFactory,
     WorkspaceFactory,
@@ -74,6 +77,191 @@ async def create_ranking_question(dataset: "Dataset") -> None:
 
 @pytest.mark.asyncio
 class TestSuiteRecords:
+    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+    async def test_update_record(self, async_client: "AsyncClient", mock_search_engine: SearchEngine, role: UserRole):
+        dataset = await DatasetFactory.create()
+        user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
+        await TermsMetadataPropertyFactory.create(name="terms-metadata-property", dataset=dataset)
+        await IntegerMetadataPropertyFactory.create(name="integer-metadata-property", dataset=dataset)
+        await FloatMetadataPropertyFactory.create(name="float-metadata-property", dataset=dataset)
+        record = await RecordFactory.create(
+            dataset=dataset,
+            metadata_={"terms-metadata-property": "a", "integer-metadata-property": 1, "float-metadata-property": 1.0},
+        )
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            json={
+                "external_id": "this is a new external id",
+                "metadata": {
+                    "terms-metadata-property": "c",
+                    "integer-metadata-property": 9999,
+                    "float-metadata-property": 9999.0,
+                    "extra-metadata": "yes",
+                },
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(record.id),
+            "fields": {"text": "This is a text", "sentiment": "neutral"},
+            "metadata": {
+                "terms-metadata-property": "c",
+                "integer-metadata-property": 9999,
+                "float-metadata-property": 9999.0,
+                "extra-metadata": "yes",
+            },
+            "external_id": "this is a new external id",
+            "responses": None,
+            "suggestions": None,
+            "inserted_at": record.inserted_at.isoformat(),
+            "updated_at": record.updated_at.isoformat(),
+        }
+        mock_search_engine.update_record_metadata.assert_called_once_with(record)
+
+    async def test_update_record_with_null_metadata(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        await TermsMetadataPropertyFactory.create(name="terms-metadata-property", dataset=dataset)
+        await IntegerMetadataPropertyFactory.create(name="integer-metadata-property", dataset=dataset)
+        await FloatMetadataPropertyFactory.create(name="float-metadata-property", dataset=dataset)
+        record = await RecordFactory.create(
+            dataset=dataset,
+            metadata_={"terms-metadata-property": "a", "integer-metadata-property": 1, "float-metadata-property": 1.0},
+        )
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers=owner_auth_header,
+            json={
+                "metadata": None,
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(record.id),
+            "fields": {"text": "This is a text", "sentiment": "neutral"},
+            "metadata": None,
+            "external_id": record.external_id,
+            "responses": None,
+            "suggestions": None,
+            "inserted_at": record.inserted_at.isoformat(),
+            "updated_at": record.updated_at.isoformat(),
+        }
+        mock_search_engine.update_record_metadata.assert_called_once_with(record)
+
+    async def test_update_record_with_no_metadata(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record = await RecordFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers=owner_auth_header,
+            json={"external_id": "this is a new external id"},
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(record.id),
+            "fields": {"text": "This is a text", "sentiment": "neutral"},
+            "metadata": None,
+            "external_id": "this is a new external id",
+            "responses": None,
+            "suggestions": None,
+            "inserted_at": record.inserted_at.isoformat(),
+            "updated_at": record.updated_at.isoformat(),
+        }
+        mock_search_engine.update_record_metadata.assert_not_called()
+
+    async def test_update_record_with_not_valid_metadata(self, async_client: "AsyncClient", owner_auth_header: dict):
+        dataset = await DatasetFactory.create(allow_extra_metadata=False)
+        await TermsMetadataPropertyFactory.create(name="terms-metadata-property", dataset=dataset)
+        record = await RecordFactory.create(
+            dataset=dataset,
+            metadata_={"terms-metadata-property": "a"},
+        )
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers=owner_auth_header,
+            json={
+                "metadata": {
+                    "terms-metadata-property": "z",
+                },
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": "'terms-metadata-property' metadata property validation failed because 'z' is not an allowed term."
+        }
+
+    async def test_update_record_with_extra_metadata_not_allowed(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(allow_extra_metadata=False)
+        await TermsMetadataPropertyFactory.create(name="terms-metadata-property", dataset=dataset)
+        await IntegerMetadataPropertyFactory.create(name="integer-metadata-property", dataset=dataset)
+        await FloatMetadataPropertyFactory.create(name="float-metadata-property", dataset=dataset)
+        record = await RecordFactory.create(
+            dataset=dataset,
+            metadata_={"terms-metadata-property": "a", "integer-metadata-property": 1, "float-metadata-property": 1.0},
+        )
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers=owner_auth_header,
+            json={
+                "metadata": {
+                    "terms-metadata-property": "c",
+                    "integer-metadata-property": 9999,
+                    "float-metadata-property": 9999.0,
+                    "extra-metadata": "yes",
+                },
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"'extra-metadata' metadata property does not exists for dataset '{dataset.id}' and extra metadata is not allowed for this dataset"
+        }
+
+    async def test_update_record_as_admin_from_another_workspace(self, async_client: "AsyncClient"):
+        record = await RecordFactory.create()
+        user = await UserFactory.create(role=UserRole.admin)
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            json={
+                "external_id": "new_external_id",
+                "metadata": {"new": "yes"},
+            },
+        )
+
+        assert response.status_code == 403
+
+    async def test_update_record_as_annotator(self, async_client: "AsyncClient"):
+        record = await RecordFactory.create()
+        user = await UserFactory.create(role=UserRole.annotator, workspaces=[record.dataset.workspace])
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            json={
+                "external_id": "new_external_id",
+                "metadata": {"new": "yes"},
+            },
+        )
+
+        assert response.status_code == 403
+
     @pytest.mark.parametrize(
         "response_status", [ResponseStatus.submitted, ResponseStatus.discarded, ResponseStatus.draft]
     )
