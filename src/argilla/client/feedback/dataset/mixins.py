@@ -156,8 +156,8 @@ class ArgillaMixin:
         else:
             raise ValueError(
                 f"Metadata property '{metadata_property.name}' is not a supported metadata property in the current"
-                " Python package version, supported field types are: "
-                f"`{'`, `'.join([arg.value for arg in FieldTypes])}`."
+                " Python package version, supported metadata property types are: "
+                f"`{'`, `'.join([arg.value for arg in MetadataPropertyTypes])}`."
             )
 
         return metadata_property
