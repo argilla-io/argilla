@@ -87,6 +87,8 @@ class DeprecatedDatasetConfig(BaseModel):
             field.pop("id", None)
             field.pop("inserted_at", None)
             field.pop("updated_at", None)
+            if "settings" not in field:
+                continue
             field["type"] = field["settings"]["type"]
             if "use_markdown" in field["settings"]:
                 field["use_markdown"] = field["settings"]["use_markdown"]
@@ -97,6 +99,8 @@ class DeprecatedDatasetConfig(BaseModel):
             question.pop("id", None)
             question.pop("inserted_at", None)
             question.pop("updated_at", None)
+            if "settings" not in question:
+                continue
             question.update({"type": question["settings"]["type"]})
             if question["type"] in ["rating", "ranking"]:
                 question["values"] = [option["value"] for option in question["settings"]["options"]]
