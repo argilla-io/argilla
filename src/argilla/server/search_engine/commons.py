@@ -151,11 +151,13 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     The rest of the code will be shared by both implementation
     """
 
-    es_number_of_shards: int
-    es_number_of_replicas: int
+    number_of_shards: int
+    number_of_replicas: int
 
     # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-settings.html#search-settings-max-buckets
     max_terms_size: int = 2 ^ 14
+    # See https://www.elastic.co/guide/en/elasticsearch/reference/5.1/index-modules.html#dynamic-index-settings
+    max_result_window: int = 500000
 
     async def create_index(self, dataset: Dataset):
         settings = self._configure_index_settings()
@@ -190,6 +192,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         ]
 
         await self._bulk_op_request(bulk_actions)
+        await self._refresh_index_request(index_name)
 
     async def update_record_response(self, response: Response):
         record = response.record
@@ -525,4 +528,8 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     @abstractmethod
     async def _bulk_op_request(self, actions: List[Dict[str, Any]]):
         """Executes request for bulk operations"""
+        pass
+
+    @abstractmethod
+    def _refresh_index_request(self, index_name:str):
         pass

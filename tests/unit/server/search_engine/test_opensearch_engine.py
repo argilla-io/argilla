@@ -213,7 +213,7 @@ async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine, op
 
 @pytest_asyncio.fixture()
 async def opensearch_engine(elasticsearch_config: dict) -> AsyncGenerator[OpenSearchEngine, None]:
-    engine = OpenSearchEngine(config=elasticsearch_config, es_number_of_replicas=0, es_number_of_shards=1)
+    engine = OpenSearchEngine(config=elasticsearch_config, number_of_replicas=0, number_of_shards=1)
     yield engine
 
     await engine.client.close()
@@ -267,8 +267,9 @@ class TestSuiteOpenSearchEngine:
                 "metadata": {"dynamic": "false", "type": "object"},
             },
         }
-        assert index["settings"]["index"]["number_of_shards"] == str(opensearch_engine.es_number_of_shards)
-        assert index["settings"]["index"]["number_of_replicas"] == str(opensearch_engine.es_number_of_replicas)
+        assert index["settings"]["index"]["max_result_window"] == str(opensearch_engine.max_result_window)
+        assert index["settings"]["index"]["number_of_shards"] == str(opensearch_engine.number_of_shards)
+        assert index["settings"]["index"]["number_of_replicas"] == str(opensearch_engine.number_of_replicas)
 
     async def test_create_index_for_dataset_with_fields(
         self,
