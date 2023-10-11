@@ -12,27 +12,43 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, List
+from typing import Iterable, Optional, TYPE_CHECKING, List, Union
 
 import pytest
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
+from argilla.client.feedback.schemas.enums import RecordSortField, SortOrder
 from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
     IntegerMetadataProperty,
+    MetadataFilters,
     TermsMetadataProperty,
 )
 from argilla.client.feedback.schemas.questions import RatingQuestion, TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
+from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 
 class TestFeedbackDataset(FeedbackDatasetBase):
+    def filter_by(
+        self,
+        *,
+        response_status: Optional[Union[FeedbackResponseStatusFilter, List[FeedbackResponseStatusFilter]]] = None,
+        metadata_filters: Optional[Union[MetadataFilters, List[MetadataFilters]]] = None,
+    ) -> "TestFeedbackDataset":
+        return self
+
+    def sort_by(
+        self, field: Union[str, RecordSortField], order: Union[str, SortOrder] = SortOrder.asc
+    ) -> "TestFeedbackDataset":
+        return self
+
     @property
-    def records(self) -> None:
-        pass
+    def records(self) -> Iterable[FeedbackRecord]:
+        return []
 
 
 def test_init(
