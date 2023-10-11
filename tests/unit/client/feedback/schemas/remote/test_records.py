@@ -157,6 +157,20 @@ def test_remote_suggestion_schema_from_api(payload: FeedbackSuggestionModel) -> 
                 "status": "draft",
             },
         ),
+        (
+            {
+                "user_id": UUID("00000000-0000-0000-0000-000000000000"),
+                "values": None,
+                "status": "discarded",
+                "inserted_at": datetime.now(),
+                "updated_at": datetime.now(),
+            },
+            {
+                "user_id": UUID("00000000-0000-0000-0000-000000000000"),
+                "values": None,
+                "status": "discarded",
+            },
+        ),
     ],
 )
 def test_remote_response_schema(schema_kwargs: Dict[str, Any], server_payload: Dict[str, Any]) -> None:
