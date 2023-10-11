@@ -25,7 +25,6 @@ from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
-from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
 from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
@@ -39,6 +38,7 @@ if TYPE_CHECKING:
         AllowedRemoteMetadataPropertyTypes,
         AllowedRemoteQuestionTypes,
     )
+    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
     from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
     from argilla.client.workspaces import Workspace
 
@@ -159,7 +159,7 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
     def filter_by(
         self,
         *,
-        response_status: Optional[Union[FeedbackResponseStatusFilter, List[FeedbackResponseStatusFilter]]] = None,
+        response_status: Optional[Union["ResponseStatusFilter", List["ResponseStatusFilter"]]] = None,
         metadata_filters: Optional[Union["MetadataFilters", List["MetadataFilters"]]] = None,
     ) -> FilteredRemoteFeedbackDataset:
         """Filters the current `RemoteFeedbackDataset` based on the `response_status` of

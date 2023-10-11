@@ -13,11 +13,12 @@
 #  limitations under the License.
 
 import warnings
-from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, conint, validator
+
+from argilla.client.feedback.schemas.enums import ResponseStatus
 
 if TYPE_CHECKING:
     from argilla.client.feedback.unification import UnifiedValueSchema
@@ -44,12 +45,6 @@ class ValueSchema(BaseModel):
     """
 
     value: Union[StrictStr, StrictInt, List[str], List[RankingValueSchema]]
-
-
-class ResponseStatus(str, Enum):
-    draft = "draft"
-    submitted = "submitted"
-    discarded = "discarded"
 
 
 class ResponseSchema(BaseModel):
@@ -105,9 +100,7 @@ class SuggestionSchema(BaseModel):
     """Schema for the suggestions for the questions related to the record.
 
     Args:
-        question_id: ID of the question in Argilla. Defaults to None, and is automatically
-           fulfilled internally once the question is pushed to Argilla.
-        question_name: name of the question.
+        question_name: name of the question in the `FeedbackDataset`.
         type: type of the question. Defaults to None. Possible values are `model` or `human`.
         score: score of the suggestion. Defaults to None.
         value: value of the suggestion, which should match the type of the question.

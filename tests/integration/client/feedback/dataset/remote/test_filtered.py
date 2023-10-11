@@ -27,11 +27,11 @@ from argilla.client.feedback.schemas.metadata import (
     MetadataFilters,
     TermsMetadataFilter,
 )
+from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.sdk.users.models import UserRole
-from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
 from argilla.client.workspaces import Workspace
 from argilla.server.models import User
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -170,15 +170,15 @@ class TestFilteredRemoteFeedbackDataset:
     @pytest.mark.parametrize(
         "status",
         [
-            FeedbackResponseStatusFilter.draft,
-            FeedbackResponseStatusFilter.missing,
-            FeedbackResponseStatusFilter.discarded,
-            FeedbackResponseStatusFilter.submitted,
-            [FeedbackResponseStatusFilter.discarded, FeedbackResponseStatusFilter.submitted],
+            ResponseStatusFilter.draft,
+            ResponseStatusFilter.missing,
+            ResponseStatusFilter.discarded,
+            ResponseStatusFilter.submitted,
+            [ResponseStatusFilter.discarded, ResponseStatusFilter.submitted],
         ],
     )
     async def test_not_implemented_methods(
-        self, role: UserRole, status: Union[FeedbackResponseStatusFilter, List[FeedbackResponseStatusFilter]]
+        self, role: UserRole, status: Union[ResponseStatusFilter, List[ResponseStatusFilter]]
     ) -> None:
         dataset = await DatasetFactory.create()
         text_field = await TextFieldFactory.create(dataset=dataset, required=True)
