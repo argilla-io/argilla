@@ -36,7 +36,10 @@ from argilla.client.feedback.schemas import (
     MultiLabelQuestion,
     RankingQuestion,
     RatingQuestion,
+    RecordSortField,
     ResponseSchema,
+    SortBy,
+    SortOrder,
     SuggestionSchema,
     TermsMetadataFilter,
     TermsMetadataProperty,
@@ -74,4 +77,7 @@ __all__ = [
     "TermsMetadataFilter",
     "IntegerMetadataFilter",
     "FloatMetadataFilter",
+    "SortOrder",
+    "SortBy",
+    "RecordSortField",
 ]

@@ -33,7 +33,11 @@ from argilla.client.sdk.v1.datasets.models import (
 
 
 def create_dataset(
-    client: httpx.Client, name: str, workspace_id: UUID, guidelines: Optional[str] = None
+    client: httpx.Client,
+    name: str,
+    workspace_id: Union[str, UUID],
+    guidelines: Optional[str] = None,
+    allow_extra_metadata: bool = True,
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
     """Sends a POST request to `/api/v1/datasets` endpoint to create a new `FeedbackDataset`.
 
@@ -42,6 +46,7 @@ def create_dataset(
         name: the name of the dataset to be created.
         workspace_id: the id of the workspace where the dataset will be created.
         guidelines: the guidelines of the dataset to be created. Defaults to `None`.
+        allow_extra_metadata: whether to allow extra metadata not defined as a metadata property. Defaults to `True`.
 
     Returns:
         A `Response` object containing a `parsed` attribute with the parsed response if the
@@ -49,7 +54,7 @@ def create_dataset(
     """
     url = "/api/v1/datasets"
 
-    body = {"name": name, "workspace_id": str(workspace_id)}
+    body = {"name": name, "workspace_id": str(workspace_id), "allow_extra_metadata": allow_extra_metadata}
     if guidelines is not None:
         body.update({"guidelines": guidelines})
 
@@ -170,6 +175,7 @@ def get_records(
     limit: int = 50,
     response_status: Optional[List[FeedbackResponseStatusFilter]] = None,
     metadata_filters: Optional[List[str]] = None,
+    sort_by: Optional[List[str]] = None,
 ) -> Response[Union[FeedbackRecordsModel, ErrorMessage, HTTPValidationError]]:
     """Sends a GET request to `/api/v1/datasets/{id}/records` endpoint to retrieve a
     list of `FeedbackTask` records.
@@ -182,6 +188,7 @@ def get_records(
         response_status: the status of the responses to be retrieved. Can either be
             `draft`, `missing`, `discarded`, or `submitted`. Defaults to None.
         metadata_filters: the metadata filters to be applied to the records. Defaults to None.
+        sort_by: the fields to be used to sort the records. Defaults to None.
 
     Returns:
         A `Response` object containing a `parsed` attribute with the parsed response if the
@@ -191,11 +198,14 @@ def get_records(
 
     params = {"include": ["responses", "suggestions"], "offset": offset, "limit": limit}
 
-    if response_status is not None:
+    if response_status:
         params["response_status"] = response_status
 
-    if metadata_filters is not None:
+    if metadata_filters:
         params["metadata"] = metadata_filters
+
+    if sort_by:
+        params["sort_by"] = sort_by
 
     response = client.get(url=url, params=params)
 

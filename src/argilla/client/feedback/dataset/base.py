@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import logging
-from abc import ABC, abstractproperty
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
 from pydantic import ValidationError
@@ -22,7 +22,10 @@ from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetM
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     FieldSchema,
+    SortBy,
 )
+from argilla.client.feedback.schemas.enums import ResponseStatusFilter
+from argilla.client.feedback.schemas.metadata import MetadataFilters
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes, AllowedQuestionTypes
 from argilla.client.feedback.training.schemas import (
     TrainingTaskForChatCompletion,
@@ -37,6 +40,7 @@ from argilla.client.feedback.training.schemas import (
 )
 from argilla.client.feedback.utils import generate_pydantic_schema_for_fields, generate_pydantic_schema_for_metadata
 from argilla.client.models import Framework
+from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
 from argilla.utils.dependency import require_dependencies, requires_dependencies
 
 if TYPE_CHECKING:
@@ -64,8 +68,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             Union[List["AllowedMetadataPropertyTypes"], List["AllowedRemoteMetadataPropertyTypes"]]
         ] = None,
         guidelines: Optional[str] = None,
-        # TODO: uncomment once ready in the API
-        # extra_metadata_allowed: bool = True,
+        allow_extra_metadata: bool = True,
     ) -> None:
         """Initializes a `FeedbackDatasetBase` instance locally.
 
@@ -75,6 +78,8 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             metadata_properties: contains the metadata properties that will be indexed
                 and could be used to filter the dataset. Defaults to `None`.
             guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
+            allow_extra_metadata: whether to allow extra metadata that has not been defined
+                as a metadata property in the records. Defaults to `True`.
 
         Raises:
             TypeError: if `fields` is not a list of `FieldSchema`.
@@ -157,11 +162,10 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                 )
 
         self._guidelines = guidelines
-        # TODO: uncomment once ready in the API
-        # self._extra_metadata_allowed = extra_metadata_allowed
+        self._allow_extra_metadata = allow_extra_metadata
 
     @property
-    @abstractproperty
+    @abstractmethod
     def records(self) -> Any:
         """Returns the records of the dataset."""
         pass
@@ -170,6 +174,11 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
     def guidelines(self) -> str:
         """Returns the guidelines for annotating the dataset."""
         return self._guidelines
+
+    @property
+    def allow_extra_metadata(self) -> bool:
+        """Returns whether if adding extra metadata to the records of the dataset is allowed"""
+        return self._allow_extra_metadata
 
     @property
     def fields(self) -> Union[List[AllowedFieldTypes], List["AllowedRemoteFieldTypes"]]:
@@ -246,6 +255,21 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                 f" {', '.join(self._metadata_properties_mapping.keys())}"
             )
 
+    @abstractmethod
+    def sort_by(self, sort: List[SortBy]) -> "FeedbackDatasetBase":
+        """Sorts the records in the dataset by the given field."""
+        pass
+
+    @abstractmethod
+    def filter_by(
+        self,
+        *,
+        response_status: Optional[Union[ResponseStatusFilter, List[ResponseStatusFilter]]] = None,
+        metadata_filters: Optional[Union[MetadataFilters, List[MetadataFilters]]] = None,
+    ) -> "FeedbackDatasetBase":
+        """Filters the records in the dataset by the given filters."""
+        pass
+
     def _unique_metadata_property(self, metadata_property: "AllowedMetadataPropertyTypes") -> None:
         """Checks whether the provided `metadata_property` already exists in the dataset.
 
@@ -317,7 +341,9 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             self._metadata_schema = None
 
         if self._metadata_schema is None and self.metadata_properties is not None:
-            self._metadata_schema = generate_pydantic_schema_for_metadata(self.metadata_properties)
+            self._metadata_schema = generate_pydantic_schema_for_metadata(
+                self.metadata_properties, allow_extra_metadata=self._allow_extra_metadata
+            )
 
         for record in records:
             try:

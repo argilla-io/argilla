@@ -28,6 +28,7 @@ These are the section headers that we use:
 - Added `add_metadata_property` method to both `FeedbackDataset` and `RemoteFeedbackDataset` (i.e. `FeedbackDataset` in Argilla) ([#3900](https://github.com/argilla-io/argilla/pull/3900)).
 - Added fields `inserted_at` and `updated_at` in `RemoteResponseSchema` ([#3822](https://github.com/argilla-io/argilla/pull/3822)).
 - New `DELETE /api/v1/metadata-properties/:metadata_property_id` endpoint allowing the deletion of a specific metadata property. ([#3911](https://github.com/argilla-io/argilla/pull/3911)).
+- Add support for `sort_by` for Argilla feedback datasets ([#3925](https://github.com/argilla-io/argilla/pull/3925))
 
 ### Changed
 
@@ -36,6 +37,8 @@ These are the section headers that we use:
 - Changed argilla dataset name in the active learning for text classification notebooks to be consistent with the default names in the huggingface spaces ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
 - Updated `GET /api/v1/datasets/{dataset_id}/records`, `GET /api/v1/me/datasets/{dataset_id}/records` and `POST /api/v1/me/datasets/{dataset_id}/records/search` endpoints to return the `total` number of records ([#3848](https://github.com/argilla-io/argilla/pull/3848) & [#3903](https://github.com/argilla-io/argilla/pull/3903)).
 - Updated `FilteredRemoteFeedbackRecords.__len__` method to return the number of records matching the provided filters ([#3916](https://github.com/argilla-io/argilla/pull/3916)).
+- Increase the default max result window for Elasticsearch created for Feedback datasets ([#3929](https://github.com/argilla-io/argilla/pull/)).
+- Force elastic index refresh after records creation ([#3929](https://github.com/argilla-io/argilla/pull/)).
 
 ### Fixed
 
