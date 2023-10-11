@@ -33,7 +33,11 @@ from argilla.client.sdk.v1.datasets.models import (
 
 
 def create_dataset(
-    client: httpx.Client, name: str, workspace_id: UUID, guidelines: Optional[str] = None
+    client: httpx.Client,
+    name: str,
+    workspace_id: UUID,
+    guidelines: Optional[str] = None,
+    allow_extra_metadata: bool = True,
 ) -> Response[Union[FeedbackDatasetModel, ErrorMessage, HTTPValidationError]]:
     """Sends a POST request to `/api/v1/datasets` endpoint to create a new `FeedbackDataset`.
 
@@ -42,6 +46,7 @@ def create_dataset(
         name: the name of the dataset to be created.
         workspace_id: the id of the workspace where the dataset will be created.
         guidelines: the guidelines of the dataset to be created. Defaults to `None`.
+        allow_extra_metadata: whether to allow extra metadata not defined as a metadata property. Defaults to `True`.
 
     Returns:
         A `Response` object containing a `parsed` attribute with the parsed response if the
@@ -49,7 +54,7 @@ def create_dataset(
     """
     url = "/api/v1/datasets"
 
-    body = {"name": name, "workspace_id": str(workspace_id)}
+    body = {"name": name, "workspace_id": str(workspace_id), "allow_extra_metadata": allow_extra_metadata}
     if guidelines is not None:
         body.update({"guidelines": guidelines})
 

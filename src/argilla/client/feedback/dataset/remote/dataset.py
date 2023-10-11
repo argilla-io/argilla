@@ -248,8 +248,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         questions: List["AllowedRemoteQuestionTypes"],
         metadata_properties: Optional[List["AllowedRemoteMetadataPropertyTypes"]] = None,
         guidelines: Optional[str] = None,
-        # TODO: uncomment once supported by the API
-        # allow_extra_metadata: bool = False,
+        allow_extra_metadata: bool = True,
     ) -> None:
         """Initializes a `RemoteFeedbackDataset` instance in Argilla.
 
@@ -285,8 +284,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         self._questions = questions
         self._metadata_properties = metadata_properties
         self._guidelines = guidelines
-        # TODO: uncomment once supported by the API
-        # self._allow_extra_metadata = allow_extra_metadata
+        self._allow_extra_metadata = allow_extra_metadata
 
         self._client = client  # Required to be able to use `allowed_for_roles` decorator
         self._id = id

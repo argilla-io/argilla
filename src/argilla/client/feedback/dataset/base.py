@@ -68,8 +68,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             Union[List["AllowedMetadataPropertyTypes"], List["AllowedRemoteMetadataPropertyTypes"]]
         ] = None,
         guidelines: Optional[str] = None,
-        # TODO: uncomment once ready in the API
-        # extra_metadata_allowed: bool = True,
+        allow_extra_metadata: bool = True,
     ) -> None:
         """Initializes a `FeedbackDatasetBase` instance locally.
 
@@ -79,6 +78,8 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             metadata_properties: contains the metadata properties that will be indexed
                 and could be used to filter the dataset. Defaults to `None`.
             guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
+            allow_extra_metadata: whether to allow extra metadata that has not been defined
+                as a metadata property in the records. Defaults to `True`.
 
         Raises:
             TypeError: if `fields` is not a list of `FieldSchema`.
@@ -161,8 +162,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                 )
 
         self._guidelines = guidelines
-        # TODO: uncomment once ready in the API
-        # self._extra_metadata_allowed = extra_metadata_allowed
+        self._allow_extra_metadata = allow_extra_metadata
 
     @property
     @abstractmethod
@@ -174,6 +174,11 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
     def guidelines(self) -> str:
         """Returns the guidelines for annotating the dataset."""
         return self._guidelines
+
+    @property
+    def allow_extra_metadata(self) -> bool:
+        """Returns whether if adding extra metadata to the records of the dataset is allowed"""
+        return self._allow_extra_metadata
 
     @property
     def fields(self) -> Union[List[AllowedFieldTypes], List["AllowedRemoteFieldTypes"]]:
@@ -336,7 +341,9 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             self._metadata_schema = None
 
         if self._metadata_schema is None and self.metadata_properties is not None:
-            self._metadata_schema = generate_pydantic_schema_for_metadata(self.metadata_properties)
+            self._metadata_schema = generate_pydantic_schema_for_metadata(
+                self.metadata_properties, allow_extra_metadata=self._allow_extra_metadata
+            )
 
         for record in records:
             try:
