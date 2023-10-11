@@ -44,11 +44,13 @@ def test_init(
         guidelines=feedback_dataset_guidelines,
         fields=feedback_dataset_fields,
         questions=feedback_dataset_questions,
+        allow_extra_metadata=False,
     )
 
     assert dataset.guidelines == feedback_dataset_guidelines
     assert dataset.fields == feedback_dataset_fields
     assert dataset.questions == feedback_dataset_questions
+    assert dataset.allow_extra_metadata == False
 
 
 def test_init_base(
@@ -203,33 +205,44 @@ def test__parse_and_validate_records_validation(record: "FeedbackRecord") -> Non
 
 
 @pytest.mark.parametrize(
-    "record, exception_cls, exception_msg",
+    "record, allow_extra_metadata, exception_cls, exception_msg",
     [
-        (FeedbackRecord(fields={}, metadata={}), ValueError, "required-field\n  field required"),
+        (FeedbackRecord(fields={}, metadata={}), True, ValueError, "required-field\n  field required"),
         (
             FeedbackRecord(fields={"optional-field": "text"}, metadata={}),
+            True,
             ValueError,
             "required-field\n  field required",
         ),
         (
             FeedbackRecord(fields={"required-field": "text"}, metadata={"terms-metadata": "d"}),
+            True,
             ValueError,
             "terms-metadata\n  Provided 'terms-metadata=d' is not valid, only values in \['a', 'b', 'c'\] are allowed.",
         ),
         (
             FeedbackRecord(fields={"required-field": "text"}, metadata={"int-metadata": 11}),
+            True,
             ValueError,
             "int-metadata\n  Provided 'int-metadata=11' is not valid, only values between 0 and 10 are allowed.",
         ),
         (
             FeedbackRecord(fields={"required-field": "text"}, metadata={"float-metadata": 11.0}),
+            True,
             ValueError,
             "float-metadata\n  Provided 'float-metadata=11.0' is not valid, only values between 0.0 and 10.0 are allowed.",
+        ),
+        (
+            FeedbackRecord(fields={"required-field": "text"}, metadata={"extra-metadata": "yes"}),
+            False,
+            ValueError,
+            "extra fields not permitted",
         ),
     ],
 )
 def test__parse_and_validate_records_validation_error(
     record: FeedbackRecord,
+    allow_extra_metadata: bool,
     exception_cls: Exception,
     exception_msg: str,
 ) -> None:
@@ -241,6 +254,7 @@ def test__parse_and_validate_records_validation_error(
             IntegerMetadataProperty(name="int-metadata", min=0, max=10),
             FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
         ],
+        allow_extra_metadata=allow_extra_metadata,
     )
     with pytest.raises(exception_cls, match=exception_msg):
         dataset._parse_and_validate_records(record)
