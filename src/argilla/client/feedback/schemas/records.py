@@ -72,7 +72,7 @@ class ResponseSchema(BaseModel):
     """
 
     user_id: Optional[UUID] = None
-    values: Dict[str, ValueSchema]
+    values: Union[Dict[str, ValueSchema], None]
     status: ResponseStatus = ResponseStatus.submitted
 
     class Config:
