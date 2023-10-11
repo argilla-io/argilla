@@ -20,7 +20,7 @@ from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
-from argilla.server.enums import DatasetStatus, RecordInclude, ResponseStatusFilter
+from argilla.server.enums import DatasetStatus, RecordInclude, ResponseStatusFilter, UserRole
 from argilla.server.models import (
     Dataset,
     Field,
@@ -55,6 +55,9 @@ if TYPE_CHECKING:
     from argilla.server.schemas.v1.suggestions import SuggestionCreate
 
 LIST_RECORDS_LIMIT = 20
+
+VISIBLE_FOR_ANNOTATORS_ALLOWED_ROLES = [UserRole.admin, UserRole.annotator]
+NOT_VISIBLE_FOR_ANNOTATORS_ALLOWED_ROLES = [UserRole.admin]
 
 
 async def get_dataset_by_id(
@@ -115,6 +118,13 @@ async def _count_required_fields_by_dataset_id(db: "AsyncSession", dataset_id: U
 async def _count_required_questions_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
     result = await db.execute(select(func.count(Question.id)).filter_by(dataset_id=dataset_id, required=True))
     return result.scalar()
+
+
+def _allowed_roles_for_metadata_property_create(metadata_property_create: MetadataPropertyCreate) -> List[UserRole]:
+    if metadata_property_create.visible_for_annotators:
+        return VISIBLE_FOR_ANNOTATORS_ALLOWED_ROLES
+    else:
+        return NOT_VISIBLE_FOR_ANNOTATORS_ALLOWED_ROLES
 
 
 async def publish_dataset(db: "AsyncSession", search_engine: SearchEngine, dataset: Dataset) -> Dataset:
@@ -240,7 +250,7 @@ async def create_metadata_property(
             type=metadata_property_create.settings.type,
             description=metadata_property_create.description,
             settings=metadata_property_create.settings.dict(),
-            allowed_roles=metadata_property_create.allowed_roles,
+            allowed_roles=_allowed_roles_for_metadata_property_create(metadata_property_create),
             dataset_id=dataset.id,
             autocommit=False,
         )

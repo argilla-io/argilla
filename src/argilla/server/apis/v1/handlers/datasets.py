@@ -16,7 +16,7 @@ import re
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, Security, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing_extensions import Annotated
 
@@ -321,18 +321,6 @@ async def list_current_user_dataset_metadata_properties(
     )
 
     return MetadataProperties(items=filtered_metadata_properties)
-
-
-# TODO: We should remove this endpoint
-@router.get("/datasets/{dataset_id}/metadata-properties", response_model=MetadataProperties)
-async def list_dataset_metadata_properties(
-    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
-):
-    dataset = await _get_dataset(db, dataset_id, with_metadata_properties=True)
-
-    await authorize(current_user, DatasetPolicyV1.get(dataset))
-
-    return MetadataProperties(items=dataset.metadata_properties)
 
 
 SortByQueryParamParsed = Annotated[

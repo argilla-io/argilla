@@ -157,7 +157,7 @@ async def test_delete_metadata_property(async_client: "AsyncClient", db: "AsyncS
         "name": "name",
         "description": "description",
         "settings": {"type": MetadataPropertyType.integer, "min": None, "max": None},
-        "allowed_roles": [],
+        "visible_for_annotators": True,
         "dataset_id": str(metadata_property.dataset_id),
         "inserted_at": metadata_property.inserted_at.isoformat(),
         "updated_at": metadata_property.updated_at.isoformat(),

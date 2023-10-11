@@ -72,7 +72,7 @@ class MetadataProperty(BaseModel):
     name: str
     description: Optional[str] = None
     settings: MetadataPropertySettings
-    allowed_roles: List[UserRole]
+    visible_for_annotators: bool
     dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime

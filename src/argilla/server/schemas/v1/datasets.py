@@ -60,8 +60,6 @@ METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH = 1
 METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH = 50
 METADATA_PROPERTY_CREATE_DESCRIPTION_MIN_LENGTH = 1
 METADATA_PROPERTY_CREATE_DESCRIPTION_MAX_LENGTH = 1000
-METADATA_PROPERTY_CREATE_ALLOWED_ROLES_MIN_ITEMS = 0
-METADATA_PROPERTY_CREATE_ALLOWED_ROLES_MAX_ITEMS = 10
 
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 10
@@ -482,12 +480,7 @@ class MetadataPropertyCreate(BaseModel):
         max_length=METADATA_PROPERTY_CREATE_DESCRIPTION_MAX_LENGTH,
     )
     settings: MetadataPropertySettingsCreate
-    allowed_roles: conlist(
-        item_type=UserRole,
-        min_items=METADATA_PROPERTY_CREATE_ALLOWED_ROLES_MIN_ITEMS,
-        max_items=METADATA_PROPERTY_CREATE_ALLOWED_ROLES_MAX_ITEMS,
-        unique_items=True,
-    ) = []
+    visible_for_annotators: bool = True
 
 
 class TermsMetadataProperty(BaseModel):
@@ -518,7 +511,7 @@ class MetadataProperty(BaseModel):
     name: str
     description: Optional[str] = None
     settings: MetadataPropertySettings
-    allowed_roles: List[UserRole]
+    visible_for_annotators: bool
     inserted_at: datetime
     updated_at: datetime
 

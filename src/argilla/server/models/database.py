@@ -200,12 +200,9 @@ class MetadataProperty(DatabaseModel):
     def parsed_settings(self) -> MetadataPropertySettings:
         return parse_obj_as(MetadataPropertySettings, self.settings)
 
-    def __repr__(self):
-        return (
-            f"MetadataProperty(id={str(self.id)!r}, name={self.name!r}, type={self.type!r}, "
-            f"dataset_id={str(self.dataset_id)!r}, "
-            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
-        )
+    @property
+    def visible_for_annotators(self) -> bool:
+        return UserRole.annotator in self.allowed_roles
 
     @property
     def is_visible(self) -> bool:
@@ -216,6 +213,13 @@ class MetadataProperty(DatabaseModel):
     def is_visible_for_annotators(self) -> bool:
         # TODO: implement logic
         return True
+
+    def __repr__(self):
+        return (
+            f"MetadataProperty(id={str(self.id)!r}, name={self.name!r}, type={self.type!r}, "
+            f"dataset_id={str(self.dataset_id)!r}, "
+            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
 
 
 DatasetStatusEnum = SAEnum(DatasetStatus, name="dataset_status_enum")
