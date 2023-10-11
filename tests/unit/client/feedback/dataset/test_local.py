@@ -114,6 +114,42 @@ def test_add_records_validation_error(
     assert len(dataset.records) == 0
 
 
+def test_sort_by_for_local_is_not_implemented():
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
+        questions=[TextQuestion(name="question", required=True)],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="int-metadata", min=0, max=10),
+            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+    )
+    with pytest.warns(
+        UserWarning,
+        match="`sort_by` method only works for `FeedbackDataset` pushed to Argilla."
+        " Use `sorted` with dataset.records instead.",
+    ):
+        assert dataset.sort_by("field") == dataset
+
+
+def test_filter_by_for_local_is_not_implemented():
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
+        questions=[TextQuestion(name="question", required=True)],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="int-metadata", min=0, max=10),
+            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+    )
+    with pytest.warns(
+        UserWarning,
+        match="`filter_by` method only works for `FeedbackDataset` pushed to Argilla."
+        " Use `filter` with dataset.records instead.",
+    ):
+        assert dataset.filter_by() == dataset
+
+
 @pytest.mark.parametrize(
     "metadata_property",
     (

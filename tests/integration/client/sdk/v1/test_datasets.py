@@ -13,6 +13,16 @@
 #  limitations under the License.
 
 import pytest
+from argilla import (
+    FeedbackDataset,
+    FloatMetadataProperty,
+    IntegerMetadataProperty,
+    TermsMetadataProperty,
+    TextField,
+    TextQuestion,
+    Workspace,
+)
+from argilla.client import api
 from argilla.client.client import Argilla
 from argilla.client.sdk.v1.datasets.api import (
     add_field,
@@ -41,7 +51,7 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackRecordsModel,
     FeedbackSuggestionModel,
 )
-from argilla.server.models import DatasetStatus, UserRole
+from argilla.server.models import DatasetStatus, User, UserRole
 
 from tests.factories import (
     DatasetFactory,
@@ -54,6 +64,20 @@ from tests.factories import (
     UserFactory,
     WorkspaceFactory,
 )
+
+
+@pytest.fixture()
+def test_dataset():
+    dataset = FeedbackDataset(
+        fields=[TextField(name="text"), TextField(name="optional", required=False)],
+        questions=[TextQuestion(name="question")],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="integer-metadata"),
+            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+    )
+    return dataset
 
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
@@ -281,14 +305,18 @@ async def test_get_metadata_properties(role: UserRole) -> None:
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
-async def test_add_records(role: UserRole) -> None:
-    text_field = await TextFieldFactory.create(name="test_field")
-    rating_question = await RatingQuestionFactory.create()
-    dataset = await DatasetFactory.create(status=DatasetStatus.ready, fields=[text_field], questions=[rating_question])
-    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+async def test_add_records(owner: User, test_dataset: FeedbackDataset, role: UserRole) -> None:
+    user = await UserFactory.create(role=role)
 
-    api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
-    response = add_records(client=api.client.httpx, id=dataset.id, records=[{"fields": {"test_field": "test_value"}}])
+    api.init(api_key=owner.api_key)
+    workspace = Workspace.create(name="test-workspace")
+    workspace.add_user(user.id)
+
+    api.init(api_key=user.api_key)
+    remote = test_dataset.push_to_argilla(name="test-dataset", workspace=workspace)
+    argilla_api = api.active_api()
+
+    response = add_records(client=argilla_api.client.httpx, id=remote.id, records=[{"fields": {"text": "test_value"}}])
 
     assert response.status_code == 204
 

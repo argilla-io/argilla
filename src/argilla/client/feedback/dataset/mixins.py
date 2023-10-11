@@ -340,7 +340,7 @@ class ArgillaMixin:
         name: Optional[str] = None,
         *,
         workspace: Optional[str] = None,
-        id: Optional[str] = None,
+        id: Optional[Union[UUID, str]] = None,
     ) -> RemoteFeedbackDataset:
         """Retrieves an existing `FeedbackDataset` from Argilla (must have been pushed in advance).
 
