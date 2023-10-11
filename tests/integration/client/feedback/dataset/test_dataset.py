@@ -22,6 +22,7 @@ from argilla.client.feedback.config import DatasetConfig
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
+    MultiLabelQuestion,
     RatingQuestion,
     TextField,
     TextQuestion,
@@ -671,3 +672,25 @@ def test_prepare_for_training_text_classification(
     task = TrainingTask.for_text_classification(text=dataset.fields[0], label=label)
 
     dataset.prepare_for_training(framework=framework, task=task)
+
+
+def test_for_text_classification():
+    labels = ["label1", "label2", "label3"]
+    dataset = FeedbackDataset.for_text_classification(labels=labels, multi_label=True, use_markdown=True)
+    assert isinstance(dataset, FeedbackDataset)
+    assert len(dataset.fields) == 1
+    assert len(dataset.questions) == 1
+    assert isinstance(dataset.questions[0], MultiLabelQuestion)
+    assert dataset.questions[0].name == "label"
+    assert dataset.questions[0].labels == labels
+    assert (
+        dataset.questions[0].description
+        == "Classify the texts by selecting the correct labels from the given list of labels."
+    )
+    assert isinstance(dataset.fields[0], TextField)
+    assert dataset.fields[0].name == "text"
+    assert dataset.fields[0].use_markdown is True
+    assert (
+        dataset.guidelines
+        == "This is a text classification dataset that contains texts and labels. Given a set of texts and a predefined set of labels, the goal of text classification is to assign one or more labels to each text based on its content. Please classify the texts by selecting the correct labels."
+    )
