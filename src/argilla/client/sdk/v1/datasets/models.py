@@ -55,7 +55,7 @@ class FeedbackResponseStatusFilter(str, Enum):
 
 class FeedbackResponseModel(BaseModel):
     id: UUID
-    values: Dict[str, FeedbackValueModel]
+    values: Union[Dict[str, FeedbackValueModel], None]
     status: FeedbackResponseStatus
     user_id: UUID
     inserted_at: datetime

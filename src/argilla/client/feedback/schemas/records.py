@@ -72,7 +72,7 @@ class ResponseSchema(BaseModel):
     """
 
     user_id: Optional[UUID] = None
-    values: Dict[str, ValueSchema]
+    values: Union[Dict[str, ValueSchema], None]
     status: ResponseStatus = ResponseStatus.submitted
 
     class Config:
@@ -94,7 +94,9 @@ class ResponseSchema(BaseModel):
         to create a `ResponseSchema` for a `FeedbackRecord`."""
         return {
             "user_id": self.user_id,
-            "values": {question_name: value.dict() for question_name, value in self.values.items()},
+            "values": {question_name: value.dict() for question_name, value in self.values.items()}
+            if self.values is not None
+            else None,
             "status": self.status.value if hasattr(self.status, "value") else self.status,
         }
 

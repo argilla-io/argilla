@@ -96,7 +96,9 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             ).rename_column("float_label", "label")
 
         self.model_kwargs = {}
-        self.model_kwargs["pretrained_model_name_or_path"] = self._model
+        self.model_kwargs["pretrained_model_name_or_path"] = (
+            self._model if isinstance(self._model, str) else self._model.config._name_or_path
+        )
 
         if self._record_class in [TextClassificationRecord, TokenClassificationRecord]:
             self.model_kwargs["num_labels"] = len(self._label_list)
