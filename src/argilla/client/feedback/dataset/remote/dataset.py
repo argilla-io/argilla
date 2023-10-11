@@ -212,7 +212,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         return [metadata_filter.query_string for metadata_filter in self._metadata_filters]
 
     @classmethod
-    def copy_from(
+    def _create_from_dataset(
         cls,
         new_ds: "RemoteFeedbackDataset",
         response_status: Optional[Union[ResponseStatusFilter, List[ResponseStatusFilter]]] = None,
@@ -365,8 +365,8 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
 
     def sort_by(self, sort: List[SortBy]) -> "RemoteFeedbackDataset":
         """Sorts the current `RemoteFeedbackDataset` based on the given sort fields and orders."""
-        sorted_dataset = self.__copy_from(self)
-        sorted_dataset._records = RemoteFeedbackRecords.copy_from(sorted_dataset, sort_by=sort)
+        sorted_dataset = self._create_from_dataset(self)
+        sorted_dataset._records = RemoteFeedbackRecords._create_from_dataset(sorted_dataset, sort_by=sort)
 
         return sorted_dataset
 
@@ -495,8 +495,8 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         if not response_status and not metadata_filters:
             raise ValueError("At least one of `response_status` or `metadata_filters` must be provided.")
 
-        filtered_dataset = RemoteFeedbackDataset.__copy_from(self)
-        filtered_dataset._records = RemoteFeedbackRecords.copy_from(
+        filtered_dataset = RemoteFeedbackDataset._create_from_dataset(self)
+        filtered_dataset._records = RemoteFeedbackRecords._create_from_dataset(
             filtered_dataset, response_status=response_status, metadata_filters=metadata_filters
         )
 
@@ -517,7 +517,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
             raise RuntimeError(f"Failed while deleting the `FeedbackDataset` from Argilla with exception: {e}") from e
 
     @classmethod
-    def __copy_from(cls, dataset: "RemoteFeedbackDataset") -> "RemoteFeedbackDataset":
+    def _create_from_dataset(cls, dataset: "RemoteFeedbackDataset") -> "RemoteFeedbackDataset":
         new_dataset = cls(
             client=dataset._client,
             id=dataset.id,
