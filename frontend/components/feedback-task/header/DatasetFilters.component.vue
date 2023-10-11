@@ -88,15 +88,16 @@ export default {
   width: 100%;
   padding: $base-space * 2 0;
   &__total-records {
+    flex-shrink: 0;
+    margin: 0;
     @include font-size(13px);
     color: $black-37;
-    flex-shrink: 0;
   }
   &__status {
     margin-left: auto;
   }
   .search-area {
-    width: min(100%, 500px);
+    width: min(100%, 400px);
   }
 }
 </style>
