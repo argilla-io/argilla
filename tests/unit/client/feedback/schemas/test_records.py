@@ -198,7 +198,7 @@ def test_ranking_value_schema_errors(
         },
         {"values": {"question-1": {"value": 1}}},
         {"values": {"question-1": {"value": "This is a value"}}, "status": "submitted"},
-        {"values": {"question-1": {"value": ["This is a value"]}}, "status": "discarded"},
+        {"values": None, "status": "discarded"},
     ],
 )
 def test_response_schema(schema_kwargs: Dict[str, Any]) -> None:
