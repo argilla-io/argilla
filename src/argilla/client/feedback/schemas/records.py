@@ -18,8 +18,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, conint, validator
 
-from argilla.client.feedback.schemas.enums import ResponseStatus
-from argilla.client.feedback.schemas.enums import RecordSortField, SortOrder
+from argilla.client.feedback.schemas.enums import RecordSortField, ResponseStatus, SortOrder
 
 if TYPE_CHECKING:
     from argilla.client.feedback.unification import UnifiedValueSchema
