@@ -36,7 +36,7 @@ def delete_metadata_property(
         A `Response` object containing a `parsed` attribute with the parsed response if
         the request was successful, which is a `FeedbackMetadataPropertyModel`.
     """
-    url = f"/api/v1/metadata_properties/{id}"
+    url = f"/api/v1/metadata-properties/{id}"
 
     response = client.delete(url=url)
 
