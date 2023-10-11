@@ -531,5 +531,5 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         pass
 
     @abstractmethod
-    def _refresh_index_request(self, index_name:str):
+    def _refresh_index_request(self, index_name: str):
         pass
