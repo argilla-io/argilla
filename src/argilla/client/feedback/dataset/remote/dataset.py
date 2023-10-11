@@ -26,6 +26,7 @@ from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
+from argilla.client.sdk.v1.metadata_properties import api as metadata_properties_api_v1
 from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
@@ -197,6 +198,49 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         from argilla.client.feedback.dataset.mixins import ArgillaMixin
 
         return ArgillaMixin._parse_to_remote_metadata_property(metadata_property=metadata_property, client=self._client)
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def delete_metadata_properties(
+        self, metadata_properties: Union[str, List[str]]
+    ) -> Union["AllowedMetadataPropertyTypes", List["AllowedMetadataPropertyTypes"]]:
+        """Deletes a list of `metadata_properties` from the current `FeedbackDataset`
+        in Argilla.
+
+        Note:
+            Existing `FeedbackRecord`s if any, will remain unchanged if those contain metadata
+            named the same way as the `metadata_properties` to delete, but the validation will
+            be removed as well as `metadata_property` index, which means one won't be able to
+            use that for filtering.
+
+        Args:
+            metadata_properties: the metadata property/ies name/s to delete from the current
+                `FeedbackDataset` in Argilla.
+
+        Returns:
+            The `metadata_property` or `metadata_properties` deleted from the current
+            `FeedbackDataset` in Argilla, but using the local schema e.g. if you delete a
+            `RemoteFloatMetadataProperty` this method will delete it from Argilla and will
+            return a `FloatMetadataProperty` instance.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+            RuntimeError: if the `metadata_properties` cannot be deleted from the current
+                `FeedbackDataset` in Argilla.
+        """
+        if isinstance(metadata_properties, str):
+            metadata_properties = [metadata_properties]
+
+        deleted_metadata_properties = []
+        for metadata_property in metadata_properties:
+            try:
+                metadata_property = metadata_properties_api_v1.delete_metadata_property(
+                    client=self._client, id=self.id
+                ).parsed
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed while deleting the `metadata_property={metadata_property}` from the current `FeedbackDataset` in Argilla with exception: {e}"
+                ) from e
+            deleted_metadata_properties.append()
 
     def filter_by(
         self,
