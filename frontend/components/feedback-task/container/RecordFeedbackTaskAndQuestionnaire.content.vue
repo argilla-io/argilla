@@ -2,12 +2,13 @@
   <div v-if="!$fetchState.pending && !$fetchState.error" class="wrapper">
     <template v-if="!!record">
       <RecordFeedbackTaskComponent
+        :key="`${record.id}_fields`"
         :recordStatus="record.status"
         :fields="record.fields"
       />
 
       <QuestionsFormComponent
-        :key="record.id"
+        :key="`${record.id}_questions`"
         class="question-form"
         :class="statusClass"
         :datasetId="datasetId"
@@ -90,39 +91,7 @@ export default {
     },
   },
   async fetch() {
-    if (this.fetching) return Promise.resolve();
-
-    this.fetching = true;
-    this.clearRecords();
-
-    await this.loadRecords(
-      this.datasetId,
-      this.currentPage,
-      this.recordStatusToFilterWith,
-      this.searchTextToFilterWith,
-      this.metadataToFilterWith,
-      this.sortBy
-    );
-
-    const isRecordExistForCurrentPage = this.records.existsRecordOn(
-      this.currentPage
-    );
-
-    if (!isRecordExistForCurrentPage && this.currentPage !== 1) {
-      this.currentPage = 1;
-
-      await this.loadRecords(
-        this.datasetId,
-        this.currentPage,
-        this.recordStatusToFilterWith,
-        this.searchTextToFilterWith,
-        this.metadataToFilterWith,
-        this.sortBy
-      );
-    }
-
-    this.updateTotalRecordsLabel();
-    this.fetching = false;
+    await this.onLoadRecords("replace");
   },
   watch: {
     async currentPage(newValue) {
@@ -184,6 +153,42 @@ export default {
     this.$root.$on("sort-changed", this.onSortChanged);
   },
   methods: {
+    async onLoadRecords(mode) {
+      if (this.fetching) return Promise.resolve();
+
+      this.fetching = true;
+
+      await this.loadRecords(
+        mode,
+        this.datasetId,
+        this.currentPage,
+        this.recordStatusToFilterWith,
+        this.searchTextToFilterWith,
+        this.metadataToFilterWith,
+        this.sortBy
+      );
+
+      const isRecordExistForCurrentPage = this.records.existsRecordOn(
+        this.currentPage
+      );
+
+      if (!isRecordExistForCurrentPage && this.currentPage !== 1) {
+        this.currentPage = 1;
+
+        await this.loadRecords(
+          "clear",
+          this.datasetId,
+          this.currentPage,
+          this.recordStatusToFilterWith,
+          this.searchTextToFilterWith,
+          this.metadataToFilterWith,
+          this.sortBy
+        );
+      }
+
+      this.updateTotalRecordsLabel();
+      this.fetching = false;
+    },
     emitResetStatusFilter() {
       this.$root.$emit("reset-status-filter");
     },
@@ -211,7 +216,7 @@ export default {
         this.searchTextToFilterWith = newSearchValue;
         this.currentPage = 1;
 
-        this.$fetch();
+        this.onLoadRecords("replace");
       };
 
       if (
@@ -242,7 +247,7 @@ export default {
         this.recordStatusToFilterWith = newStatus;
         this.currentPage = 1;
 
-        this.$fetch();
+        this.onLoadRecords("replace");
       };
 
       if (this.questionFormTouched) {
@@ -275,7 +280,7 @@ export default {
         this.metadataToFilterWith = metadata;
         this.currentPage = 1;
 
-        this.$fetch();
+        this.onLoadRecords("replace");
       };
 
       if (this.questionFormTouched) {
@@ -307,7 +312,7 @@ export default {
         this.sortBy = sort;
         this.currentPage = 1;
 
-        this.$fetch();
+        this.onLoadRecords("replace");
       };
 
       if (this.questionFormTouched) {
@@ -339,6 +344,7 @@ export default {
 
       if (!isNextRecordExist) {
         await this.loadRecords(
+          "append",
           this.datasetId,
           newPage,
           this.recordStatusToFilterWith,

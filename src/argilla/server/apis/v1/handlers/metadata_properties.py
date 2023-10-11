@@ -21,7 +21,7 @@ from argilla.server.contexts import datasets
 from argilla.server.database import get_async_db
 from argilla.server.models import MetadataProperty, User
 from argilla.server.policies import MetadataPropertyPolicyV1, authorize
-from argilla.server.schemas.v1.metadata_properties import MetadataMetrics
+from argilla.server.schemas.v1.metadata_properties import MetadataMetrics, MetadataProperty
 from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.security import auth
 
@@ -35,6 +35,7 @@ async def _get_metadata_property(db: "AsyncSession", metadata_property_id: UUID)
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Metadata property with id `{metadata_property_id}` not found",
         )
+
     return metadata_property
 
 
@@ -51,3 +52,24 @@ async def get_metadata_property_metrics(
     await authorize(current_user, MetadataPropertyPolicyV1.compute_metrics(metadata_property))
 
     return await search_engine.compute_metrics_for(metadata_property)
+
+
+@router.delete("/metadata-properties/{metadata_property_id}", response_model=MetadataProperty)
+async def delete_metadata_property(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    metadata_property_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    metadata_property = await _get_metadata_property(db, metadata_property_id)
+
+    await authorize(current_user, MetadataPropertyPolicyV1.delete(metadata_property))
+
+    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
+    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
+    try:
+        await datasets.delete_metadata_property(db, metadata_property)
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+
+    return metadata_property

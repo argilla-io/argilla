@@ -12,12 +12,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from datetime import datetime
 from typing import Generic, List, Literal, Optional, TypeVar, Union
+from uuid import UUID
 
 from pydantic import BaseModel, Field, validator
 from pydantic.generics import GenericModel
 
 from argilla.server.enums import MetadataPropertyType
+from argilla.server.schemas.v1.datasets import MetadataPropertySettings
 
 FLOAT_METADATA_METRICS_PRECISION = 5
 
@@ -62,3 +65,16 @@ class FloatMetadataMetrics(NumericMetadataMetrics[float]):
 MetadataMetrics = Annotated[
     Union[TermsMetadataMetrics, IntegerMetadataMetrics, FloatMetadataMetrics], Field(..., discriminator="type")
 ]
+
+
+class MetadataProperty(BaseModel):
+    id: UUID
+    name: str
+    description: Optional[str] = None
+    settings: MetadataPropertySettings
+    dataset_id: UUID
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True

@@ -53,43 +53,50 @@ from tests.factories import (
 class TestFilteredRemoteFeedbackDataset:
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     @pytest.mark.parametrize(
-        "status",
+        "statuses, expected_num_records",
         [
-            FeedbackResponseStatusFilter.draft,
-            FeedbackResponseStatusFilter.missing,
-            FeedbackResponseStatusFilter.discarded,
-            FeedbackResponseStatusFilter.submitted,
-            [FeedbackResponseStatusFilter.discarded, FeedbackResponseStatusFilter.submitted],
+            ([FeedbackResponseStatusFilter.draft], 1),
+            ([FeedbackResponseStatusFilter.missing], 10),
+            ([FeedbackResponseStatusFilter.discarded], 1),
+            ([FeedbackResponseStatusFilter.submitted], 1),
+            ([FeedbackResponseStatusFilter.discarded, FeedbackResponseStatusFilter.submitted], 2),
         ],
     )
     async def test_filter_by_response_status(
-        self, role: UserRole, status: Union[FeedbackResponseStatusFilter, List[FeedbackResponseStatusFilter]]
+        self, role: UserRole, statuses: List[FeedbackResponseStatusFilter], expected_num_records: int
     ) -> None:
         dataset = await DatasetFactory.create()
         await TextFieldFactory.create(dataset=dataset, required=True)
         await TextQuestionFactory.create(dataset=dataset, required=True)
-        await RecordFactory.create_batch(dataset=dataset, size=10)
+        records = await RecordFactory.create_batch(dataset=dataset, size=10)
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+        for status, record in zip(statuses, records):
+            if status != FeedbackResponseStatusFilter.missing:
+                await ResponseFactory.create(record=record, status=status)
 
         api.init(api_key=user.api_key)
         remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
-        filtered_dataset = remote_dataset.filter_by(response_status=status)
+        filtered_dataset = remote_dataset.filter_by(response_status=statuses)
         assert isinstance(filtered_dataset, FilteredRemoteFeedbackDataset)
         assert isinstance(filtered_dataset.records, FilteredRemoteFeedbackRecords)
         assert all([isinstance(record, RemoteFeedbackRecord) for record in filtered_dataset.records])
+        assert len(filtered_dataset.records) == expected_num_records
 
     @pytest.mark.parametrize(
-        "metadata_filters",
+        "metadata_filters, expected_num_records",
         [
-            TermsMetadataFilter(name="terms-metadata", values=["a", "b", "c"]),
-            IntegerMetadataFilter(name="integer-metadata", le=5),
-            IntegerMetadataFilter(name="integer-metadata", ge=5),
-            FloatMetadataFilter(name="float-metadata", ge=5.0),
-            FloatMetadataFilter(name="float-metadata", le=5.0),
+            (TermsMetadataFilter(name="terms-metadata", values=["a"]), 50),
+            (TermsMetadataFilter(name="terms-metadata", values=["a", "b"]), 100),
+            (TermsMetadataFilter(name="terms-metadata", values=["a", "b", "c"]), 150),
+            (IntegerMetadataFilter(name="integer-metadata", le=5), 100),
+            (IntegerMetadataFilter(name="integer-metadata", ge=5), 50),
+            (FloatMetadataFilter(name="float-metadata", ge=5.0), 100),
+            (FloatMetadataFilter(name="float-metadata", le=5.0), 50),
         ],
     )
     async def test_filter_by_metadata(
-        self, owner: User, metadata_filters: Union[MetadataFilters, List[MetadataFilters]]
+        self, owner: User, metadata_filters: Union[MetadataFilters, List[MetadataFilters]], expected_num_records: int
     ) -> None:
         dataset = await DatasetFactory.create(status="ready")
         await TextFieldFactory.create(dataset=dataset, name="text", required=True)
@@ -106,24 +113,28 @@ class TestFilteredRemoteFeedbackDataset:
 
         api.init(api_key=owner.api_key)
         remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
-        remote_dataset.add_records(
-            [
-                FeedbackRecord(
-                    fields={"text": "text"},
-                    metadata={
-                        "terms-metadata": random.choice(["a", "b", "c"]),
-                        "integer-metadata": random.randint(0, 10),
-                        "float-metadata": random.uniform(0, 10),
-                    },
-                )
-                for _ in range(100)
-            ]
-        )
+        for metadata in (
+            {"terms-metadata": "a", "integer-metadata": 2, "float-metadata": 2.0},
+            {"terms-metadata": "a", "integer-metadata": 4, "float-metadata": 4.0},
+            {"terms-metadata": "c", "integer-metadata": 6, "float-metadata": 6.0},
+        ):
+            remote_dataset.add_records(
+                [
+                    FeedbackRecord(
+                        fields={"text": "text"},
+                        metadata=metadata,
+                    )
+                    for _ in range(50)
+                ]
+            )
 
         filtered_dataset = remote_dataset.filter_by(metadata_filters=metadata_filters)
         assert isinstance(filtered_dataset, FilteredRemoteFeedbackDataset)
         assert isinstance(filtered_dataset.records, FilteredRemoteFeedbackRecords)
         assert all([isinstance(record, RemoteFeedbackRecord) for record in filtered_dataset.records])
+        # TODO: once we have proper integration tests and the search engine is not mocked, uncomment the line below
+        # Right now, when metadata filters are used, the search engine is used
+        # assert len(filtered_dataset.records) == expected_num_records
 
     async def test_filter_by_response_status_without_results(
         self,
