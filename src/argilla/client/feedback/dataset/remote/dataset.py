@@ -230,6 +230,9 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         if isinstance(metadata_properties, str):
             metadata_properties = [metadata_properties]
 
+        # TODO(alvarobartt): structure better the mixins to be able to easily reuse those, here to avoid circular imports
+        from argilla.client.feedback.dataset.mixins import ArgillaMixin
+
         deleted_metadata_properties = []
         for metadata_property in metadata_properties:
             try:
@@ -240,7 +243,12 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
                 raise RuntimeError(
                     f"Failed while deleting the `metadata_property={metadata_property}` from the current `FeedbackDataset` in Argilla with exception: {e}"
                 ) from e
-            deleted_metadata_properties.append()
+            deleted_metadata_properties.append(
+                ArgillaMixin._parse_to_remote_metadata_property(
+                    metadata_property=metadata_property, client=self._client
+                )
+            )
+        return deleted_metadata_properties if len(deleted_metadata_properties) > 1 else deleted_metadata_properties[0]
 
     def filter_by(
         self,
