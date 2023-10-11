@@ -13,12 +13,14 @@
 #  limitations under the License.
 
 import json
+import re
 from typing import Any, Dict, List
 
 import pytest
 from argilla.client.feedback.config import DatasetConfig, DeprecatedDatasetConfig
 from argilla.client.feedback.schemas.fields import FieldSchema
 from argilla.client.feedback.schemas.questions import QuestionSchema
+from yaml import SafeLoader, load
 
 
 @pytest.mark.usefixtures("feedback_dataset_fields", "feedback_dataset_questions", "feedback_dataset_guidelines")
@@ -531,3 +533,291 @@ def test_dataset_config_backwards_compatibility_argilla_cfg(
             assert question.server_settings == matching_question["settings"]
 
     assert config.guidelines == outdated_config["guidelines"]
+
+
+# Same thing but testing the remaining versions and using YAML as
+@pytest.mark.parametrize(
+    "argilla_version, outdated_config",
+    (
+        (
+            "1.13.0",
+            """
+            fields:
+            - id: !!python/object:uuid.UUID
+                int: 318598997309827170175814937554257429138
+              name: field-1
+              required: true
+              settings:
+                type: text
+                use_markdown: false
+              title: Field-1
+              type: text
+              use_markdown: false
+            - id: !!python/object:uuid.UUID
+                int: 69686603559390055136114715170048137456
+              name: field-2
+              required: false
+              settings:
+                type: text
+                use_markdown: false
+              title: Field-2
+              type: text
+              use_markdown: false
+            guidelines: These are the guidelines
+            questions:
+            - description: null
+              id: !!python/object:uuid.UUID
+                int: 50048965276074224092389052083005517643
+              name: question-1
+              required: true
+              settings:
+                type: text
+                use_markdown: false
+              title: Question-1
+              type: text
+              use_markdown: false
+            - description: null
+              id: !!python/object:uuid.UUID
+                int: 41875146250353770121043770832765946446
+              name: question-2
+              required: false
+              settings:
+                options:
+                - value: 1
+                - value: 2
+                - value: 3
+                - value: 4
+                - value: 5
+                type: rating
+              title: Question-2
+              type: rating
+              values:
+              - 1
+              - 2
+              - 3
+              - 4
+              - 5
+            - description: null
+              id: !!python/object:uuid.UUID
+                int: 157923404852454712001576490052121022141
+              labels:
+              - label-1
+              - label-2
+              - label-3
+              name: question-3
+              required: false
+              settings:
+                options:
+                - text: label-1
+                  value: label-1
+                - text: label-2
+                  value: label-2
+                - text: label-3
+                  value: label-3
+                type: label_selection
+                visible_options: 3
+              title: Question-3
+              type: label_selection
+              visible_labels: 3
+            - description: null
+              id: !!python/object:uuid.UUID
+                int: 250432660168731216394809741082680978815
+              labels:
+              - label-1
+              - label-2
+              - label-3
+              name: question-4
+              required: false
+              settings:
+                options:
+                - text: label-1
+                  value: label-1
+                - text: label-2
+                  value: label-2
+                - text: label-3
+                  value: label-3
+                type: multi_label_selection
+                visible_options: 3
+              title: Question-4
+              type: multi_label_selection
+              visible_labels: 3
+            - description: null
+              id: !!python/object:uuid.UUID
+                int: 251163320782812347764238417960223431273
+              name: question-5
+              required: false
+              settings:
+                options:
+                - text: label-1
+                  value: label-1
+                - text: label-2
+                  value: label-2
+                - text: label-3
+                  value: label-3
+                type: ranking
+              title: Question-5
+              type: ranking
+              values:
+              - label-1
+              - label-2
+              - label-3
+            """,
+        ),
+        (
+            "1.14.0,1.15.0,1.16.0",
+            """
+            fields:
+            - name: field-1
+              required: true
+              settings:
+                type: text
+                use_markdown: false
+              title: Field-1
+              type: text
+              use_markdown: false
+            - name: field-2
+              required: false
+              settings:
+                type: text
+                use_markdown: false
+              title: Field-2
+              type: text
+              use_markdown: false
+            guidelines: These are the guidelines
+            questions:
+            - description: null
+              name: question-1
+              required: true
+              settings:
+                type: text
+                use_markdown: false
+              title: Question-1
+              type: text
+              use_markdown: false
+            - description: null
+              name: question-2
+              required: false
+              settings:
+                options:
+                - value: 1
+                - value: 2
+                - value: 3
+                - value: 4
+                - value: 5
+                type: rating
+              title: Question-2
+              type: rating
+              values:
+              - 1
+              - 2
+              - 3
+              - 4
+              - 5
+            - description: null
+              labels:
+              - label-1
+              - label-2
+              - label-3
+              name: question-3
+              required: false
+              settings:
+                options:
+                - text: label-1
+                  value: label-1
+                - text: label-2
+                  value: label-2
+                - text: label-3
+                  value: label-3
+                type: label_selection
+                visible_options: 3
+              title: Question-3
+              type: label_selection
+              visible_labels: 3
+            - description: null
+              labels:
+              - label-1
+              - label-2
+              - label-3
+              name: question-4
+              required: false
+              settings:
+                options:
+                - text: label-1
+                  value: label-1
+                - text: label-2
+                  value: label-2
+                - text: label-3
+                  value: label-3
+                type: multi_label_selection
+                visible_options: 3
+              title: Question-4
+              type: multi_label_selection
+              visible_labels: 3
+            - description: null
+              name: question-5
+              required: false
+              settings:
+                options:
+                - text: label-1
+                  value: label-1
+                - text: label-2
+                  value: label-2
+                - text: label-3
+                  value: label-3
+                type: ranking
+              title: Question-5
+              type: ranking
+              values:
+              - label-1
+              - label-2
+              - label-3
+            """,
+        ),
+    ),
+)
+def test_dataset_config_backwards_compatibility_argilla_yaml(argilla_version: str, outdated_config: str) -> None:
+    print(f"Loading `argilla.yaml` dumped using `push_to_huggingface` from argilla=={argilla_version}")
+    config = DatasetConfig.from_yaml(outdated_config)
+    assert isinstance(config, DatasetConfig)
+
+    outdated_config_as_dict = load(
+        re.sub(r"(\n\s*|)id: !!python/object:uuid\.UUID\s+int: \d+", "", outdated_config), Loader=SafeLoader
+    )
+    assert isinstance(outdated_config_as_dict, dict)
+
+    for field in config.fields:
+        assert isinstance(field, FieldSchema)
+        matching_field = next(
+            (
+                outdated_field
+                for outdated_field in outdated_config_as_dict["fields"]
+                if outdated_field["name"] == field.name
+            ),
+            None,
+        )
+        assert matching_field is not None
+        assert field.title == matching_field["title"]
+        assert field.required == matching_field["required"]
+        if "settings" in matching_field:
+            assert field.server_settings == matching_field["settings"]
+
+    for question in config.questions:
+        assert isinstance(question, QuestionSchema)
+        matching_question = next(
+            (
+                outdated_question
+                for outdated_question in outdated_config_as_dict["questions"]
+                if outdated_question["name"] == question.name
+            ),
+            None,
+        )
+        assert matching_question is not None
+        assert question.title == matching_question["title"]
+        assert question.description == matching_question["description"]
+        assert question.required == matching_question["required"]
+        if "settings" in matching_question:
+            if matching_question["settings"]["type"] in ["label_selection", "multi_label_selection"]:
+                _ = [option.pop("description", None) for option in matching_question["settings"]["options"]]
+            assert question.server_settings == matching_question["settings"]
+
+    assert config.guidelines == outdated_config_as_dict["guidelines"]
