@@ -15,6 +15,12 @@ Here you can find end-to-end examples to help you get started with curanting dat
 Learn how to fine-tune and evaluate gpt3.5-turbo models with human feedback for RAG applications with LlamaIndex.
 
 ```
+```{grid-item-card} Ⓜ️ Finetuning LLMs as chat assistants: Supervised Finetuning on Mistral 7B
+:link: feedback/training-llm-mistral-sft.html
+
+Learn how to fine-tune Mistral 7B into a chat assistant using supervised finetuning with the ArgillaTrainer and TRL.
+
+```
 ```{grid-item-card} 🖼️ Curate an instruction dataset for supervised fine-tuning
 :link: feedback/curating-feedback-instructiondataset.html
 
@@ -96,6 +102,7 @@ Learn how to use the `sentence-transformers` and `snorkel` to do weak supervisio
 :hidden:
 
 feedback/fine-tuning-openai-rag-feedback
+feedback/training-llm-mistral-sft
 feedback/curating-feedback-instructiondataset
 feedback/train-reward-model-rlhf
 feedback/labelling-feedback-setfit
