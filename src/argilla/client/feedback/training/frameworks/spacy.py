@@ -171,6 +171,8 @@ class ArgillaSpaCyTrainer(ArgillaSpaCyTrainerV1, _ArgillaSpaCyTrainerBase):
             lang=self.language,
             gpu_id=self.gpu_id,
             framework_kwargs={"optimize": self.optimize, "freeze_tok2vec": self.freeze_tok2vec},
+            pipeline=self._pipeline,  # Used only to keep track for the config arguments
+            update_config_kwargs=self.config["training"],
             **card_data_kwargs,
         )
 
@@ -205,5 +207,7 @@ class ArgillaSpaCyTransformersTrainer(ArgillaSpaCyTransformersTrainerV1, _Argill
             lang=self.language,
             gpu_id=self.gpu_id,
             framework_kwargs={"optimize": self.optimize, "update_transformer": self.update_transformer},
+            pipeline=self._pipeline,  # Used only to keep track for the config arguments
+            update_config_kwargs=self.config["training"],
             **card_data_kwargs,
         )

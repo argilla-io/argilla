@@ -34,11 +34,7 @@ trainer = ArgillaTrainer(
     {%- if gpu_id %}{{ "\n    " }}gpu_id={{ gpu_id }},{% endif %}
     {%- if framework_kwargs %}{{ "\n    " }}framework_kwargs={{ framework_kwargs }},{% endif %}
 )
-
-trainer.update_config(
-    # The non default hyperparameters will be filled here
-)
-
+{% if update_config_call %}{{ update_config_call }}{% endif %}
 trainer.train(output_dir={{ output_dir }})
 ```
 

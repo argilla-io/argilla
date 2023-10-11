@@ -40,5 +40,6 @@ class ArgillaPeftTrainer(ArgillaPeftTrainerV1, ArgillaTransformersTrainer):
         return PeftModelCardData(
             model_name=self._model,
             task=self._task,
+            update_config_kwargs=self.lora_kwargs,
             **card_data_kwargs,
         )

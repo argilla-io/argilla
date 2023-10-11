@@ -363,5 +363,7 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
             model_name=self._model,
             task=self._task,
             framework_kwargs={"cross_encoder": self._cross_encoder},
+            update_config_kwargs={**self.trainer_kwargs, **self.model_kwargs, **self.data_kwargs},
+            trainer_cls=self._trainer_cls,
             **card_data_kwargs,
         )
