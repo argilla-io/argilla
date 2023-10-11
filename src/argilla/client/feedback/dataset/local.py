@@ -37,8 +37,7 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
         questions: List[AllowedQuestionTypes],
         metadata_properties: Optional[List["AllowedMetadataPropertyTypes"]] = None,
         guidelines: Optional[str] = None,
-        # TODO: uncomment when supported in the API
-        # extra_metadata_allowed: bool = True,
+        allow_extra_metadata: bool = True,
     ) -> None:
         """Initializes a `FeedbackDataset` instance locally.
 
@@ -48,6 +47,8 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
             metadata_properties: contains the metadata properties that will be indexed
                 and could be used to filter the dataset. Defaults to `None`.
             guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
+            allow_extra_metadata: whether to allow extra metadata that has not been defined
+                as a metadata property in the records. Defaults to `True`.
 
         Raises:
             TypeError: if `fields` is not a list of `FieldSchema`.
@@ -115,8 +116,7 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
             questions=questions,
             metadata_properties=metadata_properties,
             guidelines=guidelines,
-            # TODO: uncomment when supported in the API
-            # extra_metadata_allowed=extra_metadata_allowed,
+            allow_extra_metadata=allow_extra_metadata,
         )
 
         self._records = []

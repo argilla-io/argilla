@@ -268,7 +268,11 @@ class ArgillaMixin:
 
         try:
             new_dataset: "FeedbackDatasetModel" = datasets_api_v1.create_dataset(
-                client=httpx_client, name=name, workspace_id=workspace.id, guidelines=self.guidelines
+                client=httpx_client,
+                name=name,
+                workspace_id=workspace.id,
+                guidelines=self.guidelines,
+                allow_extra_metadata=self.allow_extra_metadata,
             ).parsed
             argilla_id = new_dataset.id
         except Exception as e:
@@ -306,6 +310,7 @@ class ArgillaMixin:
             questions=questions,
             metadata_properties=metadata_properties,
             guidelines=self.guidelines,
+            allow_extra_metadata=self.allow_extra_metadata,
         )
 
     @staticmethod
@@ -388,8 +393,7 @@ class ArgillaMixin:
             questions=questions,
             metadata_properties=metadata_properties,
             guidelines=existing_dataset.guidelines or None,
-            # TODO: uncomment once we support in the API
-            # allow_extra_metadata=existing_dataset.allow_extra_metadata,
+            allow_extra_metadata=existing_dataset.allow_extra_metadata,
         )
 
     @classmethod

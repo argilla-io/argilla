@@ -21,10 +21,18 @@ from argilla import FeedbackRecord
 from argilla.client import api
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
     IntegerMetadataProperty,
     TermsMetadataProperty,
+)
+from argilla.client.feedback.schemas.questions import (
+    LabelQuestion,
+    MultiLabelQuestion,
+    RankingQuestion,
+    RatingQuestion,
+    TextQuestion,
 )
 from argilla.client.feedback.schemas.remote.metadata import (
     RemoteFloatMetadataProperty,
@@ -52,6 +60,27 @@ if TYPE_CHECKING:
     from argilla.client.sdk.users.models import UserModel as User
 
 
+@pytest.fixture
+def feedback_dataset() -> FeedbackDataset:
+    return FeedbackDataset(
+        fields=[TextField(name="text"), TextField(name="text-2")],
+        questions=[
+            TextQuestion(name="text"),
+            LabelQuestion(name="label", labels=["label-1", "label-2", "label-3"], required=False),
+            MultiLabelQuestion(name="multi-label", labels=["label-1", "label-2", "label-3"], required=False),
+            RankingQuestion(name="ranking", values=["top-1", "top-2", "top-3"], required=False),
+            RatingQuestion(name="rating", values=[1, 2, 3, 4, 5], required=False),
+        ],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="integer-metadata", min=0, max=10),
+            FloatMetadataProperty(name="float-metadata", min=0, max=10),
+        ],
+        guidelines="unit test guidelines",
+        allow_extra_metadata=False,
+    )
+
+
 @pytest.mark.asyncio
 class TestRemoteFeedbackDataset:
     @pytest.mark.parametrize(
@@ -76,6 +105,56 @@ class TestRemoteFeedbackDataset:
         remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
         remote_dataset.add_records([record])
         assert len(remote_dataset.records) == 1
+
+    async def test_from_argilla(self, feedback_dataset: FeedbackDataset, owner: "User") -> None:
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="unit-test")
+
+        remote = feedback_dataset.push_to_argilla(name="unit-test-dataset", workspace="unit-test")
+
+        assert remote.name == "unit-test-dataset"
+        assert remote.workspace.name == workspace.name
+        assert remote.guidelines == "unit test guidelines"
+        assert remote.allow_extra_metadata is False
+
+        for remote_field, field in zip(remote.fields, feedback_dataset.fields):
+            assert field.name == remote_field.name
+            assert field.type == remote_field.type
+            assert field.required == remote_field.required
+
+        for remote_question, question in zip(remote.questions, feedback_dataset.questions):
+            assert question.name == remote_question.name
+            assert question.type == remote_question.type
+            assert question.required == remote_question.required
+
+        for remote_metadata_property, metadata_property in zip(
+            remote.metadata_properties, feedback_dataset.metadata_properties
+        ):
+            assert metadata_property.name == remote_metadata_property.name
+            assert metadata_property.type == remote_metadata_property.type
+
+        remote = FeedbackDataset.from_argilla(id=remote.id)
+
+        assert remote.name == "unit-test-dataset"
+        assert remote.workspace.name == workspace.name
+        assert remote.guidelines == "unit test guidelines"
+        assert remote.allow_extra_metadata is False
+
+        for remote_field, field in zip(remote.fields, feedback_dataset.fields):
+            assert field.name == remote_field.name
+            assert field.type == remote_field.type
+            assert field.required == remote_field.required
+
+        for remote_question, question in zip(remote.questions, feedback_dataset.questions):
+            assert question.name == remote_question.name
+            assert question.type == remote_question.type
+            assert question.required == remote_question.required
+
+        for remote_metadata_property, metadata_property in zip(
+            remote.metadata_properties, feedback_dataset.metadata_properties
+        ):
+            assert metadata_property.name == remote_metadata_property.name
+            assert metadata_property.type == remote_metadata_property.type
 
     @pytest.mark.parametrize(
         "metadata_property, remote_metadata_property_cls",
