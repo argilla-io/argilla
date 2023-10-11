@@ -19,7 +19,7 @@ from uuid import UUID
 from pydantic import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, conint, validator
 
 from argilla.client.feedback.schemas.enums import ResponseStatus
-from argilla.server.enums import RecordSortField, SortOrder
+from argilla.client.feedback.schemas.enums import RecordSortField, SortOrder
 
 if TYPE_CHECKING:
     from argilla.client.feedback.unification import UnifiedValueSchema
@@ -259,7 +259,7 @@ class SortBy(BaseModel):
     order: Union[str, SortOrder] = SortOrder.asc
 
     @validator("field")
-    def check_field_name(cls, field: Union[str, RecordSortField]):
+    def check_field_name(cls, field: Union[str, RecordSortField]) -> RecordSortField:
         if isinstance(field, str) and field.startswith("metadata."):
             return field
         elif isinstance(field, str):
