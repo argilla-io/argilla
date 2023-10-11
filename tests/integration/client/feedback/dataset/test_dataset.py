@@ -17,7 +17,6 @@ from typing import TYPE_CHECKING, List, Type, Union
 
 import datasets
 import pytest
-
 from argilla.client import api
 from argilla.client.feedback.config import DatasetConfig
 from argilla.client.feedback.dataset import FeedbackDataset
@@ -33,10 +32,10 @@ from argilla.client.feedback.training.schemas import TrainingTask
 from argilla.client.models import Framework
 
 if TYPE_CHECKING:
-    from sqlalchemy.ext.asyncio import AsyncSession
-
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
     from argilla.server.models import User as ServerUser
+    from sqlalchemy.ext.asyncio import AsyncSession
+
     from tests.integration.helpers import SecuredClient
 
 
