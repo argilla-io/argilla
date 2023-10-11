@@ -85,52 +85,6 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
             ...     guidelines="These are the annotation guidelines.",
             ... )
         """
-        if not isinstance(fields, list):
-            raise TypeError(f"Expected `fields` to be a list, got {type(fields)} instead.")
-
-        any_required = False
-        unique_names = set()
-        for field in fields:
-            if not isinstance(field, TextField):
-                raise TypeError(f"Expected `fields` to be a list of `TextField`, got {type(field)} instead.")
-            if field.name in unique_names:
-                raise ValueError(f"Expected `fields` to have unique names, got {field.name} twice instead.")
-            unique_names.add(field.name)
-            if not any_required and field.required:
-                any_required = True
-        if not any_required:
-            raise ValueError("At least one field in `fields` must be required (`required=True`).")
-
-        if not isinstance(questions, list):
-            raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
-
-        any_required = False
-        unique_names = set()
-        for question in questions:
-            if not isinstance(question, AllowedQuestionTypes.__args__):
-                raise TypeError(
-                    "Expected `questions` to be a list of"
-                    f" `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}` got a"
-                    f" question in the list with type {type(question)} instead."
-                )
-            if question.name in unique_names:
-                raise ValueError(f"Expected `questions` to have unique names, got {question.name} twice instead.")
-            unique_names.add(question.name)
-            if not any_required and question.required:
-                any_required = True
-        if not any_required:
-            raise ValueError("At least one question in `questions` must be required (`required=True`).")
-
-        if guidelines is not None:
-            if not isinstance(guidelines, str):
-                raise TypeError(
-                    f"Expected `guidelines` to be either None (default) or a string, got {type(guidelines)} instead."
-                )
-            if len(guidelines) < 1:
-                raise ValueError(
-                    "Expected `guidelines` to be either None (default) or a non-empty string, minimum length is 1."
-                )
-
         super().__init__(fields=fields, questions=questions, guidelines=guidelines)
 
         self._records = []

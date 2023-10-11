@@ -23,7 +23,7 @@ from argilla.client.feedback.schemas import (
     FeedbackRecord,
     FieldSchema,
 )
-from argilla.client.feedback.schemas.types import AllowedQuestionTypes
+from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.feedback.training.schemas import (
     TrainingTaskForChatCompletion,
     TrainingTaskForDPO,
@@ -43,7 +43,6 @@ if TYPE_CHECKING:
     from datasets import Dataset
 
     from argilla.client.feedback.schemas.types import (
-        AllowedFieldTypes,
         AllowedRemoteFieldTypes,
         AllowedRemoteQuestionTypes,
     )
@@ -58,8 +57,8 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
     def __init__(
         self,
         *,
-        fields: Union[List["AllowedFieldTypes"], List["AllowedRemoteFieldTypes"]],
-        questions: Union[List["AllowedQuestionTypes"], List["AllowedRemoteQuestionTypes"]],
+        fields: Union[List[AllowedFieldTypes], List["AllowedRemoteFieldTypes"]],
+        questions: Union[List[AllowedQuestionTypes], List["AllowedRemoteQuestionTypes"]],
         guidelines: Optional[str] = None,
     ) -> None:
         """Initializes a `FeedbackDatasetBase` instance locally.
@@ -78,9 +77,61 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             TypeError: if `guidelines` is not None and not a string.
             ValueError: if `guidelines` is an empty string.
         """
+        if not isinstance(fields, list):
+            raise TypeError(f"Expected `fields` to be a list, got {type(fields)} instead.")
+
+        any_required = False
+        unique_names = set()
+        for field in fields:
+            if not isinstance(field, AllowedFieldTypes):
+                raise TypeError(
+                    f"Expected `fields` to be a list of `{AllowedFieldTypes.__name__}`, got {type(field)} instead."
+                )
+            if field.name in unique_names:
+                raise ValueError(f"Expected `fields` to have unique names, got {field.name} twice instead.")
+            unique_names.add(field.name)
+            if not any_required and field.required:
+                any_required = True
+
+        if not any_required:
+            raise ValueError("At least one field in `fields` must be required (`required=True`).")
+
         self._fields = fields
         self._fields_schema = generate_pydantic_schema(self.fields)
+
+        if not isinstance(questions, list):
+            raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
+
+        any_required = False
+        unique_names = set()
+        for question in questions:
+            if not isinstance(question, AllowedQuestionTypes.__args__):
+                raise TypeError(
+                    "Expected `questions` to be a list of"
+                    f" `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}` got a"
+                    f" question in the list with type {type(question)} instead."
+                )
+            if question.name in unique_names:
+                raise ValueError(f"Expected `questions` to have unique names, got {question.name} twice instead.")
+            unique_names.add(question.name)
+            if not any_required and question.required:
+                any_required = True
+
+        if not any_required:
+            raise ValueError("At least one question in `questions` must be required (`required=True`).")
+
         self._questions = questions
+
+        if guidelines is not None:
+            if not isinstance(guidelines, str):
+                raise TypeError(
+                    f"Expected `guidelines` to be either None (default) or a string, got {type(guidelines)} instead."
+                )
+            if len(guidelines) < 1:
+                raise ValueError(
+                    "Expected `guidelines` to be either None (default) or a non-empty string, minimum length is 1."
+                )
+
         self._guidelines = guidelines
 
     @property
@@ -95,11 +146,11 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         return self._guidelines
 
     @property
-    def fields(self) -> Union[List["AllowedFieldTypes"], List["AllowedRemoteFieldTypes"]]:
+    def fields(self) -> Union[List[AllowedFieldTypes], List["AllowedRemoteFieldTypes"]]:
         """Returns the fields that define the schema of the records in the dataset."""
         return self._fields
 
-    def field_by_name(self, name: str) -> Union["AllowedFieldTypes", "AllowedRemoteFieldTypes"]:
+    def field_by_name(self, name: str) -> Union[AllowedFieldTypes, "AllowedRemoteFieldTypes"]:
         """Returns the field by name if it exists. Othewise a `ValueError` is raised.
 
         Args:
