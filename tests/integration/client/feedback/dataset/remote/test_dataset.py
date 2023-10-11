@@ -13,17 +13,14 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import TYPE_CHECKING, List
+from typing import List, TYPE_CHECKING, Type
 from uuid import UUID
 
 import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from argilla import (
     FeedbackRecord,
-    FloatMetadataProperty,
-    IntegerMetadataProperty,
-    TermsMetadataProperty,
-    TextField,
-    TextQuestion,
 )
 from argilla.client import api
 from argilla.client.feedback.dataset import FeedbackDataset
@@ -50,8 +47,6 @@ from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQues
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.workspaces import Workspace
 from argilla.server.models import User as ServerUser
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from tests.factories import (
     DatasetFactory,
     RecordFactory,
@@ -175,7 +170,7 @@ class TestRemoteFeedbackDataset:
             assert metadata_property.type == remote_metadata_property.type
 
     @pytest.mark.parametrize(
-        "metadata_property, remote_metadata_property_cls",
+        "metadata_property, RemoteMetadataPropertyCls",
         [
             (TermsMetadataProperty(name="new-terms-metadata"), RemoteTermsMetadataProperty),
             (TermsMetadataProperty(name="new-terms-metadata", values=["a", "b", "c"]), RemoteTermsMetadataProperty),
@@ -188,22 +183,26 @@ class TestRemoteFeedbackDataset:
     async def test_add_metadata_property(
         self,
         owner: "User",
+        test_dataset: FeedbackDataset,
         metadata_property: "AllowedMetadataPropertyTypes",
-        remote_metadata_property_cls: "AllowedRemoteMetadataPropertyTypes",
+        RemoteMetadataPropertyCls: Type["AllowedRemoteMetadataPropertyTypes"],
     ) -> None:
-        dataset = await DatasetFactory.create(status="ready")
-        await TextFieldFactory.create(dataset=dataset, required=True)
-        await TextQuestionFactory.create(dataset=dataset, required=True)
-
         api.init(api_key=owner.api_key)
-        remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
+        workspace = Workspace.create(name="test-workspace")
+
+        remote_dataset = test_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
         remote_metadata_property = remote_dataset.add_metadata_property(metadata_property)
-        assert isinstance(remote_metadata_property, remote_metadata_property_cls)
+
+        assert isinstance(remote_metadata_property, RemoteMetadataPropertyCls)
         assert remote_metadata_property.name == metadata_property.name
-        assert remote_dataset.metadata_properties == [remote_metadata_property]
+
+        remote_dataset = FeedbackDataset.from_argilla(id=remote_dataset.id)
+        assert remote_dataset.metadata_property_by_name(
+            remote_metadata_property.name
+        ) == RemoteMetadataPropertyCls.parse_obj(metadata_property.dict())
 
     @pytest.mark.parametrize(
-        "metadata_properties, remote_metadata_properties_cls",
+        "metadata_properties, RemoteMetadataPropertiesClasses",
         [
             (
                 [
@@ -234,19 +233,20 @@ class TestRemoteFeedbackDataset:
     async def test_add_metadata_property_sequential(
         self,
         owner: "User",
+        test_dataset: FeedbackDataset,
         metadata_properties: List["AllowedMetadataPropertyTypes"],
-        remote_metadata_properties_cls: List["AllowedRemoteMetadataPropertyTypes"],
+        RemoteMetadataPropertiesClasses: List[Type["AllowedRemoteMetadataPropertyTypes"]],
     ) -> None:
-        dataset = await DatasetFactory.create(status="ready")
-        await TextFieldFactory.create(dataset=dataset, required=True)
-        await TextQuestionFactory.create(dataset=dataset, required=True)
-
         api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        dataset = test_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+
         remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
-        assert len(remote_dataset.metadata_properties) == 0
+        assert len(remote_dataset.metadata_properties) == len(test_dataset.metadata_properties)
 
         for idx, (metadata_property, remote_metadata_property_cls) in enumerate(
-            zip(metadata_properties, remote_metadata_properties_cls)
+            zip(metadata_properties, RemoteMetadataPropertiesClasses), start=len(test_dataset.metadata_properties)
         ):
             remote_metadata_property = remote_dataset.add_metadata_property(metadata_property)
             assert isinstance(remote_metadata_property, remote_metadata_property_cls)
@@ -270,7 +270,7 @@ class TestRemoteFeedbackDataset:
         )
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_delete_records(self, owner: "User", role: UserRole, test_dataset: FeedbackDataset) -> None:
+    async def test_delete_records(self, owner: "User", test_dataset: FeedbackDataset, role: UserRole) -> None:
         user = await UserFactory.create(role=role)
 
         api.init(api_key=owner.api_key)
