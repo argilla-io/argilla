@@ -92,13 +92,13 @@ def test_init_wrong_fields(
             fields=None,
             questions=feedback_dataset_questions,
         )
-    with pytest.raises(TypeError, match="Expected `fields` to be a list of `FieldSchema`"):
+    with pytest.raises(TypeError, match="Expected `fields` to be a list of `TextField`"):
         TestFeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=[{"wrong": "field"}],
             questions=feedback_dataset_questions,
         )
-    with pytest.raises(ValueError, match="At least one `FieldSchema` in `fields` must be required"):
+    with pytest.raises(ValueError, match="At least one field in `fields` must be required"):
         TestFeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=[TextField(name="test", required=False)],

@@ -11,14 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import warnings
+
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from argilla.client.feedback.dataset.remote.base import RemoteFeedbackDatasetBase, RemoteFeedbackRecordsBase
+from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.client.feedback.schemas.metadata import MetadataFilters
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
-from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel, FeedbackResponseStatusFilter
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
     from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
+    from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
     from argilla.client.workspaces import Workspace
 
 
@@ -36,14 +37,14 @@ class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase):
     def __init__(
         self,
         dataset: "RemoteFeedbackDataset",
-        response_status: Optional[List["FeedbackResponseStatusFilter"]] = None,
+        response_status: Optional[List[ResponseStatusFilter]] = None,
         metadata_filters: Optional[List["MetadataFilters"]] = None,
     ) -> None:
         super().__init__(dataset=dataset)
 
         self._response_status = (
             [
-                status.value if hasattr(status, "value") else FeedbackResponseStatusFilter(status).value
+                status.value if hasattr(status, "value") else ResponseStatusFilter(status).value
                 for status in response_status
             ]
             if response_status
@@ -93,7 +94,7 @@ class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeed
         fields: List["AllowedRemoteFieldTypes"],
         questions: List["AllowedRemoteQuestionTypes"],
         guidelines: Optional[str] = None,
-        response_status: Optional[List["FeedbackResponseStatusFilter"]] = None,
+        response_status: Optional[List[ResponseStatusFilter]] = None,
         metadata_filters: Optional[List["MetadataFilters"]] = None,
     ) -> None:
         super().__init__(

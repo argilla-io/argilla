@@ -40,10 +40,12 @@ These are the section headers that we use:
 
 - Updated active learning for text classification notebooks to pass ids of type int to `TextClassificationRecord` ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
 - Fixed record fields validation that was preventing from logging records with optional fields (i.e. `required=True`) when the field value was `None` ([#3846](https://github.com/argilla-io/argilla/pull/3846)).
+- Fixed response schemas to allow `values` to be `None` i.e. when a record is discarded the `response.values` are set to `None` ([#3926](https://github.com/argilla-io/argilla/pull/3926)).
 
 ### Fixed
 
-- Fixed saving of models trained with `ArgillaTrainer` with a `peft_config` parameter. ([#3795](https://github.com/argilla-io/argilla/pull/3795))
+- Fixed saving of models trained with `ArgillaTrainer` with a `peft_config` parameter ([#3795](https://github.com/argilla-io/argilla/pull/3795)).
+- Fixed backwards compatibility on `from_huggingface` when loading a `FeedbackDataset` from the Hugging Face Hub that was previously dumped using another version of Argilla, starting at 1.8.0, when it was first introduced ([#3829](https://github.com/argilla-io/argilla/pull/3829)).
 
 ### Fixed
 
