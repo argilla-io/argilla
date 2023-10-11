@@ -196,7 +196,9 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         # TODO(alvarobartt): structure better the mixins to be able to easily reuse those, here to avoid circular imports
         from argilla.client.feedback.dataset.mixins import ArgillaMixin
 
-        metadata_property = ArgillaMixin._parse_to_remote_metadata_property(metadata_property)
+        metadata_property = ArgillaMixin._parse_to_remote_metadata_property(
+            metadata_property=metadata_property, client=self._client
+        )
         self._metadata_properties.append(metadata_property)
         self._metadata_properties_mapping[metadata_property.name] = metadata_property
         return metadata_property
