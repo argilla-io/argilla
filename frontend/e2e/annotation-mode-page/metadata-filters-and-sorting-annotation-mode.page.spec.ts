@@ -8,6 +8,7 @@ import {
 import {
   metadataPropertiesCompleted,
   mockRecordForMetadataFilter,
+  mockRecordForMetadataSorting,
 } from "../common/metadata-api-mock";
 
 const goToAnnotationPage = async (page) => {
@@ -181,7 +182,8 @@ test.describe("Annotation page Metadata filters", () => {
     });
 
     test("The user can sort by metadata", async ({ page }) => {
-      await goToAnnotationPage(page);
+      const dataset = await goToAnnotationPage(page);
+      await mockRecordForMetadataSorting(page, dataset.id);
 
       await page.getByRole("button", { name: "Sort" }).click();
 
@@ -191,7 +193,7 @@ test.describe("Annotation page Metadata filters", () => {
 
       await page.locator(".empty-content-right").click();
 
-      await page.waitForTimeout(100);
+      await page.waitForTimeout(500);
 
       await expect(page).toHaveScreenshot();
     });
