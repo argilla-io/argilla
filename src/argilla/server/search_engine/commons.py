@@ -57,11 +57,9 @@ class UserResponse(BaseModel):
     status: ResponseStatus
 
 
-def _build_metadata_field_payload(
-    dataset: Dataset, metadata: Union[Dict[str, Any], None] = None
-) -> Union[Dict[str, Any], None]:
+def _build_metadata_field_payload(dataset: Dataset, metadata: Union[Dict[str, Any], None] = None) -> Dict[str, Any]:
     if metadata is None:
-        return None
+        return {}
 
     search_engine_metadata = {}
     for metadata_property in dataset.metadata_properties:
