@@ -368,8 +368,7 @@ class ArgillaMixin:
             questions=questions,
             metadata_properties=metadata_properties,
             guidelines=existing_dataset.guidelines or None,
-            # TODO: uncomment once we support in the API
-            # allow_extra_metadata=existing_dataset.allow_extra_metadata,
+            allow_extra_metadata=existing_dataset.allow_extra_metadata,
         )
 
     @classmethod
