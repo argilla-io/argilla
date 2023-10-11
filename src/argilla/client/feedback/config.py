@@ -44,17 +44,17 @@ class DatasetConfig(BaseModel):
         return dump(self.dict())
 
     @classmethod
-    def from_yaml(cls, yaml: str) -> "DatasetConfig":
-        yaml = re.sub(r"(\n\s*|)id: !!python/object:uuid\.UUID\s+int: \d+", "", yaml)
-        yaml = load(yaml, Loader=SafeLoader)
+    def from_yaml(cls, yaml_str: str) -> "DatasetConfig":
+        yaml_str = re.sub(r"(\n\s*|)id: !!python/object:uuid\.UUID\s+int: \d+", "", yaml_str)
+        yaml_dict = load(yaml_str, Loader=SafeLoader)
         # Here for backwards compatibility
-        for field in yaml["fields"]:
+        for field in yaml_dict["fields"]:
             field.pop("id", None)
             field.pop("settings", None)
-        for question in yaml["questions"]:
+        for question in yaml_dict["questions"]:
             question.pop("id", None)
             question.pop("settings", None)
-        return cls(**yaml)
+        return cls(**yaml_dict)
 
 
 # TODO(alvarobartt): here for backwards compatibility, remove in 1.14.0
