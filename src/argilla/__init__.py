@@ -92,6 +92,9 @@ if _TYPE_CHECKING:
         TextField,
         TextQuestion,
         ValueSchema,
+        SortBy,
+        SortOrder,
+        RecordSortField,
     )
     from argilla.listeners import Metrics, RGListenerContext, Search, listener
     from argilla.monitoring.model_monitor import monitor
@@ -121,6 +124,9 @@ _import_structure = {
         "TermsMetadataFilter",
         "IntegerMetadataFilter",
         "FloatMetadataFilter",
+        "SortBy",
+        "SortOrder",
+        "RecordSortField",
     ],
     "client.api": [
         "copy",

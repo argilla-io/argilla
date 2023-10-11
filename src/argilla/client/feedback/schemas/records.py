@@ -19,6 +19,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, conint, validator
 
+from argilla.server.enums import RecordSortField, SortOrder
+
 if TYPE_CHECKING:
     from argilla.client.feedback.unification import UnifiedValueSchema
 
@@ -256,3 +258,32 @@ class FeedbackRecord(BaseModel):
         if self.external_id:
             payload["external_id"] = self.external_id
         return payload
+
+
+class SortBy(BaseModel):
+    field: Union[str, RecordSortField]
+    order: Union[str, SortOrder] = SortOrder.asc
+
+    @validator("field")
+    def check_field_name(cls, field: Union[str, RecordSortField]):
+        if isinstance(field, str) and field.startswith("metadata."):
+            return field
+        elif isinstance(field, str):
+            return RecordSortField(field)
+        return field
+
+    @validator("field", pre=True)
+    def check_record_field(cls, field):
+        try:
+            return RecordSortField(field)
+        except:
+            return field
+
+    @validator("order")
+    def check_order(cls, order):
+        return SortOrder(order)
+
+    @property
+    def is_metadata_field(self) -> bool:
+        """Returns whether the field is a metadata field."""
+        return self.field self.field.startswith("metadata.")

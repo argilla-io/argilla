@@ -31,3 +31,13 @@ class MetadataPropertyTypes(str, Enum):
     terms = "terms"
     integer = "integer"
     float = "float"
+
+
+class RecordSortField(str, Enum):
+    inserted_at = "inserted_at"
+    updated_at = "updated_at"
+
+
+class SortOrder(str, Enum):
+    asc = "asc"
+    desc = "desc"
