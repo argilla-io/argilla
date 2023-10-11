@@ -13,16 +13,18 @@
 #  limitations under the License.
 
 import logging
-from abc import ABC, abstractproperty
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
+from abc import ABC, abstractmethod
+from typing import Any, Dict, List, Literal, Optional, TYPE_CHECKING, Union
 
-from pydantic import ValidationError
+from pydantic import  ValidationError
 
 from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     FieldSchema,
 )
+from argilla.client.feedback.schemas import SortBy
+from argilla.client.feedback.schemas.metadata import MetadataFilters
 from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes, AllowedQuestionTypes
 from argilla.client.feedback.training.schemas import (
     TrainingTaskForChatCompletion,
@@ -30,13 +32,14 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForPPO,
     TrainingTaskForQuestionAnswering,
     TrainingTaskForRM,
-    TrainingTaskForSentenceSimilarity,
     TrainingTaskForSFT,
+    TrainingTaskForSentenceSimilarity,
     TrainingTaskForTextClassification,
     TrainingTaskTypes,
 )
 from argilla.client.feedback.utils import generate_pydantic_schema_for_fields, generate_pydantic_schema_for_metadata
 from argilla.client.models import Framework
+from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
 from argilla.utils.dependency import require_dependencies, requires_dependencies
 
 if TYPE_CHECKING:
@@ -155,7 +158,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         # self._extra_metadata_allowed = extra_metadata_allowed
 
     @property
-    @abstractproperty
+    @abstractmethod
     def records(self) -> Any:
         """Returns the records of the dataset."""
         pass
@@ -239,6 +242,21 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                 f"Metadata property with name='{name}' not found, available metadata property names are:"
                 f" {', '.join(self._metadata_properties_mapping.keys())}"
             )
+
+    @abstractmethod
+    def sort_by(self, sort: List[SortBy]) -> "FeedbackDatasetBase":
+        """Sorts the records in the dataset by the given field."""
+        pass
+
+    @abstractmethod
+    def filter_by(
+        self,
+        *,
+        response_status: Optional[Union[FeedbackResponseStatusFilter, List[FeedbackResponseStatusFilter]]] = None,
+        metadata_filters: Optional[Union[MetadataFilters, List[MetadataFilters]]] = None,
+    ) -> "FeedbackDatasetBase":
+        """Filters the records in the dataset by the given filters."""
+        pass
 
     def _parse_records(
         self, records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]]

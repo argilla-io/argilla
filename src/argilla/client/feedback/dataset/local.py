@@ -11,12 +11,15 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
+import warnings
+from typing import Any, Dict, Iterator, List, Optional, TYPE_CHECKING, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.mixins import ArgillaMixin, UnificationMixin
+from argilla.client.feedback.schemas.enums import RecordSortField, SortOrder
+from argilla.client.feedback.schemas.metadata import MetadataFilters
+from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.records import FeedbackRecord
@@ -186,3 +189,24 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
             self._records += records
         else:
             self._records = records
+
+    def sort_by(
+        self, field: Union[str, RecordSortField], order: Union[str, SortOrder] = SortOrder.asc
+    ) -> "FeedbackDataset":
+        warnings.warn(
+            "`sort_by` method only works for `FeedbackDataset` pushed to Argilla. "
+            "Use `sorted` with dataset.records instead."
+        )
+        return self
+
+    def filter_by(
+        self,
+        *,
+        response_status: Optional[Union[FeedbackResponseStatusFilter, List[FeedbackResponseStatusFilter]]] = None,
+        metadata_filters: Optional[Union[MetadataFilters, List[MetadataFilters]]] = None,
+    ) -> "FeedbackDataset":
+        warnings.warn(
+            "`filter_by` method only works for `FeedbackDataset` pushed to Argilla. "
+            "Use `filter` with dataset.records instead."
+        )
+        return self
