@@ -370,6 +370,22 @@ class QuestionPolicyV1:
 
 class MetadataPropertyPolicyV1:
     @classmethod
+    def get(cls, metadata_property: MetadataProperty) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            if actor.is_owner:
+                return True
+
+            exists_workspace_user = await _exists_workspace_user_by_user_and_workspace_id(
+                actor, metadata_property.dataset.workspace_id
+            )
+
+            return (actor.is_admin and exists_workspace_user) or (
+                actor.role in metadata_property.allowed_roles and exists_workspace_user
+            )
+
+        return is_allowed
+
+    @classmethod
     def compute_metrics(cls, metadata_property: MetadataProperty) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
             if actor.is_owner:
@@ -379,6 +395,7 @@ class MetadataPropertyPolicyV1:
                 actor, metadata_property.dataset.workspace_id
             )
 
+            # TODO: Check if we need to change this to support allowed_roles
             return (actor.is_admin and exists_workspace_user and metadata_property.is_visible) or (
                 actor.is_annotator and exists_workspace_user and metadata_property.is_visible_for_annotators
             )

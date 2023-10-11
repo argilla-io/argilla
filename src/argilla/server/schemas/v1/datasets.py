@@ -16,12 +16,13 @@ from datetime import datetime
 from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
-from fastapi import HTTPException, Query
-from pydantic import BaseModel, Extra, conlist, constr, root_validator, validator
+from fastapi import Query
+from pydantic import BaseModel, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
 from pydantic.generics import GenericModel
 from pydantic.utils import GetterDict
 
+from argilla.server.enums import UserRole
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
 from argilla.server.search_engine import StringQuery
@@ -31,7 +32,7 @@ try:
 except ImportError:
     from typing_extensions import Annotated
 
-from argilla.server.enums import DatasetStatus, FieldType, MetadataPropertyType, SortOrder
+from argilla.server.enums import DatasetStatus, FieldType, MetadataPropertyType
 from argilla.server.models import QuestionSettings, QuestionType, ResponseStatus
 
 DATASET_NAME_REGEX = r"^(?!-|_)[a-zA-Z0-9-_ ]+$"
@@ -59,6 +60,8 @@ METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH = 1
 METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH = 50
 METADATA_PROPERTY_CREATE_DESCRIPTION_MIN_LENGTH = 1
 METADATA_PROPERTY_CREATE_DESCRIPTION_MAX_LENGTH = 1000
+METADATA_PROPERTY_CREATE_ALLOWED_ROLES_MIN_ITEMS = 0
+METADATA_PROPERTY_CREATE_ALLOWED_ROLES_MAX_ITEMS = 10
 
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 10
@@ -479,6 +482,12 @@ class MetadataPropertyCreate(BaseModel):
         max_length=METADATA_PROPERTY_CREATE_DESCRIPTION_MAX_LENGTH,
     )
     settings: MetadataPropertySettingsCreate
+    allowed_roles: conlist(
+        item_type=UserRole,
+        min_items=METADATA_PROPERTY_CREATE_ALLOWED_ROLES_MIN_ITEMS,
+        max_items=METADATA_PROPERTY_CREATE_ALLOWED_ROLES_MAX_ITEMS,
+        unique_items=True,
+    ) = []
 
 
 class TermsMetadataProperty(BaseModel):
@@ -509,6 +518,7 @@ class MetadataProperty(BaseModel):
     name: str
     description: Optional[str] = None
     settings: MetadataPropertySettings
+    allowed_roles: List[UserRole]
     inserted_at: datetime
     updated_at: datetime
 

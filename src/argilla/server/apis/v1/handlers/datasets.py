@@ -25,7 +25,7 @@ from argilla.server.database import get_async_db
 from argilla.server.enums import MetadataPropertyType, RecordInclude, RecordSortField, ResponseStatusFilter, SortOrder
 from argilla.server.models import Dataset as DatasetModel
 from argilla.server.models import ResponseStatus, User
-from argilla.server.policies import DatasetPolicyV1, authorize
+from argilla.server.policies import DatasetPolicyV1, MetadataPropertyPolicyV1, authorize, is_authorized
 from argilla.server.schemas.v1.datasets import (
     Dataset,
     DatasetCreate,
@@ -250,6 +250,22 @@ async def _filter_records_using_search_engine(
     )
 
 
+async def _filter_metadata_properties_by_policy(
+    current_user: User, metadata_properties: List[MetadataProperty]
+) -> List[MetadataProperty]:
+    filtered_metadata_properties = []
+
+    for metadata_property in metadata_properties:
+        metadata_property_is_authorized = await is_authorized(
+            current_user, MetadataPropertyPolicyV1.get(metadata_property)
+        )
+
+        if metadata_property_is_authorized:
+            filtered_metadata_properties.append(metadata_property)
+
+    return filtered_metadata_properties
+
+
 @router.get("/me/datasets", response_model=Datasets)
 async def list_current_user_datasets(
     *,
@@ -292,6 +308,22 @@ async def list_dataset_questions(
     return Questions(items=dataset.questions)
 
 
+@router.get("/me/datasets/{dataset_id}/metadata-properties", response_model=MetadataProperties)
+async def list_current_user_dataset_metadata_properties(
+    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
+):
+    dataset = await _get_dataset(db, dataset_id, with_metadata_properties=True)
+
+    await authorize(current_user, DatasetPolicyV1.get(dataset))
+
+    filtered_metadata_properties = await _filter_metadata_properties_by_policy(
+        current_user, dataset.metadata_properties
+    )
+
+    return MetadataProperties(items=filtered_metadata_properties)
+
+
+# TODO: We should remove this endpoint
 @router.get("/datasets/{dataset_id}/metadata-properties", response_model=MetadataProperties)
 async def list_dataset_metadata_properties(
     *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
@@ -527,24 +559,26 @@ async def create_dataset_metadata_property(
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
-    metadata_prop_create: MetadataPropertyCreate,
+    metadata_property_create: MetadataPropertyCreate,
     current_user: User = Security(auth.get_current_user),
 ):
     dataset = await _get_dataset(db, dataset_id)
 
     await authorize(current_user, DatasetPolicyV1.create_metadata_property(dataset))
 
-    if await datasets.get_metadata_property_by_name_and_dataset_id(db, metadata_prop_create.name, dataset_id):
+    if await datasets.get_metadata_property_by_name_and_dataset_id(db, metadata_property_create.name, dataset_id):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"Metadata property with name `{metadata_prop_create.name}` "
+            detail=f"Metadata property with name `{metadata_property_create.name}` "
             f"already exists for dataset with id `{dataset_id}`",
         )
 
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
     # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
-        metadata_property = await datasets.create_metadata_property(db, search_engine, dataset, metadata_prop_create)
+        metadata_property = await datasets.create_metadata_property(
+            db, search_engine, dataset, metadata_property_create
+        )
         return metadata_property
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))

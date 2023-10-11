@@ -435,7 +435,9 @@ class TestSuiteDatasets:
 
         assert response.status_code == 404
 
-    async def test_list_dataset_metadata_properties(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_list_current_user_dataset_metadata_properties(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
 
         terms_property = await TermsMetadataPropertyFactory.create(name="terms", dataset=dataset)
@@ -447,7 +449,7 @@ class TestSuiteDatasets:
         await FloatMetadataPropertyFactory.create()
 
         response = await async_client.get(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header
+            f"/api/v1/me/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header
         )
 
         assert response.status_code == 200, response.json()
@@ -458,6 +460,7 @@ class TestSuiteDatasets:
                     "name": "terms",
                     "description": terms_property.description,
                     "settings": {"type": "terms", "values": ["a", "b", "c"]},
+                    "allowed_roles": [],
                     "inserted_at": terms_property.inserted_at.isoformat(),
                     "updated_at": terms_property.updated_at.isoformat(),
                 },
@@ -466,6 +469,7 @@ class TestSuiteDatasets:
                     "name": "integer",
                     "description": integer_property.description,
                     "settings": {"type": "integer", "min": None, "max": None},
+                    "allowed_roles": [],
                     "inserted_at": integer_property.inserted_at.isoformat(),
                     "updated_at": integer_property.updated_at.isoformat(),
                 },
@@ -474,6 +478,7 @@ class TestSuiteDatasets:
                     "name": "float",
                     "description": float_property.description,
                     "settings": {"type": "float", "min": None, "max": None},
+                    "allowed_roles": [],
                     "inserted_at": float_property.inserted_at.isoformat(),
                     "updated_at": float_property.updated_at.isoformat(),
                 },
@@ -2709,6 +2714,7 @@ class TestSuiteDatasets:
             "name": "name",
             "description": None,
             "settings": expected_settings,
+            "allowed_roles": [],
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
@@ -2740,6 +2746,7 @@ class TestSuiteDatasets:
         assert response_body == {
             "id": str(UUID(response_body["id"])),
             "description": None,
+            "allowed_roles": [],
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
             **metadata_property_json,
@@ -2804,6 +2811,7 @@ class TestSuiteDatasets:
             "name": "name",
             "description": "description",
             "settings": {"type": "terms", "values": ["a", "b", "c"]},
+            "allowed_roles": [],
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }

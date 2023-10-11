@@ -228,15 +228,19 @@ async def create_question(db: "AsyncSession", dataset: Dataset, question_create:
 
 
 async def create_metadata_property(
-    db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, metadata_prop_create: MetadataPropertyCreate
+    db: "AsyncSession",
+    search_engine: "SearchEngine",
+    dataset: Dataset,
+    metadata_property_create: MetadataPropertyCreate,
 ) -> MetadataProperty:
     async with db.begin_nested():
         metadata_property = await MetadataProperty.create(
             db,
-            name=metadata_prop_create.name,
-            type=metadata_prop_create.settings.type,
-            description=metadata_prop_create.description,
-            settings=metadata_prop_create.settings.dict(),
+            name=metadata_property_create.name,
+            type=metadata_property_create.settings.type,
+            description=metadata_property_create.description,
+            settings=metadata_property_create.settings.dict(),
+            allowed_roles=metadata_property_create.allowed_roles,
             dataset_id=dataset.id,
             autocommit=False,
         )
@@ -244,6 +248,7 @@ async def create_metadata_property(
             await search_engine.configure_metadata_property(dataset, metadata_property)
 
     await db.commit()
+
     return metadata_property
 
 
