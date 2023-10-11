@@ -125,11 +125,20 @@ async def test_create_dataset(role: UserRole) -> None:
     user = await UserFactory.create(role=role, workspaces=[workspace])
 
     api = Argilla(api_key=user.api_key, workspace=workspace.name)
-    response = create_dataset(client=api.client.httpx, name="dataset_name", workspace_id=str(workspace.id))
+    response = create_dataset(
+        client=api.client.httpx,
+        name="dataset_name",
+        workspace_id=str(workspace.id),
+        guidelines="integration-test",
+        allow_extra_metadata=True,
+    )
 
     assert response.status_code == 201
     assert isinstance(response.parsed, FeedbackDatasetModel)
     assert response.parsed.name == "dataset_name"
+    assert response.parsed.status == DatasetStatus.draft
+    assert response.parsed.guidelines == "integration-test"
+    assert response.parsed.allow_extra_metadata is True
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
