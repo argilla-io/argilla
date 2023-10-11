@@ -17,10 +17,12 @@ from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.mixins import ArgillaMixin, TaskTemplateMixin, UnificationMixin
+from argilla.client.feedback.schemas.fields import TextField
+from argilla.client.feedback.schemas.types import AllowedQuestionTypes
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.records import FeedbackRecord
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.schemas.types import AllowedFieldTypes
 
 from argilla.client.feedback.schemas.records import FeedbackRecord
 
@@ -30,7 +32,7 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin, TaskT
         self,
         *,
         fields: List["AllowedFieldTypes"],
-        questions: List["AllowedQuestionTypes"],
+        questions: List[AllowedQuestionTypes],
         guidelines: Optional[str] = None,
     ) -> None:
         """Initializes a `FeedbackDataset` instance locally.

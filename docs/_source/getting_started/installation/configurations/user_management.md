@@ -1,26 +1,49 @@
 # User Management
 
-This guide explains how to setup and manage the users in Argilla via the Python client and the CLI.
+This guide explains how to set up and manage the users in Argilla via the Python client and the CLI.
 
 :::{note}
 The `User` class for user management has been included as of the Argilla 1.11.0 release, and is not available in previous versions. But you will be able to use it with older Argilla instances, from 1.6.0 onwards, the only difference will be that the main role is now `owner` instead of `admin`.
 :::
 
 :::{warning}
-As of Argilla 1.11.0 the default pool of users in the quickstart contains also an owner user which uses the credentials: username `owner`, password `12345678`, and API key `owner.apikey`; while for the server image the default user is now an `owner` instead of an `admin` with the same credentials: username `argilla`, password `1234` and API key `argilla.apikey`.
+As of Argilla 1.11.0 the default pool of users in the quickstart contains also an owner user which uses the credentials: username `owner`, password `12345678`, and API key `owner.apikey`; while for the server image, the default user is now an `owner` instead of an `admin` with the same credentials: username `argilla`, password `1234` and API key `argilla.apikey`.
 :::
 
 ## User Model
 
 A user in Argilla is an authorized person who can access the UI and use the Python client and CLI in a running Argilla instance.
 
-We differentiate between three types of users depending on their role:
+We differentiate between three types of users depending on their role, permissions, and needs: `owner`, `admin`, `annotator`.
 
-- **Owner**: The owner is the user who created the Argilla instance. It has full access to all workspaces and can create new users and workspaces.
-- **Admin**: An admin user can only access the workspaces it has been assigned to. Admin users can manage datasets on assigned workspaces.
-- **Annotator**: As admin users, an annotator user can only access the workspaces it has been assigned to. Annotator users can only annotate datasets on assigned workspaces.
+### Owner
 
-An Argilla user composed of the following attributes:
+The owner is the root user who created the Argilla instance. When working with Argilla, it is very useful to work with workspaces. So, the owner has full access to all workspaces and their options:
+
+- **Workspace management**: It can create and delete a workspace.
+- **User management**: It can create a new user, update its information, assign a workspace to a user, and delete a user. It can also list all of them and search for a specific user by its name or ID.
+- **Dataset management**: It can create, configure, update, and delete datasets. It can also delete the current FeedbackDataset from Argilla.
+- **Annotation**: It can annotate datasets in the Argilla UI.
+- **Feedback**: It can provide feedback with the Argilla UI.
+
+### Admin
+
+An admin user can only access the workspaces it has been assigned to and cannot assign other users to it. An admin user has the following permissions:
+
+- **Dataset management**: It can create, configure, update, and delete datasets (including FeedbackDataset) only on assigned workspaces.
+- **Annotation**: It can annotate datasets in the assigned workspaces via the Argilla UI.
+- **Feedback**: It can provide feedback with the Argilla UI.
+
+## Annotator
+
+An annotator user is limited to accessing only the datasets assigned to it within the workspace. It has two specific permissions:
+
+- **Annotation**: It can annotate datasets in the Argilla UI.
+- **Feedback**: It can provide feedback with the Argilla UI.
+
+![user_roles_schema](/_static/images/installation/user_management/user_roles.png)
+
+An Argilla user is composed of the following attributes:
 
 | Attribute | Type | Description |
 | --- | --- | --- |
@@ -47,7 +70,7 @@ To connect to an old Argilla instance (`<1.3.0`) using newer clients, you should
 
 ### Get the current active `User`
 
-You can get the current active user in Argilla using the `me` classmethod in the `User` class. Note that the `me` method will return the active user as specified via the credentials provided via `rg.init`. Also, it is possible [set this information using environment variables](/getting_started/installation/configurations/server_configuration.html#client), which allows for skipping `rg,init`.
+You can get the current active user in Argilla using the `me` classmethod in the `User` class. Note that the `me` method will return the active user as specified via the credentials provided via `rg.init`. Also, it is possible [set this information using environment variables](\getting_started\installation\configurations\server_configuration.md#client), which allows for skipping `rg,init`.
 
 ::::{tab-set}
 
@@ -199,7 +222,7 @@ workspace.add_user(user.id)
 
 ::::
 
-### List `User`s
+### List `Users`
 
 :::{note}
 Just the "owner" can list all the users in Argilla.
@@ -219,7 +242,7 @@ argilla users list
 
 :::{tab-item} Python client
 
-You can list all the existing users in Argilla calling the `list` classmethod of the `User` class.
+You can list all the existing users in Argilla by calling the `list` classmethod of the `User` class.
 
 ```python
 import argilla as rg
@@ -253,7 +276,7 @@ argilla users --username existing-user delete
 
 :::{tab-item} Python client
 
-You can delete an existing user from Argilla calling the `delete` method on the `User` class.
+You can delete an existing user from Argilla by calling the `delete` method on the `User` class.
 
 ```python
 import argilla as rg
@@ -307,7 +330,7 @@ The migration command can create users and workspaces automatically from a YAML 
 
 To do so, the command will connect to the Argilla server database directly, therefore the environment variable `ARGILLA_DATABASE_URL` must be set unless you're using SQLite in which case you should be executing the command from the machine where Argilla server is running.
 
-The user role will be computed depending on how workspaces are setup for each user. If no `workspace` attribute is defined, the user will be considered an `owner`. Otherwise, the assigned user role will be `annotator`.
+The user role will be computed depending on how workspaces are set up for each user. If no `workspace` attribute is defined, the user will be considered an `owner`. Otherwise, the assigned user role will be `annotator`.
 
 The task will also create an extra workspace for each user named after their username.
 
