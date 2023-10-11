@@ -57,6 +57,19 @@ class UserResponse(BaseModel):
     status: ResponseStatus
 
 
+def _build_metadata_field_payload(dataset: Dataset, metadata: Union[Dict[str, Any], None] = None) -> Dict[str, Any]:
+    if metadata is None:
+        return {}
+
+    search_engine_metadata = {}
+    for metadata_property in dataset.metadata_properties:
+        value = metadata.get(metadata_property.name)
+        if value is not None:
+            search_engine_metadata[str(metadata_property.id)] = value
+
+    return search_engine_metadata
+
+
 class SearchDocumentGetter(GetterDict):
     def get(self, key: Any, default: Any = None) -> Any:
         if key == "responses":
@@ -68,15 +81,7 @@ class SearchDocumentGetter(GetterDict):
                 for response in self._obj.responses
             }
         elif key == "metadata":
-            if self._obj.metadata_ is None:
-                return {}
-
-            dataset = self._obj.dataset
-            return {
-                str(metadata_property.id): self._obj.metadata_.get(metadata_property.name)
-                for metadata_property in dataset.metadata_properties
-                if self._obj.metadata_.get(metadata_property.name) is not None
-            }
+            return _build_metadata_field_payload(self._obj.dataset, self._obj.metadata_)
 
         return super().get(key, default)
 
@@ -202,6 +207,15 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         await self._update_document_request(
             index_name, id=record.id, body={"doc": {"responses": {response.user.username: es_response.dict()}}}
+        )
+
+    async def update_record_metadata(self, record: Record):
+        index_name = await self._get_index_or_raise(record.dataset)
+
+        await self._update_document_request(
+            index_name,
+            id=record.id,
+            body={"doc": {"metadata": _build_metadata_field_payload(record.dataset, record.metadata_)}},
         )
 
     async def delete_records(self, dataset: Dataset, records: Iterable[Record]):

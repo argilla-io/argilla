@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 from tqdm import trange
 
 from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, PUSHING_BATCH_SIZE
+from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase, SortBy
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
 from argilla.client.feedback.schemas.records import FeedbackRecord
@@ -31,14 +32,13 @@ if TYPE_CHECKING:
 
     import httpx
 
-    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
     from argilla.client.feedback.schemas.metadata import MetadataFilters
     from argilla.client.feedback.schemas.types import (
         AllowedRemoteFieldTypes,
         AllowedRemoteMetadataPropertyTypes,
         AllowedRemoteQuestionTypes,
     )
-    from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
+    from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel, FeedbackResponseStatusFilter
     from argilla.client.workspaces import Workspace
 
 
@@ -428,7 +428,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
     def filter_by(
         self,
         *,
-        response_status: Optional[Union["ResponseStatusFilter", List["ResponseStatusFilter"]]] = None,
+        response_status: Optional[Union[ResponseStatusFilter, List[ResponseStatusFilter]]] = None,
         metadata_filters: Optional[Union["MetadataFilters", List["MetadataFilters"]]] = None,
     ) -> "RemoteFeedbackDataset":
         """Filters the current `RemoteFeedbackDataset` based on the `response_status` of
@@ -445,6 +445,8 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         Returns:
             A new instance of `FilteredRemoteFeedbackDataset` with the given filters.
         """
+        if not response_status and not metadata_filters:
+            raise ValueError("At least one of `response_status` or `metadata_filters` must be provided.")
 
         filtered_dataset = RemoteFeedbackDataset.__copy_from(self)
         filtered_dataset._records = RemoteFeedbackRecords.copy_from(

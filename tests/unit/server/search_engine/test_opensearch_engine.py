@@ -92,8 +92,8 @@ async def dataset_for_pagination(opensearch: OpenSearch):
 @pytest_asyncio.fixture(scope="function")
 @pytest.mark.asyncio
 async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine, opensearch: OpenSearch) -> Dataset:
-    text_question = await TextQuestionFactory()
-    rating_question = await RatingQuestionFactory()
+    text_question = await TextQuestionFactory.create()
+    rating_question = await RatingQuestionFactory.create()
 
     dataset = await DatasetFactory.create(
         fields=[
@@ -850,6 +850,50 @@ class TestSuiteOpenSearchEngine:
                     }
                 }
             },
+        }
+
+    async def test_update_record_metadata(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset: Dataset,
+    ):
+        record = test_banking_sentiment_dataset.records[0]
+
+        record.metadata_ = {"label": "a", "textId": 99999, "seq_float": 0.99}
+
+        await opensearch_engine.update_record_metadata(record)
+
+        index_name = index_name_for_dataset(test_banking_sentiment_dataset)
+
+        results = opensearch.get(index=index_name, id=record.id)
+
+        assert results["_source"]["metadata"] == {
+            str(test_banking_sentiment_dataset.metadata_properties[0].id): "a",
+            str(test_banking_sentiment_dataset.metadata_properties[1].id): 99999,
+            str(test_banking_sentiment_dataset.metadata_properties[2].id): 0.99,
+        }
+
+    async def test_update_record_metadata_with_extra_metadata(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset: Dataset,
+    ):
+        record = test_banking_sentiment_dataset.records[0]
+
+        record.metadata_ = {"label": "a", "textId": 99999, "seq_float": 0.99, "much": "data", "many": "annotations"}
+
+        await opensearch_engine.update_record_metadata(record)
+
+        index_name = index_name_for_dataset(test_banking_sentiment_dataset)
+
+        results = opensearch.get(index=index_name, id=record.id)
+
+        assert results["_source"]["metadata"] == {
+            str(test_banking_sentiment_dataset.metadata_properties[0].id): "a",
+            str(test_banking_sentiment_dataset.metadata_properties[1].id): 99999,
+            str(test_banking_sentiment_dataset.metadata_properties[2].id): 0.99,
         }
 
     async def test_delete_record_response(

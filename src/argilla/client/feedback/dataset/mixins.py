@@ -57,7 +57,11 @@ if TYPE_CHECKING:
 
     from argilla.client.client import Argilla as ArgillaClient
     from argilla.client.feedback.dataset.local import FeedbackDataset
+    from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.types import (
+        AllowedFieldTypes,
+        AllowedMetadataPropertyTypes,
+        AllowedQuestionTypes,
         AllowedRemoteFieldTypes,
         AllowedRemoteMetadataPropertyTypes,
         AllowedRemoteQuestionTypes,
@@ -91,19 +95,22 @@ class ArgillaMixin:
             )
         return field
 
-    def __add_fields(self: "FeedbackDataset", client: "httpx.Client", id: UUID) -> List["AllowedRemoteFieldTypes"]:
-        fields = []
-        for field in self._fields:
+    @staticmethod
+    def __add_fields(
+        fields: List["AllowedFieldTypes"], client: "httpx.Client", id: UUID
+    ) -> List["AllowedRemoteFieldTypes"]:
+        uploaded_fields = []
+        for field in fields:
             try:
                 new_field = datasets_api_v1.add_field(client=client, id=id, field=field.to_server_payload()).parsed
-                fields.append(ArgillaMixin._parse_to_remote_field(new_field))
+                uploaded_fields.append(ArgillaMixin._parse_to_remote_field(new_field))
             except Exception as e:
                 ArgillaMixin.__delete_dataset(client=client, id=id)
                 raise Exception(
                     f"Failed while adding the field '{field.name}' to the `FeedbackDataset` in Argilla with"
                     f" exception: {e}"
                 ) from e
-        return fields
+        return uploaded_fields
 
     @staticmethod
     def _parse_to_remote_question(question: "FeedbackQuestionModel") -> "AllowedRemoteQuestionTypes":
@@ -125,23 +132,24 @@ class ArgillaMixin:
 
         return question
 
+    @staticmethod
     def __add_questions(
-        self: "FeedbackDataset", client: "httpx.Client", id: UUID
+        questions: List["AllowedQuestionTypes"], client: "httpx.Client", id: UUID
     ) -> List["AllowedRemoteQuestionTypes"]:
-        questions = []
-        for question in self._questions:
+        uploaded_questions = []
+        for question in questions:
             try:
                 new_question = datasets_api_v1.add_question(
                     client=client, id=id, question=question.to_server_payload()
                 ).parsed
-                questions.append(ArgillaMixin._parse_to_remote_question(new_question))
+                uploaded_questions.append(ArgillaMixin._parse_to_remote_question(new_question))
             except Exception as e:
                 ArgillaMixin.__delete_dataset(client=client, id=id)
                 raise Exception(
                     f"Failed while adding the question '{question.name}' to the `FeedbackDataset` in Argilla with"
                     f" exception: {e}"
                 ) from e
-        return questions
+        return uploaded_questions
 
     @staticmethod
     def _parse_to_remote_metadata_property(
@@ -162,26 +170,29 @@ class ArgillaMixin:
 
         return metadata_property
 
+    @staticmethod
     def __add_metadata_properties(
-        self: "FeedbackDataset", client: "httpx.Client", id: UUID
+        metadata_properties: List["AllowedMetadataPropertyTypes"], client: "httpx.Client", id: UUID
     ) -> Union[List["AllowedRemoteMetadataPropertyTypes"], None]:
-        if not self._metadata_properties:
+        if not metadata_properties:
             return None
 
-        metadata_properties = []
-        for metadata_property in self._metadata_properties:
+        uploaded_metadata_properties = []
+        for metadata_property in metadata_properties:
             try:
                 new_metadata_property = datasets_api_v1.add_metadata_property(
                     client=client, id=id, metadata_property=metadata_property.to_server_payload()
                 ).parsed
-                metadata_properties.append(ArgillaMixin._parse_to_remote_metadata_property(new_metadata_property))
+                uploaded_metadata_properties.append(
+                    ArgillaMixin._parse_to_remote_metadata_property(new_metadata_property)
+                )
             except Exception as e:
                 ArgillaMixin.__delete_dataset(client=client, id=id)
                 raise Exception(
                     f"Failed while adding the metadata property '{metadata_property.name}' to the `FeedbackDataset` in"
                     f" Argilla with exception: {e}"
                 ) from e
-        return metadata_properties
+        return uploaded_metadata_properties
 
     @staticmethod
     def __publish_dataset(client: "httpx.Client", id: UUID) -> None:
@@ -191,18 +202,19 @@ class ArgillaMixin:
             ArgillaMixin.__delete_dataset(client=client, id=id)
             raise Exception(f"Failed while publishing the `FeedbackDataset` in Argilla with exception: {e}") from e
 
+    @staticmethod
     def __push_records(
-        self: "FeedbackDataset",
+        records: List["FeedbackRecord"],
         client: "httpx.Client",
         id: UUID,
         question_name_to_id: Dict[str, UUID],
         show_progress: bool = True,
     ) -> None:
-        if len(self.records) == 0:
+        if len(records) == 0:
             return
 
         for i in trange(
-            0, len(self.records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=show_progress
+            0, len(records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=show_progress
         ):
             try:
                 datasets_api_v1.add_records(
@@ -210,7 +222,7 @@ class ArgillaMixin:
                     id=id,
                     records=[
                         record.to_server_payload(question_name_to_id=question_name_to_id)
-                        for record in self.records[i : i + PUSHING_BATCH_SIZE]
+                        for record in records[i : i + PUSHING_BATCH_SIZE]
                     ],
                 )
             except Exception as e:
@@ -262,19 +274,25 @@ class ArgillaMixin:
         except Exception as e:
             raise Exception(f"Failed while creating the `FeedbackDataset` in Argilla with exception: {e}") from e
 
-        ArgillaMixin.__add_fields(client=httpx_client, id=argilla_id)
+        ArgillaMixin.__add_fields(fields=self.fields, client=httpx_client, id=argilla_id)
         fields = ArgillaMixin.__get_fields(client=httpx_client, id=argilla_id)
 
-        ArgillaMixin.__add_questions(client=httpx_client, id=argilla_id)
+        ArgillaMixin.__add_questions(questions=self.questions, client=httpx_client, id=argilla_id)
         questions = ArgillaMixin.__get_questions(client=httpx_client, id=argilla_id)
         question_name_to_id = {question.name: question.id for question in questions}
 
-        metadata_properties = ArgillaMixin.__add_metadata_properties(client=httpx_client, id=argilla_id)
+        metadata_properties = ArgillaMixin.__add_metadata_properties(
+            metadata_properties=self.metadata_properties, client=httpx_client, id=argilla_id
+        )
 
         ArgillaMixin.__publish_dataset(client=httpx_client, id=argilla_id)
 
         ArgillaMixin.__push_records(
-            client=httpx_client, id=argilla_id, show_progress=show_progress, question_name_to_id=question_name_to_id
+            records=list(self.records),
+            client=httpx_client,
+            id=argilla_id,
+            show_progress=show_progress,
+            question_name_to_id=question_name_to_id,
         )
 
         return RemoteFeedbackDataset(
