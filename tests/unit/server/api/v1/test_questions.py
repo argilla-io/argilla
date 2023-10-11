@@ -244,7 +244,7 @@ async def test_update_question_as_annotator(async_client: "AsyncClient"):
     assert response.status_code == 403
 
 
-@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
 async def test_delete_question(async_client: "AsyncClient", db: "AsyncSession", role: UserRole):
     question = await TextQuestionFactory.create(name="name", title="title", description="description")

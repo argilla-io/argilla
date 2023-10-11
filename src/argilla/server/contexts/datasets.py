@@ -198,11 +198,19 @@ async def get_question_by_name_and_dataset_id(db: "AsyncSession", name: str, dat
     return result.scalar_one_or_none()
 
 
+async def get_metadata_property_by_id(db: "AsyncSession", metadata_property_id: UUID) -> Union[MetadataProperty, None]:
+    return await MetadataProperty.read(db, id=metadata_property_id)
+
+
 async def get_metadata_property_by_name_and_dataset_id(
     db: "AsyncSession", name: str, dataset_id: UUID
 ) -> Union[MetadataProperty, None]:
     result = await db.execute(select(MetadataProperty).filter_by(name=name, dataset_id=dataset_id))
     return result.scalar_one_or_none()
+
+
+async def delete_metadata_property(db: "AsyncSession", metadata_property: MetadataProperty) -> MetadataProperty:
+    return await metadata_property.delete(db)
 
 
 async def create_question(db: "AsyncSession", dataset: Dataset, question_create: QuestionCreate) -> Question:
