@@ -25,7 +25,6 @@ from argilla.client.feedback.schemas import (
     SortBy,
 )
 from argilla.client.feedback.schemas.metadata import MetadataFilters
-from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes, AllowedQuestionTypes
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes, AllowedQuestionTypes
 from argilla.client.feedback.training.schemas import (
     TrainingTaskForChatCompletion,
