@@ -5,14 +5,9 @@
       @visibility="onSortToggleVisibility"
     >
       <span slot="dropdown-header">
-        <FilterButton
-          button-name="Sort"
-          icon-name="sort"
-          :badges="appliedSortCategories"
-          :badges-custom-text="appliedSortCategoriesDirection"
-          :show-button-name-in-collapsed-badge="true"
-          @click-on-clear="clearSortCategory"
-          max-visible-badges="0"
+        <SortButton
+          :is-active="visibleDropdown"
+          :active-sort-items="appliedSortCategories"
         />
       </span>
       <span slot="dropdown-content" class="sort-filter__container">
@@ -56,11 +51,6 @@ export default {
     selectedSortingItems() {
       return this.metadataSort.selected;
     },
-    appliedSortCategoriesDirection() {
-      return this.metadataSort.selected.map((s) =>
-        s.sort === "asc" ? "↑" : "↓"
-      );
-    },
   },
   methods: {
     onSortToggleVisibility(value) {
@@ -76,6 +66,10 @@ export default {
     },
     applySort() {
       this.onSortToggleVisibility(false);
+
+      this.sort();
+    },
+    sort() {
       this.$root.$emit("sort-changed", this.metadataSort.convertToRouteParam());
 
       this.appliedSortCategories = this.metadataSort.selectedCategoriesName;
@@ -84,6 +78,25 @@ export default {
       this.completeByRouteParams();
 
       this.appliedSortCategories = this.metadataSort.selectedCategoriesName;
+    },
+  },
+  watch: {
+    visibleDropdown() {
+      if (!this.visibleDropdown) {
+        this.debounce.stop();
+
+        this.sort();
+      }
+    },
+    "metadataSort.selected": {
+      deep: true,
+      async handler() {
+        this.debounce.stop();
+
+        await this.debounce.wait();
+
+        this.sort();
+      },
     },
   },
   mounted() {

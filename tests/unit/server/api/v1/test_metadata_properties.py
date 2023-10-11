@@ -14,14 +14,17 @@
 
 import uuid
 from typing import TYPE_CHECKING, Type
+from uuid import uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.enums import UserRole
+from argilla.server.enums import MetadataPropertyType, UserRole
+from argilla.server.models import MetadataProperty, UserRole
 from argilla.server.search_engine import FloatMetadataMetrics, IntegerMetadataMetrics, TermsMetadataMetrics
+from sqlalchemy import func, select
 
 from tests.factories import (
-    AdminFactory,
+    AnnotatorFactory,
     BaseFactory,
     FloatMetadataPropertyFactory,
     IntegerMetadataPropertyFactory,
@@ -130,3 +133,81 @@ class TestSuiteMetadataProperties:
             f"/api/v1/metadata-properties/{metadata_property.id}/metrics", headers={API_KEY_HEADER_NAME: user.api_key}
         )
         assert response.status_code == 403
+
+
+@pytest.mark.parametrize("user_role", [UserRole.owner, UserRole.admin])
+@pytest.mark.asyncio
+async def test_delete_metadata_property(async_client: "AsyncClient", db: "AsyncSession", user_role: UserRole):
+    metadata_property = await IntegerMetadataPropertyFactory.create(
+        name="name",
+        description="description",
+    )
+    user = await UserFactory.create(role=user_role, workspaces=[metadata_property.dataset.workspace])
+
+    response = await async_client.delete(
+        f"/api/v1/metadata-properties/{metadata_property.id}", headers={API_KEY_HEADER_NAME: user.api_key}
+    )
+
+    assert response.status_code == 200
+    assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 0
+
+    response_body = response.json()
+    assert response_body == {
+        "id": str(metadata_property.id),
+        "name": "name",
+        "description": "description",
+        "settings": {"type": MetadataPropertyType.integer, "min": None, "max": None},
+        "dataset_id": str(metadata_property.dataset_id),
+        "inserted_at": metadata_property.inserted_at.isoformat(),
+        "updated_at": metadata_property.updated_at.isoformat(),
+    }
+
+
+@pytest.mark.asyncio
+async def test_delete_metadata_property_without_authentication(async_client: "AsyncClient", db: "AsyncSession"):
+    metadata_property = await IntegerMetadataPropertyFactory.create()
+
+    response = await async_client.delete(f"/api/v1/metadata-properties/{metadata_property.id}")
+
+    assert response.status_code == 401
+    assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
+
+
+@pytest.mark.asyncio
+async def test_delete_metadata_property_as_admin_from_different_workspace(
+    async_client: "AsyncClient", db: "AsyncSession"
+):
+    admin = await UserFactory.create(role=UserRole.admin)
+    metadata_property = await IntegerMetadataPropertyFactory.create()
+
+    response = await async_client.delete(
+        f"/api/v1/metadata-properties/{metadata_property.id}", headers={API_KEY_HEADER_NAME: admin.api_key}
+    )
+
+    assert response.status_code == 403
+    assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
+
+
+@pytest.mark.asyncio
+async def test_delete_metadata_property_as_annotator(async_client: "AsyncClient", db: "AsyncSession"):
+    annotator = await AnnotatorFactory.create()
+    metadata_property = await IntegerMetadataPropertyFactory.create()
+
+    response = await async_client.delete(
+        f"/api/v1/metadata-properties/{metadata_property.id}", headers={API_KEY_HEADER_NAME: annotator.api_key}
+    )
+
+    assert response.status_code == 403
+    assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
+
+
+@pytest.mark.asyncio
+async def test_delete_metadata_property_with_nonexistent_metadata_property_id(
+    async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+):
+    await IntegerMetadataPropertyFactory.create()
+
+    response = await async_client.delete(f"/api/v1/metadata-properties/{uuid4()}", headers=owner_auth_header)
+
+    assert response.status_code == 404
+    assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1

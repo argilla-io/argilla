@@ -1,6 +1,6 @@
 import { Metadata } from "../../metadata/Metadata";
 
-export const metadataMocked = [
+const metadataMocked = [
   {
     id: "1",
     name: "split",
@@ -50,8 +50,50 @@ export const metadataMocked = [
   },
 ];
 
+const metadataWithNoValuesMocked = [
+  {
+    id: "1",
+    name: "split",
+    description: "The split of the record",
+    settings: {
+      type: "terms",
+      values: [],
+    },
+  },
+  {
+    id: "2",
+    name: "loss",
+    description: "The training loss affecting the records",
+    settings: {
+      type: "integer",
+      min: null,
+      max: null,
+    },
+  },
+  {
+    id: "3",
+    name: "float",
+    description: "The training loss affecting the records",
+    settings: {
+      type: "float",
+      min: null,
+      max: null,
+    },
+  },
+];
+
 export const createMetadataMock = () =>
   metadataMocked.map((metadata) => {
+    return new Metadata(
+      metadata.id,
+      metadata.name,
+      metadata.description,
+      metadata.settings
+    );
+  });
+
+export const createMetadataWithNoValuesMock = () =>
+  metadataWithNoValuesMocked.map((metadata) => {
     return new Metadata(
       metadata.id,
       metadata.name,
