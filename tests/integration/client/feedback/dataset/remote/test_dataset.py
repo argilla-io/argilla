@@ -34,6 +34,11 @@ from argilla.client.feedback.schemas.questions import (
     RatingQuestion,
     TextQuestion,
 )
+from argilla.client.feedback.schemas.remote.metadata import (
+    RemoteFloatMetadataProperty,
+    RemoteIntegerMetadataProperty,
+    RemoteTermsMetadataProperty,
+)
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.workspaces import Workspace
@@ -51,6 +56,7 @@ from tests.factories import (
 )
 
 if TYPE_CHECKING:
+    from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes, AllowedRemoteMetadataPropertyTypes
     from argilla.client.sdk.users.models import UserModel as User
 
 
@@ -149,6 +155,35 @@ class TestRemoteFeedbackDataset:
         ):
             assert metadata_property.name == remote_metadata_property.name
             assert metadata_property.type == remote_metadata_property.type
+
+    @pytest.mark.parametrize(
+        "metadata_property, remote_metadata_property_cls",
+        [
+            (TermsMetadataProperty(name="new-terms-metadata"), RemoteTermsMetadataProperty),
+            (TermsMetadataProperty(name="new-terms-metadata", values=["a", "b", "c"]), RemoteTermsMetadataProperty),
+            (IntegerMetadataProperty(name="new-integer-metadata"), RemoteIntegerMetadataProperty),
+            (IntegerMetadataProperty(name="new-integer-metadata", min=0, max=10), RemoteIntegerMetadataProperty),
+            (FloatMetadataProperty(name="new-float-metadata"), RemoteFloatMetadataProperty),
+            (FloatMetadataProperty(name="new-float-metadata", min=0, max=10), RemoteFloatMetadataProperty),
+        ],
+    )
+    async def test_add_metadata_property(
+        self,
+        owner: "User",
+        metadata_property: "AllowedMetadataPropertyTypes",
+        remote_metadata_property_cls: "AllowedRemoteMetadataPropertyTypes",
+    ) -> None:
+        dataset = await DatasetFactory.create(status="ready")
+        await TextFieldFactory.create(dataset=dataset, name="required", required=True)
+        await TextFieldFactory.create(dataset=dataset, name="optional", required=False)
+        await TextQuestionFactory.create(dataset=dataset, required=True)
+
+        api.init(api_key=owner.api_key)
+        remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
+        remote_metadata_property = remote_dataset.add_metadata_property(metadata_property)
+        assert isinstance(remote_metadata_property, remote_metadata_property_cls)
+        assert remote_metadata_property.name == metadata_property.name
+        assert remote_dataset.metadata_properties == [remote_metadata_property]
 
     @pytest.mark.parametrize("statuses", [["draft", "discarded", "submitted"]])
     async def test_from_argilla_with_responses(self, owner: "User", statuses: List[str]) -> None:
