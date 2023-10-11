@@ -157,25 +157,6 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             # allow_extra_metadata=allow_extra_metadata,
         )
 
-    @property
-    def _metadata_properties_mapping(self) -> Dict[str, "AllowedRemoteMetadataPropertyTypes"]:
-        """Returns a mapping of the metadata properties by name."""
-        if self._metadata_properties is None:
-            return {}
-        try:
-            metadata_properties = datasets_api_v1.get_metadata_properties(client=self._client, id=self.id).parsed
-        except Exception as e:
-            raise RuntimeError(
-                f"Failed while listing the `metadata_properties` from the current `FeedbackDataset` in Argilla with exception: {e}"
-            ) from e
-        # TODO(alvarobartt): structure better the mixins to be able to easily reuse those, here to avoid circular imports
-        from argilla.client.feedback.dataset.mixins import ArgillaMixin
-
-        return [
-            ArgillaMixin._parse_to_remote_metadata_property(metadata_property=metadata_property, client=self._client)
-            for metadata_property in metadata_properties
-        ]
-
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def add_metadata_property(
         self, metadata_property: "AllowedMetadataPropertyTypes"

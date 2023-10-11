@@ -20,7 +20,9 @@ from typing import TYPE_CHECKING, Any, Dict, Generic, Iterator, List, Optional, 
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
+from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes, AllowedRemoteMetadataPropertyTypes
 from argilla.client.sdk.users.models import UserRole
+from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
@@ -170,6 +172,33 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
         dataset instance.
         """
         return self._records
+
+    @property
+    def metadata_properties(self) -> "AllowedRemoteMetadataPropertyTypes":
+        """Returns the metadata properties of the dataset in Argilla."""
+        try:
+            metadata_properties = datasets_api_v1.get_metadata_properties(client=self._client, id=self.id).parsed
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed while listing the `metadata_properties` from the current `FeedbackDataset` in Argilla with exception: {e}"
+            ) from e
+
+        # TODO(alvarobartt): structure better the mixins to be able to easily reuse those, here to avoid circular imports
+        from argilla.client.feedback.dataset.mixins import ArgillaMixin
+
+        return [
+            ArgillaMixin._parse_to_remote_metadata_property(metadata_property=metadata_property, client=self._client)
+            for metadata_property in metadata_properties
+        ]
+
+    @property
+    def _metadata_properties_mapping(self) -> Dict[str, "AllowedRemoteMetadataPropertyTypes"]:
+        """Returns a mapping of the metadata properties by name."""
+        # TODO(alvarobartt): structure better the mixins to be able to easily reuse those, here to avoid circular imports
+        metadata_properties = self.metadata_properties
+        if metadata_properties is not None and len(metadata_properties) > 0:
+            return {metadata_property.name: metadata_property for metadata_property in self.metadata_properties}
+        return {}
 
     @property
     def id(self) -> "UUID":
