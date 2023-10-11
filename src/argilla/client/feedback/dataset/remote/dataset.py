@@ -157,6 +157,25 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             # allow_extra_metadata=allow_extra_metadata,
         )
 
+    @property
+    def _metadata_properties_mapping(self) -> Dict[str, "AllowedRemoteMetadataPropertyTypes"]:
+        """Returns a mapping of the metadata properties by name."""
+        if self._metadata_properties is None:
+            return {}
+        try:
+            metadata_properties = datasets_api_v1.get_metadata_properties(client=self._client, id=self.id).parsed
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed while listing the `metadata_properties` from the current `FeedbackDataset` in Argilla with exception: {e}"
+            ) from e
+        # TODO(alvarobartt): structure better the mixins to be able to easily reuse those, here to avoid circular imports
+        from argilla.client.feedback.dataset.mixins import ArgillaMixin
+
+        return [
+            ArgillaMixin._parse_to_remote_metadata_property(metadata_property=metadata_property, client=self._client)
+            for metadata_property in metadata_properties
+        ]
+
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def add_metadata_property(
         self, metadata_property: "AllowedMetadataPropertyTypes"
@@ -196,12 +215,7 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         # TODO(alvarobartt): structure better the mixins to be able to easily reuse those, here to avoid circular imports
         from argilla.client.feedback.dataset.mixins import ArgillaMixin
 
-        metadata_property = ArgillaMixin._parse_to_remote_metadata_property(
-            metadata_property=metadata_property, client=self._client
-        )
-        self._metadata_properties.append(metadata_property)
-        self._metadata_properties_mapping[metadata_property.name] = metadata_property
-        return metadata_property
+        return ArgillaMixin._parse_to_remote_metadata_property(metadata_property=metadata_property, client=self._client)
 
     def filter_by(
         self,
@@ -238,11 +252,6 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         if metadata_filters:
             if not isinstance(metadata_filters, list):
                 metadata_filters = [metadata_filters]
-            # TODO(alvarobartt): remove this when https://github.com/argilla-io/argilla/pull/3829 is merged
-            if not hasattr(self, "_metadata_properties_mapping") or self._metadata_properties_mapping is None:
-                self._metadata_properties_mapping = {
-                    metadata_property.name: metadata_property for metadata_property in self._metadata_properties
-                }
             if not all(
                 metadata_filter.name in self._metadata_properties_mapping.keys() for metadata_filter in metadata_filters
             ):
