@@ -93,6 +93,21 @@ class CRUDMixin:
         return await updated.save(db, autocommit)
 
     @classmethod
+    async def update_many(
+        cls,
+        db: "AsyncSession",
+        objects: List[Dict[str, Any]],
+        autocommit: bool = True,
+    ) -> None:
+        if len(objects) == 0:
+            raise ValueError("Cannot update empty list of objects")
+
+        await db.execute(sql.update(cls), objects)
+
+        if autocommit:
+            await db.commit()
+
+    @classmethod
     async def upsert_many(
         cls,
         db: "AsyncSession",
