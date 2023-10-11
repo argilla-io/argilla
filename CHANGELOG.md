@@ -38,7 +38,6 @@ These are the section headers that we use:
 - Increase the default max result window for Elasticsearch created for Feedback datasets ([#3929](https://github.com/argilla-io/argilla/pull/)).
 - Force elastic index refresh after records creation ([#3929](https://github.com/argilla-io/argilla/pull/)).
 
-
 ### Fixed
 
 - Updated active learning for text classification notebooks to pass ids of type int to `TextClassificationRecord` ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
