@@ -17,8 +17,6 @@ from typing import TYPE_CHECKING, List
 from uuid import UUID
 
 import pytest
-
-
 from argilla import (
     FeedbackRecord,
     FloatMetadataProperty,
@@ -145,7 +143,6 @@ class TestRemoteFeedbackDataset:
 
         with pytest.raises(Exception):
             FeedbackDataset.from_argilla(id=remote.id)
-
 
     @pytest.mark.parametrize("role", [UserRole.annotator])
     async def test_delete_not_allowed_role(self, role: UserRole) -> None:

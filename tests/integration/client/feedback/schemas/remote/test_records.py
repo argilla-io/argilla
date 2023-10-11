@@ -15,7 +15,6 @@
 from typing import TYPE_CHECKING
 
 import pytest
-
 from argilla import (
     FloatMetadataProperty,
     IntegerMetadataProperty,
