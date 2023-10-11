@@ -19,6 +19,7 @@ from argilla.client.feedback.schemas.records import (
     FeedbackRecord,
     RankingValueSchema,
     ResponseSchema,
+    SortBy,
     SuggestionSchema,
     ValueSchema,
 )
@@ -223,3 +224,16 @@ def test_response_schema(schema_kwargs: Dict[str, Any]) -> None:
 )
 def test_suggestion_schema(schema_kwargs: Dict[str, Any]) -> None:
     assert SuggestionSchema(**schema_kwargs)
+
+
+@pytest.mark.parametrize(
+    "wrong_args",
+    [
+        dict(field="wrogn_name"),
+        dict(field="metadata.field", order="wrong_order"),
+        dict(dict="ascc", order="asc"),
+    ],
+)
+def test_sort_by_with_wrong_fields(wrong_args: Dict[str, Any]) -> None:
+    with pytest.raises(ValidationError):
+        SortBy(**wrong_args)
