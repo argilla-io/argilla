@@ -295,7 +295,9 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             self._metadata_schema = None
 
         if self._metadata_schema is None and self.metadata_properties is not None:
-            self._metadata_schema = generate_pydantic_schema_for_metadata(self.metadata_properties)
+            self._metadata_schema = generate_pydantic_schema_for_metadata(
+                self.metadata_properties, allow_extra_metadata=self._allow_extra_metadata
+            )
 
         for record in records:
             try:
