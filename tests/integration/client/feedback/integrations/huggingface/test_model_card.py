@@ -68,6 +68,7 @@ def test_model_card_with_defaults(
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
     model_card_pattern: str,
+    mocked_is_on_huggingface,
 ) -> None:
     # This test is almost a copy from the one in `test_trainer.py`, it's separated for
     # simplicity, but for speed we should test this at the same trainer.
@@ -148,6 +149,7 @@ def test_model_card_sentence_transformers(
     feedback_dataset_guidelines: str,
     feedback_dataset_records: List["FeedbackRecord"],
     model_card_pattern: str,
+    mocked_is_on_huggingface,
 ) -> None:
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -327,6 +329,7 @@ def test_model_card_trl(
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
     model_card_pattern: str,
+    mocked_is_on_huggingface,
 ) -> None:
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,

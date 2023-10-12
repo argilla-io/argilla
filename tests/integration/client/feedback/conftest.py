@@ -12,11 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from argilla.client.models import Framework
 from argilla.feedback import TrainingTask
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 
 @pytest.fixture
@@ -531,3 +534,10 @@ output_text = tokenizer.decode(outputs[0])
 print(output_text)
 ```
 """
+
+
+@pytest.fixture
+def mocked_is_on_huggingface(mocker: "MockerFixture") -> bool:
+    mocker.patch(
+        "argilla.client.feedback.integrations.huggingface.model_card.model_card.is_on_huggingface", return_value=True
+    )
