@@ -18,7 +18,13 @@ from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.local.mixins import ArgillaMixin
-from argilla.client.feedback.dataset.unification import UnificationMixin
+from argilla.client.feedback.schemas.questions import (
+    LabelQuestion,
+    MultiLabelQuestion,
+    RankingQuestion,
+    RatingQuestion,
+    TextQuestion,
+)
 from argilla.client.feedback.schemas.types import AllowedQuestionTypes
 from argilla.client.feedback.training.schemas import (
     TrainingTaskForChatCompletion,
@@ -30,6 +36,13 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForSFT,
     TrainingTaskForTextClassification,
     TrainingTaskTypes,
+)
+from argilla.client.feedback.unification import (
+    LabelQuestionStrategy,
+    MultiLabelQuestionStrategy,
+    RankingQuestionStrategy,
+    RatingQuestionStrategy,
+    TextQuestionStrategy,
 )
 from argilla.client.models import Framework
 from argilla.utils.dependency import require_dependencies
@@ -43,7 +56,7 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 
-class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase, UnificationMixin):
+class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase):
     def __init__(
         self,
         *,
