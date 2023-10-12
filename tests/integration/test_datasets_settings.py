@@ -16,6 +16,8 @@ from typing import TYPE_CHECKING, Optional, Union
 from uuid import uuid4
 
 import pytest
+
+from argilla import Workspace
 from argilla.client import api
 from argilla.client.api import delete, get_workspace, init
 from argilla.client.client import Argilla
@@ -25,6 +27,7 @@ from argilla.datasets import (
     TokenClassificationSettings,
     configure_dataset,
     configure_dataset_settings,
+    load_dataset_settings,
 )
 from argilla.server.contexts import accounts
 from argilla.server.security.model import WorkspaceUserCreate
@@ -90,22 +93,28 @@ def test_settings_workflow(
         (TokenClassificationSettings(label_schema={"PER", "ORG"}), "admin"),
     ],
 )
-def test_configure_dataset_settings(
+def test_configure_dataset_settings_twice(
+    owner: "User",
     argilla_user: "User",
     settings: Union[TextClassificationSettings, TokenClassificationSettings],
     workspace: Optional[str],
 ) -> None:
+    if not workspace:
+        workspace_name = argilla_user.username
+    else:
+        init(api_key=owner.api_key)
+        workspace = Workspace.create(name=workspace)
+        workspace.add_user(argilla_user.id)
+        workspace_name = workspace.name
+
     init(api_key=argilla_user.api_key, workspace=argilla_user.username)
-
     dataset_name = f"test-dataset-{uuid4()}"
-    workspace_name = workspace or get_workspace()
-
+    # This will create the dataset
+    configure_dataset_settings(dataset_name, settings=settings, workspace=workspace_name)
+    # This will update the dataset and what describes the issue https://github.com/argilla-io/argilla/issues/3505
     configure_dataset_settings(dataset_name, settings=settings, workspace=workspace_name)
 
-    current_api = api.active_api()
-    datasets_api = current_api.datasets
-
-    found_settings = datasets_api.load_settings(dataset_name)
+    found_settings = load_dataset_settings(dataset_name, workspace_name)
     assert {label for label in found_settings.label_schema} == {str(label) for label in settings.label_schema}
 
 
