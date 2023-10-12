@@ -16,7 +16,6 @@ from typing import TYPE_CHECKING, Optional, Union
 from uuid import uuid4
 
 import pytest
-
 from argilla import Workspace
 from argilla.client import api
 from argilla.client.api import delete, get_workspace, init
