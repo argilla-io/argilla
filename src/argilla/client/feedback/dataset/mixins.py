@@ -57,7 +57,8 @@ if TYPE_CHECKING:
 
 
 class ArgillaMixin:
-    def __delete_dataset(self: "FeedbackDataset", client: "httpx.Client", id: UUID) -> None:
+    @staticmethod
+    def __delete_dataset(client: "httpx.Client", id: Union[str, UUID]) -> None:
         try:
             datasets_api_v1.delete_dataset(client=client, id=id)
         except Exception as e:
@@ -342,42 +343,3 @@ class ArgillaMixin:
             )
             for dataset in datasets
         ]
-
-
-class UnificationMixin:
-    def unify_responses(
-        self,
-        question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
-        strategy: Union[
-            str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy, RankingQuestionStrategy
-        ],
-    ) -> None:
-        """
-        The `unify_responses` function takes a question and a strategy as input and applies the strategy
-        to unify the responses for that question.
-
-        Args:
-            question The `question` parameter can be either a string representing the name of the
-                question, or an instance of one of the question classes (`LabelQuestion`, `MultiLabelQuestion`,
-                `RatingQuestion`, `RankingQuestion`).
-            strategy The `strategy` parameter is used to specify the strategy to be used for unifying
-                responses for a given question. It can be either a string or an instance of a strategy class.
-        """
-        if isinstance(question, str):
-            question = self.question_by_name(question)
-
-        if isinstance(strategy, str):
-            if isinstance(question, LabelQuestion):
-                strategy = LabelQuestionStrategy(strategy)
-            elif isinstance(question, MultiLabelQuestion):
-                strategy = MultiLabelQuestionStrategy(strategy)
-            elif isinstance(question, RatingQuestion):
-                strategy = RatingQuestionStrategy(strategy)
-            elif isinstance(question, RankingQuestion):
-                strategy = RankingQuestionStrategy(strategy)
-            elif isinstance(question, TextQuestion):
-                strategy = TextQuestionStrategy(strategy)
-            else:
-                raise ValueError(f"Question {question} is not supported yet")
-
-        strategy.unify_responses(self.records, question)
