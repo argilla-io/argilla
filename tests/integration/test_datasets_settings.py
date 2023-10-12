@@ -88,9 +88,9 @@ def test_settings_workflow(
     "settings, workspace",
     [
         (TextClassificationSettings(label_schema={"A", "B"}), None),
-        (TextClassificationSettings(label_schema={"A", "B"}), "admin"),
+        (TextClassificationSettings(label_schema={"D", "E"}), "admin"),
         (TokenClassificationSettings(label_schema={"PER", "ORG"}), None),
-        (TokenClassificationSettings(label_schema={"PER", "ORG"}), "admin"),
+        (TokenClassificationSettings(label_schema={"CAT", "DOG"}), "admin"),
     ],
 )
 def test_configure_dataset_settings_twice(
