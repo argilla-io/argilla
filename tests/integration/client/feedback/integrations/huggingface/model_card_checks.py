@@ -87,8 +87,7 @@ trainer = ArgillaTrainer(
 
 trainer.update_config({
     "logging_steps": 1,
-    "num_train_epochs": 1,
-    "output_dir": "tmp"
+    "num_train_epochs": 1
 })
 
 trainer.train(output_dir="text_classification_model")
@@ -113,8 +112,7 @@ trainer = ArgillaTrainer(
 
 trainer.update_config({
     "logging_steps": 1,
-    "num_train_epochs": 1,
-    "output_dir": "tmp"
+    "num_train_epochs": 1
 })
 
 trainer.train(output_dir="question_answering_model")
@@ -250,8 +248,7 @@ trainer = ArgillaTrainer(
 
 trainer.update_config({
     "evaluation_strategy": "no",
-    "max_steps": 1,
-    "output_dir": "tmp"
+    "max_steps": 1
 })
 
 trainer.train(output_dir="sft_model")
@@ -323,8 +320,7 @@ trainer = ArgillaTrainer(
 
 trainer.update_config({
     "evaluation_strategy": "no",
-    "max_steps": 1,
-    "output_dir": "tmp"
+    "max_steps": 1
 })
 
 trainer.train(output_dir="rm_model")
@@ -440,8 +436,7 @@ trainer = ArgillaTrainer(
 
 trainer.update_config({
     "evaluation_strategy": "no",
-    "max_steps": 1,
-    "output_dir": "tmp"
+    "max_steps": 1
 })
 
 trainer.train(output_dir="dpo_model")

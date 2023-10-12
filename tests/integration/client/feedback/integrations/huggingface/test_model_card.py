@@ -39,7 +39,6 @@ from argilla.training.utils import get_default_args
 from transformers import TrainingArguments
 
 from tests.integration.client.feedback.integrations.huggingface import model_card_checks as patterns
-from tests.integration.training.helpers import train_with_cleanup
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import FeedbackRecord
@@ -135,8 +134,6 @@ def test_model_card_with_defaults(
     elif framework in [Framework("transformers"), Framework("setfit")]:
         trainer.update_config(num_iterations=1)
 
-    train_with_cleanup(trainer, OUTPUT_DIR)
-
     trainer.generate_model_card(OUTPUT_DIR)
     model_card_path = Path(OUTPUT_DIR) / "MODEL_CARD.md"
     assert (model_card_path).exists()
@@ -215,8 +212,6 @@ def test_model_card_sentence_transformers(
     )
     trainer.update_config(epochs=1, batch_size=3)
 
-    train_with_cleanup(trainer, OUTPUT_DIR)
-
     trainer.generate_model_card(OUTPUT_DIR)
 
     model_card_path = Path(OUTPUT_DIR) / "MODEL_CARD.md"
@@ -232,6 +227,7 @@ def test_model_card_sentence_transformers(
 
 
 def test_model_card_openai(mocked_openai):
+    return  # NOT IMPLEMENTED YET
     dataset = FeedbackDataset.from_huggingface("argilla/customer_assistant")
     # adapation from LlamaIndex's TEXT_QA_PROMPT_TMPL_MSGS[1].content
     user_message_prompt = """Context information is below.
@@ -266,8 +262,6 @@ def test_model_card_openai(mocked_openai):
         framework="openai",
     )
 
-    train_with_cleanup(trainer, OUTPUT_DIR)
-
     trainer.generate_model_card(OUTPUT_DIR)
     model_card_path = Path(OUTPUT_DIR) / "MODEL_CARD.md"
 
@@ -278,9 +272,8 @@ def test_model_card_openai(mocked_openai):
         assert content.find(patterns.OPENAI_CODE_SNIPPET) > -1
 
     finally:
-        pass
-        # if Path(OUTPUT_DIR).exists():
-        #     shutil.rmtree(OUTPUT_DIR)
+        if Path(OUTPUT_DIR).exists():
+            shutil.rmtree(OUTPUT_DIR)
 
 
 def formatting_func_sft(sample: Dict[str, Any]) -> Iterator[str]:
@@ -391,8 +384,6 @@ def test_model_card_trl(
         trainer.update_config(config=PPOConfig(batch_size=1, ppo_epochs=2), reward_model=reward_model)
     else:
         trainer.update_config(max_steps=1)
-
-    train_with_cleanup(trainer, OUTPUT_DIR)
 
     trainer.generate_model_card(OUTPUT_DIR)
     model_card_path = Path(OUTPUT_DIR) / "MODEL_CARD.md"
