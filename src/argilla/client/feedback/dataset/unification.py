@@ -31,7 +31,7 @@ from argilla.client.feedback.unification import (
 
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset.base import FeedbackDatasetBase
-    from argilla.client.feedback.dataset.local import FeedbackDataset
+    from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 
 
 class UnificationMixin:

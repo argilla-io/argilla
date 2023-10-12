@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
     import httpx
 
-    from argilla.client.feedback.dataset.local import FeedbackDataset
+    from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
     from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
@@ -253,7 +253,7 @@ class RemoteFeedbackDatasetBase(FeedbackDatasetBase, Generic[T]):
             A local instance of the dataset which is a `FeedbackDataset` object.
         """
         # Importing here to avoid circular imports
-        from argilla.client.feedback.dataset.local import FeedbackDataset
+        from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 
         instance = FeedbackDataset(
             fields=self.fields,
@@ -268,5 +268,7 @@ class RemoteFeedbackDatasetBase(FeedbackDatasetBase, Generic[T]):
     def push_to_argilla(
         self, name: str, workspace: Optional[Union[str, "Workspace"]] = None, show_progress: bool = False
     ) -> "RemoteFeedbackDatasetBase":
-        warnings.warn("Already pushed datasets cannot be pushed to Argilla again.")
+        warnings.warn(
+            "Already pushed datasets cannot be pushed to Argilla again because they are synced automatically."
+        )
         return self

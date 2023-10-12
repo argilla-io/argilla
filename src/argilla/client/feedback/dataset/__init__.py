@@ -12,6 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.feedback.dataset.local import FeedbackDataset
+from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 
 __all__ = ["FeedbackDataset"]

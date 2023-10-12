@@ -94,7 +94,13 @@ class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeed
         )
 
     def delete(self) -> None:
-        raise NotImplementedError("`delete` does not work for filtered datasets.")
+        raise NotImplementedError("`delete` does not work for `FilteredRemoteFeedbackDataset.")
+
+    def prepare_for_training(self, *args, **kwargs) -> Any:
+        raise NotImplementedError("`prepare_for_training` does not work for `FilteredRemoteFeedbackDataset.")
+
+    def unify_responses(self, *args, **kwargs):
+        raise NotImplementedError("`unify_responses` does not work for `FilteredRemoteFeedbackDataset`.")
 
     def filter_by(
         self, response_status: Union["ResponseStatusFilter", List["ResponseStatusFilter"]]

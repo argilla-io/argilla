@@ -15,19 +15,10 @@
 from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 from uuid import UUID
 
-from tqdm import trange
-
 from argilla.client.api import ArgillaSingleton
 from argilla.client.feedback.constants import PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 from argilla.client.feedback.schemas.enums import FieldTypes, QuestionTypes
-from argilla.client.feedback.schemas.questions import (
-    LabelQuestion,
-    MultiLabelQuestion,
-    RankingQuestion,
-    RatingQuestion,
-    TextQuestion,
-)
 from argilla.client.feedback.schemas.remote.fields import RemoteTextField
 from argilla.client.feedback.schemas.remote.questions import (
     RemoteLabelQuestion,
@@ -36,22 +27,15 @@ from argilla.client.feedback.schemas.remote.questions import (
     RemoteRatingQuestion,
     RemoteTextQuestion,
 )
-from argilla.client.feedback.unification import (
-    LabelQuestionStrategy,
-    MultiLabelQuestionStrategy,
-    RankingQuestionStrategy,
-    RatingQuestionStrategy,
-    TextQuestionStrategy,
-)
 from argilla.client.feedback.utils import feedback_dataset_in_argilla
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.workspaces import Workspace
+from tqdm import trange
 
 if TYPE_CHECKING:
     import httpx
-
     from argilla.client.client import Argilla as ArgillaClient
-    from argilla.client.feedback.dataset.local import FeedbackDataset
+    from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
     from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel
 

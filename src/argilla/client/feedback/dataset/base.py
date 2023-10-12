@@ -12,48 +12,29 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import logging
 from abc import ABC, ABCMeta, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
 from pydantic import ValidationError
 
-from argilla import Workspace
-from argilla.client.feedback.dataset.unification import UnificationMixin
 from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
 )
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
-from argilla.client.feedback.training.schemas import (
-    TrainingTaskForChatCompletion,
-    TrainingTaskForDPO,
-    TrainingTaskForPPO,
-    TrainingTaskForQuestionAnswering,
-    TrainingTaskForRM,
-    TrainingTaskForSentenceSimilarity,
-    TrainingTaskForSFT,
-    TrainingTaskForTextClassification,
-    TrainingTaskTypes,
-)
 from argilla.client.feedback.utils import generate_pydantic_schema
-from argilla.client.models import Framework
-from argilla.utils.dependency import require_dependencies, requires_dependencies
+from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
     from datasets import Dataset
 
-    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
     from argilla.client.feedback.schemas.types import (
         AllowedRemoteFieldTypes,
         AllowedRemoteQuestionTypes,
     )
 
 
-_LOGGER = logging.getLogger(__name__)
-
-
-class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, UnificationMixin, metaclass=ABCMeta):
+class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, metaclass=ABCMeta):
     """Base class with shared functionality for `FeedbackDataset` and `RemoteFeedbackDataset`."""
 
     def __init__(
@@ -192,26 +173,8 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, UnificationMixin, metacl
         )
 
     @abstractmethod
-    def add_records(
-        self, records: Union["FeedbackRecord", Dict[str, Any], List[Union["FeedbackRecord", Dict[str, Any]]]], **kwargs
-    ):
-        """Adds the given records to the dataset, and stores them locally. If you are
-        planning to push those to Argilla, you will need to call `push_to_argilla` afterwards,
-        to both create the dataset in Argilla and push the records to it. Then, from a
-        `FeedbackDataset` pushed to Argilla, you'll just need to call `add_records` and
-        those will be automatically uploaded to Argilla.
-
-        Args:
-            records: can be a single `FeedbackRecord`, a list of `FeedbackRecord`,
-                a single dictionary, or a list of dictionaries. If a dictionary is provided,
-                it will be converted to a `FeedbackRecord` internally.
-
-        Raises:
-            ValueError: if the given records are an empty list.
-            ValueError: if the given records are neither: `FeedbackRecord`, list of `FeedbackRecord`,
-                list of dictionaries as a record or dictionary as a record.
-            ValueError: if the given records do not match the expected schema.
-        """
+    def add_records(self, *args, **kwargs) -> None:
+        """Adds the given records to the `FeedbackDataset`."""
         pass
 
     def _parse_records(
@@ -300,170 +263,32 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, UnificationMixin, metacl
             return self._huggingface_format(self)
         raise ValueError(f"Unsupported format '{format}'.")
 
-    # TODO(alvarobartt,davidberenstein1957): we should consider having something like
-    # `export(..., training=True)` to export the dataset records in any format, replacing
-    # both `format_as` and `prepare_for_training`
-    def prepare_for_training(
-        self,
-        framework: Union[Framework, str],
-        task: TrainingTaskTypes,
-        train_size: Optional[float] = 1,
-        test_size: Optional[float] = None,
-        seed: Optional[int] = None,
-        lang: Optional[str] = None,
-    ) -> Any:
-        """
-        Prepares the dataset for training for a specific training framework and NLP task by splitting the dataset into train and test sets.
-
-        Args:
-            framework: the framework to use for training. Currently supported frameworks are: `transformers`, `peft`,
-                `setfit`, `spacy`, `spacy-transformers`, `span_marker`, `spark-nlp`, `openai`, `trl`, `sentence-transformers`.
-            task: the NLP task to use for training. Currently supported tasks are: `TrainingTaskForTextClassification`,
-                `TrainingTaskForSFT`, `TrainingTaskForRM`, `TrainingTaskForPPO`, `TrainingTaskForDPO`, `TrainingTaskForSentenceSimilarity`.
-            train_size: the size of the train set. If `None`, the whole dataset will be used for training.
-            test_size: the size of the test set. If `None`, the whole dataset will be used for testing.
-            seed: the seed to use for splitting the dataset into train and test sets.
-            lang: the spaCy language to use for training. If `None`, the language of the dataset will be used.
-        """
-        if isinstance(framework, str):
-            framework = Framework(framework)
-
-        # validate train and test sizes
-        if train_size is None:
-            train_size = 1
-        if test_size is None:
-            test_size = 1 - train_size
-
-        # check if all numbers are larger than 0
-        if not [abs(train_size), abs(test_size)] == [train_size, test_size]:
-            raise ValueError("`train_size` and `test_size` must be larger than 0.")
-        # check if train sizes sum up to 1
-        if not (train_size + test_size) == 1:
-            raise ValueError("`train_size` and `test_size` must sum to 1.")
-
-        if test_size == 0:
-            test_size = None
-
-        if len(self.records) < 1:
-            raise ValueError(
-                "No records found in the dataset. Make sure you add records to the"
-                " dataset via the `FeedbackDataset.add_records` method first."
-            )
-
-        local_dataset = self.pull()
-        if isinstance(task, (TrainingTaskForTextClassification, TrainingTaskForSentenceSimilarity)):
-            if task.formatting_func is None:
-                # in sentence-transformer models we can train without labels
-                if task.label:
-                    local_dataset = local_dataset.unify_responses(
-                        question=task.label.question, strategy=task.label.strategy
-                    )
-        elif isinstance(task, TrainingTaskForQuestionAnswering):
-            if task.formatting_func is None:
-                local_dataset = self.unify_responses(question=task.answer.name, strategy="disagreement")
-        elif not isinstance(
-            task,
-            (
-                TrainingTaskForSFT,
-                TrainingTaskForRM,
-                TrainingTaskForPPO,
-                TrainingTaskForDPO,
-                TrainingTaskForChatCompletion,
-            ),
-        ):
-            raise ValueError(f"Training data {type(task)} is not supported yet")
-
-        data = task._format_data(local_dataset)
-        if framework in [
-            Framework.TRANSFORMERS,
-            Framework.SETFIT,
-            Framework.SPAN_MARKER,
-            Framework.PEFT,
-        ]:
-            return task._prepare_for_training_with_transformers(
-                data=data, train_size=train_size, seed=seed, framework=framework
-            )
-        elif framework in [Framework.SPACY, Framework.SPACY_TRANSFORMERS]:
-            require_dependencies("spacy")
-            import spacy
-
-            if lang is None:
-                _LOGGER.warning("spaCy `lang` is not provided. Using `en`(English) as default language.")
-                lang = spacy.blank("en")
-            elif lang.isinstance(str):
-                if len(lang) == 2:
-                    lang = spacy.blank(lang)
-                else:
-                    lang = spacy.load(lang)
-            return task._prepare_for_training_with_spacy(data=data, train_size=train_size, seed=seed, lang=lang)
-        elif framework is Framework.SPARK_NLP:
-            return task._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
-        elif framework is Framework.OPENAI:
-            return task._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
-        elif framework is Framework.TRL:
-            return task._prepare_for_training_with_trl(data=data, train_size=train_size, seed=seed)
-        elif framework is Framework.TRLX:
-            return task._prepare_for_training_with_trlx(data=data, train_size=train_size, seed=seed)
-        elif framework is Framework.SENTENCE_TRANSFORMERS:
-            return task._prepare_for_training_with_sentence_transformers(data=data, train_size=train_size, seed=seed)
-        else:
-            raise NotImplementedError(
-                f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
-            )
-
     @abstractmethod
     def pull(self):
-        """Pulls the dataset from Argilla and returns a local instance of it.
-
-        Returns:
-            A local instance of the dataset which is a `FeedbackDataset` object.
-        """
+        """Pulls the dataset from Argilla and returns a local instance of it."""
         pass
 
     @abstractmethod
-    def filter_by(self, response_status: Union["ResponseStatusFilter", List["ResponseStatusFilter"]]):
-        """Filters the current `RemoteFeedbackDataset` based on the `response_status` of
-        the responses of the records in Argilla. This method creates a new class instance
-        of `FilteredRemoteFeedbackDataset` with the given filters.
-
-        Args:
-            response_status: the response status/es to filter the dataset by. Can be
-                one of: draft, pending, submitted, and discarded.
-
-        Returns:
-            A new instance of `FilteredRemoteFeedbackDataset` with the given filters.
-        """
+    def filter_by(self, *args, **kwargs):
+        """Filters the current `FeedbackDataset`."""
         pass
 
     @abstractmethod
     def delete(self):
-        """Deletes the current `FeedbackDataset` from Argilla. This method is just working
-        if the user has either `owner` or `admin` role.
-
-        Raises:
-            PermissionError: if the user does not have either `owner` or `admin` role.
-            RuntimeError: if the `FeedbackDataset` cannot be deleted from Argilla.
-        """
+        """Deletes the `FeedbackDataset` from Argilla."""
         pass
 
     @abstractmethod
-    def push_to_argilla(
-        self,
-        name: str,
-        workspace: Optional[Union[str, Workspace]] = None,
-        show_progress: bool = False,
-    ) -> "FeedbackDatasetBase":
-        """Pushes the `FeedbackDataset` to Argilla.
+    def prepare_for_training(self, *args, **kwargs) -> Any:
+        """Prepares the `FeedbackDataset` for training by creating the training."""
+        pass
 
-        Note that you may need to `rg.init(...)` with your Argilla credentials before calling this function, otherwise
-        the default http://localhost:6900 will be used, which will fail if Argilla is not deployed locally.
+    @abstractmethod
+    def push_to_argilla(self, *args, **kwargs) -> "FeedbackDatasetBase":
+        """Pushes the `FeedbackDataset` to Argilla."""
+        pass
 
-        Args:
-            name: the name of the dataset to push to Argilla.
-            workspace: the workspace where to push the dataset to. If not provided, the active workspace will be used.
-            show_progress: the option to choose to show/hide tqdm progress bar while looping over records.
-
-        Returns:
-            The `FeedbackDataset` pushed to Argilla, which is now an instance of `RemoteFeedbackDataset`.
-        """
+    @abstractmethod
+    def unify_responses(self, *args, **kwargs):
+        """Unifies the responses for a given question."""
         pass

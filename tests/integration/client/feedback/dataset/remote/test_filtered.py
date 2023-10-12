@@ -18,7 +18,7 @@ from uuid import UUID
 
 import pytest
 from argilla.client import api
-from argilla.client.feedback.dataset.local import FeedbackDataset
+from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.dataset.remote.filtered import FilteredRemoteFeedbackDataset, FilteredRemoteFeedbackRecords
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.client.feedback.schemas.records import FeedbackRecord

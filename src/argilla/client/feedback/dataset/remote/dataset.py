@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import warnings
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
@@ -22,6 +23,10 @@ from argilla.client.feedback.dataset.remote.base import RemoteFeedbackDatasetBas
 from argilla.client.feedback.dataset.remote.filtered import FilteredRemoteFeedbackDataset
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
+from argilla.client.feedback.training.schemas import (
+    TrainingTaskTypes,
+)
+from argilla.client.models import Framework
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.utils import allowed_for_roles
@@ -188,3 +193,53 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
             datasets_api_v1.delete_dataset(client=self._client, id=self.id)
         except Exception as e:
             raise RuntimeError(f"Failed while deleting the `FeedbackDataset` from Argilla with exception: {e}") from e
+
+    def unify_responses(self, *args, **kwargs) -> "FeedbackDataset":
+        warnings.warn(
+            "A local `FeedbackDataset` returned because"
+            "`unify_responses` is not supported for `RemoteFeedbackDataset`. "
+            "`RemoteFeedbackDataset`.pull().unify_responses(*args, **kwargs)` is applied.",
+            UserWarning,
+        )
+        local = self.pull()
+        return local.unify_responses(*args, **kwargs)
+
+    def prepare_for_training(
+        self,
+        framework: Union[Framework, str],
+        task: TrainingTaskTypes,
+        train_size: Optional[float] = 1,
+        test_size: Optional[float] = None,
+        seed: Optional[int] = None,
+        lang: Optional[str] = None,
+    ) -> Any:
+        """
+        Prepares the dataset for training for a specific training framework and NLP task by splitting the dataset into train and test sets.
+
+        Args:
+            framework: the framework to use for training. Currently supported frameworks are: `transformers`, `peft`,
+                `setfit`, `spacy`, `spacy-transformers`, `span_marker`, `spark-nlp`, `openai`, `trl`, `sentence-transformers`.
+            task: the NLP task to use for training. Currently supported tasks are: `TrainingTaskForTextClassification`,
+                `TrainingTaskForSFT`, `TrainingTaskForRM`, `TrainingTaskForPPO`, `TrainingTaskForDPO`, `TrainingTaskForSentenceSimilarity`.
+            train_size: the size of the train set. If `None`, the whole dataset will be used for training.
+            test_size: the size of the test set. If `None`, the whole dataset will be used for testing.
+            seed: the seed to use for splitting the dataset into train and test sets.
+            lang: the spaCy language to use for training. If `None`, the language of the dataset will be used.
+        """
+        warnings.warn(
+            (
+                "A local `FeedbackDataset` returned because"
+                "`prepare_for_training` is not supported for `RemoteFeedbackDataset`. "
+                "`RemoteFeedbackDataset`.pull().prepare_for_training(*args, **kwargs)` is applied."
+            ),
+            UserWarning,
+        )
+        local = self.pull()
+        return local.prepare_for_training(
+            framework=framework,
+            task=task,
+            train_size=train_size,
+            test_size=test_size,
+            seed=seed,
+            lang=lang,
+        )
