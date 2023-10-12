@@ -225,7 +225,7 @@ class SearchEngine(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    async def update_record_metadata(self, record: Record):
+    async def update_records_metadata(self, dataset: Dataset, records: Iterable[Record]):
         pass
 
     @abstractmethod

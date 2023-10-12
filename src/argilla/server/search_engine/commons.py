@@ -209,14 +209,20 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             index_name, id=record.id, body={"doc": {"responses": {response.user.username: es_response.dict()}}}
         )
 
-    async def update_record_metadata(self, record: Record):
-        index_name = await self._get_index_or_raise(record.dataset)
+    async def update_records_metadata(self, dataset: Dataset, records: Iterable[Record]):
+        index_name = await self._get_index_or_raise(dataset)
 
-        await self._update_document_request(
-            index_name,
-            id=record.id,
-            body={"doc": {"metadata": _build_metadata_field_payload(record.dataset, record.metadata_)}},
-        )
+        bulk_actions = [
+            {
+                "_op_type": "index",
+                "_id": record.id,
+                "_index": index_name,
+                "metadata": _build_metadata_field_payload(record.dataset, record.metadata_),
+            }
+            for record in records
+        ]
+
+        await self._bulk_op_request(bulk_actions)
 
     async def delete_records(self, dataset: Dataset, records: Iterable[Record]):
         index_name = await self._get_index_or_raise(dataset)
