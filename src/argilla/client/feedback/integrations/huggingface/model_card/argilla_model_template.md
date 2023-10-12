@@ -16,7 +16,7 @@ Training the model using the `ArgillaTrainer`:
 
 ```python
 # Load the dataset if it's uploaded on huggingface hub, or create it from scratch:
-dataset = FeedbackDataset.from_huggingface({% if dataset_name %}"{{ dataset_name }}"{% else %}"..."{% endif %})
+dataset = FeedbackDataset.from_{% if _is_on_huggingface %}huggingface("{{ dataset_name }}"){% else %}argilla("{{ dataset_name }}"){% endif %}
 
 # Create the task:
 {{ trainer_task_call }}

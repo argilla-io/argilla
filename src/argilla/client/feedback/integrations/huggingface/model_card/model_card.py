@@ -20,7 +20,7 @@ from platform import python_version
 from textwrap import dedent
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
 
-from huggingface_hub import CardData, ModelCard
+from huggingface_hub import CardData, ModelCard, dataset_info, model_info
 from huggingface_hub.utils import yaml_dump
 
 from argilla._version import version
@@ -101,13 +101,12 @@ class FrameworkCardData(CardData):
     language: Optional[Union[str, List[str]]] = None
     license: Optional[str] = None
     model_name: Optional[str] = None
-    model_id: Optional[str] = None
-    encoder_name: Optional[str] = None
-    encoder_id: Optional[str] = None
     dataset_name: Optional[str] = None
     dataset_id: Optional[str] = None
-    dataset_revision: Optional[str] = None
     tags: Optional[List[str]] = field(default_factory=lambda: ["argilla"])
+
+    # Control variables for the templates
+    _is_on_huggingface: bool = field(default=False)
 
     # Obtained internally from each trainer
     framework: Optional[Framework] = None
@@ -127,6 +126,12 @@ class FrameworkCardData(CardData):
     # Used to store the arguments passed through `update_config` method. In the case
     # of transformers for example, this corresponds to the `trainer_kwargs`.
     update_config_kwargs: Dict[str, Any] = field(default_factory=lambda: {})
+
+    def __post_init__(self):
+        # To decide whether the dataset is loaded from from_huggingface or from_argilla
+        if self.dataset_name:
+            if is_on_huggingface(self.dataset_name, is_model=False):
+                self._is_on_huggingface = True
 
     def _trainer_task__repr__(self) -> str:
         """Generates the creation of the `TrainingTask*` call.
@@ -690,3 +695,20 @@ def _update_config__repr__(keyword_arguments: Dict[str, Any]) -> str:
         trainer.update_config(...) call.
     """
     return f"\ntrainer.update_config({json.dumps(keyword_arguments, sort_keys=True, indent=4)})\n"
+
+
+def is_on_huggingface(repo_id: str, is_model: bool = True) -> bool:
+    # NOTE: kindly copied from https://github.com/tomaarsen/SpanMarkerNER/blob/main/span_marker/model_card.py
+    # Models with more than two 'sections' certainly are not public models
+    if len(repo_id.split("/")) > 2:
+        return False
+
+    try:
+        if is_model:
+            model_info(repo_id)
+        else:
+            dataset_info(repo_id)
+        return True
+    except:
+        # Fetching models can fail for many reasons: Repository not existing, no internet access, HF down, etc.
+        return False
