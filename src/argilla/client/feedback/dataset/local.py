@@ -12,20 +12,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import warnings
-
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.mixins import ArgillaMixin
 from argilla.client.feedback.dataset.unification import UnificationMixin
-
 from argilla.client.feedback.schemas.types import AllowedQuestionTypes
 
 if TYPE_CHECKING:
+    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
     from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.types import AllowedFieldTypes
-    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 
 
 class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase, UnificationMixin):

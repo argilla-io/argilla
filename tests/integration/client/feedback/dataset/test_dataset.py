@@ -17,7 +17,6 @@ from typing import TYPE_CHECKING, List, Type, Union
 
 import datasets
 import pytest
-
 from argilla import Workspace
 from argilla.client import api
 from argilla.client.feedback.config import DatasetConfig
@@ -674,7 +673,7 @@ def test_prepare_for_training_text_classification(
     api.init(api_key=owner.api_key)
     ws = Workspace.create(name="test-workspace")
 
-    remote = dataset.push_to_argilla(name="test-dataset",workspace=ws)
+    remote = dataset.push_to_argilla(name="test-dataset", workspace=ws)
 
     label = remote.question_by_name(question)
     task = TrainingTask.for_text_classification(text=dataset.fields[0], label=label)
