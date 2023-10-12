@@ -20,6 +20,7 @@ default dataset fields.
 import shutil
 from collections import Counter
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Union
 
 import pytest
@@ -37,7 +38,6 @@ if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 
-OUTPUT_DIR = "tmp"
 DATASET_NAME = "argilla/emotion"
 
 
@@ -128,20 +128,11 @@ def test_model_card_with_defaults(
     elif framework in [Framework("transformers"), Framework("setfit")]:
         trainer.update_config(num_iterations=1)
 
-    trainer.generate_model_card(OUTPUT_DIR)
-    model_card_path = Path(OUTPUT_DIR) / "MODEL_CARD.md"
-    assert (model_card_path).exists()
-
-    try:
-        assert (model_card_path).exists()
-        content = model_card_path.read_text()
+    with TemporaryDirectory() as tmpdirname:
+        content = trainer.generate_model_card(tmpdirname)
+        assert (Path(tmpdirname) / "MODEL_CARD.md").exists()
         pattern = model_card_pattern(framework, training_task)
-
         assert content.find(pattern) > -1
-
-    finally:
-        if Path(OUTPUT_DIR).exists():
-            shutil.rmtree(OUTPUT_DIR)
 
 
 @pytest.mark.usefixtures(
@@ -196,19 +187,11 @@ def test_model_card_sentence_transformers(
     )
     trainer.update_config(epochs=1, batch_size=3)
 
-    trainer.generate_model_card(OUTPUT_DIR)
-
-    model_card_path = Path(OUTPUT_DIR) / "MODEL_CARD.md"
-
-    try:
-        assert (model_card_path).exists()
-        content = model_card_path.read_text()
+    with TemporaryDirectory() as tmpdirname:
+        content = trainer.generate_model_card(tmpdirname)
+        assert (Path(tmpdirname) / "MODEL_CARD.md").exists()
         pattern = model_card_pattern(Framework("sentence-transformers"), TrainingTask.for_sentence_similarity)
         assert content.find(pattern) > -1
-
-    finally:
-        if Path(OUTPUT_DIR).exists():
-            shutil.rmtree(OUTPUT_DIR)
 
 
 def test_model_card_openai(mocked_openai):
@@ -372,16 +355,8 @@ def test_model_card_trl(
     else:
         trainer.update_config(max_steps=1)
 
-    trainer.generate_model_card(OUTPUT_DIR)
-    model_card_path = Path(OUTPUT_DIR) / "MODEL_CARD.md"
-
-    try:
-        assert (model_card_path).exists()
-        content = model_card_path.read_text()
+    with TemporaryDirectory() as tmpdirname:
+        content = trainer.generate_model_card(tmpdirname)
+        assert (Path(tmpdirname) / "MODEL_CARD.md").exists()
         pattern = model_card_pattern(Framework("trl"), training_task)
-
         assert content.find(pattern) > -1
-
-    finally:
-        if Path(OUTPUT_DIR).exists():
-            shutil.rmtree(OUTPUT_DIR)
