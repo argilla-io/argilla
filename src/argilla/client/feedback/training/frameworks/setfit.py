@@ -58,7 +58,7 @@ class ArgillaSetFitTrainer(ArgillaSetFitTrainerV1, ArgillaTransformersTrainer):
         Returns:
             SetFitModelCardData: Container for the data to be written on the `ArgillaModelCard`.
         """
-        from argilla.client.feedback.integrations.huggingface.card import SetFitModelCardData
+        from argilla.client.feedback.integrations.huggingface.model_card import SetFitModelCardData
 
         return SetFitModelCardData(
             model_name=self._model,

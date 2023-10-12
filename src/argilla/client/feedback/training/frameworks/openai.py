@@ -60,7 +60,7 @@ class ArgillaOpenAITrainer(ArgillaOpenAITrainerV1, ArgillaTrainerSkeleton):
         Returns:
             OpenAIModelCardData: Container for the data to be written on the `ArgillaModelCard`.
         """
-        from argilla.client.feedback.integrations.huggingface.card import OpenAIModelCardData
+        from argilla.client.feedback.integrations.huggingface.model_card import OpenAIModelCardData
 
         return OpenAIModelCardData(
             model_name=self._model,

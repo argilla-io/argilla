@@ -12,11 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 """Only a subset of the possibilities is tested for speed.
-- sentence-transformers with formatting_func.
-- transformers with formatting_func.
-- transformers with formatting_func.
-- transformers with formatting_func.
-- transformers with formatting_func.
+- spacy, spacy-transformers, transformers (text-classification and QA), setfit, and peft with
+default dataset fields.
+- sentence-transformers and trl with formatting_func.
 """
 
 import shutil
@@ -25,7 +23,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Union
 
 import pytest
-from argilla.client.feedback.integrations.huggingface.card.model_card import (
+from argilla.client.feedback.integrations.huggingface.model_card.model_card import (
     _prepare_dict_for_comparison,
     _updated_arguments,
 )

@@ -399,7 +399,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         Returns:
             TRLModelCardData: Container for the data to be written on the `ArgillaModelCard`.
         """
-        from argilla.client.feedback.integrations.huggingface.card import TRLModelCardData
+        from argilla.client.feedback.integrations.huggingface.model_card import TRLModelCardData
 
         if isinstance(self._task, TrainingTaskForSFT):
             task_type = "for_supervised_fine_tuning"

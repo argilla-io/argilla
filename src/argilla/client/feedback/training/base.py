@@ -278,7 +278,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
         Returns:
             model_card: The model card string.
         """
-        from argilla.client.feedback.integrations.huggingface.card import ArgillaModelCard
+        from argilla.client.feedback.integrations.huggingface.model_card import ArgillaModelCard
 
         model_card = ArgillaModelCard.from_template(
             card_data=self._trainer.model_card_data(**self.model_card_kwargs),

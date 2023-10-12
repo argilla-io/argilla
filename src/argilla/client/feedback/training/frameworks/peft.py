@@ -35,7 +35,7 @@ class ArgillaPeftTrainer(ArgillaPeftTrainerV1, ArgillaTransformersTrainer):
         Returns:
             PeftModelCardData: Container for the data to be written on the `ArgillaModelCard`.
         """
-        from argilla.client.feedback.integrations.huggingface.card import PeftModelCardData
+        from argilla.client.feedback.integrations.huggingface.model_card import PeftModelCardData
 
         return PeftModelCardData(
             model_name=self._model,

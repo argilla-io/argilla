@@ -357,7 +357,7 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
         Returns:
             SentenceTransformerCardData: Container for the data to be written on the `ArgillaModelCard`.
         """
-        from argilla.client.feedback.integrations.huggingface.card import SentenceTransformerCardData
+        from argilla.client.feedback.integrations.huggingface.model_card import SentenceTransformerCardData
 
         return SentenceTransformerCardData(
             model_name=self._model,

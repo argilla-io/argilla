@@ -163,7 +163,7 @@ class ArgillaSpaCyTrainer(ArgillaSpaCyTrainerV1, _ArgillaSpaCyTrainerBase):
         Returns:
             SpacyModelCardData: Container for the data to be written on the `ArgillaModelCard`.
         """
-        from argilla.client.feedback.integrations.huggingface.card import SpacyModelCardData
+        from argilla.client.feedback.integrations.huggingface.model_card import SpacyModelCardData
 
         return SpacyModelCardData(
             model_name=self._model,
@@ -199,7 +199,7 @@ class ArgillaSpaCyTransformersTrainer(ArgillaSpaCyTransformersTrainerV1, _Argill
         Returns:
             SpacyTransformersModelCardData: Container for the data to be written on the `ArgillaModelCard`.
         """
-        from argilla.client.feedback.integrations.huggingface.card import SpacyTransformersModelCardData
+        from argilla.client.feedback.integrations.huggingface.model_card import SpacyTransformersModelCardData
 
         return SpacyTransformersModelCardData(
             model_name=self._model,

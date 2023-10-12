@@ -84,7 +84,7 @@ class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSke
         Returns:
             TransformersModelCardData: Container for the data to be written on the `ArgillaModelCard`.
         """
-        from argilla.client.feedback.integrations.huggingface.card import TransformersModelCardData
+        from argilla.client.feedback.integrations.huggingface.model_card import TransformersModelCardData
 
         if isinstance(self._task, TrainingTaskForTextClassification):
             task_type = "for_text_classification"
