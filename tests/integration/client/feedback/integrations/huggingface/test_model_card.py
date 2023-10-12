@@ -38,8 +38,6 @@ from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
 from argilla.training.utils import get_default_args
 from transformers import TrainingArguments
 
-from tests.integration.client.feedback.integrations.huggingface import model_card_checks as patterns
-
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import FeedbackRecord
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
@@ -50,15 +48,15 @@ DATASET_NAME = "argilla/emotion"
 
 
 @pytest.mark.parametrize(
-    "framework, task_type",
+    "framework, training_task",
     [
-        (Framework("spacy"), "for_text_classification"),
-        (Framework("spacy-transformers"), "for_text_classification"),
-        (Framework("transformers"), "for_text_classification"),
-        (Framework("transformers"), "for_question_answering"),
-        (Framework("setfit"), "for_text_classification"),
-        (Framework("peft"), "for_text_classification"),
-        (Framework("span_marker"), "for_text_classification"),
+        (Framework("spacy"), TrainingTask.for_text_classification),
+        (Framework("spacy-transformers"), TrainingTask.for_text_classification),
+        (Framework("transformers"), TrainingTask.for_text_classification),
+        (Framework("transformers"), TrainingTask.for_question_answering),
+        (Framework("setfit"), TrainingTask.for_text_classification),
+        (Framework("peft"), TrainingTask.for_text_classification),
+        (Framework("span_marker"), TrainingTask.for_text_classification),
     ],
 )
 @pytest.mark.usefixtures(
@@ -66,14 +64,16 @@ DATASET_NAME = "argilla/emotion"
     "feedback_dataset_fields",
     "feedback_dataset_questions",
     "feedback_dataset_records",
+    "model_card_pattern",
 )
 def test_model_card_with_defaults(
     framework: Union[Framework, str],
-    task_type: str,
+    training_task: str,
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
+    model_card_pattern: str,
 ) -> None:
     # This test is almost a copy from the one in `test_trainer.py`, it's separated for
     # simplicity, but for speed we should test this at the same trainer.
@@ -90,13 +90,13 @@ def test_model_card_with_defaults(
     ]
     label = LabelQuestionUnification(question=questions[0])
 
-    if task_type == "for_question_answering":
+    if training_task == TrainingTask.for_question_answering:
         task = TrainingTask.for_question_answering(
             question=dataset.field_by_name("label"),
             context=dataset.field_by_name("text"),
             answer=dataset.question_by_name("question-1"),
         )
-    elif task_type == "for_text_classification":
+    elif training_task == TrainingTask.for_text_classification:
         task = TrainingTask.for_text_classification(text=dataset.fields[0], label=label)
 
     if framework == Framework("spacy"):
@@ -141,19 +141,7 @@ def test_model_card_with_defaults(
     try:
         assert (model_card_path).exists()
         content = model_card_path.read_text()
-        if framework == Framework("transformers"):
-            if task_type == "for_text_classification":
-                pattern = patterns.TRANSFORMERS_CODE_SNIPPET
-            else:
-                pattern = patterns.TRANSFORMERS_QA_CODE_SNIPPET
-        elif framework == Framework("setfit"):
-            pattern = patterns.SETFIT_CODE_SNIPPET
-        elif framework == Framework("peft"):
-            pattern = patterns.PEFT_CODE_SNIPPET
-        elif framework == Framework("spacy"):
-            pattern = patterns.SPACY_CODE_SNIPPET
-        elif framework == Framework("spacy-transformers"):
-            pattern = patterns.SPACY_TRANSFORMERS_CODE_SNIPPET
+        pattern = model_card_pattern(framework, training_task)
 
         assert content.find(pattern) > -1
 
@@ -167,12 +155,14 @@ def test_model_card_with_defaults(
     "feedback_dataset_questions",
     "feedback_dataset_guidelines",
     "feedback_dataset_records",
+    "model_card_pattern",
 )
 def test_model_card_sentence_transformers(
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_guidelines: str,
     feedback_dataset_records: List["FeedbackRecord"],
+    model_card_pattern: str,
 ) -> None:
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -219,7 +209,8 @@ def test_model_card_sentence_transformers(
     try:
         assert (model_card_path).exists()
         content = model_card_path.read_text()
-        assert content.find(patterns.SENTENCE_TRANSFORMERS_CODE_SNIPPET) > -1
+        pattern = model_card_pattern(Framework("sentence-transformers"), TrainingTask.for_sentence_similarity)
+        assert content.find(pattern) > -1
 
     finally:
         if Path(OUTPUT_DIR).exists():
@@ -349,6 +340,7 @@ def formatting_func_dpo(sample: Dict[str, Any]):
     "feedback_dataset_questions",
     "feedback_dataset_guidelines",
     "feedback_dataset_records",
+    "model_card_pattern",
 )
 def test_model_card_trl(
     formatting_func: Callable,
@@ -357,6 +349,7 @@ def test_model_card_trl(
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
+    model_card_pattern: str,
 ) -> None:
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -391,15 +384,7 @@ def test_model_card_trl(
     try:
         assert (model_card_path).exists()
         content = model_card_path.read_text()
-
-        if training_task == TrainingTask.for_supervised_fine_tuning:
-            pattern = patterns.TR_SFT_CODE_SNIPPET
-        elif training_task == TrainingTask.for_reward_modeling:
-            pattern = patterns.TR_RM_CODE_SNIPPET
-        elif training_task == TrainingTask.for_proximal_policy_optimization:
-            pattern = patterns.TR_PPO_CODE_SNIPPET
-        elif training_task == TrainingTask.for_direct_preference_optimization:
-            pattern = patterns.TR_DPO_CODE_SNIPPET
+        pattern = model_card_pattern(Framework("trl"), training_task)
 
         assert content.find(pattern) > -1
 
