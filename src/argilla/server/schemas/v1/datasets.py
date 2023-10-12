@@ -16,13 +16,14 @@ from datetime import datetime
 from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
-from fastapi import HTTPException, Query
-from pydantic import BaseModel, Extra, conlist, constr, root_validator, validator
+from fastapi import Query
+from pydantic import BaseModel, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
 from pydantic.generics import GenericModel
 from pydantic.utils import GetterDict
 
 from argilla.server.schemas.base import UpdateSchema
+from argilla.server.schemas.v1.records import RecordUpdate
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
 from argilla.server.search_engine import StringQuery
 
@@ -427,6 +428,16 @@ class RecordCreate(BaseModel):
 
 class RecordsCreate(BaseModel):
     items: List[RecordCreate] = PydanticField(
+        ..., min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS
+    )
+
+
+class RecordUpdateWithId(RecordUpdate):
+    id: UUID
+
+
+class RecordsUpdate(BaseModel):
+    items: List[RecordUpdateWithId] = PydanticField(
         ..., min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS
     )
 

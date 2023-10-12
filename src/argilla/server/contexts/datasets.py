@@ -278,14 +278,14 @@ async def get_record_by_id(
 async def get_records_by_ids(
     db: "AsyncSession",
     dataset_id: UUID,
-    record_ids: List[UUID],
+    records_ids: List[UUID],
     include: Optional[List[RecordInclude]] = None,
     user_id: Optional[UUID] = None,
 ) -> List[Record]:
     if include is None:
         include = []
 
-    query = select(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(record_ids))
+    query = select(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(records_ids))
 
     if RecordInclude.responses in include:
         if user_id:
@@ -303,7 +303,7 @@ async def get_records_by_ids(
 
     # Preserver the order of the `record_ids` list
     record_order_map = {record.id: record for record in records}
-    ordered_records = [record_order_map[record_id] for record_id in record_ids]
+    ordered_records = [record_order_map[record_id] for record_id in records_ids]
 
     return ordered_records
 
@@ -373,7 +373,7 @@ async def validate_metadata(
     dataset: Dataset,
     metadata: Dict[str, Any],
     metadata_properties: Optional[Dict[str, Union[MetadataProperty, str]]] = None,
-) -> Dict[str, Union["MetadataPropertySettings", Literal["extra"]]]:
+) -> Dict[str, Union[MetadataProperty, Literal["extra"]]]:
     if metadata_properties is None:
         metadata_properties = {}
 
@@ -436,6 +436,7 @@ async def create_records(
         raise ValueError("Records cannot be created for a non published dataset")
 
     # Cache dictionaries to avoid querying the database multiple times
+    questions: Dict[UUID, Question] = {}
     metadata_properties: Dict[str, Union[MetadataProperty, Literal["extra"]]] = {}
 
     records = []
@@ -467,12 +468,10 @@ async def create_records(
 
         if record_create.suggestions:
             for suggestion in record_create.suggestions:
-                # TODO(gabrielmbmb): the result of this query should be cached
-                question = await get_question_by_id(db, suggestion.question_id)
-                if not question:
-                    raise ValueError(f"Provided question_id: {suggestion.question_id!r} is not a valid question id")
-
-                question.parsed_settings.check_response(suggestion)
+                try:
+                    questions = await validate_suggestion(db, suggestion, questions=questions)
+                except ValueError as e:
+                    raise ValueError(f"Provided suggestion for record at position {record_i} is not valid: {e}") from e
 
                 record.suggestions.append(
                     Suggestion(
@@ -507,15 +506,57 @@ async def create_records(
     await db.commit()
 
 
-async def update_records(db: "AsyncSession", search_engine: "SearchEngine", records_update: "RecordsUpdate") -> None:
-    objects = []
-    for record_update in records_update.items:
+async def update_records(
+    db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, records_update: "RecordsUpdate"
+) -> None:
+    records_update_objects = []
+    updated_records_ids = []
+    records_to_update_suggestions = []
+    suggestions = []
+
+    # Cache dictionaries to avoid querying the database multiple times
+    metadata_properties = {}
+    questions = {}
+
+    for record_i, record_update in enumerate(records_update.items):
         params = record_update.dict(exclude_unset=True)
 
-        objects.append(params)
+        if "metadata_" in params and (metadata := params["metadata_"]) is not None:
+            try:
+                metadata_properties = await validate_metadata(db, dataset, metadata, metadata_properties)
+            except ValueError as err:
+                raise ValueError(f"Provided metadata for record at position {record_i} is not valid: {e}") from err
+
+        if record_update.suggestions is not None:
+            for suggestion in record_update.suggestions:
+                try:
+                    questions = await validate_suggestion(db, suggestion, questions)
+                    suggestions.append(Suggestion(record_id=record_update.id, **suggestion.dict()))
+                except ValueError as err:
+                    raise ValueError(
+                        f"Provided suggestions for record at position {record_i} are not valid: {err}"
+                    ) from err
+            records_to_update_suggestions.append(record_update.id)
+
+        records_update_objects.append(params)
+        updated_records_ids.append(record_update.id)
 
     async with db.begin_nested():
-        await Record.update_many(db, objects, autocommit=False)
+        await Suggestion.delete_many(
+            db,
+            params=[
+                Suggestion.record_id.in_(records_to_update_suggestions),
+            ],
+            autocommit=False,
+        )
+
+        db.add_all(suggestions)
+
+        await Record.update_many(db, records_update_objects, autocommit=False)
+
+        records = await get_records_by_ids(db, dataset_id=dataset.id, records_ids=updated_records_ids)
+
+        await search_engine.update_records_metadata(dataset, records)
 
     await db.commit()
 
@@ -536,30 +577,30 @@ async def update_record(
 ) -> Record:
     params = record_update.dict(exclude_unset=True)
 
+    if "metadata_" in params and (metadata := params["metadata_"]) is not None:
+        await validate_metadata(db, dataset=record.dataset, metadata=metadata)
+
     if record_update.suggestions is not None:
-        params["suggestions"] = []
-        questions: Dict[UUID, Question] = {}
+        suggestions = []
         for suggestion in record_update.suggestions:
             try:
-                questions = await validate_suggestion(db, suggestion, questions)
+                await validate_suggestion(db, suggestion)
+                suggestions.append(Suggestion(**suggestion.dict()))
             except ValueError as err:
                 raise ValueError(
                     f"Provided suggestion for question_id={suggestion.question_id} is not valid: {err}"
                 ) from err
-            params["suggestions"].append(Suggestion(**suggestion.dict()))
 
-        # Remove old suggestions
+        # Remove existing suggestions
         record.suggestions = []
+        params["suggestions"] = suggestions
 
     async with db.begin_nested():
         record = await record.update(db, **params, replace_dict=True, autocommit=False)
 
         # If "metadata" has been included in the update, then we need to also update it in the search engine
         if "metadata_" in params:
-            metadata = params["metadata_"]
-            if metadata is not None:
-                await validate_metadata(db, dataset=record.dataset, metadata=metadata)
-            await search_engine.update_record_metadata(record)
+            await search_engine.update_records_metadata(record.dataset, [record])
 
     await db.commit()
     return record
