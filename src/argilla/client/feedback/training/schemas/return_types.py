@@ -12,12 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import logging
 from typing import Dict, List, Tuple, Union
 
 from pydantic import BaseModel
-
-_LOGGER = logging.getLogger(__name__)
 
 
 class TextClassificationReturnTypes(BaseModel):
