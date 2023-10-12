@@ -14,7 +14,7 @@
 
 import logging
 from abc import ABC, ABCMeta, abstractmethod
-from typing import Any, Dict, List, Literal, Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
 from pydantic import ValidationError
 
@@ -31,8 +31,8 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForPPO,
     TrainingTaskForQuestionAnswering,
     TrainingTaskForRM,
-    TrainingTaskForSFT,
     TrainingTaskForSentenceSimilarity,
+    TrainingTaskForSFT,
     TrainingTaskForTextClassification,
     TrainingTaskTypes,
 )
@@ -43,11 +43,11 @@ from argilla.utils.dependency import require_dependencies, requires_dependencies
 if TYPE_CHECKING:
     from datasets import Dataset
 
+    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
     from argilla.client.feedback.schemas.types import (
         AllowedRemoteFieldTypes,
         AllowedRemoteQuestionTypes,
     )
-    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 
 
 _LOGGER = logging.getLogger(__name__)
