@@ -13,9 +13,10 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
 
 from argilla.client.feedback.dataset.remote.base import RemoteFeedbackDatasetBase, RemoteFeedbackRecordsBase
+
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 
 if TYPE_CHECKING:
@@ -23,6 +24,7 @@ if TYPE_CHECKING:
 
     import httpx
 
+    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
     from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
     from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
@@ -94,3 +96,24 @@ class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeed
 
     def delete(self) -> None:
         raise NotImplementedError("`delete` does not work for filtered datasets.")
+
+    def filter_by(
+        self, response_status: Union["ResponseStatusFilter", List["ResponseStatusFilter"]]
+    ) -> "FilteredRemoteFeedbackDataset":
+        if not isinstance(response_status, list):
+            response_status = [response_status]
+
+        return self.__class__(
+            client=self._client,
+            id=self.id,
+            name=self.name,
+            workspace=self.workspace,
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+            fields=self.fields,
+            questions=self.questions,
+            guidelines=self.guidelines,
+            filters={
+                "response_status": [status.value if hasattr(status, "value") else status for status in response_status]
+            },
+        )

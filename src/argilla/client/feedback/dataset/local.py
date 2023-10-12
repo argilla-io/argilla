@@ -11,21 +11,24 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import warnings
 
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
-from argilla.client.feedback.dataset.mixins import ArgillaMixin, UnificationMixin
-from argilla.client.feedback.schemas.fields import TextField
+from argilla.client.feedback.dataset.mixins import ArgillaMixin
+from argilla.client.feedback.dataset.unification import UnificationMixin
+
 from argilla.client.feedback.schemas.types import AllowedQuestionTypes
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.types import AllowedFieldTypes
+    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 
 
-class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
+class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase, UnificationMixin):
     def __init__(
         self,
         *,
@@ -129,8 +132,7 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
             yield self._records[i : i + batch_size]
 
     def add_records(
-        self,
-        records: Union["FeedbackRecord", Dict[str, Any], List[Union["FeedbackRecord", Dict[str, Any]]]],
+        self, records: Union["FeedbackRecord", Dict[str, Any], List[Union["FeedbackRecord", Dict[str, Any]]]]
     ) -> None:
         """Adds the given records to the dataset, and stores them locally. If you are
         planning to push those to Argilla, you will need to call `push_to_argilla` afterwards,
@@ -156,3 +158,26 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
             self._records += records
         else:
             self._records = records
+
+    def pull(self) -> "FeedbackDataset":
+        """Returns the self `FeedbackDataset` instance."""
+        return self
+
+    def filter_by(
+        self, response_status: Union["ResponseStatusFilter", List["ResponseStatusFilter"]]
+    ) -> "FeedbackDataset":
+        warnings.warn(
+            "`filter_by` method is not supported for local datasets and won't take any effect. "
+            "Please, use `FeedbackDataset.from_argilla(...)` first to filter your data",
+            UserWarning,
+        )
+        return self
+
+    def delete(self):
+        # TODO: improve delete mechanism -> `FeedbackDataset.delete_from_argilla(name=..., id=...)`
+        warnings.warn(
+            "`delete` is not supported for local datasets and won't take any effect. "
+            "Please, use `FeedbackDataset.from_argilla(...).delete()`",
+            UserWarning,
+        )
+        return self

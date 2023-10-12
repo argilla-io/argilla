@@ -17,6 +17,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Generic, Iterator, List, Optional, Type, TypeVar, Union
 
+from argilla import Workspace
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
@@ -91,7 +92,7 @@ class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
         pass
 
 
-class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
+class RemoteFeedbackDatasetBase(FeedbackDatasetBase, Generic[T]):
     records_cls: Type[T]
 
     def __init__(
@@ -263,3 +264,9 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
             records=[record.to_local() for record in self._records],
         )
         return instance
+
+    def push_to_argilla(
+        self, name: str, workspace: Optional[Union[str, "Workspace"]] = None, show_progress: bool = False
+    ) -> "RemoteFeedbackDatasetBase":
+        warnings.warn("Already pushed datasets cannot be pushed to Argilla again.")
+        return self
