@@ -13,13 +13,14 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
 
 from argilla.server.models import ResponseStatus
 from argilla.server.schemas.base import UpdateSchema
+from argilla.server.schemas.v1.suggestions import SuggestionCreate
 
 
 class ResponseValue(BaseModel):
@@ -50,3 +51,4 @@ class ResponseCreate(BaseModel):
 class RecordUpdate(UpdateSchema):
     external_id: Optional[str]
     metadata_: Optional[Dict[str, Any]] = Field(None, alias="metadata")
+    suggestions: Optional[List[SuggestionCreate]] = None

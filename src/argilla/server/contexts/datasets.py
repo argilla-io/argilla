@@ -49,7 +49,7 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
     from argilla.server.models import MetadataPropertySettings
-    from argilla.server.schemas.v1.datasets import DatasetUpdate
+    from argilla.server.schemas.v1.datasets import DatasetUpdate, RecordsUpdate
     from argilla.server.schemas.v1.fields import FieldUpdate
     from argilla.server.schemas.v1.questions import QuestionUpdate
     from argilla.server.schemas.v1.records import RecordUpdate
@@ -275,27 +275,6 @@ async def get_record_by_id(
     return result.scalar_one_or_none()
 
 
-async def delete_record(db: "AsyncSession", search_engine: "SearchEngine", record: Record) -> Record:
-    async with db.begin_nested():
-        record = await record.delete(db=db, autocommit=False)
-        await search_engine.delete_records(dataset=record.dataset, records=[record])
-
-    await db.commit()
-
-    return record
-
-
-async def delete_records(
-    db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, records_ids: List[UUID]
-) -> None:
-    async with db.begin_nested():
-        params = [Record.id.in_(records_ids), Record.dataset_id == dataset.id]
-        records = await Record.delete_many(db=db, params=params, autocommit=False)
-        await search_engine.delete_records(dataset=dataset, records=records)
-
-    await db.commit()
-
-
 async def get_records_by_ids(
     db: "AsyncSession",
     dataset_id: UUID,
@@ -429,6 +408,27 @@ async def validate_metadata(
     return metadata_properties
 
 
+async def validate_suggestion(
+    db: "AsyncSession",
+    suggestion: "SuggestionCreate",
+    questions: Optional[Dict[UUID, Question]] = None,
+) -> Dict[UUID, Question]:
+    if not questions:
+        questions = {}
+
+    question = questions.get(suggestion.question_id, None)
+
+    if not question:
+        question = await get_question_by_id(db, suggestion.question_id)
+        if not question:
+            raise ValueError(f"question_id={str(suggestion.question_id)} does not exist")
+        questions[suggestion.question_id] = question
+
+    question.parsed_settings.check_response(suggestion)
+
+    return questions
+
+
 async def create_records(
     db: "AsyncSession", search_engine: SearchEngine, dataset: Dataset, records_create: RecordsCreate
 ):
@@ -507,10 +507,50 @@ async def create_records(
     await db.commit()
 
 
+async def update_records(db: "AsyncSession", search_engine: "SearchEngine", records_update: "RecordsUpdate") -> None:
+    objects = []
+    for record_update in records_update.items:
+        params = record_update.dict(exclude_unset=True)
+
+        objects.append(params)
+
+    async with db.begin_nested():
+        await Record.update_many(db, objects, autocommit=False)
+
+    await db.commit()
+
+
+async def delete_records(
+    db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, records_ids: List[UUID]
+) -> None:
+    async with db.begin_nested():
+        params = [Record.id.in_(records_ids), Record.dataset_id == dataset.id]
+        records = await Record.delete_many(db=db, params=params, autocommit=False)
+        await search_engine.delete_records(dataset=dataset, records=records)
+
+    await db.commit()
+
+
 async def update_record(
     db: "AsyncSession", search_engine: "SearchEngine", record: Record, record_update: "RecordUpdate"
 ) -> Record:
     params = record_update.dict(exclude_unset=True)
+
+    if record_update.suggestions is not None:
+        params["suggestions"] = []
+        questions: Dict[UUID, Question] = {}
+        for suggestion in record_update.suggestions:
+            try:
+                questions = await validate_suggestion(db, suggestion, questions)
+            except ValueError as err:
+                raise ValueError(
+                    f"Provided suggestion for question_id={suggestion.question_id} is not valid: {err}"
+                ) from err
+            params["suggestions"].append(Suggestion(**suggestion.dict()))
+
+        # Remove old suggestions
+        record.suggestions = []
+
     async with db.begin_nested():
         record = await record.update(db, **params, replace_dict=True, autocommit=False)
 
@@ -522,6 +562,16 @@ async def update_record(
             await search_engine.update_record_metadata(record)
 
     await db.commit()
+    return record
+
+
+async def delete_record(db: "AsyncSession", search_engine: "SearchEngine", record: Record) -> Record:
+    async with db.begin_nested():
+        record = await record.delete(db=db, autocommit=False)
+        await search_engine.delete_records(dataset=record.dataset, records=[record])
+
+    await db.commit()
+
     return record
 
 
