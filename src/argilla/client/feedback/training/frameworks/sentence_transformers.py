@@ -347,7 +347,7 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
             # dataset instead of the defaults
             self._trainer.save(output_dir, model_name=None, create_model_card=False, train_datasets=None)
 
-    def model_card_data(self, **card_data_kwargs) -> "SentenceTransformerCardData":
+    def get_model_card_data(self, **card_data_kwargs) -> "SentenceTransformerCardData":
         """
         Generate the card data to be used for the `ArgillaModelCard`.
 

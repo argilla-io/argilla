@@ -74,7 +74,7 @@ class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSke
 
         self.init_training_args()
 
-    def model_card_data(self, **card_data_kwargs) -> "TransformersModelCardData":
+    def get_model_card_data(self, **card_data_kwargs) -> "TransformersModelCardData":
         """
         Generate the card data to be used for the `ArgillaModelCard`.
 

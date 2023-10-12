@@ -48,7 +48,7 @@ class ArgillaSetFitTrainer(ArgillaSetFitTrainerV1, ArgillaTransformersTrainer):
             self._column_mapping = {"text": "text", "label": "label"}
         self.init_training_args()
 
-    def model_card_data(self, **card_data_kwargs) -> "SetFitModelCardData":
+    def get_model_card_data(self, **card_data_kwargs) -> "SetFitModelCardData":
         """
         Generate the card data to be used for the `ArgillaModelCard`.
 

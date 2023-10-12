@@ -389,7 +389,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
                 formatted_string.append(f"{key}: {val}")
         return "\n".join(formatted_string)
 
-    def model_card_data(self, **card_data_kwargs) -> "TRLModelCardData":
+    def get_model_card_data(self, **card_data_kwargs) -> "TRLModelCardData":
         """
         Generate the card data to be used for the `ArgillaModelCard`.
 

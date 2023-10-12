@@ -50,7 +50,7 @@ class ArgillaOpenAITrainer(ArgillaOpenAITrainerV1, ArgillaTrainerSkeleton):
 
         self.init_training_args(model=self._model)
 
-    def model_card_data(self, **card_data_kwargs) -> "OpenAIModelCardData":
+    def get_model_card_data(self, **card_data_kwargs) -> "OpenAIModelCardData":
         """
         Generate the card data to be used for the `ArgillaModelCard`.
 

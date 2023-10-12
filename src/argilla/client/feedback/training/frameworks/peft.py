@@ -25,7 +25,7 @@ class ArgillaPeftTrainer(ArgillaPeftTrainerV1, ArgillaTransformersTrainer):
     def __init__(self, *args, **kwargs):
         ArgillaTransformersTrainer.__init__(self, *args, **kwargs)
 
-    def model_card_data(self, **card_data_kwargs) -> "PeftModelCardData":
+    def get_model_card_data(self, **card_data_kwargs) -> "PeftModelCardData":
         """
         Generate the card data to be used for the `ArgillaModelCard`.
 

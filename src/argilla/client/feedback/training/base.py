@@ -16,7 +16,7 @@ import os
 import textwrap
 import warnings
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.training.schemas import TrainingTaskForTextClassification, TrainingTaskTypes
@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from transformers import PreTrainedModel, PreTrainedTokenizer
 
     from argilla.client.feedback.dataset import FeedbackDataset
+    from argilla.client.feedback.integrations.huggingface.model_card import FrameworkCardData
 
 
 class ArgillaTrainer(ArgillaTrainerV1):
@@ -67,7 +68,8 @@ class ArgillaTrainer(ArgillaTrainerV1):
             gpu_id: the GPU ID to use when training a SpaCy model. Defaults to -1, which means that the CPU
                 will be used by default. GPU IDs start in 0, which stands for the default GPU in the system,
                 if available.
-            framework_kwargs: arguments for the framework's trainer.
+            framework_kwargs: arguments for the framework's trainer. A special key (model_card_kwargs) is reserved
+                for the arguments that can be passed to the model card.
             **load_kwargs: arguments for the rg.load() function.
         """
         self._dataset = dataset
@@ -271,9 +273,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
         """Generate and return a model card string based on the model card data.
 
         Args:
-            card_data_kwargs:
-                Extra arguments provided by the user when creating the `ArgillaTrainer` like the license
-                or language/s.
+            output_dir: Folder where the model card will be written.
 
         Returns:
             model_card: The model card string.
@@ -281,7 +281,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
         from argilla.client.feedback.integrations.huggingface.model_card import ArgillaModelCard
 
         model_card = ArgillaModelCard.from_template(
-            card_data=self._trainer.model_card_data(**self.model_card_kwargs),
+            card_data=self._trainer.get_model_card_data(**self.model_card_kwargs),
             template_path=ArgillaModelCard.default_template_path,
         )
         from pathlib import Path
@@ -289,6 +289,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
         model_card_path = Path(output_dir) / "MODEL_CARD.md"
         model_card.save(model_card_path)
         self._logger.info(f"Model card generated at: {model_card_path}")
+        return model_card.content
 
 
 class ArgillaTrainerSkeleton(ABC):
@@ -350,4 +351,10 @@ class ArgillaTrainerSkeleton(ABC):
     def save(self, output_dir: str) -> None:
         """
         Saves the model to the specified path.
+        """
+
+    @abstractmethod
+    def get_model_card_data(self, card_data_kwargs: Dict[str, Any]) -> "FrameworkCardData":
+        """
+        Generates a `FrameworkCardData` instance to generate a model card from.
         """

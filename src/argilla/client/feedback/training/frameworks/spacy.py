@@ -153,7 +153,7 @@ class ArgillaSpaCyTrainer(ArgillaSpaCyTrainerV1, _ArgillaSpaCyTrainerBase):
         self.freeze_tok2vec = freeze_tok2vec
         _ArgillaSpaCyTrainerBase.__init__(self, **kwargs)
 
-    def model_card_data(self, **card_data_kwargs) -> "SpacyModelCardData":
+    def get_model_card_data(self, **card_data_kwargs) -> "SpacyModelCardData":
         """
         Generate the card data to be used for the `ArgillaModelCard`.
 
@@ -189,7 +189,7 @@ class ArgillaSpaCyTransformersTrainer(ArgillaSpaCyTransformersTrainerV1, _Argill
         self.update_transformer = update_transformer
         _ArgillaSpaCyTrainerBase.__init__(self, **kwargs)
 
-    def model_card_data(self, **card_data_kwargs) -> "SpacyTransformersModelCardData":
+    def get_model_card_data(self, **card_data_kwargs) -> "SpacyTransformersModelCardData":
         """
         Generate the card data to be used for the `ArgillaModelCard`.
 
