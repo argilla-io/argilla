@@ -23,10 +23,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Union
 
 import pytest
-from argilla.client.feedback.integrations.huggingface.model_card.model_card import (
-    _prepare_dict_for_comparison,
-    _updated_arguments,
-)
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     LabelQuestion,
@@ -35,8 +31,6 @@ from argilla.client.feedback.schemas import (
 from argilla.client.feedback.unification import LabelQuestionUnification
 from argilla.client.models import Framework
 from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
-from argilla.training.utils import get_default_args
-from transformers import TrainingArguments
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import FeedbackRecord
@@ -391,44 +385,3 @@ def test_model_card_trl(
     finally:
         if Path(OUTPUT_DIR).exists():
             shutil.rmtree(OUTPUT_DIR)
-
-
-default_transformer_args = get_default_args(TrainingArguments.__init__)
-default_transformer_args_1 = default_transformer_args.copy()
-default_transformer_args_1.update({"output_dir": None, "warmup_steps": 100})
-default_transformer_args_2 = default_transformer_args.copy()
-default_transformer_args_2.update({"output_dir": {"nested_name": "test"}})
-default_transformer_args_3 = default_transformer_args.copy()
-default_transformer_args_3.update({"output_dir": [1.2, 3, "value"]})
-
-# Test a random class, it could be a loss function passed as a callable, or an instance
-# of one for example.
-from dataclasses import dataclass
-
-
-@dataclass
-class Dummy:
-    pass
-
-
-default_transformer_args_4 = default_transformer_args.copy()
-default_transformer_args_4.update({"output_dir": Dummy, "other": Dummy()})
-
-
-# TODO(plaguss): Move these tests to test/unit
-@pytest.mark.parametrize(
-    "current_kwargs, new_kwargs",
-    (
-        (default_transformer_args_1, {"warmup_steps": 100}),
-        (default_transformer_args_2, {"output_dir": {"nested_name": "test"}}),
-        (default_transformer_args_3, {"output_dir": [1.2, 3, "value"]}),
-        (default_transformer_args_4, {"output_dir": Dummy, "other": Dummy()}),
-    ),
-)
-def test_updated_kwargs(current_kwargs: Dict[str, Any], new_kwargs: Dict[str, Any]):
-    # Using only the Transformer's TrainingArguments as an example, no need to check if the arguments are correct
-
-    new_arguments = _updated_arguments(default_transformer_args, current_kwargs)
-    assert set(_prepare_dict_for_comparison(new_arguments).items()) == set(
-        _prepare_dict_for_comparison(new_kwargs).items()
-    )
