@@ -13,15 +13,16 @@
 #  limitations under the License.
 
 import logging
-from abc import ABC, abstractproperty
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
+from abc import ABC, ABCMeta, abstractmethod
+from typing import Any, Dict, List, Literal, Optional, TYPE_CHECKING, Union
 
 from pydantic import ValidationError
 
+from argilla import Workspace
+from argilla.client.feedback.dataset.unification import UnificationMixin
 from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
-    FieldSchema,
 )
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.feedback.training.schemas import (
@@ -30,8 +31,8 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForPPO,
     TrainingTaskForQuestionAnswering,
     TrainingTaskForRM,
-    TrainingTaskForSentenceSimilarity,
     TrainingTaskForSFT,
+    TrainingTaskForSentenceSimilarity,
     TrainingTaskForTextClassification,
     TrainingTaskTypes,
 )
@@ -46,12 +47,13 @@ if TYPE_CHECKING:
         AllowedRemoteFieldTypes,
         AllowedRemoteQuestionTypes,
     )
+    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
+class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, UnificationMixin, metaclass=ABCMeta):
     """Base class with shared functionality for `FeedbackDataset` and `RemoteFeedbackDataset`."""
 
     def __init__(
@@ -135,7 +137,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         self._guidelines = guidelines
 
     @property
-    @abstractproperty
+    @abstractmethod
     def records(self) -> Any:
         """Returns the records of the dataset."""
         pass
@@ -188,6 +190,29 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             f"Question with name='{name}' not found, available question names are:"
             f" {', '.join(q.name for q in self._questions)}"
         )
+
+    @abstractmethod
+    def add_records(
+        self, records: Union["FeedbackRecord", Dict[str, Any], List[Union["FeedbackRecord", Dict[str, Any]]]], **kwargs
+    ):
+        """Adds the given records to the dataset, and stores them locally. If you are
+        planning to push those to Argilla, you will need to call `push_to_argilla` afterwards,
+        to both create the dataset in Argilla and push the records to it. Then, from a
+        `FeedbackDataset` pushed to Argilla, you'll just need to call `add_records` and
+        those will be automatically uploaded to Argilla.
+
+        Args:
+            records: can be a single `FeedbackRecord`, a list of `FeedbackRecord`,
+                a single dictionary, or a list of dictionaries. If a dictionary is provided,
+                it will be converted to a `FeedbackRecord` internally.
+
+        Raises:
+            ValueError: if the given records are an empty list.
+            ValueError: if the given records are neither: `FeedbackRecord`, list of `FeedbackRecord`,
+                list of dictionaries as a record or dictionary as a record.
+            ValueError: if the given records do not match the expected schema.
+        """
+        pass
 
     def _parse_records(
         self, records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]]
@@ -325,14 +350,17 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                 " dataset via the `FeedbackDataset.add_records` method first."
             )
 
+        local_dataset = self.pull()
         if isinstance(task, (TrainingTaskForTextClassification, TrainingTaskForSentenceSimilarity)):
             if task.formatting_func is None:
                 # in sentence-transformer models we can train without labels
                 if task.label:
-                    self.unify_responses(question=task.label.question, strategy=task.label.strategy)
+                    local_dataset = local_dataset.unify_responses(
+                        question=task.label.question, strategy=task.label.strategy
+                    )
         elif isinstance(task, TrainingTaskForQuestionAnswering):
             if task.formatting_func is None:
-                self.unify_responses(question=task.answer.name, strategy="disagreement")
+                local_dataset = self.unify_responses(question=task.answer.name, strategy="disagreement")
         elif not isinstance(
             task,
             (
@@ -345,7 +373,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         ):
             raise ValueError(f"Training data {type(task)} is not supported yet")
 
-        data = task._format_data(self)
+        data = task._format_data(local_dataset)
         if framework in [
             Framework.TRANSFORMERS,
             Framework.SETFIT,
@@ -382,3 +410,60 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             raise NotImplementedError(
                 f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
             )
+
+    @abstractmethod
+    def pull(self):
+        """Pulls the dataset from Argilla and returns a local instance of it.
+
+        Returns:
+            A local instance of the dataset which is a `FeedbackDataset` object.
+        """
+        pass
+
+    @abstractmethod
+    def filter_by(self, response_status: Union["ResponseStatusFilter", List["ResponseStatusFilter"]]):
+        """Filters the current `RemoteFeedbackDataset` based on the `response_status` of
+        the responses of the records in Argilla. This method creates a new class instance
+        of `FilteredRemoteFeedbackDataset` with the given filters.
+
+        Args:
+            response_status: the response status/es to filter the dataset by. Can be
+                one of: draft, pending, submitted, and discarded.
+
+        Returns:
+            A new instance of `FilteredRemoteFeedbackDataset` with the given filters.
+        """
+        pass
+
+    @abstractmethod
+    def delete(self):
+        """Deletes the current `FeedbackDataset` from Argilla. This method is just working
+        if the user has either `owner` or `admin` role.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+            RuntimeError: if the `FeedbackDataset` cannot be deleted from Argilla.
+        """
+        pass
+
+    @abstractmethod
+    def push_to_argilla(
+        self,
+        name: str,
+        workspace: Optional[Union[str, Workspace]] = None,
+        show_progress: bool = False,
+    ) -> "FeedbackDatasetBase":
+        """Pushes the `FeedbackDataset` to Argilla.
+
+        Note that you may need to `rg.init(...)` with your Argilla credentials before calling this function, otherwise
+        the default http://localhost:6900 will be used, which will fail if Argilla is not deployed locally.
+
+        Args:
+            name: the name of the dataset to push to Argilla.
+            workspace: the workspace where to push the dataset to. If not provided, the active workspace will be used.
+            show_progress: the option to choose to show/hide tqdm progress bar while looping over records.
+
+        Returns:
+            The `FeedbackDataset` pushed to Argilla, which is now an instance of `RemoteFeedbackDataset`.
+        """
+        pass
