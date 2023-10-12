@@ -227,8 +227,8 @@ class SpacyModelCardData(SpacyModelCardDataBase):
             kwargs.update({"freeze_tok2vec": freeze_tok2vec})
         return kwargs
 
-    def _update_config__repr__(self) -> str:
-        return None
+    def _update_config__repr__(self) -> Optional[str]:
+        return
         # TODO(plaguss): spacy and spacy-transformers are not implemented.
         # For this to work, `_updated_arguments` has to deal with dicts
         # with depth higher than 2 (or maybe make the function recursive).
@@ -244,7 +244,7 @@ class SpacyModelCardData(SpacyModelCardDataBase):
         # updated_args = _updated_arguments(base_kwargs, self.update_config_kwargs)
 
         # if not updated_args:
-        #     return None
+        #     return
 
         # return _update_config__repr__(updated_args)
 
@@ -261,7 +261,7 @@ class SpacyTransformersModelCardData(SpacyModelCardDataBase):
         return kwargs
 
     def _update_config__repr__(self) -> str:
-        return None
+        return
 
 
 @dataclass
@@ -332,15 +332,13 @@ class TransformersModelCardData(TransformersModelCardDataBase):
         else:
             raise NotImplementedError(f"`task_type` not implemented: `{self.task_type}`")
 
-    def _update_config__repr__(self) -> str:
+    def _update_config__repr__(self) -> Optional[str]:
         from transformers import TrainingArguments
 
         base_kwargs = get_default_args(TrainingArguments.__init__)
 
         if updated_args := _updated_arguments(base_kwargs, self.update_config_kwargs):
             return _update_config__repr__(updated_args)
-        else:
-            return None
 
 
 @dataclass
@@ -348,7 +346,7 @@ class SetFitModelCardData(TransformersModelCardDataBase):
     framework: Framework = Framework("setfit")
     tags: Optional[List[str]] = field(default_factory=lambda: ["text-classification", "setfit", "argilla"])
 
-    def _update_config__repr__(self) -> str:
+    def _update_config__repr__(self) -> Optional[str]:
         from setfit import SetFitModel, SetFitTrainer
 
         setfit_model_kwargs = get_default_args(SetFitModel._from_pretrained)
@@ -371,8 +369,6 @@ class SetFitModelCardData(TransformersModelCardDataBase):
 
         if updated_args := _updated_arguments(base_kwargs, self.update_config_kwargs):
             return _update_config__repr__(updated_args)
-        else:
-            return None
 
 
 @dataclass
@@ -393,7 +389,7 @@ class SpanMarkerModelCardData(TransformersModelCardDataBase):
 class PeftModelCardData(TransformersModelCardDataBase):
     framework: Framework = Framework("peft")
 
-    def _update_config__repr__(self) -> str:
+    def _update_config__repr__(self) -> Optional[str]:
         base_kwargs = {
             "r": 8,
             "target_modules": None,
@@ -410,8 +406,6 @@ class PeftModelCardData(TransformersModelCardDataBase):
 
         if updated_args := _updated_arguments(base_kwargs, self.update_config_kwargs):
             return _update_config__repr__(updated_args)
-        else:
-            return None
 
 
 @dataclass
@@ -522,11 +516,11 @@ class TRLModelCardData(FrameworkCardData):
         else:
             raise NotImplementedError(f"Transformer doesn't have this `task_type` implemented: `{self.task_type}`")
 
-    def _update_config__repr__(self) -> str:
+    def _update_config__repr__(self) -> Optional[str]:
         if self.task_type == "for_proximal_policy_optimization":
             # Similar to what happens with spacy, the current implementation
             # doesnt' render appropriately, for the moment let for the user to be written by hand.
-            return None
+            return
 
         else:
             base_kwargs = {
@@ -538,8 +532,6 @@ class TRLModelCardData(FrameworkCardData):
 
         if updated_args := _updated_arguments(base_kwargs, self.update_config_kwargs):
             return _update_config__repr__(updated_args)
-        else:
-            return None
 
 
 @dataclass
@@ -582,7 +574,7 @@ class SentenceTransformerCardData(FrameworkCardData):
         else:
             return {}
 
-    def _update_config__repr__(self) -> str:
+    def _update_config__repr__(self) -> Optional[str]:
         base_kwargs = {
             # model_kwargs
             **get_default_args(self.trainer_cls.__init__),
@@ -595,8 +587,6 @@ class SentenceTransformerCardData(FrameworkCardData):
 
         if updated_args := _updated_arguments(base_kwargs, self.update_config_kwargs):
             return _update_config__repr__(updated_args)
-        else:
-            return None
 
 
 def _formatting_func_call(formatting_func: Callable, task_type: TaskTypes) -> str:
