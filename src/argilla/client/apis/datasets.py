@@ -131,8 +131,8 @@ class Datasets(AbstractApi):
     class _SettingsApiModel(BaseModel):
         label_schema: Dict[str, Any]
 
-    def find_by_name(self, name: str) -> _DatasetApiModel:
-        dataset = get_dataset(self.http_client, name=name).parsed
+    def find_by_name(self, name: str, workspace: Optional[str] = None) -> _DatasetApiModel:
+        dataset = get_dataset(self.http_client, name=name, workspace=workspace).parsed
         return self._DatasetApiModel.parse_obj(dataset)
 
     def create(self, name: str, task: TaskType, workspace: str) -> _DatasetApiModel:
@@ -163,7 +163,7 @@ class Datasets(AbstractApi):
             )
             ds = self.create(name=name, task=task, workspace=workspace)
         except AlreadyExistsApiError:
-            ds = self.find_by_name(name)
+            ds = self.find_by_name(name, workspace=workspace)
         self._save_settings(dataset=ds, settings=settings)
 
     def scan(
@@ -332,20 +332,24 @@ class Datasets(AbstractApi):
                     json=settings_.dict(),
                 )
 
-    def load_settings(self, name: str) -> Optional[Settings]:
+    def load_settings(self, name: str, workspace: Optional[str] = None) -> Optional[Settings]:
         """
         Load the dataset settings
 
         Args:
             name: The dataset name
+            workspace: The workspace name where the dataset belongs to
 
         Returns:
             Settings defined for the dataset
         """
-        dataset = self.find_by_name(name)
+        dataset = self.find_by_name(name, workspace=workspace)
         try:
             with api_compatibility(self, min_version="1.0"):
-                response = self.http_client.get(f"{self._API_PREFIX}/{dataset.name}/{dataset.task.value}/settings")
+                params = {"workspace": dataset.workspace} if dataset.workspace else {}
+                response = self.http_client.get(
+                    f"{self._API_PREFIX}/{dataset.name}/{dataset.task.value}/settings", params=params
+                )
                 return __TASK_TO_SETTINGS__.get(dataset.task).from_dict(response)
         except NotFoundApiError:
             return None
