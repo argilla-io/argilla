@@ -87,18 +87,15 @@ class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSke
         from argilla.client.feedback.integrations.huggingface.model_card import TransformersModelCardData
 
         if isinstance(self._task, TrainingTaskForTextClassification):
-            task_type = "for_text_classification"
             tags = ["text-classification", "transformers", "argilla"]
             output_dir = '"text_classification_model"'
         else:
-            task_type = "for_question_answering"
             tags = ["question-answering", "transformers", "argilla"]
             output_dir = '"question_answering_model"'
 
         return TransformersModelCardData(
-            model_name=self._model,
+            model_id=self._model,
             task=self._task,
-            task_type=task_type,
             tags=tags,
             output_dir=output_dir,
             update_config_kwargs=self.trainer_kwargs,

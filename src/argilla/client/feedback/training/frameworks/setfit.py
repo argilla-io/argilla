@@ -61,7 +61,7 @@ class ArgillaSetFitTrainer(ArgillaSetFitTrainerV1, ArgillaTransformersTrainer):
         from argilla.client.feedback.integrations.huggingface.model_card import SetFitModelCardData
 
         return SetFitModelCardData(
-            model_name=self._model,
+            model_id=self._model,
             task=self._task,
             update_config_kwargs={**self.setfit_model_kwargs, **self.setfit_trainer_kwargs},
             **card_data_kwargs,

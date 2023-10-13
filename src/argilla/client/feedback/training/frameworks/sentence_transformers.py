@@ -360,7 +360,7 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
         from argilla.client.feedback.integrations.huggingface.model_card import SentenceTransformerCardData
 
         return SentenceTransformerCardData(
-            model_name=self._model,
+            model_id=self._model,
             task=self._task,
             framework_kwargs={"cross_encoder": self._cross_encoder},
             update_config_kwargs={**self.trainer_kwargs, **self.model_kwargs, **self.data_kwargs},

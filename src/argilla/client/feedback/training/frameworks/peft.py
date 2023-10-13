@@ -38,7 +38,7 @@ class ArgillaPeftTrainer(ArgillaPeftTrainerV1, ArgillaTransformersTrainer):
         from argilla.client.feedback.integrations.huggingface.model_card import PeftModelCardData
 
         return PeftModelCardData(
-            model_name=self._model,
+            model_id=self._model,
             task=self._task,
             update_config_kwargs=self.lora_kwargs,
             **card_data_kwargs,

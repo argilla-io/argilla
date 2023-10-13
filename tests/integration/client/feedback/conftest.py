@@ -88,10 +88,10 @@ def model_card_pattern() -> str:
 
 SENTENCE_TRANSFORMERS_CODE_SNIPPET = """\
 ```python
-# Load the dataset if it's uploaded on huggingface hub, or create it from scratch:
+# Load the dataset:
 dataset = FeedbackDataset.from_huggingface("argilla/emotion")
 
-# Create the task:
+# Create the training task:
     def formatting_func(sample):
         labels = [
             annotation["value"]
@@ -112,11 +112,12 @@ dataset = FeedbackDataset.from_huggingface("argilla/emotion")
 
 task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func)
 
-# Create the Trainer
+# Create the ArgillaTrainer:
 trainer = ArgillaTrainer(
     dataset=dataset,
     task=task,
     framework="sentence-transformers",
+    model="sentence-transformers/all-MiniLM-L6-v2",
     framework_kwargs={'cross_encoder': False},
 )
 
@@ -143,17 +144,18 @@ trainer.predict(
 
 TRANSFORMERS_CODE_SNIPPET = """\
 ```python
-# Load the dataset if it's uploaded on huggingface hub, or create it from scratch:
+# Load the dataset:
 dataset = FeedbackDataset.from_huggingface("argilla/emotion")
 
-# Create the task:
+# Create the training task:
 task = TrainingTask.for_text_classification(text=dataset.field_by_name("text"), label=dataset.question_by_name("question-3"))
 
-# Create the Trainer
+# Create the ArgillaTrainer:
 trainer = ArgillaTrainer(
     dataset=dataset,
     task=task,
     framework="transformers",
+    model="prajjwal1/bert-tiny",
 )
 
 trainer.update_config({
@@ -168,17 +170,18 @@ trainer.train(output_dir="text_classification_model")
 
 TRANSFORMERS_QA_CODE_SNIPPET = """\
 ```python
-# Load the dataset if it's uploaded on huggingface hub, or create it from scratch:
+# Load the dataset:
 dataset = FeedbackDataset.from_huggingface("argilla/emotion")
 
-# Create the task:
+# Create the training task:
 task = TrainingTask.for_question_answering(question=dataset.field_by_name("label"), context=dataset.field_by_name("text"), answer=dataset.question_by_name("question-1"))
 
-# Create the Trainer
+# Create the ArgillaTrainer:
 trainer = ArgillaTrainer(
     dataset=dataset,
     task=task,
     framework="transformers",
+    model="prajjwal1/bert-tiny",
 )
 
 trainer.update_config({
@@ -193,17 +196,18 @@ trainer.train(output_dir="question_answering_model")
 
 SETFIT_CODE_SNIPPET = """\
 ```python
-# Load the dataset if it's uploaded on huggingface hub, or create it from scratch:
+# Load the dataset:
 dataset = FeedbackDataset.from_huggingface("argilla/emotion")
 
-# Create the task:
+# Create the training task:
 task = TrainingTask.for_text_classification(text=dataset.field_by_name("text"), label=dataset.question_by_name("question-3"))
 
-# Create the Trainer
+# Create the ArgillaTrainer:
 trainer = ArgillaTrainer(
     dataset=dataset,
     task=task,
     framework="setfit",
+    model="all-MiniLM-L6-v2",
 )
 
 trainer.update_config({
@@ -217,17 +221,18 @@ trainer.train(output_dir="text_classification_model")
 
 PEFT_CODE_SNIPPET = """\
 ```python
-# Load the dataset if it's uploaded on huggingface hub, or create it from scratch:
+# Load the dataset:
 dataset = FeedbackDataset.from_huggingface("argilla/emotion")
 
-# Create the task:
+# Create the training task:
 task = TrainingTask.for_text_classification(text=dataset.field_by_name("text"), label=dataset.question_by_name("question-3"))
 
-# Create the Trainer
+# Create the ArgillaTrainer:
 trainer = ArgillaTrainer(
     dataset=dataset,
     task=task,
     framework="peft",
+    model="prajjwal1/bert-tiny",
 )
 
 trainer.train(output_dir="text_classification_model")
@@ -236,18 +241,19 @@ trainer.train(output_dir="text_classification_model")
 
 SPACY_CODE_SNIPPET = """\
 ```python
-# Load the dataset if it's uploaded on huggingface hub, or create it from scratch:
+# Load the dataset:
 dataset = FeedbackDataset.from_huggingface("argilla/emotion")
 
-# Create the task:
+# Create the training task:
 task = TrainingTask.for_text_classification(text=dataset.field_by_name("text"), label=dataset.question_by_name("question-3"))
 
-# Create the Trainer
+# Create the ArgillaTrainer:
 trainer = ArgillaTrainer(
     dataset=dataset,
     task=task,
     framework="spacy",
     lang="en",
+    model="en_core_web_sm",
     gpu_id=-1,
     framework_kwargs={'optimize': 'efficiency', 'freeze_tok2vec': False},
 )
@@ -259,18 +265,19 @@ trainer.train(output_dir="text_classification_model")
 
 SPACY_TRANSFORMERS_CODE_SNIPPET = """\
 ```python
-# Load the dataset if it's uploaded on huggingface hub, or create it from scratch:
+# Load the dataset:
 dataset = FeedbackDataset.from_huggingface("argilla/emotion")
 
-# Create the task:
+# Create the training task:
 task = TrainingTask.for_text_classification(text=dataset.field_by_name("text"), label=dataset.question_by_name("question-3"))
 
-# Create the Trainer
+# Create the ArgillaTrainer:
 trainer = ArgillaTrainer(
     dataset=dataset,
     task=task,
     framework="spacy-transformers",
     lang="en",
+    model="prajjwal1/bert-tiny",
     gpu_id=-1,
     framework_kwargs={'optimize': 'efficiency', 'update_transformer': True},
 )
@@ -287,10 +294,10 @@ NOT IMPLEMENTED!
 
 TR_SFT_CODE_SNIPPET = """\
 ```python
-# Load the dataset if it's uploaded on huggingface hub, or create it from scratch:
+# Load the dataset:
 dataset = FeedbackDataset.from_huggingface("argilla/emotion")
 
-# Create the task:
+# Create the training task:
 def formatting_func_sft(sample: Dict[str, Any]) -> Iterator[str]:
     # For example, the sample must be most frequently rated as "1" in question-2 and
     # label "b" from "question-3" must have not been set by any annotator
@@ -310,11 +317,12 @@ def formatting_func_sft(sample: Dict[str, Any]) -> Iterator[str]:
 
 task = TrainingTask.for_supervised_fine_tuning(formatting_func=formatting_func)
 
-# Create the Trainer
+# Create the ArgillaTrainer:
 trainer = ArgillaTrainer(
     dataset=dataset,
     task=task,
     framework="trl",
+    model="sshleifer/tiny-gpt2",
 )
 
 trainer.update_config({
@@ -360,10 +368,10 @@ generate("sft_model", "Is a toad a frog?")
 
 TR_RM_CODE_SNIPPET = """\
 ```python
-# Load the dataset if it's uploaded on huggingface hub, or create it from scratch:
+# Load the dataset:
 dataset = FeedbackDataset.from_huggingface("argilla/emotion")
 
-# Create the task:
+# Create the training task:
 def formatting_func_rm(sample: Dict[str, Any]):
     # The FeedbackDataset isn't really set up for RM, so we'll just use an arbitrary example here
     labels = [
@@ -382,11 +390,12 @@ def formatting_func_rm(sample: Dict[str, Any]):
 
 task = TrainingTask.for_reward_modeling(formatting_func=formatting_func)
 
-# Create the Trainer
+# Create the ArgillaTrainer:
 trainer = ArgillaTrainer(
     dataset=dataset,
     task=task,
     framework="trl",
+    model="sshleifer/tiny-gpt2",
 )
 
 trainer.update_config({
@@ -429,20 +438,21 @@ print(score)
 
 TR_PPO_CODE_SNIPPET = """\
 ```python
-# Load the dataset if it's uploaded on huggingface hub, or create it from scratch:
+# Load the dataset:
 dataset = FeedbackDataset.from_huggingface("argilla/emotion")
 
-# Create the task:
+# Create the training task:
 def formatting_func_ppo(sample: Dict[str, Any]):
     return sample["text"]
 
 task = TrainingTask.for_proximal_policy_optimization(formatting_func=formatting_func)
 
-# Create the Trainer
+# Create the ArgillaTrainer:
 trainer = ArgillaTrainer(
     dataset=dataset,
     task=task,
     framework="trl",
+    model="sshleifer/tiny-gpt2",
 )
 
 trainer.train(output_dir="ppo_model")
@@ -473,10 +483,10 @@ print(output_text)
 
 TR_DPO_CODE_SNIPPET = """\
 ```python
-# Load the dataset if it's uploaded on huggingface hub, or create it from scratch:
+# Load the dataset:
 dataset = FeedbackDataset.from_huggingface("argilla/emotion")
 
-# Create the task:
+# Create the training task:
 def formatting_func_dpo(sample: Dict[str, Any]):
     # The FeedbackDataset isn't really set up for DPO, so we'll just use an arbitrary example here
     labels = [
@@ -498,11 +508,12 @@ def formatting_func_dpo(sample: Dict[str, Any]):
 
 task = TrainingTask.for_direct_preference_optimization(formatting_func=formatting_func)
 
-# Create the Trainer
+# Create the ArgillaTrainer:
 trainer = ArgillaTrainer(
     dataset=dataset,
     task=task,
     framework="trl",
+    model="sshleifer/tiny-gpt2",
 )
 
 trainer.update_config({

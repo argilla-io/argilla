@@ -166,7 +166,7 @@ class ArgillaSpaCyTrainer(ArgillaSpaCyTrainerV1, _ArgillaSpaCyTrainerBase):
         from argilla.client.feedback.integrations.huggingface.model_card import SpacyModelCardData
 
         return SpacyModelCardData(
-            model_name=self._model,
+            model_id=self._model,
             task=self._task,
             lang=self.language,
             gpu_id=self.gpu_id,
@@ -202,7 +202,7 @@ class ArgillaSpaCyTransformersTrainer(ArgillaSpaCyTransformersTrainerV1, _Argill
         from argilla.client.feedback.integrations.huggingface.model_card import SpacyTransformersModelCardData
 
         return SpacyTransformersModelCardData(
-            model_name=self._model,
+            model_id=self._model,
             task=self._task,
             lang=self.language,
             gpu_id=self.gpu_id,

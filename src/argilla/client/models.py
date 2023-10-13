@@ -36,6 +36,21 @@ _LOGGER = logging.getLogger(__name__)
 Vectors = Dict[str, List[float]]
 
 
+FRAMEWORK_TO_NAME_MAPPING = {
+    "transformers": "Transformers",
+    "peft": "PEFT Transformers library",
+    "setfit": "SetFit Transformers library",
+    "spacy": "Spacy Explosion",
+    "spacy-transformers": "Spacy Transformers Explosion library",
+    "span_marker": "SpanMarker Tom Aarsen library",
+    "spark-nlp": "Spark NLP John Snow Labs library",
+    "openai": "OpenAI LLMs",
+    "trl": "Transformer Reinforcement Learning",
+    "trlx": "Transformer Reinforcement Learning X",
+    "sentence-transformers": "Sentence Transformers library",
+}
+
+
 class Framework(Enum):
     """Frameworks supported by Argilla
 
