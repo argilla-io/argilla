@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, List
+from typing import Any, TYPE_CHECKING, List
 
 import pytest
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
@@ -27,9 +27,30 @@ if TYPE_CHECKING:
 
 
 class FeedbackDataset(FeedbackDatasetBase):
-    @property
-    def records(self) -> None:
+    def add_records(self, *args, **kwargs) -> None:
         pass
+
+    def pull(self):
+        return self
+
+    def filter_by(self, *args, **kwargs):
+        return self
+
+    def delete(self):
+        pass
+
+    def prepare_for_training(self, *args, **kwargs) -> Any:
+        return []
+
+    def push_to_argilla(self, *args, **kwargs) -> "FeedbackDatasetBase":
+        return self
+
+    def unify_responses(self, *args, **kwargs):
+        return self
+
+    @property
+    def records(self) -> List[Any]:
+        return []
 
 
 def test_init(
