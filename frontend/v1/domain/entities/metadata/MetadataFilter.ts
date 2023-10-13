@@ -90,6 +90,9 @@ class MetadataFilter {
 
 export class MetadataFilterList {
   private readonly metadata: MetadataFilter[];
+  private readonly filteredMetadata: MetadataFilter[] = [];
+  private latestCommit: string[] = [];
+
   constructor(metadata: Metadata[]) {
     this.metadata = metadata.map((m) => new MetadataFilter(m));
   }
@@ -106,42 +109,33 @@ export class MetadataFilterList {
     return this.metadata.filter((m) => m.isAnswered);
   }
 
-  findByCategory(category: string) {
-    return this.metadata.find((cat) => cat.name === category);
-  }
+  get hasChangesSinceLatestCommit() {
+    if (this.filteredMetadata.length !== this.filtered.length) return true;
 
-  get hasChanges() {
-    return this.latestCommit.join("") !== this.convertToRouteParam().join("");
-  }
+    if (this.filtered.some((f) => !this.filteredMetadata.includes(f)))
+      return true;
 
-  hasDifferencesWith(compare: string[]) {
-    return this.latestCommit.join("") !== compare.join("");
+    return this.hasChangesSinceLatestCommitWith(this.convertToRouteParam());
   }
 
   get filteredCategories() {
     return this.filteredMetadata.map((cat) => cat.name);
   }
 
-  private filteredMetadata: MetadataFilter[] = [];
+  findByCategory(category: string) {
+    return this.metadata.find((cat) => cat.name === category);
+  }
 
-  private latestCommit: string[] = [];
+  hasChangesSinceLatestCommitWith(compare: string[]) {
+    return this.latestCommit.join("") !== compare.join("");
+  }
+
   commit(): string[] {
-    const newFiltered = this.filtered.filter(
-      (category) => !this.filteredMetadata.includes(category)
-    );
-    newFiltered.forEach((f) => {
-      this.filteredMetadata.push(f);
-    });
+    this.synchronizeFilteredMetadata();
 
     this.latestCommit = this.convertToRouteParam();
 
     return this.latestCommit;
-  }
-
-  convertToRouteParam(): string[] {
-    return this.toQueryParams().map((metadata) => {
-      return `${metadata.name}:${metadata.value}`;
-    });
   }
 
   initializeWith(params: string[]) {
@@ -164,6 +158,30 @@ export class MetadataFilterList {
     });
 
     this.commit();
+  }
+
+  private synchronizeFilteredMetadata() {
+    const newFiltered = this.filtered.filter(
+      (category) => !this.filteredMetadata.includes(category)
+    );
+    newFiltered.forEach((f) => {
+      this.filteredMetadata.push(f);
+    });
+
+    const removedFilters = this.filteredMetadata.filter(
+      (category) => !this.filtered.includes(category)
+    );
+    removedFilters.forEach((f) => {
+      const indexOf = this.filteredMetadata.indexOf(f);
+
+      this.filteredMetadata.splice(indexOf, 1);
+    });
+  }
+
+  private convertToRouteParam(): string[] {
+    return this.toQueryParams().map((metadata) => {
+      return `${metadata.name}:${metadata.value}`;
+    });
   }
 
   private toQueryParams() {

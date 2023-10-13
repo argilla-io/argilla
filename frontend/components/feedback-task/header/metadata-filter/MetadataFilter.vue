@@ -91,7 +91,7 @@ export default {
       this.filter();
     },
     filter() {
-      if (!this.metadataFilters.hasChanges) return;
+      if (!this.metadataFilters.hasChangesSinceLatestCommit) return;
 
       const newFilter = this.metadataFilters.commit();
 
@@ -138,7 +138,11 @@ export default {
       },
     },
     metadataFiltered() {
-      if (!this.metadataFilters.hasDifferencesWith(this.metadataFiltered))
+      if (
+        !this.metadataFilters.hasChangesSinceLatestCommitWith(
+          this.metadataFiltered
+        )
+      )
         return;
 
       this.updateAppliedCategoriesFromMetadataFilter();
