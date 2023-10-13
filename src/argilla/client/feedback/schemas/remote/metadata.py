@@ -12,8 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
+from argilla.client.feedback.mixins import ArgillaMetadataPropertiesMixin
+from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
     IntegerMetadataProperty,
@@ -21,7 +23,6 @@ from argilla.client.feedback.schemas.metadata import (
 )
 from argilla.client.feedback.schemas.remote.shared import RemoteSchema
 from argilla.client.sdk.users.models import UserRole
-from argilla.client.sdk.v1.metadata_properties import api as metadata_properties_api_v1
 from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
@@ -39,11 +40,7 @@ class _RemoteMetadataProperty(RemoteSchema):
         Returns:
             The deleted `RemoteMetadataProperty` as a `MetadataProperty` object.
         """
-        try:
-            response = metadata_properties_api_v1.delete_metadata_property(client=self.client, id=self.id)
-        except Exception as e:
-            raise RuntimeError(f"Failed to delete metadata property with ID `{self.id}` from Argilla.") from e
-        return self.from_api(payload=response.parsed).to_local()
+        return ArgillaMetadataPropertiesMixin.delete(client=self.client, metadata_property_id=self.id)
 
 
 class RemoteTermsMetadataProperty(TermsMetadataProperty, _RemoteMetadataProperty):
@@ -123,3 +120,13 @@ class RemoteFloatMetadataProperty(FloatMetadataProperty, _RemoteMetadataProperty
             min=payload.settings.get("min", None),
             max=payload.settings.get("max", None),
         )
+
+
+RemoteMetadataPropertiesMapping: Dict[
+    MetadataPropertyTypes,
+    Union[RemoteTermsMetadataProperty, RemoteIntegerMetadataProperty, RemoteFloatMetadataProperty],
+] = {
+    MetadataPropertyTypes.terms: RemoteTermsMetadataProperty,
+    MetadataPropertyTypes.integer: RemoteIntegerMetadataProperty,
+    MetadataPropertyTypes.float: RemoteFloatMetadataProperty,
+}

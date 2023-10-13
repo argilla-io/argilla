@@ -21,6 +21,7 @@ from tqdm import trange
 from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase, SortBy
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
+from argilla.client.feedback.mixins import ArgillaMetadataPropertiesMixin
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
@@ -191,6 +192,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         """Returns whether the current `RemoteFeedbackRecords` is filtered or not."""
         return bool(self._response_status) or bool(self._metadata_filters)
 
+    # TODO: define `List[ResponseStatusFilter]` and delegate `query_string` formatting to it
     @property
     def __response_status_query_strings(self) -> Optional[List[str]]:
         """Formats the `response_status` if any to the query string format. Otherwise, returns `None`."""
@@ -200,6 +202,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             else None
         )
 
+    # TODO: define `List[MetadataFilter]` and delegate `query_string` formatting to it
     @property
     def __metadata_filters_query_strings(self) -> Optional[List[str]]:
         """Formats the `metadata_filters` if any to the query string format. Otherwise, returns `None`."""
@@ -209,6 +212,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             else None
         )
 
+    # TODO: define `List[SortBy]` and delegate `query_string` formatting to it
     @property
     def __sort_by_query_strings(self) -> Optional[List[str]]:
         """Formats the `sort_by` if any to the query string format. Otherwise, returns `None`."""
@@ -433,6 +437,13 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
             )
 
         return instance
+
+    @property
+    def metadata_properties(self) -> Union[List["AllowedRemoteMetadataPropertyTypes"], None]:
+        """Retrieves the `metadata_properties` of the current dataset from Argilla, and
+        returns them if any, otherwise, it returns `None`.
+        """
+        return ArgillaMetadataPropertiesMixin.list(client=self._client, dataset_id=self.id)
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def add_metadata_property(
