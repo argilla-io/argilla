@@ -81,6 +81,8 @@ class ArgillaRecordsMixin:
         else:
             raise TypeError("Only `int` and `slice` are supported as index.")
 
+        question_id_to_name = {question.id: question.name for question in self.dataset.questions}
+
         records = []
         for offset, limit in zip(offsets, limits):
             fetched_records = self._fetch_records(offset=offset, limit=limit)
@@ -88,9 +90,7 @@ class ArgillaRecordsMixin:
                 break
             records.extend(
                 [
-                    RemoteFeedbackRecord.from_api(
-                        record, question_id_to_name=self._question_id_to_name, client=self._client
-                    )
+                    RemoteFeedbackRecord.from_api(record, question_id_to_name=question_id_to_name, client=self._client)
                     for record in fetched_records.items
                 ]
             )
@@ -103,6 +103,8 @@ class ArgillaRecordsMixin:
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def __iter__(self: "RemoteFeedbackRecords") -> Iterator["RemoteFeedbackRecord"]:
         """Iterates over the `FeedbackRecord`s of the current `FeedbackDataset` in Argilla."""
+        question_id_to_name = {question.id: question.name for question in self.dataset.questions}
+
         current_batch = 0
         while True:
             batch = self._fetch_records(offset=FETCHING_BATCH_SIZE * current_batch, limit=FETCHING_BATCH_SIZE)
@@ -110,7 +112,7 @@ class ArgillaRecordsMixin:
                 break
             for record in batch.items:
                 yield RemoteFeedbackRecord.from_api(
-                    record, question_id_to_name=self._question_id_to_name, client=self._client
+                    record, question_id_to_name=question_id_to_name, client=self._client
                 )
             current_batch += 1
 

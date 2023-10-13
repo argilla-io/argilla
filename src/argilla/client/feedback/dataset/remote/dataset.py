@@ -138,15 +138,16 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             Exception: If the pushing of the records to Argilla fails.
         """
         records = self.dataset._parse_and_validate_records(records)
+        question_name_to_id = {question.name: question.id for question in self.dataset.questions}
 
         for i in trange(
             0, len(records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=not show_progress
         ):
             datasets_api_v1.add_records(
                 client=self._client,
-                id=self._dataset.id,
+                id=self.dataset.id,
                 records=[
-                    record.to_server_payload(self._dataset.__question_name_to_id)
+                    record.to_server_payload(question_name_to_id=question_name_to_id)
                     for record in records[i : i + PUSHING_BATCH_SIZE]
                 ],
             )
@@ -288,7 +289,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         self._fields = fields
         self._fields_schema = None
         self._questions = questions
-        self.__question_name_to_id = {question.name: question.id for question in self._questions}
         self._metadata_properties = metadata_properties
         self._guidelines = guidelines
         self._allow_extra_metadata = allow_extra_metadata
