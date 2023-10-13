@@ -29,17 +29,17 @@ export default {
   data() {
     return {
       isExpanded: true,
+      numberOfVisibleCharsInPreview: 30,
     };
   },
   computed: {
     textPreview() {
-      const numberOfCharsByDefault = 30;
       const numberOfFields = this.fields[1] ? 1 : 2;
       let text = "";
       for (let i = 0; i <= numberOfFields; i++) {
         text += `${this.fields[i].title}: ${this.fields[i].content.substring(
           0,
-          numberOfCharsByDefault / numberOfFields
+          this.numberOfVisibleCharsInPreview / numberOfFields
         )}... `;
       }
       return text;
