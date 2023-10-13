@@ -85,6 +85,9 @@ TERMS_METADATA_PROPERTY_MIN_VALUES = 1
 RECORDS_CREATE_MIN_ITEMS = 1
 RECORDS_CREATE_MAX_ITEMS = 1000
 
+RECORDS_UPDATE_MIN_ITEMS = 1
+RECORDS_UPDATE_MAX_ITEMS = 250
+
 
 class Dataset(BaseModel):
     id: UUID
@@ -438,7 +441,7 @@ class RecordUpdateWithId(RecordUpdate):
 
 class RecordsUpdate(BaseModel):
     items: List[RecordUpdateWithId] = PydanticField(
-        ..., min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS
+        ..., min_items=RECORDS_UPDATE_MIN_ITEMS, max_items=RECORDS_UPDATE_MAX_ITEMS
     )
 
 

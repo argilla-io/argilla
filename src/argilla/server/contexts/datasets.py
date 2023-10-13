@@ -528,6 +528,7 @@ async def update_records(
                 raise ValueError(f"Provided metadata for record at position {record_i} is not valid: {e}") from err
 
         if record_update.suggestions is not None:
+            params.pop("suggestions")
             for suggestion in record_update.suggestions:
                 try:
                     questions = await validate_suggestion(db, suggestion, questions)
@@ -549,13 +550,9 @@ async def update_records(
             ],
             autocommit=False,
         )
-
         db.add_all(suggestions)
-
         await Record.update_many(db, records_update_objects, autocommit=False)
-
         records = await get_records_by_ids(db, dataset_id=dataset.id, records_ids=updated_records_ids)
-
         await search_engine.update_records_metadata(dataset, records)
 
     await db.commit()
