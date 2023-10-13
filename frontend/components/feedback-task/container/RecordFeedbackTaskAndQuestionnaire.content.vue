@@ -1,11 +1,13 @@
 <template>
   <div v-if="!$fetchState.pending && !$fetchState.error" class="wrapper">
     <template v-if="!!record">
-      <RecordFeedbackTaskComponent
-        :recordStatus="record.status"
-        :fields="record.fields"
-      />
-
+      <div class="fields">
+        <SimilarityRecordReference :fields="record.fields" />
+        <RecordFeedbackTaskComponent
+          :recordStatus="record.status"
+          :fields="record.fields"
+        />
+      </div>
       <QuestionsFormComponent
         :key="record.id"
         class="question-form"
@@ -316,5 +318,13 @@ export default {
     align-items: center;
     justify-content: center;
   }
+}
+.fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $base-space * 2;
+  min-width: 0;
+  height: 100%;
 }
 </style>
