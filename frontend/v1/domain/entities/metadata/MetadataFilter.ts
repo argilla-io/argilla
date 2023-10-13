@@ -119,11 +119,20 @@ export class MetadataFilterList {
   }
 
   get filteredCategories() {
-    return this.filtered.map((cat) => cat.name);
+    return this.filteredMetadata.map((cat) => cat.name);
   }
+
+  private filteredMetadata: MetadataFilter[] = [];
 
   private latestCommit: string[] = [];
   commit(): string[] {
+    const newFiltered = this.filtered.filter(
+      (category) => !this.filteredMetadata.includes(category)
+    );
+    newFiltered.forEach((f) => {
+      this.filteredMetadata.push(f);
+    });
+
     this.latestCommit = this.convertToRouteParam();
 
     return this.latestCommit;
@@ -146,14 +155,19 @@ export class MetadataFilterList {
     });
 
     metadataFilter.forEach(({ name, value }) => {
-      this.findByCategory(name)?.completeMetadata(value);
+      const metadata = this.findByCategory(name);
+      if (metadata) {
+        metadata.completeMetadata(value);
+
+        this.filteredMetadata.push(metadata);
+      }
     });
 
     this.commit();
   }
 
   private toQueryParams() {
-    return this.filtered.map((m) => {
+    return this.filteredMetadata.map((m) => {
       return {
         name: m.name,
         value: m.isTerms
