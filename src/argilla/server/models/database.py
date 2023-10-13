@@ -186,8 +186,8 @@ class MetadataProperty(DatabaseModel):
     __tablename__ = "metadata_properties"
 
     name: Mapped[str] = mapped_column(Text, index=True)
+    title: Mapped[str] = mapped_column(Text)
     type: Mapped[MetadataPropertyType] = mapped_column(Text)
-    description: Mapped[str] = mapped_column(Text, nullable=True)
     settings: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSON), default={})
     allowed_roles: Mapped[List[UserRole]] = mapped_column(MutableList.as_mutable(JSON), default=[])
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
