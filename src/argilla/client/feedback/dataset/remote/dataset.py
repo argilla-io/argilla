@@ -69,10 +69,6 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
                 and/or attributes.
         """
         self._dataset = dataset
-        # TODO: review why this is here !
-        self._question_id_to_name = {question.id: question.name for question in self._dataset.questions}
-        self._question_name_to_id = {value: key for key, value in self._question_id_to_name.items()}
-        # TODO END
 
         if response_status and not isinstance(response_status, list):
             response_status = [response_status]
@@ -150,7 +146,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
                 client=self._client,
                 id=self._dataset.id,
                 records=[
-                    record.to_server_payload(self._question_name_to_id)
+                    record.to_server_payload(self._dataset.__question_name_to_id)
                     for record in records[i : i + PUSHING_BATCH_SIZE]
                 ],
             )
@@ -285,6 +281,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         self._fields = fields
         self._fields_schema = None
         self._questions = questions
+        self.__question_name_to_id = {question.name: question.id for question in self._questions}
         self._metadata_properties = metadata_properties
         self._guidelines = guidelines
         self._allow_extra_metadata = allow_extra_metadata
