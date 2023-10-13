@@ -233,7 +233,6 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
         """
         self._unique_metadata_property(metadata_property)
         self._metadata_properties.append(metadata_property)
-        self._metadata_properties_mapping.update({metadata_property.name: metadata_property})
         return metadata_property
 
     def delete_metadata_properties(
@@ -251,29 +250,27 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
             TypeError: if `metadata_properties` is not a string or a list of strings.
             ValueError: if the provided `metadata_properties` is/are not in the dataset.
         """
-        if self._metadata_properties is None:
+        if not isinstance(metadata_properties, list):
+            metadata_properties = [metadata_properties]
+
+        if not self.metadata_properties:
             raise ValueError(
                 "The current `FeedbackDataset` does not contain any `metadata_properties` defined, so"
                 " none can be deleted."
             )
-        # TODO(alvarobartt): remove this when https://github.com/argilla-io/argilla/pull/3829 is merged
-        if not hasattr(self, "_metadata_properties_mapping") or self._metadata_properties_mapping is None:
-            self._metadata_properties_mapping = {
-                metadata_property.name: metadata_property for metadata_property in self._metadata_properties
-            }
-        if not isinstance(metadata_properties, list):
-            metadata_properties = [metadata_properties]
+        metadata_properties_names = [metadata_property.name for metadata_property in self.metadata_properties]
+
+        if not all(metadata_property in metadata_properties_names for metadata_property in metadata_properties):
+            raise ValueError(
+                f"Invalid `metadata_properties={metadata_properties}` provided. It cannot be"
+                " deleted because it does not exist, make sure you delete just existing `metadata_properties`"
+                " meaning that the name matches any of the existing `metadata_properties` if any. Current"
+                f" `metadata_properties` are: '{', '.join(metadata_properties_names)}'."
+            )
+
         deleted_metadata_properties = []
         for metadata_property in metadata_properties:
-            if metadata_property not in self._metadata_properties_mapping.keys():
-                raise ValueError(
-                    f"Invalid `metadata_property={metadata_property}` provided. It cannot be"
-                    " deleted because it does not exist, make sure you delete just existing `metadata_properties`"
-                    " meaning that the name matches any of the existing `metadata_properties` if any. Current"
-                    f" `metadata_properties` are: {list(self._metadata_properties_mapping.keys())}"
-                )
-            metadata_property_to_delete = self._metadata_properties_mapping[metadata_property]
-            deleted_metadata_properties.append(metadata_property_to_delete)
-            self._metadata_properties.pop(metadata_property_to_delete, None)
-            self._metadata_properties_mapping.pop(metadata_property, None)
+            if metadata_property in metadata_properties_names:
+                metadata_properties.remove(metadata_property)
+                deleted_metadata_properties.append(metadata_property)
         return deleted_metadata_properties if len(deleted_metadata_properties) > 1 else deleted_metadata_properties[0]

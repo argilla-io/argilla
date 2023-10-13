@@ -27,7 +27,6 @@ from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
-from argilla.client.sdk.v1.metadata_properties import api as metadata_properties_api_v1
 from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
@@ -439,9 +438,9 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         return instance
 
     @property
-    def metadata_properties(self) -> Union[List["AllowedRemoteMetadataPropertyTypes"], None]:
+    def metadata_properties(self) -> List["AllowedRemoteMetadataPropertyTypes"]:
         """Retrieves the `metadata_properties` of the current dataset from Argilla, and
-        returns them if any, otherwise, it returns `None`.
+        returns them if any, otherwise, it returns an empty list.
         """
         return ArgillaMetadataPropertiesMixin.list(client=self._client, dataset_id=self.id)
 
@@ -517,24 +516,26 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         if isinstance(metadata_properties, str):
             metadata_properties = [metadata_properties]
 
-        # TODO(alvarobartt): structure better the mixins to be able to easily reuse those, here to avoid circular imports
-        from argilla.client.feedback.dataset.mixins import ArgillaMixin
+        existing_metadata_properties = self.metadata_properties
+        existing_metadata_property_names = [
+            metadata_property.name for metadata_property in existing_metadata_properties
+        ]
 
-        deleted_metadata_properties = []
+        unexisting_metadata_properties = []
         for metadata_property in metadata_properties:
-            try:
-                metadata_property = metadata_properties_api_v1.delete_metadata_property(
-                    client=self._client, id=self.id
-                ).parsed
-            except Exception as e:
-                raise RuntimeError(
-                    f"Failed while deleting the `metadata_property={metadata_property}` from the current `FeedbackDataset` in Argilla with exception: {e}"
-                ) from e
-            deleted_metadata_properties.append(
-                ArgillaMixin._parse_to_remote_metadata_property(
-                    metadata_property=metadata_property, client=self._client
-                )
+            if metadata_property not in existing_metadata_property_names:
+                unexisting_metadata_properties.append(metadata_property)
+        if len(unexisting_metadata_properties) > 0:
+            raise ValueError(
+                f"The following metadata properties do not exist in the current `FeedbackDataset` in Argilla: {unexisting_metadata_properties}."
+                f" The existing metadata properties are: {existing_metadata_property_names}."
             )
+
+        deleted_metadata_properties = list()
+        for metadata_property in existing_metadata_properties:
+            if metadata_property.name in metadata_properties:
+                deleted_metadata_properties.append(metadata_property.delete())
+                metadata_properties.remove(metadata_property.name)
         return deleted_metadata_properties if len(deleted_metadata_properties) > 1 else deleted_metadata_properties[0]
 
     def filter_by(
