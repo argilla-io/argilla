@@ -182,33 +182,37 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             id=self._dataset.id,
             offset=offset,
             limit=limit,
-            response_status=self.__response_status_filters_for_api_call(),
-            metadata_filters=self.__metadata_filters_for_api_call(),
-            sort_by=self.__sort_by_for_api_call(),
+            response_status=self.__response_status_query_strings,
+            metadata_filters=self.__metadata_filters_query_strings,
+            sort_by=self.__sort_by_query_strings,
         ).parsed
-
-    def __sort_by_for_api_call(self) -> Optional[List[str]]:
-        if len(self._sort_by) < 1:
-            return None
-
-        return [f"{sort_by.field}:{sort_by.order}" for sort_by in self._sort_by]
 
     def _has_filters(self) -> bool:
         """Returns whether the current `RemoteFeedbackRecords` is filtered or not."""
         return bool(self._response_status) or bool(self._metadata_filters)
 
-    def __response_status_filters_for_api_call(self) -> Optional[List[str]]:
-        if len(self._response_status) < 1:
-            return None
-        return [
-            status.value if hasattr(status, "value") else FeedbackResponseStatusFilter(status).value
-            for status in self._response_status
-        ]
+    @property
+    def __response_status_query_strings(self) -> Optional[List[str]]:
+        """Formats the `response_status` if any to the query string format. Otherwise, returns `None`."""
+        return (
+            [status.value if hasattr(status, "value") else status for status in self._response_status]
+            if len(self._response_status) > 0
+            else None
+        )
 
-    def __metadata_filters_for_api_call(self) -> Optional[List[str]]:
-        if len(self._metadata_filters) < 1:
-            return None
-        return [metadata_filter.query_string for metadata_filter in self._metadata_filters]
+    @property
+    def __metadata_filters_query_strings(self) -> Optional[List[str]]:
+        """Formats the `metadata_filters` if any to the query string format. Otherwise, returns `None`."""
+        return (
+            [metadata_filter.query_string for metadata_filter in self._metadata_filters]
+            if len(self._metadata_filters) > 0
+            else None
+        )
+
+    @property
+    def __sort_by_query_strings(self) -> Optional[List[str]]:
+        """Formats the `sort_by` if any to the query string format. Otherwise, returns `None`."""
+        return [f"{sort_by.field}:{sort_by.order}" for sort_by in self._sort_by] if len(self._sort_by) > 0 else None
 
     @classmethod
     def _create_from_dataset(
