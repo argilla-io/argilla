@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import warnings
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
@@ -195,7 +196,9 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
     ) -> "FeedbackDataset":
         warnings.warn(
             "`sort_by` method only works for `FeedbackDataset` pushed to Argilla. "
-            "Use `sorted` with dataset.records instead."
+            "Use `sorted` with dataset.records instead.",
+            UserWarning,
+            stacklevel=1,
         )
         return self
 
@@ -207,7 +210,9 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
     ) -> "FeedbackDataset":
         warnings.warn(
             "`filter_by` method only works for `FeedbackDataset` pushed to Argilla. "
-            "Use `filter` with dataset.records instead."
+            "Use `filter` with dataset.records instead.",
+            UserWarning,
+            stacklevel=1,
         )
         return self
 

@@ -142,7 +142,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                     raise TypeError(
                         f"Expected `metadata_properties` to be a list of"
                         f" `{'`, `'.join([arg.__name__ for arg in AllowedMetadataPropertyTypes.__args__])}` got a"
-                        f" metadata property in the list with type type {type(metadata_property)} instead"
+                        f" metadata property in the list with type type {type(metadata_property)} instead."
                     )
                 if metadata_property.name in unique_names:
                     raise ValueError(
@@ -392,7 +392,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             >>> huggingface_dataset = dataset.format_as("datasets")
         """
         if format == "datasets":
-            return self._huggingface_format(self)
+            return HuggingFaceDatasetMixin._huggingface_format(self)
         raise ValueError(f"Unsupported format '{format}'.")
 
     # TODO(alvarobartt,davidberenstein1957): we should consider having something like

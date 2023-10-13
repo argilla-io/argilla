@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import warnings
 from typing import TYPE_CHECKING, Iterator, List, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
@@ -21,13 +20,13 @@ from argilla.client.sdk.users.models import UserRole
 from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.dataset.remote.base import RemoteFeedbackRecordsBase
+    from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackRecords
 
 
 class ArgillaRecordsMixin:
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def __getitem__(
-        self: "RemoteFeedbackRecordsBase", key: Union[slice, int]
+        self: "RemoteFeedbackRecords", key: Union[slice, int]
     ) -> Union["RemoteFeedbackRecord", List["RemoteFeedbackRecord"]]:
         """Returns the record(s) at the given index(es) from Argilla.
 
@@ -102,9 +101,7 @@ class ArgillaRecordsMixin:
         return records[0] if isinstance(key, int) else records
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def __iter__(
-        self: "RemoteFeedbackRecordsBase",
-    ) -> Iterator["RemoteFeedbackRecord"]:
+    def __iter__(self: "RemoteFeedbackRecords") -> Iterator["RemoteFeedbackRecord"]:
         """Iterates over the `FeedbackRecord`s of the current `FeedbackDataset` in Argilla."""
         current_batch = 0
         while True:
