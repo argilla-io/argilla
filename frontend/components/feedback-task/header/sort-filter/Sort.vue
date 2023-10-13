@@ -33,10 +33,18 @@ import { useSortRecords } from "./useSortRecords";
 
 export default {
   props: {
-    metadata: {
+    datasetMetadata: {
       type: Array,
       required: true,
     },
+    sortFilters: {
+      type: Array,
+      required: true,
+    },
+  },
+  model: {
+    prop: "sortFilters",
+    event: "onSortFilteredChanged",
   },
   data() {
     return {
@@ -70,12 +78,18 @@ export default {
       this.sort();
     },
     sort() {
-      this.$root.$emit("sort-changed", this.metadataSort.convertToRouteParam());
+      if (!this.metadataSort.hasChanges) return;
+
+      const newSorting = this.metadataSort.commit();
+
+      this.$emit("onSortFilteredChanged", newSorting);
 
       this.appliedSortCategories = this.metadataSort.selectedCategoriesName;
     },
-    updateFiltersFromQueryParams() {
-      this.completeByRouteParams();
+    updateAppliedCategoriesFromMetadataFilter() {
+      if (!this.metadataSort) return;
+
+      this.metadataSort.initializeWith(this.sortFilters);
 
       this.appliedSortCategories = this.metadataSort.selectedCategoriesName;
     },
@@ -98,9 +112,14 @@ export default {
         this.sort();
       },
     },
+    sortFilters() {
+      if (!this.metadataSort.hasDifferencesWith(this.sortFilters)) return;
+
+      this.updateAppliedCategoriesFromMetadataFilter();
+    },
   },
-  mounted() {
-    this.updateFiltersFromQueryParams();
+  created() {
+    this.updateAppliedCategoriesFromMetadataFilter();
   },
   setup(props) {
     return useSortRecords(props);

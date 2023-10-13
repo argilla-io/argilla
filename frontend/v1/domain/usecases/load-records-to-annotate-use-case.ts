@@ -5,6 +5,7 @@ import { Suggestion } from "../entities/question/Suggestion";
 import { IRecordStorage } from "../services/IRecordStorage";
 import { Records } from "../entities/record/Records";
 import { RecordAnswer } from "../entities/record/RecordAnswer";
+import { RecordCriteria } from "../entities/record/RecordCriteria";
 import {
   RecordRepository,
   QuestionRepository,
@@ -23,13 +24,26 @@ export class LoadRecordsToAnnotateUseCase {
 
   async execute(
     mode: LoadRecordsMode,
-    datasetId: string,
-    page: number,
-    status: string,
-    searchText: string,
-    metadataFilter: string[],
-    sortBy: string[]
+    criteria: RecordCriteria
   ): Promise<void> {
+    const { page } = criteria;
+    const records = this.recordsStorage.get();
+
+    await this.loadRecords(mode, criteria);
+
+    const isRecordExistForCurrentPage = records.existsRecordOn(page);
+
+    if (!isRecordExistForCurrentPage && page !== 1) {
+      criteria.page = 1;
+
+      await this.loadRecords(mode, criteria);
+    }
+
+    criteria.commit();
+  }
+
+  private async loadRecords(mode: LoadRecordsMode, criteria: RecordCriteria) {
+    const { datasetId, status, searchText, metadata, sortBy, page } = criteria;
     const savedRecords = this.recordsStorage.get();
 
     const { fromRecord, howMany } = savedRecords.getPageToFind(page, status);
@@ -40,7 +54,7 @@ export class LoadRecordsToAnnotateUseCase {
       howMany,
       status,
       searchText,
-      metadataFilter,
+      metadata,
       sortBy
     );
     const getQuestions = this.questionRepository.getQuestions(datasetId);

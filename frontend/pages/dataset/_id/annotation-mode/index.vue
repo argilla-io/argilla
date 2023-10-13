@@ -33,14 +33,16 @@
     </template>
     <template v-slot:top>
       <section class="dataset__top-area">
-        <DatasetFiltersComponent :datasetId="datasetId" />
+        <DatasetFiltersComponent :recordCriteria="recordCriteria" />
       </section>
     </template>
     <template v-slot:center>
-      <RecordFeedbackTaskAndQuestionnaireContent :datasetId="datasetId" />
+      <RecordFeedbackTaskAndQuestionnaireContent
+        :recordCriteria="recordCriteria"
+      />
     </template>
     <template v-slot:footer>
-      <PaginationFeedbackTaskComponent :datasetId="datasetId" />
+      <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
     </template>
   </HeaderAndTopAndOneColumn>
 </template>
@@ -60,22 +62,14 @@ export default {
       visibleTrainModal: false,
     };
   },
-  created() {
-    this.checkIfUrlHaveRecordStatusOrInitiateQueryParams();
-  },
   methods: {
-    checkIfUrlHaveRecordStatusOrInitiateQueryParams() {
-      this.$route.query?._status ??
-        this.$router.replace({
-          query: {
-            ...this.$route.query,
-            _page: 1,
-            _status: RECORD_STATUS.PENDING.toLowerCase(),
-          },
-        });
-    },
     showTrainModal(value) {
       this.visibleTrainModal = value;
+    },
+  },
+  watch: {
+    "recordCriteria.committed"() {
+      this.updateQueryParams();
     },
   },
   setup() {

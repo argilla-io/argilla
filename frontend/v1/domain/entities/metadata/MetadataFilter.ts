@@ -106,12 +106,27 @@ export class MetadataFilterList {
     return this.metadata.filter((m) => m.isAnswered);
   }
 
+  findByCategory(category: string) {
+    return this.metadata.find((cat) => cat.name === category);
+  }
+
+  get hasChanges() {
+    return this.latestCommit.join("") !== this.convertToRouteParam().join("");
+  }
+
+  hasDifferencesWith(compare: string[]) {
+    return this.latestCommit.join("") !== compare.join("");
+  }
+
   get filteredCategories() {
     return this.filtered.map((cat) => cat.name);
   }
 
-  findByCategory(category: string) {
-    return this.metadata.find((cat) => cat.name === category);
+  private latestCommit: string[] = [];
+  commit(): string[] {
+    this.latestCommit = this.convertToRouteParam();
+
+    return this.latestCommit;
   }
 
   convertToRouteParam(): string[] {
@@ -120,12 +135,12 @@ export class MetadataFilterList {
     });
   }
 
-  completeByRouteParams(params = "") {
+  initializeWith(params: string[]) {
     this.metadata.forEach((m) => m.clear());
 
-    if (!params) return;
+    if (!params.length) return;
 
-    const metadataFilter = params.split("+").map((metadata) => {
+    const metadataFilter = params.map((metadata) => {
       const [name, value] = metadata.split(/:(.*)/s);
       return { name, value };
     });
@@ -133,6 +148,8 @@ export class MetadataFilterList {
     metadataFilter.forEach(({ name, value }) => {
       this.findByCategory(name)?.completeMetadata(value);
     });
+
+    this.commit();
   }
 
   private toQueryParams() {

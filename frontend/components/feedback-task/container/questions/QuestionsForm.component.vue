@@ -228,8 +228,6 @@ export default {
     },
     emitIsQuestionsFormTouched(isFormTouched) {
       this.$emit("on-question-form-touched", isFormTouched);
-
-      this.$root.$emit("are-responses-untouched", !isFormTouched);
     },
     updateQuestionAutofocus(index) {
       this.interactionCount++;
