@@ -23,6 +23,7 @@ from argilla import (
 from argilla.client import api
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+from argilla.client.feedback.schemas import SuggestionSchema
 from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
@@ -118,6 +119,62 @@ class TestRemoteFeedbackDataset:
         remote_dataset.add_records([record])
 
         assert len(remote_dataset.records) == 1
+
+    async def test_update_records(self, owner: "User", test_dataset: FeedbackDataset):
+        import argilla as rg
+
+        rg.init(api_key=owner.api_key)
+        ws = rg.Workspace.create(name="test-workspace")
+
+        test_dataset.add_records(
+            [
+                FeedbackRecord(fields={"text": "Hello world!"}),
+                FeedbackRecord(fields={"text": "Another record"}),
+            ]
+        )
+
+        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+
+        first_record = remote[0]
+        first_record.external_id = "new-external-id"
+        first_record.metadata.update({"terms-metadata": "a"})
+
+        remote.update_records(first_record)
+
+        assert first_record == remote[0]
+
+        first_record = remote[0]
+        assert first_record.external_id == "new-external-id"
+        assert first_record.metadata["terms-metadata"] == "a"
+
+    async def test_update_records_with_suggestions(self, owner: "User", test_dataset: FeedbackDataset):
+        import argilla as rg
+
+        rg.init(api_key=owner.api_key)
+        ws = rg.Workspace.create(name="test-workspace")
+
+        test_dataset.add_records(
+            [
+                FeedbackRecord(fields={"text": "Hello world!"}),
+                FeedbackRecord(fields={"text": "Another record"}),
+            ]
+        )
+
+        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+
+        records = []
+        for record in remote:
+            record.suggestions = [
+                SuggestionSchema(question_name="question", value=f"Hello world! for {record.fields['text']}")
+            ]
+            records.append(record)
+
+        remote.update_records(records)
+
+        for record in records:
+            for suggestion in record.suggestions:
+                assert suggestion.question_name == "question"
+                assert suggestion.value == f"Hello world! for {record.fields['text']}"
 
     async def test_from_argilla(self, feedback_dataset: FeedbackDataset, owner: "User") -> None:
         api.init(api_key=owner.api_key)
