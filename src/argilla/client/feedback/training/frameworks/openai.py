@@ -19,7 +19,7 @@ from argilla.training.openai import ArgillaOpenAITrainer as ArgillaOpenAITrainer
 from argilla.utils.dependency import require_dependencies
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.integrations.huggingface.card import OpenAIModelCardData
+    from argilla.client.feedback.integrations.huggingface.model_card import OpenAIModelCardData
 
 
 class ArgillaOpenAITrainer(ArgillaOpenAITrainerV1, ArgillaTrainerSkeleton):

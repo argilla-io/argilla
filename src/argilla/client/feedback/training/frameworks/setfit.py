@@ -21,7 +21,7 @@ from argilla.training.setfit import ArgillaSetFitTrainer as ArgillaSetFitTrainer
 from argilla.utils.dependency import require_dependencies
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.integrations.huggingface.card import SetFitModelCardData
+    from argilla.client.feedback.integrations.huggingface.model_card import SetFitModelCardData
 
 
 class ArgillaSetFitTrainer(ArgillaSetFitTrainerV1, ArgillaTransformersTrainer):

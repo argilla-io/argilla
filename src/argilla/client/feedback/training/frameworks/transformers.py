@@ -21,7 +21,7 @@ from argilla.client.feedback.training.schemas import TrainingTaskForQuestionAnsw
 from argilla.training.transformers import ArgillaTransformersTrainer as ArgillaTransformersTrainerV1
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.integrations.huggingface.card import TransformersModelCardData
+    from argilla.client.feedback.integrations.huggingface.model_card import TransformersModelCardData
 
 
 class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSkeleton):

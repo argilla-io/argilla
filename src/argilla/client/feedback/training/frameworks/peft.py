@@ -18,7 +18,7 @@ from argilla.client.feedback.training.frameworks.transformers import ArgillaTran
 from argilla.training.peft import ArgillaPeftTrainer as ArgillaPeftTrainerV1
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.integrations.huggingface.card import PeftModelCardData
+    from argilla.client.feedback.integrations.huggingface.model_card import PeftModelCardData
 
 
 class ArgillaPeftTrainer(ArgillaPeftTrainerV1, ArgillaTransformersTrainer):

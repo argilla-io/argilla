@@ -22,7 +22,7 @@ from argilla.utils.dependency import require_dependencies
 
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
-    from argilla.client.feedback.integrations.huggingface.card import SentenceTransformerCardData
+    from argilla.client.feedback.integrations.huggingface.model_card import SentenceTransformerCardData
 
 
 class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):

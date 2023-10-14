@@ -25,7 +25,10 @@ from argilla.training.spacy import _ArgillaSpaCyTrainerBase as _ArgillaSpaCyTrai
 from argilla.utils.dependency import require_dependencies
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.integrations.huggingface.card import SpacyModelCardData, SpacyTransformersModelCardData
+    from argilla.client.feedback.integrations.huggingface.model_card import (
+        SpacyModelCardData,
+        SpacyTransformersModelCardData,
+    )
 
 
 class _ArgillaSpaCyTrainerBase(_ArgillaSpaCyTrainerBaseV1, ArgillaTrainerSkeleton):

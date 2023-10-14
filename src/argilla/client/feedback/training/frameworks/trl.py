@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from trl import PPOConfig
 
     from argilla.client.feedback.dataset import FeedbackDataset
-    from argilla.client.feedback.integrations.huggingface.card import TRLModelCardData
+    from argilla.client.feedback.integrations.huggingface.model_card import TRLModelCardData
 
 
 class PPOArgs:
