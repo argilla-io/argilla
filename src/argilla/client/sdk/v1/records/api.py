@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List, Union
+from typing import Any, Dict, List, Union
 from uuid import UUID
 
 import httpx
@@ -20,6 +20,28 @@ import httpx
 from argilla.client.sdk.commons.errors_handler import handle_response_error
 from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
 from argilla.client.sdk.v1.records.models import FeedbackItemModel
+
+
+def update_record(
+    # TODO: Use the proper sdk API Model instead of the dict
+    client: httpx.Client, id: Union[str, UUID], data: Dict[str, Any]
+) -> Response[Union[FeedbackItemModel, ErrorMessage, HTTPValidationError]]:
+    url = f"/api/v1/records/{id}"
+
+    body = {}
+    if "metadata" in data:
+        body["metadata"] = data["metadata"]
+    if "external_id" in data:
+        body["external_id"] = data["external_id"]
+
+    response = client.patch(url=url, json=body)
+
+    if response.status_code == 200:
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = FeedbackItemModel.parse_raw(response.content)
+        return response_obj
+
+    return handle_response_error(response)
 
 
 def delete_record(
