@@ -14,7 +14,7 @@
 
 import warnings
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Union
 from uuid import UUID
 
 from pydantic import Field
@@ -22,7 +22,6 @@ from pydantic import Field
 from argilla.client.feedback.schemas.records import FeedbackRecord, ResponseSchema, SuggestionSchema
 from argilla.client.feedback.schemas.remote.shared import RemoteSchema
 from argilla.client.sdk.users.models import UserRole
-from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.sdk.v1.records import api as records_api_v1
 from argilla.client.sdk.v1.suggestions import api as suggestions_api_v1
 from argilla.client.utils import allowed_for_roles
@@ -131,25 +130,19 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
         allow_mutation = True
         validate_assignment = True
 
-    def __update_suggestions(
+    def __normalize_suggestions_to_update(
         self,
         suggestions: Union[
-            Dict[str, Any],
-            List[Dict[str, Any]],
-            AllowedSuggestionSchema,
-            List[AllowedSuggestionSchema],
+            Dict[str, Any], List[Dict[str, Any]], AllowedSuggestionSchema, List[AllowedSuggestionSchema]
         ],
-    ) -> None:
-        """Updates the suggestions for the record in Argilla. Note that the suggestions
-        must exist in Argilla to be updated.
-
-        Note that this method will update the record in Argilla directly.
+    ) -> List[AllowedSuggestionSchema]:
+        """
+        Normalizes the suggestions to update.
 
         Args:
-            suggestions: can be a single `RemoteSuggestionSchema` or `SuggestionSchema`,
-                a list of `RemoteSuggestionSchema` or `SuggestionSchema`, a single
-                dictionary, or a list of dictionaries. If a dictionary is provided,
-                it will be converted to a `RemoteSuggestionSchema` internally.
+            suggestions: can be a single `RemoteSuggestionSchema` or `SuggestionSchema`, a dictionary, a list of
+            `RemoteSuggestionSchema` or `SuggestionSchema`, or a list of dictionaries. If a dictionary is provided,
+            it will be converted to a `SuggestionSchema` internally.
         """
         if isinstance(suggestions, (dict, SuggestionSchema)):
             suggestions = [suggestions]
@@ -205,21 +198,37 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
             else:
                 new_suggestions[suggestion.question_name] = suggestion
 
-        for suggestion in new_suggestions.values():
+            return list(new_suggestions.values())
+
+    def __update_suggestions(self, suggestions: List[AllowedSuggestionSchema]) -> None:
+        """Updates the suggestions for the record in Argilla.
+
+        Note that this method will update the record in Argilla directly.
+
+        Args:
+            suggestions: can be a list of `RemoteSuggestionSchema` or `SuggestionSchema`.
+        """
+
+        pushed_suggestions = []
+
+        for suggestion in suggestions:
             if isinstance(suggestion, RemoteSuggestionSchema):
                 suggestion = suggestion.to_local()
-            pushed_suggestion = datasets_api_v1.set_suggestion(
+            # TODO: review the existence of bulk endpoint for record suggestions
+            pushed_suggestion = records_api_v1.set_suggestion(
                 client=self.client,
                 record_id=self.id,
                 **suggestion.to_server_payload(question_name_to_id=self.question_name_to_id),
             )
-            existing_suggestions[suggestion.question_name] = RemoteSuggestionSchema.from_api(
-                payload=pushed_suggestion.parsed,
-                question_id_to_name={value: key for key, value in self.question_name_to_id.items()},
-                client=self.client,
+            pushed_suggestions.append(
+                RemoteSuggestionSchema.from_api(
+                    payload=pushed_suggestion.parsed,
+                    question_id_to_name={value: key for key, value in self.question_name_to_id.items()},
+                    client=self.client,
+                )
             )
 
-        self.__dict__["suggestions"] = tuple(existing_suggestions.values())
+        self.__dict__["suggestions"] = tuple(pushed_suggestions)
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def update(self, suggestions: Optional[AllowedSuggestionSchema] = None) -> None:
@@ -236,10 +245,12 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
         Raises:
             PermissionError: if the user does not have either `owner` or `admin` role.
         """
+        if suggestions:
+            suggestions = self.__normalize_suggestions_to_update(suggestions)
+        else:
+            suggestions = suggestions or [s for s in self.suggestions]
 
         self.__updated_record_data()
-
-        suggestions = suggestions or self.suggestions
         if suggestions:
             self.__update_suggestions(suggestions=suggestions)
 
@@ -292,7 +303,8 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
             self.__dict__["suggestions"] = tuple(existing_suggestions.values())
         except Exception as e:
             raise RuntimeError(
-                f"Failed to delete suggestions with IDs `{[suggestion.id for suggestion in delete_suggestions]}` from record with ID `{self.id}` from Argilla."
+                f"Failed to delete suggestions with IDs `{[suggestion.id for suggestion in delete_suggestions]}` from "
+                f"record with ID `{self.id}` from Argilla."
             ) from e
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
