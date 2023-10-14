@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     import httpx
 
     from argilla.client.sdk.v1.datasets.models import FeedbackResponseModel, FeedbackSuggestionModel
-    from argilla.client.sdk.v1.records.models import FeedbackItemModel
+    from argilla.client.sdk.v1.records.models import FeedbackRecordModel
 
 
 class RemoteSuggestionSchema(SuggestionSchema, RemoteSchema):
@@ -95,10 +95,21 @@ class RemoteResponseSchema(ResponseSchema, RemoteSchema):
         return RemoteResponseSchema(
             user_id=payload.user_id,
             values=payload.values,
+            # TODO: Review type mismatch between API and SDK
             status=payload.status,
             inserted_at=payload.inserted_at,
             updated_at=payload.updated_at,
         )
+
+
+AllowedSuggestionTypes = Union[
+    RemoteSuggestionSchema,
+    SuggestionSchema,
+    Dict[str, Any],
+    List[RemoteSuggestionSchema],
+    List[SuggestionSchema],
+    List[Dict[str, Any]],
+]
 
 
 class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
@@ -117,6 +128,7 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
             question. Defaults to an empty list.
     """
 
+    # TODO: remote record should receive a dataset instead of this
     question_name_to_id: Optional[Dict[str, UUID]] = Field(..., exclude=True, repr=False)
 
     responses: List[RemoteResponseSchema] = Field(default_factory=list)
@@ -125,19 +137,10 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
     )
 
     class Config:
+        allow_mutation = True
         validate_assignment = True
 
-    def __update_suggestions(
-        self,
-        suggestions: Union[
-            RemoteSuggestionSchema,
-            List[RemoteSuggestionSchema],
-            SuggestionSchema,
-            List[SuggestionSchema],
-            Dict[str, Any],
-            List[Dict[str, Any]],
-        ],
-    ) -> None:
+    def __update_suggestions(self, suggestions: AllowedSuggestionTypes) -> None:
         """Updates the suggestions for the record in Argilla. Note that the suggestions
         must exist in Argilla to be updated.
 
@@ -220,17 +223,7 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
         self.__dict__["suggestions"] = tuple(existing_suggestions.values())
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def update(
-        self,
-        suggestions: Union[
-            RemoteSuggestionSchema,
-            List[RemoteSuggestionSchema],
-            SuggestionSchema,
-            List[SuggestionSchema],
-            Dict[str, Any],
-            List[Dict[str, Any]],
-        ],
-    ) -> None:
+    def update(self, suggestions: Optional[AllowedSuggestionTypes] = None) -> None:
         """Update a `RemoteFeedbackRecord`. Currently just `suggestions` are supported.
 
         Note that this method will update the record in Argilla directly.
@@ -244,7 +237,25 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
         Raises:
             PermissionError: if the user does not have either `owner` or `admin` role.
         """
-        self.__update_suggestions(suggestions=suggestions)
+
+        self.__updated_record_data()
+
+        suggestions = suggestions or self.suggestions
+        if suggestions:
+            self.__update_suggestions(suggestions=suggestions)
+
+    def __updated_record_data(self) -> None:
+        response = records_api_v1.update_record(self.client, self.id, self.to_server_payload())
+
+        updated_record = self.from_api(
+            payload=response.parsed,
+            question_id_to_name={value: key for key, value in self.question_name_to_id.items()}
+            if self.question_name_to_id
+            else None,
+            client=self.client,
+        )
+
+        self.__dict__.update(updated_record.__dict__)
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def delete_suggestions(self, suggestions: Union[RemoteSuggestionSchema, List[RemoteSuggestionSchema]]) -> None:
@@ -316,7 +327,7 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
     @classmethod
     def from_api(
         cls,
-        payload: "FeedbackItemModel",
+        payload: "FeedbackRecordModel",
         question_id_to_name: Optional[Dict[UUID, str]] = None,
         client: Optional["httpx.Client"] = None,
     ) -> "RemoteFeedbackRecord":
