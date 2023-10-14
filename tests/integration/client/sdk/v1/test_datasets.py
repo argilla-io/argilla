@@ -39,8 +39,8 @@ from argilla.client.sdk.v1.datasets.api import (
     get_records,
     list_datasets,
     publish_dataset,
-    set_suggestion,
 )
+from argilla.client.sdk.v1.records.api import set_suggestion
 from argilla.client.sdk.v1.datasets.models import (
     FeedbackDatasetModel,
     FeedbackFieldModel,
