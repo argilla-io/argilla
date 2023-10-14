@@ -61,8 +61,6 @@ server = [
     "greenlet >= 2.0.0",
     # Async SQLite
     "aiosqlite >=0.19.0",
-    # Advanced query search dsl
-    "luqum >= 0.11,< 0.13",
     # metrics
     "scikit-learn >= 0.24.2",
     # Statics server

@@ -78,6 +78,8 @@ jobs:
           HF_HUB_ACCESS_TOKEN: ${{ secrets.HF_HUB_ACCESS_TOKEN }}
         run: echo "Enable HF access token"
       - name: Run tests 📈
+        env:
+          ARGILLA_ENABLE_TELEMETRY: 0
         run: |
           # ulimit to avoid segmentation fault
           ulimit -c unlimited
