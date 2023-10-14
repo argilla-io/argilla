@@ -16,6 +16,7 @@ import os
 import textwrap
 import warnings
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from argilla.client.feedback.schemas.records import FeedbackRecord
@@ -96,7 +97,6 @@ class ArgillaTrainer(ArgillaTrainerV1):
             )
 
         # Save the model_card arguments if given by the user
-        # TODO(plaguss): document properly the special argument name
         if model_card_kwargs := framework_kwargs.pop("model_card_kwargs", None):
             self.model_card_kwargs = model_card_kwargs
         else:
@@ -287,7 +287,6 @@ class ArgillaTrainer(ArgillaTrainerV1):
             card_data=self._trainer.get_model_card_data(**self.model_card_kwargs),
             template_path=ArgillaModelCard.default_template_path,
         )
-        from pathlib import Path
 
         model_card_path = Path(output_dir) / "MODEL_CARD.md"
         model_card.save(model_card_path)

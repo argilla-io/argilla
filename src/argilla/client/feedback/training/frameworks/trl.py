@@ -401,21 +401,21 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         """
         from argilla.client.feedback.integrations.huggingface.model_card import TRLModelCardData
 
-        if isinstance(self._task, TrainingTaskForSFT):
-            tags = ["supervised-fine-tuning"]
-        elif isinstance(self._task, TrainingTaskForRM):
-            tags = ["reward-modeling"]
-        elif isinstance(self._task, TrainingTaskForPPO):
-            tags = ["proximal-policy-optimization", "ppo"]
-        elif isinstance(self._task, TrainingTaskForDPO):
-            tags = ["direct-preference-optimization", "dpo"]
+        if not card_data_kwargs.get("tags"):
+            if isinstance(self._task, TrainingTaskForSFT):
+                tags = ["supervised-fine-tuning", "sft"]
+            elif isinstance(self._task, TrainingTaskForRM):
+                tags = ["reward-modeling", "rm"]
+            elif isinstance(self._task, TrainingTaskForPPO):
+                tags = ["proximal-policy-optimization", "ppo"]
+            elif isinstance(self._task, TrainingTaskForDPO):
+                tags = ["direct-preference-optimization", "dpo"]
 
-        tags += ["TRL", "argilla"]
+            card_data_kwargs.update({"tags": tags + ["TRL", "argilla"]})
 
         return TRLModelCardData(
             model_id=self._model,
             task=self._task,
-            tags=tags,
             update_config_kwargs={**self.training_args_kwargs, **self.trainer_kwargs},
             **card_data_kwargs,
         )

@@ -138,9 +138,6 @@ def test_model_card_with_defaults(
 
     with TemporaryDirectory() as tmpdirname:
         content = trainer.generate_model_card(tmpdirname)
-        print("*******")
-        print(content)
-        print("*******")
         assert (Path(tmpdirname) / "MODEL_CARD.md").exists()
         pattern = model_card_pattern(framework, training_task)
         assert content.find(pattern) > -1
