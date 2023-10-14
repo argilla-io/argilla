@@ -160,7 +160,7 @@ class CRUDMixin:
 
 
 def _default_inserted_at(context: DefaultExecutionContext) -> datetime:
-    return context.get_current_parameters()["inserted_at"]
+    return context.get_current_parameters(isolate_multiinsert_groups=False)["inserted_at"]
 
 
 class TimestampMixin:
