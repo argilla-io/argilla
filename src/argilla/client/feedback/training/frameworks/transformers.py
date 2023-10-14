@@ -88,16 +88,13 @@ class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSke
 
         if isinstance(self._task, TrainingTaskForTextClassification):
             tags = ["text-classification", "transformers", "argilla"]
-            output_dir = '"text_classification_model"'
         else:
             tags = ["question-answering", "transformers", "argilla"]
-            output_dir = '"question_answering_model"'
 
         return TransformersModelCardData(
             model_id=self._model,
             task=self._task,
             tags=tags,
-            output_dir=output_dir,
             update_config_kwargs=self.trainer_kwargs,
             **card_data_kwargs,
         )

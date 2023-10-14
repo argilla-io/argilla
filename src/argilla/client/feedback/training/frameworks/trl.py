@@ -403,16 +403,12 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
 
         if isinstance(self._task, TrainingTaskForSFT):
             tags = ["supervised-fine-tuning"]
-            output_dir = '"sft_model"'
         elif isinstance(self._task, TrainingTaskForRM):
             tags = ["reward-modeling"]
-            output_dir = '"rm_model"'
         elif isinstance(self._task, TrainingTaskForPPO):
             tags = ["proximal-policy-optimization", "ppo"]
-            output_dir = '"ppo_model"'
         elif isinstance(self._task, TrainingTaskForDPO):
             tags = ["direct-preference-optimization", "dpo"]
-            output_dir = '"dpo_model"'
 
         tags += ["TRL", "argilla"]
 
@@ -420,7 +416,6 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
             model_id=self._model,
             task=self._task,
             tags=tags,
-            output_dir=output_dir,
             update_config_kwargs={**self.training_args_kwargs, **self.trainer_kwargs},
             **card_data_kwargs,
         )

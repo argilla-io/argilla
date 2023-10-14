@@ -91,8 +91,10 @@ def test_model_card_with_defaults(
             context=dataset.field_by_name("text"),
             answer=dataset.question_by_name("question-1"),
         )
+        output_dir = '"question_answering_model"'
     elif training_task == TrainingTask.for_text_classification:
         task = TrainingTask.for_text_classification(text=dataset.fields[0], label=label)
+        output_dir = '"text_classification_model"'
 
     if framework == Framework("spacy"):
         model = "en_core_web_sm"
@@ -120,7 +122,12 @@ def test_model_card_with_defaults(
             framework=framework,
             model=model,
             framework_kwargs={
-                "model_card_kwargs": {"license": "mit", "language": ["en", "es"], "dataset_name": DATASET_NAME}
+                "model_card_kwargs": {
+                    "license": "mit",
+                    "language": ["en", "es"],
+                    "dataset_name": DATASET_NAME,
+                    "output_dir": output_dir,
+                },
             },
         )
 
@@ -131,6 +138,9 @@ def test_model_card_with_defaults(
 
     with TemporaryDirectory() as tmpdirname:
         content = trainer.generate_model_card(tmpdirname)
+        print("*******")
+        print(content)
+        print("*******")
         assert (Path(tmpdirname) / "MODEL_CARD.md").exists()
         pattern = model_card_pattern(framework, training_task)
         assert content.find(pattern) > -1
@@ -184,7 +194,12 @@ def test_model_card_sentence_transformers(
         framework="sentence-transformers",
         framework_kwargs={
             "cross_encoder": False,
-            "model_card_kwargs": {"license": "mit", "language": ["en", "es"], "dataset_name": DATASET_NAME},
+            "model_card_kwargs": {
+                "license": "mit",
+                "language": ["en", "es"],
+                "dataset_name": DATASET_NAME,
+                "output_dir": '"sentence_similarity_model"',
+            },
         },
     )
     trainer.update_config(epochs=1, batch_size=3)
@@ -338,15 +353,29 @@ def test_model_card_trl(
     )
     dataset.add_records(records=feedback_dataset_records * 2)
     task = training_task(formatting_func)
-
     model_id = "sshleifer/tiny-gpt2"
+
+    if training_task == TrainingTask.for_supervised_fine_tuning:
+        output_dir = '"sft_model"'
+    elif training_task == TrainingTask.for_reward_modeling:
+        output_dir = '"rm_model"'
+    elif training_task == TrainingTask.for_proximal_policy_optimization:
+        output_dir = '"ppo_model"'
+    else:
+        output_dir = '"dpo_model"'
+
     trainer = ArgillaTrainer(
         dataset=dataset,
         task=task,
         framework="trl",
         model=model_id,
         framework_kwargs={
-            "model_card_kwargs": {"license": "mit", "language": ["en", "es"], "dataset_name": DATASET_NAME}
+            "model_card_kwargs": {
+                "license": "mit",
+                "language": ["en", "es"],
+                "dataset_name": DATASET_NAME,
+                "output_dir": output_dir,
+            }
         },
     )
     if training_task == TrainingTask.for_proximal_policy_optimization:
@@ -360,10 +389,6 @@ def test_model_card_trl(
 
     with TemporaryDirectory() as tmpdirname:
         content = trainer.generate_model_card(tmpdirname)
-        print("********")
-        print(content)
-        print("********")
-
         assert (Path(tmpdirname) / "MODEL_CARD.md").exists()
         pattern = model_card_pattern(Framework("trl"), training_task)
         assert content.find(pattern) > -1

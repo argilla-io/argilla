@@ -280,6 +280,9 @@ class ArgillaTrainer(ArgillaTrainerV1):
         """
         from argilla.client.feedback.integrations.huggingface.model_card import ArgillaModelCard
 
+        if not self.model_card_kwargs.get("output_dir"):
+            self.model_card_kwargs.update({"output_dir": f'"{output_dir}"'})
+
         model_card = ArgillaModelCard.from_template(
             card_data=self._trainer.get_model_card_data(**self.model_card_kwargs),
             template_path=ArgillaModelCard.default_template_path,

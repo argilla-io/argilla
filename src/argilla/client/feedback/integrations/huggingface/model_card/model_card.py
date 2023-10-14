@@ -83,7 +83,7 @@ class FrameworkCardData(CardData):
     seed: Optional[int] = None
     framework_kwargs: Dict[str, Any] = field(default_factory=dict)
     task: Optional[TrainingTaskTypes] = None
-    output_dir: str = field(default='"text_classification_model"')
+    output_dir: Optional[str] = None
     version: Dict[str, str] = field(
         default_factory=lambda: {
             "python": python_version(),
@@ -224,7 +224,6 @@ class SpacyTransformersModelCardData(SpacyModelCardDataBase):
 @dataclass
 class TransformersModelCardDataBase(FrameworkCardData):
     tokenizer: "PreTrainedTokenizer" = ""
-    output_dir: str = field(default='"text_classification_model"')
 
     def _trainer_task__repr__(self) -> str:
         task_call = ""
@@ -366,8 +365,6 @@ class PeftModelCardData(TransformersModelCardDataBase):
 @dataclass
 class OpenAIModelCardData(FrameworkCardData):
     framework: Framework = Framework("openai")
-    # task_type: str = "for_chat_completion"
-    output_dir: str = field(default='"chat_completion_model"')
 
     def _trainer_task__repr__(self) -> str:
         return _formatting_func_call(self.task.formatting_func, self.task_type)
@@ -379,7 +376,6 @@ class OpenAIModelCardData(FrameworkCardData):
 @dataclass
 class TRLModelCardData(FrameworkCardData):
     framework: Framework = Framework("trl")
-    output_dir: str = field(default="")
 
     def _trainer_task__repr__(self) -> str:
         return _formatting_func_call(self.task.formatting_func, self.task_type)
@@ -486,7 +482,6 @@ class TRLModelCardData(FrameworkCardData):
 @dataclass
 class SentenceTransformerCardData(FrameworkCardData):
     framework: Framework = Framework("sentence-transformers")
-    output_dir: str = field(default='"sentence_similarity_model"')
     tags: Optional[List[str]] = field(
         default_factory=lambda: ["sentence-similarity", "sentence-transformers", "argilla"]
     )
@@ -519,8 +514,7 @@ class SentenceTransformerCardData(FrameworkCardData):
     def _to_dict(self) -> Dict[str, str]:
         if cross_encoder := self.cross_encoder:
             return {"cross_encoder": cross_encoder}
-        else:
-            return {}
+        return {}
 
     def _update_config__repr__(self) -> Optional[str]:
         base_kwargs = {
