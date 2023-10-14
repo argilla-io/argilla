@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     )
 
 
-class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
+class FeedbackDataset(FeedbackDatasetBase["FeedbackRecord"], ArgillaMixin, UnificationMixin):
     def __init__(
         self,
         *,
@@ -126,6 +126,12 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
     def records(self) -> List["FeedbackRecord"]:
         """Returns the records in the dataset."""
         return self._records
+
+    def update_records(self, records: Union["FeedbackRecord", List["FeedbackRecord"]]) -> None:
+        warnings.warn(
+            "`update_records` method only works for `FeedbackDataset` pushed to Argilla. "
+            "If your are working with local data, you can just iterate over the records and update them."
+        )
 
     def __repr__(self) -> str:
         """Returns a string representation of the dataset."""
