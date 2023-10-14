@@ -198,7 +198,7 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
             else:
                 new_suggestions[suggestion.question_name] = suggestion
 
-            return list(new_suggestions.values())
+        return list(new_suggestions.values())
 
     def __update_suggestions(self, suggestions: List[AllowedSuggestionSchema]) -> None:
         """Updates the suggestions for the record in Argilla.
