@@ -88,6 +88,7 @@ class ResponseSchema(BaseModel):
         """Method that will be used to create the payload that will be sent to Argilla
         to create a `ResponseSchema` for a `FeedbackRecord`."""
         return {
+            # UUID is not json serializable!!!
             "user_id": self.user_id,
             "values": {question_name: value.dict() for question_name, value in self.values.items()}
             if self.values is not None
