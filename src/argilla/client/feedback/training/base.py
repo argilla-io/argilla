@@ -255,14 +255,14 @@ class ArgillaTrainer(ArgillaTrainerV1):
         """
         return self._trainer.predict(text=text, as_argilla_records=False, **kwargs)
 
-    def save(self, output_dir: str, generate_card: bool = False) -> None:
+    def save(self, output_dir: str, generate_card: bool = True) -> None:
         """
         Saves the model to the specified path and optionally generates a `ModelCard` at the same `output_dir`.
 
         Args:
             output_dir: The path to the directory where the model will be saved.
             generate_card: Whether to generate a model card of the `ArgillaTrainer` for the HuggingFace Hub. Defaults
-                to `False`.
+                to `True`.
         """
         super().save(output_dir)
 

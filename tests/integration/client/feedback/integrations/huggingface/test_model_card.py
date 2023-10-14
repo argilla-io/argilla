@@ -264,9 +264,6 @@ def test_model_card_openai(model_card_pattern: str, mocked_openai, mocked_is_on_
 
     with TemporaryDirectory() as tmpdirname:
         content = trainer.generate_model_card(tmpdirname)
-        print("****************")
-        print(content)
-        print("****************")
         assert (Path(tmpdirname) / "MODEL_CARD.md").exists()
         pattern = model_card_pattern(Framework("openai"), TrainingTask.for_chat_completion)
         assert content.find(pattern) > -1
