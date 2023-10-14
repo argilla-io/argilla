@@ -195,9 +195,7 @@ class FeedbackRecord(BaseModel):
     fields: Dict[str, Union[str, None]]
     metadata: Dict[str, Any] = Field(default_factory=dict)
     responses: List[ResponseSchema] = Field(default_factory=list)
-    suggestions: Union[Tuple[SuggestionSchema], List[SuggestionSchema]] = Field(
-        default_factory=tuple, allow_mutation=False
-    )
+    suggestions: Union[Tuple[SuggestionSchema], List[SuggestionSchema]] = Field(default_factory=tuple)
     external_id: Optional[str] = None
 
     _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default_factory=dict)

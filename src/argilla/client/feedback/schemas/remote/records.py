@@ -102,14 +102,7 @@ class RemoteResponseSchema(ResponseSchema, RemoteSchema):
         )
 
 
-AllowedSuggestionTypes = Union[
-    RemoteSuggestionSchema,
-    SuggestionSchema,
-    Dict[str, Any],
-    List[RemoteSuggestionSchema],
-    List[SuggestionSchema],
-    List[Dict[str, Any]],
-]
+AllowedSuggestionSchema = Union[RemoteSuggestionSchema, SuggestionSchema]
 
 
 class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
@@ -132,15 +125,21 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
     question_name_to_id: Optional[Dict[str, UUID]] = Field(..., exclude=True, repr=False)
 
     responses: List[RemoteResponseSchema] = Field(default_factory=list)
-    suggestions: Union[Tuple[RemoteSuggestionSchema], List[RemoteSuggestionSchema]] = Field(
-        default_factory=tuple, allow_mutation=False
-    )
+    suggestions: Union[Tuple[AllowedSuggestionSchema], List[AllowedSuggestionSchema]] = Field(default_factory=tuple)
 
     class Config:
         allow_mutation = True
         validate_assignment = True
 
-    def __update_suggestions(self, suggestions: AllowedSuggestionTypes) -> None:
+    def __update_suggestions(
+        self,
+        suggestions: Union[
+            Dict[str, Any],
+            List[Dict[str, Any]],
+            AllowedSuggestionSchema,
+            List[AllowedSuggestionSchema],
+        ],
+    ) -> None:
         """Updates the suggestions for the record in Argilla. Note that the suggestions
         must exist in Argilla to be updated.
 
@@ -223,7 +222,7 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
         self.__dict__["suggestions"] = tuple(existing_suggestions.values())
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def update(self, suggestions: Optional[AllowedSuggestionTypes] = None) -> None:
+    def update(self, suggestions: Optional[AllowedSuggestionSchema] = None) -> None:
         """Update a `RemoteFeedbackRecord`. Currently just `suggestions` are supported.
 
         Note that this method will update the record in Argilla directly.
