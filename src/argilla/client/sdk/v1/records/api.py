@@ -25,7 +25,9 @@ from argilla.client.sdk.v1.records.models import FeedbackItemModel
 
 def update_record(
     # TODO: Use the proper sdk API Model instead of the dict
-    client: httpx.Client, id: Union[str, UUID], data: Dict[str, Any]
+    client: httpx.Client,
+    id: Union[str, UUID],
+    data: Dict[str, Any],
 ) -> Response[Union[FeedbackItemModel, ErrorMessage, HTTPValidationError]]:
     url = f"/api/v1/records/{id}"
 

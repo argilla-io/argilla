@@ -40,7 +40,6 @@ from argilla.client.sdk.v1.datasets.api import (
     list_datasets,
     publish_dataset,
 )
-from argilla.client.sdk.v1.records.api import set_suggestion
 from argilla.client.sdk.v1.datasets.models import (
     FeedbackDatasetModel,
     FeedbackFieldModel,
@@ -51,6 +50,7 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackRecordsModel,
     FeedbackSuggestionModel,
 )
+from argilla.client.sdk.v1.records.api import set_suggestion
 from argilla.server.models import DatasetStatus, User, UserRole
 
 from tests.factories import (
