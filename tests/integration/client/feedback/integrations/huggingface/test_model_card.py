@@ -208,8 +208,11 @@ def test_model_card_sentence_transformers(
         assert content.find(pattern) > -1
 
 
-def test_model_card_openai(mocked_openai):
-    return  # NOT IMPLEMENTED YET
+@pytest.mark.usefixtures(
+    "model_card_pattern",
+)
+def test_model_card_openai(model_card_pattern: str, mocked_openai, mocked_is_on_huggingface):
+    # return  # NOT IMPLEMENTED YET
     dataset = FeedbackDataset.from_huggingface("argilla/customer_assistant")
     # adapation from LlamaIndex's TEXT_QA_PROMPT_TMPL_MSGS[1].content
     user_message_prompt = """Context information is below.
@@ -244,18 +247,29 @@ def test_model_card_openai(mocked_openai):
         framework="openai",
     )
 
-    trainer.generate_model_card(OUTPUT_DIR)
-    model_card_path = Path(OUTPUT_DIR) / "MODEL_CARD.md"
+    trainer = ArgillaTrainer(
+        dataset=dataset,
+        task=task,
+        framework="openai",
+        model="gpt-3.5-turbo-0613",
+        framework_kwargs={
+            "model_card_kwargs": {
+                "license": "mit",
+                "language": ["en", "es"],
+                "dataset_name": DATASET_NAME,
+                "output_dir": '"chat_completion_model"',
+            }
+        },
+    )
 
-    try:
-        assert (model_card_path).exists()
-        content = model_card_path.read_text()
-
-        assert content.find(patterns.OPENAI_CODE_SNIPPET) > -1
-
-    finally:
-        if Path(OUTPUT_DIR).exists():
-            shutil.rmtree(OUTPUT_DIR)
+    with TemporaryDirectory() as tmpdirname:
+        content = trainer.generate_model_card(tmpdirname)
+        print("****************")
+        print(content)
+        print("****************")
+        assert (Path(tmpdirname) / "MODEL_CARD.md").exists()
+        pattern = model_card_pattern(Framework("openai"), TrainingTask.for_chat_completion)
+        assert content.find(pattern) > -1
 
 
 def formatting_func_sft(sample: Dict[str, Any]) -> Iterator[str]:

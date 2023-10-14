@@ -370,7 +370,20 @@ class OpenAIModelCardData(FrameworkCardData):
         return _formatting_func_call(self.task.formatting_func, self.task_type)
 
     def _predict__repr__(self) -> str:
-        raise NotImplementedError("To be done")
+        return dedent(
+            """\
+            # After training we can use the model from the openai framework, you can take a look at their docs in order to use the model
+            import openai
+
+            completion = openai.ChatCompletion.create(
+                model="ft:gpt-3.5-turbo:my-org:custom_suffix:id",
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": "Hello!"}
+                ]
+            )
+            """
+        )
 
 
 @dataclass

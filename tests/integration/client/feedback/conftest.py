@@ -80,6 +80,8 @@ def model_card_pattern() -> str:
                 return TR_PPO_CODE_SNIPPET
             elif training_task == TrainingTask.for_direct_preference_optimization:
                 return TR_DPO_CODE_SNIPPET
+        elif framework == Framework("openai"):
+            return OPENAI_CODE_SNIPPET
         else:
             raise ValueError(f"Framework undefined: {framework}")
 
@@ -288,7 +290,52 @@ trainer.train(output_dir="text_classification_model")
 
 
 OPENAI_CODE_SNIPPET = """\
-NOT IMPLEMENTED!
+```python
+# Load the dataset:
+dataset = FeedbackDataset.from_huggingface("argilla/emotion")
+
+# Create the training task:
+    def formatting_func(sample: dict):
+        from uuid import uuid4
+
+        if sample["response"]:
+            chat = str(uuid4())
+            user_message = user_message_prompt.format(context_str=sample["context"], query_str=sample["user-message"])
+            return [
+                (chat, "0", "system", system_prompt),
+                (chat, "1", "user", user_message),
+                (chat, "2", "assistant", sample["response"][0]["value"]),
+            ]
+        else:
+            return None
+
+task = TrainingTask.for_chat_completion(formatting_func=formatting_func)
+
+# Create the ArgillaTrainer:
+trainer = ArgillaTrainer(
+    dataset=dataset,
+    task=task,
+    framework="openai",
+)
+
+trainer.train(output_dir="chat_completion_model")
+```
+
+You can test the type of predictions of this model like so:
+
+```python
+# After training we can use the model from the openai framework, you can take a look at their docs in order to use the model
+import openai
+
+completion = openai.ChatCompletion.create(
+    model="ft:gpt-3.5-turbo:my-org:custom_suffix:id",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Hello!"}
+    ]
+)
+
+```
 """
 
 
