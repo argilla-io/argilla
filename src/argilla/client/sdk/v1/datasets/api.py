@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import warnings
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
 import httpx
@@ -28,7 +28,6 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackQuestionModel,
     FeedbackRecordsModel,
     FeedbackResponseStatusFilter,
-    FeedbackSuggestionModel,
 )
 
 
@@ -436,53 +435,6 @@ def add_metadata_property(
     if response.status_code == 201:
         response_obj = Response.from_httpx_response(response)
         response_obj.parsed = FeedbackMetadataPropertyModel(**response.json())
-        return response_obj
-    return handle_response_error(response)
-
-
-def set_suggestion(
-    client: httpx.Client,
-    record_id: UUID,
-    question_id: UUID,
-    value: Any,
-    type: Optional[Literal["model", "human"]] = None,
-    score: Optional[float] = None,
-    agent: Optional[str] = None,
-) -> Response[Union[FeedbackSuggestionModel, ErrorMessage, HTTPValidationError]]:
-    """Sends a PUT request to `/api/v1/records/{id}/suggestions` endpoint to add or update
-    a suggestion for a question in the `FeedbackDataset`.
-
-    Args:
-        client: the authenticated Argilla client to be used to send the request to the API.
-        record_id: the id of the record to add the suggestion to.
-        question_id: the id of the question to add the suggestion to.
-        value: the value of the suggestion.
-        type: the type of the suggestion. It can be either `model` or `human`. Defaults to None.
-        score: the score of the suggestion. Defaults to None.
-        agent: the agent used to obtain the suggestion. Defaults to None.
-
-    Returns:
-        A `Response` object containing a `parsed` attribute with the parsed response if the
-        request was successful, which is a `FeedbackSuggestionModel`.
-    """
-    url = f"/api/v1/records/{record_id}/suggestions"
-
-    suggestion = {
-        "question_id": str(question_id),
-        "value": value,
-    }
-    if type is not None:
-        suggestion["type"] = type
-    if score is not None:
-        suggestion["score"] = score
-    if agent is not None:
-        suggestion["agent"] = agent
-
-    response = client.put(url=url, json=suggestion)
-
-    if response.status_code in [200, 201]:
-        response_obj = Response.from_httpx_response(response)
-        response_obj.parsed = FeedbackSuggestionModel(**response.json())
         return response_obj
     return handle_response_error(response)
 
