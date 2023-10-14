@@ -14,7 +14,7 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
+from typing import Generic, Iterable, TYPE_CHECKING, Any, Dict, List, Literal, Optional, TypeVar, Union
 
 from pydantic import ValidationError
 
@@ -55,8 +55,10 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 
+R = TypeVar("R", bound=FeedbackRecord)
 
-class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
+
+class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, Generic[R]):
     """Base class with shared functionality for `FeedbackDataset` and `RemoteFeedbackDataset`."""
 
     def __init__(
@@ -166,8 +168,20 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
 
     @property
     @abstractmethod
-    def records(self) -> Any:
+    def records(self) -> Iterable[R]:
         """Returns the records of the dataset."""
+        pass
+
+    @abstractmethod
+    def update_records(self, records: Union[R, List[R]]) -> None:
+        """Updates the records of the dataset.
+
+        Args:
+            records: the records to update the dataset with.
+
+        Raises:
+            ValueError: if the provided `records` are invalid.
+        """
         pass
 
     @property
@@ -364,11 +378,12 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
 
     def _parse_and_validate_records(
         self,
-        records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
-    ) -> List[FeedbackRecord]:
+        records: Union[R, Dict[str, Any], List[Union[R, Dict[str, Any]]]],
+    ) -> List[R]:
         """Convenient method for calling `_parse_records` and `_validate_records` in sequence."""
         records = self._parse_records(records)
         self._validate_records(records)
+
         return records
 
     @requires_dependencies("datasets")
