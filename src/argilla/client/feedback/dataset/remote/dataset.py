@@ -66,10 +66,6 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
                 and/or attributes.
         """
         self._dataset = dataset
-        # TODO: review why this is here !
-        self._question_id_to_name = {question.id: question.name for question in self._dataset.questions}
-        self._question_name_to_id = {value: key for key, value in self._question_id_to_name.items()}
-        # TODO END
 
         if response_status and not isinstance(response_status, list):
             response_status = [response_status]
@@ -105,6 +101,14 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
     def _client(self) -> "httpx.Client":
         """Returns the `httpx.Client` instance that will be used to send requests to Argilla."""
         return self.dataset._client
+
+    @property
+    def _question_id_to_name(self) -> Dict["UUID", str]:
+        return self.dataset._question_id_to_name_id
+
+    @property
+    def _question_name_to_id(self) -> Dict[str, "UUID"]:
+        return self.dataset._question_name_to_id
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def __len__(self) -> int:
@@ -233,7 +237,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         )
 
 
-class RemoteFeedbackDataset(FeedbackDatasetBase):
+class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
     # TODO: Call super method once the base init contains only commons init attributes
     def __init__(
         self,
@@ -304,6 +308,14 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         """
         return self._records
 
+    def update_records(self, records: Union[RemoteFeedbackRecord, List[RemoteFeedbackRecord]]) -> None:
+        if not isinstance(records, list):
+            records = [records]
+
+        # TODO: Use the batch version of endpoint once is implemented
+        for record in records:
+            record.update()
+
     @property
     def id(self) -> "UUID":
         """Returns the ID of the dataset in Argilla."""
@@ -333,6 +345,14 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
     def updated_at(self) -> datetime:
         """Returns the datetime when the dataset was last updated in Argilla."""
         return self._updated_at
+
+    @property
+    def _question_id_to_name_id(self) -> Dict["UUID", str]:
+        return {question.id: question.name for question in self._questions}
+
+    @property
+    def _question_name_to_id(self) -> Dict[str, "UUID"]:
+        return {question.name: question.id for question in self._questions}
 
     def __repr__(self) -> str:
         """Returns a string representation of the dataset."""
