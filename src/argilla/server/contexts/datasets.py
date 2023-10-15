@@ -512,7 +512,7 @@ async def update_records(
 ) -> None:
     records_update_objects = []
     updated_records_ids = []
-    records_to_update_suggestions = []
+    records_ids_update_suggestions = []
     suggestions = []
 
     # Cache dictionaries to avoid querying the database multiple times
@@ -526,7 +526,7 @@ async def update_records(
             try:
                 metadata_properties = await validate_metadata(db, dataset, metadata, metadata_properties)
             except ValueError as err:
-                raise ValueError(f"Provided metadata for record at position {record_i} is not valid: {e}") from err
+                raise ValueError(f"Provided metadata for record at position {record_i} is not valid: {err}") from err
 
         if record_update.suggestions is not None:
             params.pop("suggestions")
@@ -538,7 +538,7 @@ async def update_records(
                     raise ValueError(
                         f"Provided suggestions for record at position {record_i} are not valid: {err}"
                     ) from err
-            records_to_update_suggestions.append(record_update.id)
+            records_ids_update_suggestions.append(record_update.id)
 
         records_update_objects.append(params)
         updated_records_ids.append(record_update.id)
@@ -547,7 +547,7 @@ async def update_records(
         await Suggestion.delete_many(
             db,
             params=[
-                Suggestion.record_id.in_(records_to_update_suggestions),
+                Suggestion.record_id.in_(records_ids_update_suggestions),
             ],
             autocommit=False,
         )
