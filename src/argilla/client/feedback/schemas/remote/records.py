@@ -14,7 +14,7 @@
 
 import warnings
 from datetime import datetime
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 from pydantic import Field
