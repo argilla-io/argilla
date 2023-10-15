@@ -19,11 +19,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 from pydantic import ValidationError
 
 from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
-from argilla.client.feedback.schemas import (
-    FeedbackRecord,
-    FieldSchema,
-    SortBy,
-)
+from argilla.client.feedback.schemas import FeedbackRecord, SortBy
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.client.feedback.schemas.metadata import MetadataFilters
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes, AllowedQuestionTypes
@@ -40,7 +36,6 @@ from argilla.client.feedback.training.schemas import (
 )
 from argilla.client.feedback.utils import generate_pydantic_schema_for_fields, generate_pydantic_schema_for_metadata
 from argilla.client.models import Framework
-from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
 from argilla.utils.dependency import require_dependencies, requires_dependencies
 
 if TYPE_CHECKING:
