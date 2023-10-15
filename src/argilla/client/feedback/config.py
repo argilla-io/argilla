@@ -39,7 +39,9 @@ class DatasetConfig(BaseModel):
     fields: List[AllowedFieldTypes]
     questions: List[Annotated[AllowedQuestionTypes, Field(..., discriminator="type")]]
     guidelines: Optional[str] = None
-    metadata_properties: Optional[List[AllowedMetadataPropertyTypes]] = None
+    metadata_properties: Optional[
+        List[Annotated[AllowedMetadataPropertyTypes, Field(..., discriminator="type")]]
+    ] = None
 
     def to_yaml(self) -> str:
         return dump(self.dict())
