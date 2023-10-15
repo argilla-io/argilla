@@ -44,6 +44,8 @@ class MetadataPropertySchema(BaseModel, ABC):
     Args:
         name: The name of the metadata property.
         description: A description of the metadata property. Defaults to `None`.
+        visible_for_annotators: Whether the metadata property should be visible for
+            users with the `annotator` role. Defaults to `True`.
         type: The type of the metadata property. A value should be set for this
             attribute in the class inheriting from this one to be able to use a
             discriminated union based on the `type` field. Defaults to `None`.
@@ -56,8 +58,7 @@ class MetadataPropertySchema(BaseModel, ABC):
 
     name: str = Field(..., regex=r"^(?=.*[a-z0-9])[a-z0-9_-]+$")
     description: Optional[str] = None
-    # TODO: uncomment once the API supports it
-    # visible_for_annotators: bool = True
+    visible_for_annotators: Optional[bool] = True
     type: MetadataPropertyTypes = Field(..., allow_mutation=False)
 
     class Config:
@@ -74,8 +75,7 @@ class MetadataPropertySchema(BaseModel, ABC):
         return {
             "name": self.name,
             "description": self.description,
-            # TODO: uncomment once the API supports it
-            # "visible_for_annotators": self.visible_for_annotators,
+            "visible_for_annotators": self.visible_for_annotators,
             "settings": self.server_settings,
         }
 
