@@ -142,7 +142,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                     raise TypeError(
                         f"Expected `metadata_properties` to be a list of"
                         f" `{'`, `'.join([arg.__name__ for arg in AllowedMetadataPropertyTypes.__args__])}` got a"
-                        f" metadata property in the list with type type {type(metadata_property)} instead"
+                        f" metadata property in the list with type type {type(metadata_property)} instead."
                     )
                 if metadata_property.name in unique_names:
                     raise ValueError(
@@ -242,18 +242,21 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         Raises:
             KeyError: if the metadata property with the given name does not exist.
         """
-        # TODO(alvarobartt): remove this when https://github.com/argilla-io/argilla/pull/3829 is merged
-        if not hasattr(self, "_metadata_properties_mapping") or self._metadata_properties_mapping is None:
-            self._metadata_properties_mapping = {
-                metadata_property.name: metadata_property for metadata_property in self._metadata_properties
-            }
-        try:
-            return self._metadata_properties_mapping[name]
-        except KeyError:
-            raise KeyError(
-                f"Metadata property with name='{name}' not found, available metadata property names are:"
-                f" {', '.join(self._metadata_properties_mapping.keys())}"
+        existing_metadata_properties = self.metadata_properties
+        if not existing_metadata_properties:
+            raise ValueError(
+                "The current `FeedbackDataset` has no `metadata_properties` defined, please add them first via"
+                " `FeedbackDataset.add_metadata_property`."
             )
+
+        for metadata_property in existing_metadata_properties:
+            if metadata_property.name == name:
+                return metadata_property
+
+        raise KeyError(
+            f"Metadata property with name='{name}' not found, available metadata property names are:"
+            f" {', '.join([metadata_property.name for metadata_property in existing_metadata_properties])}"
+        )
 
     @abstractmethod
     def sort_by(self, sort: List[SortBy]) -> "FeedbackDatasetBase":
@@ -279,16 +282,15 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         Raises:
             ValueError: if the `metadata_property` already exists in the dataset.
         """
-        if self.metadata_properties is not None:
-            # TODO(alvarobartt): remove this when https://github.com/argilla-io/argilla/pull/3829 is merged
-            if not hasattr(self, "_metadata_properties_mapping") or self._metadata_properties_mapping is None:
-                self._metadata_properties_mapping = {
-                    metadata_property.name: metadata_property for metadata_property in self._metadata_properties
-                }
-            if metadata_property.name in self._metadata_properties_mapping.keys():
+        existing_metadata_properties = self.metadata_properties
+        if existing_metadata_properties:
+            existing_metadata_property_names = [
+                metadata_property.name for metadata_property in existing_metadata_properties
+            ]
+            if metadata_property.name in existing_metadata_property_names:
                 raise ValueError(
                     f"Invalid `metadata_property={metadata_property.name}` provided as it already exists. Current"
-                    f" `metadata_properties` are: {list(self._metadata_properties_mapping.keys())}"
+                    f" `metadata_properties` are: {', '.join(existing_metadata_property_names)}"
                 )
 
     def _parse_records(
@@ -340,9 +342,11 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         if not hasattr(self, "_metadata_schema"):
             self._metadata_schema = None
 
-        if self._metadata_schema is None and self.metadata_properties is not None:
+        # TODO: review up to what extent we want to apply the validation here
+        existing_metadata_properties = self.metadata_properties
+        if self._metadata_schema is None and existing_metadata_properties:
             self._metadata_schema = generate_pydantic_schema_for_metadata(
-                self.metadata_properties, allow_extra_metadata=self._allow_extra_metadata
+                existing_metadata_properties, allow_extra_metadata=self._allow_extra_metadata
             )
 
         for record in records:
@@ -353,7 +357,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                     f"`FeedbackRecord.fields` does not match the expected schema, with exception: {e}"
                 ) from e
 
-            if record.metadata is not None and self.metadata_properties is not None:
+            if record.metadata is not None and existing_metadata_properties:
                 try:
                     self._metadata_schema.parse_obj(record.metadata)
                 except ValidationError as e:
@@ -392,7 +396,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             >>> huggingface_dataset = dataset.format_as("datasets")
         """
         if format == "datasets":
-            return self._huggingface_format(self)
+            return HuggingFaceDatasetMixin._huggingface_format(self)
         raise ValueError(f"Unsupported format '{format}'.")
 
     # TODO(alvarobartt,davidberenstein1957): we should consider having something like
