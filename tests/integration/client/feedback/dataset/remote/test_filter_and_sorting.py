@@ -17,35 +17,50 @@ from typing import List, Union
 from uuid import UUID
 
 import pytest
+from argilla import SortBy, TextField, TextQuestion
 from argilla.client import api
 from argilla.client.feedback.dataset.local import FeedbackDataset
-from argilla.client.feedback.dataset.remote.filtered import FilteredRemoteFeedbackDataset, FilteredRemoteFeedbackRecords
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataFilter,
+    FloatMetadataProperty,
     IntegerMetadataFilter,
+    IntegerMetadataProperty,
     MetadataFilters,
     TermsMetadataFilter,
+    TermsMetadataProperty,
 )
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.sdk.users.models import UserRole
+from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
 from argilla.client.workspaces import Workspace
 from argilla.server.models import User
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.factories import (
     DatasetFactory,
-    FloatMetadataPropertyFactory,
-    IntegerMetadataPropertyFactory,
     RecordFactory,
     ResponseFactory,
-    TermsMetadataPropertyFactory,
     TextFieldFactory,
     TextQuestionFactory,
     UserFactory,
 )
+
+
+@pytest.fixture()
+def test_dataset():
+    dataset = FeedbackDataset(
+        fields=[TextField(name="text")],
+        questions=[TextQuestion(name="question")],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="integer-metadata"),
+            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+    )
+    return dataset
 
 
 @pytest.mark.asyncio
@@ -72,68 +87,48 @@ class TestFilteredRemoteFeedbackDataset:
 
         for status, record in zip(statuses, records):
             if status != ResponseStatusFilter.missing:
-                await ResponseFactory.create(record=record, status=status)
+                await ResponseFactory.create(record=record, status=status, values={})
 
         api.init(api_key=user.api_key)
         remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
         filtered_dataset = remote_dataset.filter_by(response_status=statuses)
-        assert isinstance(filtered_dataset, FilteredRemoteFeedbackDataset)
-        assert isinstance(filtered_dataset.records, FilteredRemoteFeedbackRecords)
         assert all([isinstance(record, RemoteFeedbackRecord) for record in filtered_dataset.records])
         assert len(filtered_dataset.records) == expected_num_records
 
     @pytest.mark.parametrize(
         "metadata_filters, expected_num_records",
         [
-            (TermsMetadataFilter(name="terms-metadata", values=["a"]), 50),
+            (TermsMetadataFilter(name="terms-metadata", values=["a"]), 100),
             (TermsMetadataFilter(name="terms-metadata", values=["a", "b"]), 100),
             (TermsMetadataFilter(name="terms-metadata", values=["a", "b", "c"]), 150),
             (IntegerMetadataFilter(name="integer-metadata", le=5), 100),
             (IntegerMetadataFilter(name="integer-metadata", ge=5), 50),
-            (FloatMetadataFilter(name="float-metadata", ge=5.0), 100),
-            (FloatMetadataFilter(name="float-metadata", le=5.0), 50),
+            (FloatMetadataFilter(name="float-metadata", ge=5.0), 50),
+            (FloatMetadataFilter(name="float-metadata", le=5.0), 100),
         ],
     )
     async def test_filter_by_metadata(
-        self, owner: User, metadata_filters: Union[MetadataFilters, List[MetadataFilters]], expected_num_records: int
+        self,
+        owner: User,
+        test_dataset: FeedbackDataset,
+        metadata_filters: Union[MetadataFilters, List[MetadataFilters]],
+        expected_num_records: int,
     ) -> None:
-        dataset = await DatasetFactory.create(status="ready")
-        await TextFieldFactory.create(dataset=dataset, name="text", required=True)
-        await TextQuestionFactory.create(dataset=dataset, required=True)
-        await TermsMetadataPropertyFactory.create(
-            dataset=dataset, name="terms-metadata", settings={"type": "terms", "values": ["a", "b", "c"]}
-        )
-        await IntegerMetadataPropertyFactory.create(
-            dataset=dataset, name="integer-metadata", settings={"type": "integer", "min": 0, "max": 10}
-        )
-        await FloatMetadataPropertyFactory.create(
-            dataset=dataset, name="float-metadata", settings={"type": "float", "min": 0, "max": 10}
-        )
-
         api.init(api_key=owner.api_key)
-        remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
+
+        ws = Workspace.create(name="test-workspace")
+
+        remote_dataset = test_dataset.push_to_argilla(name="test-dataset", workspace=ws)
         for metadata in (
             {"terms-metadata": "a", "integer-metadata": 2, "float-metadata": 2.0},
             {"terms-metadata": "a", "integer-metadata": 4, "float-metadata": 4.0},
             {"terms-metadata": "c", "integer-metadata": 6, "float-metadata": 6.0},
         ):
-            remote_dataset.add_records(
-                [
-                    FeedbackRecord(
-                        fields={"text": "text"},
-                        metadata=metadata,
-                    )
-                    for _ in range(50)
-                ]
-            )
+            remote_dataset.add_records([FeedbackRecord(fields={"text": "text"}, metadata=metadata) for _ in range(50)])
 
         filtered_dataset = remote_dataset.filter_by(metadata_filters=metadata_filters)
-        assert isinstance(filtered_dataset, FilteredRemoteFeedbackDataset)
-        assert isinstance(filtered_dataset.records, FilteredRemoteFeedbackRecords)
         assert all([isinstance(record, RemoteFeedbackRecord) for record in filtered_dataset.records])
-        # TODO: once we have proper integration tests and the search engine is not mocked, uncomment the line below
-        # Right now, when metadata filters are used, the search engine is used
-        # assert len(filtered_dataset.records) == expected_num_records
+        assert len(filtered_dataset.records) == expected_num_records
 
     async def test_filter_by_response_status_without_results(
         self,
@@ -156,54 +151,29 @@ class TestFilteredRemoteFeedbackDataset:
         dataset.push_to_argilla(name="test-dataset")
 
         await db.refresh(argilla_user, attribute_names=["datasets"])
-
-        same_dataset = FeedbackDataset.from_argilla("test-dataset")
+        same_dataset = FeedbackDataset.from_argilla(name="test-dataset")
         filtered_dataset = same_dataset.filter_by(response_status=ResponseStatusFilter.draft).pull()
 
         assert filtered_dataset is not None
         assert filtered_dataset.records == []
 
-    # TODO: check why the metadata filters are not working from the tests, most likely because the metadata is not indexed
+    def test_filter_by_overrides_previous_values(self, owner: "User", test_dataset: FeedbackDataset):
+        remote = self._create_test_dataset_with_records(owner, test_dataset)
 
-    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    @pytest.mark.parametrize(
-        "status",
-        [
-            ResponseStatusFilter.draft,
-            ResponseStatusFilter.missing,
-            ResponseStatusFilter.discarded,
-            ResponseStatusFilter.submitted,
-            [ResponseStatusFilter.discarded, ResponseStatusFilter.submitted],
-        ],
-    )
-    async def test_not_implemented_methods(
-        self, role: UserRole, status: Union[ResponseStatusFilter, List[ResponseStatusFilter]]
-    ) -> None:
-        dataset = await DatasetFactory.create()
-        text_field = await TextFieldFactory.create(dataset=dataset, required=True)
-        await TextQuestionFactory.create(dataset=dataset, required=True)
-        await RecordFactory.create_batch(dataset=dataset, size=10)
-        user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+        filtered_dataset = (
+            remote.filter_by(metadata_filters=IntegerMetadataFilter(name="integer-metadata", ge=4, le=5))
+            .filter_by(metadata_filters=IntegerMetadataFilter(name="integer-metadata", ge=5))
+            .filter_by(metadata_filters=IntegerMetadataFilter(name="integer-metadata", le=5))
+        )
 
-        api.init(api_key=user.api_key)
-        remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
-        filtered_dataset = remote_dataset.filter_by(response_status=status)
-        assert isinstance(filtered_dataset, FilteredRemoteFeedbackDataset)
+        records = list(filtered_dataset.records)
 
-        with pytest.raises(NotImplementedError, match="`records.delete` does not work for filtered datasets."):
-            filtered_dataset.delete_records(remote_dataset.records[0])
+        another_filtered_dataset = remote.filter_by(
+            metadata_filters=IntegerMetadataFilter(name="integer-metadata", le=5)
+        )
+        other_records = list(another_filtered_dataset.records)
 
-        with pytest.raises(NotImplementedError, match="`records.delete` does not work for filtered datasets."):
-            filtered_dataset.records.delete(remote_dataset.records[0])
-
-        with pytest.raises(NotImplementedError, match="`records.add` does not work for filtered datasets."):
-            filtered_dataset.add_records(FeedbackRecord(fields={text_field.name: "test"}))
-
-        with pytest.raises(NotImplementedError, match="`records.add` does not work for filtered datasets."):
-            filtered_dataset.records.add(FeedbackRecord(fields={text_field.name: "test"}))
-
-        with pytest.raises(NotImplementedError, match="`delete` does not work for filtered datasets."):
-            filtered_dataset.delete()
+        assert records == other_records
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_attributes(self, role: UserRole) -> None:
@@ -226,3 +196,60 @@ class TestFilteredRemoteFeedbackDataset:
         assert isinstance(filtered_dataset.url, str)
         assert isinstance(filtered_dataset.created_at, datetime)
         assert isinstance(filtered_dataset.updated_at, datetime)
+
+    def test_basic_sorting(self, owner: "User", test_dataset: FeedbackDataset):
+        remote = self._create_test_dataset_with_records(owner, test_dataset)
+
+        expected_terms_values = ["a", "a", "a", "a", "b", "b", "b", "b", "c", "c"]
+
+        assert [
+            r.metadata["terms-metadata"]
+            for r in remote.sort_by([SortBy(field="metadata.terms-metadata", order="asc")]).records
+        ] == expected_terms_values
+
+        assert [
+            r.metadata["terms-metadata"]
+            for r in remote.sort_by([SortBy(field="metadata.terms-metadata", order="desc")]).records
+        ] == sorted(expected_terms_values, reverse=True)
+
+    def test_sorting_with_filter(self, owner: "User", test_dataset: FeedbackDataset):
+        remote = self._create_test_dataset_with_records(owner, test_dataset)
+
+        sort_cfg = [SortBy(field="metadata.terms-metadata", order="desc")]
+        metadata_filter = IntegerMetadataFilter(name="integer-metadata", ge=4, le=5)
+
+        new_ds = remote.filter_by(metadata_filters=metadata_filter).sort_by(sort_cfg)
+        assert [r.metadata["terms-metadata"] for r in new_ds.records] == ["b", "b", "b", "b", "a", "a"]
+
+        new_ds = remote.sort_by(sort_cfg).filter_by(metadata_filters=metadata_filter)
+        assert [r.metadata["terms-metadata"] for r in new_ds.records] == ["b", "b", "b", "b", "a", "a"]
+
+    def test_sort_by_overrides_previous_values(self, owner: "User", test_dataset: FeedbackDataset):
+        remote = self._create_test_dataset_with_records(owner, test_dataset)
+
+        sorted_dataset = (
+            remote.sort_by([SortBy(field="metadata.terms-metadata", order="desc")])
+            .sort_by([SortBy(field="inserted_at", order="desc")])
+            .sort_by([SortBy(field="metadata.terms-metadata", order="asc")])
+        )
+
+        records = list(sorted_dataset.records)
+
+        another_sorted_dataset = remote.sort_by([SortBy(field="metadata.terms-metadata", order="asc")])
+        other_records = list(another_sorted_dataset.records)
+
+        assert records == other_records
+
+    def _create_test_dataset_with_records(self, owner, test_dataset):
+        api.init(api_key=owner.api_key)
+        ws = Workspace.create(name="test-workspace")
+        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        for metadata in (
+            {"terms-metadata": "a", "integer-metadata": 2, "float-metadata": 2.0},
+            {"terms-metadata": "a", "integer-metadata": 4, "float-metadata": 4.0},
+            {"terms-metadata": "b", "integer-metadata": 4, "float-metadata": 4.0},
+            {"terms-metadata": "b", "integer-metadata": 5, "float-metadata": 4.0},
+            {"terms-metadata": "c", "integer-metadata": 6, "float-metadata": 6.0},
+        ):
+            remote.add_records([FeedbackRecord(fields={"text": "text"}, metadata=metadata) for _ in range(2)])
+        return remote

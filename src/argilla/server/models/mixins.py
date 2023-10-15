@@ -20,6 +20,7 @@ from sqlalchemy import func, sql
 from sqlalchemy.dialects.mysql import insert as mysql_insert
 from sqlalchemy.dialects.postgresql import insert as postgres_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+from sqlalchemy.engine.default import DefaultExecutionContext
 from sqlalchemy.orm import Mapped, mapped_column
 from typing_extensions import Self
 
@@ -173,6 +174,10 @@ class CRUDMixin:
         return self
 
 
+def _default_inserted_at(context: DefaultExecutionContext) -> datetime:
+    return context.get_current_parameters(isolate_multiinsert_groups=False)["inserted_at"]
+
+
 class TimestampMixin:
-    inserted_at: Mapped[datetime] = mapped_column(default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(default=func.now(), onupdate=func.now())
+    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=_default_inserted_at, onupdate=datetime.utcnow)

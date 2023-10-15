@@ -41,8 +41,8 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
         )
         return cls(
             config=config,
-            es_number_of_shards=settings.es_records_index_shards,
-            es_number_of_replicas=settings.es_records_index_replicas,
+            number_of_shards=settings.es_records_index_shards,
+            number_of_replicas=settings.es_records_index_replicas,
         )
 
     async def close(self):
@@ -50,8 +50,9 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
 
     def _configure_index_settings(self):
         return {
-            "number_of_shards": self.es_number_of_shards,
-            "number_of_replicas": self.es_number_of_replicas,
+            "max_result_window": self.max_result_window,
+            "number_of_shards": self.number_of_shards,
+            "number_of_replicas": self.number_of_replicas,
         }
 
     async def _create_index_request(self, index_name: str, mappings: dict, settings: dict) -> None:
@@ -96,3 +97,6 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
         _, errors = await helpers.async_bulk(client=self.client, actions=actions, raise_on_error=False)
         if errors:
             raise RuntimeError(errors)
+
+    async def _refresh_index_request(self, index_name: str):
+        await self.client.indices.refresh(index=index_name)

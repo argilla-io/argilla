@@ -60,32 +60,61 @@ def test_add_records_validation(record: "FeedbackRecord") -> None:
 
 
 @pytest.mark.parametrize(
-    "record, exception_cls, exception_msg",
+    "record, allow_extra_metadata, exception_cls, exception_msg",
     [
-        (FeedbackRecord(fields={}, metadata={}), ValueError, "required-field\n  field required"),
+        (FeedbackRecord(fields={}, metadata={}), True, ValueError, "required-field\n  field required"),
         (
             FeedbackRecord(fields={"optional-field": "text"}, metadata={}),
+            True,
             ValueError,
             "required-field\n  field required",
         ),
         (
             FeedbackRecord(fields={"required-field": "text"}, metadata={"terms-metadata": "d"}),
+            True,
             ValueError,
             "terms-metadata\n  Provided 'terms-metadata=d' is not valid, only values in \['a', 'b', 'c'\] are allowed.",
         ),
         (
             FeedbackRecord(fields={"required-field": "text"}, metadata={"int-metadata": 11}),
+            True,
             ValueError,
             "int-metadata\n  Provided 'int-metadata=11' is not valid, only values between 0 and 10 are allowed.",
         ),
         (
             FeedbackRecord(fields={"required-field": "text"}, metadata={"float-metadata": 11.0}),
+            True,
             ValueError,
             "float-metadata\n  Provided 'float-metadata=11.0' is not valid, only values between 0.0 and 10.0 are allowed.",
         ),
+        (
+            FeedbackRecord(fields={"required-field": "text"}, metadata={"extra-metadata": "yes"}),
+            False,
+            ValueError,
+            "extra fields not permitted",
+        ),
     ],
 )
-def test_add_records_validation_error(record: FeedbackRecord, exception_cls: Exception, exception_msg: str) -> None:
+def test_add_records_validation_error(
+    record: FeedbackRecord, allow_extra_metadata: bool, exception_cls: Exception, exception_msg: str
+) -> None:
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
+        questions=[TextQuestion(name="question", required=True)],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="int-metadata", min=0, max=10),
+            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+        allow_extra_metadata=allow_extra_metadata,
+    )
+
+    with pytest.raises(exception_cls, match=exception_msg):
+        dataset.add_records(record)
+    assert len(dataset.records) == 0
+
+
+def test_sort_by_for_local_is_not_implemented():
     dataset = FeedbackDataset(
         fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
         questions=[TextQuestion(name="question", required=True)],
@@ -95,10 +124,30 @@ def test_add_records_validation_error(record: FeedbackRecord, exception_cls: Exc
             FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
         ],
     )
+    with pytest.warns(
+        UserWarning,
+        match="`sort_by` method only works for `FeedbackDataset` pushed to Argilla."
+        " Use `sorted` with dataset.records instead.",
+    ):
+        assert dataset.sort_by("field") == dataset
 
-    with pytest.raises(exception_cls, match=exception_msg):
-        dataset.add_records(record)
-    assert len(dataset.records) == 0
+
+def test_filter_by_for_local_is_not_implemented():
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
+        questions=[TextQuestion(name="question", required=True)],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="int-metadata", min=0, max=10),
+            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+    )
+    with pytest.warns(
+        UserWarning,
+        match="`filter_by` method only works for `FeedbackDataset` pushed to Argilla."
+        " Use `filter` with dataset.records instead.",
+    ):
+        assert dataset.filter_by() == dataset
 
 
 @pytest.mark.parametrize(
