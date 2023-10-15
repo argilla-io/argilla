@@ -202,11 +202,20 @@ class HuggingFaceDatasetMixin:
             local_questions = []
             for question in self.questions:
                 local_questions.append(question.to_local() if isinstance(question, RemoteSchema) else question)
+            local_metadata_properties = []
+            if self.metadata_properties:
+                for metadata_property in self.metadata_properties:
+                    local_metadata_properties.append(
+                        metadata_property.to_local()
+                        if isinstance(metadata_property, RemoteSchema)
+                        else metadata_property
+                    )
             f.write(
                 DatasetConfig(
                     fields=local_fields,
                     questions=local_questions,
                     guidelines=self.guidelines,
+                    metadata_properties=local_metadata_properties or None,
                 ).to_yaml()
             )
             f.flush()
@@ -428,6 +437,7 @@ class HuggingFaceDatasetMixin:
             fields=config.fields,
             questions=config.questions,
             guidelines=config.guidelines,
+            metadata_properties=config.metadata_properties,
         )
         instance.add_records(records)
         return instance
