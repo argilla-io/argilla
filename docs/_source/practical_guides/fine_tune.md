@@ -111,10 +111,10 @@ trainer = ArgillaTrainer(
 trainer.train(output_dir="my_model")
 ```
 
-Even though its generated internally, if by any reason you wanted to get the content, it can be done via the `generate_model_card` method:
+Even though its generated internally, you can get the card by calling the `generate_model_card` method:
 
 ```python
-content = trainer.generate_model_card("my_model")
+argilla_model_card = trainer.generate_model_card("my_model")
 ```
 
 ### Tasks

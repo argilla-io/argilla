@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from transformers import PreTrainedModel, PreTrainedTokenizer
 
     from argilla.client.feedback.dataset import FeedbackDataset
-    from argilla.client.feedback.integrations.huggingface.model_card import FrameworkCardData
+    from argilla.client.feedback.integrations.huggingface.model_card import ArgillaModelCard, FrameworkCardData
 
 
 class ArgillaTrainer(ArgillaTrainerV1):
@@ -269,14 +269,14 @@ class ArgillaTrainer(ArgillaTrainerV1):
         if generate_card:
             self.generate_model_card(output_dir)
 
-    def generate_model_card(self, output_dir: str) -> str:
-        """Generate and return a model card string based on the model card data.
+    def generate_model_card(self, output_dir: str) -> "ArgillaModelCard":
+        """Generate and return a model card based on the model card data.
 
         Args:
             output_dir: Folder where the model card will be written.
 
         Returns:
-            model_card: The model card string.
+            model_card: The model card.
         """
         from argilla.client.feedback.integrations.huggingface.model_card import ArgillaModelCard
 
@@ -291,7 +291,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
         model_card_path = Path(output_dir) / "README.md"
         model_card.save(model_card_path)
         self._logger.info(f"Model card generated at: {model_card_path}")
-        return model_card.content
+        return model_card
 
 
 class ArgillaTrainerSkeleton(ABC):

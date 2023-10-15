@@ -138,10 +138,10 @@ def test_model_card_with_defaults(
         trainer.update_config(num_iterations=1)
 
     with TemporaryDirectory() as tmpdirname:
-        content = trainer.generate_model_card(tmpdirname)
+        model_card = trainer.generate_model_card(tmpdirname)
         assert (Path(tmpdirname) / MODEL_CARD_NAME).exists()
         pattern = model_card_pattern(framework, training_task)
-        assert content.find(pattern) > -1
+        assert model_card.content.find(pattern) > -1
 
 
 @pytest.mark.usefixtures(
@@ -203,10 +203,10 @@ def test_model_card_sentence_transformers(
     trainer.update_config(epochs=1, batch_size=3)
 
     with TemporaryDirectory() as tmpdirname:
-        content = trainer.generate_model_card(tmpdirname)
+        model_card = trainer.generate_model_card(tmpdirname)
         assert (Path(tmpdirname) / MODEL_CARD_NAME).exists()
         pattern = model_card_pattern(Framework("sentence-transformers"), TrainingTask.for_sentence_similarity)
-        assert content.find(pattern) > -1
+        assert model_card.content.find(pattern) > -1
 
 
 @pytest.mark.usefixtures(
@@ -263,10 +263,10 @@ def test_model_card_openai(model_card_pattern: str, mocked_openai, mocked_is_on_
     )
 
     with TemporaryDirectory() as tmpdirname:
-        content = trainer.generate_model_card(tmpdirname)
+        model_card = trainer.generate_model_card(tmpdirname)
         assert (Path(tmpdirname) / MODEL_CARD_NAME).exists()
         pattern = model_card_pattern(Framework("openai"), TrainingTask.for_chat_completion)
-        assert content.find(pattern) > -1
+        assert model_card.content.find(pattern) > -1
 
 
 def formatting_func_sft(sample: Dict[str, Any]) -> Iterator[str]:
@@ -396,7 +396,7 @@ def test_model_card_trl(
         trainer.update_config(max_steps=1)
 
     with TemporaryDirectory() as tmpdirname:
-        content = trainer.generate_model_card(tmpdirname)
+        model_card = trainer.generate_model_card(tmpdirname)
         assert (Path(tmpdirname) / MODEL_CARD_NAME).exists()
         pattern = model_card_pattern(Framework("trl"), training_task)
-        assert content.find(pattern) > -1
+        assert model_card.content.find(pattern) > -1
