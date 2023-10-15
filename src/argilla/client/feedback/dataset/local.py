@@ -258,19 +258,21 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
                 "The current `FeedbackDataset` does not contain any `metadata_properties` defined, so"
                 " none can be deleted."
             )
-        metadata_properties_names = [metadata_property.name for metadata_property in self.metadata_properties]
-
-        if not all(metadata_property in metadata_properties_names for metadata_property in metadata_properties):
+        metadata_properties_mapping = {
+            metadata_property.name: metadata_property for metadata_property in self.metadata_properties
+        }
+        if not all(
+            metadata_property in metadata_properties_mapping.keys() for metadata_property in metadata_properties
+        ):
             raise ValueError(
                 f"Invalid `metadata_properties={metadata_properties}` provided. It cannot be"
                 " deleted because it does not exist, make sure you delete just existing `metadata_properties`"
                 " meaning that the name matches any of the existing `metadata_properties` if any. Current"
-                f" `metadata_properties` are: '{', '.join(metadata_properties_names)}'."
+                f" `metadata_properties` are: '{', '.join(metadata_properties_mapping.keys())}'."
             )
 
         deleted_metadata_properties = []
         for metadata_property in metadata_properties:
-            if metadata_property in metadata_properties_names:
-                metadata_properties.remove(metadata_property)
-                deleted_metadata_properties.append(metadata_property)
+            deleted_metadata_properties.append(metadata_properties_mapping.pop(metadata_property))
+        self._metadata_properties = list(metadata_properties_mapping.values())
         return deleted_metadata_properties if len(deleted_metadata_properties) > 1 else deleted_metadata_properties[0]
