@@ -39,6 +39,7 @@ if TYPE_CHECKING:
 
 
 DATASET_NAME = "argilla/emotion"
+MODEL_CARD_NAME = "README.md"
 
 
 @pytest.mark.parametrize(
@@ -138,7 +139,7 @@ def test_model_card_with_defaults(
 
     with TemporaryDirectory() as tmpdirname:
         content = trainer.generate_model_card(tmpdirname)
-        assert (Path(tmpdirname) / "MODEL_CARD.md").exists()
+        assert (Path(tmpdirname) / MODEL_CARD_NAME).exists()
         pattern = model_card_pattern(framework, training_task)
         assert content.find(pattern) > -1
 
@@ -203,7 +204,7 @@ def test_model_card_sentence_transformers(
 
     with TemporaryDirectory() as tmpdirname:
         content = trainer.generate_model_card(tmpdirname)
-        assert (Path(tmpdirname) / "MODEL_CARD.md").exists()
+        assert (Path(tmpdirname) / MODEL_CARD_NAME).exists()
         pattern = model_card_pattern(Framework("sentence-transformers"), TrainingTask.for_sentence_similarity)
         assert content.find(pattern) > -1
 
@@ -212,7 +213,6 @@ def test_model_card_sentence_transformers(
     "model_card_pattern",
 )
 def test_model_card_openai(model_card_pattern: str, mocked_openai, mocked_is_on_huggingface):
-    # return  # NOT IMPLEMENTED YET
     dataset = FeedbackDataset.from_huggingface("argilla/customer_assistant")
     # adapation from LlamaIndex's TEXT_QA_PROMPT_TMPL_MSGS[1].content
     user_message_prompt = """Context information is below.
@@ -264,7 +264,7 @@ def test_model_card_openai(model_card_pattern: str, mocked_openai, mocked_is_on_
 
     with TemporaryDirectory() as tmpdirname:
         content = trainer.generate_model_card(tmpdirname)
-        assert (Path(tmpdirname) / "MODEL_CARD.md").exists()
+        assert (Path(tmpdirname) / MODEL_CARD_NAME).exists()
         pattern = model_card_pattern(Framework("openai"), TrainingTask.for_chat_completion)
         assert content.find(pattern) > -1
 
@@ -397,6 +397,6 @@ def test_model_card_trl(
 
     with TemporaryDirectory() as tmpdirname:
         content = trainer.generate_model_card(tmpdirname)
-        assert (Path(tmpdirname) / "MODEL_CARD.md").exists()
+        assert (Path(tmpdirname) / MODEL_CARD_NAME).exists()
         pattern = model_card_pattern(Framework("trl"), training_task)
         assert content.find(pattern) > -1

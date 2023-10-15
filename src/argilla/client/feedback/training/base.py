@@ -288,7 +288,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             template_path=ArgillaModelCard.default_template_path,
         )
 
-        model_card_path = Path(output_dir) / "MODEL_CARD.md"
+        model_card_path = Path(output_dir) / "README.md"
         model_card.save(model_card_path)
         self._logger.info(f"Model card generated at: {model_card_path}")
         return model_card.content
