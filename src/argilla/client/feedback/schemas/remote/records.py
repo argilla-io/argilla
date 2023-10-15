@@ -231,7 +231,17 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
         self.__dict__["suggestions"] = tuple(pushed_suggestions)
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def update(self, suggestions: Optional[AllowedSuggestionSchema] = None) -> None:
+    def update(
+        self,
+        suggestions: Optional[
+            Union[
+                AllowedSuggestionSchema,
+                Dict[str, Any],
+                List[AllowedSuggestionSchema],
+                List[Dict[str, Any]],
+            ]
+        ] = None,
+    ) -> None:
         """Update a `RemoteFeedbackRecord`. Currently just `suggestions` are supported.
 
         Note that this method will update the record in Argilla directly.
