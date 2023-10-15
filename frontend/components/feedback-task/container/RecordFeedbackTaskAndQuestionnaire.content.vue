@@ -67,8 +67,8 @@ export default {
       return `--${this.record.status}`;
     },
   },
-  fetch() {
-    this.onLoadRecords("replace");
+  async fetch() {
+    await this.onLoadRecords("replace");
   },
   methods: {
     async onLoadRecords(mode) {
