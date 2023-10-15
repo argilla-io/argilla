@@ -52,6 +52,7 @@ if TYPE_CHECKING:
     from argilla.server.schemas.v1.datasets import DatasetUpdate
     from argilla.server.schemas.v1.fields import FieldUpdate
     from argilla.server.schemas.v1.questions import QuestionUpdate
+    from argilla.server.schemas.v1.records import RecordUpdate
     from argilla.server.schemas.v1.suggestions import SuggestionCreate
 
 LIST_RECORDS_LIMIT = 20
@@ -255,6 +256,7 @@ async def create_metadata_property(
             autocommit=False,
         )
         if dataset.is_ready:
+            await db.flush([metadata_property])
             await search_engine.configure_metadata_property(dataset, metadata_property)
 
     await db.commit()
@@ -279,7 +281,10 @@ async def get_record_by_id(
 ) -> Union[Record, None]:
     query = select(Record).filter_by(id=record_id)
     if with_dataset:
-        query = query.options(selectinload(Record.dataset).selectinload(Dataset.questions))
+        query = query.options(
+            selectinload(Record.dataset).selectinload(Dataset.questions),
+            selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
+        )
     if with_suggestions:
         query = query.options(selectinload(Record.suggestions))
     result = await db.execute(query)
@@ -404,25 +409,24 @@ async def validate_metadata(
     db: "AsyncSession",
     dataset: Dataset,
     metadata: Dict[str, Any],
-    metadata_properties_settings: Optional[Dict[str, Union["MetadataPropertySettings", str]]] = None,
+    metadata_properties: Optional[Dict[str, Union[MetadataProperty, str]]] = None,
 ) -> Dict[str, Union["MetadataPropertySettings", Literal["extra"]]]:
-    if metadata_properties_settings is None:
-        metadata_properties_settings = {}
+    if metadata_properties is None:
+        metadata_properties = {}
 
     for name, value in metadata.items():
-        metadata_property_settings = metadata_properties_settings.get(name)
+        metadata_property = metadata_properties.get(name)
 
-        if metadata_property_settings is None:
+        if metadata_property is None:
             metadata_property = await get_metadata_property_by_name_and_dataset_id(db, name=name, dataset_id=dataset.id)
 
             # If metadata property does not exists but extra metadata is allowed, then we set a flag value to
             # avoid querying the database again
             if metadata_property is None and dataset.allow_extra_metadata:
-                metadata_property_settings = _EXTRA_METADATA_FLAG
-                metadata_properties_settings[name] = metadata_property_settings
+                metadata_property = _EXTRA_METADATA_FLAG
+                metadata_properties[name] = metadata_property
             elif metadata_property is not None:
-                metadata_property_settings = metadata_property.parsed_settings
-                metadata_properties_settings[name] = metadata_property_settings
+                metadata_properties[name] = metadata_property
             else:
                 raise ValueError(
                     f"'{name}' metadata property does not exists for dataset '{dataset.id}' and extra metadata is"
@@ -430,15 +434,15 @@ async def validate_metadata(
                 )
 
         # If metadata property is not found and extra metadata is allowed, then we skip the value validation
-        if metadata_property_settings == _EXTRA_METADATA_FLAG:
+        if metadata_property == _EXTRA_METADATA_FLAG:
             continue
 
         try:
-            metadata_property_settings.check_metadata(value)
+            metadata_property.parsed_settings.check_metadata(value)
         except ValueError as e:
             raise ValueError(f"'{name}' metadata property validation failed because {e}") from e
 
-    return metadata_properties_settings
+    return metadata_properties
 
 
 async def create_records(
@@ -448,7 +452,7 @@ async def create_records(
         raise ValueError("Records cannot be created for a non published dataset")
 
     # Cache dictionaries to avoid querying the database multiple times
-    metadata_properties_settings: Dict[str, Union["MetadataPropertySettings", Literal["extra"]]] = {}
+    metadata_properties: Dict[str, Union[MetadataProperty, Literal["extra"]]] = {}
 
     records = []
     for record_i, record_create in enumerate(records_create.items):
@@ -498,11 +502,11 @@ async def create_records(
 
         if record_create.metadata:
             try:
-                metadata_properties_settings = await validate_metadata(
+                metadata_properties = await validate_metadata(
                     db,
                     dataset=dataset,
                     metadata=record_create.metadata,
-                    metadata_properties_settings=metadata_properties_settings,
+                    metadata_properties=metadata_properties,
                 )
             except ValueError as e:
                 raise ValueError(f"Provided metadata for record at position {record_i} is not valid: {e}") from e
@@ -517,6 +521,24 @@ async def create_records(
         await search_engine.add_records(dataset, records)
 
     await db.commit()
+
+
+async def update_record(
+    db: "AsyncSession", search_engine: "SearchEngine", record: Record, record_update: "RecordUpdate"
+) -> Record:
+    params = record_update.dict(exclude_unset=True)
+    async with db.begin_nested():
+        record = await record.update(db, **params, replace_dict=True, autocommit=False)
+
+        # If "metadata" has been included in the update, then we need to also update it in the search engine
+        if "metadata_" in params:
+            metadata = params["metadata_"]
+            if metadata is not None:
+                await validate_metadata(db, dataset=record.dataset, metadata=metadata)
+            await search_engine.update_record_metadata(record)
+
+    await db.commit()
+    return record
 
 
 async def get_response_by_id(db: "AsyncSession", response_id: UUID) -> Union[Response, None]:

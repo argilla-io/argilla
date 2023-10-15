@@ -52,6 +52,7 @@ jobs:
             ADMIN_API_KEY=${{ steps.credentials.outputs.admin }}
             ANNOTATOR_PASSWORD=${{ steps.credentials.outputs.annotator }}
             ANNOTATOR_API_KEY=${{ steps.credentials.outputs.annotator }}
+            ARGILLA_ENABLE_TELEMETRY=0
 
       - name: Post credentials in Slack
         uses: ./.github/actions/slack-post-credentials

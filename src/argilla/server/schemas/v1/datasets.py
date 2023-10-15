@@ -413,9 +413,11 @@ class RecordCreate(BaseModel):
     suggestions: Optional[List[SuggestionCreate]]
 
     @validator("responses")
-    def check_user_id_is_unique(cls, values):
-        user_ids = []
+    def check_user_id_is_unique(cls, values: Optional[List[UserResponseCreate]]) -> Optional[List[UserResponseCreate]]:
+        if values is None:
+            return values
 
+        user_ids = []
         for value in values:
             if value.user_id in user_ids:
                 raise ValueError(f"Responses contains several responses for the same user_id: {str(value.user_id)!r}")

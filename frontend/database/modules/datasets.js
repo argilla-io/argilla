@@ -233,13 +233,7 @@ async function updateViewSettings({ id, data }) {
 }
 
 async function _callSearchApi({ dataset, query, sort, size, from = 0 }) {
-  const { advancedQueryDsl } = $nuxt.$route.query;
-  if (advancedQueryDsl === null || advancedQueryDsl === "true") {
-    query.advanced_query_dsl = true;
-  }
-
   const vector = VectorModel.query().where("is_active", true).first();
-
   const numberOfRecords = vector ? 50 : size;
 
   const { record_id, vector_name, vector_values } = vector || {};

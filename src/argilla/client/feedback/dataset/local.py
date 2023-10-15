@@ -11,12 +11,15 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import warnings
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.mixins import ArgillaMixin, UnificationMixin
+from argilla.client.feedback.schemas.enums import RecordSortField, ResponseStatusFilter, SortOrder
+from argilla.client.feedback.schemas.metadata import MetadataFilters
+from argilla.client.feedback.schemas.types import AllowedQuestionTypes
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.records import FeedbackRecord
@@ -35,8 +38,7 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
         questions: List["AllowedQuestionTypes"],
         metadata_properties: Optional[List["AllowedMetadataPropertyTypes"]] = None,
         guidelines: Optional[str] = None,
-        # TODO: uncomment when supported in the API
-        # extra_metadata_allowed: bool = True,
+        allow_extra_metadata: bool = True,
     ) -> None:
         """Initializes a `FeedbackDataset` instance locally.
 
@@ -46,6 +48,8 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
             metadata_properties: contains the metadata properties that will be indexed
                 and could be used to filter the dataset. Defaults to `None`.
             guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
+            allow_extra_metadata: whether to allow extra metadata that has not been defined
+                as a metadata property in the records. Defaults to `True`.
 
         Raises:
             TypeError: if `fields` is not a list of `FieldSchema`.
@@ -113,8 +117,7 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
             questions=questions,
             metadata_properties=metadata_properties,
             guidelines=guidelines,
-            # TODO: uncomment when supported in the API
-            # extra_metadata_allowed=extra_metadata_allowed,
+            allow_extra_metadata=allow_extra_metadata,
         )
 
         self._records = []
@@ -186,3 +189,44 @@ class FeedbackDataset(FeedbackDatasetBase, ArgillaMixin, UnificationMixin):
             self._records += records
         else:
             self._records = records
+
+    def sort_by(
+        self, field: Union[str, RecordSortField], order: Union[str, SortOrder] = SortOrder.asc
+    ) -> "FeedbackDataset":
+        warnings.warn(
+            "`sort_by` method only works for `FeedbackDataset` pushed to Argilla. "
+            "Use `sorted` with dataset.records instead."
+        )
+        return self
+
+    def filter_by(
+        self,
+        *,
+        response_status: Optional[Union[ResponseStatusFilter, List[ResponseStatusFilter]]] = None,
+        metadata_filters: Optional[Union[MetadataFilters, List[MetadataFilters]]] = None,
+    ) -> "FeedbackDataset":
+        warnings.warn(
+            "`filter_by` method only works for `FeedbackDataset` pushed to Argilla. "
+            "Use `filter` with dataset.records instead."
+        )
+        return self
+
+    def add_metadata_property(
+        self, metadata_property: "AllowedMetadataPropertyTypes"
+    ) -> "AllowedMetadataPropertyTypes":
+        """Adds the given metadata property to the dataset.
+
+        Args:
+            metadata_property: the metadata property to add.
+
+        Returns:
+            The metadata property that was added.
+
+        Raises:
+            TypeError: if `metadata_property` is not a `MetadataPropertySchema`.
+            ValueError: if `metadata_property` is already in the dataset.
+        """
+        self._unique_metadata_property(metadata_property)
+        self._metadata_properties.append(metadata_property)
+        self._metadata_properties_mapping.update({metadata_property.name: metadata_property})
+        return metadata_property

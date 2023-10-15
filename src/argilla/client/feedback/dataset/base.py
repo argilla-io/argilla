@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import logging
-from abc import ABC, abstractproperty
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
 from pydantic import ValidationError
@@ -22,8 +22,11 @@ from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetM
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     FieldSchema,
+    SortBy,
 )
-from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes, AllowedQuestionTypes
+from argilla.client.feedback.schemas.enums import ResponseStatusFilter
+from argilla.client.feedback.schemas.metadata import MetadataFilters
+from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes, AllowedQuestionTypes
 from argilla.client.feedback.training.schemas import (
     TrainingTaskForChatCompletion,
     TrainingTaskForDPO,
@@ -37,13 +40,13 @@ from argilla.client.feedback.training.schemas import (
 )
 from argilla.client.feedback.utils import generate_pydantic_schema_for_fields, generate_pydantic_schema_for_metadata
 from argilla.client.models import Framework
+from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
 from argilla.utils.dependency import require_dependencies, requires_dependencies
 
 if TYPE_CHECKING:
     from datasets import Dataset
 
     from argilla.client.feedback.schemas.types import (
-        AllowedFieldTypes,
         AllowedRemoteFieldTypes,
         AllowedRemoteMetadataPropertyTypes,
         AllowedRemoteQuestionTypes,
@@ -59,14 +62,13 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
     def __init__(
         self,
         *,
-        fields: Union[List["AllowedFieldTypes"], List["AllowedRemoteFieldTypes"]],
-        questions: Union[List["AllowedQuestionTypes"], List["AllowedRemoteQuestionTypes"]],
+        fields: Union[List[AllowedFieldTypes], List["AllowedRemoteFieldTypes"]],
+        questions: Union[List[AllowedQuestionTypes], List["AllowedRemoteQuestionTypes"]],
         metadata_properties: Optional[
             Union[List["AllowedMetadataPropertyTypes"], List["AllowedRemoteMetadataPropertyTypes"]]
         ] = None,
         guidelines: Optional[str] = None,
-        # TODO: uncomment once ready in the API
-        # extra_metadata_allowed: bool = True,
+        allow_extra_metadata: bool = True,
     ) -> None:
         """Initializes a `FeedbackDatasetBase` instance locally.
 
@@ -76,6 +78,8 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             metadata_properties: contains the metadata properties that will be indexed
                 and could be used to filter the dataset. Defaults to `None`.
             guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
+            allow_extra_metadata: whether to allow extra metadata that has not been defined
+                as a metadata property in the records. Defaults to `True`.
 
         Raises:
             TypeError: if `fields` is not a list of `FieldSchema`.
@@ -92,17 +96,21 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         any_required = False
         unique_names = set()
         for field in fields:
-            if not isinstance(field, FieldSchema):
-                raise TypeError(f"Expected `fields` to be a list of `FieldSchema`, got {type(field)} instead.")
+            if not isinstance(field, AllowedFieldTypes):
+                raise TypeError(
+                    f"Expected `fields` to be a list of `{AllowedFieldTypes.__name__}`, got {type(field)} instead."
+                )
             if field.name in unique_names:
                 raise ValueError(f"Expected `fields` to have unique names, got {field.name} twice instead.")
             unique_names.add(field.name)
             if not any_required and field.required:
                 any_required = True
+
         if not any_required:
-            raise ValueError("At least one `FieldSchema` in `fields` must be required (`required=True`).")
+            raise ValueError("At least one field in `fields` must be required (`required=True`).")
+
         self._fields = fields
-        self._fields_schema = None
+        self._fields_schema = generate_pydantic_schema_for_fields(self.fields)
 
         if not isinstance(questions, list):
             raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
@@ -121,8 +129,10 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             unique_names.add(question.name)
             if not any_required and question.required:
                 any_required = True
+
         if not any_required:
             raise ValueError("At least one question in `questions` must be required (`required=True`).")
+
         self._questions = questions
 
         if metadata_properties is not None:
@@ -150,12 +160,12 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                 raise ValueError(
                     "Expected `guidelines` to be either None (default) or a non-empty string, minimum length is 1."
                 )
+
         self._guidelines = guidelines
-        # TODO: uncomment once ready in the API
-        # self._extra_metadata_allowed = extra_metadata_allowed
+        self._allow_extra_metadata = allow_extra_metadata
 
     @property
-    @abstractproperty
+    @abstractmethod
     def records(self) -> Any:
         """Returns the records of the dataset."""
         pass
@@ -166,11 +176,16 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         return self._guidelines
 
     @property
-    def fields(self) -> Union[List["AllowedFieldTypes"], List["AllowedRemoteFieldTypes"]]:
+    def allow_extra_metadata(self) -> bool:
+        """Returns whether if adding extra metadata to the records of the dataset is allowed"""
+        return self._allow_extra_metadata
+
+    @property
+    def fields(self) -> Union[List[AllowedFieldTypes], List["AllowedRemoteFieldTypes"]]:
         """Returns the fields that define the schema of the records in the dataset."""
         return self._fields
 
-    def field_by_name(self, name: str) -> Union["AllowedFieldTypes", "AllowedRemoteFieldTypes"]:
+    def field_by_name(self, name: str) -> Union[AllowedFieldTypes, "AllowedRemoteFieldTypes"]:
         """Returns the field by name if it exists. Othewise a `ValueError` is raised.
 
         Args:
@@ -240,6 +255,42 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
                 f" {', '.join(self._metadata_properties_mapping.keys())}"
             )
 
+    @abstractmethod
+    def sort_by(self, sort: List[SortBy]) -> "FeedbackDatasetBase":
+        """Sorts the records in the dataset by the given field."""
+        pass
+
+    @abstractmethod
+    def filter_by(
+        self,
+        *,
+        response_status: Optional[Union[ResponseStatusFilter, List[ResponseStatusFilter]]] = None,
+        metadata_filters: Optional[Union[MetadataFilters, List[MetadataFilters]]] = None,
+    ) -> "FeedbackDatasetBase":
+        """Filters the records in the dataset by the given filters."""
+        pass
+
+    def _unique_metadata_property(self, metadata_property: "AllowedMetadataPropertyTypes") -> None:
+        """Checks whether the provided `metadata_property` already exists in the dataset.
+
+        Args:
+            metadata_property: the metadata property to validate.
+
+        Raises:
+            ValueError: if the `metadata_property` already exists in the dataset.
+        """
+        if self.metadata_properties is not None:
+            # TODO(alvarobartt): remove this when https://github.com/argilla-io/argilla/pull/3829 is merged
+            if not hasattr(self, "_metadata_properties_mapping") or self._metadata_properties_mapping is None:
+                self._metadata_properties_mapping = {
+                    metadata_property.name: metadata_property for metadata_property in self._metadata_properties
+                }
+            if metadata_property.name in self._metadata_properties_mapping.keys():
+                raise ValueError(
+                    f"Invalid `metadata_property={metadata_property.name}` provided as it already exists. Current"
+                    f" `metadata_properties` are: {list(self._metadata_properties_mapping.keys())}"
+                )
+
     def _parse_records(
         self, records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]]
     ) -> List[FeedbackRecord]:
@@ -290,7 +341,9 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             self._metadata_schema = None
 
         if self._metadata_schema is None and self.metadata_properties is not None:
-            self._metadata_schema = generate_pydantic_schema_for_metadata(self.metadata_properties)
+            self._metadata_schema = generate_pydantic_schema_for_metadata(
+                self.metadata_properties, allow_extra_metadata=self._allow_extra_metadata
+            )
 
         for record in records:
             try:
