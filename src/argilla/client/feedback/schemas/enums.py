@@ -25,3 +25,16 @@ class QuestionTypes(str, Enum):
     label_selection = "label_selection"
     multi_label_selection = "multi_label_selection"
     ranking = "ranking"
+
+
+class ResponseStatus(str, Enum):
+    draft = "draft"
+    submitted = "submitted"
+    discarded = "discarded"
+
+
+class ResponseStatusFilter(str, Enum):
+    draft = "draft"
+    submitted = "submitted"
+    discarded = "discarded"
+    missing = "missing"

@@ -213,8 +213,6 @@ class RecordFactory(BaseFactory):
     external_id = factory.Sequence(lambda n: f"external-id-{n}")
     dataset = factory.SubFactory(DatasetFactory)
 
-    inserted_at = factory.Sequence(lambda n: datetime.datetime.utcnow() + datetime.timedelta(seconds=n))
-
 
 class ResponseFactory(BaseFactory):
     class Meta:

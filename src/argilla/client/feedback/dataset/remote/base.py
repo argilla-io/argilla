@@ -134,9 +134,7 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
             TypeError: if `guidelines` is not None and not a string.
             ValueError: if `guidelines` is an empty string.
         """
-        self._fields = fields
-        self._questions = questions
-        self._guidelines = guidelines
+        super().__init__(fields=fields, questions=questions, guidelines=guidelines)
 
         self._client = client  # Required to be able to use `allowed_for_roles` decorator
         self._id = id
