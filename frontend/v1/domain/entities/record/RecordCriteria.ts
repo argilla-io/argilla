@@ -10,7 +10,6 @@ interface PreviousRecordCriteria {
 
 export class RecordCriteria {
   public committed: PreviousRecordCriteria;
-
   public page: number;
   public status: RecordStatus;
 
@@ -18,12 +17,13 @@ export class RecordCriteria {
     public readonly datasetId: string,
     page: number,
     status: RecordStatus,
-    public searchText: string = "",
+    public searchText: string,
     public metadata: string[] = [],
     public sortBy: string[] = []
   ) {
     this.page = page ? Number(page) : 1;
     this.status = status || "pending";
+    this.searchText = searchText ?? "";
 
     this.committed = {
       page: this.page,
