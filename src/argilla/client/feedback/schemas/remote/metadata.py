@@ -12,81 +12,115 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
+from argilla.client.feedback.mixins import ArgillaMetadataPropertiesMixin
+from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
     IntegerMetadataProperty,
     TermsMetadataProperty,
 )
 from argilla.client.feedback.schemas.remote.shared import RemoteSchema
+from argilla.client.sdk.users.models import UserRole
+from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
+    import httpx
+
+    from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackMetadataPropertyModel
 
 
-class RemoteTermsMetadataProperty(TermsMetadataProperty, RemoteSchema):
+class _RemoteMetadataProperty(RemoteSchema):
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def delete(self) -> "AllowedMetadataPropertyTypes":
+        """Deletes the `RemoteMetadataProperty` from Argilla.
+
+        Returns:
+            The deleted `RemoteMetadataProperty` as a `MetadataProperty` object.
+        """
+        return ArgillaMetadataPropertiesMixin.delete(client=self.client, metadata_property_id=self.id)
+
+
+class RemoteTermsMetadataProperty(TermsMetadataProperty, _RemoteMetadataProperty):
     def to_local(self) -> TermsMetadataProperty:
         return TermsMetadataProperty(
             name=self.name,
             description=self.description,
-            # TODO: uncomment once API is ready
-            # visible_for_annotators=self.visible_for_annotators,
+            visible_for_annotators=self.visible_for_annotators,
             values=self.values,
         )
 
     @classmethod
-    def from_api(cls, payload: "FeedbackMetadataPropertyModel") -> "RemoteTermsMetadataProperty":
+    def from_api(
+        cls, payload: "FeedbackMetadataPropertyModel", client: Optional["httpx.Client"] = None
+    ) -> "RemoteTermsMetadataProperty":
         return RemoteTermsMetadataProperty(
+            client=client,
+            id=payload.id,
             name=payload.name,
             description=payload.description,
-            # TODO: uncomment once API is ready
-            # visible_for_annotators=payload.visible_for_annotators,
+            visible_for_annotators=payload.visible_for_annotators,
             values=payload.settings.get("values", None),
         )
 
 
-class RemoteIntegerMetadataProperty(IntegerMetadataProperty, RemoteSchema):
+class RemoteIntegerMetadataProperty(IntegerMetadataProperty, _RemoteMetadataProperty):
     def to_local(self) -> IntegerMetadataProperty:
         return IntegerMetadataProperty(
             name=self.name,
             description=self.description,
-            # TODO: uncomment once API is ready
-            # visible_for_annotators=self.visible_for_annotators,
+            visible_for_annotators=self.visible_for_annotators,
             min=self.min,
             max=self.max,
         )
 
     @classmethod
-    def from_api(cls, payload: "FeedbackMetadataPropertyModel") -> "RemoteIntegerMetadataProperty":
+    def from_api(
+        cls, payload: "FeedbackMetadataPropertyModel", client: Optional["httpx.Client"] = None
+    ) -> "RemoteIntegerMetadataProperty":
         return RemoteIntegerMetadataProperty(
+            client=client,
+            id=payload.id,
             name=payload.name,
             description=payload.description,
-            # TODO: uncomment once API is ready
-            # visible_for_annotators=payload.visible_for_annotators,
+            visible_for_annotators=payload.visible_for_annotators,
             min=payload.settings.get("min", None),
             max=payload.settings.get("max", None),
         )
 
 
-class RemoteFloatMetadataProperty(FloatMetadataProperty, RemoteSchema):
+class RemoteFloatMetadataProperty(FloatMetadataProperty, _RemoteMetadataProperty):
     def to_local(self) -> FloatMetadataProperty:
         return FloatMetadataProperty(
             name=self.name,
             description=self.description,
-            # TODO: uncomment once API is ready
-            # visible_for_annotators=self.visible_for_annotators,
+            visible_for_annotators=self.visible_for_annotators,
             min=self.min,
             max=self.max,
         )
 
     @classmethod
-    def from_api(cls, payload: "FeedbackMetadataPropertyModel") -> "RemoteFloatMetadataProperty":
+    def from_api(
+        cls, payload: "FeedbackMetadataPropertyModel", client: Optional["httpx.Client"] = None
+    ) -> "RemoteFloatMetadataProperty":
         return RemoteFloatMetadataProperty(
+            client=client,
+            id=payload.id,
             name=payload.name,
             description=payload.description,
-            # TODO: uncomment once API is ready
-            # visible_for_annotators=payload.visible_for_annotators,
+            visible_for_annotators=payload.visible_for_annotators,
             min=payload.settings.get("min", None),
             max=payload.settings.get("max", None),
         )
+
+
+RemoteMetadataPropertiesMapping: Dict[
+    MetadataPropertyTypes,
+    Union[RemoteTermsMetadataProperty, RemoteIntegerMetadataProperty, RemoteFloatMetadataProperty],
+] = {
+    MetadataPropertyTypes.terms: RemoteTermsMetadataProperty,
+    MetadataPropertyTypes.integer: RemoteIntegerMetadataProperty,
+    MetadataPropertyTypes.float: RemoteFloatMetadataProperty,
+}

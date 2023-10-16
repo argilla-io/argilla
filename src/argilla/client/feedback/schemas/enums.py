@@ -31,3 +31,26 @@ class MetadataPropertyTypes(str, Enum):
     terms = "terms"
     integer = "integer"
     float = "float"
+
+
+class RecordSortField(str, Enum):
+    inserted_at = "inserted_at"
+    updated_at = "updated_at"
+
+
+class SortOrder(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
+class ResponseStatus(str, Enum):
+    draft = "draft"
+    submitted = "submitted"
+    discarded = "discarded"
+
+
+class ResponseStatusFilter(str, Enum):
+    draft = "draft"
+    submitted = "submitted"
+    discarded = "discarded"
+    missing = "missing"

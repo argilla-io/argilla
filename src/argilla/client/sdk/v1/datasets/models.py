@@ -25,6 +25,7 @@ class FeedbackDatasetModel(BaseModel):
     id: UUID
     name: str = Field(regex="^(?!-|_)[a-zA-Z0-9-_ ]+$")
     guidelines: Optional[str] = None
+    allow_extra_metadata: bool
     status: Optional[str] = None
     workspace_id: Optional[UUID] = None
     inserted_at: datetime
@@ -55,7 +56,7 @@ class FeedbackResponseStatusFilter(str, Enum):
 
 class FeedbackResponseModel(BaseModel):
     id: UUID
-    values: Dict[str, FeedbackValueModel]
+    values: Union[Dict[str, FeedbackValueModel], None]
     status: FeedbackResponseStatus
     user_id: UUID
     inserted_at: datetime
@@ -112,8 +113,7 @@ class FeedbackMetadataPropertyModel(BaseModel):
     id: UUID
     name: str
     description: Optional[str] = None
-    # TODO: uncomment when the API is ready
-    # visible_for_annotators: bool
+    visible_for_annotators: Optional[bool] = True
     settings: Dict[str, Any]
     inserted_at: datetime
     updated_at: datetime

@@ -77,6 +77,7 @@ def generate_pydantic_schema_for_fields(
 def generate_pydantic_schema_for_metadata(
     metadata_properties: List[Union["AllowedMetadataPropertyTypes", "AllowedRemoteMetadataPropertyTypes"]],
     name: Optional[str] = "MetadataSchema",
+    allow_extra_metadata: bool = True,
 ) -> BaseModel:
     """Generates a `pydantic.BaseModel` schema from a list of `AllowedMetadataPropertyTypes` or
     `AllowedRemoteMetadataPropertyTypes` objects to validate the metadata of a `FeedbackDataset`
@@ -86,6 +87,7 @@ def generate_pydantic_schema_for_metadata(
         metadata_properties: the list of `AllowedMetadataPropertyTypes` or `AllowedRemoteMetadataPropertyTypes`
             objects to generate the schema from.
         name: the name of the `pydantic.BaseModel` schema to generate. Defaults to "MetadataSchema".
+        allow_extra_metadata: whether to allow extra metadata properties or not. Defaults to `True`.
 
     Returns:
         A `pydantic.BaseModel` schema to validate the metadata of a `FeedbackDataset` or `RemoteFeedbackDataset`
@@ -118,7 +120,7 @@ def generate_pydantic_schema_for_metadata(
         metadata_validators.update(pydantic_validator)
 
     class MetadataConfig:
-        extra = Extra.ignore
+        extra = Extra.allow if allow_extra_metadata else Extra.forbid
 
     return create_model(name, **metadata_fields, __validators__=metadata_validators, __config__=MetadataConfig)
 
