@@ -40,6 +40,7 @@ from argilla.server.schemas.v1.datasets import (
     QuestionCreate,
     RecordsCreate,
 )
+from argilla.server.schemas.v1.metadata_properties import MetadataPropertyUpdate
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
 from argilla.server.search_engine import SearchEngine
@@ -248,8 +249,8 @@ async def create_metadata_property(
         metadata_property = await MetadataProperty.create(
             db,
             name=metadata_property_create.name,
+            title=metadata_property_create.title,
             type=metadata_property_create.settings.type,
-            description=metadata_property_create.description,
             settings=metadata_property_create.settings.dict(),
             allowed_roles=_allowed_roles_for_metadata_property_create(metadata_property_create),
             dataset_id=dataset.id,
@@ -262,6 +263,18 @@ async def create_metadata_property(
     await db.commit()
 
     return metadata_property
+
+
+async def update_metadata_property(
+    db: "AsyncSession",
+    metadata_property: MetadataProperty,
+    metadata_property_update: MetadataPropertyUpdate,
+):
+    return await metadata_property.update(
+        db,
+        title=metadata_property_update.title or metadata_property.title,
+        allowed_roles=_allowed_roles_for_metadata_property_create(metadata_property_update),
+    )
 
 
 async def update_question(db: "AsyncSession", question: Question, question_update: "QuestionUpdate") -> Question:
