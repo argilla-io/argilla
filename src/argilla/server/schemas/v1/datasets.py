@@ -57,9 +57,9 @@ QUESTION_CREATE_DESCRIPTION_MAX_LENGTH = 1000
 
 METADATA_PROPERTY_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH = 1
-METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH = 50
-METADATA_PROPERTY_CREATE_DESCRIPTION_MIN_LENGTH = 1
-METADATA_PROPERTY_CREATE_DESCRIPTION_MAX_LENGTH = 1000
+METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH = 200
+METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH = 1
+METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH = 500
 
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 10
@@ -463,6 +463,11 @@ class FloatMetadataPropertyCreate(NumericMetadataProperty[float]):
     type: Literal[MetadataPropertyType.float]
 
 
+MetadataPropertyTitleCreate = Annotated[
+    constr(min_length=METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH, max_length=METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH),
+    PydanticField(..., description="The title of the metadata property"),
+]
+
 MetadataPropertySettingsCreate = Annotated[
     Union[TermsMetadataPropertyCreate, IntegerMetadataPropertyCreate, FloatMetadataPropertyCreate],
     PydanticField(..., discriminator="type"),
@@ -476,11 +481,7 @@ class MetadataPropertyCreate(BaseModel):
         min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
         max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
     )
-    description: Optional[str] = PydanticField(
-        None,
-        min_length=METADATA_PROPERTY_CREATE_DESCRIPTION_MIN_LENGTH,
-        max_length=METADATA_PROPERTY_CREATE_DESCRIPTION_MAX_LENGTH,
-    )
+    title: MetadataPropertyTitleCreate
     settings: MetadataPropertySettingsCreate
     visible_for_annotators: bool = True
 
@@ -511,7 +512,7 @@ MetadataPropertySettings = Annotated[
 class MetadataProperty(BaseModel):
     id: UUID
     name: str
-    description: Optional[str] = None
+    title: str
     settings: MetadataPropertySettings
     visible_for_annotators: bool
     inserted_at: datetime

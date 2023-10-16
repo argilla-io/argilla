@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, Iterable, List, Optional, Union
+from typing import Any, Dict, TYPE_CHECKING, Iterable, List, Optional, Union
 
 import pytest
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
@@ -36,13 +36,14 @@ if TYPE_CHECKING:
 
 
 class TestFeedbackDataset(FeedbackDatasetBase):
+
+    def update_records(self, **kwargs: Dict[str, Any]) -> None:
+        pass
+
     def add_metadata_property(self, metadata_property):
         pass
 
     def delete_metadata_properties(self, metadata_properties):
-        pass
-
-    def update_records(self, records: Union[FeedbackRecord, List[FeedbackRecord]]) -> None:
         pass
 
     def filter_by(

@@ -14,7 +14,7 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Literal, Optional, Type, TypeVar, Union
+from typing import Any, Dict, Generic, Iterable, List, Literal, Optional, TYPE_CHECKING, Type, TypeVar, Union
 
 from pydantic import BaseModel, ValidationError
 
@@ -26,17 +26,11 @@ from argilla.client.feedback.schemas import (
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.client.feedback.schemas.metadata import MetadataFilters
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes, AllowedQuestionTypes
-from argilla.client.feedback.training.schemas import (
-    TrainingTaskForChatCompletion,
-    TrainingTaskForDPO,
-    TrainingTaskForPPO,
-    TrainingTaskForQuestionAnswering,
-    TrainingTaskForRM,
-    TrainingTaskForSentenceSimilarity,
-    TrainingTaskForSFT,
-    TrainingTaskForTextClassification,
-    TrainingTaskTypes,
-)
+from argilla.client.feedback.training.schemas import (TrainingTaskForChatCompletion, TrainingTaskForDPO,
+                                                      TrainingTaskForPPO, TrainingTaskForQuestionAnswering,
+                                                      TrainingTaskForRM, TrainingTaskForSFT,
+                                                      TrainingTaskForSentenceSimilarity,
+                                                      TrainingTaskForTextClassification, TrainingTaskTypes, )
 from argilla.client.feedback.utils import generate_pydantic_schema_for_fields, generate_pydantic_schema_for_metadata
 from argilla.client.models import Framework
 from argilla.utils.dependency import require_dependencies, requires_dependencies

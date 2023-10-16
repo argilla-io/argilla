@@ -253,7 +253,7 @@ class MetadataPropertyFactory(BaseFactory):
         return super()._create(model_class, *args, **kwargs)
 
     name = factory.Sequence(lambda n: f"metadata-property-{n}")
-    description = "Metadata property description"
+    title = "Metadata property title"
     allowed_roles = [UserRole.admin, UserRole.annotator]
     dataset = factory.SubFactory(DatasetFactory)
 
