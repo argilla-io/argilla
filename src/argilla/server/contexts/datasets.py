@@ -369,7 +369,7 @@ async def count_records_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> i
 _EXTRA_METADATA_FLAG = "extra"
 
 
-async def validate_metadata(
+async def _validate_metadata(
     db: "AsyncSession",
     dataset: Dataset,
     metadata: Dict[str, Any],
@@ -409,7 +409,7 @@ async def validate_metadata(
     return metadata_properties
 
 
-async def validate_suggestion(
+async def _validate_suggestion(
     db: "AsyncSession",
     suggestion: "SuggestionCreate",
     questions: Optional[Dict[UUID, Question]] = None,
@@ -470,7 +470,7 @@ async def create_records(
         if record_create.suggestions:
             for suggestion in record_create.suggestions:
                 try:
-                    questions = await validate_suggestion(db, suggestion, questions=questions)
+                    questions = await _validate_suggestion(db, suggestion, questions=questions)
                 except ValueError as e:
                     raise ValueError(f"Provided suggestion for record at position {record_i} is not valid: {e}") from e
 
@@ -486,7 +486,7 @@ async def create_records(
 
         if record_create.metadata:
             try:
-                metadata_properties = await validate_metadata(
+                metadata_properties = await _validate_metadata(
                     db,
                     dataset=dataset,
                     metadata=record_create.metadata,
@@ -507,53 +507,63 @@ async def create_records(
     await db.commit()
 
 
+async def _exists_records_with_ids(db: "AsyncSession", dataset_id: UUID, records_ids: List[UUID]) -> List[UUID]:
+    result = await db.execute(select(Record.id).filter(Record.dataset_id == dataset_id, Record.id.in_(records_ids)))
+    return result.scalars().all()
+
+
 async def update_records(
     db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, records_update: "RecordsUpdate"
 ) -> None:
-    records_update_objects = []
-    updated_records_ids = []
-    records_ids_update_suggestions = []
-    suggestions = []
+    records_ids = [record_update.id for record_update in records_update.items]
+    existing_records_ids = await _exists_records_with_ids(db, dataset_id=dataset.id, records_ids=records_ids)
+    non_existing_records_ids = set(records_ids) - set(existing_records_ids)
+
+    if non_existing_records_ids:
+        records_ids_str = ", ".join(str(record_id) for record_id in non_existing_records_ids)
+        raise ValueError(f"Found records that do not exist: {records_ids_str}")
+
+    # Lists to store the records that will be updated in the database or in the search engine
+    records_update_objects: List[Dict[str, Any]] = []
+    records_search_engine_update: List[UUID] = []
+    records_delete_suggestions: List[UUID] = []
 
     # Cache dictionaries to avoid querying the database multiple times
-    metadata_properties = {}
-    questions = {}
+    metadata_properties: Dict[str, Union[MetadataProperty, Literal["extra"]]] = {}
+    questions: Dict[UUID, Question] = {}
 
+    suggestions = []
     for record_i, record_update in enumerate(records_update.items):
         params = record_update.dict(exclude_unset=True)
 
         if "metadata_" in params and (metadata := params["metadata_"]) is not None:
             try:
-                metadata_properties = await validate_metadata(db, dataset, metadata, metadata_properties)
+                metadata_properties = await _validate_metadata(db, dataset, metadata, metadata_properties)
             except ValueError as err:
                 raise ValueError(f"Provided metadata for record at position {record_i} is not valid: {err}") from err
+            records_search_engine_update.append(record_update.id)
 
         if record_update.suggestions is not None:
             params.pop("suggestions")
-            for suggestion in record_update.suggestions:
+            for suggestion_i, suggestion in enumerate(record_update.suggestions):
                 try:
-                    questions = await validate_suggestion(db, suggestion, questions)
+                    questions = await _validate_suggestion(db, suggestion, questions)
                     suggestions.append(Suggestion(record_id=record_update.id, **suggestion.dict()))
                 except ValueError as err:
                     raise ValueError(
-                        f"Provided suggestions for record at position {record_i} are not valid: {err}"
+                        f"Provided suggestion for record at position {record_i} and suggestion at position "
+                        f"{suggestion_i} is not valid: {err}"
                     ) from err
-            records_ids_update_suggestions.append(record_update.id)
+            records_delete_suggestions.append(record_update.id)
 
         records_update_objects.append(params)
-        updated_records_ids.append(record_update.id)
 
     async with db.begin_nested():
-        await Suggestion.delete_many(
-            db,
-            params=[
-                Suggestion.record_id.in_(records_ids_update_suggestions),
-            ],
-            autocommit=False,
-        )
+        params = [Suggestion.record_id.in_(records_delete_suggestions)]
+        await Suggestion.delete_many(db, params=params, autocommit=False)
         db.add_all(suggestions)
         await Record.update_many(db, records_update_objects, autocommit=False)
-        records = await get_records_by_ids(db, dataset_id=dataset.id, records_ids=updated_records_ids)
+        records = await get_records_by_ids(db, dataset_id=dataset.id, records_ids=records_search_engine_update)
         await search_engine.update_records_metadata(dataset, records)
 
     await db.commit()
@@ -576,13 +586,13 @@ async def update_record(
     params = record_update.dict(exclude_unset=True)
 
     if "metadata_" in params and (metadata := params["metadata_"]) is not None:
-        await validate_metadata(db, dataset=record.dataset, metadata=metadata)
+        await _validate_metadata(db, dataset=record.dataset, metadata=metadata)
 
     if record_update.suggestions is not None:
         suggestions = []
         for suggestion in record_update.suggestions:
             try:
-                await validate_suggestion(db, suggestion)
+                await _validate_suggestion(db, suggestion)
                 suggestions.append(Suggestion(**suggestion.dict()))
             except ValueError as err:
                 raise ValueError(
