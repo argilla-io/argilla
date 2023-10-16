@@ -1,7 +1,7 @@
 <template>
   <div>
     <BaseLoading v-if="isLoadingDataset" />
-    <HeaderAndTopAndOneColumn>
+    <HeaderAndTopAndOneColumn :key="refreshKey">
       <template v-slot:header>
         <HeaderFeedbackTaskComponent
           :key="datasetId"
@@ -29,7 +29,7 @@
       <template v-slot:sidebar-right>
         <SidebarFeedbackTaskComponent
           :datasetId="datasetId"
-          @refresh="loadDataset()"
+          @refresh="refresh()"
         />
       </template>
       <template v-slot:top>
@@ -61,11 +61,15 @@ export default {
   data() {
     return {
       visibleTrainModal: false,
+      refreshKey: 0,
     };
   },
   methods: {
     showTrainModal(value) {
       this.visibleTrainModal = value;
+    },
+    refresh() {
+      this.refreshKey += 1;
     },
   },
   watch: {

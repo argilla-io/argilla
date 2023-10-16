@@ -8,10 +8,6 @@ import { useResolve } from "ts-injecty";
 import { useDatasetViewModel } from "../useDatasetViewModel";
 import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use-case";
 import { useDataset } from "@/v1/infrastructure/storage/DatasetStorage";
-import {
-  useEvents,
-  UpdateMetricsEventHandler,
-} from "~/v1/infrastructure/events";
 import { RecordCriteria } from "~/v1/domain/entities/record/RecordCriteria";
 import { useRoutes } from "~/v1/infrastructure/services";
 import { RecordStatus } from "~/v1/domain/entities/record/RecordAnswer";
@@ -78,10 +74,6 @@ export const useAnnotationModeViewModel = () => {
   };
 
   onBeforeMount(() => {
-    useEvents(() => {
-      new UpdateMetricsEventHandler();
-    });
-
     loadDataset();
   });
 
@@ -90,7 +82,6 @@ export const useAnnotationModeViewModel = () => {
     dataset,
     datasetId,
     isLoadingDataset,
-    loadDataset,
     breadcrumbs,
     updateQueryParams,
   };

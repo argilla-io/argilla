@@ -26,8 +26,10 @@ export class MetadataRepository {
   }
 
   private async completeEmptyMetadataFilters(
-    metadataFilters: BackendMetadata[]
+    metadataFilters?: BackendMetadata[]
   ): Promise<BackendMetadata[]> {
+    if (!metadataFilters) return [];
+
     const metadataWithNoValues = metadataFilters.filter((m) => {
       if (m.settings.type === "terms") {
         return !m.settings.values;

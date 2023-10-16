@@ -138,37 +138,35 @@ export default {
     return useRecordFeedbackTaskViewModel();
   },
   created() {
-    this.$root.$on("on-change-record-page", (criteria) => {
-      if (this.questionFormTouched) {
-        return this.showNotificationForNewFilter(
-          async () => {
-            await this.paginate();
+    this.$root.$on("on-change-record-page", async (criteria) => {
+      const filter = async () => {
+        await this.paginate();
+        this.record.initialize();
+      };
 
-            this.record.initialize();
-          },
-          () => criteria.reset()
+      if (this.questionFormTouched) {
+        return this.showNotificationForNewFilter(filter, () =>
+          criteria.reset()
         );
       }
 
-      this.paginate();
+      await filter();
     });
 
-    this.$root.$on("on-change-record-criteria-filter", (criteria) => {
-      if (this.questionFormTouched) {
-        return this.showNotificationForNewFilter(
-          async () => {
-            await this.onLoadRecords("replace");
+    this.$root.$on("on-change-record-criteria-filter", async (criteria) => {
+      const filter = async () => {
+        await this.onLoadRecords("replace");
+        this.record.initialize();
+      };
 
-            this.record.initialize();
-          },
-          () => criteria.reset()
+      if (this.questionFormTouched) {
+        return this.showNotificationForNewFilter(filter, () =>
+          criteria.reset()
         );
       }
 
-      this.onLoadRecords("replace");
+      await filter();
     });
-
-    this.loadMetrics(this.recordCriteria.datasetId);
   },
   destroyed() {
     this.$root.$off("on-change-record-page");

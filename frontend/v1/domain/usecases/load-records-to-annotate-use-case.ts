@@ -131,7 +131,6 @@ export class LoadRecordsToAnnotateUseCase {
           fields,
           answer,
           suggestions,
-          record.updated_at,
           index + page
         );
       }
