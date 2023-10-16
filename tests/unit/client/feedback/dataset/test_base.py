@@ -36,6 +36,12 @@ if TYPE_CHECKING:
 
 
 class TestFeedbackDataset(FeedbackDatasetBase):
+    def add_metadata_property(self, metadata_property):
+        pass
+
+    def delete_metadata_properties(self, metadata_properties):
+        pass
+
     def update_records(self, records: Union[FeedbackRecord, List[FeedbackRecord]]) -> None:
         pass
 
