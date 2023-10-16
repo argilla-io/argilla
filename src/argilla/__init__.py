@@ -90,6 +90,7 @@ if _TYPE_CHECKING:
         ResponseSchema,
         SortBy,
         SortOrder,
+        SuggestionSchema,
         TermsMetadataFilter,
         TermsMetadataProperty,
         TextField,
@@ -126,6 +127,7 @@ _import_structure = {
         "FloatMetadataFilter",
         "SortBy",
         "SortOrder",
+        "SuggestionSchema",
         "RecordSortField",
     ],
     "client.api": [
