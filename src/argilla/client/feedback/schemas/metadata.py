@@ -319,7 +319,7 @@ class TermsMetadataFilter(MetadataFilterSchema):
         >>> TermsMetadataFilter(name="color", values=["red", "blue", "green"])
     """
 
-    type: MetadataPropertyTypes = MetadataPropertyTypes.terms.value
+    type: Literal[MetadataPropertyTypes.terms] = Field(MetadataPropertyTypes.terms.value, allow_mutation=False)
     values: List[str] = Field(..., min_items=TERMS_METADATA_FILTER_MIN_VALUES)
 
     @validator("values")
@@ -385,7 +385,7 @@ class IntegerMetadataFilter(_NumericMetadataFilterSchema):
         >>> IntegerMetadataFilter(name="day", le=15, ge=10)
     """
 
-    type: MetadataPropertyTypes = MetadataPropertyTypes.integer.value
+    type: Literal[MetadataPropertyTypes.integer] = Field(MetadataPropertyTypes.integer.value, allow_mutation=False)
     le: Optional[int] = None
     ge: Optional[int] = None
 
@@ -410,7 +410,7 @@ class FloatMetadataFilter(_NumericMetadataFilterSchema):
         >>> FloatMetadataFilter(name="price", le=15.0, ge=10.0)
     """
 
-    type: MetadataPropertyTypes = MetadataPropertyTypes.float.value
+    type: Literal[MetadataPropertyTypes.float] = Field(MetadataPropertyTypes.float.value, allow_mutation=False)
     le: Optional[float] = None
     ge: Optional[float] = None
 
