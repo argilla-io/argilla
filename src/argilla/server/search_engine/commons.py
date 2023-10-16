@@ -73,7 +73,7 @@ def _build_metadata_field_payload(dataset: Dataset, metadata: Union[Dict[str, An
 class SearchDocumentGetter(GetterDict):
     def get(self, key: Any, default: Any = None) -> Any:
         if key == "responses":
-            # `responses` of the record hasn't been loaded, set the default value so when using
+            # `responses` of the record haven't been loaded, set the default value so when using
             # `SearchDocument(...).dict(exclude_unset=True)` the field is not included.
             if "responses" not in self._obj.__dict__:
                 return default
