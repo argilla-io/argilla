@@ -197,7 +197,7 @@ class MetadataProperty(DatabaseModel):
 
     @property
     def type(self) -> MetadataPropertyType:
-        return self.settings["type"]
+        return MetadataPropertyType(self.settings["type"])
 
     @property
     def parsed_settings(self) -> MetadataPropertySettings:
