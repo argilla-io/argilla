@@ -219,6 +219,7 @@ class HuggingFaceDatasetMixin:
                     questions=local_questions,
                     guidelines=self.guidelines,
                     metadata_properties=local_metadata_properties or None,
+                    allow_extra_metadata=self.allow_extra_metadata,
                 ).to_yaml()
             )
             f.flush()
@@ -441,6 +442,7 @@ class HuggingFaceDatasetMixin:
             questions=config.questions,
             guidelines=config.guidelines,
             metadata_properties=config.metadata_properties,
+            allow_extra_metadata=config.allow_extra_metadata,
         )
         instance.add_records(records)
         return instance

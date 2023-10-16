@@ -42,6 +42,7 @@ class DatasetConfig(BaseModel):
     metadata_properties: Optional[
         List[Annotated[AllowedMetadataPropertyTypes, Field(..., discriminator="type")]]
     ] = None
+    allow_extra_metadata: bool = True
 
     def to_yaml(self) -> str:
         return dump(self.dict())
