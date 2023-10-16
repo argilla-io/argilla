@@ -655,7 +655,6 @@ def test_push_to_huggingface_and_from_huggingface(
     "feedback_dataset_records",
 )
 
-
 def test_prepare_for_training_text_classification(
     framework: Union[Framework, str],
     question: str,
@@ -675,32 +674,6 @@ def test_prepare_for_training_text_classification(
 
     dataset.prepare_for_training(framework=framework, task=task)
 
-
-"""def test_for_text_classification():
-    labels = ["label1", "label2", "label3"]
-    dataset = FeedbackDataset.for_text_classification(labels=labels, multi_label=True, use_markdown=True)
-    assert isinstance(dataset, FeedbackDataset)
-    assert len(dataset.fields) == 1
-    assert len(dataset.questions) == 1
-    assert isinstance(dataset.questions[0], MultiLabelQuestion)
-    assert dataset.questions[0].name == "label"
-    assert dataset.questions[0].labels == labels
-    assert (
-        dataset.questions[0].description
-        == "Classify the texts by selecting the correct labels from the given list of labels."
-    )
-    assert isinstance(dataset.fields[0], TextField)
-    assert dataset.fields[0].name == "text"
-    assert dataset.fields[0].use_markdown is True
-    assert (
-        dataset.guidelines
-        == "This is a text classification dataset that contains texts and labels. Given a set of texts and a predefined set of labels, the goal of text classification is to assign one or more labels to each text based on its content. Please classify the texts by selecting the correct labels."
-    )
-"""
-
-from argilla.client.feedback.dataset.local import FeedbackDataset
-
-
 def test_for_extractive_question_answering():
     dataset = FeedbackDataset.for_extractive_question_answering(use_markdown=True)
     assert len(dataset.fields) == 2
@@ -713,15 +686,6 @@ def test_for_extractive_question_answering():
     assert dataset.fields[1].name == "context"
     assert dataset.fields[1].use_markdown == True
     assert dataset.guidelines == "This is a question answering dataset that contains questions and contexts. Please answer the question by using the context."
-
-
-from argilla.client.feedback.schemas.questions import (
-    LabelQuestion,
-    MultiLabelQuestion,
-    RankingQuestion,
-    RatingQuestion,
-    TextQuestion,
-)
 
 def test_for_text_classification():
     # Test case 1: Single label classification
