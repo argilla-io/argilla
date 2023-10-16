@@ -66,6 +66,10 @@ class MetadataPropertySchema(BaseModel, ABC):
         extra = Extra.forbid
         exclude = {"type"}
 
+    @validator("title", always=True)
+    def title_must_have_value(cls, v: Optional[str], values: Dict[str, Any]) -> str:
+        return values.get("name") if not v else v
+
     @property
     @abstractmethod
     def server_settings(self) -> Dict[str, Any]:
