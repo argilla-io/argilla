@@ -82,22 +82,16 @@ export default {
 
       this.fetching = false;
     },
-    async setCurrentPage(newPage) {
+    async paginate() {
       if (this.fetching) return Promise.resolve();
 
       Notification.dispatch("clear");
 
       this.fetching = true;
 
-      let isNextRecordExist = this.records.existsRecordOn(newPage);
+      const isNextRecordExist = await this.paginateRecords(this.recordCriteria);
 
       if (!isNextRecordExist) {
-        await this.loadRecords("append", this.recordCriteria);
-
-        isNextRecordExist = this.records.existsRecordOn(newPage);
-      }
-
-      if (!isNextRecordExist && this.recordCriteria.committed.page < newPage) {
         Notification.dispatch("notify", {
           message: this.noMoreDataMessage,
           numberOfChars: this.noMoreDataMessage.length,
@@ -115,7 +109,9 @@ export default {
       this.questionFormTouched = isTouched;
     },
     goToNext() {
-      this.setCurrentPage(this.recordCriteria.page + 1);
+      this.recordCriteria.nextPage();
+
+      this.paginate();
     },
     showNotificationForNewFilter(onFilter, onClose) {
       Notification.dispatch("clear");
@@ -146,14 +142,15 @@ export default {
       if (this.questionFormTouched) {
         return this.showNotificationForNewFilter(
           async () => {
-            await self.setCurrentPage(criteria.page);
-            self.record.initialize();
+            await this.paginate();
+
+            this.record.initialize();
           },
           () => criteria.reset()
         );
       }
 
-      this.setCurrentPage(criteria.page);
+      this.paginate();
     });
 
     this.$root.$on("on-change-record-criteria-filter", (criteria) => {

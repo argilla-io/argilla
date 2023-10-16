@@ -71,6 +71,14 @@ export class RecordCriteria {
     this.sortBy = this.committed.sortBy;
   }
 
+  nextPage() {
+    this.page = this.committed.page + 1;
+  }
+
+  previousPage() {
+    this.page = this.committed.page - 1;
+  }
+
   private areEquals(firstArray: string[], secondArray: string[]) {
     return firstArray.join("") === secondArray.join("");
   }

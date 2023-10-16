@@ -20,12 +20,17 @@ export const useRecordFeedbackTaskViewModel = () => {
     mode: LoadRecordsMode,
     criteria: RecordCriteria
   ) => {
-    await getRecords.execute(mode, criteria);
+    await getRecords.load(mode, criteria);
+  };
+
+  const paginateRecords = (criteria: RecordCriteria) => {
+    return getRecords.paginate(criteria);
   };
 
   return {
     records,
     loadMetrics,
     loadRecords,
+    paginateRecords,
   };
 };

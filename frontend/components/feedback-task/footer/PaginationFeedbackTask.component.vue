@@ -20,10 +20,10 @@ export default {
   },
   methods: {
     goToNextPage() {
-      this.recordCriteria.page++;
+      this.recordCriteria.nextPage();
     },
     goToPrevPage() {
-      this.recordCriteria.page--;
+      this.recordCriteria.previousPage();
     },
   },
   watch: {

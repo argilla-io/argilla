@@ -22,16 +22,12 @@ export class LoadRecordsToAnnotateUseCase {
     private readonly recordsStorage: IRecordStorage
   ) {}
 
-  async execute(
-    mode: LoadRecordsMode,
-    criteria: RecordCriteria
-  ): Promise<void> {
+  async load(mode: LoadRecordsMode, criteria: RecordCriteria): Promise<void> {
     const { page } = criteria;
-    const records = this.recordsStorage.get();
 
-    await this.loadRecords(mode, criteria);
+    const newRecords = await this.loadRecords(mode, criteria);
 
-    const isRecordExistForCurrentPage = records.existsRecordOn(page);
+    const isRecordExistForCurrentPage = newRecords.existsRecordOn(page);
 
     if (!isRecordExistForCurrentPage && page !== 1) {
       criteria.page = 1;
@@ -40,6 +36,23 @@ export class LoadRecordsToAnnotateUseCase {
     }
 
     criteria.commit();
+  }
+
+  async paginate(criteria: RecordCriteria): Promise<boolean> {
+    const { page } = criteria;
+    const records = this.recordsStorage.get();
+
+    let isNextRecordExist = records.existsRecordOn(page);
+
+    if (!isNextRecordExist) {
+      const newRecords = await this.loadRecords("append", criteria);
+
+      isNextRecordExist = newRecords.existsRecordOn(page);
+    }
+
+    if (isNextRecordExist) criteria.commit();
+
+    return isNextRecordExist;
   }
 
   private async loadRecords(mode: LoadRecordsMode, criteria: RecordCriteria) {
@@ -131,5 +144,7 @@ export class LoadRecordsToAnnotateUseCase {
     } else {
       this.recordsStorage.replace(records);
     }
+
+    return records;
   }
 }
