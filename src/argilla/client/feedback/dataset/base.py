@@ -26,11 +26,17 @@ from argilla.client.feedback.schemas import (
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.client.feedback.schemas.metadata import MetadataFilters
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes, AllowedQuestionTypes
-from argilla.client.feedback.training.schemas import (TrainingTaskForChatCompletion, TrainingTaskForDPO,
-                                                      TrainingTaskForPPO, TrainingTaskForQuestionAnswering,
-                                                      TrainingTaskForRM, TrainingTaskForSFT,
-                                                      TrainingTaskForSentenceSimilarity,
-                                                      TrainingTaskForTextClassification, TrainingTaskTypes, )
+from argilla.client.feedback.training.schemas import (
+    TrainingTaskForChatCompletion,
+    TrainingTaskForDPO,
+    TrainingTaskForPPO,
+    TrainingTaskForQuestionAnswering,
+    TrainingTaskForRM,
+    TrainingTaskForSFT,
+    TrainingTaskForSentenceSimilarity,
+    TrainingTaskForTextClassification,
+    TrainingTaskTypes,
+)
 from argilla.client.feedback.utils import generate_pydantic_schema_for_fields, generate_pydantic_schema_for_metadata
 from argilla.client.models import Framework
 from argilla.utils.dependency import require_dependencies, requires_dependencies
@@ -282,11 +288,11 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, Generic[R]):
         """Returns the fields schema of the dataset."""
         return generate_pydantic_schema_for_fields(self.fields)
 
-    def _build_metadata_schema(self) -> Optional[Type[BaseModel]]:
+    def _build_metadata_schema(self) -> Type[BaseModel]:
         """Returns the metadata schema of the dataset."""
-
-        if self.metadata_properties:
-            return generate_pydantic_schema_for_metadata(self.metadata_properties)
+        return generate_pydantic_schema_for_metadata(
+            self.metadata_properties, allow_extra_metadata=self.allow_extra_metadata
+        )
 
     def _unique_metadata_property(self, metadata_property: "AllowedMetadataPropertyTypes") -> None:
         """Checks whether the provided `metadata_property` already exists in the dataset.
@@ -371,11 +377,11 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, Generic[R]):
     ) -> None:
         """Validates the `FeedbackRecord.metadata` against the schema defined by the `metadata_properties`."""
 
+        if not record.metadata:
+            return
+
         if metadata_schema is None:
             metadata_schema = self._build_metadata_schema()
-
-        if not (record.metadata and metadata_schema):
-            return
 
         try:
             metadata_schema.parse_obj(record.metadata)
