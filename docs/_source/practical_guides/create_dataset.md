@@ -39,6 +39,63 @@ fields = [
 The order of the fields in the UI follows the order in which these are added to the `fields` attribute in the Python SDK.
 ```
 
+#### Define metadata properties
+```{warning}
+[TODO] Definition of `MetadataProperty`.
+```
+Metadata properties allow you to configure ...
+
+
+You can define the metadata properties using the Python SDK providing the following arguments:
+
+- `name`: The name of the metadata property, as it will be used internally.
+- `title` (optional): The name of the metadata property, as it will be displayed in the UI. Defaults to the `name` value, but capitalized.
+- `visible_for_annotators` (optional): A boolean to specify whether the metadata property will be accessible for users with an `annotator` role in the UI (`True`), or if it will only be visible for users with `owner` or `admin` roles (`False`). It is set to `True` by default.
+
+The following arguments apply to specific metadata types:
+- `values` (optional): In a `TermsMetadataProperty`, you can pass a list of valid values for this metadata property, in case you want to run a validation. If none are provided, the list of values will be computed from the values provided in the records.
+- `min` (optional): In an `IntengerMetadataProperty` or a `FloatMetadataProperty`, you can pass a minimum valid value. If none is provided, the minimum value will be computed from the values provided in the records.
+- `max` (optional): In an `IntengerMetadataProperty` or a `FloatMetadataProperty`, you can pass a maximum valid value. If none is provided, the maximum value will be computed from the values provided in the records.
+
+::::{tab-set}
+
+:::{tab-item} Terms
+
+```python
+rg.TermsMetadataProperty(
+    name="groups",
+    title="Annotation groups",
+    values=["group-a", "group-b", "group-c"] #optional
+)
+```
+:::
+:::{tab-item} Integer
+
+```python
+rg.IntegerMetadataProperty(
+    name="integer-metadata",
+    title="Integers",
+    min=0, #optional
+    max=100, #optional
+    visible_for_annotators=False
+)
+```
+:::
+:::{tab-item} Float
+
+```python
+rg.FloatMetadataProperty(
+    name="float-metadata",
+    title="Floats",
+    min=-0.45, #optional
+    max=1000.34, #optional
+    visible_for_annotators=False
+)
+```
+:::
+::::
+
+
 #### Define `questions`
 
 To collect feedback for your dataset, you need to formulate questions. The Feedback Task currently supports the following types of questions:
@@ -84,6 +141,8 @@ Once the scope of the project is defined, which implies knowing the `fields`, `q
 - `fields`: The list of fields to show in the record card. The order in which the fields will appear in the UI matches the order of this list.
 - `questions`: The list of questions to show in the form. The order in which the questions will appear in the UI matches the order of this list.
 - `guidelines` (optional): A set of guidelines for the annotators. These will appear in the dataset settings in the UI.
+- `metadata`(optional): The list of metadata properties included in this dataset.
+- `extra_metadata_properties` (optional): A boolean to specify whether this dataset will allow metadata fields in the records other than those specified under `metadata`. Note that these will not be accessible from the UI for any user, only retrievable using the Python SDK.
 
 If you haven't done so already, check the sections above to learn about each of them.
 
@@ -175,6 +234,12 @@ Now, we simply add our records to the dataset we configured [above](#configure-t
 ```python
 #add records to the dataset
 dataset.add_records(records)
+```
+
+### Add metadata
+
+```{warning}
+[TODO] Explain how metadata values are added to the records.
 ```
 
 ### Add suggestions

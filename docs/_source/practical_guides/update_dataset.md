@@ -16,6 +16,15 @@ rg.init(
 )
 ```
 
+#### Add or update metadata properties
+```{warning}
+[TODO]
+```
+#### Delete metadata properties
+```{warning}
+[TODO]
+```
+
 ### Add records
 
 To add a `FeedbackRecord` and/or a list of `FeedbackRecord`s to an existing dataset you will need to load the `FeedbackDataset` from Argilla first, calling `FeedbackDataset.from_argilla`, and then call the `add_records` method.
@@ -158,6 +167,14 @@ dataset = rg.FeedbackDataset.from_argilla(name="my-dataset", workspace="my-works
 
 # Delete the first suggestion from a record in Argilla
 dataset.records[0].suggestions[0].delete()
+```
+#### Add or update metadata
+```{warning}
+[TODO]
+```
+#### Delete metadata
+```{warning}
+[TODO]
 ```
 
 ## Other datasets
