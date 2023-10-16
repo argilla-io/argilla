@@ -12,10 +12,28 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from ._dataset_card import ArgillaDatasetCard
-from ._parser import size_categories_parser
+from .model_card import (
+    ArgillaModelCard,
+    FrameworkCardData,
+    OpenAIModelCardData,
+    PeftModelCardData,
+    SentenceTransformerCardData,
+    SetFitModelCardData,
+    SpacyModelCardData,
+    SpacyTransformersModelCardData,
+    TransformersModelCardData,
+    TRLModelCardData,
+)
 
 __all__ = [
-    "ArgillaDatasetCard",
-    "size_categories_parser",
+    "ArgillaModelCard",
+    "FrameworkCardData",
+    "SentenceTransformerCardData",
+    "TransformersModelCardData",
+    "SetFitModelCardData",
+    "PeftModelCardData",
+    "SpacyModelCardData",
+    "SpacyTransformersModelCardData",
+    "OpenAIModelCardData",
+    "TRLModelCardData",
 ]
