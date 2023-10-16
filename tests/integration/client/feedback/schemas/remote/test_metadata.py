@@ -12,32 +12,46 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 import argilla as rg
+import pytest
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 from argilla.client.feedback.schemas.remote.metadata import (
     RemoteFloatMetadataProperty,
     RemoteIntegerMetadataProperty,
     RemoteTermsMetadataProperty,
 )
+from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes
 
 if TYPE_CHECKING:
     from argilla.client.sdk.users.models import UserModel
 
 
-def test_metadata_properties(owner: "UserModel") -> None:
+@pytest.mark.parametrize(
+    "metadata_properties",
+    (
+        [rg.TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"])],
+        [rg.TermsMetadataProperty(name="terms-metadata", visible_for_annotators=False)],
+        [rg.IntegerMetadataProperty(name="integer-metadata", min=0, max=10)],
+        [rg.IntegerMetadataProperty(name="integer-metadata", visible_for_annotators=False)],
+        [rg.FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0)],
+        [rg.FloatMetadataProperty(name="float-metadata", visible_for_annotators=False)],
+        [
+            rg.TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            rg.IntegerMetadataProperty(name="integer-metadata", min=0, max=10),
+            rg.FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+    ),
+)
+def test_metadata_properties(owner: "UserModel", metadata_properties: List["AllowedMetadataPropertyTypes"]) -> None:
     rg.init(api_key=owner.api_key)
 
     workspace = rg.Workspace.create(name="my-workspace")
     dataset = rg.FeedbackDataset(
         fields=[rg.TextField(name="text-field")],
         questions=[rg.TextQuestion(name="text-question")],
-        metadata_properties=[
-            rg.TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
-            rg.IntegerMetadataProperty(name="integer-metadata", min=0, max=10),
-            rg.FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
-        ],
+        metadata_properties=metadata_properties,
     )
 
     remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace=workspace.name)
