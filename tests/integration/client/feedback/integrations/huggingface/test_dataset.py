@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import os
+import re
 from uuid import uuid4
 
 import argilla as rg
@@ -21,7 +22,8 @@ import argilla as rg
 class TestSuiteHuggingFaceDatasetMixin:
     @classmethod
     def setup_class(cls: "TestSuiteHuggingFaceDatasetMixin") -> None:
-        cls.repo_id = "argilla/test-integration-{}-{}".format(os.getenv("GITHUB_REF", "local"), uuid4())
+        github_ref_name = re.sub(r"[^a-zA-Z0-9-]", "-", os.getenv("GITHUB_REF_NAME", "fix/hello-world"))
+        cls.repo_id = "argilla/test-integration-{}-{}".format(github_ref_name, uuid4())
         cls.dataset = rg.FeedbackDataset(
             fields=[
                 rg.TextField(name="text-field", required=True),
