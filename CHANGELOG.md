@@ -28,8 +28,9 @@ These are the section headers that we use:
 - Added `add_metadata_property` method to both `FeedbackDataset` and `RemoteFeedbackDataset` (i.e. `FeedbackDataset` in Argilla) ([#3900](https://github.com/argilla-io/argilla/pull/3900)).
 - Added fields `inserted_at` and `updated_at` in `RemoteResponseSchema` ([#3822](https://github.com/argilla-io/argilla/pull/3822)).
 - New `DELETE /api/v1/metadata-properties/:metadata_property_id` endpoint allowing the deletion of a specific metadata property. ([#3911](https://github.com/argilla-io/argilla/pull/3911)).
-- Added support for `sort_by` for Argilla feedback datasets ([#3925](https://github.com/argilla-io/argilla/pull/3925)).
+- Added support for `sort_by` for `RemoteFeedbackDataset` i.e. a `FeedbackDataset` uploaded to Argilla ([#3925](https://github.com/argilla-io/argilla/pull/3925)).
 - Added `metadata_properties` support for both `push_to_huggingface` and `from_huggingface` ([#3947](https://github.com/argilla-io/argilla/pull/3947)).
+- Added `delete_metadata_properties` and `Remote{Terms,Integer,Float}MetadataProperty.delete` methods to delete metadata properties ([#3932](https://github.com/argilla-io/argilla/pull/3932)).
 
 ### Changed
 
