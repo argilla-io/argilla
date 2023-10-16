@@ -302,7 +302,7 @@ async def get_records_by_ids(
     result = await db.execute(query)
     records = result.unique().scalars().all()
 
-    # Preserver the order of the `record_ids` list
+    # Preserve the order of the `record_ids` list
     record_order_map = {record.id: record for record in records}
     ordered_records = [record_order_map[record_id] for record_id in records_ids]
 
@@ -516,12 +516,15 @@ async def update_records(
     db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, records_update: "RecordsUpdate"
 ) -> None:
     records_ids = [record_update.id for record_update in records_update.items]
+
+    if len(records_ids) != len(set(records_ids)):
+        raise ValueError("Found duplicate records IDs")
+
     existing_records_ids = await _exists_records_with_ids(db, dataset_id=dataset.id, records_ids=records_ids)
     non_existing_records_ids = set(records_ids) - set(existing_records_ids)
 
-    if non_existing_records_ids:
-        records_ids_str = ", ".join(str(record_id) for record_id in non_existing_records_ids)
-        raise ValueError(f"Found records that do not exist: {records_ids_str}")
+    if len(non_existing_records_ids) > 0:
+        raise ValueError("Found records that do not exist")
 
     # Lists to store the records that will be updated in the database or in the search engine
     records_update_objects: List[Dict[str, Any]] = []
