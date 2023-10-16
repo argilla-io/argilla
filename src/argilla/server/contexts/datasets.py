@@ -250,7 +250,6 @@ async def create_metadata_property(
             db,
             name=metadata_property_create.name,
             title=metadata_property_create.title,
-            type=metadata_property_create.settings.type,
             settings=metadata_property_create.settings.dict(),
             allowed_roles=_allowed_roles_for_metadata_property_create(metadata_property_create),
             dataset_id=dataset.id,
