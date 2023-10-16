@@ -101,6 +101,11 @@ def test_terms_metadata_property(
             ValidationError,
             "1 validation error for TermsMetadataProperty\nvalues\n  `TermsMetadataProperty` with name=terms-metadata-property cannot have repeated `values`",
         ),
+        (
+            {"name": "int-metadata-property", "extra-arg": "a"},
+            ValidationError,
+            "1 validation error for TermsMetadataProperty\nextra-arg\n  extra fields not permitted \(type=value_error.extra\)",
+        ),
     ],
 )
 def test_terms_metadata_property_errors(
@@ -195,6 +200,11 @@ def test_integer_metadata_property(
             ValidationError,
             "1 validation error for IntegerMetadataProperty\n__root__\n  `IntegerMetadataProperty` with name=int-metadata-property cannot have `max` less or equal than `min`",
         ),
+        (
+            {"name": "int-metadata-property", "extra-arg": 5},
+            ValidationError,
+            "1 validation error for IntegerMetadataProperty\nextra-arg\n  extra fields not permitted \(type=value_error.extra\)",
+        ),
     ],
 )
 def test_integer_metadata_property_errors(
@@ -288,6 +298,11 @@ def test_float_metadata_property(
             {"name": "float-metadata-property", "min": 6.0, "max": 5.0},
             ValidationError,
             "1 validation error for FloatMetadataProperty\n__root__\n  `FloatMetadataProperty` with name=float-metadata-property cannot have `max` less or equal than `min`",
+        ),
+        (
+            {"name": "float-metadata-property", "extra-arg": 5.0},
+            ValidationError,
+            "1 validation error for FloatMetadataProperty\nextra-arg\n  extra fields not permitted \(type=value_error.extra\)",
         ),
     ],
 )
