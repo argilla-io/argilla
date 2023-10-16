@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Type
+from typing import Any, TYPE_CHECKING, List, Tuple, Type
 from uuid import UUID
 
 import pytest
@@ -175,6 +175,38 @@ class TestRemoteFeedbackDataset:
             for suggestion in record.suggestions:
                 assert suggestion.question_name == "question"
                 assert suggestion.value == f"Hello world! for {record.fields['text']}"
+
+    @pytest.mark.parametrize(
+        "metadata", [("terms-metadata", "wrong-label"), ("integer-metadata", "wrong-integer"), ("float-metadata", 11.5)]
+    )
+    async def test_update_records_with_metadata_validation_error(
+        self, owner: "User", test_dataset: FeedbackDataset, metadata: Tuple[str, Any]
+    ):
+        import argilla as rg
+
+        rg.init(api_key=owner.api_key)
+        ws = rg.Workspace.create(name="test-workspace")
+
+        test_dataset.add_records(FeedbackRecord(fields={"text": "Hello world!"}))
+
+        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+
+        key, value = metadata
+
+        record = remote[0]
+        record.metadata.update({key: value})
+
+        with pytest.raises(ValueError, match=r"`FeedbackRecord.metadata` .* does not match the expected schema"):
+            remote.update_records([record])
+
+        record.metadata = {"new-metadata": 100}
+        remote.update_records([record])
+
+        remote.add_metadata_property(IntegerMetadataProperty(name="new-metadata", min=0, max=10))
+        with pytest.raises(
+            ValueError, match="Provided 'new-metadata=100' is not valid, only values between 0 and 10 are allowed."
+        ):
+            remote.update_records([record])
 
     async def test_from_argilla(self, feedback_dataset: FeedbackDataset, owner: "User") -> None:
         api.init(api_key=owner.api_key)
