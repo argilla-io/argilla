@@ -152,7 +152,7 @@ class TestSuiteRecords:
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
-        mock_search_engine.update_record_metadata.assert_called_once_with(record)
+        mock_search_engine.add_records.assert_called_once_with(dataset, [record])
 
     async def test_update_record_with_null_metadata(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
@@ -185,7 +185,7 @@ class TestSuiteRecords:
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
-        mock_search_engine.update_record_metadata.assert_called_once_with(record)
+        mock_search_engine.add_records.assert_called_once_with(dataset, [record])
 
     async def test_update_record_with_no_metadata(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
@@ -210,7 +210,32 @@ class TestSuiteRecords:
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
-        mock_search_engine.update_record_metadata.assert_not_called()
+        mock_search_engine.add_records.assert_not_called()
+
+    async def test_update_record_with_no_suggestions(
+        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict
+    ):
+        suggestion = await SuggestionFactory.create()
+        record = suggestion.record
+
+        response = await async_client.patch(
+            f"/api/v1/records/{suggestion.record.id}",
+            headers=owner_auth_header,
+            json={"suggestions": []},
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(record.id),
+            "fields": {"text": "This is a text", "sentiment": "neutral"},
+            "metadata": None,
+            "external_id": record.external_id,
+            "responses": None,
+            "suggestions": [],
+            "inserted_at": record.inserted_at.isoformat(),
+            "updated_at": record.updated_at.isoformat(),
+        }
+        assert (await db.execute(select(Suggestion).where(Suggestion.id == suggestion.id))).scalar_one_or_none() is None
 
     async def test_update_record_with_not_valid_metadata(self, async_client: "AsyncClient", owner_auth_header: dict):
         dataset = await DatasetFactory.create(allow_extra_metadata=False)
