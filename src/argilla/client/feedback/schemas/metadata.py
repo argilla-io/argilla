@@ -62,7 +62,7 @@ class MetadataPropertySchema(BaseModel, ABC):
 
     class Config:
         validate_assignment = True
-        extra = Extra.ignore
+        extra = Extra.forbid
         exclude = {"type"}
 
     @property
@@ -201,7 +201,7 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
     @property
     def _pydantic_field_with_validator(
         self,
-    ) -> Tuple[Dict[Union[StrictInt, StrictFloat], Tuple[str, None]], Dict[str, Callable]]:
+    ) -> Tuple[Dict[str, Tuple[Union[StrictInt, StrictFloat], None]], Dict[str, Callable]]:
         return (
             {self.name: (METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE[self.type], None)},
             {f"{self.name}_validator": validator(self.name, allow_reuse=True)(self._value_in_bounds)},

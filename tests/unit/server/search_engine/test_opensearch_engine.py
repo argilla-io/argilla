@@ -92,8 +92,8 @@ async def dataset_for_pagination(opensearch: OpenSearch):
 @pytest_asyncio.fixture(scope="function")
 @pytest.mark.asyncio
 async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine, opensearch: OpenSearch) -> Dataset:
-    text_question = await TextQuestionFactory()
-    rating_question = await RatingQuestionFactory()
+    text_question = await TextQuestionFactory.create()
+    rating_question = await RatingQuestionFactory.create()
 
     dataset = await DatasetFactory.create(
         fields=[
@@ -213,7 +213,7 @@ async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine, op
 
 @pytest_asyncio.fixture()
 async def opensearch_engine(elasticsearch_config: dict) -> AsyncGenerator[OpenSearchEngine, None]:
-    engine = OpenSearchEngine(config=elasticsearch_config, es_number_of_replicas=0, es_number_of_shards=1)
+    engine = OpenSearchEngine(config=elasticsearch_config, number_of_replicas=0, number_of_shards=1)
     yield engine
 
     await engine.client.close()
@@ -267,8 +267,9 @@ class TestSuiteOpenSearchEngine:
                 "metadata": {"dynamic": "false", "type": "object"},
             },
         }
-        assert index["settings"]["index"]["number_of_shards"] == str(opensearch_engine.es_number_of_shards)
-        assert index["settings"]["index"]["number_of_replicas"] == str(opensearch_engine.es_number_of_replicas)
+        assert index["settings"]["index"]["max_result_window"] == str(opensearch_engine.max_result_window)
+        assert index["settings"]["index"]["number_of_shards"] == str(opensearch_engine.number_of_shards)
+        assert index["settings"]["index"]["number_of_replicas"] == str(opensearch_engine.number_of_replicas)
 
     async def test_create_index_for_dataset_with_fields(
         self,
@@ -307,6 +308,33 @@ class TestSuiteOpenSearchEngine:
                 "metadata": {"dynamic": "false", "type": "object"},
             },
         }
+
+    async def test_create_metadata_property(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        db: "AsyncSession",
+    ):
+        text_field = await TextFieldFactory.create(name="field")
+
+        terms_property = await TermsMetadataPropertyFactory.create(name="terms")
+        integer_property = await IntegerMetadataPropertyFactory.create(name="integer")
+        float_property = await FloatMetadataPropertyFactory.create(name="float")
+
+        metadata_properties = [terms_property, integer_property]
+
+        dataset = await DatasetFactory.create(fields=[text_field], metadata_properties=metadata_properties)
+
+        await _refresh_dataset(dataset)
+
+        await opensearch_engine.create_index(dataset)
+        await opensearch_engine.configure_metadata_property(dataset, float_property)
+
+        index_name = index_name_for_dataset(dataset)
+        assert opensearch.indices.exists(index=index_name)
+
+        index = opensearch.indices.get(index=index_name)[index_name]
+        assert index["mappings"]["properties"]["metadata"]["properties"][str(float_property.id)] == {"type": "float"}
 
     async def test_create_index_for_dataset_with_metadata_properties(
         self,
@@ -850,6 +878,50 @@ class TestSuiteOpenSearchEngine:
                     }
                 }
             },
+        }
+
+    async def test_update_record_metadata(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset: Dataset,
+    ):
+        record = test_banking_sentiment_dataset.records[0]
+
+        record.metadata_ = {"label": "a", "textId": 99999, "seq_float": 0.99}
+
+        await opensearch_engine.update_record_metadata(record)
+
+        index_name = index_name_for_dataset(test_banking_sentiment_dataset)
+
+        results = opensearch.get(index=index_name, id=record.id)
+
+        assert results["_source"]["metadata"] == {
+            str(test_banking_sentiment_dataset.metadata_properties[0].id): "a",
+            str(test_banking_sentiment_dataset.metadata_properties[1].id): 99999,
+            str(test_banking_sentiment_dataset.metadata_properties[2].id): 0.99,
+        }
+
+    async def test_update_record_metadata_with_extra_metadata(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset: Dataset,
+    ):
+        record = test_banking_sentiment_dataset.records[0]
+
+        record.metadata_ = {"label": "a", "textId": 99999, "seq_float": 0.99, "much": "data", "many": "annotations"}
+
+        await opensearch_engine.update_record_metadata(record)
+
+        index_name = index_name_for_dataset(test_banking_sentiment_dataset)
+
+        results = opensearch.get(index=index_name, id=record.id)
+
+        assert results["_source"]["metadata"] == {
+            str(test_banking_sentiment_dataset.metadata_properties[0].id): "a",
+            str(test_banking_sentiment_dataset.metadata_properties[1].id): 99999,
+            str(test_banking_sentiment_dataset.metadata_properties[2].id): 0.99,
         }
 
     async def test_delete_record_response(

@@ -13,14 +13,34 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Type
 from uuid import UUID
 
 import pytest
-from argilla import FeedbackRecord
+from argilla import (
+    FeedbackRecord,
+)
 from argilla.client import api
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+from argilla.client.feedback.schemas.fields import TextField
+from argilla.client.feedback.schemas.metadata import (
+    FloatMetadataProperty,
+    IntegerMetadataProperty,
+    TermsMetadataProperty,
+)
+from argilla.client.feedback.schemas.questions import (
+    LabelQuestion,
+    MultiLabelQuestion,
+    RankingQuestion,
+    RatingQuestion,
+    TextQuestion,
+)
+from argilla.client.feedback.schemas.remote.metadata import (
+    RemoteFloatMetadataProperty,
+    RemoteIntegerMetadataProperty,
+    RemoteTermsMetadataProperty,
+)
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.workspaces import Workspace
@@ -38,7 +58,43 @@ from tests.factories import (
 )
 
 if TYPE_CHECKING:
+    from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes, AllowedRemoteMetadataPropertyTypes
     from argilla.client.sdk.users.models import UserModel as User
+
+
+@pytest.fixture()
+def test_dataset():
+    dataset = FeedbackDataset(
+        fields=[TextField(name="text"), TextField(name="optional", required=False)],
+        questions=[TextQuestion(name="question")],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="integer-metadata"),
+            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+    )
+    return dataset
+
+
+@pytest.fixture
+def feedback_dataset() -> FeedbackDataset:
+    return FeedbackDataset(
+        fields=[TextField(name="text"), TextField(name="text-2")],
+        questions=[
+            TextQuestion(name="text"),
+            LabelQuestion(name="label", labels=["label-1", "label-2", "label-3"], required=False),
+            MultiLabelQuestion(name="multi-label", labels=["label-1", "label-2", "label-3"], required=False),
+            RankingQuestion(name="ranking", values=["top-1", "top-2", "top-3"], required=False),
+            RatingQuestion(name="rating", values=[1, 2, 3, 4, 5], required=False),
+        ],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="integer-metadata", min=0, max=10),
+            FloatMetadataProperty(name="float-metadata", min=0, max=10),
+        ],
+        guidelines="unit test guidelines",
+        allow_extra_metadata=False,
+    )
 
 
 @pytest.mark.asyncio
@@ -46,25 +102,183 @@ class TestRemoteFeedbackDataset:
     @pytest.mark.parametrize(
         "record",
         [
-            FeedbackRecord(fields={"required": "Hello world!"}, metadata={}),
-            FeedbackRecord(fields={"required": "Hello world!", "optional": "Bye world!"}, metadata={}),
-            FeedbackRecord(fields={"required": "Hello world!"}, metadata={"terms-metadata": "a"}),
-            FeedbackRecord(fields={"required": "Hello world!"}, metadata={"unrelated-metadata": "unrelated-value"}),
+            FeedbackRecord(fields={"text": "Hello world!"}, metadata={}),
+            FeedbackRecord(fields={"text": "Hello world!", "optional": "Bye world!"}, metadata={}),
+            FeedbackRecord(fields={"text": "Hello world!"}, metadata={"terms-metadata": "a"}),
+            FeedbackRecord(fields={"text": "Hello world!"}, metadata={"unrelated-metadata": "unrelated-value"}),
         ],
     )
-    async def test_add_records(self, owner: "User", record: FeedbackRecord) -> None:
-        dataset = await DatasetFactory.create(status="ready")
-        await TextFieldFactory.create(dataset=dataset, name="required", required=True)
-        await TextFieldFactory.create(dataset=dataset, name="optional", required=False)
-        await TextQuestionFactory.create(dataset=dataset, required=True)
-        await TermsMetadataPropertyFactory.create(
-            dataset=dataset, name="terms-metadata", settings={"type": "terms", "values": ["a", "b", "c"]}
-        )
-
+    async def test_add_records(self, owner: "User", test_dataset: FeedbackDataset, record: FeedbackRecord) -> None:
         api.init(api_key=owner.api_key)
-        remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
+        ws = Workspace.create(name="test-workspace")
+
+        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+
+        remote_dataset = FeedbackDataset.from_argilla(id=remote.id)
         remote_dataset.add_records([record])
+
         assert len(remote_dataset.records) == 1
+
+    async def test_from_argilla(self, feedback_dataset: FeedbackDataset, owner: "User") -> None:
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="unit-test")
+
+        remote = feedback_dataset.push_to_argilla(name="unit-test-dataset", workspace="unit-test")
+
+        assert remote.name == "unit-test-dataset"
+        assert remote.workspace.name == workspace.name
+        assert remote.guidelines == "unit test guidelines"
+        assert remote.allow_extra_metadata is False
+
+        for remote_field, field in zip(remote.fields, feedback_dataset.fields):
+            assert field.name == remote_field.name
+            assert field.type == remote_field.type
+            assert field.required == remote_field.required
+
+        for remote_question, question in zip(remote.questions, feedback_dataset.questions):
+            assert question.name == remote_question.name
+            assert question.type == remote_question.type
+            assert question.required == remote_question.required
+
+        for remote_metadata_property, metadata_property in zip(
+            remote.metadata_properties, feedback_dataset.metadata_properties
+        ):
+            assert metadata_property.name == remote_metadata_property.name
+            assert metadata_property.type == remote_metadata_property.type
+
+        remote = FeedbackDataset.from_argilla(id=remote.id)
+
+        assert remote.name == "unit-test-dataset"
+        assert remote.workspace.name == workspace.name
+        assert remote.guidelines == "unit test guidelines"
+        assert remote.allow_extra_metadata is False
+
+        for remote_field, field in zip(remote.fields, feedback_dataset.fields):
+            assert field.name == remote_field.name
+            assert field.type == remote_field.type
+            assert field.required == remote_field.required
+
+        for remote_question, question in zip(remote.questions, feedback_dataset.questions):
+            assert question.name == remote_question.name
+            assert question.type == remote_question.type
+            assert question.required == remote_question.required
+
+        for remote_metadata_property, metadata_property in zip(
+            remote.metadata_properties, feedback_dataset.metadata_properties
+        ):
+            assert metadata_property.name == remote_metadata_property.name
+            assert metadata_property.type == remote_metadata_property.type
+
+    @pytest.mark.parametrize(
+        "metadata_property, RemoteMetadataPropertyCls",
+        [
+            (TermsMetadataProperty(name="new-terms-metadata"), RemoteTermsMetadataProperty),
+            (TermsMetadataProperty(name="new-terms-metadata", values=["a", "b", "c"]), RemoteTermsMetadataProperty),
+            (IntegerMetadataProperty(name="new-integer-metadata"), RemoteIntegerMetadataProperty),
+            (IntegerMetadataProperty(name="new-integer-metadata", min=0, max=10), RemoteIntegerMetadataProperty),
+            (FloatMetadataProperty(name="new-float-metadata"), RemoteFloatMetadataProperty),
+            (FloatMetadataProperty(name="new-float-metadata", min=0.0, max=10.0), RemoteFloatMetadataProperty),
+        ],
+    )
+    async def test_add_metadata_property(
+        self,
+        owner: "User",
+        test_dataset: FeedbackDataset,
+        metadata_property: "AllowedMetadataPropertyTypes",
+        RemoteMetadataPropertyCls: Type["AllowedRemoteMetadataPropertyTypes"],
+    ) -> None:
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        remote_dataset = test_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+        remote_metadata_property = remote_dataset.add_metadata_property(metadata_property)
+
+        assert isinstance(remote_metadata_property, RemoteMetadataPropertyCls)
+        assert remote_metadata_property.name == metadata_property.name
+
+        remote_dataset = FeedbackDataset.from_argilla(id=remote_dataset.id)
+        remote_metadata_property = remote_dataset.metadata_property_by_name(remote_metadata_property.name)
+        assert remote_metadata_property.to_local() == metadata_property
+
+    async def test_delete_metadata_property(self, owner: "User", feedback_dataset: FeedbackDataset) -> None:
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+        assert isinstance(remote_dataset, RemoteFeedbackDataset)
+        assert len(remote_dataset.metadata_properties) == len(feedback_dataset.metadata_properties)
+
+        for idx, metadata_property in enumerate(remote_dataset.metadata_properties, 1):
+            remote_dataset.delete_metadata_properties(metadata_property.name)
+            assert len(remote_dataset.metadata_properties) == len(feedback_dataset.metadata_properties) - idx
+
+        assert len(remote_dataset.metadata_properties) == 0
+
+    async def test_delete_metadata_property_in_place(self, owner: "User", feedback_dataset: FeedbackDataset) -> None:
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+        assert isinstance(remote_dataset, RemoteFeedbackDataset)
+        assert len(remote_dataset.metadata_properties) == len(feedback_dataset.metadata_properties)
+
+        for idx, metadata_property in enumerate(remote_dataset.metadata_properties, 1):
+            metadata_property.delete()
+            assert len(remote_dataset.metadata_properties) == len(feedback_dataset.metadata_properties) - idx
+
+        assert len(remote_dataset.metadata_properties) == 0
+
+    @pytest.mark.parametrize(
+        "metadata_properties, RemoteMetadataPropertiesClasses",
+        [
+            (
+                [
+                    TermsMetadataProperty(name="new-terms-metadata"),
+                    IntegerMetadataProperty(name="new-integer-metadata"),
+                    FloatMetadataProperty(name="new-float-metadata"),
+                ],
+                [
+                    RemoteTermsMetadataProperty,
+                    RemoteIntegerMetadataProperty,
+                    RemoteFloatMetadataProperty,
+                ],
+            ),
+            (
+                [
+                    TermsMetadataProperty(name="new-terms-metadata", values=["a", "b", "c"]),
+                    IntegerMetadataProperty(name="new-integer-metadata", min=0, max=10),
+                    FloatMetadataProperty(name="new-float-metadata", min=0.0, max=10.0),
+                ],
+                [
+                    RemoteTermsMetadataProperty,
+                    RemoteIntegerMetadataProperty,
+                    RemoteFloatMetadataProperty,
+                ],
+            ),
+        ],
+    )
+    async def test_add_metadata_property_sequential(
+        self,
+        owner: "User",
+        test_dataset: FeedbackDataset,
+        metadata_properties: List["AllowedMetadataPropertyTypes"],
+        RemoteMetadataPropertiesClasses: List[Type["AllowedRemoteMetadataPropertyTypes"]],
+    ) -> None:
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        dataset = test_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+
+        remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
+        assert len(remote_dataset.metadata_properties) == len(test_dataset.metadata_properties)
+
+        for idx, (metadata_property, remote_metadata_property_cls) in enumerate(
+            zip(metadata_properties, RemoteMetadataPropertiesClasses), start=len(test_dataset.metadata_properties)
+        ):
+            remote_metadata_property = remote_dataset.add_metadata_property(metadata_property)
+            assert isinstance(remote_metadata_property, remote_metadata_property_cls)
+            assert remote_metadata_property.name == metadata_property.name
+            assert len(remote_dataset.metadata_properties) == (idx + 1)
 
     @pytest.mark.parametrize("statuses", [["draft", "discarded", "submitted"]])
     async def test_from_argilla_with_responses(self, owner: "User", statuses: List[str]) -> None:
@@ -83,38 +297,48 @@ class TestRemoteFeedbackDataset:
         )
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_delete_records(self, role: UserRole) -> None:
-        dataset = await DatasetFactory.create()
-        await TextFieldFactory.create(dataset=dataset, required=True)
-        await TextQuestionFactory.create(dataset=dataset, required=True)
-        await RecordFactory.create_batch(dataset=dataset, size=10)
-        user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+    async def test_delete_records(self, owner: "User", test_dataset: FeedbackDataset, role: UserRole) -> None:
+        user = await UserFactory.create(role=role)
 
-        api.init(api_key=user.api_key)
-        remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
-        remote_records = [record for record in remote_dataset.records]
+        api.init(api_key=owner.api_key)
+        ws = Workspace.create(name="test-workspace")
+        ws.add_user(user.id)
+
+        api.init(api_key=user.api_key, workspace=ws.name)
+
+        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        remote.add_records(
+            [
+                FeedbackRecord(fields={"text": "Hello world!"}),
+                FeedbackRecord(fields={"text": "Hello world!"}),
+            ]
+        )
+
+        remote_records = [record for record in remote.records]
         assert all(record.id for record in remote_records)
 
-        remote_dataset.delete_records(remote_records[0])
-        assert len(remote_dataset.records) == len(remote_records) - 1
+        remote.delete_records(remote_records[0])
+        assert len(remote.records) == len(remote_records) - 1
 
-        remote_dataset.delete_records(remote_records[1:])
-        assert len(remote_dataset.records) == 0
+        remote.delete_records(remote_records[1:])
+        assert len(remote.records) == 0
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_delete(self, role: UserRole) -> None:
-        dataset = await DatasetFactory.create()
-        await TextFieldFactory.create(dataset=dataset, required=True)
-        await TextQuestionFactory.create(dataset=dataset, required=True)
-        await RecordFactory.create_batch(dataset=dataset, size=10)
-        user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+    async def test_delete(self, owner: "User", test_dataset: FeedbackDataset, role: UserRole) -> None:
+        user = await UserFactory.create(role=role)
+
+        api.init(api_key=owner.api_key)
+
+        ws = Workspace.create(name="test-workspace")
+        ws.add_user(user.id)
 
         api.init(api_key=user.api_key)
-        remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
+        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        remote_dataset = FeedbackDataset.from_argilla(id=remote.id)
         remote_dataset.delete()
 
-        datasets = api.active_api().http_client.get("/api/v1/me/datasets")["items"]
-        assert not any(ds["name"] == remote_dataset.name for ds in datasets)
+        with pytest.raises(Exception, match="Could not find a `FeedbackDataset` in Argilla"):
+            FeedbackDataset.from_argilla(id=remote.id)
 
     @pytest.mark.parametrize("role", [UserRole.annotator])
     async def test_delete_not_allowed_role(self, role: UserRole) -> None:

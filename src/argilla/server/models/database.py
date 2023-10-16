@@ -123,7 +123,7 @@ class Record(DatabaseModel):
     __tablename__ = "records"
 
     fields: Mapped[dict] = mapped_column(JSON, default={})
-    metadata_: Mapped[Optional[dict]] = mapped_column("metadata", JSON, nullable=True)
+    metadata_: Mapped[Optional[dict]] = mapped_column("metadata", MutableDict.as_mutable(JSON), nullable=True)
     external_id: Mapped[Optional[str]] = mapped_column(index=True)
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
 
@@ -189,7 +189,7 @@ class MetadataProperty(DatabaseModel):
     title: Mapped[str] = mapped_column(Text)
     type: Mapped[MetadataPropertyType] = mapped_column(Text)
     settings: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSON), default={})
-    allowed_roles: Mapped[List[UserRole]] = mapped_column(MutableList.as_mutable(JSON), default=[])
+    allowed_roles: Mapped[List[UserRole]] = mapped_column(MutableList.as_mutable(JSON), default=[], server_default="[]")
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
 
     dataset: Mapped["Dataset"] = relationship(back_populates="metadata_properties")
