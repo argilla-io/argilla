@@ -43,7 +43,8 @@ class MetadataPropertySchema(BaseModel, ABC):
 
     Args:
         name: The name of the metadata property.
-        title: A title of the metadata property (what's shown in the UI). Defaults to `None`.
+        title: A title of the metadata property (what's shown in the UI). Defaults to `None`,
+            which means that if not provided then the `name` will be used as the `title`.
         visible_for_annotators: Whether the metadata property should be visible for
             users with the `annotator` role. Defaults to `True`.
         type: The type of the metadata property. A value should be set for this
@@ -100,7 +101,8 @@ class TermsMetadataProperty(MetadataPropertySchema):
 
     Args:
         name: The name of the metadata property.
-        title: A title of the metadata property (what's shown in the UI). Defaults to `None`.
+        title: A title of the metadata property (what's shown in the UI). Defaults to `None`,
+            which means that if not provided then the `name` will be used as the `title`.
         visible_for_annotators: Whether the metadata property should be visible for
             users with the `annotator` role. Defaults to `True`.
         values: A list of possible values for the metadata property. It must contain
@@ -160,7 +162,8 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
 
     Args:
         name: The name of the metadata property.
-        title: A title of the metadata property (what's shown in the UI). Defaults to `None`.
+        title: A title of the metadata property (what's shown in the UI). Defaults to `None`,
+            which means that if not provided then the `name` will be used as the `title`.
         visible_for_annotators: Whether the metadata property should be visible for
             users with the `annotator` role. Defaults to `True`.
         min: The lower bound of the numeric value. Must be provided and be lower than
@@ -244,7 +247,8 @@ class IntegerMetadataProperty(_NumericMetadataPropertySchema):
 
     Args:
         name: The name of the metadata property.
-        title: A title of the metadata property (what's shown in the UI). Defaults to `None`.
+        title: A title of the metadata property (what's shown in the UI). Defaults to `None`,
+            which means that if not provided then the `name` will be used as the `title`.
         visible_for_annotators: Whether the metadata property should be visible for
             users with the `annotator` role. Defaults to `True`.
         min: The lower bound of the integer value. Must be provided, and be lower than
@@ -269,7 +273,8 @@ class FloatMetadataProperty(_NumericMetadataPropertySchema):
 
     Args:
         name: The name of the metadata property.
-        title: A title of the metadata property (what's shown in the UI). Defaults to `None`.
+        title: A title of the metadata property (what's shown in the UI). Defaults to `None`,
+            which means that if not provided then the `name` will be used as the `title`.
         visible_for_annotators: Whether the metadata property should be visible for
             users with the `annotator` role. Defaults to `True`.
         min: The lower bound of the float value. Must be provided, and be lower than
