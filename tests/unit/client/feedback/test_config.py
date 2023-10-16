@@ -14,7 +14,7 @@
 
 import json
 import re
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List
 
 import pytest
 from argilla.client.feedback.config import DatasetConfig, DeprecatedDatasetConfig
@@ -22,27 +22,40 @@ from argilla.client.feedback.schemas.fields import FieldSchema
 from argilla.client.feedback.schemas.questions import QuestionSchema
 from yaml import SafeLoader, load
 
+if TYPE_CHECKING:
+    from argilla.client.feedback.schemas.types import (
+        AllowedFieldTypes,
+        AllowedMetadataPropertyTypes,
+        AllowedQuestionTypes,
+    )
 
-@pytest.mark.usefixtures("feedback_dataset_fields", "feedback_dataset_questions", "feedback_dataset_guidelines")
+
 def test_dataset_config_yaml(
-    feedback_dataset_fields: List[FieldSchema],
-    feedback_dataset_questions: List[QuestionSchema],
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_metadata_properties: List["AllowedMetadataPropertyTypes"],
     feedback_dataset_guidelines: str,
 ) -> None:
     config = DatasetConfig(
         fields=feedback_dataset_fields,
         questions=feedback_dataset_questions,
+        metadata_properties=feedback_dataset_metadata_properties,
         guidelines=feedback_dataset_guidelines,
     )
     assert isinstance(config, DatasetConfig)
     assert config.fields == feedback_dataset_fields
     assert config.questions == feedback_dataset_questions
+    assert config.metadata_properties == feedback_dataset_metadata_properties
     assert config.guidelines == feedback_dataset_guidelines
 
     to_yaml_config = config.to_yaml()
     assert isinstance(to_yaml_config, str)
     assert all(f"name: {field.name}" in to_yaml_config for field in feedback_dataset_fields)
     assert all(f"name: {question.name}" in to_yaml_config for question in feedback_dataset_questions)
+    assert all(
+        f"name: {metadata_property.name}" in to_yaml_config
+        for metadata_property in feedback_dataset_metadata_properties
+    )
     assert f"guidelines: {feedback_dataset_guidelines}" in to_yaml_config
 
     assert "!!python/object:uuid.UUID" not in to_yaml_config
@@ -51,13 +64,14 @@ def test_dataset_config_yaml(
     assert isinstance(from_yaml_config, DatasetConfig)
     assert from_yaml_config.fields == feedback_dataset_fields
     assert from_yaml_config.questions == feedback_dataset_questions
+    assert from_yaml_config.metadata_properties == feedback_dataset_metadata_properties
     assert from_yaml_config.guidelines == feedback_dataset_guidelines
 
 
 @pytest.mark.usefixtures("feedback_dataset_fields", "feedback_dataset_questions", "feedback_dataset_guidelines")
 def test_dataset_config_json_deprecated(
-    feedback_dataset_fields: List[FieldSchema],
-    feedback_dataset_questions: List[QuestionSchema],
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_guidelines: str,
 ) -> None:
     config = DeprecatedDatasetConfig(
