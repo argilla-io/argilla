@@ -43,6 +43,7 @@ from argilla.client.feedback.schemas.remote.metadata import (
     RemoteTermsMetadataProperty,
 )
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+from argilla.client.sdk.commons.errors import ValidationApiError
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.workspaces import Workspace
 from argilla.server.models import User as ServerUser
@@ -207,6 +208,9 @@ class TestRemoteFeedbackDataset:
             ValueError, match="Provided 'new-metadata=100' is not valid, only values between 0 and 10 are allowed."
         ):
             remote.update_records([record])
+
+        with pytest.raises(ValidationApiError, match=r"'new-metadata' metadata property validation failed"):
+            record.update()
 
     async def test_from_argilla(self, feedback_dataset: FeedbackDataset, owner: "User") -> None:
         api.init(api_key=owner.api_key)
