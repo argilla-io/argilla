@@ -49,7 +49,7 @@ async def get_metadata_property_metrics(
 ):
     metadata_property = await _get_metadata_property(db, metadata_property_id)
 
-    await authorize(current_user, MetadataPropertyPolicyV1.compute_metrics(metadata_property))
+    await authorize(current_user, MetadataPropertyPolicyV1.get(metadata_property))
 
     return await search_engine.compute_metrics_for(metadata_property)
 
