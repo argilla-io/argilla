@@ -103,8 +103,6 @@ class ArgillaRecordsMixin:
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def __iter__(self: "RemoteFeedbackRecords") -> Iterator["RemoteFeedbackRecord"]:
         """Iterates over the `FeedbackRecord`s of the current `FeedbackDataset` in Argilla."""
-        question_id_to_name = {question.id: question.name for question in self.dataset.questions}
-
         current_batch = 0
         while True:
             batch = self._fetch_records(offset=FETCHING_BATCH_SIZE * current_batch, limit=FETCHING_BATCH_SIZE)
@@ -112,7 +110,7 @@ class ArgillaRecordsMixin:
                 break
             for record in batch.items:
                 yield RemoteFeedbackRecord.from_api(
-                    record, question_id_to_name=question_id_to_name, client=self._client
+                    record, question_id_to_name=self._question_id_to_name, client=self._client
                 )
             current_batch += 1
 

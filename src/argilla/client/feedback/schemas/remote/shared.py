@@ -21,6 +21,7 @@ from pydantic import BaseModel
 
 
 class RemoteSchema(BaseModel, ABC):
+    # TODO(@alvarobartt): Review optional id configuration for remote schemas
     id: Optional[UUID] = None
     client: Optional[httpx.Client] = None
 
@@ -30,6 +31,7 @@ class RemoteSchema(BaseModel, ABC):
         return self.client
 
     class Config:
+        # TODO(@alvarobart) Not sure if we need this at this level
         allow_mutation = False
         arbitrary_types_allowed = True
 

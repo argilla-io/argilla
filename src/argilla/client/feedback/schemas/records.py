@@ -88,6 +88,7 @@ class ResponseSchema(BaseModel):
         """Method that will be used to create the payload that will be sent to Argilla
         to create a `ResponseSchema` for a `FeedbackRecord`."""
         return {
+            # UUID is not json serializable!!!
             "user_id": self.user_id,
             "values": {question_name: value.dict() for question_name, value in self.values.items()}
             if self.values is not None
@@ -194,9 +195,7 @@ class FeedbackRecord(BaseModel):
     fields: Dict[str, Union[str, None]]
     metadata: Dict[str, Any] = Field(default_factory=dict)
     responses: List[ResponseSchema] = Field(default_factory=list)
-    suggestions: Union[Tuple[SuggestionSchema], List[SuggestionSchema]] = Field(
-        default_factory=tuple, allow_mutation=False
-    )
+    suggestions: Union[Tuple[SuggestionSchema], List[SuggestionSchema]] = Field(default_factory=tuple)
     external_id: Optional[str] = None
 
     _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default_factory=dict)

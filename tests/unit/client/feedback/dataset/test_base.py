@@ -26,7 +26,6 @@ from argilla.client.feedback.schemas.metadata import (
 )
 from argilla.client.feedback.schemas.questions import RatingQuestion, TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
-from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import (
@@ -37,6 +36,9 @@ if TYPE_CHECKING:
 
 
 class TestFeedbackDataset(FeedbackDatasetBase):
+    def update_records(self, **kwargs: Dict[str, Any]) -> None:
+        pass
+
     def filter_by(
         self,
         *,
