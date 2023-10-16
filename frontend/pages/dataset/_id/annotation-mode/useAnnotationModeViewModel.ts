@@ -18,7 +18,7 @@ export const useAnnotationModeViewModel = () => {
   const { state: dataset } = useDataset();
   const getDatasetUseCase = useResolve(GetDatasetByIdUseCase);
 
-  const { datasetId, isLoadingDataset, handleError, createRootBreadCrumbs } =
+  const { datasetId, handleError, createRootBreadCrumbs } =
     useDatasetViewModel();
 
   const breadcrumbs = computed(() => createRootBreadCrumbs(dataset));
@@ -61,15 +61,11 @@ export const useAnnotationModeViewModel = () => {
 
   const loadDataset = async () => {
     try {
-      isLoadingDataset.value = true;
-
       await getDatasetUseCase.execute(datasetId);
     } catch (error) {
       handleError(error.response);
 
       router.push("/");
-    } finally {
-      isLoadingDataset.value = false;
     }
   };
 
@@ -81,7 +77,6 @@ export const useAnnotationModeViewModel = () => {
     recordCriteria,
     dataset,
     datasetId,
-    isLoadingDataset,
     breadcrumbs,
     updateQueryParams,
   };

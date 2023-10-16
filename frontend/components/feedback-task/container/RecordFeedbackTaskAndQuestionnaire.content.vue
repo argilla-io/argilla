@@ -1,5 +1,6 @@
 <template>
-  <div v-if="!$fetchState.pending && !$fetchState.error" class="wrapper">
+  <BaseLoading v-if="$fetchState.pending || $fetchState.error" />
+  <div v-else class="wrapper">
     <template v-if="!!record">
       <RecordFeedbackTaskComponent
         :key="`${record.id}_fields`"
@@ -19,13 +20,8 @@
       />
     </template>
 
-    <div v-else class="wrapper--empty">
-      <p
-        v-if="!records.hasRecordsToAnnotate"
-        class="wrapper__text --heading3"
-        v-text="noRecordsMessage"
-      />
-      <BaseSpinner v-else />
+    <div v-if="!records.hasRecordsToAnnotate" class="wrapper--empty">
+      <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
     </div>
   </div>
 </template>
