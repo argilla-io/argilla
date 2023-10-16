@@ -485,7 +485,6 @@ class TaskTemplateMixin:
     ) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for summarization tasks.
-        To add items to your dataset, use the "add_item" method.
 
         Args:
             use_markdown: Set this parameter to True if you want to use markdown in your dataset
@@ -512,7 +511,6 @@ class TaskTemplateMixin:
     ) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for translation tasks.
-        To add items to your dataset, use the "add_item" method.
 
         Args:
             use_markdown: Set this parameter to True if you want to use markdown in your dataset
@@ -538,7 +536,6 @@ class TaskTemplateMixin:
     ) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for supervised fine-tuning tasks.
-        To add items to your dataset, use the "add_item" method.
 
         Args:
             context: Set this parameter to True if you want to add context to your dataset
@@ -577,7 +574,6 @@ class TaskTemplateMixin:
     ) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for retrieval augmented generation tasks.
-        To add items to your dataset, use the "add_item" method.
 
         Args:
             number_of_documents: Set this parameter to the number of documents you want to add to your dataset
@@ -633,7 +629,6 @@ class TaskTemplateMixin:
     ) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for sentence similarity tasks.
-        To add items to your dataset, use the "add_item" method.
 
         Args:
             similarity_scale: Set this parameter to the number of similarity scale you want to add to your dataset
@@ -666,7 +661,6 @@ class TaskTemplateMixin:
     ) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for preference tasks.
-        To add items to your dataset, use the "add_item" method.
 
         Args:
             use_markdown: Set this parameter to True if you want to use markdown in your dataset
