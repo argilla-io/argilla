@@ -22,6 +22,7 @@ from argilla.client.feedback.config import DatasetConfig
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
+    LabelQuestion,
     MultiLabelQuestion,
     RatingQuestion,
     TextField,
