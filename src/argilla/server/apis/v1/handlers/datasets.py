@@ -590,6 +590,7 @@ async def update_dataset_records(
 
     try:
         await datasets.update_records(db, search_engine, dataset, records_update)
+        telemetry_client.track_data(action="DatasetRecordsUpdated", data={"records": len(records_update.items)})
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
