@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 
 
 class TestFeedbackDataset(FeedbackDatasetBase):
-    def update_records(self, records: Union[FeedbackRecord, List[FeedbackRecord]]) -> None:
+    def update_records(self, **kwargs: Dict[str, Any]) -> None:
         pass
 
     def filter_by(
