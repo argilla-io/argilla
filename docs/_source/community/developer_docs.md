@@ -34,7 +34,7 @@ cd argilla
 ```
 
 To keep your fork's main/develop branch up to date with our repo you should add it as an
-[upstream remote branch](https://dev.to/louhayes3/git-add-an-upstream-to-a-forked-repo-1mik>):
+[upstream remote branch](https://dev.to/louhayes3/git-add-an-upstream-to-a-forked-repo-1mik):
 
 ```sh
 git remote add upstream https://github.com/argilla-io/argilla.git

@@ -125,7 +125,7 @@ Once you have unified your responses, you will have a dataset that's ready for [
 ```{include} /_common/other_datasets.md
 ```
 
-This guide gives you a brief introduction to Argilla Metrics. Argilla Metrics enables you to perform fine-grained analyses of your models and training datasets. Argilla Metrics are inspired by a number of seminal works such as [Explainaboard](https://github.com/neulab/explainaBoard).
+This guide gives you a brief introduction to Argilla Metrics. Argilla Metrics enable you to perform fine-grained analyses of your models and training datasets. Argilla Metrics are inspired by a a number of seminal works such as [Explainaboard](https://explainaboard.inspiredco.ai/).
 
 The main goal is to make it easier to build more robust models and training data, going beyond single-number metrics (e.g., F1).
 
