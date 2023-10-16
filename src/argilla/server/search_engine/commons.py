@@ -73,6 +73,11 @@ def _build_metadata_field_payload(dataset: Dataset, metadata: Union[Dict[str, An
 class SearchDocumentGetter(GetterDict):
     def get(self, key: Any, default: Any = None) -> Any:
         if key == "responses":
+            # `responses` of the record hasn't been loaded, set the default value so when using
+            # `SearchDocument(...).dict(exclude_unset=True)` the field is not included.
+            if "responses" not in self._obj.__dict__:
+                return default
+
             return {
                 response.user.username: UserResponse(
                     values={k: v["value"] for k, v in response.values.items()} if response.values else None,
@@ -199,6 +204,13 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         await self._bulk_op_request(bulk_actions)
         await self._refresh_index_request(index_name)
 
+    async def delete_records(self, dataset: Dataset, records: Iterable[Record]):
+        index_name = await self._get_index_or_raise(dataset)
+
+        bulk_actions = [{"_op_type": "delete", "_id": record.id, "_index": index_name} for record in records]
+
+        await self._bulk_op_request(bulk_actions)
+
     async def update_record_response(self, response: Response):
         record = response.record
         index_name = await self._get_index_or_raise(record.dataset)
@@ -211,28 +223,6 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         await self._update_document_request(
             index_name, id=record.id, body={"doc": {"responses": {response.user.username: es_response.dict()}}}
         )
-
-    async def update_records_metadata(self, dataset: Dataset, records: Iterable[Record]):
-        index_name = await self._get_index_or_raise(dataset)
-
-        bulk_actions = [
-            {
-                "_op_type": "index",
-                "_id": record.id,
-                "_index": index_name,
-                "metadata": _build_metadata_field_payload(record.dataset, record.metadata_),
-            }
-            for record in records
-        ]
-
-        await self._bulk_op_request(bulk_actions)
-
-    async def delete_records(self, dataset: Dataset, records: Iterable[Record]):
-        index_name = await self._get_index_or_raise(dataset)
-
-        bulk_actions = [{"_op_type": "delete", "_id": record.id, "_index": index_name} for record in records]
-
-        await self._bulk_op_request(bulk_actions)
 
     async def delete_record_response(self, response: Response):
         record = response.record

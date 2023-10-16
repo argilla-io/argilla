@@ -225,10 +225,6 @@ class SearchEngine(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    async def update_records_metadata(self, dataset: Dataset, records: Iterable[Record]):
-        pass
-
-    @abstractmethod
     async def delete_record_response(self, response: Response):
         pass
 

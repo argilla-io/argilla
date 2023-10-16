@@ -880,66 +880,6 @@ class TestSuiteOpenSearchEngine:
             },
         }
 
-    async def test_update_records_metadata(
-        self,
-        opensearch_engine: OpenSearchEngine,
-        opensearch: OpenSearch,
-        test_banking_sentiment_dataset: Dataset,
-    ):
-        record_a = test_banking_sentiment_dataset.records[0]
-        record_b = test_banking_sentiment_dataset.records[1]
-        record_c = test_banking_sentiment_dataset.records[2]
-
-        record_a.metadata_ = {"label": "a", "textId": 99999, "seq_float": 0.99}
-        record_b.metadata_ = {"label": "b", "textId": -99999, "seq_float": -0.99}
-        record_c.metadata_ = {"label": "c", "textId": 0, "seq_float": 0}
-
-        await opensearch_engine.update_records_metadata(test_banking_sentiment_dataset, [record_a, record_b, record_c])
-
-        index_name = index_name_for_dataset(test_banking_sentiment_dataset)
-
-        results = opensearch.mget(
-            index=index_name, body={"ids": [str(record_a.id), str(record_b.id), str(record_c.id)]}
-        )
-
-        assert results["docs"][0]["_source"]["metadata"] == {
-            str(test_banking_sentiment_dataset.metadata_properties[0].id): "a",
-            str(test_banking_sentiment_dataset.metadata_properties[1].id): 99999,
-            str(test_banking_sentiment_dataset.metadata_properties[2].id): 0.99,
-        }
-        assert results["docs"][1]["_source"]["metadata"] == {
-            str(test_banking_sentiment_dataset.metadata_properties[0].id): "b",
-            str(test_banking_sentiment_dataset.metadata_properties[1].id): -99999,
-            str(test_banking_sentiment_dataset.metadata_properties[2].id): -0.99,
-        }
-        assert results["docs"][2]["_source"]["metadata"] == {
-            str(test_banking_sentiment_dataset.metadata_properties[0].id): "c",
-            str(test_banking_sentiment_dataset.metadata_properties[1].id): 0,
-            str(test_banking_sentiment_dataset.metadata_properties[2].id): 0,
-        }
-
-    async def test_update_record_metadata_with_extra_metadata(
-        self,
-        opensearch_engine: OpenSearchEngine,
-        opensearch: OpenSearch,
-        test_banking_sentiment_dataset: Dataset,
-    ):
-        record = test_banking_sentiment_dataset.records[0]
-
-        record.metadata_ = {"label": "a", "textId": 99999, "seq_float": 0.99, "much": "data", "many": "annotations"}
-
-        await opensearch_engine.update_records_metadata(test_banking_sentiment_dataset, [record])
-
-        index_name = index_name_for_dataset(test_banking_sentiment_dataset)
-
-        results = opensearch.get(index=index_name, id=record.id)
-
-        assert results["_source"]["metadata"] == {
-            str(test_banking_sentiment_dataset.metadata_properties[0].id): "a",
-            str(test_banking_sentiment_dataset.metadata_properties[1].id): 99999,
-            str(test_banking_sentiment_dataset.metadata_properties[2].id): 0.99,
-        }
-
     async def test_delete_record_response(
         self,
         opensearch_engine: OpenSearchEngine,
