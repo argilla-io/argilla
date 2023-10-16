@@ -403,7 +403,7 @@ def get_metadata_properties(
         A `Response` object containing a `parsed` attribute with the parsed response if the
         request was successful, which is a list of `FeedbackMetadataPropertyModel`.
     """
-    url = f"/api/v1/datasets/{id}/metadata-properties"
+    url = f"/api/v1/me/datasets/{id}/metadata-properties"
 
     response = client.get(url=url)
 
