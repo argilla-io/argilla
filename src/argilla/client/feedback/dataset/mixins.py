@@ -56,8 +56,6 @@ if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel
 
-from argilla.client.feedback.schemas.records import FeedbackRecord
-
 
 class ArgillaMixin:
     def __delete_dataset(self: "FeedbackDataset", client: "httpx.Client", id: UUID) -> None:
@@ -397,30 +395,13 @@ class TaskTemplateMixin:
         "translation"
         "supervised-fine-tuning"
         "conversational"
-        "retrieval-augmented-generation"
-        "sentence-similarity"
+        "retrieval_augmented_generation"
+        "sentence_similarity"
         "preference"
-        "natural-language-inference"
-        "proximal-policy-optimization"
-        "direct-preference-optimization"
+        "natural_language_inference"
+        "proximal_policy_optimization"
+        "direct_preference_optimization"
     """
-
-    guidelines_dict = {
-        "question_answering": "This is a question answering dataset that contains questions and contexts. Please answer the question by using the context.",
-        "text_classification_single_label": "This is a text classification dataset that contains texts and labels. Given a set of texts and a predefined set of labels, the goal of text classification is to assign one or more labels to each text based on its content. Please classify the texts by selecting the correct label.",
-        "text_classification_multi_label": "This is a text classification dataset that contains texts and labels. Given a set of texts and a predefined set of labels, the goal of text classification is to assign one or more labels to each text based on its content. Please classify the texts by selecting the correct labels.",
-        "summarization": "This is a summarization dataset that contains texts. Please summarize the text in the text field.",
-        "translation": "This is a translation dataset that contains texts. Please translate the text in the text field.",
-        "supervised-fine-tuning_context": "This is a supervised fine-tuning dataset that contains instructions and contexts. Please write the response to the instruction in the response field.",
-        "supervised-fine-tuning_no_context": "This is a supervised fine-tuning dataset that contains instructions. Please write the response to the instruction in the response field.",
-        "conversational": "This is a conversational dataset that contains contexts and system prompts. Please write the response to the context in the response field.",
-        "retrieval-augmented-generation": "This is a retrieval augmented generation dataset that contains queries and retrieved documents. Please rate the relevancy of retrieved document and write the response to the query in the response field.",
-        "sentence-similarity": "This is a sentence similarity dataset that contains two sentences. Please rate the similarity between the two sentences.",
-        "preference-modeling": "This is a preference dataset that contains contexts and options. Please choose the option that you would prefer in the given context.",
-        "natural-language-inference": "This is a natural language inference dataset that contains premises and hypotheses. Please choose the correct label for the given premise and hypothesis.",
-        "proximal-policy-optimization": "This is a proximal policy optimization dataset that contains contexts and prompts. Please choose the label that best prompt.",
-        "direct-preference-optimization": "This is a direct preference optimization dataset that contains contexts and options. Please choose the option that you would prefer in the given context.",
-    }
 
     @classmethod
     def for_extractive_question_answering(
@@ -435,6 +416,7 @@ class TaskTemplateMixin:
         Returns:
             A `FeedbackDataset` object for question answering containing "context" and "question" fields and a TextQuestion named "answer"
         """
+        default_guidelines = "This is a question answering dataset that contains questions and contexts. Please answer the question by using the context."
         return cls(
             fields=[
                 TextField(name="question", use_markdown=use_markdown),
@@ -448,7 +430,7 @@ class TaskTemplateMixin:
                     required=True,
                 )
             ],
-            guidelines=cls.guidelines_dict["question_answering"] if guidelines is None else guidelines,
+            guidelines=default_guidelines if guidelines is None else guidelines,
         )
 
     @classmethod
@@ -470,11 +452,11 @@ class TaskTemplateMixin:
         Returns:
             A `FeedbackDataset` object for text classification containing "text" field and LabelQuestion or MultiLabelQuestion named "label"
         """
+        default_guidelines = "This is a text classification dataset that contains texts and labels. Given a set of texts and a predefined set of labels, the goal of text classification is to assign one or more labels to each text based on its content. Please classify the texts by selecting the correct labels."
+
         description = "Classify the text by selecting the correct label from the given list of labels."
         return cls(
-            fields=[
-                TextField(name="text", use_markdown=use_markdown),
-            ],
+            fields=[TextField(name="text", use_markdown=use_markdown)],
             questions=[
                 LabelQuestion(
                     name="label",
@@ -490,9 +472,9 @@ class TaskTemplateMixin:
             ],
             guidelines=guidelines
             if guidelines is not None
-            else cls.guidelines_dict["text_classification_multi_label"]
+            else default_guidelines
             if multi_label
-            else cls.guidelines_dict["text_classification_single_label"],
+            else default_guidelines.replace("one or more", "one"),
         )
 
     @classmethod
@@ -511,14 +493,15 @@ class TaskTemplateMixin:
         Returns:
             A `FeedbackDataset` object for summarization containing "text" field and a TextQuestion named "summary"
         """
+        default_guidelines = (
+            "This is a summarization dataset that contains texts. Please summarize the text in the text field."
+        )
         return cls(
-            fields=[
-                TextField(name="text", use_markdown=use_markdown),
-            ],
+            fields=[TextField(name="text", use_markdown=use_markdown)],
             questions=[
                 TextQuestion(name="summary", description="Write a summary of the text.", use_markdown=use_markdown)
             ],
-            guidelines=cls.guidelines_dict["summarization"] if guidelines is None else guidelines,
+            guidelines=default_guidelines if guidelines is None else guidelines,
         )
 
     @classmethod
@@ -537,10 +520,13 @@ class TaskTemplateMixin:
         Returns:
             A `FeedbackDataset` object for translation containing "text" field and a TextQuestion named "translation"
         """
+        default_guidelines = (
+            "This is a translation dataset that contains texts. Please translate the text in the text field."
+        )
         return cls(
             fields=[TextField(name="text", use_markdown=use_markdown)],
             questions=[TextQuestion(name="translation", description="Translate the text.", use_markdown=use_markdown)],
-            guidelines=guidelines["translation"] if guidelines is None else guidelines,
+            guidelines=default_guidelines if guidelines is None else guidelines,
         )
 
     @classmethod
@@ -561,15 +547,14 @@ class TaskTemplateMixin:
         Returns:
             A `FeedbackDataset` object for supervised fine-tuning containing "instruction" and optional "context" field and a TextQuestion named "response"
         """
+        default_guidelines = "This is a supervised fine-tuning dataset that contains instructions. Please write the response to the instruction in the response field."
+        fields = [
+            TextField(name="prompt", use_markdown=use_markdown),
+        ]
+        if context:
+            fields.append(TextField(name="context", use_markdown=use_markdown, required=False))
         return cls(
-            fields=[
-                TextField(name="prompt", use_markdown=use_markdown),
-                TextField(name="context", use_markdown=use_markdown, required=False),
-            ]
-            if context
-            else [
-                TextField(name="prompt", use_markdown=use_markdown),
-            ],
+            fields=fields,
             questions=[
                 TextQuestion(
                     name="response", description="Write the response to the instruction.", use_markdown=use_markdown
@@ -577,9 +562,9 @@ class TaskTemplateMixin:
             ],
             guidelines=guidelines
             if guidelines is not None
-            else cls.guidelines_dict["supervised-fine-tuning_context"]
+            else default_guidelines + " Take the context into account when writing the response."
             if context
-            else cls.guidelines_dict["supervised-fine-tuning_no_context"],
+            else default_guidelines,
         )
 
     @classmethod
@@ -601,6 +586,7 @@ class TaskTemplateMixin:
         Returns:
             A `FeedbackDataset` object for retrieval augmented generation containing "query" and "retrieved_document" fields and a TextQuestion named "response"
         """
+        default_guidelines = "This is a retrieval augmented generation dataset that contains queries and retrieved documents. Please rate the relevancy of retrieved document and write the response to the query in the response field."
         document_fields = [
             TextField(
                 name="retrieved_document_" + str(doc + 1),
@@ -622,22 +608,20 @@ class TaskTemplateMixin:
             for doc in range(number_of_documents)
         ]
 
-        print(document_fields)
-        print(rating_questions)
+        total_questions = rating_questions + [
+            TextQuestion(
+                name="response",
+                title="Write a helpful, harmless, accurate response to the query.",
+                description="Write the response to the query.",
+                use_markdown=use_markdown,
+                required=False,
+            )
+        ]
 
         return cls(
             fields=[TextField(name="query", use_markdown=use_markdown, required=True)] + document_fields,
-            questions=rating_questions
-            + [
-                TextQuestion(
-                    name="response",
-                    title="Write a helpful, harmless, accurate response to the query.",
-                    description="Write the response to the query.",
-                    use_markdown=use_markdown,
-                    required=False,
-                )
-            ],
-            guidelines=cls.guidelines_dict["retrieval-augmented-generation"] if guidelines is None else guidelines,
+            questions=total_questions,
+            guidelines=default_guidelines if guidelines is None else guidelines,
         )
 
     @classmethod
@@ -658,6 +642,7 @@ class TaskTemplateMixin:
         Returns:
             A `FeedbackDataset` object for sentence similarity containing "sentence1" and "sentence2" fields and a RatingQuestion named "similarity"
         """
+        default_guidelines = "This is a sentence similarity dataset that contains two sentences. Please rate the similarity between the two sentences."
         return cls(
             fields=[
                 TextField(name="sentence1", use_markdown=use_markdown),
@@ -670,7 +655,7 @@ class TaskTemplateMixin:
                     description="Rate the similarity between the two sentences.",
                 )
             ],
-            guidelines=cls.guidelines_dict["sentence-similarity"] if guidelines is None else guidelines,
+            guidelines=default_guidelines if guidelines is None else guidelines,
         )
 
     @classmethod
@@ -689,6 +674,7 @@ class TaskTemplateMixin:
         Returns:
             A `FeedbackDataset` object for preference containing "prompt", "option1" and "option2" fields and a LabelQuestion named "preference"
         """
+        default_guidelines = "This is a preference dataset that contains contexts and options. Please choose the option that you would prefer in the given context."
         return cls(
             fields=[
                 TextField(name="prompt", use_markdown=use_markdown),
@@ -701,13 +687,13 @@ class TaskTemplateMixin:
                     name="preference", labels=["Response 1", "Response 2"], description="Choose your preference."
                 )
             ],
-            guidelines=cls.guidelines_dict["preference-modeling"] if guidelines is None else guidelines,
+            guidelines=default_guidelines if guidelines is None else guidelines,
         )
 
     @classmethod
     def for_natural_language_inference(
         cls: Type["FeedbackDataset"],
-        labels: List[str] = ["entailment", "neutral", "contradiction"],
+        labels: Optional[List[str]] = None,
         use_markdown: bool = False,
         guidelines: str = None,
     ) -> "FeedbackDataset":
@@ -721,13 +707,16 @@ class TaskTemplateMixin:
         Returns:
             A `FeedbackDataset` object for natural language inference containing "premise" and "hypothesis" fields and a LabelQuestion named "label"
         """
+        default_guidelines = "This is a natural language inference dataset that contains premises and hypotheses. Please choose the correct label for the given premise and hypothesis."
+        if labels is None:
+            labels = ["entailment", "neutral", "contradiction"]
         return cls(
             fields=[
                 TextField(name="premise", use_markdown=use_markdown),
                 TextField(name="hypothesis", use_markdown=use_markdown),
             ],
             questions=[LabelQuestion(name="label", labels=labels, description="Choose one of the labels.")],
-            guidelines=cls.guidelines_dict["natural-language-inference"] if guidelines is None else guidelines,
+            guidelines=default_guidelines if guidelines is None else guidelines,
         )
 
     @classmethod
@@ -746,6 +735,7 @@ class TaskTemplateMixin:
         Returns:
             A `FeedbackDataset` object for proximal policy optimization containing "context" and "action" fields and a LabelQuestion named "label"
         """
+        default_guidelines = "This is a proximal policy optimization dataset that contains contexts and prompts. Please choose the label that best prompt."
         fields = [TextField(name="prompt", use_markdown=use_markdown)]
         if context:
             fields.append(TextField(name="context", use_markdown=use_markdown, required=False))
@@ -759,7 +749,7 @@ class TaskTemplateMixin:
                     description="Choose one of the labels that best describes the prompt.",
                 )
             ],
-            guidelines=cls.guidelines_dict["proximal-policy-optimization"] if guidelines is None else guidelines,
+            guidelines=default_guidelines if guidelines is None else guidelines,
         )
 
     @classmethod
@@ -779,6 +769,7 @@ class TaskTemplateMixin:
         Returns:
             A `FeedbackDataset` object for direct preference optimization containing "prompt", "response1", "response2" with the optional "context" fields and a LabelQuestion named "preference"
         """
+        default_guidelines = "This is a direct preference optimization dataset that contains contexts and options. Please choose the option that you would prefer in the given context."
         dataset_fields = [
             TextField(name="prompt", use_markdown=use_markdown),
             TextField(name="response1", title="Response 1", use_markdown=use_markdown),
@@ -795,5 +786,5 @@ class TaskTemplateMixin:
                     description="Choose the label that is your preference.",
                 )
             ],
-            guidelines=cls.guidelines_dict["direct-preference-optimization"] if guidelines is None else guidelines,
+            guidelines=default_guidelines if guidelines is None else guidelines,
         )
