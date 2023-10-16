@@ -30,6 +30,7 @@ These are the section headers that we use:
 - New `DELETE /api/v1/metadata-properties/:metadata_property_id` endpoint allowing the deletion of a specific metadata property. ([#3911](https://github.com/argilla-io/argilla/pull/3911)).
 - Add support for `sort_by` for Argilla feedback datasets ([#3925](https://github.com/argilla-io/argilla/pull/3925)).
 - Added `delete_metadata_properties` and `Remote{Terms,Integer,Float}MetadataProperty.delete` methods to delete metadata properties ([#3932](https://github.com/argilla-io/argilla/pull/3932)).
+- New `PATCH /api/v1/metadata-properties/:metadata_property_id` endpoint allowing the update of a specific metadata property. ([#3952](https://github.com/argilla-io/argilla/pull/3952)).
 
 ### Changed
 
