@@ -3,13 +3,13 @@
   <div v-else class="wrapper">
     <template v-if="!!record">
       <RecordFeedbackTaskComponent
-        :key="`${record.id}_fields`"
+        :key="`${record.id}_${record.status}_fields`"
         :recordStatus="record.status"
         :fields="record.fields"
       />
 
       <QuestionsFormComponent
-        :key="`${record.id}_questions`"
+        :key="`${record.id}_${record.status}_questions`"
         class="question-form"
         :class="statusClass"
         :datasetId="recordCriteria.datasetId"
@@ -137,7 +137,7 @@ export default {
     this.$root.$on("on-change-record-page", async (criteria) => {
       const filter = async () => {
         await this.paginate();
-        this.record.initialize();
+        this.record?.initialize();
       };
 
       if (this.questionFormTouched) {
@@ -152,7 +152,7 @@ export default {
     this.$root.$on("on-change-record-criteria-filter", async (criteria) => {
       const filter = async () => {
         await this.onLoadRecords("replace");
-        this.record.initialize();
+        this.record?.initialize();
       };
 
       if (this.questionFormTouched) {
