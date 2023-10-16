@@ -16,12 +16,13 @@ from datetime import datetime
 from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
-from fastapi import HTTPException, Query
-from pydantic import BaseModel, Extra, conlist, constr, root_validator, validator
+from fastapi import Query
+from pydantic import BaseModel, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
 from pydantic.generics import GenericModel
 from pydantic.utils import GetterDict
 
+from argilla.server.enums import UserRole
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
 from argilla.server.search_engine import StringQuery
@@ -31,7 +32,7 @@ try:
 except ImportError:
     from typing_extensions import Annotated
 
-from argilla.server.enums import DatasetStatus, FieldType, MetadataPropertyType, SortOrder
+from argilla.server.enums import DatasetStatus, FieldType, MetadataPropertyType
 from argilla.server.models import QuestionSettings, QuestionType, ResponseStatus
 
 DATASET_NAME_REGEX = r"^(?!-|_)[a-zA-Z0-9-_ ]+$"
@@ -412,9 +413,11 @@ class RecordCreate(BaseModel):
     suggestions: Optional[List[SuggestionCreate]]
 
     @validator("responses")
-    def check_user_id_is_unique(cls, values):
-        user_ids = []
+    def check_user_id_is_unique(cls, values: Optional[List[UserResponseCreate]]) -> Optional[List[UserResponseCreate]]:
+        if values is None:
+            return values
 
+        user_ids = []
         for value in values:
             if value.user_id in user_ids:
                 raise ValueError(f"Responses contains several responses for the same user_id: {str(value.user_id)!r}")
@@ -479,6 +482,7 @@ class MetadataPropertyCreate(BaseModel):
         max_length=METADATA_PROPERTY_CREATE_DESCRIPTION_MAX_LENGTH,
     )
     settings: MetadataPropertySettingsCreate
+    visible_for_annotators: bool = True
 
 
 class TermsMetadataProperty(BaseModel):
@@ -509,6 +513,7 @@ class MetadataProperty(BaseModel):
     name: str
     description: Optional[str] = None
     settings: MetadataPropertySettings
+    visible_for_annotators: bool
     inserted_at: datetime
     updated_at: datetime
 

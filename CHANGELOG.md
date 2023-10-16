@@ -25,8 +25,11 @@ These are the section headers that we use:
 - Added new endpoint `GET /api/v1/metadata-properties/:metadata_property_id/metrics` to compute metrics for metadata properties ([#3856](https://github.com/argilla-io/argilla/pull/3856))
 - Added a validation layer for both `metadata_properties` and `metadata_filters` in their schemas and as part of the `add_records` and `filter_by` methods, respectively ([#3860](https://github.com/argilla-io/argilla/pull/3860)).
 - Added `sort_by` query parameter to listing records endpoints that allows to sort the records by `inserted_at`, `updated_at` or metadata property ([#3843](https://github.com/argilla-io/argilla/pull/3843)).
+- Added `add_metadata_property` method to both `FeedbackDataset` and `RemoteFeedbackDataset` (i.e. `FeedbackDataset` in Argilla) ([#3900](https://github.com/argilla-io/argilla/pull/3900)).
 - Added fields `inserted_at` and `updated_at` in `RemoteResponseSchema` ([#3822](https://github.com/argilla-io/argilla/pull/3822)).
 - New `DELETE /api/v1/metadata-properties/:metadata_property_id` endpoint allowing the deletion of a specific metadata property. ([#3911](https://github.com/argilla-io/argilla/pull/3911)).
+- Add support for `sort_by` for Argilla feedback datasets ([#3925](https://github.com/argilla-io/argilla/pull/3925)).
+- Added `delete_metadata_properties` and `Remote{Terms,Integer,Float}MetadataProperty.delete` methods to delete metadata properties ([#3932](https://github.com/argilla-io/argilla/pull/3932)).
 
 ### Changed
 
@@ -35,18 +38,17 @@ These are the section headers that we use:
 - Changed argilla dataset name in the active learning for text classification notebooks to be consistent with the default names in the huggingface spaces ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
 - Updated `GET /api/v1/datasets/{dataset_id}/records`, `GET /api/v1/me/datasets/{dataset_id}/records` and `POST /api/v1/me/datasets/{dataset_id}/records/search` endpoints to return the `total` number of records ([#3848](https://github.com/argilla-io/argilla/pull/3848) & [#3903](https://github.com/argilla-io/argilla/pull/3903)).
 - Updated `FilteredRemoteFeedbackRecords.__len__` method to return the number of records matching the provided filters ([#3916](https://github.com/argilla-io/argilla/pull/3916)).
+- Increase the default max result window for Elasticsearch created for Feedback datasets ([#3929](https://github.com/argilla-io/argilla/pull/)).
+- Force elastic index refresh after records creation ([#3929](https://github.com/argilla-io/argilla/pull/)).
 
 ### Fixed
 
 - Updated active learning for text classification notebooks to pass ids of type int to `TextClassificationRecord` ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
 - Fixed record fields validation that was preventing from logging records with optional fields (i.e. `required=True`) when the field value was `None` ([#3846](https://github.com/argilla-io/argilla/pull/3846)).
-
-### Fixed
-
-- Fixed saving of models trained with `ArgillaTrainer` with a `peft_config` parameter. ([#3795](https://github.com/argilla-io/argilla/pull/3795))
-
-### Fixed
-
+- Fixed response schemas to allow `values` to be `None` i.e. when a record is discarded the `response.values` are set to `None` ([#3926](https://github.com/argilla-io/argilla/pull/3926)).
+- The `inserted_at` and `updated_at` attributes are create using the `utcnow` factory to avoid unexpected race conditions on timestamp creation ([#3945](https://github.com/argilla-io/argilla/pull/3945))
+- Fixed saving of models trained with `ArgillaTrainer` with a `peft_config` parameter ([#3795](https://github.com/argilla-io/argilla/pull/3795)).
+- Fixed backwards compatibility on `from_huggingface` when loading a `FeedbackDataset` from the Hugging Face Hub that was previously dumped using another version of Argilla, starting at 1.8.0, when it was first introduced ([#3829](https://github.com/argilla-io/argilla/pull/3829)).
 - Fixed allow pull datasets without records ([#3851](https://github.com/argilla-io/argilla/pull/3851))
 - Updated active learning for text classification notebooks to pass ids of type int to `TextClassificationRecord` ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
 - Fixed record fields validation that was preventing from logging records with optional fields (i.e. `required=True`) when the field value was `None` ([#3846](https://github.com/argilla-io/argilla/pull/3846)).

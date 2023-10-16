@@ -57,6 +57,19 @@ class UserResponse(BaseModel):
     status: ResponseStatus
 
 
+def _build_metadata_field_payload(dataset: Dataset, metadata: Union[Dict[str, Any], None] = None) -> Dict[str, Any]:
+    if metadata is None:
+        return {}
+
+    search_engine_metadata = {}
+    for metadata_property in dataset.metadata_properties:
+        value = metadata.get(metadata_property.name)
+        if value is not None:
+            search_engine_metadata[str(metadata_property.id)] = value
+
+    return search_engine_metadata
+
+
 class SearchDocumentGetter(GetterDict):
     def get(self, key: Any, default: Any = None) -> Any:
         if key == "responses":
@@ -68,15 +81,7 @@ class SearchDocumentGetter(GetterDict):
                 for response in self._obj.responses
             }
         elif key == "metadata":
-            if self._obj.metadata_ is None:
-                return {}
-
-            dataset = self._obj.dataset
-            return {
-                str(metadata_property.id): self._obj.metadata_.get(metadata_property.name)
-                for metadata_property in dataset.metadata_properties
-                if self._obj.metadata_.get(metadata_property.name) is not None
-            }
+            return _build_metadata_field_payload(self._obj.dataset, self._obj.metadata_)
 
         return super().get(key, default)
 
@@ -151,11 +156,13 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     The rest of the code will be shared by both implementation
     """
 
-    es_number_of_shards: int
-    es_number_of_replicas: int
+    number_of_shards: int
+    number_of_replicas: int
 
     # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-settings.html#search-settings-max-buckets
     max_terms_size: int = 2 ^ 14
+    # See https://www.elastic.co/guide/en/elasticsearch/reference/5.1/index-modules.html#dynamic-index-settings
+    max_result_window: int = 500000
 
     async def create_index(self, dataset: Dataset):
         settings = self._configure_index_settings()
@@ -190,6 +197,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         ]
 
         await self._bulk_op_request(bulk_actions)
+        await self._refresh_index_request(index_name)
 
     async def update_record_response(self, response: Response):
         record = response.record
@@ -202,6 +210,15 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         await self._update_document_request(
             index_name, id=record.id, body={"doc": {"responses": {response.user.username: es_response.dict()}}}
+        )
+
+    async def update_record_metadata(self, record: Record):
+        index_name = await self._get_index_or_raise(record.dataset)
+
+        await self._update_document_request(
+            index_name,
+            id=record.id,
+            body={"doc": {"metadata": _build_metadata_field_payload(record.dataset, record.metadata_)}},
         )
 
     async def delete_records(self, dataset: Dataset, records: Iterable[Record]):
@@ -525,4 +542,8 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     @abstractmethod
     async def _bulk_op_request(self, actions: List[Dict[str, Any]]):
         """Executes request for bulk operations"""
+        pass
+
+    @abstractmethod
+    def _refresh_index_request(self, index_name: str):
         pass
