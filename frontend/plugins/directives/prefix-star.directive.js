@@ -17,7 +17,10 @@ const sparkIcon = {
 
 Vue.directive("prefix-star", {
   update: (element, binding) => {
-    if (!binding?.value.enabled) return;
+    if (!binding?.value.enabled) {
+      sparkIcon.remove(element);
+      return;
+    }
 
     if (binding?.value.show) {
       sparkIcon.add(element, binding);
@@ -26,7 +29,10 @@ Vue.directive("prefix-star", {
     }
   },
   bind: (element, binding) => {
-    if (!binding?.value.enabled) return;
+    if (!binding?.value.enabled) {
+      sparkIcon.remove(element);
+      return;
+    }
 
     if (binding?.value.show) {
       sparkIcon.add(element, binding);

@@ -137,7 +137,6 @@ export default {
     this.$root.$on("on-change-record-page", async (criteria) => {
       const filter = async () => {
         await this.paginate();
-        this.record.initialize();
       };
 
       if (this.questionFormTouched) {
@@ -152,7 +151,6 @@ export default {
     this.$root.$on("on-change-record-criteria-filter", async (criteria) => {
       const filter = async () => {
         await this.onLoadRecords("replace");
-        this.record.initialize();
       };
 
       if (this.questionFormTouched) {
