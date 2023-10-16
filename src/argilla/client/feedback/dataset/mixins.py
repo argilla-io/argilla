@@ -154,18 +154,19 @@ class ArgillaMixin:
     @staticmethod
     def _parse_to_remote_metadata_property(
         metadata_property: "FeedbackMetadataPropertyModel",
+        client: Optional["httpx.Client"] = None,
     ) -> "AllowedRemoteMetadataPropertyTypes":
         if metadata_property.settings["type"] == MetadataPropertyTypes.terms:
-            metadata_property = RemoteTermsMetadataProperty.from_api(metadata_property)
+            metadata_property = RemoteTermsMetadataProperty.from_api(payload=metadata_property, client=client)
         elif metadata_property.settings["type"] == MetadataPropertyTypes.integer:
-            metadata_property = RemoteIntegerMetadataProperty.from_api(metadata_property)
+            metadata_property = RemoteIntegerMetadataProperty.from_api(payload=metadata_property, client=client)
         elif metadata_property.settings["type"] == MetadataPropertyTypes.float:
-            metadata_property = RemoteFloatMetadataProperty.from_api(metadata_property)
+            metadata_property = RemoteFloatMetadataProperty.from_api(payload=metadata_property, client=client)
         else:
             raise ValueError(
                 f"Metadata property '{metadata_property.name}' is not a supported metadata property in the current"
-                " Python package version, supported field types are: "
-                f"`{'`, `'.join([arg.value for arg in FieldTypes])}`."
+                " Python package version, supported metadata property types are: "
+                f"`{'`, `'.join([arg.value for arg in MetadataPropertyTypes])}`."
             )
 
         return metadata_property
@@ -184,7 +185,9 @@ class ArgillaMixin:
                     client=client, id=id, metadata_property=metadata_property.to_server_payload()
                 ).parsed
                 uploaded_metadata_properties.append(
-                    ArgillaMixin._parse_to_remote_metadata_property(new_metadata_property)
+                    ArgillaMixin._parse_to_remote_metadata_property(
+                        metadata_property=new_metadata_property, client=client
+                    )
                 )
             except Exception as e:
                 ArgillaMixin.__delete_dataset(client=client, id=id)
@@ -331,7 +334,9 @@ class ArgillaMixin:
     def __get_metadata_properties(client: "httpx.Client", id: UUID) -> List["AllowedRemoteMetadataPropertyTypes"]:
         metadata_properties = []
         for metadata_prop in datasets_api_v1.get_metadata_properties(client=client, id=id).parsed:
-            metadata_properties.append(ArgillaMixin._parse_to_remote_metadata_property(metadata_prop))
+            metadata_properties.append(
+                ArgillaMixin._parse_to_remote_metadata_property(metadata_property=metadata_prop, client=client)
+            )
         return metadata_properties
 
     @classmethod

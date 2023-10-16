@@ -21,7 +21,7 @@ from argilla.server.contexts import datasets
 from argilla.server.database import get_async_db
 from argilla.server.models import MetadataProperty, User
 from argilla.server.policies import MetadataPropertyPolicyV1, authorize
-from argilla.server.schemas.v1.metadata_properties import MetadataMetrics, MetadataProperty
+from argilla.server.schemas.v1.metadata_properties import MetadataMetrics, MetadataProperty, MetadataPropertyUpdate
 from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.security import auth
 
@@ -49,9 +49,24 @@ async def get_metadata_property_metrics(
 ):
     metadata_property = await _get_metadata_property(db, metadata_property_id)
 
-    await authorize(current_user, MetadataPropertyPolicyV1.compute_metrics(metadata_property))
+    await authorize(current_user, MetadataPropertyPolicyV1.get(metadata_property))
 
     return await search_engine.compute_metrics_for(metadata_property)
+
+
+@router.patch("/metadata-properties/{metadata_property_id}", response_model=MetadataProperty)
+async def update_metadata_property(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    metadata_property_id: UUID,
+    metadata_property_update: MetadataPropertyUpdate,
+    current_user: User = Security(auth.get_current_user),
+):
+    metadata_property = await _get_metadata_property(db, metadata_property_id)
+
+    await authorize(current_user, MetadataPropertyPolicyV1.update(metadata_property))
+
+    return await datasets.update_metadata_property(db, metadata_property, metadata_property_update)
 
 
 @router.delete("/metadata-properties/{metadata_property_id}", response_model=MetadataProperty)

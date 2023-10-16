@@ -22,6 +22,7 @@ from pydantic import Field as PydanticField
 from pydantic.generics import GenericModel
 from pydantic.utils import GetterDict
 
+from argilla.server.enums import UserRole
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.records import RecordUpdate
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
@@ -32,7 +33,7 @@ try:
 except ImportError:
     from typing_extensions import Annotated
 
-from argilla.server.enums import DatasetStatus, FieldType, MetadataPropertyType, SortOrder
+from argilla.server.enums import DatasetStatus, FieldType, MetadataPropertyType
 from argilla.server.models import QuestionSettings, QuestionType, ResponseStatus
 
 DATASET_NAME_REGEX = r"^(?!-|_)[a-zA-Z0-9-_ ]+$"
@@ -57,9 +58,9 @@ QUESTION_CREATE_DESCRIPTION_MAX_LENGTH = 1000
 
 METADATA_PROPERTY_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH = 1
-METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH = 50
-METADATA_PROPERTY_CREATE_DESCRIPTION_MIN_LENGTH = 1
-METADATA_PROPERTY_CREATE_DESCRIPTION_MAX_LENGTH = 1000
+METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH = 200
+METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH = 1
+METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH = 500
 
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 10
@@ -476,6 +477,11 @@ class FloatMetadataPropertyCreate(NumericMetadataProperty[float]):
     type: Literal[MetadataPropertyType.float]
 
 
+MetadataPropertyTitleCreate = Annotated[
+    constr(min_length=METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH, max_length=METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH),
+    PydanticField(..., description="The title of the metadata property"),
+]
+
 MetadataPropertySettingsCreate = Annotated[
     Union[TermsMetadataPropertyCreate, IntegerMetadataPropertyCreate, FloatMetadataPropertyCreate],
     PydanticField(..., discriminator="type"),
@@ -489,12 +495,9 @@ class MetadataPropertyCreate(BaseModel):
         min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
         max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
     )
-    description: Optional[str] = PydanticField(
-        None,
-        min_length=METADATA_PROPERTY_CREATE_DESCRIPTION_MIN_LENGTH,
-        max_length=METADATA_PROPERTY_CREATE_DESCRIPTION_MAX_LENGTH,
-    )
+    title: MetadataPropertyTitleCreate
     settings: MetadataPropertySettingsCreate
+    visible_for_annotators: bool = True
 
 
 class TermsMetadataProperty(BaseModel):
@@ -523,8 +526,9 @@ MetadataPropertySettings = Annotated[
 class MetadataProperty(BaseModel):
     id: UUID
     name: str
-    description: Optional[str] = None
+    title: str
     settings: MetadataPropertySettings
+    visible_for_annotators: bool
     inserted_at: datetime
     updated_at: datetime
 

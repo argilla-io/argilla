@@ -215,6 +215,7 @@ class DatasetPolicyV1:
         async def is_allowed(actor: User) -> bool:
             if actor.is_owner or workspace_id is None:
                 return True
+
             return await _exists_workspace_user_by_user_and_workspace_id(actor, workspace_id)
 
         return is_allowed
@@ -379,17 +380,21 @@ class QuestionPolicyV1:
 
 class MetadataPropertyPolicyV1:
     @classmethod
-    def compute_metrics(cls, metadata_property: MetadataProperty) -> PolicyAction:
+    def get(cls, metadata_property: MetadataProperty) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            if actor.is_owner:
-                return True
-
-            exists_workspace_user = await _exists_workspace_user_by_user_and_workspace_id(
-                actor, metadata_property.dataset.workspace_id
+            return actor.is_owner or (
+                actor.role in metadata_property.allowed_roles
+                and await _exists_workspace_user_by_user_and_workspace_id(actor, metadata_property.dataset.workspace_id)
             )
 
-            return (actor.is_admin and exists_workspace_user and metadata_property.is_visible) or (
-                actor.is_annotator and exists_workspace_user and metadata_property.is_visible_for_annotators
+        return is_allowed
+
+    @classmethod
+    def update(cls, metadata_property: MetadataProperty) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (
+                actor.is_admin
+                and await _exists_workspace_user_by_user_and_workspace_id(actor, metadata_property.dataset.workspace_id)
             )
 
         return is_allowed

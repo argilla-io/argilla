@@ -20,7 +20,7 @@ from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
-from argilla.server.enums import DatasetStatus, RecordInclude, ResponseStatusFilter
+from argilla.server.enums import DatasetStatus, RecordInclude, ResponseStatusFilter, UserRole
 from argilla.server.models import (
     Dataset,
     Field,
@@ -40,6 +40,7 @@ from argilla.server.schemas.v1.datasets import (
     QuestionCreate,
     RecordsCreate,
 )
+from argilla.server.schemas.v1.metadata_properties import MetadataPropertyUpdate
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate
 from argilla.server.search_engine import SearchEngine
@@ -56,6 +57,9 @@ if TYPE_CHECKING:
     from argilla.server.schemas.v1.suggestions import SuggestionCreate
 
 LIST_RECORDS_LIMIT = 20
+
+VISIBLE_FOR_ANNOTATORS_ALLOWED_ROLES = [UserRole.admin, UserRole.annotator]
+NOT_VISIBLE_FOR_ANNOTATORS_ALLOWED_ROLES = [UserRole.admin]
 
 
 async def get_dataset_by_id(
@@ -116,6 +120,13 @@ async def _count_required_fields_by_dataset_id(db: "AsyncSession", dataset_id: U
 async def _count_required_questions_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
     result = await db.execute(select(func.count(Question.id)).filter_by(dataset_id=dataset_id, required=True))
     return result.scalar()
+
+
+def _allowed_roles_for_metadata_property_create(metadata_property_create: MetadataPropertyCreate) -> List[UserRole]:
+    if metadata_property_create.visible_for_annotators:
+        return VISIBLE_FOR_ANNOTATORS_ALLOWED_ROLES
+    else:
+        return NOT_VISIBLE_FOR_ANNOTATORS_ALLOWED_ROLES
 
 
 async def publish_dataset(db: "AsyncSession", search_engine: SearchEngine, dataset: Dataset) -> Dataset:
@@ -229,15 +240,19 @@ async def create_question(db: "AsyncSession", dataset: Dataset, question_create:
 
 
 async def create_metadata_property(
-    db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, metadata_prop_create: MetadataPropertyCreate
+    db: "AsyncSession",
+    search_engine: "SearchEngine",
+    dataset: Dataset,
+    metadata_property_create: MetadataPropertyCreate,
 ) -> MetadataProperty:
     async with db.begin_nested():
         metadata_property = await MetadataProperty.create(
             db,
-            name=metadata_prop_create.name,
-            type=metadata_prop_create.settings.type,
-            description=metadata_prop_create.description,
-            settings=metadata_prop_create.settings.dict(),
+            name=metadata_property_create.name,
+            title=metadata_property_create.title,
+            type=metadata_property_create.settings.type,
+            settings=metadata_property_create.settings.dict(),
+            allowed_roles=_allowed_roles_for_metadata_property_create(metadata_property_create),
             dataset_id=dataset.id,
             autocommit=False,
         )
@@ -246,7 +261,20 @@ async def create_metadata_property(
             await search_engine.configure_metadata_property(dataset, metadata_property)
 
     await db.commit()
+
     return metadata_property
+
+
+async def update_metadata_property(
+    db: "AsyncSession",
+    metadata_property: MetadataProperty,
+    metadata_property_update: MetadataPropertyUpdate,
+):
+    return await metadata_property.update(
+        db,
+        title=metadata_property_update.title or metadata_property.title,
+        allowed_roles=_allowed_roles_for_metadata_property_create(metadata_property_update),
+    )
 
 
 async def update_question(db: "AsyncSession", question: Question, question_update: "QuestionUpdate") -> Question:

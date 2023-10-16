@@ -19,8 +19,8 @@ from uuid import UUID
 from pydantic import BaseModel, Field, validator
 from pydantic.generics import GenericModel
 
-from argilla.server.enums import MetadataPropertyType
-from argilla.server.schemas.v1.datasets import MetadataPropertySettings
+from argilla.server.enums import MetadataPropertyType, UserRole
+from argilla.server.schemas.v1.datasets import MetadataPropertySettings, MetadataPropertyTitleCreate
 
 FLOAT_METADATA_METRICS_PRECISION = 5
 
@@ -70,11 +70,17 @@ MetadataMetrics = Annotated[
 class MetadataProperty(BaseModel):
     id: UUID
     name: str
-    description: Optional[str] = None
+    title: str
     settings: MetadataPropertySettings
+    visible_for_annotators: bool
     dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
 
     class Config:
         orm_mode = True
+
+
+class MetadataPropertyUpdate(BaseModel):
+    title: Optional[MetadataPropertyTitleCreate]
+    visible_for_annotators: Optional[bool]
