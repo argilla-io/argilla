@@ -14,7 +14,7 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Generic, Iterable, List, Literal, Optional, TYPE_CHECKING, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Literal, Optional, Type, TypeVar, Union
 
 from pydantic import BaseModel, ValidationError
 
@@ -32,8 +32,8 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForPPO,
     TrainingTaskForQuestionAnswering,
     TrainingTaskForRM,
-    TrainingTaskForSFT,
     TrainingTaskForSentenceSimilarity,
+    TrainingTaskForSFT,
     TrainingTaskForTextClassification,
     TrainingTaskTypes,
 )

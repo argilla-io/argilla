@@ -37,7 +37,6 @@ if TYPE_CHECKING:
 
 
 class TestFeedbackDataset(FeedbackDatasetBase):
-
     def update_records(self, **kwargs: Dict[str, Any]) -> None:
         pass
 

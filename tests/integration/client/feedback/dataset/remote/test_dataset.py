@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, TYPE_CHECKING, List, Tuple, Type
+from typing import TYPE_CHECKING, Any, List, Tuple, Type
 from uuid import UUID
 
 import pytest
