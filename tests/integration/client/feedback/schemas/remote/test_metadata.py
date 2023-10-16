@@ -22,53 +22,84 @@ from argilla.client.feedback.schemas.remote.metadata import (
     RemoteIntegerMetadataProperty,
     RemoteTermsMetadataProperty,
 )
-from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes
 
 if TYPE_CHECKING:
+    from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes
     from argilla.client.sdk.users.models import UserModel
 
 
-@pytest.mark.parametrize(
-    "metadata_properties",
-    (
-        [rg.TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"])],
-        [rg.TermsMetadataProperty(name="terms-metadata", visible_for_annotators=False)],
-        [rg.IntegerMetadataProperty(name="integer-metadata", min=0, max=10)],
-        [rg.IntegerMetadataProperty(name="integer-metadata", visible_for_annotators=False)],
-        [rg.FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0)],
-        [rg.FloatMetadataProperty(name="float-metadata", visible_for_annotators=False)],
-        [
-            rg.TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
-            rg.IntegerMetadataProperty(name="integer-metadata", min=0, max=10),
-            rg.FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
-        ],
-    ),
-)
-def test_metadata_properties(owner: "UserModel", metadata_properties: List["AllowedMetadataPropertyTypes"]) -> None:
-    rg.init(api_key=owner.api_key)
-
-    workspace = rg.Workspace.create(name="my-workspace")
-    dataset = rg.FeedbackDataset(
-        fields=[rg.TextField(name="text-field")],
-        questions=[rg.TextQuestion(name="text-question")],
-        metadata_properties=metadata_properties,
+class TestSuiteRemoteMetadataProperties:
+    @pytest.mark.parametrize(
+        "metadata_properties",
+        (
+            [rg.TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"])],
+            [rg.TermsMetadataProperty(name="terms-metadata", visible_for_annotators=False)],
+            [rg.IntegerMetadataProperty(name="integer-metadata", min=0, max=10)],
+            [rg.IntegerMetadataProperty(name="integer-metadata", visible_for_annotators=False)],
+            [rg.FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0)],
+            [rg.FloatMetadataProperty(name="float-metadata", visible_for_annotators=False)],
+            [
+                rg.TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+                rg.IntegerMetadataProperty(name="integer-metadata", min=0, max=10),
+                rg.FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+            ],
+        ),
     )
+    def test_create_and_restore(
+        self, owner: "UserModel", metadata_properties: List["AllowedMetadataPropertyTypes"]
+    ) -> None:
+        rg.init(api_key=owner.api_key)
 
-    remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace=workspace.name)
-    assert isinstance(remote_dataset, RemoteFeedbackDataset)
-    assert len(remote_dataset.metadata_properties) == len(dataset.metadata_properties)
+        workspace = rg.Workspace.create(name="my-workspace")
+        dataset = rg.FeedbackDataset(
+            fields=[rg.TextField(name="text-field")],
+            questions=[rg.TextQuestion(name="text-question")],
+            metadata_properties=metadata_properties,
+        )
 
-    for remote_metadata_property in remote_dataset.metadata_properties:
-        assert isinstance(
-            remote_metadata_property,
-            (RemoteTermsMetadataProperty, RemoteIntegerMetadataProperty, RemoteFloatMetadataProperty),
+        remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace=workspace.name)
+        assert isinstance(remote_dataset, RemoteFeedbackDataset)
+        assert len(remote_dataset.metadata_properties) == len(dataset.metadata_properties)
+
+        for remote_metadata_property in remote_dataset.metadata_properties:
+            assert isinstance(
+                remote_metadata_property,
+                (RemoteTermsMetadataProperty, RemoteIntegerMetadataProperty, RemoteFloatMetadataProperty),
+            )
+            matching_metadata_property = next(
+                metadata_property
+                for metadata_property in dataset.metadata_properties
+                if metadata_property.name == remote_metadata_property.name
+            )
+            assert isinstance(
+                matching_metadata_property,
+                (rg.TermsMetadataProperty, rg.IntegerMetadataProperty, rg.FloatMetadataProperty),
+            )
+            assert remote_metadata_property.to_local() == matching_metadata_property
+
+    def test_delete(self, owner: "UserModel") -> None:
+        rg.init(api_key=owner.api_key)
+
+        workspace = rg.Workspace.create(name="my-workspace")
+        dataset = rg.FeedbackDataset(
+            fields=[rg.TextField(name="text-field")],
+            questions=[rg.TextQuestion(name="text-question")],
+            metadata_properties=[
+                rg.TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+                rg.IntegerMetadataProperty(name="integer-metadata", min=0, max=10),
+                rg.FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+            ],
         )
-        matching_metadata_property = next(
-            metadata_property
-            for metadata_property in dataset.metadata_properties
-            if metadata_property.name == remote_metadata_property.name
-        )
-        assert isinstance(
-            matching_metadata_property, (rg.TermsMetadataProperty, rg.IntegerMetadataProperty, rg.FloatMetadataProperty)
-        )
-        assert remote_metadata_property.to_local() == matching_metadata_property
+
+        remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace=workspace.name)
+        assert isinstance(remote_dataset, RemoteFeedbackDataset)
+        assert len(remote_dataset.metadata_properties) == len(dataset.metadata_properties)
+
+        remote_dataset.metadata_properties[0].delete()
+        for metadata_property in remote_dataset.metadata_properties:
+            local_metadata_property = metadata_property.delete()
+            assert isinstance(
+                local_metadata_property,
+                (rg.TermsMetadataProperty, rg.IntegerMetadataProperty, rg.FloatMetadataProperty),
+            )
+        assert len(remote_dataset.metadata_properties) == 0

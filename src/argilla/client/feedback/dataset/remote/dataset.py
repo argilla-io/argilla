@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import warnings
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
@@ -20,6 +21,7 @@ from tqdm import trange
 from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase, SortBy
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
+from argilla.client.feedback.mixins import ArgillaMetadataPropertiesMixin
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
@@ -32,6 +34,7 @@ if TYPE_CHECKING:
 
     import httpx
 
+    from argilla.client.feedback.dataset import FeedbackDataset
     from argilla.client.feedback.schemas.metadata import MetadataFilters
     from argilla.client.feedback.schemas.types import (
         AllowedMetadataPropertyTypes,
@@ -66,10 +69,6 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
                 and/or attributes.
         """
         self._dataset = dataset
-        # TODO: review why this is here !
-        self._question_id_to_name = {question.id: question.name for question in self._dataset.questions}
-        self._question_name_to_id = {value: key for key, value in self._question_id_to_name.items()}
-        # TODO END
 
         if response_status and not isinstance(response_status, list):
             response_status = [response_status]
@@ -139,15 +138,16 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             Exception: If the pushing of the records to Argilla fails.
         """
         records = self.dataset._parse_and_validate_records(records)
+        question_name_to_id = {question.name: question.id for question in self.dataset.questions}
 
         for i in trange(
             0, len(records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=not show_progress
         ):
             datasets_api_v1.add_records(
                 client=self._client,
-                id=self._dataset.id,
+                id=self.dataset.id,
                 records=[
-                    record.to_server_payload(self._question_name_to_id)
+                    record.to_server_payload(question_name_to_id=question_name_to_id)
                     for record in records[i : i + PUSHING_BATCH_SIZE]
                 ],
             )
@@ -183,33 +183,40 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             id=self._dataset.id,
             offset=offset,
             limit=limit,
-            response_status=self.__response_status_filters_for_api_call(),
-            metadata_filters=self.__metadata_filters_for_api_call(),
-            sort_by=self.__sort_by_for_api_call(),
+            response_status=self.__response_status_query_strings,
+            metadata_filters=self.__metadata_filters_query_strings,
+            sort_by=self.__sort_by_query_strings,
         ).parsed
-
-    def __sort_by_for_api_call(self) -> Optional[List[str]]:
-        if len(self._sort_by) < 1:
-            return None
-
-        return [f"{sort_by.field}:{sort_by.order}" for sort_by in self._sort_by]
 
     def _has_filters(self) -> bool:
         """Returns whether the current `RemoteFeedbackRecords` is filtered or not."""
         return bool(self._response_status) or bool(self._metadata_filters)
 
-    def __response_status_filters_for_api_call(self) -> Optional[List[str]]:
-        if len(self._response_status) < 1:
-            return None
-        return [
-            status.value if hasattr(status, "value") else FeedbackResponseStatusFilter(status).value
-            for status in self._response_status
-        ]
+    # TODO: define `List[ResponseStatusFilter]` and delegate `query_string` formatting to it
+    @property
+    def __response_status_query_strings(self) -> Optional[List[str]]:
+        """Formats the `response_status` if any to the query string format. Otherwise, returns `None`."""
+        return (
+            [status.value if hasattr(status, "value") else status for status in self._response_status]
+            if len(self._response_status) > 0
+            else None
+        )
 
-    def __metadata_filters_for_api_call(self) -> Optional[List[str]]:
-        if len(self._metadata_filters) < 1:
-            return None
-        return [metadata_filter.query_string for metadata_filter in self._metadata_filters]
+    # TODO: define `List[MetadataFilter]` and delegate `query_string` formatting to it
+    @property
+    def __metadata_filters_query_strings(self) -> Optional[List[str]]:
+        """Formats the `metadata_filters` if any to the query string format. Otherwise, returns `None`."""
+        return (
+            [metadata_filter.query_string for metadata_filter in self._metadata_filters]
+            if len(self._metadata_filters) > 0
+            else None
+        )
+
+    # TODO: define `List[SortBy]` and delegate `query_string` formatting to it
+    @property
+    def __sort_by_query_strings(self) -> Optional[List[str]]:
+        """Formats the `sort_by` if any to the query string format. Otherwise, returns `None`."""
+        return [f"{sort_by.field}:{sort_by.order}" for sort_by in self._sort_by] if len(self._sort_by) > 0 else None
 
     @classmethod
     def _create_from_dataset(
@@ -422,9 +429,20 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         if len(records) > 0:
             instance.add_records(records=records)
         else:
-            warnings.warn("The dataset is empty, so no records will be added to the local instance.")
+            warnings.warn(
+                "The dataset is empty, so no records will be added to the local instance.",
+                UserWarning,
+                stacklevel=1,
+            )
 
         return instance
+
+    @property
+    def metadata_properties(self) -> List["AllowedRemoteMetadataPropertyTypes"]:
+        """Retrieves the `metadata_properties` of the current dataset from Argilla, and
+        returns them if any, otherwise, it returns an empty list.
+        """
+        return ArgillaMetadataPropertiesMixin.list(client=self._client, dataset_id=self.id)
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def add_metadata_property(
@@ -465,10 +483,60 @@ class RemoteFeedbackDataset(FeedbackDatasetBase):
         # TODO(alvarobartt): structure better the mixins to be able to easily reuse those, here to avoid circular imports
         from argilla.client.feedback.dataset.mixins import ArgillaMixin
 
-        metadata_property = ArgillaMixin._parse_to_remote_metadata_property(metadata_property)
-        self._metadata_properties.append(metadata_property)
-        self._metadata_properties_mapping[metadata_property.name] = metadata_property
-        return metadata_property
+        return ArgillaMixin._parse_to_remote_metadata_property(metadata_property=metadata_property, client=self._client)
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def delete_metadata_properties(
+        self, metadata_properties: Union[str, List[str]]
+    ) -> Union["AllowedMetadataPropertyTypes", List["AllowedMetadataPropertyTypes"]]:
+        """Deletes a list of `metadata_properties` from the current `FeedbackDataset`
+        in Argilla.
+
+        Note:
+            Existing `FeedbackRecord`s if any, will remain unchanged if those contain metadata
+            named the same way as the `metadata_properties` to delete, but the validation will
+            be removed as well as `metadata_property` index, which means one won't be able to
+            use that for filtering.
+
+        Args:
+            metadata_properties: the metadata property/ies name/s to delete from the current
+                `FeedbackDataset` in Argilla.
+
+        Returns:
+            The `metadata_property` or `metadata_properties` deleted from the current
+            `FeedbackDataset` in Argilla, but using the local schema e.g. if you delete a
+            `RemoteFloatMetadataProperty` this method will delete it from Argilla and will
+            return a `FloatMetadataProperty` instance.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+            RuntimeError: if the `metadata_properties` cannot be deleted from the current
+                `FeedbackDataset` in Argilla.
+        """
+        if isinstance(metadata_properties, str):
+            metadata_properties = [metadata_properties]
+
+        existing_metadata_properties = self.metadata_properties
+        existing_metadata_property_names = [
+            metadata_property.name for metadata_property in existing_metadata_properties
+        ]
+
+        unexisting_metadata_properties = []
+        for metadata_property in metadata_properties:
+            if metadata_property not in existing_metadata_property_names:
+                unexisting_metadata_properties.append(metadata_property)
+        if len(unexisting_metadata_properties) > 0:
+            raise ValueError(
+                f"The following metadata properties do not exist in the current `FeedbackDataset` in Argilla: {unexisting_metadata_properties}."
+                f" The existing metadata properties are: {existing_metadata_property_names}."
+            )
+
+        deleted_metadata_properties = list()
+        for metadata_property in existing_metadata_properties:
+            if metadata_property.name in metadata_properties:
+                deleted_metadata_properties.append(metadata_property.delete())
+                metadata_properties.remove(metadata_property.name)
+        return deleted_metadata_properties if len(deleted_metadata_properties) > 1 else deleted_metadata_properties[0]
 
     def filter_by(
         self,
