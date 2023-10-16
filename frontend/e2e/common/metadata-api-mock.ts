@@ -1,4 +1,3 @@
-import { Page } from "@playwright/test";
 import { recordTwo } from "./record-api-mock";
 
 const metadataFromBackend = {
@@ -77,7 +76,7 @@ const recordsMatchingMetadata = {
 
 export const metadataPropertiesCompleted = async (page, datasetId) => {
   await page.route(
-    `*/**/api/v1/datasets/${datasetId}/metadata-properties`,
+    `*/**/api/v1/me/datasets/${datasetId}/metadata-properties`,
     async (route) => {
       await route.fulfill({
         json: metadataFromBackend,
