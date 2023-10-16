@@ -26,7 +26,7 @@ You can define the fields using the Python SDK providing the following arguments
 - `name`: The name of the field, as it will be seen internally.
 - `title` (optional): The name of the field, as it will be displayed in the UI. Defaults to the `name` value, but capitalized.
 - `required` (optional): Whether the field is required or not. Defaults to `True`. Note that at least one field must be required.
-- `use_markdown`(optional): Sepcify whether you want markdown rendered in the UI. Defaults to `False`.
+- `use_markdown`(optional): Specify whether you want markdown rendered in the UI. Defaults to `False`.
 
 ```python
 fields = [
@@ -47,7 +47,7 @@ To collect feedback for your dataset, you need to formulate questions. The Feedb
 - `TextQuestion`: These questions offer annotators a free-text area where they can enter any text. This type is useful for collecting natural language data, such as corrections or explanations.
 - `LabelQuestion`: These questions ask annotators to choose one label from a list of options. This type is useful for text classification tasks. In the UI, the labels of the `LabelQuestion` will have a rounded shape.
 - `MultiLabelQuestion`: These questions ask annotators to choose all applicable labels from a list of options. This type is useful for multi-label text classification tasks. In the UI, the labels of the `MultiLabelQuestion` will have a squared shape.
-- `RankingQuestion`: This question asks annotators to order a list of options. It is useful to gather information on preference or relevance on a set of options. Ties are allowed and all options will need to be ranked.
+- `RankingQuestion`: This question asks annotators to order a list of options. It is useful to gather information on the preference or relevance of a set of options. Ties are allowed and all options will need to be ranked.
 
 You can define your questions using the Python SDK and set up the following configurations:
 
@@ -58,7 +58,7 @@ You can define your questions using the Python SDK and set up the following conf
 
 The following arguments apply to specific question types:
 
-- `values`: In the `RatingQuestion` this will be any list of unique integers that represent the options that annotators can choose from. These values must be defined in the range [1, 10]. In the `RankingQuestion`, values will be a list of strings with the options they will need to rank. If you'd like the text of the options to be different in the UI and internally, you can pass a dictionary instead where the key is the internal name and the value the text to display in the UI.
+- `values`: In the `RatingQuestion` this will be any list of unique integers that represent the options that annotators can choose from. These values must be defined in the range [1, 10]. In the `RankingQuestion`, values will be a list of strings with the options they will need to rank. If you'd like the text of the options to be different in the UI and internally, you can pass a dictionary instead where the key is the internal name and the value is the text to display in the UI.
 - `labels`: In `LabelQuestion` and `MultiLabelQuestion` this is a list of strings with the options for these questions. If you'd like the text of the labels to be different in the UI and internally, you can pass a dictionary instead where the key is the internal name and the value the text to display in the UI.
 - `visible_labels` (optional): In `LabelQuestion` and `MultiLabelQuestion` this is the number of labels that will be visible in the UI. By default, the UI will show 20 labels and collapse the rest. Set your preferred number to change this limit or set `visible_labels=None` to show all options.
 - `use_markdown` (optional): In `TextQuestion` define whether the field should render markdown text. Defaults to `False`.
@@ -75,7 +75,7 @@ Once you have decided on the data to show and the questions to ask, it's importa
 - In the dataset guidelines: this is added as an argument when you create your dataset in the Python SDK (see [below](#configure-the-dataset)). It will appear in the dataset settings in the UI.
 - As question descriptions: these are added as an argument when you create questions in the Python SDK (see [above](#define-questions)). This text will appear in a tooltip next to the question in the UI.
 
-It is good practice to use at least the dataset guidelines if not both methods. Question descriptions should be short and provide context to a specific question. They can be a summary of the guidelines to that question, but often times that is not sufficient to align the whole annotation team. In the guidelines, you can include a description of the project, details on how to answer each question with examples, instructions on when to discard a record, etc.
+It is good practice to use at least the dataset guidelines if not both methods. Question descriptions should be short and provide context to a specific question. They can be a summary of the guidelines to that question, but often that is not sufficient to align the whole annotation team. In the guidelines, you can include a description of the project, details on how to answer each question with examples, instructions on when to discard a record, etc.
 
 #### Create the dataset
 
@@ -116,11 +116,11 @@ After configuring your dataset, you can still edit the main information such as 
 ```
 
 ```{note}
-Fields and questions in the UI follow the order in which these are added to the `fields` and `questions` atrributes in the Python SDK.
+Fields and questions in the UI follow the order in which these are added to the `fields` and `questions` attributes in the Python SDK.
 ```
 
 ```{hint}
-If you are working as part of an annotation team and you would like to control how much overlap you'd like to have between your annotators, you should consider the different workflows in the [Set up your annotation team guide](set_up_annotation_team.ipynb) before configuring and pushing your dataset.
+If you are working as part of an annotation team and you would like to control how much overlap you'd like to have between your annotators, you should consider the different workflows in the [Set up your annotation team guide](/installation/configurations/workspace_management) before configuring and pushing your dataset.
 ```
 
 ### Add records
@@ -128,13 +128,13 @@ If you are working as part of an annotation team and you would like to control h
 At this point, we just need to add records to our `FeedbackDataset`. Take some time to explore and find data that fits the purpose of your project. If you are planning to use public data, the [Datasets page](https://huggingface.co/datasets) of the Hugging Face Hub is a good place to start.
 
 ```{tip}
-If you are using a public dataset, remember to always check the license to make sure you can legally employ it for your specfic use case.
+If you are using a public dataset, remember to always check the license to make sure you can legally employ it for your specific use case.
 ```
 
 ```python
 from datasets import load_dataset
 
-# load and inspect a dataset from the Hugging Face Hub
+# Load and inspect a dataset from the Hugging Face Hub
 hf_dataset = load_dataset('databricks/databricks-dolly-15k', split='train')
 df = hf_dataset.to_pandas()
 df
@@ -146,14 +146,14 @@ Take some time to inspect the data before adding it to the dataset in case this 
 
 The next step is to create records following Argilla's `FeedbackRecord` format. These are the attributes of a `FeedbackRecord`:
 
-- `fields`: A dictionary with the name (key) and content (value) of each of the fields in the record. These will need to match the fields set up in the dataset configuration (see [Define record fields](#define-record-fields)).
+- `fields`: A dictionary with the name (key) and content (value) of each of the fields in the record. These will need to match the fields set up in the dataset configuration (see [Define record fields](/practical_guides/create_dataset.md#define-fields)).
 - `metadata` (optional): A dictionary with the metadata of the record. This can include any information about the record that is not part of the fields. For example, the source of the record or the date it was created. If there is no metadata, this will be `None`.
 - `external_id` (optional): An ID of the record defined by the user. If there is no external ID, this will be `None`.
 - `suggestions`(optional): A list of all suggested responses for a record e.g., model predictions or other helpful hints for the annotators. Just one suggestion can be provided for each question, and suggestion values must be compliant with the pre-defined questions e.g. if we have a `RatingQuestion` between 1 and 5, the suggestion should have a valid value within that range. If suggestions are added, they will appear in the UI as pre-filled responses.
 - `responses` (optional): A list of all responses to a record. You will only need to add them if your dataset already has some annotated records. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered. Also make sure to include `user_id`s in case you're planning to add more than one response for the same question, as only one `user_id` can be None, later to be replaced by the current active `user_id`, while the rest will be discarded otherwise.
 
 ```python
-# create a single Feedback Record
+# Create a single Feedback Record
 record = rg.FeedbackRecord(
     fields={
         "question": "Why can camels survive long without water?",
@@ -173,7 +173,7 @@ records = [rg.FeedbackRecord(fields={"question": record["instruction"], "answer"
 Now, we simply add our records to the dataset we configured [above](#configure-the-dataset):
 
 ```python
-#add records to the dataset
+# Add records to the dataset
 dataset.add_records(records)
 ```
 
@@ -437,7 +437,7 @@ dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 
 ::::
 
-Now you're ready to start [the annotation process](annotate_dataset.ipynb).
+Now you're ready to start [the annotation process](/practical_guides/annotate_dataset).
 
 ## Other Datasets
 
@@ -465,7 +465,7 @@ import argilla as rg
 
 settings = rg.TextClassificationSettings(label_schema=["A", "B", "C"])
 
-rg.configure_dataset(name="my_dataset", settings=settings)
+rg.configure_dataset_settings(name="my_dataset", settings=settings)
 ```
 :::
 
@@ -475,7 +475,7 @@ import argilla as rg
 
 settings = rg.TokenClassificationSettings(label_schema=["A", "B", "C"])
 
-rg.configure_dataset(name="my_dataset", settings=settings)
+rg.configure_dataset_settings(name="my_dataset", settings=settings)
 ```
 :::
 
@@ -503,12 +503,12 @@ The most critical attributes of a record that are common to all types are:
 
 Some other cool attributes for a record are:
 
- - `vectors`: Input vectors to enable [semantic search](label_records_with_semanticsearch.html).
- - `explanation`: Token attributions for [highlighting text](log_model_explanations.html).
+ - `vectors`: Input vectors to enable [semantic search](/practical_guides/annotate_dataset.md#semantic-search).
+ - `explanation`: Token attributions for [highlighting text](/tutorials/notebooks/monitoring-textclassification-shaptransformersinterpret-explainability).
 
 In Argilla, records are created programmatically using the [client library](/reference/python/python_client.rst) within a Python script, a [Jupyter notebook](https://jupyter.org/), or another IDE.
 
-Let's see how to create and upload a basic record to the Argilla web app  (make sure Argilla is already installed on your machine as described in the [setup guide](/getting_started/quickstart_installation.html)).
+Let's see how to create and upload a basic record to the Argilla web app  (make sure Argilla is already installed on your machine as described in the [setup guide](/getting_started/quickstart_installation)).
 
 We support different tasks within the Argilla eco-system focused on NLP: `Text Classification`, `Token Classification` and `Text2Text`.
 
@@ -536,7 +536,7 @@ rg.log(records=rec, name="my_dataset")
 import argilla as rg
 
 rec = rg.TextClassificationRecord(
-    text="damn this kid and her fancy clothes makes me feel like a bad parent.",
+    text="damn this kid and her fancy clothes make me feel like a bad parent.",
     prediction=[("admiration", 0.75), ("annoyance", 0.25)],
     annotation=["price", "annoyance"],
     multi_label=True
@@ -552,7 +552,7 @@ rg.log(records=rec, name="my_dataset")
 ```python
 import argilla as rg
 
-record = rg.TokenClassificationRecord(
+rec = rg.TokenClassificationRecord(
     text="Michael is a professor at Harvard",
     tokens=["Michael", "is", "a", "professor", "at", "Harvard"],
     prediction=[("NAME", 0, 7, 0.75), ("LOC", 26, 33, 0.8)],
@@ -569,7 +569,7 @@ rg.log(records=rec, name="my_dataset")
 ```python
 import argilla as rg
 
-record = rg.Text2TextRecord(
+rec = rg.Text2TextRecord(
     text="A giant giant spider is discovered... how much does he make in a year?",
     prediction=["He has 3*4 trees. So he has 12*5=60 apples."],
 )
@@ -605,7 +605,7 @@ rec = rg.TextClassificationRecord(
 
 :::{tab-item} Text Classification (multi-label)
 
-In this case, we expect a `List[Tuple[str, float]]` as the prediction, where the second element of the tuple is the confidence score of the prediction. In case of multi-label, the `multi_label` attribute of the record should be set to `True`.
+In this case, we expect a `List[Tuple[str, float]]` as the prediction, where the second element of the tuple is the confidence score of the prediction. In the case of multi-label, the `multi_label` attribute of the record should be set to `True`.
 
 ```python
 import argilla as rg
@@ -627,7 +627,7 @@ In this case, we expect a `List[Tuple[str, int, int, float]]` as the prediction,
 ```python
 import argilla as rg
 
-record = rg.TokenClassificationRecord(
+rec = rg.TokenClassificationRecord(
     text=...,
     tokens=...,
     prediction=[("label_1", 0, 7, 0.75), ("label_2", 26, 33, 0.8)],
@@ -644,7 +644,7 @@ In this case, we expect a `List[str]` as the prediction.
 ```python
 import argilla as rg
 
-record = rg.Text2TextRecord(
+rec = rg.Text2TextRecord(
     text=...,
     prediction=["He has 3*4 trees. So he has 12*5=60 apples."],
 )
@@ -703,7 +703,7 @@ In this case, we expect a `List[Tuple[str, int, int]]` as the annotation, where 
 ```python
 import argilla as rg
 
-record = rg.TokenClassificationRecord(
+rec = rg.TokenClassificationRecord(
     text=...,
     tokens=...,
     annotation=[("label_1", 0, 7), ("label_2", 26, 33)],
@@ -721,7 +721,7 @@ In this case, we expect a `str` as the annotation.
 ```python
 import argilla as rg
 
-record = rg.Text2TextRecord(
+rec = rg.Text2TextRecord(
     text=...,
     annotation="He has 3*4 trees. So he has 12*5=60 apples.",
 )

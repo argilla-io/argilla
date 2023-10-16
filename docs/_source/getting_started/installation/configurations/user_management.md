@@ -1,13 +1,13 @@
 # User Management
 
-This guide explains how to setup and manage the users in Argilla via the Python client and the CLI.
+This guide explains how to set up and manage the users in Argilla via the Python client and the CLI.
 
 :::{note}
-The `User` class for user management has been included as of the Argilla 1.11.0 release, and is not available in previous versions. But you will be able to use it with older Argilla instances, from 1.6.0 onwards, the only difference will be that the main role is now `owner` instead of `admin`.
+The `User` class for user management has been included as of the Argilla 1.11.0 release and is not available in previous versions. But you will be able to use it with older Argilla instances, from 1.6.0 onwards, the only difference will be that the main role is now `owner` instead of `admin`.
 :::
 
 :::{warning}
-As of Argilla 1.11.0 the default pool of users in the quickstart contains also an owner user which uses the credentials: username `owner`, password `12345678`, and API key `owner.apikey`; while for the server image the default user is now an `owner` instead of an `admin` with the same credentials: username `argilla`, password `1234` and API key `argilla.apikey`.
+As of Argilla 1.11.0, the default pool of users in the quickstart contains also an owner user which uses the credentials: username `owner`, password `12345678`, and API key `owner.apikey`; while for the server image the default user is now an `owner` instead of an `admin` with the same credentials: username `argilla`, password `1234` and API key `argilla.apikey`.
 :::
 
 ## User Model
@@ -20,7 +20,7 @@ We differentiate between three types of users depending on their role:
 - **Admin**: An admin user can only access the workspaces it has been assigned to. Admin users can manage datasets on assigned workspaces.
 - **Annotator**: As admin users, an annotator user can only access the workspaces it has been assigned to. Annotator users can only annotate datasets on assigned workspaces.
 
-An Argilla user composed of the following attributes:
+An Argilla user is composed of the following attributes:
 
 | Attribute | Type | Description |
 | --- | --- | --- |
@@ -45,9 +45,9 @@ The `User` class in the Python client gives developers with `owner` role the abi
 To connect to an old Argilla instance (`<1.3.0`) using newer clients, you should specify the default user API key `rubrix.apikey`. Otherwise, connections will fail with an Unauthorized server error.
 :::
 
-### Get the current active `User`
+### Get the currently active `User`
 
-You can get the current active user in Argilla using the `me` classmethod in the `User` class. Note that the `me` method will return the active user as specified via the credentials provided via `rg.init`. Also, it is possible [set this information using environment variables](/getting_started/installation/configurations/server_configuration.html#client), which allows for skipping `rg,init`.
+You can get the currently active user in Argilla using the `me` classmethod in the `User` class. Note that the `me` method will return the active user as specified via the credentials provided via `rg.init`. Also, it is possible to [set this information using environment variables](/getting_started/installation/configurations/server_configuration.md#client), which allows for skipping `rg.init`.
 
 ::::{tab-set}
 
@@ -118,7 +118,7 @@ user = rg.User.create(
 
 ### Update a `User`
 
-You can change the assigned role for an existing user using the database connection, therefore the environment variable `ARGILLA_DATABASE_URL` must be set unless you're using SQLite in which case you should be executing the command from the machine where Argilla server is running.
+You can change the assigned role for an existing user using the database connection, therefore the environment variable `ARGILLA_DATABASE_URL` must be set unless you're using SQLite in which case you should be executing the command from the machine where the Argilla server is running.
 
 ```bash
 argilla server database users update argilla --role owner
@@ -199,7 +199,7 @@ workspace.add_user(user.id)
 
 ::::
 
-### List `User`s
+### List `Users`
 
 :::{note}
 Just the "owner" can list all the users in Argilla.
@@ -307,7 +307,7 @@ The migration command can create users and workspaces automatically from a YAML 
 
 To do so, the command will connect to the Argilla server database directly, therefore the environment variable `ARGILLA_DATABASE_URL` must be set unless you're using SQLite in which case you should be executing the command from the machine where Argilla server is running.
 
-The user role will be computed depending on how workspaces are setup for each user. If no `workspace` attribute is defined, the user will be considered an `owner`. Otherwise, the assigned user role will be `annotator`.
+The user role will be computed depending on how workspaces are set up for each user. If no `workspace` attribute is defined, the user will be considered an `owner`. Otherwise, the assigned user role will be `annotator`.
 
 The task will also create an extra workspace for each user named after their username.
 
@@ -359,10 +359,10 @@ After that change you can start the containers with:
 docker-compose up
 ```
 
-And after running the containers you can run the task to migrate the users as follows:
+And, after running the containers you can run the task to migrate the users as follows:
 
 ```bash
 docker-compose exec argilla argilla server database users migrate
 ```
 
-If everything went well, the configured users can now log in, their annotations will be tracked with their usernames, and they'll have access to the defined workspaces.
+If everything goes well, the configured users can now log in, their annotations will be tracked with their usernames, and they'll have access to the defined workspaces.

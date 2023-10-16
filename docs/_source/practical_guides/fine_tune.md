@@ -5,7 +5,7 @@
 ```{include} /_common/feedback_dataset.md
 ```
 
-After [collecting the responses](/practical_guides/collect_responses) from our `FeedbackDataset`, we can start fine-tuning our LLMs and other models. Due to the customizability of the task, this might require setting up a custom post-processing workflow, but we will provide some good toy examples for the [LLM approaches](/conceptual_guides/llm/rlhf): supervised fine-tuning, and reinforcement learning through human feedback (RLHF). However, we also still provide for other NLP tasks like text classification.
+After [collecting the responses](/practical_guides/collect_responses) from our `FeedbackDataset`, we can start fine-tuning our LLMs and other models. Due to the customizability of the task, this might require setting up a custom post-processing workflow, but we will provide some good toy examples for the [LLM approaches](/conceptual_guides/llm/rlhf): supervised fine-tuning, and reinforcement learning through human feedback (RLHF). However, we still provide for other NLP tasks like text classification.
 
 ### The `ArgillaTrainer`
 
@@ -15,7 +15,7 @@ Using the `ArgillaTrainer` is straightforward, but it slightly differs per task.
 
 1. First, we define a `TrainingTask`. This is done using a custom `formatting_func`. However, tasks like Text Classification can also be defined using default definitions using the `FeedbackDataset` fields and questions. These tasks are then used for retrieving data from a dataset and initializing the training. We also offer some ideas for [unifying data](/practical_guides/collect_responses) out of the box.
 2. Next, we initialize the `ArgillaTrainer` and forward the task and training framework. Internally, this uses the `FeedbackData.prepare_for_training`-method to format the data according to the expectations from the framework. Some other interesting methods are:
-   1. `ArgillaTrainer.update_config` to change framework specific training parameters.
+   1. `ArgillaTrainer.update_config` to change framework-specific training parameters.
    2. `ArgillaTrainer.train` to start training.
    3. `ArgillTrainer.predict` to run inference.
 
@@ -107,7 +107,7 @@ Single-label text classification refers to the task of assigning a single catego
 Multi-label text classification is generally more complex than single-label classification due to the challenge of determining and predicting multiple relevant labels for each text. It finds applications in various domains, including document tagging, topic labeling, and content recommendation systems. For example, in customer care, a multi-label text classification task would involve assigning topics such as "new_card," "mortgage," or "opening_hours" to texts based on their content.
 
 ```{tip}
-For a multi-label scenario it is recommended to add some examples without any labels to improve model performance.
+For a multi-label scenario, it is recommended to add some examples without any labels to improve model performance.
 ```
 
 ```batch
@@ -122,7 +122,7 @@ We then use either `text-label`-pair to further fine-tune the model.
 
 ##### Training
 
-Text classification is one of the most widely supported training tasks tasks within NLP. For example purposes we will use our [emotion demo dataset](https://huggingface.co/datasets/argilla/emotion).
+Text classification is one of the most widely supported training tasks within NLP. As an illustration, we will use our [emotion demo dataset](https://huggingface.co/datasets/argilla/emotion).
 
 **Data Preparation**
 
@@ -139,7 +139,7 @@ For this task, we assume we need a `text-label`-pair or a `formatting_func` for 
 ::::{tab-set}
 
 :::{tab-item} text-label-pair
-We offer the option to use default unification strategies and formatting based on a `text-label`-pair. Here we infer formatting information based on a `TextField` and a `LabelQuestion`, `MultiLabelQuestion`, `RatingQuestion` or , `RankingQuestion` from the dataset. This is the easiest way to define a `TrainingTask` for text classification but if you need a custom workflow, you can use `formatting_func`.
+We offer the option to use default unification strategies and formatting based on a `text-label`-pair. Here we infer formatting information based on a `TextField` and a `LabelQuestion`, `MultiLabelQuestion`, `RatingQuestion` or `RankingQuestion` from the dataset. This is the easiest way to define a `TrainingTask` for text classification but if you need a custom workflow, you can use `formatting_func`.
 
 ```{note}
 An overview of the unifcation measures can be found [here](/practical_guides/collect_responses). The `RatingQuestion` and `RankingQuestion` can be unified using a "majority"-, "min"-, "max"- or "disagreement"-strategy. Both the `LabelQuestion` and `MultiLabelQuestion` can be resolved using a "majority"-, or "disagreement"-strategy.
@@ -229,7 +229,7 @@ You can find a sample of an extractive QnA dataset underneath:
 Officially, answers need to be passed as a list of `{'answer_start': int, 'text': str}`-dicts. However, we only support a string, where the `answer_start` is inferred from the `context` and `text`-field.
 ```
 
-We then use either `question-context-answer`-set or a `formatting_func` to further fine-tune the model.
+We then use either a `question-context-answer`-set or a `formatting_func` to further fine-tune the model.
 
 ##### Training
 
@@ -522,7 +522,7 @@ In a generic fine-tuning setting, the aim is to make the model more proficient i
 
 *Chat*
 
-On the other hand, instruction-based fine-tuning involves training the model to understand and respond to specific instructions or prompts given by the user. This approach allows for greater control and specificity in the generated output. For example, if we want the model to summarize a given text, we can fine-tune it using a dataset that consists of pairs of text passages and their corresponding summaries. The model can then be instructed to generate a summary based on a given input text. By fine-tuning the model in this manner, it becomes more adept at following instructions and producing output that aligns with the desired task or objective. An example of this format used is our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en) with `instruction`, `context` and `response` fields. However, we can also have simpler datasets with only `question` and `answer` fields.
+On the other hand, instruction-based fine-tuning involves training the model to understand and respond to specific instructions or prompts given by the user. This approach allows for greater control and specificity in the generated output. For example, if we want the model to summarize a given text, we can fine-tune it using a dataset that consists of pairs of text passages and their corresponding summaries. The model can then be instructed to generate a summary based on a given input text. By fine-tuning the model in this manner, it becomes more adept at following instructions and producing output that aligns with the desired task or objective. An example of this format used is our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en) with `instruction`, `context` and `response` fields. However, we can also have simpler datasets with only the `question` and `answer` fields.
 
 ::::{tab-set}
 
@@ -562,7 +562,7 @@ Ultimately, the choice between these two approaches to be used as `text`-field d
 
 ##### Training
 
-There are many good libraries to help with this step, however, we are a fan of the [Transformer Reinforcement Learning (TRL)](https://huggingface.co/docs/trl) package, [Transformer Reinforcement Learning X (TRLX)](https://github.com/CarperAI/trlx),and the no-code [Hugging Face AutoTrain](https://huggingface.co/spaces/autotrain-projects/autotrain-advanced) for fine-tuning. In both cases, we need a backbone model and for example purposes we will use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en).
+There are many good libraries to help with this step, however, we are a fan of the [Transformer Reinforcement Learning (TRL)](https://huggingface.co/docs/trl) package, [Transformer Reinforcement Learning X (TRLX)](https://github.com/CarperAI/trlx),and the no-code [Hugging Face AutoTrain](https://huggingface.co/spaces/autotrain-projects/autotrain-advanced) for fine-tuning. In both cases, we need a backbone model and for example purposes, we will use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/databricks-dolly-15k-curated-en).
 
 ```{note}
 This dataset only contains a single annotator response per record. We gave some suggestions on dealing with [responses from multiple annotators](/practical_guides/collect_responses).
@@ -680,18 +680,18 @@ def generate(model_id: str, instruction: str, context: str = "") -> str:
 ### Response: A frog is a small, round, black-eyed, frog with a long, black-winged head. It is a member of the family Pter
 ```
 
-Much better! This model follows the template like we want.
+Much better! This model follows the template as we want.
 
 #### Reward Modeling
 
 ##### Background
 
-A Reward Model (RM) is used to rate responses in alignment with human preferences and afterwards using this RM to fine-tune the LLM with the associated scores. Fine-tuning using a Reward Model can be done in different ways. We can either get the annotator to rate output completely manually, we can use a simple heuristic or we can use a stochastic preference model. Both [TRL](https://huggingface.co/docs/trl) and [TRLX](https://github.com/CarperAI/trlx) provide decent options for incorporating rewards. The [DeepSpeed library of Microsoft](https://github.com/microsoft/DeepSpeed/tree/master/blogs/deepspeed-chat) is a worthy mention too but will not be covered in our docs.
+A Reward Model (RM) is used to rate responses in alignment with human preferences and afterwards, using this RM, to fine-tune the LLM with the associated scores. Fine-tuning using a Reward Model can be done in different ways. We can either get the annotator to rate output completely manually, we can use a simple heuristic or we can use a stochastic preference model. Both [TRL](https://huggingface.co/docs/trl) and [TRLX](https://github.com/CarperAI/trlx) provide decent options for incorporating rewards. The [DeepSpeed library of Microsoft](https://github.com/microsoft/DeepSpeed/tree/master/blogs/deepspeed-chat) is a worthy mention too but will not be covered in our docs.
 
 ```{include} /_common/dolly_dataset_info.md
 ```
 
-In case of training an RM, we then use the `chosen-rejected`-pairs and train a classifier to distinguish between them.
+In the case of training an RM, we then use the `chosen-rejected`-pairs and train a classifier to distinguish between them.
 
 ##### Training
 
@@ -717,7 +717,7 @@ However, fields (i.e. the left side of the Argilla annotation view) are provided
     ...
 }
 ```
-And all questions (i.e. the right side of the Argilla annotation view) are provided like so:
+And, all questions (i.e. the right side of the Argilla annotation view) are provided like so:
 ```python
 >>> sample
 {
@@ -851,13 +851,13 @@ As expected, the good response has a higher score than the worse response.
 The [TRL](https://huggingface.co/docs/trl) library implements the last step of RLHF: Proximal Policy Optimization (PPO). It requires prompts, which are then fed through the model being finetuned. Its results are passed through a reward model. Lastly, the prompts, responses and rewards are used to update the model through reinforcement learning.
 
 ```{note}
-PPO requires a trained supervised fine-tuned model and reward model to work. Take a look at that task outlines above to train your own models.
+PPO requires a trained supervised fine-tuned model and reward model to work. Take a look at the task outlines above to train your own models.
 ```
 
 ```{include} /_common/dolly_dataset_info.md
 ```
 
-In case of training an PPO, we then use the prompt and context data and correct the generated response from the SFT model by using the reward model. Hence, we will need to format the following `text`.
+In the case of training an PPO, we then use the prompt and context data and correct the generated response from the SFT model by using the reward model. Hence, we will need to format the following `text`.
 
 ```
 ### Instruction
@@ -980,16 +980,16 @@ print(output_text)
 
 ##### Background
 
-The [TRL](https://huggingface.co/docs/trl) library implements and alternative way to incorporate human feedback into an LLM which is called Direct Preference Optimization (DPO). This approach skips the step of training a separate reward model and directly uses the preference data during training as measure for optimization of human feedback. In order to properly use th
+The [TRL](https://huggingface.co/docs/trl) library implements and alternative way to incorporate human feedback into an LLM which is called Direct Preference Optimization (DPO). This approach skips the step of training a separate reward model and directly uses the preference data during training as a measure for optimization of human feedback.
 
 ```{note}
-DPO requires a trained supervised fine-tuned model to function. Take a look at that task outline above to train your own model.
+DPO requires a trained supervised fine-tuned model to function. Take a look at the task outline above to train your own model.
 ```
 
 ```{include} /_common/dolly_dataset_info.md
 ```
 
-In case of training using PPO, we then use the prompt and context data and correct the generated response from the SFT model by using the reward model. Hence, we will need to format the following `text`.
+In the case of training using PPO, we then use the prompt and context data and correct the generated response from the SFT model by using the reward model. Hence, we will need to format the following `text`.
 
 ```
 ### Instruction
@@ -1006,7 +1006,7 @@ The airline has since grown to directly serve 32 cities in Australia, from hubs 
 {to be generated by SFT model}
 ```
 
-Within the DPO approach we infer the reward from the formatted prompt and the provided preference data as `prompt-chosen-rejected`-pairs.
+Within the DPO approach, we infer the reward from the formatted prompt and the provided preference data as `prompt-chosen-rejected`-pairs.
 
 ##### Training
 
@@ -1015,7 +1015,7 @@ Within the DPO approach we infer the reward from the formatted prompt and the pr
 
 **Data Preperation**
 
-We will start with our a basic example of a formatting function. For DPO it should return `prompt-chosen-rejected`-pairs, where the prompt is formatted according to a template.
+We will start with our basic example of a formatting function. For DPO it should return `prompt-chosen-rejected`-pairs, where the prompt is formatted according to a template.
 
 ```python
 from argilla.feedback import TrainingTask
@@ -1045,7 +1045,7 @@ task = TrainingTask.for_direct_preference_optimization(formatting_func=formattin
 
 **ArgillaTrainer**
 
-We'll use the task directly with our `FeedbackDataset` in the `ArgillaTrainer`. In contrary to PPO, we do not need to specify any reward model, because this preference modeling is inferred internally by the DPO-algorithm.
+We'll use the task directly with our `FeedbackDataset` in the `ArgillaTrainer`. In contrary to PPO, we do not need to specify any reward model, because this preference modeling is inferred internally by the DPO algorithm.
 
 ```python
 from argilla.feedback import ArgillaTrainer
@@ -1140,7 +1140,7 @@ dataset = rg.FeedbackDataset.from_huggingface("argilla/customer_assistant")
 We will start with our basic example of a formatting function. For Chat Completion it should return `chat-turn-role-text`, where the prompt is formatted according to a template. We require this split because each conversational chain needs to be able to be retraced in the correct order and based on the user roles that might have been speaking.
 
 ```{note}
-We infer a so-called message because OpenAI expect this output format but this might differ for other scenarios.
+We infer a so-called message because OpenAI expects this output format but this might differ for other scenarios.
 ```
 
 ```python
@@ -1232,7 +1232,7 @@ We plan on adding more support for other tasks and frameworks so feel free to re
 | PEFT              | ✔️                  | ✔️                   |           |
 | SpanMarker        |                    | ✔️                   |           |
 
-##### Tranining configs
+##### Training configs
 
 The trainer also has an `ArgillaTrainer.update_config()` method, which maps a dict with `**kwargs` to the respective framework. So, these can be derived from the underlying framework that was used to initialize the trainer. Underneath, you can find an overview of these variables for the supported frameworks.
 
@@ -1266,7 +1266,7 @@ Single-label text classification refers to the task of assigning a single catego
 Multi-label text classification is generally more complex than single-label classification due to the challenge of determining and predicting multiple relevant labels for each text. It finds applications in various domains, including document tagging, topic labeling, and content recommendation systems. For example, in customer care, a multi-label text classification task would involve assigning topics such as "new_card," "mortgage," or "opening_hours" to texts based on their content.
 
 ```{tip}
-For a multi-label scenario it is recommended to add some examples without any labels to improve model performance.
+For a multi-label scenario, it is recommended to add some examples without any labels to improve model performance.
 ```
 
 ```batch
@@ -1298,15 +1298,3 @@ trainer.update_config(num_iterations=1)
 trainer.train(output_dir="my_setfit_model")
 trainer.predict("This is awesome!")
 ``````
-
-#### Token Classification
-
-##### Background
-
-##### Training
-
-#### Text2Text
-
-##### Background
-
-##### Training

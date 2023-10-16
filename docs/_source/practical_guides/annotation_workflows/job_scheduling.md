@@ -3,14 +3,14 @@
 ## Feedback Dataset
 
 ```{warning}
-The `FeedbackDataset` does not offer support for job scheduling as of now. If you would like to use it, you will need to use one of the other datasets. To get more info about the dataset differences, you can have a look at [here](/practical_guides/choose_dataset).
+The `FeedbackDataset` does not offer support for job scheduling as of now. If you would like to use it, you will need to use one of the other datasets. To get more info about the dataset differences, you can have a look [here](/practical_guides/choose_dataset).
 ```
 
 ## Other datasets
 
-This guide gives you a brief introduction to Argilla Listeners. Argilla Listeners enable you to build fine-grained complex workflows as background processes, like a low-key alternative to job scheduling directly integrated with Argilla.
+This guide gives you a brief introduction to Argilla Listeners. Argilla Listeners enables you to build fine-grained complex workflows as background processes, like a low-key alternative to job scheduling directly integrated with Argilla.
 
-The main goal facilitates the user to define and customize their Argilla experience. Note that the tutorial about [active learning with small-text](../tutorials/libraries/smalltext.md) is a great example of how powerful listeners can be. Alternatively, you can check the [Python Client](/reference/python/python_listeners.rst) to get acquainted.
+The main goal facilitates the user to define and customize their Argilla experience. Note that the tutorial about [active learning with small-text](/tutorials/notebooks/training-textclassification-smalltext-activelearning.ipynb) is a great example of how powerful listeners can be. Alternatively, you can check the [Python Client](/reference/python/python_listeners.rst) to get acquainted.
 
 
 <div class="alert alert-info">
@@ -49,7 +49,7 @@ def update_records(records, ctx):
     rg.log(name, records)
 ```
 
-We can then start and  the listener by calling the function:
+We can then start the listener by calling the function:
 
 ```python
 update_records.start()
@@ -60,7 +60,7 @@ update_records.stop()
 
 #### Conditional execution
 
-We can set a condition for the expected number of record to require before actually excuting the decorated function.
+We can set a condition for the expected number of records to require before actually executing the decorated function.
 
 ```python
 @listener(
@@ -76,7 +76,7 @@ We can set a condition for the expected number of record to require before actua
 
 #### Updatable `query_params`
 
-During a execution loop, it is possible to update and change `query_params` to allow for flexible querying based on the output of the query.
+During an execution loop, it is possible to update and change `query_params` to allow for flexible querying based on the output of the query.
 
 ```python
 @listener(
@@ -105,7 +105,7 @@ def update_records(records, ctx):
 
 #### Without loading records
 
-Sometimes we might just want to listen without loading and processing the docs direcly.
+Sometimes we might just want to listen without loading and processing the docs directly.
 
 ```python
 @listener(

@@ -1,22 +1,22 @@
 # Telemetry
 Argilla uses telemetry to report anonymous usage and error information. As an open-source software, this type of information is important to improve and understand how the product is used.
 
-## How to opt-out
-You can opt-out of telemetry reporting using the `ENV` variable `ARGILLA_ENABLE_TELEMETRY` before launching the server. Setting this variable to `0` will completely disable telemetry reporting.
+## How to opt out
+You can opt out of telemetry reporting using the `ENV` variable `ARGILLA_ENABLE_TELEMETRY` before launching the server. Setting this variable to `0` will completely disable telemetry reporting.
 
-If you are a Linux/MacOs users you should run:
+If you are a Linux/MacOs user, you should run:
 
 ```bash
 export ARGILLA_ENABLE_TELEMETRY=0
 ```
 
-If you are Windows users you should run:
+If you are a Windows user, you should run:
 
 ```bash
 set ARGILLA_ENABLE_TELEMETRY=0
 ```
 
-To opt-in again, you can set the variable to `1`.
+To opt in again, you can set the variable to `1`.
 
 ## Why reporting telemetry
 Anonymous telemetry information enables us to continuously improve the product and detect recurring problems to better serve all users. We collect aggregated information about general usage and errors. We do NOT collect any information on users' data records, datasets, or metadata information.

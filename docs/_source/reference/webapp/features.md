@@ -4,7 +4,7 @@
 ## Annotate records
 
 ```{note}
-For information about features in the new Feedback Task datasets, please check [this guide](/practical_guides/annotate_dataset.ipynb).
+For information about features in the new Feedback Task datasets, please check [this guide](/practical_guides/annotate_dataset.md).
 ```
 
 ![Annotate records](/_static/reference/webapp/features-annotate.png)
@@ -12,7 +12,7 @@ For information about features in the new Feedback Task datasets, please check [
 The Argilla UI has a dedicated mode to quickly label your data in a very intuitive way, or revise previous gold labels and correct them.
 Argilla's powerful search and filter functionalities, together with potential model predictions, can guide the annotation process and support the annotator.
 
-The _Annotate mode_ is the default mode of the [Dataset page](dataset.md).
+The _Annotate mode_ is the default mode of the [Dataset page](/reference/webapp/pages.md#modes).
 
 ### Create labels
 
@@ -44,7 +44,7 @@ When the dataset contains a large list of labels (10 +), we encourage viewing th
 ![Token classification record](/_static/reference/webapp/features-tokclass_record.png)
 
 For token classification datasets, you can highlight words (tokens) in the text and annotate them with a label.
-Under the hood, the highlighting takes advantage of the `tokens` information in the [Token Classification data model](../python/python_client.rst#Argilla.client.models.TokenClassificationRecord).
+Under the hood, the highlighting takes advantage of the `tokens` information in the [Token Classification data model](/reference/python/python_client.rst#Argilla.client.models.TokenClassificationRecord).
 To remove specific labels, hover over the highlights and press the _X_ button or double-click directly on the colored area. You can also click the _Clear_ button to remove all annotations in the record.
 
 After modifying a record, either by adding or removing annotations, its status will change to _Pending_. When you have finished your annotation of the whole record, click *Validate* to save the changes. The status will change to *Validated* in the upper left corner of the record card. Alternatively, you can use the *Reset* button to discard your changes and recover the previous state of the record.
@@ -64,7 +64,7 @@ If you want to discard the record from the dataset, click *Discard*.
 ### Bulk annotate
 
 
-For all [tasks](/guides/task_examples.ipynb), you can use **bulk actions**. You can either select the records one by one with the selection box on the upper left of each card, or you can use the global selection box below the search bar, which will select all records shown on the page. Then you can _Validate_ and _Discard_ the selected records using the icons next to the global selection box. For the multi-label text classification and token classification tasks you can also _Clear_ and _Reset_ at bulk level.
+For all [tasks](/practical_guides/annotate_dataset), you can use **bulk actions**. You can either select the records one by one with the selection box on the upper left of each card, or you can use the global selection box below the search bar, which will select all records shown on the page. Then you can _Validate_ and _Discard_ the selected records using the icons next to the global selection box. For the multi-label text classification and token classification tasks you can also _Clear_ and _Reset_ at bulk level.
 
 ![Bulk actions bar](/_static/reference/webapp/features-bulk-actions.png)
 
@@ -78,11 +78,11 @@ In single-label text classification, there is no need to validate after selectin
 
 ### Validate predictions
 
-In Argilla you can pre-annotate your data by including model predictions in your records.
+In Argilla, you can pre-annotate your data by including model predictions in your records.
 Assuming that the model works reasonably well on your dataset, you can filter for records with high prediction scores, and simply _validate_ their predictions to quickly annotate records.
 
 ```{note}
-If you make any changes to predictions, validated annotations or annotate from scratch, you will need to validate the records to save the changes.
+If you make any changes to predictions, validate annotations or annotate from scratch, you will need to validate the records to save the changes.
 ```
 
 #### Text Classification
@@ -91,7 +91,7 @@ For this task, model predictions are shown as percentages in the label tags.
 You can validate the predictions shown in a slightly darker tone by pressing the _Validate_ button:
 
 - for a **single label** classification task, this will be the prediction with the highest percentage
-- for a **multi label** classification task, this will be the predictions with a percentage above 50%
+- for a **multi-label** classification task, this will be the predictions with a percentage above 50%
 
 If you select a different label in the single label task, the status will change to _Validated_ automatically. In the multi-label task, if you make any changes or clear the predictions/annotations, the status will change to _Pending_. You can then click _Validate_ to save the changes or _Reset_ to revert them and restore the previous status.
 
@@ -111,14 +111,14 @@ If you make any changes, the status will change to *Pending* and you will need t
 ### Search and filter
 
 
-The powerful search bar allows you to do simple, quick searches, as well as complex queries that take full advantage of Argilla's [data models](../python/python_client.rst#module-Argilla.client.models).
-In addition, the _filters_ provide you a quick and intuitive way to filter and sort your records with respect to various parameters, including the metadata of your records.
+The powerful search bar allows you to do simple, quick searches, as well as complex queries that take full advantage of Argilla's [data models](/reference/python/python_client.rst#module-Argilla.client.models).
+In addition, the _filters_ provide you with a quick and intuitive way to filter and sort your records with respect to various parameters, including the metadata of your records.
 For example, you can use the **Status filter** to hide already annotated records (_Status: Default_), or to only show annotated records when revising previous annotations (_Status: Validated_).
 
-You can find more information about how to use the search bar and the filters in our detailed [search guide](search_records.md) and [filter guide](filter_records.md).
+You can find more information about how to use the search bar and the filters in our detailed [search guide](/reference/webapp/pages.md#id2) and [filter guide](/reference/webapp/pages.md#filters).
 
 ```{note}
-Not all filters are available for all [tasks](/guides/task_examples.ipynb).
+Not all filters are available for all [tasks](/practical_guides/annotate_dataset).
 ```
 
 ### Progress metric
@@ -127,7 +127,7 @@ Not all filters are available for all [tasks](/guides/task_examples.ipynb).
 From the sidebar you can access the _Progress metrics_.
 There you will find the progress of your annotation session, the distribution of validated and discarded records, and the label distribution of your annotations.
 
-You can find more information about the metrics in our dedicated [metrics guide](view_dataset_metrics.md).
+You can find more information about the metrics in our dedicated [metrics guide](/practical_guides/collect_responses).
 
 
 ## Weak labeling
@@ -135,9 +135,9 @@ You can find more information about the metrics in our dedicated [metrics guide]
 ![Weak labeling](/_static/reference/webapp/features-weak-labelling.png)
 
 The Argilla UI has a dedicated mode to find good **heuristic rules**, also often referred to as _labeling functions_, for a [weak supervision](https://www.snorkel.org/blog/weak-supervision) workflow.
-As shown in our [guide](/guides/weak-supervision.ipynb) and [tutorial](/tutorials/labelling-textclassification-sentencetransformers-weaksupervision.ipynb), these rules allow you to quickly annotate your data with noisy labels in a semiautomatic way.
+As shown in our [guide](/tutorials/techniques/weak_supervision) and [tutorial](/tutorials/labelling-textclassification-sentencetransformers-weaksupervision), these rules allow you to quickly annotate your data with noisy labels in a semiautomatic way.
 
-You can access the _Weak labeling_ mode via the sidebar of the [Dataset page](dataset.md).
+You can access the _Weak labeling_ mode via the sidebar of the [Dataset page](/reference/webapp/pages.md#modes).
 
 ```{note}
 The _Weak labeling_ mode is only available for text classification datasets.
@@ -146,16 +146,16 @@ The _Weak labeling_ mode is only available for text classification datasets.
 ### Query plus labels
 
 
-A rule in Argilla basically applies a chosen set of labels to a list of records that match a given [query](search_records.md), so all you need is a query plus labels.
+A rule in Argilla basically applies a chosen set of labels to a list of records that match a given [query](/practical_guides/filter_dataset), so all you need is a query plus labels.
 After entering a query in the search bar and selecting one or multiple labels, you will see some [metrics](#rule-metrics) for the rule on the right and the matches of your query in the record list below.
 
 ```{warning}
-Filters are not part of the rule, but are applied to the record list.
-This means, if you have filters set, the record list does not necessarily correspond to the records affected by the rule.
+Filters are not part of the rule but are applied to the record list.
+This means that, if you have filters set, the record list does not necessarily correspond to the records affected by the rule.
 ```
 
 If you are happy with the metrics and/or the matching record list, you can save the rule by clicking on "Save rule".
-In this way it will be stored as part of the current dataset and can be accessed via the [manage rules](#manage-rules) button.
+In this way, it will be stored as part of the current dataset and can be accessed via the [manage rules](#manage-rules) button.
 
 
 ```{hint}
@@ -180,12 +180,12 @@ For multi-label classification tasks, we only count wrongly predicted labels as 
 #### Overall rule metrics
 
 
-From the [right sidebar](dataset.md#sidebar) you can access the **Overall rule metrics**.
+From the [right sidebar](/reference/webapp/pages.md#id2) you can access the **Overall rule metrics**.
 Here you will find the aggregated metrics, such as the coverages, the average precision and the total number of correctly/incorrectly predicted labels.
-You can also find an overview about how many rules you saved and how they are distributed with respect to their labels.
+You can also find an overview of how many rules you saved and how they are distributed with respect to their labels.
 
 ```{hint}
-If you struggle to increase the overall coverage, try to filter for the records that are not covered by your rules via the [Annotation filter](filter_records.md#annotations-filter).
+If you struggle to increase the overall coverage, try to filter for the records that are not covered by your rules via the [Annotation filter](/practical_guides/filter_dataset).
 ```
 
 ### Manage rules
@@ -195,7 +195,7 @@ Here you will see a list of your saved rules.
 You can edit a rule by clicking on its name, or delete it by clicking on the trash icon.
 
 ## Semantic search
-This feature enables you to find similar records when exploring or annotating records. This leverages semantic search to find "semantically" similar records. In order to use this feature, your dataset records should contain vectors which can be associated when logging the dataset into Argilla. Check the Deep Dive Feature guide about [Semantic Search](/guides/features/semantic-search.html) to understand how to benefit from this feature.
+This feature enables you to find similar records when exploring or annotating records. This leverages semantic search to find "semantically" similar records. In order to use this feature, your dataset records should contain vectors that can be associated when logging the dataset into Argilla. Check the Deep Dive Feature guide about [Semantic Search](/tutorials/notebooks/labelling-textclassification-sentence-transformers-semantic) to understand how to benefit from this feature.
 
 ![Similarity Search](/_static/reference/webapp/features-similaritysearch.png)
 
@@ -208,25 +208,25 @@ If you want to explore your dataset or analyze the predictions of a model, the A
 The powerful search functionality and intuitive filters allow you to quickly navigate through your records and dive deep into your dataset.
 At the same time, you can view the predictions and compare them to gold annotations.
 
-You can access the _Explore mode_ via the sidebar of the [Dataset page](dataset.md).
+You can access the _Explore mode_ via the sidebar of the [Dataset page](/reference/webapp/pages.md#modes).
 
 ### Search and filter
 
 
-The powerful search bar allows you to do simple, quick searches, as well as complex queries that take full advantage of Argilla's [data models](../python/python_client.rst#module-Argilla.client.models).
+The powerful search bar allows you to do simple, quick searches, as well as complex queries that take full advantage of Argilla's [data models](/reference/python/python_client.rst#module-Argilla.client.models).
 In addition, the _filters_ provide you a quick and intuitive way to filter and sort your records with respect to various parameters, including predictions and annotations.
 Both of the components can be used together to dissect in-depth your dataset, validate hunches, and find specific records.
 
-You can find more information about how to use the search bar and the filters in our detailed [search guide](search_records.md) and [filter guide](filter_records.md).
+You can find more information about how to use the search bar and the filters in our detailed [search guide](/reference/webapp/pages.md#id2) and [filter guide](/reference/webapp/pages.md#filters).
 
 ```{note}
-Not all filters are available for all [tasks](/guides/task_examples.ipynb).
+Not all filters are available for all [tasks](/practical_guides/annotate_dataset).
 ```
 
 ### Predictions and annotations
 
-Predictions and annotations are an integral part of Argilla's [data models](../python/python_client.rst#module-Argilla.client.models).
-The way they are presented in the Argilla UI depends on the [task](/guides/task_examples.ipynb) of the dataset and the mode activated in the right column.
+Predictions and annotations are an integral part of Argilla's [data models](/reference/python/python_client.rst#module-argilla.client.models)
+The way they are presented in the Argilla UI depends on the [task](/practical_guides/annotate_dataset) of the dataset and the mode activated in the right column.
 
 #### Text classification
 
@@ -249,7 +249,7 @@ Once you start making changes to the text or after you have validated the annota
 ### Metrics
 
 
-From the side bar you can access the [_Stats_ metrics](pages.md) that provide support for your analysis of the dataset.
+From the sidebar you can access the [_Stats_ metrics](/reference/webapp/pages.md#metrics) that provide support for your analysis of the dataset.
 
 
 ## Search Records
@@ -266,25 +266,25 @@ Check out the [query guide](/practical_guides/filter_dataset) for a comprehensiv
 
 The Argilla UI provides a set of filters that help you to quickly and conveniently navigate your records.
 For example, you can filter records by their predictions, by a specific metadata, or choose to only view records that are missing annotations.
-The filters are available in all [modes](dataset.md#modes) of the UI.
+The filters are available in all [modes](/reference/webapp/pages.md#modes) of the UI.
 
 ```{hint}
 You can also filter the records through the search bar by means of [queries](/practical_guides/filter_dataset).
 ```
 
 ```{note}
-Not all filters listed below are available for all [tasks](/guides/task_examples.ipynb).
+Not all filters listed below are available for all [tasks](/practical_guides/annotate_dataset).
 ```
 
 ### Predictions filter
 
 
-This filter allows you to filter records with respect of their predictions:
+This filter allows you to filter records with respect to their predictions:
 
 - **Predicted as**: filter records by their predicted labels
 - **Predicted ok**: filter records whose predictions do, or do not, match the annotations
 - **Score**: filter records with respect to the score of their prediction
-- **Predicted by**: filter records by the [prediction agent](../python/python_client.rst#module-argilla.client.models)
+- **Predicted by**: filter records by the [prediction agent](/reference/python/python_client.rst#module-argilla.client.models)
 
 ### Annotations filter
 
@@ -292,8 +292,8 @@ This filter allows you to filter records with respect of their predictions:
 This filter allows you to filter records with respect to their annotations:
 
 - **Annotated as**: filter records with respect to their annotated labels
-- **Annotated by**: filter records by the [annotation agent](../python/python_client.rst#module-argilla.client.models)
-- **Only records not covered by rules**: this option only appears if you [defined rules](define_rules.md) for your dataset.
+- **Annotated by**: filter records by the [annotation agent](/reference/python/python_client.rst#module-argilla.client.models)
+- **Only records not covered by rules**: this option only appears if you [defined rules](/reference/webapp/features.md#weak-labeling) for your dataset.
   It allows you to show only records that are **not** covered by your rules.
 
 ### Status filter
@@ -311,17 +311,17 @@ This filter allows you to filter records with respect to their status:
 This filter allows you to filter records with respect to their metadata.
 
 ```{hint}
-Nested metadata will be flattened and the keys will be joint by a dot.
+Nested metadata will be flattened and the keys will be joined by a dot.
 ```
 
 ### Sort records
 
 
-With this component you can sort the records by various parameters, such as the predictions, annotations or their metadata.
+With this component, you can sort the records by various parameters, such as the predictions, annotations or their metadata.
 
 ### Examples
 
-Here we will provide a few examples how you can take advantage of the filters for different use cases.
+Here we will provide a few examples of how you can take advantage of the filters for different use cases.
 
 #### Missing annotations
 
@@ -329,11 +329,11 @@ If you are annotating records and want to display only records that do not have 
 
 #### Low scores
 
-If you uploaded model predictions and want to check for which records the model still struggles, you can use the [score filter](#predictions-filter) to filter records with a low score.
+If you uploaded model predictions and want to check for which records the model still struggles with, you can use the [score filter](#predictions-filter) to filter records with a low score.
 
 #### High loss
 
-If you logged the *model loss* as a metadata for each record, you can [sort the records](#sort-records) by this loss in descending order to see records for which the model disagrees with the annotations (see this [tutorial](/tutorials/08-error_analysis_using_loss.ipynb) for an example).
+If you logged the *model loss* as metadata for each record, you can [sort the records](#sort-records) by this loss in descending order to see records for which the model disagrees with the annotations (see this [tutorial](/tutorials/notebooks/monitoring-textclassification-transformers-explainability) for an example).
 
 
 
@@ -341,9 +341,9 @@ If you logged the *model loss* as a metadata for each record, you can [sort the 
 
 ![View metrics](/_static/reference/webapp/features-metrics.png)
 
-The **Dataset Metrics** are part of the **Sidebar** placed on the right side of **Argilla datasets**. To know more about this component, click [here](dataset.md).
+The **Dataset Metrics** are part of the **Sidebar** placed on the right side of **Argilla datasets**. To know more about this component, click [here](/reference/webapp/pages).
 
-Argilla metrics are very convenient in terms of assesing the status of the dataset, and to extract valuable information.
+Argilla metrics are very convenient in terms of assessing the status of the dataset, and extracting valuable information.
 
 ### How to use Metrics
 
@@ -376,14 +376,14 @@ In both modes, the **Keywords** list displays a list of relevant words and the n
 
 ##### Annotation mode
 
-In the **annotation mode**, the stats show the **mentions** (this is, the entities) which are present in the records.
+In the **annotation mode**, the stats show the **mentions** (this is, the entities) that are present in the records.
 
 This submenu has the **Predicted as** (for predictions) and the **Annotated as** (for annotation) sections, and here users can see the number of entities predicted or annotated with a specific label. The number of occurrences is ordered from highest to lowest, and the labels are also ordered in that way.
 
 
 #### Refresh button
 
-Users should click this button whenever they wanted to see the page updated. If any change is made, this button displays the updated page.
+Users should click this button whenever they want to see the page updated. If any change is made, this button displays the updated page.
 
 
 
