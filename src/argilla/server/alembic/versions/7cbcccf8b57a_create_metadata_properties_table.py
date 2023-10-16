@@ -36,10 +36,8 @@ def upgrade() -> None:
         sa.Column("id", sa.Uuid(), nullable=False),
         sa.Column("name", sa.String(), nullable=False),
         sa.Column("title", sa.Text(), nullable=False),
-        # TODO: We should move type column to settings as an attribute (as we are already doing for Fields and Questions).
-        sa.Column("type", sa.Text(), nullable=False),
-        sa.Column("allowed_roles", sa.JSON(), server_default="[]", nullable=False),
         sa.Column("settings", sa.JSON(), nullable=False),
+        sa.Column("allowed_roles", sa.JSON(), server_default="[]", nullable=False),
         sa.Column("dataset_id", sa.Uuid(), nullable=False),
         sa.Column("inserted_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
