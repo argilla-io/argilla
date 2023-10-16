@@ -372,16 +372,11 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, Generic[R]):
         except ValidationError as e:
             raise ValueError(f"`FeedbackRecord.fields` does not match the expected schema, with exception: {e}") from e
 
-    def _validate_record_metadata(
-        self, record: FeedbackRecord, metadata_schema: Optional[Type[BaseModel]] = None
-    ) -> None:
+    def _validate_record_metadata(self, record: FeedbackRecord, metadata_schema: Type[BaseModel] = None) -> None:
         """Validates the `FeedbackRecord.metadata` against the schema defined by the `metadata_properties`."""
 
         if not record.metadata:
             return
-
-        if metadata_schema is None:
-            metadata_schema = self._build_metadata_schema()
 
         try:
             metadata_schema.parse_obj(record.metadata)
