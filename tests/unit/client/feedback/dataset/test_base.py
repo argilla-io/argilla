@@ -12,7 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, TYPE_CHECKING, Iterable, List, Optional, Union
+
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 
 import pytest
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
