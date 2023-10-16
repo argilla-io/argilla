@@ -17,7 +17,7 @@ from typing import Any, List, Optional
 from uuid import UUID
 
 from pydantic import parse_obj_as
-from sqlalchemy import ARRAY, JSON, ForeignKey, Text, UniqueConstraint, and_, sql
+from sqlalchemy import JSON, ForeignKey, String, Text, UniqueConstraint, and_, sql
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.ext.mutable import MutableDict, MutableList
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -47,7 +47,7 @@ _USER_API_KEY_BYTES_LENGTH = 80
 class Field(DatabaseModel):
     __tablename__ = "fields"
 
-    name: Mapped[str] = mapped_column(Text, index=True)
+    name: Mapped[str] = mapped_column(String, index=True)
     title: Mapped[str] = mapped_column(Text)
     required: Mapped[bool] = mapped_column(default=False)
     settings: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSON), default={})
@@ -153,7 +153,7 @@ class Record(DatabaseModel):
 class Question(DatabaseModel):
     __tablename__ = "questions"
 
-    name: Mapped[str] = mapped_column(index=True)
+    name: Mapped[str] = mapped_column(String, index=True)
     title: Mapped[str] = mapped_column(Text)
     description: Mapped[str] = mapped_column(Text, nullable=True)
     required: Mapped[bool] = mapped_column(default=False)
@@ -185,7 +185,7 @@ class Question(DatabaseModel):
 class MetadataProperty(DatabaseModel):
     __tablename__ = "metadata_properties"
 
-    name: Mapped[str] = mapped_column(Text, index=True)
+    name: Mapped[str] = mapped_column(String, index=True)
     title: Mapped[str] = mapped_column(Text)
     type: Mapped[MetadataPropertyType] = mapped_column(Text)
     settings: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSON), default={})
