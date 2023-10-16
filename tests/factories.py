@@ -253,23 +253,20 @@ class MetadataPropertyFactory(BaseFactory):
         return super()._create(model_class, *args, **kwargs)
 
     name = factory.Sequence(lambda n: f"metadata-property-{n}")
-    description = "Metadata property description"
+    title = "Metadata property title"
     allowed_roles = [UserRole.admin, UserRole.annotator]
     dataset = factory.SubFactory(DatasetFactory)
 
 
 class TermsMetadataPropertyFactory(MetadataPropertyFactory):
-    type = MetadataPropertyType.terms
     settings = {"type": MetadataPropertyType.terms, "values": ["a", "b", "c"]}
 
 
 class IntegerMetadataPropertyFactory(MetadataPropertyFactory):
-    type = MetadataPropertyType.integer
     settings = {"type": MetadataPropertyType.integer}
 
 
 class FloatMetadataPropertyFactory(MetadataPropertyFactory):
-    type = MetadataPropertyType.float
     settings = {"type": MetadataPropertyType.float}
 
 

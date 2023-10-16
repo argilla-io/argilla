@@ -476,13 +476,6 @@ async def test_update_dataset_records_in_argilla(
                 },
             ]
         )
-    with pytest.raises(TypeError, match='"RemoteFeedbackRecord" is immutable and does not support item assignment'):
-        record.suggestions = [
-            {
-                "question_name": "question-1",
-                "value": "This is a suggestion to question 1",
-            },
-        ]
 
 
 def test_push_to_huggingface_and_from_huggingface(
