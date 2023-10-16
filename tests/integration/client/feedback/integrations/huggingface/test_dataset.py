@@ -17,8 +17,10 @@ import re
 from uuid import uuid4
 
 import argilla as rg
+import pytest
 
 
+@pytest.mark.skipif(os.getenv("HF_HUB_ACCESS_TOKEN") is None, reason="`HF_HUB_ACCESS_TOKEN` is not set")
 class TestSuiteHuggingFaceDatasetMixin:
     @classmethod
     def setup_class(cls: "TestSuiteHuggingFaceDatasetMixin") -> None:
