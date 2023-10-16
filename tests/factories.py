@@ -259,17 +259,14 @@ class MetadataPropertyFactory(BaseFactory):
 
 
 class TermsMetadataPropertyFactory(MetadataPropertyFactory):
-    type = MetadataPropertyType.terms
     settings = {"type": MetadataPropertyType.terms, "values": ["a", "b", "c"]}
 
 
 class IntegerMetadataPropertyFactory(MetadataPropertyFactory):
-    type = MetadataPropertyType.integer
     settings = {"type": MetadataPropertyType.integer}
 
 
 class FloatMetadataPropertyFactory(MetadataPropertyFactory):
-    type = MetadataPropertyType.float
     settings = {"type": MetadataPropertyType.float}
 
 
