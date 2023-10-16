@@ -130,7 +130,7 @@ def test_for_supervised_fine_tuning():
 def test_for_retrieval_augmented_generation():
     # Test case 1: Single document retrieval augmented generation
     dataset = FeedbackDataset.for_retrieval_augmented_generation(
-        number_of_documents=1, rating_scale=5, use_markdown=True
+        number_of_retrievals=1, rating_scale=5, use_markdown=True
     )
     assert len(dataset) == 0
     assert dataset.questions[0].name == "question_rating_1"
@@ -151,7 +151,7 @@ def test_for_retrieval_augmented_generation():
 
     # Test case 2: Multiple document retrieval augmented generation
     dataset = FeedbackDataset.for_retrieval_augmented_generation(
-        number_of_documents=3, rating_scale=10, use_markdown=False, guidelines="Custom guidelines"
+        number_of_retrievals=3, rating_scale=10, use_markdown=False, guidelines="Custom guidelines"
     )
     assert len(dataset) == 0
     assert dataset.questions[0].name == "question_rating_1"
@@ -198,9 +198,7 @@ def test_for_sentence_similarity():
     )
 
     # Test case 2: Custom parameters
-    dataset = FeedbackDataset.for_sentence_similarity(
-        similarity_scale=5, use_markdown=True, guidelines="Custom guidelines"
-    )
+    dataset = FeedbackDataset.for_sentence_similarity(rating_scale=5, use_markdown=True, guidelines="Custom guidelines")
     assert len(dataset) == 0
     assert dataset.questions[0].name == "similarity"
     assert dataset.questions[0].description == "Rate the similarity between the two sentences."
