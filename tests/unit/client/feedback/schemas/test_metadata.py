@@ -35,7 +35,7 @@ from pydantic import ValidationError, create_model
             {
                 "name": "terms-metadata",
                 "description": "b",
-                # "visible_for_annotators": True,
+                "visible_for_annotators": True,
                 "settings": {"type": "terms"},
             },
             TermsMetadataFilter(name="terms-metadata", values=["a", "b", "c"]),
@@ -46,7 +46,7 @@ from pydantic import ValidationError, create_model
             {
                 "name": "terms-metadata",
                 "description": "b",
-                # "visible_for_annotators": True,
+                "visible_for_annotators": True,
                 "settings": {"type": "terms", "values": ["a", "b", "c"]},
             },
             TermsMetadataFilter(name="terms-metadata", values=["a", "b", "c"]),
@@ -55,13 +55,13 @@ from pydantic import ValidationError, create_model
         (
             {
                 "name": "terms-metadata",
-                # "visible_for_annotators": False,
+                "visible_for_annotators": False,
                 "values": ["a", "b", "c"],
             },
             {
                 "name": "terms-metadata",
                 "description": None,
-                # "visible_for_annotators": False,
+                "visible_for_annotators": False,
                 "settings": {"type": "terms", "values": ["a", "b", "c"]},
             },
             TermsMetadataFilter(name="terms-metadata", values=["a", "b", "c"]),
@@ -118,7 +118,7 @@ def test_terms_metadata_property_errors(
             {
                 "name": "int-metadata",
                 "description": "b",
-                # "visible_for_annotators": True,
+                "visible_for_annotators": True,
                 "settings": {"type": "integer"},
             },
             IntegerMetadataFilter(name="int-metadata", le=10, ge=5),
@@ -127,13 +127,13 @@ def test_terms_metadata_property_errors(
         (
             {
                 "name": "int-metadata",
-                # "visible_for_annotators": False,
+                "visible_for_annotators": False,
                 "max": 5,
             },
             {
                 "name": "int-metadata",
                 "description": None,
-                # "visible_for_annotators": False,
+                "visible_for_annotators": False,
                 "settings": {"type": "integer", "max": 5},
             },
             IntegerMetadataFilter(name="int-metadata", le=5, ge=0),
@@ -144,7 +144,7 @@ def test_terms_metadata_property_errors(
             {
                 "name": "int-metadata",
                 "description": None,
-                # "visible_for_annotators": True,
+                "visible_for_annotators": True,
                 "settings": {"type": "integer", "min": 5},
             },
             IntegerMetadataFilter(name="int-metadata", le=10, ge=5),
@@ -155,7 +155,7 @@ def test_terms_metadata_property_errors(
             {
                 "name": "int-metadata",
                 "description": None,
-                # "visible_for_annotators": True,
+                "visible_for_annotators": True,
                 "settings": {"type": "integer", "min": 5, "max": 10},
             },
             IntegerMetadataFilter(name="int-metadata", le=10, ge=5),
@@ -212,7 +212,7 @@ def test_integer_metadata_property_errors(
             {
                 "name": "float-metadata",
                 "description": "b",
-                # "visible_for_annotators": True,
+                "visible_for_annotators": True,
                 "settings": {"type": "float"},
             },
             FloatMetadataFilter(name="float-metadata", le=10.0, ge=5.0),
@@ -221,13 +221,13 @@ def test_integer_metadata_property_errors(
         (
             {
                 "name": "float-metadata",
-                # "visible_for_annotators": False,
+                "visible_for_annotators": False,
                 "max": 5.0,
             },
             {
                 "name": "float-metadata",
                 "description": None,
-                # "visible_for_annotators": False,
+                "visible_for_annotators": False,
                 "settings": {"type": "float", "max": 5.0},
             },
             FloatMetadataFilter(name="float-metadata", le=5.0, ge=0.0),
@@ -238,7 +238,7 @@ def test_integer_metadata_property_errors(
             {
                 "name": "float-metadata",
                 "description": None,
-                # "visible_for_annotators": True,
+                "visible_for_annotators": True,
                 "settings": {"type": "float", "min": 5.0},
             },
             FloatMetadataFilter(name="float-metadata", le=10.0, ge=5.0),
@@ -249,7 +249,7 @@ def test_integer_metadata_property_errors(
             {
                 "name": "float-metadata",
                 "description": None,
-                # "visible_for_annotators": True,
+                "visible_for_annotators": True,
                 "settings": {"type": "float", "min": 5.0, "max": 10.0},
             },
             FloatMetadataFilter(name="float-metadata", le=10.0, ge=5.0),
