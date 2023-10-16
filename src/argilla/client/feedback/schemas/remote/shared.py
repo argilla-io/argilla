@@ -42,7 +42,7 @@ class RemoteSchema(BaseModel, ABC):
 
     @classmethod
     @abstractmethod
-    def from_api(cls) -> Type["RemoteSchema"]:
+    def from_api(cls, payload: "BaseModel") -> Type["RemoteSchema"]:
         """Abstract method to be implemented by subclasses to convert the API payload
         into a remote schema."""
         raise NotImplementedError

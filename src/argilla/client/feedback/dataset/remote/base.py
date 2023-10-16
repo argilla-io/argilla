@@ -12,11 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import textwrap
 import warnings
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Generic, Iterator, List, Optional, Type, TypeVar, Union
 
+from argilla import Workspace
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
@@ -28,7 +30,7 @@ if TYPE_CHECKING:
 
     import httpx
 
-    from argilla.client.feedback.dataset.local import FeedbackDataset
+    from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
     from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
@@ -91,7 +93,7 @@ class RemoteFeedbackRecordsBase(ABC, ArgillaRecordsMixin):
         pass
 
 
-class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
+class RemoteFeedbackDatasetBase(FeedbackDatasetBase, Generic[T]):
     records_cls: Type[T]
 
     def __init__(
@@ -186,10 +188,17 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
 
     def __repr__(self) -> str:
         """Returns a string representation of the dataset."""
+        indent = "   "
         return (
-            f"<FeedbackDataset id={self.id} name={self.name} workspace={self.workspace}"
-            f" url={self.url} fields={self.fields} questions={self.questions}"
-            f" guidelines={self.guidelines}>"
+            "RemoteFeedbackDataset("
+            + textwrap.indent(f"\nid={self.id}", indent)
+            + textwrap.indent(f"\nname={self.name}", indent)
+            + textwrap.indent(f"\nworkspace={self.workspace}", indent)
+            + textwrap.indent(f"\nurl={self.url}", indent)
+            + textwrap.indent(f"\nfields={self.fields}", indent)
+            + textwrap.indent(f"\nquestions={self.questions}", indent)
+            + textwrap.indent(f"\nguidelines={self.guidelines}", indent)
+            + ")"
         )
 
     def __len__(self) -> int:
@@ -252,7 +261,7 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
             A local instance of the dataset which is a `FeedbackDataset` object.
         """
         # Importing here to avoid circular imports
-        from argilla.client.feedback.dataset.local import FeedbackDataset
+        from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 
         instance = FeedbackDataset(
             fields=self.fields,
@@ -263,3 +272,11 @@ class RemoteFeedbackDatasetBase(Generic[T], FeedbackDatasetBase):
             records=[record.to_local() for record in self._records],
         )
         return instance
+
+    def push_to_argilla(
+        self, name: str, workspace: Optional[Union[str, "Workspace"]] = None, show_progress: bool = False
+    ) -> "RemoteFeedbackDatasetBase":
+        warnings.warn(
+            "Already pushed datasets cannot be pushed to Argilla again because they are synced automatically."
+        )
+        return self
