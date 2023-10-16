@@ -82,6 +82,7 @@ jobs:
         env:
           ARGILLA_ENABLE_TELEMETRY: 0
         run: |
+          df -h
           # ulimit to avoid segmentation fault
           ulimit -c unlimited
           pip install -e ".[server,listeners]"

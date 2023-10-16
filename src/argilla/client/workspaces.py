@@ -262,7 +262,7 @@ class Workspace:
             raise RuntimeError(f"The `rg.active_client()` is not available or not respoding.") from e
 
     @classmethod
-    def __new_instance(
+    def _new_instance(
         cls, client: Optional["httpx.Client"] = None, ws: Optional[Union[WorkspaceModelV0, WorkspaceModelV1]] = None
     ) -> "Workspace":
         """Returns a new `Workspace` instance."""
@@ -293,7 +293,7 @@ class Workspace:
         client = cls.__active_client()
         try:
             ws = workspaces_api.create_workspace(client, name).parsed
-            return cls.__new_instance(client, ws)
+            return cls._new_instance(client, ws)
         except AlreadyExistsApiError as e:
             raise ValueError(f"Workspace with name=`{name}` already exists, so please use a different name.") from e
         except (ValidationApiError, BaseClientError) as e:
@@ -321,7 +321,7 @@ class Workspace:
         client = cls.__active_client()
         try:
             ws = workspaces_api_v1.get_workspace(client, id).parsed
-            return cls.__new_instance(client, ws)
+            return cls._new_instance(client, ws)
         except NotFoundApiError as e:
             raise ValueError(
                 f"Workspace with id=`{id}` doesn't exist in Argilla, so please"
@@ -362,7 +362,7 @@ class Workspace:
 
         for ws in workspaces:
             if ws.name == name:
-                return cls.__new_instance(client, ws)
+                return cls._new_instance(client, ws)
 
         raise ValueError(
             f"Workspace with name=`{name}` doesn't exist in Argilla, so please"
@@ -388,6 +388,6 @@ class Workspace:
         try:
             workspaces = workspaces_api_v1.list_workspaces_me(client).parsed
             for ws in workspaces:
-                yield cls.__new_instance(client, ws)
+                yield cls._new_instance(client, ws)
         except Exception as e:
             raise RuntimeError("Error while retrieving the list of workspaces from Argilla.") from e

@@ -113,8 +113,11 @@ def test_prepare_for_training_text_classification_with_defaults(
 
 
 @pytest.mark.parametrize(
-    ("framework", "model_id"),
-    [(Framework("transformers"), "bert-base-cased"), (Framework("peft"), "distilbert-base-cased")],
+    "framework, model_id, target_modules",
+    [
+        (Framework("transformers"), "distilbert-base-cased", None),
+        (Framework("peft"), "distilbert-base-cased", ["q_lin", "k_lin"]),
+    ],
 )
 @pytest.mark.usefixtures(
     "feedback_dataset_guidelines",
@@ -125,6 +128,7 @@ def test_prepare_for_training_text_classification_with_defaults(
 def test_argilla_trainer_text_classification_with_model_tokenizer(
     framework: Union[Framework, str],
     model_id: str,
+    target_modules: Union[List[str], None],
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
@@ -145,17 +149,16 @@ def test_argilla_trainer_text_classification_with_model_tokenizer(
 
     model = AutoModelForSequenceClassification.from_pretrained(model_id, num_labels=3)
     tokenizer = AutoTokenizer.from_pretrained(model_id, padding_side="right", add_prefix_space=True)
-    # Set some values to track and assert later
-    model.test_value = 12
-    tokenizer.test_value = 12
     if not (framework == Framework("peft") and sys.version_info < (3, 9)):
         trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, model=model, tokenizer=tokenizer)
-        trainer.update_config(num_steps=1)
+        trainer.update_config(num_steps=1, target_modules=target_modules)
         trainer.train(__OUTPUT_DIR__)
 
-        # Verify that the passed model and tokenizer are used
-        assert trainer._trainer._transformers_model.test_value == 12
-        assert trainer._trainer._transformers_tokenizer.test_value == 12
+        # Assert that the provided tokenizer is used
+        assert (
+            trainer._trainer._transformers_tokenizer.pretrained_init_configuration
+            == tokenizer.pretrained_init_configuration
+        )
 
     if Path(__OUTPUT_DIR__).exists():
         shutil.rmtree(__OUTPUT_DIR__)
