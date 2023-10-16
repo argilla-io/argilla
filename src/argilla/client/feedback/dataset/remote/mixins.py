@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import warnings
 from typing import TYPE_CHECKING, Iterator, List, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
@@ -82,6 +81,8 @@ class ArgillaRecordsMixin:
         else:
             raise TypeError("Only `int` and `slice` are supported as index.")
 
+        question_id_to_name = {question.id: question.name for question in self.dataset.questions}
+
         records = []
         for offset, limit in zip(offsets, limits):
             fetched_records = self._fetch_records(offset=offset, limit=limit)
@@ -89,9 +90,7 @@ class ArgillaRecordsMixin:
                 break
             records.extend(
                 [
-                    RemoteFeedbackRecord.from_api(
-                        record, question_id_to_name=self._question_id_to_name, client=self._client
-                    )
+                    RemoteFeedbackRecord.from_api(record, question_id_to_name=question_id_to_name, client=self._client)
                     for record in fetched_records.items
                 ]
             )
@@ -102,9 +101,7 @@ class ArgillaRecordsMixin:
         return records[0] if isinstance(key, int) else records
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def __iter__(
-        self: "RemoteFeedbackRecords",
-    ) -> Iterator["RemoteFeedbackRecord"]:
+    def __iter__(self: "RemoteFeedbackRecords") -> Iterator["RemoteFeedbackRecord"]:
         """Iterates over the `FeedbackRecord`s of the current `FeedbackDataset` in Argilla."""
         current_batch = 0
         while True:
