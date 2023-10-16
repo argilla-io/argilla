@@ -13,13 +13,17 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, TYPE_CHECKING, List, Tuple, Type
+from typing import Any, List, TYPE_CHECKING, Tuple, Type
 from uuid import UUID
 
 import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
+
+
 from argilla import (
     FeedbackRecord,
 )
+import argilla as rg
 from argilla.client import api
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
@@ -47,8 +51,6 @@ from argilla.client.sdk.commons.errors import ValidationApiError
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.workspaces import Workspace
 from argilla.server.models import User as ServerUser
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from tests.factories import (
     DatasetFactory,
     RecordFactory,
@@ -122,8 +124,6 @@ class TestRemoteFeedbackDataset:
         assert len(remote_dataset.records) == 1
 
     async def test_update_records(self, owner: "User", test_dataset: FeedbackDataset):
-        import argilla as rg
-
         rg.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
@@ -149,8 +149,6 @@ class TestRemoteFeedbackDataset:
         assert first_record.metadata["terms-metadata"] == "a"
 
     async def test_update_records_with_suggestions(self, owner: "User", test_dataset: FeedbackDataset):
-        import argilla as rg
-
         rg.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
@@ -183,8 +181,6 @@ class TestRemoteFeedbackDataset:
     async def test_update_records_with_metadata_validation_error(
         self, owner: "User", test_dataset: FeedbackDataset, metadata: Tuple[str, Any]
     ):
-        import argilla as rg
-
         rg.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
