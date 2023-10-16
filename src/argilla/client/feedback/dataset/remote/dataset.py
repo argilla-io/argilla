@@ -21,10 +21,21 @@ from tqdm import trange
 from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.remote.base import RemoteFeedbackDatasetBase, RemoteFeedbackRecordsBase
 from argilla.client.feedback.dataset.remote.filtered import FilteredRemoteFeedbackDataset
+from argilla.client.feedback.schemas.questions import (
+    LabelQuestion,
+    MultiLabelQuestion,
+    RatingQuestion,
+)
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.feedback.training.schemas import (
     TrainingTaskTypes,
+)
+from argilla.client.feedback.unification import (
+    LabelQuestionStrategy,
+    MultiLabelQuestionStrategy,
+    RankingQuestionStrategy,
+    RatingQuestionStrategy,
 )
 from argilla.client.models import Framework
 from argilla.client.sdk.users.models import UserRole
@@ -36,6 +47,7 @@ if TYPE_CHECKING:
 
     import httpx
 
+    from argilla.client.feedback.dataset.local import FeedbackDataset
     from argilla.client.feedback.schemas.enums import ResponseStatusFilter
     from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
@@ -194,15 +206,32 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         except Exception as e:
             raise RuntimeError(f"Failed while deleting the `FeedbackDataset` from Argilla with exception: {e}") from e
 
-    def unify_responses(self, *args, **kwargs) -> "FeedbackDataset":
+    def unify_responses(
+        self,
+        question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
+        strategy: Union[
+            str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy, RankingQuestionStrategy
+        ],
+    ) -> "FeedbackDataset":
+        """
+        The `unify_responses` function takes a question and a strategy as input and applies the strategy
+        to unify the responses for that question.
+
+        Args:
+            question The `question` parameter can be either a string representing the name of the
+                question, or an instance of one of the question classes (`LabelQuestion`, `MultiLabelQuestion`,
+                `RatingQuestion`, `RankingQuestion`).
+            strategy The `strategy` parameter is used to specify the strategy to be used for unifying
+                responses for a given question. It can be either a string or an instance of a strategy class.
+        """
         warnings.warn(
-            "A local `FeedbackDataset` returned because"
+            "A local `FeedbackDataset` returned because "
             "`unify_responses` is not supported for `RemoteFeedbackDataset`. "
             "`RemoteFeedbackDataset`.pull().unify_responses(*args, **kwargs)` is applied.",
             UserWarning,
         )
         local = self.pull()
-        return local.unify_responses(*args, **kwargs)
+        return local.unify_responses(question=question, strategy=strategy)
 
     def prepare_for_training(
         self,
@@ -228,7 +257,7 @@ class RemoteFeedbackDataset(RemoteFeedbackDatasetBase[RemoteFeedbackRecords]):
         """
         warnings.warn(
             (
-                "A local `FeedbackDataset` returned because"
+                "A local `FeedbackDataset` returned because "
                 "`prepare_for_training` is not supported for `RemoteFeedbackDataset`. "
                 "`RemoteFeedbackDataset`.pull().prepare_for_training(*args, **kwargs)` is applied."
             ),

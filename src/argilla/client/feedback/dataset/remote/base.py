@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import textwrap
 import warnings
 from abc import ABC, abstractmethod
 from datetime import datetime
@@ -187,10 +188,17 @@ class RemoteFeedbackDatasetBase(FeedbackDatasetBase, Generic[T]):
 
     def __repr__(self) -> str:
         """Returns a string representation of the dataset."""
+        indent = "   "
         return (
-            f"<FeedbackDataset id={self.id} name={self.name} workspace={self.workspace}"
-            f" url={self.url} fields={self.fields} questions={self.questions}"
-            f" guidelines={self.guidelines}>"
+            "RemoteFeedbackDataset("
+            + textwrap.indent(f"\nid={self.id}", indent)
+            + textwrap.indent(f"\nname={self.name}", indent)
+            + textwrap.indent(f"\nworkspace={self.workspace}", indent)
+            + textwrap.indent(f"\nurl={self.url}", indent)
+            + textwrap.indent(f"\nfields={self.fields}", indent)
+            + textwrap.indent(f"\nquestions={self.questions}", indent)
+            + textwrap.indent(f"\nguidelines={self.guidelines}", indent)
+            + ")"
         )
 
     def __len__(self) -> int:

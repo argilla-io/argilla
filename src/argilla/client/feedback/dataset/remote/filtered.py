@@ -39,7 +39,7 @@ class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase):
         self._filters = filters
 
     def __len__(self) -> None:
-        raise NotImplementedError("`__len__` does not work for filtered datasets.")
+        raise NotImplementedError("`__len__` does not work for `FilteredRemoteFeedbackDataset`.")
 
     def _fetch_records(self, offset: int, limit: int) -> "FeedbackRecordsModel":
         """Fetches a batch of records from Argilla."""
@@ -56,10 +56,10 @@ class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase):
         records: Union["FeedbackRecord", Dict[str, Any], List[Union["FeedbackRecord", Dict[str, Any]]]],
         show_progress: bool = True,
     ) -> None:
-        raise NotImplementedError("`records.add` does not work for filtered datasets.")
+        raise NotImplementedError("`records.add` does not work for `FilteredRemoteFeedbackDataset`.")
 
     def delete(self, records: List["RemoteFeedbackRecord"]) -> None:
-        raise NotImplementedError("`records.delete` does not work for filtered datasets.")
+        raise NotImplementedError("`records.delete` does not work for `FilteredRemoteFeedbackDataset`.")
 
 
 class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeedbackRecords]):
@@ -94,10 +94,10 @@ class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeed
         )
 
     def delete(self) -> None:
-        raise NotImplementedError("`delete` does not work for `FilteredRemoteFeedbackDataset.")
+        raise NotImplementedError("`delete` does not work for `FilteredRemoteFeedbackDataset`.")
 
     def prepare_for_training(self, *args, **kwargs) -> Any:
-        raise NotImplementedError("`prepare_for_training` does not work for `FilteredRemoteFeedbackDataset.")
+        raise NotImplementedError("`prepare_for_training` does not work for `FilteredRemoteFeedbackDataset`.")
 
     def unify_responses(self, *args, **kwargs):
         raise NotImplementedError("`unify_responses` does not work for `FilteredRemoteFeedbackDataset`.")

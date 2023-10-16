@@ -680,3 +680,37 @@ def test_prepare_for_training_text_classification(
 
     data = remote.prepare_for_training(framework=framework, task=task)
     assert data is not None
+
+
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records",
+)
+def test_warning_remote_dataset_methods(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records: List[FeedbackRecord],
+):
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+
+    with pytest.warns(
+        UserWarning, match="`pull` method is not supported for local datasets and won't take any effect."
+    ):
+        dataset.pull()
+
+    with pytest.warns(
+        UserWarning, match="`filter_by` method is not supported for local datasets and won't take any effect."
+    ):
+        dataset.filter_by()
+
+    with pytest.warns(
+        UserWarning, match="`delete` method is not supported for local datasets and won't take any effect."
+    ):
+        dataset.delete()

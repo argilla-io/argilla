@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import logging
+import textwrap
 import warnings
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
@@ -48,7 +49,6 @@ from argilla.client.models import Framework
 from argilla.utils.dependency import require_dependencies
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
     from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.types import AllowedFieldTypes
 
@@ -127,7 +127,13 @@ class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase):
 
     def __repr__(self) -> str:
         """Returns a string representation of the dataset."""
-        return f"<FeedbackDataset fields={self.fields} questions={self.questions} guidelines={self.guidelines}>"
+        return (
+            "FeedbackDataset("
+            + textwrap.indent(
+                f"\nfields={self.fields}\nquestions={self.questions}\nguidelines={self.guidelines})", "    "
+            )
+            + "\n)"
+        )
 
     def __len__(self) -> int:
         """Returns the number of records in the dataset."""
@@ -188,30 +194,26 @@ class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase):
             self._records = records
 
     def pull(self) -> "FeedbackDataset":
-        """Returns the self `FeedbackDataset` instance."""
         warnings.warn(
             "`pull` method is not supported for local datasets and won't take any effect."
-            "First, you need to push the dataset to Argilla with `FeedbackDataset.push_to_argilla`."
+            "First, you need to push the dataset to Argilla with `FeedbackDataset.push_to_argilla()`."
             "After, use `FeedbackDataset.from_argilla(...).pull()`.",
             UserWarning,
         )
         return self
 
-    def filter_by(
-        self, response_status: Union["ResponseStatusFilter", List["ResponseStatusFilter"]]
-    ) -> "FeedbackDataset":
+    def filter_by(self, *args, **kwargs) -> "FeedbackDataset":
         warnings.warn(
             "`filter_by` method is not supported for local datasets and won't take any effect. "
-            "First, you need to push the dataset to Argilla with `FeedbackDataset.push_to_argilla`."
+            "First, you need to push the dataset to Argilla with `FeedbackDataset.push_to_argilla()`."
             "After, use `FeedbackDataset.from_argilla(...).filter_by()`.",
             UserWarning,
         )
         return self
 
     def delete(self):
-        # TODO: improve delete mechanism -> `FeedbackDataset.delete_from_argilla(name=..., id=...)`
         warnings.warn(
-            "`delete` is not supported for local datasets and won't take any effect. "
+            "`delete` method is not supported for local datasets and won't take any effect. "
             "First, you need to push the dataset to Argilla with `FeedbackDataset.push_to_argilla`."
             "After, use `FeedbackDataset.from_argilla(...).delete()`",
             UserWarning,
@@ -303,7 +305,7 @@ class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase):
         if len(self.records) < 1:
             raise ValueError(
                 "No records found in the dataset. Make sure you add records to the"
-                " dataset via the `FeedbackDataset.add_records` method first."
+                " dataset via the `FeedbackDataset.add_records()` method first."
             )
 
         local_dataset = self.pull()
