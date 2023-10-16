@@ -65,7 +65,7 @@ class TestSuiteMetadataProperties:
             ),
         ],
     )
-    async def test_compute_metrics_for_metadata_property(
+    async def test_get_metadata_property_metrics(
         self,
         async_client: "AsyncClient",
         mock_search_engine: "SearchEngine",
@@ -85,11 +85,18 @@ class TestSuiteMetadataProperties:
         assert response.status_code == 200
         assert response.json() == expected_json
 
+    async def test_get_metadata_property_metrics_without_authentication(self, async_client: "AsyncClient"):
+        metadata_property = await TermsMetadataPropertyFactory.create()
+
+        response = await async_client.get(f"/api/v1/metadata-properties/{metadata_property.id}/metrics")
+
+        assert response.status_code == 401
+
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
-    async def test_compute_metrics_for_metadata_property_for_non_owners(
+    async def test_get_metadata_property_metrics_as_allowed_role(
         self, async_client: "AsyncClient", mock_search_engine: "SearchEngine", role: UserRole
     ):
-        metadata_property = await IntegerMetadataPropertyFactory.create()
+        metadata_property = await IntegerMetadataPropertyFactory.create(allowed_roles=[role])
         workspace = metadata_property.dataset.workspace
 
         user = await UserFactory.create(role=role)
@@ -104,7 +111,26 @@ class TestSuiteMetadataProperties:
 
         assert response.status_code == 200
 
-    async def test_compute_metrics_for_not_found_metadata_property(
+    @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
+    async def test_get_metadata_property_metrics_as_non_allowed_role(
+        self, async_client: "AsyncClient", mock_search_engine: "SearchEngine", role: UserRole
+    ):
+        metadata_property = await IntegerMetadataPropertyFactory.create(allowed_roles=[])
+        workspace = metadata_property.dataset.workspace
+
+        user = await UserFactory.create(role=role)
+
+        await WorkspaceUserFactory.create(user_id=user.id, workspace_id=workspace.id)
+
+        mock_search_engine.compute_metrics_for.return_value = IntegerMetadataMetrics(min=0, max=10)
+
+        response = await async_client.get(
+            f"/api/v1/metadata-properties/{metadata_property.id}/metrics", headers={API_KEY_HEADER_NAME: user.api_key}
+        )
+
+        assert response.status_code == 403
+
+    async def test_get_metadata_property_metrics_with_nonexistent_metadata_property(
         self, async_client: "AsyncClient", owner_auth_header: dict
     ):
         await TermsMetadataPropertyFactory.create()
@@ -115,19 +141,12 @@ class TestSuiteMetadataProperties:
 
         assert response.status_code == 404
 
-    async def test_compute_metrics_for_unauthenticated_user(self, async_client: "AsyncClient"):
-        metadata_property = await TermsMetadataPropertyFactory.create()
-
-        response = await async_client.get(f"/api/v1/metadata-properties/{metadata_property.id}/metrics")
-
-        assert response.status_code == 401
-
-    @pytest.mark.parametrize("unauthorized_roles", [UserRole.admin, UserRole.annotator])
-    async def test_compute_metrics_for_unauthorized_user(
-        self, async_client: "AsyncClient", unauthorized_roles: UserRole
+    @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
+    async def test_get_metadata_property_metrics_as_restricted_user_role_from_different_workspace(
+        self, async_client: "AsyncClient", role: UserRole
     ):
+        user = await UserFactory.create(role=role)
         metadata_property = await TermsMetadataPropertyFactory.create()
-        user = await UserFactory.create(role=unauthorized_roles)
 
         response = await async_client.get(
             f"/api/v1/metadata-properties/{metadata_property.id}/metrics", headers={API_KEY_HEADER_NAME: user.api_key}
@@ -157,6 +176,7 @@ async def test_delete_metadata_property(async_client: "AsyncClient", db: "AsyncS
         "name": "name",
         "description": "description",
         "settings": {"type": MetadataPropertyType.integer, "min": None, "max": None},
+        "visible_for_annotators": True,
         "dataset_id": str(metadata_property.dataset_id),
         "inserted_at": metadata_property.inserted_at.isoformat(),
         "updated_at": metadata_property.updated_at.isoformat(),
