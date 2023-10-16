@@ -270,7 +270,6 @@ async def update_metadata_property(
     metadata_property: MetadataProperty,
     metadata_property_update: MetadataPropertyUpdate,
 ):
-    # TODO: Do we need some additional step to reindex on the search engine?
     return await metadata_property.update(
         db,
         title=metadata_property_update.title or metadata_property.title,
