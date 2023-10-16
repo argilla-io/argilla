@@ -16,14 +16,11 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, List, Tuple, Type
 from uuid import UUID
 
+import argilla as rg
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-
-
 from argilla import (
     FeedbackRecord,
 )
-import argilla as rg
 from argilla.client import api
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
@@ -51,6 +48,8 @@ from argilla.client.sdk.commons.errors import ValidationApiError
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.workspaces import Workspace
 from argilla.server.models import User as ServerUser
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from tests.factories import (
     DatasetFactory,
     RecordFactory,
