@@ -23,18 +23,19 @@ const $route = {
   },
 };
 
-jest.mock("@/models/feedback-task-model/record/record.queries", () => ({
-  RECORD_STATUS: {
-    PENDING: "PENDING",
-    DISCARDED: "DISCARDED",
-    SUBMITTED: "SUBMITTED",
-  },
-}));
-
 describe("AnnotationModePage", () => {
   it("render the layout while the data are in fetching state", () => {
     const options = {
-      stubs: ["BaseModal", "DatasetTrainComponent", "BaseLoading"],
+      stubs: [
+        "HeaderFeedbackTaskComponent",
+        "SidebarFeedbackTaskComponent",
+        "RecordFeedbackTaskAndQuestionnaireContent",
+        "DatasetFiltersComponent",
+        "PaginationFeedbackTaskComponent",
+        "BaseModal",
+        "DatasetTrainComponent",
+        "BaseLoading",
+      ],
       mocks: {
         $route,
       },
