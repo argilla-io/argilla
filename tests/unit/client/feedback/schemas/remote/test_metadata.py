@@ -36,19 +36,33 @@ from argilla.client.sdk.v1.datasets.models import FeedbackMetadataPropertyModel
     [
         (
             {"name": "a"},
-            {"name": "a", "description": None, "settings": {"type": "terms"}},
+            {"name": "a", "description": None, "visible_for_annotators": True, "settings": {"type": "terms"}},
         ),
         (
             {"name": "a", "description": "b"},
-            {"name": "a", "description": "b", "settings": {"type": "terms"}},
+            {"name": "a", "description": "b", "visible_for_annotators": True, "settings": {"type": "terms"}},
+        ),
+        (
+            {"name": "a", "visible_for_annotators": False},
+            {"name": "a", "description": None, "visible_for_annotators": False, "settings": {"type": "terms"}},
         ),
         (
             {"name": "a", "values": ["a"]},
-            {"name": "a", "description": None, "settings": {"type": "terms", "values": ["a"]}},
+            {
+                "name": "a",
+                "description": None,
+                "visible_for_annotators": True,
+                "settings": {"type": "terms", "values": ["a"]},
+            },
         ),
         (
             {"name": "a", "values": ["a", "b", "c"]},
-            {"name": "a", "description": None, "settings": {"type": "terms", "values": ["a", "b", "c"]}},
+            {
+                "name": "a",
+                "description": None,
+                "visible_for_annotators": True,
+                "settings": {"type": "terms", "values": ["a", "b", "c"]},
+            },
         ),
     ],
 )
@@ -72,6 +86,7 @@ def test_remote_terms_metadata_property(schema_kwargs: Dict[str, Any], server_pa
             id=uuid4(),
             name="a",
             description="A",
+            visible_for_annotators=True,
             settings={"type": "terms"},
             inserted_at=datetime.now(),
             updated_at=datetime.now(),
@@ -80,6 +95,7 @@ def test_remote_terms_metadata_property(schema_kwargs: Dict[str, Any], server_pa
             id=uuid4(),
             name="b",
             description=None,
+            visible_for_annotators=False,
             settings={"type": "terms", "values": ["a", "b", "c"]},
             inserted_at=datetime.now(),
             updated_at=datetime.now(),
@@ -98,23 +114,42 @@ def test_remote_terms_metadata_property_from_api(payload: FeedbackMetadataProper
     [
         (
             {"name": "a"},
-            {"name": "a", "description": None, "settings": {"type": "integer"}},
+            {"name": "a", "description": None, "visible_for_annotators": True, "settings": {"type": "integer"}},
         ),
         (
             {"name": "a", "description": "b"},
-            {"name": "a", "description": "b", "settings": {"type": "integer"}},
+            {"name": "a", "description": "b", "visible_for_annotators": True, "settings": {"type": "integer"}},
+        ),
+        (
+            {"name": "a", "visible_for_annotators": False},
+            {"name": "a", "description": None, "visible_for_annotators": False, "settings": {"type": "integer"}},
         ),
         (
             {"name": "a", "min": 0},
-            {"name": "a", "description": None, "settings": {"type": "integer", "min": 0}},
+            {
+                "name": "a",
+                "description": None,
+                "visible_for_annotators": True,
+                "settings": {"type": "integer", "min": 0},
+            },
         ),
         (
             {"name": "a", "max": 10},
-            {"name": "a", "description": None, "settings": {"type": "integer", "max": 10}},
+            {
+                "name": "a",
+                "description": None,
+                "visible_for_annotators": True,
+                "settings": {"type": "integer", "max": 10},
+            },
         ),
         (
             {"name": "a", "min": 0, "max": 10},
-            {"name": "a", "description": None, "settings": {"type": "integer", "min": 0, "max": 10}},
+            {
+                "name": "a",
+                "description": None,
+                "visible_for_annotators": True,
+                "settings": {"type": "integer", "min": 0, "max": 10},
+            },
         ),
     ],
 )
@@ -138,6 +173,7 @@ def test_remote_integer_metadata_property(schema_kwargs: Dict[str, Any], server_
             id=uuid4(),
             name="a",
             description="A",
+            visible_for_annotators=True,
             settings={"type": "integer"},
             inserted_at=datetime.now(),
             updated_at=datetime.now(),
@@ -146,6 +182,7 @@ def test_remote_integer_metadata_property(schema_kwargs: Dict[str, Any], server_
             id=uuid4(),
             name="b",
             description=None,
+            visible_for_annotators=True,
             settings={"type": "integer", "min": 0},
             inserted_at=datetime.now(),
             updated_at=datetime.now(),
@@ -154,6 +191,7 @@ def test_remote_integer_metadata_property(schema_kwargs: Dict[str, Any], server_
             id=uuid4(),
             name="c",
             description=None,
+            visible_for_annotators=False,
             settings={"type": "integer", "min": 0, "max": 10},
             inserted_at=datetime.now(),
             updated_at=datetime.now(),
@@ -172,23 +210,42 @@ def test_remote_integer_metadata_property_from_api(payload: FeedbackMetadataProp
     [
         (
             {"name": "a"},
-            {"name": "a", "description": None, "settings": {"type": "float"}},
+            {"name": "a", "description": None, "visible_for_annotators": True, "settings": {"type": "float"}},
         ),
         (
             {"name": "a", "description": "b"},
-            {"name": "a", "description": "b", "settings": {"type": "float"}},
+            {"name": "a", "description": "b", "visible_for_annotators": True, "settings": {"type": "float"}},
+        ),
+        (
+            {"name": "a", "visible_for_annotators": False},
+            {"name": "a", "description": None, "visible_for_annotators": False, "settings": {"type": "float"}},
         ),
         (
             {"name": "a", "min": 0.0},
-            {"name": "a", "description": None, "settings": {"type": "float", "min": 0.0}},
+            {
+                "name": "a",
+                "description": None,
+                "visible_for_annotators": True,
+                "settings": {"type": "float", "min": 0.0},
+            },
         ),
         (
             {"name": "a", "max": 10.0},
-            {"name": "a", "description": None, "settings": {"type": "float", "max": 10.0}},
+            {
+                "name": "a",
+                "description": None,
+                "visible_for_annotators": True,
+                "settings": {"type": "float", "max": 10.0},
+            },
         ),
         (
             {"name": "a", "min": 0.0, "max": 10.0},
-            {"name": "a", "description": None, "settings": {"type": "float", "min": 0.0, "max": 10.0}},
+            {
+                "name": "a",
+                "description": None,
+                "visible_for_annotators": True,
+                "settings": {"type": "float", "min": 0.0, "max": 10.0},
+            },
         ),
     ],
 )
@@ -212,6 +269,7 @@ def test_remote_float_metadata_property(schema_kwargs: Dict[str, Any], server_pa
             id=uuid4(),
             name="a",
             description="A",
+            visible_for_annotators=True,
             settings={"type": "float"},
             inserted_at=datetime.now(),
             updated_at=datetime.now(),
@@ -220,6 +278,7 @@ def test_remote_float_metadata_property(schema_kwargs: Dict[str, Any], server_pa
             id=uuid4(),
             name="b",
             description=None,
+            visible_for_annotators=True,
             settings={"type": "float", "min": 0.0},
             inserted_at=datetime.now(),
             updated_at=datetime.now(),
@@ -228,6 +287,7 @@ def test_remote_float_metadata_property(schema_kwargs: Dict[str, Any], server_pa
             id=uuid4(),
             name="c",
             description=None,
+            visible_for_annotators=False,
             settings={"type": "float", "min": 0.0, "max": 10.0},
             inserted_at=datetime.now(),
             updated_at=datetime.now(),
