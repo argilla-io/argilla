@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import time
+
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
 from unittest.mock import ANY, MagicMock
@@ -66,7 +66,7 @@ from argilla.server.search_engine import (
     TermsMetadataFilter,
     UserResponseStatusFilter,
 )
-from sqlalchemy import func, select
+from sqlalchemy import func, inspect, select
 
 from tests.factories import (
     AdminFactory,
@@ -3899,6 +3899,332 @@ class TestSuiteDatasets:
         assert response.status_code == 404
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
+
+    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+    async def test_update_dataset_records(
+        self, async_client: "AsyncClient", mock_search_engine: "SearchEngine", role: UserRole
+    ):
+        dataset = await DatasetFactory.create()
+        user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
+        question_1 = await TextQuestionFactory.create(dataset=dataset)
+        question_2 = await TextQuestionFactory.create(dataset=dataset)
+        question_3 = await TextQuestionFactory.create(dataset=dataset)
+        await TermsMetadataPropertyFactory.create(name="terms-metadata-property", dataset=dataset)
+        await IntegerMetadataPropertyFactory.create(name="integer-metadata-property", dataset=dataset)
+        await FloatMetadataPropertyFactory.create(name="float-metadata-property", dataset=dataset)
+        records = await RecordFactory.create_batch(
+            size=10,
+            dataset=dataset,
+            metadata_={"terms-metadata-property": "a", "integer-metadata-property": 1, "float-metadata-property": 1.0},
+        )
+
+        # record 0 suggestions (should be deleted)
+        suggestions_records_0 = [
+            await SuggestionFactory.create(question=question_1, record=records[0], value="suggestion 0 1"),
+            await SuggestionFactory.create(question=question_2, record=records[0], value="suggestion 0 2"),
+            await SuggestionFactory.create(question=question_3, record=records[0], value="suggestion 0 3"),
+        ]
+
+        # record 1 suggestions (should be deleted)
+        suggestions_records_1 = [
+            await SuggestionFactory.create(question=question_1, record=records[1], value="suggestion 1 1"),
+            await SuggestionFactory.create(question=question_2, record=records[1], value="suggestion 1 2"),
+            await SuggestionFactory.create(question=question_3, record=records[1], value="suggestion 1 3"),
+        ]
+
+        # record 2 suggestions (should be kept)
+        suggestions_records_2 = [
+            await SuggestionFactory.create(question=question_1, record=records[2], value="suggestion 2 1"),
+            await SuggestionFactory.create(question=question_2, record=records[2], value="suggestion 2 2"),
+            await SuggestionFactory.create(question=question_3, record=records[2], value="suggestion 2 3"),
+        ]
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            json={
+                "items": [
+                    {
+                        "id": str(records[0].id),
+                        "external_id": "this is a new external id 0",
+                        "metadata": {
+                            "terms-metadata-property": "a",
+                            "integer-metadata-property": 0,
+                            "float-metadata-property": 0.0,
+                            "extra-metadata": "yes",
+                        },
+                        "suggestions": [
+                            {
+                                "question_id": str(question_1.id),
+                                "value": "suggestion updated 0 1",
+                            },
+                            {
+                                "question_id": str(question_2.id),
+                                "value": "suggestion updated 0 2",
+                            },
+                            {"question_id": str(question_3.id), "value": "suggestion updated 0 3"},
+                        ],
+                    },
+                    {
+                        "id": str(records[1].id),
+                        "external_id": "this is a new external id 1",
+                        "metadata": {
+                            "terms-metadata-property": "b",
+                            "integer-metadata-property": 1,
+                            "float-metadata-property": 1.0,
+                            "extra-metadata": "yes",
+                        },
+                        "suggestions": [
+                            {
+                                "question_id": str(question_1.id),
+                                "value": "suggestion updated 1 1",
+                            }
+                        ],
+                    },
+                    {
+                        "id": str(records[2].id),
+                        "metadata": {
+                            "terms-metadata-property": "c",
+                            "integer-metadata-property": 2,
+                            "float-metadata-property": 2.0,
+                            "extra-metadata": "yes",
+                        },
+                    },
+                    {
+                        "id": str(records[3].id),
+                        "suggestions": [
+                            {
+                                "question_id": str(question_1.id),
+                                "value": "suggestion updated 3 1",
+                            },
+                            {
+                                "question_id": str(question_2.id),
+                                "value": "suggestion updated 3 2",
+                            },
+                            {"question_id": str(question_3.id), "value": "suggestion updated 3 3"},
+                        ],
+                    },
+                ]
+            },
+        )
+
+        assert response.status_code == 204
+
+        # Record 0
+        assert records[0].external_id == "this is a new external id 0"
+        assert records[0].metadata_ == {
+            "terms-metadata-property": "a",
+            "integer-metadata-property": 0,
+            "float-metadata-property": 0.0,
+            "extra-metadata": "yes",
+        }
+        await records[0].awaitable_attrs.suggestions
+        assert len(records[0].suggestions) == 3
+        assert records[0].suggestions[0].value == "suggestion updated 0 1"
+        assert records[0].suggestions[1].value == "suggestion updated 0 2"
+        assert records[0].suggestions[2].value == "suggestion updated 0 3"
+        for suggestion in suggestions_records_0:
+            assert inspect(suggestion).deleted
+
+        # Record 1
+        assert records[1].external_id == "this is a new external id 1"
+        assert records[1].metadata_ == {
+            "terms-metadata-property": "b",
+            "integer-metadata-property": 1,
+            "float-metadata-property": 1.0,
+            "extra-metadata": "yes",
+        }
+        await records[1].awaitable_attrs.suggestions
+        assert len(records[1].suggestions) == 1
+        assert records[1].suggestions[0].value == "suggestion updated 1 1"
+        for suggestion in suggestions_records_1:
+            assert inspect(suggestion).deleted
+
+        # Record 2
+        assert records[2].metadata_ == {
+            "terms-metadata-property": "c",
+            "integer-metadata-property": 2,
+            "float-metadata-property": 2.0,
+            "extra-metadata": "yes",
+        }
+        await records[2].awaitable_attrs.suggestions
+        for suggestion in suggestions_records_2:
+            assert inspect(suggestion).persistent
+
+        # Record 3
+        await records[3].awaitable_attrs.suggestions
+        assert len(records[3].suggestions) == 3
+        assert records[3].suggestions[0].value == "suggestion updated 3 1"
+        assert records[3].suggestions[1].value == "suggestion updated 3 2"
+        assert records[3].suggestions[2].value == "suggestion updated 3 3"
+
+        # it should be called only with the first three records (metadata was updated for them)
+        mock_search_engine.add_records.assert_called_once_with(dataset, records[:3])
+
+    async def test_update_dataset_records_with_invalid_metadata(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        await TermsMetadataPropertyFactory.create(dataset=dataset, name="terms")
+        records = await RecordFactory.create_batch(5, dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "id": str(records[0].id),
+                        "metadata": {
+                            "terms": "a",
+                        },
+                    },
+                    {
+                        "id": str(records[1].id),
+                        "metadata": {
+                            "terms": "i was not declared",
+                        },
+                    },
+                ]
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": "Provided metadata for record at position 1 is not valid: 'terms' metadata property validation "
+            "failed because 'i was not declared' is not an allowed term."
+        }
+
+    async def test_update_dataset_records_with_invalid_suggestions(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        question = await LabelSelectionQuestionFactory.create(dataset=dataset)
+        records = await RecordFactory.create_batch(5, dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {"id": str(records[0].id), "suggestions": [{"question_id": str(question.id), "value": "option-a"}]},
+                    {
+                        "id": str(records[1].id),
+                        "suggestions": [{"question_id": str(question.id), "value": "not-valid-option"}],
+                    },
+                ]
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": "Provided suggestion for record at position 0 and suggestion at position 0 is not valid: "
+            "'option-a' is not a valid option.\nValid options are: ['option1', 'option2', 'option3']"
+        }
+
+    async def test_update_dataset_records_with_nonexistent_dataset_id(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset_id = uuid4()
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset_id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "id": str(uuid4()),
+                    }
+                ]
+            },
+        )
+
+        assert response.status_code == 404
+        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+
+    async def test_update_dataset_records_with_nonexistent_records(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record = await RecordFactory.create(dataset=dataset)
+
+        records = [{"id": str(uuid4()), "metadata": {"i exists": False}} for _ in range(3)]
+
+        records.append({"id": str(record.id), "metadata": {"i exists": True}})
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={"items": records},
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {"detail": "Found records that do not exist"}
+
+    async def test_update_dataset_records_with_duplicate_records_ids(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record = await RecordFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {"id": str(record.id)},
+                    {"id": str(record.id)},
+                ]
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {"detail": "Found duplicate records IDs"}
+
+    async def test_update_dataset_records_as_admin_from_another_workspace(self, async_client: "AsyncClient"):
+        dataset = await DatasetFactory.create()
+        user = await UserFactory.create(role=UserRole.admin)
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            json={
+                "items": [
+                    {
+                        "id": str(uuid4()),
+                    }
+                ]
+            },
+        )
+
+        assert response.status_code == 403
+
+    async def test_update_dataset_records_as_annotator(self, async_client: "AsyncClient"):
+        dataset = await DatasetFactory.create()
+        user = await UserFactory.create(role=UserRole.annotator, workspaces=[dataset.workspace])
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            json={
+                "items": [
+                    {
+                        "id": str(uuid4()),
+                    }
+                ]
+            },
+        )
+
+        assert response.status_code == 403
+
+    async def test_update_dataset_records_without_authentication(self, async_client: "AsyncClient"):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records", json={"items": [{"id": str(uuid4())}]}
+        )
+
+        assert response.status_code == 401
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_delete_dataset_records(
