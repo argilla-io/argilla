@@ -22,7 +22,6 @@ from pydantic import Field as PydanticField
 from pydantic.generics import GenericModel
 from pydantic.utils import GetterDict
 
-from argilla.server.enums import UserRole
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.records import RecordUpdate
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
@@ -173,7 +172,9 @@ class Fields(BaseModel):
 
 FieldName = Annotated[
     constr(
-        regex=FIELD_CREATE_NAME_REGEX, min_length=FIELD_CREATE_NAME_MIN_LENGTH, max_length=FIELD_CREATE_NAME_MAX_LENGTH
+        regex=FIELD_CREATE_NAME_REGEX,
+        min_length=FIELD_CREATE_NAME_MIN_LENGTH,
+        max_length=FIELD_CREATE_NAME_MAX_LENGTH,
     ),
     PydanticField(..., description="The name of the field"),
 ]
@@ -317,22 +318,36 @@ class Questions(BaseModel):
     items: List[Question]
 
 
-class QuestionCreate(BaseModel):
-    name: constr(
+QuestionName = Annotated[
+    constr(
         regex=QUESTION_CREATE_NAME_REGEX,
         min_length=QUESTION_CREATE_NAME_MIN_LENGTH,
         max_length=QUESTION_CREATE_NAME_MAX_LENGTH,
-    )
-    title: constr(
+    ),
+    PydanticField(..., description="The name of the question"),
+]
+
+QuestionTitle = Annotated[
+    constr(
         min_length=QUESTION_CREATE_TITLE_MIN_LENGTH,
         max_length=QUESTION_CREATE_TITLE_MAX_LENGTH,
-    )
-    description: Optional[
-        constr(
-            min_length=QUESTION_CREATE_DESCRIPTION_MIN_LENGTH,
-            max_length=QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
-        )
-    ]
+    ),
+    PydanticField(..., description="The title of the question"),
+]
+
+QuestionDescription = Annotated[
+    constr(
+        min_length=QUESTION_CREATE_DESCRIPTION_MIN_LENGTH,
+        max_length=QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
+    ),
+    PydanticField(..., description="The description of the question"),
+]
+
+
+class QuestionCreate(BaseModel):
+    name: QuestionName
+    title: QuestionTitle
+    description: Optional[QuestionDescription]
     required: Optional[bool]
     settings: QuestionSettingsCreate
 
@@ -477,7 +492,7 @@ class FloatMetadataPropertyCreate(NumericMetadataProperty[float]):
     type: Literal[MetadataPropertyType.float]
 
 
-MetadataPropertyTitleCreate = Annotated[
+MetadataPropertyTitle = Annotated[
     constr(min_length=METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH, max_length=METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH),
     PydanticField(..., description="The title of the metadata property"),
 ]
@@ -495,7 +510,7 @@ class MetadataPropertyCreate(BaseModel):
         min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
         max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
     )
-    title: MetadataPropertyTitleCreate
+    title: MetadataPropertyTitle
     settings: MetadataPropertySettingsCreate
     visible_for_annotators: bool = True
 
