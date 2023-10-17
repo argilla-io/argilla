@@ -20,7 +20,8 @@ import Mode from "frontmatter-markdown-loader/mode";
 import pkg from "./package.json";
 import { translations } from "./translation";
 
-const LOCAL_ENVIRONMENT = "http://localhost:6900";
+const LOCAL_ENVIRONMENT =
+  "https://argilla-quickstart-pr-3949-ki24f765kq-no.a.run.app";
 const BASE_URL = process.env.API_BASE_URL ?? LOCAL_ENVIRONMENT;
 const DIST_FOLDER = process.env.DIST_FOLDER || "dist";
 

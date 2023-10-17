@@ -155,7 +155,7 @@ export default {
   setup() {
     return useRecordFeedbackTaskViewModel();
   },
-  created() {
+  mounted() {
     this.$root.$on("on-change-record-page", this.onChangeRecordPage);
 
     this.$root.$on(

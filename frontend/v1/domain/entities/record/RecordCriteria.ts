@@ -35,11 +35,11 @@ export class RecordCriteria {
   }
 
   get isFilteringByText() {
-    return this.searchText.length > 0;
+    return this.committed.searchText.length > 0;
   }
 
   get isFilteringByMetadata() {
-    return this.metadata.length > 0;
+    return this.committed.metadata.length > 0;
   }
 
   get hasChanges(): boolean {

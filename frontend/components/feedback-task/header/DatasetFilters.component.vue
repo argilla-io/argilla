@@ -77,7 +77,7 @@ export default {
   setup() {
     return useDatasetsFiltersViewModel();
   },
-  created() {
+  mounted() {
     this.$root.$on("on-changed-total-records", (totalRecords) => {
       this.totalRecords = totalRecords;
     });
