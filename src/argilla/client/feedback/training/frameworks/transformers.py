@@ -100,3 +100,26 @@ class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSke
             update_config_kwargs=self.trainer_kwargs,
             **card_data_kwargs,
         )
+
+    def push_to_huggingface(self, repo_id: str, **kwargs) -> None:
+        """Uploads the transformer model and tokenizer to [huggingface's model hub](https://huggingface.co/models).
+
+        The full list of parameters can be seen at:
+        [huggingface_hub](https://huggingface.co/docs/huggingface_hub/package_reference/mixins#huggingface_hub.ModelHubMixin.push_to_hub).
+
+        Args:
+            repo_id:
+                The name of the repository you want to push your model and tokenizer to.
+                It should contain your organization name when pushing to a given organization.
+
+        Raises:
+            NotImplementedError: If the model doesn't exist, meaning it hasn't been instantiated yet.
+        """
+        if not self._transformers_model:
+            raise ValueError(
+                "The model must be initialized prior to this point. You can either call `train` or `init_model`."
+            )
+        model_url = self._transformers_model.push_to_hub(repo_id, **kwargs)
+        self._logger.info(f"Model pushed to: {model_url}")
+        tokenizer_url = self._transformers_tokenizer.push_to_hub(repo_id, **kwargs)
+        self._logger.info(f"Tokenizer pushed to: {tokenizer_url}")
