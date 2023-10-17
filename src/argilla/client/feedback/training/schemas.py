@@ -743,6 +743,9 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
 
         datasets_dict = {"id": [], "text": [], "label": []}
         for index, entry in enumerate(data):
+            if any([entry.get("label") is None, entry.get("text") is None]):
+                warnings.warn(f"Skipping entry {entry} because it has no label or text.")
+                continue
             datasets_dict["id"].append(index)
             datasets_dict["text"].append(entry["text"])
             datasets_dict["label"].append(entry["label"])
@@ -791,6 +794,9 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
             db = DocBin(store_user_data=True)
             # Creating the DocBin object as in https://spacy.io/usage/training#training-data
             for entry in data:
+                if any([entry.get("label") is None, entry.get("text") is None]):
+                    warnings.warn(f"Skipping entry {entry} because it has no label or text.")
+                    continue
                 doc = lang.make_doc(entry["text"])
 
                 cats = dict.fromkeys(all_labels, 0)
@@ -840,6 +846,9 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
         def _prepare(data):
             jsonl = []
             for entry in data:
+                if any([entry.get("label") is None, entry.get("text") is None]):
+                    warnings.warn(f"Skipping entry {entry} because it has no label or text.")
+                    continue
                 prompt = entry["text"]
                 prompt += separator  # needed for better performance
 
@@ -934,6 +943,9 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
 
         datasets_dict = {"id": [], "text": []}
         for index, sample in enumerate(data):
+            if any([sample.get("text") is None]):
+                warnings.warn(f"Skipping entry {sample} because it has no text.")
+                continue
             datasets_dict["id"].append(index)
             datasets_dict["text"].append(sample["text"])
 
@@ -1019,6 +1031,9 @@ class TrainingTaskForRM(BaseModel, TrainingData):
 
         datasets_dict = {"chosen": [], "rejected": []}
         for sample in data:
+            if any([sample.get("chosen") is None, sample.get("rejected") is None]):
+                warnings.warn(f"Skipping entry {sample} because it has no chosen or rejected.")
+                continue
             datasets_dict["chosen"].append(sample["chosen"])
             datasets_dict["rejected"].append(sample["rejected"])
 
@@ -1088,6 +1103,9 @@ class TrainingTaskForPPO(BaseModel, TrainingData):
 
         datasets_dict = {"id": [], "query": []}
         for index, entry in enumerate(data):
+            if entry.get("query") is None:
+                warnings.warn(f"Skipping entry {entry} because it has no query.")
+                continue
             datasets_dict["id"].append(index)
             datasets_dict["query"].append(entry["query"])
 
@@ -1169,6 +1187,9 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
 
         datasets_dict = {"prompt": [], "chosen": [], "rejected": []}
         for sample in data:
+            if any([sample.get("prompt") is None, sample.get("chosen") is None, sample.get("rejected") is None]):
+                warnings.warn(f"Skipping entry {sample} because it has no prompt, chosen or rejected.")
+                continue
             datasets_dict["prompt"].append(sample["prompt"])
             datasets_dict["chosen"].append(sample["chosen"])
             datasets_dict["rejected"].append(sample["rejected"])
@@ -1283,10 +1304,11 @@ class TrainingTaskForQuestionAnswering(BaseModel, TrainingData):
             "answer": [],
         }
         for entry in data:
-            if any([entry["question"] is None, entry["context"] is None, entry["answer"] is None]):
+            if any([entry.get("question") is None, entry.get("context") is None, entry.get("answer") is None]):
+                warnings.warn(f"Skipping entry {entry} because it has no question, context or answer.")
                 continue
-            if entry["answer"] not in entry["context"]:
-                warnings.warn("This is extractive QnA but the answer is not in the context.")
+            if entry.get("answer") not in entry.get("context"):
+                warnings.warn(f"Skipping entry {entry} because answer is not in context.")
                 continue
             # get index of answer in context
             answer_start = entry["context"].index(entry["answer"])
@@ -1392,6 +1414,9 @@ class TrainingTaskForChatCompletion(BaseModel, TrainingData):
 
         datasets_dict = {"chat": [], "turn": [], "role": [], "content": []}
         for entry in data:
+            if any([entry.get("prompt") is None, entry.get("response") is None]):
+                warnings.warn(f"Skipping entry {entry} because it has no prompt or response.")
+                continue
             if entry["role"] not in ["system", "user", "assistant"]:
                 raise ValueError("Role must be one of 'system', 'user', 'assistant'")
             datasets_dict["chat"].append(entry["chat"])
