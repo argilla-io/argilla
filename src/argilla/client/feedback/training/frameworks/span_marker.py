@@ -12,11 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import TYPE_CHECKING
+
 from datasets import DatasetDict
 
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
 from argilla.client.models import TokenClassificationRecord
 from argilla.training.span_marker import ArgillaSpanMarkerTrainer as ArgillaSpanMarkerTrainerV1
+
+if TYPE_CHECKING:
+    from argilla.client.feedback.integrations.huggingface.model_card import FrameworkCardData
 
 
 class ArgillaSpanMarkerTrainer(ArgillaSpanMarkerTrainerV1, ArgillaTrainerSkeleton):
@@ -56,3 +61,8 @@ class ArgillaSpanMarkerTrainer(ArgillaSpanMarkerTrainerV1, ArgillaTrainerSkeleto
             raise NotImplementedError("Text2TextRecord and TextClassification are not supported.")
 
         self.init_training_args()
+
+    def get_model_card_data(self, **card_data_kwargs) -> "FrameworkCardData":
+        raise NotImplementedError(
+            "This method has to be implemented after `FeedbackDataset` allows for token classification."
+        )

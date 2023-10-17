@@ -24,6 +24,7 @@ if TYPE_CHECKING:
     import httpx
 
     from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
     from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
     from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
@@ -38,7 +39,7 @@ class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase):
         self._filters = filters
 
     def __len__(self) -> None:
-        raise NotImplementedError("`__len__` does not work for filtered datasets.")
+        raise NotImplementedError("`__len__` does not work for `FilteredRemoteFeedbackDataset`.")
 
     def _fetch_records(self, offset: int, limit: int) -> "FeedbackRecordsModel":
         """Fetches a batch of records from Argilla."""
@@ -55,10 +56,10 @@ class FilteredRemoteFeedbackRecords(RemoteFeedbackRecordsBase):
         records: Union["FeedbackRecord", Dict[str, Any], List[Union["FeedbackRecord", Dict[str, Any]]]],
         show_progress: bool = True,
     ) -> None:
-        raise NotImplementedError("`records.add` does not work for filtered datasets.")
+        raise NotImplementedError("`records.add` does not work for `FilteredRemoteFeedbackDataset`.")
 
     def delete(self, records: List["RemoteFeedbackRecord"]) -> None:
-        raise NotImplementedError("`records.delete` does not work for filtered datasets.")
+        raise NotImplementedError("`records.delete` does not work for `FilteredRemoteFeedbackDataset`.")
 
 
 class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeedbackRecords]):
@@ -93,4 +94,31 @@ class FilteredRemoteFeedbackDataset(RemoteFeedbackDatasetBase[FilteredRemoteFeed
         )
 
     def delete(self) -> None:
-        raise NotImplementedError("`delete` does not work for filtered datasets.")
+        raise NotImplementedError("`delete` does not work for `FilteredRemoteFeedbackDataset`.")
+
+    def prepare_for_training(self, *args, **kwargs) -> Any:
+        raise NotImplementedError("`prepare_for_training` does not work for `FilteredRemoteFeedbackDataset`.")
+
+    def unify_responses(self, *args, **kwargs):
+        raise NotImplementedError("`unify_responses` does not work for `FilteredRemoteFeedbackDataset`.")
+
+    def filter_by(
+        self, response_status: Union["ResponseStatusFilter", List["ResponseStatusFilter"]]
+    ) -> "FilteredRemoteFeedbackDataset":
+        if not isinstance(response_status, list):
+            response_status = [response_status]
+
+        return self.__class__(
+            client=self._client,
+            id=self.id,
+            name=self.name,
+            workspace=self.workspace,
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+            fields=self.fields,
+            questions=self.questions,
+            guidelines=self.guidelines,
+            filters={
+                "response_status": [status.value if hasattr(status, "value") else status for status in response_status]
+            },
+        )
