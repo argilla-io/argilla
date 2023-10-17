@@ -45,7 +45,7 @@ class WeakLabelsBase:
             If None, we will use the rules of the dataset (Default).
         ids: An optional list of record ids to filter the dataset before applying the rules.
         query: An optional ElasticSearch query with the
-            `query string syntax <https://argilla.readthedocs.io/en/stable/guides/queries.html>`_
+            `query string syntax <https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html>`_
             to filter the dataset before applying the rules.
 
     Raises:
@@ -351,7 +351,7 @@ class WeakLabels(WeakLabelsBase):
             If None, we will use the rules of the dataset (Default).
         ids: An optional list of record ids to filter the dataset before applying the rules.
         query: An optional ElasticSearch query with the
-            `query string syntax <https://argilla.readthedocs.io/en/stable/guides/queries.html>`_
+            `query string syntax <https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html>`_
             to filter the dataset before applying the rules.
         label2int: An optional dict, mapping the labels to integers. Remember that the return type ``None`` means
             abstention (e.g. ``{None: -1}``). By default, we will build a mapping on the fly when applying the rules.
@@ -769,7 +769,7 @@ class WeakMultiLabels(WeakLabelsBase):
             abstention. If None, we will use the rules of the dataset (Default).
         ids: An optional list of record ids to filter the dataset before applying the rules.
         query: An optional ElasticSearch query with the
-            `query string syntax <https://argilla.readthedocs.io/en/stable/guides/queries.html>`_
+            `query string syntax <https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html>`_
             to filter the dataset before applying the rules.
 
     Raises:
