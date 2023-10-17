@@ -112,8 +112,8 @@ class FeedbackQuestionModel(BaseModel):
 class FeedbackMetadataPropertyModel(BaseModel):
     id: UUID
     name: str
-    title: Optional[str] = None
-    visible_for_annotators: Optional[bool] = True
+    title: str
+    visible_for_annotators: bool
     settings: Dict[str, Any]
     inserted_at: datetime
     updated_at: datetime
