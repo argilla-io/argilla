@@ -398,7 +398,7 @@ class TaskTemplateMixin:
         )
 
     @classmethod
-    def for_extractive_question_answering(
+    def for_question_answering(
         cls: Type["FeedbackDataset"], use_markdown: bool = False, guidelines: str = None
     ) -> "FeedbackDataset":
         """

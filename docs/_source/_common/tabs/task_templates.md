@@ -105,7 +105,7 @@ ds
 ```python
 import argilla as rg
 
-ds = rg.FeedbackDataset.for_extractive_question_answering(
+ds = rg.FeedbackDataset.for_question_answering(
     use_markdown=True,
     guidelines=None,
 )

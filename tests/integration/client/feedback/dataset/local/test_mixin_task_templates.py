@@ -26,8 +26,8 @@ if TYPE_CHECKING:
     pass
 
 
-def test_for_extractive_question_answering():
-    dataset = FeedbackDataset.for_extractive_question_answering(use_markdown=True)
+def test_for_question_answering():
+    dataset = FeedbackDataset.for_question_answering(use_markdown=True)
     assert len(dataset.fields) == 2
     assert len(dataset.questions) == 1
     assert dataset.questions[0].name == "answer"
