@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Type, Union
 
 import argilla as rg
 import pytest
@@ -76,6 +76,123 @@ class TestSuiteRemoteMetadataProperties:
                 (rg.TermsMetadataProperty, rg.IntegerMetadataProperty, rg.FloatMetadataProperty),
             )
             assert remote_metadata_property.to_local() == matching_metadata_property
+
+    @pytest.mark.parametrize(
+        "metadata_properties, title, visible_for_annotators",
+        [
+            (
+                [rg.TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"])],
+                "new-title",
+                False,
+            ),
+            (
+                [rg.IntegerMetadataProperty(name="integer-metadata", min=0, max=10)],
+                "new-title",
+                False,
+            ),
+            (
+                [rg.FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0)],
+                "new-title",
+                False,
+            ),
+            (
+                [
+                    rg.TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+                    rg.IntegerMetadataProperty(name="integer-metadata", min=0, max=10),
+                    rg.FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+                ],
+                "new-title",
+                False,
+            ),
+        ],
+    )
+    def test_update(
+        self,
+        owner: "UserModel",
+        metadata_properties: List["AllowedMetadataPropertyTypes"],
+        title: str,
+        visible_for_annotators: bool,
+    ) -> None:
+        rg.init(api_key=owner.api_key)
+
+        workspace = rg.Workspace.create(name="my-workspace")
+        dataset = rg.FeedbackDataset(
+            fields=[rg.TextField(name="text-field")],
+            questions=[rg.TextQuestion(name="text-question")],
+            metadata_properties=metadata_properties,
+        )
+
+        remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace=workspace.name)
+        assert isinstance(remote_dataset, RemoteFeedbackDataset)
+        assert len(remote_dataset.metadata_properties) == len(dataset.metadata_properties)
+
+        # Ensure that the in-place `update` for `metadata_properties` works as expected
+        for metadata_property in remote_dataset.metadata_properties:
+            metadata_property.update(title=title, visible_for_annotators=visible_for_annotators)
+            assert metadata_property.title == title
+            assert metadata_property.visible_for_annotators == visible_for_annotators
+
+        # Ensure that `metadata_properties` are updated in Argilla and restored successfully
+        remote_dataset = rg.FeedbackDataset.from_argilla(name="my-dataset", workspace=workspace.name)
+        assert isinstance(remote_dataset, RemoteFeedbackDataset)
+        assert len(remote_dataset.metadata_properties) == len(dataset.metadata_properties)
+
+        for metadata_property in remote_dataset.metadata_properties:
+            assert metadata_property.title == title
+            assert metadata_property.visible_for_annotators == visible_for_annotators
+
+    @pytest.mark.parametrize(
+        "metadata_properties, title, visible_for_annotators, exception_cls, exception_msg",
+        [
+            (
+                [rg.TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"])],
+                None,
+                None,
+                ValueError,
+                "At least one of `title` or `visible_for_annotators` must be provided and not `None`",
+            ),
+            (
+                [rg.TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"])],
+                "terms-metadata",
+                None,
+                ValueError,
+                "Provided `title=terms-metadata` is the same as the current one `terms-metadata`",
+            ),
+            (
+                [rg.TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"])],
+                None,
+                True,
+                ValueError,
+                "Provided `visible_for_annotators=True` is the same as the current one `True`",
+            ),
+        ],
+    )
+    def test_update_with_invalid_values(
+        self,
+        owner: "UserModel",
+        metadata_properties: List["AllowedMetadataPropertyTypes"],
+        title: Union[str, None],
+        visible_for_annotators: Union[bool, None],
+        exception_cls: Type[Exception],
+        exception_msg: str,
+    ) -> None:
+        rg.init(api_key=owner.api_key)
+
+        workspace = rg.Workspace.create(name="my-workspace")
+        dataset = rg.FeedbackDataset(
+            fields=[rg.TextField(name="text-field")],
+            questions=[rg.TextQuestion(name="text-question")],
+            metadata_properties=metadata_properties,
+        )
+
+        remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace=workspace.name)
+        assert isinstance(remote_dataset, RemoteFeedbackDataset)
+        assert len(remote_dataset.metadata_properties) == len(dataset.metadata_properties)
+
+        # Check that the `exception_cls` is raised when trying to update `metadata_properties` with invalid values
+        for metadata_property in remote_dataset.metadata_properties:
+            with pytest.raises(exception_cls, match=exception_msg):
+                metadata_property.update(title=title, visible_for_annotators=visible_for_annotators)
 
     def test_delete(self, owner: "UserModel") -> None:
         rg.init(api_key=owner.api_key)
