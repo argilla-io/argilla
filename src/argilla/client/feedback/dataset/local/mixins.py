@@ -776,15 +776,15 @@ class TaskTemplateMixin:
             A `FeedbackDataset` object for direct preference optimization containing "prompt", "response1", "response2" with the optional "context" fields and a LabelQuestion named "preference"
         """
         default_guidelines = "This is a direct preference optimization dataset that contains contexts and options. Please choose the option that you would prefer in the given context."
-        fields = [
+        dataset_fields = [
             TextField(name="prompt", use_markdown=use_markdown),
             TextField(name="response1", title="Response 1", use_markdown=use_markdown),
             TextField(name="response2", title="Response 2", use_markdown=use_markdown),
         ]
         if context:
-            fields.insert(1, TextField(name="context", use_markdown=use_markdown, required=False))
+            dataset_fields.insert(1, TextField(name="context", use_markdown=use_markdown, required=False))
         return cls(
-            fields=fields,
+            fields=dataset_fields,
             questions=[
                 LabelQuestion(
                     name="preference",

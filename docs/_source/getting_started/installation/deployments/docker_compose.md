@@ -6,7 +6,7 @@ This guide explains how to run the Argilla server with Elasticsearch using `dock
 (launching-the-web-app-via-docker-compose)=
 ## Launching Argilla and Elasticsearch with `docker-compose`
 
-For this method you first need to install [Docker Compose](https://docs.docker.com/compose/install/).
+For this method, you first need to install [Docker Compose](https://docs.docker.com/compose/install/).
 
 Then, create a folder:
 
@@ -20,7 +20,7 @@ and launch the docker-contained web app with the following command:
 wget -O docker-compose.yaml https://raw.githubusercontent.com/argilla-io/argilla/main/docker/docker-compose.yaml && docker-compose up -d
 ```
 :::{warning}
-Latest versions of docker should be executed without the dash '-', e.g:
+The latest versions of docker should be executed without the dash '-', e.g.:
 
 ```bash
 docker compose up -d
@@ -30,7 +30,7 @@ docker compose up -d
 This is a convenient way because it automatically includes an [Elasticsearch](https://www.elastic.co/elasticsearch/) instance, Argilla's main persistent layer.
 
 :::{warning}
-Keep in mind, if you execute
+Keep in mind that if you execute
 ```bash
 docker-compose down
 ```
@@ -51,7 +51,7 @@ By default, telemetry is enabled. This helps us to improve our product. For more
 
 ## Persisting ElasticSearch data
 To avoid losing all the data when the docker-compose/server goes down, you can add some persistence by mounting a
-volume in the docker compose.
+volume in the docker-compose.
 
 To this end, **modify the elasticsearch service and create a new volume** in the `docker-compose.yaml` file:
 

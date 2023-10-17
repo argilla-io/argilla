@@ -243,7 +243,7 @@ trainer.update_config(
 :::{tab-item} TRL
 
 ```python
-# parameters from `trl.RewardTrainer`, `trl.SFTTrainer`, `trl.PPOTrainer` or `trl.DPOTrainer`.
+# Parameters from `trl.RewardTrainer`, `trl.SFTTrainer`, `trl.PPOTrainer` or `trl.DPOTrainer`.
 # `transformers.TrainingArguments`
 trainer.update_config(
     per_device_train_batch_size = 8,
@@ -275,7 +275,7 @@ trainer.update_config(
 :::{tab-item} sentence-transformers
 
 ```python
-# parameters related to the model initialization from `sentence_transformers.SentenceTransformer`
+# Parameters related to the model initialization from `sentence_transformers.SentenceTransformer`
 trainer.update_config(
     model="sentence-transformers/all-MiniLM-L6-v2",
     modules = False,
@@ -305,7 +305,7 @@ trainer.update_config(
     loss_fct = None
     activation_fct = nn.Identity(),
 )
-# the remaining arguments are common for both procedures
+# The remaining arguments are common for both procedures
 trainer.update_config(
     evaluator: SentenceEvaluator = evaluation.EmbeddingSimilarityEvaluator,
     epochs: int = 1,
