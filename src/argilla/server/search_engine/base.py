@@ -213,7 +213,7 @@ class SearchEngine(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    async def add_records(self, dataset: Dataset, records: Iterable[Record]):
+    async def index_records(self, dataset: Dataset, records: Iterable[Record]):
         pass
 
     @abstractmethod
@@ -222,10 +222,6 @@ class SearchEngine(metaclass=ABCMeta):
 
     @abstractmethod
     async def update_record_response(self, response: Response):
-        pass
-
-    @abstractmethod
-    async def update_record_metadata(self, record: Record):
         pass
 
     @abstractmethod

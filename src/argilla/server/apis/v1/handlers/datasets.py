@@ -45,6 +45,7 @@ from argilla.server.schemas.v1.datasets import (
     Questions,
     Records,
     RecordsCreate,
+    RecordsUpdate,
     SearchRecord,
     SearchRecordsQuery,
     SearchRecordsResult,
@@ -245,7 +246,7 @@ async def _filter_records_using_search_engine(
 
     record_ids = [response.record_id for response in search_responses.items]
     return (
-        await datasets.get_records_by_ids(db=db, dataset_id=dataset.id, record_ids=record_ids, include=include),
+        await datasets.get_records_by_ids(db=db, dataset_id=dataset.id, records_ids=record_ids, include=include),
         search_responses.total,
     )
 
@@ -595,6 +596,27 @@ async def create_dataset_records(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
 
+@router.patch("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
+async def update_dataset_records(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
+    dataset_id: UUID,
+    records_update: RecordsUpdate,
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = await _get_dataset(db, dataset_id, with_fields=True, with_questions=True, with_metadata_properties=True)
+
+    await authorize(current_user, DatasetPolicyV1.update_records(dataset))
+
+    try:
+        await datasets.update_records(db, search_engine, dataset, records_update)
+        telemetry_client.track_data(action="DatasetRecordsUpdated", data={"records": len(records_update.items)})
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+
+
 @router.delete("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_dataset_records(
     *,
@@ -676,7 +698,7 @@ async def search_dataset_records(
     records = await datasets.get_records_by_ids(
         db=db,
         dataset_id=dataset_id,
-        record_ids=list(record_id_score_map.keys()),
+        records_ids=list(record_id_score_map.keys()),
         include=include,
         user_id=current_user.id,
     )
