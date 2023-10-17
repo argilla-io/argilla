@@ -441,7 +441,6 @@ class ArgillaMixin:
             for dataset in datasets
         ]
 
-
 class TaskTemplateMixin:
     """
     Mixin to add task template functionality to a `FeedbackDataset`.
@@ -850,3 +849,4 @@ class TaskTemplateMixin:
             questions=total_questions,
             guidelines=default_guidelines if guidelines is None else guidelines,
         )
+

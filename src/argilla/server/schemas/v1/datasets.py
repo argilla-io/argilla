@@ -24,6 +24,7 @@ from pydantic.utils import GetterDict
 
 from argilla.server.enums import UserRole
 from argilla.server.schemas.base import UpdateSchema
+from argilla.server.schemas.v1.records import RecordUpdate
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
 from argilla.server.search_engine import StringQuery
 
@@ -84,6 +85,9 @@ TERMS_METADATA_PROPERTY_MIN_VALUES = 1
 
 RECORDS_CREATE_MIN_ITEMS = 1
 RECORDS_CREATE_MAX_ITEMS = 1000
+
+RECORDS_UPDATE_MIN_ITEMS = 1
+RECORDS_UPDATE_MAX_ITEMS = 1000
 
 
 class Dataset(BaseModel):
@@ -357,9 +361,9 @@ class RecordGetterDict(GetterDict):
     def get(self, key: str, default: Any) -> Any:
         if key == "metadata":
             return getattr(self._obj, "metadata_", None)
-        if key == "responses" and "responses" not in self._obj.__dict__:
+        if key == "responses" and not self._obj.is_relationship_loaded("responses"):
             return default
-        if key == "suggestions" and "suggestions" not in self._obj.__dict__:
+        if key == "suggestions" and not self._obj.is_relationship_loaded("suggestions"):
             return default
         return super().get(key, default)
 
@@ -429,6 +433,16 @@ class RecordCreate(BaseModel):
 class RecordsCreate(BaseModel):
     items: List[RecordCreate] = PydanticField(
         ..., min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS
+    )
+
+
+class RecordUpdateWithId(RecordUpdate):
+    id: UUID
+
+
+class RecordsUpdate(BaseModel):
+    items: List[RecordUpdateWithId] = PydanticField(
+        ..., min_items=RECORDS_UPDATE_MIN_ITEMS, max_items=RECORDS_UPDATE_MAX_ITEMS
     )
 
 
