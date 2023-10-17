@@ -153,6 +153,8 @@ export class MetadataFilterList {
       if (metadata) {
         metadata.completeMetadata(value);
 
+        if (this.filteredMetadata.includes(metadata)) return;
+
         this.filteredMetadata.push(metadata);
       }
     });

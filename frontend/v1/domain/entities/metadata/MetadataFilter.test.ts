@@ -146,6 +146,15 @@ describe("MetadataFilter ", () => {
       });
     });
 
+    test("should not support duplicated filtered categories", () => {
+      const metadataFilter = new MetadataFilterList(createMetadataMock());
+      metadataFilter.initializeWith(["split:test,train"]);
+
+      metadataFilter.initializeWith(["split:test,train"]);
+
+      expect(metadataFilter.filteredCategories).toEqual(["split"]);
+    });
+
     test("the user can see the filtered categories in the same order that he/she selected", () => {
       const metadataFilter = new MetadataFilterList(createMetadataMock());
       metadataFilter.initializeWith([
