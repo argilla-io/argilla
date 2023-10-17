@@ -29,13 +29,26 @@ def update_record(
     id: Union[str, UUID],
     data: Dict[str, Any],
 ) -> Response[Union[FeedbackItemModel, ErrorMessage, HTTPValidationError]]:
+    """Sends a `PATCH` request to `/api/v1/records/{id}` endpoint to partially update
+    a record in Argilla.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the record to be updated in Argilla.
+        data: the data to be updated in the record. It can contain `metadata` and/or
+            `suggestions` fields.
+
+    Returns:
+        A `Response` object containing a `parsed` attribute with the parsed response if
+        the request was successful, which is a `FeedbackItemModel`.
+    """
     url = f"/api/v1/records/{id}"
 
     body = {}
     if "metadata" in data:
         body["metadata"] = data["metadata"]
-    if "external_id" in data:
-        body["external_id"] = data["external_id"]
+    if "suggestions" in data:
+        body["suggestions"] = data["suggestions"]
 
     response = client.patch(url=url, json=body)
 

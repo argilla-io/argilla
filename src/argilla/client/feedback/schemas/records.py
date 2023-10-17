@@ -132,7 +132,7 @@ class SuggestionSchema(BaseModel):
         """Method that will be used to create the payload that will be sent to Argilla
         to create a `SuggestionSchema` for a `FeedbackRecord`."""
         payload = {}
-        payload["question_id"] = question_name_to_id[self.question_name]
+        payload["question_id"] = str(question_name_to_id[self.question_name])
         payload["value"] = self.value
         if self.type:
             payload["type"] = self.type

@@ -136,14 +136,6 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
             Dict[str, Any], List[Dict[str, Any]], AllowedSuggestionSchema, List[AllowedSuggestionSchema]
         ],
     ) -> List[AllowedSuggestionSchema]:
-        """
-        Normalizes the suggestions to update.
-
-        Args:
-            suggestions: can be a single `RemoteSuggestionSchema` or `SuggestionSchema`, a dictionary, a list of
-            `RemoteSuggestionSchema` or `SuggestionSchema`, or a list of dictionaries. If a dictionary is provided,
-            it will be converted to a `SuggestionSchema` internally.
-        """
         if isinstance(suggestions, (dict, SuggestionSchema)):
             suggestions = [suggestions]
 
@@ -233,39 +225,46 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def update(
         self,
+        metadata: Optional[Dict[str, Any]] = None,
         suggestions: Optional[
             Union[
-                AllowedSuggestionSchema,
+                SuggestionSchema,
                 Dict[str, Any],
-                List[AllowedSuggestionSchema],
+                List[SuggestionSchema],
                 List[Dict[str, Any]],
             ]
         ] = None,
     ) -> None:
-        """Update a `RemoteFeedbackRecord`. Currently just `suggestions` are supported.
+        """Update a `RemoteFeedbackRecord`.
 
         Note that this method will update the record in Argilla directly.
 
         Args:
-            suggestions: can be a single `RemoteSuggestionSchema` or `SuggestionSchema`,
-                a list of `RemoteSuggestionSchema` or `SuggestionSchema`, a single
-                dictionary, or a list of dictionaries. If a dictionary is provided,
-                it will be converted to a `RemoteSuggestionSchema` internally.
+            metadata: the new metadata to set for the record. Defaults to `None`.
+            suggestions: the new list of suggestions to set for the record. It can be a
+                single `SuggestionSchema`, a list of `SuggestionSchema`, a single
+                dictionary or a list of dictionary. If a dictionary is provided, it
+                will be converted to a `SuggestionSchema` internally. Defaults to
+                `None`.
 
         Raises:
             PermissionError: if the user does not have either `owner` or `admin` role.
         """
-        if suggestions:
+        # TODO: once we have a dataset ref in the record, we should validate the new metadata
+        if isinstance(metadata, dict):
+            self.metadata = metadata
+
+        if isinstance(suggestions, (SuggestionSchema, dict)):
+            suggestions = [suggestions]
+
+        if isinstance(suggestions, list):
             suggestions = self.__normalize_suggestions_to_update(suggestions)
-        else:
-            suggestions = suggestions or [s for s in self.suggestions]
+            self.suggestions = tuple(suggestions)
 
         self.__updated_record_data()
-        if suggestions:
-            self.__update_suggestions(suggestions=suggestions)
 
     def __updated_record_data(self) -> None:
-        response = records_api_v1.update_record(self.client, self.id, self.to_server_payload())
+        response = records_api_v1.update_record(self.client, self.id, self.to_server_payload(self.question_name_to_id))
 
         updated_record = self.from_api(
             payload=response.parsed,
