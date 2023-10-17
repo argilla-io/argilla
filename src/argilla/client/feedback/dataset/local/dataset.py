@@ -14,7 +14,7 @@
 import logging
 import textwrap
 import warnings
-from typing import Any, Dict, Iterator, List, Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
@@ -34,8 +34,8 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForPPO,
     TrainingTaskForQuestionAnswering,
     TrainingTaskForRM,
-    TrainingTaskForSFT,
     TrainingTaskForSentenceSimilarity,
+    TrainingTaskForSFT,
     TrainingTaskForTextClassification,
     TrainingTaskTypes,
 )

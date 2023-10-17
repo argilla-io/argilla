@@ -251,13 +251,11 @@ def test_not_implemented_methods():
     )
 
     with pytest.warns(
-        UserWarning,
-        match="`sort_by` method is not supported for local datasets and won't take any effect. "
+        UserWarning, match="`sort_by` method is not supported for local datasets and won't take any effect. "
     ):
         assert dataset.sort_by("field") == dataset
 
     with pytest.warns(
-        UserWarning,
-        match="`filter_by` method is not supported for local datasets and won't take any effect. "
+        UserWarning, match="`filter_by` method is not supported for local datasets and won't take any effect. "
     ):
         assert dataset.filter_by() == dataset

@@ -51,6 +51,8 @@ if TYPE_CHECKING:
     import httpx
 
     from argilla.client.feedback.dataset import FeedbackDataset
+    from argilla.client.feedback.dataset.local import FeedbackDataset
+    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
     from argilla.client.feedback.schemas.metadata import MetadataFilters
     from argilla.client.feedback.schemas.types import (
         AllowedMetadataPropertyTypes,
@@ -59,10 +61,6 @@ if TYPE_CHECKING:
         AllowedRemoteQuestionTypes,
     )
     from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel, FeedbackResponseStatusFilter
-    from argilla.client.feedback.dataset.local import FeedbackDataset
-    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
-    from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
-    from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
     from argilla.client.workspaces import Workspace
 
 

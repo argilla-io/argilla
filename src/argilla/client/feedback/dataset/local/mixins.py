@@ -26,7 +26,6 @@ from argilla.client.feedback.schemas.questions import (
     RatingQuestion,
     TextQuestion,
 )
-from argilla.client.feedback.schemas.enums import FieldTypes, QuestionTypes
 from argilla.client.feedback.schemas.remote.fields import RemoteTextField
 from argilla.client.feedback.schemas.remote.metadata import (
     RemoteFloatMetadataProperty,
@@ -48,10 +47,8 @@ from tqdm import trange
 if TYPE_CHECKING:
     import httpx
     from argilla.client.client import Argilla as ArgillaClient
-    from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
-    from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
-    from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel
     from argilla.client.feedback.dataset.local import FeedbackDataset
+    from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
     from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.types import (
         AllowedFieldTypes,
