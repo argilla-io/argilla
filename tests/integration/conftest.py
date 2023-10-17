@@ -366,3 +366,25 @@ def mocked_openai(mocker):
     mocker.patch("openai.FineTuningJob.create", return_value=response)
     mocker.patch("openai.FineTune.create", return_value=response)
     mocker.patch("openai.File.create", return_value=response)
+
+
+# A pytest plugin to skip `@pytest.mark.slow` tests by default.
+# The code is copied from: https://github.com/okken/pytest-skip-slow/tree/main
+# which is indeed a package of the pytest docs at:
+# https://docs.pytest.org/en/latest/example/simple.html#control-skipping-of-tests-according-to-command-line-option
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "slow: mark test as slow to run")
+
+
+def pytest_addoption(parser):
+    parser.addoption("--slow", action="store_true", help="include tests marked slow")
+
+
+def pytest_collection_modifyitems(config, items):
+    if not config.getoption("--slow"):
+        skip_slow = pytest.mark.skip(reason="need --slow option to run")
+        for item in items:
+            if item.get_closest_marker("slow"):
+                item.add_marker(skip_slow)
