@@ -578,6 +578,11 @@ async def update_records(
 
         if record_update.suggestions is not None:
             params.pop("suggestions")
+
+            questions_ids = [suggestion.question_id for suggestion in record_update.suggestions]
+            if len(questions_ids) != len(set(questions_ids)):
+                raise ValueError(f"Found duplicate suggestions question IDs for record at position {record_i}")
+
             for suggestion_i, suggestion in enumerate(record_update.suggestions):
                 try:
                     questions = await _validate_suggestion(db, suggestion, questions)
@@ -622,6 +627,10 @@ async def update_record(
         await _validate_metadata(db, dataset=record.dataset, metadata=metadata)
 
     if record_update.suggestions is not None:
+        questions_ids = [suggestion.question_id for suggestion in record_update.suggestions]
+        if len(questions_ids) != len(set(questions_ids)):
+            raise ValueError("Found duplicate suggestions question IDs")
+
         suggestions = []
         for suggestion in record_update.suggestions:
             try:

@@ -333,6 +333,27 @@ class TestSuiteRecords:
             "detail": f"Provided suggestion for question_id={question_id} is not valid: question_id={question_id} does not exist"
         }
 
+    async def test_update_record_with_duplicate_suggestions_question_ids(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        question = await TextQuestionFactory.create(dataset=dataset)
+        record = await RecordFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers=owner_auth_header,
+            json={
+                "suggestions": [
+                    {"question_id": str(question.id), "value": "a"},
+                    {"question_id": str(question.id), "value": "b"},
+                ]
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {"detail": "Found duplicate suggestions question IDs"}
+
     async def test_update_record_as_admin_from_another_workspace(self, async_client: "AsyncClient"):
         record = await RecordFactory.create()
         user = await UserFactory.create(role=UserRole.admin)

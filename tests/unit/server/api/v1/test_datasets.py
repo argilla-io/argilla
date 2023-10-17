@@ -4281,6 +4281,32 @@ class TestSuiteDatasets:
         assert response.status_code == 422
         assert response.json() == {"detail": "Found duplicate records IDs"}
 
+    async def test_update_dataset_records_with_duplicate_suggestions_question_ids(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        question = await TextQuestionFactory.create(dataset=dataset)
+        record = await RecordFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "id": str(record.id),
+                        "suggestions": [
+                            {"question_id": str(question.id), "value": "a"},
+                            {"question_id": str(question.id), "value": "b"},
+                        ],
+                    },
+                ]
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {"detail": "Found duplicate suggestions question IDs for record at position 0"}
+
     async def test_update_dataset_records_as_admin_from_another_workspace(self, async_client: "AsyncClient"):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(role=UserRole.admin)
