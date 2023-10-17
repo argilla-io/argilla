@@ -43,7 +43,7 @@ export const useRoutes = () => {
     router.push({ path: `/${ROUTES.datasets}` });
   };
 
-  const changeQueryParams = async (
+  const setQueryParams = async (
     ...params: { key: KindOfParam; value: string }[]
   ) => {
     let newQuery = {};
@@ -73,7 +73,7 @@ export const useRoutes = () => {
     goToDatasetsList,
     goToSetting,
     getDatasetLink,
-    setQueryParams: changeQueryParams,
+    setQueryParams,
     getQueryParams,
   };
 };

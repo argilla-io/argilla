@@ -25,13 +25,7 @@ export class RecordCriteria {
     this.status = status || "pending";
     this.searchText = searchText ?? "";
 
-    this.committed = {
-      page: this.page,
-      status: this.status,
-      searchText: this.searchText,
-      metadata: this.metadata,
-      sortBy: this.sortBy,
-    };
+    this.commit();
   }
 
   get isFilteringByText() {
