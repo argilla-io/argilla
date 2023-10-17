@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
-from argilla.client.feedback.dataset.local.mixins import ArgillaMixin
+from argilla.client.feedback.dataset.local.mixins import ArgillaMixin, TaskTemplateMixin
 from argilla.client.feedback.schemas.enums import RecordSortField, SortOrder
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
@@ -62,7 +62,7 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 
-class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase["FeedbackRecord"]):
+class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase["FeedbackRecord"], TaskTemplateMixin):
     def __init__(
         self,
         *,
