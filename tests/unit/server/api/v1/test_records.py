@@ -152,7 +152,7 @@ class TestSuiteRecords:
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
-        mock_search_engine.add_records.assert_called_once_with(dataset, [record])
+        mock_search_engine.index_records.assert_called_once_with(dataset, [record])
 
     async def test_update_record_with_null_metadata(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
@@ -185,7 +185,7 @@ class TestSuiteRecords:
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
-        mock_search_engine.add_records.assert_called_once_with(dataset, [record])
+        mock_search_engine.index_records.assert_called_once_with(dataset, [record])
 
     async def test_update_record_with_no_metadata(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
@@ -210,7 +210,7 @@ class TestSuiteRecords:
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
-        mock_search_engine.add_records.assert_not_called()
+        mock_search_engine.index_records.assert_not_called()
 
     async def test_update_record_with_no_suggestions(
         self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict

@@ -112,7 +112,7 @@ async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine, op
     await _refresh_dataset(dataset)
     await opensearch_engine.create_index(dataset)
 
-    await opensearch_engine.add_records(
+    await opensearch_engine.index_records(
         dataset,
         records=[
             await RecordFactory.create(
@@ -721,7 +721,7 @@ class TestSuiteOpenSearchEngine:
 
         assert [item.record_id for item in results.items] == [record.id for record in records]
 
-    async def test_add_records(self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch):
+    async def test_index_records(self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch):
         text_fields = await TextFieldFactory.create_batch(5)
         dataset = await DatasetFactory.create(fields=text_fields, questions=[])
         records = await RecordFactory.create_batch(
@@ -734,7 +734,7 @@ class TestSuiteOpenSearchEngine:
         await _refresh_dataset(dataset)
 
         await opensearch_engine.create_index(dataset)
-        await opensearch_engine.add_records(dataset, records)
+        await opensearch_engine.index_records(dataset, records)
 
         index_name = index_name_for_dataset(dataset)
         opensearch.indices.refresh(index=index_name)
@@ -768,7 +768,7 @@ class TestSuiteOpenSearchEngine:
             "properties": {str(terms_property.id): {"type": "keyword"}},
         }
 
-    async def test_add_records_with_metadata(self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch):
+    async def test_index_records_with_metadata(self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch):
         text_fields = await TextFieldFactory.create_batch(5)
         metadata_properties = await TermsMetadataPropertyFactory.create_batch(3)
 
@@ -784,7 +784,7 @@ class TestSuiteOpenSearchEngine:
         await _refresh_dataset(dataset)
 
         await opensearch_engine.create_index(dataset)
-        await opensearch_engine.add_records(dataset, records)
+        await opensearch_engine.index_records(dataset, records)
 
         index_name = index_name_for_dataset(dataset)
         opensearch.indices.refresh(index=index_name)
@@ -817,7 +817,7 @@ class TestSuiteOpenSearchEngine:
         await _refresh_dataset(dataset)
 
         await opensearch_engine.create_index(dataset)
-        await opensearch_engine.add_records(dataset, records)
+        await opensearch_engine.index_records(dataset, records)
 
         records_to_delete, records_to_keep = records[:5], records[5:]
         await opensearch_engine.delete_records(dataset, records_to_delete)

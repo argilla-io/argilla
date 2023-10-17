@@ -3122,7 +3122,7 @@ class TestSuiteDatasets:
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 3
 
         records = (await db.execute(select(Record))).scalars().all()
-        mock_search_engine.add_records.assert_called_once_with(dataset, records)
+        mock_search_engine.index_records.assert_called_once_with(dataset, records)
 
         test_telemetry.assert_called_once_with(
             action="DatasetRecordsCreated", data={"records": len(records_json["items"])}
@@ -3190,7 +3190,7 @@ class TestSuiteDatasets:
         assert (await db.execute(select(func.count(Response.id)).where(Response.user_id == owner.id))).scalar() == 1
 
         records = (await db.execute(select(Record))).scalars().all()
-        mock_search_engine.add_records.assert_called_once_with(dataset, records)
+        mock_search_engine.index_records.assert_called_once_with(dataset, records)
 
     async def test_create_dataset_records_with_response_for_unknown_user(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
@@ -3691,7 +3691,7 @@ class TestSuiteDatasets:
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 4
 
         records = (await db.execute(select(Record))).scalars().all()
-        mock_search_engine.add_records.assert_called_once_with(dataset, records)
+        mock_search_engine.index_records.assert_called_once_with(dataset, records)
 
         test_telemetry.assert_called_once_with(
             action="DatasetRecordsCreated", data={"records": len(records_json["items"])}
@@ -4157,7 +4157,7 @@ class TestSuiteDatasets:
         assert records[3].suggestions[2].value == "suggestion updated 3 3"
 
         # it should be called only with the first three records (metadata was updated for them)
-        mock_search_engine.add_records.assert_called_once_with(dataset, records[:3])
+        mock_search_engine.index_records.assert_called_once_with(dataset, records[:3])
 
     async def test_update_dataset_records_with_invalid_metadata(
         self, async_client: "AsyncClient", owner_auth_header: dict

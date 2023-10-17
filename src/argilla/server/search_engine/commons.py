@@ -187,7 +187,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         await self._delete_index_request(index_name)
 
-    async def add_records(self, dataset: Dataset, records: Iterable[Record]):
+    async def index_records(self, dataset: Dataset, records: Iterable[Record]):
         index_name = await self._get_index_or_raise(dataset)
 
         bulk_actions = [
@@ -541,5 +541,5 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         pass
 
     @abstractmethod
-    def _refresh_index_request(self, index_name: str):
+    async def _refresh_index_request(self, index_name: str):
         pass

@@ -530,7 +530,7 @@ async def create_records(
         await db.flush(records)
         for record in records:
             await record.awaitable_attrs.responses
-        await search_engine.add_records(dataset, records)
+        await search_engine.index_records(dataset, records)
 
     await db.commit()
 
@@ -597,7 +597,7 @@ async def update_records(
         db.add_all(suggestions)
         await Record.update_many(db, records_update_objects, autocommit=False)
         records = await get_records_by_ids(db, dataset_id=dataset.id, records_ids=records_search_engine_update)
-        await search_engine.add_records(dataset, records)
+        await search_engine.index_records(dataset, records)
 
     await db.commit()
 
@@ -641,7 +641,7 @@ async def update_record(
 
         # If "metadata" has been included in the update, then we need to also update it in the search engine
         if "metadata_" in params:
-            await search_engine.add_records(record.dataset, [record])
+            await search_engine.index_records(record.dataset, [record])
 
     await db.commit()
     return record
