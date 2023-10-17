@@ -29,6 +29,7 @@ from tests.factories import (
     FloatMetadataPropertyFactory,
     IntegerMetadataPropertyFactory,
     LabelSelectionQuestionFactory,
+    MetadataPropertyFactory,
     MultiLabelSelectionQuestionFactory,
     QuestionFactory,
     RankingQuestionFactory,
@@ -237,28 +238,50 @@ class TestSuiteRecords:
         }
         assert (await db.execute(select(Suggestion).where(Suggestion.id == suggestion.id))).scalar_one_or_none() is None
 
-    async def test_update_record_with_not_valid_metadata(self, async_client: "AsyncClient", owner_auth_header: dict):
+    @pytest.mark.parametrize(
+        ["MetadataPropertyFactoryClass", "create_value", "update_value", "expected_error"],
+        [
+            (
+                TermsMetadataPropertyFactory,
+                "a",
+                "z",
+                "'name' metadata property validation failed because 'z' is not an allowed term.",
+            ),
+            (
+                IntegerMetadataPropertyFactory,
+                10,
+                "wrong-integer",
+                "'name' metadata property validation failed because 'wrong-integer' is not an integer.",
+            ),
+            (
+                FloatMetadataPropertyFactory,
+                13.3,
+                "wrong-float",
+                "'name' metadata property validation failed because 'wrong-float' is not an float.",
+            ),
+        ],
+    )
+    async def test_update_record_with_not_valid_metadata(
+        self,
+        async_client: "AsyncClient",
+        owner_auth_header: dict,
+        MetadataPropertyFactoryClass: Type[MetadataPropertyFactory],
+        create_value: Any,
+        update_value: Any,
+        expected_error: str,
+    ):
         dataset = await DatasetFactory.create(allow_extra_metadata=False)
-        await TermsMetadataPropertyFactory.create(name="terms-metadata-property", dataset=dataset)
-        record = await RecordFactory.create(
-            dataset=dataset,
-            metadata_={"terms-metadata-property": "a"},
-        )
+        await MetadataPropertyFactoryClass.create(name="name", dataset=dataset)
+        record = await RecordFactory.create(dataset=dataset, metadata_={"name": create_value})
 
         response = await async_client.patch(
             f"/api/v1/records/{record.id}",
             headers=owner_auth_header,
-            json={
-                "metadata": {
-                    "terms-metadata-property": "z",
-                },
-            },
+            json={"metadata": {"name": update_value}},
         )
 
         assert response.status_code == 422
-        assert response.json() == {
-            "detail": "'terms-metadata-property' metadata property validation failed because 'z' is not an allowed term."
-        }
+        assert response.json() == {"detail": expected_error}
 
     async def test_update_record_with_extra_metadata_not_allowed(
         self, async_client: "AsyncClient", owner_auth_header: dict

@@ -13,9 +13,10 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Type
+from typing import TYPE_CHECKING, Any, List, Tuple, Type
 from uuid import UUID
 
+import argilla as rg
 import pytest
 from argilla import (
     FeedbackRecord,
@@ -43,6 +44,7 @@ from argilla.client.feedback.schemas.remote.metadata import (
     RemoteTermsMetadataProperty,
 )
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+from argilla.client.sdk.commons.errors import ValidationApiError
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.workspaces import Workspace
 from argilla.server.models import User as ServerUser
@@ -121,8 +123,6 @@ class TestRemoteFeedbackDataset:
         assert len(remote_dataset.records) == 1
 
     async def test_update_records(self, owner: "User", test_dataset: FeedbackDataset):
-        import argilla as rg
-
         rg.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
@@ -148,8 +148,6 @@ class TestRemoteFeedbackDataset:
         assert first_record.metadata["terms-metadata"] == "a"
 
     async def test_update_records_with_suggestions(self, owner: "User", test_dataset: FeedbackDataset):
-        import argilla as rg
-
         rg.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
@@ -175,6 +173,39 @@ class TestRemoteFeedbackDataset:
             for suggestion in record.suggestions:
                 assert suggestion.question_name == "question"
                 assert suggestion.value == f"Hello world! for {record.fields['text']}"
+
+    @pytest.mark.parametrize(
+        "metadata", [("terms-metadata", "wrong-label"), ("integer-metadata", "wrong-integer"), ("float-metadata", 11.5)]
+    )
+    async def test_update_records_with_metadata_validation_error(
+        self, owner: "User", test_dataset: FeedbackDataset, metadata: Tuple[str, Any]
+    ):
+        rg.init(api_key=owner.api_key)
+        ws = rg.Workspace.create(name="test-workspace")
+
+        test_dataset.add_records(FeedbackRecord(fields={"text": "Hello world!"}))
+
+        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+
+        key, value = metadata
+
+        record = remote[0]
+        record.metadata.update({key: value})
+
+        with pytest.raises(ValueError, match=r"`FeedbackRecord.metadata` .* does not match the expected schema"):
+            remote.update_records([record])
+
+        record.metadata = {"new-metadata": 100}
+        remote.update_records([record])
+
+        remote.add_metadata_property(IntegerMetadataProperty(name="new-metadata", min=0, max=10))
+        with pytest.raises(
+            ValueError, match="Provided 'new-metadata=100' is not valid, only values between 0 and 10 are allowed."
+        ):
+            remote.update_records([record])
+
+        with pytest.raises(ValidationApiError, match=r"'new-metadata' metadata property validation failed"):
+            record.update()
 
     async def test_from_argilla(self, feedback_dataset: FeedbackDataset, owner: "User") -> None:
         api.init(api_key=owner.api_key)

@@ -47,7 +47,7 @@ class RemoteTermsMetadataProperty(TermsMetadataProperty, _RemoteMetadataProperty
     def to_local(self) -> TermsMetadataProperty:
         return TermsMetadataProperty(
             name=self.name,
-            description=self.description,
+            title=self.title,
             visible_for_annotators=self.visible_for_annotators,
             values=self.values,
         )
@@ -60,7 +60,7 @@ class RemoteTermsMetadataProperty(TermsMetadataProperty, _RemoteMetadataProperty
             client=client,
             id=payload.id,
             name=payload.name,
-            description=payload.description,
+            title=payload.title,
             visible_for_annotators=payload.visible_for_annotators,
             values=payload.settings.get("values", None),
         )
@@ -70,7 +70,7 @@ class RemoteIntegerMetadataProperty(IntegerMetadataProperty, _RemoteMetadataProp
     def to_local(self) -> IntegerMetadataProperty:
         return IntegerMetadataProperty(
             name=self.name,
-            description=self.description,
+            title=self.title,
             visible_for_annotators=self.visible_for_annotators,
             min=self.min,
             max=self.max,
@@ -84,7 +84,7 @@ class RemoteIntegerMetadataProperty(IntegerMetadataProperty, _RemoteMetadataProp
             client=client,
             id=payload.id,
             name=payload.name,
-            description=payload.description,
+            title=payload.title,
             visible_for_annotators=payload.visible_for_annotators,
             min=payload.settings.get("min", None),
             max=payload.settings.get("max", None),
@@ -95,7 +95,7 @@ class RemoteFloatMetadataProperty(FloatMetadataProperty, _RemoteMetadataProperty
     def to_local(self) -> FloatMetadataProperty:
         return FloatMetadataProperty(
             name=self.name,
-            description=self.description,
+            title=self.title,
             visible_for_annotators=self.visible_for_annotators,
             min=self.min,
             max=self.max,
@@ -109,7 +109,7 @@ class RemoteFloatMetadataProperty(FloatMetadataProperty, _RemoteMetadataProperty
             client=client,
             id=payload.id,
             name=payload.name,
-            description=payload.description,
+            title=payload.title,
             visible_for_annotators=payload.visible_for_annotators,
             min=payload.settings.get("min", None),
             max=payload.settings.get("max", None),

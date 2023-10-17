@@ -795,49 +795,49 @@ class TestSuiteDatasets:
         ("property_config", "param_value", "expected_filter_class", "expected_filter_args"),
         [
             (
-                {"name": "terms_prop", "type": "terms"},
+                {"name": "terms_prop", "settings": {"type": "terms"}},
                 "value",
                 TermsMetadataFilter,
                 dict(values=["value"]),
             ),
             (
-                {"name": "terms_prop", "type": "terms"},
+                {"name": "terms_prop", "settings": {"type": "terms"}},
                 "value1,value2",
                 TermsMetadataFilter,
                 dict(values=["value1", "value2"]),
             ),
             (
-                {"name": "integer_prop", "type": "integer"},
+                {"name": "integer_prop", "settings": {"type": "integer"}},
                 '{"ge": 10, "le": 20}',
                 IntegerMetadataFilter,
                 dict(ge=10, le=20),
             ),
             (
-                {"name": "integer_prop", "type": "integer"},
+                {"name": "integer_prop", "settings": {"type": "integer"}},
                 '{"ge": 20}',
                 IntegerMetadataFilter,
                 dict(ge=20, high=None),
             ),
             (
-                {"name": "integer_prop", "type": "integer"},
+                {"name": "integer_prop", "settings": {"type": "integer"}},
                 '{"le": 20}',
                 IntegerMetadataFilter,
                 dict(ge=None, le=20),
             ),
             (
-                {"name": "float_prop", "type": "float"},
+                {"name": "float_prop", "settings": {"type": "float"}},
                 '{"ge": -1.30, "le": 23.23}',
                 FloatMetadataFilter,
                 dict(ge=-1.30, le=23.23),
             ),
             (
-                {"name": "float_prop", "type": "float"},
+                {"name": "float_prop", "settings": {"type": "float"}},
                 '{"ge": 23.23}',
                 FloatMetadataFilter,
                 dict(ge=23.23, high=None),
             ),
             (
-                {"name": "float_prop", "type": "float"},
+                {"name": "float_prop", "settings": {"type": "float"}},
                 '{"le": 11.32}',
                 FloatMetadataFilter,
                 dict(ge=None, le=11.32),
@@ -859,7 +859,9 @@ class TestSuiteDatasets:
         dataset, _, records, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
 
         metadata_property = await MetadataPropertyFactory.create(
-            **property_config, settings={"type": property_config["type"]}, dataset=dataset
+            name=property_config["name"],
+            settings=property_config["settings"],
+            dataset=dataset,
         )
 
         mock_search_engine.search.return_value = SearchResponses(
@@ -1395,49 +1397,49 @@ class TestSuiteDatasets:
         ("property_config", "param_value", "expected_filter_class", "expected_filter_args"),
         [
             (
-                {"name": "terms_prop", "type": "terms"},
+                {"name": "terms_prop", "settings": {"type": "terms"}},
                 "value",
                 TermsMetadataFilter,
                 dict(values=["value"]),
             ),
             (
-                {"name": "terms_prop", "type": "terms"},
+                {"name": "terms_prop", "settings": {"type": "terms"}},
                 "value1,value2",
                 TermsMetadataFilter,
                 dict(values=["value1", "value2"]),
             ),
             (
-                {"name": "integer_prop", "type": "integer"},
+                {"name": "integer_prop", "settings": {"type": "integer"}},
                 '{"ge": 10, "le": 20}',
                 IntegerMetadataFilter,
                 dict(ge=10, le=20),
             ),
             (
-                {"name": "integer_prop", "type": "integer"},
+                {"name": "integer_prop", "settings": {"type": "integer"}},
                 '{"ge": 20}',
                 IntegerMetadataFilter,
                 dict(ge=20, le=None),
             ),
             (
-                {"name": "integer_prop", "type": "integer"},
+                {"name": "integer_prop", "settings": {"type": "integer"}},
                 '{"le": 20}',
                 IntegerMetadataFilter,
                 dict(ge=None, le=20),
             ),
             (
-                {"name": "float_prop", "type": "float"},
+                {"name": "float_prop", "settings": {"type": "float"}},
                 '{"ge": -1.30, "le": 23.23}',
                 FloatMetadataFilter,
                 dict(ge=-1.30, le=23.23),
             ),
             (
-                {"name": "float_prop", "type": "float"},
+                {"name": "float_prop", "settings": {"type": "float"}},
                 '{"ge": 23.23}',
                 FloatMetadataFilter,
                 dict(ge=23.23, le=None),
             ),
             (
-                {"name": "float_prop", "type": "float"},
+                {"name": "float_prop", "settings": {"type": "float"}},
                 '{"le": 11.32}',
                 FloatMetadataFilter,
                 dict(ge=None, le=11.32),
@@ -1459,7 +1461,9 @@ class TestSuiteDatasets:
         dataset, _, records, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
 
         metadata_property = await MetadataPropertyFactory.create(
-            **property_config, settings={"type": property_config["type"]}, dataset=dataset
+            name=property_config["name"],
+            settings=property_config["settings"],
+            dataset=dataset,
         )
 
         mock_search_engine.search.return_value = SearchResponses(
@@ -3462,7 +3466,7 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         await TextFieldFactory.create(name="completion", dataset=dataset)
         await TextQuestionFactory.create(name="corrected", dataset=dataset)
-        await MetadataPropertyFactoryType.create(name="metadata-property", dataset=dataset, settings=settings)
+        await MetadataPropertyFactoryType.create(name="metadata-property", settings=settings, dataset=dataset)
 
         records_json = {
             "items": [
@@ -4506,49 +4510,49 @@ class TestSuiteDatasets:
         ("property_config", "param_value", "expected_filter_class", "expected_filter_args"),
         [
             (
-                {"name": "terms_prop", "type": "terms"},
+                {"name": "terms_prop", "settings": {"type": "terms"}},
                 "value",
                 TermsMetadataFilter,
                 dict(values=["value"]),
             ),
             (
-                {"name": "terms_prop", "type": "terms"},
+                {"name": "terms_prop", "settings": {"type": "terms"}},
                 "value1,value2",
                 TermsMetadataFilter,
                 dict(values=["value1", "value2"]),
             ),
             (
-                {"name": "integer_prop", "type": "integer"},
+                {"name": "integer_prop", "settings": {"type": "integer"}},
                 '{"ge": 10, "le": 20}',
                 IntegerMetadataFilter,
                 dict(ge=10, le=20),
             ),
             (
-                {"name": "integer_prop", "type": "integer"},
+                {"name": "integer_prop", "settings": {"type": "integer"}},
                 '{"ge": 20}',
                 IntegerMetadataFilter,
                 dict(ge=20, high=None),
             ),
             (
-                {"name": "integer_prop", "type": "integer"},
+                {"name": "integer_prop", "settings": {"type": "integer"}},
                 '{"le": 20}',
                 IntegerMetadataFilter,
                 dict(low=None, le=20),
             ),
             (
-                {"name": "float_prop", "type": "float"},
+                {"name": "float_prop", "settings": {"type": "float"}},
                 '{"ge": -1.30, "le": 23.23}',
                 FloatMetadataFilter,
                 dict(ge=-1.30, le=23.23),
             ),
             (
-                {"name": "float_prop", "type": "float"},
+                {"name": "float_prop", "settings": {"type": "float"}},
                 '{"ge": 23.23}',
                 FloatMetadataFilter,
                 dict(ge=23.23, high=None),
             ),
             (
-                {"name": "float_prop", "type": "float"},
+                {"name": "float_prop", "settings": {"type": "float"}},
                 '{"le": 11.32}',
                 FloatMetadataFilter,
                 dict(low=None, le=11.32),
@@ -4570,7 +4574,9 @@ class TestSuiteDatasets:
         dataset, _, records, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
 
         metadata_property = await MetadataPropertyFactory.create(
-            **property_config, settings={"type": property_config["type"]}, dataset=dataset
+            name=property_config["name"],
+            settings=property_config["settings"],
+            dataset=dataset,
         )
 
         mock_search_engine.search.return_value = SearchResponses(
@@ -4605,20 +4611,20 @@ class TestSuiteDatasets:
     @pytest.mark.parametrize(
         ("property_config", "wrong_value"),
         [
-            ({"name": "terms_prop", "type": "terms"}, None),
-            ({"name": "terms_prop", "type": "terms"}, "terms_prop"),
-            ({"name": "terms_prop", "type": "terms"}, "terms_prop:"),
-            ({"name": "terms_prop", "type": "terms"}, "wrong-value"),
-            ({"name": "integer_prop", "type": "integer"}, None),
-            ({"name": "integer_prop", "type": "integer"}, "integer_prop"),
-            ({"name": "integer_prop", "type": "integer"}, "integer_prop:"),
-            ({"name": "integer_prop", "type": "integer"}, "integer_prop:{}"),
-            ({"name": "integer_prop", "type": "integer"}, "wrong-value"),
-            ({"name": "float_prop", "type": "float"}, None),
-            ({"name": "float_prop", "type": "float"}, "float_prop"),
-            ({"name": "float_prop", "type": "float"}, "float_prop:"),
-            ({"name": "float_prop", "type": "float"}, "float_prop:{}"),
-            ({"name": "float_prop", "type": "float"}, "wrong-value"),
+            ({"name": "terms_prop", "settings": {"type": "terms"}}, None),
+            ({"name": "terms_prop", "settings": {"type": "terms"}}, "terms_prop"),
+            ({"name": "terms_prop", "settings": {"type": "terms"}}, "terms_prop:"),
+            ({"name": "terms_prop", "settings": {"type": "terms"}}, "wrong-value"),
+            ({"name": "integer_prop", "settings": {"type": "integer"}}, None),
+            ({"name": "integer_prop", "settings": {"type": "integer"}}, "integer_prop"),
+            ({"name": "integer_prop", "settings": {"type": "integer"}}, "integer_prop:"),
+            ({"name": "integer_prop", "settings": {"type": "integer"}}, "integer_prop:{}"),
+            ({"name": "integer_prop", "settings": {"type": "integer"}}, "wrong-value"),
+            ({"name": "float_prop", "settings": {"type": "float"}}, None),
+            ({"name": "float_prop", "settings": {"type": "float"}}, "float_prop"),
+            ({"name": "float_prop", "settings": {"type": "float"}}, "float_prop:"),
+            ({"name": "float_prop", "settings": {"type": "float"}}, "float_prop:{}"),
+            ({"name": "float_prop", "settings": {"type": "float"}}, "wrong-value"),
         ],
     )
     async def test_search_dataset_records_with_wrong_metadata_filter_values(
@@ -4634,7 +4640,9 @@ class TestSuiteDatasets:
         dataset, _, records, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
 
         await MetadataPropertyFactory.create(
-            **property_config, settings={"type": property_config["type"]}, dataset=dataset
+            name=property_config["name"],
+            settings=property_config["settings"],
+            dataset=dataset,
         )
 
         mock_search_engine.search.return_value = SearchResponses(
