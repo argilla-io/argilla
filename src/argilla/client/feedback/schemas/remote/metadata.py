@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import warnings
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from argilla.client.feedback.mixins import ArgillaMetadataPropertiesMixin
@@ -51,22 +52,29 @@ class _RemoteMetadataProperty(RemoteSchema):
         if title is None and visible_for_annotators is None:
             raise ValueError("At least one of `title` or `visible_for_annotators` must be provided and not `None`.")
         if title is not None and title == self.title:
-            raise ValueError(
+            warnings.warn(
                 f"Provided `title={title}` is the same as the current one `{self.title}`, you need either to provide"
-                " a different one, or just pass it empty."
+                " a different one, or just pass it empty.",
+                UserWarning,
+                stacklevel=1,
             )
         if visible_for_annotators is not None and visible_for_annotators == self.visible_for_annotators:
-            raise ValueError(
+            warnings.warn(
                 f"Provided `visible_for_annotators={visible_for_annotators}` is the same as the current one"
-                f" `{self.visible_for_annotators}`, you need either to provide a different one, or just pass it empty."
+                f" `{self.visible_for_annotators}`, you need either to provide a different one, or just pass it empty.",
+                UserWarning,
+                stacklevel=1,
             )
-        updated_metadata_property = ArgillaMetadataPropertiesMixin.update(
-            client=self.client,
-            metadata_property_id=self.id,
-            title=title,
-            visible_for_annotators=visible_for_annotators,
-        )
-        self.__dict__.update(updated_metadata_property.__dict__)
+        if (title is not None and title != self.title) or (
+            visible_for_annotators is not None and visible_for_annotators != self.visible_for_annotators
+        ):
+            updated_metadata_property = ArgillaMetadataPropertiesMixin.update(
+                client=self.client,
+                metadata_property_id=self.id,
+                title=title,
+                visible_for_annotators=visible_for_annotators,
+            )
+            self.__dict__.update(updated_metadata_property.__dict__)
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def delete(self: "AllowedRemoteMetadataPropertyTypes") -> "AllowedMetadataPropertyTypes":
