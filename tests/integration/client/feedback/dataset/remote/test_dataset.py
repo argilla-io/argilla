@@ -122,7 +122,7 @@ class TestRemoteFeedbackDataset:
 
         assert len(remote_dataset.records) == 1
 
-    async def test_update_records(self, owner: "User", test_dataset: FeedbackDataset):
+    def test_update_records(self, owner: "User", test_dataset: FeedbackDataset):
         rg.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
@@ -140,12 +140,13 @@ class TestRemoteFeedbackDataset:
         first_record.metadata.update({"terms-metadata": "a"})
 
         remote.update_records(first_record)
+        print(first_record)
 
         assert first_record == remote[0]
 
         first_record = remote[0]
-        assert first_record.external_id == "new-external-id"
         assert first_record.metadata["terms-metadata"] == "a"
+        assert first_record.external_id == "new-external-id"
 
     async def test_update_records_with_suggestions(self, owner: "User", test_dataset: FeedbackDataset):
         rg.init(api_key=owner.api_key)
