@@ -26,7 +26,7 @@ def f1(name: str, query: Optional[str] = None) -> MetricSummary:
         name:
             The dataset name.
         query:
-            An ElasticSearch query with the [query string syntax](https://argilla.readthedocs.io/en/stable/guides/queries.html)
+            An ElasticSearch query with the [query string syntax](https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html)
 
     Returns:
         The f1 metric summary
@@ -52,7 +52,7 @@ def f1_multilabel(name: str, query: Optional[str] = None) -> MetricSummary:
         name:
             The dataset name.
         query:
-            An ElasticSearch query with the [query string syntax](https://argilla.readthedocs.io/en/stable/guides/queries.html)
+            An ElasticSearch query with the [query string syntax](https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html)
 
     Returns:
         The f1 metric summary

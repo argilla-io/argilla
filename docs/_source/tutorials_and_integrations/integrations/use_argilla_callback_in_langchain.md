@@ -1,6 +1,6 @@
 # `LangChain`: Monitoring LLMs in apps, chains, and agents and tools
 
-This guide explains how to use the `ArgillaCallbackHandler` to integrate Argilla with LangChain apps. With this integration, Argilla can be used evaluate and fine-tune LLMs. It works by collecting the interactions with LLMs and pushing them into a `FeedbackDataset` for continuous monitoring and human feedback. You just need to create a Langchain-compatible `FeedbackDataset` in Argilla and then instantiate the `ArgillaCallbackHandler` to be provided to `LangChain` LLMs, Chains, and/or Agents.
+This guide explains how to use the `ArgillaCallbackHandler` to integrate Argilla with LangChain apps. With this integration, Argilla can be used to evaluate and fine-tune LLMs. It works by collecting the interactions with LLMs and pushing them into a `FeedbackDataset` for continuous monitoring and human feedback. You just need to create a Langchain-compatible `FeedbackDataset` in Argilla and then instantiate the `ArgillaCallbackHandler` to be provided to `LangChain` LLMs, Chains, and/or Agents.
 
 :::{warning}
 As of Argilla 1.14.0 the `FeedbackDataset` has been refactored to improve its usage, so if you're using Argilla 1.14.0 or higher, you won't be able to use the `ArgillaCallbackHandler` as it's not been updated in `LangChain` yet.
@@ -56,7 +56,7 @@ For more information on how to create a `FeedbackDataset`, please refer to the [
 
 ## Monitoring
 
-As all the `LangChain` callbacks, those are instantiated and provided to the `LangChain` LLMs, Chains, and/or Agents, and then there's no need to worry about them anymore, as those will automatically keep track of everything taking place in the `LangChain` pipeline. In this case, we're keeping track of both the input and the final response provided by the LLMs, Chains, and/or Agents.
+All the `LangChain` callbacks are instantiated and provided to the `LangChain` LLMs, Chains, and/or Agents, and then there's no need to worry about them anymore, as those will automatically keep track of everything taking place in the `LangChain` pipeline. In this case, we're keeping track of both the input and the final response provided by the LLMs, Chains, and/or Agents.
 
 ```python
 from langchain.callbacks import ArgillaCallbackHandler
@@ -150,7 +150,7 @@ agent.run("Who was the first president of the United States of America?")
 
 ## Synthetic data
 
-If you want to create synthetic data with LangChain, you can use the `ArgillaCallbackHandler` to keep track of the input and the output of the LLMs, Chains, and/or Agents, and then store that data in Argilla. This means you would monitor the data in a similar scenario as described above, but instead of providing a direct functional prompt tailored to data generation in order to setup your LLMs to come up with some synthetic data for a `TextField. If you want a more tailored approach to data generation and computational feedback, you can take a look at [this integration with LangChain](/tutorials_and_integrations/integrations/use_argilla_callback_in_langchain) or [this tutorial on SetFit for suggestions](/tutorials_and_integrations/tutorials/feedback/labelling-feedback-setfit).
+If you want to create synthetic data with LangChain, you can use the `ArgillaCallbackHandler` to keep track of the input and the output of the LLMs, Chains, and/or Agents, and then store that data in Argilla. This means you would monitor the data in a similar scenario as described above, but instead of providing a direct functional prompt tailored to data generation in order to set up your LLMs to come up with some synthetic data for a `TextField. If you want a more tailored approach to data generation and computational feedback, you can take a look at [this integration with LangChain](/tutorials_and_integrations/integrations/use_argilla_callback_in_langchain) or [this tutorial on SetFit for suggestions](/tutorials_and_integrations/tutorials/feedback/labelling-feedback-setfit).
 
 ```{warning}
 Do keep in mind that LLMs have licenses and not every LLM can be used for creating synthetic data in every operational setting. Please check the license of the LLM you are using before using it for creating synthetic data.

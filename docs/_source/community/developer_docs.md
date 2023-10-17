@@ -16,9 +16,9 @@ For more information please visit our [Setup and Installation](../getting_starte
 
 ### SQLite
 
-By default Argilla will use SQLite to store information about users, workspaces, etc. Non additional configuration is required to start using SQLite.
+By default, Argilla will use SQLite to store information about users, workspaces, etc. No additional configuration is required to start using SQLite.
 
-By default the database file will be created at `~/.argilla/argilla.db`, this can be configured setting different values for `ARGILLA_DATABASE_URL` and `ARGILLA_HOME_PATH` environment variables.
+By default, the database file will be created at `~/.argilla/argilla.db`, this can be configured by setting different values for `ARGILLA_DATABASE_URL` and `ARGILLA_HOME_PATH` environment variables.
 
 ## Development setup
 
@@ -34,7 +34,7 @@ cd argilla
 ```
 
 To keep your fork's main/develop branch up to date with our repo you should add it as an
-[upstream remote branch](https://dev.to/louhayes3/git-add-an-upstream-to-a-forked-repo-1mik>):
+[upstream remote branch](https://dev.to/louhayes3/git-add-an-upstream-to-a-forked-repo-1mik):
 
 ```sh
 git remote add upstream https://github.com/argilla-io/argilla.git
@@ -63,7 +63,7 @@ Or installing just the `server` extra:
 pip install -e ".[server]"
 ```
 
-Or installing all the extras, that are also required to run the tests via `pytest` to make sure that the implemented features or the bug fixes work as expected, and that the unit/integration tests are passing.
+Or installing all the extras, which are also required to run the tests via `pytest` to make sure that the implemented features or the bug fixes work as expected, and that the unit/integration tests are passing.
 
 ```sh
 pip install -e ".[server,listeners,postgresql,integrations,tests]"
@@ -104,7 +104,7 @@ For running more heavy integration tests you can just run pytest with the `tests
 pytest tests/integration
 ```
 
-Note: For now, integration tests are mocking the connection to the Argilla server. In the future, this may change and tests will be launched using an up and running Argilla server instance.
+Note: For now, integration tests are mocking the connection to the Argilla server. In the future, this may change and tests will be launched using an up-and-running Argilla server instance.
 
 You will need an Elasticsearch instance up and running for the time being. You can get one running using Docker with the following command:
 
@@ -114,7 +114,7 @@ docker run -d --name elasticsearch-for-argilla -p 9200:9200 -p 9300:9300 -e "ES_
 
 ### Code formatting tools
 
-To keep a consistent code format, we use [pre-commit](https://pre-commit.com) hooks. So on, you first need to install
+To keep a consistent code format, we use [pre-commit](https://pre-commit.com) hooks. So, you first need to install
 `pre-commit` if not installed already, via pip as follows:
 
 ```sh
@@ -163,7 +163,7 @@ Run database migrations executing the following task:
 argilla server database migrate
 ```
 
-The default SQLite database will be created at `~/.argilla/argilla.db`. This can be changed setting different values for `ARGILLA_DATABASE_URL` and `ARGILLA_HOME_PATH` environment variables.
+The default SQLite database will be created at `~/.argilla/argilla.db`. This can be changed by setting different values for `ARGILLA_DATABASE_URL` and `ARGILLA_HOME_PATH` environment variables.
 
 ### Generating a database migration
 
@@ -183,13 +183,13 @@ After generating a new migration script, you will need to apply the migrations a
 
 Occasionally, it may be necessary to recreate the database from scratch to ensure a clean state in your development environment. For instance, to run the Argilla test suite or troubleshoot issues that could be related to database inconsistencies.
 
-First you need to delete the Argilla database with the following command:
+First, you need to delete the Argilla database with the following command:
 
 ```sh
 rm ~/.argilla/argilla.db
 ```
 
-After deleting the database, you will need to run the database migrate task:
+After deleting the database, you will need to run the database migration task:
 
 ```sh
 argilla server database migrate
@@ -199,7 +199,7 @@ By following these steps, you'll have a fresh and clean database to work with.
 
 ### Creating your first user
 
-At least one user is required to interact with Argilla API and web UI. You can easily create one user executing the following command:
+At least one user is required to interact with Argilla API and web UI. You can easily create one user by executing the following command:
 
 ```sh
 argilla server database users create

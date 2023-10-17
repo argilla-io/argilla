@@ -32,6 +32,7 @@
    practical_guides/update_dataset
    practical_guides/filter_dataset
    practical_guides/annotate_dataset
+   practical_guides/annotation_workflows/annotation_workflows
    practical_guides/collect_responses
    practical_guides/export_dataset
    practical_guides/fine_tune
