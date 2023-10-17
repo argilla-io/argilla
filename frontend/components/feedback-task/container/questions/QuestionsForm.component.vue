@@ -160,7 +160,7 @@ export default {
       if (event.srcElement.id || event.srcElement.getAttribute("for")) return;
 
       this.userComesFromOutside = false;
-      this.focusOnFirstQuestion(event);
+      this.updateQuestionAutofocus(0);
     },
     focusOnFirstQuestion(event) {
       event.preventDefault();
