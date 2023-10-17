@@ -257,7 +257,7 @@ class TestSuiteRecords:
                 FloatMetadataPropertyFactory,
                 13.3,
                 "wrong-float",
-                "'name' metadata property validation failed because 'wrong-float' is not an float.",
+                "'name' metadata property validation failed because 'wrong-float' is not a float.",
             ),
         ],
     )
