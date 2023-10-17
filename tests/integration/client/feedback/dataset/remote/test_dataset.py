@@ -122,7 +122,7 @@ class TestRemoteFeedbackDataset:
 
         assert len(remote_dataset.records) == 1
 
-    async def test_update_records(self, owner: "User", test_dataset: FeedbackDataset):
+    def test_update_records(self, owner: "User", test_dataset: FeedbackDataset):
         rg.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
@@ -140,12 +140,13 @@ class TestRemoteFeedbackDataset:
         first_record.metadata.update({"terms-metadata": "a"})
 
         remote.update_records(first_record)
+        print(first_record)
 
         assert first_record == remote[0]
 
         first_record = remote[0]
-        assert first_record.external_id == "new-external-id"
         assert first_record.metadata["terms-metadata"] == "a"
+        assert first_record.external_id == "new-external-id"
 
     async def test_update_records_with_suggestions(self, owner: "User", test_dataset: FeedbackDataset):
         rg.init(api_key=owner.api_key)
@@ -517,3 +518,28 @@ class TestRemoteFeedbackDataset:
 
         assert local_copy is not None
         assert local_copy.records == []
+
+    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+    async def test_warning_local_methods(self, role: UserRole) -> None:
+        dataset = await DatasetFactory.create()
+        await TextFieldFactory.create(dataset=dataset, required=True)
+        await TextQuestionFactory.create(dataset=dataset, required=True)
+        await RecordFactory.create_batch(dataset=dataset, size=10)
+        user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+        api.init(api_key=user.api_key)
+        ds = FeedbackDataset.from_argilla(id=dataset.id)
+
+        with pytest.raises(ValueError, match="`FeedbackRecord.fields` does not match the expected schema"):
+            with pytest.warns(
+                UserWarning,
+                match="A local `FeedbackDataset` returned because `unify_responses` is not supported for `RemoteFeedbackDataset`. ",
+            ):
+                ds.unify_responses(question=None, strategy=None)
+
+        with pytest.raises(ValueError, match="`FeedbackRecord.fields` does not match the expected schema"):
+            with pytest.warns(
+                UserWarning,
+                match="A local `FeedbackDataset` returned because `prepare_for_training` is not supported for `RemoteFeedbackDataset`. ",
+            ):
+                ds.prepare_for_training(framework=None, task=None)

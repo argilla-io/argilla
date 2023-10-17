@@ -35,6 +35,7 @@ These are the section headers that we use:
 - Add support for update records (`metadata` and `external_id`) from Python SDK ([#3946](https://github.com/argilla-io/argilla/pull/3946)).
 - Added `delete_metadata_properties` and `Remote{Terms,Integer,Float}MetadataProperty.delete` methods to delete metadata properties ([#3932](https://github.com/argilla-io/argilla/pull/3932)).
 - New `PATCH /api/v1/metadata-properties/:metadata_property_id` endpoint allowing the update of a specific metadata property. ([#3952](https://github.com/argilla-io/argilla/pull/3952)).
+- Added automatic model card generation through `ArgillaTrainer.save` ([#3857](https://github.com/argilla-io/argilla/pull/3857)).
 
 ### Changed
 
@@ -45,11 +46,14 @@ These are the section headers that we use:
 - Updated `FilteredRemoteFeedbackRecords.__len__` method to return the number of records matching the provided filters ([#3916](https://github.com/argilla-io/argilla/pull/3916)).
 - Increase the default max result window for Elasticsearch created for Feedback datasets ([#3929](https://github.com/argilla-io/argilla/pull/)).
 - Force elastic index refresh after records creation ([#3929](https://github.com/argilla-io/argilla/pull/)).
+- `FeedbackDataset` methods have been aligned to be accessible through the several implementations ([#3937](https://github.com/argilla-io/argilla/pull/3937)).
+- Support on `RemoteFeedbackDataset` for `unify_responses` method ([#3937](https://github.com/argilla-io/argilla/pull/3937)).
 
 ### Fixed
 
 - Updated active learning for text classification notebooks to pass ids of type int to `TextClassificationRecord` ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
 - Fixed record fields validation that was preventing from logging records with optional fields (i.e. `required=True`) when the field value was `None` ([#3846](https://github.com/argilla-io/argilla/pull/3846)).
+- Fixed `configure_dataset_settings` when providing the workspace via the arg `workspace` ([#3887](https://github.com/argilla-io/argilla/pull/3887)).
 - Fixed response schemas to allow `values` to be `None` i.e. when a record is discarded the `response.values` are set to `None` ([#3926](https://github.com/argilla-io/argilla/pull/3926)).
 - The `inserted_at` and `updated_at` attributes are create using the `utcnow` factory to avoid unexpected race conditions on timestamp creation ([#3945](https://github.com/argilla-io/argilla/pull/3945))
 - Fixed saving of models trained with `ArgillaTrainer` with a `peft_config` parameter ([#3795](https://github.com/argilla-io/argilla/pull/3795)).
@@ -57,6 +61,9 @@ These are the section headers that we use:
 - Fixed allow pull datasets without records ([#3851](https://github.com/argilla-io/argilla/pull/3851))
 - Updated active learning for text classification notebooks to pass ids of type int to `TextClassificationRecord` ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
 - Fixed record fields validation that was preventing from logging records with optional fields (i.e. `required=True`) when the field value was `None` ([#3846](https://github.com/argilla-io/argilla/pull/3846)).
+- Fixed wrong `__repr__` problem for `TrainingTask` ([#3969](https://github.com/argilla-io/argilla/pull/3969)).
+- Fixed wrong key return error `prepare_for_training_with_*` for `TrainingTask` ([#3969](https://github.com/argilla-io/argilla/pull/3969)).
+
 
 ## [1.16.0](https://github.com/argilla-io/argilla/compare/v1.15.1...v1.16.0)
 
