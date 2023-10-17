@@ -36,6 +36,24 @@ if TYPE_CHECKING:
 
 
 class TestFeedbackDataset(FeedbackDatasetBase):
+    def add_records(self, *args, **kwargs) -> None:
+        pass
+
+    def pull(self):
+        pass
+
+    def delete(self):
+        pass
+
+    def prepare_for_training(self, *args, **kwargs) -> Any:
+        pass
+
+    def push_to_argilla(self, *args, **kwargs) -> "FeedbackDatasetBase":
+        pass
+
+    def unify_responses(self, *args, **kwargs):
+        pass
+
     def update_records(self, **kwargs: Dict[str, Any]) -> None:
         pass
 

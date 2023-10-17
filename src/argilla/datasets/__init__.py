@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import logging
+import warnings
 from typing import Optional
 
 from argilla.client import api
@@ -22,7 +23,7 @@ __all__ = [TextClassificationSettings, TokenClassificationSettings, Settings]
 _LOGGER = logging.getLogger(__name__)
 
 
-def load_dataset_settings(name: str, workspace: Optional[str] = None) -> Settings:
+def load_dataset_settings(name: str, workspace: Optional[str] = None) -> Optional[Settings]:
     """
     Loads the settings of a dataset
 
@@ -34,10 +35,9 @@ def load_dataset_settings(name: str, workspace: Optional[str] = None) -> Setting
         The dataset settings
     """
     active_api = api.active_api()
-    if workspace is not None:
-        active_api.set_workspace(workspace)
     datasets = active_api.datasets
-    settings = datasets.load_settings(name)
+
+    settings = datasets.load_settings(name, workspace=workspace)
     if settings is None:
         return None
     else:
@@ -73,5 +73,5 @@ def configure_dataset(name: str, settings: Settings, workspace: Optional[str] = 
         settings: The dataset settings
         workspace: The workspace name where the dataset will belongs to
     """
-    _LOGGER.warning("This method is deprecated. Use configure_dataset_settings instead.")
+    warnings.warn("This method is deprecated. Use configure_dataset_settings instead.", DeprecationWarning)
     return configure_dataset_settings(name, settings, workspace)

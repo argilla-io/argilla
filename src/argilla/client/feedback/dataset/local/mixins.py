@@ -15,16 +15,14 @@
 from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 from uuid import UUID
 
-from tqdm import trange
-
 from argilla.client.api import ArgillaSingleton
 from argilla.client.feedback.constants import PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 from argilla.client.feedback.schemas.enums import FieldTypes, MetadataPropertyTypes, QuestionTypes
+from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
-    RankingQuestion,
     RatingQuestion,
     TextQuestion,
 )
@@ -41,22 +39,16 @@ from argilla.client.feedback.schemas.remote.questions import (
     RemoteRatingQuestion,
     RemoteTextQuestion,
 )
-from argilla.client.feedback.unification import (
-    LabelQuestionStrategy,
-    MultiLabelQuestionStrategy,
-    RankingQuestionStrategy,
-    RatingQuestionStrategy,
-    TextQuestionStrategy,
-)
 from argilla.client.feedback.utils import feedback_dataset_in_argilla
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.workspaces import Workspace
+from tqdm import trange
 
 if TYPE_CHECKING:
     import httpx
-
     from argilla.client.client import Argilla as ArgillaClient
     from argilla.client.feedback.dataset.local import FeedbackDataset
+    from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
     from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.types import (
         AllowedFieldTypes,
@@ -450,40 +442,411 @@ class ArgillaMixin:
         ]
 
 
-class UnificationMixin:
-    def unify_responses(
-        self: "FeedbackDataset",
-        question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
-        strategy: Union[
-            str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy, RankingQuestionStrategy
-        ],
-    ) -> None:
+class TaskTemplateMixin:
+    """
+    Mixin to add task template functionality to a `FeedbackDataset`.
+    The NLP tasks covered are:
+        "text_classification"
+        "extractive_question_answering"
+        "summarization"
+        "translation"
+        "sentence_similarity"
+        "natural_language_inference"
+        "supervised_fine_tuning"
+        "preference_modeling/reward_modeling"
+        "proximal_policy_optimization"
+        "direct_preference_optimization"
+        "retrieval_augmented_generation"
+    """
+
+    @classmethod
+    def for_text_classification(
+        cls: Type["FeedbackDataset"],
+        labels: List[str],
+        multi_label: bool = False,
+        use_markdown: bool = False,
+        guidelines: str = None,
+    ) -> "FeedbackDataset":
         """
-        The `unify_responses` function takes a question and a strategy as input and applies the strategy
-        to unify the responses for that question.
+        You can use this method to create a basic dataset for text classification tasks.
 
         Args:
-            question The `question` parameter can be either a string representing the name of the
-                question, or an instance of one of the question classes (`LabelQuestion`, `MultiLabelQuestion`,
-                `RatingQuestion`, `RankingQuestion`).
-            strategy The `strategy` parameter is used to specify the strategy to be used for unifying
-                responses for a given question. It can be either a string or an instance of a strategy class.
+            labels: A list of labels for your dataset
+            multi_label: Set this parameter to True if you want to add multiple labels to your dataset
+            use_markdown: Set this parameter to True if you want to use markdown in your dataset
+
+        Returns:
+            A `FeedbackDataset` object for text classification containing "text" field and LabelQuestion or MultiLabelQuestion named "label"
         """
-        if isinstance(question, str):
-            question = self.question_by_name(question)
+        default_guidelines = "This is a text classification dataset that contains texts and labels. Given a set of texts and a predefined set of labels, the goal of text classification is to assign one or more labels to each text based on its content. Please classify the texts by making the correct selection."
 
-        if isinstance(strategy, str):
-            if isinstance(question, LabelQuestion):
-                strategy = LabelQuestionStrategy(strategy)
-            elif isinstance(question, MultiLabelQuestion):
-                strategy = MultiLabelQuestionStrategy(strategy)
-            elif isinstance(question, RatingQuestion):
-                strategy = RatingQuestionStrategy(strategy)
-            elif isinstance(question, RankingQuestion):
-                strategy = RankingQuestionStrategy(strategy)
-            elif isinstance(question, TextQuestion):
-                strategy = TextQuestionStrategy(strategy)
-            else:
-                raise ValueError(f"Question {question} is not supported yet")
+        description = "Classify the text by selecting the correct label from the given list of labels."
+        return cls(
+            fields=[TextField(name="text", use_markdown=use_markdown)],
+            questions=[
+                LabelQuestion(
+                    name="label",
+                    labels=labels,
+                    description=description,
+                )
+                if not multi_label
+                else MultiLabelQuestion(
+                    name="label",
+                    labels=labels,
+                    description=description,
+                )
+            ],
+            guidelines=guidelines
+            if guidelines is not None
+            else default_guidelines
+            if multi_label
+            else default_guidelines.replace("one or more labels", "one label"),
+        )
 
-        strategy.unify_responses(self.records, question)
+    @classmethod
+    def for_question_answering(
+        cls: Type["FeedbackDataset"], use_markdown: bool = False, guidelines: str = None
+    ) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for question answering tasks.
+
+        Args:
+            use_markdown: Set this parameter to True if you want to use markdown in your dataset
+
+        Returns:
+            A `FeedbackDataset` object for question answering containing "context" and "question" fields and a TextQuestion named "answer"
+        """
+        default_guidelines = "This is a question answering dataset that contains questions and contexts. Please answer the question by using the context."
+        return cls(
+            fields=[
+                TextField(name="question", use_markdown=use_markdown),
+                TextField(name="context", use_markdown=use_markdown),
+            ],
+            questions=[
+                TextQuestion(
+                    name="answer",
+                    description="Answer the question. Note that the answer must exactly be in the context.",
+                    use_markdown=use_markdown,
+                    required=True,
+                )
+            ],
+            guidelines=default_guidelines if guidelines is None else guidelines,
+        )
+
+    @classmethod
+    def for_summarization(
+        cls: Type["FeedbackDataset"],
+        use_markdown: bool = False,
+        guidelines: str = None,
+    ) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for summarization tasks.
+
+        Args:
+            use_markdown: Set this parameter to True if you want to use markdown in your dataset
+
+        Returns:
+            A `FeedbackDataset` object for summarization containing "text" field and a TextQuestion named "summary"
+        """
+        default_guidelines = (
+            "This is a summarization dataset that contains texts. Please summarize the text in the text field."
+        )
+        return cls(
+            fields=[TextField(name="text", use_markdown=use_markdown)],
+            questions=[
+                TextQuestion(name="summary", description="Write a summary of the text.", use_markdown=use_markdown)
+            ],
+            guidelines=default_guidelines if guidelines is None else guidelines,
+        )
+
+    @classmethod
+    def for_translation(
+        cls: Type["FeedbackDataset"],
+        use_markdown: bool = False,
+        guidelines: str = None,
+    ) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for translation tasks.
+
+        Args:
+            use_markdown: Set this parameter to True if you want to use markdown in your dataset
+
+        Returns:
+            A `FeedbackDataset` object for translation containing "source" field and a TextQuestion named "target"
+        """
+        default_guidelines = (
+            "This is a translation dataset that contains texts. Please translate the text in the text field."
+        )
+        return cls(
+            fields=[TextField(name="source", use_markdown=use_markdown)],
+            questions=[TextQuestion(name="target", description="Translate the text.", use_markdown=use_markdown)],
+            guidelines=default_guidelines if guidelines is None else guidelines,
+        )
+
+    @classmethod
+    def for_sentence_similarity(
+        cls: Type["FeedbackDataset"],
+        rating_scale: int = 10,
+        use_markdown: bool = False,
+        guidelines: str = None,
+    ) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for sentence similarity tasks.
+
+        Args:
+            rating_scale: Set this parameter to the number of similarity scale you want to add to your dataset
+            use_markdown: Set this parameter to True if you want to use markdown in your dataset
+
+        Returns:
+            A `FeedbackDataset` object for sentence similarity containing "sentence1" and "sentence2" fields and a RatingQuestion named "similarity"
+        """
+        default_guidelines = "This is a sentence similarity dataset that contains two sentences. Please rate the similarity between the two sentences."
+        return cls(
+            fields=[
+                TextField(name="sentence1", use_markdown=use_markdown),
+                TextField(name="sentence2", use_markdown=use_markdown),
+            ],
+            questions=[
+                RatingQuestion(
+                    name="similarity",
+                    values=list(range(1, rating_scale + 1)),
+                    description="Rate the similarity between the two sentences.",
+                )
+            ],
+            guidelines=default_guidelines if guidelines is None else guidelines,
+        )
+
+    @classmethod
+    def for_natural_language_inference(
+        cls: Type["FeedbackDataset"],
+        labels: Optional[List[str]] = None,
+        use_markdown: bool = False,
+        guidelines: str = None,
+    ) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for natural language inference tasks.
+
+        Args:
+            labels: A list of labels for your dataset
+            use_markdown: Set this parameter to True if you want to use markdown in your dataset
+
+        Returns:
+            A `FeedbackDataset` object for natural language inference containing "premise" and "hypothesis" fields and a LabelQuestion named "label"
+        """
+        default_guidelines = "This is a natural language inference dataset that contains premises and hypotheses. Please choose the correct label for the given premise and hypothesis."
+        if labels is None:
+            labels = ["entailment", "neutral", "contradiction"]
+        return cls(
+            fields=[
+                TextField(name="premise", use_markdown=use_markdown),
+                TextField(name="hypothesis", use_markdown=use_markdown),
+            ],
+            questions=[LabelQuestion(name="label", labels=labels, description="Choose one of the labels.")],
+            guidelines=default_guidelines if guidelines is None else guidelines,
+        )
+
+    @classmethod
+    def for_supervised_fine_tuning(
+        cls: Type["FeedbackDataset"],
+        context: bool = False,
+        use_markdown: bool = False,
+        guidelines: str = None,
+    ) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for supervised fine-tuning tasks.
+
+        Args:
+            context: Set this parameter to True if you want to add context to your dataset
+            use_markdown: Set this parameter to True if you want to use markdown in your dataset
+
+        Returns:
+            A `FeedbackDataset` object for supervised fine-tuning containing "instruction" and optional "context" field and a TextQuestion named "response"
+        """
+        default_guidelines = "This is a supervised fine-tuning dataset that contains instructions. Please write the response to the instruction in the response field."
+        fields = [
+            TextField(name="prompt", use_markdown=use_markdown),
+        ]
+        if context:
+            fields.append(TextField(name="context", use_markdown=use_markdown, required=False))
+        return cls(
+            fields=fields,
+            questions=[
+                TextQuestion(
+                    name="response", description="Write the response to the instruction.", use_markdown=use_markdown
+                )
+            ],
+            guidelines=guidelines
+            if guidelines is not None
+            else default_guidelines + " Take the context into account when writing the response."
+            if context
+            else default_guidelines,
+        )
+
+    @classmethod
+    def for_preference_modeling(
+        cls: Type["FeedbackDataset"],
+        context: bool = False,
+        use_markdown: bool = False,
+        guidelines: str = None,
+    ) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for preference tasks.
+
+        Args:
+            use_markdown: Set this parameter to True if you want to use markdown in your dataset
+
+        Returns:
+            A `FeedbackDataset` object for preference containing "prompt", "option1" and "option2" fields and a LabelQuestion named "preference"
+        """
+        default_guidelines = "This is a preference dataset that contains contexts and options. Please choose the option that you would prefer in the given context."
+        fields = [
+            TextField(name="prompt", use_markdown=use_markdown),
+            TextField(name="response1", title="Response 1", use_markdown=use_markdown),
+            TextField(name="response2", title="Response 2", use_markdown=use_markdown),
+        ]
+        if context:
+            fields.insert(1, TextField(name="context", use_markdown=use_markdown, required=False))
+        return cls(
+            fields=fields,
+            questions=[
+                LabelQuestion(
+                    name="preference", labels=["Response 1", "Response 2"], description="Choose your preference."
+                )
+            ],
+            guidelines=default_guidelines if guidelines is None else guidelines,
+        )
+
+    @classmethod
+    def for_reward_modeling(
+        cls: Type["FeedbackDataset"],
+        context: bool = False,
+        use_markdown: bool = False,
+        guidelines: str = None,
+    ) -> "FeedbackDataset":
+        return cls.for_preference_modeling(context=context, use_markdown=use_markdown, guidelines=guidelines)
+
+    @classmethod
+    def for_proximal_policy_optimization(
+        cls: Type["FeedbackDataset"],
+        context: bool = False,
+        use_markdown: bool = False,
+        guidelines: str = None,
+    ) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for proximal policy optimization tasks.
+
+        Args:
+            use_markdown: Set this parameter to True if you want to use markdown in your dataset
+
+        Returns:
+            A `FeedbackDataset` object for proximal policy optimization containing "context" and "action" fields and a LabelQuestion named "label"
+        """
+        default_guidelines = "This is a proximal policy optimization dataset that contains contexts and prompts. Please choose the label that best prompt."
+        fields = [TextField(name="prompt", use_markdown=use_markdown)]
+        if context:
+            fields.append(TextField(name="context", use_markdown=use_markdown, required=False))
+
+        return cls(
+            fields=fields,
+            questions=[
+                LabelQuestion(
+                    name="prompt",
+                    labels=["good", "bad"],
+                    description="Choose one of the labels that best describes the prompt.",
+                )
+            ],
+            guidelines=default_guidelines if guidelines is None else guidelines,
+        )
+
+    @classmethod
+    def for_direct_preference_optimization(
+        cls: Type["FeedbackDataset"],
+        context: bool = False,
+        use_markdown: bool = False,
+        guidelines: str = None,
+    ) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for direct preference optimization tasks.
+
+        Args:
+            context: Set this parameter to True if you want to add context to your dataset
+            use_markdown: Set this parameter to True if you want to use markdown in your dataset
+
+        Returns:
+            A `FeedbackDataset` object for direct preference optimization containing "prompt", "response1", "response2" with the optional "context" fields and a LabelQuestion named "preference"
+        """
+        default_guidelines = "This is a direct preference optimization dataset that contains contexts and options. Please choose the option that you would prefer in the given context."
+        fields = [
+            TextField(name="prompt", use_markdown=use_markdown),
+            TextField(name="response1", title="Response 1", use_markdown=use_markdown),
+            TextField(name="response2", title="Response 2", use_markdown=use_markdown),
+        ]
+        if context:
+            fields.insert(1, TextField(name="context", use_markdown=use_markdown, required=False))
+        return cls(
+            fields=fields,
+            questions=[
+                LabelQuestion(
+                    name="preference",
+                    labels=["Response 1", "Response 2"],
+                    description="Choose the label that is your preference.",
+                )
+            ],
+            guidelines=default_guidelines if guidelines is None else guidelines,
+        )
+
+    @classmethod
+    def for_retrieval_augmented_generation(
+        cls: Type["FeedbackDataset"],
+        number_of_retrievals: int = 1,
+        rating_scale: int = 10,
+        use_markdown: bool = False,
+        guidelines: str = None,
+    ) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for retrieval augmented generation tasks.
+
+        Args:
+            number_of_retrievals: Set this parameter to the number of documents you want to add to your dataset
+            use_markdown: Set this parameter to True if you want to use markdown in your dataset
+
+        Returns:
+            A `FeedbackDataset` object for retrieval augmented generation containing "query" and "retrieved_document" fields and a TextQuestion named "response"
+        """
+        default_guidelines = "This is a retrieval augmented generation dataset that contains queries and retrieved documents. Please rate the relevancy of retrieved document and write the response to the query in the response field."
+        document_fields = [
+            TextField(
+                name="retrieved_document_" + str(doc + 1),
+                title="Retrieved Document " + str(doc + 1),
+                use_markdown=use_markdown,
+                required=True if doc == 0 else False,
+            )
+            for doc in range(number_of_retrievals)
+        ]
+
+        rating_questions = [
+            RatingQuestion(
+                name="question_rating_" + str(doc + 1),
+                title="Rate the relevance of the user question" + str(doc + 1),
+                values=list(range(1, rating_scale + 1)),
+                description="Rate the relevance of the retrieved document.",
+                required=True if doc == 0 else False,
+            )
+            for doc in range(number_of_retrievals)
+        ]
+
+        total_questions = rating_questions + [
+            TextQuestion(
+                name="response",
+                title="Write a helpful, harmless, accurate response to the query.",
+                description="Write the response to the query.",
+                use_markdown=use_markdown,
+                required=False,
+            )
+        ]
+
+        return cls(
+            fields=[TextField(name="query", use_markdown=use_markdown, required=True)] + document_fields,
+            questions=total_questions,
+            guidelines=default_guidelines if guidelines is None else guidelines,
+        )

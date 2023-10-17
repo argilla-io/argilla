@@ -12,9 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import TYPE_CHECKING
+
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
 from argilla.training.openai import ArgillaOpenAITrainer as ArgillaOpenAITrainerV1
 from argilla.utils.dependency import require_dependencies
+
+if TYPE_CHECKING:
+    from argilla.client.feedback.integrations.huggingface.model_card import OpenAIModelCardData
 
 
 class ArgillaOpenAITrainer(ArgillaOpenAITrainerV1, ArgillaTrainerSkeleton):
@@ -44,3 +49,21 @@ class ArgillaOpenAITrainer(ArgillaOpenAITrainerV1, ArgillaTrainerSkeleton):
             raise NotImplementedError("Legacy models are not supported for OpenAI with the FeedbackDataset.")
 
         self.init_training_args(model=self._model)
+
+    def get_model_card_data(self, **card_data_kwargs) -> "OpenAIModelCardData":
+        """
+        Generate the card data to be used for the `ArgillaModelCard`.
+
+        Args:
+            card_data_kwargs: Extra arguments provided by the user when creating the `ArgillaTrainer`.
+
+        Returns:
+            OpenAIModelCardData: Container for the data to be written on the `ArgillaModelCard`.
+        """
+        from argilla.client.feedback.integrations.huggingface.model_card import OpenAIModelCardData
+
+        return OpenAIModelCardData(
+            model_name=self._model,
+            task=self._task,
+            **card_data_kwargs,
+        )

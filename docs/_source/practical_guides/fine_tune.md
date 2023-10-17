@@ -82,6 +82,41 @@ A `TrainingTask` is used to define how the data should be processed and formatte
 | for_direct_preference_optimization | `prompt-chosen-rejected`     | `Union[Tuple[str, str, str], Iterator[Tuple[str, str, str]]]`          | ✗      |
 | for_chat_completion                | `chat-turn-role-content`     | `Union[Tuple[str, str, str, str], Iterator[Tuple[str, str, str, str]]]`| ✗      |
 
+#### Model card generation
+
+The `ArgillaTrainer` automatically generates a [model card](https://huggingface.co/docs/hub/model-cards) when saving the model. After calling `trainer.train(output_dir="my_model")`, you should see the model card under the same output dir you passed through the train method: `./my_model/README.md`. Most of the fields in the card are automatically generated when possible, but the following fields can be (optionally) updated via the `framework_kwargs` variable of the `ArgillaTrainer` like so:
+
+```python
+model_card_kwargs = {
+    "language": ["en", "es"],
+    "license": "Apache-2.0",
+    "model_id": "all-MiniLM-L6-v2",
+    "dataset_name": "argilla/emotion",
+    "tags": ["nlp", "few-shot-learning", "argilla", "setfit"],
+    "model_summary": "Small summary of what the model does",
+    "model_description": "An extended explanation of the model",
+    "model_type": "A 1.3B parameter embedding model fine-tuned on an awesome dataset",
+    "finetuned_from": "all-MiniLM-L6-v2",
+    "repo": "https://github.com/..."
+    "developers": "",
+    "shared_by": "",
+}
+
+trainer = ArgillaTrainer(
+    dataset=dataset,
+    task=task,
+    framework="setfit",
+    framework_kwargs={"model_card_kwargs": model_card_kwargs}
+)
+trainer.train(output_dir="my_model")
+```
+
+Even though its generated internally, you can get the card by calling the `generate_model_card` method:
+
+```python
+argilla_model_card = trainer.generate_model_card("my_model")
+```
+
 ### Tasks
 
 #### Text Classification

@@ -38,7 +38,7 @@ class TestSuiteListDatasetsCommand:
     ) -> None:
         add_row_spy = mocker.spy(Table, "add_row")
         feedback_dataset_list_mock = mocker.patch(
-            "argilla.client.feedback.dataset.local.FeedbackDataset.list", return_value=[remote_feedback_dataset]
+            "argilla.client.feedback.dataset.local.dataset.FeedbackDataset.list", return_value=[remote_feedback_dataset]
         )
         list_datasets_mock = mocker.patch("argilla.client.api.list_datasets", return_value=[dataset])
 
@@ -74,7 +74,7 @@ class TestSuiteListDatasetsCommand:
 
     def test_list_datasets_with_workspace(self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture") -> None:
         workspace_from_name_mock = mocker.patch("argilla.client.workspaces.Workspace.from_name")
-        feedback_dataset_list_mock = mocker.patch("argilla.client.feedback.dataset.local.FeedbackDataset.list")
+        feedback_dataset_list_mock = mocker.patch("argilla.client.feedback.dataset.local.dataset.FeedbackDataset.list")
         list_datasets_mock = mocker.patch("argilla.client.api.list_datasets")
 
         result = cli_runner.invoke(cli, "datasets list --workspace unit-test")
@@ -98,7 +98,7 @@ class TestSuiteListDatasetsCommand:
     def test_list_datasets_using_type_feedback_filter(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"
     ) -> None:
-        feedback_dataset_list_mock = mocker.patch("argilla.client.feedback.dataset.local.FeedbackDataset.list")
+        feedback_dataset_list_mock = mocker.patch("argilla.client.feedback.dataset.local.dataset.FeedbackDataset.list")
         list_datasets_mock = mocker.patch("argilla.client.api.list_datasets")
 
         result = cli_runner.invoke(cli, "datasets list --type feedback")
@@ -110,7 +110,7 @@ class TestSuiteListDatasetsCommand:
     def test_list_datasets_using_type_other_filter(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"
     ) -> None:
-        feedback_dataset_list_mock = mocker.patch("argilla.client.feedback.dataset.local.FeedbackDataset.list")
+        feedback_dataset_list_mock = mocker.patch("argilla.client.feedback.dataset.local.dataset.FeedbackDataset.list")
         list_datasets_mock = mocker.patch("argilla.client.api.list_datasets")
 
         result = cli_runner.invoke(cli, "datasets list --type other")
