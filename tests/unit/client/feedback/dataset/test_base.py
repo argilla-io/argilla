@@ -36,7 +36,31 @@ if TYPE_CHECKING:
 
 
 class TestFeedbackDataset(FeedbackDatasetBase):
+    def add_records(self, *args, **kwargs) -> None:
+        pass
+
+    def pull(self):
+        pass
+
+    def delete(self):
+        pass
+
+    def prepare_for_training(self, *args, **kwargs) -> Any:
+        pass
+
+    def push_to_argilla(self, *args, **kwargs) -> "FeedbackDatasetBase":
+        pass
+
+    def unify_responses(self, *args, **kwargs):
+        pass
+
     def update_records(self, **kwargs: Dict[str, Any]) -> None:
+        pass
+
+    def add_metadata_property(self, metadata_property):
+        pass
+
+    def delete_metadata_properties(self, metadata_properties):
         pass
 
     def filter_by(

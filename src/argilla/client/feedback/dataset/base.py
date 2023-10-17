@@ -14,34 +14,18 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Literal, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Literal, Optional, Type, TypeVar, Union
 
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
-    FieldSchema,
     SortBy,
 )
-from argilla.client.feedback.schemas.enums import ResponseStatusFilter
-from argilla.client.feedback.schemas.metadata import MetadataFilters
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes, AllowedQuestionTypes
-from argilla.client.feedback.training.schemas import (
-    TrainingTaskForChatCompletion,
-    TrainingTaskForDPO,
-    TrainingTaskForPPO,
-    TrainingTaskForQuestionAnswering,
-    TrainingTaskForRM,
-    TrainingTaskForSentenceSimilarity,
-    TrainingTaskForSFT,
-    TrainingTaskForTextClassification,
-    TrainingTaskTypes,
-)
 from argilla.client.feedback.utils import generate_pydantic_schema_for_fields, generate_pydantic_schema_for_metadata
-from argilla.client.models import Framework
-from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
-from argilla.utils.dependency import require_dependencies, requires_dependencies
+from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
     from datasets import Dataset
@@ -112,7 +96,6 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, Generic[R]):
             raise ValueError("At least one field in `fields` must be required (`required=True`).")
 
         self._fields = fields
-        self._fields_schema = generate_pydantic_schema_for_fields(self.fields)
 
         if not isinstance(questions, list):
             raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
@@ -277,15 +260,15 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, Generic[R]):
         """Sorts the records in the dataset by the given field."""
         pass
 
-    @abstractmethod
-    def filter_by(
-        self,
-        *,
-        response_status: Optional[Union[ResponseStatusFilter, List[ResponseStatusFilter]]] = None,
-        metadata_filters: Optional[Union[MetadataFilters, List[MetadataFilters]]] = None,
-    ) -> "FeedbackDatasetBase":
-        """Filters the records in the dataset by the given filters."""
-        pass
+    def _build_fields_schema(self) -> Type[BaseModel]:
+        """Returns the fields schema of the dataset."""
+        return generate_pydantic_schema_for_fields(self.fields)
+
+    def _build_metadata_schema(self) -> Type[BaseModel]:
+        """Returns the metadata schema of the dataset."""
+        return generate_pydantic_schema_for_metadata(
+            self.metadata_properties, allow_extra_metadata=self.allow_extra_metadata
+        )
 
     def _unique_metadata_property(self, metadata_property: "AllowedMetadataPropertyTypes") -> None:
         """Checks whether the provided `metadata_property` already exists in the dataset.
@@ -349,36 +332,35 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, Generic[R]):
         Raises:
             ValueError: if the `fields` schema does not match the `FeedbackRecord.fields` schema.
         """
-        if self._fields_schema is None:
-            self._fields_schema = generate_pydantic_schema_for_fields(self.fields)
-
-        # TODO: this is here to avoid conflicts with other PRs
-        if not hasattr(self, "_metadata_schema"):
-            self._metadata_schema = None
-
-        # TODO: review up to what extent we want to apply the validation here
-        existing_metadata_properties = self.metadata_properties
-        if self._metadata_schema is None and existing_metadata_properties:
-            self._metadata_schema = generate_pydantic_schema_for_metadata(
-                existing_metadata_properties, allow_extra_metadata=self._allow_extra_metadata
-            )
+        # WE build once the schemas to avoid building it for each record
+        fields_schema = self._build_fields_schema()
+        metadata_schema = self._build_metadata_schema()
 
         for record in records:
-            try:
-                self._fields_schema.parse_obj(record.fields)
-            except ValidationError as e:
-                raise ValueError(
-                    f"`FeedbackRecord.fields` does not match the expected schema, with exception: {e}"
-                ) from e
+            self._validate_record_fields(record, fields_schema)
+            self._validate_record_metadata(record, metadata_schema)
 
-            if record.metadata is not None and existing_metadata_properties:
-                try:
-                    self._metadata_schema.parse_obj(record.metadata)
-                except ValidationError as e:
-                    raise ValueError(
-                        f"`FeedbackRecord.metadata` {record.metadata} does not match the expected schema,"
-                        f" with exception: {e}"
-                    ) from e
+    @staticmethod
+    def _validate_record_fields(record: FeedbackRecord, fields_schema: Type[BaseModel]) -> None:
+        """Validates the `FeedbackRecord.fields` against the schema defined by the `fields`."""
+        try:
+            fields_schema.parse_obj(record.fields)
+        except ValidationError as e:
+            raise ValueError(f"`FeedbackRecord.fields` does not match the expected schema, with exception: {e}") from e
+
+    def _validate_record_metadata(self, record: FeedbackRecord, metadata_schema: Type[BaseModel] = None) -> None:
+        """Validates the `FeedbackRecord.metadata` against the schema defined by the `metadata_properties`."""
+
+        if not record.metadata:
+            return
+
+        try:
+            metadata_schema.parse_obj(record.metadata)
+        except ValidationError as e:
+            raise ValueError(
+                f"`FeedbackRecord.metadata` {record.metadata} does not match the expected schema,"
+                f" with exception: {e}"
+            ) from e
 
     def _parse_and_validate_records(
         self,
@@ -414,110 +396,88 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, Generic[R]):
             return HuggingFaceDatasetMixin._huggingface_format(self)
         raise ValueError(f"Unsupported format '{format}'.")
 
-    # TODO(alvarobartt,davidberenstein1957): we should consider having something like
-    # `export(..., training=True)` to export the dataset records in any format, replacing
-    # both `format_as` and `prepare_for_training`
-    def prepare_for_training(
-        self,
-        framework: Union[Framework, str],
-        task: TrainingTaskTypes,
-        train_size: Optional[float] = 1,
-        test_size: Optional[float] = None,
-        seed: Optional[int] = None,
-        lang: Optional[str] = None,
-    ) -> Any:
-        """
-        Prepares the dataset for training for a specific training framework and NLP task by splitting the dataset into train and test sets.
+    @abstractmethod
+    def add_records(self, *args, **kwargs) -> None:
+        """Adds the given records to the `FeedbackDataset`."""
+        pass
+
+    @abstractmethod
+    def pull(self):
+        """Pulls the dataset from Argilla and returns a local instance of it."""
+        pass
+
+    @abstractmethod
+    def filter_by(self, *args, **kwargs):
+        """Filters the current `FeedbackDataset`."""
+        pass
+
+    @abstractmethod
+    def delete(self):
+        """Deletes the `FeedbackDataset` from Argilla."""
+        pass
+
+    @abstractmethod
+    def prepare_for_training(self, *args, **kwargs) -> Any:
+        """Prepares the `FeedbackDataset` for training by creating the training."""
+        pass
+
+    @abstractmethod
+    def push_to_argilla(self, *args, **kwargs) -> "FeedbackDatasetBase":
+        """Pushes the `FeedbackDataset` to Argilla."""
+        pass
+
+    @abstractmethod
+    def unify_responses(self, *args, **kwargs):
+        """Unifies the responses for a given question."""
+        pass
+
+    @abstractmethod
+    def add_metadata_property(self, metadata_property):
+        """Adds a new `metadata_property` to the current `FeedbackDataset` in Argilla.
+
+        Note:
+            Existing `FeedbackRecord`s if any will remain unchanged if those contain metadata
+            named the same way as the `metadata_property`, but added before the
+            `metadata_property` was added.
 
         Args:
-            framework: the framework to use for training. Currently supported frameworks are: `transformers`, `peft`,
-                `setfit`, `spacy`, `spacy-transformers`, `span_marker`, `spark-nlp`, `openai`, `trl`, `sentence-transformers`.
-            task: the NLP task to use for training. Currently supported tasks are: `TrainingTaskForTextClassification`,
-                `TrainingTaskForSFT`, `TrainingTaskForRM`, `TrainingTaskForPPO`, `TrainingTaskForDPO`, `TrainingTaskForSentenceSimilarity`.
-            train_size: the size of the train set. If `None`, the whole dataset will be used for training.
-            test_size: the size of the test set. If `None`, the whole dataset will be used for testing.
-            seed: the seed to use for splitting the dataset into train and test sets.
-            lang: the spaCy language to use for training. If `None`, the language of the dataset will be used.
+            metadata_property: the metadata property to add to the current `FeedbackDataset`
+                in Argilla.
+
+        Returns:
+            The newly added `metadata_property` to the current `FeedbackDataset` in Argilla.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+            RuntimeError: if the `metadata_property` cannot be added to the current
+                `FeedbackDataset` in Argilla.
         """
-        if isinstance(framework, str):
-            framework = Framework(framework)
+        pass
 
-        # validate train and test sizes
-        if train_size is None:
-            train_size = 1
-        if test_size is None:
-            test_size = 1 - train_size
+    @abstractmethod
+    def delete_metadata_properties(self, metadata_properties):
+        """Deletes a list of `metadata_properties` from the current `FeedbackDataset`
+        in Argilla.
 
-        # check if all numbers are larger than 0
-        if not [abs(train_size), abs(test_size)] == [train_size, test_size]:
-            raise ValueError("`train_size` and `test_size` must be larger than 0.")
-        # check if train sizes sum up to 1
-        if not (train_size + test_size) == 1:
-            raise ValueError("`train_size` and `test_size` must sum to 1.")
+        Note:
+            Existing `FeedbackRecord`s if any, will remain unchanged if those contain metadata
+            named the same way as the `metadata_properties` to delete, but the validation will
+            be removed as well as `metadata_property` index, which means one won't be able to
+            use that for filtering.
 
-        if test_size == 0:
-            test_size = None
+        Args:
+            metadata_properties: the metadata property/ies name/s to delete from the current
+                `FeedbackDataset` in Argilla.
 
-        if len(self.records) < 1:
-            raise ValueError(
-                "No records found in the dataset. Make sure you add records to the"
-                " dataset via the `FeedbackDataset.add_records` method first."
-            )
+        Returns:
+            The `metadata_property` or `metadata_properties` deleted from the current
+            `FeedbackDataset` in Argilla, but using the local schema e.g. if you delete a
+            `RemoteFloatMetadataProperty` this method will delete it from Argilla and will
+            return a `FloatMetadataProperty` instance.
 
-        if isinstance(task, (TrainingTaskForTextClassification, TrainingTaskForSentenceSimilarity)):
-            if task.formatting_func is None:
-                # in sentence-transformer models we can train without labels
-                if task.label:
-                    self.unify_responses(question=task.label.question, strategy=task.label.strategy)
-        elif isinstance(task, TrainingTaskForQuestionAnswering):
-            if task.formatting_func is None:
-                self.unify_responses(question=task.answer.name, strategy="disagreement")
-        elif not isinstance(
-            task,
-            (
-                TrainingTaskForSFT,
-                TrainingTaskForRM,
-                TrainingTaskForPPO,
-                TrainingTaskForDPO,
-                TrainingTaskForChatCompletion,
-            ),
-        ):
-            raise ValueError(f"Training data {type(task)} is not supported yet")
-
-        data = task._format_data(self)
-        if framework in [
-            Framework.TRANSFORMERS,
-            Framework.SETFIT,
-            Framework.SPAN_MARKER,
-            Framework.PEFT,
-        ]:
-            return task._prepare_for_training_with_transformers(
-                data=data, train_size=train_size, seed=seed, framework=framework
-            )
-        elif framework in [Framework.SPACY, Framework.SPACY_TRANSFORMERS]:
-            require_dependencies("spacy")
-            import spacy
-
-            if lang is None:
-                _LOGGER.warning("spaCy `lang` is not provided. Using `en`(English) as default language.")
-                lang = spacy.blank("en")
-            elif lang.isinstance(str):
-                if len(lang) == 2:
-                    lang = spacy.blank(lang)
-                else:
-                    lang = spacy.load(lang)
-            return task._prepare_for_training_with_spacy(data=data, train_size=train_size, seed=seed, lang=lang)
-        elif framework is Framework.SPARK_NLP:
-            return task._prepare_for_training_with_spark_nlp(data=data, train_size=train_size, seed=seed)
-        elif framework is Framework.OPENAI:
-            return task._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
-        elif framework is Framework.TRL:
-            return task._prepare_for_training_with_trl(data=data, train_size=train_size, seed=seed)
-        elif framework is Framework.TRLX:
-            return task._prepare_for_training_with_trlx(data=data, train_size=train_size, seed=seed)
-        elif framework is Framework.SENTENCE_TRANSFORMERS:
-            return task._prepare_for_training_with_sentence_transformers(data=data, train_size=train_size, seed=seed)
-        else:
-            raise NotImplementedError(
-                f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
-            )
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+            RuntimeError: if the `metadata_properties` cannot be deleted from the current
+                `FeedbackDataset` in Argilla.
+        """
+        pass

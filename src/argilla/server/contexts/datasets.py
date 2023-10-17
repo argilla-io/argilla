@@ -50,7 +50,7 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
     from argilla.server.models import MetadataPropertySettings
-    from argilla.server.schemas.v1.datasets import DatasetUpdate
+    from argilla.server.schemas.v1.datasets import DatasetUpdate, RecordsUpdate
     from argilla.server.schemas.v1.fields import FieldUpdate
     from argilla.server.schemas.v1.questions import QuestionUpdate
     from argilla.server.schemas.v1.records import RecordUpdate
@@ -303,38 +303,17 @@ async def get_record_by_id(
     return result.scalar_one_or_none()
 
 
-async def delete_record(db: "AsyncSession", search_engine: "SearchEngine", record: Record) -> Record:
-    async with db.begin_nested():
-        record = await record.delete(db=db, autocommit=False)
-        await search_engine.delete_records(dataset=record.dataset, records=[record])
-
-    await db.commit()
-
-    return record
-
-
-async def delete_records(
-    db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, records_ids: List[UUID]
-) -> None:
-    async with db.begin_nested():
-        params = [Record.id.in_(records_ids), Record.dataset_id == dataset.id]
-        records = await Record.delete_many(db=db, params=params, autocommit=False)
-        await search_engine.delete_records(dataset=dataset, records=records)
-
-    await db.commit()
-
-
 async def get_records_by_ids(
     db: "AsyncSession",
     dataset_id: UUID,
-    record_ids: List[UUID],
+    records_ids: List[UUID],
     include: Optional[List[RecordInclude]] = None,
     user_id: Optional[UUID] = None,
 ) -> List[Record]:
     if include is None:
         include = []
 
-    query = select(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(record_ids))
+    query = select(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(records_ids))
 
     if RecordInclude.responses in include:
         if user_id:
@@ -350,9 +329,9 @@ async def get_records_by_ids(
     result = await db.execute(query)
     records = result.unique().scalars().all()
 
-    # Preserver the order of the `record_ids` list
+    # Preserve the order of the `record_ids` list
     record_order_map = {record.id: record for record in records}
-    ordered_records = [record_order_map[record_id] for record_id in record_ids]
+    ordered_records = [record_order_map[record_id] for record_id in records_ids]
 
     return ordered_records
 
@@ -417,12 +396,12 @@ async def count_records_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> i
 _EXTRA_METADATA_FLAG = "extra"
 
 
-async def validate_metadata(
+async def _validate_metadata(
     db: "AsyncSession",
     dataset: Dataset,
     metadata: Dict[str, Any],
     metadata_properties: Optional[Dict[str, Union[MetadataProperty, str]]] = None,
-) -> Dict[str, Union["MetadataPropertySettings", Literal["extra"]]]:
+) -> Dict[str, Union[MetadataProperty, Literal["extra"]]]:
     if metadata_properties is None:
         metadata_properties = {}
 
@@ -457,6 +436,27 @@ async def validate_metadata(
     return metadata_properties
 
 
+async def _validate_suggestion(
+    db: "AsyncSession",
+    suggestion: "SuggestionCreate",
+    questions: Optional[Dict[UUID, Question]] = None,
+) -> Dict[UUID, Question]:
+    if not questions:
+        questions = {}
+
+    question = questions.get(suggestion.question_id, None)
+
+    if not question:
+        question = await get_question_by_id(db, suggestion.question_id)
+        if not question:
+            raise ValueError(f"question_id={str(suggestion.question_id)} does not exist")
+        questions[suggestion.question_id] = question
+
+    question.parsed_settings.check_response(suggestion)
+
+    return questions
+
+
 async def create_records(
     db: "AsyncSession", search_engine: SearchEngine, dataset: Dataset, records_create: RecordsCreate
 ):
@@ -464,6 +464,7 @@ async def create_records(
         raise ValueError("Records cannot be created for a non published dataset")
 
     # Cache dictionaries to avoid querying the database multiple times
+    questions: Dict[UUID, Question] = {}
     metadata_properties: Dict[str, Union[MetadataProperty, Literal["extra"]]] = {}
 
     records = []
@@ -495,12 +496,10 @@ async def create_records(
 
         if record_create.suggestions:
             for suggestion in record_create.suggestions:
-                # TODO(gabrielmbmb): the result of this query should be cached
-                question = await get_question_by_id(db, suggestion.question_id)
-                if not question:
-                    raise ValueError(f"Provided question_id: {suggestion.question_id!r} is not a valid question id")
-
-                question.parsed_settings.check_response(suggestion)
+                try:
+                    questions = await _validate_suggestion(db, suggestion, questions=questions)
+                except ValueError as e:
+                    raise ValueError(f"Provided suggestion for record at position {record_i} is not valid: {e}") from e
 
                 record.suggestions.append(
                     Suggestion(
@@ -514,7 +513,7 @@ async def create_records(
 
         if record_create.metadata:
             try:
-                metadata_properties = await validate_metadata(
+                metadata_properties = await _validate_metadata(
                     db,
                     dataset=dataset,
                     metadata=record_create.metadata,
@@ -530,7 +529,90 @@ async def create_records(
         await db.flush(records)
         for record in records:
             await record.awaitable_attrs.responses
-        await search_engine.add_records(dataset, records)
+        await search_engine.index_records(dataset, records)
+
+    await db.commit()
+
+
+async def _exists_records_with_ids(db: "AsyncSession", dataset_id: UUID, records_ids: List[UUID]) -> List[UUID]:
+    result = await db.execute(select(Record.id).filter(Record.dataset_id == dataset_id, Record.id.in_(records_ids)))
+    return result.scalars().all()
+
+
+async def update_records(
+    db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, records_update: "RecordsUpdate"
+) -> None:
+    records_ids = [record_update.id for record_update in records_update.items]
+
+    if len(records_ids) != len(set(records_ids)):
+        raise ValueError("Found duplicate records IDs")
+
+    existing_records_ids = await _exists_records_with_ids(db, dataset_id=dataset.id, records_ids=records_ids)
+    non_existing_records_ids = set(records_ids) - set(existing_records_ids)
+
+    if len(non_existing_records_ids) > 0:
+        sorted_non_existing_records_ids = sorted(non_existing_records_ids, key=lambda x: records_ids.index(x))
+        records_str = ", ".join([str(record_id) for record_id in sorted_non_existing_records_ids])
+        raise ValueError(f"Found records that do not exist: {records_str}")
+
+    # Lists to store the records that will be updated in the database or in the search engine
+    records_update_objects: List[Dict[str, Any]] = []
+    records_search_engine_update: List[UUID] = []
+    records_delete_suggestions: List[UUID] = []
+
+    # Cache dictionaries to avoid querying the database multiple times
+    metadata_properties: Dict[str, Union[MetadataProperty, Literal["extra"]]] = {}
+    questions: Dict[UUID, Question] = {}
+
+    suggestions = []
+    for record_i, record_update in enumerate(records_update.items):
+        params = record_update.dict(exclude_unset=True)
+
+        if "metadata_" in params and (metadata := params["metadata_"]) is not None:
+            try:
+                metadata_properties = await _validate_metadata(db, dataset, metadata, metadata_properties)
+            except ValueError as err:
+                raise ValueError(f"Provided metadata for record at position {record_i} is not valid: {err}") from err
+            records_search_engine_update.append(record_update.id)
+
+        if record_update.suggestions is not None:
+            params.pop("suggestions")
+
+            questions_ids = [suggestion.question_id for suggestion in record_update.suggestions]
+            if len(questions_ids) != len(set(questions_ids)):
+                raise ValueError(f"Found duplicate suggestions question IDs for record at position {record_i}")
+
+            for suggestion_i, suggestion in enumerate(record_update.suggestions):
+                try:
+                    questions = await _validate_suggestion(db, suggestion, questions)
+                    suggestions.append(Suggestion(record_id=record_update.id, **suggestion.dict()))
+                except ValueError as err:
+                    raise ValueError(
+                        f"Provided suggestion for record at position {record_i} and suggestion at position "
+                        f"{suggestion_i} is not valid: {err}"
+                    ) from err
+            records_delete_suggestions.append(record_update.id)
+
+        records_update_objects.append(params)
+
+    async with db.begin_nested():
+        params = [Suggestion.record_id.in_(records_delete_suggestions)]
+        await Suggestion.delete_many(db, params=params, autocommit=False)
+        db.add_all(suggestions)
+        await Record.update_many(db, records_update_objects, autocommit=False)
+        records = await get_records_by_ids(db, dataset_id=dataset.id, records_ids=records_search_engine_update)
+        await search_engine.index_records(dataset, records)
+
+    await db.commit()
+
+
+async def delete_records(
+    db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, records_ids: List[UUID]
+) -> None:
+    async with db.begin_nested():
+        params = [Record.id.in_(records_ids), Record.dataset_id == dataset.id]
+        records = await Record.delete_many(db=db, params=params, autocommit=False)
+        await search_engine.delete_records(dataset=dataset, records=records)
 
     await db.commit()
 
@@ -539,17 +621,47 @@ async def update_record(
     db: "AsyncSession", search_engine: "SearchEngine", record: Record, record_update: "RecordUpdate"
 ) -> Record:
     params = record_update.dict(exclude_unset=True)
+
+    if "metadata_" in params and (metadata := params["metadata_"]) is not None:
+        await _validate_metadata(db, dataset=record.dataset, metadata=metadata)
+
+    if record_update.suggestions is not None:
+        questions_ids = [suggestion.question_id for suggestion in record_update.suggestions]
+        if len(questions_ids) != len(set(questions_ids)):
+            raise ValueError("Found duplicate suggestions question IDs")
+
+        suggestions = []
+        for suggestion in record_update.suggestions:
+            try:
+                await _validate_suggestion(db, suggestion)
+                suggestions.append(Suggestion(**suggestion.dict()))
+            except ValueError as err:
+                raise ValueError(
+                    f"Provided suggestion for question_id={suggestion.question_id} is not valid: {err}"
+                ) from err
+
+        # Remove existing suggestions
+        record.suggestions = []
+        params["suggestions"] = suggestions
+
     async with db.begin_nested():
         record = await record.update(db, **params, replace_dict=True, autocommit=False)
 
         # If "metadata" has been included in the update, then we need to also update it in the search engine
         if "metadata_" in params:
-            metadata = params["metadata_"]
-            if metadata is not None:
-                await validate_metadata(db, dataset=record.dataset, metadata=metadata)
-            await search_engine.update_record_metadata(record)
+            await search_engine.index_records(record.dataset, [record])
 
     await db.commit()
+    return record
+
+
+async def delete_record(db: "AsyncSession", search_engine: "SearchEngine", record: Record) -> Record:
+    async with db.begin_nested():
+        record = await record.delete(db=db, autocommit=False)
+        await search_engine.delete_records(dataset=record.dataset, records=[record])
+
+    await db.commit()
+
     return record
 
 

@@ -33,7 +33,7 @@ class TestSuiteDatasetsPushCommand:
         remote_feedback_dataset: "RemoteFeedbackDataset",
     ) -> None:
         dataset_from_argilla_mock = mocker.patch(
-            "argilla.client.feedback.dataset.local.FeedbackDataset.from_argilla",
+            "argilla.client.feedback.dataset.local.dataset.FeedbackDataset.from_argilla",
             return_value=remote_feedback_dataset,
         )
         push_to_huggingface_mock = mocker.patch(
@@ -58,7 +58,7 @@ class TestSuiteDatasetsPushCommand:
         remote_feedback_dataset: "RemoteFeedbackDataset",
     ) -> None:
         mocker.patch(
-            "argilla.client.feedback.dataset.local.FeedbackDataset.from_argilla",
+            "argilla.client.feedback.dataset.local.dataset.FeedbackDataset.from_argilla",
             return_value=remote_feedback_dataset,
         )
 
