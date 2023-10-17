@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import json
 import random
 from collections import Counter
 from typing import TYPE_CHECKING, Callable, List, Union
@@ -44,9 +45,16 @@ from argilla.client.feedback.training.schemas import (
 )
 from argilla.client.feedback.unification import LabelQuestionUnification
 from argilla.client.models import Framework
+from huggingface_hub import HfApi, HfFolder, hf_hub_download
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 __OUTPUT_DIR__ = "tmp"
+
+# To mimick the tests from huggingface_hub: https://github.com/huggingface/huggingface_hub/blob/v0.18.0.rc0/tests/testing_constants.py
+HF_HUB_CONSTANTS = {
+    "HF_HUB_ENDPOINT_STAGING": "https://hub-ci.huggingface.co",
+    "HF_HUB_TOKEN": "hf_94wBhPGp6KrrTH3KDchhKpRxZwd6dmHWLL",
+}
 
 
 @pytest.mark.parametrize(
@@ -365,3 +373,103 @@ def test_tokenizer_warning_wrong_framework(
     tokenizer = AutoTokenizer.from_pretrained("gpt2")
     with pytest.warns(UserWarning, match="Passing a tokenizer is not supported for the setfit framework."):
         ArgillaTrainer(dataset=dataset, task=task, framework="setfit", tokenizer=tokenizer)
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    "framework",
+    [
+        # Framework("spacy"),
+        # Framework("spacy-transformers"),
+        Framework("transformers"),
+        # Framework("span_marker"),
+        # Framework("setfit"),
+        # Framework("peft"),
+    ],
+)
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records",
+)
+def test_push_to_huggingface(
+    framework: Union[Framework, str],
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records: List[FeedbackRecord],
+) -> None:
+    # The token will be grabbed internally, but fail and warn soon if the user has no token available
+    token = HfFolder.get_token()
+    if token is None:
+        raise ValueError("No token available, please set it with the following env var name: 'HUGGING_FACE_HUB_TOKEN'")
+
+    hf_api = HfApi()
+
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records * 2)
+
+    questions = [
+        question for question in dataset.questions if isinstance(question, (LabelQuestion, MultiLabelQuestion))
+    ]
+    label = LabelQuestionUnification(question=questions[0])
+    task = TrainingTask.for_text_classification(text=dataset.fields[0], label=label)
+
+    if framework == Framework("span_marker"):
+        with pytest.raises(
+            NotImplementedError,
+            match=f"Framework {framework} is not supported for this {TrainingTaskForTextClassification}.",
+        ):
+            trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework)
+
+    else:
+        if framework == Framework("spacy"):
+            model = "en_core_web_sm"
+        elif framework == Framework("setfit"):
+            model = "all-MiniLM-L6-v2"
+        else:
+            model = "prajjwal1/bert-tiny"
+
+        trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, model=model)
+
+    # We need to initialize the model (is faster than calling the whole training process) before calling push_to_huggingface.
+    if framework == Framework("transformers"):
+        trainer._trainer.init_model(new=True)
+    else:
+        trainer._trainer.init_model()
+
+    # NOTE: This is just to test locally, we need a better solution for the CI.
+    repo_id = "plaguss/test_model"
+
+    trainer.push_to_huggingface(repo_id, generate_card=True)
+
+    # Check the repo is created.
+    # For the moment, the same check done at: https://github.com/huggingface/huggingface_hub/blob/v0.18.0.rc0/tests/test_hubmixin.py#L154
+    model_info = hf_api.model_info(repo_id)
+    assert model_info.modelId == repo_id
+
+    tmp_config_path = hf_hub_download(
+        repo_id=repo_id,
+        filename="config.json",
+        use_auth_token=token,
+    )
+
+    with open(tmp_config_path) as f:
+        conf = json.load(f)
+        assert isinstance(conf, dict)
+        assert len(conf) > 0
+
+    # No need to test this file, if the download succeeds its working
+    tmp_readme_path = hf_hub_download(
+        repo_id=repo_id,
+        filename="README.md",
+        use_auth_token=token,
+    )
+
+    # Delete repo
+    hf_api.delete_repo(repo_id=repo_id)
