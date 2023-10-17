@@ -361,9 +361,9 @@ class RecordGetterDict(GetterDict):
     def get(self, key: str, default: Any) -> Any:
         if key == "metadata":
             return getattr(self._obj, "metadata_", None)
-        if key == "responses" and "responses" not in self._obj.__dict__:
+        if key == "responses" and not self._obj.is_relationship_loaded("responses"):
             return default
-        if key == "suggestions" and "suggestions" not in self._obj.__dict__:
+        if key == "suggestions" and not self._obj.is_relationship_loaded("suggestions"):
             return default
         return super().get(key, default)
 

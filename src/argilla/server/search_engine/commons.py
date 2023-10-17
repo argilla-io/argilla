@@ -75,7 +75,7 @@ class SearchDocumentGetter(GetterDict):
         if key == "responses":
             # `responses` of the record haven't been loaded, set the default value so when using
             # `SearchDocument(...).dict(exclude_unset=True)` the field is not included.
-            if "responses" not in self._obj.__dict__:
+            if not self._obj.is_relationship_loaded("responses"):
                 return default
 
             return {
