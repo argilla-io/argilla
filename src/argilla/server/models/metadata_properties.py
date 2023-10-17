@@ -77,7 +77,7 @@ class FloatMetadataPropertySettings(NumericMetadataPropertySettings[float]):
 
     def check_metadata(self, value: float) -> None:
         if not isinstance(value, float):
-            raise ValueError(f"'{value}' is not an float.")
+            raise ValueError(f"'{value}' is not a float.")
         return super().check_metadata(value)
 
 
