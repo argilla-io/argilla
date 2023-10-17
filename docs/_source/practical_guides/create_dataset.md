@@ -24,6 +24,8 @@ The `FeedbackDataset` has a set of predefined task templates that you can use to
 ```{include} /_common/tabs/task_templates.md
 ```
 
+After having initialized the `FeedbackDataset` templates, we can still alter the `fields`, `questions`, and `guidelines` to fit our specific needs using a [custom configuration](#custom-configuration).
+
 #### Custom Configuration
 
 ##### Define `fields`
