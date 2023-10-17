@@ -34,6 +34,26 @@ if TYPE_CHECKING:
 
 class _RemoteMetadataProperty(RemoteSchema):
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def update(self, title: Optional[str] = None, visible_for_annotators: Optional[bool] = None) -> None:
+        """Updates the `RemoteMetadataProperty` in Argilla.
+
+        Args:
+            title: the new title of the metadata property. Defaults to `None`.
+            visible_for_annotators: whether the metadata property should be visible for annotators. Defaults to `None`.
+
+        Returns:
+            The updated `RemoteMetadataProperty` object.
+        """
+        if title is None and visible_for_annotators is None:
+            raise ValueError("At least one of `title` or `visible_for_annotators` must be provided and not `None`.")
+        self = ArgillaMetadataPropertiesMixin.update(
+            client=self.client,
+            metadata_property_id=self.id,
+            title=title,
+            visible_for_annotators=visible_for_annotators,
+        )
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def delete(self) -> "AllowedMetadataPropertyTypes":
         """Deletes the `RemoteMetadataProperty` from Argilla.
 
