@@ -28,13 +28,17 @@ from argilla.client.utils import allowed_for_roles
 if TYPE_CHECKING:
     import httpx
 
-    from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes
+    from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes, AllowedRemoteMetadataPropertyTypes
     from argilla.client.sdk.v1.datasets.models import FeedbackMetadataPropertyModel
 
 
 class _RemoteMetadataProperty(RemoteSchema):
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def update(self, title: Optional[str] = None, visible_for_annotators: Optional[bool] = None) -> None:
+    def update(
+        self: "AllowedRemoteMetadataPropertyTypes",
+        title: Optional[str] = None,
+        visible_for_annotators: Optional[bool] = None,
+    ) -> None:
         """Updates the `RemoteMetadataProperty` in Argilla.
 
         Args:
@@ -46,15 +50,26 @@ class _RemoteMetadataProperty(RemoteSchema):
         """
         if title is None and visible_for_annotators is None:
             raise ValueError("At least one of `title` or `visible_for_annotators` must be provided and not `None`.")
-        self = ArgillaMetadataPropertiesMixin.update(
+        if title is not None and title == self.title:
+            raise ValueError(
+                f"Provided `title={title}` is the same as the current one `{self.title}`, you need either to provide"
+                " a different one, or just pass it empty."
+            )
+        if visible_for_annotators is not None and visible_for_annotators == self.visible_for_annotators:
+            raise ValueError(
+                f"Provided `visible_for_annotators={visible_for_annotators}` is the same as the current one"
+                f" `{self.visible_for_annotators}`, you need either to provide a different one, or just pass it empty."
+            )
+        updated_metadata_property = ArgillaMetadataPropertiesMixin.update(
             client=self.client,
             metadata_property_id=self.id,
             title=title,
             visible_for_annotators=visible_for_annotators,
         )
+        self.__dict__.update(updated_metadata_property.__dict__)
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def delete(self) -> "AllowedMetadataPropertyTypes":
+    def delete(self: "AllowedRemoteMetadataPropertyTypes") -> "AllowedMetadataPropertyTypes":
         """Deletes the `RemoteMetadataProperty` from Argilla.
 
         Returns:
