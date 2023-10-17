@@ -109,7 +109,7 @@ def generate_pydantic_schema_for_metadata(
     """
     metadata_fields, metadata_validators = {}, {}
 
-    for metadata_property in metadata_properties:
+    for metadata_property in metadata_properties or []:
         if metadata_property.type not in MetadataPropertyTypes:
             raise ValueError(
                 f"Metadata property {metadata_property.name} has an unsupported type: {metadata_property.type}, for the moment only the"

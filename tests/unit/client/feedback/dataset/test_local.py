@@ -15,7 +15,7 @@
 from typing import TYPE_CHECKING, List
 
 import pytest
-from argilla.client.feedback.dataset.local import FeedbackDataset
+from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
@@ -252,14 +252,12 @@ def test_not_implemented_methods():
 
     with pytest.warns(
         UserWarning,
-        match="`sort_by` method only works for `FeedbackDataset` pushed to Argilla."
-        " Use `sorted` with dataset.records instead.",
+        match="`sort_by` method is not supported for local datasets and won't take any effect. "
     ):
         assert dataset.sort_by("field") == dataset
 
     with pytest.warns(
         UserWarning,
-        match="`filter_by` method only works for `FeedbackDataset` pushed to Argilla."
-        " Use `filter` with dataset.records instead.",
+        match="`filter_by` method is not supported for local datasets and won't take any effect. "
     ):
         assert dataset.filter_by() == dataset

@@ -32,7 +32,7 @@ def callback(
     init_callback()
 
     from argilla.cli.rich import echo_in_panel
-    from argilla.client.feedback.dataset.local import FeedbackDataset
+    from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 
     if ctx.invoked_subcommand not in _COMMANDS_REQUIRING_DATASET:
         return

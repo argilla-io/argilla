@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import textwrap
 import warnings
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
@@ -23,8 +24,23 @@ from argilla.client.feedback.dataset.base import FeedbackDatasetBase, SortBy
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
 from argilla.client.feedback.mixins import ArgillaMetadataPropertiesMixin
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
+from argilla.client.feedback.schemas.questions import (
+    LabelQuestion,
+    MultiLabelQuestion,
+    RatingQuestion,
+)
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
+from argilla.client.feedback.training.schemas import (
+    TrainingTaskTypes,
+)
+from argilla.client.feedback.unification import (
+    LabelQuestionStrategy,
+    MultiLabelQuestionStrategy,
+    RankingQuestionStrategy,
+    RatingQuestionStrategy,
+)
+from argilla.client.models import Framework
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.utils import allowed_for_roles
@@ -43,6 +59,10 @@ if TYPE_CHECKING:
         AllowedRemoteQuestionTypes,
     )
     from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel, FeedbackResponseStatusFilter
+    from argilla.client.feedback.dataset.local import FeedbackDataset
+    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
+    from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
+    from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
     from argilla.client.workspaces import Workspace
 
 
@@ -371,10 +391,17 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
 
     def __repr__(self) -> str:
         """Returns a string representation of the dataset."""
+        indent = "   "
         return (
-            f"<FeedbackDataset id={self.id} name={self.name} workspace={self.workspace}"
-            f" url={self.url} fields={self.fields} questions={self.questions}"
-            f" guidelines={self.guidelines}>"
+            "RemoteFeedbackDataset("
+            + textwrap.indent(f"\nid={self.id}", indent)
+            + textwrap.indent(f"\nname={self.name}", indent)
+            + textwrap.indent(f"\nworkspace={self.workspace}", indent)
+            + textwrap.indent(f"\nurl={self.url}", indent)
+            + textwrap.indent(f"\nfields={self.fields}", indent)
+            + textwrap.indent(f"\nquestions={self.questions}", indent)
+            + textwrap.indent(f"\nguidelines={self.guidelines}", indent)
+            + ")"
         )
 
     def __len__(self) -> int:
@@ -444,7 +471,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             A local instance of the dataset which is a `FeedbackDataset` object.
         """
         # Importing here to avoid circular imports
-        from argilla.client.feedback.dataset.local import FeedbackDataset
+        from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 
         instance = FeedbackDataset(
             fields=self.fields,
@@ -509,7 +536,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             ) from e
 
         # TODO(alvarobartt): structure better the mixins to be able to easily reuse those, here to avoid circular imports
-        from argilla.client.feedback.dataset.mixins import ArgillaMixin
+        from argilla.client.feedback.dataset.local.mixins import ArgillaMixin
 
         return ArgillaMixin._parse_to_remote_metadata_property(metadata_property=metadata_property, client=self._client)
 
@@ -628,3 +655,79 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         new_dataset._records = dataset.records
 
         return new_dataset
+
+    def unify_responses(
+        self,
+        question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
+        strategy: Union[
+            str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy, RankingQuestionStrategy
+        ],
+    ) -> "FeedbackDataset":
+        """
+        The `unify_responses` function takes a question and a strategy as input and applies the strategy
+        to unify the responses for that question.
+
+        Args:
+            question The `question` parameter can be either a string representing the name of the
+                question, or an instance of one of the question classes (`LabelQuestion`, `MultiLabelQuestion`,
+                `RatingQuestion`, `RankingQuestion`).
+            strategy The `strategy` parameter is used to specify the strategy to be used for unifying
+                responses for a given question. It can be either a string or an instance of a strategy class.
+        """
+        warnings.warn(
+            "A local `FeedbackDataset` returned because "
+            "`unify_responses` is not supported for `RemoteFeedbackDataset`. "
+            "`RemoteFeedbackDataset`.pull().unify_responses(*args, **kwargs)` is applied.",
+            UserWarning,
+        )
+        local = self.pull()
+        return local.unify_responses(question=question, strategy=strategy)
+
+    def prepare_for_training(
+        self,
+        framework: Union[Framework, str],
+        task: TrainingTaskTypes,
+        train_size: Optional[float] = 1,
+        test_size: Optional[float] = None,
+        seed: Optional[int] = None,
+        lang: Optional[str] = None,
+    ) -> Any:
+        """
+        Prepares the dataset for training for a specific training framework and NLP task by splitting the dataset into train and test sets.
+
+        Args:
+            framework: the framework to use for training. Currently supported frameworks are: `transformers`, `peft`,
+                `setfit`, `spacy`, `spacy-transformers`, `span_marker`, `spark-nlp`, `openai`, `trl`, `sentence-transformers`.
+            task: the NLP task to use for training. Currently supported tasks are: `TrainingTaskForTextClassification`,
+                `TrainingTaskForSFT`, `TrainingTaskForRM`, `TrainingTaskForPPO`, `TrainingTaskForDPO`, `TrainingTaskForSentenceSimilarity`.
+            train_size: the size of the train set. If `None`, the whole dataset will be used for training.
+            test_size: the size of the test set. If `None`, the whole dataset will be used for testing.
+            seed: the seed to use for splitting the dataset into train and test sets.
+            lang: the spaCy language to use for training. If `None`, the language of the dataset will be used.
+        """
+        warnings.warn(
+            (
+                "A local `FeedbackDataset` returned because "
+                "`prepare_for_training` is not supported for `RemoteFeedbackDataset`. "
+                "`RemoteFeedbackDataset`.pull().prepare_for_training(*args, **kwargs)` is applied."
+            ),
+            UserWarning,
+        )
+        local = self.pull()
+        return local.prepare_for_training(
+            framework=framework,
+            task=task,
+            train_size=train_size,
+            test_size=test_size,
+            seed=seed,
+            lang=lang,
+        )
+
+    def push_to_argilla(
+        self, name: str, workspace: Optional[Union[str, "Workspace"]] = None, show_progress: bool = False
+    ) -> "RemoteFeedbackDataset":
+        warnings.warn(
+            "Already pushed datasets cannot be pushed to Argilla again because they are synced automatically.",
+            UserWarning,
+        )
+        return self
