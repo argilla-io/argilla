@@ -30,7 +30,11 @@ These are the section headers that we use:
 - New `DELETE /api/v1/metadata-properties/:metadata_property_id` endpoint allowing the deletion of a specific metadata property. ([#3911](https://github.com/argilla-io/argilla/pull/3911)).
 - Added support for `sort_by` for `RemoteFeedbackDataset` i.e. a `FeedbackDataset` uploaded to Argilla ([#3925](https://github.com/argilla-io/argilla/pull/3925)).
 - Added `metadata_properties` support for both `push_to_huggingface` and `from_huggingface` ([#3947](https://github.com/argilla-io/argilla/pull/3947)).
+- New `PATCH /api/v1/records/{record_id}` endpoint to update a record ([#3920](https://github.com/argilla-io/argilla/pull/3920)).
+- New `PATCH /api/v1/dataset/{dataset_id}/records` endpoint to bulk update the records of a dataset ([#3934](https://github.com/argilla-io/argilla/pull/3934)).
+- Add support for update records (`metadata` and `external_id`) from Python SDK ([#3946](https://github.com/argilla-io/argilla/pull/3946)).
 - Added `delete_metadata_properties` and `Remote{Terms,Integer,Float}MetadataProperty.delete` methods to delete metadata properties ([#3932](https://github.com/argilla-io/argilla/pull/3932)).
+- New `PATCH /api/v1/metadata-properties/:metadata_property_id` endpoint allowing the update of a specific metadata property. ([#3952](https://github.com/argilla-io/argilla/pull/3952)).
 
 ### Changed
 

@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Type, Union
 
 from pydantic import BaseModel, Extra, create_model
 
@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 
 def generate_pydantic_schema_for_fields(
     fields: List[Union["AllowedFieldTypes", "AllowedRemoteFieldTypes"]], name: Optional[str] = "FieldsSchema"
-) -> BaseModel:
+) -> Type[BaseModel]:
     """Generates a `pydantic.BaseModel` schema from a list of `AllowedFieldTypes` or `AllowedRemoteFieldTypes`
     objects to validate the fields of a `FeedbackDataset` or `RemoteFeedbackDataset` object, respectively,
     before inserting them.
@@ -78,7 +78,7 @@ def generate_pydantic_schema_for_metadata(
     metadata_properties: List[Union["AllowedMetadataPropertyTypes", "AllowedRemoteMetadataPropertyTypes"]],
     name: Optional[str] = "MetadataSchema",
     allow_extra_metadata: bool = True,
-) -> BaseModel:
+) -> Type[BaseModel]:
     """Generates a `pydantic.BaseModel` schema from a list of `AllowedMetadataPropertyTypes` or
     `AllowedRemoteMetadataPropertyTypes` objects to validate the metadata of a `FeedbackDataset`
     or `RemoteFeedbackDataset` object, respectively, before inserting them.

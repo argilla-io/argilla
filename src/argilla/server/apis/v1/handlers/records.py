@@ -59,7 +59,7 @@ async def update_record(
     record_update: RecordUpdate,
     current_user: User = Security(auth.get_current_user),
 ):
-    record = await _get_record(db, record_id, with_dataset=True)
+    record = await _get_record(db, record_id, with_dataset=True, with_suggestions=True)
 
     await authorize(current_user, RecordPolicyV1.update(record))
 

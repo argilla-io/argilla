@@ -14,14 +14,14 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Literal, Optional, Type, TypeVar, Union
 
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
-from argilla.client.feedback.schemas import FeedbackRecord, SortBy
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.client.feedback.schemas.metadata import MetadataFilters
+from argilla.client.feedback.schemas.records import FeedbackRecord, SortBy
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes, AllowedQuestionTypes
 from argilla.client.feedback.training.schemas import (
     TrainingTaskForChatCompletion,
@@ -50,8 +50,10 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 
+R = TypeVar("R", bound=FeedbackRecord)
 
-class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
+
+class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, Generic[R]):
     """Base class with shared functionality for `FeedbackDataset` and `RemoteFeedbackDataset`."""
 
     def __init__(
@@ -105,7 +107,6 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             raise ValueError("At least one field in `fields` must be required (`required=True`).")
 
         self._fields = fields
-        self._fields_schema = generate_pydantic_schema_for_fields(self.fields)
 
         if not isinstance(questions, list):
             raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
@@ -161,8 +162,20 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
 
     @property
     @abstractmethod
-    def records(self) -> Any:
+    def records(self) -> Iterable[R]:
         """Returns the records of the dataset."""
+        pass
+
+    @abstractmethod
+    def update_records(self, records: Union[R, List[R]]) -> None:
+        """Updates the records of the dataset.
+
+        Args:
+            records: the records to update the dataset with.
+
+        Raises:
+            ValueError: if the provided `records` are invalid.
+        """
         pass
 
     @property
@@ -268,6 +281,16 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         """Filters the records in the dataset by the given filters."""
         pass
 
+    def _build_fields_schema(self) -> Type[BaseModel]:
+        """Returns the fields schema of the dataset."""
+        return generate_pydantic_schema_for_fields(self.fields)
+
+    def _build_metadata_schema(self) -> Type[BaseModel]:
+        """Returns the metadata schema of the dataset."""
+        return generate_pydantic_schema_for_metadata(
+            self.metadata_properties, allow_extra_metadata=self.allow_extra_metadata
+        )
+
     def _unique_metadata_property(self, metadata_property: "AllowedMetadataPropertyTypes") -> None:
         """Checks whether the provided `metadata_property` already exists in the dataset.
 
@@ -330,44 +353,44 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
         Raises:
             ValueError: if the `fields` schema does not match the `FeedbackRecord.fields` schema.
         """
-        if self._fields_schema is None:
-            self._fields_schema = generate_pydantic_schema_for_fields(self.fields)
-
-        # TODO: this is here to avoid conflicts with other PRs
-        if not hasattr(self, "_metadata_schema"):
-            self._metadata_schema = None
-
-        # TODO: review up to what extent we want to apply the validation here
-        existing_metadata_properties = self.metadata_properties
-        if self._metadata_schema is None and existing_metadata_properties:
-            self._metadata_schema = generate_pydantic_schema_for_metadata(
-                existing_metadata_properties, allow_extra_metadata=self._allow_extra_metadata
-            )
+        # WE build once the schemas to avoid building it for each record
+        fields_schema = self._build_fields_schema()
+        metadata_schema = self._build_metadata_schema()
 
         for record in records:
-            try:
-                self._fields_schema.parse_obj(record.fields)
-            except ValidationError as e:
-                raise ValueError(
-                    f"`FeedbackRecord.fields` does not match the expected schema, with exception: {e}"
-                ) from e
+            self._validate_record_fields(record, fields_schema)
+            self._validate_record_metadata(record, metadata_schema)
 
-            if record.metadata is not None and existing_metadata_properties:
-                try:
-                    self._metadata_schema.parse_obj(record.metadata)
-                except ValidationError as e:
-                    raise ValueError(
-                        f"`FeedbackRecord.metadata` {record.metadata} does not match the expected schema,"
-                        f" with exception: {e}"
-                    ) from e
+    @staticmethod
+    def _validate_record_fields(record: FeedbackRecord, fields_schema: Type[BaseModel]) -> None:
+        """Validates the `FeedbackRecord.fields` against the schema defined by the `fields`."""
+        try:
+            fields_schema.parse_obj(record.fields)
+        except ValidationError as e:
+            raise ValueError(f"`FeedbackRecord.fields` does not match the expected schema, with exception: {e}") from e
+
+    def _validate_record_metadata(self, record: FeedbackRecord, metadata_schema: Type[BaseModel] = None) -> None:
+        """Validates the `FeedbackRecord.metadata` against the schema defined by the `metadata_properties`."""
+
+        if not record.metadata:
+            return
+
+        try:
+            metadata_schema.parse_obj(record.metadata)
+        except ValidationError as e:
+            raise ValueError(
+                f"`FeedbackRecord.metadata` {record.metadata} does not match the expected schema,"
+                f" with exception: {e}"
+            ) from e
 
     def _parse_and_validate_records(
         self,
-        records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
-    ) -> List[FeedbackRecord]:
+        records: Union[R, Dict[str, Any], List[Union[R, Dict[str, Any]]]],
+    ) -> List[R]:
         """Convenient method for calling `_parse_records` and `_validate_records` in sequence."""
         records = self._parse_records(records)
         self._validate_records(records)
+
         return records
 
     @requires_dependencies("datasets")
@@ -501,3 +524,54 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin):
             raise NotImplementedError(
                 f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
             )
+
+    @abstractmethod
+    def add_metadata_property(self, metadata_property):
+        """Adds a new `metadata_property` to the current `FeedbackDataset` in Argilla.
+
+        Note:
+            Existing `FeedbackRecord`s if any will remain unchanged if those contain metadata
+            named the same way as the `metadata_property`, but added before the
+            `metadata_property` was added.
+
+        Args:
+            metadata_property: the metadata property to add to the current `FeedbackDataset`
+                in Argilla.
+
+        Returns:
+            The newly added `metadata_property` to the current `FeedbackDataset` in Argilla.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+            RuntimeError: if the `metadata_property` cannot be added to the current
+                `FeedbackDataset` in Argilla.
+        """
+        pass
+
+    @abstractmethod
+    def delete_metadata_properties(self, metadata_properties):
+        """Deletes a list of `metadata_properties` from the current `FeedbackDataset`
+        in Argilla.
+
+        Note:
+            Existing `FeedbackRecord`s if any, will remain unchanged if those contain metadata
+            named the same way as the `metadata_properties` to delete, but the validation will
+            be removed as well as `metadata_property` index, which means one won't be able to
+            use that for filtering.
+
+        Args:
+            metadata_properties: the metadata property/ies name/s to delete from the current
+                `FeedbackDataset` in Argilla.
+
+        Returns:
+            The `metadata_property` or `metadata_properties` deleted from the current
+            `FeedbackDataset` in Argilla, but using the local schema e.g. if you delete a
+            `RemoteFloatMetadataProperty` this method will delete it from Argilla and will
+            return a `FloatMetadataProperty` instance.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+            RuntimeError: if the `metadata_properties` cannot be deleted from the current
+                `FeedbackDataset` in Argilla.
+        """
+        pass
