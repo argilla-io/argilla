@@ -51,7 +51,7 @@ from argilla.server.schemas.v1.datasets import (
     RATING_OPTIONS_MIN_ITEMS,
     RECORDS_CREATE_MAX_ITEMS,
     RECORDS_CREATE_MIN_ITEMS,
-    TERMS_METADATA_PROPERTY_MAX_ITEMS,
+    TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS,
     VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH,
     VALUE_TEXT_OPTION_TEXT_MAX_LENGTH,
     VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
@@ -3034,7 +3034,7 @@ class TestSuiteDatasets:
         assert created_metadata_property
         assert created_metadata_property.allowed_roles == [UserRole.admin, UserRole.annotator]
 
-    @pytest.mark.parametrize("values", [[], ["value"] * (TERMS_METADATA_PROPERTY_MAX_ITEMS + 1)])
+    @pytest.mark.parametrize("values", [[], ["value"] * (TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS + 1)])
     async def test_create_dataset_terms_metadata_property_with_invalid_number_of_values(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, values: List[str]
     ):
