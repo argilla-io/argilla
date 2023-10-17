@@ -49,6 +49,5 @@ class ResponseCreate(BaseModel):
 
 
 class RecordUpdate(UpdateSchema):
-    external_id: Optional[str]
     metadata_: Optional[Dict[str, Any]] = Field(None, alias="metadata")
     suggestions: Optional[List[SuggestionCreate]] = None

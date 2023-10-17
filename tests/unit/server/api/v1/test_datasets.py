@@ -4048,7 +4048,6 @@ class TestSuiteDatasets:
                 "items": [
                     {
                         "id": str(records[0].id),
-                        "external_id": "this is a new external id 0",
                         "metadata": {
                             "terms-metadata-property": "a",
                             "integer-metadata-property": 0,
@@ -4069,7 +4068,6 @@ class TestSuiteDatasets:
                     },
                     {
                         "id": str(records[1].id),
-                        "external_id": "this is a new external id 1",
                         "metadata": {
                             "terms-metadata-property": "b",
                             "integer-metadata-property": 1,
@@ -4113,7 +4111,6 @@ class TestSuiteDatasets:
         assert response.status_code == 204
 
         # Record 0
-        assert records[0].external_id == "this is a new external id 0"
         assert records[0].metadata_ == {
             "terms-metadata-property": "a",
             "integer-metadata-property": 0,
@@ -4129,7 +4126,6 @@ class TestSuiteDatasets:
             assert inspect(suggestion).deleted
 
         # Record 1
-        assert records[1].external_id == "this is a new external id 1"
         assert records[1].metadata_ == {
             "terms-metadata-property": "b",
             "integer-metadata-property": 1,

@@ -100,7 +100,6 @@ class TestSuiteRecords:
             f"/api/v1/records/{record.id}",
             headers={API_KEY_HEADER_NAME: user.api_key},
             json={
-                "external_id": "this is a new external id",
                 "metadata": {
                     "terms-metadata-property": "c",
                     "integer-metadata-property": 9999,
@@ -130,7 +129,7 @@ class TestSuiteRecords:
                 "float-metadata-property": 9999.0,
                 "extra-metadata": "yes",
             },
-            "external_id": "this is a new external id",
+            "external_id": record.external_id,
             "responses": None,
             "suggestions": [
                 {
@@ -197,7 +196,7 @@ class TestSuiteRecords:
         response = await async_client.patch(
             f"/api/v1/records/{record.id}",
             headers=owner_auth_header,
-            json={"external_id": "this is a new external id"},
+            json={},
         )
 
         assert response.status_code == 200
@@ -205,7 +204,7 @@ class TestSuiteRecords:
             "id": str(record.id),
             "fields": {"text": "This is a text", "sentiment": "neutral"},
             "metadata": None,
-            "external_id": "this is a new external id",
+            "external_id": record.external_id,
             "responses": None,
             "suggestions": [],
             "inserted_at": record.inserted_at.isoformat(),
@@ -385,7 +384,6 @@ class TestSuiteRecords:
             f"/api/v1/records/{record.id}",
             headers={API_KEY_HEADER_NAME: user.api_key},
             json={
-                "external_id": "new_external_id",
                 "metadata": {"new": "yes"},
             },
         )
@@ -400,7 +398,6 @@ class TestSuiteRecords:
             f"/api/v1/records/{record.id}",
             headers={API_KEY_HEADER_NAME: user.api_key},
             json={
-                "external_id": "new_external_id",
                 "metadata": {"new": "yes"},
             },
         )
