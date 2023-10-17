@@ -38,7 +38,7 @@ import argilla as rg
 
 settings = rg.TextClassificationSettings(label_schema=["A", "B", "C"])
 
-rg.configure_dataset(name="my_dataset", settings=settings)
+rg.configure_dataset_settings(name="my_dataset", settings=settings)
 ```
 :::
 
@@ -48,7 +48,7 @@ import argilla as rg
 
 settings = rg.TokenClassificationSettings(label_schema=["A", "B", "C"])
 
-rg.configure_dataset(name="my_dataset", settings=settings)
+rg.configure_dataset_settings(name="my_dataset", settings=settings)
 ```
 :::
 

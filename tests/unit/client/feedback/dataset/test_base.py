@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Any, List
 
 import pytest
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
@@ -27,9 +27,30 @@ if TYPE_CHECKING:
 
 
 class FeedbackDataset(FeedbackDatasetBase):
-    @property
-    def records(self) -> None:
+    def add_records(self, *args, **kwargs) -> None:
         pass
+
+    def pull(self):
+        return self
+
+    def filter_by(self, *args, **kwargs):
+        return self
+
+    def delete(self):
+        pass
+
+    def prepare_for_training(self, *args, **kwargs) -> Any:
+        return []
+
+    def push_to_argilla(self, *args, **kwargs) -> "FeedbackDatasetBase":
+        return self
+
+    def unify_responses(self, *args, **kwargs):
+        return self
+
+    @property
+    def records(self) -> List[Any]:
+        return []
 
 
 def test_init(
@@ -87,13 +108,13 @@ def test_init_wrong_fields(
             fields=None,
             questions=feedback_dataset_questions,
         )
-    with pytest.raises(TypeError, match="Expected `fields` to be a list of `FieldSchema`"):
+    with pytest.raises(TypeError, match="Expected `fields` to be a list of `TextField`"):
         FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=[{"wrong": "field"}],
             questions=feedback_dataset_questions,
         )
-    with pytest.raises(ValueError, match="At least one `FieldSchema` in `fields` must be required"):
+    with pytest.raises(ValueError, match="At least one field in `fields` must be required"):
         FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
             fields=[TextField(name="test", required=False)],

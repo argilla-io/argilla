@@ -78,7 +78,7 @@ The args and kwargs of `push_to_huggingface` are the args of `push_to_hub` from 
 ​
 ### Save to disk
 ​
-Additionally, due to the integration with 🤗 Datasets, you can also export the records of a `FeedbackDataset` locally in your preferred format by converting the `FeedbackDataset` to a `datasets.Dataset` first using the method `format_as("datasets")`. Then, you may export the `datasets.Dataset` to either CSV, JSON, Parquet, etc. Check all the options in the [�� Datasets documentation](https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/main_classes#datasets.Dataset.save_to_disk).
+Additionally, due to the integration with 🤗 Datasets, you can also export the records of a `FeedbackDataset` locally in your preferred format by converting the `FeedbackDataset` to a `datasets.Dataset` first using the method `format_as("datasets")`. Then, you may export the `datasets.Dataset` to either CSV, JSON, Parquet, etc. Check all the options in the 🤗[Datasets documentation](https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/main_classes#datasets.Dataset.save_to_disk).
 ​
 ```python
 hf_dataset = dataset.format_as("datasets")
@@ -90,7 +90,7 @@ hf_dataset.to_parquet()  # Save as Parquet
 ```
 ​
 ```{note}
-This workaround will just export the records into the desired format, not the dataset configuration. If you want to load the records back into Argilla, you will need to create a `FeedbackDataset` and add the records as explained [here](create_dataset.ipynb).
+This workaround will just export the records into the desired format, not the dataset configuration. If you want to load the records back into Argilla, you will need to create a `FeedbackDataset` and add the records as explained [here](/practical_guides/create_dataset.md).
 ```
 ​
 ## Other datasets
@@ -143,9 +143,9 @@ dataset_ds.push_to_hub("my_dataset")
 ```
 ​
 ### Save to disk
-Your dataset will always be safe and accesible from Argilla, but in case you need to share or save it somewhere else, here are a couple of options.
+Your dataset will always be safe and accessible from Argilla, but in case you need to share or save it somewhere else, here are a couple of options.
 ​
-Alternatively, you can save the dataset locally. To do that, we recommend formatting the dataset as a [Hugging Face Dataset](https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/main_classes#datasets.Dataset.save_to_disk) or [Pandas DataFrame](https://pandas.pydata.org/docs/reference/io.html) first and use the methods native to these libraries to export as csv, json, parquet, etc.
+Alternatively, you can save the dataset locally. To do that, we recommend formatting the dataset as a [Hugging Face Dataset](https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/main_classes#datasets.Dataset.save_to_disk) or [Pandas DataFrame](https://pandas.pydata.org/docs/reference/io.html) first and use the methods native to these libraries to export as CSV, JSON, Parquet, etc.
 ​
 ```python
 # save locally using Hugging Face datasets

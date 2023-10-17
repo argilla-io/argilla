@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from typing import Optional, Type
 from uuid import UUID
 
@@ -20,7 +20,7 @@ import httpx
 from pydantic import BaseModel
 
 
-class RemoteSchema(BaseModel):
+class RemoteSchema(BaseModel, ABC):
     id: Optional[UUID] = None
     client: Optional[httpx.Client] = None
 
@@ -42,7 +42,7 @@ class RemoteSchema(BaseModel):
 
     @classmethod
     @abstractmethod
-    def from_api(cls) -> Type["RemoteSchema"]:
+    def from_api(cls, payload: "BaseModel") -> Type["RemoteSchema"]:
         """Abstract method to be implemented by subclasses to convert the API payload
         into a remote schema."""
         raise NotImplementedError
