@@ -40,13 +40,10 @@ The order of the fields in the UI follows the order in which these are added to 
 ```
 
 #### Define metadata properties
-```{warning}
-[TODO] Definition of `MetadataProperty`.
-```
-Metadata properties allow you to configure ...
 
+Metadata properties allow you to configure the use of metadata information for the filtering and sorting features available in the UI and Python SDK.
 
-You can define the metadata properties using the Python SDK providing the following arguments:
+You can define metadata properties using the Python SDK by providing the following arguments:
 
 - `name`: The name of the metadata property, as it will be used internally.
 - `title` (optional): The name of the metadata property, as it will be displayed in the UI. Defaults to the `name` value, but capitalized.
@@ -206,8 +203,8 @@ Take some time to inspect the data before adding it to the dataset in case this 
 The next step is to create records following Argilla's `FeedbackRecord` format. These are the attributes of a `FeedbackRecord`:
 
 - `fields`: A dictionary with the name (key) and content (value) of each of the fields in the record. These will need to match the fields set up in the dataset configuration (see [Define record fields](#define-record-fields)).
-- `metadata` (optional): A dictionary with the metadata of the record. This can include any information about the record that is not part of the fields. For example, the source of the record or the date it was created. If there is no metadata, this will be `None`.
 - `external_id` (optional): An ID of the record defined by the user. If there is no external ID, this will be `None`.
+- `metadata` (optional): A dictionary with the metadata of the record. This can include any information about the record that is not part of the fields. If you want the metadata to correspond with the metadata properties configured for your dataset, make sure that the key of the dictionary corresponds with the metadata property `name`. When the key doesn't correspond, this will be considered extra metadata that will get stored with the record, but will not be usable for filtering and sorting. If there is no metadata, this will be `None`.
 - `suggestions`(optional): A list of all suggested responses for a record e.g., model predictions or other helpful hints for the annotators. Just one suggestion can be provided for each question, and suggestion values must be compliant with the pre-defined questions e.g. if we have a `RatingQuestion` between 1 and 5, the suggestion should have a valid value within that range. If suggestions are added, they will appear in the UI as pre-filled responses.
 - `responses` (optional): A list of all responses to a record. You will only need to add them if your dataset already has some annotated records. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered. Also make sure to include `user_id`s in case you're planning to add more than one response for the same question, as only one `user_id` can be None, later to be replaced by the current active `user_id`, while the rest will be discarded otherwise.
 
@@ -234,12 +231,6 @@ Now, we simply add our records to the dataset we configured [above](#configure-t
 ```python
 #add records to the dataset
 dataset.add_records(records)
-```
-
-### Add metadata
-
-```{warning}
-[TODO] Explain how metadata values are added to the records.
 ```
 
 ### Add suggestions
