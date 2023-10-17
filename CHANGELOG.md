@@ -43,8 +43,8 @@ These are the section headers that we use:
 - Updated `FilteredRemoteFeedbackRecords.__len__` method to return the number of records matching the provided filters ([#3916](https://github.com/argilla-io/argilla/pull/3916)).
 - Increase the default max result window for Elasticsearch created for Feedback datasets ([#3929](https://github.com/argilla-io/argilla/pull/)).
 - Force elastic index refresh after records creation ([#3929](https://github.com/argilla-io/argilla/pull/)).
-- FeedbackDataset API methods have been aligned to be accessible through the several implementations ([#3937](https://github.com/argilla-io/argilla/pull/3937)).
-- The `unify_responses` support for remote datasets ([#3937](https://github.com/argilla-io/argilla/pull/3937)).
+- `FeedbackDataset` methods have been aligned to be accessible through the several implementations ([#3937](https://github.com/argilla-io/argilla/pull/3937)).
+- Support on `RemoteFeedbackDataset` for `unify_responses` method ([#3937](https://github.com/argilla-io/argilla/pull/3937)).
 
 ### Fixed
 
