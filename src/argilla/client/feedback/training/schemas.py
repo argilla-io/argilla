@@ -1266,9 +1266,9 @@ class TrainingTaskForQuestionAnswering(BaseModel, TrainingData):
         else:
             return (
                 f"{self.__class__.__name__}"
-                f"\n\t question={self.text.name}"
+                f"\n\t question={self.question.name}"
                 f"\n\t context={self.context.name}"
-                f"\n\t answer={self.__multi_label__}"
+                f"\n\t answer={self.answer.name}"
             )
 
     @requires_dependencies("transformers")
