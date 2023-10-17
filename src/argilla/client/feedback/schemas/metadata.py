@@ -43,7 +43,8 @@ class MetadataPropertySchema(BaseModel, ABC):
 
     Args:
         name: The name of the metadata property.
-        description: A description of the metadata property. Defaults to `None`.
+        title: A title of the metadata property (what's shown in the UI). Defaults to `None`,
+            which means that if not provided then the `name` will be used as the `title`.
         visible_for_annotators: Whether the metadata property should be visible for
             users with the `annotator` role. Defaults to `True`.
         type: The type of the metadata property. A value should be set for this
@@ -57,7 +58,7 @@ class MetadataPropertySchema(BaseModel, ABC):
     """
 
     name: str = Field(..., regex=r"^(?=.*[a-z0-9])[a-z0-9_-]+$")
-    description: Optional[str] = None
+    title: Optional[str] = None
     visible_for_annotators: Optional[bool] = True
     type: MetadataPropertyTypes = Field(..., allow_mutation=False)
 
@@ -65,6 +66,10 @@ class MetadataPropertySchema(BaseModel, ABC):
         validate_assignment = True
         extra = Extra.forbid
         exclude = {"type"}
+
+    @validator("title", always=True)
+    def title_must_have_value(cls, v: Optional[str], values: Dict[str, Any]) -> str:
+        return values.get("name") if not v else v
 
     @property
     @abstractmethod
@@ -74,7 +79,7 @@ class MetadataPropertySchema(BaseModel, ABC):
     def to_server_payload(self) -> Dict[str, Any]:
         return {
             "name": self.name,
-            "description": self.description,
+            "title": self.title,
             "visible_for_annotators": self.visible_for_annotators,
             "settings": self.server_settings,
         }
@@ -96,7 +101,10 @@ class TermsMetadataProperty(MetadataPropertySchema):
 
     Args:
         name: The name of the metadata property.
-        description: A description of the metadata property. Defaults to `None`.
+        title: A title of the metadata property (what's shown in the UI). Defaults to `None`,
+            which means that if not provided then the `name` will be used as the `title`.
+        visible_for_annotators: Whether the metadata property should be visible for
+            users with the `annotator` role. Defaults to `True`.
         values: A list of possible values for the metadata property. It must contain
             at least one value.
 
@@ -154,7 +162,10 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
 
     Args:
         name: The name of the metadata property.
-        description: A description of the metadata property. Defaults to `None`.
+        title: A title of the metadata property (what's shown in the UI). Defaults to `None`,
+            which means that if not provided then the `name` will be used as the `title`.
+        visible_for_annotators: Whether the metadata property should be visible for
+            users with the `annotator` role. Defaults to `True`.
         min: The lower bound of the numeric value. Must be provided and be lower than
             the `max` value.
         max: The upper bound of the numeric value. Must be provided and be greater
@@ -236,7 +247,10 @@ class IntegerMetadataProperty(_NumericMetadataPropertySchema):
 
     Args:
         name: The name of the metadata property.
-        description: A description of the metadata property. Defaults to `None`.
+        title: A title of the metadata property (what's shown in the UI). Defaults to `None`,
+            which means that if not provided then the `name` will be used as the `title`.
+        visible_for_annotators: Whether the metadata property should be visible for
+            users with the `annotator` role. Defaults to `True`.
         min: The lower bound of the integer value. Must be provided, and be lower than
             the `max` value.
         max: The upper bound of the integer value. Must be provided, and be greater than
@@ -259,7 +273,10 @@ class FloatMetadataProperty(_NumericMetadataPropertySchema):
 
     Args:
         name: The name of the metadata property.
-        description: A description of the metadata property. Defaults to `None`.
+        title: A title of the metadata property (what's shown in the UI). Defaults to `None`,
+            which means that if not provided then the `name` will be used as the `title`.
+        visible_for_annotators: Whether the metadata property should be visible for
+            users with the `annotator` role. Defaults to `True`.
         min: The lower bound of the float value. Must be provided, and be lower than
             the `max` value.
         max: The upper bound of the float value. Must be provided, and be greater than

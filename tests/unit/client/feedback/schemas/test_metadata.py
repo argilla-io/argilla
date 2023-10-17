@@ -31,10 +31,10 @@ from pydantic import ValidationError, create_model
     "schema_kwargs, server_payload, metadata_filter, metadata_property_to_validate",
     [
         (
-            {"name": "terms-metadata", "description": "b"},
+            {"name": "terms-metadata", "title": "alt-title"},
             {
                 "name": "terms-metadata",
-                "description": "b",
+                "title": "alt-title",
                 "visible_for_annotators": True,
                 "settings": {"type": "terms"},
             },
@@ -42,10 +42,10 @@ from pydantic import ValidationError, create_model
             {"terms-metadata": "a"},
         ),
         (
-            {"name": "terms-metadata", "description": "b", "values": ["a", "b", "c"]},
+            {"name": "terms-metadata", "values": ["a", "b", "c"]},
             {
                 "name": "terms-metadata",
-                "description": "b",
+                "title": "terms-metadata",
                 "visible_for_annotators": True,
                 "settings": {"type": "terms", "values": ["a", "b", "c"]},
             },
@@ -60,7 +60,7 @@ from pydantic import ValidationError, create_model
             },
             {
                 "name": "terms-metadata",
-                "description": None,
+                "title": "terms-metadata",
                 "visible_for_annotators": False,
                 "settings": {"type": "terms", "values": ["a", "b", "c"]},
             },
@@ -119,10 +119,10 @@ def test_terms_metadata_property_errors(
     "schema_kwargs, server_payload, metadata_filter, metadata_property_to_validate",
     [
         (
-            {"name": "int-metadata", "description": "b"},
+            {"name": "int-metadata", "title": "alt-title"},
             {
                 "name": "int-metadata",
-                "description": "b",
+                "title": "alt-title",
                 "visible_for_annotators": True,
                 "settings": {"type": "integer"},
             },
@@ -137,7 +137,7 @@ def test_terms_metadata_property_errors(
             },
             {
                 "name": "int-metadata",
-                "description": None,
+                "title": "int-metadata",
                 "visible_for_annotators": False,
                 "settings": {"type": "integer", "max": 5},
             },
@@ -148,7 +148,7 @@ def test_terms_metadata_property_errors(
             {"name": "int-metadata", "min": 5},
             {
                 "name": "int-metadata",
-                "description": None,
+                "title": "int-metadata",
                 "visible_for_annotators": True,
                 "settings": {"type": "integer", "min": 5},
             },
@@ -159,7 +159,7 @@ def test_terms_metadata_property_errors(
             {"name": "int-metadata", "min": 5, "max": 10},
             {
                 "name": "int-metadata",
-                "description": None,
+                "title": "int-metadata",
                 "visible_for_annotators": True,
                 "settings": {"type": "integer", "min": 5, "max": 10},
             },
@@ -218,10 +218,10 @@ def test_integer_metadata_property_errors(
     "schema_kwargs, server_payload, metadata_filter, metadata_property_to_validate",
     [
         (
-            {"name": "float-metadata", "description": "b"},
+            {"name": "float-metadata", "title": "alt-title"},
             {
                 "name": "float-metadata",
-                "description": "b",
+                "title": "alt-title",
                 "visible_for_annotators": True,
                 "settings": {"type": "float"},
             },
@@ -236,7 +236,7 @@ def test_integer_metadata_property_errors(
             },
             {
                 "name": "float-metadata",
-                "description": None,
+                "title": "float-metadata",
                 "visible_for_annotators": False,
                 "settings": {"type": "float", "max": 5.0},
             },
@@ -247,7 +247,7 @@ def test_integer_metadata_property_errors(
             {"name": "float-metadata", "min": 5.0},
             {
                 "name": "float-metadata",
-                "description": None,
+                "title": "float-metadata",
                 "visible_for_annotators": True,
                 "settings": {"type": "float", "min": 5.0},
             },
@@ -258,7 +258,7 @@ def test_integer_metadata_property_errors(
             {"name": "float-metadata", "min": 5.0, "max": 10.0},
             {
                 "name": "float-metadata",
-                "description": None,
+                "title": "float-metadata",
                 "visible_for_annotators": True,
                 "settings": {"type": "float", "min": 5.0, "max": 10.0},
             },

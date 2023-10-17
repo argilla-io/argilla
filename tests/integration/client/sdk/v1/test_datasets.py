@@ -279,7 +279,7 @@ async def test_add_metadata_property(role: UserRole) -> None:
         id=dataset.id,
         metadata_property={
             "name": "test_metadata_property",
-            "description": "test_description",
+            "title": "test_metadata_property_title",
             "settings": {"type": "terms", "values": ["a", "b", "c"]},
         },
     )
