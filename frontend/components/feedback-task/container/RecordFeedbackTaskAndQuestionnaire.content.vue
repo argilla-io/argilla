@@ -98,6 +98,32 @@ export default {
       this.onSearchFinished();
       this.fetching = false;
     },
+    async onChangeRecordPage(criteria) {
+      const filter = async () => {
+        await this.paginate();
+      };
+
+      if (this.questionFormTouched) {
+        return this.showNotificationForNewFilter(filter, () =>
+          criteria.reset()
+        );
+      }
+
+      await filter();
+    },
+    async onChangeRecordFilter(criteria) {
+      const filter = async () => {
+        await this.onLoadRecords("replace");
+      };
+
+      if (this.questionFormTouched) {
+        return this.showNotificationForNewFilter(filter, () =>
+          criteria.reset()
+        );
+      }
+
+      await filter();
+    },
     onSearchFinished() {
       return this.$root.$emit("on-changed-total-records", this.records.total);
     },
@@ -134,33 +160,12 @@ export default {
     return useRecordFeedbackTaskViewModel();
   },
   created() {
-    this.$root.$on("on-change-record-page", async (criteria) => {
-      const filter = async () => {
-        await this.paginate();
-      };
+    this.$root.$on("on-change-record-page", this.onChangeRecordPage);
 
-      if (this.questionFormTouched) {
-        return this.showNotificationForNewFilter(filter, () =>
-          criteria.reset()
-        );
-      }
-
-      await filter();
-    });
-
-    this.$root.$on("on-change-record-criteria-filter", async (criteria) => {
-      const filter = async () => {
-        await this.onLoadRecords("replace");
-      };
-
-      if (this.questionFormTouched) {
-        return this.showNotificationForNewFilter(filter, () =>
-          criteria.reset()
-        );
-      }
-
-      await filter();
-    });
+    this.$root.$on(
+      "on-change-record-criteria-filter",
+      this.onChangeRecordFilter
+    );
   },
   destroyed() {
     this.$root.$off("on-change-record-page");
