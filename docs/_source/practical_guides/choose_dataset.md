@@ -34,11 +34,16 @@ We are working on it! We will be adding new features to the `FeedbackDataset` ov
 |-------------------------------	|-----------------	|-------------------|
 | Text classification           	| ✔️               	| ✔️                  |
 | Token classificaiton          	|                 	| ✔️                  |
-| Text2text                     	| ✔️               	| ✔️                   |
-| RLHF               	| ✔️               	|                              	|
-| RAG               	| ✔️               	|                              	|
+| Summarization                  	| ✔️               	| ✔️                   |
+| Translation                  	| ✔️               	| ✔️                   |
+| NLI                  	| ✔️               	| ✔️                   |
 | Sentence Similarity               	| ✔️               	|                              	|
 | Question Answering               	| ✔️               	|                              	|
+| RLHF (SFT)               	| ✔️               	|                              	|
+| RLHF (RM)               	| ✔️               	|                              	|
+| RLHF (PPO)               	| ✔️               	|                              	|
+| RLHF (DPO)               	| ✔️               	|                              	|
+| RAG               	| ✔️               	|                              	|
 | Image support               	| ✔️               	|                              	|
 | And many more               	| ✔️               	|                              	|
 
