@@ -4257,7 +4257,9 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Found records that do not exist"}
+        assert response.json() == {
+            "detail": f"Found records that do not exist: {records[0]['id']}, {records[1]['id']}, {records[2]['id']}"
+        }
 
     async def test_update_dataset_records_with_duplicate_records_ids(
         self, async_client: "AsyncClient", owner_auth_header: dict

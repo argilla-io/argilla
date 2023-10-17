@@ -552,7 +552,9 @@ async def update_records(
     non_existing_records_ids = set(records_ids) - set(existing_records_ids)
 
     if len(non_existing_records_ids) > 0:
-        raise ValueError("Found records that do not exist")
+        sorted_non_existing_records_ids = sorted(non_existing_records_ids, key=lambda x: records_ids.index(x))
+        records_str = ", ".join([str(record_id) for record_id in sorted_non_existing_records_ids])
+        raise ValueError(f"Found records that do not exist: {records_str}")
 
     # Lists to store the records that will be updated in the database or in the search engine
     records_update_objects: List[Dict[str, Any]] = []
