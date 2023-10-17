@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 
 import pytest
@@ -37,6 +38,12 @@ if TYPE_CHECKING:
 
 class TestFeedbackDataset(FeedbackDatasetBase):
     def update_records(self, **kwargs: Dict[str, Any]) -> None:
+        pass
+
+    def add_metadata_property(self, metadata_property):
+        pass
+
+    def delete_metadata_properties(self, metadata_properties):
         pass
 
     def filter_by(

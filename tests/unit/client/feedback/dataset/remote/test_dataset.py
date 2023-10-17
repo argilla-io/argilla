@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
+from typing import Dict
 from uuid import uuid4
 
 import httpx
@@ -63,6 +64,53 @@ def test_remote_record(
     )
 
 
+def configure_mock_routes(mock_httpx_client: httpx.Client, mock_routes: Dict) -> None:
+    def _mock_route(routes: Dict[str, httpx.Response]):
+        return lambda url, **kwargs: routes[url]
+
+    for method, routes in mock_routes.items():
+        getattr(mock_httpx_client, method).side_effect = _mock_route(routes)
+
+
+def create_mock_routes(
+    test_remote_dataset: RemoteFeedbackDataset, test_remote_record: RemoteFeedbackRecord
+) -> Dict[str, Dict[str, httpx.Response]]:
+    routes = {
+        "put": {},
+        "post": {},
+        "delete": {},
+        "get": {
+            "/api/me": httpx.Response(
+                status_code=200,
+                content=UserModel(
+                    id=uuid4(),
+                    first_name="test",
+                    username="test",
+                    role=UserRole.owner,
+                    api_key="api.key",
+                    inserted_at=datetime.utcnow(),
+                    updated_at=datetime.utcnow(),
+                ).json(),
+            ),
+            f"/api/v1/me/datasets/{test_remote_dataset.id}/metadata-properties": httpx.Response(
+                status_code=200, json={"items": []}
+            ),
+        },
+        "patch": {
+            f"/api/v1/records/{test_remote_record.id}": httpx.Response(
+                status_code=200,
+                content=FeedbackItemModel(
+                    id=test_remote_record.id,
+                    fields=test_remote_record.fields,
+                    inserted_at=datetime.utcnow(),
+                    updated_at=datetime.utcnow(),
+                ).json(),
+            )
+        },
+    }
+    return routes
+
+
 class TestSuiteRemoteDataset:
     def test_update_records(
         self,
@@ -72,28 +120,8 @@ class TestSuiteRemoteDataset:
     ) -> None:
         """Test updating records."""
 
-        mock_httpx_client.get.return_value = httpx.Response(
-            status_code=200,
-            content=UserModel(
-                id=uuid4(),
-                first_name="test",
-                username="test",
-                role=UserRole.owner,
-                api_key="api.key",
-                inserted_at=datetime.utcnow(),
-                updated_at=datetime.utcnow(),
-            ).json(),
-        )
-
-        mock_httpx_client.patch.return_value = httpx.Response(
-            status_code=200,
-            content=FeedbackItemModel(
-                id=test_remote_record.id,
-                fields=test_remote_record.fields,
-                inserted_at=datetime.utcnow(),
-                updated_at=datetime.utcnow(),
-            ).json(),
-        )
+        mock_routes = create_mock_routes(test_remote_dataset, test_remote_record)
+        configure_mock_routes(mock_httpx_client, mock_routes)
 
         test_remote_dataset.update_records(records=[test_remote_record])
 
@@ -110,18 +138,8 @@ class TestSuiteRemoteDataset:
     ) -> None:
         """Test updating records."""
 
-        mock_httpx_client.get.return_value = httpx.Response(
-            status_code=200,
-            content=UserModel(
-                id=uuid4(),
-                first_name="test",
-                username="test",
-                role=UserRole.owner,
-                api_key="api.key",
-                inserted_at=datetime.utcnow(),
-                updated_at=datetime.utcnow(),
-            ).json(),
-        )
+        mock_routes = create_mock_routes(test_remote_dataset, test_remote_record)
+        configure_mock_routes(mock_httpx_client, mock_routes)
 
         mock_httpx_client.patch.return_value = httpx.Response(
             status_code=200,
@@ -145,29 +163,6 @@ class TestSuiteRemoteDataset:
     ) -> None:
         """Test updating records."""
 
-        mock_httpx_client.get.return_value = httpx.Response(
-            status_code=200,
-            content=UserModel(
-                id=uuid4(),
-                first_name="test",
-                username="test",
-                role=UserRole.owner,
-                api_key="api.key",
-                inserted_at=datetime.utcnow(),
-                updated_at=datetime.utcnow(),
-            ).json(),
-        )
-
-        mock_httpx_client.patch.return_value = httpx.Response(
-            status_code=200,
-            content=FeedbackItemModel(
-                id=test_remote_record.id,
-                fields=test_remote_record.fields,
-                inserted_at=datetime.utcnow(),
-                updated_at=datetime.utcnow(),
-            ).json(),
-        )
-
         expected_suggestion = FeedbackSuggestionModel(
             id=uuid4(),
             question_id=test_remote_dataset.question_by_name("text").id,
@@ -175,7 +170,16 @@ class TestSuiteRemoteDataset:
             score=0.5,
             agent="test",
         )
-        mock_httpx_client.put.return_value = httpx.Response(status_code=200, content=expected_suggestion.json())
+
+        mock_routes = create_mock_routes(test_remote_dataset, test_remote_record)
+        mock_routes["put"].update(
+            {
+                f"/api/v1/records/{test_remote_record.id}/suggestions": httpx.Response(
+                    status_code=200, content=expected_suggestion.json()
+                )
+            }
+        )
+        configure_mock_routes(mock_httpx_client, mock_routes)
 
         test_remote_record.suggestions = [
             SuggestionSchema(question_name="text", value="Test value", score=0.5, agent="test")
@@ -192,19 +196,6 @@ class TestSuiteRemoteDataset:
         test_remote_dataset: RemoteFeedbackDataset,
         test_remote_record: RemoteFeedbackRecord,
     ) -> None:
-        mock_httpx_client.get.return_value = httpx.Response(
-            status_code=200,
-            content=UserModel(
-                id=uuid4(),
-                first_name="test",
-                username="test",
-                role=UserRole.owner,
-                api_key="api.key",
-                inserted_at=datetime.utcnow(),
-                updated_at=datetime.utcnow(),
-            ).json(),
-        )
-
         expected_suggestion = FeedbackSuggestionModel(
             id=uuid4(),
             question_id=test_remote_dataset.question_by_name("text").id,
@@ -212,16 +203,16 @@ class TestSuiteRemoteDataset:
             score=0.5,
             agent="test",
         )
-        mock_httpx_client.patch.return_value = httpx.Response(
-            status_code=200,
-            content=FeedbackItemModel(
-                id=test_remote_record.id,
-                fields=test_remote_record.fields,
-                inserted_at=datetime.utcnow(),
-                updated_at=datetime.utcnow(),
-            ).json(),
+
+        mock_routes = create_mock_routes(test_remote_dataset, test_remote_record)
+        mock_routes["put"].update(
+            {
+                f"/api/v1/records/{test_remote_record.id}/suggestions": httpx.Response(
+                    status_code=200, content=expected_suggestion.json()
+                )
+            }
         )
-        mock_httpx_client.put.return_value = httpx.Response(status_code=200, content=expected_suggestion.json())
+        configure_mock_routes(mock_httpx_client, mock_routes)
 
         test_remote_record.suggestions = [
             SuggestionSchema(question_name="text", value="Test value", score=0.5, agent="test")

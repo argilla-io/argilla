@@ -107,7 +107,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
 
     @property
     def _question_id_to_name(self) -> Dict["UUID", str]:
-        return self.dataset._question_id_to_name_id
+        return self.dataset._question_id_to_name
 
     @property
     def _question_name_to_id(self) -> Dict[str, "UUID"]:
@@ -323,6 +323,10 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         if not isinstance(records, list):
             records = [records]
 
+        metadata_schema = self._build_metadata_schema()
+        for record in records:
+            self._validate_record_metadata(record=record, metadata_schema=metadata_schema)
+
         # TODO: Use the batch version of endpoint once is implemented
         for record in records:
             record.update()
@@ -358,7 +362,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         return self._updated_at
 
     @property
-    def _question_id_to_name_id(self) -> Dict["UUID", str]:
+    def _question_id_to_name(self) -> Dict["UUID", str]:
         return {question.id: question.name for question in self._questions}
 
     @property
