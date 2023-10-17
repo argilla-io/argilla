@@ -478,7 +478,7 @@ class FloatMetadataPropertyCreate(NumericMetadataProperty[float]):
     type: Literal[MetadataPropertyType.float]
 
 
-MetadataPropertyTitleCreate = Annotated[
+MetadataPropertyTitle = Annotated[
     constr(min_length=METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH, max_length=METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH),
     PydanticField(..., description="The title of the metadata property"),
 ]
@@ -496,7 +496,7 @@ class MetadataPropertyCreate(BaseModel):
         min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
         max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
     )
-    title: MetadataPropertyTitleCreate
+    title: MetadataPropertyTitle
     settings: MetadataPropertySettingsCreate
     visible_for_annotators: bool = True
 
