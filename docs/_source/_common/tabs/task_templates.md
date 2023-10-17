@@ -83,7 +83,7 @@ ds
 import argilla as rg
 
 ds = rg.FeedbackDataset.for_sentence_similarity(
-    similarity_scale=10,
+    rating_scale=10,
     use_markdown=True,
     guidelines=None,
 )
