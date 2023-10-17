@@ -25,14 +25,22 @@ export class LoadRecordsToAnnotateUseCase {
   async load(mode: LoadRecordsMode, criteria: RecordCriteria): Promise<void> {
     const { page } = criteria;
 
-    const newRecords = await this.loadRecords(mode, criteria);
+    let newRecords = await this.loadRecords(mode, criteria);
 
-    const isRecordExistForCurrentPage = newRecords.existsRecordOn(page);
+    let isRecordExistForCurrentPage = newRecords.existsRecordOn(page);
 
     if (!isRecordExistForCurrentPage && page !== 1) {
       criteria.page = 1;
 
-      await this.loadRecords(mode, criteria);
+      newRecords = await this.loadRecords(mode, criteria);
+
+      isRecordExistForCurrentPage = newRecords.existsRecordOn(page);
+    }
+
+    if (isRecordExistForCurrentPage) {
+      const record = newRecords.getRecordOn(page);
+
+      record.initialize();
     }
 
     criteria.commit();
@@ -40,17 +48,22 @@ export class LoadRecordsToAnnotateUseCase {
 
   async paginate(criteria: RecordCriteria): Promise<boolean> {
     const { page } = criteria;
-    const records = this.recordsStorage.get();
-
+    let records = this.recordsStorage.get();
     let isNextRecordExist = records.existsRecordOn(page);
 
     if (!isNextRecordExist) {
-      const newRecords = await this.loadRecords("append", criteria);
+      records = await this.loadRecords("append", criteria);
 
-      isNextRecordExist = newRecords.existsRecordOn(page);
+      isNextRecordExist = records.existsRecordOn(page);
     }
 
-    if (isNextRecordExist) criteria.commit();
+    if (isNextRecordExist) {
+      const record = records.getRecordOn(page);
+
+      record.initialize();
+
+      criteria.commit();
+    }
 
     return isNextRecordExist;
   }

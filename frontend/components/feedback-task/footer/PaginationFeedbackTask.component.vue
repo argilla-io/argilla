@@ -21,14 +21,11 @@ export default {
   methods: {
     goToNextPage() {
       this.recordCriteria.nextPage();
+
+      this.$root.$emit("on-change-record-page", this.recordCriteria);
     },
     goToPrevPage() {
       this.recordCriteria.previousPage();
-    },
-  },
-  watch: {
-    "recordCriteria.page"() {
-      if (!this.recordCriteria.hasChanges) return;
 
       this.$root.$emit("on-change-record-page", this.recordCriteria);
     },

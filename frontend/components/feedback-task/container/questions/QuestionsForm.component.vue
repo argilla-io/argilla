@@ -2,7 +2,7 @@
   <form
     class="questions-form"
     :class="{
-      '--focused-form': isFormTouched || (formHasFocus && interactionCount > 1),
+      '--focused-form': isTouched || (formHasFocus && interactionCount > 1),
     }"
     @submit.prevent="onSubmit"
     v-click-outside="onClickOutside"
@@ -102,9 +102,9 @@ export default {
   },
   data() {
     return {
-      isFormTouched: false,
       autofocusPosition: 0,
       interactionCount: 0,
+      isTouched: false,
       userComesFromOutside: false,
     };
   },
@@ -123,35 +123,26 @@ export default {
     },
     isSubmitButtonDisabled() {
       if (this.record.isSubmitted)
-        return !this.isFormTouched || !this.questionAreCompletedCorrectly;
+        return !this.isTouched || !this.questionAreCompletedCorrectly;
 
       return !this.questionAreCompletedCorrectly;
     },
   },
   watch: {
-    isFormTouched(isFormTouched) {
-      if (this.record.isSubmitted)
-        this.emitIsQuestionsFormTouched(isFormTouched);
-    },
     record: {
       deep: true,
       immediate: true,
       handler() {
         if (this.record.isModified) this.saveDraft(this.record);
 
-        this.isFormTouched = this.record.isModified;
+        this.isTouched = this.record.isSubmitted && this.record.isModified;
       },
     },
-  },
-  created() {
-    this.record.initialize();
   },
   mounted() {
     document.addEventListener("keydown", this.handleGlobalKeys);
   },
   destroyed() {
-    this.emitIsQuestionsFormTouched(false);
-
     document.removeEventListener("keydown", this.handleGlobalKeys);
   },
   methods: {
@@ -174,7 +165,7 @@ export default {
       const { code, shiftKey, ctrlKey, metaKey } = event;
 
       if (code == "Tab" && this.userComesFromOutside) {
-        this.focusOnFirstQuestionFromOutside(event);
+        this.focusOnFirstQuestion(event);
 
         return;
       }
@@ -225,9 +216,6 @@ export default {
     },
     async onSaveDraftImmediately() {
       await this.saveDraftImmediately(this.record);
-    },
-    emitIsQuestionsFormTouched(isFormTouched) {
-      this.$emit("on-question-form-touched", isFormTouched);
     },
     updateQuestionAutofocus(index) {
       this.interactionCount++;

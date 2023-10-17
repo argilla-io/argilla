@@ -16,7 +16,6 @@
         :record="record"
         @on-submit-responses="goToNext"
         @on-discard-responses="goToNext"
-        @on-question-form-touched="onQuestionFormTouched"
       />
     </template>
 
@@ -40,7 +39,6 @@ export default {
   },
   data() {
     return {
-      questionFormTouched: false,
       fetching: false,
     };
   },
@@ -61,6 +59,9 @@ export default {
     },
     statusClass() {
       return `--${this.record.status}`;
+    },
+    shouldShowNotification() {
+      return this.record?.isSubmitted && this.record?.isModified;
     },
   },
   async fetch() {
@@ -88,55 +89,50 @@ export default {
       const isNextRecordExist = await this.paginateRecords(this.recordCriteria);
 
       if (!isNextRecordExist) {
-        Notification.dispatch("notify", {
-          message: this.noMoreDataMessage,
-          numberOfChars: this.noMoreDataMessage.length,
-          type: "info",
-        });
+        setTimeout(() => {
+          Notification.dispatch("notify", {
+            message: this.noMoreDataMessage,
+            numberOfChars: this.noMoreDataMessage.length,
+            type: "info",
+          });
+        }, 100);
       }
 
       this.onSearchFinished();
       this.fetching = false;
     },
-    async onChangeRecordPage(criteria) {
+    onChangeRecordPage(criteria) {
       const filter = async () => {
         await this.paginate();
       };
 
-      if (this.questionFormTouched) {
-        return this.showNotificationForNewFilter(filter, () =>
-          criteria.reset()
-        );
-      }
-
-      await filter();
+      this.showNotificationForNewFilterWhenIfNeeded(filter, () =>
+        criteria.reset()
+      );
     },
-    async onChangeRecordFilter(criteria) {
+    onChangeRecordFilter(criteria) {
       const filter = async () => {
         await this.onLoadRecords("replace");
       };
 
-      if (this.questionFormTouched) {
-        return this.showNotificationForNewFilter(filter, () =>
-          criteria.reset()
-        );
-      }
-
-      await filter();
+      this.showNotificationForNewFilterWhenIfNeeded(filter, () =>
+        criteria.reset()
+      );
     },
     onSearchFinished() {
       return this.$root.$emit("on-changed-total-records", this.records.total);
-    },
-    onQuestionFormTouched(isTouched) {
-      this.questionFormTouched = isTouched;
     },
     goToNext() {
       this.recordCriteria.nextPage();
 
       this.paginate();
     },
-    showNotificationForNewFilter(onFilter, onClose) {
+    showNotificationForNewFilterWhenIfNeeded(onFilter, onClose) {
       Notification.dispatch("clear");
+
+      if (!this.shouldShowNotification) {
+        return onFilter();
+      }
 
       setTimeout(() => {
         Notification.dispatch("notify", {
