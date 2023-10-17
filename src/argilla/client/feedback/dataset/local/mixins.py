@@ -372,7 +372,7 @@ class TaskTemplateMixin:
         Returns:
             A `FeedbackDataset` object for text classification containing "text" field and LabelQuestion or MultiLabelQuestion named "label"
         """
-        default_guidelines = "This is a text classification dataset that contains texts and labels. Given a set of texts and a predefined set of labels, the goal of text classification is to assign one or more labels to each text based on its content. Please classify the texts by selecting the correct labels."
+        default_guidelines = "This is a text classification dataset that contains texts and labels. Given a set of texts and a predefined set of labels, the goal of text classification is to assign one or more labels to each text based on its content. Please classify the texts by making the correct selection."
 
         description = "Classify the text by selecting the correct label from the given list of labels."
         return cls(
@@ -394,7 +394,7 @@ class TaskTemplateMixin:
             if guidelines is not None
             else default_guidelines
             if multi_label
-            else default_guidelines.replace("one or more", "one"),
+            else default_guidelines.replace("one or more labels", "one label"),
         )
 
     @classmethod
@@ -599,7 +599,7 @@ class TaskTemplateMixin:
             TextField(name="response2", title="Response 2", use_markdown=use_markdown),
         ]
         if context:
-            fields.insert(0, TextField(name="context", use_markdown=use_markdown, required=False))
+            fields.insert(1, TextField(name="context", use_markdown=use_markdown, required=False))
         return cls(
             fields=fields,
             questions=[
@@ -676,7 +676,7 @@ class TaskTemplateMixin:
             TextField(name="response2", title="Response 2", use_markdown=use_markdown),
         ]
         if context:
-            dataset_fields.insert(0, TextField(name="context", use_markdown=use_markdown, required=False))
+            dataset_fields.insert(1, TextField(name="context", use_markdown=use_markdown, required=False))
         return cls(
             fields=dataset_fields,
             questions=[

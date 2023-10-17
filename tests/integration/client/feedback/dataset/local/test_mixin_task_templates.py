@@ -60,7 +60,7 @@ def test_for_text_classification():
     assert dataset.fields[0].use_markdown is False
     assert (
         dataset.guidelines
-        == "This is a text classification dataset that contains texts and labels. Given a set of texts and a predefined set of labels, the goal of text classification is to assign one or more labels to each text based on its content. Please classify the texts by selecting the correct label."
+        == "This is a text classification dataset that contains texts and labels. Given a set of texts and a predefined set of labels, the goal of text classification is to assign one label to each text based on its content. Please classify the texts by making the correct selection."
     )
 
     # Test case 2: Multi-label classification
@@ -78,7 +78,7 @@ def test_for_text_classification():
     print(dataset.guidelines)
     assert (
         dataset.guidelines
-        == "This is a text classification dataset that contains texts and labels. Given a set of texts and a predefined set of labels, the goal of text classification is to assign one or more labels to each text based on its content. Please classify the texts by selecting the correct labels."
+        == "This is a text classification dataset that contains texts and labels. Given a set of texts and a predefined set of labels, the goal of text classification is to assign one or more labels to each text based on its content. Please classify the texts by making the correct selection."
     )
 
 
@@ -212,7 +212,7 @@ def test_for_sentence_similarity():
 
 
 def test_for_preference_modeling():
-    dataset = FeedbackDataset.for_preference_modeling(use_markdown=False)
+    dataset = FeedbackDataset.for_preference_modeling(use_markdown=False, context=True)
     assert len(dataset) == 0
     assert dataset.questions[0].name == "preference"
     assert dataset.questions[0].description == "Choose your preference."
@@ -325,9 +325,9 @@ def test_for_direct_preference_optimization():
     assert dataset.questions[0].description == "Choose the label that is your preference."
     assert isinstance(dataset.questions[0], LabelQuestion)
     assert dataset.questions[0].labels == ["Response 1", "Response 2"]
-    assert dataset.fields[0].name == "context"
+    assert dataset.fields[0].name == "prompt"
     assert dataset.fields[0].use_markdown is True
-    assert dataset.fields[1].name == "prompt"
+    assert dataset.fields[1].name == "context"
     assert dataset.fields[1].use_markdown is True
     assert dataset.fields[2].name == "response1"
     assert dataset.fields[2].title == "Response 1"
