@@ -19,8 +19,6 @@ from uuid import uuid4
 
 import httpx
 import pytest
-from pytest_mock import MockerFixture
-
 from argilla import FeedbackDataset, Workspace
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 from argilla.client.feedback.schemas import SuggestionSchema
@@ -30,6 +28,7 @@ from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.sdk.users.models import UserModel, UserRole
 from argilla.client.sdk.v1.datasets.models import FeedbackItemModel, FeedbackSuggestionModel
 from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
+from pytest_mock import MockerFixture
 
 
 @pytest.fixture()
