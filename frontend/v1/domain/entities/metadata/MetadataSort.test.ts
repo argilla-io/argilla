@@ -87,7 +87,7 @@ describe("MetadataSort ", () => {
       metadataSort.select("split");
       metadataSort.toggleSort("loss");
 
-      const param = metadataSort.convertToRouteParam();
+      const param = metadataSort.commit();
 
       expect(param).toEqual(["metadata.loss:desc", "metadata.split:asc"]);
     });
@@ -98,7 +98,7 @@ describe("MetadataSort ", () => {
       metadataSort.select("inserted_at");
       metadataSort.toggleSort("loss");
 
-      const param = metadataSort.convertToRouteParam();
+      const param = metadataSort.commit();
 
       expect(param).toEqual(["metadata.loss:desc", "inserted_at:asc"]);
     });
@@ -107,9 +107,7 @@ describe("MetadataSort ", () => {
   describe("Complete by Route Params", () => {
     test("should be able to complete by route params", () => {
       const metadataSort = new MetadataSortList(createMetadataMock());
-      metadataSort.completeByRouteParams(
-        "metadata.loss:desc,metadata.split:asc"
-      );
+      metadataSort.initializeWith(["metadata.loss:desc", "metadata.split:asc"]);
 
       expect(metadataSort.selected[0].name).toEqual("loss");
       expect(metadataSort.selected[0].sort).toEqual("desc");
@@ -119,7 +117,7 @@ describe("MetadataSort ", () => {
 
     test("should be able to complete record sort", () => {
       const metadataSort = new MetadataSortList(createMetadataMock());
-      metadataSort.completeByRouteParams("metadata.loss:desc,inserted_at:desc");
+      metadataSort.initializeWith(["metadata.loss:desc", "inserted_at:desc"]);
 
       expect(metadataSort.selected[0].name).toEqual("loss");
       expect(metadataSort.selected[0].sort).toEqual("desc");

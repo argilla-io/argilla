@@ -13,7 +13,7 @@ The [Kubernetes (k8s) folder](https://github.com/argilla-io/argilla/tree/main/k8
 - [argilla-server-service.yaml](https://github.com/argilla-io/argilla/tree/main/k8s/argilla-server-service.yaml): server service config.
 - [elasticsearch-deployment.yaml](https://github.com/argilla-io/argilla/tree/main/k8s/elasticsearch-deployment.yaml): a minimal Elastic Search config.
 - [elasticsearch-pvc.yaml](https://github.com/argilla-io/argilla/tree/main/k8s/elasticsearch-pvc.yaml): a persistent volume claim to dynamically scale and retain data.
-- [elasticsearch-service.yaml](https://github.com/argilla-io/argilla/tree/main/k8s/elasticsearch-service.yaml): a Elastic service config.
+- [elasticsearch-service.yaml](https://github.com/argilla-io/argilla/tree/main/k8s/elasticsearch-service.yaml): an Elastic service config.
 
 ### Helm charts
 
@@ -51,7 +51,7 @@ argilla-aws
 ```
 
 Available Amazon Machine Instance (AMI) depends on region. The provided AMI is available for eu-west regions and is an ubuntu-16.04-server image.
-To find available recent images, go to the [AWS AMI Marketplace](https://console.aws.amazon.com/ec2/home), choose "Launch instance". and filter by `ubuntu`
+To find available recent images, go to the [AWS AMI Marketplace](https://console.aws.amazon.com/ec2/home), choose "Launch instance" and filter by `ubuntu`
 (don't forget to choose your targeted region).
 
 If you already have multiple instances and VPC in the targeted region, creating a new VPC before creating the Argilla instance is recommended.
@@ -76,7 +76,7 @@ In our case, the assigned ip is `52.213.178.33`
 
 ### Connect to remote docker machine
 
-To enable the connection between the local docker client and the remote daemon, we must type following command:
+To enable the connection between the local docker client and the remote daemon, we must type the following command:
 
 ```bash
 eval $(docker-machine env argilla-aws)
@@ -108,11 +108,11 @@ The easiest way to deploy Argilla on Azure is using the Azure Container Instance
 
 ### 1. Install Docker with compose
 
-Install th latest Docker with the compose method described as described in the [official documentation](https://docs.docker.com/compose/install/). Note that this is not the independent `docker-compose` application.
+Install the latest Docker with the compose method described as described in the [official documentation](https://docs.docker.com/compose/install/). Note that this is not the independent `docker-compose` application.
 
-### 2. Login to Azure
+### 2. Log in to Azure
 
-Using `docker` and `az` CLI, login to Azure:
+Using `docker` and `az` CLI, log in to Azure:
 
 ```bash
 docker login azure
@@ -146,4 +146,4 @@ This guide is adapted from this [blog post by Ben Burtenshaw](https://medium.com
 
 Coming soon!
 
-> 🚒 **If you'd like support with this and/or want to contribute this gude, join the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
+> 🚒 **If you'd like support with this and/or want to contribute this guide, join the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**

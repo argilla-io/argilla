@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.sdk.v1.datasets.models import FeedbackMetadataPropertyModel
@@ -75,3 +75,30 @@ class ArgillaMetadataPropertiesMixin:
         response = metadata_properties_api_v1.delete_metadata_property(client=client, id=metadata_property_id)
         if response.status_code == 200:
             return ArgillaMetadataPropertiesMixin.parse_payload(client=client, payload=response.parsed)[0].to_local()
+
+    @staticmethod
+    def update(
+        client: "httpx.Client",
+        metadata_property_id: "UUID",
+        title: Optional[str] = None,
+        visible_for_annotators: Optional[bool] = None,
+    ) -> "AllowedRemoteMetadataPropertyTypes":
+        """Updates the metadata property with the given ID in Argilla.
+
+        Args:
+            client: contains the `httpx.Client` instance that will be used to send requests to Argilla.
+            metadata_property_id: contains the UUID of the metadata property in Argilla.
+            title: the new title of the metadata property. Defaults to `None`.
+            visible_for_annotators: whether the metadata property should be visible for annotators. Defaults to `None`.
+
+        Returns:
+            The updated `RemoteMetadataProperty` object.
+        """
+        response = metadata_properties_api_v1.update_metadata_property(
+            client=client,
+            id=metadata_property_id,
+            title=title,
+            visible_for_annotators=visible_for_annotators,
+        )
+        if response.status_code == 200:
+            return ArgillaMetadataPropertiesMixin.parse_payload(client=client, payload=response.parsed)[0]

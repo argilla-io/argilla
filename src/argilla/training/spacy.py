@@ -163,8 +163,8 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
         """Update the `spaCy` training config.
 
         Disclaimer: currently just the `training` config is supported, but in the future
-        we will support all the `spaCy` config values supported for a more precise control
-        over the training process. Also note that the arguments may differ between the CPU
+        we will support all the `spaCy` config values for more precise control
+        over the training process. Also, note that the arguments may differ between the CPU
         and GPU training.
 
         Args:
@@ -183,7 +183,7 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
 
         self._logger.warning(
             "Note that the spaCy training is expected to be used through the CLI rather"
-            " than programatically, so the dataset needs to be dumped into the disk and"
+            " than programmatically, so the dataset needs to be dumped into the disk and"
             " then loaded from disk. More information at"
             " https://spacy.io/usage/training#api"
         )

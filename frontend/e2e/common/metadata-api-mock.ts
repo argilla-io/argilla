@@ -5,7 +5,7 @@ const metadataFromBackend = {
     {
       id: "acb07ca1-aba8-48c3-b52e-f3a227808dfb",
       name: "correctness-langsmith",
-      description: null,
+      title: "correctness-langsmith-title",
       settings: {
         type: "terms",
         values: ["incorrect", "unknown", "correct"],
@@ -14,7 +14,7 @@ const metadataFromBackend = {
     {
       id: "cc35ee5b-2a88-4350-b536-be5088aa490e",
       name: "model-name",
-      description: null,
+      title: "model-name-title",
       settings: {
         type: "terms",
         values: [
@@ -30,7 +30,7 @@ const metadataFromBackend = {
     {
       id: "daf89c99-f7a5-49ce-a9a3-0f04b458acf0",
       name: "temperature",
-      description: null,
+      title: "temperature-title",
       settings: {
         type: "float",
         min: 0.0,
@@ -40,7 +40,7 @@ const metadataFromBackend = {
     {
       id: "cfea0213-4c90-4006-afeb-5a94cebc94cd",
       name: "cpu-user",
-      description: null,
+      title: "cpu-user-title",
       settings: {
         type: "float",
         min: 1.06,
@@ -50,7 +50,7 @@ const metadataFromBackend = {
     {
       id: "06e04754-a445-4cf9-bbd4-0a7fa1fef559",
       name: "cpu-system",
-      description: null,
+      title: "cpu-system-title",
       settings: {
         type: "float",
         min: 0.52,
@@ -60,7 +60,7 @@ const metadataFromBackend = {
     {
       id: "1cc9a1eb-618b-4dd1-8637-ed11d7e7f04c",
       name: "library-version",
-      description: null,
+      title: "library-version-title",
       settings: {
         type: "terms",
         values: ["0.0.301"],

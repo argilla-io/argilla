@@ -11,7 +11,7 @@ export class GetMetadataUseCase {
       return new Metadata(
         metadata.id,
         metadata.name,
-        metadata.description,
+        metadata.title,
         metadata.settings
       );
     });

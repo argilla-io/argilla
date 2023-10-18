@@ -1,13 +1,23 @@
 <template>
   <div class="filters">
-    <SearchBarBase v-model="searchInput" :placeholder="'Introduce a query'" />
-    <MetadataFilter
-      v-if="!!datasetsMetadata.length"
-      :metadata="datasetsMetadata"
+    <SearchBarBase
+      v-model="recordCriteria.searchText"
+      :placeholder="'Introduce a query'"
     />
-    <Sort v-if="!!datasetsMetadata.length" :metadata="datasetsMetadata" />
-    <p class="filters__total-records">{{ totalRecordsInfo }}</p>
-    <StatusFilter class="filters__status" v-model="selectedStatus" />
+    <MetadataFilter
+      v-if="!!datasetMetadata.length"
+      :datasetMetadata="datasetMetadata"
+      v-model="recordCriteria.metadata"
+    />
+    <Sort
+      v-if="!!datasetMetadata.length"
+      :datasetMetadata="datasetMetadata"
+      v-model="recordCriteria.sortBy"
+    />
+    <p v-if="shouldShowTotalRecords" class="filters__total-records">
+      {{ totalRecordsInfo }}
+    </p>
+    <StatusFilter class="filters__status" v-model="recordCriteria.status" />
   </div>
 </template>
 
@@ -17,64 +27,65 @@ import { useDatasetsFiltersViewModel } from "./useDatasetsFiltersViewModel";
 export default {
   name: "DatasetFiltersComponent",
   props: {
-    datasetId: {
-      type: String,
+    recordCriteria: {
+      type: Object,
       required: true,
     },
   },
   data: () => {
     return {
-      selectedStatus: null,
-      searchInput: null,
       totalRecords: null,
     };
-  },
-  setup() {
-    return useDatasetsFiltersViewModel();
-  },
-  mounted() {
-    this.loadMetadata(this.datasetId);
-  },
-  beforeMount() {
-    this.selectedStatus = this.selectedStatus ?? this.statusFromRoute;
-    this.searchInput = this.searchInput ?? this.searchFromRoute;
-
-    this.$root.$on("reset-status-filter", () => {
-      this.selectedStatus = this.statusFromRoute;
-    });
-    this.$root.$on("reset-search-filter", () => {
-      this.searchInput = this.searchFromRoute;
-    });
-    this.$root.$on("total-records", (totalRecords) => {
-      this.totalRecords = totalRecords;
-    });
   },
   computed: {
     totalRecordsInfo() {
       if (!this.totalRecords || this.totalRecords === 0) return null;
 
       if (this.totalRecords === 1) return `${this.totalRecords} record`;
+
       return `${this.totalRecords} records`;
     },
-    statusFromRoute() {
-      return this.$route.query?._status;
+    shouldShowTotalRecords() {
+      return (
+        this.recordCriteria.isFilteringByText ||
+        this.recordCriteria.isFilteringByMetadata
+      );
     },
-    searchFromRoute() {
-      return this.$route.query?._search ?? null;
+  },
+  methods: {
+    newFiltersChanged() {
+      if (!this.recordCriteria.hasChanges) return;
+      this.recordCriteria.page = 1;
+
+      this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
     },
   },
   watch: {
-    selectedStatus(newValue) {
-      this.$root.$emit("status-filter-changed", newValue);
+    "recordCriteria.searchText"() {
+      this.newFiltersChanged();
     },
-    searchInput(searchInput) {
-      this.$root.$emit("search-filter-changed", searchInput);
+    "recordCriteria.status"() {
+      this.newFiltersChanged();
+    },
+    "recordCriteria.metadata"() {
+      this.newFiltersChanged();
+    },
+    "recordCriteria.sortBy"() {
+      this.newFiltersChanged();
     },
   },
-  beforeDestroy() {
-    this.$root.$off("reset-status-filter");
-    this.$root.$off("reset-search-filter");
-    this.$root.$off("total-records");
+  setup() {
+    return useDatasetsFiltersViewModel();
+  },
+  mounted() {
+    this.$root.$on("on-changed-total-records", (totalRecords) => {
+      this.totalRecords = totalRecords;
+    });
+
+    this.loadMetadata(this.recordCriteria.datasetId);
+  },
+  destroyed() {
+    this.$root.$off("on-changed-total-records");
   },
 };
 </script>

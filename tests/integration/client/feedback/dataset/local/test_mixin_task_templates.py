@@ -59,8 +59,9 @@ def test_for_text_classification():
     assert dataset.fields[0].name == "text"
     assert dataset.fields[0].use_markdown is False
     assert (
-        dataset.guidelines
-        == "This is a text classification dataset that contains texts and labels. Given a set of texts and a predefined set of labels, the goal of text classification is to assign one or more labels to each text based on its content. Please classify the texts by selecting the correct label."
+        dataset.guidelines == "This is a text classification dataset that contains texts and labels. "
+        "Given a set of texts and a predefined set of labels, the goal of text classification is to assign one label "
+        "to each text based on its content. Please classify the texts by making the correct selection."
     )
 
     # Test case 2: Multi-label classification
@@ -77,8 +78,9 @@ def test_for_text_classification():
     assert dataset.fields[0].use_markdown is False
     print(dataset.guidelines)
     assert (
-        dataset.guidelines
-        == "This is a text classification dataset that contains texts and labels. Given a set of texts and a predefined set of labels, the goal of text classification is to assign one or more labels to each text based on its content. Please classify the texts by selecting the correct labels."
+        dataset.guidelines == "This is a text classification dataset that contains texts and labels. "
+        "Given a set of texts and a predefined set of labels, the goal of text classification is to assign one "
+        "or more labels to each text based on its content. Please classify the texts by making the correct selection."
     )
 
 

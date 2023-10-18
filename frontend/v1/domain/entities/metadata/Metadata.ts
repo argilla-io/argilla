@@ -9,7 +9,7 @@ export class Metadata {
   constructor(
     private id: string,
     public name: string,
-    private description: string,
+    public title: string,
     public settings: MetadataSettings
   ) {}
 

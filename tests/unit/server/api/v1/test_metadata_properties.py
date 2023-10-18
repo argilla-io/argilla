@@ -218,10 +218,10 @@ async def test_update_metadata_property_title(async_client: "AsyncClient", db: "
 
 @pytest.mark.parametrize(
     "title",
-    ["", "t" * (METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH + 1)],
+    [None, "", "t" * (METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH + 1)],
 )
 @pytest.mark.asyncio
-async def test_update_metadata_property_with_invalid_length_title(
+async def test_update_metadata_property_with_invalid_title(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, title: str
 ):
     metadata_property = await IntegerMetadataPropertyFactory.create(title="title")
@@ -284,6 +284,27 @@ async def test_update_metadata_property_disabling_visible_for_annotators(
     metadata_property = await db.get(MetadataProperty, metadata_property.id)
     assert metadata_property.visible_for_annotators == False
     assert metadata_property.allowed_roles == [UserRole.admin]
+
+
+@pytest.mark.asyncio
+async def test_update_metadata_property_with_visible_for_annotators_as_none(
+    async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+):
+    metadata_property = await IntegerMetadataPropertyFactory.create(allowed_roles=[UserRole.admin, UserRole.annotator])
+
+    assert metadata_property.visible_for_annotators == True
+
+    response = await async_client.patch(
+        f"/api/v1/metadata-properties/{metadata_property.id}",
+        headers=owner_auth_header,
+        json={"visible_for_annotators": None},
+    )
+
+    assert response.status_code == 422
+
+    metadata_property = await db.get(MetadataProperty, metadata_property.id)
+    assert metadata_property.visible_for_annotators == True
+    assert metadata_property.allowed_roles == [UserRole.admin, UserRole.annotator]
 
 
 @pytest.mark.asyncio
