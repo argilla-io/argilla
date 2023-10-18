@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Literal, Optional, Type, TypeVar, Union
 
@@ -33,8 +32,6 @@ if TYPE_CHECKING:
         AllowedRemoteQuestionTypes,
     )
 
-
-_LOGGER = logging.getLogger(__name__)
 
 R = TypeVar("R", bound=FeedbackRecord)
 
