@@ -79,8 +79,10 @@ LABEL_SELECTION_OPTIONS_MAX_ITEMS = 250
 LABEL_SELECTION_MIN_VISIBLE_OPTIONS = 3
 
 RANKING_OPTIONS_MIN_ITEMS = 2
+RANKING_OPTIONS_MAX_ITEMS = 50
 
-TERMS_METADATA_PROPERTY_MIN_VALUES = 1
+TERMS_METADATA_PROPERTY_VALUES_MIN_ITEMS = 1
+TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS = 250
 
 RECORDS_CREATE_MIN_ITEMS = 1
 RECORDS_CREATE_MAX_ITEMS = 1000
@@ -285,6 +287,7 @@ class RankingQuestionSettingsCreate(UniqueValuesCheckerMixin):
     options: conlist(
         item_type=ValueTextQuestionSettingsOption,
         min_items=RANKING_OPTIONS_MIN_ITEMS,
+        max_items=RANKING_OPTIONS_MAX_ITEMS,
     )
 
 
@@ -481,7 +484,9 @@ class NumericMetadataProperty(GenericModel, Generic[NT]):
 
 class TermsMetadataPropertyCreate(BaseModel):
     type: Literal[MetadataPropertyType.terms]
-    values: Optional[List[str]] = PydanticField(None, min_items=TERMS_METADATA_PROPERTY_MIN_VALUES)
+    values: Optional[List[str]] = PydanticField(
+        None, min_items=TERMS_METADATA_PROPERTY_VALUES_MIN_ITEMS, max_items=TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS
+    )
 
 
 class IntegerMetadataPropertyCreate(NumericMetadataProperty[int]):

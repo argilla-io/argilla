@@ -38,6 +38,7 @@ These are the section headers that we use:
 - Missing validations to `PATCH /api/v1/questions/:question_id`. Now `title` and `description` are using the same validations used to create questions. ([#3967](https://github.com/argilla-io/argilla/pull/3967))
 - Added automatic model card generation through `ArgillaTrainer.save` ([#3857](https://github.com/argilla-io/argilla/pull/3857)).
 - Added `FeedbackDataset` `TaskTemplateMixin` for pre-defined task templates. ([#3969](https://github.com/argilla-io/argilla/pull/3969)).
+- A maximum limit of 50 on the number of options a ranking question can accept. ([#3975](https://github.com/argilla-io/argilla/pull/3975))
 
 ### Changed
 
