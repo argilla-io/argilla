@@ -16,11 +16,7 @@
           class="category__item"
           :disabled="!category.hasValues"
           ><span>{{ category.title }}</span>
-          <svgicon
-            v-if="category.hasValues"
-            name="chevron-right"
-            width="10"
-            height="10"
+          <svgicon name="chevron-right" width="10" height="10"
         /></BaseButton>
       </li>
     </ul>
