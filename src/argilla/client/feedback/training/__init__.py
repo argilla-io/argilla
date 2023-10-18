@@ -15,14 +15,14 @@
 from argilla.client.feedback.training.base import ArgillaTrainer
 from argilla.client.feedback.training.schemas import (
     TrainingTask,
+    TrainingTaskForChatCompletion,
     TrainingTaskForDPO,
     TrainingTaskForPPO,
+    TrainingTaskForQuestionAnswering,
     TrainingTaskForRM,
+    TrainingTaskForSentenceSimilarity,
     TrainingTaskForSFT,
     TrainingTaskForTextClassification,
-    TrainingTaskForQuestionAnswering,
-    TrainingTaskForChatCompletion,
-    TrainingTaskForSentenceSimilarity,
     TrainingTaskMapping,  # <- Deprecated
     TrainingTaskMappingForTextClassification,  # <- Deprecated
 )
