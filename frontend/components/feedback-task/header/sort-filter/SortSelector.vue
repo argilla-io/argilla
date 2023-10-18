@@ -22,9 +22,10 @@
       </span>
       <span slot="dropdown-content">
         <SortCategoriesList
+          v-click-outside="onToggleVisibility"
           :categories="nonSelectedSortingItems"
           @include-category="includeSortCategory"
-        ></SortCategoriesList>
+        />
       </span>
     </BaseDropdown>
   </div>
