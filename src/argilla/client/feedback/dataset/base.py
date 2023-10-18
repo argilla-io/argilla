@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from abc import ABC, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Literal, Optional, Type, TypeVar, Union
 
 from pydantic import BaseModel, ValidationError
@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 R = TypeVar("R", bound=FeedbackRecord)
 
 
-class FeedbackDatasetBase(ABC, Generic[R]):
+class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
     """Base class with shared functionality for `FeedbackDataset` and `RemoteFeedbackDataset`."""
 
     def __init__(
@@ -473,5 +473,19 @@ class FeedbackDatasetBase(ABC, Generic[R]):
             PermissionError: if the user does not have either `owner` or `admin` role.
             RuntimeError: if the `metadata_properties` cannot be deleted from the current
                 `FeedbackDataset` in Argilla.
+        """
+        pass
+
+    @abstractmethod
+    def push_to_huggingface(self, repo_id, generate_card, *args, **kwargs):
+        """Pushes the current `FeedbackDataset` to HuggingFace Hub.
+
+        Note:
+            The records from the `RemoteFeedbackDataset` are being pulled before pushing,
+            to ensure that there's no missmatch while uploading those as those are lazily fetched.
+
+        Args:
+            repo_id: the ID of the HuggingFace repo to push the dataset to.
+            generate_card: whether to generate a dataset card or not. Defaults to `True`.
         """
         pass
