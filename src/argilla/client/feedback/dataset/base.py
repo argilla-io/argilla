@@ -425,52 +425,16 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, Generic[R]):
         pass
 
     @abstractmethod
-    def add_metadata_property(self, metadata_property):
-        """Adds a new `metadata_property` to the current `FeedbackDataset` in Argilla.
-
-        Note:
-            Existing `FeedbackRecord`s if any will remain unchanged if those contain metadata
-            named the same way as the `metadata_property`, but added before the
-            `metadata_property` was added.
-
-        Args:
-            metadata_property: the metadata property to add to the current `FeedbackDataset`
-                in Argilla.
-
-        Returns:
-            The newly added `metadata_property` to the current `FeedbackDataset` in Argilla.
-
-        Raises:
-            PermissionError: if the user does not have either `owner` or `admin` role.
-            RuntimeError: if the `metadata_property` cannot be added to the current
-                `FeedbackDataset` in Argilla.
-        """
+    def add_metadata_property(self, *args, **kwargs):
+        """Adds a new `metadata_property` to the current `FeedbackDataset`."""
         pass
 
     @abstractmethod
-    def delete_metadata_properties(self, metadata_properties):
-        """Deletes a list of `metadata_properties` from the current `FeedbackDataset`
-        in Argilla.
+    def update_metadata_properties(self, *args, **kwargs):
+        """Updates the `metadata_properties` of the current `FeedbackDataset`."""
+        pass
 
-        Note:
-            Existing `FeedbackRecord`s if any, will remain unchanged if those contain metadata
-            named the same way as the `metadata_properties` to delete, but the validation will
-            be removed as well as `metadata_property` index, which means one won't be able to
-            use that for filtering.
-
-        Args:
-            metadata_properties: the metadata property/ies name/s to delete from the current
-                `FeedbackDataset` in Argilla.
-
-        Returns:
-            The `metadata_property` or `metadata_properties` deleted from the current
-            `FeedbackDataset` in Argilla, but using the local schema e.g. if you delete a
-            `RemoteFloatMetadataProperty` this method will delete it from Argilla and will
-            return a `FloatMetadataProperty` instance.
-
-        Raises:
-            PermissionError: if the user does not have either `owner` or `admin` role.
-            RuntimeError: if the `metadata_properties` cannot be deleted from the current
-                `FeedbackDataset` in Argilla.
-        """
+    @abstractmethod
+    def delete_metadata_properties(self, *args, **kwargs):
+        """Deletes a list of `metadata_properties` from the current `FeedbackDataset`."""
         pass
