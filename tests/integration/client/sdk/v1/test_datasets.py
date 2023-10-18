@@ -411,7 +411,7 @@ async def test_add_suggestion(role: UserRole) -> None:
         assert response.status_code == 201
         assert isinstance(response.parsed, FeedbackSuggestionModel)
         assert response.parsed.value == 1
-        assert response.parsed.question_id == dataset.questions[0].id
+        assert response.parsed.question_id == str(dataset.questions[0].id)
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner, UserRole.annotator])

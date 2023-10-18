@@ -172,6 +172,33 @@ class TestRemoteFeedbackDataset:
                 assert suggestion.question_name == "question"
                 assert suggestion.value == f"Hello world! for {record.fields['text']}"
 
+    async def test_update_records_with_empty_list_of_suggestions(self, owner: "User", test_dataset: FeedbackDataset):
+        rg.init(api_key=owner.api_key)
+        ws = rg.Workspace.create(name="test-workspace")
+
+        test_dataset.add_records(
+            [
+                FeedbackRecord(
+                    fields={"text": "Hello world!"}, suggestions=[{"question_name": "question", "value": "test"}]
+                ),
+                FeedbackRecord(
+                    fields={"text": "Another record"}, suggestions=[{"question_name": "question", "value": "test"}]
+                ),
+            ]
+        )
+
+        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+
+        records = []
+        for record in remote:
+            record.suggestions = []
+            records.append(record)
+
+        remote.update_records(records)
+
+        for records in remote:
+            assert len(records.suggestions) == 0
+
     @pytest.mark.parametrize(
         "metadata", [("terms-metadata", "wrong-label"), ("integer-metadata", "wrong-integer"), ("float-metadata", 11.5)]
     )

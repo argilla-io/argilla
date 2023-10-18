@@ -241,7 +241,7 @@ class FeedbackRecord(BaseModel):
         payload["fields"] = {key: value for key, value in self.fields.items() if value is not None}
         if self.responses:
             payload["responses"] = [response.to_server_payload() for response in self.responses]
-        if self.suggestions and question_name_to_id:
+        if question_name_to_id:
             payload["suggestions"] = [
                 suggestion.to_server_payload(question_name_to_id) for suggestion in self.suggestions
             ]
