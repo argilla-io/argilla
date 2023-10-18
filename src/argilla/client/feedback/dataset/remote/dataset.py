@@ -472,10 +472,12 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 
         instance = FeedbackDataset(
-            fields=self.fields,
-            questions=self.questions,
-            guidelines=self.guidelines,
-            metadata_properties=self.metadata_properties,
+            fields=[field.to_local() for field in self.fields],
+            questions=[question.to_local() for question in self.questions],
+            guidelines=self.guidelines or None,
+            metadata_properties=[metadata_property.to_local() for metadata_property in self.metadata_properties]
+            or None,
+            allow_extra_metadata=self._allow_extra_metadata,
         )
         records = [record.to_local() for record in self._records]
 
