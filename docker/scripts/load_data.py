@@ -271,7 +271,7 @@ if __name__ == "__main__":
         load_datasets = LOAD_DATASETS.lower().strip()
         while True:
             try:
-                response = requests.get("http://0.0.0.0:6900/")
+                response = requests.get("http://0.0.0.0:6900")
                 if response.status_code == 200:
                     ld = LoadDatasets(API_KEY)
                     ld.load_error_analysis(with_metadata_property_options=False)

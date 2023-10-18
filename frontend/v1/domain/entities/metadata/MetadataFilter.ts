@@ -90,6 +90,9 @@ class MetadataFilter {
 
 export class MetadataFilterList {
   private readonly metadata: MetadataFilter[];
+  private readonly filteredMetadata: MetadataFilter[] = [];
+  private latestCommit: string[] = [];
+
   constructor(metadata: Metadata[]) {
     this.metadata = metadata.map((m) => new MetadataFilter(m));
   }
@@ -106,37 +109,85 @@ export class MetadataFilterList {
     return this.metadata.filter((m) => m.isAnswered);
   }
 
+  get hasChangesSinceLatestCommit() {
+    if (this.filteredMetadata.length !== this.filtered.length) return true;
+
+    if (this.filtered.some((f) => !this.filteredMetadata.includes(f)))
+      return true;
+
+    return this.hasChangesSinceLatestCommitWith(this.convertToRouteParam());
+  }
+
   get filteredCategories() {
-    return this.filtered.map((cat) => cat.name);
+    return this.filteredMetadata.map((cat) => cat.name);
   }
 
   findByCategory(category: string) {
     return this.metadata.find((cat) => cat.name === category);
   }
 
-  convertToRouteParam(): string[] {
-    return this.toQueryParams().map((metadata) => {
-      return `${metadata.name}:${metadata.value}`;
-    });
+  hasChangesSinceLatestCommitWith(compare: string[]) {
+    return this.latestCommit.join("") !== compare.join("");
   }
 
-  completeByRouteParams(params = "") {
+  commit(): string[] {
+    this.synchronizeFilteredMetadata();
+
+    this.latestCommit = this.convertToRouteParam();
+
+    return this.latestCommit;
+  }
+
+  initializeWith(params: string[]) {
     this.metadata.forEach((m) => m.clear());
 
-    if (!params) return;
+    if (!params.length) return;
 
-    const metadataFilter = params.split("+").map((metadata) => {
+    const metadataFilter = params.map((metadata) => {
       const [name, value] = metadata.split(/:(.*)/s);
       return { name, value };
     });
 
     metadataFilter.forEach(({ name, value }) => {
-      this.findByCategory(name)?.completeMetadata(value);
+      const metadata = this.findByCategory(name);
+      if (metadata) {
+        metadata.completeMetadata(value);
+
+        if (this.filteredMetadata.includes(metadata)) return;
+
+        this.filteredMetadata.push(metadata);
+      }
+    });
+
+    this.commit();
+  }
+
+  private synchronizeFilteredMetadata() {
+    const newFiltered = this.filtered.filter(
+      (category) => !this.filteredMetadata.includes(category)
+    );
+    newFiltered.forEach((f) => {
+      this.filteredMetadata.push(f);
+    });
+
+    const removedFilters = this.filteredMetadata.filter(
+      (category) => !this.filtered.includes(category)
+    );
+    removedFilters.forEach((f) => {
+      const indexOf = this.filteredMetadata.indexOf(f);
+
+      this.filteredMetadata.splice(indexOf, 1);
+    });
+  }
+
+  private convertToRouteParam(): string[] {
+    return this.toQueryParams().map((metadata) => {
+      return `${metadata.name}:${metadata.value}`;
     });
   }
 
   private toQueryParams() {
-    return this.filtered.map((m) => {
+    return this.filteredMetadata.map((m) => {
       return {
         name: m.name,
         value: m.isTerms

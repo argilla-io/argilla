@@ -35,7 +35,7 @@ class RGDatasetListener:
 
     Args:
         dataset: The dataset over which listener is created
-        action: The action to execute when condition is satisfied
+        action: The action to execute when the condition is satisfied
         metrics: A list of metrics ids that will be required in condition
         query: The query string to apply
         query_params: Defined parameters used dynamically in the provided query
@@ -238,14 +238,14 @@ def listener(
     **query_params,
 ):
     """
-    Configures the decorated function as a argilla listener.
+    Configures the decorated function as an argilla listener.
 
     Args:
         dataset: The dataset name.
         query: The query string.
         metrics: Required metrics for listener condition.
         condition: Defines condition over search and metrics that launch action when is satisfied.
-        with_records: Include records as part or action arguments. If ``False``,
+        with_records: Include records as part of action arguments. If ``False``,
             only the listener context ``RGListenerContext`` will be passed. Default: ``True``.
         execution_interval_in_seconds: Define the execution interval in seconds when listener
             iteration will be executed.

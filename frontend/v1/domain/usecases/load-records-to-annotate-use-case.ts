@@ -5,6 +5,7 @@ import { Suggestion } from "../entities/question/Suggestion";
 import { IRecordStorage } from "../services/IRecordStorage";
 import { Records } from "../entities/record/Records";
 import { RecordAnswer } from "../entities/record/RecordAnswer";
+import { RecordCriteria } from "../entities/record/RecordCriteria";
 import {
   RecordRepository,
   QuestionRepository,
@@ -21,15 +22,54 @@ export class LoadRecordsToAnnotateUseCase {
     private readonly recordsStorage: IRecordStorage
   ) {}
 
-  async execute(
-    mode: LoadRecordsMode,
-    datasetId: string,
-    page: number,
-    status: string,
-    searchText: string,
-    metadataFilter: string[],
-    sortBy: string[]
-  ): Promise<void> {
+  async load(mode: LoadRecordsMode, criteria: RecordCriteria): Promise<void> {
+    const { page } = criteria;
+
+    let newRecords = await this.loadRecords(mode, criteria);
+
+    let isRecordExistForCurrentPage = newRecords.existsRecordOn(page);
+
+    if (!isRecordExistForCurrentPage && page !== 1) {
+      criteria.page = 1;
+
+      newRecords = await this.loadRecords(mode, criteria);
+
+      isRecordExistForCurrentPage = newRecords.existsRecordOn(page);
+    }
+
+    if (isRecordExistForCurrentPage) {
+      const record = newRecords.getRecordOn(page);
+
+      record.initialize();
+    }
+
+    criteria.commit();
+  }
+
+  async paginate(criteria: RecordCriteria): Promise<boolean> {
+    const { page } = criteria;
+    let records = this.recordsStorage.get();
+    let isNextRecordExist = records.existsRecordOn(page);
+
+    if (!isNextRecordExist) {
+      records = await this.loadRecords("append", criteria);
+
+      isNextRecordExist = records.existsRecordOn(page);
+    }
+
+    if (isNextRecordExist) {
+      const record = records.getRecordOn(page);
+
+      record.initialize();
+
+      criteria.commit();
+    }
+
+    return isNextRecordExist;
+  }
+
+  private async loadRecords(mode: LoadRecordsMode, criteria: RecordCriteria) {
+    const { datasetId, status, searchText, metadata, sortBy, page } = criteria;
     const savedRecords = this.recordsStorage.get();
 
     const { fromRecord, howMany } = savedRecords.getPageToFind(page, status);
@@ -40,7 +80,7 @@ export class LoadRecordsToAnnotateUseCase {
       howMany,
       status,
       searchText,
-      metadataFilter,
+      metadata,
       sortBy
     );
     const getQuestions = this.questionRepository.getQuestions(datasetId);
@@ -104,7 +144,6 @@ export class LoadRecordsToAnnotateUseCase {
           fields,
           answer,
           suggestions,
-          record.updated_at,
           index + page
         );
       }
@@ -117,5 +156,7 @@ export class LoadRecordsToAnnotateUseCase {
     } else {
       this.recordsStorage.replace(records);
     }
+
+    return records;
   }
 }

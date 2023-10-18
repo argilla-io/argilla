@@ -1,7 +1,7 @@
 import { useRoute, useRouter } from "@nuxtjs/composition-api";
 import { Dataset } from "@/v1/domain/entities/Dataset";
 
-type KindOfParam = "_status" | "_page" | "_search" | "_metadata";
+type KindOfParam = "_status" | "_page" | "_search" | "_metadata" | "_sort";
 
 export const ROUTES = {
   datasets: "datasets",
@@ -43,12 +43,14 @@ export const useRoutes = () => {
     router.push({ path: `/${ROUTES.datasets}` });
   };
 
-  const addQueryParam = async (
+  const setQueryParams = async (
     ...params: { key: KindOfParam; value: string }[]
   ) => {
     let newQuery = {};
 
     params.forEach(({ key, value }) => {
+      if (!value) return;
+
       newQuery = {
         ...newQuery,
         [key]: value,
@@ -58,29 +60,20 @@ export const useRoutes = () => {
     await router.push({
       path: route.value.path,
       query: {
-        ...route.value.query,
         ...newQuery,
       },
     });
   };
 
-  const removeQueryParam = async (key: KindOfParam) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { [key]: _, ...rest } = route.value.query;
-
-    await router.push({
-      path: route.value.path,
-      query: {
-        ...rest,
-      },
-    });
+  const getQueryParams = <T>(key: KindOfParam): T => {
+    return route.value.query[key] as T;
   };
 
   return {
     goToDatasetsList,
     goToSetting,
     getDatasetLink,
-    addQueryParam,
-    removeQueryParam,
+    setQueryParams,
+    getQueryParams,
   };
 };

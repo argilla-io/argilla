@@ -56,10 +56,18 @@ import "assets/icons/chevron-left";
 
 export default {
   props: {
-    metadata: {
+    datasetMetadata: {
       type: Array,
       required: true,
     },
+    metadataFiltered: {
+      type: Array,
+      required: true,
+    },
+  },
+  model: {
+    prop: "metadataFiltered",
+    event: "onMetadataFilteredChanged",
   },
   data() {
     return {
@@ -68,12 +76,6 @@ export default {
       selectedOptions: [],
       appliedCategoriesFilters: [],
     };
-  },
-  created() {
-    this.$root.$on("reset-metadata-filter", this.updateFiltersFromQueryParams);
-  },
-  destroyed() {
-    this.$root.$off("reset-metadata-filter");
   },
   methods: {
     onMetadataToggleVisibility(value) {
@@ -89,21 +91,13 @@ export default {
       this.filter();
     },
     filter() {
-      this.$root.$emit(
-        "metadata-filter-changed",
-        this.metadataFilters.convertToRouteParam()
-      );
+      if (!this.metadataFilters.hasChangesSinceLatestCommit) return;
 
-      const newCategoryFilters = this.metadataFilters.filteredCategories.filter(
-        (category) => !this.appliedCategoriesFilters.includes(category)
-      );
-      if (newCategoryFilters.length) {
-        newCategoryFilters.forEach((f) => {
-          this.appliedCategoriesFilters.push(f);
-        });
-      } else {
-        this.appliedCategoriesFilters = this.metadataFilters.filteredCategories;
-      }
+      const newFilter = this.metadataFilters.commit();
+
+      this.$emit("onMetadataFilteredChanged", newFilter);
+
+      this.appliedCategoriesFilters = this.metadataFilters.filteredCategories;
     },
     openCategoryFilter(category) {
       this.visibleDropdown = this.visibleDropdown
@@ -117,8 +111,10 @@ export default {
 
       this.applyFilter();
     },
-    updateFiltersFromQueryParams() {
-      this.completeByRouteParams();
+    updateAppliedCategoriesFromMetadataFilter() {
+      if (!this.metadataFilters) return;
+
+      this.metadataFilters.initializeWith(this.metadataFiltered);
 
       this.appliedCategoriesFilters = this.metadataFilters.filteredCategories;
     },
@@ -141,9 +137,19 @@ export default {
         this.filter();
       },
     },
+    metadataFiltered() {
+      if (
+        !this.metadataFilters.hasChangesSinceLatestCommitWith(
+          this.metadataFiltered
+        )
+      )
+        return;
+
+      this.updateAppliedCategoriesFromMetadataFilter();
+    },
   },
-  mounted() {
-    this.updateFiltersFromQueryParams();
+  created() {
+    this.updateAppliedCategoriesFromMetadataFilter();
   },
   setup(props) {
     return useMetadataFilterViewModel(props);
