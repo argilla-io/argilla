@@ -24,13 +24,12 @@ from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas.enums import QuestionTypes
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
-from argilla.client.feedback.schemas.remote.shared import RemoteSchema
 from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
     from datasets import Dataset
 
-    from argilla.client.feedback.dataset.local import FeedbackDataset
+    from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
     from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 
 _LOGGER = logging.getLogger(__name__)
@@ -158,7 +157,7 @@ class HuggingFaceDatasetMixin:
 
     @requires_dependencies(["huggingface_hub", "datasets"])
     def push_to_huggingface(
-        self: Union["FeedbackDataset", "RemoteFeedbackDataset"],
+        self: "FeedbackDataset",
         repo_id: str,
         generate_card: Optional[bool] = True,
         *args,
@@ -199,26 +198,12 @@ class HuggingFaceDatasetMixin:
         hfds.push_to_hub(repo_id, *args, **kwargs)
 
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
-            local_fields = []
-            for field in self.fields:
-                local_fields.append(field.to_local() if isinstance(field, RemoteSchema) else field)
-            local_questions = []
-            for question in self.questions:
-                local_questions.append(question.to_local() if isinstance(question, RemoteSchema) else question)
-            local_metadata_properties = []
-            if self.metadata_properties:
-                for metadata_property in self.metadata_properties:
-                    local_metadata_properties.append(
-                        metadata_property.to_local()
-                        if isinstance(metadata_property, RemoteSchema)
-                        else metadata_property
-                    )
             f.write(
                 DatasetConfig(
-                    fields=local_fields,
-                    questions=local_questions,
+                    fields=self.fields,
+                    questions=self.questions,
                     guidelines=self.guidelines,
-                    metadata_properties=local_metadata_properties or None,
+                    metadata_properties=self.metadata_properties or None,
                     allow_extra_metadata=self.allow_extra_metadata,
                 ).to_yaml()
             )
@@ -256,7 +241,7 @@ class HuggingFaceDatasetMixin:
                 repo_id=repo_id,
                 argilla_fields=self.fields,
                 argilla_questions=self.questions,
-                argilla_guidelines=self.guidelines,
+                argilla_guidelines=self.guidelines or None,
                 argilla_record=json.loads(sample_argilla_record.json()),
                 huggingface_record=sample_huggingface_record,
             )
@@ -316,7 +301,7 @@ class HuggingFaceDatasetMixin:
             with open(config_path, "r") as f:
                 config = DatasetConfig.from_yaml(f.read())
         except EntryNotFoundError:
-            # TODO(alvarobartt): here for backwards compatibility, remove in 1.14.0
+            # TODO(alvarobartt): here for backwards compatibility, last used in 1.12.0
             warnings.warn(
                 "No `argilla.yaml` file found in the Hugging Face Hub repository, which"
                 " means that the `DatasetConfig` was dumped using Argilla 1.12.0 or"

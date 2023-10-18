@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 R = TypeVar("R", bound=FeedbackRecord)
 
 
-class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, Generic[R]):
+class FeedbackDatasetBase(ABC, Generic[R]):
     """Base class with shared functionality for `FeedbackDataset` and `RemoteFeedbackDataset`."""
 
     def __init__(

@@ -731,3 +731,18 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             UserWarning,
         )
         return self
+
+    # TODO(@frascuchon): is this actually needed? what are the probabilities on a missmatch happening?
+    def push_to_huggingface(self, repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs) -> None:
+        """Pushes the current `FeedbackDataset` to HuggingFace Hub.
+
+        Note:
+            The records from the `RemoteFeedbackDataset` are being pulled before pushing,
+            to ensure that there's no missmatch while uploading those as those are lazily fetched.
+
+        Args:
+            repo_id: the ID of the HuggingFace repo to push the dataset to.
+            generate_card: whether to generate a dataset card or not. Defaults to `True`.
+        """
+        dataset = self.pull()
+        dataset.push_to_huggingface(repo_id=repo_id, generate_card=generate_card, *args, **kwargs)
