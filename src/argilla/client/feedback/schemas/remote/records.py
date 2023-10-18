@@ -124,7 +124,7 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
     question_name_to_id: Optional[Dict[str, UUID]] = Field(..., exclude=True, repr=False)
 
     responses: List[RemoteResponseSchema] = Field(default_factory=list)
-    suggestions: Union[Tuple[AllowedSuggestionSchema], List[AllowedSuggestionSchema]] = Field(default_factory=tuple)
+    suggestions: Tuple[AllowedSuggestionSchema] = Field(default_factory=tuple)
 
     class Config:
         allow_mutation = True
@@ -139,7 +139,6 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
         if isinstance(suggestions, (dict, SuggestionSchema)):
             suggestions = [suggestions]
 
-        existing_suggestions = {suggestion.question_name: suggestion for suggestion in self.suggestions}
         new_suggestions = {}
 
         for suggestion in suggestions:
@@ -161,71 +160,12 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
                 )
                 new_suggestions.pop(suggestion.question_name, None)
                 new_suggestions[suggestion.question_name] = suggestion
-            elif suggestion.question_name in existing_suggestions:
-                comparable_fields = {"question_name", "type", "score", "value", "agent"}
-                comparable_suggestion = suggestion.dict(include={"question_name", "type", "score", "value", "agent"})
-                if any(
-                    [
-                        comparable_suggestion == suggestion_.dict(include=comparable_fields)
-                        for suggestion_ in existing_suggestions.values()
-                    ]
-                ):
-                    warnings.warn(
-                        f"A suggestion for question `{suggestion.question_name}` has already"
-                        " been provided and the provided suggestion is the same, so it will"
-                        " be ignored.",
-                        UserWarning,
-                        stacklevel=1,
-                    )
-                else:
-                    warnings.warn(
-                        f"A suggestion for question `{suggestion.question_name}` has already"
-                        " been provided but the provided suggestion is different, so it will"
-                        " overwrite the existing one.",
-                        UserWarning,
-                        stacklevel=1,
-                    )
-                    existing_suggestions.pop(suggestion.question_name, None)
-                    new_suggestions[suggestion.question_name] = suggestion
-            else:
-                new_suggestions[suggestion.question_name] = suggestion
 
         return list(new_suggestions.values())
-
-    def __update_suggestions(self, suggestions: List[AllowedSuggestionSchema]) -> None:
-        """Updates the suggestions for the record in Argilla.
-
-        Note that this method will update the record in Argilla directly.
-
-        Args:
-            suggestions: can be a list of `RemoteSuggestionSchema` or `SuggestionSchema`.
-        """
-
-        pushed_suggestions = []
-
-        for suggestion in suggestions:
-            if isinstance(suggestion, RemoteSuggestionSchema):
-                suggestion = suggestion.to_local()
-            # TODO: review the existence of bulk endpoint for record suggestions
-            pushed_suggestion = records_api_v1.set_suggestion(
-                client=self.client,
-                record_id=self.id,
-                **suggestion.to_server_payload(question_name_to_id=self.question_name_to_id),
-            )
-            pushed_suggestions.append(
-                RemoteSuggestionSchema.from_api(
-                    payload=pushed_suggestion.parsed,
-                    question_id_to_name={value: key for key, value in self.question_name_to_id.items()},
-                    client=self.client,
-                )
-            )
-
-        self.__dict__["suggestions"] = tuple(pushed_suggestions)
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def update(
         self,
-        metadata: Optional[Dict[str, Any]] = None,
         suggestions: Optional[
             Union[
                 SuggestionSchema,
@@ -235,31 +175,29 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
             ]
         ] = None,
     ) -> None:
-        """Update a `RemoteFeedbackRecord`.
+        """Update a `RemoteFeedbackRecord` in Argilla.
 
         Note that this method will update the record in Argilla directly.
 
         Args:
-            metadata: the new metadata to set for the record. Defaults to `None`.
-            suggestions: the new list of suggestions to set for the record. It can be a
-                single `SuggestionSchema`, a list of `SuggestionSchema`, a single
-                dictionary or a list of dictionary. If a dictionary is provided, it
-                will be converted to a `SuggestionSchema` internally. Defaults to
+            suggestions: **DEPRECATED** the new list of suggestions to set for the
+                record. It can be a single `SuggestionSchema`, a list of `SuggestionSchema`,
+                a single dictionary or a list of dictionary. If a dictionary is provided,
+                it will be converted to a `SuggestionSchema` internally. Defaults to
                 `None`.
 
         Raises:
             PermissionError: if the user does not have either `owner` or `admin` role.
         """
-        # TODO: once we have a dataset ref in the record, we should validate the new metadata
-        if isinstance(metadata, dict):
-            self.metadata = metadata
+        if suggestions is not None:
+            warnings.warn(
+                "The `suggestions` argument is deprecated and will be removed in "
+                "future releases. In order to update the suggestions of a record "
+                "assign the `suggestions` attribute directly.",
+                stacklevel=1,
+            )
 
-        if isinstance(suggestions, (SuggestionSchema, dict)):
-            suggestions = [suggestions]
-
-        if isinstance(suggestions, list):
-            suggestions = self.__normalize_suggestions_to_update(suggestions)
-            self.suggestions = tuple(suggestions)
+            self.suggestions = tuple(self.__normalize_suggestions_to_update(suggestions))
 
         self.__updated_record_data()
 
