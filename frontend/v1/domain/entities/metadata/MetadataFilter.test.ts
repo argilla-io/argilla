@@ -45,34 +45,38 @@ describe("MetadataFilter ", () => {
   describe("FilteredCategories", () => {
     test("should return the categories", () => {
       const metadataFilter = new MetadataFilterList(createMetadataMock());
-      const categories = metadataFilter.filteredCategories;
 
-      expect(categories).toEqual([]);
+      metadataFilter.commit();
+
+      expect(metadataFilter.filteredCategories).toEqual([]);
     });
 
     test("should return empty array if there is no metadata", () => {
       const metadataFilter = new MetadataFilterList([]);
-      const categories = metadataFilter.filteredCategories;
 
-      expect(categories).toEqual([]);
+      metadataFilter.commit();
+
+      expect(metadataFilter.filteredCategories).toEqual([]);
     });
 
     test("should return the categories with selected options", () => {
       const metadataFilter = new MetadataFilterList(createMetadataMock());
       metadataFilter.findByCategory("split").completeMetadata("test,train");
-      const categories = metadataFilter.filteredCategories;
 
-      expect(categories).toEqual(["split"]);
+      metadataFilter.commit();
+
+      expect(metadataFilter.filteredCategories).toEqual(["split"]);
     });
   });
 
-  describe("Convert to Router Parameter", () => {
+  describe("commit Parameter", () => {
     test("should return the router params for answered filters for terms", () => {
       const metadataFilter = new MetadataFilterList(createMetadataMock());
       metadataFilter.findByCategory("split").completeMetadata("test,train");
-      const routerParams = metadataFilter.convertToRouteParam();
 
-      expect(routerParams).toEqual(["split:test,train"]);
+      const committedFilters = metadataFilter.commit();
+
+      expect(committedFilters).toEqual(["split:test,train"]);
     });
 
     test("should return the router params for answered filters for numbers", () => {
@@ -80,27 +84,52 @@ describe("MetadataFilter ", () => {
       metadataFilter
         .findByCategory("loss")
         .completeMetadata(JSON.stringify({ ge: 10, le: 20 }));
-      const routerParams = metadataFilter.convertToRouteParam();
+
+      const committedFilters = metadataFilter.commit();
 
       // eslint-disable-next-line quotes
-      expect(routerParams).toEqual(['loss:{"ge":10,"le":20}']);
+      expect(committedFilters).toEqual(['loss:{"ge":10,"le":20}']);
     });
 
     test("should return the router params for answered filters", () => {
       const metadataFilter = new MetadataFilterList(createMetadataMock());
-      const routerParams = metadataFilter.convertToRouteParam();
 
-      expect(routerParams).toEqual([]);
+      const committedFilters = metadataFilter.commit();
+
+      expect(committedFilters).toEqual([]);
+    });
+
+    test("should return the filtered metadata in the same order answered by the user", () => {
+      const metadataFilter = new MetadataFilterList(createMetadataMock());
+      metadataFilter
+        .findByCategory("loss")
+        .completeMetadata(JSON.stringify({ ge: 10, le: 20 }));
+
+      // First search
+      metadataFilter.commit();
+      metadataFilter.findByCategory("split").completeMetadata("test,train");
+
+      // Second search
+      const committedFilters = metadataFilter.commit();
+
+      expect(committedFilters).toEqual([
+        // eslint-disable-next-line quotes
+        'loss:{"ge":10,"le":20}',
+        "split:test,train",
+      ]);
     });
   });
 
-  describe("Complete By Route Parameter", () => {
+  describe("Initialize With", () => {
     test("should complete the metadata filter by route params", () => {
       const metadataFilter = new MetadataFilterList(createMetadataMock());
-      metadataFilter.completeByRouteParams(
+      metadataFilter.initializeWith([
+        "split:test,train",
         // eslint-disable-next-line quotes
-        'split:test,train+loss:{"ge":10,"le":20}+float:{"ge":0.5,"le":0.6}'
-      );
+        'loss:{"ge":10,"le":20}',
+        // eslint-disable-next-line quotes
+        'float:{"ge":0.5,"le":0.6}',
+      ]);
 
       expect(
         metadataFilter
@@ -111,16 +140,41 @@ describe("MetadataFilter ", () => {
         ge: 10,
         le: 20,
       });
-
       expect(metadataFilter.findByCategory("float").value).toEqual({
         ge: 0.5,
         le: 0.6,
       });
     });
 
+    test("should not support duplicated filtered categories", () => {
+      const metadataFilter = new MetadataFilterList(createMetadataMock());
+      metadataFilter.initializeWith(["split:test,train"]);
+
+      metadataFilter.initializeWith(["split:test,train"]);
+
+      expect(metadataFilter.filteredCategories).toEqual(["split"]);
+    });
+
+    test("the user can see the filtered categories in the same order that he/she selected", () => {
+      const metadataFilter = new MetadataFilterList(createMetadataMock());
+      metadataFilter.initializeWith([
+        // eslint-disable-next-line quotes
+        'loss:{"ge":10,"le":20}',
+        // eslint-disable-next-line quotes
+        'float:{"ge":0.5,"le":0.6}',
+        "split:test,train",
+      ]);
+
+      expect(metadataFilter.filteredCategories).toEqual([
+        "loss",
+        "float",
+        "split",
+      ]);
+    });
+
     test("no modify anything when the param does not contain the option", () => {
       const metadataFilter = new MetadataFilterList(createMetadataMock());
-      metadataFilter.completeByRouteParams("");
+      metadataFilter.initializeWith([]);
 
       expect(
         metadataFilter
@@ -131,7 +185,7 @@ describe("MetadataFilter ", () => {
 
     test("no modify anything when the meta does not exist", () => {
       const metadataFilter = new MetadataFilterList(createMetadataMock());
-      metadataFilter.completeByRouteParams("not-exist:10");
+      metadataFilter.initializeWith(["not-exist:10"]);
 
       expect(
         metadataFilter
@@ -142,7 +196,7 @@ describe("MetadataFilter ", () => {
 
     test("set settings value when the json is not valid", () => {
       const metadataFilter = new MetadataFilterList(createMetadataMock());
-      metadataFilter.completeByRouteParams("loss:invalid");
+      metadataFilter.initializeWith(["loss:invalid"]);
 
       expect(metadataFilter.findByCategory("loss").value).toEqual({
         ge: 0,
@@ -154,7 +208,7 @@ describe("MetadataFilter ", () => {
   describe("Has Filters", () => {
     test("should return true if there is filters", () => {
       const metadataFilter = new MetadataFilterList(createMetadataMock());
-      metadataFilter.completeByRouteParams("split:test,train");
+      metadataFilter.initializeWith(["split:test", "train"]);
 
       expect(metadataFilter.hasFilters).toBeTruthy();
     });

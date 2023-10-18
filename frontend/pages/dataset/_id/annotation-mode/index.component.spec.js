@@ -23,18 +23,19 @@ const $route = {
   },
 };
 
-jest.mock("@/models/feedback-task-model/record/record.queries", () => ({
-  RECORD_STATUS: {
-    PENDING: "PENDING",
-    DISCARDED: "DISCARDED",
-    SUBMITTED: "SUBMITTED",
-  },
-}));
-
 describe("AnnotationModePage", () => {
-  it("not render the layout while the data are in fetching state", () => {
+  it("render the layout while the data are in fetching state", () => {
     const options = {
-      stubs: ["BaseModal", "DatasetTrainComponent", "BaseLoading"],
+      stubs: [
+        "HeaderFeedbackTaskComponent",
+        "SidebarFeedbackTaskComponent",
+        "RecordFeedbackTaskAndQuestionnaireContent",
+        "DatasetFiltersComponent",
+        "PaginationFeedbackTaskComponent",
+        "BaseModal",
+        "DatasetTrainComponent",
+        "BaseLoading",
+      ],
       mocks: {
         $route,
       },
@@ -54,7 +55,7 @@ describe("AnnotationModePage", () => {
       HeaderAndTopAndOneColumn
     );
 
-    expect(headerComponentWrapper.exists()).toBeFalsy();
+    expect(headerComponentWrapper.exists()).toBeTruthy();
   });
   it("render the layout when data are fetched and no error", () => {
     const options = {

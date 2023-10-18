@@ -9,6 +9,7 @@ const DEFAULT_STATUS = "pending";
 export class Record {
   // eslint-disable-next-line no-use-before-define
   private original: Record;
+  public updatedAt?: string;
 
   constructor(
     public readonly id: string,
@@ -17,10 +18,10 @@ export class Record {
     public readonly fields: Field[],
     public answer: RecordAnswer,
     private readonly suggestions: Suggestion[],
-    public updatedAt: string,
     public readonly page: number
   ) {
     this.completeQuestion();
+    this.updatedAt = answer?.updatedAt;
   }
 
   get status() {
