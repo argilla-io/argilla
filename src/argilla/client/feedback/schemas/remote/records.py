@@ -124,7 +124,7 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
     question_name_to_id: Optional[Dict[str, UUID]] = Field(..., exclude=True, repr=False)
 
     responses: List[RemoteResponseSchema] = Field(default_factory=list)
-    suggestions: Tuple[AllowedSuggestionSchema] = Field(default_factory=tuple)
+    suggestions: Union[Tuple[AllowedSuggestionSchema], List[AllowedSuggestionSchema]] = Field(default_factory=tuple)
 
     class Config:
         allow_mutation = True
