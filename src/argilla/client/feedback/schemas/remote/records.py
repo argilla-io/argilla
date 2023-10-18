@@ -69,7 +69,7 @@ class RemoteSuggestionSchema(SuggestionSchema, RemoteSchema):
             id=payload.id,
             client=client,
             question_id=payload.question_id,
-            question_name=question_id_to_name[payload.question_id],
+            question_name=question_id_to_name[UUID(payload.question_id)],
             type=payload.type,
             score=payload.score,
             value=payload.value,
@@ -158,8 +158,8 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
                     UserWarning,
                     stacklevel=1,
                 )
-                new_suggestions.pop(suggestion.question_name, None)
-                new_suggestions[suggestion.question_name] = suggestion
+
+            new_suggestions[suggestion.question_name] = suggestion
 
         return list(new_suggestions.values())
 
@@ -198,7 +198,8 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
                 stacklevel=1,
             )
 
-            self.suggestions = tuple(self.__normalize_suggestions_to_update(suggestions))
+            new_suggestions = self.__normalize_suggestions_to_update(suggestions)
+            self.suggestions = tuple(new_suggestions)
 
         self.__updated_record_data()
 

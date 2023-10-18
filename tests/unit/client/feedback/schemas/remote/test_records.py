@@ -110,7 +110,7 @@ def test_remote_suggestion_schema(schema_kwargs: Dict[str, Any], server_payload:
     ],
 )
 def test_remote_suggestion_schema_from_api(payload: FeedbackSuggestionModel) -> None:
-    suggestion = RemoteSuggestionSchema.from_api(payload, question_id_to_name={payload.question_id: "question-1"})
+    suggestion = RemoteSuggestionSchema.from_api(payload, question_id_to_name={UUID(payload.question_id): "question-1"})
     assert suggestion.to_server_payload(question_name_to_id={"question-1": payload.question_id}) == payload.dict(
         exclude={"id"}
     )
@@ -325,7 +325,7 @@ def test_remote_feedback_record(schema_kwargs: Dict[str, Any], server_payload: D
 )
 def test_remote_feedback_record_schema_from_api(payload: FeedbackItemModel) -> None:
     record = RemoteFeedbackRecord.from_api(
-        payload, question_id_to_name={payload.suggestions[0].question_id: "question-1"}
+        payload, question_id_to_name={UUID(payload.suggestions[0].question_id): "question-1"}
     )
     # Skipping `suggestions` temporarily as it's now a tuple internally formatted and the type is not preserved
     assert record.dict(
