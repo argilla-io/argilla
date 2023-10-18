@@ -587,7 +587,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         deleted_metadata_properties = list()
         for metadata_property in existing_metadata_properties:
             if metadata_property.name in metadata_properties:
-                deleted_metadata_properties.append(metadata_property.delete())
+                deleted_metadata_properties.append(metadata_property._delete())
                 metadata_properties.remove(metadata_property.name)
         return deleted_metadata_properties if len(deleted_metadata_properties) > 1 else deleted_metadata_properties[0]
 

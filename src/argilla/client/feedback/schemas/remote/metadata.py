@@ -34,12 +34,8 @@ if TYPE_CHECKING:
 
 
 class _RemoteMetadataProperty(RemoteSchema):
-    class Config:
-        allow_mutation = True
-        validate_assignment = True
-
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def update(self: "AllowedRemoteMetadataPropertyTypes") -> None:
+    def _update(self: "AllowedRemoteMetadataPropertyTypes") -> None:
         """Updates the `RemoteMetadataProperty` in Argilla.
 
         Returns:
@@ -54,7 +50,7 @@ class _RemoteMetadataProperty(RemoteSchema):
         self.__dict__.update(updated_metadata_property.__dict__)
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def delete(self: "AllowedRemoteMetadataPropertyTypes") -> "AllowedMetadataPropertyTypes":
+    def _delete(self: "AllowedRemoteMetadataPropertyTypes") -> "AllowedMetadataPropertyTypes":
         """Deletes the `RemoteMetadataProperty` from Argilla.
 
         Returns:

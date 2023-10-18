@@ -106,7 +106,7 @@ class TestSuiteRemoteMetadataProperties:
             ),
         ],
     )
-    def test_update(
+    def test__update(
         self,
         owner: "UserModel",
         metadata_properties: List["AllowedMetadataPropertyTypes"],
@@ -130,7 +130,7 @@ class TestSuiteRemoteMetadataProperties:
         for metadata_property in remote_dataset.metadata_properties:
             metadata_property.title = title
             metadata_property.visible_for_annotators = visible_for_annotators
-            metadata_property.update()
+            metadata_property._update()
 
         # Ensure that `metadata_properties` are updated in Argilla and restored successfully
         remote_dataset = rg.FeedbackDataset.from_argilla(name="my-dataset", workspace=workspace.name)
@@ -141,7 +141,7 @@ class TestSuiteRemoteMetadataProperties:
             assert metadata_property.title == title
             assert metadata_property.visible_for_annotators == visible_for_annotators
 
-    def test_delete(self, owner: "UserModel") -> None:
+    def test__delete(self, owner: "UserModel") -> None:
         rg.init(api_key=owner.api_key)
 
         workspace = rg.Workspace.create(name="my-workspace")
@@ -159,9 +159,9 @@ class TestSuiteRemoteMetadataProperties:
         assert isinstance(remote_dataset, RemoteFeedbackDataset)
         assert len(remote_dataset.metadata_properties) == len(dataset.metadata_properties)
 
-        remote_dataset.metadata_properties[0].delete()
+        remote_dataset.metadata_properties[0]._delete()
         for metadata_property in remote_dataset.metadata_properties:
-            local_metadata_property = metadata_property.delete()
+            local_metadata_property = metadata_property._delete()
             assert isinstance(
                 local_metadata_property,
                 (rg.TermsMetadataProperty, rg.IntegerMetadataProperty, rg.FloatMetadataProperty),
