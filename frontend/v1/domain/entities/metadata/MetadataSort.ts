@@ -17,6 +17,8 @@ abstract class Sort {
   }
 
   abstract get name(): string;
+
+  abstract get title(): string;
 }
 
 class MetadataSort extends Sort {
@@ -27,10 +29,14 @@ class MetadataSort extends Sort {
   get name() {
     return this.metadata.name;
   }
+
+  get title() {
+    return this.metadata.title;
+  }
 }
 
 class RecordSort extends Sort {
-  constructor(public readonly name: string) {
+  constructor(public readonly name: string, public readonly title = name) {
     super();
   }
 }
@@ -52,10 +58,6 @@ export class MetadataSortList {
     return this.metadataSorts.filter(
       (metadata) => !this.selectedCategories.includes(metadata)
     );
-  }
-
-  get selectedCategoriesName() {
-    return this.selectedCategories.map((s) => s.name);
   }
 
   select(category: string) {

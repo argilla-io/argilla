@@ -8,8 +8,8 @@
       <span slot="dropdown-header" class="sort-selector-item__dropdown__header">
         <span
           class="sort-selector-item__dropdown__header__text"
-          title="category.name"
-          v-text="category.name"
+          title="category.title"
+          v-text="category.title"
         />
         <svgicon width="12" height="12" name="chevron-down" />
       </span>

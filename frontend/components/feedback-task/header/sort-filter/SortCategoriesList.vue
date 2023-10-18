@@ -14,7 +14,7 @@
         <BaseButton
           @on-click="includeCategory(category)"
           class="sort-categories__item"
-          ><span>{{ category.name }}</span></BaseButton
+          ><span>{{ category.title }}</span></BaseButton
         >
       </li>
     </ul>
@@ -36,7 +36,7 @@ export default {
   computed: {
     categoriesFilteredBySearchText() {
       return this.categories.filter((cat) =>
-        cat.name.toLowerCase().includes(this.searchText.toLowerCase())
+        cat.title.toLowerCase().includes(this.searchText.toLowerCase())
       );
     },
   },

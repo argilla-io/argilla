@@ -7,7 +7,7 @@
       <span slot="dropdown-header">
         <SortButton
           :is-active="visibleDropdown"
-          :active-sort-items="appliedSortCategories"
+          :active-sort-items="selectedSortingItems"
         />
       </span>
       <span slot="dropdown-content" class="sort-filter__container">
@@ -48,7 +48,6 @@ export default {
   },
   data() {
     return {
-      appliedSortCategories: [],
       visibleDropdown: false,
     };
   },
@@ -83,15 +82,11 @@ export default {
       const newSorting = this.metadataSort.commit();
 
       this.$emit("onSortFilteredChanged", newSorting);
-
-      this.appliedSortCategories = this.metadataSort.selectedCategoriesName;
     },
     updateAppliedCategoriesFromMetadataFilter() {
       if (!this.metadataSort) return;
 
       this.metadataSort.initializeWith(this.sortFilters);
-
-      this.appliedSortCategories = this.metadataSort.selectedCategoriesName;
     },
   },
   watch: {
