@@ -744,5 +744,13 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             repo_id: the ID of the HuggingFace repo to push the dataset to.
             generate_card: whether to generate a dataset card or not. Defaults to `True`.
         """
+        warnings.warn(
+            (
+                "The dataset is first pulled locally and pushed to Hugging Face after because "
+                "`push_to_huggingface` is not supported for a `RemoteFeedbackDataset`. "
+                "`RemoteFeedbackDataset.pull().push_to_huggingface(...)` is applied."
+            ),
+            UserWarning,
+        )
         dataset = self.pull()
         dataset.push_to_huggingface(repo_id=repo_id, generate_card=generate_card, *args, **kwargs)
