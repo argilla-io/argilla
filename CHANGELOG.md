@@ -22,6 +22,7 @@ These are the section headers that we use:
 
 - Added fields `inserted_at` and `updated_at` in `RemoteResponseSchema` ([#3822](https://github.com/argilla-io/argilla/pull/3822)).
 - Added automatic model card generation through `ArgillaTrainer.save` ([#3857](https://github.com/argilla-io/argilla/pull/3857)).
+- Added task templates to the `FeedbackDataset` ([#3973](https://github.com/argilla-io/argilla/pull/3973)).
 
 ### Changed
 
@@ -41,6 +42,8 @@ These are the section headers that we use:
 - Fixed `configure_dataset_settings` when providing the workspace via the arg `workspace` ([#3887](https://github.com/argilla-io/argilla/pull/3887)).
 - Fixed saving of models trained with `ArgillaTrainer` with a `peft_config` parameter ([#3795](https://github.com/argilla-io/argilla/pull/3795)).
 - Fixed backwards compatibility on `from_huggingface` when loading a `FeedbackDataset` from the Hugging Face Hub that was previously dumped using another version of Argilla, starting at 1.8.0, when it was first introduced ([#3829](https://github.com/argilla-io/argilla/pull/3829)).
+- Fixed `TrainingTaskForQuestionAnswering.__repr__` ([#3969](https://github.com/argilla-io/argilla/pull/3969))
+- Fixed potential dictionary key-errors in `TrainingTask.prepare_for_training_with_*`-methods ([#3969](https://github.com/argilla-io/argilla/pull/3969))
 
 ### Deprecated
 
