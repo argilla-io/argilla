@@ -1,5 +1,6 @@
 <template>
-  <div v-if="!$fetchState.pending && !$fetchState.error" class="wrapper">
+  <BaseLoading v-if="$fetchState.pending || $fetchState.error" />
+  <div v-else class="wrapper">
     <template v-if="!!record">
       <RecordFeedbackTaskComponent
         :key="`${record.id}_fields`"
@@ -11,146 +12,60 @@
         :key="`${record.id}_questions`"
         class="question-form"
         :class="statusClass"
-        :datasetId="datasetId"
+        :datasetId="recordCriteria.datasetId"
         :record="record"
         @on-submit-responses="goToNext"
         @on-discard-responses="goToNext"
-        @on-question-form-touched="onQuestionFormTouched"
       />
     </template>
 
-    <div v-else class="wrapper--empty">
-      <p
-        v-if="!records.hasRecordsToAnnotate"
-        class="wrapper__text --heading3"
-        v-text="noRecordsMessage"
-      />
-      <BaseSpinner v-else />
+    <div v-if="!records.hasRecordsToAnnotate" class="wrapper--empty">
+      <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
     </div>
   </div>
 </template>
 
 <script>
-import { isNil } from "lodash";
 import { Notification } from "@/models/Notifications";
-import { RECORD_STATUS } from "@/models/feedback-task-model/record/record.queries";
 import { useRecordFeedbackTaskViewModel } from "./useRecordFeedbackTaskViewModel";
 
 export default {
   name: "RecordFeedbackTaskAndQuestionnaireComponent",
   props: {
-    datasetId: {
-      type: String,
+    recordCriteria: {
+      type: Object,
       required: true,
     },
   },
   data() {
     return {
-      questionFormTouched: false,
-      recordStatusToFilterWith: null,
-      searchTextToFilterWith: null,
-      metadataToFilterWith: null,
-      sortBy: null,
-      currentPage: null,
       fetching: false,
     };
   },
   computed: {
-    noMoreDataMessage() {
-      return `You've reached the end of the data for the ${this.recordStatusToFilterWith} queue.`;
-    },
     record() {
-      return this.records.getRecordOn(this.currentPage);
+      return this.records.getRecordOn(this.recordCriteria.committed.page);
+    },
+    noMoreDataMessage() {
+      return `You've reached the end of the data for the ${this.recordCriteria.committed.status} queue.`;
     },
     noRecordsMessage() {
-      if (
-        isNil(this.searchTextToFilterWith) ||
-        this.searchTextToFilterWith.length === 0
-      )
-        return `You have no ${this.recordStatusToFilterWith} records`;
-      return `You have no ${this.recordStatusToFilterWith} records matching the search input`;
+      const { status } = this.recordCriteria.committed;
+
+      if (this.recordCriteria.isFilteringByText)
+        return `You have no ${status} records matching the search input`;
+
+      return `You have no ${status} records`;
     },
     statusClass() {
       return `--${this.record.status}`;
     },
-    statusFilterFromQuery() {
-      return this.$route.query?._status ?? RECORD_STATUS.PENDING.toLowerCase();
-    },
-    searchFilterFromQuery() {
-      return this.$route.query?._search ?? "";
-    },
-    metadataFilterFromQuery() {
-      return this.$route.query?._metadata?.split("+") ?? [];
-    },
-    sortByFromQuery() {
-      return this.$route.query?._sort?.split(",") ?? [];
-    },
-    pageFromQuery() {
-      const { _page } = this.$route.query;
-      return isNil(_page) ? 1 : +_page;
+    shouldShowNotification() {
+      return this.record?.isSubmitted && this.record?.isModified;
     },
   },
   async fetch() {
     await this.onLoadRecords("replace");
-  },
-  watch: {
-    async currentPage(newValue) {
-      await this.routes.addQueryParam({ key: "_page", value: newValue });
-    },
-    async recordStatusToFilterWith(newValue) {
-      await this.routes.addQueryParam(
-        { key: "_page", value: this.currentPage },
-        { key: "_status", value: newValue }
-      );
-    },
-    async searchTextToFilterWith(newValue) {
-      if (newValue)
-        return await this.routes.addQueryParam(
-          { key: "_page", value: this.currentPage },
-          { key: "_search", value: newValue }
-        );
-
-      await this.routes.removeQueryParam("_search");
-    },
-    async metadataToFilterWith(newValue = []) {
-      if (newValue.length)
-        return await this.routes.addQueryParam(
-          { key: "_page", value: this.currentPage },
-          { key: "_metadata", value: newValue.join("+") }
-        );
-
-      await this.routes.removeQueryParam("_metadata");
-    },
-    async sortBy(newValue = []) {
-      if (newValue.length)
-        return await this.routes.addQueryParam(
-          { key: "_page", value: this.currentPage },
-          { key: "_sort", value: newValue.join(",") }
-        );
-
-      await this.routes.removeQueryParam("_sort");
-    },
-  },
-  created() {
-    this.recordStatusToFilterWith = this.statusFilterFromQuery;
-    this.searchTextToFilterWith = this.searchFilterFromQuery;
-    this.metadataToFilterWith = this.metadataFilterFromQuery;
-    this.sortBy = this.sortByFromQuery;
-    this.currentPage = this.pageFromQuery;
-
-    this.loadMetrics(this.datasetId);
-  },
-  mounted() {
-    this.$root.$on("go-to-next-page", () => {
-      this.setCurrentPage(this.currentPage + 1);
-    });
-    this.$root.$on("go-to-prev-page", () => {
-      this.setCurrentPage(this.currentPage - 1);
-    });
-    this.$root.$on("status-filter-changed", this.onStatusFilterChanged);
-    this.$root.$on("search-filter-changed", this.onSearchFilterChanged);
-    this.$root.$on("metadata-filter-changed", this.onMetadataFilterChanged);
-    this.$root.$on("sort-changed", this.onSortChanged);
   },
   methods: {
     async onLoadRecords(mode) {
@@ -158,232 +73,100 @@ export default {
 
       this.fetching = true;
 
-      await this.loadRecords(
-        mode,
-        this.datasetId,
-        this.currentPage,
-        this.recordStatusToFilterWith,
-        this.searchTextToFilterWith,
-        this.metadataToFilterWith,
-        this.sortBy
-      );
+      await this.loadRecords(mode, this.recordCriteria);
 
-      const isRecordExistForCurrentPage = this.records.existsRecordOn(
-        this.currentPage
-      );
+      this.onSearchFinished();
 
-      if (!isRecordExistForCurrentPage && this.currentPage !== 1) {
-        this.currentPage = 1;
-
-        await this.loadRecords(
-          "clear",
-          this.datasetId,
-          this.currentPage,
-          this.recordStatusToFilterWith,
-          this.searchTextToFilterWith,
-          this.metadataToFilterWith,
-          this.sortBy
-        );
-      }
-
-      this.updateTotalRecordsLabel();
       this.fetching = false;
     },
-    emitResetStatusFilter() {
-      this.$root.$emit("reset-status-filter");
-    },
-    emitResetSearchFilter() {
-      this.$root.$emit("reset-search-filter");
-    },
-    emitResetMetadataFilter() {
-      this.$root.$emit("reset-metadata-filter");
-    },
-    emitResetSort() {
-      this.$root.$emit("reset-sort");
-    },
-    updateTotalRecordsLabel() {
-      if (
-        this.searchTextToFilterWith?.length ||
-        this.metadataToFilterWith?.length
-      )
-        return this.$root.$emit("total-records", this.records.total);
-
-      this.$root.$emit("total-records", null);
-    },
-    onSearchFilterChanged(newSearchValue) {
-      const self = this;
-      const onFilter = () => {
-        this.searchTextToFilterWith = newSearchValue;
-        this.currentPage = 1;
-
-        this.onLoadRecords("replace");
-      };
-
-      if (
-        this.questionFormTouched &&
-        newSearchValue !== this.searchFilterFromQuery
-      ) {
-        return Notification.dispatch("notify", {
-          message: this.$t("changes_no_submit"),
-          buttonText: this.$t("button.ignore_and_continue"),
-          numberOfChars: 500,
-          type: "warning",
-          async onClick() {
-            onFilter();
-          },
-          onClose() {
-            self.emitResetSearchFilter();
-          },
-        });
-      }
-
-      if (newSearchValue !== this.searchFilterFromQuery) return onFilter();
-    },
-    onStatusFilterChanged(newStatus) {
-      if (this.recordStatusToFilterWith === newStatus) return;
-
-      const self = this;
-      const onFilter = () => {
-        this.recordStatusToFilterWith = newStatus;
-        this.currentPage = 1;
-
-        this.onLoadRecords("replace");
-      };
-
-      if (this.questionFormTouched) {
-        Notification.dispatch("notify", {
-          message: this.$t("changes_no_submit"),
-          buttonText: this.$t("button.ignore_and_continue"),
-          numberOfChars: 500,
-          type: "warning",
-          async onClick() {
-            onFilter();
-          },
-          onClose() {
-            self.emitResetStatusFilter();
-          },
-        });
-      } else {
-        onFilter();
-      }
-    },
-    onMetadataFilterChanged(metadata) {
-      const hasOtherFilter =
-        metadata.length !== this.metadataFilterFromQuery.length ||
-        metadata.some((e) => !this.metadataFilterFromQuery.includes(e));
-
-      if (!hasOtherFilter) return;
-
-      const self = this;
-
-      const onFilter = () => {
-        this.metadataToFilterWith = metadata;
-        this.currentPage = 1;
-
-        this.onLoadRecords("replace");
-      };
-
-      if (this.questionFormTouched) {
-        return Notification.dispatch("notify", {
-          message: this.$t("changes_no_submit"),
-          buttonText: this.$t("button.ignore_and_continue"),
-          numberOfChars: 500,
-          type: "warning",
-          async onClick() {
-            onFilter();
-          },
-          onClose() {
-            self.emitResetMetadataFilter();
-          },
-        });
-      }
-
-      onFilter();
-    },
-    onSortChanged(sort) {
-      const self = this;
-      const sortWasChanged =
-        sort.length !== this.sortBy.length ||
-        sort.some((e) => !this.sortBy.includes(e));
-
-      if (!sortWasChanged) return;
-
-      const onFilter = () => {
-        this.sortBy = sort;
-        this.currentPage = 1;
-
-        this.onLoadRecords("replace");
-      };
-
-      if (this.questionFormTouched) {
-        return Notification.dispatch("notify", {
-          message: this.$t("changes_no_submit"),
-          buttonText: this.$t("button.ignore_and_continue"),
-          numberOfChars: 500,
-          type: "warning",
-          async onClick() {
-            onFilter();
-          },
-          onClose() {
-            self.emitResetSort();
-          },
-        });
-      }
-
-      onFilter();
-    },
-    onQuestionFormTouched(isTouched) {
-      this.questionFormTouched = isTouched;
-    },
-    async setCurrentPage(newPage) {
+    async paginate() {
       if (this.fetching) return Promise.resolve();
+
+      Notification.dispatch("clear");
 
       this.fetching = true;
 
-      let isNextRecordExist = this.records.existsRecordOn(newPage);
+      const isNextRecordExist = await this.paginateRecords(this.recordCriteria);
 
       if (!isNextRecordExist) {
-        await this.loadRecords(
-          "append",
-          this.datasetId,
-          newPage,
-          this.recordStatusToFilterWith,
-          this.searchTextToFilterWith,
-          this.metadataToFilterWith,
-          this.sortBy
-        );
-
-        isNextRecordExist = this.records.existsRecordOn(newPage);
+        setTimeout(() => {
+          Notification.dispatch("notify", {
+            message: this.noMoreDataMessage,
+            numberOfChars: this.noMoreDataMessage.length,
+            type: "info",
+          });
+        }, 100);
       }
 
-      if (isNextRecordExist) {
-        this.currentPage = newPage;
-      } else if (this.currentPage < newPage) {
-        Notification.dispatch("notify", {
-          message: this.noMoreDataMessage,
-          numberOfChars: this.noMoreDataMessage.length,
-          type: "info",
-        });
-      }
-
-      this.updateTotalRecordsLabel();
+      this.onSearchFinished();
       this.fetching = false;
     },
-    goToNext() {
-      this.setCurrentPage(this.currentPage + 1);
+    onChangeRecordPage(criteria) {
+      const filter = async () => {
+        await this.paginate();
+      };
+
+      this.showNotificationForNewFilterWhenIfNeeded(filter, () =>
+        criteria.reset()
+      );
     },
-  },
-  beforeDestroy() {
-    this.$root.$off("go-to-next-page");
-    this.$root.$off("go-to-prev-page");
-    this.$root.$off("status-filter-changed");
-    this.$root.$off("search-filter-changed");
-    this.$root.$off("metadata-filter-changed");
-    this.$root.$off("reset-metadata-filter");
-    Notification.dispatch("clear");
+    onChangeRecordFilter(criteria) {
+      const filter = async () => {
+        await this.onLoadRecords("replace");
+      };
+
+      this.showNotificationForNewFilterWhenIfNeeded(filter, () =>
+        criteria.reset()
+      );
+    },
+    onSearchFinished() {
+      return this.$root.$emit("on-changed-total-records", this.records.total);
+    },
+    goToNext() {
+      this.recordCriteria.nextPage();
+
+      this.paginate();
+    },
+    showNotificationForNewFilterWhenIfNeeded(onFilter, onClose) {
+      Notification.dispatch("clear");
+
+      if (!this.shouldShowNotification) {
+        return onFilter();
+      }
+
+      setTimeout(() => {
+        Notification.dispatch("notify", {
+          message: this.$t("changes_no_submit"),
+          buttonText: this.$t("button.ignore_and_continue"),
+          numberOfChars: 500,
+          type: "warning",
+          onClick() {
+            Notification.dispatch("clear");
+            return onFilter();
+          },
+          onClose() {
+            Notification.dispatch("clear");
+            return onClose();
+          },
+        });
+      }, 100);
+    },
   },
   setup() {
     return useRecordFeedbackTaskViewModel();
+  },
+  mounted() {
+    this.$root.$on("on-change-record-page", this.onChangeRecordPage);
+
+    this.$root.$on(
+      "on-change-record-criteria-filter",
+      this.onChangeRecordFilter
+    );
+  },
+  destroyed() {
+    this.$root.$off("on-change-record-page");
+    this.$root.$off("on-change-record-criteria-filter");
+    Notification.dispatch("clear");
   },
 };
 </script>

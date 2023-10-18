@@ -24,7 +24,7 @@ questions = [
         name="response_ranking",
         title="Order the responses based on their accuracy and helpfulness:",
         required=True,
-        values={"response-1": "Response 1", "response-2", "Response 2"} # or ["response-1", "response-2"]
+        values={"response-1": "Response 1", "response-2": "Response 2"} # or ["response-1", "response-2"]
     )
 ]
 ```
@@ -60,20 +60,20 @@ Next, define **guidelines** for labelers. These instructions help labelers under
 
 ```python
 dataset = rg.FeedbackDataset(
-	guidelines="Please, read the prompt carefully and...",
-	questions=questions,
-	fields=fields
+    guidelines="Please, read the prompt carefully and...",
+    questions=questions,
+    fields=fields
 )
 ```
 
 ### Add records
 
-The aim of this phase is to create records with a `prompt` and two generated `responses` to be pushed into Argilla for collecting human `rankings`.
+This phase aims to create records with a `prompt` and two generated `responses` to be pushed into Argilla for collecting human `rankings`.
 
 Once you have configured the dataset, you need to add records and publish them for labelers. In this case, the records will contain three fields: the **prompt**, **response 1**, and **response 2**. The **prompt** and the two **responses** will be shown to labelers in the UI and we will ask them to rank the two responses. The most important questions at this step are: **how to generate the two responses** in order to maximize the quality and variety of the resulting LLM.
 
 :::{tip}
-Important features for the resulting dataset include diversity, consistent response style, and quality. These features must be considered when designing the data selection and collection processes.
+Important features of the resulting dataset include diversity, consistent response style, and quality. These features must be considered when designing the data selection and collection processes.
 :::
 
 The responses can be generated using a pre-trained LLM, fine-tuned on a prior dataset. You can use different strategies to generate the responses, such as generating multiple responses and selecting two, or generating two responses with different parameters (e.g., temperature).
@@ -145,7 +145,7 @@ Here's an example of a record generated with the above code:
 
 | Prompt | Response 1 | Response 2 |
 |--------|------------|------------|
-| Write a follow-up for a sales email | Dear [Customer Name],<br/><br/>Thank you for purchasing [Product Name] from us last week. We hope you have been enjoying using it!<br/><br/>If you have any questions or feedback about your purchase, please do not hesitate to let us know. We are always happy to help.<br/><br/>Best regards,<br/>[Sales Team] | Dear [Customer Name],<br/><br/>Thank you for your recent purchase [Product Name]. We hope you"re enjoying your [Product Name] as much as we are here at [Company Name].<br/><br/>If you have any questions or feedback regarding your purchase, please don"t hesitate to let us know. We"d love the chance to make your shopping experience even better.<br/><br/>Thank you again for your purchase,<br/>[Company Name] |
+| Write a follow-up for a sales email | Dear [Customer Name],<br/><br/>Thank you for purchasing [Product Name] from us last week. We hope you have been enjoying using it!<br/><br/>If you have any questions or feedback about your purchase, please do not hesitate to let us know. We are always happy to help.<br/><br/>Best regards,<br/>[Sales Team] | Dear [Customer Name],<br/><br/>Thank you for your recent purchase [Product Name]. We hope you're enjoying your [Product Name] as much as we are here at [Company Name].<br/><br/>If you have any questions or feedback regarding your purchase, please don't hesitate to let us know. We"d love the chance to make your shopping experience even better.<br/><br/>Thank you again for your purchase,<br/>[Company Name] |
 
 :::{note}
 The ranking task can be challenging for labelers if the two responses are very similar. Consider adjusting the parameters of the generation process (e.g., the temperature) to produce more varied responses.
@@ -157,13 +157,13 @@ As the field is rapidly evolving and lacking consensus, we suggest beginning wit
 
 ## Labelers rank responses
 
-The aim of this phase is to provide human rankings for pairs of responses to a given `prompt` using the Argilla UI.
+This phase aims to provide human rankings for pairs of responses to a given `prompt` using the Argilla UI.
 
 Once you upload your dataset to Argilla, it becomes accessible via the Argilla UI. Argilla Feedback allows simultaneous feedback collection from multiple users, enhancing quality control. Each user with dataset access can give feedback.
 
-However, when resources are limited, workload distribution among various labelers is recommended. This strategy entails assigning each labeler a subset of records to rank. This [how-to guide](../practical_guides/set_up_annotation_team.html) provides detailed instructions on setting up these workload distribution options effectively.
+However, when resources are limited, workload distribution among various labelers is recommended. This strategy entails assigning each labeler a subset of records to rank. This [how-to guide](/practical_guides/assign_records) provides detailed instructions on setting up these workload distribution options effectively.
 
-For a comprehensive understanding of the Argilla UI's main features, refer to this [how-to guide](../practical_guides/annotate_dataset.html).
+For a comprehensive understanding of the Argilla UI's main features, refer to this [how-to guide](/practical_guides/annotate_dataset).
 
 ## Prepare the dataset
 
@@ -200,9 +200,9 @@ Each record in `feedback.records` contain a `responses` attribute, which houses 
 
 - `user_id`: The Argilla user ID of the labeler.
 - `values`: The feedback provided by the labeler. This is formatted as a dictionary, with keys for each question and values holding the respective answers.
-- `status`: The status of the response, which can be either submitted or discarded. For our purposes, we"re only interested in the submitted responses.
+- `status`: The status of the response, which can be either submitted or discarded. For our purposes, we're only interested in the submitted responses.
 
-For datasets where each record has a single response (no annotation overlap), post-processing is straightforward as there's no need to resolve conflicts between different annotations. However, if annotation overlaps exist, conflict resolution becomes necessary. For strategies on conflict resolution, refer to [this guide](../practical_guides/collect_responses.md#unifying-disagreements).
+For datasets where each record has a single response (no annotation overlap), post-processing is straightforward as there's no need to resolve conflicts between different annotations. However, if annotation overlaps exist, conflict resolution becomes necessary. For strategies on conflict resolution, refer to [this guide](/practical_guides/collect_responses.md#unifying-disagreements).
 
 ```{tip}
 Sharing the comparison data collection among multiple labelers can be beneficial. Each labeler identifies their favored response for a specific prompt. By pooling these choices, we can derive a collective ranking for all responses.
@@ -277,4 +277,4 @@ for record in feedback.records:
 # preferred and less preferred responses
 ````
 
-The final step is to prepare your dataset for training your reward model. This preparation depends on the chosen framework. [This guide](../practical_guides/fine_tune.md#rlhf) provides a comprehensive overview of the options and corresponding data preparation methods.
+The final step is to prepare your dataset for training your reward model. This preparation depends on the chosen framework. [This guide](/practical_guides/fine_tune) provides a comprehensive overview of the options and corresponding data preparation methods.

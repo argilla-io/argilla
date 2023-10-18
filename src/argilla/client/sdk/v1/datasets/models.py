@@ -25,7 +25,8 @@ class FeedbackDatasetModel(BaseModel):
     id: UUID
     name: str = Field(regex="^(?!-|_)[a-zA-Z0-9-_ ]+$")
     guidelines: Optional[str] = None
-    allow_extra_metadata: bool
+    # Set default for backward compatibility
+    allow_extra_metadata: Optional[bool] = True
     status: Optional[str] = None
     workspace_id: Optional[UUID] = None
     inserted_at: datetime

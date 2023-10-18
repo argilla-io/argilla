@@ -33,16 +33,18 @@ Manage your Argilla users:
 - Migrate users from `users.yaml`
 - Migration users with Docker Compose
 ```
-```{grid-item-card} Workspace Management
+```{grid-item-card} Workspace and Dataset Management
 :link: workspace_management.md
 
-Manage your Argilla workspaces:
+Manage your Argilla workspaces and datasets:
 - Workspace model
 - Create a new workspace
 - List all the existing workspaces
-- Get a workspace by name
-- Get a workspace by id
+- Get a workspace by name or id
 - Add, list, or delete users from a workspace
+- Dataset model
+- List datasets in a workspace
+- Delete datasets in a workspace
 ```
 
 ```{grid-item-card} Database Migrations

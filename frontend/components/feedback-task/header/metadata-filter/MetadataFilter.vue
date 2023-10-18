@@ -11,9 +11,10 @@
         <MetadataButton
           :is-active="visibleDropdown"
           :badges="appliedCategoriesFilters"
-          :active-badge="visibleCategory?.name"
+          :active-badge="visibleCategory"
           @click-on-badge="openCategoryFilter"
           @click-on-clear="removeCategoryFilters"
+          @click-on-clear-all="clearAllCategories"
         />
       </span>
       <span
@@ -32,7 +33,7 @@
             class="metadata-filter__header"
             @click="selectMetadataCategory(null)"
           >
-            <span v-text="visibleCategory.name" />
+            <span v-text="visibleCategory.title" />
             <svgicon name="chevron-left" width="12" height="12" />
           </div>
           <div class="metadata-filter__content">
@@ -56,10 +57,18 @@ import "assets/icons/chevron-left";
 
 export default {
   props: {
-    metadata: {
+    datasetMetadata: {
       type: Array,
       required: true,
     },
+    metadataFiltered: {
+      type: Array,
+      required: true,
+    },
+  },
+  model: {
+    prop: "metadataFiltered",
+    event: "onMetadataFilteredChanged",
   },
   data() {
     return {
@@ -69,19 +78,13 @@ export default {
       appliedCategoriesFilters: [],
     };
   },
-  created() {
-    this.$root.$on("reset-metadata-filter", this.updateFiltersFromQueryParams);
-  },
-  destroyed() {
-    this.$root.$off("reset-metadata-filter");
-  },
   methods: {
     onMetadataToggleVisibility(value) {
       this.visibleDropdown = value;
       this.visibleCategory = null;
     },
     selectMetadataCategory(category) {
-      this.visibleCategory = this.metadataFilters.findByCategory(category);
+      this.visibleCategory = category;
     },
     applyFilter() {
       this.visibleDropdown = false;
@@ -89,36 +92,37 @@ export default {
       this.filter();
     },
     filter() {
-      this.$root.$emit(
-        "metadata-filter-changed",
-        this.metadataFilters.convertToRouteParam()
-      );
+      if (!this.metadataFilters.hasChangesSinceLatestCommit) return;
 
-      const newCategoryFilters = this.metadataFilters.filteredCategories.filter(
-        (category) => !this.appliedCategoriesFilters.includes(category)
-      );
-      if (newCategoryFilters.length) {
-        newCategoryFilters.forEach((f) => {
-          this.appliedCategoriesFilters.push(f);
-        });
-      } else {
-        this.appliedCategoriesFilters = this.metadataFilters.filteredCategories;
-      }
+      const newFilter = this.metadataFilters.commit();
+
+      this.$emit("onMetadataFilteredChanged", newFilter);
+
+      this.appliedCategoriesFilters = this.metadataFilters.filteredCategories;
     },
     openCategoryFilter(category) {
       this.visibleDropdown = this.visibleDropdown
-        ? category !== this.visibleCategory?.name
+        ? category !== this.visibleCategory
         : true;
 
       this.selectMetadataCategory(category);
     },
     removeCategoryFilters(category) {
-      this.metadataFilters.findByCategory(category).clear();
+      category.clear();
 
       this.applyFilter();
     },
-    updateFiltersFromQueryParams() {
-      this.completeByRouteParams();
+    clearAllCategories(categories) {
+      categories.forEach((category) => {
+        category.clear();
+      });
+
+      this.applyFilter();
+    },
+    updateAppliedCategoriesFromMetadataFilter() {
+      if (!this.metadataFilters) return;
+
+      this.metadataFilters.initializeWith(this.metadataFiltered);
 
       this.appliedCategoriesFilters = this.metadataFilters.filteredCategories;
     },
@@ -141,9 +145,19 @@ export default {
         this.filter();
       },
     },
+    metadataFiltered() {
+      if (
+        !this.metadataFilters.hasChangesSinceLatestCommitWith(
+          this.metadataFiltered
+        )
+      )
+        return;
+
+      this.updateAppliedCategoriesFromMetadataFilter();
+    },
   },
-  mounted() {
-    this.updateFiltersFromQueryParams();
+  created() {
+    this.updateAppliedCategoriesFromMetadataFilter();
   },
   setup(props) {
     return useMetadataFilterViewModel(props);

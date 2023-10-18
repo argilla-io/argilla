@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.dataset.local.mixins import ArgillaMixin, TaskTemplateMixin
+from argilla.client.feedback.integrations.huggingface.dataset import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas.enums import RecordSortField, SortOrder
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
@@ -50,9 +51,9 @@ from argilla.client.feedback.unification import (
 )
 from argilla.client.models import Framework
 from argilla.utils.dependency import require_dependencies
+from argilla.client.feedback.schemas.records import FeedbackRecord
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas.records import FeedbackRecord
     from argilla.client.feedback.schemas.types import (
         AllowedFieldTypes,
         AllowedMetadataPropertyTypes,
@@ -63,7 +64,7 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 
-class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase["FeedbackRecord"], TaskTemplateMixin):
+class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase[FeedbackRecord], TaskTemplateMixin):
     def __init__(
         self,
         *,
@@ -246,6 +247,22 @@ class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase["FeedbackRecord"], TaskT
         self._unique_metadata_property(metadata_property)
         self._metadata_properties.append(metadata_property)
         return metadata_property
+
+    def update_metadata_properties(
+        self,
+        metadata_properties: Union["AllowedMetadataPropertyTypes", List["AllowedMetadataPropertyTypes"]],
+    ) -> None:
+        """Does nothing because the `metadata_properties` are updated automatically for
+        `FeedbackDataset` datasets when assigning their updateable attributes to a new value.
+        """
+        warnings.warn(
+            "`update_metadata_properties` method is not supported for `FeedbackDataset` datasets"
+            " unless its pushed to Argilla i.e. `RemoteFeedbackDataset`. This is because the"
+            " `metadata_properties` updates are already applied via assignment if any. So,"
+            " this method is not required locally.",
+            UserWarning,
+            stacklevel=1,
+        )
 
     def delete_metadata_properties(
         self, metadata_properties: Union[str, List[str]]

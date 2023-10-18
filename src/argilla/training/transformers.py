@@ -516,7 +516,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
 
     def save(self, output_dir: str):
         """
-        The function saves the model to the path specified, and also saves the label2id and id2label
+        The function saves the model to the path specified and also saves the label2id and id2label
         dictionaries to the same path
 
         Args:

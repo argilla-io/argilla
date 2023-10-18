@@ -32,13 +32,17 @@ except ImportError:
         " so you can run `pip install pyyaml`."
     )
 
-from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes, AllowedQuestionTypes
 
 
 class DatasetConfig(BaseModel):
     fields: List[AllowedFieldTypes]
     questions: List[Annotated[AllowedQuestionTypes, Field(..., discriminator="type")]]
     guidelines: Optional[str] = None
+    metadata_properties: Optional[
+        List[Annotated[AllowedMetadataPropertyTypes, Field(..., discriminator="type")]]
+    ] = None
+    allow_extra_metadata: bool = True
 
     def to_yaml(self) -> str:
         return dump(self.dict())
@@ -57,7 +61,7 @@ class DatasetConfig(BaseModel):
         return cls(**yaml_dict)
 
 
-# TODO(alvarobartt): here for backwards compatibility, remove in 1.14.0
+# TODO(alvarobartt): here for backwards compatibility, last used in v1.12.0
 class DeprecatedDatasetConfig(BaseModel):
     fields: List[AllowedFieldTypes]
     questions: List[AllowedQuestionTypes]

@@ -2,7 +2,10 @@
   <div class="sidebar__container">
     <SidebarFeedbackTaskPanel v-if="isPanelVisible" @close-panel="closePanel">
       <HelpShortcut v-if="currentPanel === 'help-shortcut'" />
-      <FeedbackTaskProgress v-else-if="currentPanel === 'metrics'" />
+      <FeedbackTaskProgress
+        v-else-if="currentPanel === 'metrics'"
+        :datasetId="datasetId"
+      />
     </SidebarFeedbackTaskPanel>
     <SidebarFeedbackTask
       @on-click-sidebar-action="onClickSidebarAction"

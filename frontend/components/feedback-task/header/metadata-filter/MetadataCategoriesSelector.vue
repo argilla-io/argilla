@@ -15,7 +15,7 @@
           @on-click="selectCategory(category)"
           class="category__item"
           :disabled="!category.hasValues"
-          ><span>{{ category.name }}</span>
+          ><span>{{ category.title }}</span>
           <svgicon
             v-if="category.hasValues"
             name="chevron-right"
@@ -43,13 +43,13 @@ export default {
   computed: {
     categoriesFilteredBySearchText() {
       return this.categories.filter((cat) =>
-        cat.name.toLowerCase().includes(this.searchText.toLowerCase())
+        cat.title.toLowerCase().includes(this.searchText.toLowerCase())
       );
     },
   },
   methods: {
     selectCategory(category) {
-      this.$emit("select-category", category.name);
+      this.$emit("select-category", category);
     },
   },
 };

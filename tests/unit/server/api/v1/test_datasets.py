@@ -46,10 +46,12 @@ from argilla.server.schemas.v1.datasets import (
     QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
     QUESTION_CREATE_NAME_MAX_LENGTH,
     QUESTION_CREATE_TITLE_MAX_LENGTH,
+    RANKING_OPTIONS_MAX_ITEMS,
     RATING_OPTIONS_MAX_ITEMS,
     RATING_OPTIONS_MIN_ITEMS,
     RECORDS_CREATE_MAX_ITEMS,
     RECORDS_CREATE_MIN_ITEMS,
+    TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS,
     VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH,
     VALUE_TEXT_OPTION_TEXT_MAX_LENGTH,
     VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
@@ -2682,6 +2684,13 @@ class TestSuiteDatasets:
             {
                 "type": "ranking",
                 "options": [
+                    {"value": value, "text": value, "description": value}
+                    for value in range(0, RANKING_OPTIONS_MAX_ITEMS + 1)
+                ],
+            },
+            {
+                "type": "ranking",
+                "options": [
                     {
                         "value": "a",
                         "text": "a",
@@ -3024,6 +3033,21 @@ class TestSuiteDatasets:
         created_metadata_property = await db.get(MetadataProperty, UUID(response_body["id"]))
         assert created_metadata_property
         assert created_metadata_property.allowed_roles == [UserRole.admin, UserRole.annotator]
+
+    @pytest.mark.parametrize("values", [[], ["value"] * (TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS + 1)])
+    async def test_create_dataset_terms_metadata_property_with_invalid_number_of_values(
+        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, values: List[str]
+    ):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/metadata-properties",
+            headers=owner_auth_header,
+            json={"name": "name", "title": "title", "settings": {"type": "terms", "values": values}},
+        )
+
+        assert response.status_code == 422
+        assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 0
 
     async def test_create_dataset_records(
         self,

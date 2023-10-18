@@ -15,6 +15,8 @@
 from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 from uuid import UUID
 
+from tqdm import trange
+
 from argilla.client.api import ArgillaSingleton
 from argilla.client.feedback.constants import PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
@@ -42,10 +44,10 @@ from argilla.client.feedback.schemas.remote.questions import (
 from argilla.client.feedback.utils import feedback_dataset_in_argilla
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.workspaces import Workspace
-from tqdm import trange
 
 if TYPE_CHECKING:
     import httpx
+
     from argilla.client.client import Argilla as ArgillaClient
     from argilla.client.feedback.dataset.local import FeedbackDataset
     from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
@@ -776,15 +778,15 @@ class TaskTemplateMixin:
             A `FeedbackDataset` object for direct preference optimization containing "prompt", "response1", "response2" with the optional "context" fields and a LabelQuestion named "preference"
         """
         default_guidelines = "This is a direct preference optimization dataset that contains contexts and options. Please choose the option that you would prefer in the given context."
-        fields = [
+        dataset_fields = [
             TextField(name="prompt", use_markdown=use_markdown),
             TextField(name="response1", title="Response 1", use_markdown=use_markdown),
             TextField(name="response2", title="Response 2", use_markdown=use_markdown),
         ]
         if context:
-            fields.insert(1, TextField(name="context", use_markdown=use_markdown, required=False))
+            dataset_fields.insert(1, TextField(name="context", use_markdown=use_markdown, required=False))
         return cls(
-            fields=fields,
+            fields=dataset_fields,
             questions=[
                 LabelQuestion(
                     name="preference",

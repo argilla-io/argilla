@@ -12,17 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import logging
-from abc import ABC, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Literal, Optional, Type, TypeVar, Union
 
 from pydantic import BaseModel, ValidationError
 
 from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
-from argilla.client.feedback.schemas import (
-    FeedbackRecord,
-    SortBy,
-)
+from argilla.client.feedback.schemas.records import FeedbackRecord, SortBy
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes, AllowedQuestionTypes
 from argilla.client.feedback.utils import generate_pydantic_schema_for_fields, generate_pydantic_schema_for_metadata
 from argilla.utils.dependency import requires_dependencies
@@ -36,13 +32,10 @@ if TYPE_CHECKING:
         AllowedRemoteQuestionTypes,
     )
 
-
-_LOGGER = logging.getLogger(__name__)
-
 R = TypeVar("R", bound=FeedbackRecord)
 
 
-class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, Generic[R]):
+class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
     """Base class with shared functionality for `FeedbackDataset` and `RemoteFeedbackDataset`."""
 
     def __init__(
@@ -183,7 +176,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, Generic[R]):
         return self._fields
 
     def field_by_name(self, name: str) -> Union[AllowedFieldTypes, "AllowedRemoteFieldTypes"]:
-        """Returns the field by name if it exists. Othewise a `ValueError` is raised.
+        """Returns the field by name if it exists. Otherwise a `ValueError` is raised.
 
         Args:
             name: the name of the field to return.
@@ -205,7 +198,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, Generic[R]):
         return self._questions
 
     def question_by_name(self, name: str) -> Union[AllowedQuestionTypes, "AllowedRemoteQuestionTypes"]:
-        """Returns the question by name if it exists. Othewise a `ValueError` is raised.
+        """Returns the question by name if it exists. Otherwise a `ValueError` is raised.
 
         Args:
             name: the name of the question to return.
@@ -231,7 +224,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, Generic[R]):
     def metadata_property_by_name(
         self, name: str
     ) -> Union["AllowedMetadataPropertyTypes", "AllowedRemoteMetadataPropertyTypes"]:
-        """Returns the metadata property by name if it exists. Othewise a `ValueError` is raised.
+        """Returns the metadata property by name if it exists. Otherwise a `ValueError` is raised.
 
         Args:
             name: the name of the metadata property to return.
@@ -446,52 +439,30 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, Generic[R]):
         pass
 
     @abstractmethod
-    def add_metadata_property(self, metadata_property):
-        """Adds a new `metadata_property` to the current `FeedbackDataset` in Argilla.
-
-        Note:
-            Existing `FeedbackRecord`s if any will remain unchanged if those contain metadata
-            named the same way as the `metadata_property`, but added before the
-            `metadata_property` was added.
-
-        Args:
-            metadata_property: the metadata property to add to the current `FeedbackDataset`
-                in Argilla.
-
-        Returns:
-            The newly added `metadata_property` to the current `FeedbackDataset` in Argilla.
-
-        Raises:
-            PermissionError: if the user does not have either `owner` or `admin` role.
-            RuntimeError: if the `metadata_property` cannot be added to the current
-                `FeedbackDataset` in Argilla.
-        """
+    def add_metadata_property(self, *args, **kwargs):
+        """Adds a new `metadata_property` to the current `FeedbackDataset`."""
         pass
 
     @abstractmethod
-    def delete_metadata_properties(self, metadata_properties):
-        """Deletes a list of `metadata_properties` from the current `FeedbackDataset`
-        in Argilla.
+    def update_metadata_properties(self, *args, **kwargs):
+        """Updates the `metadata_properties` of the current `FeedbackDataset`."""
+        pass
+
+    @abstractmethod
+    def delete_metadata_properties(self, *args, **kwargs):
+        """Deletes a list of `metadata_properties` from the current `FeedbackDataset`."""
+        pass
+
+    @abstractmethod
+    def push_to_huggingface(self, repo_id, generate_card, *args, **kwargs):
+        """Pushes the current `FeedbackDataset` to HuggingFace Hub.
 
         Note:
-            Existing `FeedbackRecord`s if any, will remain unchanged if those contain metadata
-            named the same way as the `metadata_properties` to delete, but the validation will
-            be removed as well as `metadata_property` index, which means one won't be able to
-            use that for filtering.
+            The records from the `RemoteFeedbackDataset` are being pulled before pushing,
+            to ensure that there's no missmatch while uploading those as those are lazily fetched.
 
         Args:
-            metadata_properties: the metadata property/ies name/s to delete from the current
-                `FeedbackDataset` in Argilla.
-
-        Returns:
-            The `metadata_property` or `metadata_properties` deleted from the current
-            `FeedbackDataset` in Argilla, but using the local schema e.g. if you delete a
-            `RemoteFloatMetadataProperty` this method will delete it from Argilla and will
-            return a `FloatMetadataProperty` instance.
-
-        Raises:
-            PermissionError: if the user does not have either `owner` or `admin` role.
-            RuntimeError: if the `metadata_properties` cannot be deleted from the current
-                `FeedbackDataset` in Argilla.
+            repo_id: the ID of the HuggingFace repo to push the dataset to.
+            generate_card: whether to generate a dataset card or not. Defaults to `True`.
         """
         pass

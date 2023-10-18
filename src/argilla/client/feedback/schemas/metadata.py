@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Union
 
 from pydantic import (
     BaseModel,
@@ -113,7 +113,7 @@ class TermsMetadataProperty(MetadataPropertySchema):
         >>> TermsMetadataProperty(name="color", values=["red", "blue", "green"])
     """
 
-    type: MetadataPropertyTypes = MetadataPropertyTypes.terms
+    type: Literal[MetadataPropertyTypes.terms] = Field(MetadataPropertyTypes.terms.value, allow_mutation=False)
     values: Optional[List[str]] = None
 
     @validator("values")
@@ -131,7 +131,7 @@ class TermsMetadataProperty(MetadataPropertySchema):
 
     @property
     def server_settings(self) -> Dict[str, Any]:
-        settings: Dict[str, Any] = {"type": self.type.value}
+        settings: Dict[str, Any] = {"type": self.type}
         if self.values is not None:
             settings["values"] = self.values
         return settings
@@ -183,7 +183,7 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
 
     @property
     def server_settings(self) -> Dict[str, Any]:
-        settings: Dict[str, Any] = {"type": self.type.value}
+        settings: Dict[str, Any] = {"type": self.type}
         if self.min is not None:
             settings["min"] = self.min
         if self.max is not None:
@@ -261,7 +261,7 @@ class IntegerMetadataProperty(_NumericMetadataPropertySchema):
         >>> IntegerMetadataProperty(name="day", min=0, max=31)
     """
 
-    type: MetadataPropertyTypes = MetadataPropertyTypes.integer
+    type: Literal[MetadataPropertyTypes.integer] = Field(MetadataPropertyTypes.integer.value, allow_mutation=False)
     min: Optional[int] = None
     max: Optional[int] = None
 
@@ -287,7 +287,7 @@ class FloatMetadataProperty(_NumericMetadataPropertySchema):
         >>> FloatMetadataProperty(name="price", min=0.0, max=100.0)
     """
 
-    type: MetadataPropertyTypes = MetadataPropertyTypes.float
+    type: Literal[MetadataPropertyTypes.float] = Field(MetadataPropertyTypes.float.value, allow_mutation=False)
     min: Optional[float] = None
     max: Optional[float] = None
 
@@ -336,7 +336,7 @@ class TermsMetadataFilter(MetadataFilterSchema):
         >>> TermsMetadataFilter(name="color", values=["red", "blue", "green"])
     """
 
-    type: MetadataPropertyTypes = MetadataPropertyTypes.terms
+    type: Literal[MetadataPropertyTypes.terms] = Field(MetadataPropertyTypes.terms.value, allow_mutation=False)
     values: List[str] = Field(..., min_items=TERMS_METADATA_FILTER_MIN_VALUES)
 
     @validator("values")
@@ -402,7 +402,7 @@ class IntegerMetadataFilter(_NumericMetadataFilterSchema):
         >>> IntegerMetadataFilter(name="day", le=15, ge=10)
     """
 
-    type: MetadataPropertyTypes = MetadataPropertyTypes.integer
+    type: Literal[MetadataPropertyTypes.integer] = Field(MetadataPropertyTypes.integer.value, allow_mutation=False)
     le: Optional[int] = None
     ge: Optional[int] = None
 
@@ -427,7 +427,7 @@ class FloatMetadataFilter(_NumericMetadataFilterSchema):
         >>> FloatMetadataFilter(name="price", le=15.0, ge=10.0)
     """
 
-    type: MetadataPropertyTypes = MetadataPropertyTypes.float
+    type: Literal[MetadataPropertyTypes.float] = Field(MetadataPropertyTypes.float.value, allow_mutation=False)
     le: Optional[float] = None
     ge: Optional[float] = None
 

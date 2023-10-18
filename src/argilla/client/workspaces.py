@@ -40,8 +40,8 @@ if TYPE_CHECKING:
 
 class Workspace:
     """The `Workspace` class is used to manage workspaces in Argilla. It provides
-    methods to create new workspaces, adding users to them, listing the linked users,
-    and deleting users from the workspace. While it's not allowed to delete a workspace
+    methods to create new workspaces, add users to them, list the linked users,
+    and delete users from the workspace. While it's not allowed to delete a workspace
     neither to update the workspace name.
 
     Args:
@@ -128,8 +128,8 @@ class Workspace:
     def add_user(self, user_id: UUID) -> None:
         """Adds an existing user to the workspace in Argilla.
 
-        Note that users with `owner` role are excluded of the `add_user` method, as they
-        are superusers and they can access to all the workspaces and datasets in Argilla.
+        Note that users with the `owner` role are excluded from the `add_user` method, as they
+        are superusers and they can access all the workspaces and datasets in Argilla.
 
         Args:
             user_id: the ID of the user to be added to the workspace. The user must exist in Argilla.
@@ -159,8 +159,8 @@ class Workspace:
         if user.is_owner:
             warnings.warn(
                 "The user you are trying to add to the workspace has the `owner` role, so it"
-                " will be excluded from the workspace. Note that users with `owner` role are"
-                " superusers and they can access to all the workspaces and datasets in Argilla.",
+                " will be excluded from the workspace. Note that users with the `owner` role are"
+                " superusers and they can access all the workspaces and datasets in Argilla.",
                 UserWarning,
                 stacklevel=2,
             )
@@ -178,8 +178,8 @@ class Workspace:
         """Deletes an existing user from the workspace in Argilla. Note that the user
         will not be deleted from Argilla, but just from the workspace.
 
-        Note that users with `owner` role are excluded of the `delete_user` method, as they
-        are superusers and they can access to all the workspaces and datasets in Argilla.
+        Note that users with the `owner` role are excluded from the `delete_user` method, as they
+        are superusers and they can access all the workspaces and datasets in Argilla.
 
         Args:
             user_id: the ID of the user to be deleted from the workspace. The user must exist in Argilla.
@@ -208,8 +208,8 @@ class Workspace:
         if user.is_owner:
             warnings.warn(
                 "The user you are trying to delete from the workspace has the `owner` role, so it"
-                " will be excluded from the workspace. Note that users with `owner` role are"
-                " superusers and they can access to all the workspaces and datasets in Argilla.",
+                " will be excluded from the workspace. Note that users with the `owner` role are"
+                " superusers and they can access all the workspaces and datasets in Argilla.",
                 UserWarning,
                 stacklevel=2,
             )
@@ -230,10 +230,10 @@ class Workspace:
     @allowed_for_roles(roles=[UserRole.owner])
     def delete(self) -> None:
         """Deletes an existing workspace from Argilla. Note that the workspace
-        cannot have any linked dataset to be removed from Argilla. Otherwise an error will be raised.
+        cannot have any linked dataset to be removed from Argilla. Otherwise, an error will be raised.
 
         Raises:
-            ValueError: if the workspace does not exists or some datasets are linked to it.
+            ValueError: if the workspace does not exist or some datasets are linked to it.
             RuntimeError: if there was an unexpected error while deleting the user from the workspace.
 
         Examples:
@@ -259,7 +259,7 @@ class Workspace:
         try:
             return active_client().http_client.httpx
         except Exception as e:
-            raise RuntimeError(f"The `rg.active_client()` is not available or not respoding.") from e
+            raise RuntimeError(f"The `rg.active_client()` is not available or not responding.") from e
 
     @classmethod
     def _new_instance(

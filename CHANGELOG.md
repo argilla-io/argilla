@@ -28,15 +28,18 @@ These are the section headers that we use:
 - Added `add_metadata_property` method to both `FeedbackDataset` and `RemoteFeedbackDataset` (i.e. `FeedbackDataset` in Argilla) ([#3900](https://github.com/argilla-io/argilla/pull/3900)).
 - Added fields `inserted_at` and `updated_at` in `RemoteResponseSchema` ([#3822](https://github.com/argilla-io/argilla/pull/3822)).
 - New `DELETE /api/v1/metadata-properties/:metadata_property_id` endpoint allowing the deletion of a specific metadata property. ([#3911](https://github.com/argilla-io/argilla/pull/3911)).
-- Add support for `sort_by` for Argilla feedback datasets ([#3925](https://github.com/argilla-io/argilla/pull/3925)).
+- Added support for `sort_by` for `RemoteFeedbackDataset` i.e. a `FeedbackDataset` uploaded to Argilla ([#3925](https://github.com/argilla-io/argilla/pull/3925)).
+- Added `metadata_properties` support for both `push_to_huggingface` and `from_huggingface` ([#3947](https://github.com/argilla-io/argilla/pull/3947)).
 - New `PATCH /api/v1/records/{record_id}` endpoint to update a record ([#3920](https://github.com/argilla-io/argilla/pull/3920)).
 - New `PATCH /api/v1/dataset/{dataset_id}/records` endpoint to bulk update the records of a dataset ([#3934](https://github.com/argilla-io/argilla/pull/3934)).
-- Add support for `sort_by` for Argilla feedback datasets ([#3925](https://github.com/argilla-io/argilla/pull/3925))
 - Add support for update records (`metadata` and `external_id`) from Python SDK ([#3946](https://github.com/argilla-io/argilla/pull/3946)).
 - Added `delete_metadata_properties` and `Remote{Terms,Integer,Float}MetadataProperty.delete` methods to delete metadata properties ([#3932](https://github.com/argilla-io/argilla/pull/3932)).
 - New `PATCH /api/v1/metadata-properties/:metadata_property_id` endpoint allowing the update of a specific metadata property. ([#3952](https://github.com/argilla-io/argilla/pull/3952)).
+- Added `update_metadata_properties` method for both `FeedbackDataset` and `RemoteFeedbackDataset` to update one or more `metadata_properties` from the Python client ([#3961](https://github.com/argilla-io/argilla/pull/3961)).
+- Missing validations to `PATCH /api/v1/questions/:question_id`. Now `title` and `description` are using the same validations used to create questions. ([#3967](https://github.com/argilla-io/argilla/pull/3967))
 - Added automatic model card generation through `ArgillaTrainer.save` ([#3857](https://github.com/argilla-io/argilla/pull/3857)).
 - Added `FeedbackDataset` `TaskTemplateMixin` for pre-defined task templates. ([#3969](https://github.com/argilla-io/argilla/pull/3969)).
+- A maximum limit of 50 on the number of options a ranking question can accept. ([#3975](https://github.com/argilla-io/argilla/pull/3975))
 
 ### Changed
 

@@ -19,16 +19,16 @@ Learn how to fine-tune Mistral 7B into a chat assistant using supervised finetun
 
 Learn how to fine-tune and evaluate gpt3.5-turbo models with human feedback for RAG applications with LlamaIndex.
 ```
+```{grid-item-card} 🎛️ Fine-tune a SetFit model using the ArgillaTrainer
+:link: feedback/trainer-feedback-setfit.html
+
+Learn how to use the ArgillaTrainer to fine-tune your Feedback Dataset using Setfit.
+```
 ```{grid-item-card} 🏆 Fine-tuning a Reward Model for RLHF
 :link: feedback/train-reward-model-rlhf.html
 
 Learn how to collect comparison or human preference data and train a reward model with the trl library.
 
-```
-```{grid-item-card} 🎛️ Fine-tuning a SetFit model using the ArgillaTrainer
-:link: feedback/trainer-feedback-setfit.html
-
-Learn how to use the ArgillaTrainer to fine-tune your Feedback Dataset using Setfit.
 ```
 ```{grid-item-card} ✨ Add zero-shot text classification suggestions using SetFit
 :link: feedback/labelling-feedback-setfit.html
@@ -97,6 +97,11 @@ Learn how to use the `snorkel` library to perform weak supervision for NER.
 
 Learn how to use the `sentence-transformers` and `snorkel` to do weak supervision for text classification with semantic search.
 ```
+```{grid-item-card} 🔗 Using LLMs for token classification with spacy-llm
+:link: other_datasets/labelling-tokenclassification-using-spacy-llm.html
+
+Learn how to use the `spacy-llm` library to do few-shot token classification.
+```
 ````
 <!--
 ```{toctree}
@@ -116,4 +121,5 @@ other_datasets/label_data_with_semantic_search
 other_datasets/label_errors_cleanlab
 other_datasets/weak_supervision_ner
 other_datasets/weak_supervision_text_classification_semantic_search
+other_datasets/labelling-tokenclassification-using-spacy-llm
 ``` -->

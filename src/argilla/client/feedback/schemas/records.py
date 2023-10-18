@@ -152,7 +152,7 @@ class FeedbackRecord(BaseModel):
             record itself.
         metadata: Metadata to be included to enrich the information for a given record.
             Note that the metadata is not shown in the UI so you'll just be able to see
-            that programatically after pulling the records. Defaults to None.
+            that programmatically after pulling the records. Defaults to None.
         responses: Responses given by either the current user, or one or a collection of
             users that must exist in Argilla. Each response corresponds to one of the
             `FeedbackDataset` questions, so the values should match the question type.

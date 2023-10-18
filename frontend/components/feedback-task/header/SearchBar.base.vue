@@ -70,7 +70,6 @@
 
 <script>
 import { isNil } from "lodash";
-// TODO - manage only empty strings and not null in the  search component
 
 export default {
   name: "SearchBarComponent",
