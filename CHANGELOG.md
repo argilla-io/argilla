@@ -18,56 +18,56 @@ These are the section headers that we use:
 
 ### Added
 
-- Added new endpoint `POST /api/v1/datasets/:dataset_id/metadata-properties` for dataset metadata property creation ([#3813](https://github.com/argilla-io/argilla/pull/3813))
-- Added new endpoint `GET /api/v1/datasets/:dataset_id/metadata-properties` for listing dataset metadata property ([#3813](https://github.com/argilla-io/argilla/pull/3813))
-- Added `TermsMetadataProperty`, `IntegerMetadataProperty` and `FloatMetadataProperty` classes allowing to define metadata properties for a `FeedbackDataset` ([#3818](https://github.com/argilla-io/argilla/pull/3818)).
-- Added `metadata_filters` to `filter_by` method in `RemoteFeedbackDataset` to filter based on metadata i.e. `TermsMetadataFilter`, `IntegerMetadataFilter`, and `FloatMetadataFilter` ([#3834](https://github.com/argilla-io/argilla/pull/3834)).
-- Added new endpoint `GET /api/v1/metadata-properties/:metadata_property_id/metrics` to compute metrics for metadata properties ([#3856](https://github.com/argilla-io/argilla/pull/3856))
-- Added a validation layer for both `metadata_properties` and `metadata_filters` in their schemas and as part of the `add_records` and `filter_by` methods, respectively ([#3860](https://github.com/argilla-io/argilla/pull/3860)).
-- Added `sort_by` query parameter to listing records endpoints that allows to sort the records by `inserted_at`, `updated_at` or metadata property ([#3843](https://github.com/argilla-io/argilla/pull/3843)).
-- Added `add_metadata_property` method to both `FeedbackDataset` and `RemoteFeedbackDataset` (i.e. `FeedbackDataset` in Argilla) ([#3900](https://github.com/argilla-io/argilla/pull/3900)).
-- Added fields `inserted_at` and `updated_at` in `RemoteResponseSchema` ([#3822](https://github.com/argilla-io/argilla/pull/3822)).
-- New `DELETE /api/v1/metadata-properties/:metadata_property_id` endpoint allowing the deletion of a specific metadata property. ([#3911](https://github.com/argilla-io/argilla/pull/3911)).
-- Added support for `sort_by` for `RemoteFeedbackDataset` i.e. a `FeedbackDataset` uploaded to Argilla ([#3925](https://github.com/argilla-io/argilla/pull/3925)).
-- Added `metadata_properties` support for both `push_to_huggingface` and `from_huggingface` ([#3947](https://github.com/argilla-io/argilla/pull/3947)).
-- New `PATCH /api/v1/records/{record_id}` endpoint to update a record ([#3920](https://github.com/argilla-io/argilla/pull/3920)).
-- New `PATCH /api/v1/dataset/{dataset_id}/records` endpoint to bulk update the records of a dataset ([#3934](https://github.com/argilla-io/argilla/pull/3934)).
-- Add support for update records (`metadata` and `external_id`) from Python SDK ([#3946](https://github.com/argilla-io/argilla/pull/3946)).
-- Added `delete_metadata_properties` and `Remote{Terms,Integer,Float}MetadataProperty.delete` methods to delete metadata properties ([#3932](https://github.com/argilla-io/argilla/pull/3932)).
-- New `PATCH /api/v1/metadata-properties/:metadata_property_id` endpoint allowing the update of a specific metadata property. ([#3952](https://github.com/argilla-io/argilla/pull/3952)).
-- Added `update_metadata_properties` method for both `FeedbackDataset` and `RemoteFeedbackDataset` to update one or more `metadata_properties` from the Python client ([#3961](https://github.com/argilla-io/argilla/pull/3961)).
+- New `GET /api/v1/datasets/:dataset_id/metadata-properties` endpoint for listing dataset metadata properties. ([#3813](https://github.com/argilla-io/argilla/pull/3813))
+- New `POST /api/v1/datasets/:dataset_id/metadata-properties` endpoint for creating dataset metadata properties. ([#3813](https://github.com/argilla-io/argilla/pull/3813))
+- New `PATCH /api/v1/metadata-properties/:metadata_property_id` endpoint allowing the update of a specific metadata property. ([#3952](https://github.com/argilla-io/argilla/pull/3952))
+- New `DELETE /api/v1/metadata-properties/:metadata_property_id` endpoint for deletion of a specific metadata property. ([#3911](https://github.com/argilla-io/argilla/pull/3911))
+- New `GET /api/v1/metadata-properties/:metadata_property_id/metrics` endpoint to compute metrics for a specific metadata property. ([#3856](https://github.com/argilla-io/argilla/pull/3856))
+- New `PATCH /api/v1/records/:record_id` endpoint to update a record. ([#3920](https://github.com/argilla-io/argilla/pull/3920))
+- New `PATCH /api/v1/dataset/:dataset_id/records` endpoint to bulk update the records of a dataset. ([#3934](https://github.com/argilla-io/argilla/pull/3934))
 - Missing validations to `PATCH /api/v1/questions/:question_id`. Now `title` and `description` are using the same validations used to create questions. ([#3967](https://github.com/argilla-io/argilla/pull/3967))
-- Added automatic model card generation through `ArgillaTrainer.save` ([#3857](https://github.com/argilla-io/argilla/pull/3857)).
-- Added `FeedbackDataset` `TaskTemplateMixin` for pre-defined task templates. ([#3969](https://github.com/argilla-io/argilla/pull/3969)).
+- Added `TermsMetadataProperty`, `IntegerMetadataProperty` and `FloatMetadataProperty` classes allowing to define metadata properties for a `FeedbackDataset`. ([#3818](https://github.com/argilla-io/argilla/pull/3818))
+- Added `metadata_filters` to `filter_by` method in `RemoteFeedbackDataset` to filter based on metadata i.e. `TermsMetadataFilter`, `IntegerMetadataFilter`, and `FloatMetadataFilter`. ([#3834](https://github.com/argilla-io/argilla/pull/3834))
+- Added a validation layer for both `metadata_properties` and `metadata_filters` in their schemas and as part of the `add_records` and `filter_by` methods, respectively. ([#3860](https://github.com/argilla-io/argilla/pull/3860))
+- Added `sort_by` query parameter to listing records endpoints that allows to sort the records by `inserted_at`, `updated_at` or metadata property. ([#3843](https://github.com/argilla-io/argilla/pull/3843))
+- Added `add_metadata_property` method to both `FeedbackDataset` and `RemoteFeedbackDataset` (i.e. `FeedbackDataset` in Argilla). ([#3900](https://github.com/argilla-io/argilla/pull/3900))
+- Added fields `inserted_at` and `updated_at` in `RemoteResponseSchema`. ([#3822](https://github.com/argilla-io/argilla/pull/3822))
+- Added support for `sort_by` for `RemoteFeedbackDataset` i.e. a `FeedbackDataset` uploaded to Argilla. ([#3925](https://github.com/argilla-io/argilla/pull/3925))
+- Added `metadata_properties` support for both `push_to_huggingface` and `from_huggingface`. ([#3947](https://github.com/argilla-io/argilla/pull/3947))
+- Add support for update records (`metadata` and `external_id`) from Python SDK. ([#3946](https://github.com/argilla-io/argilla/pull/3946))
+- Added `delete_metadata_properties` and `Remote{Terms,Integer,Float}MetadataProperty.delete` methods to delete metadata properties. ([#3932](https://github.com/argilla-io/argilla/pull/3932))
+- Added `update_metadata_properties` method for both `FeedbackDataset` and `RemoteFeedbackDataset` to update one or more `metadata_properties` from the Python client. ([#3961](https://github.com/argilla-io/argilla/pull/3961))
+- Added automatic model card generation through `ArgillaTrainer.save` ([#3857](https://github.com/argilla-io/argilla/pull/3857))
+- Added `FeedbackDataset` `TaskTemplateMixin` for pre-defined task templates. ([#3969](https://github.com/argilla-io/argilla/pull/3969))
 - A maximum limit of 50 on the number of options a ranking question can accept. ([#3975](https://github.com/argilla-io/argilla/pull/3975))
 
 ### Changed
 
-- Updated `Dockerfile` to use multi stage build ([#3221](https://github.com/argilla-io/argilla/pull/3221) and [#3793](https://github.com/argilla-io/argilla/pull/3793)).
-- Updated active learning for text classification notebooks to use the most recent small-text version ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
-- Changed argilla dataset name in the active learning for text classification notebooks to be consistent with the default names in the huggingface spaces ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
-- Updated `GET /api/v1/datasets/{dataset_id}/records`, `GET /api/v1/me/datasets/{dataset_id}/records` and `POST /api/v1/me/datasets/{dataset_id}/records/search` endpoints to return the `total` number of records ([#3848](https://github.com/argilla-io/argilla/pull/3848) & [#3903](https://github.com/argilla-io/argilla/pull/3903)).
-- Updated `FilteredRemoteFeedbackRecords.__len__` method to return the number of records matching the provided filters ([#3916](https://github.com/argilla-io/argilla/pull/3916)).
-- Increase the default max result window for Elasticsearch created for Feedback datasets ([#3929](https://github.com/argilla-io/argilla/pull/)).
-- Force elastic index refresh after records creation ([#3929](https://github.com/argilla-io/argilla/pull/)).
-- `FeedbackDataset` methods have been aligned to be accessible through the several implementations ([#3937](https://github.com/argilla-io/argilla/pull/3937)).
-- Support on `RemoteFeedbackDataset` for `unify_responses` method ([#3937](https://github.com/argilla-io/argilla/pull/3937)).
+- `Dockerfile` to use multi stage build. ([#3221](https://github.com/argilla-io/argilla/pull/3221), [#3793](https://github.com/argilla-io/argilla/pull/3793))
+- Active learning for text classification notebooks to use the most recent small-text version. ([#3831](https://github.com/argilla-io/argilla/pull/3831))
+- Argilla dataset name in the active learning for text classification notebooks to be consistent with the default names in the huggingface spaces. ([#3831](https://github.com/argilla-io/argilla/pull/3831))
+- `GET /api/v1/datasets/{dataset_id}/records`, `GET /api/v1/me/datasets/{dataset_id}/records` and `POST /api/v1/me/datasets/{dataset_id}/records/search` endpoints to return the `total` number of records. ([#3848](https://github.com/argilla-io/argilla/pull/3848), [#3903](https://github.com/argilla-io/argilla/pull/3903))
+- `FilteredRemoteFeedbackRecords.__len__` method to return the number of records matching the provided filters. ([#3916](https://github.com/argilla-io/argilla/pull/3916))
+- Increase the default max result window for Elasticsearch created for Feedback datasets. ([#3929](https://github.com/argilla-io/argilla/pull/))
+- Force elastic index refresh after records creation. ([#3929](https://github.com/argilla-io/argilla/pull/))
+- `FeedbackDataset` methods have been aligned to be accessible through the several implementations. ([#3937](https://github.com/argilla-io/argilla/pull/3937))
+- Support on `RemoteFeedbackDataset` for `unify_responses` method. ([#3937](https://github.com/argilla-io/argilla/pull/3937))
 
 ### Fixed
 
 - Fix field not shown in the order defined in the dataset settings. Closes [#3959](https://github.com/argilla-io/argilla/issues/3959) ([#3984](https://github.com/argilla-io/argilla/pull/3984))
-- Updated active learning for text classification notebooks to pass ids of type int to `TextClassificationRecord` ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
-- Fixed record fields validation that was preventing from logging records with optional fields (i.e. `required=True`) when the field value was `None` ([#3846](https://github.com/argilla-io/argilla/pull/3846)).
-- Fixed `configure_dataset_settings` when providing the workspace via the arg `workspace` ([#3887](https://github.com/argilla-io/argilla/pull/3887)).
-- Fixed response schemas to allow `values` to be `None` i.e. when a record is discarded the `response.values` are set to `None` ([#3926](https://github.com/argilla-io/argilla/pull/3926)).
-- The `inserted_at` and `updated_at` attributes are create using the `utcnow` factory to avoid unexpected race conditions on timestamp creation ([#3945](https://github.com/argilla-io/argilla/pull/3945))
-- Fixed saving of models trained with `ArgillaTrainer` with a `peft_config` parameter ([#3795](https://github.com/argilla-io/argilla/pull/3795)).
-- Fixed backwards compatibility on `from_huggingface` when loading a `FeedbackDataset` from the Hugging Face Hub that was previously dumped using another version of Argilla, starting at 1.8.0, when it was first introduced ([#3829](https://github.com/argilla-io/argilla/pull/3829)).
-- Fixed allow pull datasets without records ([#3851](https://github.com/argilla-io/argilla/pull/3851))
-- Updated active learning for text classification notebooks to pass ids of type int to `TextClassificationRecord` ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
-- Fixed record fields validation that was preventing from logging records with optional fields (i.e. `required=True`) when the field value was `None` ([#3846](https://github.com/argilla-io/argilla/pull/3846)).
-- Fixed wrong `__repr__` problem for `TrainingTask` ([#3969](https://github.com/argilla-io/argilla/pull/3969)).
-- Fixed wrong key return error `prepare_for_training_with_*` for `TrainingTask` ([#3969](https://github.com/argilla-io/argilla/pull/3969)).
+- Updated active learning for text classification notebooks to pass ids of type int to `TextClassificationRecord`. ([#3831](https://github.com/argilla-io/argilla/pull/3831))
+- Fixed record fields validation that was preventing from logging records with optional fields (i.e. `required=True`) when the field value was `None`. ([#3846](https://github.com/argilla-io/argilla/pull/3846))
+- Fixed `configure_dataset_settings` when providing the workspace via the arg `workspace`. ([#3887](https://github.com/argilla-io/argilla/pull/3887))
+- Fixed response schemas to allow `values` to be `None` i.e. when a record is discarded the `response.values` are set to `None`. ([#3926](https://github.com/argilla-io/argilla/pull/3926))
+- The `inserted_at` and `updated_at` attributes are create using the `utcnow` factory to avoid unexpected race conditions on timestamp creation. ([#3945](https://github.com/argilla-io/argilla/pull/3945))
+- Fixed saving of models trained with `ArgillaTrainer` with a `peft_config` parameter. ([#3795](https://github.com/argilla-io/argilla/pull/3795))
+- Fixed backwards compatibility on `from_huggingface` when loading a `FeedbackDataset` from the Hugging Face Hub that was previously dumped using another version of Argilla, starting at 1.8.0, when it was first introduced. ([#3829](https://github.com/argilla-io/argilla/pull/3829))
+- Fixed allow pull datasets without records. ([#3851](https://github.com/argilla-io/argilla/pull/3851))
+- Updated active learning for text classification notebooks to pass ids of type int to `TextClassificationRecord`. ([#3831](https://github.com/argilla-io/argilla/pull/3831))
+- Fixed record fields validation that was preventing from logging records with optional fields (i.e. `required=True`) when the field value was `None`. ([#3846](https://github.com/argilla-io/argilla/pull/3846))
+- Fixed wrong `__repr__` problem for `TrainingTask`. ([#3969](https://github.com/argilla-io/argilla/pull/3969))
+- Fixed wrong key return error `prepare_for_training_with_*` for `TrainingTask`. ([#3969](https://github.com/argilla-io/argilla/pull/3969))
 
 
 ## [1.16.0](https://github.com/argilla-io/argilla/compare/v1.15.1...v1.16.0)
