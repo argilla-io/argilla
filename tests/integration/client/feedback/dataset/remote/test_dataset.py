@@ -286,34 +286,6 @@ class TestRemoteFeedbackDataset:
         remote_metadata_property = remote_dataset.metadata_property_by_name(remote_metadata_property.name)
         assert remote_metadata_property.to_local() == metadata_property
 
-    async def test_delete_metadata_property(self, owner: "User", feedback_dataset: FeedbackDataset) -> None:
-        api.init(api_key=owner.api_key)
-        workspace = Workspace.create(name="test-workspace")
-
-        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
-        assert isinstance(remote_dataset, RemoteFeedbackDataset)
-        assert len(remote_dataset.metadata_properties) == len(feedback_dataset.metadata_properties)
-
-        for idx, metadata_property in enumerate(remote_dataset.metadata_properties, 1):
-            remote_dataset.delete_metadata_properties(metadata_property.name)
-            assert len(remote_dataset.metadata_properties) == len(feedback_dataset.metadata_properties) - idx
-
-        assert len(remote_dataset.metadata_properties) == 0
-
-    async def test_delete_metadata_property_in_place(self, owner: "User", feedback_dataset: FeedbackDataset) -> None:
-        api.init(api_key=owner.api_key)
-        workspace = Workspace.create(name="test-workspace")
-
-        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
-        assert isinstance(remote_dataset, RemoteFeedbackDataset)
-        assert len(remote_dataset.metadata_properties) == len(feedback_dataset.metadata_properties)
-
-        for idx, metadata_property in enumerate(remote_dataset.metadata_properties, 1):
-            metadata_property.delete()
-            assert len(remote_dataset.metadata_properties) == len(feedback_dataset.metadata_properties) - idx
-
-        assert len(remote_dataset.metadata_properties) == 0
-
     @pytest.mark.parametrize(
         "metadata_properties, RemoteMetadataPropertiesClasses",
         [
@@ -365,6 +337,70 @@ class TestRemoteFeedbackDataset:
             assert isinstance(remote_metadata_property, remote_metadata_property_cls)
             assert remote_metadata_property.name == metadata_property.name
             assert len(remote_dataset.metadata_properties) == (idx + 1)
+
+    async def test_update_metadata_properties(self, owner: "User", feedback_dataset: FeedbackDataset) -> None:
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+        assert isinstance(remote_dataset, RemoteFeedbackDataset)
+        assert len(remote_dataset.metadata_properties) == len(feedback_dataset.metadata_properties)
+
+        for metadata_property in remote_dataset.metadata_properties:
+            metadata_property.title = "new-title"
+            metadata_property.visible_for_annotators = False
+            remote_dataset.update_metadata_properties(metadata_property)
+        assert len(remote_dataset.metadata_properties) == len(feedback_dataset.metadata_properties)
+
+        for metadata_property in remote_dataset.metadata_properties:
+            assert metadata_property.title == "new-title"
+            assert metadata_property.visible_for_annotators is False
+
+    async def test_update_metadata_property_in_place(self, owner: "User", feedback_dataset: FeedbackDataset) -> None:
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+        assert isinstance(remote_dataset, RemoteFeedbackDataset)
+        assert len(remote_dataset.metadata_properties) == len(feedback_dataset.metadata_properties)
+
+        for metadata_property in remote_dataset.metadata_properties:
+            metadata_property.title = "new-title"
+            metadata_property.visible_for_annotators = False
+            metadata_property._update()
+        assert len(remote_dataset.metadata_properties) == len(feedback_dataset.metadata_properties)
+
+        for metadata_property in remote_dataset.metadata_properties:
+            assert metadata_property.title == "new-title"
+            assert metadata_property.visible_for_annotators is False
+
+    async def test_delete_metadata_properties(self, owner: "User", feedback_dataset: FeedbackDataset) -> None:
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+        assert isinstance(remote_dataset, RemoteFeedbackDataset)
+        assert len(remote_dataset.metadata_properties) == len(feedback_dataset.metadata_properties)
+
+        for idx, metadata_property in enumerate(remote_dataset.metadata_properties, 1):
+            remote_dataset.delete_metadata_properties(metadata_property.name)
+            assert len(remote_dataset.metadata_properties) == len(feedback_dataset.metadata_properties) - idx
+
+        assert len(remote_dataset.metadata_properties) == 0
+
+    async def test_delete_metadata_property_in_place(self, owner: "User", feedback_dataset: FeedbackDataset) -> None:
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+        assert isinstance(remote_dataset, RemoteFeedbackDataset)
+        assert len(remote_dataset.metadata_properties) == len(feedback_dataset.metadata_properties)
+
+        for idx, metadata_property in enumerate(remote_dataset.metadata_properties, 1):
+            metadata_property._delete()
+            assert len(remote_dataset.metadata_properties) == len(feedback_dataset.metadata_properties) - idx
+
+        assert len(remote_dataset.metadata_properties) == 0
 
     @pytest.mark.parametrize("statuses", [["draft", "discarded", "submitted"]])
     async def test_from_argilla_with_responses(self, owner: "User", statuses: List[str]) -> None:
