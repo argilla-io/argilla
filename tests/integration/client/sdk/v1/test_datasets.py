@@ -39,6 +39,7 @@ from argilla.client.sdk.v1.datasets.api import (
     get_records,
     list_datasets,
     publish_dataset,
+    update_records,
 )
 from argilla.client.sdk.v1.datasets.models import (
     FeedbackDatasetModel,
@@ -317,6 +318,51 @@ async def test_add_records(owner: User, test_dataset: FeedbackDataset, role: Use
     argilla_api = api.active_api()
 
     response = add_records(client=argilla_api.client.httpx, id=remote.id, records=[{"fields": {"text": "test_value"}}])
+
+    assert response.status_code == 204
+
+
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+@pytest.mark.asyncio
+async def test_update_records(test_dataset: FeedbackDataset, role: UserRole) -> None:
+    workspace = await WorkspaceFactory.create()
+    user = await UserFactory.create(role=role, workspaces=[workspace])
+
+    test_dataset.add_records(
+        [
+            {
+                "fields": {"text": "test_value_1", "optional": "optional_1"},
+                "metadata": {"terms-metadata": "a", "integer-metadata": 0, "float-metadata": 0.0},
+                "suggestions": [{"question_name": "question", "value": "suggestion 1"}],
+            },
+            {
+                "fields": {"text": "test_value_2", "optional": "optional_2"},
+                "metadata": {"terms-metadata": "b", "integer-metadata": 1, "float-metadata": 1.0},
+                "suggestions": [{"question_name": "question", "value": "suggestion 1"}],
+            },
+            {
+                "fields": {"text": "test_value_3", "optional": "optional_3"},
+                "metadata": {"terms-metadata": "c", "integer-metadata": 2, "float-metadata": 2.0},
+                "suggestions": [{"question_name": "question", "value": "suggestion 1"}],
+            },
+        ]
+    )
+
+    api.init(api_key=user.api_key)
+    remote = test_dataset.push_to_argilla(name="test-dataset", workspace=workspace.name)
+
+    records_to_update = []
+    for record in remote.records:
+        records_to_update.append(
+            {
+                "id": str(record.id),
+                "metadata": {"terms-metadata": "c", "integer-metadata": 9, "float-metadata": 9.0},
+                "suggestions": [{"question_id": str(remote.questions[0].id), "value": "new suggestion"}],
+            }
+        )
+
+    argilla_api = api.active_api()
+    response = update_records(client=argilla_api.client.httpx, id=remote.id, records=records_to_update)
 
     assert response.status_code == 204
 
