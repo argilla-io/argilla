@@ -259,7 +259,7 @@ class Workspace:
         try:
             return active_client().http_client.httpx
         except Exception as e:
-            raise RuntimeError(f"The `rg.active_client()` is not available or not respoding.") from e
+            raise RuntimeError(f"The `rg.active_client()` is not available or not responding.") from e
 
     @classmethod
     def _new_instance(

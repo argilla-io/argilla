@@ -60,7 +60,7 @@ def tokens_length(name: str, query: Optional[str] = None, interval: int = 1) -> 
 
 
 def token_frequency(name: str, query: Optional[str] = None, tokens: int = 1000) -> MetricSummary:
-    """Computes the token frequency distribution for a numbe of tokens.
+    """Computes the token frequency distribution for a number of tokens.
 
     Args:
         name: The dataset name.

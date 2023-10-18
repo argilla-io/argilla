@@ -183,7 +183,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, Generic[R]):
         return self._fields
 
     def field_by_name(self, name: str) -> Union[AllowedFieldTypes, "AllowedRemoteFieldTypes"]:
-        """Returns the field by name if it exists. Othewise a `ValueError` is raised.
+        """Returns the field by name if it exists. Otherwise a `ValueError` is raised.
 
         Args:
             name: the name of the field to return.
@@ -205,7 +205,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, Generic[R]):
         return self._questions
 
     def question_by_name(self, name: str) -> Union[AllowedQuestionTypes, "AllowedRemoteQuestionTypes"]:
-        """Returns the question by name if it exists. Othewise a `ValueError` is raised.
+        """Returns the question by name if it exists. Otherwise a `ValueError` is raised.
 
         Args:
             name: the name of the question to return.
@@ -231,7 +231,7 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, Generic[R]):
     def metadata_property_by_name(
         self, name: str
     ) -> Union["AllowedMetadataPropertyTypes", "AllowedRemoteMetadataPropertyTypes"]:
-        """Returns the metadata property by name if it exists. Othewise a `ValueError` is raised.
+        """Returns the metadata property by name if it exists. Otherwise a `ValueError` is raised.
 
         Args:
             name: the name of the metadata property to return.

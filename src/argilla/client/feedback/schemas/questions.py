@@ -112,7 +112,7 @@ class RatingQuestion(QuestionSchema, LabelMappingMixin):
     Args:
         type: The type of the question. Defaults to 'rating' and cannot/shouldn't be
             modified.
-        values: The list of interger values of the rating question. There is not need
+        values: The list of integer values of the rating question. There is not need
             for the values to be sequential, but they must be unique, contain at least two
             unique integers in the range [1, 10].
 
