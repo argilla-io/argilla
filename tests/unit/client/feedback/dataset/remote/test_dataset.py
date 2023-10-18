@@ -14,11 +14,14 @@
 
 from datetime import datetime
 from typing import Dict
+from unittest import mock
 from uuid import uuid4
 
 import httpx
 import pytest
-from argilla import Workspace
+from pytest_mock import MockerFixture
+
+from argilla import FeedbackDataset, Workspace
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 from argilla.client.feedback.schemas import SuggestionSchema
 from argilla.client.feedback.schemas.remote.fields import RemoteTextField
@@ -240,3 +243,14 @@ class TestSuiteRemoteDataset:
     ) -> None:
         # TODO: Implement
         pass
+
+    def test_push_to_huggingface_warnings(
+        self, mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch, test_remote_dataset: RemoteFeedbackDataset
+    ) -> None:
+        monkeypatch.setattr(test_remote_dataset, "pull", lambda: mocker.Mock(FeedbackDataset))
+        with pytest.warns(
+            UserWarning,
+            match="The dataset is first pulled locally and pushed to Hugging Face after "
+            "because `push_to_huggingface` is not supported for a `RemoteFeedbackDataset`",
+        ):
+            test_remote_dataset.push_to_huggingface("repo_id")
