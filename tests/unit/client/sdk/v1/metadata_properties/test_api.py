@@ -15,13 +15,11 @@
 from uuid import uuid4
 
 import httpx
-import pytest
 from argilla.client.sdk.v1.metadata_properties.api import update_metadata_property
 
 
-@pytest.mark.asyncio
 class TestSuiteMetadataPropertiesSDK:
-    async def test_update_metadata_property(self, mock_httpx_client: httpx.Client) -> None:
+    def test_update_metadata_property(self, mock_httpx_client: httpx.Client) -> None:
         metadata_property_id = uuid4()
         mock_httpx_client.patch.return_value = httpx.Response(
             status_code=200,
