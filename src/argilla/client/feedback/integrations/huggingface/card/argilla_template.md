@@ -64,7 +64,7 @@ There are no leaderboards associated with this dataset.
 
 The dataset is created in Argilla with: **fields**, **questions**, **suggestions**, and **guidelines**.
 
-The **fields** are the dataset records themselves, for the moment just text fields are suppported. These are the ones that will be used to provide responses to the questions.
+The **fields** are the dataset records themselves, for the moment just text fields are supported. These are the ones that will be used to provide responses to the questions.
 
 | Field Name | Title | Type | Required | Markdown |
 | ---------- | ----- | ---- | -------- | -------- |
@@ -100,7 +100,7 @@ While the same record in HuggingFace `datasets` looks as follows:
 
 Among the dataset fields, we differentiate between the following:
 
-* **Fields:** These are the dataset records themselves, for the moment just text fields are suppported. These are the ones that will be used to provide responses to the questions.
+* **Fields:** These are the dataset records themselves, for the moment just text fields are supported. These are the ones that will be used to provide responses to the questions.
     {% for field in argilla_fields %}
     * {% if field.required == false %}(optional) {% endif %}**{{ field.name }}** is of type `{{ field.type }}`.{% endfor %}
 

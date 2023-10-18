@@ -286,7 +286,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         """Initializes a `RemoteFeedbackDataset` instance in Argilla.
 
         Note:
-            This class is not intended to be initiallised directly. Instead, use
+            This class is not intended to be initialised directly. Instead, use
             `FeedbackDataset.from_argilla` to get an instance of this class.
 
         Args:
