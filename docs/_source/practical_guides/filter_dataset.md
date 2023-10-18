@@ -14,14 +14,45 @@ The `filter_by` method returns a new instance which is a `FeedbackDataset` with 
 :::
 
 #### By `fields` content
-```{warning}
-[TODO] UI only? search bar.
-```
-
+In the UI, you can filter records based on their content using the searchbar in the top left corner on top of the record card. For example, you may read or annotate all records mentioning John Wick by simply typing "John Wick" in the searchbar.
 
 #### By metadata property
-```{warning}
-[TODO]
+
+In the UI, you will find a metadata filter that lets you easily set a combination of filters based on the metadata properties defined for your dataset.
+
+```{note}
+Note that if a metadata property was set to `visible_for_annotators=False` this metadata property will only appear in the metadata filter for users with the `admin` or `owner` role.
+```
+
+In the Python SDK, you can also filter the records using one or a combination of metadata filters for the metadata properties defined in your dataset. Depending on the type of metadata you want to filter by, you will need to choose one of the following: `IntegerMetadataFilter`, `FloatMetadataFilter` or `TermsMetadataFilter`.
+
+These are the arguments that you will need to define for your filter:
+- `name`: The name of the metadata property you want to filter by.
+- `ge`: In an `IntegerMetadataFilter` or `FloatMetadataFilter`, match values greater than or equal to the provided value. At least one of `ge` or `le` should be provided.
+- `le`: In an `IntegerMetadataFilter` or `FloatMetadataFilter`, match values lower than or equal to the provided value. At least one of `ge` or `le` should be provided.
+- `values`: In a `TermsMetadataFilter`, returns records with at least one of the values provided.
+
+
+```python
+import argilla as rg
+
+rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
+
+dataset = rg.FeedbackDataset.from_argilla(name="my-dataset", workspace="my-workspace")
+
+filtered_records = dataset.filter_by(
+    metadata_filters=[
+        rg.IntegerMetadataFilter(
+            name="tokens-length",
+            ge=900, # at least one of ge or le should be provided
+            le=1000
+        ),
+        rg.TermsMetadataFilter(
+            name="task",
+            values=["summarization", "information-extraction"]
+        )
+    ]
+)
 ```
 
 #### By status
@@ -67,12 +98,24 @@ filtered_dataset = dataset.filter_by(response_status=["submitted", "draft"])
 ::::
 
 ### Sort
-```{warning}
-[TODO] By metadata only.
-In the UI ascending vs descending, One can combine multiple sorts.
-SDK?
+You may also order your records according to one or several attributes. In the UI, you can easily do this using the `Sort` menu. In the Python SDK, you can do this sorting with the `sort_by` method.
+
+You can sort
+- `field`: This refers to the information that will be used for the sorting. This can be time when a record was created (`created_at`), last updated (`updated_at`) or any metadata properties configured for your dataset (`metadata.my-metadata-name`).
+- `order`: Whether the order should be ascending (`asc`) or descending (`des`).
+
+```python
+sorted_records = remote.sort_by(
+    [
+        SortBy(field="metadata.my-metadata", order="asc"),
+        SortBy(field="updated_at", order="des"),
+    ]
+)
 ```
 
+```{tip}
+You can also combine filters and sorting: `dataset.filter_by(...).sort_by(...)`
+```
 
 ## Other datasets
 
