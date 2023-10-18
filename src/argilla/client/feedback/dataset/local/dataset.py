@@ -246,6 +246,22 @@ class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase["FeedbackRecord"], TaskT
         self._metadata_properties.append(metadata_property)
         return metadata_property
 
+    def update_metadata_properties(
+        self,
+        metadata_properties: Union["AllowedMetadataPropertyTypes", List["AllowedMetadataPropertyTypes"]],
+    ) -> None:
+        """Does nothing because the `metadata_properties` are updated automatically for
+        `FeedbackDataset` datasets when assigning their updateable attributes to a new value.
+        """
+        warnings.warn(
+            "`update_metadata_properties` method is not supported for `FeedbackDataset` datasets"
+            " unless its pushed to Argilla i.e. `RemoteFeedbackDataset`. This is because the"
+            " `metadata_properties` updates are already applied via assignment if any. So,"
+            " this method is not required locally.",
+            UserWarning,
+            stacklevel=1,
+        )
+
     def delete_metadata_properties(
         self, metadata_properties: Union[str, List[str]]
     ) -> Union["AllowedMetadataPropertyTypes", List["AllowedMetadataPropertyTypes"]]:

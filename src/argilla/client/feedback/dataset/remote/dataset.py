@@ -539,6 +539,43 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         return ArgillaMixin._parse_to_remote_metadata_property(metadata_property=metadata_property, client=self._client)
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def update_metadata_properties(
+        self,
+        metadata_properties: Union["AllowedRemoteMetadataPropertyTypes", List["AllowedRemoteMetadataPropertyTypes"]],
+    ) -> None:
+        """Updates a list of `metadata_properties` in the current `FeedbackDataset` in Argilla.
+
+        Note:
+            All the `metadata_properties` provided must exist in Argilla in advance, and
+            those will be pushed again to Argilla with the current values that they have,
+            which ideally, should have been updated via assignment e.g. `metadata_property.title = \"...\"`.
+
+        Args:
+            metadata_properties: the metadata property/ies to update in the current `FeedbackDataset` in Argilla.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+            RuntimeError: if the `metadata_properties` cannot be updated in the current
+                `FeedbackDataset` in Argilla.
+        """
+        if not isinstance(metadata_properties, list):
+            metadata_properties = [metadata_properties]
+
+        for metadata_property in metadata_properties:
+            try:
+                ArgillaMetadataPropertiesMixin.update(
+                    client=self._client,
+                    metadata_property_id=metadata_property.id,
+                    title=metadata_property.title,
+                    visible_for_annotators=metadata_property.visible_for_annotators,
+                )
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed while updating the `metadata_property={metadata_property.name}` in the current"
+                    f" `FeedbackDataset` in Argilla with exception: {e}"
+                ) from e
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def delete_metadata_properties(
         self, metadata_properties: Union[str, List[str]]
     ) -> Union["AllowedMetadataPropertyTypes", List["AllowedMetadataPropertyTypes"]]:
