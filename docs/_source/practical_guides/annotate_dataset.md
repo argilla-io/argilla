@@ -5,11 +5,11 @@
 ```{include} /_common/feedback_dataset.md
 ```
 
-![Spanshot of the Submitted queue and the progress bar in a Feedback Dataset](/_static/images/llms/snapshot-feedback-submitted.png)
+![Snapshot of the Submitted queue and the progress bar in a Feedback Dataset](/_static/images/llms/snapshot-feedback-submitted.png)
 
-After pushing a `FeedbackDataset` to Argilla, as explained in [Create a Dataset](create_dataset.ipynb), you can start annotating it through the Argilla UI.
+After pushing a `FeedbackDataset` to Argilla, as explained in [Create a Dataset](create_dataset.md), you can start annotating it through the Argilla UI.
 
-As you open the dataset in the UI, you will see by default the records with `Pending` responses, i.e. records that still don't have a response (annotation), in a single-record view. On the left, you can find the record to annotate and on the right the form with the questions to answer. You can navigate through the records using the `Prev` and `Next` buttons in the bottom bar. You may use the search bar to filter the records based on specific words or phrases.
+As you open the dataset in the UI, you will see by default the records with `Pending` responses, i.e. records that still don't have a response (annotation), in a single-record view. On the left, you can find the record to annotate and to the right is the form with the questions to answer. You can navigate through the records using the `Prev` and `Next` buttons in the bottom bar. You may use the search bar to filter the records based on specific words or phrases.
 
 ```{hint}
 It is important that the dataset has annotations for a wide variety of records with diverse content. Try not to restrict your annotations to records retrieved in a single search or records with very similar content.
@@ -64,7 +64,7 @@ Provide a text response inside the text area.
 
 ::::
 
-Some questions may include a suggested response as well. Those questions will be marked with this icon ✨ and you will see the suggestion as a pre-filled response. If you agree with the suggestion, there is nothing you need to do; if you don't do any modifications, the suggestion will be saved as your response once you submit the response. In case the suggestion is not quite right, you will just need to make the necessary modifications.
+Some questions may include a suggested response as well. Those questions will be marked with this icon ✨ and you will see the suggestion as a pre-filled response. If you agree with the suggestion, there is nothing you need to do; if you don't make any modifications, the suggestion will be saved as your response once you submit the response. In case the suggestion is not quite right, you will just need to make the necessary modifications.
 
 Additionally, you may find questions that are marked as required. Those questions will be marked with a red asterisk (<span style="color:red; font-weight:bold;">*</span>) and you will not be able to submit the response until you provide a response for those questions.
 
@@ -130,7 +130,7 @@ Alternatively, you can discard your changes and revert to the previous state of 
 #### Filters
 
 The Argilla UI provides a set of filters that help you to quickly and conveniently navigate your records.
-For example, you can filter records by their predictions, by a specific metadata, or choose to only view records that are missing annotations.
+For example, you can filter records by their predictions, by specific metadata, or choose to only view records that are missing annotations.
 The filters are available in all [modes](/reference/webapp/pages.md#modes) of the UI.
 
 ```{note}
@@ -168,12 +168,12 @@ This filter allows you to filter records with respect to their status:
 This filter allows you to filter records with respect to their metadata.
 
 ```{hint}
-Nested metadata will be flattened and the keys will be joint by a dot.
+Nested metadata will be flattened and the keys will be joined by a dot.
 ```
 
 #### Sort records
 
-With this component you can sort the records by various parameters, such as the predictions, annotations or their metadata.
+With this component, you can sort the records by various parameters, such as the predictions, annotations or their metadata.
 
 #### Search
 
@@ -183,7 +183,7 @@ The search bar in Argilla is driven by Elasticsearch's powerful [query string sy
 
 It allows you to perform simple fuzzy searches of words and phrases, or complex queries taking full advantage of Argilla's data model.
 
-Check out our guide for [filtering and querying datasets](filter_dataset.md) for a comprehensive guide on how to search in the Argilla UI.
+Check out our guide for [filtering and querying datasets](/practical_guides/filter_dataset) for a comprehensive guide on how to search in the Argilla UI.
 
 #### Semantic search
 
@@ -210,9 +210,9 @@ In single-label text classification, there is no need to validate after selectin
 ![Weak labeling](/_static/reference/webapp/features-weak-labelling.png)
 
 The Argilla UI has a dedicated mode to find good **heuristic rules**, also often referred to as _labeling functions_, for a [weak supervision](https://www.snorkel.org/blog/weak-supervision) workflow.
-As shown in our [guide](/guides/weak-supervision.ipynb) and [tutorial](/tutorials/notebooks/labelling-textclassification-sentencetransformers-weaksupervision.ipynb), these rules allow you to quickly annotate your data with noisy labels in a semiautomatic way.
+As shown in our [guide](/practical_guides/annotation_workflows/weak_supervision.ipynb) and [tutorial](/tutorials/notebooks/labelling-textclassification-sentencetransformers-weaksupervision.ipynb), these rules allow you to quickly annotate your data with noisy labels in a semiautomatic way.
 
-You can access the _Weak labeling_ mode via the sidebar of the [Dataset page](dataset.md).
+You can access the _Weak labeling_ mode via the sidebar of the [Dataset page](/reference/webapp/pages.md#sidebar).
 
 ```{note}
 The _Weak labeling_ mode is only available for text classification datasets.
@@ -224,12 +224,12 @@ A rule in Argilla basically applies a chosen set of labels to a list of records 
 After entering a query in the search bar and selecting one or multiple labels, you will see some [metrics](#rule-metrics) for the rule on the right and the matches of your query in the record list below.
 
 ```{warning}
-Filters are not part of the rule, but are applied to the record list.
-This means, if you have filters set, the record list does not necessarily correspond to the records affected by the rule.
+Filters are not part of the rule but are applied to the record list.
+This means that if you have filters set, the record list does not necessarily correspond to the records affected by the rule.
 ```
 
 If you are happy with the metrics and/or the matching record list, you can save the rule by clicking on "Save rule".
-In this way it will be stored as part of the current dataset and can be accessed via the [manage rules](#manage-rules) button.
+In this way, it will be stored as part of the current dataset and can be accessed via the [manage rules](#manage-rules) button.
 
 ```{hint}
 If you want to add labels to the available list of labels, you can go to your [Dataset Settings page](/reference/webapp/pages.md#dataset-settings) and create new labels there.
@@ -251,9 +251,9 @@ For multi-label classification tasks, we only count wrongly predicted labels as 
 
 ##### Overall rule metrics
 
-From the [right sidebar](dataset.md#sidebar) you can access the **Overall rule metrics**.
+From the [right sidebar](/reference/webapp/pages.md#sidebar) you can access the **Overall rule metrics**.
 Here you will find the aggregated metrics, such as the coverages, the average precision and the total number of correctly/incorrectly predicted labels.
-You can also find an overview about how many rules you saved and how they are distributed with respect to their labels.
+You can also find an overview of how many rules you saved and how they are distributed with respect to their labels.
 
 ```{hint}
 If you struggle to increase the overall coverage, try to filter for the records that are not covered by your rules via the [Annotation filter](#annotations-filter).

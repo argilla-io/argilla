@@ -61,8 +61,6 @@ server = [
     "greenlet >= 2.0.0",
     # Async SQLite
     "aiosqlite >=0.19.0",
-    # Advanced query search dsl
-    "luqum >= 0.11,< 0.13",
     # metrics
     "scikit-learn >= 0.24.2",
     # Statics server
@@ -106,7 +104,7 @@ integrations = [
     "evaluate",
     "seqeval",
     "sentence-transformers",
-    "setfit",
+    "setfit>=0.7.0",
     "span_marker",
     "openai>=0.27.10",
     "peft",
@@ -117,6 +115,7 @@ tests = [
     "pytest-cov",
     "pytest-mock",
     "pytest-asyncio",
+    "pytest-env",
     "factory_boy ~= 3.2.1",
 ]
 
@@ -144,7 +143,7 @@ log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 log_cli = "True"
 testpaths = ["tests"]
-env = ["ARGILLA_DATABASE_URL=sqlite+aiosqlite://$HOME/.argilla/test.db"]
+env = ["ARGILLA_ENABLE_TELEMETRY=0"]
 
 
 [tool.coverage.run]

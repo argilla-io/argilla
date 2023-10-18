@@ -9,7 +9,6 @@ Please go the the `Preview` tab and select the appropriate sub-template:
 * [🐞-bug](?expand=1&template=bug.md)
 * [📚-documentation](?expand=1&template=docs.md)
 * [🆕-features](?expand=1&template=features.md)
-* [🔗-💥-integration](?expand=1&template=integration.md)
 
 # Generic Pull Request Template
 

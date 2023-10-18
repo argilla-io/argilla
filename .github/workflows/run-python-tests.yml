@@ -68,6 +68,8 @@ jobs:
         run: echo "Enable HF access token"
 
       - name: Run tests 📈
+        env:
+          ARGILLA_ENABLE_TELEMETRY: 0
         run: |
           python -m pytest --cov=argilla --cov-report=xml:${{ env.COVERAGE_REPORT }}.xml ${{ inputs.pytestArgs }}
 

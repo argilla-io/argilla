@@ -147,3 +147,28 @@ class TestRemoteFeedbackDataset:
         assert isinstance(remote_dataset.url, str)
         assert isinstance(remote_dataset.created_at, datetime)
         assert isinstance(remote_dataset.updated_at, datetime)
+
+    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+    async def test_warning_local_methods(self, role: UserRole) -> None:
+        dataset = await DatasetFactory.create()
+        await TextFieldFactory.create(dataset=dataset, required=True)
+        await TextQuestionFactory.create(dataset=dataset, required=True)
+        await RecordFactory.create_batch(dataset=dataset, size=10)
+        user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+
+        api.init(api_key=user.api_key)
+        ds = FeedbackDataset.from_argilla(id=dataset.id)
+
+        with pytest.raises(ValueError, match="`FeedbackRecord.fields` does not match the expected schema"):
+            with pytest.warns(
+                UserWarning,
+                match="A local `FeedbackDataset` returned because `unify_responses` is not supported for `RemoteFeedbackDataset`. ",
+            ):
+                ds.unify_responses(question=None, strategy=None)
+
+        with pytest.raises(ValueError, match="`FeedbackRecord.fields` does not match the expected schema"):
+            with pytest.warns(
+                UserWarning,
+                match="A local `FeedbackDataset` returned because `prepare_for_training` is not supported for `RemoteFeedbackDataset`. ",
+            ):
+                ds.prepare_for_training(framework=None, task=None)

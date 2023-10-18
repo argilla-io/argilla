@@ -16,7 +16,8 @@ import os
 import textwrap
 import warnings
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, List, Optional, Union
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.training.schemas import TrainingTaskForTextClassification, TrainingTaskTypes
@@ -30,6 +31,7 @@ if TYPE_CHECKING:
     from transformers import PreTrainedModel, PreTrainedTokenizer
 
     from argilla.client.feedback.dataset import FeedbackDataset
+    from argilla.client.feedback.integrations.huggingface.model_card import ArgillaModelCard, FrameworkCardData
 
 
 class ArgillaTrainer(ArgillaTrainerV1):
@@ -67,7 +69,8 @@ class ArgillaTrainer(ArgillaTrainerV1):
             gpu_id: the GPU ID to use when training a SpaCy model. Defaults to -1, which means that the CPU
                 will be used by default. GPU IDs start in 0, which stands for the default GPU in the system,
                 if available.
-            framework_kwargs: arguments for the framework's trainer.
+            framework_kwargs: arguments for the framework's trainer. A special key (model_card_kwargs) is reserved
+                for the arguments that can be passed to the model card.
             **load_kwargs: arguments for the rg.load() function.
         """
         self._dataset = dataset
@@ -92,6 +95,12 @@ class ArgillaTrainer(ArgillaTrainerV1):
             warnings.warn(
                 f"Passing a tokenizer is not supported for the {framework} framework.", UserWarning, stacklevel=2
             )
+
+        # Save the model_card arguments if given by the user
+        if model_card_kwargs := framework_kwargs.pop("model_card_kwargs", None):
+            self.model_card_kwargs = model_card_kwargs
+        else:
+            self.model_card_kwargs = {}
 
         if framework is Framework.SETFIT:
             if not isinstance(task, TrainingTaskForTextClassification):
@@ -246,6 +255,44 @@ class ArgillaTrainer(ArgillaTrainerV1):
         """
         return self._trainer.predict(text=text, as_argilla_records=False, **kwargs)
 
+    def save(self, output_dir: str, generate_card: bool = True) -> None:
+        """
+        Saves the model to the specified path and optionally generates a `ModelCard` at the same `output_dir`.
+
+        Args:
+            output_dir: The path to the directory where the model will be saved.
+            generate_card: Whether to generate a model card of the `ArgillaTrainer` for the HuggingFace Hub. Defaults
+                to `True`.
+        """
+        super().save(output_dir)
+
+        if generate_card:
+            self.generate_model_card(output_dir)
+
+    def generate_model_card(self, output_dir: str) -> "ArgillaModelCard":
+        """Generate and return a model card based on the model card data.
+
+        Args:
+            output_dir: Folder where the model card will be written.
+
+        Returns:
+            model_card: The model card.
+        """
+        from argilla.client.feedback.integrations.huggingface.model_card import ArgillaModelCard
+
+        if not self.model_card_kwargs.get("output_dir"):
+            self.model_card_kwargs.update({"output_dir": f'"{output_dir}"'})
+
+        model_card = ArgillaModelCard.from_template(
+            card_data=self._trainer.get_model_card_data(**self.model_card_kwargs),
+            template_path=ArgillaModelCard.default_template_path,
+        )
+
+        model_card_path = Path(output_dir) / "README.md"
+        model_card.save(model_card_path)
+        self._logger.info(f"Model card generated at: {model_card_path}")
+        return model_card
+
 
 class ArgillaTrainerSkeleton(ABC):
     def __init__(
@@ -306,4 +353,10 @@ class ArgillaTrainerSkeleton(ABC):
     def save(self, output_dir: str) -> None:
         """
         Saves the model to the specified path.
+        """
+
+    @abstractmethod
+    def get_model_card_data(self, card_data_kwargs: Dict[str, Any]) -> "FrameworkCardData":
+        """
+        Generates a `FrameworkCardData` instance to generate a model card from.
         """
