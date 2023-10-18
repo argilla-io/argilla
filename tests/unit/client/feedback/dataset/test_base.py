@@ -36,6 +36,9 @@ if TYPE_CHECKING:
 
 
 class TestFeedbackDataset(FeedbackDatasetBase):
+    def push_to_huggingface(self, *args, **kwargs):
+        pass
+
     def add_records(self, *args, **kwargs) -> None:
         pass
 
