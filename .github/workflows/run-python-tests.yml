@@ -59,7 +59,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e .[server,postgresql,tests,integrations]
+          python -m pip install -e .[server,postgresql,tests,integrations,listeners]
 
       - name: Set huggingface hub credentials
         if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/releases')
