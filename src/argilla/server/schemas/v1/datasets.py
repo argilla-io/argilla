@@ -22,8 +22,8 @@ from pydantic import Field as PydanticField
 from pydantic.generics import GenericModel
 from pydantic.utils import GetterDict
 
-from argilla.server.enums import UserRole
 from argilla.server.schemas.base import UpdateSchema
+from argilla.server.schemas.v1.records import RecordUpdate
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
 from argilla.server.search_engine import StringQuery
 
@@ -57,9 +57,9 @@ QUESTION_CREATE_DESCRIPTION_MAX_LENGTH = 1000
 
 METADATA_PROPERTY_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH = 1
-METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH = 50
-METADATA_PROPERTY_CREATE_DESCRIPTION_MIN_LENGTH = 1
-METADATA_PROPERTY_CREATE_DESCRIPTION_MAX_LENGTH = 1000
+METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH = 200
+METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH = 1
+METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH = 500
 
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 10
@@ -79,11 +79,16 @@ LABEL_SELECTION_OPTIONS_MAX_ITEMS = 250
 LABEL_SELECTION_MIN_VISIBLE_OPTIONS = 3
 
 RANKING_OPTIONS_MIN_ITEMS = 2
+RANKING_OPTIONS_MAX_ITEMS = 50
 
-TERMS_METADATA_PROPERTY_MIN_VALUES = 1
+TERMS_METADATA_PROPERTY_VALUES_MIN_ITEMS = 1
+TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS = 250
 
 RECORDS_CREATE_MIN_ITEMS = 1
 RECORDS_CREATE_MAX_ITEMS = 1000
+
+RECORDS_UPDATE_MIN_ITEMS = 1
+RECORDS_UPDATE_MAX_ITEMS = 1000
 
 
 class Dataset(BaseModel):
@@ -169,7 +174,9 @@ class Fields(BaseModel):
 
 FieldName = Annotated[
     constr(
-        regex=FIELD_CREATE_NAME_REGEX, min_length=FIELD_CREATE_NAME_MIN_LENGTH, max_length=FIELD_CREATE_NAME_MAX_LENGTH
+        regex=FIELD_CREATE_NAME_REGEX,
+        min_length=FIELD_CREATE_NAME_MIN_LENGTH,
+        max_length=FIELD_CREATE_NAME_MAX_LENGTH,
     ),
     PydanticField(..., description="The name of the field"),
 ]
@@ -280,6 +287,7 @@ class RankingQuestionSettingsCreate(UniqueValuesCheckerMixin):
     options: conlist(
         item_type=ValueTextQuestionSettingsOption,
         min_items=RANKING_OPTIONS_MIN_ITEMS,
+        max_items=RANKING_OPTIONS_MAX_ITEMS,
     )
 
 
@@ -313,22 +321,36 @@ class Questions(BaseModel):
     items: List[Question]
 
 
-class QuestionCreate(BaseModel):
-    name: constr(
+QuestionName = Annotated[
+    constr(
         regex=QUESTION_CREATE_NAME_REGEX,
         min_length=QUESTION_CREATE_NAME_MIN_LENGTH,
         max_length=QUESTION_CREATE_NAME_MAX_LENGTH,
-    )
-    title: constr(
+    ),
+    PydanticField(..., description="The name of the question"),
+]
+
+QuestionTitle = Annotated[
+    constr(
         min_length=QUESTION_CREATE_TITLE_MIN_LENGTH,
         max_length=QUESTION_CREATE_TITLE_MAX_LENGTH,
-    )
-    description: Optional[
-        constr(
-            min_length=QUESTION_CREATE_DESCRIPTION_MIN_LENGTH,
-            max_length=QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
-        )
-    ]
+    ),
+    PydanticField(..., description="The title of the question"),
+]
+
+QuestionDescription = Annotated[
+    constr(
+        min_length=QUESTION_CREATE_DESCRIPTION_MIN_LENGTH,
+        max_length=QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
+    ),
+    PydanticField(..., description="The description of the question"),
+]
+
+
+class QuestionCreate(BaseModel):
+    name: QuestionName
+    title: QuestionTitle
+    description: Optional[QuestionDescription]
     required: Optional[bool]
     settings: QuestionSettingsCreate
 
@@ -357,9 +379,9 @@ class RecordGetterDict(GetterDict):
     def get(self, key: str, default: Any) -> Any:
         if key == "metadata":
             return getattr(self._obj, "metadata_", None)
-        if key == "responses" and "responses" not in self._obj.__dict__:
+        if key == "responses" and not self._obj.is_relationship_loaded("responses"):
             return default
-        if key == "suggestions" and "suggestions" not in self._obj.__dict__:
+        if key == "suggestions" and not self._obj.is_relationship_loaded("suggestions"):
             return default
         return super().get(key, default)
 
@@ -432,6 +454,16 @@ class RecordsCreate(BaseModel):
     )
 
 
+class RecordUpdateWithId(RecordUpdate):
+    id: UUID
+
+
+class RecordsUpdate(BaseModel):
+    items: List[RecordUpdateWithId] = PydanticField(
+        ..., min_items=RECORDS_UPDATE_MIN_ITEMS, max_items=RECORDS_UPDATE_MAX_ITEMS
+    )
+
+
 NT = TypeVar("NT", int, float)
 
 
@@ -452,7 +484,9 @@ class NumericMetadataProperty(GenericModel, Generic[NT]):
 
 class TermsMetadataPropertyCreate(BaseModel):
     type: Literal[MetadataPropertyType.terms]
-    values: Optional[List[str]] = PydanticField(None, min_items=TERMS_METADATA_PROPERTY_MIN_VALUES)
+    values: Optional[List[str]] = PydanticField(
+        None, min_items=TERMS_METADATA_PROPERTY_VALUES_MIN_ITEMS, max_items=TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS
+    )
 
 
 class IntegerMetadataPropertyCreate(NumericMetadataProperty[int]):
@@ -462,6 +496,11 @@ class IntegerMetadataPropertyCreate(NumericMetadataProperty[int]):
 class FloatMetadataPropertyCreate(NumericMetadataProperty[float]):
     type: Literal[MetadataPropertyType.float]
 
+
+MetadataPropertyTitle = Annotated[
+    constr(min_length=METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH, max_length=METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH),
+    PydanticField(..., description="The title of the metadata property"),
+]
 
 MetadataPropertySettingsCreate = Annotated[
     Union[TermsMetadataPropertyCreate, IntegerMetadataPropertyCreate, FloatMetadataPropertyCreate],
@@ -476,11 +515,7 @@ class MetadataPropertyCreate(BaseModel):
         min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
         max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
     )
-    description: Optional[str] = PydanticField(
-        None,
-        min_length=METADATA_PROPERTY_CREATE_DESCRIPTION_MIN_LENGTH,
-        max_length=METADATA_PROPERTY_CREATE_DESCRIPTION_MAX_LENGTH,
-    )
+    title: MetadataPropertyTitle
     settings: MetadataPropertySettingsCreate
     visible_for_annotators: bool = True
 
@@ -511,7 +546,7 @@ MetadataPropertySettings = Annotated[
 class MetadataProperty(BaseModel):
     id: UUID
     name: str
-    description: Optional[str] = None
+    title: str
     settings: MetadataPropertySettings
     visible_for_annotators: bool
     inserted_at: datetime

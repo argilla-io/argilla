@@ -26,8 +26,10 @@ export class MetadataRepository {
   }
 
   private async completeEmptyMetadataFilters(
-    metadataFilters: BackendMetadata[]
+    metadataFilters?: BackendMetadata[]
   ): Promise<BackendMetadata[]> {
+    if (!metadataFilters) return [];
+
     const metadataWithNoValues = metadataFilters.filter((m) => {
       if (m.settings.type === "terms") {
         return !m.settings.values;
@@ -36,14 +38,16 @@ export class MetadataRepository {
       return m.settings.max === null && m.settings.min === null;
     });
 
-    const p = metadataWithNoValues.map((m) =>
-      this.metadataMetricsRepository.getMetric(m.id)
+    const metrics = await Promise.allSettled(
+      metadataWithNoValues.map((m) =>
+        this.metadataMetricsRepository.getMetric(m.id)
+      )
     );
-    const metrics = await Promise.allSettled(p);
 
     metrics.forEach((response) => {
       if (response.status === "rejected") return;
       const metric = response.value;
+
       const metadata = metadataFilters.find((m) => m.id === metric.id);
 
       if (metadata.settings.type === "terms") {

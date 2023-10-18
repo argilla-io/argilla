@@ -15,7 +15,7 @@
 from typing import TYPE_CHECKING, List
 
 import pytest
-from argilla.client.feedback.dataset.local import FeedbackDataset
+from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
@@ -170,6 +170,22 @@ def test_add_metadata_property_errors(metadata_property: "AllowedMetadataPropert
     assert len(dataset.metadata_properties) == 3
 
 
+def test_update_records_with_warning() -> None:
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field")],
+        questions=[TextQuestion(name="question")],
+    )
+
+    with pytest.warns(
+        UserWarning,
+        match="`update_records` method only works for `FeedbackDataset` pushed to Argilla."
+        " If your are working with local data, you can just iterate over the records and update them.",
+    ):
+        dataset.update_records(
+            FeedbackRecord(fields={"required-field": "text"}, metadata={"nested-metadata": {"a": 1}})
+        )
+
+
 @pytest.mark.parametrize(
     "metadata_properties",
     (
@@ -235,15 +251,11 @@ def test_not_implemented_methods():
     )
 
     with pytest.warns(
-        UserWarning,
-        match="`sort_by` method only works for `FeedbackDataset` pushed to Argilla."
-        " Use `sorted` with dataset.records instead.",
+        UserWarning, match="`sort_by` method is not supported for local datasets and won't take any effect. "
     ):
         assert dataset.sort_by("field") == dataset
 
     with pytest.warns(
-        UserWarning,
-        match="`filter_by` method only works for `FeedbackDataset` pushed to Argilla."
-        " Use `filter` with dataset.records instead.",
+        UserWarning, match="`filter_by` method is not supported for local datasets and won't take any effect. "
     ):
         assert dataset.filter_by() == dataset

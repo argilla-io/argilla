@@ -29,7 +29,7 @@ def push_to_huggingface(
     from rich.spinner import Spinner
 
     from argilla.cli.rich import echo_in_panel
-    from argilla.client.feedback.dataset.local import FeedbackDataset
+    from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 
     dataset: "FeedbackDataset" = ctx.obj
 

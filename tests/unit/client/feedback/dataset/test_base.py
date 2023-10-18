@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, Iterable, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 
 import pytest
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase
@@ -26,7 +26,6 @@ from argilla.client.feedback.schemas.metadata import (
 )
 from argilla.client.feedback.schemas.questions import RatingQuestion, TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
-from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import (
@@ -37,6 +36,33 @@ if TYPE_CHECKING:
 
 
 class TestFeedbackDataset(FeedbackDatasetBase):
+    def add_records(self, *args, **kwargs) -> None:
+        pass
+
+    def pull(self):
+        pass
+
+    def delete(self):
+        pass
+
+    def prepare_for_training(self, *args, **kwargs) -> Any:
+        pass
+
+    def push_to_argilla(self, *args, **kwargs) -> "FeedbackDatasetBase":
+        pass
+
+    def unify_responses(self, *args, **kwargs):
+        pass
+
+    def update_records(self, **kwargs: Dict[str, Any]) -> None:
+        pass
+
+    def add_metadata_property(self, metadata_property):
+        pass
+
+    def delete_metadata_properties(self, metadata_properties):
+        pass
+
     def filter_by(
         self,
         *,

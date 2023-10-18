@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import time
+
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
 from unittest.mock import ANY, MagicMock
@@ -41,15 +41,17 @@ from argilla.server.schemas.v1.datasets import (
     DATASET_NAME_MAX_LENGTH,
     FIELD_CREATE_NAME_MAX_LENGTH,
     FIELD_CREATE_TITLE_MAX_LENGTH,
-    METADATA_PROPERTY_CREATE_DESCRIPTION_MAX_LENGTH,
     METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
+    METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH,
     QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
     QUESTION_CREATE_NAME_MAX_LENGTH,
     QUESTION_CREATE_TITLE_MAX_LENGTH,
+    RANKING_OPTIONS_MAX_ITEMS,
     RATING_OPTIONS_MAX_ITEMS,
     RATING_OPTIONS_MIN_ITEMS,
     RECORDS_CREATE_MAX_ITEMS,
     RECORDS_CREATE_MIN_ITEMS,
+    TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS,
     VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH,
     VALUE_TEXT_OPTION_TEXT_MAX_LENGTH,
     VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
@@ -66,7 +68,7 @@ from argilla.server.search_engine import (
     TermsMetadataFilter,
     UserResponseStatusFilter,
 )
-from sqlalchemy import func, select
+from sqlalchemy import func, inspect, select
 
 from tests.factories import (
     AdminFactory,
@@ -458,7 +460,7 @@ class TestSuiteDatasets:
                 {
                     "id": str(terms_property.id),
                     "name": "terms",
-                    "description": terms_property.description,
+                    "title": terms_property.title,
                     "settings": {"type": "terms", "values": ["a", "b", "c"]},
                     "visible_for_annotators": True,
                     "inserted_at": terms_property.inserted_at.isoformat(),
@@ -467,7 +469,7 @@ class TestSuiteDatasets:
                 {
                     "id": str(integer_property.id),
                     "name": "integer",
-                    "description": integer_property.description,
+                    "title": integer_property.title,
                     "settings": {"type": "integer", "min": None, "max": None},
                     "visible_for_annotators": True,
                     "inserted_at": integer_property.inserted_at.isoformat(),
@@ -476,7 +478,7 @@ class TestSuiteDatasets:
                 {
                     "id": str(float_property.id),
                     "name": "float",
-                    "description": float_property.description,
+                    "title": float_property.title,
                     "settings": {"type": "float", "min": None, "max": None},
                     "visible_for_annotators": True,
                     "inserted_at": float_property.inserted_at.isoformat(),
@@ -795,49 +797,49 @@ class TestSuiteDatasets:
         ("property_config", "param_value", "expected_filter_class", "expected_filter_args"),
         [
             (
-                {"name": "terms_prop", "type": "terms"},
+                {"name": "terms_prop", "settings": {"type": "terms"}},
                 "value",
                 TermsMetadataFilter,
                 dict(values=["value"]),
             ),
             (
-                {"name": "terms_prop", "type": "terms"},
+                {"name": "terms_prop", "settings": {"type": "terms"}},
                 "value1,value2",
                 TermsMetadataFilter,
                 dict(values=["value1", "value2"]),
             ),
             (
-                {"name": "integer_prop", "type": "integer"},
+                {"name": "integer_prop", "settings": {"type": "integer"}},
                 '{"ge": 10, "le": 20}',
                 IntegerMetadataFilter,
                 dict(ge=10, le=20),
             ),
             (
-                {"name": "integer_prop", "type": "integer"},
+                {"name": "integer_prop", "settings": {"type": "integer"}},
                 '{"ge": 20}',
                 IntegerMetadataFilter,
                 dict(ge=20, high=None),
             ),
             (
-                {"name": "integer_prop", "type": "integer"},
+                {"name": "integer_prop", "settings": {"type": "integer"}},
                 '{"le": 20}',
                 IntegerMetadataFilter,
                 dict(ge=None, le=20),
             ),
             (
-                {"name": "float_prop", "type": "float"},
+                {"name": "float_prop", "settings": {"type": "float"}},
                 '{"ge": -1.30, "le": 23.23}',
                 FloatMetadataFilter,
                 dict(ge=-1.30, le=23.23),
             ),
             (
-                {"name": "float_prop", "type": "float"},
+                {"name": "float_prop", "settings": {"type": "float"}},
                 '{"ge": 23.23}',
                 FloatMetadataFilter,
                 dict(ge=23.23, high=None),
             ),
             (
-                {"name": "float_prop", "type": "float"},
+                {"name": "float_prop", "settings": {"type": "float"}},
                 '{"le": 11.32}',
                 FloatMetadataFilter,
                 dict(ge=None, le=11.32),
@@ -859,7 +861,9 @@ class TestSuiteDatasets:
         dataset, _, records, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
 
         metadata_property = await MetadataPropertyFactory.create(
-            **property_config, settings={"type": property_config["type"]}, dataset=dataset
+            name=property_config["name"],
+            settings=property_config["settings"],
+            dataset=dataset,
         )
 
         mock_search_engine.search.return_value = SearchResponses(
@@ -1395,49 +1399,49 @@ class TestSuiteDatasets:
         ("property_config", "param_value", "expected_filter_class", "expected_filter_args"),
         [
             (
-                {"name": "terms_prop", "type": "terms"},
+                {"name": "terms_prop", "settings": {"type": "terms"}},
                 "value",
                 TermsMetadataFilter,
                 dict(values=["value"]),
             ),
             (
-                {"name": "terms_prop", "type": "terms"},
+                {"name": "terms_prop", "settings": {"type": "terms"}},
                 "value1,value2",
                 TermsMetadataFilter,
                 dict(values=["value1", "value2"]),
             ),
             (
-                {"name": "integer_prop", "type": "integer"},
+                {"name": "integer_prop", "settings": {"type": "integer"}},
                 '{"ge": 10, "le": 20}',
                 IntegerMetadataFilter,
                 dict(ge=10, le=20),
             ),
             (
-                {"name": "integer_prop", "type": "integer"},
+                {"name": "integer_prop", "settings": {"type": "integer"}},
                 '{"ge": 20}',
                 IntegerMetadataFilter,
                 dict(ge=20, le=None),
             ),
             (
-                {"name": "integer_prop", "type": "integer"},
+                {"name": "integer_prop", "settings": {"type": "integer"}},
                 '{"le": 20}',
                 IntegerMetadataFilter,
                 dict(ge=None, le=20),
             ),
             (
-                {"name": "float_prop", "type": "float"},
+                {"name": "float_prop", "settings": {"type": "float"}},
                 '{"ge": -1.30, "le": 23.23}',
                 FloatMetadataFilter,
                 dict(ge=-1.30, le=23.23),
             ),
             (
-                {"name": "float_prop", "type": "float"},
+                {"name": "float_prop", "settings": {"type": "float"}},
                 '{"ge": 23.23}',
                 FloatMetadataFilter,
                 dict(ge=23.23, le=None),
             ),
             (
-                {"name": "float_prop", "type": "float"},
+                {"name": "float_prop", "settings": {"type": "float"}},
                 '{"le": 11.32}',
                 FloatMetadataFilter,
                 dict(ge=None, le=11.32),
@@ -1459,7 +1463,9 @@ class TestSuiteDatasets:
         dataset, _, records, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
 
         metadata_property = await MetadataPropertyFactory.create(
-            **property_config, settings={"type": property_config["type"]}, dataset=dataset
+            name=property_config["name"],
+            settings=property_config["settings"],
+            dataset=dataset,
         )
 
         mock_search_engine.search.return_value = SearchResponses(
@@ -2678,6 +2684,13 @@ class TestSuiteDatasets:
             {
                 "type": "ranking",
                 "options": [
+                    {"value": value, "text": value, "description": value}
+                    for value in range(0, RANKING_OPTIONS_MAX_ITEMS + 1)
+                ],
+            },
+            {
+                "type": "ranking",
+                "options": [
                     {
                         "value": "a",
                         "text": "a",
@@ -2734,7 +2747,7 @@ class TestSuiteDatasets:
         expected_settings: dict,
     ):
         dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": "name", "settings": settings}
+        metadata_property_json = {"name": "name", "title": "title", "settings": settings}
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
@@ -2748,7 +2761,7 @@ class TestSuiteDatasets:
         assert response_body == {
             "id": str(UUID(response_body["id"])),
             "name": "name",
-            "description": None,
+            "title": "title",
             "settings": expected_settings,
             "visible_for_annotators": True,
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
@@ -2765,6 +2778,7 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         metadata_property_json = {
             "name": "name",
+            "title": "title",
             "settings": {"type": "terms", "values": ["valueA", "valueB", "valueC"]},
         }
 
@@ -2781,7 +2795,6 @@ class TestSuiteDatasets:
         assert created_metadata_property
         assert response_body == {
             "id": str(UUID(response_body["id"])),
-            "description": None,
             "visible_for_annotators": True,
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
@@ -2798,6 +2811,7 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         metadata_property_json = {
             "name": "name",
+            "title": "title",
             "settings": {"type": "terms", "values": ["valueA", "valueB", "valueC"]},
         }
 
@@ -2812,7 +2826,11 @@ class TestSuiteDatasets:
         workspace = await WorkspaceFactory.create()
         admin = await AdminFactory.create(workspaces=[workspace])
         dataset = await DatasetFactory.create(workspace=workspace)
-        metadata_property_json = {"name": "name", "settings": {"type": "terms", "values": ["a", "b", "c"]}}
+        metadata_property_json = {
+            "name": "name",
+            "title": "title",
+            "settings": {"type": "terms", "values": ["a", "b", "c"]},
+        }
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties",
@@ -2822,35 +2840,6 @@ class TestSuiteDatasets:
 
         assert response.status_code == 201
         assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
-
-    async def test_create_dataset_metadata_property_with_description(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
-    ):
-        dataset = await DatasetFactory.create()
-        metadata_property_json = {
-            "name": "name",
-            "description": "description",
-            "settings": {"type": "terms", "values": ["a", "b", "c"]},
-        }
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
-        )
-
-        assert response.status_code == 201
-        assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
-
-        response_body = response.json()
-        assert await db.get(MetadataProperty, UUID(response_body["id"]))
-        assert response_body == {
-            "id": str(UUID(response_body["id"])),
-            "name": "name",
-            "description": "description",
-            "settings": {"type": "terms", "values": ["a", "b", "c"]},
-            "visible_for_annotators": True,
-            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
-        }
 
     @pytest.mark.parametrize(
         "settings",
@@ -2868,7 +2857,7 @@ class TestSuiteDatasets:
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, settings: dict
     ):
         dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": "name", "settings": settings}
+        metadata_property_json = {"name": "name", "title": "title", "settings": settings}
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
@@ -2884,7 +2873,11 @@ class TestSuiteDatasets:
         admin = await AdminFactory.create(workspaces=[workspace])
 
         dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": "name", "settings": {"type": "terms", "values": ["a", "b", "c"]}}
+        metadata_property_json = {
+            "name": "name",
+            "title": "title",
+            "settings": {"type": "terms", "values": ["a", "b", "c"]},
+        }
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties",
@@ -2898,7 +2891,7 @@ class TestSuiteDatasets:
     async def test_create_dataset_metadata_property_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
         annotator = await AnnotatorFactory.create()
         dataset = await DatasetFactory.create()
-        question_json = {"name": "name", "settings": {"type": "terms", "values": ["a", "b", "c"]}}
+        question_json = {"name": "name", "title": "title", "settings": {"type": "terms", "values": ["a", "b", "c"]}}
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties",
@@ -2910,7 +2903,7 @@ class TestSuiteDatasets:
         assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
 
     @pytest.mark.parametrize(
-        "name",
+        "invalid_name",
         [
             None,
             "",
@@ -2923,10 +2916,10 @@ class TestSuiteDatasets:
         ],
     )
     async def test_create_dataset_metadata_property_with_invalid_name(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, name: str
+        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, invalid_name: str
     ):
         dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": name, "settings": {"type": "terms"}}
+        metadata_property_json = {"name": invalid_name, "title": "title", "settings": {"type": "terms"}}
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
@@ -2939,7 +2932,11 @@ class TestSuiteDatasets:
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         metadata_property = await TermsMetadataPropertyFactory.create(name="name")
-        metadata_property_json = {"name": "name", "settings": {"type": "terms", "values": ["a", "b", "c"]}}
+        metadata_property_json = {
+            "name": "name",
+            "title": "title",
+            "settings": {"type": "terms", "values": ["a", "b", "c"]},
+        }
 
         response = await async_client.post(
             f"/api/v1/datasets/{metadata_property.dataset.id}/metadata-properties",
@@ -2951,14 +2948,14 @@ class TestSuiteDatasets:
         assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
 
     @pytest.mark.parametrize(
-        "description",
-        ["", "a" * (METADATA_PROPERTY_CREATE_DESCRIPTION_MAX_LENGTH + 1)],
+        "title",
+        ["", "a" * (METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH + 1)],
     )
-    async def test_create_dataset_metadata_property_with_invalid_description(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, description: str
+    async def test_create_dataset_metadata_property_with_invalid_title(
+        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, title: str
     ):
         dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": "name", "description": description, "settings": {"type": "terms"}}
+        metadata_property_json = {"name": "name", "title": title, "settings": {"type": "terms"}}
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
@@ -2971,7 +2968,12 @@ class TestSuiteDatasets:
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": "name", "settings": {"type": "terms"}, "visible_for_annotators": True}
+        metadata_property_json = {
+            "name": "name",
+            "title": "title",
+            "settings": {"type": "terms"},
+            "visible_for_annotators": True,
+        }
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
@@ -2991,7 +2993,12 @@ class TestSuiteDatasets:
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": "name", "settings": {"type": "terms"}, "visible_for_annotators": False}
+        metadata_property_json = {
+            "name": "name",
+            "title": "title",
+            "settings": {"type": "terms"},
+            "visible_for_annotators": False,
+        }
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
@@ -3011,7 +3018,7 @@ class TestSuiteDatasets:
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": "name", "settings": {"type": "terms"}}
+        metadata_property_json = {"name": "name", "title": "title", "settings": {"type": "terms"}}
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
@@ -3026,6 +3033,21 @@ class TestSuiteDatasets:
         created_metadata_property = await db.get(MetadataProperty, UUID(response_body["id"]))
         assert created_metadata_property
         assert created_metadata_property.allowed_roles == [UserRole.admin, UserRole.annotator]
+
+    @pytest.mark.parametrize("values", [[], ["value"] * (TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS + 1)])
+    async def test_create_dataset_terms_metadata_property_with_invalid_number_of_values(
+        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, values: List[str]
+    ):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/metadata-properties",
+            headers=owner_auth_header,
+            json={"name": "name", "title": "title", "settings": {"type": "terms", "values": values}},
+        )
+
+        assert response.status_code == 422
+        assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 0
 
     async def test_create_dataset_records(
         self,
@@ -3128,7 +3150,7 @@ class TestSuiteDatasets:
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 3
 
         records = (await db.execute(select(Record))).scalars().all()
-        mock_search_engine.add_records.assert_called_once_with(dataset, records)
+        mock_search_engine.index_records.assert_called_once_with(dataset, records)
 
         test_telemetry.assert_called_once_with(
             action="DatasetRecordsCreated", data={"records": len(records_json["items"])}
@@ -3196,7 +3218,7 @@ class TestSuiteDatasets:
         assert (await db.execute(select(func.count(Response.id)).where(Response.user_id == owner.id))).scalar() == 1
 
         records = (await db.execute(select(Record))).scalars().all()
-        mock_search_engine.add_records.assert_called_once_with(dataset, records)
+        mock_search_engine.index_records.assert_called_once_with(dataset, records)
 
     async def test_create_dataset_records_with_response_for_unknown_user(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
@@ -3468,7 +3490,7 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         await TextFieldFactory.create(name="completion", dataset=dataset)
         await TextQuestionFactory.create(name="corrected", dataset=dataset)
-        await MetadataPropertyFactoryType.create(name="metadata-property", dataset=dataset, settings=settings)
+        await MetadataPropertyFactoryType.create(name="metadata-property", settings=settings, dataset=dataset)
 
         records_json = {
             "items": [
@@ -3697,7 +3719,7 @@ class TestSuiteDatasets:
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 4
 
         records = (await db.execute(select(Record))).scalars().all()
-        mock_search_engine.add_records.assert_called_once_with(dataset, records)
+        mock_search_engine.index_records.assert_called_once_with(dataset, records)
 
         test_telemetry.assert_called_once_with(
             action="DatasetRecordsCreated", data={"records": len(records_json["items"])}
@@ -4005,6 +4027,356 @@ class TestSuiteDatasets:
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+    async def test_update_dataset_records(
+        self, async_client: "AsyncClient", mock_search_engine: "SearchEngine", role: UserRole
+    ):
+        dataset = await DatasetFactory.create()
+        user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
+        question_1 = await TextQuestionFactory.create(dataset=dataset)
+        question_2 = await TextQuestionFactory.create(dataset=dataset)
+        question_3 = await TextQuestionFactory.create(dataset=dataset)
+        await TermsMetadataPropertyFactory.create(name="terms-metadata-property", dataset=dataset)
+        await IntegerMetadataPropertyFactory.create(name="integer-metadata-property", dataset=dataset)
+        await FloatMetadataPropertyFactory.create(name="float-metadata-property", dataset=dataset)
+        records = await RecordFactory.create_batch(
+            size=10,
+            dataset=dataset,
+            metadata_={"terms-metadata-property": "a", "integer-metadata-property": 1, "float-metadata-property": 1.0},
+        )
+
+        # record 0 suggestions (should be deleted)
+        suggestions_records_0 = [
+            await SuggestionFactory.create(question=question_1, record=records[0], value="suggestion 0 1"),
+            await SuggestionFactory.create(question=question_2, record=records[0], value="suggestion 0 2"),
+            await SuggestionFactory.create(question=question_3, record=records[0], value="suggestion 0 3"),
+        ]
+
+        # record 1 suggestions (should be deleted)
+        suggestions_records_1 = [
+            await SuggestionFactory.create(question=question_1, record=records[1], value="suggestion 1 1"),
+            await SuggestionFactory.create(question=question_2, record=records[1], value="suggestion 1 2"),
+            await SuggestionFactory.create(question=question_3, record=records[1], value="suggestion 1 3"),
+        ]
+
+        # record 2 suggestions (should be kept)
+        suggestions_records_2 = [
+            await SuggestionFactory.create(question=question_1, record=records[2], value="suggestion 2 1"),
+            await SuggestionFactory.create(question=question_2, record=records[2], value="suggestion 2 2"),
+            await SuggestionFactory.create(question=question_3, record=records[2], value="suggestion 2 3"),
+        ]
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            json={
+                "items": [
+                    {
+                        "id": str(records[0].id),
+                        "metadata": {
+                            "terms-metadata-property": "a",
+                            "integer-metadata-property": 0,
+                            "float-metadata-property": 0.0,
+                            "extra-metadata": "yes",
+                        },
+                        "suggestions": [
+                            {
+                                "question_id": str(question_1.id),
+                                "value": "suggestion updated 0 1",
+                            },
+                            {
+                                "question_id": str(question_2.id),
+                                "value": "suggestion updated 0 2",
+                            },
+                            {"question_id": str(question_3.id), "value": "suggestion updated 0 3"},
+                        ],
+                    },
+                    {
+                        "id": str(records[1].id),
+                        "metadata": {
+                            "terms-metadata-property": "b",
+                            "integer-metadata-property": 1,
+                            "float-metadata-property": 1.0,
+                            "extra-metadata": "yes",
+                        },
+                        "suggestions": [
+                            {
+                                "question_id": str(question_1.id),
+                                "value": "suggestion updated 1 1",
+                            }
+                        ],
+                    },
+                    {
+                        "id": str(records[2].id),
+                        "metadata": {
+                            "terms-metadata-property": "c",
+                            "integer-metadata-property": 2,
+                            "float-metadata-property": 2.0,
+                            "extra-metadata": "yes",
+                        },
+                    },
+                    {
+                        "id": str(records[3].id),
+                        "suggestions": [
+                            {
+                                "question_id": str(question_1.id),
+                                "value": "suggestion updated 3 1",
+                            },
+                            {
+                                "question_id": str(question_2.id),
+                                "value": "suggestion updated 3 2",
+                            },
+                            {"question_id": str(question_3.id), "value": "suggestion updated 3 3"},
+                        ],
+                    },
+                ]
+            },
+        )
+
+        assert response.status_code == 204
+
+        # Record 0
+        assert records[0].metadata_ == {
+            "terms-metadata-property": "a",
+            "integer-metadata-property": 0,
+            "float-metadata-property": 0.0,
+            "extra-metadata": "yes",
+        }
+        await records[0].awaitable_attrs.suggestions
+        assert len(records[0].suggestions) == 3
+        assert records[0].suggestions[0].value == "suggestion updated 0 1"
+        assert records[0].suggestions[1].value == "suggestion updated 0 2"
+        assert records[0].suggestions[2].value == "suggestion updated 0 3"
+        for suggestion in suggestions_records_0:
+            assert inspect(suggestion).deleted
+
+        # Record 1
+        assert records[1].metadata_ == {
+            "terms-metadata-property": "b",
+            "integer-metadata-property": 1,
+            "float-metadata-property": 1.0,
+            "extra-metadata": "yes",
+        }
+        await records[1].awaitable_attrs.suggestions
+        assert len(records[1].suggestions) == 1
+        assert records[1].suggestions[0].value == "suggestion updated 1 1"
+        for suggestion in suggestions_records_1:
+            assert inspect(suggestion).deleted
+
+        # Record 2
+        assert records[2].metadata_ == {
+            "terms-metadata-property": "c",
+            "integer-metadata-property": 2,
+            "float-metadata-property": 2.0,
+            "extra-metadata": "yes",
+        }
+        await records[2].awaitable_attrs.suggestions
+        for suggestion in suggestions_records_2:
+            assert inspect(suggestion).persistent
+
+        # Record 3
+        await records[3].awaitable_attrs.suggestions
+        assert len(records[3].suggestions) == 3
+        assert records[3].suggestions[0].value == "suggestion updated 3 1"
+        assert records[3].suggestions[1].value == "suggestion updated 3 2"
+        assert records[3].suggestions[2].value == "suggestion updated 3 3"
+
+        # it should be called only with the first three records (metadata was updated for them)
+        mock_search_engine.index_records.assert_called_once_with(dataset, records[:3])
+
+    async def test_update_dataset_records_with_invalid_metadata(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        await TermsMetadataPropertyFactory.create(dataset=dataset, name="terms")
+        records = await RecordFactory.create_batch(5, dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "id": str(records[0].id),
+                        "metadata": {
+                            "terms": "a",
+                        },
+                    },
+                    {
+                        "id": str(records[1].id),
+                        "metadata": {
+                            "terms": "i was not declared",
+                        },
+                    },
+                ]
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": "Provided metadata for record at position 1 is not valid: 'terms' metadata property validation "
+            "failed because 'i was not declared' is not an allowed term."
+        }
+
+    async def test_update_dataset_records_with_invalid_suggestions(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        question = await LabelSelectionQuestionFactory.create(dataset=dataset)
+        records = await RecordFactory.create_batch(5, dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {"id": str(records[0].id), "suggestions": [{"question_id": str(question.id), "value": "option-a"}]},
+                    {
+                        "id": str(records[1].id),
+                        "suggestions": [{"question_id": str(question.id), "value": "not-valid-option"}],
+                    },
+                ]
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": "Provided suggestion for record at position 0 and suggestion at position 0 is not valid: "
+            "'option-a' is not a valid option.\nValid options are: ['option1', 'option2', 'option3']"
+        }
+
+    async def test_update_dataset_records_with_nonexistent_dataset_id(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset_id = uuid4()
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset_id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "id": str(uuid4()),
+                    }
+                ]
+            },
+        )
+
+        assert response.status_code == 404
+        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+
+    async def test_update_dataset_records_with_nonexistent_records(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record = await RecordFactory.create(dataset=dataset)
+
+        records = [{"id": str(uuid4()), "metadata": {"i exists": False}} for _ in range(3)]
+
+        records.append({"id": str(record.id), "metadata": {"i exists": True}})
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={"items": records},
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"Found records that do not exist: {records[0]['id']}, {records[1]['id']}, {records[2]['id']}"
+        }
+
+    async def test_update_dataset_records_with_duplicate_records_ids(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record = await RecordFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {"id": str(record.id)},
+                    {"id": str(record.id)},
+                ]
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {"detail": "Found duplicate records IDs"}
+
+    async def test_update_dataset_records_with_duplicate_suggestions_question_ids(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        question = await TextQuestionFactory.create(dataset=dataset)
+        record = await RecordFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "id": str(record.id),
+                        "suggestions": [
+                            {"question_id": str(question.id), "value": "a"},
+                            {"question_id": str(question.id), "value": "b"},
+                        ],
+                    },
+                ]
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {"detail": "Found duplicate suggestions question IDs for record at position 0"}
+
+    async def test_update_dataset_records_as_admin_from_another_workspace(self, async_client: "AsyncClient"):
+        dataset = await DatasetFactory.create()
+        user = await UserFactory.create(role=UserRole.admin)
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            json={
+                "items": [
+                    {
+                        "id": str(uuid4()),
+                    }
+                ]
+            },
+        )
+
+        assert response.status_code == 403
+
+    async def test_update_dataset_records_as_annotator(self, async_client: "AsyncClient"):
+        dataset = await DatasetFactory.create()
+        user = await UserFactory.create(role=UserRole.annotator, workspaces=[dataset.workspace])
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            json={
+                "items": [
+                    {
+                        "id": str(uuid4()),
+                    }
+                ]
+            },
+        )
+
+        assert response.status_code == 403
+
+    async def test_update_dataset_records_without_authentication(self, async_client: "AsyncClient"):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records", json={"items": [{"id": str(uuid4())}]}
+        )
+
+        assert response.status_code == 401
+
+    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_delete_dataset_records(
         self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, role: UserRole
     ):
@@ -4158,49 +4530,49 @@ class TestSuiteDatasets:
         ("property_config", "param_value", "expected_filter_class", "expected_filter_args"),
         [
             (
-                {"name": "terms_prop", "type": "terms"},
+                {"name": "terms_prop", "settings": {"type": "terms"}},
                 "value",
                 TermsMetadataFilter,
                 dict(values=["value"]),
             ),
             (
-                {"name": "terms_prop", "type": "terms"},
+                {"name": "terms_prop", "settings": {"type": "terms"}},
                 "value1,value2",
                 TermsMetadataFilter,
                 dict(values=["value1", "value2"]),
             ),
             (
-                {"name": "integer_prop", "type": "integer"},
+                {"name": "integer_prop", "settings": {"type": "integer"}},
                 '{"ge": 10, "le": 20}',
                 IntegerMetadataFilter,
                 dict(ge=10, le=20),
             ),
             (
-                {"name": "integer_prop", "type": "integer"},
+                {"name": "integer_prop", "settings": {"type": "integer"}},
                 '{"ge": 20}',
                 IntegerMetadataFilter,
                 dict(ge=20, high=None),
             ),
             (
-                {"name": "integer_prop", "type": "integer"},
+                {"name": "integer_prop", "settings": {"type": "integer"}},
                 '{"le": 20}',
                 IntegerMetadataFilter,
                 dict(low=None, le=20),
             ),
             (
-                {"name": "float_prop", "type": "float"},
+                {"name": "float_prop", "settings": {"type": "float"}},
                 '{"ge": -1.30, "le": 23.23}',
                 FloatMetadataFilter,
                 dict(ge=-1.30, le=23.23),
             ),
             (
-                {"name": "float_prop", "type": "float"},
+                {"name": "float_prop", "settings": {"type": "float"}},
                 '{"ge": 23.23}',
                 FloatMetadataFilter,
                 dict(ge=23.23, high=None),
             ),
             (
-                {"name": "float_prop", "type": "float"},
+                {"name": "float_prop", "settings": {"type": "float"}},
                 '{"le": 11.32}',
                 FloatMetadataFilter,
                 dict(low=None, le=11.32),
@@ -4222,7 +4594,9 @@ class TestSuiteDatasets:
         dataset, _, records, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
 
         metadata_property = await MetadataPropertyFactory.create(
-            **property_config, settings={"type": property_config["type"]}, dataset=dataset
+            name=property_config["name"],
+            settings=property_config["settings"],
+            dataset=dataset,
         )
 
         mock_search_engine.search.return_value = SearchResponses(
@@ -4257,20 +4631,20 @@ class TestSuiteDatasets:
     @pytest.mark.parametrize(
         ("property_config", "wrong_value"),
         [
-            ({"name": "terms_prop", "type": "terms"}, None),
-            ({"name": "terms_prop", "type": "terms"}, "terms_prop"),
-            ({"name": "terms_prop", "type": "terms"}, "terms_prop:"),
-            ({"name": "terms_prop", "type": "terms"}, "wrong-value"),
-            ({"name": "integer_prop", "type": "integer"}, None),
-            ({"name": "integer_prop", "type": "integer"}, "integer_prop"),
-            ({"name": "integer_prop", "type": "integer"}, "integer_prop:"),
-            ({"name": "integer_prop", "type": "integer"}, "integer_prop:{}"),
-            ({"name": "integer_prop", "type": "integer"}, "wrong-value"),
-            ({"name": "float_prop", "type": "float"}, None),
-            ({"name": "float_prop", "type": "float"}, "float_prop"),
-            ({"name": "float_prop", "type": "float"}, "float_prop:"),
-            ({"name": "float_prop", "type": "float"}, "float_prop:{}"),
-            ({"name": "float_prop", "type": "float"}, "wrong-value"),
+            ({"name": "terms_prop", "settings": {"type": "terms"}}, None),
+            ({"name": "terms_prop", "settings": {"type": "terms"}}, "terms_prop"),
+            ({"name": "terms_prop", "settings": {"type": "terms"}}, "terms_prop:"),
+            ({"name": "terms_prop", "settings": {"type": "terms"}}, "wrong-value"),
+            ({"name": "integer_prop", "settings": {"type": "integer"}}, None),
+            ({"name": "integer_prop", "settings": {"type": "integer"}}, "integer_prop"),
+            ({"name": "integer_prop", "settings": {"type": "integer"}}, "integer_prop:"),
+            ({"name": "integer_prop", "settings": {"type": "integer"}}, "integer_prop:{}"),
+            ({"name": "integer_prop", "settings": {"type": "integer"}}, "wrong-value"),
+            ({"name": "float_prop", "settings": {"type": "float"}}, None),
+            ({"name": "float_prop", "settings": {"type": "float"}}, "float_prop"),
+            ({"name": "float_prop", "settings": {"type": "float"}}, "float_prop:"),
+            ({"name": "float_prop", "settings": {"type": "float"}}, "float_prop:{}"),
+            ({"name": "float_prop", "settings": {"type": "float"}}, "wrong-value"),
         ],
     )
     async def test_search_dataset_records_with_wrong_metadata_filter_values(
@@ -4286,7 +4660,9 @@ class TestSuiteDatasets:
         dataset, _, records, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
 
         await MetadataPropertyFactory.create(
-            **property_config, settings={"type": property_config["type"]}, dataset=dataset
+            name=property_config["name"],
+            settings=property_config["settings"],
+            dataset=dataset,
         )
 
         mock_search_engine.search.return_value = SearchResponses(

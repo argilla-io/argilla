@@ -407,7 +407,7 @@ class TrainingTask:
             [Dict[str, Any]], Union[None, Tuple[str, str, str, str], Iterator[Tuple[str, str, str, str]]]
         ],
     ) -> "TrainingTaskForChatCompletion":
-        """Training data for chat comletion
+        """Training data for chat completion
         Args:
             formatting_func: A formatting function converting a dictionary of records into zero,
                 one or more chat-turn-role-content text tuples.
@@ -743,6 +743,9 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
 
         datasets_dict = {"id": [], "text": [], "label": []}
         for index, entry in enumerate(data):
+            if any([entry.get("label") is None, entry.get("text") is None]):
+                warnings.warn(f"Skipping entry {entry} because it has no label or text.")
+                continue
             datasets_dict["id"].append(index)
             datasets_dict["text"].append(entry["text"])
             datasets_dict["label"].append(entry["label"])
@@ -791,6 +794,9 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
             db = DocBin(store_user_data=True)
             # Creating the DocBin object as in https://spacy.io/usage/training#training-data
             for entry in data:
+                if any([entry.get("label") is None, entry.get("text") is None]):
+                    warnings.warn(f"Skipping entry {entry} because it has no label or text.")
+                    continue
                 doc = lang.make_doc(entry["text"])
 
                 cats = dict.fromkeys(all_labels, 0)
@@ -840,6 +846,9 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
         def _prepare(data):
             jsonl = []
             for entry in data:
+                if any([entry.get("label") is None, entry.get("text") is None]):
+                    warnings.warn(f"Skipping entry {entry} because it has no label or text.")
+                    continue
                 prompt = entry["text"]
                 prompt += separator  # needed for better performance
 
@@ -934,6 +943,9 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
 
         datasets_dict = {"id": [], "text": []}
         for index, sample in enumerate(data):
+            if any([sample.get("text") is None]):
+                warnings.warn(f"Skipping entry {sample} because it has no text.")
+                continue
             datasets_dict["id"].append(index)
             datasets_dict["text"].append(sample["text"])
 
@@ -1019,6 +1031,9 @@ class TrainingTaskForRM(BaseModel, TrainingData):
 
         datasets_dict = {"chosen": [], "rejected": []}
         for sample in data:
+            if any([sample.get("chosen") is None, sample.get("rejected") is None]):
+                warnings.warn(f"Skipping entry {sample} because it has no chosen or rejected.")
+                continue
             datasets_dict["chosen"].append(sample["chosen"])
             datasets_dict["rejected"].append(sample["rejected"])
 
@@ -1088,6 +1103,9 @@ class TrainingTaskForPPO(BaseModel, TrainingData):
 
         datasets_dict = {"id": [], "query": []}
         for index, entry in enumerate(data):
+            if entry.get("query") is None:
+                warnings.warn(f"Skipping entry {entry} because it has no query.")
+                continue
             datasets_dict["id"].append(index)
             datasets_dict["query"].append(entry["query"])
 
@@ -1169,6 +1187,9 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
 
         datasets_dict = {"prompt": [], "chosen": [], "rejected": []}
         for sample in data:
+            if any([sample.get("prompt") is None, sample.get("chosen") is None, sample.get("rejected") is None]):
+                warnings.warn(f"Skipping entry {sample} because it has no prompt, chosen or rejected.")
+                continue
             datasets_dict["prompt"].append(sample["prompt"])
             datasets_dict["chosen"].append(sample["chosen"])
             datasets_dict["rejected"].append(sample["rejected"])
@@ -1266,9 +1287,9 @@ class TrainingTaskForQuestionAnswering(BaseModel, TrainingData):
         else:
             return (
                 f"{self.__class__.__name__}"
-                f"\n\t question={self.text.name}"
+                f"\n\t question={self.question.name}"
                 f"\n\t context={self.context.name}"
-                f"\n\t answer={self.__multi_label__}"
+                f"\n\t answer={self.answer.name}"
             )
 
     @requires_dependencies("transformers")
@@ -1283,10 +1304,11 @@ class TrainingTaskForQuestionAnswering(BaseModel, TrainingData):
             "answer": [],
         }
         for entry in data:
-            if any([entry["question"] is None, entry["context"] is None, entry["answer"] is None]):
+            if any([entry.get("question") is None, entry.get("context") is None, entry.get("answer") is None]):
+                warnings.warn(f"Skipping entry {entry} because it has no question, context or answer.")
                 continue
-            if entry["answer"] not in entry["context"]:
-                warnings.warn("This is extractive QnA but the answer is not in the context.")
+            if entry.get("answer") not in entry.get("context"):
+                warnings.warn(f"Skipping entry {entry} because answer is not in context.")
                 continue
             # get index of answer in context
             answer_start = entry["context"].index(entry["answer"])
@@ -1324,7 +1346,7 @@ class TrainingTaskForChatCompletionFormat(BaseModel):
 
 
 class TrainingTaskForChatCompletion(BaseModel, TrainingData):
-    """Training data for chat comletion
+    """Training data for chat completion
 
     Args:
         formatting_func: A formatting function converting a dictionary of records into zero,
@@ -1392,6 +1414,9 @@ class TrainingTaskForChatCompletion(BaseModel, TrainingData):
 
         datasets_dict = {"chat": [], "turn": [], "role": [], "content": []}
         for entry in data:
+            if any([entry.get("prompt") is None, entry.get("response") is None]):
+                warnings.warn(f"Skipping entry {entry} because it has no prompt or response.")
+                continue
             if entry["role"] not in ["system", "user", "assistant"]:
                 raise ValueError("Role must be one of 'system', 'user', 'assistant'")
             datasets_dict["chat"].append(entry["chat"])
@@ -1485,9 +1510,8 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
     def __repr__(self) -> str:
         return (
             f"{self.__class__.__name__}"
-            f"\n\t texts={self.text.name}"
-            f"\n\t label={self.label.question.name}"
-            f"\n\t multi_label={self.__multi_label__}"
+            f"\n\t texts={self.texts.name if self.texts else None}"
+            f"\n\t label={self.label.question.name if self.label else None}"
             f"\n\t all_labels={self.__all_labels__}"
             f"\n\t formatting_funct={self.formatting_func}"
         )
@@ -1632,6 +1656,18 @@ TrainingTaskTypes = Union[
     TrainingTaskForChatCompletion,
     TrainingTaskForSentenceSimilarity,
 ]
+
+# Helper map fr the creation of the model cards.
+TRAINING_TASK_MAPPING = {
+    TrainingTaskForTextClassification: "for_text_classification",
+    TrainingTaskForSFT: "for_supervised_fine_tuning",
+    TrainingTaskForRM: "for_reward_modeling",
+    TrainingTaskForPPO: "for_proximal_policy_optimization",
+    TrainingTaskForDPO: "for_direct_preference_optimization",
+    TrainingTaskForChatCompletion: "for_chat_completion",
+    TrainingTaskForQuestionAnswering: "for_question_answering",
+    TrainingTaskForSentenceSimilarity: "for_sentence_similarity",
+}
 
 
 # Old, deprecated variants.

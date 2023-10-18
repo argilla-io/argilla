@@ -17,7 +17,7 @@ interface MetadataFloatSettings {
 export interface BackendMetadata {
   id: string;
   name: string;
-  description: string;
+  title: string;
   settings:
     | MetadataTermsSettings
     | MetadataIntegerSettings

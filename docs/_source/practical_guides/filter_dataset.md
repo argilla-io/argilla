@@ -144,7 +144,7 @@ Inclusive ranges are specified with square brackets and exclusive ranges are wit
 :::{tab-item} operators
 
 You can combine an arbitrary amount of terms and fields in your search using the familiar boolean operators `AND`, `OR` and `NOT`.
-Following examples showcase the power of these operators:
+The following examples showcase the power of these operators:
 
 - `text:(quick AND fox)`: Returns records that contain the word *quick* and *fox*. The `AND` operator is the default operator, so `text:(quick fox)` is equivalent.
 - `text:(quick OR brown)`: Returns records that contain either the word *quick* or *brown*.
@@ -202,7 +202,7 @@ For a complete list of available fields and their content, have a look at the fi
 The default behavior when not specifying any fields in the query string changed in version `>=0.16.0`.
 Before this version, Argilla searched in a mixture of the the deprecated `word` and `word.extended` fields that allowed searches for special characters like `!` and `.`.
 If you want to search for special characters now, you have to specify the `text.exact` field.
-For example, this is the query if you want to search for words with an exclamation mark in the end: `text.exact:*\!`
+For example, this is the query if you want to search for words with an exclamation mark at the end: `text.exact:*\!`
 
 If you do not retrieve any results after a version update, you should use the `words` and `words.extended` fields in your search query for old datasets instead of the `text` and `text.exact` ones.
 ```
@@ -244,23 +244,23 @@ Again, as with the `text` field, you can also use the white space analyzer to pe
 
 ### Words and phrases
 
-Apart from single words you can also search for *phrases* by surrounding multiples words with double quotes.
+Apart from single words you can also search for *phrases* by surrounding multiple words with double quotes.
 This searches for all the words in the phrase, in the same order.
 
-If we take the two examples from above, then following query will only return the second example:
+If we take the two examples from above, then the following query will only return the second example:
 
 - `text:"lazy dog hated"`
 
 ### Metadata fields
 
 You also have the metadata of your records available when performing a search.
-Imagine you provided the split to which the record belongs to as metadata, that is `metadata={"split": "train"}` or `metadata={"split": "test"}`.
+Imagine you provided the split to which the record belongs as metadata, that is `metadata={"split": "train"}` or `metadata={"split": "test"}`.
 Then you could only search your training data by specifying the corresponding field in your query:
 
 - `metadata.split:train`
 
 Metadata are indexed as keywords.
-This means you cannot search for single words in them, and capitalization and punctuations are taken into account.
+This means you cannot search for single words in them, and capitalization and punctuation are taken into account.
 You can, however, use wild cards.
 
 ```{warning}
@@ -270,7 +270,7 @@ The metadata field has by default a maximum length of 128 characters and a field
 
 #### Non-searchable metadata fields
 
-If your intention is to only store metadata with records and not use it for searches, you can achieve this by defining
+If you intend to only store metadata with records and not use it for searches, you can achieve this by defining
 the metadata field with a leading underscore. For instance, if you use `metadata._my_hidden_field`, the field will be
 accessible at the record level, but it won't be used in searches.
 
@@ -283,24 +283,24 @@ Note that the URL cannot exceed the metadata length limit.
 
 ### Vector fields
 
-It is also possible to query the presense of vector field. Imagine you only want to include records with `vectors={"vector_1": vector_1}`. You can then define a query `vectors.vector_1: *`.
+It is also possible to query the presence of vector field. Imagine you only want to include records with `vectors={"vector_1": vector_1}`. You can then define a query `vectors.vector_1: *`.
 
 ### Filters as query string
 
-Just like the metadata, you can also use the filter fields in you query.
+Just like the metadata, you can also use the filter fields in your query.
 A few examples to emulate the filters in the query string are:
 
 - `status:Validated`
 - `annotated_as:HAM`
 - `predicted_by:Model A`
 
-The field values are treated as keywords, that is you cannot search for single words in them, and capitalization and punctuations are taken into account.
+The field values are treated as keywords, that is you cannot search for single words in them, and capitalization and punctuation are taken into account.
 You can, however, use wild cards.
 
 ### Combine terms and fields
 
 You can combine an arbitrary amount of terms and fields in your search using the familiar boolean operators `AND`, `OR` and `NOT`.
-Following examples showcase the power of these operators:
+The following examples showcase the power of these operators:
 
 - `text:(quick AND fox)`: Returns records that contain the word *quick* and *fox*. The `AND` operator is the default operator, so `text:(quick fox)` is equivalent.
 - `text:(quick OR brown)`: Returns records that contain either the word *quick* or *brown*.
@@ -311,7 +311,7 @@ Following examples showcase the power of these operators:
 ### Query string features
 
 The query string syntax has many powerful features that you can use to create complex searches.
-Following is just a hand selected subset of the many features you can look up on the official [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/query-dsl-query-string-query.html).
+The following is just a hand-selected subset of the many features you can look up on the official [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/query-dsl-query-string-query.html).
 
 #### Wildcards
 
@@ -327,7 +327,7 @@ Regular expression patterns can be embedded in the query string by wrapping them
 
 - `text:/joh?n(ath[oa]n)/`: Matches *jonathon*, *jonathan*, *johnathon*, and *johnathan*.
 
-The supported regular expression syntax is explained on the official [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/regexp-syntax.html).
+The supported regular expression syntax is explained in the official [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/regexp-syntax.html).
 
 #### Fuzziness
 
@@ -346,8 +346,8 @@ Inclusive ranges are specified with square brackets and exclusive ranges with cu
 
 ##### Datetime Ranges
 
-Datetime ranges are a special kind of range queries that can be defined for the `event_timestamp` and `last_updated` fields.
-The formatting is similar to normal range queries, but they require an iso-formatted datetime, which can be ontained via `datetime.now().isoformat()`, resulting in `1984-01-01T01:01:01.000000`. Note that the `*` can be used inter-changebly for the end of time or beginning of time.
+Datetime ranges are a special kind of range query that can be defined for the `event_timestamp` and `last_updated` fields.
+The formatting is similar to normal range queries, but they require an iso-formatted datetime, which can be obtained via `datetime.now().isoformat()`, resulting in `1984-01-01T01:01:01.000000`. Note that the `*` can be used interchangeably for the end of time or beginning of time.
 
 - `event_timestamp:[1984-01-01T01:01:01.000000 TO *]`
 - `last_updated:{* TO 1984-01-01T01:01:01.000000}`

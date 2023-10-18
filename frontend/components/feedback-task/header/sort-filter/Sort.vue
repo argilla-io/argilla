@@ -7,7 +7,7 @@
       <span slot="dropdown-header">
         <SortButton
           :is-active="visibleDropdown"
-          :active-sort-items="appliedSortCategories"
+          :active-sort-items="selectedSortingItems"
         />
       </span>
       <span slot="dropdown-content" class="sort-filter__container">
@@ -33,14 +33,21 @@ import { useSortRecords } from "./useSortRecords";
 
 export default {
   props: {
-    metadata: {
+    datasetMetadata: {
+      type: Array,
+      required: true,
+    },
+    sortFilters: {
       type: Array,
       required: true,
     },
   },
+  model: {
+    prop: "sortFilters",
+    event: "onSortFilteredChanged",
+  },
   data() {
     return {
-      appliedSortCategories: [],
       visibleDropdown: false,
     };
   },
@@ -70,14 +77,16 @@ export default {
       this.sort();
     },
     sort() {
-      this.$root.$emit("sort-changed", this.metadataSort.convertToRouteParam());
+      if (!this.metadataSort.hasChanges) return;
 
-      this.appliedSortCategories = this.metadataSort.selectedCategoriesName;
+      const newSorting = this.metadataSort.commit();
+
+      this.$emit("onSortFilteredChanged", newSorting);
     },
-    updateFiltersFromQueryParams() {
-      this.completeByRouteParams();
+    updateAppliedCategoriesFromMetadataFilter() {
+      if (!this.metadataSort) return;
 
-      this.appliedSortCategories = this.metadataSort.selectedCategoriesName;
+      this.metadataSort.initializeWith(this.sortFilters);
     },
   },
   watch: {
@@ -98,9 +107,14 @@ export default {
         this.sort();
       },
     },
+    sortFilters() {
+      if (!this.metadataSort.hasDifferencesWith(this.sortFilters)) return;
+
+      this.updateAppliedCategoriesFromMetadataFilter();
+    },
   },
-  mounted() {
-    this.updateFiltersFromQueryParams();
+  created() {
+    this.updateAppliedCategoriesFromMetadataFilter();
   },
   setup(props) {
     return useSortRecords(props);

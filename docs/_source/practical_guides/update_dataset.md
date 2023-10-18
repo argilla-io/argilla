@@ -38,11 +38,11 @@ From Argilla 1.14.0, calling `from_argilla` will pull the `FeedbackDataset` from
 :::{tab-item} Argilla 1.14.0 or higher
 
 ```python
-# load the dataset
+# Load the dataset
 dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_workspace")
-# list of Feedback records to add
+# List of Feedback records to add
 new_records = [...]
-# add records to the dataset
+# Add records to the dataset
 dataset.add_records(new_records)
 ```
 
@@ -51,13 +51,13 @@ dataset.add_records(new_records)
 :::{tab-item} Lower than Argilla 1.14.0
 
 ```python
-# load the dataset
+# Load the dataset
 dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_workspace")
-# list of Feedback records to add
+# List of Feedback records to add
 new_records = [...]
-# add records to the dataset
+# Add records to the dataset
 dataset.add_records(new_records)
-# push the dataset to Argilla
+# Push the dataset to Argilla
 dataset.push_to_argilla()
 ```
 
@@ -77,9 +77,9 @@ From `v1.14.0`, it is possible to delete records from a `FeedbackDataset` in Arg
 The first alternative is to call the `delete` method over a single `FeedbackRecord` in the dataset, which will delete that record from Argilla.
 
 ```python
-# load the dataset
+# Load the dataset
 dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_workspace")
-# delete a specific record
+# Delete a specific record
 dataset.records[0].delete()
 ```
 :::
@@ -88,9 +88,9 @@ dataset.records[0].delete()
 Otherwise, you can also select one or more records from the existing `FeedbackDataset` (which are `FeedbackRecord`s in Argilla) and call the `delete_records` method to delete them from Argilla.
 
 ```python
-# load the dataset
+# Load the dataset
 dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_workspace")
-# delete a list of records from a dataset
+# Delete a list of records from a dataset
 dataset.delete_records(list(dataset.records[:5]))
 ```
 :::
@@ -117,9 +117,9 @@ If you include in this method a suggestion for a question that already has one, 
 ```
 
 ```python
-# load the dataset
+# Load the dataset
 dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_workspace")
-# loop through the records and add suggestions
+# Loop through the records and add suggestions
 for record in dataset.records:
     record.update(suggestions=[...])
 ```
@@ -130,9 +130,9 @@ for record in dataset.records:
 This method will only add suggestions to records that don't have them. To update suggestions, upgrade to `v1.14.0` or higher and follow the snippet in the other tab.
 
 ```python
-# load the dataset
+# Load the dataset
 dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_workspace")
-# loop through the records and add suggestions
+# Loop through the records and add suggestions
 for record in dataset.records:
     record.set_suggestions([...])
 dataset.push_to_argilla()
@@ -144,7 +144,7 @@ To learn about the schema that these suggestions should follow check [this page]
 
 #### Delete suggestions
 
-From Argilla `v1.15.0`, you can also delete suggestions from existing records in Argilla via either the `delete_suggestions` method available for every record in Argilla, or via the `delete` method of every suggestion.
+From Argilla `v1.15.0`, you can also delete suggestions from existing records in Argilla via either the `delete_suggestions` method available for every record in Argilla, or via the `delete` method for every suggestion.
 
 To delete some or all the suggestions from a `FeedbackRecord` pushed to Argilla, you can do the following:
 
@@ -212,12 +212,12 @@ It is possible to update records from your Argilla datasets using our Python API
 ```python
 import argilla as rg
 
-# read all records in the dataset or define a specific search via the `query` parameter
+# Read all records in the dataset or define a specific search via the `query` parameter
 record = rg.load("my_first_dataset")
 
-# modify first record metadata (if no previous metadata dict you might need to create it)
-record[0].metadata["my_metadata"] = "im a new value"
+# Modify first record metadata (if no previous metadata dict, you might need to create it)
+record[0].metadata["my_metadata"] = "I'm a new value"
 
-# log record to update it, this will keep everything but add my_metadata field and value
+# Log record to update it, this will keep everything but add my_metadata field and value
 rg.log(name="my_first_dataset", records=record[0])
 ```

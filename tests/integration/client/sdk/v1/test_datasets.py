@@ -39,7 +39,6 @@ from argilla.client.sdk.v1.datasets.api import (
     get_records,
     list_datasets,
     publish_dataset,
-    set_suggestion,
 )
 from argilla.client.sdk.v1.datasets.models import (
     FeedbackDatasetModel,
@@ -51,6 +50,7 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackRecordsModel,
     FeedbackSuggestionModel,
 )
+from argilla.client.sdk.v1.records.api import set_suggestion
 from argilla.server.models import DatasetStatus, User, UserRole
 
 from tests.factories import (
@@ -279,7 +279,7 @@ async def test_add_metadata_property(role: UserRole) -> None:
         id=dataset.id,
         metadata_property={
             "name": "test_metadata_property",
-            "description": "test_description",
+            "title": "test_metadata_property_title",
             "settings": {"type": "terms", "values": ["a", "b", "c"]},
         },
     )

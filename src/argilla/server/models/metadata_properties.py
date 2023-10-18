@@ -66,9 +66,19 @@ class NumericMetadataPropertySettings(BaseMetadataPropertySettings, GenericModel
 class IntegerMetadataPropertySettings(NumericMetadataPropertySettings[int]):
     type: Literal[MetadataPropertyType.integer]
 
+    def check_metadata(self, value: int) -> None:
+        if not isinstance(value, int):
+            raise ValueError(f"'{value}' is not an integer.")
+        return super().check_metadata(value)
+
 
 class FloatMetadataPropertySettings(NumericMetadataPropertySettings[float]):
     type: Literal[MetadataPropertyType.float]
+
+    def check_metadata(self, value: float) -> None:
+        if not isinstance(value, float):
+            raise ValueError(f"'{value}' is not a float.")
+        return super().check_metadata(value)
 
 
 MetadataPropertySettings = Annotated[

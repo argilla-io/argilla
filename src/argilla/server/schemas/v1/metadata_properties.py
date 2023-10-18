@@ -19,8 +19,9 @@ from uuid import UUID
 from pydantic import BaseModel, Field, validator
 from pydantic.generics import GenericModel
 
-from argilla.server.enums import MetadataPropertyType, UserRole
-from argilla.server.schemas.v1.datasets import MetadataPropertySettings
+from argilla.server.enums import MetadataPropertyType
+from argilla.server.schemas.base import UpdateSchema
+from argilla.server.schemas.v1.datasets import MetadataPropertySettings, MetadataPropertyTitle
 
 FLOAT_METADATA_METRICS_PRECISION = 5
 
@@ -70,7 +71,7 @@ MetadataMetrics = Annotated[
 class MetadataProperty(BaseModel):
     id: UUID
     name: str
-    description: Optional[str] = None
+    title: str
     settings: MetadataPropertySettings
     visible_for_annotators: bool
     dataset_id: UUID
@@ -79,3 +80,10 @@ class MetadataProperty(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class MetadataPropertyUpdate(UpdateSchema):
+    title: Optional[MetadataPropertyTitle]
+    visible_for_annotators: Optional[bool]
+
+    __non_nullable_fields__ = {"title", "visible_for_annotators"}

@@ -17,6 +17,8 @@ abstract class Sort {
   }
 
   abstract get name(): string;
+
+  abstract get title(): string;
 }
 
 class MetadataSort extends Sort {
@@ -27,10 +29,14 @@ class MetadataSort extends Sort {
   get name() {
     return this.metadata.name;
   }
+
+  get title() {
+    return this.metadata.title;
+  }
 }
 
 class RecordSort extends Sort {
-  constructor(public readonly name: string) {
+  constructor(public readonly name: string, public readonly title = name) {
     super();
   }
 }
@@ -54,12 +60,9 @@ export class MetadataSortList {
     );
   }
 
-  get selectedCategoriesName() {
-    return this.selectedCategories.map((metadataSort) => metadataSort.name);
-  }
-
   select(category: string) {
     const found = this.findByCategory(category);
+
     if (found) {
       this.selectedCategories.push(found);
     }
@@ -96,20 +99,33 @@ export class MetadataSortList {
     if (found) found.toggleSort();
   }
 
-  convertToRouteParam(): string[] {
+  get hasChanges() {
+    return this.latestCommit.join("") !== this.createSortCriteria().join("");
+  }
+
+  hasDifferencesWith(compare: string[]) {
+    return this.latestCommit.join("") !== compare.join("");
+  }
+
+  private latestCommit: string[] = [];
+  commit(): string[] {
+    this.latestCommit = this.createSortCriteria();
+
+    return this.latestCommit;
+  }
+
+  private createSortCriteria(): string[] {
     return this.selected.map(
       (c) => `${c.key}${c.name}${ORDER_BY_SEPARATOR}${c.sort}`
     );
   }
 
-  completeByRouteParams(sort: string) {
+  initializeWith(sort: string[]) {
     this.clear();
 
-    if (!sort) return;
+    if (!sort.length) return;
 
-    const sortParams = sort.split(",");
-
-    sortParams.forEach((sortParam) => {
+    sort.forEach((sortParam) => {
       const categories = sortParam.split(SORT_KEY_SEPARATOR);
       const [name, sort] =
         categories[categories.length - 1].split(ORDER_BY_SEPARATOR);
@@ -122,6 +138,8 @@ export class MetadataSortList {
         this.selectedCategories.push(found);
       }
     });
+
+    this.commit();
   }
 
   private findByCategory(category: string) {

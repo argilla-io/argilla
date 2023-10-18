@@ -17,7 +17,7 @@ from typing import Any, List, Optional
 from uuid import UUID
 
 from pydantic import parse_obj_as
-from sqlalchemy import ARRAY, JSON, ForeignKey, Text, UniqueConstraint, and_, sql
+from sqlalchemy import JSON, ForeignKey, String, Text, UniqueConstraint, and_, sql
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.ext.mutable import MutableDict, MutableList
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -47,7 +47,7 @@ _USER_API_KEY_BYTES_LENGTH = 80
 class Field(DatabaseModel):
     __tablename__ = "fields"
 
-    name: Mapped[str] = mapped_column(Text, index=True)
+    name: Mapped[str] = mapped_column(String, index=True)
     title: Mapped[str] = mapped_column(Text)
     required: Mapped[bool] = mapped_column(default=False)
     settings: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSON), default={})
@@ -153,7 +153,7 @@ class Record(DatabaseModel):
 class Question(DatabaseModel):
     __tablename__ = "questions"
 
-    name: Mapped[str] = mapped_column(index=True)
+    name: Mapped[str] = mapped_column(String, index=True)
     title: Mapped[str] = mapped_column(Text)
     description: Mapped[str] = mapped_column(Text, nullable=True)
     required: Mapped[bool] = mapped_column(default=False)
@@ -185,9 +185,8 @@ class Question(DatabaseModel):
 class MetadataProperty(DatabaseModel):
     __tablename__ = "metadata_properties"
 
-    name: Mapped[str] = mapped_column(Text, index=True)
-    type: Mapped[MetadataPropertyType] = mapped_column(Text)
-    description: Mapped[str] = mapped_column(Text, nullable=True)
+    name: Mapped[str] = mapped_column(String, index=True)
+    title: Mapped[str] = mapped_column(Text)
     settings: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSON), default={})
     allowed_roles: Mapped[List[UserRole]] = mapped_column(MutableList.as_mutable(JSON), default=[], server_default="[]")
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
@@ -195,6 +194,10 @@ class MetadataProperty(DatabaseModel):
     dataset: Mapped["Dataset"] = relationship(back_populates="metadata_properties")
 
     __table_args__ = (UniqueConstraint("name", "dataset_id", name="metadata_property_name_dataset_id_uq"),)
+
+    @property
+    def type(self) -> MetadataPropertyType:
+        return MetadataPropertyType(self.settings["type"])
 
     @property
     def parsed_settings(self) -> MetadataPropertySettings:
@@ -206,8 +209,7 @@ class MetadataProperty(DatabaseModel):
 
     def __repr__(self):
         return (
-            f"MetadataProperty(id={str(self.id)!r}, name={self.name!r}, type={self.type!r}, "
-            f"dataset_id={str(self.dataset_id)!r}, "
+            f"MetadataProperty(id={str(self.id)!r}, name={self.name!r}, dataset_id={str(self.dataset_id)!r}, "
             f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
 

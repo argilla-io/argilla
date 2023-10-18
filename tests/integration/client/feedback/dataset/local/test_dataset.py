@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, List, Type, Union
 
 import datasets
 import pytest
+from argilla import Workspace
 from argilla.client import api
 from argilla.client.feedback.config import DatasetConfig
 from argilla.client.feedback.dataset import FeedbackDataset
@@ -476,13 +477,6 @@ async def test_update_dataset_records_in_argilla(
                 },
             ]
         )
-    with pytest.raises(TypeError, match='"RemoteFeedbackRecord" is immutable and does not support item assignment'):
-        record.suggestions = [
-            {
-                "question_name": "question-1",
-                "value": "This is a suggestion to question 1",
-            },
-        ]
 
 
 def test_push_to_huggingface_and_from_huggingface(
@@ -603,6 +597,7 @@ def test_push_to_huggingface_and_from_huggingface(
     "feedback_dataset_records",
 )
 def test_prepare_for_training_text_classification(
+    owner: "ServerUser",
     framework: Union[Framework, str],
     question: str,
     feedback_dataset_guidelines: str,
@@ -616,7 +611,48 @@ def test_prepare_for_training_text_classification(
         questions=feedback_dataset_questions,
     )
     dataset.add_records(feedback_dataset_records)
-    label = dataset.question_by_name(question)
+
+    api.init(api_key=owner.api_key)
+    ws = Workspace.create(name="test-workspace")
+
+    remote = dataset.push_to_argilla(name="test-dataset", workspace=ws)
+
+    label = remote.question_by_name(question)
     task = TrainingTask.for_text_classification(text=dataset.fields[0], label=label)
 
-    dataset.prepare_for_training(framework=framework, task=task)
+    data = remote.prepare_for_training(framework=framework, task=task)
+    assert data is not None
+
+
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records",
+)
+def test_warning_remote_dataset_methods(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records: List[FeedbackRecord],
+):
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+
+    with pytest.warns(
+        UserWarning, match="`pull` method is not supported for local datasets and won't take any effect."
+    ):
+        dataset.pull()
+
+    with pytest.warns(
+        UserWarning, match="`filter_by` method is not supported for local datasets and won't take any effect."
+    ):
+        dataset.filter_by()
+
+    with pytest.warns(
+        UserWarning, match="`delete` method is not supported for local datasets and won't take any effect."
+    ):
+        dataset.delete()
