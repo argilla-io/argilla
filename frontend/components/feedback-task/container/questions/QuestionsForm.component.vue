@@ -160,7 +160,7 @@ export default {
       if (event.srcElement.id || event.srcElement.getAttribute("for")) return;
 
       this.userComesFromOutside = false;
-      this.focusOnFirstQuestion(event);
+      this.updateQuestionAutofocus(0);
     },
     focusOnFirstQuestion(event) {
       event.preventDefault();
@@ -174,7 +174,7 @@ export default {
       const { code, shiftKey, ctrlKey, metaKey } = event;
 
       if (code == "Tab" && this.userComesFromOutside) {
-        this.focusOnFirstQuestionFromOutside(event);
+        this.focusOnFirstQuestion(event);
 
         return;
       }
