@@ -45,7 +45,7 @@ from argilla.client.sdk.v1.datasets.models import (
                 "agent": "b",
             },
             {
-                "question_id": UUID("00000000-0000-0000-0000-000000000000"),
+                "question_id": "00000000-0000-0000-0000-000000000000",
                 "type": "human",
                 "score": 0.5,
                 "value": "a",
@@ -62,7 +62,7 @@ from argilla.client.sdk.v1.datasets.models import (
                 "agent": "b",
             },
             {
-                "question_id": UUID("00000000-0000-0000-0000-000000000000"),
+                "question_id": "00000000-0000-0000-0000-000000000000",
                 "type": "model",
                 "score": 1.0,
                 "value": "a",
@@ -93,7 +93,7 @@ def test_remote_suggestion_schema(schema_kwargs: Dict[str, Any], server_payload:
     [
         FeedbackSuggestionModel(
             id=uuid4(),
-            question_id=uuid4(),
+            question_id=str(uuid4()),
             type="human",
             score=0.5,
             value="a",
@@ -101,7 +101,7 @@ def test_remote_suggestion_schema(schema_kwargs: Dict[str, Any], server_payload:
         ),
         FeedbackSuggestionModel(
             id=uuid4(),
-            question_id=uuid4(),
+            question_id=str(uuid4()),
             type="model",
             score=1.0,
             value="a",
@@ -259,7 +259,7 @@ def test_remote_response_schema_from_api(payload: FeedbackResponseModel) -> None
                 ],
                 "suggestions": [
                     {
-                        "question_id": UUID("00000000-0000-0000-0000-000000000000"),
+                        "question_id": "00000000-0000-0000-0000-000000000000",
                         "type": "model",
                         "score": 0.9,
                         "value": "This is the first suggestion",
@@ -311,7 +311,7 @@ def test_remote_feedback_record(schema_kwargs: Dict[str, Any], server_payload: D
             suggestions=[
                 FeedbackSuggestionModel(
                     id=uuid4(),
-                    question_id=uuid4(),
+                    question_id=str(uuid4()),
                     type="model",
                     score=0.9,
                     value="This is the first suggestion",

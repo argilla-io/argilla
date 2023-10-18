@@ -54,6 +54,9 @@ class FeedbackResponseStatusFilter(str, Enum):
     discarded = "discarded"
 
 
+# TODO: these models shouldn't transform the payload from the server to not JSON serializable types (UUID, datetime, etc)
+
+
 class FeedbackResponseModel(BaseModel):
     id: UUID
     values: Union[Dict[str, FeedbackValueModel], None]
@@ -65,7 +68,7 @@ class FeedbackResponseModel(BaseModel):
 
 class FeedbackSuggestionModel(BaseModel):
     id: UUID
-    question_id: UUID
+    question_id: str
     type: Optional[Literal["human", "model"]] = None
     score: Optional[float] = None
     value: Any

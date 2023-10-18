@@ -165,7 +165,7 @@ class TestSuiteRemoteDataset:
 
         expected_suggestion = FeedbackSuggestionModel(
             id=uuid4(),
-            question_id=test_remote_dataset.question_by_name("text").id,
+            question_id=str(test_remote_dataset.question_by_name("text").id),
             value="Test value",
             score=0.5,
             agent="test",
@@ -198,7 +198,7 @@ class TestSuiteRemoteDataset:
     ) -> None:
         expected_suggestion = FeedbackSuggestionModel(
             id=uuid4(),
-            question_id=test_remote_dataset.question_by_name("text").id,
+            question_id=str(test_remote_dataset.question_by_name("text").id),
             value="Test value",
             score=0.5,
             agent="test",
