@@ -44,16 +44,12 @@ export class GetRecordsToAnnotateUseCase {
 
     const recordsToAnnotate = recordsFromBackend.records.map(
       (record, index) => {
-        const fields = Object.keys(record.fields).map((fieldName) => {
-          const field = fieldsFromBackend.find(
-            (field) => field.name === fieldName
-          );
-
+        const fields = fieldsFromBackend.map((field) => {
           return new Field(
             field.id,
             field.name,
             field.title,
-            record.fields[fieldName],
+            record.fields[field.name],
             datasetId,
             field.required,
             field.settings
