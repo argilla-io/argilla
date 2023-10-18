@@ -20,6 +20,9 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForRM,
     TrainingTaskForSFT,
     TrainingTaskForTextClassification,
+    TrainingTaskForQuestionAnswering,
+    TrainingTaskForChatCompletion,
+    TrainingTaskForSentenceSimilarity,
     TrainingTaskMapping,  # <- Deprecated
     TrainingTaskMappingForTextClassification,  # <- Deprecated
 )

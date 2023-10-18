@@ -20,6 +20,9 @@ from argilla.client.feedback.training import (
     TrainingTaskForRM,
     TrainingTaskForSFT,
     TrainingTaskForTextClassification,
+    TrainingTaskForQuestionAnswering,
+    TrainingTaskForChatCompletion,
+    TrainingTaskForSentenceSimilarity,
     TrainingTaskMapping,  # <- Deprecated
     TrainingTaskMappingForTextClassification,  # <- Deprecated
 )
@@ -48,6 +51,9 @@ __all__ = [
     "TrainingTaskForDPO",
     "TrainingTaskMapping",
     "TrainingTaskMappingForTextClassification",
+    "TrainingTaskForQuestionAnswering",
+    "TrainingTaskForChatCompletion",
+    "TrainingTaskForSentenceSimilarity",
     "RankingQuestionStrategy",
     "UnifiedValueSchema",
     "LabelQuestionUnification",
