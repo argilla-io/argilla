@@ -29,6 +29,7 @@ from argilla.client.feedback.schemas.questions import (
     RatingQuestion,
     TextQuestion,
 )
+from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.types import AllowedQuestionTypes
 from argilla.client.feedback.training.schemas import (
     TrainingTaskForChatCompletion,
@@ -50,7 +51,6 @@ from argilla.client.feedback.unification import (
 )
 from argilla.client.models import Framework
 from argilla.utils.dependency import require_dependencies
-from argilla.client.feedback.schemas.records import FeedbackRecord
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import (
