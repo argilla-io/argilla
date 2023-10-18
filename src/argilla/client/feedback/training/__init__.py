@@ -30,11 +30,14 @@ from argilla.client.feedback.training.schemas import (
 __all__ = [
     "ArgillaTrainer",
     "TrainingTask",
-    "TrainingTaskForTextClassification",
-    "TrainingTaskForSFT",
-    "TrainingTaskForRM",
-    "TrainingTaskForPPO",
+    "TrainingTaskForChatCompletion",
     "TrainingTaskForDPO",
+    "TrainingTaskForPPO",
+    "TrainingTaskForQuestionAnswering",
+    "TrainingTaskForRM",
+    "TrainingTaskForSentenceSimilarity",
+    "TrainingTaskForSFT",
+    "TrainingTaskForTextClassification",
     "TrainingTaskMapping",
     "TrainingTaskMappingForTextClassification",
 ]
