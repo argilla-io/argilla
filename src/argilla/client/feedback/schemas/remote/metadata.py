@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Dict, Optional, TYPE_CHECKING, Type, Union
+from typing import TYPE_CHECKING, Dict, Optional, Type, Union
 
 from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
 from argilla.client.feedback.schemas.metadata import (
