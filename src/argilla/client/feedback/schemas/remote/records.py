@@ -194,6 +194,7 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
                 "The `suggestions` argument is deprecated and will be removed in "
                 "future releases. In order to update the suggestions of a record "
                 "assign the `suggestions` attribute directly.",
+                DeprecationWarning,
                 stacklevel=1,
             )
 
