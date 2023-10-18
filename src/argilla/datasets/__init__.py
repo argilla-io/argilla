@@ -22,7 +22,7 @@ __all__ = [TextClassificationSettings, TokenClassificationSettings, Settings]
 _LOGGER = logging.getLogger(__name__)
 
 
-def load_dataset_settings(name: str, workspace: Optional[str] = None) -> Settings:
+def load_dataset_settings(name: str, workspace: Optional[str] = None) -> Optional[Settings]:
     """
     Loads the settings of a dataset
 
@@ -34,10 +34,9 @@ def load_dataset_settings(name: str, workspace: Optional[str] = None) -> Setting
         The dataset settings
     """
     active_api = api.active_api()
-    if workspace is not None:
-        active_api.set_workspace(workspace)
     datasets = active_api.datasets
-    settings = datasets.load_settings(name)
+
+    settings = datasets.load_settings(name, workspace=workspace)
     if settings is None:
         return None
     else:

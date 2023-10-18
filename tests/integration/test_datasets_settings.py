@@ -12,16 +12,22 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, Union
+from uuid import uuid4
 
-import argilla as rg
 import pytest
+from argilla import Workspace
 from argilla.client import api
 from argilla.client.api import delete, get_workspace, init
 from argilla.client.client import Argilla
 from argilla.client.sdk.commons.errors import ForbiddenApiError
-from argilla.datasets import TextClassificationSettings, TokenClassificationSettings
-from argilla.datasets.__init__ import configure_dataset
+from argilla.datasets import (
+    TextClassificationSettings,
+    TokenClassificationSettings,
+    configure_dataset,
+    configure_dataset_settings,
+    load_dataset_settings,
+)
 from argilla.server.contexts import accounts
 from argilla.server.security.model import WorkspaceUserCreate
 
@@ -29,6 +35,8 @@ if TYPE_CHECKING:
     from argilla.client.apis.datasets import LabelsSchemaSettings
     from argilla.server.models import User
     from sqlalchemy.ext.asyncio import AsyncSession
+
+    from .helpers import SecuredClient
 
 
 @pytest.mark.parametrize(
@@ -73,6 +81,59 @@ def test_settings_workflow(
 
     with pytest.raises(ValueError, match="Task type mismatch"):
         configure_dataset(dataset, wrong_settings, workspace=workspace)
+
+
+@pytest.mark.parametrize(
+    "settings, workspace",
+    [
+        (TextClassificationSettings(label_schema={"A", "B"}), None),
+        (TextClassificationSettings(label_schema={"D", "E"}), "admin"),
+        (TokenClassificationSettings(label_schema={"PER", "ORG"}), None),
+        (TokenClassificationSettings(label_schema={"CAT", "DOG"}), "admin"),
+    ],
+)
+def test_configure_dataset_settings_twice(
+    owner: "User",
+    argilla_user: "User",
+    settings: Union[TextClassificationSettings, TokenClassificationSettings],
+    workspace: Optional[str],
+) -> None:
+    if not workspace:
+        workspace_name = argilla_user.username
+    else:
+        init(api_key=owner.api_key)
+        workspace = Workspace.create(name=workspace)
+        workspace.add_user(argilla_user.id)
+        workspace_name = workspace.name
+
+    init(api_key=argilla_user.api_key, workspace=argilla_user.username)
+    dataset_name = f"test-dataset-{uuid4()}"
+    # This will create the dataset
+    configure_dataset_settings(dataset_name, settings=settings, workspace=workspace_name)
+    # This will update the dataset and what describes the issue https://github.com/argilla-io/argilla/issues/3505
+    configure_dataset_settings(dataset_name, settings=settings, workspace=workspace_name)
+
+    found_settings = load_dataset_settings(dataset_name, workspace_name)
+    assert {label for label in found_settings.label_schema} == {str(label) for label in settings.label_schema}
+
+
+@pytest.mark.parametrize(
+    "settings",
+    [
+        TextClassificationSettings(label_schema={"A", "B"}),
+        TokenClassificationSettings(label_schema={"PER", "ORG"}),
+    ],
+)
+def test_configure_dataset_deprecation_warning(
+    argilla_user: "User", settings: Union[TextClassificationSettings, TokenClassificationSettings]
+) -> None:
+    init(api_key=argilla_user.api_key, workspace=argilla_user.username)
+
+    dataset_name = f"test-dataset-{uuid4()}"
+    workspace_name = get_workspace()
+
+    with pytest.warns(DeprecationWarning, match="This method is deprecated. Use configure_dataset_settings instead."):
+        configure_dataset(dataset_name, settings=settings, workspace=workspace_name)
 
 
 def test_list_dataset(mocked_client: "SecuredClient"):

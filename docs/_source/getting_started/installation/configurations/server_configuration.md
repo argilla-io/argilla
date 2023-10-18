@@ -7,8 +7,8 @@ By default, the Argilla Server will look for your Elasticsearch (ES) endpoint at
 ## Launching
 ### Using a proxy
 
-If you run Argilla behind a proxy by adding some extra prefix to expose the service, you should setup the `ARGILLA_BASE_URL`
-environment variable to properly route requests to server application.
+If you run Argilla behind a proxy by adding some extra prefix to expose the service, you should set the `ARGILLA_BASE_URL`
+environment variable to properly route requests to the server application.
 
 For example, if your proxy exposes Argilla in the URL `https://my-proxy/custom-path-for-argilla`,  you should launch the
 Argilla server with `ARGILLA_BASE_URL=/custom-path-for-argilla`.
@@ -28,7 +28,7 @@ For more details about FastAPI and uvicorn, see [here](https://fastapi.tiangolo.
 
 ## Environment variables
 
-You can set following environment variables to further configure your server and client.
+You can set the following environment variables to further configure your server and client.
 
 ### Server
 
