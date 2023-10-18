@@ -31,6 +31,10 @@ class MetadataFilter {
     return this.metadata.name;
   }
 
+  get title() {
+    return this.metadata.title;
+  }
+
   get isTerms() {
     return this.metadata.isTerms;
   }
@@ -119,7 +123,7 @@ export class MetadataFilterList {
   }
 
   get filteredCategories() {
-    return this.filteredMetadata.map((cat) => cat.name);
+    return this.filteredMetadata;
   }
 
   findByCategory(category: string) {

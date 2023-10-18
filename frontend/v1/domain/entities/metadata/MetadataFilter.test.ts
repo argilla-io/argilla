@@ -65,7 +65,9 @@ describe("MetadataFilter ", () => {
 
       metadataFilter.commit();
 
-      expect(metadataFilter.filteredCategories).toEqual(["split"]);
+      expect(metadataFilter.filteredCategories.map((f) => f.name)).toEqual([
+        "split",
+      ]);
     });
   });
 
@@ -152,7 +154,9 @@ describe("MetadataFilter ", () => {
 
       metadataFilter.initializeWith(["split:test,train"]);
 
-      expect(metadataFilter.filteredCategories).toEqual(["split"]);
+      expect(metadataFilter.filteredCategories.map((f) => f.name)).toEqual([
+        "split",
+      ]);
     });
 
     test("the user can see the filtered categories in the same order that he/she selected", () => {
@@ -165,7 +169,7 @@ describe("MetadataFilter ", () => {
         "split:test,train",
       ]);
 
-      expect(metadataFilter.filteredCategories).toEqual([
+      expect(metadataFilter.filteredCategories.map((f) => f.name)).toEqual([
         "loss",
         "float",
         "split",

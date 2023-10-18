@@ -11,9 +11,10 @@
         <MetadataButton
           :is-active="visibleDropdown"
           :badges="appliedCategoriesFilters"
-          :active-badge="visibleCategory?.name"
+          :active-badge="visibleCategory"
           @click-on-badge="openCategoryFilter"
           @click-on-clear="removeCategoryFilters"
+          @click-on-clear-all="clearAllCategories"
         />
       </span>
       <span
@@ -32,7 +33,7 @@
             class="metadata-filter__header"
             @click="selectMetadataCategory(null)"
           >
-            <span v-text="visibleCategory.name" />
+            <span v-text="visibleCategory.title" />
             <svgicon name="chevron-left" width="12" height="12" />
           </div>
           <div class="metadata-filter__content">
@@ -83,7 +84,7 @@ export default {
       this.visibleCategory = null;
     },
     selectMetadataCategory(category) {
-      this.visibleCategory = this.metadataFilters.findByCategory(category);
+      this.visibleCategory = category;
     },
     applyFilter() {
       this.visibleDropdown = false;
@@ -101,13 +102,20 @@ export default {
     },
     openCategoryFilter(category) {
       this.visibleDropdown = this.visibleDropdown
-        ? category !== this.visibleCategory?.name
+        ? category !== this.visibleCategory
         : true;
 
       this.selectMetadataCategory(category);
     },
     removeCategoryFilters(category) {
-      this.metadataFilters.findByCategory(category).clear();
+      category.clear();
+
+      this.applyFilter();
+    },
+    clearAllCategories(categories) {
+      categories.forEach((category) => {
+        category.clear();
+      });
 
       this.applyFilter();
     },

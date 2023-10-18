@@ -10,8 +10,8 @@
         class="metadata-button__badge"
         :active-badge="activeBadge === badge && isActive"
         v-for="badge in visibleBadges"
-        :key="badge"
-        :text="badge"
+        :key="badge.name"
+        :text="badge.title"
         @on-click="onClickOnBadge(badge, $event)"
         @on-clear="onClickOnClear(badge, $event)"
       ></FilterBadge>
@@ -31,8 +31,8 @@
           <FilterBadge
             class="badge"
             v-for="badge in collapsedBadges"
-            :key="badge"
-            :text="badge"
+            :key="badge.name"
+            :text="badge.title"
             @on-click="onClickOnBadge(badge, $event)"
             @on-clear="onClickOnClear(badge, $event)"
           ></FilterBadge>
@@ -56,7 +56,7 @@ export default {
       default: () => [],
     },
     activeBadge: {
-      type: String,
+      type: Object,
     },
     maxVisibleBadges: {
       default: 2,
@@ -95,9 +95,7 @@ export default {
       this.$emit("click-on-clear", badge, e);
     },
     onClearAll() {
-      this.badges.forEach((badge) => {
-        this.$emit("click-on-clear", badge);
-      });
+      this.$emit("click-on-clear-all", this.badges);
     },
     toggleTooltip(e) {
       e.stopPropagation();
