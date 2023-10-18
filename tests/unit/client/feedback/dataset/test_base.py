@@ -57,10 +57,13 @@ class TestFeedbackDataset(FeedbackDatasetBase):
     def update_records(self, **kwargs: Dict[str, Any]) -> None:
         pass
 
-    def add_metadata_property(self, metadata_property):
+    def add_metadata_property(self, *args, **kwargs) -> None:
         pass
 
-    def delete_metadata_properties(self, metadata_properties):
+    def update_metadata_properties(self, *args, **kwargs) -> None:
+        pass
+
+    def delete_metadata_properties(self, *args, **kwargs) -> None:
         pass
 
     def filter_by(

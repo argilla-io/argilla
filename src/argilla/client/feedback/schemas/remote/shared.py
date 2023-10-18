@@ -17,22 +17,21 @@ from typing import Optional
 from uuid import UUID
 
 import httpx
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class RemoteSchema(BaseModel, ABC):
     # TODO(@alvarobartt): Review optional id configuration for remote schemas
-    id: Optional[UUID] = None
-    client: Optional[httpx.Client] = None
+    id: Optional[UUID] = Field(None, allow_mutation=False)
+    client: Optional[httpx.Client] = Field(None, allow_mutation=False)
 
-    # TODO(alvarobartt): here to be able to use the `allowed_for_roles` decorator
+    # TODO(@alvarobartt): here to be able to use the `allowed_for_roles` decorator
     @property
     def _client(self) -> Optional[httpx.Client]:
         return self.client
 
     class Config:
-        # TODO(@alvarobart) Not sure if we need this at this level
-        allow_mutation = False
+        validate_assignment = True
         arbitrary_types_allowed = True
 
     @abstractmethod

@@ -59,6 +59,22 @@ def test_add_records_validation(record: "FeedbackRecord") -> None:
     assert dataset.records[0] == record
 
 
+def test_update_records_with_warning() -> None:
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field")],
+        questions=[TextQuestion(name="question")],
+    )
+
+    with pytest.warns(
+        UserWarning,
+        match="`update_records` method only works for `FeedbackDataset` pushed to Argilla."
+        " If your are working with local data, you can just iterate over the records and update them.",
+    ):
+        dataset.update_records(
+            FeedbackRecord(fields={"required-field": "text"}, metadata={"nested-metadata": {"a": 1}})
+        )
+
+
 @pytest.mark.parametrize(
     "record, allow_extra_metadata, exception_cls, exception_msg",
     [
@@ -170,20 +186,29 @@ def test_add_metadata_property_errors(metadata_property: "AllowedMetadataPropert
     assert len(dataset.metadata_properties) == 3
 
 
-def test_update_records_with_warning() -> None:
+def test_update_metadata_properties() -> None:
     dataset = FeedbackDataset(
-        fields=[TextField(name="required-field")],
-        questions=[TextQuestion(name="question")],
+        fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
+        questions=[TextQuestion(name="question", required=True)],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="int-metadata", min=0, max=10),
+            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
     )
+    for metadata_property in dataset.metadata_properties:
+        metadata_property.title = "new-title"
+        metadata_property.visible_for_annotators = False
 
     with pytest.warns(
-        UserWarning,
-        match="`update_records` method only works for `FeedbackDataset` pushed to Argilla."
-        " If your are working with local data, you can just iterate over the records and update them.",
+        UserWarning, match="`update_metadata_properties` method is not supported for `FeedbackDataset` datasets"
     ):
-        dataset.update_records(
-            FeedbackRecord(fields={"required-field": "text"}, metadata={"nested-metadata": {"a": 1}})
-        )
+        dataset.update_metadata_properties(dataset.metadata_properties[0])
+
+    with pytest.warns(
+        UserWarning, match="`update_metadata_properties` method is not supported for `FeedbackDataset` datasets"
+    ):
+        dataset.update_metadata_properties(dataset.metadata_properties)
 
 
 @pytest.mark.parametrize(

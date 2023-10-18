@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Type, Union
 
 import argilla as rg
 import pytest
@@ -76,30 +76,3 @@ class TestSuiteRemoteMetadataProperties:
                 (rg.TermsMetadataProperty, rg.IntegerMetadataProperty, rg.FloatMetadataProperty),
             )
             assert remote_metadata_property.to_local() == matching_metadata_property
-
-    def test_delete(self, owner: "UserModel") -> None:
-        rg.init(api_key=owner.api_key)
-
-        workspace = rg.Workspace.create(name="my-workspace")
-        dataset = rg.FeedbackDataset(
-            fields=[rg.TextField(name="text-field")],
-            questions=[rg.TextQuestion(name="text-question")],
-            metadata_properties=[
-                rg.TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
-                rg.IntegerMetadataProperty(name="integer-metadata", min=0, max=10),
-                rg.FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
-            ],
-        )
-
-        remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace=workspace.name)
-        assert isinstance(remote_dataset, RemoteFeedbackDataset)
-        assert len(remote_dataset.metadata_properties) == len(dataset.metadata_properties)
-
-        remote_dataset.metadata_properties[0].delete()
-        for metadata_property in remote_dataset.metadata_properties:
-            local_metadata_property = metadata_property.delete()
-            assert isinstance(
-                local_metadata_property,
-                (rg.TermsMetadataProperty, rg.IntegerMetadataProperty, rg.FloatMetadataProperty),
-            )
-        assert len(remote_dataset.metadata_properties) == 0

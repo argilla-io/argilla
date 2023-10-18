@@ -35,6 +35,7 @@ These are the section headers that we use:
 - Add support for update records (`metadata` and `external_id`) from Python SDK ([#3946](https://github.com/argilla-io/argilla/pull/3946)).
 - Added `delete_metadata_properties` and `Remote{Terms,Integer,Float}MetadataProperty.delete` methods to delete metadata properties ([#3932](https://github.com/argilla-io/argilla/pull/3932)).
 - New `PATCH /api/v1/metadata-properties/:metadata_property_id` endpoint allowing the update of a specific metadata property. ([#3952](https://github.com/argilla-io/argilla/pull/3952)).
+- Added `update_metadata_properties` method for both `FeedbackDataset` and `RemoteFeedbackDataset` to update one or more `metadata_properties` from the Python client ([#3961](https://github.com/argilla-io/argilla/pull/3961)).
 - Missing validations to `PATCH /api/v1/questions/:question_id`. Now `title` and `description` are using the same validations used to create questions. ([#3967](https://github.com/argilla-io/argilla/pull/3967))
 - Added automatic model card generation through `ArgillaTrainer.save` ([#3857](https://github.com/argilla-io/argilla/pull/3857)).
 - Added `FeedbackDataset` `TaskTemplateMixin` for pre-defined task templates. ([#3969](https://github.com/argilla-io/argilla/pull/3969)).
