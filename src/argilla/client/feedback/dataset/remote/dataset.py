@@ -624,8 +624,9 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         deleted_metadata_properties = list()
         for metadata_property in existing_metadata_properties:
             if metadata_property.name in metadata_properties:
-                deleted_metadata_properties.append(metadata_property._delete())
+                ArgillaMetadataPropertiesMixin.delete(client=self._client, metadata_property_id=metadata_property.id)
                 metadata_properties.remove(metadata_property.name)
+                deleted_metadata_properties.append(metadata_property)
         return deleted_metadata_properties if len(deleted_metadata_properties) > 1 else deleted_metadata_properties[0]
 
     def filter_by(
