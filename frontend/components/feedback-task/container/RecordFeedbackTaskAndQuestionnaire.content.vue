@@ -2,7 +2,6 @@
   <div v-if="!$fetchState.pending && !$fetchState.error" class="wrapper">
     <template v-if="!!record">
       <div class="fields">
-        <SimilarityRecordReference :fields="record.fields" />
         <RecordFeedbackTaskComponent
           :recordStatus="record.status"
           :fields="record.fields"

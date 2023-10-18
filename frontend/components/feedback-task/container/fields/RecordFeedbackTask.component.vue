@@ -1,30 +1,33 @@
 <template>
-  <div class="record">
-    <div class="record__header" v-if="showDefaultRecordHeader">
-      <div class="record__header--left">
-        <StatusTag
-          v-if="recordStatus"
-          class="record__status"
-          :recordStatus="recordStatus"
+  <div>
+    <SimilarityRecordReference :fields="fields" />
+    <div class="record">
+      <div class="record__header" v-if="showDefaultRecordHeader">
+        <div class="record__header--left">
+          <StatusTag
+            v-if="recordStatus"
+            class="record__status"
+            :recordStatus="recordStatus"
+          />
+          <BaseBadge :text="similarityScore" data-title="Similarity Score" />
+        </div>
+        <SimilarityFilter
+          v-if="datasetVectors.length"
+          :available-vectors="datasetVectors"
         />
-        <BaseBadge :text="similarityScore" data-title="Similarity Score" />
       </div>
-      <SimilarityFilter
-        v-if="recordVectors.length"
-        :available-vectors="recordVectors"
-      />
-    </div>
-    <div
-      v-for="{ id, title, content, isTextType, settings } in fields"
-      :key="id"
-    >
-      <TextFieldComponent
-        v-if="isTextType"
-        :title="title"
-        :fieldText="content"
-        :useMarkdown="settings.use_markdown"
-        :stringToHighlight="searchValue"
-      />
+      <div
+        v-for="{ id, title, content, isTextType, settings } in fields"
+        :key="id"
+      >
+        <TextFieldComponent
+          v-if="isTextType"
+          :title="title"
+          :fieldText="content"
+          :useMarkdown="settings.use_markdown"
+          :stringToHighlight="searchValue"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -47,13 +50,15 @@ export default {
   data() {
     return {
       similarityScore: "80 %",
-      recordVectors: [{ id: "text_vector" }, { id: "second_vector" }],
     };
   },
   computed: {
     searchValue() {
       return this.$route.query?._search ?? "";
     },
+  },
+  setup() {
+    return useRecordFieldsViewModel();
   },
 };
 </script>
