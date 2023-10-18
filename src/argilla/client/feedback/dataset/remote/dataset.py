@@ -60,7 +60,7 @@ if TYPE_CHECKING:
         AllowedRemoteMetadataPropertyTypes,
         AllowedRemoteQuestionTypes,
     )
-    from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel, FeedbackResponseStatusFilter
+    from argilla.client.sdk.v1.datasets.models import FeedbackRecordsModel
     from argilla.client.workspaces import Workspace
 
 
@@ -472,10 +472,12 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 
         instance = FeedbackDataset(
-            fields=self.fields,
-            questions=self.questions,
-            guidelines=self.guidelines,
-            metadata_properties=self.metadata_properties,
+            fields=[field.to_local() for field in self.fields],
+            questions=[question.to_local() for question in self.questions],
+            guidelines=self.guidelines or None,
+            metadata_properties=[metadata_property.to_local() for metadata_property in self.metadata_properties]
+            or None,
+            allow_extra_metadata=self._allow_extra_metadata,
         )
         records = [record.to_local() for record in self._records]
 
@@ -767,3 +769,26 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             UserWarning,
         )
         return self
+
+    # TODO(@frascuchon): is this actually needed? what are the probabilities on a missmatch happening?
+    def push_to_huggingface(self, repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs) -> None:
+        """Pushes the current `FeedbackDataset` to HuggingFace Hub.
+
+        Note:
+            The records from the `RemoteFeedbackDataset` are being pulled before pushing,
+            to ensure that there's no missmatch while uploading those as those are lazily fetched.
+
+        Args:
+            repo_id: the ID of the HuggingFace repo to push the dataset to.
+            generate_card: whether to generate a dataset card or not. Defaults to `True`.
+        """
+        warnings.warn(
+            (
+                "The dataset is first pulled locally and pushed to Hugging Face after because "
+                "`push_to_huggingface` is not supported for a `RemoteFeedbackDataset`. "
+                "`RemoteFeedbackDataset.pull().push_to_huggingface(...)` is applied."
+            ),
+            UserWarning,
+        )
+        dataset = self.pull()
+        dataset.push_to_huggingface(repo_id=repo_id, generate_card=generate_card, *args, **kwargs)
