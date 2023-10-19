@@ -49,7 +49,7 @@ FeedbackDataset
    :members: RemoteFeedbackDataset, RemoteFeedbackRecords
    :inherited-members:
 
-.. automodule:: argilla.client.feedback.local.dataset.mixins
+.. automodule:: argilla.client.feedback.dataset.local.mixins
    :members: ArgillaMixin, UnificationMixin, HuggingFaceDatasetMixin
    :inherited-members:
 
