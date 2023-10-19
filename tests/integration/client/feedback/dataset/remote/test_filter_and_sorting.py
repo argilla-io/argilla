@@ -258,7 +258,6 @@ class TestFilteredRemoteFeedbackDataset:
             match="The metadata property name `unexpected-field` does not exist in the current `FeedbackDataset` "
             "in Argilla. ",
         ):
-
             remote.filter_by(metadata_filters=IntegerMetadataFilter(name="unexpected-field", ge=4, le=5))
 
     def _create_test_dataset_with_records(self, owner, test_dataset):
