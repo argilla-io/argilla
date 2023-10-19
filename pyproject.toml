@@ -137,6 +137,9 @@ version = { attr = "argilla.__version__" }
 "argilla.client.feedback.integrations.huggingface.card" = [
     "argilla_template.md",
 ]
+"argilla.client.feedback.integrations.huggingface.model_card" = [
+    "argilla_model_template.md",
+]
 
 [tool.pytest.ini_options]
 log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
