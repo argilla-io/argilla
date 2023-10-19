@@ -227,7 +227,18 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
 
         Raises:
             PermissionError: if the user does not have either `owner` or `admin` role.
+
+        **DEPRECATED**
         """
+
+        warnings.warn(
+            "The `delete_suggestions` method is deprecated and will be removed in "
+            "future releases. In order to update/delete the suggestions of a record "
+            "assign the `suggestions` attribute directly (`record.suggestions = []`).",
+            DeprecationWarning,
+            stacklevel=1,
+        )
+
         if isinstance(suggestions, RemoteSuggestionSchema):
             suggestions = [suggestions]
 
