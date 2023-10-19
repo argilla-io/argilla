@@ -33,7 +33,7 @@ If you want to delete an existing metadata property:
 ```python
 ds = rg.FeedbackDataset.from_argilla("my_dataset", workspace="my_workspace")
 mp = ds.metadata_property_by_name("library-version")
-mp.delete()
+ds.delete_metadata_properties(mp)
 ```
 
 ### Add records
