@@ -120,7 +120,7 @@ for record in dataset.records:
     # e.g. adding /modifying a metadata field
     record.metadata["my_metadata"] = "new_metadata"
     # e.g. removing all suggestions
-    record.suggestions = None
+    record.suggestions = []
     record.update()
 ```
 
