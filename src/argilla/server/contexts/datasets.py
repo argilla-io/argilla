@@ -51,8 +51,7 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
     from argilla.server.models import MetadataPropertySettings
-    from argilla.server.schemas.v1.datasets import DatasetUpdate, RecordsUpdate
-    from argilla.server.schemas.v1.datasets import DatasetUpdate, VectorSettingsCreate
+    from argilla.server.schemas.v1.datasets import DatasetUpdate, RecordsUpdate, VectorSettingsCreate
     from argilla.server.schemas.v1.fields import FieldUpdate
     from argilla.server.schemas.v1.questions import QuestionUpdate
     from argilla.server.schemas.v1.records import RecordUpdate

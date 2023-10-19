@@ -273,7 +273,6 @@ class DatasetPolicyV1:
 
         return is_allowed
 
-
     @classmethod
     def create_records(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:

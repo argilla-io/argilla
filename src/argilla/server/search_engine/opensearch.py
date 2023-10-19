@@ -17,8 +17,6 @@ from typing import Any, Dict, List, Optional
 
 from opensearchpy import AsyncOpenSearch, helpers
 
-from argilla.server.search_engine.base import SearchEngine
-from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine
 from argilla.server.models import (
     VectorSettings,
 )
