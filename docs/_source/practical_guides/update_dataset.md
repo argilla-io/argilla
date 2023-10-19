@@ -123,7 +123,7 @@ for record in dataset.records:
     # e.g. removing all suggestions
     record.suggestions = []
     modified_records.append(record)
-    
+
  dataset.update_records(modified_records)
 ```
 
