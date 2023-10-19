@@ -12,9 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import copy
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from uuid import UUID
 
+import sqlalchemy
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
@@ -48,6 +50,12 @@ if TYPE_CHECKING:
     from argilla.server.schemas.v1.suggestions import SuggestionCreate
 
 LIST_RECORDS_LIMIT = 20
+
+
+async def _touch_dataset_last_activity_at(db: "AsyncSession", dataset: Dataset) -> Dataset:
+    return await db.execute(
+        sqlalchemy.update(Dataset).where(Dataset.id == dataset.id).values(last_activity_at=datetime.utcnow())
+    )
 
 
 async def get_dataset_by_id(
@@ -427,6 +435,7 @@ async def create_response(
             autocommit=False,
         )
         await db.flush([response])
+        await _touch_dataset_last_activity_at(db, record.dataset)
         await search_engine.update_record_response(response)
 
     await db.commit()
@@ -447,6 +456,7 @@ async def update_response(
             replace_dict=True,
             autocommit=False,
         )
+        await _touch_dataset_last_activity_at(db, response.record.dataset)
         await search_engine.update_record_response(response)
 
     await db.commit()
@@ -457,6 +467,7 @@ async def update_response(
 async def delete_response(db: "AsyncSession", search_engine: SearchEngine, response: Response) -> Response:
     async with db.begin_nested():
         response = await response.delete(db, autocommit=False)
+        await _touch_dataset_last_activity_at(db, response.record.dataset)
         await search_engine.delete_record_response(response)
 
     await db.commit()

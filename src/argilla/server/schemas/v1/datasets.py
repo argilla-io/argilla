@@ -83,6 +83,7 @@ class Dataset(BaseModel):
     guidelines: Optional[str]
     status: DatasetStatus
     workspace_id: UUID
+    last_activity_at: datetime
     inserted_at: datetime
     updated_at: datetime
 

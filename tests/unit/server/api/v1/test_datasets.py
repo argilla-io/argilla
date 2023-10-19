@@ -101,6 +101,7 @@ class TestSuiteDatasets:
                     "guidelines": None,
                     "status": "draft",
                     "workspace_id": str(dataset_a.workspace_id),
+                    "last_activity_at": dataset_a.last_activity_at.isoformat(),
                     "inserted_at": dataset_a.inserted_at.isoformat(),
                     "updated_at": dataset_a.updated_at.isoformat(),
                 },
@@ -110,6 +111,7 @@ class TestSuiteDatasets:
                     "guidelines": "guidelines",
                     "status": "draft",
                     "workspace_id": str(dataset_b.workspace_id),
+                    "last_activity_at": dataset_b.last_activity_at.isoformat(),
                     "inserted_at": dataset_b.inserted_at.isoformat(),
                     "updated_at": dataset_b.updated_at.isoformat(),
                 },
@@ -119,6 +121,7 @@ class TestSuiteDatasets:
                     "guidelines": None,
                     "status": "ready",
                     "workspace_id": str(dataset_c.workspace_id),
+                    "last_activity_at": dataset_c.last_activity_at.isoformat(),
                     "inserted_at": dataset_c.inserted_at.isoformat(),
                     "updated_at": dataset_c.updated_at.isoformat(),
                 },
@@ -1140,6 +1143,7 @@ class TestSuiteDatasets:
             "guidelines": None,
             "status": "draft",
             "workspace_id": str(dataset.workspace_id),
+            "last_activity_at": dataset.last_activity_at.isoformat(),
             "inserted_at": dataset.inserted_at.isoformat(),
             "updated_at": dataset.updated_at.isoformat(),
         }
@@ -1300,9 +1304,11 @@ class TestSuiteDatasets:
             "guidelines": "guidelines",
             "status": "draft",
             "workspace_id": str(workspace.id),
+            "last_activity_at": datetime.fromisoformat(response_body["last_activity_at"]).isoformat(),
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
+        assert response_body["last_activity_at"] == response_body["inserted_at"] == response_body["updated_at"]
 
     async def test_create_dataset_with_invalid_length_guidelines(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
@@ -3484,15 +3490,18 @@ class TestSuiteDatasets:
             guidelines = dataset.guidelines
 
         assert response.status_code == 200
-        assert response.json() == {
+        response_body = response.json()
+        assert response_body == {
             "id": str(dataset.id),
             "name": name,
             "guidelines": guidelines,
             "status": "ready",
             "workspace_id": str(dataset.workspace_id),
+            "last_activity_at": dataset.last_activity_at.isoformat(),
             "inserted_at": dataset.inserted_at.isoformat(),
             "updated_at": dataset.updated_at.isoformat(),
         }
+        assert response_body["last_activity_at"] == response_body["updated_at"]
 
         dataset = await db.get(Dataset, dataset.id)
         assert dataset.name == name

@@ -84,6 +84,9 @@ class TestSuiteResponses:
             status=ResponseStatus.submitted,
         )
 
+        dataset_previous_last_activity_at = dataset.last_activity_at
+        dataset_previous_updated_at = dataset.updated_at
+
         resp = await async_client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
 
         assert resp.status_code == 200
@@ -99,6 +102,9 @@ class TestSuiteResponses:
             "inserted_at": response.inserted_at.isoformat(),
             "updated_at": datetime.fromisoformat(resp_body["updated_at"]).isoformat(),
         }
+
+        assert dataset.last_activity_at > dataset_previous_last_activity_at
+        assert dataset.updated_at == dataset_previous_updated_at
 
         mock_search_engine.update_record_response.assert_called_once_with(response)
 
@@ -399,11 +405,18 @@ class TestSuiteResponses:
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, db: "AsyncSession", owner_auth_header: dict
     ):
         response = await ResponseFactory.create()
+        dataset = response.record.dataset
+
+        dataset_previous_last_activity_at = dataset.last_activity_at
+        dataset_previous_updated_at = dataset.updated_at
 
         resp = await async_client.delete(f"/api/v1/responses/{response.id}", headers=owner_auth_header)
 
         assert resp.status_code == 200
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
+
+        assert dataset.last_activity_at > dataset_previous_last_activity_at
+        assert dataset.updated_at == dataset_previous_updated_at
 
         mock_search_engine.delete_record_response.assert_called_once_with(response)
 
