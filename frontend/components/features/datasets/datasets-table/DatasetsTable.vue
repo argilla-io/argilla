@@ -81,7 +81,7 @@ export default {
         },
         {
           name: "Updated at",
-          field: "updatedAt",
+          field: "lastActivityAt",
           class: "date",
           type: "date",
           sortable: "true",
