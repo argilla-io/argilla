@@ -115,13 +115,16 @@ It is possible add, update and delete attributes of existing records such as sug
 ```python
 # Load the dataset
 dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_workspace")
+modified_records = []
 # Loop through the records and make modifications
 for record in dataset.records:
     # e.g. adding /modifying a metadata field
     record.metadata["my_metadata"] = "new_metadata"
     # e.g. removing all suggestions
     record.suggestions = []
-    record.update()
+    modified_records.append(record)
+    
+ dataset.update_records(modified_records)
 ```
 
 ## Other datasets
