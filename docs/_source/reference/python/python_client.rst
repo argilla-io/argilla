@@ -50,7 +50,7 @@ FeedbackDataset
    :inherited-members:
 
 .. automodule:: argilla.client.feedback.dataset.local.mixins
-   :members: ArgillaMixin, UnificationMixin, HuggingFaceDatasetMixin
+   :members: ArgillaMixin, HuggingFaceDatasetMixin
    :inherited-members:
 
 .. automodule:: argilla.client.feedback.integrations.huggingface
