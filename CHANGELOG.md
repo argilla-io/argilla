@@ -35,7 +35,7 @@ These are the section headers that we use:
 - Added support for `sort_by` for `RemoteFeedbackDataset` i.e. a `FeedbackDataset` uploaded to Argilla. ([#3925](https://github.com/argilla-io/argilla/pull/3925))
 - Added `metadata_properties` support for both `push_to_huggingface` and `from_huggingface`. ([#3947](https://github.com/argilla-io/argilla/pull/3947))
 - Add support for update records (`metadata` and `external_id`) from Python SDK. ([#3946](https://github.com/argilla-io/argilla/pull/3946))
-- Added `delete_metadata_properties` and `Remote{Terms,Integer,Float}MetadataProperty.delete` methods to delete metadata properties. ([#3932](https://github.com/argilla-io/argilla/pull/3932))
+- Added `delete_metadata_properties` method to delete metadata properties. ([#3932](https://github.com/argilla-io/argilla/pull/3932))
 - Added `update_metadata_properties` method for both `FeedbackDataset` and `RemoteFeedbackDataset` to update one or more `metadata_properties` from the Python client. ([#3961](https://github.com/argilla-io/argilla/pull/3961))
 - Added automatic model card generation through `ArgillaTrainer.save` ([#3857](https://github.com/argilla-io/argilla/pull/3857))
 - Added `FeedbackDataset` `TaskTemplateMixin` for pre-defined task templates. ([#3969](https://github.com/argilla-io/argilla/pull/3969))
