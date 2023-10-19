@@ -104,7 +104,7 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
         await self.client.indices.create(index=index_name, settings=settings, mappings=mappings)
 
     async def _delete_index_request(self, index_name: str):
-        await self.client.indices.delete(index_name, ignore=[404], ignore_unavailable=True)
+        await self.client.indices.delete(index=index_name, ignore=[404], ignore_unavailable=True)
 
     async def _update_document_request(self, index_name: str, id: str, body: dict):
         await self.client.update(index=index_name, id=id, **body)
