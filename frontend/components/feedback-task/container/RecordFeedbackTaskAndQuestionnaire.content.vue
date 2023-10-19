@@ -2,13 +2,12 @@
   <BaseLoading v-if="$fetchState.pending || $fetchState.error" />
   <div v-else class="wrapper">
     <template v-if="!!record">
-      <div class="fields">
-        <RecordFeedbackTaskComponent
-          :key="`${record.id}_fields`"
-          :recordStatus="record.status"
-          :fields="record.fields"
-        />
-      </div>
+      <RecordFieldsAndSimilarity
+        :key="`${record.id}_fields`"
+        :recordStatus="record.status"
+        :fields="record.fields"
+      />
+
       <QuestionsFormComponent
         :key="`${record.id}_questions`"
         class="question-form"
@@ -187,13 +186,5 @@ export default {
     align-items: center;
     justify-content: center;
   }
-}
-.fields {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: $base-space * 2;
-  min-width: 0;
-  height: 100%;
 }
 </style>

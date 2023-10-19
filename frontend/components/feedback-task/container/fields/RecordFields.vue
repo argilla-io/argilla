@@ -1,38 +1,37 @@
 <template>
-  <div>
-    <SimilarityRecordReference :fields="fields" />
-    <div class="record">
-      <div class="record__header" v-if="showDefaultRecordHeader">
-        <div class="record__header--left">
-          <StatusTag
-            v-if="recordStatus"
-            class="record__status"
-            :recordStatus="recordStatus"
-          />
-          <BaseBadge :text="similarityScore" data-title="Similarity Score" />
-        </div>
-        <SimilarityFilter
-          v-if="datasetVectors.length"
-          :available-vectors="datasetVectors"
+  <div class="record">
+    <div class="record__header" v-if="showDefaultRecordHeader">
+      <div class="record__header--left">
+        <StatusTag
+          v-if="recordStatus"
+          class="record__status"
+          :recordStatus="recordStatus"
         />
+        <BaseBadge :text="similarityScore" data-title="Similarity Score" />
       </div>
-      <div
-        v-for="{ id, title, content, isTextType, settings } in fields"
-        :key="id"
-      >
-        <TextFieldComponent
-          v-if="isTextType"
-          :title="title"
-          :fieldText="content"
-          :useMarkdown="settings.use_markdown"
-          :stringToHighlight="searchValue"
-        />
-      </div>
+      <SimilarityFilter
+        v-if="datasetVectors.length"
+        :available-vectors="datasetVectors"
+      />
+    </div>
+    <div
+      v-for="{ id, title, content, isTextType, settings } in fields"
+      :key="id"
+    >
+      <TextFieldComponent
+        v-if="isTextType"
+        :title="title"
+        :fieldText="content"
+        :useMarkdown="settings.use_markdown"
+        :stringToHighlight="searchValue"
+      />
     </div>
   </div>
 </template>
 
 <script>
+import { useRecordFieldsViewModel } from "./useRecordFieldsViewModel";
+
 export default {
   props: {
     recordStatus: {

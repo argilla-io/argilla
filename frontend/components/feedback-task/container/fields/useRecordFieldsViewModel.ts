@@ -9,10 +9,16 @@ export const useRecordFieldsViewModel = () => {
   const datasetVectors = ref<DatasetVector[]>([]);
   const getDatasetVectorsUseCase = useResolve(GetDatasetVectorsUseCase);
   const loadVectors = async () => {
-    datasetVectors.value = await getDatasetVectorsUseCase.execute("");
+    try {
+      datasetVectors.value = await getDatasetVectorsUseCase.execute("");
+    } catch (error) {
+      // TODO !
+    }
   };
+
   onBeforeMount(() => {
     loadVectors();
   });
+
   return { datasetVectors };
 };

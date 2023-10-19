@@ -10,7 +10,7 @@
         @minimize="minimize"
       />
     </div>
-    <RecordFeedbackTaskComponent
+    <RecordFields
       v-if="isExpanded"
       :fields="fields"
       :showDefaultRecordHeader="false"
@@ -34,9 +34,10 @@ export default {
   },
   computed: {
     textPreview() {
-      const numberOfFields = this.fields[1] ? 1 : 2;
+      const numberOfFields = this.fields.length > 1 ? 2 : 1;
+
       let text = "";
-      for (let i = 0; i <= numberOfFields; i++) {
+      for (let i = 0; i < numberOfFields; i++) {
         text += `${this.fields[i].title}: ${this.fields[i].content.substring(
           0,
           this.numberOfVisibleCharsInPreview / numberOfFields
