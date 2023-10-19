@@ -127,6 +127,22 @@ test.describe("pending record", () => {
 
     await page.close({ runBeforeUnload: true });
   });
+
+  test("user submit and then goes back to previous record, show updated answers", async ({
+    page,
+  }) => {
+    const record = await goToAnnotationPageWithTwoRecords(page);
+    await mockRecordResponses(page, record.id, "submitted");
+    await page.getByText("Very Positive").first().click();
+    await page.getByText('Positive').nth(3).click();
+    await expect(page).toHaveScreenshot();
+
+    await page.getByRole("button", { name: "Submit" }).click();
+    await expect(page).toHaveScreenshot();
+
+    await page.getByRole("button", { name: "Prev" }).click();
+    await expect(page).toHaveScreenshot();
+  });
 });
 test.describe("discarded record", () => {
   test("when the user modifies a discarded record after 2 seconds should be pending", async ({
@@ -267,6 +283,32 @@ test.describe("submitted record", () => {
     await page
       .getByText("You didn't submit your changes")
       .waitFor({ state: "visible" });
+    await expect(page).toHaveScreenshot();
+  });
+
+  test("when user ignore current modification and go back to same record, the record have the initial answers", async ({
+    page,
+  }) => {
+    const record = await goToAnnotationPageWithTwoRecords(page);
+    await mockRecordResponses(page, record.id, "submitted");
+    await page.getByText("Very Positive").first().click();
+    await page.getByText('Positive').nth(3).click();
+    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Prev" }).click();
+    await expect(page).toHaveScreenshot();
+
+
+    await page.getByText('Negative').nth(1).click();
+    await page.getByText('Disappointed').nth(1).click();
+    await expect(page).toHaveScreenshot();
+
+    await page.getByRole("button", { name: "Next" }).click();
+    await expect(page).toHaveScreenshot();
+
+    await page.getByRole("button", { name: "Ignore and continue" }).click();
+    await expect(page).toHaveScreenshot();
+
+    await page.getByRole("button", { name: "Prev" }).click();
     await expect(page).toHaveScreenshot();
   });
 });

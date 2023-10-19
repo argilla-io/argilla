@@ -109,14 +109,16 @@ export class Record {
     return this.questions.map((question) => {
       const answerForQuestion = this.answer?.value[question.name];
 
-      question.complete(answerForQuestion);
-
       if (this.isPending || this.isDraft) {
+        question.complete(answerForQuestion);
+
         const suggestion = this.suggestions?.find(
           (s) => s.questionId === question.id
         );
 
         question.suggests(suggestion);
+      } else {
+        question.forceComplete(answerForQuestion);
       }
 
       return question;

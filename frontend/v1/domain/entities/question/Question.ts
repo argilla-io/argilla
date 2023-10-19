@@ -153,6 +153,12 @@ export class Question {
     this.answer.complete(answer);
   }
 
+  forceComplete(answer: RecordAnswer) {
+    if (!answer) return;
+
+    this.answer.forceComplete(answer);
+  }
+
   suggests(suggestion: Suggestion) {
     if (!suggestion) return;
 
