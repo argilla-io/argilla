@@ -15,11 +15,12 @@
 import textwrap
 import warnings
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
+from typing import Any, Dict, Iterator, List, Optional, TYPE_CHECKING, Union
 
 from tqdm import trange
 
 from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, PUSHING_BATCH_SIZE
+from argilla.client.feedback.dataset import helpers
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase, SortBy
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
 from argilla.client.feedback.mixins import ArgillaMetadataPropertiesMixin
@@ -97,6 +98,8 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         self._sort_by = sort_by or []
         self._response_status = response_status or []
         self._metadata_filters = metadata_filters or []
+
+        self._validate_metadata_names()
 
     @property
     def dataset(self) -> "RemoteFeedbackDataset":
@@ -294,6 +297,15 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             metadata_filters=metadata_filters,
             response_status=response_status,
         )
+
+    def _validate_metadata_names(self):
+        names = []
+        if self.metadata_filters:
+            names.extend([metadata_filter.name for metadata_filter in self.metadata_filters])
+        if self.sort_by:
+            names.extend([sort.metadata_name for sort in self.sort_by if sort.is_metadata_field])
+        if names:
+            helpers.validate_metadata_names(self.dataset, names)
 
 
 class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
