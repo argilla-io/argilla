@@ -15,6 +15,7 @@
 import asyncio
 from typing import TYPE_CHECKING, AsyncGenerator, Generator
 
+import httpx
 import pytest
 import pytest_asyncio
 from argilla.cli.server.database.migrate import migrate_db
@@ -35,6 +36,11 @@ def event_loop() -> Generator["asyncio.AbstractEventLoop", None, None]:
     loop = asyncio.get_event_loop_policy().get_event_loop()
     yield loop
     loop.close()
+
+
+@pytest.fixture(scope="function")
+def mock_httpx_client(mocker) -> Generator[httpx.Client, None, None]:
+    return mocker.Mock(httpx.Client)
 
 
 @pytest_asyncio.fixture(scope="session")

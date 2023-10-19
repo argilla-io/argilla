@@ -104,7 +104,7 @@ async def test_banking_sentiment_dataset(elasticsearch_engine: ElasticSearchEngi
 
     await elasticsearch_engine.create_index(dataset)
 
-    await elasticsearch_engine.add_records(
+    await elasticsearch_engine.index_records(
         dataset,
         records=[
             await RecordFactory.create(
@@ -222,7 +222,7 @@ async def test_banking_sentiment_dataset_with_vectors(
 
 @pytest_asyncio.fixture()
 async def elasticsearch_engine(elasticsearch_config: dict) -> AsyncGenerator[ElasticSearchEngine, None]:
-    engine = ElasticSearchEngine(config=elasticsearch_config, es_number_of_replicas=0, es_number_of_shards=1)
+    engine = ElasticSearchEngine(config=elasticsearch_config, number_of_replicas=0, number_of_shards=1)
     yield engine
 
     await engine.client.close()
@@ -268,8 +268,9 @@ class TestSuiteElasticSearchEngine:
                 "responses": {"dynamic": "true", "type": "object"},
             },
         }
-        assert index["settings"]["index"]["number_of_shards"] == str(elasticsearch_engine.es_number_of_shards)
-        assert index["settings"]["index"]["number_of_replicas"] == str(elasticsearch_engine.es_number_of_replicas)
+
+        assert index["settings"]["index"]["number_of_shards"] == str(elasticsearch_engine.number_of_shards)
+        assert index["settings"]["index"]["number_of_replicas"] == str(elasticsearch_engine.number_of_replicas)
 
     async def test_create_index_for_dataset_with_fields(
         self,
@@ -523,7 +524,7 @@ class TestSuiteElasticSearchEngine:
         await _refresh_dataset(dataset)
 
         await elasticsearch_engine.create_index(dataset)
-        await elasticsearch_engine.add_records(dataset, records)
+        await elasticsearch_engine.index_records(dataset, records)
 
         index_name = index_name_for_dataset(dataset)
         opensearch.indices.refresh(index=index_name)
@@ -544,7 +545,7 @@ class TestSuiteElasticSearchEngine:
         await _refresh_dataset(dataset)
 
         await elasticsearch_engine.create_index(dataset)
-        await elasticsearch_engine.add_records(dataset, records)
+        await elasticsearch_engine.index_records(dataset, records)
 
         records_to_delete, records_to_keep = records[:5], records[5:]
         await elasticsearch_engine.delete_records(dataset, records_to_delete)

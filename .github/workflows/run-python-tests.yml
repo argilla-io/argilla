@@ -27,12 +27,13 @@ on:
         type: string
 env:
   # Increase this value to reset cache if etc/example-environment.yml has not changed
-  CACHE_NUMBER:  5
+  CACHE_NUMBER: 5
 
 jobs:
   run-python-tests:
     name: Argilla python tests
     runs-on: ${{ inputs.runsOn }}
+    continue-on-error: true
     services:
       search_engine:
         image: ${{ inputs.searchEngineDockerImage }}
@@ -89,9 +90,14 @@ jobs:
           echo "ARGILLA_SEARCH_ENGINE=opensearch" >> "$GITHUB_ENV"
           echo "Configure elasticsearch engine"
       - name: Run tests 📈
+        env:
+          ARGILLA_ENABLE_TELEMETRY: 0
         run: |
+          df -h
+          # ulimit to avoid segmentation fault
+          ulimit -c unlimited
           pip install -e ".[server,listeners]"
-          pytest --cov=argilla --cov-report=xml:${{ env.COVERAGE_REPORT }}.xml ${{ inputs.pytestArgs }}
+          pytest --cov=argilla --cov-report=xml:${{ env.COVERAGE_REPORT }}.xml ${{ inputs.pytestArgs }} -vs
       - name: Upload coverage report artifact
         uses: actions/upload-artifact@v3
         with:

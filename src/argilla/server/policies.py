@@ -23,6 +23,7 @@ from argilla.server.errors import ForbiddenOperationError
 from argilla.server.models import (
     Dataset,
     Field,
+    MetadataProperty,
     Question,
     Record,
     Response,
@@ -215,6 +216,7 @@ class DatasetPolicyV1:
         async def is_allowed(actor: User) -> bool:
             if actor.is_owner or workspace_id is None:
                 return True
+
             return await _exists_workspace_user_by_user_and_workspace_id(actor, workspace_id)
 
         return is_allowed
@@ -263,6 +265,16 @@ class DatasetPolicyV1:
         return is_allowed
 
     @classmethod
+    def create_vector_settings(cls, dataset: Dataset) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (
+                actor.is_admin and await _exists_workspace_user_by_user_and_workspace_id(actor, dataset.workspace_id)
+            )
+
+        return is_allowed
+
+
+    @classmethod
     def create_records(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
             return actor.is_owner or (
@@ -272,7 +284,7 @@ class DatasetPolicyV1:
         return is_allowed
 
     @classmethod
-    def create_vector_settings(cls, dataset: Dataset) -> PolicyAction:
+    def update_records(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
             return actor.is_owner or (
                 actor.is_admin and await _exists_workspace_user_by_user_and_workspace_id(actor, dataset.workspace_id)
@@ -316,6 +328,15 @@ class DatasetPolicyV1:
 
     @classmethod
     def update(cls, dataset: Dataset) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (
+                actor.is_admin and await _exists_workspace_user_by_user_and_workspace_id(actor, dataset.workspace_id)
+            )
+
+        return is_allowed
+
+    @classmethod
+    def create_metadata_property(cls, dataset: Dataset):
         async def is_allowed(actor: User) -> bool:
             return actor.is_owner or (
                 actor.is_admin and await _exists_workspace_user_by_user_and_workspace_id(actor, dataset.workspace_id)
@@ -380,7 +401,49 @@ class VectorSettingsPolicyV1:
         return is_allowed
 
 
+class MetadataPropertyPolicyV1:
+    @classmethod
+    def get(cls, metadata_property: MetadataProperty) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (
+                actor.role in metadata_property.allowed_roles
+                and await _exists_workspace_user_by_user_and_workspace_id(actor, metadata_property.dataset.workspace_id)
+            )
+
+        return is_allowed
+
+    @classmethod
+    def update(cls, metadata_property: MetadataProperty) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (
+                actor.is_admin
+                and await _exists_workspace_user_by_user_and_workspace_id(actor, metadata_property.dataset.workspace_id)
+            )
+
+        return is_allowed
+
+    @classmethod
+    def delete(cls, metadata_property: MetadataProperty) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (
+                actor.is_admin
+                and await _exists_workspace_user_by_user_and_workspace_id(actor, metadata_property.dataset.workspace_id)
+            )
+
+        return is_allowed
+
+
 class RecordPolicyV1:
+    @classmethod
+    def update(cls, record: Record) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (
+                actor.is_admin
+                and await _exists_workspace_user_by_user_and_workspace_id(actor, record.dataset.workspace_id)
+            )
+
+        return is_allowed
+
     @classmethod
     def delete(cls, record: Record) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:

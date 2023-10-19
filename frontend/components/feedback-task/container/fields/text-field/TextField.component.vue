@@ -1,28 +1,26 @@
 <template>
-  <transition name="fade" v-if="fieldText" appear mode="out-in">
-    <div class="text_field_component" :key="fieldText">
-      <div class="title-area --body2">
-        <span class="text_field_component__title-content" v-text="title" />
-        <BaseActionTooltip
-          class="text_field_component__tooltip"
-          tooltip="Copied"
-          tooltip-position="left"
+  <div class="text_field_component" :key="fieldText">
+    <div class="title-area --body2">
+      <span class="text_field_component__title-content" v-text="title" />
+      <BaseActionTooltip
+        class="text_field_component__tooltip"
+        tooltip="Copied"
+        tooltip-position="left"
+      >
+        <BaseButton
+          title="Copy to clipboard"
+          class="text_field_component__copy-button"
+          @click.prevent="$copyToClipboard(fieldText)"
         >
-          <BaseButton
-            title="Copy to clipboard"
-            class="text_field_component__copy-button"
-            @click.prevent="$copyToClipboard(fieldText)"
-          >
-            <svgicon color="#acacac" name="copy" width="18" height="18" />
-          </BaseButton>
-        </BaseActionTooltip>
-      </div>
-      <div class="content-area --body1">
-        <div v-if="!useMarkdown" v-html="text" />
-        <RenderMarkdownBaseComponent v-else :markdown="text" />
-      </div>
+          <svgicon color="#acacac" name="copy" width="18" height="18" />
+        </BaseButton>
+      </BaseActionTooltip>
     </div>
-  </transition>
+    <div class="content-area --body1">
+      <div v-if="!useMarkdown" v-html="text" />
+      <RenderMarkdownBaseComponent v-else :markdown="text" />
+    </div>
+  </div>
 </template>
 
 <script>

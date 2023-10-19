@@ -12,54 +12,152 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import dataclasses
 from abc import ABCMeta, abstractmethod
 from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator, Dict, Iterable, List, Optional, Union
+from typing import Any, AsyncGenerator, ClassVar, Dict, Generic, Iterable, List, Optional, Type, TypeVar, Union
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, root_validator
+from pydantic.generics import GenericModel
 
-from argilla.server.enums import ResponseStatus, ResponseStatusFilter
+from argilla.server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SortOrder
+from argilla.server.models import Dataset, MetadataProperty, Record, Response, User
 from argilla.server.models import Dataset, Record, Response, User, Vector, VectorSettings
 
 __all__ = [
     "SearchEngine",
-    "UserResponse",
     "StringQuery",
+    "MetadataFilter",
+    "TermsMetadataFilter",
+    "IntegerMetadataFilter",
+    "FloatMetadataFilter",
     "UserResponseStatusFilter",
     "SearchResponseItem",
     "SearchResponses",
+    "SortBy",
+    "MetadataMetrics",
+    "TermsMetadataMetrics",
+    "IntegerMetadataMetrics",
+    "FloatMetadataMetrics",
 ]
 
 
-class UserResponse(BaseModel):
-    values: Optional[Dict[str, Any]]
-    status: ResponseStatus
-
-
-@dataclasses.dataclass
-class StringQuery:
+class StringQuery(BaseModel):
     q: str
     field: Optional[str] = None
 
 
-@dataclasses.dataclass
-class UserResponseStatusFilter:
-    user: User
+class UserResponseStatusFilter(BaseModel):
     statuses: List[ResponseStatusFilter]
+    user: Optional[User] = None
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
-@dataclasses.dataclass
-class SearchResponseItem:
+class MetadataFilter(BaseModel):
+    metadata_property: MetadataProperty
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    @classmethod
+    @abstractmethod
+    def from_string(cls, metadata_property: MetadataProperty, string: str) -> "MetadataFilter":
+        pass
+
+
+class TermsMetadataFilter(MetadataFilter):
+    values: List[str]
+
+    @classmethod
+    def from_string(cls, metadata_property: MetadataProperty, string: str) -> "MetadataFilter":
+        return cls(metadata_property=metadata_property, values=string.split(","))
+
+
+NT = TypeVar("NT", int, float)
+
+
+class _RangeModel(GenericModel, Generic[NT]):
+    ge: Optional[NT]
+    le: Optional[NT]
+
+
+class NumericMetadataFilter(GenericModel, Generic[NT], MetadataFilter):
+    ge: Optional[NT] = None
+    le: Optional[NT] = None
+
+    _json_model: ClassVar[Type[_RangeModel]]
+
+    @root_validator
+    def check_bounds(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        ge = values.get("ge")
+        le = values.get("le")
+
+        if ge is None and le is None:
+            raise ValueError("One of 'ge' or 'le' values must be specified")
+
+        if ge is not None and le is not None and ge > le:
+            raise ValueError(f"'ge' ({ge}) must be lower or equal than 'le' ({le})")
+
+        return values
+
+    @classmethod
+    def from_string(cls, metadata_property: MetadataProperty, string: str) -> "NumericMetadataFilter":
+        model = cls._json_model.parse_raw(string)
+        return cls(metadata_property=metadata_property, ge=model.ge, le=model.le)
+
+
+class IntegerMetadataFilter(NumericMetadataFilter[int]):
+    _json_model = _RangeModel[int]
+
+
+class FloatMetadataFilter(NumericMetadataFilter[float]):
+    _json_model = _RangeModel[float]
+
+
+class SearchResponseItem(BaseModel):
     record_id: UUID
     score: Optional[float]
 
 
-@dataclasses.dataclass
-class SearchResponses:
+class SearchResponses(BaseModel):
     items: List[SearchResponseItem]
     total: int = 0
+
+
+class SortBy(BaseModel):
+    field: Union[MetadataProperty, RecordSortField]
+    order: SortOrder = SortOrder.asc
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class TermsMetadataMetrics(BaseModel):
+    class TermCount(BaseModel):
+        term: str
+        count: int
+
+    type: MetadataPropertyType = Field(MetadataPropertyType.terms, const=True)
+    total: int
+    values: List[TermCount] = Field(default_factory=list)
+
+
+class NumericMetadataMetrics(GenericModel, Generic[NT]):
+    min: Optional[NT]
+    max: Optional[NT]
+
+
+class IntegerMetadataMetrics(NumericMetadataMetrics[int]):
+    type: MetadataPropertyType = Field(MetadataPropertyType.integer, const=True)
+
+
+class FloatMetadataMetrics(NumericMetadataMetrics[float]):
+    type: MetadataPropertyType = Field(MetadataPropertyType.float, const=True)
+
+
+MetadataMetrics = Union[TermsMetadataMetrics, IntegerMetadataMetrics, FloatMetadataMetrics]
 
 
 class SearchEngine(metaclass=ABCMeta):
@@ -112,7 +210,11 @@ class SearchEngine(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    async def add_records(self, dataset: Dataset, records: Iterable[Record]):
+    async def configure_metadata_property(self, dataset: Dataset, metadata_property: MetadataProperty):
+        pass
+
+    @abstractmethod
+    async def index_records(self, dataset: Dataset, records: Iterable[Record]):
         pass
 
     @abstractmethod
@@ -131,14 +233,20 @@ class SearchEngine(metaclass=ABCMeta):
     async def search(
         self,
         dataset: Dataset,
-        query: Union[StringQuery, str],
+        query: Optional[Union[StringQuery, str]] = None,
+        # TODO(@frascuchon): The search records method should receive a generic list of filters
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
+        metadata_filters: Optional[List[MetadataFilter]] = None,
         offset: int = 0,
         limit: int = 100,
+        sort_by: Optional[List[SortBy]] = None,
     ) -> SearchResponses:
         pass
 
     @abstractmethod
+    async def compute_metrics_for(self, metadata_property: MetadataProperty) -> MetadataMetrics:
+        pass
+
     async def configure_index_vectors(self, vector_settings: VectorSettings):
         pass
 

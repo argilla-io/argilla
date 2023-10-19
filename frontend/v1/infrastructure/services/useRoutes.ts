@@ -1,11 +1,14 @@
-import { useRouter } from "@nuxtjs/composition-api";
+import { useRoute, useRouter } from "@nuxtjs/composition-api";
 import { Dataset } from "@/v1/domain/entities/Dataset";
+
+type KindOfParam = "_status" | "_page" | "_search" | "_metadata" | "_sort";
 
 export const ROUTES = {
   datasets: "datasets",
 };
 export const useRoutes = () => {
   const router = useRouter();
+  const route = useRoute();
 
   const isOldTask = (task: string) => {
     return ["TokenClassification", "TextClassification", "Text2Text"].includes(
@@ -40,5 +43,37 @@ export const useRoutes = () => {
     router.push({ path: `/${ROUTES.datasets}` });
   };
 
-  return { goToDatasetsList, goToSetting, getDatasetLink };
+  const setQueryParams = async (
+    ...params: { key: KindOfParam; value: string }[]
+  ) => {
+    let newQuery = {};
+
+    params.forEach(({ key, value }) => {
+      if (!value) return;
+
+      newQuery = {
+        ...newQuery,
+        [key]: value,
+      };
+    });
+
+    await router.push({
+      path: route.value.path,
+      query: {
+        ...newQuery,
+      },
+    });
+  };
+
+  const getQueryParams = <T>(key: KindOfParam): T => {
+    return route.value.query[key] as T;
+  };
+
+  return {
+    goToDatasetsList,
+    goToSetting,
+    getDatasetLink,
+    setQueryParams,
+    getQueryParams,
+  };
 };

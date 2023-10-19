@@ -12,11 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, Type, Union
+from typing import Any, Dict
 
 import pytest
+from argilla.client.feedback.schemas.enums import QuestionTypes
 from argilla.client.feedback.schemas.questions import (
-    QuestionSchema,
+    LabelQuestion,
+    MultiLabelQuestion,
     RankingQuestion,
     RatingQuestion,
     TextQuestion,
@@ -25,282 +27,419 @@ from argilla.client.feedback.schemas.questions import (
 from pydantic import ValidationError
 
 
-def test_question_schema_name_validation_error() -> None:
-    with pytest.raises(ValidationError, match=r"name\n  string does not match regex"):
-        QuestionSchema(name="Completion-A")
-
-
 @pytest.mark.parametrize(
-    "schema_kwargs, expected_exception, expected_exception_message",
+    "schema_kwargs, server_payload",
     [
         (
-            {"name": "a", "description": "a", "required": True, "labels": ["a"]},
-            ValidationError,
-            "ensure this value has at least 2 items",
+            {"name": "a", "required": True, "use_markdown": True},
+            {
+                "name": "a",
+                "title": "A",
+                "description": None,
+                "required": True,
+                "settings": {"type": "text", "use_markdown": True},
+            },
         ),
         (
-            {"name": "a", "description": "a", "required": True, "labels": ["a", "b"], "visible_labels": 2},
-            ValidationError,
-            "ensure this value is greater than or equal to 3",
-        ),
-        (
-            {"name": "a", "description": "a", "required": True, "labels": ["a", "a"]},
-            ValidationError,
-            "the list has duplicated items",
-        ),
-        (
-            {"name": "a", "description": "a", "required": True, "labels": "a"},
-            ValidationError,
-            "(value is not a valid list)|(value is not a valid dict)",
-        ),
-        (
-            {"name": "a", "description": "a", "required": True, "labels": {"a": "a"}},
-            ValidationError,
-            "ensure this dict has at least 2 items",
-        ),
-        (
-            {"name": "a", "description": "a", "required": True, "labels": {"a": "a", "b": "a"}},
-            ValidationError,
-            "ensure this dict has unique values",
+            {"name": "a", "title": "B", "description": "b", "required": False, "use_markdown": False},
+            {
+                "name": "a",
+                "title": "B",
+                "description": "b",
+                "required": False,
+                "settings": {"type": "text", "use_markdown": False},
+            },
         ),
     ],
 )
-def test__label_question_errors(
-    schema_kwargs: Dict[str, Any], expected_exception: Exception, expected_exception_message: Union[str, None]
-) -> None:
-    with pytest.raises(expected_exception, match=expected_exception_message):
-        _LabelQuestion(**schema_kwargs)
+def test_text_question(schema_kwargs: Dict[str, Any], server_payload: Dict[str, Any]) -> None:
+    text_question = TextQuestion(**schema_kwargs)
+    assert text_question.type == QuestionTypes.text
+    assert text_question.server_settings == server_payload["settings"]
+    assert text_question.to_server_payload() == server_payload
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, expected_warning, expected_warning_message",
+    "schema_kwargs, server_payload",
     [
         (
-            {"name": "a", "description": "a", "required": True, "labels": ["a", "b", "c"], "visible_labels": 4},
+            {"name": "a", "values": [8, 9, 10]},
+            {
+                "name": "a",
+                "title": "A",
+                "description": None,
+                "required": True,
+                "settings": {"type": "rating", "options": [{"value": 8}, {"value": 9}, {"value": 10}]},
+            },
+        ),
+        (
+            {"name": "a", "title": "A", "description": "a", "required": False, "values": [1, 2, 3]},
+            {
+                "name": "a",
+                "title": "A",
+                "description": "a",
+                "required": False,
+                "settings": {"type": "rating", "options": [{"value": 1}, {"value": 2}, {"value": 3}]},
+            },
+        ),
+    ],
+)
+def test_rating_question(schema_kwargs: Dict[str, Any], server_payload: Dict[str, Any]) -> None:
+    rating_question = RatingQuestion(**schema_kwargs)
+    assert rating_question.type == QuestionTypes.rating
+    assert rating_question.server_settings == server_payload["settings"]
+    assert rating_question.to_server_payload() == server_payload
+
+
+@pytest.mark.parametrize(
+    "schema_kwargs, exception_cls, exception_message",
+    [
+        ({"name": "a", "values": ["a", "b"]}, ValidationError, "value is not a valid integer"),
+        ({"name": "a", "values": [1, 1, 1]}, ValidationError, "the list has duplicated items"),
+        ({"name": "a", "values": [1]}, ValidationError, "ensure this value has at least 2 items"),
+        ({"name": "a", "values": [0, 1]}, ValidationError, "ensure this value is greater than or equal to 1"),
+        ({"name": "a", "values": [1, 11]}, ValidationError, "ensure this value is less than or equal to 10"),
+    ],
+)
+def test_rating_question_errors(schema_kwargs: Dict[str, Any], exception_cls: Any, exception_message: str) -> None:
+    with pytest.raises(exception_cls, match=exception_message):
+        RatingQuestion(**schema_kwargs)
+
+
+@pytest.mark.parametrize(
+    "schema_kwargs, exception_cls, exception_message",
+    [
+        ({"name": "a", "labels": ["a"]}, ValidationError, "ensure this value has at least 2 items"),
+        (
+            {"name": "a", "labels": ["a", "b"], "visible_labels": 2},
+            ValidationError,
+            "ensure this value is greater than or equal to 3",
+        ),
+        ({"name": "a", "labels": ["a", "a"]}, ValidationError, "the list has duplicated items"),
+        ({"name": "a", "labels": "a"}, ValidationError, r"(value is not a valid list)|(value is not a valid dict)"),
+        ({"name": "a", "labels": {"a": "a"}}, ValidationError, "ensure this dict has at least 2 items"),
+        ({"name": "a", "labels": {"a": "a", "b": "a"}}, ValidationError, "ensure this dict has unique values"),
+    ],
+)
+def test__label_question_errors(schema_kwargs: Dict[str, Any], exception_cls: Any, exception_message: str) -> None:
+    with pytest.raises(exception_cls, match=exception_message):
+        _LabelQuestion(**schema_kwargs, type="label_selection")
+
+
+@pytest.mark.parametrize(
+    "schema_kwargs, warning_cls, warning_message",
+    [
+        (
+            {"name": "a", "labels": ["a", "b", "c"], "visible_labels": 4},
             UserWarning,
             "\`visible_labels=4\` is greater than the total number of labels \(3\), so it will be set to \`3\`.",
         ),
         (
-            {"name": "a", "description": "a", "required": True, "labels": ["a", "b"], "visible_labels": 3},
+            {"name": "a", "labels": ["a", "b"], "visible_labels": 3},
             UserWarning,
             "\`labels=\['a', 'b'\]\` has less than 3 labels, so \`visible_labels\` will be set to \`None\`, which means that all the labels will be visible.",
         ),
         (
-            {"name": "a", "description": "a", "required": True, "labels": list(range(100))},
+            {"name": "a", "labels": list(range(100))},
             UserWarning,
             "Since \`visible_labels\` has not been provided and the total number of labels is greater than 20, \`visible_labels\` will be set to \`20\`.",
         ),
     ],
 )
-def test__label_question_warnings(
-    schema_kwargs: Dict[str, Any],
-    expected_warning: Warning,
-    expected_warning_message: str,
-) -> None:
-    with pytest.warns(expected_warning, match=expected_warning_message):
-        _LabelQuestion(**schema_kwargs)
+def test__label_question_warnings(schema_kwargs: Dict[str, Any], warning_cls: Warning, warning_message: str) -> None:
+    with pytest.warns(warning_cls, match=warning_message):
+        _LabelQuestion(**schema_kwargs, type="label_selection")
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, expected_settings",
+    "schema_kwargs, server_payload",
     [
         (
-            {"name": "a", "description": "a", "required": True, "labels": ["a", "b"]},
-            {
-                "type": None,
-                "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
-                "visible_options": None,
-            },
-        ),
-        (
-            {"name": "a", "description": "a", "required": True, "labels": {"a": "A", "b": "B"}},
-            {
-                "type": None,
-                "options": [{"value": "a", "text": "A"}, {"value": "b", "text": "B"}],
-                "visible_options": None,
-            },
-        ),
-        (
-            {"name": "a", "description": "a", "required": True, "labels": ["a", "b"], "visible_labels": 3},
-            {
-                "type": None,
-                "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
-                "visible_options": None,
-            },
-        ),
-        (
-            {"name": "a", "description": "a", "required": True, "labels": ["a", "b"], "visible_labels": None},
-            {
-                "type": None,
-                "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
-                "visible_options": None,
-            },
-        ),
-        (
-            {"name": "a", "description": "a", "required": True, "labels": list(range(20))},
-            {
-                "type": None,
-                "options": [{"value": str(n), "text": str(n)} for n in list(range(20))],
-                "visible_options": None,
-            },
-        ),
-        (
-            {"name": "a", "description": "a", "required": True, "labels": list(range(21))},
-            {
-                "type": None,
-                "options": [{"value": str(n), "text": str(n)} for n in list(range(21))],
-                "visible_options": 20,
-            },
-        ),
-        (
+            {"name": "a", "labels": ["a", "b"]},
             {
                 "name": "a",
-                "description": "a",
+                "title": "A",
+                "description": None,
                 "required": True,
-                "labels": list(range(2)),
-                "visible_labels": None,
-            },
-            {
-                "type": None,
-                "options": [{"value": str(n), "text": str(n)} for n in list(range(2))],
-                "visible_options": None,
+                "settings": {
+                    "type": "label_selection",
+                    "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
+                    "visible_options": None,
+                },
             },
         ),
         (
+            {"name": "a", "labels": {"a": "A", "b": "B"}},
             {
                 "name": "a",
-                "description": "a",
+                "title": "A",
+                "description": None,
                 "required": True,
-                "labels": list(range(2)),
-                "visible_labels": 3,
+                "settings": {
+                    "type": "label_selection",
+                    "options": [{"value": "a", "text": "A"}, {"value": "b", "text": "B"}],
+                    "visible_options": None,
+                },
             },
+        ),
+        (
+            {"name": "a", "labels": ["a", "b"], "visible_labels": 3},
             {
-                "type": None,
-                "options": [{"value": str(n), "text": str(n)} for n in list(range(2))],
-                "visible_options": None,
+                "name": "a",
+                "title": "A",
+                "description": None,
+                "required": True,
+                "settings": {
+                    "type": "label_selection",
+                    "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
+                    "visible_options": None,
+                },
+            },
+        ),
+        (
+            {"name": "a", "labels": ["a", "b"], "visible_labels": None},
+            {
+                "name": "a",
+                "title": "A",
+                "description": None,
+                "required": True,
+                "settings": {
+                    "type": "label_selection",
+                    "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
+                    "visible_options": None,
+                },
+            },
+        ),
+        (
+            {"name": "a", "labels": list(range(20))},
+            {
+                "name": "a",
+                "title": "A",
+                "description": None,
+                "required": True,
+                "settings": {
+                    "type": "label_selection",
+                    "options": [{"value": str(n), "text": str(n)} for n in list(range(20))],
+                    "visible_options": None,
+                },
+            },
+        ),
+        (
+            {"name": "a", "labels": list(range(21))},
+            {
+                "name": "a",
+                "title": "A",
+                "description": None,
+                "required": True,
+                "settings": {
+                    "type": "label_selection",
+                    "options": [{"value": str(n), "text": str(n)} for n in list(range(21))],
+                    "visible_options": 20,
+                },
+            },
+        ),
+        (
+            {"name": "a", "labels": list(range(2)), "visible_labels": None},
+            {
+                "name": "a",
+                "title": "A",
+                "description": None,
+                "required": True,
+                "settings": {
+                    "type": "label_selection",
+                    "options": [{"value": str(n), "text": str(n)} for n in list(range(2))],
+                    "visible_options": None,
+                },
+            },
+        ),
+        (
+            {"name": "a", "labels": list(range(2)), "visible_labels": 3},
+            {
+                "name": "a",
+                "title": "A",
+                "description": None,
+                "required": True,
+                "settings": {
+                    "type": "label_selection",
+                    "options": [{"value": str(n), "text": str(n)} for n in list(range(2))],
+                    "visible_options": None,
+                },
             },
         ),
     ],
 )
-def test__label_question(schema_kwargs: Dict[str, Any], expected_settings: Dict[str, Any]) -> None:
-    assert _LabelQuestion(**schema_kwargs).dict(include={"settings"})["settings"] == expected_settings
+def test_label_question(schema_kwargs: Dict[str, Any], server_payload: Dict[str, Any]) -> None:
+    label_question = LabelQuestion(**schema_kwargs)
+    assert label_question.type == QuestionTypes.label_selection
+    assert label_question.server_settings == server_payload["settings"]
+    assert label_question.to_server_payload() == server_payload
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, expected_settings",
+    "schema_kwargs, server_payload",
     [
         (
-            {"name": "a", "description": "a", "required": True, "use_markdown": True},
-            {"type": "text", "use_markdown": True},
+            {"name": "a", "labels": ["a", "b"]},
+            {
+                "name": "a",
+                "title": "A",
+                "description": None,
+                "required": True,
+                "settings": {
+                    "type": "multi_label_selection",
+                    "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
+                    "visible_options": None,
+                },
+            },
         ),
         (
-            {"name": "a", "description": "a", "required": True, "use_markdown": False},
-            {"type": "text", "use_markdown": False},
+            {"name": "a", "labels": {"a": "A", "b": "B"}},
+            {
+                "name": "a",
+                "title": "A",
+                "description": None,
+                "required": True,
+                "settings": {
+                    "type": "multi_label_selection",
+                    "options": [{"value": "a", "text": "A"}, {"value": "b", "text": "B"}],
+                    "visible_options": None,
+                },
+            },
+        ),
+        (
+            {"name": "a", "labels": ["a", "b"], "visible_labels": 3},
+            {
+                "name": "a",
+                "title": "A",
+                "description": None,
+                "required": True,
+                "settings": {
+                    "type": "multi_label_selection",
+                    "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
+                    "visible_options": None,
+                },
+            },
+        ),
+        (
+            {"name": "a", "labels": ["a", "b"], "visible_labels": None},
+            {
+                "name": "a",
+                "title": "A",
+                "description": None,
+                "required": True,
+                "settings": {
+                    "type": "multi_label_selection",
+                    "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
+                    "visible_options": None,
+                },
+            },
+        ),
+        (
+            {"name": "a", "labels": list(range(20))},
+            {
+                "name": "a",
+                "title": "A",
+                "description": None,
+                "required": True,
+                "settings": {
+                    "type": "multi_label_selection",
+                    "options": [{"value": str(n), "text": str(n)} for n in list(range(20))],
+                    "visible_options": None,
+                },
+            },
+        ),
+        (
+            {"name": "a", "labels": list(range(21))},
+            {
+                "name": "a",
+                "title": "A",
+                "description": None,
+                "required": True,
+                "settings": {
+                    "type": "multi_label_selection",
+                    "options": [{"value": str(n), "text": str(n)} for n in list(range(21))],
+                    "visible_options": 20,
+                },
+            },
+        ),
+        (
+            {"name": "a", "labels": list(range(2)), "visible_labels": None},
+            {
+                "name": "a",
+                "title": "A",
+                "description": None,
+                "required": True,
+                "settings": {
+                    "type": "multi_label_selection",
+                    "options": [{"value": str(n), "text": str(n)} for n in list(range(2))],
+                    "visible_options": None,
+                },
+            },
+        ),
+        (
+            {"name": "a", "labels": list(range(2)), "visible_labels": 3},
+            {
+                "name": "a",
+                "title": "A",
+                "description": None,
+                "required": True,
+                "settings": {
+                    "type": "multi_label_selection",
+                    "options": [{"value": str(n), "text": str(n)} for n in list(range(2))],
+                    "visible_options": None,
+                },
+            },
         ),
     ],
 )
-def test_text_question(schema_kwargs: Dict[str, Any], expected_settings: Dict[str, Any]) -> None:
-    assert TextQuestion(**schema_kwargs).dict(include={"settings"})["settings"] == expected_settings
+def test_multi_label_question(schema_kwargs: Dict[str, Any], server_payload: Dict[str, Any]) -> None:
+    label_question = MultiLabelQuestion(**schema_kwargs)
+    assert label_question.type == QuestionTypes.multi_label_selection
+    assert label_question.server_settings == server_payload["settings"]
+    assert label_question.to_server_payload() == server_payload
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, expected_exception, expected_exception_message",
+    "schema_kwargs, server_payload",
     [
         (
-            {"name": "a", "description": "a", "required": True, "values": ["a", "b"]},
-            ValidationError,
-            "value is not a valid integer",
+            {"name": "a", "values": ["a", "b"]},
+            {
+                "name": "a",
+                "title": "A",
+                "description": None,
+                "required": True,
+                "settings": {"type": "ranking", "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}]},
+            },
         ),
         (
-            {"name": "a", "description": "a", "required": True, "values": [1, 1, 1]},
-            ValidationError,
-            "the list has duplicated items",
-        ),
-        (
-            {"name": "a", "description": "a", "required": True, "values": [1]},
-            ValidationError,
-            "ensure this value has at least 2 items",
-        ),
-        (
-            {"name": "a", "description": "a", "required": True, "values": [0, 1]},
-            ValidationError,
-            "ensure this value is greater than or equal to 1",
-        ),
-        (
-            {"name": "a", "description": "a", "required": True, "values": [1, 11]},
-            ValidationError,
-            "ensure this value is less than or equal to 10",
+            {"name": "a", "values": {"a": "A", "b": "B"}},
+            {
+                "name": "a",
+                "title": "A",
+                "description": None,
+                "required": True,
+                "settings": {"type": "ranking", "options": [{"value": "a", "text": "A"}, {"value": "b", "text": "B"}]},
+            },
         ),
     ],
 )
-def test_rating_question_errors(
-    schema_kwargs: Dict[str, Any], expected_exception: Type[Exception], expected_exception_message: Union[str, None]
-) -> None:
-    with pytest.raises(expected_exception, match=expected_exception_message):
-        RatingQuestion(**schema_kwargs)
+def test_ranking_question(schema_kwargs: Dict[str, Any], server_payload: Dict[str, Any]) -> None:
+    ranking_question = RankingQuestion(**schema_kwargs)
+    assert ranking_question.type == QuestionTypes.ranking
+    assert ranking_question.server_settings == server_payload["settings"]
+    assert ranking_question.to_server_payload() == server_payload
 
 
 @pytest.mark.parametrize(
-    "schema_kwargs, expected_settings",
+    "schema_kwargs, exception_cls, exception_message",
     [
-        (
-            {"name": "a", "description": "a", "required": True, "values": [1, 2, 3]},
-            {"type": "rating", "options": [{"value": 1}, {"value": 2}, {"value": 3}]},
-        ),
-        (
-            {"name": "a", "description": "a", "required": True, "values": [8, 9, 10]},
-            {"type": "rating", "options": [{"value": 8}, {"value": 9}, {"value": 10}]},
-        ),
+        ({"name": "a", "values": [1, 1]}, ValidationError, "the list has duplicated items"),
+        ({"name": "a", "values": ["a"]}, ValidationError, "ensure this value has at least 2 items"),
+        ({"name": "a", "values": {"a": "a"}}, ValidationError, "ensure this dict has at least 2 items"),
+        ({"name": "a", "values": {1: "a", 2: "a"}}, ValidationError, "ensure this dict has unique values"),
     ],
 )
-def test_rating_question(schema_kwargs: Dict[str, Any], expected_settings: Dict[str, Any]) -> None:
-    assert RatingQuestion(**schema_kwargs).dict(include={"settings"})["settings"] == expected_settings
-
-
-@pytest.mark.parametrize(
-    "schema_kwargs, expected_exception, expected_exception_message",
-    [
-        (
-            {"name": "a", "description": "a", "required": True, "values": [1, 1]},
-            ValidationError,
-            "the list has duplicated items",
-        ),
-        (
-            {"name": "a", "description": "a", "required": True, "values": ["a"]},
-            ValidationError,
-            "ensure this value has at least 2 items",
-        ),
-        (
-            {"name": "a", "description": "a", "required": True, "values": {"a": "a"}},
-            ValidationError,
-            "ensure this dict has at least 2 items",
-        ),
-        (
-            {"name": "a", "description": "a", "required": True, "values": {1: "a", 2: "a"}},
-            ValidationError,
-            "ensure this dict has unique values",
-        ),
-    ],
-)
-def test_ranking_question_errors(
-    schema_kwargs: Dict[str, Any], expected_exception: Exception, expected_exception_message: Union[str, None]
-) -> None:
-    with pytest.raises(expected_exception, match=expected_exception_message):
+def test_ranking_question_errors(schema_kwargs: Dict[str, Any], exception_cls: Any, exception_message: str) -> None:
+    with pytest.raises(exception_cls, match=exception_message):
         RankingQuestion(**schema_kwargs)
-
-
-@pytest.mark.parametrize(
-    "schema_kwargs, expected_settings",
-    [
-        (
-            {"name": "a", "description": "a", "required": True, "values": ["a", "b"]},
-            {"type": "ranking", "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}]},
-        ),
-        (
-            {"name": "a", "description": "a", "required": True, "values": {"a": "A", "b": "B"}},
-            {"type": "ranking", "options": [{"value": "a", "text": "A"}, {"value": "b", "text": "B"}]},
-        ),
-    ],
-)
-def test_ranking_question(schema_kwargs: Dict[str, Any], expected_settings: Dict[str, Any]) -> None:
-    assert RankingQuestion(**schema_kwargs).dict(include={"settings"})["settings"] == expected_settings

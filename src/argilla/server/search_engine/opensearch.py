@@ -17,6 +17,8 @@ from typing import Any, Dict, List, Optional
 
 from opensearchpy import AsyncOpenSearch, helpers
 
+from argilla.server.search_engine.base import SearchEngine
+from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine
 from argilla.server.models import (
     VectorSettings,
 )
@@ -31,10 +33,7 @@ from argilla.server.settings import settings
 @SearchEngine.register(engine_name="opensearch")
 @dataclasses.dataclass
 class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
-    config: Dict[str, Any]
-
-    es_number_of_shards: int
-    es_number_of_replicas: int
+    config: Dict[str, Any] = dataclasses.field(default_factory=dict)
 
     def __post_init__(self):
         self.client = AsyncOpenSearch(**self.config)
@@ -49,33 +48,20 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
             max_retries=5,
         )
         return cls(
-            config,
-            es_number_of_shards=settings.es_records_index_shards,
-            es_number_of_replicas=settings.es_records_index_replicas,
+            config=config,
+            number_of_shards=settings.es_records_index_shards,
+            number_of_replicas=settings.es_records_index_replicas,
         )
 
     async def close(self):
         await self.client.close()
 
-    def _configure_index_mappings(self, dataset) -> dict:
-        return {
-            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic.html#dynamic-parameters
-            "dynamic": "strict",
-            "dynamic_templates": self._dynamic_templates_for_question_responses(dataset.questions),
-            "properties": {
-                # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
-                "id": {"type": "keyword"},
-                "responses": {"dynamic": True, "type": "object"},
-                **self._mapping_for_vectors_settings(dataset.vectors_settings),
-                **self._mapping_for_fields(dataset.fields),
-            },
-        }
-
     def _configure_index_settings(self):
         return {
             "index.knn": False,
-            "number_of_shards": self.es_number_of_shards,
-            "number_of_replicas": self.es_number_of_replicas,
+            "max_result_window": self.max_result_window,
+            "number_of_shards": self.number_of_shards,
+            "number_of_replicas": self.number_of_replicas,
         }
 
     def _mapping_for_vector_settings(self, vector_settings: VectorSettings) -> dict:
@@ -122,14 +108,26 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
     async def put_index_mapping_request(self, index: str, mappings: dict):
         await self.client.indices.put_mapping(index=index, body={"properties": mappings})
 
-    async def _index_search_request(self, index: str, query: dict, size: int, from_: int):
+    async def _index_search_request(
+        self,
+        index: str,
+        query: dict,
+        size: Optional[int] = None,
+        from_: Optional[int] = None,
+        sort: str = None,
+        aggregations: Optional[dict] = None,
+    ) -> dict:
+        body = {"query": query}
+        if aggregations:
+            body["aggs"] = aggregations
+
         return await self.client.search(
             index=index,
-            body={"query": query},
+            body=body,
             from_=from_,
             size=size,
             _source=False,
-            sort="_score:desc,id:asc",
+            sort=sort or "_score:desc,id:asc",
             track_total_hits=True,
         )
 
@@ -140,3 +138,6 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
         _, errors = await helpers.async_bulk(client=self.client, actions=actions, raise_on_error=False)
         if errors:
             raise RuntimeError(errors)
+
+    async def _refresh_index_request(self, index_name: str):
+        await self.client.indices.refresh(index=index_name)

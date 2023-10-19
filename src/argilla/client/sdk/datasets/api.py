@@ -26,11 +26,14 @@ from argilla.client.sdk.datasets.models import CopyDatasetRequest, Dataset
 
 
 @lru_cache(maxsize=None)
-def get_dataset(client: AuthenticatedClient, name: str) -> Response[Dataset]:
+def get_dataset(client: AuthenticatedClient, name: str, workspace: Optional[str] = None) -> Response[Dataset]:
     url = f"{client.base_url}/api/datasets/{name}"
+
+    params = {"workspace": workspace} if workspace else None
 
     response = httpx.get(
         url=url,
+        params=params,
         headers=client.get_headers(),
         cookies=client.get_cookies(),
         timeout=client.get_timeout(),
@@ -40,6 +43,7 @@ def get_dataset(client: AuthenticatedClient, name: str) -> Response[Dataset]:
         response_obj = Response.from_httpx_response(response)
         response_obj.parsed = Dataset(**response.json())
         return response_obj
+
     handle_response_error(response)
 
 

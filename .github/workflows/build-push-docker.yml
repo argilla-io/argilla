@@ -116,8 +116,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: ${{ inputs.build-args }}
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Docker Hub Description
         uses: peter-evans/dockerhub-description@v3

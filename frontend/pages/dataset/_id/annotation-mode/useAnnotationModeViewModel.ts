@@ -1,15 +1,20 @@
-import { computed, onBeforeMount, useRouter } from "@nuxtjs/composition-api";
+import {
+  computed,
+  onBeforeMount,
+  ref,
+  useRouter,
+} from "@nuxtjs/composition-api";
 import { useResolve } from "ts-injecty";
 import { useDatasetViewModel } from "../useDatasetViewModel";
 import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use-case";
 import { useDataset } from "@/v1/infrastructure/storage/DatasetStorage";
-import {
-  useEvents,
-  UpdateMetricsEventHandler,
-} from "~/v1/infrastructure/events";
+import { RecordCriteria } from "~/v1/domain/entities/record/RecordCriteria";
+import { useRoutes } from "~/v1/infrastructure/services";
+import { RecordStatus } from "~/v1/domain/entities/record/RecordAnswer";
 
 export const useAnnotationModeViewModel = () => {
   const router = useRouter();
+  const routes = useRoutes();
   const { state: dataset } = useDataset();
   const getDatasetUseCase = useResolve(GetDatasetByIdUseCase);
 
@@ -18,10 +23,45 @@ export const useAnnotationModeViewModel = () => {
 
   const breadcrumbs = computed(() => createRootBreadCrumbs(dataset));
 
+  const recordCriteria = ref<RecordCriteria>(
+    new RecordCriteria(
+      datasetId,
+      routes.getQueryParams<number>("_page"),
+      routes.getQueryParams<RecordStatus>("_status"),
+      routes.getQueryParams<RecordStatus>("_search"),
+      routes.getQueryParams<string>("_metadata")?.split("+"),
+      routes.getQueryParams<string>("_sort")?.split(",")
+    )
+  );
+
+  const updateQueryParams = async () => {
+    await routes.setQueryParams(
+      {
+        key: "_page",
+        value: recordCriteria.value.committed.page.toString(),
+      },
+      {
+        key: "_status",
+        value: recordCriteria.value.committed.status,
+      },
+      {
+        key: "_search",
+        value: recordCriteria.value.committed.searchText,
+      },
+      {
+        key: "_metadata",
+        value: recordCriteria.value.committed.metadata.join("+"),
+      },
+      {
+        key: "_sort",
+        value: recordCriteria.value.committed.sortBy.join(","),
+      }
+    );
+  };
+
   const loadDataset = async () => {
     try {
       isLoadingDataset.value = true;
-
       await getDatasetUseCase.execute(datasetId);
     } catch (error) {
       handleError(error.response);
@@ -33,12 +73,15 @@ export const useAnnotationModeViewModel = () => {
   };
 
   onBeforeMount(() => {
-    useEvents(() => {
-      new UpdateMetricsEventHandler();
-    });
-
     loadDataset();
   });
 
-  return { dataset, datasetId, isLoadingDataset, loadDataset, breadcrumbs };
+  return {
+    isLoadingDataset,
+    recordCriteria,
+    dataset,
+    datasetId,
+    breadcrumbs,
+    updateQueryParams,
+  };
 };

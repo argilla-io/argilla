@@ -16,9 +16,6 @@ import re
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-from luqum.elasticsearch import ElasticsearchQueryBuilder, SchemaAnalyzer
-from luqum.parser import parser
-
 from argilla.server.daos.backend.query_helpers import filters
 from argilla.server.daos.backend.search.model import (
     BackendDatasetsQuery,
@@ -144,27 +141,7 @@ class EsQueryBuilder:
         if not query:
             return filters.match_all()
 
-        if not query.advanced_query_dsl or not query.query_text:
-            return self._to_es_query(query)
-
-        text_search = query.query_text
-        new_query = query.copy(update={"query_text": None})
-
-        schema = SchemaAnalyzer(schema)
-        es_query_builder = ElasticsearchQueryBuilder(
-            **{
-                **schema.query_builder_options(),
-                "default_field": "text",
-            }
-        )
-
-        query_tree = parser.parse(text_search)
-        query_text = es_query_builder(query_tree)
-        boolean_filter_query = self._to_es_query(new_query)
-        return filters.boolean_filter(
-            filter_query=boolean_filter_query,
-            must_query=query_text,
-        )
+        return self._to_es_query(query)
 
     def map_2_es_query(
         self,
@@ -280,7 +257,6 @@ class EsQueryBuilder:
 
         query_data = query.dict(
             exclude={
-                "advanced_query_dsl",
                 "vector",
                 "query_text",
                 "metadata",
