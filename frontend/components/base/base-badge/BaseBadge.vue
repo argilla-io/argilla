@@ -24,8 +24,8 @@ export default {
     }
   },
   methods: {
-    onClick() {
-      this.$emit("on-click");
+    onClick($event) {
+      this.$emit("on-click", $event);
     },
   },
 };

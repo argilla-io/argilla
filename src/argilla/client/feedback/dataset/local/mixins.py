@@ -15,10 +15,12 @@
 from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 from uuid import UUID
 
+from tqdm import trange
+
 from argilla.client.api import ArgillaSingleton
 from argilla.client.feedback.constants import PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-from argilla.client.feedback.schemas.enums import FieldTypes, QuestionTypes
+from argilla.client.feedback.schemas.enums import FieldTypes, MetadataPropertyTypes, QuestionTypes
 from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
@@ -27,6 +29,11 @@ from argilla.client.feedback.schemas.questions import (
     TextQuestion,
 )
 from argilla.client.feedback.schemas.remote.fields import RemoteTextField
+from argilla.client.feedback.schemas.remote.metadata import (
+    RemoteFloatMetadataProperty,
+    RemoteIntegerMetadataProperty,
+    RemoteTermsMetadataProperty,
+)
 from argilla.client.feedback.schemas.remote.questions import (
     RemoteLabelQuestion,
     RemoteMultiLabelQuestion,
@@ -37,19 +44,33 @@ from argilla.client.feedback.schemas.remote.questions import (
 from argilla.client.feedback.utils import feedback_dataset_in_argilla
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.workspaces import Workspace
-from tqdm import trange
 
 if TYPE_CHECKING:
     import httpx
+
     from argilla.client.client import Argilla as ArgillaClient
+    from argilla.client.feedback.dataset.local import FeedbackDataset
     from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
-    from argilla.client.feedback.schemas.types import AllowedRemoteFieldTypes, AllowedRemoteQuestionTypes
-    from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel
+    from argilla.client.feedback.schemas.records import FeedbackRecord
+    from argilla.client.feedback.schemas.types import (
+        AllowedFieldTypes,
+        AllowedMetadataPropertyTypes,
+        AllowedQuestionTypes,
+        AllowedRemoteFieldTypes,
+        AllowedRemoteMetadataPropertyTypes,
+        AllowedRemoteQuestionTypes,
+    )
+    from argilla.client.sdk.v1.datasets.models import (
+        FeedbackDatasetModel,
+        FeedbackFieldModel,
+        FeedbackMetadataPropertyModel,
+        FeedbackQuestionModel,
+    )
 
 
 class ArgillaMixin:
     @staticmethod
-    def __delete_dataset(client: "httpx.Client", id: Union[str, UUID]) -> None:
+    def __delete_dataset(client: "httpx.Client", id: UUID) -> None:
         try:
             datasets_api_v1.delete_dataset(client=client, id=id)
         except Exception as e:
@@ -57,57 +78,140 @@ class ArgillaMixin:
                 f"Failed while deleting the `FeedbackDataset` with ID '{id}' from Argilla with" f" exception: {e}"
             ) from e
 
-    def __add_fields(self: "FeedbackDataset", client: "httpx.Client", id: UUID) -> List["AllowedRemoteFieldTypes"]:
-        fields = []
-        for field in self._fields:
+    @staticmethod
+    def _parse_to_remote_field(field: "FeedbackFieldModel") -> "AllowedRemoteFieldTypes":
+        if field.settings["type"] == FieldTypes.text:
+            field = RemoteTextField.from_api(field)
+        else:
+            raise ValueError(
+                f"Field '{field.name}' is not a supported field in the current Python package version,"
+                f" supported field types are: `{'`, `'.join([arg.value for arg in FieldTypes])}`."
+            )
+        return field
+
+    @staticmethod
+    def __add_fields(
+        fields: List["AllowedFieldTypes"], client: "httpx.Client", id: UUID
+    ) -> List["AllowedRemoteFieldTypes"]:
+        uploaded_fields = []
+        for field in fields:
             try:
                 new_field = datasets_api_v1.add_field(client=client, id=id, field=field.to_server_payload()).parsed
-                fields.append(new_field)
+                uploaded_fields.append(ArgillaMixin._parse_to_remote_field(new_field))
             except Exception as e:
-                self.__delete_dataset(client=client, id=id)
+                ArgillaMixin.__delete_dataset(client=client, id=id)
                 raise Exception(
                     f"Failed while adding the field '{field.name}' to the `FeedbackDataset` in Argilla with"
                     f" exception: {e}"
                 ) from e
-        return fields
+        return uploaded_fields
 
+    @staticmethod
+    def _parse_to_remote_question(question: "FeedbackQuestionModel") -> "AllowedRemoteQuestionTypes":
+        if question.settings["type"] == QuestionTypes.rating:
+            question = RemoteRatingQuestion.from_api(question)
+        elif question.settings["type"] == QuestionTypes.text:
+            question = RemoteTextQuestion.from_api(question)
+        elif question.settings["type"] == QuestionTypes.label_selection:
+            question = RemoteLabelQuestion.from_api(question)
+        elif question.settings["type"] == QuestionTypes.multi_label_selection:
+            question = RemoteMultiLabelQuestion.from_api(question)
+        elif question.settings["type"] == QuestionTypes.ranking:
+            question = RemoteRankingQuestion.from_api(question)
+        else:
+            raise ValueError(
+                f"Question '{question.name}' is not a supported question in the current Python package"
+                f" version, supported question types are: `{'`, `'.join([arg.value for arg in QuestionTypes])}`."
+            )
+
+        return question
+
+    @staticmethod
     def __add_questions(
-        self: "FeedbackDataset", client: "httpx.Client", id: UUID
+        questions: List["AllowedQuestionTypes"], client: "httpx.Client", id: UUID
     ) -> List["AllowedRemoteQuestionTypes"]:
-        questions = []
-        for question in self._questions:
+        uploaded_questions = []
+        for question in questions:
             try:
                 new_question = datasets_api_v1.add_question(
                     client=client, id=id, question=question.to_server_payload()
                 ).parsed
-                questions.append(new_question)
+                uploaded_questions.append(ArgillaMixin._parse_to_remote_question(new_question))
             except Exception as e:
-                self.__delete_dataset(client=client, id=id)
+                ArgillaMixin.__delete_dataset(client=client, id=id)
                 raise Exception(
                     f"Failed while adding the question '{question.name}' to the `FeedbackDataset` in Argilla with"
                     f" exception: {e}"
                 ) from e
-        return questions
+        return uploaded_questions
 
-    def __publish_dataset(self: "FeedbackDataset", client: "httpx.Client", id: UUID) -> None:
+    @staticmethod
+    def _parse_to_remote_metadata_property(
+        metadata_property: "FeedbackMetadataPropertyModel",
+        client: Optional["httpx.Client"] = None,
+    ) -> "AllowedRemoteMetadataPropertyTypes":
+        if metadata_property.settings["type"] == MetadataPropertyTypes.terms:
+            metadata_property = RemoteTermsMetadataProperty.from_api(payload=metadata_property, client=client)
+        elif metadata_property.settings["type"] == MetadataPropertyTypes.integer:
+            metadata_property = RemoteIntegerMetadataProperty.from_api(payload=metadata_property, client=client)
+        elif metadata_property.settings["type"] == MetadataPropertyTypes.float:
+            metadata_property = RemoteFloatMetadataProperty.from_api(payload=metadata_property, client=client)
+        else:
+            raise ValueError(
+                f"Metadata property '{metadata_property.name}' is not a supported metadata property in the current"
+                " Python package version, supported metadata property types are: "
+                f"`{'`, `'.join([arg.value for arg in MetadataPropertyTypes])}`."
+            )
+
+        return metadata_property
+
+    @staticmethod
+    def __add_metadata_properties(
+        metadata_properties: List["AllowedMetadataPropertyTypes"], client: "httpx.Client", id: UUID
+    ) -> Union[List["AllowedRemoteMetadataPropertyTypes"], None]:
+        if not metadata_properties:
+            return None
+
+        uploaded_metadata_properties = []
+        for metadata_property in metadata_properties:
+            try:
+                new_metadata_property = datasets_api_v1.add_metadata_property(
+                    client=client, id=id, metadata_property=metadata_property.to_server_payload()
+                ).parsed
+                uploaded_metadata_properties.append(
+                    ArgillaMixin._parse_to_remote_metadata_property(
+                        metadata_property=new_metadata_property, client=client
+                    )
+                )
+            except Exception as e:
+                ArgillaMixin.__delete_dataset(client=client, id=id)
+                raise Exception(
+                    f"Failed while adding the metadata property '{metadata_property.name}' to the `FeedbackDataset` in"
+                    f" Argilla with exception: {e}"
+                ) from e
+        return uploaded_metadata_properties
+
+    @staticmethod
+    def __publish_dataset(client: "httpx.Client", id: UUID) -> None:
         try:
             datasets_api_v1.publish_dataset(client=client, id=id)
         except Exception as e:
-            self.__delete_dataset(client=client, id=id)
+            ArgillaMixin.__delete_dataset(client=client, id=id)
             raise Exception(f"Failed while publishing the `FeedbackDataset` in Argilla with exception: {e}") from e
 
+    @staticmethod
     def __push_records(
-        self: "FeedbackDataset",
+        records: List["FeedbackRecord"],
         client: "httpx.Client",
         id: UUID,
         question_name_to_id: Dict[str, UUID],
         show_progress: bool = True,
     ) -> None:
-        if len(self.records) == 0:
+        if len(records) == 0:
             return
 
         for i in trange(
-            0, len(self.records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=show_progress
+            0, len(records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=show_progress
         ):
             try:
                 datasets_api_v1.add_records(
@@ -115,17 +219,17 @@ class ArgillaMixin:
                     id=id,
                     records=[
                         record.to_server_payload(question_name_to_id=question_name_to_id)
-                        for record in self.records[i : i + PUSHING_BATCH_SIZE]
+                        for record in records[i : i + PUSHING_BATCH_SIZE]
                     ],
                 )
             except Exception as e:
-                self.__delete_dataset(client=client, id=id)
+                ArgillaMixin.__delete_dataset(client=client, id=id)
                 raise Exception(
                     f"Failed while adding the records to the `FeedbackDataset` in Argilla with exception: {e}"
                 ) from e
 
     def push_to_argilla(
-        self: "FeedbackDataset",
+        self: Union["FeedbackDataset", "ArgillaMixin"],
         name: str,
         workspace: Optional[Union[str, Workspace]] = None,
         show_progress: bool = False,
@@ -161,23 +265,35 @@ class ArgillaMixin:
 
         try:
             new_dataset: "FeedbackDatasetModel" = datasets_api_v1.create_dataset(
-                client=httpx_client, name=name, workspace_id=workspace.id, guidelines=self.guidelines
+                client=httpx_client,
+                name=name,
+                workspace_id=workspace.id,
+                guidelines=self.guidelines,
+                allow_extra_metadata=self.allow_extra_metadata,
             ).parsed
             argilla_id = new_dataset.id
         except Exception as e:
             raise Exception(f"Failed while creating the `FeedbackDataset` in Argilla with exception: {e}") from e
 
-        # TODO(alvarobartt): re-use ArgillaMixin components when applicable
-        self.__add_fields(client=httpx_client, id=argilla_id)
-        fields = self.__get_fields(client=httpx_client, id=argilla_id)
+        ArgillaMixin.__add_fields(fields=self.fields, client=httpx_client, id=argilla_id)
+        fields = ArgillaMixin.__get_fields(client=httpx_client, id=argilla_id)
 
-        self.__add_questions(client=httpx_client, id=argilla_id)
-        questions = self.__get_questions(client=httpx_client, id=argilla_id)
+        ArgillaMixin.__add_questions(questions=self.questions, client=httpx_client, id=argilla_id)
+        questions = ArgillaMixin.__get_questions(client=httpx_client, id=argilla_id)
         question_name_to_id = {question.name: question.id for question in questions}
 
-        self.__publish_dataset(client=httpx_client, id=argilla_id)
-        self.__push_records(
-            client=httpx_client, id=argilla_id, show_progress=show_progress, question_name_to_id=question_name_to_id
+        metadata_properties = ArgillaMixin.__add_metadata_properties(
+            metadata_properties=self.metadata_properties, client=httpx_client, id=argilla_id
+        )
+
+        ArgillaMixin.__publish_dataset(client=httpx_client, id=argilla_id)
+
+        ArgillaMixin.__push_records(
+            records=list(self.records),
+            client=httpx_client,
+            id=argilla_id,
+            show_progress=show_progress,
+            question_name_to_id=question_name_to_id,
         )
 
         return RemoteFeedbackDataset(
@@ -189,44 +305,33 @@ class ArgillaMixin:
             updated_at=new_dataset.updated_at,
             fields=fields,
             questions=questions,
+            metadata_properties=metadata_properties,
             guidelines=self.guidelines,
+            allow_extra_metadata=self.allow_extra_metadata,
         )
 
     @staticmethod
     def __get_fields(client: "httpx.Client", id: UUID) -> List["AllowedRemoteFieldTypes"]:
         fields = []
         for field in datasets_api_v1.get_fields(client=client, id=id).parsed:
-            if field.settings["type"] == FieldTypes.text:
-                field = RemoteTextField.from_api(field)
-            else:
-                raise ValueError(
-                    f"Field '{field.name}' is not a supported field in the current Python package version,"
-                    f" supported field types are: `{'`, `'.join([arg.value for arg in FieldTypes])}`."
-                )
-            fields.append(field)
+            fields.append(ArgillaMixin._parse_to_remote_field(field))
         return fields
 
     @staticmethod
     def __get_questions(client: "httpx.Client", id: UUID) -> List["AllowedRemoteQuestionTypes"]:
         questions = []
         for question in datasets_api_v1.get_questions(client=client, id=id).parsed:
-            if question.settings["type"] == QuestionTypes.rating:
-                question = RemoteRatingQuestion.from_api(question)
-            elif question.settings["type"] == QuestionTypes.text:
-                question = RemoteTextQuestion.from_api(question)
-            elif question.settings["type"] == QuestionTypes.label_selection:
-                question = RemoteLabelQuestion.from_api(question)
-            elif question.settings["type"] == QuestionTypes.multi_label_selection:
-                question = RemoteMultiLabelQuestion.from_api(question)
-            elif question.settings["type"] == QuestionTypes.ranking:
-                question = RemoteRankingQuestion.from_api(question)
-            else:
-                raise ValueError(
-                    f"Question '{question.name}' is not a supported question in the current Python package"
-                    f" version, supported question types are: `{'`, `'.join([arg.value for arg in QuestionTypes])}`."
-                )
-            questions.append(question)
+            questions.append(ArgillaMixin._parse_to_remote_question(question))
         return questions
+
+    @staticmethod
+    def __get_metadata_properties(client: "httpx.Client", id: UUID) -> List["AllowedRemoteMetadataPropertyTypes"]:
+        metadata_properties = []
+        for metadata_prop in datasets_api_v1.get_metadata_properties(client=client, id=id).parsed:
+            metadata_properties.append(
+                ArgillaMixin._parse_to_remote_metadata_property(metadata_property=metadata_prop, client=client)
+            )
+        return metadata_properties
 
     @classmethod
     def from_argilla(
@@ -234,7 +339,7 @@ class ArgillaMixin:
         name: Optional[str] = None,
         *,
         workspace: Optional[str] = None,
-        id: Optional[str] = None,
+        id: Optional[Union[UUID, str]] = None,
     ) -> RemoteFeedbackDataset:
         """Retrieves an existing `FeedbackDataset` from Argilla (must have been pushed in advance).
 
@@ -272,8 +377,9 @@ class ArgillaMixin:
                 )
             )
 
-        fields = cls.__get_fields(client=httpx_client, id=existing_dataset.id)
-        questions = cls.__get_questions(client=httpx_client, id=existing_dataset.id)
+        fields = ArgillaMixin.__get_fields(client=httpx_client, id=existing_dataset.id)
+        questions = ArgillaMixin.__get_questions(client=httpx_client, id=existing_dataset.id)
+        metadata_properties = ArgillaMixin.__get_metadata_properties(client=httpx_client, id=existing_dataset.id)
 
         return RemoteFeedbackDataset(
             client=httpx_client,
@@ -284,7 +390,9 @@ class ArgillaMixin:
             updated_at=existing_dataset.updated_at,
             fields=fields,
             questions=questions,
+            metadata_properties=metadata_properties,
             guidelines=existing_dataset.guidelines or None,
+            allow_extra_metadata=existing_dataset.allow_extra_metadata,
         )
 
     @classmethod
@@ -328,8 +436,8 @@ class ArgillaMixin:
                 workspace=workspace if workspace is not None else Workspace.from_id(dataset.workspace_id),
                 created_at=dataset.inserted_at,
                 updated_at=dataset.updated_at,
-                fields=cls.__get_fields(client=httpx_client, id=dataset.id),
-                questions=cls.__get_questions(client=httpx_client, id=dataset.id),
+                fields=ArgillaMixin.__get_fields(client=httpx_client, id=dataset.id),
+                questions=ArgillaMixin.__get_questions(client=httpx_client, id=dataset.id),
                 guidelines=dataset.guidelines or None,
             )
             for dataset in datasets

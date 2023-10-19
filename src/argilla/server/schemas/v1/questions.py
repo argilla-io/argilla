@@ -19,6 +19,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field, PositiveInt, conlist
 
 from argilla.server.schemas.base import UpdateSchema
+from argilla.server.schemas.v1.datasets import QuestionDescription, QuestionTitle
 
 try:
     from typing import Annotated
@@ -127,8 +128,8 @@ QuestionSettingsUpdate = Annotated[
 
 
 class QuestionUpdate(UpdateSchema):
-    title: Optional[str]
-    description: Optional[str]
-    settings: QuestionSettingsUpdate
+    title: Optional[QuestionTitle]
+    description: Optional[QuestionDescription]
+    settings: Optional[QuestionSettingsUpdate]
 
-    __non_nullable_fields__ = {"title"}
+    __non_nullable_fields__ = {"title", "settings"}

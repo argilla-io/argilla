@@ -12,54 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.feedback import (
-    ArgillaTrainer,
-    LabelQuestionStrategy,
-    LabelQuestionUnification,
-    MultiLabelQuestionStrategy,
-    MultiLabelQuestionUnification,
-    RankingQuestionStrategy,
-    RankingQuestionUnification,
-    RatingQuestionStrategy,
-    RatingQuestionUnification,
-    TrainingTask,
-    TrainingTaskMapping,  # <- Deprecated
-)
-from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.schemas import (
-    FeedbackRecord,
-    LabelQuestion,
-    MultiLabelQuestion,
-    RankingQuestion,
-    RatingQuestion,
-    ResponseSchema,
-    SuggestionSchema,
-    TextField,
-    TextQuestion,
-    ValueSchema,
-)
-
-__all__ = [
-    "ArgillaTrainer",
-    "LabelQuestionStrategy",
-    "MultiLabelQuestionStrategy",
-    "RatingQuestionStrategy",
-    "RankingQuestionStrategy",
-    "LabelQuestionUnification",
-    "MultiLabelQuestionUnification",
-    "RatingQuestionUnification",
-    "RankingQuestionUnification",
-    "TrainingTask",
-    "TrainingTaskMapping",
-    "FeedbackDataset",
-    "FeedbackRecord",
-    "LabelQuestion",
-    "MultiLabelQuestion",
-    "RatingQuestion",
-    "RankingQuestion",
-    "ResponseSchema",
-    "SuggestionSchema",
-    "TextField",
-    "TextQuestion",
-    "ValueSchema",
-]
+# !!! All modules used here must define the __all__ variable properly
+from argilla.client.feedback import *  # noqa
+from argilla.client.feedback.dataset import FeedbackDataset  # noqa
+from argilla.client.feedback.schemas import *  # noqa

@@ -18,6 +18,7 @@ from uuid import uuid4
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import DatasetStatus, Question, UserRole
+from argilla.server.schemas.v1.datasets import QUESTION_CREATE_DESCRIPTION_MAX_LENGTH, QUESTION_CREATE_TITLE_MAX_LENGTH
 from sqlalchemy import func, select
 
 from tests.factories import (
@@ -171,9 +172,61 @@ async def test_update_question(
     assert question.settings == expected_settings
 
 
+@pytest.mark.parametrize("title", [None, "", "t" * (QUESTION_CREATE_TITLE_MAX_LENGTH + 1)])
+@pytest.mark.asyncio
+async def test_update_question_with_invalid_title(
+    async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, title: str
+):
+    question = await TextQuestionFactory.create(title="title")
+
+    response = await async_client.patch(
+        f"/api/v1/questions/{question.id}", headers=owner_auth_header, json={"title": title}
+    )
+
+    assert response.status_code == 422
+
+    question = await db.get(Question, question.id)
+    assert question.title == "title"
+
+
+@pytest.mark.asyncio
+async def test_update_question_with_description_as_none(
+    async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+):
+    question = await TextQuestionFactory.create(description="description")
+
+    response = await async_client.patch(
+        f"/api/v1/questions/{question.id}", headers=owner_auth_header, json={"description": None}
+    )
+
+    assert response.status_code == 200
+    assert response.json()["description"] == None
+
+    question = await db.get(Question, question.id)
+    assert question.description == None
+
+
+@pytest.mark.parametrize("description", ["", "d" * (QUESTION_CREATE_DESCRIPTION_MAX_LENGTH + 1)])
+@pytest.mark.asyncio
+async def test_update_question_with_invalid_description(
+    async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, description: str
+):
+    question = await TextQuestionFactory.create(description="description")
+
+    response = await async_client.patch(
+        f"/api/v1/questions/{question.id}", headers=owner_auth_header, json={"description": description}
+    )
+
+    assert response.status_code == 422
+
+    question = await db.get(Question, question.id)
+    assert question.description == "description"
+
+
 @pytest.mark.parametrize(
     "QuestionFactory, payload",
     [
+        (TextQuestionFactory, {"settings": None}),
         (TextQuestionFactory, {"title": None, "description": None, "settings": None}),
         (TextQuestionFactory, {"settings": {"type": "text", "use_markdown": None}}),
         (TextQuestionFactory, {"title": "New Title", "settings": {"type": "label_selection"}}),
@@ -244,7 +297,7 @@ async def test_update_question_as_annotator(async_client: "AsyncClient"):
     assert response.status_code == 403
 
 
-@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+@pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
 async def test_delete_question(async_client: "AsyncClient", db: "AsyncSession", role: UserRole):
     question = await TextQuestionFactory.create(name="name", title="title", description="description")

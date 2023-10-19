@@ -12,12 +12,23 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List
+from typing import TYPE_CHECKING, List
 
 import pytest
 from argilla.client.feedback.schemas.fields import TextField
+from argilla.client.feedback.schemas.metadata import (
+    FloatMetadataProperty,
+    IntegerMetadataProperty,
+    TermsMetadataProperty,
+)
 from argilla.client.feedback.schemas.questions import TextQuestion
-from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+
+if TYPE_CHECKING:
+    from argilla.client.feedback.schemas.types import (
+        AllowedFieldTypes,
+        AllowedMetadataPropertyTypes,
+        AllowedQuestionTypes,
+    )
 
 
 @pytest.fixture
@@ -56,14 +67,23 @@ def feedback_dataset_guidelines() -> str:
 
 
 @pytest.fixture
-def feedback_dataset_fields() -> List[AllowedFieldTypes]:
+def feedback_dataset_fields() -> List["AllowedFieldTypes"]:
     return [
         TextField(name="text-field", required=True),
     ]
 
 
 @pytest.fixture
-def feedback_dataset_questions() -> List[AllowedQuestionTypes]:
+def feedback_dataset_questions() -> List["AllowedQuestionTypes"]:
     return [
         TextQuestion(name="text-question", description="text", required=True),
+    ]
+
+
+@pytest.fixture
+def feedback_dataset_metadata_properties() -> List["AllowedMetadataPropertyTypes"]:
+    return [
+        TermsMetadataProperty(name="terms-metadata", values=["1", "2"]),
+        IntegerMetadataProperty(name="integer-metadata", min=0, max=10),
+        FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
     ]

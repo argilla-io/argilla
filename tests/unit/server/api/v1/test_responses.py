@@ -19,7 +19,6 @@ from uuid import uuid4
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import DatasetStatus, Response, ResponseStatus, UserRole
-from argilla.server.models.models import Question
 from argilla.server.search_engine import SearchEngine
 from sqlalchemy import func, select
 
@@ -39,7 +38,7 @@ from tests.factories import (
 )
 
 if TYPE_CHECKING:
-    from argilla.server.models.models import User
+    from argilla.server.models import User
     from httpx import AsyncClient
     from sqlalchemy.ext.asyncio import AsyncSession
 
