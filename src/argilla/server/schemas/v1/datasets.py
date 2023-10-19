@@ -573,6 +573,7 @@ class MetadataQueryParams(BaseModel):
 
     @property
     def metadata_parsed(self) -> List[MetadataParsedQueryParam]:
+        # TODO: Validate metadata fields names from query params
         return [MetadataParsedQueryParam(q) for q in self.metadata]
 
 
