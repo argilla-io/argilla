@@ -93,7 +93,7 @@ jobs:
     needs: check_repo_files
     if: |
       needs.check_repo_files.outputs.pythonChanges == 'true' &&
-      github.event_name == 'release'
+      startsWith(github.event.ref, 'refs/tags/v')
     with:
       searchEngineDockerImage: ${{ matrix.searchEngineDockerImage }}
       searchEngineDockerEnv: ${{ matrix.searchEngineDockerEnv }}
