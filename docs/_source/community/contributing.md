@@ -12,7 +12,7 @@ If you're a new contributor, we recommend you start reading the [New Contributor
 
 If you're a new contributor, read the [README](https://github.com/argilla-io/argilla/blob/develop/README.md) to get an overview of the project. In addition, here are some resources to help you get started with open-source contributions:
 
-* **Slack**: You are welcome to join the [Argilla Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g), where you can keep in touch with other users, contributors and the Argilla team. In the following [section](#first-contact-in-slack), you can find more information on how to get started in Slack. 
+* **Slack**: You are welcome to join the [Argilla Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g), where you can keep in touch with other users, contributors and the Argilla team. In the following [section](#first-contact-in-slack), you can find more information on how to get started in Slack.
 * **Git**: This is a very useful tool to keep track of the changes in your files. Using the command-line interface (CLI), you can make your contributions easily. For that, you need to have it [installed and updated](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) on your computer.
 * **GitHub**: It is a platform and cloud-based service that uses git and allows developers to collaborate on projects. To contribute to Argilla, you'll need to create an account. Check the [Contributor Workflow with Git and Github](#contributor-workflow-with-git-and-github) for more info.
 * **Developer Documentation**: To collaborate, you'll need to set up an efficient environment. Check the [developer documentation](/community/developer_docs.md) to know how to do it.
@@ -89,7 +89,7 @@ Now, you will be redirected to your fork. You can see that you are in your fork 
 
 In order to make the required adjustments, clone the forked repository to your local machine. Choose the destination folder and run the following command:
 
-```sh 
+```sh
 git clone https://github.com/[your-github-username]/argilla.git
 cd argilla
 ```
@@ -98,7 +98,7 @@ To keep your fork’s main/develop branch up to date with our repo, add it as an
 
 ```sh
 git remote add upstream https://github.com/argilla-io/argilla.git
-``` 
+```
 
 
 ### Create a new branch
@@ -172,7 +172,7 @@ Then, fill in the pull request template. In the title, add the feat, bug or docs
 
 ![pr](../_static/images/community/contributing/pull-request.PNG)
 
-Below, we chose the feature template. Now, fill in it carefully and follow the guidelines. Remember to link the original issue. Finally, enable the checkbox to allow maintainer edits so the branch can be updated for a merge and click on `Create pull request`. 
+Below, we chose the feature template. Now, fill in it carefully and follow the guidelines. Remember to link the original issue. Finally, enable the checkbox to allow maintainer edits so the branch can be updated for a merge and click on `Create pull request`.
 
 ![pr-feature-template](../_static/images/community/contributing/pull-request-feature.PNG)
 
