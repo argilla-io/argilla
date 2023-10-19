@@ -240,6 +240,27 @@ class TestFilteredRemoteFeedbackDataset:
 
         assert records == other_records
 
+    def test_sort_by_with_wrong_field(self, owner: "User", test_dataset: FeedbackDataset):
+        remote = self._create_test_dataset_with_records(owner, test_dataset)
+
+        with pytest.raises(
+            ValueError,
+            match="The metadata property name `unexpected-field` does not exist in the current `FeedbackDataset` "
+            "in Argilla. ",
+        ):
+            remote.sort_by([SortBy(field="metadata.unexpected-field", order="desc")])
+
+    def test_filter_by_wrong_field(self, owner: "User", test_dataset: FeedbackDataset):
+        remote = self._create_test_dataset_with_records(owner, test_dataset)
+
+        with pytest.raises(
+            ValueError,
+            match="The metadata property name `unexpected-field` does not exist in the current `FeedbackDataset` "
+            "in Argilla. ",
+        ):
+
+            remote.filter_by(metadata_filters=IntegerMetadataFilter(name="unexpected-field", ge=4, le=5))
+
     def _create_test_dataset_with_records(self, owner, test_dataset):
         api.init(api_key=owner.api_key)
         ws = Workspace.create(name="test-workspace")
