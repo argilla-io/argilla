@@ -31,6 +31,11 @@ export default {
       selected: this.value,
     };
   },
+  mounted() {
+    if (!this.selected) {
+      this.selected = this.vectors[0].id;
+    }
+  },
   watch: {
     selected() {
       this.$emit("onValueChanged", this.selected);
