@@ -65,7 +65,7 @@ def _build_metadata_field_payload(dataset: Dataset, metadata: Union[Dict[str, An
     for metadata_property in dataset.metadata_properties:
         value = metadata.get(metadata_property.name)
         if value is not None:
-            search_engine_metadata[str(metadata_property.id)] = value
+            search_engine_metadata[str(metadata_property.name)] = value
 
     return search_engine_metadata
 
@@ -120,7 +120,7 @@ def _mapping_for_field(field: Field) -> dict:
 
 
 def _mapping_key_for_metadata_property(metadata_property: MetadataProperty) -> str:
-    return f"metadata.{metadata_property.id}"
+    return f"metadata.{metadata_property.name}"
 
 
 def _mapping_for_metadata_property(metadata_property: MetadataProperty) -> dict:
@@ -138,9 +138,9 @@ def _mapping_for_metadata_property(metadata_property: MetadataProperty) -> dict:
 
 def _aggregation_for_metadata_property(metadata_property: MetadataProperty) -> dict:
     if metadata_property.type == MetadataPropertyType.terms:
-        return {f"{metadata_property.id}": {"terms": {"field": _mapping_key_for_metadata_property(metadata_property)}}}
+        return {f"{metadata_property.name}": {"terms": {"field": _mapping_key_for_metadata_property(metadata_property)}}}
     if metadata_property.type in [MetadataPropertyType.integer, MetadataPropertyType.float]:
-        return {f"{metadata_property.id}": {"stats": {"field": _mapping_key_for_metadata_property(metadata_property)}}}
+        return {f"{metadata_property.name}": {"stats": {"field": _mapping_key_for_metadata_property(metadata_property)}}}
     else:
         raise ValueError(f"Cannot process request for metadata property {metadata_property}")
 
