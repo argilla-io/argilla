@@ -155,7 +155,7 @@ jobs:
       readme: docker/quickstart.README.md
       platforms: linux/amd64
       build-args: |
-        ARGILLA_VERSION=${{ needs.build_server_docker_image.outputs.version }}
+        ARGILLA_VERSION=${{ needs.build_server_docker_image_linux_amd64.outputs.version }}
     secrets: inherit
 
   # Build of arm64 Docker images only when release, as we need QEMU virtualization and it's very slow
@@ -194,7 +194,7 @@ jobs:
       readme: docker/quickstart.README.md
       platforms: linux/arm64
       build-args: |
-        ARGILLA_VERSION=${{ needs.build_server_docker_image.outputs.version }}
+        ARGILLA_VERSION=${{ needs.build_server_docker_image_linux_arm64.outputs.version }}
     secrets: inherit
 
   # Deploy preview environment per PR
