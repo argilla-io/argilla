@@ -14,6 +14,7 @@
 
 import sys
 import time
+from typing import Union
 
 import argilla as rg
 import pandas as pd
@@ -25,6 +26,21 @@ from datasets import load_dataset
 class LoadDatasets:
     def __init__(self, api_key: str):
         rg.init(api_key=api_key)
+
+    @staticmethod
+    def load_news_text_summarization():
+        print("Loading News-text-summarization dataset")
+
+        # Load dataset from hub
+        dataset = load_dataset("argilla/news-summary", split="train")
+        dataset_rg = rg.read_datasets(dataset, task="Text2Text")
+
+        # Log the dataset
+        rg.log(
+            dataset_rg,
+            name="news-text-summarization",
+            tags={"description": "A text summarization dataset with news pieces and their predicted summaries."},
+        )
 
     @staticmethod
     def load_sst_sentiment_explainability():
@@ -50,21 +66,6 @@ class LoadDatasets:
                 "description": "The sst2 sentiment dataset with predictions from a pretrained pipeline and "
                 "explanations from Transformers Interpret."
             },
-        )
-
-    @staticmethod
-    def load_news_text_summarization():
-        print("Loading News-text-summarization dataset")
-
-        # Load dataset from hub
-        dataset = load_dataset("argilla/news-summary", split="train")
-        dataset_rg = rg.read_datasets(dataset, task="Text2Text")
-
-        # Log the dataset
-        rg.log(
-            dataset_rg,
-            name="news-text-summarization",
-            tags={"description": "A text summarization dataset with news pieces and their predicted summaries."},
         )
 
     @staticmethod
@@ -161,6 +162,104 @@ class LoadDatasets:
 
         dataset.push_to_argilla(name=repo_id.split("/")[-1])
 
+    @staticmethod
+    def build_error_analysis_record(
+        row: pd.Series, legacy: bool = False
+    ) -> Union[rg.FeedbackRecord, rg.TextClassificationRecord]:
+        fields = {
+            "user-message-1": row["HumanMessage1"],
+            "llm-output": row["llm_output"]
+            if not row["llm_output"].__contains__("```json")
+            else row["llm_output"].replace("'", '"'),
+            "ai-message": (f"```json\n{row['AIMessage']}\n```" if not legacy else row["AIMessage"]).replace("'", '"'),
+            "function-message": (f"```json\n{row['FunctionMessage']}\n```" if not legacy else row["AIMessage"]).replace(
+                "'", '"'
+            ),
+            "system-message": "You are an AI assistant name ACME",
+            "langsmith-url": f"https://smith.langchain.com/o/{row['parent_id']}",
+        }
+        metadata = {
+            "correctness-langsmith": row["correctness_langsmith"],
+            "model-name": row["model_name"],
+            "temperature": row["temperature"],
+            "max-tokens": int(row["max_tokens"]),
+            "cpu-user": row["cpu_time_user"],
+            "cpu-system": row["cpu_time_system"],
+            "library-version": row["library_version"],
+        }
+
+        if legacy:
+            return rg.TextClassificationRecord(
+                inputs=fields, metadata=metadata, vectors=eval(row["vectors"]), multi_label=True
+            )
+        return rg.FeedbackRecord(fields=fields, metadata=metadata)
+
+    @staticmethod
+    def load_error_analysis(with_metadata_property_options: bool = True):
+        print("Loading Error Analysis dataset as a `FeedbackDataset` (Alpha)")
+        df = pd.read_csv("https://raw.githubusercontent.com/argilla-io/dataset_examples/main/synthetic_data_v2.csv")
+
+        fields = [
+            rg.TextField(name="user-message-1", use_markdown=True),
+            rg.TextField(name="llm-output", use_markdown=True),
+            rg.TextField(name="ai-message", use_markdown=True, required=False),
+            rg.TextField(name="function-message", use_markdown=True, required=False),
+            rg.TextField(name="system-message", use_markdown=True, required=False),
+            rg.TextField(name="langsmith-url", use_markdown=True, required=False),
+        ]
+
+        questions = [
+            rg.MultiLabelQuestion(
+                name="issue",
+                title="Please categorize the record:",
+                labels=["follow-up needed", "reviewed", "no-repro", "not-helpful", "empty-response", "critical"],
+            ),
+            rg.TextQuestion(name="note", title="Leave a note to describe the issue:", required=False),
+        ]
+
+        dataset_name = "error-analysis-with-feedback"
+
+        if with_metadata_property_options:
+            metadata = [
+                rg.TermsMetadataProperty(
+                    name="correctness-langsmith", values=df.correctness_langsmith.unique().tolist()
+                ),
+                rg.TermsMetadataProperty(name="model-name", values=df.model_name.unique().tolist()),
+                rg.FloatMetadataProperty(name="temperature", min=df.temperature.min(), max=df.temperature.max()),
+                rg.FloatMetadataProperty(name="cpu-user", min=df.cpu_time_user.min(), max=df.cpu_time_user.max()),
+                rg.FloatMetadataProperty(name="cpu-system", min=df.cpu_time_system.min(), max=df.cpu_time_system.max()),
+                rg.TermsMetadataProperty(name="library-version", values=df.library_version.unique().tolist()),
+            ]
+        else:
+            dataset_name += "-no-settings"
+
+            metadata = [
+                rg.TermsMetadataProperty(name="correctness-langsmith"),
+                rg.TermsMetadataProperty(name="model-name"),
+                rg.FloatMetadataProperty(name="temperature"),
+                rg.FloatMetadataProperty(name="cpu-user"),
+                rg.FloatMetadataProperty(name="cpu-system"),
+                rg.TermsMetadataProperty(name="library-version"),
+            ]
+
+        dataset = rg.FeedbackDataset(fields=fields, questions=questions, metadata_properties=metadata)
+        dataset.add_records(records=[LoadDatasets.build_error_analysis_record(row) for _, row in df.iterrows()])
+        dataset.push_to_argilla(name=dataset_name)
+
+    @staticmethod
+    def load_error_analysis_textcat_version():
+        print("Loading Error Analysis dataset as a `DatasetForTextClassification`")
+        df = pd.read_csv(
+            "https://raw.githubusercontent.com/argilla-io/dataset_examples/main/synthetic_data_v2_with_vectors.csv"
+        )
+
+        labels = ["follow-up needed", "reviewed", "no-repro", "not-helpful", "empty-response", "critical"]
+        settings = rg.TextClassificationSettings(label_schema=labels)
+        rg.configure_dataset_settings(name="error-analysis-with-text-classification", settings=settings)
+
+        records = [LoadDatasets.build_error_analysis_record(row, legacy=True) for _, row in df.iterrows()]
+        rg.log(name="error-analysis-with-text-classification", records=records, batch_size=25)
+
 
 if __name__ == "__main__":
     API_KEY = sys.argv[1]
@@ -169,16 +268,17 @@ if __name__ == "__main__":
     if LOAD_DATASETS.lower() == "none":
         print("No datasets will be loaded")
     else:
+        load_datasets = LOAD_DATASETS.lower().strip()
         while True:
             try:
-                response = requests.get("http://0.0.0.0:6900/")
+                response = requests.get("http://0.0.0.0:6900")
                 if response.status_code == 200:
                     ld = LoadDatasets(API_KEY)
-
+                    ld.load_error_analysis(with_metadata_property_options=False)
+                    ld.load_error_analysis()
+                    ld.load_error_analysis_textcat_version()
                     ld.load_feedback_dataset_from_huggingface(
-                        repo_id="argilla/databricks-dolly-15k-curated-en",
-                        split="train",
-                        samples=100,
+                        repo_id="argilla/databricks-dolly-15k-curated-en", split="train", samples=100
                     )
 
                     if LOAD_DATASETS.lower() != "single":
@@ -191,14 +291,10 @@ if __name__ == "__main__":
                         ld.load_gutenberg_spacy_ner_monitoring()
                         # `FeedbackDataset`
                         ld.load_feedback_dataset_from_huggingface(
-                            repo_id="argilla/oasst_response_quality",
-                            split="train",
-                            samples=100,
+                            repo_id="argilla/oasst_response_quality", split="train", samples=100
                         )
                         ld.load_feedback_dataset_from_huggingface(
-                            repo_id="argilla/oasst_response_comparison",
-                            split="train",
-                            samples=100,
+                            repo_id="argilla/oasst_response_comparison", split="train", samples=100
                         )
             except requests.exceptions.ConnectionError:
                 pass

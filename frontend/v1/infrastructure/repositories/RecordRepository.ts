@@ -5,7 +5,8 @@ import {
   BackendAnswerCombinations,
   BackendResponse,
   BackendRecordStatus,
-  Response,
+  BackendSearchRecords,
+  ResponseWithTotal,
 } from "../types";
 import { RecordAnswer } from "@/v1/domain/entities/record/RecordAnswer";
 import { Record } from "@/v1/domain/entities/record/Record";
@@ -26,7 +27,9 @@ export class RecordRepository {
     fromRecord: number,
     howMany: number,
     status: string,
-    searchText: string
+    searchText: string,
+    metadata: string[],
+    sortBy: string[]
   ): Promise<BackedRecords> {
     if (searchText?.length)
       return this.getRecordsByText(
@@ -34,10 +37,19 @@ export class RecordRepository {
         fromRecord,
         howMany,
         status,
-        searchText
+        searchText,
+        metadata,
+        sortBy
       );
 
-    return this.getRecordsDatasetId(datasetId, fromRecord, howMany, status);
+    return this.getRecordsDatasetId(
+      datasetId,
+      fromRecord,
+      howMany,
+      status,
+      metadata,
+      sortBy
+    );
   }
 
   async deleteRecordResponse(record: Record) {
@@ -119,20 +131,32 @@ export class RecordRepository {
     datasetId: string,
     fromRecord: number,
     howMany: number,
-    status: string
+    status: string,
+    metadata: string[],
+    sortBy: string[]
   ): Promise<BackedRecords> {
     try {
       const url = `/v1/me/datasets/${datasetId}/records`;
 
-      const params = this.createParams(fromRecord, howMany, status);
+      const params = this.createParams(
+        fromRecord,
+        howMany,
+        status,
+        metadata,
+        sortBy
+      );
 
-      const { data } = await this.axios.get<Response<BackedRecord[]>>(url, {
-        params,
-      });
+      const { data } = await this.axios.get<ResponseWithTotal<BackedRecord[]>>(
+        url,
+        {
+          params,
+        }
+      );
+      const { items: records, total } = data;
 
       return {
-        records: data.items,
-        total: data.items.length,
+        records,
+        total,
       };
     } catch (err) {
       throw {
@@ -146,7 +170,9 @@ export class RecordRepository {
     fromRecord: number,
     howMany: number,
     status: string,
-    searchText: string
+    searchText: string,
+    metadata: string[],
+    sortBy: string[]
   ): Promise<BackedRecords> {
     try {
       const url = `/v1/me/datasets/${datasetId}/records/search`;
@@ -161,9 +187,17 @@ export class RecordRepository {
         })
       );
 
-      const params = this.createParams(fromRecord, howMany, status);
+      const params = this.createParams(
+        fromRecord,
+        howMany,
+        status,
+        metadata,
+        sortBy
+      );
 
-      const { data } = await this.axios.post(url, body, { params });
+      const { data } = await this.axios.post<
+        ResponseWithTotal<BackendSearchRecords[]>
+      >(url, body, { params });
 
       const { items, total } = data;
 
@@ -201,7 +235,13 @@ export class RecordRepository {
     };
   }
 
-  private createParams(fromRecord: number, howMany: number, status: string) {
+  private createParams(
+    fromRecord: number,
+    howMany: number,
+    status: string,
+    metadata: string[],
+    sortBy: string[]
+  ) {
     const offset = `${fromRecord - 1}`;
     const backendStatus = status === "pending" ? "missing" : status;
     const params = new URLSearchParams();
@@ -213,6 +253,14 @@ export class RecordRepository {
     params.append("response_status", backendStatus);
 
     if (backendStatus === "missing") params.append("response_status", "draft");
+
+    metadata.forEach((query) => {
+      params.append("metadata", query);
+    });
+
+    sortBy.forEach((sort) => {
+      params.append("sort_by", sort);
+    });
 
     return params;
   }

@@ -21,12 +21,14 @@ from argilla import Workspace
 from argilla.client import api
 from argilla.client.feedback.config import DatasetConfig
 from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.schemas import (
-    FeedbackRecord,
-    RatingQuestion,
-    TextField,
-    TextQuestion,
+from argilla.client.feedback.schemas.fields import TextField
+from argilla.client.feedback.schemas.metadata import (
+    FloatMetadataProperty,
+    IntegerMetadataProperty,
+    TermsMetadataProperty,
 )
+from argilla.client.feedback.schemas.questions import TextQuestion
+from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteSuggestionSchema
 from argilla.client.feedback.training.schemas import TrainingTask
 from argilla.client.models import Framework
@@ -37,109 +39,6 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
     from tests.integration.helpers import SecuredClient
-
-
-def test_init(
-    feedback_dataset_guidelines: str,
-    feedback_dataset_fields: List["AllowedFieldTypes"],
-    feedback_dataset_questions: List["AllowedQuestionTypes"],
-) -> None:
-    dataset = FeedbackDataset(
-        guidelines=feedback_dataset_guidelines,
-        fields=feedback_dataset_fields,
-        questions=feedback_dataset_questions,
-    )
-
-    assert dataset.guidelines == feedback_dataset_guidelines
-    assert dataset.fields == feedback_dataset_fields
-    assert dataset.questions == feedback_dataset_questions
-
-
-def test_init_wrong_guidelines(
-    feedback_dataset_fields: List["AllowedFieldTypes"], feedback_dataset_questions: List["AllowedQuestionTypes"]
-) -> None:
-    with pytest.raises(TypeError, match="Expected `guidelines` to be"):
-        FeedbackDataset(
-            guidelines=[],
-            fields=feedback_dataset_fields,
-            questions=feedback_dataset_questions,
-        )
-    with pytest.raises(ValueError, match="Expected `guidelines` to be"):
-        FeedbackDataset(
-            guidelines="",
-            fields=feedback_dataset_fields,
-            questions=feedback_dataset_questions,
-        )
-
-
-def test_init_wrong_fields(
-    feedback_dataset_guidelines: str, feedback_dataset_questions: List["AllowedQuestionTypes"]
-) -> None:
-    with pytest.raises(TypeError, match="Expected `fields` to be a list"):
-        FeedbackDataset(
-            guidelines=feedback_dataset_guidelines,
-            fields=None,
-            questions=feedback_dataset_questions,
-        )
-    with pytest.raises(TypeError, match="Expected `fields` to be a list of `TextField`"):
-        FeedbackDataset(
-            guidelines=feedback_dataset_guidelines,
-            fields=[{"wrong": "field"}],
-            questions=feedback_dataset_questions,
-        )
-    with pytest.raises(ValueError, match="At least one field in `fields` must be required"):
-        FeedbackDataset(
-            guidelines=feedback_dataset_guidelines,
-            fields=[TextField(name="test", required=False)],
-            questions=feedback_dataset_questions,
-        )
-    with pytest.raises(ValueError, match="Expected `fields` to have unique names"):
-        FeedbackDataset(
-            guidelines=feedback_dataset_guidelines,
-            fields=[
-                TextField(name="test", required=True),
-                TextField(name="test", required=True),
-            ],
-            questions=feedback_dataset_questions,
-        )
-
-
-def test_init_wrong_questions(
-    feedback_dataset_guidelines: str, feedback_dataset_fields: List["AllowedFieldTypes"]
-) -> None:
-    with pytest.raises(TypeError, match="Expected `questions` to be a list, got"):
-        FeedbackDataset(
-            guidelines=feedback_dataset_guidelines,
-            fields=feedback_dataset_fields,
-            questions=None,
-        )
-    with pytest.raises(
-        TypeError,
-        match="Expected `questions` to be a list of",
-    ):
-        FeedbackDataset(
-            guidelines=feedback_dataset_guidelines,
-            fields=feedback_dataset_fields,
-            questions=[{"wrong": "question"}],
-        )
-    with pytest.raises(ValueError, match="At least one question in `questions` must be required"):
-        FeedbackDataset(
-            guidelines=feedback_dataset_guidelines,
-            fields=feedback_dataset_fields,
-            questions=[
-                TextQuestion(name="question-1", required=False),
-                RatingQuestion(name="question-2", values=[1, 2], required=False),
-            ],
-        )
-    with pytest.raises(ValueError, match="Expected `questions` to have unique names"):
-        FeedbackDataset(
-            guidelines=feedback_dataset_guidelines,
-            fields=feedback_dataset_fields,
-            questions=[
-                TextQuestion(name="question-1", required=True),
-                TextQuestion(name="question-1", required=True),
-            ],
-        )
 
 
 def test_create_dataset_with_suggestions(argilla_user: "ServerUser") -> None:
@@ -324,6 +223,56 @@ def test_add_records(
     assert len(dataset[:2]) == 2
     assert len(dataset[1:2]) == 1
     assert len(dataset) == len(dataset.records)
+
+
+@pytest.mark.parametrize(
+    "record, exception_cls, exception_msg",
+    [
+        (FeedbackRecord(fields={}, metadata={}), ValueError, "required-field\n  field required"),
+        (
+            FeedbackRecord(fields={"optional-field": "text"}, metadata={}),
+            ValueError,
+            "required-field\n  field required",
+        ),
+        (
+            FeedbackRecord(fields={"required-field": "text"}, metadata={"terms-metadata": "d"}),
+            ValueError,
+            "terms-metadata\n  Provided 'terms-metadata=d' is not valid, only values in \['a', 'b', 'c'\] are allowed.",
+        ),
+        (
+            FeedbackRecord(fields={"required-field": "text"}, metadata={"int-metadata": 11}),
+            ValueError,
+            "int-metadata\n  Provided 'int-metadata=11' is not valid, only values between 0 and 10 are allowed.",
+        ),
+        (
+            FeedbackRecord(fields={"required-field": "text"}, metadata={"float-metadata": 11.0}),
+            ValueError,
+            "float-metadata\n  Provided 'float-metadata=11.0' is not valid, only values between 0.0 and 10.0 are allowed.",
+        ),
+    ],
+)
+def test_add_records_validation_error(
+    record: FeedbackRecord, exception_cls: Exception, exception_msg: str, argilla_user: "ServerUser"
+) -> None:
+    api.init(api_key=argilla_user.api_key)
+
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
+        questions=[TextQuestion(name="question", required=True)],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="int-metadata", min=0, max=10),
+            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+    )
+
+    remote_dataset = dataset.push_to_argilla(name="my-dataset")
+
+    with pytest.raises(exception_cls, match=exception_msg):
+        remote_dataset.add_records(record)
+
+    assert len(dataset.records) == 0
+    remote_dataset.delete()
 
 
 @pytest.mark.parametrize("format_as,expected_output", [("datasets", datasets.Dataset)])
@@ -528,13 +477,6 @@ async def test_update_dataset_records_in_argilla(
                 },
             ]
         )
-    with pytest.raises(TypeError, match='"RemoteFeedbackRecord" is immutable and does not support item assignment'):
-        record.suggestions = [
-            {
-                "question_name": "question-1",
-                "value": "This is a suggestion to question 1",
-            },
-        ]
 
 
 def test_push_to_huggingface_and_from_huggingface(

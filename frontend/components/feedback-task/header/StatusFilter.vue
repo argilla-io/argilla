@@ -28,10 +28,6 @@
 <script>
 export default {
   props: {
-    options: {
-      type: Array,
-      required: true,
-    },
     selectedOption: {
       type: String,
     },
@@ -39,6 +35,24 @@ export default {
   model: {
     prop: "selectedOption",
     event: "change",
+  },
+  data() {
+    return {
+      options: [
+        {
+          id: "pending",
+          name: "Pending",
+        },
+        {
+          id: "submitted",
+          name: "Submitted",
+        },
+        {
+          id: "discarded",
+          name: "Discarded",
+        },
+      ],
+    };
   },
   methods: {
     onChangeOption(option) {

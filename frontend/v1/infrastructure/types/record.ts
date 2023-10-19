@@ -27,7 +27,12 @@ export interface BackedRecord {
   fields: { [key: string]: string };
   updated_at: string;
 }
+
 export interface BackedRecords {
   records: BackedRecord[];
   total: number;
+}
+
+export interface BackendSearchRecords {
+  record: BackedRecord;
 }

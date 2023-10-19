@@ -1,90 +1,91 @@
 <template>
   <div class="filters">
-    <span class="filters__component">
-      <SearchBarBase
-        v-model="searchInput"
-        :placeholder="'Introduce a query'"
-        :additionalInfo="additionalInfoForSearchComponent"
-      />
-    </span>
-    <span class="filters__component">
-      <StatusFilter :options="statusOptions" v-model="selectedStatus" />
-    </span>
+    <SearchBarBase
+      v-model="recordCriteria.searchText"
+      :placeholder="'Introduce a query'"
+    />
+    <MetadataFilter
+      v-if="!!datasetMetadata.length"
+      :datasetMetadata="datasetMetadata"
+      v-model="recordCriteria.metadata"
+    />
+    <Sort
+      v-if="!!datasetMetadata.length"
+      :datasetMetadata="datasetMetadata"
+      v-model="recordCriteria.sortBy"
+    />
+    <p v-if="shouldShowTotalRecords" class="filters__total-records">
+      {{ totalRecordsInfo }}
+    </p>
+    <StatusFilter class="filters__status" v-model="recordCriteria.status" />
   </div>
 </template>
 
 <script>
+import { useDatasetsFiltersViewModel } from "./useDatasetsFiltersViewModel";
+
 export default {
   name: "DatasetFiltersComponent",
   props: {
-    datasetId: {
-      type: String,
+    recordCriteria: {
+      type: Object,
       required: true,
     },
   },
   data: () => {
     return {
-      selectedStatus: null,
-      searchInput: null,
       totalRecords: null,
     };
   },
-  beforeMount() {
-    this.selectedStatus = this.selectedStatus ?? this.statusFromRoute;
-    this.searchInput = this.searchInput ?? this.searchFromRoute;
-
-    this.$root.$on("reset-status-filter", () => {
-      this.selectedStatus = this.statusFromRoute;
-    });
-    this.$root.$on("reset-search-filter", () => {
-      this.searchInput = this.searchFromRoute;
-    });
-    this.$root.$on("total-records", (totalRecords) => {
-      this.totalRecords = totalRecords;
-    });
-  },
   computed: {
-    additionalInfoForSearchComponent() {
+    totalRecordsInfo() {
       if (!this.totalRecords || this.totalRecords === 0) return null;
 
       if (this.totalRecords === 1) return `${this.totalRecords} record`;
+
       return `${this.totalRecords} records`;
     },
-    statusFromRoute() {
-      return this.$route.query?._status;
+    shouldShowTotalRecords() {
+      return (
+        this.recordCriteria.isFilteringByText ||
+        this.recordCriteria.isFilteringByMetadata
+      );
     },
-    searchFromRoute() {
-      return this.$route.query?._search;
+  },
+  methods: {
+    newFiltersChanged() {
+      if (!this.recordCriteria.hasChanges) return;
+      this.recordCriteria.page = 1;
+
+      this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
     },
   },
   watch: {
-    selectedStatus(newValue) {
-      this.$root.$emit("status-filter-changed", newValue);
+    "recordCriteria.searchText"() {
+      this.newFiltersChanged();
     },
-    searchInput(searchInput) {
-      this.$root.$emit("search-filter-changed", searchInput);
+    "recordCriteria.status"() {
+      this.newFiltersChanged();
+    },
+    "recordCriteria.metadata"() {
+      this.newFiltersChanged();
+    },
+    "recordCriteria.sortBy"() {
+      this.newFiltersChanged();
     },
   },
-  created() {
-    this.statusOptions = [
-      {
-        id: "pending",
-        name: "Pending",
-      },
-      {
-        id: "submitted",
-        name: "Submitted",
-      },
-      {
-        id: "discarded",
-        name: "Discarded",
-      },
-    ];
+  setup() {
+    return useDatasetsFiltersViewModel();
   },
-  beforeDestroy() {
-    this.$root.$off("reset-status-filter");
-    this.$root.$off("reset-search-filter");
-    this.$root.$off("total-records");
+  mounted() {
+    this.$root.$on("on-changed-total-records", (totalRecords) => {
+      this.totalRecords = totalRecords;
+    });
+
+    this.loadMetadata(this.recordCriteria.datasetId);
+  },
+  destroyed() {
+    this.$root.$off("on-changed-total-records");
   },
 };
 </script>
@@ -92,12 +93,22 @@ export default {
 <style lang="scss" scoped>
 .filters {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: $base-space * 2;
   align-items: center;
+  width: 100%;
   padding: $base-space * 2 0;
-}
-.search-area {
-  width: clamp(300px, 30vw, 800px);
+  &__total-records {
+    flex-shrink: 0;
+    margin: 0;
+    @include font-size(13px);
+    color: $black-37;
+  }
+  &__status {
+    margin-left: auto;
+  }
+  .search-area {
+    width: min(100%, 400px);
+  }
 }
 </style>
