@@ -210,6 +210,11 @@ class FeedbackRecord(BaseModel):
             return tuple([v for v in values])
         return values
 
+    @property
+    def unified_responses(self) -> Optional[Dict[str, List["UnifiedValueSchema"]]]:
+        """Property that returns the unified responses for the record."""
+        return self._unified_responses
+
     def update(
         self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
     ) -> None:

@@ -12,72 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.feedback import (
-    ArgillaTrainer,
-    LabelQuestionStrategy,
-    LabelQuestionUnification,
-    MultiLabelQuestionStrategy,
-    MultiLabelQuestionUnification,
-    RankingQuestionStrategy,
-    RankingQuestionUnification,
-    RatingQuestionStrategy,
-    RatingQuestionUnification,
-    TrainingTask,
-    TrainingTaskMapping,  # <- Deprecated
-)
-from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.schemas import (
-    FeedbackRecord,
-    FloatMetadataFilter,
-    FloatMetadataProperty,
-    IntegerMetadataFilter,
-    IntegerMetadataProperty,
-    LabelQuestion,
-    MultiLabelQuestion,
-    RankingQuestion,
-    RatingQuestion,
-    RecordSortField,
-    ResponseSchema,
-    SortBy,
-    SortOrder,
-    SuggestionSchema,
-    TermsMetadataFilter,
-    TermsMetadataProperty,
-    TextField,
-    TextQuestion,
-    ValueSchema,
-)
-
-__all__ = [
-    "ArgillaTrainer",
-    "LabelQuestionStrategy",
-    "MultiLabelQuestionStrategy",
-    "RatingQuestionStrategy",
-    "RankingQuestionStrategy",
-    "LabelQuestionUnification",
-    "MultiLabelQuestionUnification",
-    "RatingQuestionUnification",
-    "RankingQuestionUnification",
-    "TrainingTask",
-    "TrainingTaskMapping",
-    "FeedbackDataset",
-    "FeedbackRecord",
-    "LabelQuestion",
-    "MultiLabelQuestion",
-    "RatingQuestion",
-    "RankingQuestion",
-    "ResponseSchema",
-    "SuggestionSchema",
-    "TextField",
-    "TextQuestion",
-    "ValueSchema",
-    "FloatMetadataProperty",
-    "IntegerMetadataProperty",
-    "TermsMetadataProperty",
-    "TermsMetadataFilter",
-    "IntegerMetadataFilter",
-    "FloatMetadataFilter",
-    "SortOrder",
-    "SortBy",
-    "RecordSortField",
-]
+# !!! All modules used here must define the __all__ variable properly
+from argilla.client.feedback import *  # noqa
+from argilla.client.feedback.dataset import FeedbackDataset  # noqa
+from argilla.client.feedback.schemas import *  # noqa

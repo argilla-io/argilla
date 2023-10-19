@@ -43,32 +43,47 @@ These are the section headers that we use:
 
 ### Changed
 
-- `Dockerfile` to use multi stage build. ([#3221](https://github.com/argilla-io/argilla/pull/3221), [#3793](https://github.com/argilla-io/argilla/pull/3793))
-- Active learning for text classification notebooks to use the most recent small-text version. ([#3831](https://github.com/argilla-io/argilla/pull/3831))
-- Argilla dataset name in the active learning for text classification notebooks to be consistent with the default names in the huggingface spaces. ([#3831](https://github.com/argilla-io/argilla/pull/3831))
 - `GET /api/v1/datasets/{dataset_id}/records`, `GET /api/v1/me/datasets/{dataset_id}/records` and `POST /api/v1/me/datasets/{dataset_id}/records/search` endpoints to return the `total` number of records. ([#3848](https://github.com/argilla-io/argilla/pull/3848), [#3903](https://github.com/argilla-io/argilla/pull/3903))
-- `FilteredRemoteFeedbackRecords.__len__` method to return the number of records matching the provided filters. ([#3916](https://github.com/argilla-io/argilla/pull/3916))
+- Implemented `__len__` method for filtered datasets to return the number of records matching the provided filters. ([#3916](https://github.com/argilla-io/argilla/pull/3916))
 - Increase the default max result window for Elasticsearch created for Feedback datasets. ([#3929](https://github.com/argilla-io/argilla/pull/))
 - Force elastic index refresh after records creation. ([#3929](https://github.com/argilla-io/argilla/pull/))
-- `FeedbackDataset` methods have been aligned to be accessible through the several implementations. ([#3937](https://github.com/argilla-io/argilla/pull/3937))
-- Support on `RemoteFeedbackDataset` for `unify_responses` method. ([#3937](https://github.com/argilla-io/argilla/pull/3937))
+
+### Fixed
+
+- Fixed response schemas to allow `values` to be `None` i.e. when a record is discarded the `response.values` are set to `None`. ([#3926](https://github.com/argilla-io/argilla/pull/3926))
+
+## [1.17.0](https://github.com/argilla-io/argilla/compare/v1.16.0...v1.17.0)
+
+### Added
+
+- Added fields `inserted_at` and `updated_at` in `RemoteResponseSchema` ([#3822](https://github.com/argilla-io/argilla/pull/3822)).
+- Added automatic model card generation through `ArgillaTrainer.save` ([#3857](https://github.com/argilla-io/argilla/pull/3857)).
+- Added task templates to the `FeedbackDataset` ([#3973](https://github.com/argilla-io/argilla/pull/3973)).
+
+### Changed
+
+- Updated `Dockerfile` to use multi stage build ([#3221](https://github.com/argilla-io/argilla/pull/3221) and [#3793](https://github.com/argilla-io/argilla/pull/3793)).
+- Updated active learning for text classification notebooks to use the most recent small-text version ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
+- Changed argilla dataset name in the active learning for text classification notebooks to be consistent with the default names in the huggingface spaces ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
+- FeedbackDataset API methods have been aligned to be accessible through the several implementations ([#3937](https://github.com/argilla-io/argilla/pull/3937)).
+- The `unify_responses` support for remote datasets ([#3937](https://github.com/argilla-io/argilla/pull/3937)).
 
 ### Fixed
 
 - Fix field not shown in the order defined in the dataset settings. Closes [#3959](https://github.com/argilla-io/argilla/issues/3959) ([#3984](https://github.com/argilla-io/argilla/pull/3984))
-- Updated active learning for text classification notebooks to pass ids of type int to `TextClassificationRecord`. ([#3831](https://github.com/argilla-io/argilla/pull/3831))
-- Fixed record fields validation that was preventing from logging records with optional fields (i.e. `required=True`) when the field value was `None`. ([#3846](https://github.com/argilla-io/argilla/pull/3846))
-- Fixed `configure_dataset_settings` when providing the workspace via the arg `workspace`. ([#3887](https://github.com/argilla-io/argilla/pull/3887))
-- Fixed response schemas to allow `values` to be `None` i.e. when a record is discarded the `response.values` are set to `None`. ([#3926](https://github.com/argilla-io/argilla/pull/3926))
-- The `inserted_at` and `updated_at` attributes are create using the `utcnow` factory to avoid unexpected race conditions on timestamp creation. ([#3945](https://github.com/argilla-io/argilla/pull/3945))
-- Fixed saving of models trained with `ArgillaTrainer` with a `peft_config` parameter. ([#3795](https://github.com/argilla-io/argilla/pull/3795))
-- Fixed backwards compatibility on `from_huggingface` when loading a `FeedbackDataset` from the Hugging Face Hub that was previously dumped using another version of Argilla, starting at 1.8.0, when it was first introduced. ([#3829](https://github.com/argilla-io/argilla/pull/3829))
-- Fixed allow pull datasets without records. ([#3851](https://github.com/argilla-io/argilla/pull/3851))
-- Updated active learning for text classification notebooks to pass ids of type int to `TextClassificationRecord`. ([#3831](https://github.com/argilla-io/argilla/pull/3831))
-- Fixed record fields validation that was preventing from logging records with optional fields (i.e. `required=True`) when the field value was `None`. ([#3846](https://github.com/argilla-io/argilla/pull/3846))
+- Updated active learning for text classification notebooks to pass ids of type int to `TextClassificationRecord` ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
+- Fixed record fields validation that was preventing from logging records with optional fields (i.e. `required=True`) when the field value was `None` ([#3846](https://github.com/argilla-io/argilla/pull/3846)).
+- Always set `pretrained_model_name_or_path` attribute as string in `ArgillaTrainer` ([#3914](https://github.com/argilla-io/argilla/pull/3914)).
+- The `inserted_at` and `updated_at` attributes are create using the `utcnow` factory to avoid unexpected race conditions on timestamp creation ([#3945](https://github.com/argilla-io/argilla/pull/3945))
+- Fixed `configure_dataset_settings` when providing the workspace via the arg `workspace` ([#3887](https://github.com/argilla-io/argilla/pull/3887)).
+- Fixed saving of models trained with `ArgillaTrainer` with a `peft_config` parameter ([#3795](https://github.com/argilla-io/argilla/pull/3795)).
+- Fixed backwards compatibility on `from_huggingface` when loading a `FeedbackDataset` from the Hugging Face Hub that was previously dumped using another version of Argilla, starting at 1.8.0, when it was first introduced ([#3829](https://github.com/argilla-io/argilla/pull/3829)).
 - Fixed wrong `__repr__` problem for `TrainingTask`. ([#3969](https://github.com/argilla-io/argilla/pull/3969))
 - Fixed wrong key return error `prepare_for_training_with_*` for `TrainingTask`. ([#3969](https://github.com/argilla-io/argilla/pull/3969))
 
+### Deprecated
+
+- Function `rg.configure_dataset` is deprecated in favour of `rg.configure_dataset_settings`. The former will be removed in version 1.19.0
 
 ## [1.16.0](https://github.com/argilla-io/argilla/compare/v1.15.1...v1.16.0)
 

@@ -41,16 +41,21 @@ Datasets
 FeedbackDataset
 ---------------
 
-.. automodule:: argilla.client.feedback.dataset.local
+.. automodule:: argilla.client.feedback.dataset.local.dataset
    :members: FeedbackDataset
+   :inherited-members:
+
+.. automodule:: argilla.client.feedback.dataset.local.mixins
+   :members: ArgillaMixin, TaskTemplateMixin
    :inherited-members:
 
 .. automodule:: argilla.client.feedback.dataset.remote.dataset
    :members: RemoteFeedbackDataset, RemoteFeedbackRecords
    :inherited-members:
 
-.. automodule:: argilla.client.feedback.dataset.mixins
-   :members: ArgillaMixin, UnificationMixin
+.. automodule:: argilla.client.feedback.dataset.remote.mixins
+   :members: ArgillaRecordsMixin
+   :inherited-members:
 
 .. automodule:: argilla.client.feedback.integrations.huggingface
    :members: HuggingFaceDatasetMixin
