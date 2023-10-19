@@ -1,5 +1,5 @@
 <template>
-  <SimilarityConfigDropdown v-model="value" :options="['most', 'least']" />
+  <SimilarityConfigDropdown v-model="selected" :options="['most', 'least']" />
 </template>
 <script>
 export default {
@@ -7,6 +7,20 @@ export default {
     value: {
       type: String,
       required: true,
+    },
+  },
+  model: {
+    prop: "value",
+    event: "onValueChanged",
+  },
+  data() {
+    return {
+      selected: this.value,
+    };
+  },
+  watch: {
+    selected() {
+      this.$emit("onValueChanged", this.selected);
     },
   },
 };

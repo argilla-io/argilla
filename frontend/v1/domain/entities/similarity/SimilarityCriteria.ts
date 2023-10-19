@@ -7,8 +7,7 @@ export class SimilarityCriteria {
   public order: OrderSimilarity;
 
   constructor() {
-    this.limit = 50;
-    this.order = "most";
+    this.reset();
   }
 
   complete(
@@ -30,6 +29,13 @@ export class SimilarityCriteria {
       this.limit !== undefined &&
       this.order !== undefined
     );
+  }
+
+  reset() {
+    this.recordId = undefined;
+    this.vectorId = undefined;
+    this.limit = 50;
+    this.order = "most";
   }
 
   isEqual(other: SimilarityCriteria): boolean {

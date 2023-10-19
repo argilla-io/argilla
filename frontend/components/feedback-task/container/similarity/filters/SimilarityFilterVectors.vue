@@ -6,7 +6,6 @@
       :id="vector.id"
       :value="vector.id"
       v-model="selected"
-      @click="onChanged(vector.id)"
     >
       {{ vector.title }}
     </BaseRadioButton>
@@ -29,22 +28,12 @@ export default {
   },
   data() {
     return {
-      selected: null,
+      selected: this.value,
     };
   },
   watch: {
-    value(newSelected) {
-      this.selected = newSelected;
-    },
-  },
-  mounted() {
-    if (!this.value) {
-      this.$emit("onValueChanged", this.vectors[0].id);
-    }
-  },
-  methods: {
-    onChanged(vectorId) {
-      this.$emit("onValueChanged", vectorId);
+    selected() {
+      this.$emit("onValueChanged", this.selected);
     },
   },
 };

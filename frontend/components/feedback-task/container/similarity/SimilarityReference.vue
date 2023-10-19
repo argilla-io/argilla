@@ -48,6 +48,14 @@ export default {
       required: true,
     },
   },
+  watch: {
+    "recordCriteria.similaritySearch.order"() {
+      this.filterChanged();
+    },
+    "recordCriteria.similaritySearch.limit"() {
+      this.filterChanged();
+    },
+  },
   methods: {
     expand() {
       this.$emit("expand");
@@ -55,7 +63,17 @@ export default {
     minimize() {
       this.$emit("minimize");
     },
-    removeSimilaritySearch() {},
+    removeSimilaritySearch() {
+      this.recordCriteria.similaritySearch.reset();
+
+      this.filterChanged();
+    },
+    filterChanged() {
+      if (!this.recordCriteria.hasChanges) return;
+      this.recordCriteria.page = 1;
+
+      this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
+    },
   },
 };
 </script>
