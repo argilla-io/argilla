@@ -798,7 +798,8 @@ class TestSuiteOpenSearchEngine:
                 "updated_at": record.updated_at.isoformat(),
                 "responses": {},
                 "metadata": {
-                    str(metadata_prop.name): record.metadata_[metadata_prop.name] for metadata_prop in metadata_properties
+                    str(metadata_prop.name): record.metadata_[metadata_prop.name]
+                    for metadata_prop in metadata_properties
                 },
             }
             for record in records

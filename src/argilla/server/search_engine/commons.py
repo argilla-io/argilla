@@ -138,9 +138,13 @@ def _mapping_for_metadata_property(metadata_property: MetadataProperty) -> dict:
 
 def _aggregation_for_metadata_property(metadata_property: MetadataProperty) -> dict:
     if metadata_property.type == MetadataPropertyType.terms:
-        return {f"{metadata_property.name}": {"terms": {"field": _mapping_key_for_metadata_property(metadata_property)}}}
+        return {
+            f"{metadata_property.name}": {"terms": {"field": _mapping_key_for_metadata_property(metadata_property)}}
+        }
     if metadata_property.type in [MetadataPropertyType.integer, MetadataPropertyType.float]:
-        return {f"{metadata_property.name}": {"stats": {"field": _mapping_key_for_metadata_property(metadata_property)}}}
+        return {
+            f"{metadata_property.name}": {"stats": {"field": _mapping_key_for_metadata_property(metadata_property)}}
+        }
     else:
         raise ValueError(f"Cannot process request for metadata property {metadata_property}")
 
