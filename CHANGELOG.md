@@ -34,7 +34,7 @@ These are the section headers that we use:
 - Added fields `inserted_at` and `updated_at` in `RemoteResponseSchema`. ([#3822](https://github.com/argilla-io/argilla/pull/3822))
 - Added support for `sort_by` for `RemoteFeedbackDataset` i.e. a `FeedbackDataset` uploaded to Argilla. ([#3925](https://github.com/argilla-io/argilla/pull/3925))
 - Added `metadata_properties` support for both `push_to_huggingface` and `from_huggingface`. ([#3947](https://github.com/argilla-io/argilla/pull/3947))
-- Add support for update records (`metadata` and `external_id`) from Python SDK. ([#3946](https://github.com/argilla-io/argilla/pull/3946))
+- Add support for update records (`metadata`) from Python SDK. ([#3946](https://github.com/argilla-io/argilla/pull/3946))
 - Added `delete_metadata_properties` method to delete metadata properties. ([#3932](https://github.com/argilla-io/argilla/pull/3932))
 - Added `update_metadata_properties` method to update `metadata_properties`. ([#3961](https://github.com/argilla-io/argilla/pull/3961))
 - Added automatic model card generation through `ArgillaTrainer.save` ([#3857](https://github.com/argilla-io/argilla/pull/3857))
