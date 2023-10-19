@@ -477,7 +477,7 @@ class TRLModelCardData(FrameworkCardData):
     def _update_config__repr__(self) -> Optional[str]:
         if self.task_type == "for_proximal_policy_optimization":
             # Similar to what happens with spacy, the current implementation
-            # doesnt' render appropriately, for the moment let for the user to be written by hand.
+            # doesn't render appropriately, for the moment let for the user to be written by hand.
             return
 
         else:

@@ -12,14 +12,39 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 import httpx
 
 from argilla.client.sdk.commons.errors_handler import handle_response_error
 from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError, Response
+from argilla.client.sdk.v1.datasets.models import FeedbackSuggestionModel
 from argilla.client.sdk.v1.records.models import FeedbackItemModel
+
+
+def update_record(
+    # TODO: Use the proper sdk API Model instead of the dict
+    client: httpx.Client,
+    id: Union[str, UUID],
+    data: Dict[str, Any],
+) -> Response[Union[FeedbackItemModel, ErrorMessage, HTTPValidationError]]:
+    url = f"/api/v1/records/{id}"
+
+    body = {}
+    if "metadata" in data:
+        body["metadata"] = data["metadata"]
+    if "external_id" in data:
+        body["external_id"] = data["external_id"]
+
+    response = client.patch(url=url, json=body)
+
+    if response.status_code == 200:
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = FeedbackItemModel.parse_raw(response.content)
+        return response_obj
+
+    return handle_response_error(response)
 
 
 def delete_record(
@@ -68,4 +93,51 @@ def delete_suggestions(
 
     if response.status_code == 204:
         return Response.from_httpx_response(response)
+    return handle_response_error(response)
+
+
+def set_suggestion(
+    client: httpx.Client,
+    record_id: UUID,
+    question_id: UUID,
+    value: Any,
+    type: Optional[Literal["model", "human"]] = None,
+    score: Optional[float] = None,
+    agent: Optional[str] = None,
+) -> Response[Union[FeedbackSuggestionModel, ErrorMessage, HTTPValidationError]]:
+    """Sends a PUT request to `/api/v1/records/{id}/suggestions` endpoint to add or update
+    a suggestion for a question in the `FeedbackDataset`.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        record_id: the id of the record to add the suggestion to.
+        question_id: the id of the question to add the suggestion to.
+        value: the value of the suggestion.
+        type: the type of the suggestion. It can be either `model` or `human`. Defaults to None.
+        score: the score of the suggestion. Defaults to None.
+        agent: the agent used to obtain the suggestion. Defaults to None.
+
+    Returns:
+        A `Response` object containing a `parsed` attribute with the parsed response if the
+        request was successful, which is a `FeedbackSuggestionModel`.
+    """
+    url = f"/api/v1/records/{record_id}/suggestions"
+
+    suggestion = {
+        "question_id": str(question_id),
+        "value": value,
+    }
+    if type is not None:
+        suggestion["type"] = type
+    if score is not None:
+        suggestion["score"] = score
+    if agent is not None:
+        suggestion["agent"] = agent
+
+    response = client.put(url=url, json=suggestion)
+
+    if response.status_code in [200, 201]:
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = FeedbackSuggestionModel(**response.json())
+        return response_obj
     return handle_response_error(response)

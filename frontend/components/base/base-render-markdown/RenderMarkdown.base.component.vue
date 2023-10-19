@@ -136,6 +136,7 @@ export default {
     color: #8fbb62;
   }
   .hljs-tag,
+  .hljs-punctuation,
   .hljs-tag .hljs-attr,
   .hljs-tag .hljs-name {
     color: #c0a5a5;

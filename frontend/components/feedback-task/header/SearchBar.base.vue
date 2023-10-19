@@ -70,7 +70,6 @@
 
 <script>
 import { isNil } from "lodash";
-// TODO - manage only empty strings and not null in the  search component
 
 export default {
   name: "SearchBarComponent",
@@ -147,7 +146,6 @@ export default {
 <style lang="scss" scoped>
 .search-area {
   display: flex;
-  min-width: 300px;
   align-items: center;
   gap: $base-space * 1.5;
   padding: $base-space * 1.2 $base-space * 1.5;

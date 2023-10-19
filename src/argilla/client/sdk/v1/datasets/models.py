@@ -25,6 +25,8 @@ class FeedbackDatasetModel(BaseModel):
     id: UUID
     name: str = Field(regex="^(?!-|_)[a-zA-Z0-9-_ ]+$")
     guidelines: Optional[str] = None
+    # Set default for backward compatibility
+    allow_extra_metadata: Optional[bool] = True
     status: Optional[str] = None
     workspace_id: Optional[UUID] = None
     inserted_at: datetime
@@ -55,7 +57,7 @@ class FeedbackResponseStatusFilter(str, Enum):
 
 class FeedbackResponseModel(BaseModel):
     id: UUID
-    values: Dict[str, FeedbackValueModel]
+    values: Union[Dict[str, FeedbackValueModel], None]
     status: FeedbackResponseStatus
     user_id: UUID
     inserted_at: datetime
@@ -84,6 +86,7 @@ class FeedbackItemModel(BaseModel):
 
 class FeedbackRecordsModel(BaseModel):
     items: List[FeedbackItemModel]
+    total: int
 
 
 class FeedbackFieldModel(BaseModel):
@@ -102,6 +105,16 @@ class FeedbackQuestionModel(BaseModel):
     title: str
     description: Optional[str] = None
     required: bool
+    settings: Dict[str, Any]
+    inserted_at: datetime
+    updated_at: datetime
+
+
+class FeedbackMetadataPropertyModel(BaseModel):
+    id: UUID
+    name: str
+    title: str
+    visible_for_annotators: bool
     settings: Dict[str, Any]
     inserted_at: datetime
     updated_at: datetime
