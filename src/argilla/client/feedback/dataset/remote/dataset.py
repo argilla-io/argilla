@@ -15,11 +15,12 @@
 import textwrap
 import warnings
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
+from typing import Any, Dict, Iterator, List, Optional, TYPE_CHECKING, Union
 
 from tqdm import trange
 
 from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, PUSHING_BATCH_SIZE
+from argilla.client.feedback.dataset import helpers
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase, SortBy
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
 from argilla.client.feedback.mixins import ArgillaMetadataPropertiesMixin
@@ -50,7 +51,7 @@ if TYPE_CHECKING:
 
     import httpx
 
-    from argilla.client.feedback.dataset import FeedbackDataset, helpers
+    from argilla.client.feedback.dataset import FeedbackDataset
     from argilla.client.feedback.dataset.local import FeedbackDataset
     from argilla.client.feedback.schemas.enums import ResponseStatusFilter
     from argilla.client.feedback.schemas.metadata import MetadataFilters
@@ -97,6 +98,8 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         self._sort_by = sort_by or []
         self._response_status = response_status or []
         self._metadata_filters = metadata_filters or []
+
+        self._validate_metadata_names()
 
     @property
     def dataset(self) -> "RemoteFeedbackDataset":
@@ -295,6 +298,15 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             response_status=response_status,
         )
 
+    def _validate_metadata_names(self):
+        names = []
+        if self.metadata_filters:
+            names.extend([metadata_filter.name for metadata_filter in self.metadata_filters])
+        if self.sort_by:
+            names.extend([sort.metadata_name for sort in self.sort_by if sort.is_metadata_field])
+        if names:
+            helpers.validate_metadata_names(self.dataset, names)
+
 
 class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
     # TODO: Call super method once the base init contains only commons init attributes
@@ -441,10 +453,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
 
     def sort_by(self, sort: List[SortBy]) -> "RemoteFeedbackDataset":
         """Sorts the current `RemoteFeedbackDataset` based on the given sort fields and orders."""
-        helpers.validate_metadata_names(
-            dataset=self, names=[sort_.metadata_name for sort_ in sort if sort_.is_metadata_field]
-        )
-
         sorted_dataset = self._create_from_dataset(self)
         sorted_dataset._records = RemoteFeedbackRecords._create_from_dataset(sorted_dataset, sort_by=sort)
 
@@ -696,10 +704,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         """
         if not response_status and not metadata_filters:
             raise ValueError("At least one of `response_status` or `metadata_filters` must be provided.")
-
-        helpers.validate_metadata_names(
-            dataset=self, names=[metadata_filter.name for metadata_filter in metadata_filters]
-        )
 
         filtered_dataset = RemoteFeedbackDataset._create_from_dataset(self)
         filtered_dataset._records = RemoteFeedbackRecords._create_from_dataset(
