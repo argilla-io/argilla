@@ -27,7 +27,12 @@ RUN useradd -ms /bin/bash argilla
 
 # Create argilla volume
 RUN mkdir -p "$ARGILLA_HOME_PATH" && \
-  chown argilla:argilla "$ARGILLA_HOME_PATH"
+  chown argilla:argilla "$ARGILLA_HOME_PATH" && \
+  apt-get update && \
+  apt-get install -y libpq-dev && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/* && \
+  rm -rf /packages
 VOLUME $ARGILLA_HOME_PATH
 
 COPY scripts/start_argilla_server.sh /home/argilla
