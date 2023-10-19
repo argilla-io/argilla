@@ -16,10 +16,13 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [1.17.0](https://github.com/argilla-io/argilla/compare/v1.16.0...v1.17.0)
+
 ### Added
 
 - Added fields `inserted_at` and `updated_at` in `RemoteResponseSchema` ([#3822](https://github.com/argilla-io/argilla/pull/3822)).
 - Added automatic model card generation through `ArgillaTrainer.save` ([#3857](https://github.com/argilla-io/argilla/pull/3857)).
+- Added task templates to the `FeedbackDataset` ([#3973](https://github.com/argilla-io/argilla/pull/3973)).
 
 ### Changed
 
@@ -34,10 +37,17 @@ These are the section headers that we use:
 - Fix field not shown in the order defined in the dataset settings. Closes [#3959](https://github.com/argilla-io/argilla/issues/3959) ([#3984](https://github.com/argilla-io/argilla/pull/3984))
 - Updated active learning for text classification notebooks to pass ids of type int to `TextClassificationRecord` ([#3831](https://github.com/argilla-io/argilla/pull/3831)).
 - Fixed record fields validation that was preventing from logging records with optional fields (i.e. `required=True`) when the field value was `None` ([#3846](https://github.com/argilla-io/argilla/pull/3846)).
-- Fixed `configure_dataset_settings` when providing the workspace via the arg `workspace` ([#3887](https://github.com/argilla-io/argilla/pull/3887)).
+- Always set `pretrained_model_name_or_path` attribute as string in `ArgillaTrainer` ([#3914](https://github.com/argilla-io/argilla/pull/3914)).
 - The `inserted_at` and `updated_at` attributes are create using the `utcnow` factory to avoid unexpected race conditions on timestamp creation ([#3945](https://github.com/argilla-io/argilla/pull/3945))
+- Fixed `configure_dataset_settings` when providing the workspace via the arg `workspace` ([#3887](https://github.com/argilla-io/argilla/pull/3887)).
 - Fixed saving of models trained with `ArgillaTrainer` with a `peft_config` parameter ([#3795](https://github.com/argilla-io/argilla/pull/3795)).
 - Fixed backwards compatibility on `from_huggingface` when loading a `FeedbackDataset` from the Hugging Face Hub that was previously dumped using another version of Argilla, starting at 1.8.0, when it was first introduced ([#3829](https://github.com/argilla-io/argilla/pull/3829)).
+- Fixed `TrainingTaskForQuestionAnswering.__repr__` ([#3969](https://github.com/argilla-io/argilla/pull/3969))
+- Fixed potential dictionary key-errors in `TrainingTask.prepare_for_training_with_*`-methods ([#3969](https://github.com/argilla-io/argilla/pull/3969))
+
+### Deprecated
+
+- Function `rg.configure_dataset` is deprecated in favour of `rg.configure_dataset_settings`. The former will be removed in version 1.19.0
 
 ## [1.16.0](https://github.com/argilla-io/argilla/compare/v1.15.1...v1.16.0)
 
