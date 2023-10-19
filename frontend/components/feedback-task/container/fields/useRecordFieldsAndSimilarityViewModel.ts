@@ -5,7 +5,7 @@ import {
   GetDatasetVectorsUseCase,
 } from "~/v1/domain/usecases/get-dataset-vectors-use-case";
 
-export const useRecordFieldsViewModel = () => {
+export const useRecordFieldsAndSimilarityViewModel = () => {
   const datasetVectors = ref<DatasetVector[]>([]);
   const getDatasetVectorsUseCase = useResolve(GetDatasetVectorsUseCase);
   const loadVectors = async () => {

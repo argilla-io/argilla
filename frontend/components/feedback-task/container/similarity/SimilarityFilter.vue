@@ -5,7 +5,6 @@
     @click="findSimilar"
     >Find similar</BaseButton
   >
-
   <BaseDropdown
     v-else
     :visible="dropdownIsVisible"
@@ -18,21 +17,15 @@
     <template slot="dropdown-content">
       <div class="similarity-filter__dropdown">
         <span class="similarity-filter__header">
-          <SimilarityConfigDropdown
-            :value="mostOrLeastSimilar"
-            :options="['Most', 'Least']"
+          <SimilarityFilterOrder
+            v-model="recordCriteria.similaritySearch.order"
           />
           similar using:
         </span>
-        <BaseRadioButton
-          v-for="vector in availableVectors"
-          :key="vector.id"
-          :id="vector.id"
-          :value="vector"
-          v-model="selectedVector"
-        >
-          {{ vector.id }}
-        </BaseRadioButton>
+        <SimilarityFilterVectors
+          v-model="recordCriteria.similaritySearch.vectorId"
+          :vectors="availableVectors"
+        />
         <div class="similarity-filter__buttons">
           <base-button class="primary outline small" @click="cancel">
             Cancel
@@ -53,12 +46,18 @@ export default {
       type: Array,
       required: true,
     },
+    recordCriteria: {
+      type: Object,
+      required: true,
+    },
+    recordId: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
       dropdownIsVisible: false,
-      selectedVector: this.availableVectors[0],
-      mostOrLeastSimilar: "Most",
     };
   },
   methods: {
@@ -70,11 +69,12 @@ export default {
     },
     findSimilar() {
       this.dropdownIsVisible = false;
-      console.log(
-        "Search similarity...",
-        this.mostOrLeastSimilar,
-        this.selectedVector
-      );
+
+      if (!this.recordCriteria.hasChanges) return;
+      this.recordCriteria.page = 1;
+      this.recordCriteria.similaritySearch.recordId = this.recordId;
+
+      this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
     },
   },
 };

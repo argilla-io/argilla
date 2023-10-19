@@ -1,10 +1,16 @@
 export interface DatasetVector {
   id: string;
+  title: string;
 }
 
 export class DatasetVectorsRepositoryMock {
-  getVectors(datasetId: string) {
-    return Promise.all([{ id: "text_vector" }, { id: "second_vector" }]);
+  async getVectors(_datasetId: string) {
+    const vectors = await Promise.all([
+      { id: "1", title: "Vector 1" },
+      { id: "2", title: "Vector 2" },
+    ]);
+
+    return vectors;
   }
 }
 

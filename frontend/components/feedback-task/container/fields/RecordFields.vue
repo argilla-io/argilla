@@ -1,19 +1,6 @@
 <template>
   <div class="record">
-    <div class="record__header" v-if="showDefaultRecordHeader">
-      <div class="record__header--left">
-        <StatusTag
-          v-if="recordStatus"
-          class="record__status"
-          :recordStatus="recordStatus"
-        />
-        <BaseBadge :text="similarityScore" data-title="Similarity Score" />
-      </div>
-      <SimilarityFilter
-        v-if="datasetVectors.length"
-        :available-vectors="datasetVectors"
-      />
-    </div>
+    <slot></slot>
     <div
       v-for="{ id, title, content, isTextType, settings } in fields"
       :key="id"
@@ -28,36 +15,18 @@
     </div>
   </div>
 </template>
-
 <script>
-import { useRecordFieldsViewModel } from "./useRecordFieldsViewModel";
-
 export default {
   props: {
-    recordStatus: {
-      type: String,
-    },
     fields: {
       type: Array,
       required: true,
     },
-    showDefaultRecordHeader: {
-      type: Boolean,
-      default: true,
-    },
-  },
-  data() {
-    return {
-      similarityScore: "80 %",
-    };
   },
   computed: {
     searchValue() {
       return this.$route.query?._search ?? "";
     },
-  },
-  setup() {
-    return useRecordFieldsViewModel();
   },
 };
 </script>
@@ -74,28 +43,5 @@ export default {
   background: palette(white);
   border: 1px solid palette(grey, 600);
   border-radius: $border-radius-m;
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    &--left {
-      display: flex;
-      align-items: center;
-      gap: $base-space;
-    }
-  }
-  &__status {
-    display: inline-flex;
-    margin-right: auto;
-  }
-}
-.badge {
-  color: #ee7b00;
-  border-color: #ee7b00;
-  background: lighten(#ee7b00, 50%);
-  font-weight: 500;
-  &[data-title] {
-    position: relative;
-    @extend %has-tooltip--right;
-  }
 }
 </style>

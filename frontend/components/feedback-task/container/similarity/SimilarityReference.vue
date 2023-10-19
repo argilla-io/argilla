@@ -1,17 +1,15 @@
 <template>
   <div class="similarity-reference">
     <div class="similarity-reference__left">
-      <SimilarityConfigDropdown
+      <SimilarityFilterLimit
         class="similarity-reference__dropdown"
-        :value="similaritySearchConfig.limit"
-        :options="similaritySearchOptions.limit"
+        v-model="recordCriteria.similaritySearch.limit"
       />
-      <SimilarityConfigDropdown
+      <SimilarityFilterOrder
         class="similarity-reference__dropdown"
-        :value="similaritySearchConfig.searchBy"
-        :options="similaritySearchOptions.searchBy"
+        v-model="recordCriteria.similaritySearch.order"
       />
-      <p>Similar to:</p>
+      <p v-if="!isExpanded">Similar to:</p>
       <span
         class="similarity-reference__preview"
         v-if="!isExpanded"
@@ -45,31 +43,19 @@ export default {
       type: Boolean,
       default: true,
     },
-  },
-  data() {
-    return {
-      similaritySearchOptions: {
-        limit: ["50", "100", "200"],
-        searchBy: ["Most", "Least"],
-      },
-      similaritySearchConfig: {
-        limit: "50",
-        searchBy: "Most",
-      },
-    };
+    recordCriteria: {
+      type: Object,
+      required: true,
+    },
   },
   methods: {
     expand() {
       this.$emit("expand");
-      console.log("expand");
     },
     minimize() {
       this.$emit("minimize");
-      console.log("minimize");
     },
-    removeSimilaritySearch() {
-      console.log("remove similarity search");
-    },
+    removeSimilaritySearch() {},
   },
 };
 </script>

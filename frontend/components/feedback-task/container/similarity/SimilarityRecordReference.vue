@@ -6,15 +6,12 @@
       <SimilarityReference
         :preview="textPreview"
         :isExpanded="isExpanded"
+        :recordCriteria="recordCriteria"
         @expand="expand"
         @minimize="minimize"
       />
     </div>
-    <RecordFields
-      v-if="isExpanded"
-      :fields="fields"
-      :showDefaultRecordHeader="false"
-    />
+    <RecordFields v-if="isExpanded" :fields="fields" />
   </div>
 </template>
 
@@ -23,6 +20,10 @@ export default {
   props: {
     fields: {
       type: Array,
+      required: true,
+    },
+    recordCriteria: {
+      type: Object,
       required: true,
     },
   },

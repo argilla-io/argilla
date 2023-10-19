@@ -4,8 +4,8 @@
     <template v-if="!!record">
       <RecordFieldsAndSimilarity
         :key="`${record.id}_fields`"
-        :recordStatus="record.status"
-        :fields="record.fields"
+        :recordCriteria="recordCriteria"
+        :record="record"
       />
 
       <QuestionsFormComponent

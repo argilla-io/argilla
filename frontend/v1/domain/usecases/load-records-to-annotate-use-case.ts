@@ -83,6 +83,7 @@ export class LoadRecordsToAnnotateUseCase {
       metadata,
       sortBy
     );
+
     const getQuestions = this.questionRepository.getQuestions(datasetId);
     const getFields = this.fieldRepository.getFields(datasetId);
 

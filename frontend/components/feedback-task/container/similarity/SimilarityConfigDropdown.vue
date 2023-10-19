@@ -27,13 +27,17 @@
 export default {
   props: {
     value: {
-      type: String,
+      type: [String, Number],
       required: true,
     },
     options: {
       type: Array,
       required: true,
     },
+  },
+  model: {
+    prop: "value",
+    event: "onValueChange",
   },
   data() {
     return {
@@ -50,7 +54,8 @@ export default {
       this.dropdownIsVisible = value;
     },
     selectOption(option) {
-      this.value = option;
+      this.$emit("onValueChange", option);
+
       this.dropdownIsVisible = false;
     },
   },
@@ -58,6 +63,9 @@ export default {
 </script>
 <style lang="scss" scoped>
 .similarity-config {
+  user-select: none;
+  text-transform: capitalize;
+
   &__options {
     list-style: none;
     padding: calc($base-space / 2);
