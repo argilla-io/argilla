@@ -52,60 +52,6 @@ fields = [
 The order of the fields in the UI follows the order in which these are added to the `fields` attribute in the Python SDK.
 ```
 
-#### Define metadata properties
-
-Metadata properties allow you to configure the use of metadata information for the filtering and sorting features available in the UI and Python SDK.
-
-You can define metadata properties using the Python SDK by providing the following arguments:
-
-- `name`: The name of the metadata property, as it will be used internally.
-- `title` (optional): The name of the metadata property, as it will be displayed in the UI. Defaults to the `name` value, but capitalized.
-- `visible_for_annotators` (optional): A boolean to specify whether the metadata property will be accessible for users with an `annotator` role in the UI (`True`), or if it will only be visible for users with `owner` or `admin` roles (`False`). It is set to `True` by default.
-
-The following arguments apply to specific metadata types:
-- `values` (optional): In a `TermsMetadataProperty`, you can pass a list of valid values for this metadata property, in case you want to run a validation. If none are provided, the list of values will be computed from the values provided in the records.
-- `min` (optional): In an `IntengerMetadataProperty` or a `FloatMetadataProperty`, you can pass a minimum valid value. If none is provided, the minimum value will be computed from the values provided in the records.
-- `max` (optional): In an `IntengerMetadataProperty` or a `FloatMetadataProperty`, you can pass a maximum valid value. If none is provided, the maximum value will be computed from the values provided in the records.
-
-::::{tab-set}
-
-:::{tab-item} Terms
-
-```python
-rg.TermsMetadataProperty(
-    name="groups",
-    title="Annotation groups",
-    values=["group-a", "group-b", "group-c"] #optional
-)
-```
-:::
-:::{tab-item} Integer
-
-```python
-rg.IntegerMetadataProperty(
-    name="integer-metadata",
-    title="Integers",
-    min=0, #optional
-    max=100, #optional
-    visible_for_annotators=False
-)
-```
-:::
-:::{tab-item} Float
-
-```python
-rg.FloatMetadataProperty(
-    name="float-metadata",
-    title="Floats",
-    min=-0.45, #optional
-    max=1000.34, #optional
-    visible_for_annotators=False
-)
-```
-:::
-::::
-
-
 #### Define `questions`
 
 To collect feedback for your dataset, you need to formulate questions. The Feedback Task currently supports the following types of questions:
@@ -133,6 +79,24 @@ The following arguments apply to specific question types:
 Check out the following tabs to learn how to set up questions according to their type:
 
 ```{include} /_common/tabs/question_settings.md
+```
+
+#### Define metadata properties
+
+Metadata properties allow you to configure the use of metadata information for the filtering and sorting features available in the UI and Python SDK.
+
+You can define metadata properties using the Python SDK by providing the following arguments:
+
+- `name`: The name of the metadata property, as it will be used internally.
+- `title` (optional): The name of the metadata property, as it will be displayed in the UI. Defaults to the `name` value, but capitalized.
+- `visible_for_annotators` (optional): A boolean to specify whether the metadata property will be accessible for users with an `annotator` role in the UI (`True`), or if it will only be visible for users with `owner` or `admin` roles (`False`). It is set to `True` by default.
+
+The following arguments apply to specific metadata types:
+- `values` (optional): In a `TermsMetadataProperty`, you can pass a list of valid values for this metadata property, in case you want to run a validation. If none are provided, the list of values will be computed from the values provided in the records.
+- `min` (optional): In an `IntegerMetadataProperty` or a `FloatMetadataProperty`, you can pass a minimum valid value. If none is provided, the minimum value will be computed from the values provided in the records.
+- `max` (optional): In an `IntengerMetadataProperty` or a `FloatMetadataProperty`, you can pass a maximum valid value. If none is provided, the maximum value will be computed from the values provided in the records.
+
+```{include} /_common/tabs/metadata_types.md
 ```
 
 ##### Define `guidelines`
