@@ -16,13 +16,24 @@ rg.init(
 )
 ```
 
-#### Add or update metadata properties
-```{warning}
-[TODO]
+#### Add or delete metadata properties
+If you want to add a metadata property to an existing dataset, you can do so with the `add_metadata_property` method like so:
+```python
+ds = rg.FeedbackDataset.from_argilla("my_dataset", workspace="my_workspace")
+ds.add_metadata_property(
+    rg.TermsMetadataProperty(
+        name="my-property",
+        title="My property",
+        visible_for_annotators=True
+    )
+)
 ```
-#### Delete metadata properties
-```{warning}
-[TODO]
+
+If you want to delete an existing metadata property:
+```python
+ds = rg.FeedbackDataset.from_argilla("my_dataset", workspace="my_workspace")
+mp = ds.metadata_property_by_name("library-version")
+mp.delete()
 ```
 
 ### Add records
@@ -168,6 +179,7 @@ dataset = rg.FeedbackDataset.from_argilla(name="my-dataset", workspace="my-works
 # Delete the first suggestion from a record in Argilla
 dataset.records[0].suggestions[0].delete()
 ```
+
 #### Add or update metadata
 ```{warning}
 [TODO]
