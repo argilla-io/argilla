@@ -48,6 +48,7 @@ These are the section headers that we use:
 - Increase the default max result window for Elasticsearch created for Feedback datasets. ([#3929](https://github.com/argilla-io/argilla/pull/))
 - Force elastic index refresh after records creation. ([#3929](https://github.com/argilla-io/argilla/pull/))
 - Validate metadata fields for filtering and sorting in the Python SDK. ([#3993](https://github.com/argilla-io/argilla/pull/3993))
+- Using metadata property name instead of id for indexing data in search engine index. ([#3994](https://github.com/argilla-io/argilla/pull/3994))
 
 ### Fixed
 
