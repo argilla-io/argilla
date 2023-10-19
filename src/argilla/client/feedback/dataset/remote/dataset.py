@@ -51,7 +51,7 @@ if TYPE_CHECKING:
 
     import httpx
 
-    from argilla.client.feedback.dataset import FeedbackDataset
+    from argilla.client.feedback.dataset import FeedbackDataset, helpers
     from argilla.client.feedback.dataset.local import FeedbackDataset
     from argilla.client.feedback.schemas.enums import ResponseStatusFilter
     from argilla.client.feedback.schemas.metadata import MetadataFilters
@@ -453,6 +453,10 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
 
     def sort_by(self, sort: List[SortBy]) -> "RemoteFeedbackDataset":
         """Sorts the current `RemoteFeedbackDataset` based on the given sort fields and orders."""
+        helpers.validate_metadata_names(
+            dataset=self, names=[sort_.metadata_name for sort_ in sort if sort_.is_metadata_field]
+        )
+
         sorted_dataset = self._create_from_dataset(self)
         sorted_dataset._records = RemoteFeedbackRecords._create_from_dataset(sorted_dataset, sort_by=sort)
 
@@ -704,6 +708,10 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         """
         if not response_status and not metadata_filters:
             raise ValueError("At least one of `response_status` or `metadata_filters` must be provided.")
+
+        helpers.validate_metadata_names(
+            dataset=self, names=[metadata_filter.name for metadata_filter in metadata_filters]
+        )
 
         filtered_dataset = RemoteFeedbackDataset._create_from_dataset(self)
         filtered_dataset._records = RemoteFeedbackRecords._create_from_dataset(

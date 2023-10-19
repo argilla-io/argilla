@@ -281,3 +281,9 @@ class SortBy(BaseModel):
     def is_metadata_field(self) -> bool:
         """Returns whether the field is a metadata field."""
         return self.field.startswith("metadata.")
+
+    @property
+    def metadata_name(self) -> Optional[str]:
+        """Returns the name of the metadata field."""
+        if self.field.startswith("metadata."):
+            return self.field.split("metadata.")[1]

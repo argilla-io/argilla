@@ -47,6 +47,7 @@ These are the section headers that we use:
 - Implemented `__len__` method for filtered datasets to return the number of records matching the provided filters. ([#3916](https://github.com/argilla-io/argilla/pull/3916))
 - Increase the default max result window for Elasticsearch created for Feedback datasets. ([#3929](https://github.com/argilla-io/argilla/pull/))
 - Force elastic index refresh after records creation. ([#3929](https://github.com/argilla-io/argilla/pull/))
+- Validate metadata fields for filtering and sorting in the Python SDK. ([#3993](https://github.com/argilla-io/argilla/pull/3993))
 
 ### Fixed
 
