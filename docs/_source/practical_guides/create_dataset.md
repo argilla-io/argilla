@@ -52,7 +52,7 @@ fields = [
 The order of the fields in the UI follows the order in which these are added to the `fields` attribute in the Python SDK.
 ```
 
-##### Define `questions`
+#### Define `questions`
 
 To collect feedback for your dataset, you need to formulate questions. The Feedback Task currently supports the following types of questions:
 
@@ -81,6 +81,24 @@ Check out the following tabs to learn how to set up questions according to their
 ```{include} /_common/tabs/question_settings.md
 ```
 
+#### Define metadata properties
+
+Metadata properties allow you to configure the use of metadata information for the filtering and sorting features available in the UI and Python SDK.
+
+You can define metadata properties using the Python SDK by providing the following arguments:
+
+- `name`: The name of the metadata property, as it will be used internally.
+- `title` (optional): The name of the metadata property, as it will be displayed in the UI. Defaults to the `name` value, but capitalized.
+- `visible_for_annotators` (optional): A boolean to specify whether the metadata property will be accessible for users with an `annotator` role in the UI (`True`), or if it will only be visible for users with `owner` or `admin` roles (`False`). It is set to `True` by default.
+
+The following arguments apply to specific metadata types:
+- `values` (optional): In a `TermsMetadataProperty`, you can pass a list of valid values for this metadata property, in case you want to run a validation. If none are provided, the list of values will be computed from the values provided in the records.
+- `min` (optional): In an `IntegerMetadataProperty` or a `FloatMetadataProperty`, you can pass a minimum valid value. If none is provided, the minimum value will be computed from the values provided in the records.
+- `max` (optional): In an `IntengerMetadataProperty` or a `FloatMetadataProperty`, you can pass a maximum valid value. If none is provided, the maximum value will be computed from the values provided in the records.
+
+```{include} /_common/tabs/metadata_types.md
+```
+
 ##### Define `guidelines`
 
 Once you have decided on the data to show and the questions to ask, it's important to provide clear guidelines to the annotators. These guidelines help them understand the task and answer the questions consistently. You can provide guidelines in two ways:
@@ -97,6 +115,8 @@ Once the scope of the project is defined, which implies knowing the `fields`, `q
 - `fields`: The list of fields to show in the record card. The order in which the fields will appear in the UI matches the order of this list.
 - `questions`: The list of questions to show in the form. The order in which the questions will appear in the UI matches the order of this list.
 - `guidelines` (optional): A set of guidelines for the annotators. These will appear in the dataset settings in the UI.
+- `metadata`(optional): The list of metadata properties included in this dataset.
+- `extra_metadata_properties` (optional): A boolean to specify whether this dataset will allow metadata fields in the records other than those specified under `metadata`. Note that these will not be accessible from the UI for any user, only retrievable using the Python SDK.
 
 If you haven't done so already, check the sections above to learn about each of them.
 
@@ -159,9 +179,9 @@ Take some time to inspect the data before adding it to the dataset in case this 
 
 The next step is to create records following Argilla's `FeedbackRecord` format. These are the attributes of a `FeedbackRecord`:
 
-- `fields`: A dictionary with the name (key) and content (value) of each of the fields in the record. These will need to match the fields set up in the dataset configuration (see [Define record fields](/practical_guides/create_dataset.md#define-fields)).
-- `metadata` (optional): A dictionary with the metadata of the record. This can include any information about the record that is not part of the fields. For example, the source of the record or the date it was created. If there is no metadata, this will be `None`.
+- `fields`: A dictionary with the name (key) and content (value) of each of the fields in the record. These will need to match the fields set up in the dataset configuration (see [Define record fields](#define-record-fields)).
 - `external_id` (optional): An ID of the record defined by the user. If there is no external ID, this will be `None`.
+- `metadata` (optional): A dictionary with the metadata of the record. This can include any information about the record that is not part of the fields. If you want the metadata to correspond with the metadata properties configured for your dataset, make sure that the key of the dictionary corresponds with the metadata property `name`. When the key doesn't correspond, this will be considered extra metadata that will get stored with the record, but will not be usable for filtering and sorting. If there is no metadata, this will be `None`.
 - `suggestions`(optional): A list of all suggested responses for a record e.g., model predictions or other helpful hints for the annotators. Just one suggestion can be provided for each question, and suggestion values must be compliant with the pre-defined questions e.g. if we have a `RatingQuestion` between 1 and 5, the suggestion should have a valid value within that range. If suggestions are added, they will appear in the UI as pre-filled responses.
 - `responses` (optional): A list of all responses to a record. You will only need to add them if your dataset already has some annotated records. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered. Also make sure to include `user_id`s in case you're planning to add more than one response for the same question, as only one `user_id` can be None, later to be replaced by the current active `user_id`, while the rest will be discarded otherwise.
 
