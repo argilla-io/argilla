@@ -179,6 +179,36 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             )
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def update(
+        self,
+        records: Union[RemoteFeedbackRecord, List[RemoteFeedbackRecord]],
+        show_progress: bool = True,
+    ) -> None:
+        """Updates a list of `RemoteFeedbackRecord`s in Argilla.
+
+        Args:
+            records: can be a single `RemoteFeedbackRecord` or a list of
+                `RemoteFeedbackRecord`.
+            show_progress: Whether to show a `tqdm` progress bar while updating the records.
+        """
+        if isinstance(records, RemoteFeedbackRecord):
+            records = [records]
+
+        self.dataset._validate_records(records, attributes_to_validate=["metadata"])
+
+        for i in trange(
+            0, len(records), PUSHING_BATCH_SIZE, desc="Updating records in Argilla...", disable=not show_progress
+        ):
+            datasets_api_v1.update_records(
+                client=self._client,
+                id=self.dataset.id,
+                records=[
+                    {"id": str(record.id), **record.to_server_payload(self._question_name_to_id)}
+                    for record in records[i : i + PUSHING_BATCH_SIZE]
+                ],
+            )
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def delete(self, records: List[RemoteFeedbackRecord]) -> None:
         """Deletes a list of `RemoteFeedbackRecord`s from Argilla.
 
@@ -337,18 +367,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         """
         return self._records
 
-    def update_records(self, records: Union[RemoteFeedbackRecord, List[RemoteFeedbackRecord]]) -> None:
-        if not isinstance(records, list):
-            records = [records]
-
-        metadata_schema = self._build_metadata_schema()
-        for record in records:
-            self._validate_record_metadata(record=record, metadata_schema=metadata_schema)
-
-        # TODO: Use the batch version of endpoint once is implemented
-        for record in records:
-            record.update()
-
     @property
     def id(self) -> "UUID":
         """Returns the ID of the dataset in Argilla."""
@@ -439,6 +457,8 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             records: can be a single `FeedbackRecord`, a list of `FeedbackRecord`,
                 a single dictionary, or a list of dictionaries. If a dictionary is provided,
                 it will be converted to a `FeedbackRecord` internally.
+            show_progress: if `True`, shows a progress bar while pushing the records to
+                Argilla. Defaults to `True`.
 
         Raises:
             PermissionError: if the user does not have either `owner` or `admin` role.
@@ -447,6 +467,25 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
                 record; or if the given records do not match the expected schema.
         """
         self._records.add(records=records, show_progress=show_progress)
+
+    def update_records(
+        self,
+        records: Union[RemoteFeedbackRecord, List[RemoteFeedbackRecord]],
+        show_progress: bool = True,
+    ) -> None:
+        """Updates the given records in the dataset in Argilla.
+
+        Args:
+            records: the records to update in the dataset. Can be a single record or a
+                list of records. The records need to be previously pushed to Argilla,
+                otherwise they won't be updated.
+            show_progress: if `True`, shows a progress bar while pushing the records to
+                Argilla. Defaults to `True`.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+        """
+        self._records.update(records=records, show_progress=show_progress)
 
     def delete_records(self, records: Union["RemoteFeedbackRecord", List["RemoteFeedbackRecord"]]) -> None:
         """Deletes the given records from the dataset in Argilla.

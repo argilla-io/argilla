@@ -265,6 +265,38 @@ def add_records(
     return handle_response_error(response)
 
 
+def update_records(
+    client: httpx.Client, id: UUID, records: List[Dict[str, Any]]
+) -> Response[Union[ErrorMessage, HTTPValidationError]]:
+    """Sends a PATCH requests to `/api/v1/datasets/{id}/records` endpoint to update a
+    a list of `FeedbackTask` records from a `FeedbackDataset`.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to update the records from.
+        records: the list of records to be updated.
+
+    Returns:
+        A `Response` object with the response itself, and/or the error codes if applicable.
+    """
+    url = f"/api/v1/datasets/{id}/records"
+
+    items = []
+    for record in records:
+        item = {"id": record["id"]}
+        if "metadata" in record:
+            item["metadata"] = record["metadata"]
+        if "suggestions" in record:
+            item["suggestions"] = record["suggestions"]
+        items.append(item)
+
+    response = client.patch(url=url, json={"items": items})
+
+    if response.status_code == 204:
+        return Response.from_httpx_response(response)
+    return handle_response_error(response)
+
+
 def delete_records(
     client: httpx.Client, id: UUID, record_ids: List[UUID]
 ) -> Response[Union[ErrorMessage, HTTPValidationError]]:

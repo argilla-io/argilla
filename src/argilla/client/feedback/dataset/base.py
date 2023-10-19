@@ -316,22 +316,36 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
                 )
         return new_records
 
-    def _validate_records(self, records: List[FeedbackRecord]) -> None:
+    def _validate_records(
+        self, records: List[FeedbackRecord], attributes_to_validate: Optional[List[str]] = None
+    ) -> None:
         """Validates the records against the schema defined by the `fields`.
 
         Args:
             records: a list of `FeedbackRecord` objects to validate.
+            attributes_to_validate: a list containing the name of the attributes to
+                validate from the record. Valid values are: `fields` and `metadata`.
+                If not provided, both `fields` and `metadata` are validated. Defaults
+                to `None`.
 
         Raises:
             ValueError: if the `fields` schema does not match the `FeedbackRecord.fields` schema.
         """
-        # WE build once the schemas to avoid building it for each record
-        fields_schema = self._build_fields_schema()
-        metadata_schema = self._build_metadata_schema()
+        if attributes_to_validate is None:
+            attributes_to_validate = ["fields", "metadata"]
+
+        if "fields" in attributes_to_validate:
+            fields_schema = self._build_fields_schema()
+
+        if "metadata" in attributes_to_validate:
+            metadata_schema = self._build_metadata_schema()
 
         for record in records:
-            self._validate_record_fields(record, fields_schema)
-            self._validate_record_metadata(record, metadata_schema)
+            if "fields" in attributes_to_validate:
+                self._validate_record_fields(record, fields_schema)
+
+            if "metadata" in attributes_to_validate:
+                self._validate_record_metadata(record, metadata_schema)
 
     @staticmethod
     def _validate_record_fields(record: FeedbackRecord, fields_schema: Type[BaseModel]) -> None:
