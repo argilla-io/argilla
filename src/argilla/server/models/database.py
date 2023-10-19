@@ -39,6 +39,8 @@ __all__ = [
     "Workspace",
     "WorkspaceUser",
     "MetadataProperty",
+    "Vector",
+    "VectorSettings",
 ]
 
 _USER_API_KEY_BYTES_LENGTH = 80

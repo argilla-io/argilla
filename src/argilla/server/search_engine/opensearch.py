@@ -91,7 +91,8 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
         if user_response_status_filter:
             # See https://opensearch.org/docs/latest/search-plugins/knn/filter-search-knn/#efficient-k-nn-filtering
             # Will work from Opensearch >= v2.4
-            knn_query["filter"] = self._response_status_filter_builder(user_response_status_filter)
+            # TODO: Add metadata !!!!
+            knn_query["filter"] = self._build_response_status_filter(user_response_status_filter)
 
         body = {"query": {"knn": knn_query}}
         return await self.client.search(index=index, body=body, _source=False, track_total_hits=True)

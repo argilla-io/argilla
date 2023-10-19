@@ -18,7 +18,7 @@ from abc import abstractmethod
 from typing import Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, conint
 from pydantic.utils import GetterDict
 
 from argilla.server.enums import FieldType, MetadataPropertyType, RecordSortField, ResponseStatusFilter
@@ -34,14 +34,25 @@ from argilla.server.models import (
     Vector,
     VectorSettings,
 )
-from argilla.server.search_engine.base import (FloatMetadataFilter, FloatMetadataMetrics, IntegerMetadataFilter,
-                                               IntegerMetadataMetrics, MetadataFilter, MetadataMetrics, SearchEngine,
-                                               SearchResponseItem, SearchResponses, SortBy,
-                                               StringQuery, TermsMetadataFilter, TermsMetadataMetrics, UserResponse,
-                                               UserResponseStatusFilter, )
+from argilla.server.search_engine.base import (
+    FloatMetadataFilter,
+    FloatMetadataMetrics,
+    IntegerMetadataFilter,
+    IntegerMetadataMetrics,
+    MetadataFilter,
+    MetadataMetrics,
+    SearchEngine,
+    SearchResponseItem,
+    SearchResponses,
+    SortBy,
+    StringQuery,
+    TermsMetadataFilter,
+    TermsMetadataMetrics,
+    UserResponse,
+    UserResponseStatusFilter,
+)
 
 ALL_RESPONSES_STATUSES_FIELD = "all_responses_statuses"
-
 
 
 def _build_metadata_field_payload(dataset: Dataset, metadata: Union[Dict[str, Any], None] = None) -> Dict[str, Any]:
@@ -55,9 +66,6 @@ def _build_metadata_field_payload(dataset: Dataset, metadata: Union[Dict[str, An
             search_engine_metadata[str(metadata_property.id)] = value
 
     return search_engine_metadata
-
-
-)
 
 
 class SearchDocumentGetter(GetterDict):
@@ -240,6 +248,48 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         ]
 
         await self._bulk_op_request(bulk_actions)
+
+    async def similarity_search(
+        self,
+        dataset: Dataset,
+        vector_settings: VectorSettings,
+        value: Optional[List[float]] = None,
+        record: Optional[Record] = None,
+        user_response_status_filter: Optional[UserResponseStatusFilter] = None,
+        max_results: conint(ge=2, le=500) = 100,
+        threshold: Optional[float] = None,
+    ) -> SearchResponses:
+        if not (value or record):
+            raise ValueError("Must provide vector value or record to compute the similarity search")
+
+        vector_value = value
+
+        if not vector_value:
+            for vector in record.vectors:
+                if vector.vector_settings_id == vector_settings.id:
+                    vector_value = vector.value
+
+        if not vector_value:
+            raise ValueError("Cannot find a vector value to apply with provided info")
+
+        index = await self._get_index_or_raise(dataset)
+        response = await self._request_similarity_search(
+            index=index,
+            vector_settings=vector_settings,
+            value=vector_value,
+            k=max_results,
+            user_response_status_filter=user_response_status_filter,
+        )
+
+        return await self._process_search_response(response, threshold)
+
+    async def delete_record_response(self, response: Response):
+        record = response.record
+        index_name = await self._get_index_or_raise(record.dataset)
+
+        await self._update_document_request(
+            index_name, id=record.id, body={"script": f'ctx._source["responses"].remove("{response.user.username}")'}
+        )
 
     async def configure_index_vectors(self, vector_settings: VectorSettings) -> None:
         index = await self._get_index_or_raise(vector_settings.dataset)

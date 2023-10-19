@@ -11,10 +11,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import TYPE_CHECKING, Any, AsyncGenerator, List, Optional, Union
+from typing import Any, AsyncGenerator, List, Optional, TYPE_CHECKING, Union
+
+from opensearchpy import RequestError
 
 from argilla.server.enums import MetadataPropertyType, ResponseStatusFilter
-from argilla.server.models import Record, User
+from argilla.server.models import Record, User, VectorSettings
 from argilla.server.search_engine import (
     FloatMetadataFilter,
     IntegerMetadataFilter,
@@ -25,9 +27,6 @@ from argilla.server.search_engine import (
 )
 from argilla.server.search_engine.commons import ALL_RESPONSES_STATUSES_FIELD, index_name_for_dataset
 from argilla.server.settings import settings as server_settings
-from opensearchpy import RequestError
-from sqlalchemy.orm import Session
-
 from tests.factories import (
     FloatMetadataPropertyFactory,
     IntegerMetadataPropertyFactory,
@@ -35,24 +34,6 @@ from tests.factories import (
     MultiLabelSelectionQuestionFactory,
     ResponseFactory,
     TermsMetadataPropertyFactory,
-from typing import TYPE_CHECKING, AsyncGenerator, List, Union
-
-from argilla.server.enums import ResponseStatusFilter
-from argilla.server.models import Record, User, VectorSettings
-from argilla.server.models import User
-from argilla.server.search_engine import (
-    StringQuery,
-    UserResponseStatusFilter,
-)
-from argilla.server.search_engine.commons import index_name_for_dataset
-from argilla.server.settings import settings as server_settings
-from opensearchpy import RequestError
-from sqlalchemy.orm import Session
-
-from tests.factories import (
-    LabelSelectionQuestionFactory,
-    MultiLabelSelectionQuestionFactory,
-    ResponseFactory,
     UserFactory,
 )
 
@@ -229,6 +210,7 @@ async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine, op
     opensearch.indices.refresh(index=index_name_for_dataset(dataset))
 
     return dataset
+
 
 @pytest_asyncio.fixture(scope="function")
 @pytest.mark.asyncio
@@ -1041,10 +1023,7 @@ class TestSuiteOpenSearchEngine:
         vectors_settings = await VectorSettingsFactory.create_batch(5)
         dataset = await DatasetFactory.create(vectors_settings=vectors_settings)
 
-        await dataset.awaitable_attrs.vectors_settings
-        await dataset.awaitable_attrs.fields
-        await dataset.awaitable_attrs.questions
-
+        await _refresh_dataset(dataset)
         await opensearch_engine.create_index(dataset)
 
         index_name = index_name_for_dataset(dataset)
@@ -1118,7 +1097,6 @@ class TestSuiteOpenSearchEngine:
 
         assert responses.total == 1
         assert responses.items[0].record_id == selected_record.id
-
 
     async def _configure_record_responses(
         self,

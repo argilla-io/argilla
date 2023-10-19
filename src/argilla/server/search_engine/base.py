@@ -20,12 +20,12 @@ from uuid import UUID
 from pydantic import BaseModel, Field, root_validator
 from pydantic.generics import GenericModel
 
-from argilla.server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SortOrder
-from argilla.server.models import Dataset, MetadataProperty, Record, Response, User
-from argilla.server.models import Dataset, Record, Response, User, Vector, VectorSettings
+from argilla.server.enums import MetadataPropertyType, RecordSortField, ResponseStatus, ResponseStatusFilter, SortOrder
+from argilla.server.models import Dataset, MetadataProperty, Record, Response, User, Vector, VectorSettings
 
 __all__ = [
     "SearchEngine",
+    "UserResponse",
     "StringQuery",
     "MetadataFilter",
     "TermsMetadataFilter",
@@ -40,6 +40,11 @@ __all__ = [
     "IntegerMetadataMetrics",
     "FloatMetadataMetrics",
 ]
+
+
+class UserResponse(BaseModel):
+    values: Optional[Dict[str, Any]]
+    status: ResponseStatus
 
 
 class StringQuery(BaseModel):
