@@ -2,6 +2,8 @@ import Vue from "vue";
 
 const sparkIcon = {
   add: (element, binding) => {
+    if (element.childNodes.length === 2) return;
+
     const emoji = document.createTextNode("✨ ");
     const emojiWrapper = document.createElement("span");
     emojiWrapper.setAttribute("data-title", binding?.value.tooltip);
