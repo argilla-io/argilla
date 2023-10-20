@@ -43,10 +43,8 @@ class MetadataFilter {
     return this.metadata.settings;
   }
 
-  get hasValues() {
-    if (this.isTerms) return this.options.length > 0;
-
-    return this.value.ge !== null && this.value.le !== null;
+  get canFilter() {
+    return this.metadata.hasValues;
   }
 
   public filterByText(text: string) {
