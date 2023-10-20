@@ -143,18 +143,20 @@ def test_add_records_validation_error(
 )
 def test_add_metadata_property(metadata_property: "AllowedMetadataPropertyTypes") -> None:
     dataset = FeedbackDataset(
-        fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
-        questions=[TextQuestion(name="question", required=True)],
-        metadata_properties=[
-            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
-            IntegerMetadataProperty(name="int-metadata", min=0, max=10),
-            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        fields=[
+            TextField(name="required-field"),
+            TextField(name="optional-field", required=False),
         ],
+        questions=[TextQuestion(name="question")],
     )
 
     new_metadata_property = dataset.add_metadata_property(metadata_property)
     assert new_metadata_property.name == metadata_property.name
-    assert len(dataset.metadata_properties) == 4
+    assert len(dataset.metadata_properties) == 1
+
+    current_number_of_metadata_properties = len(dataset.metadata_properties)
+    dataset.add_metadata_property(TermsMetadataProperty(name="new-metadata-property", values=["a", "b", "c"]))
+    assert len(dataset.metadata_properties) == current_number_of_metadata_properties + 1
 
 
 @pytest.mark.parametrize(
