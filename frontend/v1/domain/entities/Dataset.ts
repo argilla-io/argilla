@@ -10,7 +10,8 @@ export class Dataset {
     public readonly workspaceName: string,
     public readonly tags: unknown,
     public readonly createdAt: string,
-    public updatedAt: string
+    public updatedAt: string,
+    public readonly lastActivityAt: string
   ) {
     this.originalGuidelines = guidelines;
   }

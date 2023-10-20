@@ -19,7 +19,7 @@ from uuid import UUID, uuid4
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.enums import ResponseStatus
-from argilla.server.models import Record, Response, Suggestion, User, UserRole
+from argilla.server.models import Dataset, Record, Response, Suggestion, User, UserRole
 from argilla.server.search_engine import SearchEngine
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -830,12 +830,18 @@ class TestSuiteRecords:
             "status": status,
         }
 
+        dataset_previous_last_activity_at = dataset.last_activity_at
+        dataset_previous_updated_at = dataset.updated_at
+
         response = await async_client.post(
             f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
         )
 
         assert response.status_code == 201
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
+
+        assert dataset.last_activity_at > dataset_previous_last_activity_at
+        assert dataset.updated_at == dataset_previous_updated_at
 
         response_body = response.json()
         assert await db.get(Response, UUID(response_body["id"]))

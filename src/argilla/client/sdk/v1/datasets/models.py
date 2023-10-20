@@ -29,6 +29,7 @@ class FeedbackDatasetModel(BaseModel):
     allow_extra_metadata: Optional[bool] = True
     status: Optional[str] = None
     workspace_id: Optional[UUID] = None
+    last_activity_at: Optional[datetime] = None
     inserted_at: datetime
     updated_at: datetime
 

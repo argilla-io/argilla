@@ -369,7 +369,7 @@ class TestSuiteOpenSearchEngine:
         assert opensearch.indices.exists(index=index_name)
 
         index = opensearch.indices.get(index=index_name)[index_name]
-        assert index["mappings"]["properties"]["metadata"]["properties"][str(float_property.id)] == {"type": "float"}
+        assert index["mappings"]["properties"]["metadata"]["properties"][str(float_property.name)] == {"type": "float"}
 
     async def test_create_index_for_dataset_with_metadata_properties(
         self,
@@ -415,9 +415,9 @@ class TestSuiteOpenSearchEngine:
                 "metadata": {
                     "dynamic": "false",
                     "properties": {
-                        str(terms_property.id): {"type": "keyword"},
-                        str(integer_property.id): {"type": "long"},
-                        str(float_property.id): {"type": "float"},
+                        str(terms_property.name): {"type": "keyword"},
+                        str(integer_property.name): {"type": "long"},
+                        str(float_property.name): {"type": "float"},
                     },
                 },
             },
@@ -800,7 +800,7 @@ class TestSuiteOpenSearchEngine:
         index = opensearch.indices.get(index=index_name)[index_name]
         assert index["mappings"]["properties"]["metadata"] == {
             "dynamic": "false",
-            "properties": {str(terms_property.id): {"type": "keyword"}},
+            "properties": {str(terms_property.name): {"type": "keyword"}},
         }
 
     async def test_index_records_with_metadata(self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch):
@@ -833,7 +833,8 @@ class TestSuiteOpenSearchEngine:
                 "updated_at": record.updated_at.isoformat(),
                 "responses": {},
                 "metadata": {
-                    str(metadata_prop.id): record.metadata_[metadata_prop.name] for metadata_prop in metadata_properties
+                    str(metadata_prop.name): record.metadata_[metadata_prop.name]
+                    for metadata_prop in metadata_properties
                 },
             }
             for record in records

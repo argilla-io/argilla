@@ -48,6 +48,7 @@ These are the section headers that we use:
 - Added automatic model card generation through `ArgillaTrainer.save` ([#3857](https://github.com/argilla-io/argilla/pull/3857))
 - Added `FeedbackDataset` `TaskTemplateMixin` for pre-defined task templates. ([#3969](https://github.com/argilla-io/argilla/pull/3969))
 - A maximum limit of 50 on the number of options a ranking question can accept. ([#3975](https://github.com/argilla-io/argilla/pull/3975))
+- New `last_activity_at` field to `FeedbackDataset` exposing when the last activity for the associated dataset occurs. ([#3992](https://github.com/argilla-io/argilla/pull/3992))
 
 ### Changed
 
@@ -56,6 +57,7 @@ These are the section headers that we use:
 - Increase the default max result window for Elasticsearch created for Feedback datasets. ([#3929](https://github.com/argilla-io/argilla/pull/))
 - Force elastic index refresh after records creation. ([#3929](https://github.com/argilla-io/argilla/pull/))
 - Validate metadata fields for filtering and sorting in the Python SDK. ([#3993](https://github.com/argilla-io/argilla/pull/3993))
+- Using metadata property name instead of id for indexing data in search engine index. ([#3994](https://github.com/argilla-io/argilla/pull/3994))
 
 ### Fixed
 
