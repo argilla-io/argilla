@@ -73,6 +73,7 @@ def test_dataset_with_metadata_properties():
     )
     return dataset
 
+
 @pytest.fixture()
 def test_dataset_with_metadata_properties():
     dataset = FeedbackDataset(
@@ -82,10 +83,9 @@ def test_dataset_with_metadata_properties():
             TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
             IntegerMetadataProperty(name="integer-metadata"),
             FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
-        ]
+        ],
     )
     return dataset
-
 
 
 @pytest.fixture
@@ -120,7 +120,9 @@ class TestRemoteFeedbackDataset:
             FeedbackRecord(fields={"text": "Hello world!"}, metadata={"unrelated-metadata": "unrelated-value"}),
         ],
     )
-    async def test_add_records(self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset, record: FeedbackRecord) -> None:
+    async def test_add_records(
+        self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset, record: FeedbackRecord
+    ) -> None:
         api.init(api_key=owner.api_key)
         ws = Workspace.create(name="test-workspace")
 
@@ -154,9 +156,9 @@ class TestRemoteFeedbackDataset:
         first_record = remote[0]
         assert first_record.metadata["terms-metadata"] == "a"
 
-    async def test_update_records_with_suggestions(self, owner: "User",
-                                                   test_dataset_with_metadata_properties: FeedbackDataset
-                                                   ):
+    async def test_update_records_with_suggestions(
+        self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset
+    ):
         rg.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
@@ -183,9 +185,9 @@ class TestRemoteFeedbackDataset:
                 assert suggestion.question_name == "question"
                 assert suggestion.value == f"Hello world! for {record.fields['text']}"
 
-    async def test_update_records_with_empty_list_of_suggestions(self, owner: "User",
-                                                                 test_dataset_with_metadata_properties: FeedbackDataset
-                                                                 ):
+    async def test_update_records_with_empty_list_of_suggestions(
+        self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset
+    ):
         rg.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
@@ -371,7 +373,8 @@ class TestRemoteFeedbackDataset:
         assert len(remote_dataset.metadata_properties) == len(test_dataset_with_metadata_properties.metadata_properties)
 
         for idx, (metadata_property, remote_metadata_property_cls) in enumerate(
-            zip(metadata_properties, RemoteMetadataPropertiesClasses), start=len(test_dataset_with_metadata_properties.metadata_properties)
+            zip(metadata_properties, RemoteMetadataPropertiesClasses),
+            start=len(test_dataset_with_metadata_properties.metadata_properties),
         ):
             remote_metadata_property = remote_dataset.add_metadata_property(metadata_property)
             assert isinstance(remote_metadata_property, remote_metadata_property_cls)
@@ -461,7 +464,9 @@ class TestRemoteFeedbackDataset:
         )
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_delete_records(self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset, role: UserRole) -> None:
+    async def test_delete_records(
+        self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset, role: UserRole
+    ) -> None:
         user = await UserFactory.create(role=role)
 
         api.init(api_key=owner.api_key)
@@ -488,7 +493,9 @@ class TestRemoteFeedbackDataset:
         assert len(remote.records) == 0
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_delete(self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset, role: UserRole) -> None:
+    async def test_delete(
+        self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset, role: UserRole
+    ) -> None:
         user = await UserFactory.create(role=role)
 
         api.init(api_key=owner.api_key)
