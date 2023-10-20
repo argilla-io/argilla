@@ -21,11 +21,9 @@
 </a>
 </p>
 
-<h2 align="center">Open-source data curation platform for LLMs</h2>
+<h2 align="center">Open-source feedback layer for LLMs</h2>
 <br>
 
-
-https://github.com/argilla-io/argilla/assets/1107111/49e28d64-9799-4cac-be49-19dce0f6bd86
 
 <p align="center">
 <a  href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g">
@@ -51,9 +49,19 @@ https://github.com/argilla-io/argilla/assets/1107111/49e28d64-9799-4cac-be49-19d
 </p>
 </h3>
 
+## What is Argilla?
+
+Argilla is an open-source platform for data-centric LLM development. Integrates human and model feedback loops for continuous LLM refinement and oversight.
+
+With Argilla's Python SDK and adaptable UI, you can create human and model-in-the-loop workflows for:
+
+* Supervised fine-tuning
+* Preference tuning (RLHF, DPO, RLAIF, and more)
+* Small, specialized NLP models
+* Scalable evaluation.
+
 ## 🚀 Quickstart
 
-Argilla is an open-source data curation platform for LLMs. Using Argilla, everyone can build robust language models through faster data curation using both human and machine feedback. We provide support for each step in the MLOps cycle, from data labeling to model monitoring.
 
 There are different options to get started:
 
