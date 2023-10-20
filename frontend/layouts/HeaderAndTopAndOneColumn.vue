@@ -3,10 +3,6 @@
     <div class="header-area">
       <slot name="header">here is the header</slot>
     </div>
-    <div class="empty-content-left"></div>
-    <div class="footer-area">
-      <slot name="footer">here is the footer</slot>
-    </div>
     <div class="sidebar-area">
       <slot name="sidebar-right">here is the sidebar content left</slot>
     </div>
@@ -16,7 +12,9 @@
     <div class="center-area">
       <slot name="center">here is the center content</slot>
     </div>
-    <div class="empty-content-right"></div>
+    <div class="footer-area">
+      <slot name="footer">here is the footer</slot>
+    </div>
   </div>
 </template>
 
@@ -45,7 +43,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$gap-width: $base-space * 7;
+$gap-width: $base-space * 2;
 .layout {
   display: grid;
   grid-template-columns: $gap-width 1fr $gap-width $sidebarMenuWidth;
@@ -82,5 +80,6 @@ $gap-width: $base-space * 7;
 }
 .center-area {
   grid-area: 3 / 2 / 4 / 3;
+  min-width: 0;
 }
 </style>
