@@ -167,7 +167,7 @@ def test_generate_pydantic_schema_for_remote_metadata(
             [RemoteTermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"])],
             {"terms-metadata": 1},
             ValidationError,
-            "terms-metadata\n  str type expected",
+            "Provided 'terms-metadata=1' of type <class 'int'> is not valid",
         ),
         (
             [RemoteIntegerMetadataProperty(name="int-metadata", min=0, max=10)],
@@ -179,7 +179,7 @@ def test_generate_pydantic_schema_for_remote_metadata(
             [RemoteIntegerMetadataProperty(name="int-metadata", min=0, max=10)],
             {"int-metadata": "wrong"},
             ValidationError,
-            "int-metadata\n  value is not a valid int",
+            "Provided 'int-metadata=wrong' of type <class 'str'> is not valid",
         ),
         (
             [RemoteFloatMetadataProperty(name="float-metadata", min=0.0, max=10.0)],
@@ -191,7 +191,7 @@ def test_generate_pydantic_schema_for_remote_metadata(
             [RemoteFloatMetadataProperty(name="float-metadata", min=0.0, max=10.0)],
             {"float-metadata": "wrong"},
             ValidationError,
-            "float-metadata\n  value is not a valid float",
+            "Provided 'float-metadata=wrong' of type <class 'str'> is not valid",
         ),
     ],
 )

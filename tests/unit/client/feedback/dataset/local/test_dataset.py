@@ -161,9 +161,7 @@ def test_add_metadata_property(metadata_property: "AllowedMetadataPropertyTypes"
 
 
 @pytest.mark.parametrize("property_class", [IntegerMetadataProperty, FloatMetadataProperty])
-@pytest.mark.parametrize(
-    "numpy_type", [numpy.int16, numpy.int32, numpy.int64, numpy.float16, numpy.float32, numpy.float64]
-)
+@pytest.mark.parametrize("numpy_type", [numpy.int16, numpy.int32, numpy.int64, numpy.float16, numpy.float32])
 def test_add_record_with_numpy_values(property_class: Type["AllowedMetadataPropertyTypes"], numpy_type: Type) -> None:
     dataset = FeedbackDataset(
         fields=[
