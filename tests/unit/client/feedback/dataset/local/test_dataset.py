@@ -12,8 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Type
 
+import numpy.array_api
 import pytest
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.fields import TextField
@@ -157,6 +158,36 @@ def test_add_metadata_property(metadata_property: "AllowedMetadataPropertyTypes"
     current_number_of_metadata_properties = len(dataset.metadata_properties)
     dataset.add_metadata_property(TermsMetadataProperty(name="new-metadata-property", values=["a", "b", "c"]))
     assert len(dataset.metadata_properties) == current_number_of_metadata_properties + 1
+
+
+@pytest.mark.parametrize("property_class", [IntegerMetadataProperty, FloatMetadataProperty])
+@pytest.mark.parametrize(
+    "numpy_type", [numpy.int16, numpy.int32, numpy.int64, numpy.float16, numpy.float32, numpy.float64]
+)
+def test_add_record_with_numpy_values(property_class: Type["AllowedMetadataPropertyTypes"], numpy_type: Type) -> None:
+    dataset = FeedbackDataset(
+        fields=[
+            TextField(name="required-field"),
+            TextField(name="optional-field", required=False),
+        ],
+        questions=[TextQuestion(name="question")],
+    )
+
+    metadata_property = property_class(name="numeric_property")
+    dataset.add_metadata_property(metadata_property)
+
+    property_to_primitive_type = {IntegerMetadataProperty: int, FloatMetadataProperty: float}
+    expected_type = property_to_primitive_type[property_class]
+
+    value = numpy_type(10.0)
+    record = FeedbackRecord(fields={"required-field": "text"}, metadata={"numeric_property": value})
+
+    with pytest.raises(
+        ValueError,
+        match=f"Provided 'numeric_property={value}' of type {str(numpy_type)} is not valid, "
+        f"only values of type {expected_type} are allowed.",
+    ):
+        dataset.add_records(record)
 
 
 @pytest.mark.parametrize(
