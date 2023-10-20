@@ -114,7 +114,7 @@ class HuggingFaceDatasetMixin:
 
         for record in dataset.records:
             for field in dataset.fields:
-                hf_dataset[field.name].append(record.fields[field.name] if field.name in record.fields else None)
+                hf_dataset[field.name].append(record.fields.get(field.name, None))
             for question in dataset.questions:
                 if not record.responses:
                     hf_dataset[question.name].append([])
