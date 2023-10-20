@@ -10,11 +10,14 @@
         v-model="recordCriteria.similaritySearch.order"
       />
       <p v-if="!isExpanded">Similar to:</p>
-      <span
-        class="similarity-reference__preview"
-        v-if="!isExpanded"
-        v-text="preview"
-      />
+      <span v-if="!isExpanded" class="similarity-reference__preview">
+        <span
+          v-for="text in preview"
+          :key="text"
+          class="similarity-reference__preview__text"
+          >{{ text }}</span
+        >
+      </span>
     </div>
     <div class="similarity-reference__right">
       <BaseButton
@@ -114,14 +117,19 @@ $color-border-preview: #ffc28f;
     pointer-events: none;
   }
   &__preview {
+    display: flex;
     flex: 1;
     background: $color-bg-preview;
     padding: 0 $base-space;
     border: 1px solid $color-border-preview;
     border-radius: $border-radius;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    min-width: 0;
+    &__text {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
   :deep(.dropdown__header) {
     background: none;
@@ -132,8 +140,6 @@ $color-border-preview: #ffc28f;
     right: auto;
   }
   &:hover {
-    transition: background 0.3s ease-in-out;
-    background: $black-4;
     .similarity-reference__button-close {
       opacity: 1;
       pointer-events: all;

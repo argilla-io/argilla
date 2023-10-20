@@ -33,10 +33,8 @@ export default {
 
 <style lang="scss" scoped>
 .record {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100%;
   overflow: auto;
   gap: $base-space * 2;
   padding: $base-space * 2;

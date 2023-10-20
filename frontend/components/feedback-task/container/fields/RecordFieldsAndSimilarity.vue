@@ -48,7 +48,7 @@ export default {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: $base-space * 2;
+  gap: $base-space;
   min-width: 0;
   height: 100%;
 

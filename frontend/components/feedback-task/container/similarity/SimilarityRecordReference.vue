@@ -4,7 +4,7 @@
   >
     <div class="record-reference__header">
       <SimilarityReference
-        :preview="textPreview"
+        :preview="fieldsPreview"
         :isExpanded="isExpanded"
         :recordCriteria="recordCriteria"
         @expand="expand"
@@ -34,17 +34,12 @@ export default {
     };
   },
   computed: {
-    textPreview() {
-      const numberOfFields = this.fields.length > 1 ? 2 : 1;
-
-      let text = "";
-      for (let i = 0; i < numberOfFields; i++) {
-        text += `${this.fields[i].title}: ${this.fields[i].content.substring(
-          0,
-          this.numberOfVisibleCharsInPreview / numberOfFields
-        )}... `;
-      }
-      return text;
+    fieldsPreview() {
+      const firstFieldText = (index) =>
+        `${this.fields[index].title}: ${this.fields[index].content}`;
+      return this.fields.length > 1
+        ? [firstFieldText(0), firstFieldText(1)]
+        : [firstFieldText(0)];
     },
   },
   methods: {
@@ -64,6 +59,11 @@ $color-bg: #fff3e9;
   display: flex;
   flex-direction: column;
   border-radius: $border-radius-m;
+  background: palette(white);
+  border: 1px solid palette(grey, 600);
+  &__header {
+    padding: calc($base-space / 2) $base-space * 2;
+  }
   .record {
     border: none;
     padding-top: 0;
@@ -72,11 +72,8 @@ $color-bg: #fff3e9;
     background: $color-bg;
   }
   &--isExpanded {
-    flex: 1;
-    height: 100%;
-    background: palette(white);
+    max-height: 30vh;
     overflow: auto;
-    border: 1px solid palette(grey, 600);
     @extend .record-reference;
     #{$this}__header {
       padding: $base-space $base-space * 2;
