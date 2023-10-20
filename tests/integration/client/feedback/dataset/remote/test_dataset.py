@@ -66,7 +66,15 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture()
-def test_dataset():
+def test_dataset_with_metadata_properties():
+    dataset = FeedbackDataset(
+        fields=[TextField(name="text"), TextField(name="optional", required=False)],
+        questions=[TextQuestion(name="question")],
+    )
+    return dataset
+
+@pytest.fixture()
+def test_dataset_with_metadata_properties():
     dataset = FeedbackDataset(
         fields=[TextField(name="text"), TextField(name="optional", required=False)],
         questions=[TextQuestion(name="question")],
@@ -74,9 +82,10 @@ def test_dataset():
             TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
             IntegerMetadataProperty(name="integer-metadata"),
             FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
-        ],
+        ]
     )
     return dataset
+
 
 
 @pytest.fixture
@@ -111,29 +120,29 @@ class TestRemoteFeedbackDataset:
             FeedbackRecord(fields={"text": "Hello world!"}, metadata={"unrelated-metadata": "unrelated-value"}),
         ],
     )
-    async def test_add_records(self, owner: "User", test_dataset: FeedbackDataset, record: FeedbackRecord) -> None:
+    async def test_add_records(self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset, record: FeedbackRecord) -> None:
         api.init(api_key=owner.api_key)
         ws = Workspace.create(name="test-workspace")
 
-        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
 
         remote_dataset = FeedbackDataset.from_argilla(id=remote.id)
         remote_dataset.add_records([record])
 
         assert len(remote_dataset.records) == 1
 
-    def test_update_records(self, owner: "User", test_dataset: FeedbackDataset):
+    def test_update_records(self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset):
         rg.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
-        test_dataset.add_records(
+        test_dataset_with_metadata_properties.add_records(
             [
                 FeedbackRecord(fields={"text": "Hello world!"}),
                 FeedbackRecord(fields={"text": "Another record"}),
             ]
         )
 
-        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
 
         first_record = remote[0]
         first_record.metadata.update({"terms-metadata": "a"})
@@ -145,18 +154,20 @@ class TestRemoteFeedbackDataset:
         first_record = remote[0]
         assert first_record.metadata["terms-metadata"] == "a"
 
-    async def test_update_records_with_suggestions(self, owner: "User", test_dataset: FeedbackDataset):
+    async def test_update_records_with_suggestions(self, owner: "User",
+                                                   test_dataset_with_metadata_properties: FeedbackDataset
+                                                   ):
         rg.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
-        test_dataset.add_records(
+        test_dataset_with_metadata_properties.add_records(
             [
                 FeedbackRecord(fields={"text": "Hello world!"}),
                 FeedbackRecord(fields={"text": "Another record"}),
             ]
         )
 
-        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
 
         records = []
         for record in remote:
@@ -172,11 +183,13 @@ class TestRemoteFeedbackDataset:
                 assert suggestion.question_name == "question"
                 assert suggestion.value == f"Hello world! for {record.fields['text']}"
 
-    async def test_update_records_with_empty_list_of_suggestions(self, owner: "User", test_dataset: FeedbackDataset):
+    async def test_update_records_with_empty_list_of_suggestions(self, owner: "User",
+                                                                 test_dataset_with_metadata_properties: FeedbackDataset
+                                                                 ):
         rg.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
-        test_dataset.add_records(
+        test_dataset_with_metadata_properties.add_records(
             [
                 FeedbackRecord(
                     fields={"text": "Hello world!"}, suggestions=[{"question_name": "question", "value": "test"}]
@@ -187,7 +200,7 @@ class TestRemoteFeedbackDataset:
             ]
         )
 
-        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
 
         records = []
         for record in remote:
@@ -203,14 +216,14 @@ class TestRemoteFeedbackDataset:
         "metadata", [("terms-metadata", "wrong-label"), ("integer-metadata", "wrong-integer"), ("float-metadata", 11.5)]
     )
     async def test_update_records_with_metadata_validation_error(
-        self, owner: "User", test_dataset: FeedbackDataset, metadata: Tuple[str, Any]
+        self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset, metadata: Tuple[str, Any]
     ):
         rg.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
-        test_dataset.add_records(FeedbackRecord(fields={"text": "Hello world!"}))
+        test_dataset_with_metadata_properties.add_records(FeedbackRecord(fields={"text": "Hello world!"}))
 
-        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
 
         key, value = metadata
 
@@ -296,14 +309,14 @@ class TestRemoteFeedbackDataset:
     async def test_add_metadata_property(
         self,
         owner: "User",
-        test_dataset: FeedbackDataset,
+        test_dataset_with_metadata_properties: FeedbackDataset,
         metadata_property: "AllowedMetadataPropertyTypes",
         RemoteMetadataPropertyCls: Type["AllowedRemoteMetadataPropertyTypes"],
     ) -> None:
         api.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
-        remote_dataset = test_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+        remote_dataset = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=workspace)
         remote_metadata_property = remote_dataset.add_metadata_property(metadata_property)
 
         assert isinstance(remote_metadata_property, RemoteMetadataPropertyCls)
@@ -345,20 +358,20 @@ class TestRemoteFeedbackDataset:
     async def test_add_metadata_property_sequential(
         self,
         owner: "User",
-        test_dataset: FeedbackDataset,
+        test_dataset_with_metadata_properties: FeedbackDataset,
         metadata_properties: List["AllowedMetadataPropertyTypes"],
         RemoteMetadataPropertiesClasses: List[Type["AllowedRemoteMetadataPropertyTypes"]],
     ) -> None:
         api.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
-        dataset = test_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+        dataset = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=workspace)
 
         remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
-        assert len(remote_dataset.metadata_properties) == len(test_dataset.metadata_properties)
+        assert len(remote_dataset.metadata_properties) == len(test_dataset_with_metadata_properties.metadata_properties)
 
         for idx, (metadata_property, remote_metadata_property_cls) in enumerate(
-            zip(metadata_properties, RemoteMetadataPropertiesClasses), start=len(test_dataset.metadata_properties)
+            zip(metadata_properties, RemoteMetadataPropertiesClasses), start=len(test_dataset_with_metadata_properties.metadata_properties)
         ):
             remote_metadata_property = remote_dataset.add_metadata_property(metadata_property)
             assert isinstance(remote_metadata_property, remote_metadata_property_cls)
@@ -448,7 +461,7 @@ class TestRemoteFeedbackDataset:
         )
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_delete_records(self, owner: "User", test_dataset: FeedbackDataset, role: UserRole) -> None:
+    async def test_delete_records(self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset, role: UserRole) -> None:
         user = await UserFactory.create(role=role)
 
         api.init(api_key=owner.api_key)
@@ -457,7 +470,7 @@ class TestRemoteFeedbackDataset:
 
         api.init(api_key=user.api_key, workspace=ws.name)
 
-        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
         remote.add_records(
             [
                 FeedbackRecord(fields={"text": "Hello world!"}),
@@ -475,7 +488,7 @@ class TestRemoteFeedbackDataset:
         assert len(remote.records) == 0
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_delete(self, owner: "User", test_dataset: FeedbackDataset, role: UserRole) -> None:
+    async def test_delete(self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset, role: UserRole) -> None:
         user = await UserFactory.create(role=role)
 
         api.init(api_key=owner.api_key)
@@ -484,7 +497,7 @@ class TestRemoteFeedbackDataset:
         ws.add_user(user.id)
 
         api.init(api_key=user.api_key)
-        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
         remote_dataset = FeedbackDataset.from_argilla(id=remote.id)
         remote_dataset.delete()
 
