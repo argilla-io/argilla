@@ -233,11 +233,12 @@ export default {
   display: flex;
   flex-direction: column;
   flex-basis: max(520px, 30%);
-  height: 100%;
+  max-height: 100%;
   justify-content: space-between;
   border-radius: $border-radius-m;
   border: 1px solid transparent;
   background: palette(white);
+  margin-bottom: auto;
   &__header {
     align-items: baseline;
   }
