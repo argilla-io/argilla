@@ -13,18 +13,21 @@
 #  limitations under the License.
 
 import secrets
+from datetime import datetime
 from typing import Any, List, Optional
 from uuid import UUID
 
 from pydantic import parse_obj_as
 from sqlalchemy import JSON, ForeignKey, String, Text, UniqueConstraint, and_, sql
 from sqlalchemy import Enum as SAEnum
+from sqlalchemy.engine.default import DefaultExecutionContext
 from sqlalchemy.ext.mutable import MutableDict, MutableList
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from argilla.server.enums import DatasetStatus, MetadataPropertyType, ResponseStatus, SuggestionType, UserRole
 from argilla.server.models.base import DatabaseModel
 from argilla.server.models.metadata_properties import MetadataPropertySettings
+from argilla.server.models.mixins import inserted_at_current_value
 from argilla.server.models.questions import QuestionSettings
 
 # Include here the data model ref to be accessible for automatic alembic migration scripts
@@ -217,6 +220,10 @@ class MetadataProperty(DatabaseModel):
 DatasetStatusEnum = SAEnum(DatasetStatus, name="dataset_status_enum")
 
 
+def _updated_at_current_value(context: DefaultExecutionContext) -> datetime:
+    return context.get_current_parameters(isolate_multiinsert_groups=False)["updated_at"]
+
+
 class Dataset(DatabaseModel):
     __tablename__ = "datasets"
 
@@ -225,6 +232,11 @@ class Dataset(DatabaseModel):
     allow_extra_metadata: Mapped[bool] = mapped_column(default=True, server_default=sql.true())
     status: Mapped[DatasetStatus] = mapped_column(DatasetStatusEnum, default=DatasetStatus.draft, index=True)
     workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
+    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=inserted_at_current_value, onupdate=datetime.utcnow)
+    last_activity_at: Mapped[datetime] = mapped_column(
+        default=inserted_at_current_value, onupdate=_updated_at_current_value
+    )
 
     workspace: Mapped["Workspace"] = relationship(back_populates="datasets")
     fields: Mapped[List["Field"]] = relationship(
@@ -266,6 +278,7 @@ class Dataset(DatabaseModel):
         return (
             f"Dataset(id={str(self.id)!r}, name={self.name!r}, guidelines={self.guidelines!r}, "
             f"status={self.status.value!r}, workspace_id={str(self.workspace_id)!r}, "
+            f"last_activity_at={str(self.last_activity_at)!r}, "
             f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
 
