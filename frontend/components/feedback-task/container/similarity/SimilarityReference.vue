@@ -44,7 +44,7 @@ export default {
     },
     isExpanded: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     recordCriteria: {
       type: Object,
