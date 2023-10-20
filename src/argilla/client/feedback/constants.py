@@ -12,10 +12,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.feedback.schemas.enums import FieldTypes
+from pydantic import StrictFloat, StrictInt, StrictStr
+
+from argilla.client.feedback.schemas.enums import FieldTypes, MetadataPropertyTypes
 
 FETCHING_BATCH_SIZE = 250
 PUSHING_BATCH_SIZE = 32
 DELETE_DATASET_RECORDS_MAX_NUMBER = 100
 
 FIELD_TYPE_TO_PYTHON_TYPE = {FieldTypes.text: str}
+# We are using `pydantic`'s strict types to avoid implicit type conversions
+METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE = {
+    MetadataPropertyTypes.terms: StrictStr,
+    MetadataPropertyTypes.integer: StrictInt,
+    MetadataPropertyTypes.float: StrictFloat,
+}

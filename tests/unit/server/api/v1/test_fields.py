@@ -19,7 +19,7 @@ from uuid import uuid4
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import DatasetStatus, Field, UserRole
-from fastapi.testclient import TestClient
+from argilla.server.schemas.v1.datasets import FIELD_CREATE_TITLE_MAX_LENGTH
 from sqlalchemy import func, select
 
 from tests.factories import (
@@ -79,22 +79,35 @@ async def test_update_field(
     assert field.settings == expected_settings
 
 
+@pytest.mark.parametrize("title", [None, "", "t" * (FIELD_CREATE_TITLE_MAX_LENGTH + 1)])
+@pytest.mark.asyncio
+async def test_update_field_with_invalid_title(
+    async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, title: str
+):
+    field = await TextFieldFactory.create(title="title")
+
+    response = await async_client.patch(f"/api/v1/fields/{field.id}", headers=owner_auth_header, json={"title": title})
+
+    assert response.status_code == 422
+
+    field = await db.get(Field, field.id)
+    assert field.title == "title"
+
+
 @pytest.mark.parametrize(
-    "field_json",
+    "payload",
     [
-        {"title": None, "settings": None},
+        {"settings": None},
         {"settings": {"type": "text"}},
         {"settings": {"type": "text", "use_markdown": None}},
         {"settings": {"type": "i don't exist"}},
     ],
 )
 @pytest.mark.asyncio
-async def test_update_field_with_invalid_settings(
-    async_client: "AsyncClient", owner_auth_header: dict, field_json: dict
-):
+async def test_update_field_with_invalid_settings(async_client: "AsyncClient", owner_auth_header: dict, payload: dict):
     field = await TextFieldFactory.create()
 
-    response = await async_client.patch(f"/api/v1/fields/{field.id}", headers=owner_auth_header, json=field_json)
+    response = await async_client.patch(f"/api/v1/fields/{field.id}", headers=owner_auth_header, json=payload)
 
     assert response.status_code == 422
 

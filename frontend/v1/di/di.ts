@@ -9,6 +9,7 @@ import {
   QuestionRepository,
   FieldRepository,
   MetricsRepository,
+  MetadataRepository,
 } from "@/v1/infrastructure/repositories";
 
 import { useDataset } from "@/v1/infrastructure/storage/DatasetStorage";
@@ -20,7 +21,7 @@ import { useDatasetSetting } from "@/v1/infrastructure/storage/DatasetSettingSto
 import { GetDatasetsUseCase } from "@/v1/domain/usecases/get-datasets-use-case";
 import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use-case";
 import { DeleteDatasetUseCase } from "@/v1/domain/usecases/delete-dataset-use-case";
-import { GetRecordsToAnnotateUseCase } from "~/v1/domain/usecases/get-records-to-annotate-use-case";
+import { LoadRecordsToAnnotateUseCase } from "@/v1/domain/usecases/load-records-to-annotate-use-case";
 import { SubmitRecordUseCase } from "@/v1/domain/usecases/submit-record-use-case";
 import { SaveDraftRecord } from "@/v1/domain/usecases/save-draft-use-case";
 import { ClearRecordUseCase } from "@/v1/domain/usecases/clear-record-use-case";
@@ -30,6 +31,7 @@ import { GetDatasetSettingsUseCase } from "@/v1/domain/usecases/dataset-setting/
 import { UpdateQuestionSettingUseCase } from "@/v1/domain/usecases/dataset-setting/update-question-setting-use-case";
 import { UpdateFieldSettingUseCase } from "@/v1/domain/usecases/dataset-setting/update-field-setting-use-case";
 import { UpdateDatasetSettingUseCase } from "@/v1/domain/usecases/dataset-setting/update-dataset-setting-use-case";
+import { GetMetadataUseCase } from "@/v1/domain/usecases/get-metadata-use-case";
 
 export const loadDependencyContainer = (context: Context) => {
   const useAxios = () => context.$axios;
@@ -41,6 +43,7 @@ export const loadDependencyContainer = (context: Context) => {
     register(QuestionRepository).withDependency(useAxios).build(),
     register(FieldRepository).withDependency(useAxios).build(),
     register(MetricsRepository).withDependency(useAxios).build(),
+    register(MetadataRepository).withDependency(useAxios).build(),
 
     register(DeleteDatasetUseCase).withDependency(DatasetRepository).build(),
 
@@ -52,7 +55,7 @@ export const loadDependencyContainer = (context: Context) => {
       .withDependencies(DatasetRepository, useDataset)
       .build(),
 
-    register(GetRecordsToAnnotateUseCase)
+    register(LoadRecordsToAnnotateUseCase)
       .withDependencies(
         RecordRepository,
         QuestionRepository,
@@ -97,6 +100,8 @@ export const loadDependencyContainer = (context: Context) => {
     register(UpdateDatasetSettingUseCase)
       .withDependency(DatasetRepository)
       .build(),
+
+    register(GetMetadataUseCase).withDependency(MetadataRepository).build(),
   ];
 
   Container.register(dependencies);

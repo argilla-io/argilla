@@ -18,7 +18,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, conint, validator
 
-from argilla.client.feedback.schemas.enums import ResponseStatus
+from argilla.client.feedback.schemas.enums import RecordSortField, ResponseStatus, SortOrder
 
 if TYPE_CHECKING:
     from argilla.client.feedback.unification import UnifiedValueSchema
@@ -67,7 +67,7 @@ class ResponseSchema(BaseModel):
     """
 
     user_id: Optional[UUID] = None
-    values: Dict[str, ValueSchema]
+    values: Union[Dict[str, ValueSchema], None]
     status: ResponseStatus = ResponseStatus.submitted
 
     class Config:
@@ -88,8 +88,11 @@ class ResponseSchema(BaseModel):
         """Method that will be used to create the payload that will be sent to Argilla
         to create a `ResponseSchema` for a `FeedbackRecord`."""
         return {
+            # UUID is not json serializable!!!
             "user_id": self.user_id,
-            "values": {question_name: value.dict() for question_name, value in self.values.items()},
+            "values": {question_name: value.dict() for question_name, value in self.values.items()}
+            if self.values is not None
+            else None,
             "status": self.status.value if hasattr(self.status, "value") else self.status,
         }
 
@@ -129,7 +132,7 @@ class SuggestionSchema(BaseModel):
         """Method that will be used to create the payload that will be sent to Argilla
         to create a `SuggestionSchema` for a `FeedbackRecord`."""
         payload = {}
-        payload["question_id"] = question_name_to_id[self.question_name]
+        payload["question_id"] = str(question_name_to_id[self.question_name])
         payload["value"] = self.value
         if self.type:
             payload["type"] = self.type
@@ -149,7 +152,7 @@ class FeedbackRecord(BaseModel):
             record itself.
         metadata: Metadata to be included to enrich the information for a given record.
             Note that the metadata is not shown in the UI so you'll just be able to see
-            that programatically after pulling the records. Defaults to None.
+            that programmatically after pulling the records. Defaults to None.
         responses: Responses given by either the current user, or one or a collection of
             users that must exist in Argilla. Each response corresponds to one of the
             `FeedbackDataset` questions, so the values should match the question type.
@@ -192,9 +195,7 @@ class FeedbackRecord(BaseModel):
     fields: Dict[str, Union[str, None]]
     metadata: Dict[str, Any] = Field(default_factory=dict)
     responses: List[ResponseSchema] = Field(default_factory=list)
-    suggestions: Union[Tuple[SuggestionSchema], List[SuggestionSchema]] = Field(
-        default_factory=tuple, allow_mutation=False
-    )
+    suggestions: Union[Tuple[SuggestionSchema], List[SuggestionSchema]] = Field(default_factory=tuple)
     external_id: Optional[str] = None
 
     _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default_factory=dict)
@@ -208,6 +209,11 @@ class FeedbackRecord(BaseModel):
         if not isinstance(values, tuple):
             return tuple([v for v in values])
         return values
+
+    @property
+    def unified_responses(self) -> Optional[Dict[str, List["UnifiedValueSchema"]]]:
+        """Property that returns the unified responses for the record."""
+        return self._unified_responses
 
     def update(
         self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
@@ -240,7 +246,7 @@ class FeedbackRecord(BaseModel):
         payload["fields"] = {key: value for key, value in self.fields.items() if value is not None}
         if self.responses:
             payload["responses"] = [response.to_server_payload() for response in self.responses]
-        if self.suggestions and question_name_to_id:
+        if question_name_to_id:
             payload["suggestions"] = [
                 suggestion.to_server_payload(question_name_to_id) for suggestion in self.suggestions
             ]
@@ -249,3 +255,35 @@ class FeedbackRecord(BaseModel):
         if self.external_id:
             payload["external_id"] = self.external_id
         return payload
+
+
+class SortBy(BaseModel):
+    field: Union[str, RecordSortField]
+    order: Union[str, SortOrder] = SortOrder.asc
+
+    @validator("field", pre=True)
+    def check_field_name(cls, field: Union[str, RecordSortField]) -> Union[str, RecordSortField]:
+        try:
+            return RecordSortField(field)
+        except ValueError:
+            if field.startswith("metadata."):
+                return field
+            else:
+                raise ValueError(
+                    f"{field} is not a valid field name. Supported fields are: {RecordSortField} or metadata.*"
+                )
+
+    @validator("order")
+    def check_order(cls, order):
+        return SortOrder(order)
+
+    @property
+    def is_metadata_field(self) -> bool:
+        """Returns whether the field is a metadata field."""
+        return self.field.startswith("metadata.")
+
+    @property
+    def metadata_name(self) -> Optional[str]:
+        """Returns the name of the metadata field."""
+        if self.field.startswith("metadata."):
+            return self.field.split("metadata.")[1]

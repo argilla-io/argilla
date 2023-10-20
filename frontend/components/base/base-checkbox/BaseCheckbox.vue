@@ -16,16 +16,11 @@
   -->
 
 <template>
-  <div class="re-checkbox" :class="[classes]">
-    <label
-      v-if="$slots.default"
-      :for="id"
-      class="checkbox-label"
-      @click.prevent="toggleCheck"
-    >
+  <div class="re-checkbox" :class="[classes]" @click.prevent="toggleCheck">
+    <label v-if="$slots.default" :for="id" class="checkbox-label">
       <slot />
     </label>
-    <div class="checkbox-container" tabindex="0" @click="toggleCheck">
+    <div class="checkbox-container" tabindex="0">
       <input
         :id="id"
         type="checkbox"

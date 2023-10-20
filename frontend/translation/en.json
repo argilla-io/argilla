@@ -24,5 +24,6 @@
       "discard": "Discard (⇧ shift + ⌫ backspace)",
       "submit": "Submit (⇧ shift + ↵ enter)"
     }
-  }
+  },
+  "filterBy": "Filter by..."
 }
