@@ -51,7 +51,7 @@
 
 ## What is Argilla?
 
-Argilla is an open-source platform for data-centric LLM development. It provides scalable oversight and integrates human feedback loops for continuous LLM refinement.
+Argilla is an open-source platform for data-centric LLM development. Integrates human and model feedback loops for continuous LLM refinement and oversight.
 
 With Argilla's Python SDK and adaptable UI, you can create human and model-in-the-loop workflows for:
 
