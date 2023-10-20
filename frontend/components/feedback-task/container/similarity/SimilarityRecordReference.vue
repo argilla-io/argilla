@@ -29,7 +29,7 @@ export default {
   },
   data() {
     return {
-      isExpanded: true,
+      isExpanded: false,
       numberOfVisibleCharsInPreview: 30,
     };
   },
