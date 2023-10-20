@@ -39,7 +39,7 @@ import "assets/icons/chevron-down";
 export default {
   props: {
     preview: {
-      type: String,
+      type: Array,
       required: true,
     },
     isExpanded: {
