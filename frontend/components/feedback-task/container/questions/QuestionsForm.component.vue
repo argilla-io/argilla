@@ -232,9 +232,8 @@ export default {
 .questions-form {
   display: flex;
   flex-direction: column;
-  flex-basis: 37em;
+  flex-basis: max(520px, 30%);
   height: 100%;
-  min-width: 0;
   justify-content: space-between;
   border-radius: $border-radius-m;
   border: 1px solid transparent;
