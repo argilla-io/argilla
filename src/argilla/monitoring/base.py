@@ -170,7 +170,7 @@ class BaseMonitor(wrapt.ObjectProxy):
     dataset:
         argilla dataset name
     sample_rate:
-        The portion of the data to store in argilla. Default = 0.2
+        The portion of the data to be store in argilla. Default = 0.2
     """
 
     def __init__(

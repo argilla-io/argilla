@@ -1,6 +1,7 @@
 import { Records } from "../entities/record/Records";
 
 export interface IRecordStorage {
-  add(records: Records);
+  append(records: Records);
+  replace(records: Records);
   get(): Records;
 }

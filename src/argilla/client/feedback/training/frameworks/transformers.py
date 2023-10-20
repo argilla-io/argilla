@@ -12,12 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import TYPE_CHECKING
 
 from datasets import Dataset, DatasetDict
 
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
 from argilla.client.feedback.training.schemas import TrainingTaskForQuestionAnswering, TrainingTaskForTextClassification
 from argilla.training.transformers import ArgillaTransformersTrainer as ArgillaTransformersTrainerV1
+
+if TYPE_CHECKING:
+    from argilla.client.feedback.integrations.huggingface.model_card import TransformersModelCardData
 
 
 class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSkeleton):
@@ -69,3 +73,30 @@ class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSke
             )
 
         self.init_training_args()
+
+    def get_model_card_data(self, **card_data_kwargs) -> "TransformersModelCardData":
+        """
+        Generate the card data to be used for the `ArgillaModelCard`.
+
+        Args:
+            card_data_kwargs: Extra arguments provided by the user when creating the `ArgillaTrainer`.
+
+        Returns:
+            TransformersModelCardData: Container for the data to be written on the `ArgillaModelCard`.
+        """
+        from argilla.client.feedback.integrations.huggingface.model_card import TransformersModelCardData
+
+        if not card_data_kwargs.get("tags"):
+            if isinstance(self._task, TrainingTaskForTextClassification):
+                tags = ["text-classification"]
+            else:
+                tags = ["question-answering"]
+
+            card_data_kwargs.update({"tags": tags + ["transformers", "argilla"]})
+
+        return TransformersModelCardData(
+            model_id=self._model,
+            task=self._task,
+            update_config_kwargs=self.trainer_kwargs,
+            **card_data_kwargs,
+        )

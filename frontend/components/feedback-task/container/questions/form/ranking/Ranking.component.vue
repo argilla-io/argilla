@@ -32,23 +32,19 @@ export default {
       default: () => false,
     },
   },
-  data() {
-    return {
-      options: this.question.answer.values,
-    };
-  },
   computed: {
+    options() {
+      return this.question.answer.values;
+    },
     ranking() {
       return adaptQuestionsToSlots({ options: this.options });
     },
   },
   methods: {
     onChanged(newQuestionRanked) {
-      this.question.answer.values.forEach((option) => {
+      this.options.forEach((option) => {
         option.rank = newQuestionRanked.getRanking(option);
       });
-
-      this.options = this.question.answer.values;
     },
     onFocus() {
       this.$emit("on-focus");

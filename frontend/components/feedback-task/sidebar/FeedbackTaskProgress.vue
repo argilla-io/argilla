@@ -17,7 +17,7 @@
 
 <template>
   <SidebarFeedbackTaskProgress
-    v-if="datasetMetrics"
+    v-if="datasetMetrics.records"
     :progressTotal="datasetMetrics.records"
     :totalSubmitted="datasetMetrics.submitted"
     :totalDiscarded="datasetMetrics.discarded"
@@ -25,14 +25,17 @@
 </template>
 
 <script>
-import { useMetrics } from "@/v1/infrastructure/storage/MetricsStorage";
-export default {
-  computed: {
-    datasetMetrics() {
-      const { state: metrics } = useMetrics();
+import { useFeedbackTaskProgressViewModel } from "./useFeedbackTaskProgressViewModel";
 
-      return metrics;
+export default {
+  props: {
+    datasetId: {
+      type: String,
+      required: true,
     },
+  },
+  setup(props) {
+    return useFeedbackTaskProgressViewModel(props);
   },
 };
 </script>

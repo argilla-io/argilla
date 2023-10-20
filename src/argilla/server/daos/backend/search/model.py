@@ -75,7 +75,6 @@ class VectorSearch(BaseModel):
 
 class BaseRecordsQuery(BaseQuery):
     query_text: Optional[str] = None
-    advanced_query_dsl: bool = False
 
     ids: Optional[List[Union[str, int]]]
 

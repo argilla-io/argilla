@@ -15,7 +15,7 @@
 """create vectors settings table
 
 Revision ID: 7850ab5b42d9
-Revises: 1e629a913727
+Revises: 84f6b9ff6076
 Create Date: 2023-09-12 16:21:14.321044
 
 """
@@ -24,7 +24,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "7850ab5b42d9"
-down_revision = "1e629a913727"
+down_revision = "84f6b9ff6076"
 branch_labels = None
 depends_on = None
 

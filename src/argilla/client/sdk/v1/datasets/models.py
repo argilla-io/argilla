@@ -25,8 +25,11 @@ class FeedbackDatasetModel(BaseModel):
     id: UUID
     name: str = Field(regex="^(?!-|_)[a-zA-Z0-9-_ ]+$")
     guidelines: Optional[str] = None
+    # Set default for backward compatibility
+    allow_extra_metadata: Optional[bool] = True
     status: Optional[str] = None
     workspace_id: Optional[UUID] = None
+    last_activity_at: Optional[datetime] = None
     inserted_at: datetime
     updated_at: datetime
 
@@ -53,9 +56,12 @@ class FeedbackResponseStatusFilter(str, Enum):
     discarded = "discarded"
 
 
+# TODO: these models shouldn't transform the payload from the server to not JSON serializable types (UUID, datetime, etc)
+
+
 class FeedbackResponseModel(BaseModel):
     id: UUID
-    values: Dict[str, FeedbackValueModel]
+    values: Union[Dict[str, FeedbackValueModel], None]
     status: FeedbackResponseStatus
     user_id: UUID
     inserted_at: datetime
@@ -64,7 +70,7 @@ class FeedbackResponseModel(BaseModel):
 
 class FeedbackSuggestionModel(BaseModel):
     id: UUID
-    question_id: UUID
+    question_id: str
     type: Optional[Literal["human", "model"]] = None
     score: Optional[float] = None
     value: Any
@@ -84,6 +90,7 @@ class FeedbackItemModel(BaseModel):
 
 class FeedbackRecordsModel(BaseModel):
     items: List[FeedbackItemModel]
+    total: int
 
 
 class FeedbackFieldModel(BaseModel):
@@ -107,13 +114,14 @@ class FeedbackQuestionModel(BaseModel):
     updated_at: datetime
 
 
-class FeedbackSuggestionModel(BaseModel):
+class FeedbackMetadataPropertyModel(BaseModel):
     id: UUID
-    question_id: UUID
-    type: Optional[Literal["human", "model"]] = None
-    score: Optional[float] = None
-    value: Any
-    agent: Optional[str] = None
+    name: str
+    title: str
+    visible_for_annotators: bool
+    settings: Dict[str, Any]
+    inserted_at: datetime
+    updated_at: datetime
 
 
 class FeedbackRecordsMetricsModel(BaseModel):

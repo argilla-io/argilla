@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     from trl import PPOConfig
 
     from argilla.client.feedback.dataset import FeedbackDataset
+    from argilla.client.feedback.integrations.huggingface.model_card import TRLModelCardData
 
 
 class PPOArgs:
@@ -373,8 +374,8 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         """
         Saves the model to the specified path.
         """
-        self._transformers_model.save_pretrained(output_dir)
-        self._transformers_tokenizer.save_pretrained(output_dir)
+        self._trainer.model.save_pretrained(output_dir)
+        self._trainer.tokenizer.save_pretrained(output_dir)
 
     def __repr__(self) -> str:
         formatted_string = []
@@ -387,3 +388,34 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
             for key, val in arg_dict_single.items():
                 formatted_string.append(f"{key}: {val}")
         return "\n".join(formatted_string)
+
+    def get_model_card_data(self, **card_data_kwargs) -> "TRLModelCardData":
+        """
+        Generate the card data to be used for the `ArgillaModelCard`.
+
+        Args:
+            card_data_kwargs: Extra arguments provided by the user when creating the `ArgillaTrainer`.
+
+        Returns:
+            TRLModelCardData: Container for the data to be written on the `ArgillaModelCard`.
+        """
+        from argilla.client.feedback.integrations.huggingface.model_card import TRLModelCardData
+
+        if not card_data_kwargs.get("tags"):
+            if isinstance(self._task, TrainingTaskForSFT):
+                tags = ["supervised-fine-tuning", "sft"]
+            elif isinstance(self._task, TrainingTaskForRM):
+                tags = ["reward-modeling", "rm"]
+            elif isinstance(self._task, TrainingTaskForPPO):
+                tags = ["proximal-policy-optimization", "ppo"]
+            elif isinstance(self._task, TrainingTaskForDPO):
+                tags = ["direct-preference-optimization", "dpo"]
+
+            card_data_kwargs.update({"tags": tags + ["TRL", "argilla"]})
+
+        return TRLModelCardData(
+            model_id=self._model,
+            task=self._task,
+            update_config_kwargs={**self.training_args_kwargs, **self.trainer_kwargs},
+            **card_data_kwargs,
+        )

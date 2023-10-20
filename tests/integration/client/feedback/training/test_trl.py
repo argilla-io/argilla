@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import os
 import re
 from collections import Counter
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List
@@ -28,6 +29,7 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForSFTFormat,
 )
 from datasets import Dataset, DatasetDict
+from peft import LoraConfig, TaskType
 from transformers import AutoModelForCausalLM, AutoModelForSequenceClassification, AutoTokenizer
 from trl import AutoModelForCausalLMWithValueHead
 
@@ -320,3 +322,50 @@ def test_prepare_for_training_dpo(
         if tokenizer is not None:
             assert trainer._trainer._transformers_model.test_value == 12
             assert trainer._trainer._transformers_tokenizer.test_value == 12
+
+
+def test_sft_with_peft(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records: List[FeedbackRecord],
+    tmp_path,
+) -> None:
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records * 2)
+
+    def formatting_func(sample: Dict[str, Any]) -> Iterator[str]:
+        # For example, the sample must be most frequently rated as "1" in question-2 and
+        # label "b" from "question-3" must have not been set by any annotator
+        ratings = [
+            annotation["value"]
+            for annotation in sample["question-2"]
+            if annotation["status"] == "submitted" and annotation["value"] is not None
+        ]
+        labels = [
+            annotation["value"]
+            for annotation in sample["question-3"]
+            if annotation["status"] == "submitted" and annotation["value"] is not None
+        ]
+        if ratings and Counter(ratings).most_common(1)[0][0] == 1 and "b" not in labels:
+            return f"### Text\n{sample['text']}"
+        return None
+
+    task = TrainingTask.for_supervised_fine_tuning(formatting_func)
+
+    small_model_id = "sshleifer/tiny-gpt2"
+    loaded_model = AutoModelForCausalLM.from_pretrained(small_model_id)
+    loaded_tokenizer = AutoTokenizer.from_pretrained(small_model_id)
+    loaded_tokenizer.pad_token_id = loaded_tokenizer.eos_token_id
+    trainer = ArgillaTrainer(dataset, task, framework=FRAMEWORK, model=loaded_model, tokenizer=loaded_tokenizer)
+    peft_config = LoraConfig(
+        task_type=TaskType.CAUSAL_LM, inference_mode=False, r=8, lora_alpha=16, lora_dropout=0.05  # 32,
+    )
+    trainer.update_config(peft_config=peft_config)
+    trainer.train(tmp_path)
+    assert "adapter_config.json" in os.listdir(tmp_path)
+    assert "adapter_model.bin" in os.listdir(tmp_path)

@@ -128,7 +128,7 @@ getting_started_html = open("./_common/getting_started.html", "r", encoding="utf
 next_steps_html = open("./_common/next_steps.html", "r", encoding="utf8").read()
 
 # -- AUTODOC IMPORT MOCKS ---------------------------------------------------
-autodoc_typehints = "signature"
+autodoc_typehints = "description"
 autodoc_mock_imports = [
     "cleanlab",
     "datasets",
@@ -352,7 +352,7 @@ pygments_dark_style = "material"
 
 
 # Open graph meta
-ogp_image = "_static/images/og-doc.png"
+ogp_image = "https://docs.argilla.io/en/latest/_static/images/og-doc.png"
 
 ogp_custom_meta_tags = [
     '<meta name="twitter:card" content="summary_large_image" />',

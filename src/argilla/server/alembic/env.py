@@ -16,21 +16,9 @@ from logging.config import fileConfig
 
 from alembic import context
 from argilla.server.database import database_url_sync
-from argilla.server.models import (
-    DatabaseModel,
-    Dataset,
-    Field,
-    Question,
-    Record,
-    Response,
-    Suggestion,
-    User,
-    Workspace,
-    WorkspaceUser,
-)
+from argilla.server.models.base import DatabaseModel
+from argilla.server.models.database import *  # noqa: I001
 from sqlalchemy import engine_from_config, pool
-
-__ALL_MODELS__ = (Dataset, Field, Question, Record, Response, Suggestion, User, Workspace, WorkspaceUser)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

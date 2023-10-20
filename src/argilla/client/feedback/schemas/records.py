@@ -13,18 +13,12 @@
 #  limitations under the License.
 
 import warnings
-from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 from uuid import UUID
 
-import httpx
 from pydantic import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, conint, validator
 
-from argilla.client.sdk.users.models import UserRole
-from argilla.client.sdk.v1.datasets import api as datasets_api_v1
-from argilla.client.sdk.v1.records import api as records_api_v1
-from argilla.client.sdk.v1.suggestions import api as suggestions_api_v1
-from argilla.client.utils import allowed_for_roles
+from argilla.client.feedback.schemas.enums import RecordSortField, ResponseStatus, SortOrder
 
 if TYPE_CHECKING:
     from argilla.client.feedback.unification import UnifiedValueSchema
@@ -53,12 +47,6 @@ class ValueSchema(BaseModel):
     value: Union[StrictStr, StrictInt, List[str], List[RankingValueSchema]]
 
 
-class ResponseStatus(str, Enum):
-    draft = "draft"
-    submitted = "submitted"
-    discarded = "discarded"
-
-
 class ResponseSchema(BaseModel):
     """Schema for the `FeedbackRecord` response.
 
@@ -79,8 +67,12 @@ class ResponseSchema(BaseModel):
     """
 
     user_id: Optional[UUID] = None
-    values: Dict[str, ValueSchema]
+    values: Union[Dict[str, ValueSchema], None]
     status: ResponseStatus = ResponseStatus.submitted
+
+    class Config:
+        extra = Extra.forbid
+        validate_assignment = True
 
     @validator("user_id", always=True)
     def user_id_must_have_value(cls, v):
@@ -92,17 +84,24 @@ class ResponseSchema(BaseModel):
             )
         return v
 
-    class Config:
-        extra = Extra.forbid
+    def to_server_payload(self) -> Dict[str, Any]:
+        """Method that will be used to create the payload that will be sent to Argilla
+        to create a `ResponseSchema` for a `FeedbackRecord`."""
+        return {
+            # UUID is not json serializable!!!
+            "user_id": self.user_id,
+            "values": {question_name: value.dict() for question_name, value in self.values.items()}
+            if self.values is not None
+            else None,
+            "status": self.status.value if hasattr(self.status, "value") else self.status,
+        }
 
 
 class SuggestionSchema(BaseModel):
     """Schema for the suggestions for the questions related to the record.
 
     Args:
-        question_id: ID of the question in Argilla. Defaults to None, and is automatically
-           fulfilled internally once the question is pushed to Argilla.
-        question_name: name of the question.
+        question_name: name of the question in the `FeedbackDataset`.
         type: type of the question. Defaults to None. Possible values are `model` or `human`.
         score: score of the suggestion. Defaults to None.
         value: value of the suggestion, which should match the type of the question.
@@ -119,7 +118,6 @@ class SuggestionSchema(BaseModel):
         ... )
     """
 
-    question_id: Optional[UUID] = None
     question_name: str
     type: Optional[Literal["model", "human"]] = None
     score: Optional[float] = None
@@ -128,30 +126,21 @@ class SuggestionSchema(BaseModel):
 
     class Config:
         extra = Extra.forbid
-
-
-class RemoteSuggestionSchema(SuggestionSchema):
-    client: httpx.Client
-    id: UUID
-
-    # TODO(alvarobartt): here to be able to use the `allowed_for_roles` decorator
-    @property
-    def _client(self) -> httpx.Client:
-        return self.client
-
-    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def delete(self) -> None:
-        """Deletes the `RemoteSuggestionSchema` from Argilla."""
-        try:
-            suggestions_api_v1.delete_suggestion(client=self._client, id=self.id)
-        except Exception as e:
-            raise RuntimeError(f"Failed to delete suggestion with ID `{self.id}` from Argilla.") from e
-
-    class Config:
-        arbitrary_types_allowed = True
         validate_assignment = True
-        allow_mutation = False
-        exclude = {"client"}
+
+    def to_server_payload(self, question_name_to_id: Dict[str, UUID]) -> Dict[str, Any]:
+        """Method that will be used to create the payload that will be sent to Argilla
+        to create a `SuggestionSchema` for a `FeedbackRecord`."""
+        payload = {}
+        payload["question_id"] = str(question_name_to_id[self.question_name])
+        payload["value"] = self.value
+        if self.type:
+            payload["type"] = self.type
+        if self.score:
+            payload["score"] = self.score
+        if self.agent:
+            payload["agent"] = self.agent
+        return payload
 
 
 class FeedbackRecord(BaseModel):
@@ -163,7 +152,7 @@ class FeedbackRecord(BaseModel):
             record itself.
         metadata: Metadata to be included to enrich the information for a given record.
             Note that the metadata is not shown in the UI so you'll just be able to see
-            that programatically after pulling the records. Defaults to None.
+            that programmatically after pulling the records. Defaults to None.
         responses: Responses given by either the current user, or one or a collection of
             users that must exist in Argilla. Each response corresponds to one of the
             `FeedbackDataset` questions, so the values should match the question type.
@@ -203,21 +192,28 @@ class FeedbackRecord(BaseModel):
 
     """
 
-    fields: Dict[str, str]
+    fields: Dict[str, Union[str, None]]
     metadata: Dict[str, Any] = Field(default_factory=dict)
     responses: List[ResponseSchema] = Field(default_factory=list)
-    suggestions: Union[Tuple[SuggestionSchema], List[SuggestionSchema]] = Field(
-        default_factory=tuple, allow_mutation=False
-    )
+    suggestions: Union[Tuple[SuggestionSchema], List[SuggestionSchema]] = Field(default_factory=tuple)
     external_id: Optional[str] = None
 
     _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default_factory=dict)
+
+    class Config:
+        extra = Extra.forbid
+        validate_assignment = True
 
     @validator("suggestions", always=True)
     def normalize_suggestions(cls, values: Any) -> Tuple:
         if not isinstance(values, tuple):
             return tuple([v for v in values])
         return values
+
+    @property
+    def unified_responses(self) -> Optional[Dict[str, List["UnifiedValueSchema"]]]:
+        """Property that returns the unified responses for the record."""
+        return self._unified_responses
 
     def update(
         self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
@@ -242,221 +238,52 @@ class FeedbackRecord(BaseModel):
 
         self.__dict__["suggestions"] = tuple(suggestions_dict.values())
 
-    class Config:
-        extra = Extra.forbid
-        validate_assignment = True
-        exclude = {"_unified_responses"}
+    def to_server_payload(self, question_name_to_id: Optional[Dict[str, UUID]] = None) -> Dict[str, Any]:
+        """Method that will be used to create the payload that will be sent to Argilla
+        to create a `FeedbackRecord` in the `FeedbackDataset`.
+        """
+        payload = {}
+        payload["fields"] = {key: value for key, value in self.fields.items() if value is not None}
+        if self.responses:
+            payload["responses"] = [response.to_server_payload() for response in self.responses]
+        if question_name_to_id:
+            payload["suggestions"] = [
+                suggestion.to_server_payload(question_name_to_id) for suggestion in self.suggestions
+            ]
+        if self.metadata:
+            payload["metadata"] = self.metadata
+        if self.external_id:
+            payload["external_id"] = self.external_id
+        return payload
 
 
-class RemoteFeedbackRecord(FeedbackRecord):
-    """Schema for the records of a `RemoteFeedbackDataset`.
+class SortBy(BaseModel):
+    field: Union[str, RecordSortField]
+    order: Union[str, SortOrder] = SortOrder.asc
 
-    Note this schema shouldn't be instantiated directly, but just internally by the
-    `RemoteFeedbackDataset` class when fetching records from Argilla.
+    @validator("field", pre=True)
+    def check_field_name(cls, field: Union[str, RecordSortField]) -> Union[str, RecordSortField]:
+        try:
+            return RecordSortField(field)
+        except ValueError:
+            if field.startswith("metadata."):
+                return field
+            else:
+                raise ValueError(
+                    f"{field} is not a valid field name. Supported fields are: {RecordSortField} or metadata.*"
+                )
 
-    Args:
-        client: The Argilla client to use to push the record to Argilla. Is shared with
-            the `RemoteFeedbackDataset` that created this record.
-        name2id: A dictionary that maps the question names to their corresponding IDs.
-        id: The ID of the record in Argilla. Defaults to None, and is automatically
-            fulfilled internally once the record is pushed to Argilla.
-        suggestions: A list of `RemoteSuggestionSchema` that contains the suggestions
-            for the current record in Argilla. Every suggestion is linked to only one
-            question. Defaults to an empty list.
-    """
+    @validator("order")
+    def check_order(cls, order):
+        return SortOrder(order)
 
-    client: httpx.Client
-    name2id: Dict[str, UUID]
-
-    id: UUID
-    suggestions: Union[Tuple[RemoteSuggestionSchema], List[RemoteSuggestionSchema]] = Field(
-        default_factory=tuple, allow_mutation=False
-    )
-
-    # TODO(alvarobartt): here to be able to use the `allowed_for_roles` decorator
     @property
-    def _client(self) -> httpx.Client:
-        return self.client
+    def is_metadata_field(self) -> bool:
+        """Returns whether the field is a metadata field."""
+        return self.field.startswith("metadata.")
 
-    def __update_suggestions(
-        self,
-        suggestions: Union[
-            RemoteSuggestionSchema,
-            List[RemoteSuggestionSchema],
-            SuggestionSchema,
-            List[SuggestionSchema],
-            Dict[str, Any],
-            List[Dict[str, Any]],
-        ],
-    ) -> None:
-        """Updates the suggestions for the record in Argilla. Note that the suggestions
-        must exist in Argilla to be updated.
-
-        Note that this method will update the record in Argilla directly.
-
-        Args:
-            suggestions: can be a single `RemoteSuggestionSchema` or `SuggestionSchema`,
-                a list of `RemoteSuggestionSchema` or `SuggestionSchema`, a single
-                dictionary, or a list of dictionaries. If a dictionary is provided,
-                it will be converted to a `RemoteSuggestionSchema` internally.
-        """
-        if isinstance(suggestions, (dict, SuggestionSchema)):
-            suggestions = [suggestions]
-
-        existing_suggestions = {suggestion.question_name: suggestion for suggestion in self.suggestions}
-        new_suggestions = {}
-
-        for suggestion in suggestions:
-            if isinstance(suggestion, dict):
-                if "question_id" not in suggestion or not suggestion["question_id"]:
-                    suggestion["question_id"] = self.name2id[suggestion["question_name"]]
-                if "id" in suggestion:
-                    suggestion = RemoteSuggestionSchema(client=self._client, **suggestion)
-                else:
-                    suggestion = SuggestionSchema(**suggestion)
-
-            if isinstance(suggestion, SuggestionSchema):
-                if not suggestion.question_id:
-                    suggestion.question_id = self.name2id[suggestion.question_name]
-
-            if suggestion.question_name in new_suggestions:
-                warnings.warn(
-                    f"A suggestion for question `{suggestion.question_name}` has been"
-                    " provided twice in the same update, so the last one will be the one"
-                    " to be kept.",
-                    UserWarning,
-                    stacklevel=1,
-                )
-                new_suggestions.pop(suggestion.question_name, None)
-                new_suggestions[suggestion.question_name] = suggestion
-            elif suggestion.question_name in existing_suggestions:
-                comparable_fields = {"question_name", "type", "score", "value", "agent"}
-                comparable_suggestion = suggestion.dict(include={"question_name", "type", "score", "value", "agent"})
-                if any(
-                    [
-                        comparable_suggestion == suggestion.dict(include=comparable_fields)
-                        for suggestion in existing_suggestions.values()
-                    ]
-                ):
-                    warnings.warn(
-                        f"A suggestion for question `{suggestion.question_name}` has already"
-                        " been provided and the provided suggestion is the same, so it will"
-                        " be ignored.",
-                        UserWarning,
-                        stacklevel=1,
-                    )
-                else:
-                    warnings.warn(
-                        f"A suggestion for question `{suggestion.question_name}` has already"
-                        " been provided but the provided suggestion is different, so it will"
-                        " overwrite the existing one.",
-                        UserWarning,
-                        stacklevel=1,
-                    )
-                    existing_suggestions.pop(suggestion.question_name, None)
-                    new_suggestions[suggestion.question_name] = suggestion
-            else:
-                new_suggestions[suggestion.question_name] = suggestion
-
-        for suggestion in new_suggestions.values():
-            if isinstance(suggestion, SuggestionSchema):
-                exclude = {"question_name"}
-            elif isinstance(suggestion, RemoteSuggestionSchema):
-                exclude = {"client", "id", "question_name"}
-            pushed_suggestion = datasets_api_v1.set_suggestion(
-                client=self._client, record_id=self.id, **suggestion.dict(exclude_none=True, exclude=exclude)
-            )
-            existing_suggestions[suggestion.question_name] = RemoteSuggestionSchema(
-                client=self._client,
-                question_name=suggestion.question_name,
-                **pushed_suggestion.parsed.dict(exclude_none=True),
-            )
-
-        self.__dict__["suggestions"] = tuple(existing_suggestions.values())
-
-    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def update(
-        self,
-        suggestions: Union[
-            RemoteSuggestionSchema,
-            List[RemoteSuggestionSchema],
-            SuggestionSchema,
-            List[SuggestionSchema],
-            Dict[str, Any],
-            List[Dict[str, Any]],
-        ],
-    ) -> None:
-        """Update a `RemoteFeedbackRecord`. Currently just `suggestions` are supported.
-
-        Note that this method will update the record in Argilla directly.
-
-        Args:
-            suggestions: can be a single `RemoteSuggestionSchema` or `SuggestionSchema`,
-                a list of `RemoteSuggestionSchema` or `SuggestionSchema`, a single
-                dictionary, or a list of dictionaries. If a dictionary is provided,
-                it will be converted to a `RemoteSuggestionSchema` internally.
-
-        Raises:
-            PermissionError: if the user does not have either `owner` or `admin` role.
-        """
-        self.__update_suggestions(suggestions=suggestions)
-
-    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def delete_suggestions(self, suggestions: Union[RemoteSuggestionSchema, List[RemoteSuggestionSchema]]) -> None:
-        """Deletes the provided suggestions from the record in Argilla. Note that the
-        suggestions must exist in Argilla to be removed from the record.
-
-        Args:
-            suggestions: can be a single `RemoteSuggestionSchema` or a list of
-                `RemoteSuggestionSchema`.
-
-        Raises:
-            PermissionError: if the user does not have either `owner` or `admin` role.
-        """
-        if isinstance(suggestions, RemoteSuggestionSchema):
-            suggestions = [suggestions]
-
-        existing_suggestions = {suggestion.question_name: suggestion for suggestion in self.suggestions}
-        delete_suggestions = []
-        for suggestion in suggestions:
-            if suggestion.question_name not in existing_suggestions:
-                warnings.warn(
-                    f"A suggestion for question `{suggestion.question_name}` has not been"
-                    " provided, so it cannot be removed.",
-                    UserWarning,
-                    stacklevel=1,
-                )
-            else:
-                existing_suggestions.pop(suggestion.question_name, None)
-                delete_suggestions.append(suggestion)
-
-        try:
-            records_api_v1.delete_suggestions(
-                client=self._client, id=self.id, suggestion_ids=[suggestion.id for suggestion in delete_suggestions]
-            )
-            self.__dict__["suggestions"] = tuple(existing_suggestions.values())
-        except Exception as e:
-            raise RuntimeError(
-                f"Failed to delete suggestions with IDs `{[suggestion.id for suggestion in delete_suggestions]}` from record with ID `{self.id}` from Argilla."
-            ) from e
-
-    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def delete(self) -> FeedbackRecord:
-        """Deletes the `RemoteFeedbackRecord` from Argilla.
-
-        Returns:
-            The deleted record formatted as a `FeedbackRecord`.
-
-        Raises:
-            PermissionError: if the user does not have either `owner` or `admin` role.
-        """
-        try:
-            response = records_api_v1.delete_record(client=self._client, id=self.id)
-        except Exception as e:
-            raise RuntimeError(f"Failed to delete record with ID `{self.id}` from Argilla.") from e
-        return FeedbackRecord(**response.parsed.dict(exclude={"id", "inserted_at", "updated_at"}, exclude_none=True))
-
-    class Config:
-        arbitrary_types_allowed = True
-        validate_assignment = True
-        exclude = {"_unified_responses", "client", "name2id"}
+    @property
+    def metadata_name(self) -> Optional[str]:
+        """Returns the name of the metadata field."""
+        if self.field.startswith("metadata."):
+            return self.field.split("metadata.")[1]

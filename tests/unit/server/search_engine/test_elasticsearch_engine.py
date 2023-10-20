@@ -19,7 +19,7 @@ from argilla.server.search_engine import (
     StringQuery,
     UserResponseStatusFilter,
 )
-from argilla.server.search_engine.commons import index_name_for_dataset
+from argilla.server.search_engine.commons import ALL_RESPONSES_STATUSES_FIELD, index_name_for_dataset
 from argilla.server.settings import settings as server_settings
 from sqlalchemy.orm import Session
 
@@ -98,13 +98,11 @@ async def test_banking_sentiment_dataset(elasticsearch_engine: ElasticSearchEngi
         questions=[text_question, rating_question],
     )
 
-    await dataset.awaitable_attrs.fields
-    await dataset.awaitable_attrs.questions
-    await dataset.awaitable_attrs.vectors_settings
+    await _refresh_dataset(dataset)
 
     await elasticsearch_engine.create_index(dataset)
 
-    await elasticsearch_engine.add_records(
+    await elasticsearch_engine.index_records(
         dataset,
         records=[
             await RecordFactory.create(
@@ -214,7 +212,7 @@ async def test_banking_sentiment_dataset_with_vectors(
 
     opensearch.indices.refresh(index=index_name_for_dataset(test_banking_sentiment_dataset))
 
-    await test_banking_sentiment_dataset.awaitable_attrs.vectors_settings
+    await _refresh_dataset(test_banking_sentiment_dataset)
     await test_banking_sentiment_dataset.awaitable_attrs.records
 
     return test_banking_sentiment_dataset
@@ -222,7 +220,7 @@ async def test_banking_sentiment_dataset_with_vectors(
 
 @pytest_asyncio.fixture()
 async def elasticsearch_engine(elasticsearch_config: dict) -> AsyncGenerator[ElasticSearchEngine, None]:
-    engine = ElasticSearchEngine(config=elasticsearch_config, es_number_of_replicas=0, es_number_of_shards=1)
+    engine = ElasticSearchEngine(config=elasticsearch_config, number_of_replicas=0, number_of_shards=1)
     yield engine
 
     await engine.client.close()
@@ -231,6 +229,7 @@ async def elasticsearch_engine(elasticsearch_config: dict) -> AsyncGenerator[Ela
 async def _refresh_dataset(dataset: Dataset):
     await dataset.awaitable_attrs.fields
     await dataset.awaitable_attrs.questions
+    await dataset.awaitable_attrs.metadata_properties
     await dataset.awaitable_attrs.vectors_settings
 
 
@@ -261,15 +260,25 @@ class TestSuiteElasticSearchEngine:
         assert index["mappings"] == {
             "dynamic": "strict",
             "dynamic_templates": [
-                {"status_responses": {"mapping": {"type": "keyword"}, "path_match": "responses.*.status"}}
+                {
+                    "status_responses": {
+                        "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_STATUSES_FIELD},
+                        "path_match": "responses.*.status",
+                    }
+                }
             ],
             "properties": {
                 "id": {"type": "keyword"},
+                "inserted_at": {"type": "date_nanos"},
+                "updated_at": {"type": "date_nanos"},
+                ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
                 "responses": {"dynamic": "true", "type": "object"},
+                "metadata": {"dynamic": "false", "type": "object"},
             },
         }
-        assert index["settings"]["index"]["number_of_shards"] == str(elasticsearch_engine.es_number_of_shards)
-        assert index["settings"]["index"]["number_of_replicas"] == str(elasticsearch_engine.es_number_of_replicas)
+
+        assert index["settings"]["index"]["number_of_shards"] == str(elasticsearch_engine.number_of_shards)
+        assert index["settings"]["index"]["number_of_replicas"] == str(elasticsearch_engine.number_of_replicas)
 
     async def test_create_index_for_dataset_with_fields(
         self,
@@ -291,12 +300,21 @@ class TestSuiteElasticSearchEngine:
         assert index["mappings"] == {
             "dynamic": "strict",
             "dynamic_templates": [
-                {"status_responses": {"mapping": {"type": "keyword"}, "path_match": "responses.*.status"}}
+                {
+                    "status_responses": {
+                        "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_STATUSES_FIELD},
+                        "path_match": "responses.*.status",
+                    }
+                }
             ],
             "properties": {
                 "id": {"type": "keyword"},
+                "inserted_at": {"type": "date_nanos"},
+                "updated_at": {"type": "date_nanos"},
+                ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
                 "fields": {"properties": {field.name: {"type": "text"} for field in dataset.fields}},
                 "responses": {"type": "object", "dynamic": "true"},
+                "metadata": {"dynamic": "false", "type": "object"},
             },
         }
 
@@ -331,10 +349,19 @@ class TestSuiteElasticSearchEngine:
             "dynamic": "strict",
             "properties": {
                 "id": {"type": "keyword"},
+                "inserted_at": {"type": "date_nanos"},
+                "updated_at": {"type": "date_nanos"},
+                ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
                 "responses": {"dynamic": "true", "type": "object"},
+                "metadata": {"dynamic": "false", "type": "object"},
             },
             "dynamic_templates": [
-                {"status_responses": {"mapping": {"type": "keyword"}, "path_match": "responses.*.status"}},
+                {
+                    "status_responses": {
+                        "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_STATUSES_FIELD},
+                        "path_match": "responses.*.status",
+                    }
+                },
                 *[
                     config
                     for question in text_questions
@@ -523,13 +550,23 @@ class TestSuiteElasticSearchEngine:
         await _refresh_dataset(dataset)
 
         await elasticsearch_engine.create_index(dataset)
-        await elasticsearch_engine.add_records(dataset, records)
+        await elasticsearch_engine.index_records(dataset, records)
 
         index_name = index_name_for_dataset(dataset)
         opensearch.indices.refresh(index=index_name)
 
         es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
-        assert es_docs == [{"id": str(record.id), "fields": record.fields, "responses": {}} for record in records]
+        assert es_docs == [
+            {
+                "id": str(record.id),
+                "fields": record.fields,
+                "inserted_at": record.inserted_at.isoformat(),
+                "updated_at": record.updated_at.isoformat(),
+                "metadata": {},
+                "responses": {},
+            }
+            for record in records
+        ]
 
     async def test_delete_records(self, elasticsearch_engine: ElasticSearchEngine, opensearch: OpenSearch):
         text_fields = await TextFieldFactory.create_batch(5)
@@ -544,7 +581,7 @@ class TestSuiteElasticSearchEngine:
         await _refresh_dataset(dataset)
 
         await elasticsearch_engine.create_index(dataset)
-        await elasticsearch_engine.add_records(dataset, records)
+        await elasticsearch_engine.index_records(dataset, records)
 
         records_to_delete, records_to_keep = records[:5], records[5:]
         await elasticsearch_engine.delete_records(dataset, records_to_delete)
@@ -600,7 +637,7 @@ class TestSuiteElasticSearchEngine:
             "properties": {
                 response.user.username: {
                     "properties": {
-                        "status": {"type": "keyword"},
+                        "status": {"type": "keyword", "copy_to": [ALL_RESPONSES_STATUSES_FIELD]},
                         "values": {"properties": {question.name: {"index": False, "type": "text"}}},
                     }
                 }
@@ -647,10 +684,7 @@ class TestSuiteElasticSearchEngine:
         vectors_settings = await VectorSettingsFactory.create_batch(5)
         dataset = await DatasetFactory.create(vectors_settings=vectors_settings)
 
-        await dataset.awaitable_attrs.vectors_settings
-        await dataset.awaitable_attrs.fields
-        await dataset.awaitable_attrs.questions
-
+        await _refresh_dataset(dataset)
         await elasticsearch_engine.create_index(dataset)
 
         index_name = index_name_for_dataset(dataset)

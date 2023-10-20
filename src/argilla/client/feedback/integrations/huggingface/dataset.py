@@ -16,19 +16,21 @@ import json
 import logging
 import tempfile
 import warnings
-from typing import TYPE_CHECKING, Any, Optional, Type
+from typing import TYPE_CHECKING, Any, Optional, Type, Union
 
 from packaging.version import parse as parse_version
 
 from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
-from argilla.client.feedback.schemas import FeedbackRecord
-from argilla.client.feedback.schemas.types import AllowedQuestionTypes
+from argilla.client.feedback.schemas.enums import QuestionTypes
+from argilla.client.feedback.schemas.records import FeedbackRecord
+from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
     from datasets import Dataset
 
-    from argilla.client.feedback.dataset import FeedbackDataset
+    from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
+    from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,31 +38,29 @@ _LOGGER = logging.getLogger(__name__)
 class HuggingFaceDatasetMixin:
     @staticmethod
     @requires_dependencies("datasets")
-    def _huggingface_format(dataset: "FeedbackDataset") -> "Dataset":
-        """Formats a `FeedbackDataset` as a `datasets.Dataset` object.
+    def _huggingface_format(dataset: Union["FeedbackDataset", "RemoteFeedbackDataset"]) -> "Dataset":
+        """Formats either a `FeedbackDataset` or a `RemoteFeedbackDataset` as a `datasets.Dataset` object.
 
         Args:
-            dataset: The `FeedbackDataset` to format as `datasets.Dataset`.
+            dataset: The `FeedbackDataset` or `RemoteFeedbackDataset` to format as `datasets.Dataset`.
 
         Returns:
-            The `FeedbackDataset.records` formatted as a `datasets.Dataset` object,
-            including the `FeedbackDataset.fields` and `FeedbackDataset.questions` as
-            `datasets.Features`.
+            The records from the dataset formatted as a `datasets.Dataset` object, including the fields,
+            questions, and metadata_properties formatted as `datasets.Features`.
 
         Examples:
-            >>> import argilla as rg
-            >>> rg.init(...)
-            >>> dataset = rg.FeedbackDataset.from_argilla(name="my-dataset")
-            >>> huggingface_dataset = rg.HuggingFaceDatasetMixin.set_format(dataset)
+            >>> from argilla.client.feedback.integrations.dataset import HuggingFaceDatasetMixin
+            >>> dataset = FeedbackDataset(...) or RemoteFeedbackDataset(...)
+            >>> huggingface_dataset = HuggingFaceDatasetMixin._huggingface_format(dataset)
         """
         from datasets import Dataset, Features, Sequence, Value
 
         hf_dataset, hf_features = {}, {}
 
         for field in dataset.fields:
-            if field.settings["type"] not in FIELD_TYPE_TO_PYTHON_TYPE.keys():
+            if field.type not in FIELD_TYPE_TO_PYTHON_TYPE.keys():
                 raise ValueError(
-                    f"Field {field.name} has an unsupported type: {field.settings['type']}, for the moment"
+                    f"Field {field.name} has an unsupported type: {field.type}, for the moment"
                     f" only the following types are supported: {list(FIELD_TYPE_TO_PYTHON_TYPE.keys())}"
                 )
             hf_features[field.name] = Value(dtype="string", id="field")
@@ -68,19 +68,19 @@ class HuggingFaceDatasetMixin:
                 hf_dataset[field.name] = []
 
         for question in dataset.questions:
-            if question.settings["type"] in ["text", "label_selection"]:
+            if question.type in [QuestionTypes.text, QuestionTypes.label_selection]:
                 value = Value(dtype="string", id="question")
-            elif question.settings["type"] == "rating":
+            elif question.type == QuestionTypes.rating:
                 value = Value(dtype="int32", id="question")
-            elif question.settings["type"] == "ranking":
+            elif question.type == QuestionTypes.ranking:
                 value = Sequence({"rank": Value(dtype="uint8"), "value": Value(dtype="string")}, id="question")
-            elif question.settings["type"] in "multi_label_selection":
+            elif question.type in QuestionTypes.multi_label_selection:
                 value = Sequence(Value(dtype="string"), id="question")
             else:
                 raise ValueError(
-                    f"Question {question.name} is of type `{type(question).__name__}`,"
+                    f"Question {question.name} is of type `{question.type}`,"
                     " for the moment only the following question types are supported:"
-                    f" `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}`."
+                    f" `{'`, `'.join([arg.value for arg in QuestionTypes])}`."
                 )
 
             hf_features[question.name] = [
@@ -128,7 +128,7 @@ class HuggingFaceDatasetMixin:
                             "value": None,
                             "status": response.status.value if hasattr(response.status, "value") else response.status,
                         }
-                        if question.settings["type"] == "ranking":
+                        if question.type == QuestionTypes.ranking:
                             value = [r.dict() for r in response.values[question.name].value]
                         else:
                             value = response.values[question.name].value
@@ -157,22 +157,26 @@ class HuggingFaceDatasetMixin:
 
     @requires_dependencies(["huggingface_hub", "datasets"])
     def push_to_huggingface(
-        self: "FeedbackDataset", repo_id: str, generate_card: Optional[bool] = True, *args, **kwargs
+        self: "FeedbackDataset",
+        repo_id: str,
+        generate_card: Optional[bool] = True,
+        *args,
+        **kwargs,
     ) -> None:
-        """Pushes the `FeedbackDataset` to the HuggingFace Hub. If the dataset has been previously pushed to the
-        HuggingFace Hub, it will be updated instead. Note that some params as `private` have no effect at all
-        when a dataset is previously uploaded to the HuggingFace Hub.
+        """Pushes the `FeedbackDataset` to the Hugging Face Hub. If the dataset has been previously pushed to the
+        Hugging Face Hub, it will be updated instead. Note that some params as `private` have no effect at all
+        when a dataset is previously uploaded to the Hugging Face Hub.
 
         Args:
-            dataset: the `FeedbackDataset` to push to the HuggingFace Hub.
-            repo_id: the ID of the HuggingFace Hub repo to push the `FeedbackDataset` to.
-            generate_card: whether to generate a dataset card for the `FeedbackDataset` in the HuggingFace Hub. Defaults
+            dataset: the `FeedbackDataset` to push to the Hugging Face Hub.
+            repo_id: the ID of the Hugging Face Hub repo to push the `FeedbackDataset` to.
+            generate_card: whether to generate a dataset card for the `FeedbackDataset` in the Hugging Face Hub. Defaults
                 to `True`.
             *args: the args to pass to `datasets.Dataset.push_to_hub`.
             **kwargs: the kwargs to pass to `datasets.Dataset.push_to_hub`.
         """
         import huggingface_hub
-        from huggingface_hub import DatasetCardData, HfApi
+        from huggingface_hub import HfApi
 
         # https://github.com/argilla-io/argilla/issues/3468
         from argilla.client.feedback.config import DatasetConfig
@@ -181,12 +185,12 @@ class HuggingFaceDatasetMixin:
             _LOGGER.warning(
                 "Recommended `huggingface_hub` version is 0.14.0 or higher, and you have"
                 f" {huggingface_hub.__version__}, so in case you have any issue when pushing the dataset to the"
-                " HuggingFace Hub upgrade it as `pip install huggingface_hub --upgrade`."
+                " Hugging Face Hub upgrade it as `pip install huggingface_hub --upgrade`."
             )
 
         if len(self) < 1:
             raise ValueError(
-                "Cannot push an empty `rg.FeedbackDataset` to the HuggingFace Hub, please make sure to add at"
+                "Cannot push an empty `rg.FeedbackDataset` to the Hugging Face Hub, please make sure to add at"
                 " least one record, via the method `add_records`."
             )
 
@@ -199,6 +203,8 @@ class HuggingFaceDatasetMixin:
                     fields=self.fields,
                     questions=self.questions,
                     guidelines=self.guidelines,
+                    metadata_properties=self.metadata_properties or None,
+                    allow_extra_metadata=self.allow_extra_metadata,
                 ).to_yaml()
             )
             f.flush()
@@ -212,10 +218,20 @@ class HuggingFaceDatasetMixin:
             )
 
         if generate_card:
+            from huggingface_hub import DatasetCardData
+
             from argilla.client.feedback.integrations.huggingface.card import (
                 ArgillaDatasetCard,
                 size_categories_parser,
             )
+
+            sample_argilla_record = self.records[0]
+            sample_argilla_record = (
+                sample_argilla_record.to_local()
+                if isinstance(sample_argilla_record, RemoteFeedbackRecord)
+                else sample_argilla_record
+            )
+            sample_huggingface_record = hfds[0]
 
             card = ArgillaDatasetCard.from_template(
                 card_data=DatasetCardData(
@@ -225,34 +241,24 @@ class HuggingFaceDatasetMixin:
                 repo_id=repo_id,
                 argilla_fields=self.fields,
                 argilla_questions=self.questions,
-                argilla_guidelines=self.guidelines,
-                argilla_record=json.loads(
-                    self.records[0].json(
-                        exclude={
-                            "client": ...,
-                            "id": ...,
-                            "name2id": ...,
-                            "suggestions": {"__all__": {"id", "client"}},
-                        },
-                        exclude_none=True,
-                    )
-                ),
-                huggingface_record=hfds[0],
+                argilla_guidelines=self.guidelines or None,
+                argilla_record=json.loads(sample_argilla_record.json()),
+                huggingface_record=sample_huggingface_record,
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
 
     @classmethod
     @requires_dependencies(["huggingface_hub", "datasets"])
     def from_huggingface(cls: Type["FeedbackDataset"], repo_id: str, *args: Any, **kwargs: Any) -> "FeedbackDataset":
-        """Loads a `FeedbackDataset` from the HuggingFace Hub.
+        """Loads a `FeedbackDataset` from the Hugging Face Hub.
 
         Args:
-            repo_id: the ID of the HuggingFace Hub repo to load the `FeedbackDataset` from.
+            repo_id: the ID of the Hugging Face Hub repo to load the `FeedbackDataset` from.
             *args: the args to pass to `datasets.Dataset.load_from_hub`.
             **kwargs: the kwargs to pass to `datasets.Dataset.load_from_hub`.
 
         Returns:
-            A `FeedbackDataset` loaded from the HuggingFace Hub.
+            A `FeedbackDataset` loaded from the Hugging Face Hub.
         """
         import huggingface_hub
         from datasets import DatasetDict, load_dataset
@@ -269,7 +275,7 @@ class HuggingFaceDatasetMixin:
             _LOGGER.warning(
                 "Recommended `huggingface_hub` version is 0.14.0 or higher, and you have"
                 f" {huggingface_hub.__version__}, so in case you have any issue when pushing the dataset to the"
-                " HuggingFace Hub upgrade it as `pip install huggingface_hub --upgrade`."
+                " Hugging Face Hub upgrade it as `pip install huggingface_hub --upgrade`."
             )
 
         if "token" in kwargs:
@@ -295,13 +301,13 @@ class HuggingFaceDatasetMixin:
             with open(config_path, "r") as f:
                 config = DatasetConfig.from_yaml(f.read())
         except EntryNotFoundError:
-            # TODO(alvarobartt): here for backwards compatibility, remove in 1.14.0
+            # TODO(alvarobartt): here for backwards compatibility, last used in 1.12.0
             warnings.warn(
-                "No `argilla.yaml` file found in the HuggingFace Hub repository, which"
+                "No `argilla.yaml` file found in the Hugging Face Hub repository, which"
                 " means that the `DatasetConfig` was dumped using Argilla 1.12.0 or"
                 " lower, and the `argilla.yaml` file was not generated. Please consider"
                 " re-dumping the `DatasetConfig` using Argilla 1.13.0 or higher, or"
-                " manually create the `argilla.yaml` file in the HuggingFace Hub.",
+                " manually create the `argilla.yaml` file in the Hugging Face Hub.",
                 UserWarning,
             )
             config_path = hf_hub_download(
@@ -315,9 +321,9 @@ class HuggingFaceDatasetMixin:
         except Exception as e:
             raise FileNotFoundError(
                 "Neither `argilla.yaml` nor `argilla.cfg` files were found in the"
-                " HuggingFace Hub repository. Please make sure to dump the `DatasetConfig`"
+                " Hugging Face Hub repository. Please make sure to dump the `DatasetConfig`"
                 " using `FeedbackDataset.push_to_huggingface` to automatically upload"
-                " the `DatasetConfig` as `argilla.yaml` to the HuggingFace Hub."
+                " the `DatasetConfig` as `argilla.yaml` to the Hugging Face Hub."
             ) from e
 
         hfds = load_dataset(repo_id, token=auth, *args, **kwargs)  # use_auth_token is deprecated
@@ -385,7 +391,7 @@ class HuggingFaceDatasetMixin:
                             }
                         value = response["value"]
                         if value is not None:
-                            if question.settings["type"] == "ranking":
+                            if question.type == QuestionTypes.ranking:
                                 value = [{"rank": r, "value": v} for r, v in zip(value["rank"], value["value"])]
                             responses[user_id or "user_without_id"]["values"].update({question.name: {"value": value}})
 
@@ -420,6 +426,8 @@ class HuggingFaceDatasetMixin:
             fields=config.fields,
             questions=config.questions,
             guidelines=config.guidelines,
+            metadata_properties=config.metadata_properties,
+            allow_extra_metadata=config.allow_extra_metadata,
         )
         instance.add_records(records)
         return instance

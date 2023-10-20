@@ -102,6 +102,30 @@ class TestDatabaseModel:
         assert model.int_col == 2
         assert model.dict_col == {"a": 10}
 
+    async def test_datbase_model_update_many(self, db: "AsyncSession"):
+        model_1 = await Model.create(
+            db, str_col="unit-test-1", int_col=1, dict_col={"a": 1, "b": 2, "c": 3}, autocommit=True
+        )
+        model_2 = await Model.create(
+            db, str_col="unit-test-2", int_col=2, dict_col={"a": 4, "b": 5, "c": 6}, autocommit=True
+        )
+        model_3 = await Model.create(
+            db, str_col="unit-test-3", int_col=3, dict_col={"a": 7, "b": 8, "c": 9}, autocommit=True
+        )
+
+        await Model.update_many(
+            db,
+            objects=[
+                {"id": model_1.id, "int_col": 4},
+                {"id": model_2.id, "int_col": 5},
+                {"id": model_3.id, "int_col": 6},
+            ],
+        )
+
+        assert model_1.int_col == 4
+        assert model_2.int_col == 5
+        assert model_3.int_col == 6
+
     async def test_database_model_upsert_many(self, db: "AsyncSession"):
         models = []
         schemas = []

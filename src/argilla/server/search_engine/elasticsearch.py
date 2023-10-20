@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
-from typing import Any, AsyncGenerator, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from elasticsearch8 import AsyncElasticsearch, helpers
 
@@ -37,10 +37,7 @@ def _compute_num_candidates_from_k(k: int) -> int:
 @SearchEngine.register(engine_name="elasticsearch")
 @dataclasses.dataclass
 class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
-    config: Dict[str, Any]
-
-    es_number_of_shards: int
-    es_number_of_replicas: int
+    config: Dict[str, Any] = dataclasses.field(default_factory=dict)
 
     def __post_init__(self):
         self.client = AsyncElasticsearch(**self.config)
@@ -55,9 +52,9 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
             max_retries=5,
         )
         return cls(
-            config,
-            es_number_of_shards=settings.es_records_index_shards,
-            es_number_of_replicas=settings.es_records_index_replicas,
+            config=config,
+            number_of_shards=settings.es_records_index_shards,
+            number_of_replicas=settings.es_records_index_replicas,
         )
 
     async def close(self):
@@ -65,8 +62,9 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
 
     def _configure_index_settings(self) -> Dict[str, Any]:
         return {
-            "number_of_shards": self.es_number_of_shards,
-            "number_of_replicas": self.es_number_of_replicas,
+            "max_result_window": self.max_result_window,
+            "number_of_shards": self.number_of_shards,
+            "number_of_replicas": self.number_of_replicas,
         }
 
     def _mapping_for_vector_settings(self, vector_settings: VectorSettings) -> dict:
@@ -97,7 +95,8 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
         }
 
         if user_response_status_filter:
-            knn_query["filter"] = self._response_status_filter_builder(user_response_status_filter)
+            # TODO: Add metadata !!!!
+            knn_query["filter"] = self._build_response_status_filter(user_response_status_filter)
 
         return await self.client.search(index=index, knn=knn_query, _source=False, track_total_hits=True)
 
@@ -105,7 +104,7 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
         await self.client.indices.create(index=index_name, settings=settings, mappings=mappings)
 
     async def _delete_index_request(self, index_name: str):
-        await self.client.indices.delete(index_name, ignore=[404], ignore_unavailable=True)
+        await self.client.indices.delete(index=index_name, ignore=[404], ignore_unavailable=True)
 
     async def _update_document_request(self, index_name: str, id: str, body: dict):
         await self.client.update(index=index_name, id=id, **body)
@@ -113,14 +112,23 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
     async def put_index_mapping_request(self, index: str, mappings: dict):
         await self.client.indices.put_mapping(index=index, properties=mappings)
 
-    async def _index_search_request(self, index: str, query: dict, size: int, from_: int):
+    async def _index_search_request(
+        self,
+        index: str,
+        query: dict,
+        size: Optional[int] = None,
+        from_: Optional[int] = None,
+        sort: str = None,
+        aggregations: Optional[dict] = None,
+    ) -> dict:
         return await self.client.search(
             index=index,
             query=query,
             from_=from_,
             size=size,
             source=False,
-            sort="_score:desc,id:asc",
+            aggregations=aggregations,
+            sort=sort or "_score:desc,id:asc",
             track_total_hits=True,
         )
 
@@ -131,3 +139,6 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
         _, errors = await helpers.async_bulk(client=self.client, actions=actions, raise_on_error=False)
         if errors:
             raise RuntimeError(errors)
+
+    async def _refresh_index_request(self, index_name: str):
+        await self.client.indices.refresh(index=index_name)
