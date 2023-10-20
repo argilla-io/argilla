@@ -100,7 +100,7 @@ The following arguments apply to specific metadata types:
 ```
 
 ```{note}
-You can also define metadata properties after the dataset has been configured or add them to an existing dataset in Argilla. To do that use the `add_metadata_property` method as explained [here](../practical_guides/update_dataset.md#add-or-delete-metadata-properties).
+You can also define metadata properties after the dataset has been configured or add them to an existing dataset in Argilla. To do that use the `add_metadata_property` method as explained [here](/practical_guides/update_dataset.md#add-or-delete-metadata-properties).
 ```
 
 ##### Define `guidelines`
