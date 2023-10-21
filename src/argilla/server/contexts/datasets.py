@@ -381,11 +381,11 @@ async def record_exists(db: "AsyncSession", record_id: UUID, dataset_id: Optiona
 async def get_records_by_ids(
     db: "AsyncSession",
     dataset_id: UUID,
-    record_ids: List[UUID],
+    records_ids: List[UUID],
     include: Optional["RecordIncludeParam"] = None,
     user_id: Optional[UUID] = None,
 ) -> List[Record]:
-    query = select(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(record_ids))
+    query = select(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(records_ids))
 
     if include is not None:
         if include.relationships is not None:
@@ -474,7 +474,9 @@ async def list_records_by_dataset_id(
     records_query = records_query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
     result_records = await db.execute(records_query)
 
-    count_query = records_query.with_only_columns(func.count()).order_by(None).offset(None).limit(None)
+    count_query = (
+        records_query.with_only_columns(func.count(Record.id.distinct())).order_by(None).offset(None).limit(None)
+    )
     result_count = await db.execute(count_query)
 
     return result_records.unique().scalars().all(), result_count.scalar_one()
