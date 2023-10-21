@@ -962,10 +962,7 @@ class TestSuiteDatasets:
         )
 
     async def test_list_dataset_records_with_multiple_response_per_record(
-        self,
-        async_client: "AsyncClient",
-        owner: "User",
-        owner_auth_header: dict
+        self, async_client: "AsyncClient", owner: "User", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
         record = await RecordFactory.create(dataset=dataset)
