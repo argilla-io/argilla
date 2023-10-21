@@ -91,17 +91,19 @@ export class LoadRecordsToAnnotateUseCase {
 
     const recordsToAnnotate = recordsFromBackend.records.map(
       (record, index) => {
-        const fields = fieldsFromBackend.map((field) => {
-          return new Field(
-            field.id,
-            field.name,
-            field.title,
-            record.fields[field.name],
-            datasetId,
-            field.required,
-            field.settings
-          );
-        });
+        const fields = fieldsFromBackend
+          .filter((f) => record.fields[f.name])
+          .map((field) => {
+            return new Field(
+              field.id,
+              field.name,
+              field.title,
+              record.fields[field.name],
+              datasetId,
+              field.required,
+              field.settings
+            );
+          });
 
         const questions = questionsFromBackend.map((question) => {
           return new Question(
