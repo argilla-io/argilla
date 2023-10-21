@@ -24,4 +24,10 @@ export class Metadata {
   public get isFloat() {
     return this.settings.type === "float";
   }
+
+  get hasValues() {
+    if (this.isTerms) return this.settings.values?.length > 0;
+
+    return this.settings.max !== null && this.settings.min !== null;
+  }
 }

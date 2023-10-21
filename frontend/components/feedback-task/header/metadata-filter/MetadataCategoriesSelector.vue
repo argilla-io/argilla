@@ -14,7 +14,7 @@
         <BaseButton
           @on-click="selectCategory(category)"
           class="category__item"
-          :disabled="!category.hasValues"
+          :disabled="!category.canFilter"
           ><span>{{ category.title }}</span>
           <svgicon name="chevron-right" width="10" height="10"
         /></BaseButton>
