@@ -85,8 +85,10 @@ export default {
       }
 
       this.styleRange();
+
       if (newValue === this.max) {
-        this.$refs.to.style.zIndex = 4;
+        this.$refs.from.style.zIndex = 4;
+        this.$refs.to.style.zIndex = 3;
       }
     },
     sliderTo(newValue) {
@@ -98,8 +100,10 @@ export default {
       }
 
       this.styleRange();
-      if (newValue === this.max) {
-        this.$refs.from.style.zIndex = 4;
+
+      if (newValue === this.min) {
+        this.$refs.from.style.zIndex = 3;
+        this.$refs.to.style.zIndex = 4;
       }
     },
   },
