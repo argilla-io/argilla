@@ -18,7 +18,7 @@ from uuid import UUID
 
 import sqlalchemy
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import and_, exists, func, or_, select
+from sqlalchemy import Select, and_, exists, func, or_, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
@@ -313,13 +313,10 @@ async def delete_question(db: "AsyncSession", question: Question) -> Question:
     return await question.delete(db)
 
 
-async def get_vector_settings_by_id(
-    db: "AsyncSession", vector_settings_id: UUID, dataset_id: Optional[UUID] = None
-) -> Union[VectorSettings, None]:
-    filters = [VectorSettings.id == vector_settings_id]
-    if dataset_id:
-        filters.append(VectorSettings.dataset_id == dataset_id)
-    result = await db.execute(select(VectorSettings).where(*filters).options(selectinload(VectorSettings.dataset)))
+async def get_vector_settings_by_id(db: "AsyncSession", vector_settings_id: UUID) -> Union[VectorSettings, None]:
+    result = await db.execute(
+        select(VectorSettings).filter_by(id=vector_settings_id).options(selectinload(VectorSettings.dataset))
+    )
     return result.scalar_one_or_none()
 
 
@@ -371,11 +368,8 @@ async def get_record_by_id(
     return result.scalar_one_or_none()
 
 
-async def record_exists(db: "AsyncSession", record_id: UUID, dataset_id: Optional[UUID] = None) -> bool:
-    filters = [Record.id == record_id]
-    if dataset_id:
-        filters.append(Record.dataset_id == dataset_id)
-    return await db.scalar(select(exists().where(*filters)))
+async def record_exists(db: "AsyncSession", record_id: UUID) -> bool:
+    return await db.scalar(select(exists().filter_by(id=record_id)))
 
 
 async def get_records_by_ids(
@@ -386,27 +380,7 @@ async def get_records_by_ids(
     user_id: Optional[UUID] = None,
 ) -> List[Record]:
     query = select(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(records_ids))
-
-    if include is not None:
-        if include.relationships is not None:
-            if RecordInclude.responses in include.relationships:
-                if user_id:
-                    query = query.outerjoin(
-                        Response, and_(Response.record_id == Record.id, Response.user_id == user_id)
-                    ).options(contains_eager(Record.responses))
-                else:
-                    query = query.options(joinedload(Record.responses))
-
-            if RecordInclude.suggestions in include.relationships:
-                query = query.options(joinedload(Record.suggestions))
-
-            if RecordInclude.vectors in include.relationships:
-                query = query.options(joinedload(Record.vectors))
-
-        if include.vectors is not None:
-            query = query.outerjoin(
-                Vector, and_(Vector.record_id == Record.id, Vector.vector_settings_id.in_(include.vectors))
-            ).options(contains_eager(Record.vectors))
+    query = await _configure_query_relationships(query, user_id=user_id, include=include)
 
     result = await db.execute(query)
     records = result.unique().scalars().all()
@@ -416,6 +390,34 @@ async def get_records_by_ids(
     ordered_records = [record_order_map[record_id] for record_id in records_ids]
 
     return ordered_records
+
+
+async def _configure_query_relationships(
+    query: "Select", user_id: UUID, include: Optional[RecordIncludeParam] = None
+) -> "Select":
+    if not include:
+        return query
+
+    if include.with_responses:
+        if not user_id:
+            query = query.options(joinedload(Record.responses))
+        else:
+            query = query.outerjoin(
+                Response, and_(Response.record_id == Record.id, Response.user_id == user_id)
+            ).options(contains_eager(Record.responses))
+
+    if include.with_suggestions:
+        query = query.options(joinedload(Record.suggestions))
+
+    if include.with_all_vectors:
+        query = query.options(joinedload(Record.vectors))
+
+    elif include.with_some_vector:
+        query = query.outerjoin(
+            Vector, and_(Vector.record_id == Record.id, Vector.vector_settings_id.in_(include.vectors))
+        ).options(contains_eager(Record.vectors))
+
+    return query
 
 
 async def list_records_by_dataset_id(
@@ -455,21 +457,7 @@ async def list_records_by_dataset_id(
     if response_status_filter_expressions:
         records_query = records_query.filter(or_(*response_status_filter_expressions))
 
-    if include is not None:
-        if include.relationships is not None:
-            if RecordInclude.responses in include.relationships:
-                records_query = records_query.options(contains_eager(Record.responses))
-
-            if RecordInclude.suggestions in include.relationships:
-                records_query = records_query.options(joinedload(Record.suggestions))
-
-            if RecordInclude.vectors in include.relationships:
-                records_query = records_query.options(joinedload(Record.vectors))
-
-        if include.vectors is not None:
-            records_query = records_query.outerjoin(
-                Vector, and_(Vector.record_id == Record.id, Vector.vector_settings_id.in_(include.vectors))
-            ).options(contains_eager(Record.vectors))
+    records_query = await _configure_query_relationships(query=records_query, user_id=user_id, include=include)
 
     records_query = records_query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
     result_records = await db.execute(records_query)
@@ -597,7 +585,7 @@ async def validate_vector(
     vector_settings = vectors_settings.get(vector.vector_settings_id, None)
 
     if not vector_settings:
-        vector_settings = await get_vector_settings_by_id(db, vector.vector_settings_id, dataset_id)
+        vector_settings = await get_vector_settings_by_id(db, vector.vector_settings_id)
         if not vector_settings:
             raise ValueError(
                 f"vector_settings_id={str(vector.vector_settings_id)} does not exist for dataset_id={str(dataset_id)}"
@@ -1013,7 +1001,7 @@ async def upsert_vectors(
     for i, vector in enumerate(vectors_create.items):
         # Check provided record exists
         if vector.record_id not in records_ids:
-            if not await record_exists(db, record_id=vector.record_id, dataset_id=dataset.id):
+            if not await record_exists(db, record_id=vector.record_id):
                 raise ValueError(
                     f"Provided record_id={str(vector.record_id)} at position {i} does not exist for "
                     f"dataset_id={str(dataset.id)}"

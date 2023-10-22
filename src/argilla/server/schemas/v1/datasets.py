@@ -701,3 +701,19 @@ class RecordIncludeParam(BaseModel):
             )
 
         return values
+
+    @property
+    def with_responses(self) -> bool:
+        return self.relationships and RecordInclude.responses in self.relationships
+
+    @property
+    def with_suggestions(self) -> bool:
+        return self.relationships and RecordInclude.suggestions in self.relationships
+
+    @property
+    def with_all_vectors(self) -> bool:
+        return self.relationships and not self.vectors and RecordInclude.vectors in self.relationships
+
+    @property
+    def with_some_vector(self) -> bool:
+        return len(self.vectors) > 1
