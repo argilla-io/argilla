@@ -48,6 +48,12 @@ class ResponseCreate(BaseModel):
     status: ResponseStatus
 
 
+class VectorCreate(BaseModel):
+    vector_settings_id: UUID
+    value: List[float] = Field(..., min_items=1)
+
+
 class RecordUpdate(UpdateSchema):
     metadata_: Optional[Dict[str, Any]] = Field(None, alias="metadata")
     suggestions: Optional[List[SuggestionCreate]] = None
+    vectors: Optional[List[VectorCreate]] = None

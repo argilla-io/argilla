@@ -13,7 +13,7 @@
 #  limitations under the License.
 import copy
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Set, TYPE_CHECKING, Tuple, Union
 from uuid import UUID
 
 import sqlalchemy
@@ -22,7 +22,7 @@ from sqlalchemy import Select, and_, exists, func, or_, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
-from argilla.server.enums import DatasetStatus, RecordInclude, ResponseStatusFilter, UserRole
+from argilla.server.enums import DatasetStatus, ResponseStatusFilter, UserRole
 from argilla.server.models import (
     Dataset,
     Field,
@@ -44,10 +44,11 @@ from argilla.server.schemas.v1.datasets import (
     RecordsCreate,
     ResponseValueCreate,
     VectorCreate,
+    VectorCreateWithRecordId,
     VectorCreateWithRecordIdAndDatasetId,
+    VectorSettings as VectorSettingsSchema,
     VectorsCreate,
 )
-from argilla.server.schemas.v1.datasets import VectorSettings as VectorSettingsSchema
 from argilla.server.schemas.v1.metadata_properties import MetadataPropertyUpdate
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate, ResponseValueUpdate
@@ -57,7 +58,6 @@ from argilla.server.security.model import User
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
-    from argilla.server.models import MetadataPropertySettings
     from argilla.server.models.questions import QuestionSettings
     from argilla.server.schemas.v1.datasets import (
         DatasetUpdate,
@@ -378,7 +378,16 @@ async def get_records_by_ids(
     user_id: Optional[UUID] = None,
 ) -> List[Record]:
     query = select(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(records_ids))
-    query = await _configure_query_relationships(query, user_id=user_id, include=include)
+
+    if include and include.with_responses:
+        if not user_id:
+            query = query.options(joinedload(Record.responses))
+        else:
+            query = query.outerjoin(
+                Response, and_(Response.record_id == Record.id, Response.user_id == user_id)
+            ).options(contains_eager(Record.responses))
+
+    query = await _configure_query_relationships(query, include_params=include)
 
     result = await db.execute(query)
     records = result.unique().scalars().all()
@@ -391,28 +400,20 @@ async def get_records_by_ids(
 
 
 async def _configure_query_relationships(
-    query: "Select", user_id: UUID, include: Optional[RecordIncludeParam] = None
+    query: "Select", include_params: Optional["RecordIncludeParam"] = None
 ) -> "Select":
-    if not include:
+    if not include_params:
         return query
 
-    if include.with_responses:
-        if not user_id:
-            query = query.options(joinedload(Record.responses))
-        else:
-            query = query.outerjoin(
-                Response, and_(Response.record_id == Record.id, Response.user_id == user_id)
-            ).options(contains_eager(Record.responses))
-
-    if include.with_suggestions:
+    if include_params.with_suggestions:
         query = query.options(joinedload(Record.suggestions))
 
-    if include.with_all_vectors:
+    if include_params.with_all_vectors:
         query = query.options(joinedload(Record.vectors))
 
-    elif include.with_some_vector:
+    elif include_params.with_some_vector:
         query = query.outerjoin(
-            Vector, and_(Vector.record_id == Record.id, Vector.vector_settings_id.in_(include.vectors))
+            Vector, and_(Vector.record_id == Record.id, Vector.vector_settings_id.in_(include_params.vectors))
         ).options(contains_eager(Record.vectors))
 
     return query
@@ -455,8 +456,10 @@ async def list_records_by_dataset_id(
     if response_status_filter_expressions:
         records_query = records_query.filter(or_(*response_status_filter_expressions))
 
-    records_query = await _configure_query_relationships(query=records_query, user_id=user_id, include=include)
+    if include and include.with_responses:
+        records_query = records_query.options(contains_eager(Record.responses))
 
+    records_query = await _configure_query_relationships(query=records_query, include_params=include)
     records_query = records_query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
     result_records = await db.execute(records_query)
 
@@ -584,10 +587,11 @@ async def validate_vector(
 
     if not vector_settings:
         vector_settings = await get_vector_settings_by_id(db, vector.vector_settings_id)
-        if not vector_settings:
+        if not vector_settings or vector_settings.dataset_id != dataset_id:
             raise ValueError(
                 f"vector_settings_id={str(vector.vector_settings_id)} does not exist for dataset_id={str(dataset_id)}"
             )
+
         vector_settings = VectorSettingsSchema.from_orm(vector_settings)
         vectors_settings[vector.vector_settings_id] = vector_settings
 
@@ -703,6 +707,7 @@ async def _exists_records_with_ids(db: "AsyncSession", dataset_id: UUID, records
 async def update_records(
     db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, records_update: "RecordsUpdate"
 ) -> None:
+    # TODO: Align flow with `create_records` function
     records_ids = [record_update.id for record_update in records_update.items]
 
     if len(records_ids) != len(set(records_ids)):
@@ -720,10 +725,12 @@ async def update_records(
     records_update_objects: List[Dict[str, Any]] = []
     records_search_engine_update: List[UUID] = []
     records_delete_suggestions: List[UUID] = []
+    vectors_create: List[VectorCreateWithRecordId] = []
 
     # Cache dictionaries to avoid querying the database multiple times
     metadata_properties: Dict[str, Union[MetadataProperty, Literal["extra"]]] = {}
     questions: Dict[UUID, Question] = {}
+    vectors_settings: Dict[UUID, VectorSettingsSchema] = {}
 
     suggestions = []
     for record_i, record_update in enumerate(records_update.items):
@@ -736,6 +743,25 @@ async def update_records(
                 raise ValueError(f"Provided metadata for record at position {record_i} is not valid: {err}") from err
             records_search_engine_update.append(record_update.id)
 
+        if "vectors" in params:
+            params.pop("vectors")
+
+            for vector_idx, vector in enumerate(record_update.vectors):
+                try:
+                    vectors_settings = await validate_vector(db, dataset.id, vector, vectors_settings)
+                except ValueError as e:
+                    raise ValueError(
+                        f"Provided vector for record at position {record_i} and vector at position "
+                        f"{vector_idx} is not valid: {e}"
+                    ) from e
+
+            vectors_create.extend(
+                [
+                    VectorCreateWithRecordId(record_id=record_update.id, **vector.dict())
+                    for vector in record_update.vectors
+                ]
+            )
+
         if record_update.suggestions is not None:
             params.pop("suggestions")
 
@@ -746,12 +772,12 @@ async def update_records(
             for suggestion_i, suggestion in enumerate(record_update.suggestions):
                 try:
                     questions = await _validate_suggestion(db, suggestion, questions)
-                    suggestions.append(Suggestion(record_id=record_update.id, **suggestion.dict()))
                 except ValueError as err:
                     raise ValueError(
                         f"Provided suggestion for record at position {record_i} and suggestion at position "
                         f"{suggestion_i} is not valid: {err}"
                     ) from err
+                suggestions.append(Suggestion(record_id=record_update.id, **suggestion.dict()))
             records_delete_suggestions.append(record_update.id)
 
         records_update_objects.append(params)
@@ -763,6 +789,17 @@ async def update_records(
         await Record.update_many(db, records_update_objects, autocommit=False)
         records = await get_records_by_ids(db, dataset_id=dataset.id, records_ids=records_search_engine_update)
         await search_engine.index_records(dataset, records)
+        if vectors_create:
+            vectors = await Vector.upsert_many(
+                db,
+                objects=[
+                    VectorCreateWithRecordIdAndDatasetId(dataset_id=dataset.id, **vector.dict())
+                    for vector in vectors_create
+                ],
+                constraints=[Vector.record_id, Vector.vector_settings_id],
+                autocommit=False,
+            )
+            await search_engine.set_records_vectors(dataset, vectors)
 
     await db.commit()
 
@@ -795,15 +832,36 @@ async def update_record(
         for suggestion in record_update.suggestions:
             try:
                 await _validate_suggestion(db, suggestion)
-                suggestions.append(Suggestion(**suggestion.dict()))
             except ValueError as err:
                 raise ValueError(
                     f"Provided suggestion for question_id={suggestion.question_id} is not valid: {err}"
                 ) from err
 
+            suggestions.append(Suggestion(**suggestion.dict()))
+
         # Remove existing suggestions
         record.suggestions = []
         params["suggestions"] = suggestions
+
+    if record_update.vectors:
+        vectors_settings: Dict[UUID, VectorSettingsSchema] = {}
+        vectors = []
+        for i, vector in enumerate(record_update.vectors):
+            try:
+                vectors_settings = await validate_vector(db, record.dataset.id, vector, vectors_settings)
+            except ValueError as e:
+                raise ValueError(f"Provided vector at position {i} of record is not valid: {e}") from e
+
+            vector = Vector(
+                value=vector.value, dataset_id=record.dataset.id, vector_settings_id=vector.vector_settings_id
+            )
+
+            record.vectors.append(vector)
+            vectors.append(vector)
+
+        # TODO: mix with old ones (allow partial update))
+        record.vectors = []
+        params["vectors"] = vectors
 
     async with db.begin_nested():
         record = await record.update(db, **params, replace_dict=True, autocommit=False)
@@ -811,6 +869,9 @@ async def update_record(
         # If "metadata" has been included in the update, then we need to also update it in the search engine
         if "metadata_" in params:
             await search_engine.index_records(record.dataset, [record])
+
+        if "vectors" in params:
+            await search_engine.set_records_vectors(record.dataset, record.vectors)
 
     await db.commit()
     return record

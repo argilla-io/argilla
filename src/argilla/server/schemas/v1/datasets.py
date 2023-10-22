@@ -24,7 +24,7 @@ from pydantic.utils import GetterDict
 
 from argilla.server.enums import RecordInclude
 from argilla.server.schemas.base import UpdateSchema
-from argilla.server.schemas.v1.records import RecordUpdate
+from argilla.server.schemas.v1.records import RecordUpdate, VectorCreate
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
 from argilla.server.search_engine import StringQuery
 
@@ -482,11 +482,6 @@ UserResponseCreate = Annotated[
 ]
 
 
-class VectorCreate(BaseModel):
-    vector_settings_id: UUID
-    value: List[float] = PydanticField(..., min_items=1)
-
-
 class VectorCreateWithRecordId(VectorCreate):
     record_id: UUID
 
@@ -703,16 +698,20 @@ class RecordIncludeParam(BaseModel):
 
     @property
     def with_responses(self) -> bool:
-        return self.relationships and RecordInclude.responses in self.relationships
+        return self._has_relationships and RecordInclude.responses in self.relationships
 
     @property
     def with_suggestions(self) -> bool:
-        return self.relationships and RecordInclude.suggestions in self.relationships
+        return self._has_relationships and RecordInclude.suggestions in self.relationships
 
     @property
     def with_all_vectors(self) -> bool:
-        return self.relationships and not self.vectors and RecordInclude.vectors in self.relationships
+        return self._has_relationships and not self.vectors and RecordInclude.vectors in self.relationships
 
     @property
     def with_some_vector(self) -> bool:
-        return len(self.vectors) > 1
+        return self.vectors is not None and len(self.vectors) > 0
+
+    @property
+    def _has_relationships(self):
+        return self.relationships is not None
