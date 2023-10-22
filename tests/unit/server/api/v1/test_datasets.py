@@ -1022,21 +1022,21 @@ class TestSuiteDatasets:
         owner_auth_header: dict,
         response_status_filter: Union[str, List[str]],
     ):
-        num_responses_per_status = 10
+        num_records_per_response_status = 10
         response_values = {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}
 
         dataset = await DatasetFactory.create()
         # missing responses
-        await RecordFactory.create_batch(size=num_responses_per_status, dataset=dataset)
+        await RecordFactory.create_batch(size=num_records_per_response_status, dataset=dataset)
         # discarded responses
-        await self.create_records_with_response(num_responses_per_status, dataset, owner, ResponseStatus.discarded)
+        await self.create_records_with_response(num_records_per_response_status, dataset, owner, ResponseStatus.discarded)
         # submitted responses
         await self.create_records_with_response(
-            num_responses_per_status, dataset, owner, ResponseStatus.submitted, response_values
+            num_records_per_response_status, dataset, owner, ResponseStatus.submitted, response_values
         )
         # drafted responses
         await self.create_records_with_response(
-            num_responses_per_status, dataset, owner, ResponseStatus.draft, response_values
+            num_records_per_response_status, dataset, owner, ResponseStatus.draft, response_values
         )
 
         other_dataset = await DatasetFactory.create()
@@ -1057,12 +1057,12 @@ class TestSuiteDatasets:
         assert response.status_code == 200
         response_json = response.json()
 
-        assert len(response_json["items"]) == (num_responses_per_status * len(response_status_filter))
+        assert len(response_json["items"]) == (num_records_per_response_status * len(response_status_filter))
 
         if "missing" in response_status_filter:
             assert (
-                len([record for record in response_json["items"] if len(record["responses"]) == 0])
-                >= num_responses_per_status
+                    len([record for record in response_json["items"] if len(record["responses"]) == 0])
+                    >= num_records_per_response_status
             )
         assert all(
             [
@@ -4850,25 +4850,26 @@ class TestSuiteDatasets:
             dataset=dataset, vector_settings=vector_settings_a, record=record_a, value=[1, 2, 3, 4, 5]
         )
 
-        response = await async_client.put(
-            f"/api/v1/datasets/{dataset.id}/vectors",
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
             headers={API_KEY_HEADER_NAME: user.api_key},
             json={
                 "items": [
                     {
-                        "record_id": str(record_a.id),
-                        "vector_settings_id": str(vector_settings_a.id),
-                        "value": [5, 6, 7, 8, 9],
+                        "id": str(record_a.id),
+                        "vectors": [{"vector_settings_id": str(vector_settings_a.id), "value": [5, 6, 7, 8, 9]}],
                     },
                     {
-                        "record_id": str(record_b.id),
-                        "vector_settings_id": str(vector_settings_a.id),
-                        "value": [100, 101, 102, 103, 104],
+                        "id": str(record_b.id),
+                        "vectors": [
+                            {"vector_settings_id": str(vector_settings_a.id), "value": [100, 101, 102, 103, 104]}
+                        ],
                     },
                     {
-                        "record_id": str(record_c.id),
-                        "vector_settings_id": str(vector_settings_b.id),
-                        "value": [200, 201, 202, 203, 204],
+                        "id": str(record_c.id),
+                        "vectors": [
+                            {"vector_settings_id": str(vector_settings_b.id), "value": [200, 201, 202, 203, 204]}
+                        ],
                     },
                 ]
             },
@@ -4903,11 +4904,16 @@ class TestSuiteDatasets:
         vector_settings = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
         record = await RecordFactory.create(dataset=dataset)
 
-        response = await async_client.put(
-            f"/api/v1/datasets/{dataset.id}/vectors",
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
             headers=owner_auth_header,
             json={
-                "items": [{"record_id": str(record.id), "vector_settings_id": str(vector_settings.id), "value": [1]}]
+                "items": [
+                    {
+                        "id": str(record.id),
+                        "vectors": [{"vector_settings_id": str(vector_settings.id), "value": [1]}],
+                    }
+                ]
             },
         )
 
@@ -4919,11 +4925,16 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create()
         record = await RecordFactory.create(dataset=dataset)
 
-        response = await async_client.put(
-            f"/api/v1/datasets/{dataset.id}/vectors",
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
             headers=owner_auth_header,
             json={
-                "items": [{"record_id": str(record.id), "vector_settings_id": str(uuid4()), "value": [1, 2, 3, 4, 5]}]
+                "items": [
+                    {
+                        "id": str(record.id),
+                        "vectors": [{"vector_settings_id": str(uuid4()), "value": [1, 2, 3, 4, 5]}],
+                    }
+                ]
             },
         )
 
@@ -4938,15 +4949,14 @@ class TestSuiteDatasets:
         # Create vector settings in another dataset
         vector_settings = await VectorSettingsFactory.create(dimensions=5)
 
-        response = await async_client.put(
-            f"/api/v1/datasets/{dataset.id}/vectors",
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
             headers=owner_auth_header,
             json={
                 "items": [
                     {
-                        "record_id": str(record.id),
-                        "vector_settings_id": str(vector_settings.id),
-                        "value": [1, 2, 3, 4, 5],
+                        "id": str(record.id),
+                        "vectors": [{"vector_settings_id": str(vector_settings.id), "value": [1, 2, 3, 4, 5]}],
                     }
                 ]
             },
@@ -4960,12 +4970,15 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create()
         vector_settings = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
 
-        response = await async_client.put(
-            f"/api/v1/datasets/{dataset.id}/vectors",
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
             headers=owner_auth_header,
             json={
                 "items": [
-                    {"record_id": str(uuid4()), "vector_settings_id": str(vector_settings.id), "value": [1, 2, 3, 4, 5]}
+                    {
+                        "id": str(uuid4()),
+                        "vectors": [{"vector_settings_id": str(vector_settings.id), "value": [1, 2, 3, 4, 5]}],
+                    }
                 ]
             },
         )
@@ -4977,10 +4990,17 @@ class TestSuiteDatasets:
     ):
         dataset = await DatasetFactory.create()
 
-        response = await async_client.put(
-            f"/api/v1/datasets/{dataset.id}/vectors",
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
             headers=owner_auth_header,
-            json={"items": [{"record_id": str(uuid4()), "vector_settings_id": str(uuid4()), "value": [1, 2, 3, 4, 5]}]},
+            json={
+                "items": [
+                    {
+                        "id": str(uuid4()),
+                        "vectors": [{"vector_settings_id": str(uuid4()), "value": [1, 2, 3, 4, 5]}],
+                    }
+                ]
+            },
         )
 
         assert response.status_code == 422
