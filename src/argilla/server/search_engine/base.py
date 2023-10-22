@@ -26,7 +26,7 @@ from argilla.server.models import Dataset, MetadataProperty, Record, Response, U
 __all__ = [
     "SearchEngine",
     "UserResponse",
-    "StringQuery",
+    "TextQuery",
     "MetadataFilter",
     "TermsMetadataFilter",
     "IntegerMetadataFilter",
@@ -47,7 +47,7 @@ class UserResponse(BaseModel):
     status: ResponseStatus
 
 
-class StringQuery(BaseModel):
+class TextQuery(BaseModel):
     q: str
     field: Optional[str] = None
 
@@ -238,7 +238,7 @@ class SearchEngine(metaclass=ABCMeta):
     async def search(
         self,
         dataset: Dataset,
-        query: Optional[Union[StringQuery, str]] = None,
+        query: Optional[Union[TextQuery, str]] = None,
         # TODO(@frascuchon): The search records method should receive a generic list of filters
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
@@ -267,6 +267,7 @@ class SearchEngine(metaclass=ABCMeta):
         value: Optional[List[float]] = None,
         record: Optional[Record] = None,
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
+        metadata_filters: Optional[List[MetadataFilter]] = None,
         max_results: int = 100,
         threshold: Optional[float] = None,
     ) -> SearchResponses:

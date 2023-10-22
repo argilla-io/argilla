@@ -19,7 +19,7 @@ from argilla.server.search_engine import (
     FloatMetadataFilter,
     IntegerMetadataFilter,
     SortBy,
-    StringQuery,
+    TextQuery,
     TermsMetadataFilter,
     UserResponseStatusFilter,
 )
@@ -532,16 +532,16 @@ class TestSuiteOpenSearchEngine:
             ("00000", 1),
             ("card payment", 5),
             ("nothing", 0),
-            (StringQuery(q="card"), 5),
-            (StringQuery(q="account"), 1),
-            (StringQuery(q="payment"), 6),
-            (StringQuery(q="cash"), 3),
-            (StringQuery(q="card payment"), 5),
-            (StringQuery(q="nothing"), 0),
-            (StringQuery(q="rate negative"), 1),  # Terms are found in two different fields
-            (StringQuery(q="negative", field="label"), 4),
-            (StringQuery(q="00000", field="textId"), 1),
-            (StringQuery(q="card payment", field="text"), 5),
+            (TextQuery(q="card"), 5),
+            (TextQuery(q="account"), 1),
+            (TextQuery(q="payment"), 6),
+            (TextQuery(q="cash"), 3),
+            (TextQuery(q="card payment"), 5),
+            (TextQuery(q="nothing"), 0),
+            (TextQuery(q="rate negative"), 1),  # Terms are found in two different fields
+            (TextQuery(q="negative", field="label"), 4),
+            (TextQuery(q="00000", field="textId"), 1),
+            (TextQuery(q="card payment", field="text"), 5),
         ],
     )
     async def test_search_with_query_string(
@@ -549,7 +549,7 @@ class TestSuiteOpenSearchEngine:
         opensearch_engine: OpenSearchEngine,
         opensearch: OpenSearch,
         test_banking_sentiment_dataset: Dataset,
-        query: Union[str, StringQuery],
+        query: Union[str, TextQuery],
         expected_items: int,
     ):
         result = await opensearch_engine.search(test_banking_sentiment_dataset, query=query)
@@ -594,7 +594,7 @@ class TestSuiteOpenSearchEngine:
 
         result = await opensearch_engine.search(
             test_banking_sentiment_dataset,
-            query=StringQuery(q="payment"),
+            query=TextQuery(q="payment"),
             user_response_status_filter=UserResponseStatusFilter(user=user, statuses=statuses),
         )
         assert len(result.items) == expected_items
@@ -697,12 +697,12 @@ class TestSuiteOpenSearchEngine:
         )
 
         no_filter_results = await opensearch_engine.search(
-            test_banking_sentiment_dataset, query=StringQuery(q="payment")
+            test_banking_sentiment_dataset, query=TextQuery(q="payment")
         )
 
         results = await opensearch_engine.search(
             test_banking_sentiment_dataset,
-            query=StringQuery(q="payment"),
+            query=TextQuery(q="payment"),
             user_response_status_filter=UserResponseStatusFilter(user=user, statuses=all_statuses),
         )
 

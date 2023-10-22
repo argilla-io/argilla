@@ -67,7 +67,7 @@ from argilla.server.search_engine import (
     SearchResponseItem,
     SearchResponses,
     SortBy,
-    StringQuery,
+    TextQuery,
     TermsMetadataFilter,
     UserResponseStatusFilter,
 )
@@ -4684,7 +4684,7 @@ class TestSuiteDatasets:
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
-            query=StringQuery(q="Hello", field="input"),
+            query=TextQuery(q="Hello", field="input"),
             metadata_filters=[],
             user_response_status_filter=None,
             offset=0,
@@ -4814,7 +4814,7 @@ class TestSuiteDatasets:
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
-            query=StringQuery(q="Hello", field="input"),
+            query=TextQuery(q="Hello", field="input"),
             metadata_filters=[expected_filter_class(metadata_property=metadata_property, **expected_filter_args)],
             user_response_status_filter=None,
             offset=0,
@@ -4943,7 +4943,7 @@ class TestSuiteDatasets:
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
-            query=StringQuery(q="Hello", field="input"),
+            query=TextQuery(q="Hello", field="input"),
             metadata_filters=[],
             user_response_status_filter=None,
             offset=0,
@@ -5047,7 +5047,7 @@ class TestSuiteDatasets:
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
-            query=StringQuery(q="Hello", field="input"),
+            query=TextQuery(q="Hello", field="input"),
             metadata_filters=[],
             user_response_status_filter=None,
             offset=0,
@@ -5156,7 +5156,7 @@ class TestSuiteDatasets:
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
-            query=StringQuery(q="Hello", field="input"),
+            query=TextQuery(q="Hello", field="input"),
             metadata_filters=[],
             user_response_status_filter=UserResponseStatusFilter(user=owner, statuses=[ResponseStatusFilter.submitted]),
             offset=0,
@@ -5191,7 +5191,7 @@ class TestSuiteDatasets:
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
-            query=StringQuery(q="Hello", field="input"),
+            query=TextQuery(q="Hello", field="input"),
             metadata_filters=[],
             user_response_status_filter=None,
             offset=0,

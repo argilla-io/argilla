@@ -45,7 +45,7 @@ from argilla.server.search_engine.base import (
     SearchResponseItem,
     SearchResponses,
     SortBy,
-    StringQuery,
+    TextQuery,
     TermsMetadataFilter,
     TermsMetadataMetrics,
     UserResponse,
@@ -260,7 +260,8 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         value: Optional[List[float]] = None,
         record: Optional[Record] = None,
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
-        max_results: conint(ge=2, le=500) = 100,
+        metadata_filters: Optional[List[MetadataFilter]] = None,
+        max_results: int = 100,
         threshold: Optional[float] = None,
     ) -> SearchResponses:
         if not (value or record):
@@ -304,7 +305,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     async def search(
         self,
         dataset: Dataset,
-        query: Optional[Union[StringQuery, str]] = None,
+        query: Optional[Union[TextQuery, str]] = None,
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
         offset: int = 0,
@@ -314,7 +315,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html
 
         if isinstance(query, str):
-            query = StringQuery(q=query)
+            query = TextQuery(q=query)
 
         text_query = self._text_query_builder(dataset, text=query)
         bool_query: Dict[str, Any] = {"must": [text_query]}
@@ -408,7 +409,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         return SearchResponses(items=items, total=total)
 
     @staticmethod
-    def _text_query_builder(dataset: Dataset, text: Optional[StringQuery] = None) -> dict:
+    def _text_query_builder(dataset: Dataset, text: Optional[TextQuery] = None) -> dict:
         if text is None:
             return {"match_all": {}}
         if not text.field:

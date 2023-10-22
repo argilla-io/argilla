@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, AsyncGenerator, List, Union
 from argilla.server.enums import ResponseStatusFilter
 from argilla.server.models import Record, User, VectorSettings
 from argilla.server.search_engine import (
-    StringQuery,
+    TextQuery,
     UserResponseStatusFilter,
 )
 from argilla.server.search_engine.commons import ALL_RESPONSES_STATUSES_FIELD, index_name_for_dataset
@@ -429,16 +429,16 @@ class TestSuiteElasticSearchEngine:
             ("00000", 1),
             ("card payment", 5),
             ("nothing", 0),
-            (StringQuery(q="card"), 5),
-            (StringQuery(q="account"), 1),
-            (StringQuery(q="payment"), 6),
-            (StringQuery(q="cash"), 3),
-            (StringQuery(q="card payment"), 5),
-            (StringQuery(q="nothing"), 0),
-            (StringQuery(q="rate negative"), 1),  # Terms are found in two different fields
-            (StringQuery(q="negative", field="label"), 4),
-            (StringQuery(q="00000", field="textId"), 1),
-            (StringQuery(q="card payment", field="text"), 5),
+            (TextQuery(q="card"), 5),
+            (TextQuery(q="account"), 1),
+            (TextQuery(q="payment"), 6),
+            (TextQuery(q="cash"), 3),
+            (TextQuery(q="card payment"), 5),
+            (TextQuery(q="nothing"), 0),
+            (TextQuery(q="rate negative"), 1),  # Terms are found in two different fields
+            (TextQuery(q="negative", field="label"), 4),
+            (TextQuery(q="00000", field="textId"), 1),
+            (TextQuery(q="card payment", field="text"), 5),
         ],
     )
     async def test_search_with_query_string(
@@ -446,7 +446,7 @@ class TestSuiteElasticSearchEngine:
         elasticsearch_engine: ElasticSearchEngine,
         opensearch: OpenSearch,
         test_banking_sentiment_dataset: Dataset,
-        query: Union[str, StringQuery],
+        query: Union[str, TextQuery],
         expected_items: int,
     ):
         opensearch.indices.refresh(index=index_name_for_dataset(test_banking_sentiment_dataset))
@@ -491,7 +491,7 @@ class TestSuiteElasticSearchEngine:
 
         result = await elasticsearch_engine.search(
             test_banking_sentiment_dataset,
-            query=StringQuery(q="payment"),
+            query=TextQuery(q="payment"),
             user_response_status_filter=UserResponseStatusFilter(user=user, statuses=statuses),
         )
         assert len(result.items) == expected_items
@@ -507,11 +507,11 @@ class TestSuiteElasticSearchEngine:
 
         no_filter_results = await elasticsearch_engine.search(
             test_banking_sentiment_dataset,
-            query=StringQuery(q="payment"),
+            query=TextQuery(q="payment"),
         )
         results = await elasticsearch_engine.search(
             test_banking_sentiment_dataset,
-            query=StringQuery(q="payment"),
+            query=TextQuery(q="payment"),
             user_response_status_filter=UserResponseStatusFilter(user=user, statuses=all_statuses),
         )
         assert len(no_filter_results.items) == len(results.items)
