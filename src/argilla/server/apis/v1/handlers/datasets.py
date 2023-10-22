@@ -699,31 +699,6 @@ async def delete_dataset_records(
     await datasets.delete_records(db, search_engine, dataset, record_ids)
 
 
-@router.put("/datasets/{dataset_id}/vectors", status_code=status.HTTP_204_NO_CONTENT)
-async def create_or_replace_vectors(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    search_engine: SearchEngine = Depends(get_search_engine),
-    dataset_id: UUID,
-    vectors_create: VectorsCreate,
-    current_user: User = Security(auth.get_current_user),
-):
-    dataset = await _get_dataset(db, dataset_id, with_vectors_settings=True)
-
-    await authorize(current_user, DatasetPolicyV1.create_vectors(dataset))
-
-    if not dataset.vectors_settings:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Cannot create vectors for dataset without vector settings",
-        )
-
-    try:
-        await datasets.upsert_vectors(db, search_engine, dataset, vectors_create)
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
-
-
 @router.post(
     "/me/datasets/{dataset_id}/records/search",
     status_code=status.HTTP_200_OK,
