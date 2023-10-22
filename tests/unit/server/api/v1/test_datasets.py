@@ -1029,7 +1029,9 @@ class TestSuiteDatasets:
         # missing responses
         await RecordFactory.create_batch(size=num_records_per_response_status, dataset=dataset)
         # discarded responses
-        await self.create_records_with_response(num_records_per_response_status, dataset, owner, ResponseStatus.discarded)
+        await self.create_records_with_response(
+            num_records_per_response_status, dataset, owner, ResponseStatus.discarded
+        )
         # submitted responses
         await self.create_records_with_response(
             num_records_per_response_status, dataset, owner, ResponseStatus.submitted, response_values
@@ -1061,8 +1063,8 @@ class TestSuiteDatasets:
 
         if "missing" in response_status_filter:
             assert (
-                    len([record for record in response_json["items"] if len(record["responses"]) == 0])
-                    >= num_records_per_response_status
+                len([record for record in response_json["items"] if len(record["responses"]) == 0])
+                >= num_records_per_response_status
             )
         assert all(
             [
