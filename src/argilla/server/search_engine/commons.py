@@ -45,9 +45,9 @@ from argilla.server.search_engine.base import (
     SearchResponseItem,
     SearchResponses,
     SortBy,
-    TextQuery,
     TermsMetadataFilter,
     TermsMetadataMetrics,
+    TextQuery,
     UserResponse,
     UserResponseStatusFilter,
 )

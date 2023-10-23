@@ -19,8 +19,8 @@ from argilla.server.search_engine import (
     FloatMetadataFilter,
     IntegerMetadataFilter,
     SortBy,
-    TextQuery,
     TermsMetadataFilter,
+    TextQuery,
     UserResponseStatusFilter,
 )
 from argilla.server.search_engine.commons import ALL_RESPONSES_STATUSES_FIELD, index_name_for_dataset
@@ -696,9 +696,7 @@ class TestSuiteOpenSearchEngine:
             opensearch, test_banking_sentiment_dataset, all_statuses, len(test_banking_sentiment_dataset.records), user
         )
 
-        no_filter_results = await opensearch_engine.search(
-            test_banking_sentiment_dataset, query=TextQuery(q="payment")
-        )
+        no_filter_results = await opensearch_engine.search(test_banking_sentiment_dataset, query=TextQuery(q="payment"))
 
         results = await opensearch_engine.search(
             test_banking_sentiment_dataset,

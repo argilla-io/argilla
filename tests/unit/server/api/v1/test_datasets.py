@@ -67,8 +67,8 @@ from argilla.server.search_engine import (
     SearchResponseItem,
     SearchResponses,
     SortBy,
-    TextQuery,
     TermsMetadataFilter,
+    TextQuery,
     UserResponseStatusFilter,
 )
 from sqlalchemy import func, inspect, select
