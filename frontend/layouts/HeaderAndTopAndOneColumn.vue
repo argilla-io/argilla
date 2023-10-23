@@ -54,14 +54,14 @@ $gap-width: $base-space * 2;
   transition: 0.4s ease-in-out;
   &.--panel {
     @include media(">desktop") {
-      grid-template-columns: $gap-width 1fr calc($gap-width / 2) $sidebarWidth;
+      grid-template-columns: auto 1fr auto $sidebarWidth;
       transition: 0.4s ease-out;
     }
   }
 }
 
 .header-area {
-  grid-area: 1 / 1 / 2 / 3;
+  grid-area: 1 / 1 / 2 / 5;
 }
 .footer-area {
   grid-area: 5 / 1 / 5 / 2;
