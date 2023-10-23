@@ -94,7 +94,7 @@ git clone https://github.com/[your-github-username]/argilla.git
 cd argilla
 ```
 
-To keep your fork’s main/develop branch up to date with our repo, add it as an upstream remote branch. For more info, check the [documentation](/community/developer_docs.html).
+To keep your fork’s main/develop branch up to date with our repo, add it as an upstream remote branch. For more info, check the [documentation](/community/developer_docs.md).
 
 ```sh
 git remote add upstream https://github.com/argilla-io/argilla.git
@@ -127,7 +127,7 @@ git checkout [branch-name]
 
 ### Make changes and push them
 
-Make the changes you want in your local repository, and test that everything works and you are following the guidelines. Check the [documentation](/community/developer_docs.html) for more information about the development.
+Make the changes you want in your local repository, and test that everything works and you are following the guidelines. Check the [documentation](/community/developer_docs.md) for more information about the development.
 
 Once you have finished, you can check the status of your repository and synchronize with the upstreaming repo with the following command:
 
