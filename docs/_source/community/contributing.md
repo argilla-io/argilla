@@ -43,7 +43,7 @@ So now there is only one thing left to do, introduce yourself and talk to the co
 
 ## Contributor Workflow with Git and GitHub
 
-If you're working with Argilla and suddenly a new idea comes to your mind or you find an issue that can be improved. It's time to actively participate and contribute to the project! The main steps will be the following:
+If you're working with Argilla and suddenly a new idea comes to your mind or you find an issue that can be improved, it's time to actively participate and contribute to the project! The main steps will be the following:
 
 <!-- no toc -->
 1. [Report an issue](#report-an-issue)
@@ -78,11 +78,11 @@ After having reported the issue, you can start working on it. For that, you will
 
 ![fork-bar](../_static/images/community/contributing/fork-bar.PNG)
 
-Now, fill in the information. Remember to uncheck the `Copy develop branch only` if you are going to work in or from another branch (for instance, to fix documentation the main branch is used)  Then, click on `Create fork`.
+Now, fill in the information. Remember to uncheck the `Copy develop branch only` if you are going to work in or from another branch (for instance, to fix documentation the `main` branch is used). Then, click on `Create fork`.
 
 ![create-fork](../_static/images/community/contributing/create-fork.PNG)
 
-Now, you will be redirected to your fork. You can see that you are in your fork because the name of the repository will be your username/argilla, and it will indicate `forked from argilla-io/argilla`.
+Now, you will be redirected to your fork. You can see that you are in your fork because the name of the repository will be your `username/argilla`, and it will indicate `forked from argilla-io/argilla`.
 
 
 #### Clone your forked repository
