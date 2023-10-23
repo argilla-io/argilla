@@ -14,16 +14,16 @@
 
 """create vectors table
 
-Revision ID: 66e63faf4a33
+Revision ID: bda6fe24314e
 Revises: 7850ab5b42d9
-Create Date: 2023-09-12 16:22:04.279445
+Create Date: 2023-09-21 15:41:59.642012
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "66e63faf4a33"
+revision = "bda6fe24314e"
 down_revision = "7850ab5b42d9"
 branch_labels = None
 depends_on = None
@@ -34,14 +34,17 @@ def upgrade() -> None:
     op.create_table(
         "vectors",
         sa.Column("value", sa.JSON(), nullable=False),
-        sa.Column("vector_settings_id", sa.Uuid(), nullable=False),
+        sa.Column("dataset_id", sa.Uuid(), nullable=False),
         sa.Column("record_id", sa.Uuid(), nullable=False),
+        sa.Column("vector_settings_id", sa.Uuid(), nullable=False),
         sa.Column("id", sa.Uuid(), nullable=False),
         sa.Column("inserted_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
+        sa.ForeignKeyConstraint(["dataset_id"], ["datasets.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["record_id"], ["records.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["vector_settings_id"], ["vectors_settings.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("record_id", "vector_settings_id", name="vector_record_id_vector_settings_id_uq"),
     )
     op.create_index(op.f("ix_vectors_record_id"), "vectors", ["record_id"], unique=False)
     op.create_index(op.f("ix_vectors_vector_settings_id"), "vectors", ["vector_settings_id"], unique=False)
