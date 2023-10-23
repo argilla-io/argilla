@@ -297,7 +297,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
 
         return model_card
 
-    # TODO(plaguss): Include the option to push_to_huggingface in `train` method.
+    # TODO(plaguss): Include the option of using push_to_huggingface in `train` method.
     def push_to_huggingface(self, repo_id: str, generate_card: Optional[bool] = False, **kwargs) -> None:
         """Push your model to [huggingface's model hub](https://huggingface.co/models).
 
@@ -315,10 +315,15 @@ class ArgillaTrainer(ArgillaTrainerV1):
             if token := HfFolder.get_token():
                 kwargs["token"] = token
 
-        self._trainer.push_to_huggingface(repo_id, **kwargs)
+        url = self._trainer.push_to_huggingface(repo_id, **kwargs)
 
         if generate_card:
             model_card = self.generate_model_card()
+            # For spacy based models, overwrite the repo_id with the url variable returned
+            # from its trainer.
+            if getattr(self._trainer, "language", None):
+                repo_id = url
+
             model_card.push_to_hub(repo_id, repo_type="model", token=token)
 
 
