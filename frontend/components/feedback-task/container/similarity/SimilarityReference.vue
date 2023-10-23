@@ -17,18 +17,27 @@
           class="similarity-reference__preview__text"
           >{{ text }}</span
         >
+        <BaseButton
+          class="similarity-reference__preview__button-close"
+          @on-click="removeSimilaritySearch"
+          ><svgicon name="close" height="8"
+        /></BaseButton>
       </span>
     </div>
     <div class="similarity-reference__right">
       <BaseButton
+        v-if="isExpanded"
         class="similarity-reference__button-close"
         @on-click="removeSimilaritySearch"
-        ><svgicon name="close" height="14"
+        ><svgicon name="close" height="12"
       /></BaseButton>
       <BaseButton
+        :title="isExpanded ? $t('minimize') : $t('expand')"
         class="similarity-reference__button-expand"
         @on-click="$emit(isExpanded ? 'minimize' : 'expand')"
-        ><svgicon :name="isExpanded ? 'minimize-arrows' : 'expand-arrows'"
+        ><svgicon
+          height="12"
+          :name="isExpanded ? 'minimize-arrows' : 'expand-arrows'"
       /></BaseButton>
     </div>
   </div>
@@ -86,12 +95,12 @@ $color-border-preview: #ffc28f;
 .similarity-reference {
   display: flex;
   align-items: center;
-  gap: $base-space * 2;
+  gap: $base-space;
   padding: calc($base-space / 2);
   justify-content: space-between;
   border-radius: $border-radius-m;
-  @include font-size(12px);
   color: $black-54;
+  @include font-size(13px);
   transition: background 0.3s ease-in-out;
   &__left {
     display: flex;
@@ -122,13 +131,17 @@ $color-border-preview: #ffc28f;
     background: $color-bg-preview;
     padding: 0 $base-space;
     border: 1px solid $color-border-preview;
-    border-radius: $border-radius;
+    border-radius: $border-radius-l;
     min-width: 0;
+    @include font-size(12px);
     &__text {
       flex: 1;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    &__button-close {
+      padding: 0;
     }
   }
   :deep(.dropdown__header) {

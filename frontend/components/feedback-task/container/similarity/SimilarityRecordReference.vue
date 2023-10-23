@@ -1,6 +1,10 @@
 <template>
   <div
-    :class="isExpanded ? 'record-reference--isExpanded' : 'record-reference'"
+    :class="
+      isExpanded
+        ? 'record-reference--isExpanded'
+        : 'record-reference--isCollapsed'
+    "
   >
     <div class="record-reference__header">
       <SimilarityReference
@@ -60,10 +64,6 @@ $color-bg: #fff3e9;
   flex-direction: column;
   border-radius: $border-radius-m;
   background: palette(white);
-  border: 1px solid palette(grey, 600);
-  &__header {
-    padding: calc($base-space / 2) $base-space * 2;
-  }
   .record {
     border: none;
     padding-top: 0;
@@ -75,8 +75,22 @@ $color-bg: #fff3e9;
     max-height: 30vh;
     overflow: auto;
     @extend .record-reference;
+    border: 1px solid $black-10;
     #{$this}__header {
       padding: $base-space $base-space * 2;
+    }
+  }
+  &--isCollapsed {
+    @extend .record-reference;
+    background: $black-4;
+    border-radius: $border-radius;
+    transition: background 0.2s ease;
+    &:hover {
+      transition: background 0.2s ease;
+      background: $black-6;
+    }
+    #{$this}__header {
+      padding: calc($base-space / 2) $base-space;
     }
   }
 }
