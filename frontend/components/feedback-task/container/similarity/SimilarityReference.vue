@@ -90,8 +90,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$color-bg-preview: #fff3e9;
-$color-border-preview: #ffc28f;
+$color-bg-preview: #ffd1ab;
 .similarity-reference {
   display: flex;
   align-items: center;
@@ -130,7 +129,6 @@ $color-border-preview: #ffc28f;
     flex: 1;
     background: $color-bg-preview;
     padding: 0 $base-space;
-    border: 1px solid $color-border-preview;
     border-radius: $border-radius-l;
     min-width: 0;
     @include font-size(12px);
