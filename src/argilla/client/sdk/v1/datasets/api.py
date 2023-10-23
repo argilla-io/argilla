@@ -221,19 +221,27 @@ def get_records(
 # TODO: Add the rest of search supported parameters.
 def search_records(
     client: httpx.Client,
-    dataset_id: UUID,
+    id: UUID,
     query: FeedbackRecordsSearchQuery,
+    # TODO: This should be named response_statuses (like we are already doing in the API) but get_records is using response_status
+    response_status: Optional[List[FeedbackResponseStatusFilter]] = None,
+    metadata_filters: Optional[List[str]] = None,
+    sort_by: Optional[List[str]] = None,
     offset: int = 0,
     limit: int = 50,
 ) -> Response[Union[FeedbackRecordsSearchModel, ErrorMessage, HTTPValidationError]]:
-    url = f"/api/me/datasets/{dataset_id}/records/search"
-    params = {
-        "offset": offset,
-        "limit": limit,
-    }
-    json = {
-        "query": query,
-    }
+    url = f"/api/me/datasets/{id}/records/search"
+    params = {"include": ["responses", "suggestions"], "offset": offset, "limit": limit}
+    json = {"query": query}
+
+    if response_status:
+        params["response_status"] = response_status
+
+    if metadata_filters:
+        params["metadata"] = metadata_filters
+
+    if sort_by:
+        params["sort_by"] = sort_by
 
     response = client.post(url=url, params=params, json=json)
 

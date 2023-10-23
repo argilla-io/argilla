@@ -18,7 +18,7 @@ from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Field, StrictInt, StrictStr, conint
+from pydantic import BaseModel, Field, StrictInt, StrictStr, conint, root_validator
 
 
 class FeedbackDatasetModel(BaseModel):
@@ -97,7 +97,7 @@ class FeedbackRecordsModel(BaseModel):
 # TODO: Maybe `query_score` should not be optional.
 class FeedbackRecordSearchModel(BaseModel):
     record: FeedbackItemModel
-    query_score: Optional[Float]
+    query_score: Optional[float]
 
 
 class FeedbackRecordsSearchModel(BaseModel):
@@ -105,9 +105,9 @@ class FeedbackRecordsSearchModel(BaseModel):
     total: int
 
 
-# TODO: Add missing logic here
 class FeedbackRecordsSearchTextQuery(BaseModel):
-    pass
+    q: str
+    field: Optional[str] = None
 
 
 class FeedbackRecordsSearchVectorQuery(BaseModel):
