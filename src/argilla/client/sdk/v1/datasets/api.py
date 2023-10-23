@@ -226,7 +226,7 @@ def search_records(
     offset: int = 0,
     limit: int = 50,
 ) -> Response[Union[FeedbackRecordsSearchModel, ErrorMessage, HTTPValidationError]]:
-    url = f"/api/v1/me/datasets/{dataset_id}/records/search"
+    url = f"/api/me/datasets/{dataset_id}/records/search"
     params = {
         "offset": offset,
         "limit": limit,
