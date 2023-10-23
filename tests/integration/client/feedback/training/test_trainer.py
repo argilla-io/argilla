@@ -48,6 +48,8 @@ from argilla.client.models import Framework
 from huggingface_hub import HfApi, HfFolder, hf_hub_download
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
+from tests.integration.training.helpers import train_with_cleanup
+
 __OUTPUT_DIR__ = "tmp"
 
 # To mimick the tests from huggingface_hub: https://github.com/huggingface/huggingface_hub/blob/v0.18.0.rc0/tests/testing_constants.py
@@ -63,7 +65,6 @@ HF_HUB_CONSTANTS = {
         Framework("spacy"),
         Framework("spacy-transformers"),
         Framework("transformers"),
-        Framework("spark-nlp"),
         Framework("span_marker"),
         Framework("setfit"),
         Framework("peft"),
@@ -379,12 +380,12 @@ def test_tokenizer_warning_wrong_framework(
 @pytest.mark.parametrize(
     "framework",
     [
-        # Framework("spacy"),
-        # Framework("spacy-transformers"),
+        Framework("spacy"),
+        Framework("spacy-transformers"),
         Framework("transformers"),
-        # Framework("span_marker"),
-        # Framework("setfit"),
-        # Framework("peft"),
+        Framework("setfit"),
+        Framework("peft"),
+        # Framework("span_marker"),  # The FeedbackDataset needs to work with token classification for this framework to work.
     ],
 )
 @pytest.mark.usefixtures(
@@ -437,25 +438,51 @@ def test_push_to_huggingface(
 
         trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, model=model)
 
+    # NOTE: This is just to test locally, we need a better solution for the CI.
+    username = "plaguss"
+    model_name = "test_model"
+    repo_id = f"{username}/{model_name}"
+    # Filename to check on huggingface
+    filename = "config.json"
     # We need to initialize the model (is faster than calling the whole training process) before calling push_to_huggingface.
-    if framework == Framework("transformers"):
+    # The remaining models need to call the train method first.
+    if framework in (Framework("transformers"), Framework("peft")):
+        if framework == Framework("peft"):
+            filename = "adapter_config.json"
+        trainer.update_config(num_iterations=1)
         trainer._trainer.init_model(new=True)
+    elif framework in (Framework("setfit"), Framework("spacy"), Framework("spacy-transformers")):
+        if framework in (Framework("spacy"), Framework("spacy-transformers")):
+            filename = "meta.json"
+            repo_id = __OUTPUT_DIR__
+            trainer.update_config(max_steps=1)
+            trainer.train(__OUTPUT_DIR__)
+
+        else:
+            trainer.update_config(num_iterations=1)
+            train_with_cleanup(trainer, __OUTPUT_DIR__)
+
     else:
         trainer._trainer.init_model()
 
-    # NOTE: This is just to test locally, we need a better solution for the CI.
-    repo_id = "plaguss/test_model"
-
     trainer.push_to_huggingface(repo_id, generate_card=True)
+    # We have to overwrite the name of the packaged moded as spacy's `package` command
+    # prepends the `lang` variable to the name.
+    if framework in (Framework("spacy"), Framework("spacy-transformers")):
+        repo_id = f"{username}/en_{repo_id}"
+        # Remove the folder of the trained model for spacy. We cannot
+        # use train_with_cleanup due to the need for packaging the model
+        if Path(__OUTPUT_DIR__).exists():
+            shutil.rmtree(__OUTPUT_DIR__)
 
-    # Check the repo is created.
-    # For the moment, the same check done at: https://github.com/huggingface/huggingface_hub/blob/v0.18.0.rc0/tests/test_hubmixin.py#L154
+    # Check the repo is created, the same check done at:
+    # https://github.com/huggingface/huggingface_hub/blob/v0.18.0.rc0/tests/test_hubmixin.py#L154
     model_info = hf_api.model_info(repo_id)
     assert model_info.modelId == repo_id
 
     tmp_config_path = hf_hub_download(
         repo_id=repo_id,
-        filename="config.json",
+        filename=filename,
         use_auth_token=token,
     )
 
