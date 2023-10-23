@@ -387,6 +387,12 @@ async def test_get_records(role: UserRole) -> None:
     assert FeedbackItemModel(**response.parsed.items[0].dict())
 
 
+@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
+@pytest.mark.asyncio
+async def test_search_records(role: UserRole) -> None:
+    pass
+
+
 # TODO: check if we can include a callback to the factory to index the metadata in Elastic Search
 # TODO: check why the metadata filters are not working, most likely because the metadata is not indexed
 

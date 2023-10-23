@@ -480,6 +480,10 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         """
         self._records.add(records=records, show_progress=show_progress)
 
+    def search_records(self):
+        # TODO: Call here to argilla.client.sdk.v1.datasets.api.search_records ???
+        pass
+
     def update_records(
         self,
         records: Union[RemoteFeedbackRecord, List[RemoteFeedbackRecord]],

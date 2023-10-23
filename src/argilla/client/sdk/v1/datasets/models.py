@@ -93,6 +93,45 @@ class FeedbackRecordsModel(BaseModel):
     total: int
 
 
+# TODO: `query_score` naming can be improved to simply `score`. (frontend should be aligned)
+# TODO: Maybe `query_score` should not be optional.
+class FeedbackRecordSearchModel(BaseModel):
+    record: FeedbackItemModel
+    query_score: Optional[Float]
+
+
+class FeedbackRecordsSearchModel(BaseModel):
+    items: List[FeedbackRecordSearchModel]
+    total: int
+
+
+# TODO: Add missing logic here
+class FeedbackRecordsSearchTextQuery(BaseModel):
+    pass
+
+
+class FeedbackRecordsSearchVectorQuery(BaseModel):
+    name: str
+    record_id: Optional[UUID] = None
+    value: Optional[List[float]] = None
+
+    @root_validator
+    def check_required(cls, values: dict) -> dict:
+        """Check that either 'record_id' or 'value' is provided"""
+        record_id = values.get("record_id")
+        value = values.get("value")
+
+        if record_id is None and value is None:
+            raise ValueError("Either 'record_id' or 'value' must be provided")
+
+        return values
+
+
+class FeedbackRecordsSearchQuery(BaseModel):
+    text: Optional[FeedbackRecordsSearchTextQuery] = None
+    vector: Optional[FeedbackRecordsSearchVectorQuery] = None
+
+
 class FeedbackFieldModel(BaseModel):
     id: UUID
     name: str

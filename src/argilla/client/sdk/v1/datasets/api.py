@@ -27,6 +27,8 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackMetricsModel,
     FeedbackQuestionModel,
     FeedbackRecordsModel,
+    FeedbackRecordsSearchModel,
+    FeedbackRecordsSearchQuery,
     FeedbackResponseStatusFilter,
 )
 
@@ -212,6 +214,35 @@ def get_records(
         response_obj = Response.from_httpx_response(response)
         response_obj.parsed = FeedbackRecordsModel(**response.json())
         return response_obj
+    return handle_response_error(response)
+
+
+# TODO: Add small docstring to the function.
+# TODO: Add the rest of search supported parameters.
+def search_records(
+    client: httpx.Client,
+    dataset_id: UUID,
+    query: FeedbackRecordsSearchQuery,
+    offset: int = 0,
+    limit: int = 50,
+) -> Response[Union[FeedbackRecordsSearchModel, ErrorMessage, HTTPValidationError]]:
+    url = f"/api/v1/me/datasets/{dataset_id}/records/search"
+    params = {
+        "offset": offset,
+        "limit": limit,
+    }
+    json = {
+        "query": query,
+    }
+
+    response = client.post(url=url, params=params, json=json)
+
+    if response.status_code == 200:
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = FeedbackRecordsSearchModel(**response.json())
+
+        return response_obj
+
     return handle_response_error(response)
 
 
