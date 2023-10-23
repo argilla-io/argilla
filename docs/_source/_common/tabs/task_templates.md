@@ -186,7 +186,7 @@ ds
 #   ],
 #   questions=[
 #       TextQuestion(name="response", use_markdown=True)
-```	
+```
 :::
 
 :::{tab-item} Direct Preference Optimization (DPO)
