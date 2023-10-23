@@ -186,6 +186,7 @@ ds
 #   ],
 #   questions=[
 #       TextQuestion(name="response", use_markdown=True)
+```
 :::
 
 :::{tab-item} Direct Preference Optimization (DPO)
@@ -224,14 +225,15 @@ ds = rg.FeedbackDataset.for_retrieval_augmented_generation(
     guidelines=None,
 )
 ds
+
 # FeedbackDataset(
 #   fields=[
-#       TextField(name="prompt", use_markdown=True),
-#       TextField(name="retrieved_document_1", use_markdown=True),
-#       TextField(name="response", use_markdown=True),
+#       TextField(name="query", use_markdown=False),
+#       TextField(name="retrieved_document_1", use_markdown=False),
 #   ],
 #   questions=[
-#       RatingQuestion(name="retrieval_1_rating", values=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+#       RatingQuestion(name="question_rating_1", values=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+#       TextQuestion(name="response", use_markdown=False),
 #   ]
 #   guidelines="<Guidelines for the task>",
 # )
