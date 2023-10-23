@@ -19,6 +19,7 @@ from datasets import Dataset, DatasetDict
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
 from argilla.client.feedback.training.schemas import TrainingTaskForQuestionAnswering, TrainingTaskForTextClassification
 from argilla.training.transformers import ArgillaTransformersTrainer as ArgillaTransformersTrainerV1
+from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
     from argilla.client.feedback.integrations.huggingface.model_card import TransformersModelCardData
@@ -101,6 +102,7 @@ class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSke
             **card_data_kwargs,
         )
 
+    @requires_dependencies("huggingface_hub")
     def push_to_huggingface(self, repo_id: str, **kwargs) -> None:
         """Uploads the transformer model and tokenizer to [huggingface's model hub](https://huggingface.co/models).
 
