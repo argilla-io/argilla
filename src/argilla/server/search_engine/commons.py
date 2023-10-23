@@ -199,7 +199,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         bulk_actions = [
             {
                 # If document exist, we update source with latest version
-                "_op_type": "index", # TODO: Review and maybe change to partial update
+                "_op_type": "index",  # TODO: Review and maybe change to partial update
                 "_id": record.id,
                 "_index": index_name,
                 **SearchDocument.from_orm(record).dict(exclude_unset=True),

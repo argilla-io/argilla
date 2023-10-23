@@ -13,7 +13,7 @@
 #  limitations under the License.
 import copy
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional, Set, TYPE_CHECKING, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Set, Tuple, Union
 from uuid import UUID
 
 import sqlalchemy
@@ -43,6 +43,8 @@ from argilla.server.schemas.v1.datasets import (
     QuestionCreate,
     RecordsCreate,
     ResponseValueCreate,
+)
+from argilla.server.schemas.v1.datasets import (
     VectorSettings as VectorSettingsSchema,
 )
 from argilla.server.schemas.v1.metadata_properties import MetadataPropertyUpdate

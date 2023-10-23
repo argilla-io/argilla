@@ -5243,7 +5243,9 @@ class TestSuiteDatasets:
         }
 
         if "responses" in includes:
-            first_owner_response, second_owner_response = [response for response in responses if response.user_id == owner.id]
+            first_owner_response, second_owner_response = [
+                response for response in responses if response.user_id == owner.id
+            ]
             expected["items"][0]["record"]["responses"] = [
                 {
                     "id": str(first_owner_response.id),
