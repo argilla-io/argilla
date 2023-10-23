@@ -24,7 +24,57 @@ The `FeedbackDataset` has a set of predefined task templates that you can use to
 ```{include} /_common/tabs/task_templates.md
 ```
 
-After having initialized the `FeedbackDataset` templates, we can still alter the `fields`, `questions`, and `guidelines` to fit our specific needs using a [custom configuration](#custom-configuration).
+After having initialized the `FeedbackDataset` templates, we can still alter the `fields`, `questions`, and `guidelines` to fit our specific needs using a [custom configuration](#custom-configuration). Below you can find a quick example of how to alter them:
+
+::::{tab-set}
+
+:::{tab-item} Fields
+```python
+# Add new fields
+ds = rg.FeedbackDataset.for_task()
+
+new_fields=[
+        rg.Type_of_field(.,.,.),
+        rg.Type_of_field(.,.,.),
+    ]
+
+ds.fields.extend(new_fields)
+
+# Remove a non-required field
+ds.fields.pop(0)
+```
+:::
+
+:::{tab-item} Questions
+```python
+# Add new questions
+ds = rg.FeedbackDataset.for_task()
+
+new_questions=[
+        rg.Type_of_question(.,.,.),
+        rg.Type_of_question(.,.,.),
+    ]
+
+ds.questions.extend(new_questions)
+
+# Remove a non-required question
+ds.questions.pop(0)
+```
+:::
+
+:::{tab-item} Guidelines
+```python
+# Define new guidelines from the template
+ds = rg.FeedbackDataset.for_task(
+    guidelines="New custom guidelines."
+)
+
+# Define new guidelines for a question
+ds.questions[0].description = 'New description for the question.'
+```
+:::
+
+::::
 
 #### Custom Configuration
 
