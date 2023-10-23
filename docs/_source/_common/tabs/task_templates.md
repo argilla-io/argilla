@@ -233,7 +233,7 @@ ds
 #   ],
 #   questions=[
 #       RatingQuestion(name="question_rating_1", values=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
-#       TextQuestion(name="response", use_markdown=False)
+#       TextQuestion(name="response", use_markdown=False),
 #   ]
 #   guidelines="<Guidelines for the task>",
 # )
