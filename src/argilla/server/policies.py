@@ -88,7 +88,7 @@ class WorkspacePolicy:
 
     @classmethod
     def delete(cls, workspace: Workspace) -> PolicyAction:
-        def is_allowed(actor: User) -> bool:
+        async def is_allowed(actor: User) -> bool:
             return actor.is_owner
 
         return is_allowed
@@ -284,6 +284,15 @@ class DatasetPolicyV1:
 
     @classmethod
     def update_records(cls, dataset: Dataset) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (
+                actor.is_admin and await _exists_workspace_user_by_user_and_workspace_id(actor, dataset.workspace_id)
+            )
+
+        return is_allowed
+
+    @classmethod
+    def create_vectors(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
             return actor.is_owner or (
                 actor.is_admin and await _exists_workspace_user_by_user_and_workspace_id(actor, dataset.workspace_id)
