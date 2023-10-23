@@ -127,6 +127,7 @@ $color-bg-preview: #ffd1ab;
   &__preview {
     display: flex;
     flex: 1;
+    gap: $base-space;
     background: $color-bg-preview;
     padding: 0 $base-space;
     border-radius: $border-radius-l;
