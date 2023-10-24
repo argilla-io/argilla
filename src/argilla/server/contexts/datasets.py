@@ -646,8 +646,11 @@ async def create_records(
     async with db.begin_nested():
         db.add_all(records)
         await db.flush(records)
+        # TODO: We need to remove these asynchronicity requirements somehow
         for record in records:
             await record.awaitable_attrs.responses
+        for vector in vectors:
+            await vector.awaitable_attrs.vector_settings
         # TODO: Review and unify in a single method
         await search_engine.index_records(dataset, records)
         if vectors:
