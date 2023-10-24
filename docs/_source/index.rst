@@ -65,7 +65,6 @@
 
    Slack <https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g>
    Github <https://github.com/argilla-io/argilla>
-   Discussion forum <https://github.com/argilla-io/argilla/discussions>
    community/developer_docs
    community/contributing
    community/migration-rubrix.md
