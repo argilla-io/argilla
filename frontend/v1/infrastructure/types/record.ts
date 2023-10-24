@@ -43,7 +43,7 @@ export interface BackendAdvanceSearchQuery {
       name: string;
       record_id: string;
       max_results: number;
-      // order
+      order: "most_similar" | "least_similar";
     };
     text?: {
       q: string;
