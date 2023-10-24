@@ -1,25 +1,80 @@
 # Developer Documentation
 
-Being a developer in Argilla means that you are a part of the Argilla community and you are contributing to the development of Argilla. This page will guide you through the steps that you need to take to set up your development environment and start contributing to Argilla. Argilla is built upon 5 different core components:
+Being a developer in Argilla means that you are a part of the Argilla community and you are contributing to the development of Argilla. This page will guide you through the steps that you need to take to set up your development environment and start contributing to Argilla. Argilla is built upon different core components:
 
-- **Python SDK**: A Python SDK which is installable with pip install argilla. To interact with the Argilla Server and the Argilla UI. It provides an API to manage the data, configuration, and annotation workflows.
+- **Documentation**: The documentation for Argilla serves as an invaluable resource, providing a comprehensive and in-depth guide for users seeking to explore, understand, and effectively harness the core components of the Argilla ecosystem.
 
-- **FastAPI Server**: The core of Argilla is a Python FastAPI server that manages the data, by pre-processing it and storing it in the vector database. Also, it stores application information in the relational database. It provides a REST API to interact with the data from the Python SDK and the Argilla UI. It also provides a web interface to visualize the data.
+- **Python SDK**: A Python SDK which is installable with `pip install argilla`, to interact with the Argilla Server and the Argilla UI. It provides an API to manage the data, configuration, and annotation workflows.
 
-- **Relational Database**: A relational database to store the metadata of the records and the annotations. SQLite is used as the default built-in option and is deployed separately with the Argilla Server but a separate PostgreSQL can be used too.
+- **FastAPI Server**: The core of Argilla is a Python `FastAPI server` that manages the data, by pre-processing it and storing it in the vector database. Also, it stores application information in the relational database. It provides a REST API to interact with the data from the Python SDK and the Argilla UI. It also provides a web interface to visualize the data.
 
-- **Vector Database**: A vector database to store the records data and perform scalable vector similarity searches and basic document searches. We currently support ElasticSearch and AWS OpenSearch and they can be deployed as separate Docker images.
+- **Relational Database**: A relational database to store the metadata of the records and the annotations. `SQLite` is used as the default built-in option and is deployed separately with the Argilla Server but a separate `PostgreSQL` can be used too.
 
-- **Vue.js UI**: A web application to visualize and annotate your data, users, and teams. It is built with Vue.js and is directly deployed alongside the Argilla Server within our Argilla Docker image.
+- **Vector Database**: A vector database to store the records data and perform scalable vector similarity searches and basic document searches. We currently support `ElasticSearch` and `AWS OpenSearch` and they can be deployed as separate Docker images.
 
-For a proper installation, you will need to;
+- **Vue.js UI**: A web application to visualize and annotate your data, users, and teams. It is built with `Vue.js` and is directly deployed alongside the Argilla Server within our Argilla Docker image.
 
+For a proper installation, you will need to:
+
+- [Set up the Documentation Environment](#set-up-the-documentation-environment),
 - [Set up the Python Environment](#set-up-the-python-environment),
 - [Set up the Databases](#set-up-the-databases),
 - [Set up the Frontend](#set-up-the-frontend),
 - [Set up the Server](#set-up-the-server),
 
 And, you can start to [make your contribution](#make-your-contribution)!
+
+## Set up the Documentation Environment
+
+To kickstart your journey in contributing to Argilla, immersing yourself in the documentation is highly recommended. To do so, we recommend you create a virtual environment and follow the steps below.
+
+### Clone the Argilla Repository
+
+First of all, you have to fork our repository and clone the fork to your computer. For more information, you can check our [guide](/community/contributing.md#work-with-a-fork).
+
+```sh
+git clone https://github.com/[your-github-username]/argilla.git
+cd argilla
+```
+To keep your fork’s main branch up to date with our repo you should add it as an [upstream remote branch](https://dev.to/louhayes3/git-add-an-upstream-to-a-forked-repo-1mik):
+```sh
+git remote add upstream https://github.com/argilla-io/argilla.git
+```
+> Remember that to work on documentation, you'll work using a branch created from `main`.
+
+### Install Dependencies
+
+To build the documentation, make sure you set up your system by installing the required dependencies.
+
+```sh
+pip install -r docs/_source/requirements.txt
+```
+During the installation, you may encounter the following error: Microsoft Visual C++ 14.0 or greater is required. To solve it easily, check this [link](https://learn.microsoft.com/en-us/answers/questions/136595/error-microsoft-visual-c-14-0-or-greater-is-requir).
+
+### Build the documentation
+
+If the installation was smooth, then use `sphinx-autobuild` to continuously deploy the webpage using the following command:
+
+```sh
+sphinx-autobuild docs/_source docs/_build/html
+```
+
+This will create a _build/html folder that is served at [http://127.0.0.1:8000](http://127.0.0.1:8000). Also, it starts watching for changes in the docs/source directory. When a change is detected in docs/source, the documentation is rebuilt and any open browser windows are reloaded automatically. Make sure that all files are indexed correctly. KeyboardInterrupt (ctrl+c) will stop the server. Below is an example of the server output running and stopping:
+
+```sh
+The HTML pages are in docs\_build\html.
+[I 231024 10:58:36 server:335] Serving on http://127.0.0.1:8000
+[I 231024 10:58:36 handlers:62] Start watching changes
+[I 231024 10:58:36 handlers:64] Start detecting changes
+[I 231024 11:00:53 server:358] Shutting down...
+```
+
+>**Troubleshooting**
+>If you get warnings while building documentation then you can handle them this way:
+>
+>- If they are toctree or title underline warnings then they can be ignored.
+>- If they are import errors then they can be resolved by reinstalling autodoc and argilla from docs/_source/requirements.txt
+
 
 ## Set up the Python Environment
 
