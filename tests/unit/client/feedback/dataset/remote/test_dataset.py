@@ -117,6 +117,9 @@ def create_mock_routes(
 
 
 class TestSuiteRemoteDataset:
+    def test_search_records(self) -> None:
+        pass
+
     def test_update_records(
         self,
         mock_httpx_client: httpx.Client,

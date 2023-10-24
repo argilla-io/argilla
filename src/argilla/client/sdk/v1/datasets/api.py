@@ -230,7 +230,7 @@ def search_records(
     offset: int = 0,
     limit: int = 50,
 ) -> Response[Union[FeedbackRecordsSearchModel, ErrorMessage, HTTPValidationError]]:
-    url = f"/api/me/datasets/{id}/records/search"
+    url = f"/api/v1/me/datasets/{id}/records/search"
     params = {"include": ["responses", "suggestions"], "offset": offset, "limit": limit}
     json = {"query": query}
 

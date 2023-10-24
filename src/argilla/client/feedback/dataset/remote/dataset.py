@@ -15,7 +15,7 @@
 import textwrap
 import warnings
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple, Union
 
 from tqdm import trange
 
@@ -44,6 +44,7 @@ from argilla.client.feedback.unification import (
 from argilla.client.models import Framework
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
+from argilla.client.sdk.v1.datasets.models import FeedbackRecordsSearchQuery
 from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
@@ -480,9 +481,33 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         """
         self._records.add(records=records, show_progress=show_progress)
 
-    def search_records(self):
-        # TODO: Call here to argilla.client.sdk.v1.datasets.api.search_records ???
-        pass
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    # TODO: We are using an API schema as query parameter, not sure if this match with the current design of the SDK.
+    # Maybe we should try a different approach here.
+    def search_records(
+        self, query: FeedbackRecordsSearchQuery, offset: int = 0, limit: int = 50
+    ) -> List[Tuple[RemoteFeedbackRecord, float]]:
+        try:
+            response = datasets_api_v1.search_records(
+                client=self._client,
+                id=self.id,
+                query=query,
+                # TODO: Add support for these additional search attributes too.
+                # response_status=,
+                # metadata_filters=,
+                # sort_by=,
+                offset=offset,
+                limit=limit,
+            )
+        # TODO: We are using exceptions to control logic. The API response should include
+        # a way to check if the response finished correctly or not instead of raising an exception.
+        except Exception as e:
+            raise RuntimeError(f"Failed searching records for dataset with exception: {e}") from e
+
+        return [
+            (RemoteFeedbackRecord.from_api(record_score.record), record_score.query_score)
+            for record_score in response.parsed
+        ]
 
     def update_records(
         self,
