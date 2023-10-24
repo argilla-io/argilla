@@ -107,7 +107,10 @@ def create_mock_routes(
                     inserted_at=datetime.utcnow(),
                     updated_at=datetime.utcnow(),
                 ).json(),
-            )
+            ),
+            f"/api/v1/datasets/{test_remote_dataset.id}/records": httpx.Response(
+                status_code=204,
+            ),
         },
     }
     return routes
@@ -128,8 +131,8 @@ class TestSuiteRemoteDataset:
         test_remote_dataset.update_records(records=[test_remote_record])
 
         mock_httpx_client.patch.assert_called_once_with(
-            url=f"/api/v1/records/{test_remote_record.id}",
-            json={"metadata": {"new": "metadata"}},
+            url=f"/api/v1/datasets/{test_remote_dataset.id}/records",
+            json={"items": [{"id": str(test_remote_record.id), "metadata": {"new": "metadata"}, "suggestions": []}]},
         )
 
     def test_update_multiple_records(
@@ -143,19 +146,11 @@ class TestSuiteRemoteDataset:
         mock_routes = create_mock_routes(test_remote_dataset, test_remote_record)
         configure_mock_routes(mock_httpx_client, mock_routes)
 
-        mock_httpx_client.patch.return_value = httpx.Response(
-            status_code=200,
-            content=FeedbackItemModel(
-                id=test_remote_record.id,
-                fields=test_remote_record.fields,
-                inserted_at=datetime.utcnow(),
-                updated_at=datetime.utcnow(),
-            ).json(),
-        )
+        mock_httpx_client.patch.return_value = httpx.Response(status_code=204)
 
         test_remote_dataset.update_records(records=[test_remote_record] * 10)
 
-        assert mock_httpx_client.patch.call_count == 10
+        assert mock_httpx_client.patch.call_count == 1
 
     def test_update_records_with_multiple_suggestions(
         self,
@@ -164,23 +159,7 @@ class TestSuiteRemoteDataset:
         test_remote_record: RemoteFeedbackRecord,
     ) -> None:
         """Test updating records."""
-
-        expected_suggestion = FeedbackSuggestionModel(
-            id=uuid4(),
-            question_id=test_remote_dataset.question_by_name("text").id,
-            value="Test value",
-            score=0.5,
-            agent="test",
-        )
-
         mock_routes = create_mock_routes(test_remote_dataset, test_remote_record)
-        mock_routes["put"].update(
-            {
-                f"/api/v1/records/{test_remote_record.id}/suggestions": httpx.Response(
-                    status_code=200, content=expected_suggestion.json()
-                )
-            }
-        )
         configure_mock_routes(mock_httpx_client, mock_routes)
 
         test_remote_record.suggestions = [
@@ -189,8 +168,7 @@ class TestSuiteRemoteDataset:
 
         test_remote_dataset.update_records(records=[test_remote_record] * 10)
 
-        # TODO: Reduce the number of call -> bulk endpoint at least for suggestions
-        assert mock_httpx_client.put.call_count == 100
+        assert mock_httpx_client.patch.call_count == 1
 
     def test_update_records_suggestions(
         self,
@@ -200,20 +178,13 @@ class TestSuiteRemoteDataset:
     ) -> None:
         expected_suggestion = FeedbackSuggestionModel(
             id=uuid4(),
-            question_id=test_remote_dataset.question_by_name("text").id,
+            question_id=str(test_remote_dataset.question_by_name("text").id),
             value="Test value",
             score=0.5,
             agent="test",
         )
 
         mock_routes = create_mock_routes(test_remote_dataset, test_remote_record)
-        mock_routes["put"].update(
-            {
-                f"/api/v1/records/{test_remote_record.id}/suggestions": httpx.Response(
-                    status_code=200, content=expected_suggestion.json()
-                )
-            }
-        )
         configure_mock_routes(mock_httpx_client, mock_routes)
 
         test_remote_record.suggestions = [
@@ -222,15 +193,24 @@ class TestSuiteRemoteDataset:
 
         test_remote_dataset.update_records(records=test_remote_record)
 
-        mock_httpx_client.patch.assert_called
-        mock_httpx_client.put.assert_called_with(
-            url=f"/api/v1/records/{test_remote_record.id}/suggestions",
+        mock_httpx_client.patch.assert_called_with(
+            url=f"/api/v1/datasets/{test_remote_dataset.id}/records",
             # TODO: This should be a list of suggestions
             json={
-                "agent": expected_suggestion.agent,
-                "question_id": str(expected_suggestion.question_id),
-                "score": expected_suggestion.score,
-                "value": expected_suggestion.value,
+                "items": [
+                    {
+                        "id": str(test_remote_record.id),
+                        "metadata": {"new": "metadata"},
+                        "suggestions": [
+                            {
+                                "agent": expected_suggestion.agent,
+                                "question_id": str(expected_suggestion.question_id),
+                                "score": expected_suggestion.score,
+                                "value": expected_suggestion.value,
+                            }
+                        ],
+                    }
+                ]
             },
         )
 

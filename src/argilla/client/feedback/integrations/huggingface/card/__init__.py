@@ -15,7 +15,4 @@
 from ._dataset_card import ArgillaDatasetCard
 from ._parser import size_categories_parser
 
-__all__ = [
-    "ArgillaDatasetCard",
-    "size_categories_parser",
-]
+__all__ = ["ArgillaDatasetCard", "size_categories_parser"]

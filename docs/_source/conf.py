@@ -128,7 +128,7 @@ getting_started_html = open("./_common/getting_started.html", "r", encoding="utf
 next_steps_html = open("./_common/next_steps.html", "r", encoding="utf8").read()
 
 # -- AUTODOC IMPORT MOCKS ---------------------------------------------------
-autodoc_typehints = "signature"
+autodoc_typehints = "description"
 autodoc_mock_imports = [
     "cleanlab",
     "datasets",

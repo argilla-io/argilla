@@ -132,7 +132,7 @@ class SuggestionSchema(BaseModel):
         """Method that will be used to create the payload that will be sent to Argilla
         to create a `SuggestionSchema` for a `FeedbackRecord`."""
         payload = {}
-        payload["question_id"] = question_name_to_id[self.question_name]
+        payload["question_id"] = str(question_name_to_id[self.question_name])
         payload["value"] = self.value
         if self.type:
             payload["type"] = self.type
@@ -210,6 +210,11 @@ class FeedbackRecord(BaseModel):
             return tuple([v for v in values])
         return values
 
+    @property
+    def unified_responses(self) -> Optional[Dict[str, List["UnifiedValueSchema"]]]:
+        """Property that returns the unified responses for the record."""
+        return self._unified_responses
+
     def update(
         self, suggestions: Union[SuggestionSchema, List[SuggestionSchema], Dict[str, Any], List[Dict[str, Any]]]
     ) -> None:
@@ -241,7 +246,7 @@ class FeedbackRecord(BaseModel):
         payload["fields"] = {key: value for key, value in self.fields.items() if value is not None}
         if self.responses:
             payload["responses"] = [response.to_server_payload() for response in self.responses]
-        if self.suggestions and question_name_to_id:
+        if question_name_to_id:
             payload["suggestions"] = [
                 suggestion.to_server_payload(question_name_to_id) for suggestion in self.suggestions
             ]

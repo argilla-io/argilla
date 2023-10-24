@@ -393,7 +393,7 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
                 " dataset via the `FeedbackDataset.add_records()` method first."
             )
 
-        local_dataset = self.pull()
+        local_dataset = self
         if isinstance(task, (TrainingTaskForTextClassification, TrainingTaskForSentenceSimilarity)):
             if task.formatting_func is None:
                 # in sentence-transformer models we can train without labels
