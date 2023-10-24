@@ -621,6 +621,8 @@ class VectorQuery(BaseModel):
     record_id: Optional[UUID] = None
     value: Optional[List[float]] = None
 
+    order: Union[Literal["most_similar"], Literal["least_similar"]] = "most_similar"
+
     @root_validator
     def check_required(cls, values: dict) -> dict:
         """Check that either 'record_id' or 'value' is provided"""
