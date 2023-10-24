@@ -1,10 +1,10 @@
-type OrderSimilarity = "most" | "least";
+export type SimilarityOrder = "most" | "least";
 
 export class SimilarityCriteria {
   public recordId: string;
   public vectorId: string;
   public limit: number;
-  public order: OrderSimilarity;
+  public order: SimilarityOrder;
 
   constructor() {
     this.reset();
@@ -14,7 +14,7 @@ export class SimilarityCriteria {
     recordId: string,
     vectorId: string,
     limit: number,
-    order: OrderSimilarity
+    order: SimilarityOrder
   ) {
     this.recordId = recordId;
     this.vectorId = vectorId;

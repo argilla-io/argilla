@@ -8,12 +8,14 @@ import {
   ResponseWithTotal,
   BackedRecords,
   BackendRecordStatus,
+  BackendSimilaritySearchOrder,
 } from "../types";
 import { RecordAnswer } from "@/v1/domain/entities/record/RecordAnswer";
 import { Record } from "@/v1/domain/entities/record/Record";
 import { Question } from "@/v1/domain/entities/question/Question";
 import { RecordCriteria } from "@/v1/domain/entities/record/RecordCriteria";
 import { Pagination } from "@/v1/domain/entities/Pagination";
+import { SimilarityOrder } from "@/v1/domain/entities/similarity/SimilarityCriteria";
 
 const RECORD_API_ERRORS = {
   ERROR_FETCHING_RECORDS: "ERROR_FETCHING_RECORDS",
@@ -22,7 +24,9 @@ const RECORD_API_ERRORS = {
   ERROR_CREATING_RECORD_RESPONSE: "ERROR_CREATING_RECORD_RESPONSE",
 };
 
-const BACKEND_ORDER = {
+const BACKEND_ORDER: {
+  [key in SimilarityOrder]: BackendSimilaritySearchOrder;
+} = {
   most: "most_similar",
   least: "least_similar",
 };

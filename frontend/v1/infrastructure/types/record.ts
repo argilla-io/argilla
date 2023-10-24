@@ -37,13 +37,15 @@ export interface BackendSearchRecords {
   record: BackedRecord;
 }
 
+export type BackendSimilaritySearchOrder = "most_similar" | "least_similar";
+
 export interface BackendAdvanceSearchQuery {
   query: {
     vector?: {
       name: string;
       record_id: string;
       max_results: number;
-      order: "most_similar" | "least_similar";
+      order: BackendSimilaritySearchOrder;
     };
     text?: {
       q: string;
