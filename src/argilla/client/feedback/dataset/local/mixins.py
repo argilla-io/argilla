@@ -41,6 +41,7 @@ from argilla.client.feedback.schemas.remote.questions import (
     RemoteRatingQuestion,
     RemoteTextQuestion,
 )
+from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes
 from argilla.client.feedback.utils import feedback_dataset_in_argilla
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.workspaces import Workspace
@@ -468,6 +469,7 @@ class TaskTemplateMixin:
         multi_label: bool = False,
         use_markdown: bool = False,
         guidelines: str = None,
+        metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for text classification tasks.
@@ -476,6 +478,8 @@ class TaskTemplateMixin:
             labels: A list of labels for your dataset
             multi_label: Set this parameter to True if you want to add multiple labels to your dataset
             use_markdown: Set this parameter to True if you want to use markdown in your dataset
+            metadata_properties: contains the metadata properties that will be indexed and could be used to filter the dataset. Defaults to `None`.
+
 
         Returns:
             A `FeedbackDataset` object for text classification containing "text" field and LabelQuestion or MultiLabelQuestion named "label"
@@ -503,17 +507,22 @@ class TaskTemplateMixin:
             else default_guidelines
             if multi_label
             else default_guidelines.replace("one or more labels", "one label"),
+            metadata_properties=metadata_properties,
         )
 
     @classmethod
     def for_question_answering(
-        cls: Type["FeedbackDataset"], use_markdown: bool = False, guidelines: str = None
+        cls: Type["FeedbackDataset"],
+        use_markdown: bool = False,
+        guidelines: str = None,
+        metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for question answering tasks.
 
         Args:
             use_markdown: Set this parameter to True if you want to use markdown in your dataset
+            metadata_properties: contains the metadata properties that will be indexed and could be used to filter the dataset. Defaults to `None`.
 
         Returns:
             A `FeedbackDataset` object for question answering containing "context" and "question" fields and a TextQuestion named "answer"
@@ -533,6 +542,7 @@ class TaskTemplateMixin:
                 )
             ],
             guidelines=default_guidelines if guidelines is None else guidelines,
+            metadata_properties=metadata_properties,
         )
 
     @classmethod
@@ -540,12 +550,14 @@ class TaskTemplateMixin:
         cls: Type["FeedbackDataset"],
         use_markdown: bool = False,
         guidelines: str = None,
+        metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for summarization tasks.
 
         Args:
             use_markdown: Set this parameter to True if you want to use markdown in your dataset
+            metadata_properties: contains the metadata properties that will be indexed and could be used to filter the dataset. Defaults to `None`.
 
         Returns:
             A `FeedbackDataset` object for summarization containing "text" field and a TextQuestion named "summary"
@@ -559,6 +571,7 @@ class TaskTemplateMixin:
                 TextQuestion(name="summary", description="Write a summary of the text.", use_markdown=use_markdown)
             ],
             guidelines=default_guidelines if guidelines is None else guidelines,
+            metadata_properties=metadata_properties,
         )
 
     @classmethod
@@ -566,12 +579,14 @@ class TaskTemplateMixin:
         cls: Type["FeedbackDataset"],
         use_markdown: bool = False,
         guidelines: str = None,
+        metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for translation tasks.
 
         Args:
             use_markdown: Set this parameter to True if you want to use markdown in your dataset
+            metadata_properties: contains the metadata properties that will be indexed and could be used to filter the dataset. Defaults to `None`.
 
         Returns:
             A `FeedbackDataset` object for translation containing "source" field and a TextQuestion named "target"
@@ -583,6 +598,7 @@ class TaskTemplateMixin:
             fields=[TextField(name="source", use_markdown=use_markdown)],
             questions=[TextQuestion(name="target", description="Translate the text.", use_markdown=use_markdown)],
             guidelines=default_guidelines if guidelines is None else guidelines,
+            metadata_properties=metadata_properties,
         )
 
     @classmethod
@@ -591,6 +607,7 @@ class TaskTemplateMixin:
         rating_scale: int = 10,
         use_markdown: bool = False,
         guidelines: str = None,
+        metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for sentence similarity tasks.
@@ -598,6 +615,7 @@ class TaskTemplateMixin:
         Args:
             rating_scale: Set this parameter to the number of similarity scale you want to add to your dataset
             use_markdown: Set this parameter to True if you want to use markdown in your dataset
+            metadata_properties: contains the metadata properties that will be indexed and could be used to filter the dataset. Defaults to `None`.
 
         Returns:
             A `FeedbackDataset` object for sentence similarity containing "sentence1" and "sentence2" fields and a RatingQuestion named "similarity"
@@ -616,6 +634,7 @@ class TaskTemplateMixin:
                 )
             ],
             guidelines=default_guidelines if guidelines is None else guidelines,
+            metadata_properties=metadata_properties,
         )
 
     @classmethod
@@ -624,6 +643,7 @@ class TaskTemplateMixin:
         labels: Optional[List[str]] = None,
         use_markdown: bool = False,
         guidelines: str = None,
+        metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for natural language inference tasks.
@@ -631,6 +651,7 @@ class TaskTemplateMixin:
         Args:
             labels: A list of labels for your dataset
             use_markdown: Set this parameter to True if you want to use markdown in your dataset
+            metadata_properties: contains the metadata properties that will be indexed and could be used to filter the dataset. Defaults to `None`.
 
         Returns:
             A `FeedbackDataset` object for natural language inference containing "premise" and "hypothesis" fields and a LabelQuestion named "label"
@@ -645,6 +666,7 @@ class TaskTemplateMixin:
             ],
             questions=[LabelQuestion(name="label", labels=labels, description="Choose one of the labels.")],
             guidelines=default_guidelines if guidelines is None else guidelines,
+            metadata_properties=metadata_properties,
         )
 
     @classmethod
@@ -653,6 +675,7 @@ class TaskTemplateMixin:
         context: bool = False,
         use_markdown: bool = False,
         guidelines: str = None,
+        metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for supervised fine-tuning tasks.
@@ -660,6 +683,7 @@ class TaskTemplateMixin:
         Args:
             context: Set this parameter to True if you want to add context to your dataset
             use_markdown: Set this parameter to True if you want to use markdown in your dataset
+            metadata_properties: contains the metadata properties that will be indexed and could be used to filter the dataset. Defaults to `None`.
 
         Returns:
             A `FeedbackDataset` object for supervised fine-tuning containing "instruction" and optional "context" field and a TextQuestion named "response"
@@ -682,6 +706,7 @@ class TaskTemplateMixin:
             else default_guidelines + " Take the context into account when writing the response."
             if context
             else default_guidelines,
+            metadata_properties=metadata_properties,
         )
 
     @classmethod
@@ -690,12 +715,14 @@ class TaskTemplateMixin:
         context: bool = False,
         use_markdown: bool = False,
         guidelines: str = None,
+        metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for preference tasks.
 
         Args:
             use_markdown: Set this parameter to True if you want to use markdown in your dataset
+            metadata_properties: contains the metadata properties that will be indexed and could be used to filter the dataset. Defaults to `None`.
 
         Returns:
             A `FeedbackDataset` object for preference containing "prompt", "option1" and "option2" fields and a LabelQuestion named "preference"
@@ -716,6 +743,7 @@ class TaskTemplateMixin:
                 )
             ],
             guidelines=default_guidelines if guidelines is None else guidelines,
+            metadata_properties=metadata_properties,
         )
 
     @classmethod
@@ -724,8 +752,11 @@ class TaskTemplateMixin:
         context: bool = False,
         use_markdown: bool = False,
         guidelines: str = None,
+        metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
-        return cls.for_preference_modeling(context=context, use_markdown=use_markdown, guidelines=guidelines)
+        return cls.for_preference_modeling(
+            context=context, use_markdown=use_markdown, guidelines=guidelines, metadata_properties=metadata_properties
+        )
 
     @classmethod
     def for_proximal_policy_optimization(
@@ -733,12 +764,14 @@ class TaskTemplateMixin:
         context: bool = False,
         use_markdown: bool = False,
         guidelines: str = None,
+        metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for proximal policy optimization tasks.
 
         Args:
             use_markdown: Set this parameter to True if you want to use markdown in your dataset
+            metadata_properties: contains the metadata properties that will be indexed and could be used to filter the dataset. Defaults to `None`.
 
         Returns:
             A `FeedbackDataset` object for proximal policy optimization containing "context" and "action" fields and a LabelQuestion named "label"
@@ -758,6 +791,7 @@ class TaskTemplateMixin:
                 )
             ],
             guidelines=default_guidelines if guidelines is None else guidelines,
+            metadata_properties=metadata_properties,
         )
 
     @classmethod
@@ -766,6 +800,7 @@ class TaskTemplateMixin:
         context: bool = False,
         use_markdown: bool = False,
         guidelines: str = None,
+        metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for direct preference optimization tasks.
@@ -773,6 +808,7 @@ class TaskTemplateMixin:
         Args:
             context: Set this parameter to True if you want to add context to your dataset
             use_markdown: Set this parameter to True if you want to use markdown in your dataset
+            metadata_properties: contains the metadata properties that will be indexed and could be used to filter the dataset. Defaults to `None`.
 
         Returns:
             A `FeedbackDataset` object for direct preference optimization containing "prompt", "response1", "response2" with the optional "context" fields and a LabelQuestion named "preference"
@@ -795,6 +831,7 @@ class TaskTemplateMixin:
                 )
             ],
             guidelines=default_guidelines if guidelines is None else guidelines,
+            metadata_properties=metadata_properties,
         )
 
     @classmethod
@@ -804,6 +841,7 @@ class TaskTemplateMixin:
         rating_scale: int = 10,
         use_markdown: bool = False,
         guidelines: str = None,
+        metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for retrieval augmented generation tasks.
@@ -811,6 +849,7 @@ class TaskTemplateMixin:
         Args:
             number_of_retrievals: Set this parameter to the number of documents you want to add to your dataset
             use_markdown: Set this parameter to True if you want to use markdown in your dataset
+            metadata_properties: contains the metadata properties that will be indexed and could be used to filter the dataset. Defaults to `None`.
 
         Returns:
             A `FeedbackDataset` object for retrieval augmented generation containing "query" and "retrieved_document" fields and a TextQuestion named "response"
@@ -851,4 +890,5 @@ class TaskTemplateMixin:
             fields=[TextField(name="query", use_markdown=use_markdown, required=True)] + document_fields,
             questions=total_questions,
             guidelines=default_guidelines if guidelines is None else guidelines,
+            metadata_properties=metadata_properties,
         )

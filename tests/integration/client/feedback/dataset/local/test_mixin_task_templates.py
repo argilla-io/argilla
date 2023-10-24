@@ -21,13 +21,16 @@ from argilla.client.feedback.schemas import (
     RatingQuestion,
     TextQuestion,
 )
+from argilla.client.feedback.schemas.metadata import TermsMetadataProperty
 
 if TYPE_CHECKING:
     pass
 
 
 def test_for_question_answering():
-    dataset = FeedbackDataset.for_question_answering(use_markdown=True)
+    dataset = FeedbackDataset.for_question_answering(
+        use_markdown=True, metadata_properties=[TermsMetadataProperty(name="test")]
+    )
     assert len(dataset.fields) == 2
     assert len(dataset.questions) == 1
     assert dataset.questions[0].name == "answer"
@@ -43,11 +46,14 @@ def test_for_question_answering():
         dataset.guidelines
         == "This is a question answering dataset that contains questions and contexts. Please answer the question by using the context."
     )
+    assert dataset.metadata_properties[0].name == "test"
 
 
 def test_for_text_classification():
     # Test case 1: Single label classification
-    dataset = FeedbackDataset.for_text_classification(labels=["positive", "negative"])
+    dataset = FeedbackDataset.for_text_classification(
+        labels=["positive", "negative"], metadata_properties=[TermsMetadataProperty(name="test")]
+    )
     assert len(dataset) == 0
     assert dataset.questions[0].name == "label"
     assert (
@@ -63,9 +69,12 @@ def test_for_text_classification():
         "Given a set of texts and a predefined set of labels, the goal of text classification is to assign one label "
         "to each text based on its content. Please classify the texts by making the correct selection."
     )
+    assert dataset.metadata_properties[0].name == "test"
 
     # Test case 2: Multi-label classification
-    dataset = FeedbackDataset.for_text_classification(labels=["positive", "negative"], multi_label=True)
+    dataset = FeedbackDataset.for_text_classification(
+        labels=["positive", "negative"], multi_label=True, metadata_properties=[TermsMetadataProperty(name="test")]
+    )
     assert len(dataset) == 0
     assert dataset.questions[0].name == "label"
     assert (
@@ -82,10 +91,13 @@ def test_for_text_classification():
         "Given a set of texts and a predefined set of labels, the goal of text classification is to assign one "
         "or more labels to each text based on its content. Please classify the texts by making the correct selection."
     )
+    assert dataset.metadata_properties[0].name == "test"
 
 
 def test_for_summarization():
-    dataset = FeedbackDataset.for_summarization(use_markdown=True)
+    dataset = FeedbackDataset.for_summarization(
+        use_markdown=True, metadata_properties=[TermsMetadataProperty(name="test")]
+    )
     assert len(dataset) == 0
     assert dataset.questions[0].name == "summary"
     assert dataset.questions[0].description == "Write a summary of the text."
@@ -96,11 +108,14 @@ def test_for_summarization():
         dataset.guidelines
         == "This is a summarization dataset that contains texts. Please summarize the text in the text field."
     )
+    assert dataset.metadata_properties[0].name == "test"
 
 
 def test_for_supervised_fine_tuning():
     # Test case 1: context=False, use_markdown=False, guidelines=None
-    dataset = FeedbackDataset.for_supervised_fine_tuning(context=False, use_markdown=False, guidelines=None)
+    dataset = FeedbackDataset.for_supervised_fine_tuning(
+        context=False, use_markdown=False, guidelines=None, metadata_properties=[TermsMetadataProperty(name="test")]
+    )
     assert len(dataset) == 0
     assert dataset.questions[0].name == "response"
     assert dataset.questions[0].description == "Write the response to the instruction."
@@ -112,10 +127,14 @@ def test_for_supervised_fine_tuning():
         dataset.guidelines
         == "This is a supervised fine-tuning dataset that contains instructions. Please write the response to the instruction in the response field."
     )
+    assert dataset.metadata_properties[0].name == "test"
 
     # Test case 2: context=True, use_markdown=True, guidelines="Custom guidelines"
     dataset = FeedbackDataset.for_supervised_fine_tuning(
-        context=True, use_markdown=True, guidelines="Custom guidelines"
+        context=True,
+        use_markdown=True,
+        guidelines="Custom guidelines",
+        metadata_properties=[TermsMetadataProperty(name="test")],
     )
     assert len(dataset) == 0
     assert dataset.questions[0].name == "response"
@@ -127,12 +146,16 @@ def test_for_supervised_fine_tuning():
     assert dataset.fields[1].name == "context"
     assert dataset.fields[1].use_markdown is True
     assert dataset.guidelines == "Custom guidelines"
+    assert dataset.metadata_properties[0].name == "test"
 
 
 def test_for_retrieval_augmented_generation():
     # Test case 1: Single document retrieval augmented generation
     dataset = FeedbackDataset.for_retrieval_augmented_generation(
-        number_of_retrievals=1, rating_scale=5, use_markdown=True
+        number_of_retrievals=1,
+        rating_scale=5,
+        use_markdown=True,
+        metadata_properties=[TermsMetadataProperty(name="test")],
     )
     assert len(dataset) == 0
     assert dataset.questions[0].name == "question_rating_1"
@@ -150,10 +173,15 @@ def test_for_retrieval_augmented_generation():
         dataset.guidelines
         == "This is a retrieval augmented generation dataset that contains queries and retrieved documents. Please rate the relevancy of retrieved document and write the response to the query in the response field."
     )
+    assert dataset.metadata_properties[0].name == "test"
 
     # Test case 2: Multiple document retrieval augmented generation
     dataset = FeedbackDataset.for_retrieval_augmented_generation(
-        number_of_retrievals=3, rating_scale=10, use_markdown=False, guidelines="Custom guidelines"
+        number_of_retrievals=3,
+        rating_scale=10,
+        use_markdown=False,
+        guidelines="Custom guidelines",
+        metadata_properties=[TermsMetadataProperty(name="test")],
     )
     assert len(dataset) == 0
     assert dataset.questions[0].name == "question_rating_1"
@@ -180,11 +208,12 @@ def test_for_retrieval_augmented_generation():
     assert dataset.fields[3].name == "retrieved_document_3"
     assert dataset.fields[3].use_markdown is False
     assert dataset.guidelines == "Custom guidelines"
+    assert dataset.metadata_properties[0].name == "test"
 
 
 def test_for_sentence_similarity():
     # Test case 1: Default parameters
-    dataset = FeedbackDataset.for_sentence_similarity()
+    dataset = FeedbackDataset.for_sentence_similarity(metadata_properties=[TermsMetadataProperty(name="test")])
     assert len(dataset) == 0
     assert dataset.questions[0].name == "similarity"
     assert dataset.questions[0].description == "Rate the similarity between the two sentences."
@@ -198,9 +227,15 @@ def test_for_sentence_similarity():
         dataset.guidelines
         == "This is a sentence similarity dataset that contains two sentences. Please rate the similarity between the two sentences."
     )
+    assert dataset.metadata_properties[0].name == "test"
 
     # Test case 2: Custom parameters
-    dataset = FeedbackDataset.for_sentence_similarity(rating_scale=5, use_markdown=True, guidelines="Custom guidelines")
+    dataset = FeedbackDataset.for_sentence_similarity(
+        rating_scale=5,
+        use_markdown=True,
+        guidelines="Custom guidelines",
+        metadata_properties=[TermsMetadataProperty(name="test")],
+    )
     assert len(dataset) == 0
     assert dataset.questions[0].name == "similarity"
     assert dataset.questions[0].description == "Rate the similarity between the two sentences."
@@ -211,10 +246,13 @@ def test_for_sentence_similarity():
     assert dataset.fields[1].name == "sentence2"
     assert dataset.fields[1].use_markdown is True
     assert dataset.guidelines == "Custom guidelines"
+    assert dataset.metadata_properties[0].name == "test"
 
 
 def test_for_preference_modeling():
-    dataset = FeedbackDataset.for_preference_modeling(use_markdown=False, context=True)
+    dataset = FeedbackDataset.for_preference_modeling(
+        use_markdown=False, context=True, metadata_properties=[TermsMetadataProperty(name="test")]
+    )
     assert len(dataset) == 0
     assert dataset.questions[0].name == "preference"
     assert dataset.questions[0].description == "Choose your preference."
@@ -235,11 +273,12 @@ def test_for_preference_modeling():
         dataset.guidelines
         == "This is a preference dataset that contains contexts and options. Please choose the option that you would prefer in the given context."
     )
+    assert dataset.metadata_properties[0].name == "test"
 
 
 def test_for_natural_language_inference():
     # Test case 1: Default labels and guidelines
-    dataset = FeedbackDataset.for_natural_language_inference()
+    dataset = FeedbackDataset.for_natural_language_inference(metadata_properties=[TermsMetadataProperty(name="test")])
     assert len(dataset) == 0
     assert dataset.questions[0].name == "label"
     assert dataset.questions[0].description == "Choose one of the labels."
@@ -253,8 +292,12 @@ def test_for_natural_language_inference():
         dataset.guidelines
         == "This is a natural language inference dataset that contains premises and hypotheses. Please choose the correct label for the given premise and hypothesis."
     )
+    assert dataset.metadata_properties[0].name == "test"
+
     # Test case 2: Custom labels and guidelines
-    dataset = FeedbackDataset.for_natural_language_inference(labels=["yes", "no"], guidelines="Custom guidelines")
+    dataset = FeedbackDataset.for_natural_language_inference(
+        labels=["yes", "no"], guidelines="Custom guidelines", metadata_properties=[TermsMetadataProperty(name="test")]
+    )
     assert len(dataset) == 0
     assert dataset.questions[0].name == "label"
     assert dataset.questions[0].description == "Choose one of the labels."
@@ -265,11 +308,12 @@ def test_for_natural_language_inference():
     assert dataset.fields[1].name == "hypothesis"
     assert dataset.fields[1].use_markdown is False
     assert dataset.guidelines == "Custom guidelines"
+    assert dataset.metadata_properties[0].name == "test"
 
 
 def test_for_proximal_policy_optimization():
     # Test case 1: Without context and without markdown
-    dataset = FeedbackDataset.for_proximal_policy_optimization()
+    dataset = FeedbackDataset.for_proximal_policy_optimization(metadata_properties=[TermsMetadataProperty(name="test")])
     assert len(dataset) == 0
     assert dataset.questions[0].name == "prompt"
     assert dataset.questions[0].description == "Choose one of the labels that best describes the prompt."
@@ -281,9 +325,12 @@ def test_for_proximal_policy_optimization():
         dataset.guidelines
         == "This is a proximal policy optimization dataset that contains contexts and prompts. Please choose the label that best prompt."
     )
+    assert dataset.metadata_properties[0].name == "test"
 
     # Test case 2: With context and with markdown
-    dataset = FeedbackDataset.for_proximal_policy_optimization(context=True, use_markdown=True)
+    dataset = FeedbackDataset.for_proximal_policy_optimization(
+        context=True, use_markdown=True, metadata_properties=[TermsMetadataProperty(name="test")]
+    )
     assert len(dataset) == 0
     assert dataset.questions[0].name == "prompt"
     assert dataset.questions[0].description == "Choose one of the labels that best describes the prompt."
@@ -297,11 +344,14 @@ def test_for_proximal_policy_optimization():
         dataset.guidelines
         == "This is a proximal policy optimization dataset that contains contexts and prompts. Please choose the label that best prompt."
     )
+    assert dataset.metadata_properties[0].name == "test"
 
 
 def test_for_direct_preference_optimization():
     # Test case 1: Without context and markdown
-    dataset = FeedbackDataset.for_direct_preference_optimization()
+    dataset = FeedbackDataset.for_direct_preference_optimization(
+        metadata_properties=[TermsMetadataProperty(name="test")]
+    )
     assert len(dataset) == 0
     assert dataset.questions[0].name == "preference"
     assert dataset.questions[0].description == "Choose the label that is your preference."
@@ -319,9 +369,12 @@ def test_for_direct_preference_optimization():
         dataset.guidelines
         == "This is a direct preference optimization dataset that contains contexts and options. Please choose the option that you would prefer in the given context."
     )
+    assert dataset.metadata_properties[0].name == "test"
 
     # Test case 2: With context and markdown
-    dataset = FeedbackDataset.for_direct_preference_optimization(context=True, use_markdown=True)
+    dataset = FeedbackDataset.for_direct_preference_optimization(
+        context=True, use_markdown=True, metadata_properties=[TermsMetadataProperty(name="test")]
+    )
     assert len(dataset) == 0
     assert dataset.questions[0].name == "preference"
     assert dataset.questions[0].description == "Choose the label that is your preference."
@@ -341,3 +394,4 @@ def test_for_direct_preference_optimization():
         dataset.guidelines
         == "This is a direct preference optimization dataset that contains contexts and options. Please choose the option that you would prefer in the given context."
     )
+    assert dataset.metadata_properties[0].name == "test"
