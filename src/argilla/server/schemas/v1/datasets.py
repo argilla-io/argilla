@@ -617,10 +617,9 @@ class MetadataQueryParams(BaseModel):
 
 class VectorQuery(BaseModel):
     name: str
+
     record_id: Optional[UUID] = None
     value: Optional[List[float]] = None
-    # TODO: Remove this field and use the `limit` query param instead
-    max_results: conint(gt=0, le=500) = PydanticField(default=50)
 
     @root_validator
     def check_required(cls, values: dict) -> dict:

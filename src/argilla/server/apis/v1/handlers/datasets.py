@@ -250,7 +250,7 @@ async def _get_search_responses(
             record=record,
             metadata_filters=metadata_filters,
             user_response_status_filter=response_status_filter,
-            max_results=vector_query.max_results,
+            max_results=limit,
         )
     else:
         return await search_engine.search(
