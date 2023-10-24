@@ -189,7 +189,7 @@ def test_for_sentence_similarity():
     assert dataset.questions[0].name == "similarity"
     assert dataset.questions[0].description == "Rate the similarity between the two sentences."
     assert isinstance(dataset.questions[0], RatingQuestion)
-    assert dataset.questions[0].values == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    assert dataset.questions[0].values == [1, 2, 3, 4, 5, 6, 7]
     assert dataset.fields[0].name == "sentence1"
     assert dataset.fields[0].use_markdown is False
     assert dataset.fields[1].name == "sentence2"
@@ -273,8 +273,8 @@ def test_for_proximal_policy_optimization():
     assert len(dataset) == 0
     assert dataset.questions[0].name == "prompt"
     assert dataset.questions[0].description == "Choose one of the labels that best describes the prompt."
-    assert isinstance(dataset.questions[0], LabelQuestion)
-    assert dataset.questions[0].labels == ["good", "bad"]
+    assert isinstance(dataset.questions[0], RatingQuestion)
+    assert dataset.questions[0].values == list(range(1, 8))
     assert dataset.fields[0].name == "prompt"
     assert dataset.fields[0].use_markdown is False
     assert (
@@ -287,8 +287,8 @@ def test_for_proximal_policy_optimization():
     assert len(dataset) == 0
     assert dataset.questions[0].name == "prompt"
     assert dataset.questions[0].description == "Choose one of the labels that best describes the prompt."
-    assert isinstance(dataset.questions[0], LabelQuestion)
-    assert dataset.questions[0].labels == ["good", "bad"]
+    assert isinstance(dataset.questions[0], RatingQuestion)
+    assert dataset.questions[0].values == list(range(1, 8))
     assert dataset.fields[0].name == "prompt"
     assert dataset.fields[0].use_markdown is True
     assert dataset.fields[1].name == "context"
@@ -304,7 +304,7 @@ def test_for_direct_preference_optimization():
     dataset = FeedbackDataset.for_direct_preference_optimization()
     assert len(dataset) == 0
     assert dataset.questions[0].name == "preference"
-    assert dataset.questions[0].description == "Choose the label that is your preference."
+    assert dataset.questions[0].description == "Choose your preference."
     assert isinstance(dataset.questions[0], LabelQuestion)
     assert dataset.questions[0].labels == ["Response 1", "Response 2"]
     assert dataset.fields[0].name == "prompt"
@@ -324,7 +324,7 @@ def test_for_direct_preference_optimization():
     dataset = FeedbackDataset.for_direct_preference_optimization(context=True, use_markdown=True)
     assert len(dataset) == 0
     assert dataset.questions[0].name == "preference"
-    assert dataset.questions[0].description == "Choose the label that is your preference."
+    assert dataset.questions[0].description == "Choose your preference."
     assert isinstance(dataset.questions[0], LabelQuestion)
     assert dataset.questions[0].labels == ["Response 1", "Response 2"]
     assert dataset.fields[0].name == "prompt"

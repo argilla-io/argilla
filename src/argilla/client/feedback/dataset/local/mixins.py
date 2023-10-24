@@ -588,7 +588,7 @@ class TaskTemplateMixin:
     @classmethod
     def for_sentence_similarity(
         cls: Type["FeedbackDataset"],
-        rating_scale: int = 10,
+        rating_scale: int = 7,
         use_markdown: bool = False,
         guidelines: str = None,
     ) -> "FeedbackDataset":
@@ -687,49 +687,78 @@ class TaskTemplateMixin:
     @classmethod
     def for_preference_modeling(
         cls: Type["FeedbackDataset"],
+        number_of_responses: int = 2,
         context: bool = False,
         use_markdown: bool = False,
         guidelines: str = None,
+        metadata_properties: List["AllowedMetadataPropertyTypes"] = None,
     ) -> "FeedbackDataset":
         """
         You can use this method to create a basic dataset for preference tasks.
 
         Args:
+            number_of_responses: Set this parameter to the number of responses you want to add to your dataset
+            context: Set this parameter to True if you want to add context to your dataset
             use_markdown: Set this parameter to True if you want to use markdown in your dataset
+            guidelines: contains the guidelines for the dataset.
+            metadata_properties: contains the metadata properties that will be indexed and could be used to filter the dataset. Defaults to `None`.
 
         Returns:
             A `FeedbackDataset` object for preference containing "prompt", "option1" and "option2" fields and a LabelQuestion named "preference"
         """
         default_guidelines = "This is a preference dataset that contains contexts and options. Please choose the option that you would prefer in the given context."
+        response_fields = [
+            TextField(
+                name="response" + str(response + 1),
+                title="Response " + str(response + 1),
+                use_markdown=use_markdown,
+                required=True if response == 0 else False,
+            )
+            for response in range(number_of_responses)
+        ]
+
         fields = [
             TextField(name="prompt", use_markdown=use_markdown),
-            TextField(name="response1", title="Response 1", use_markdown=use_markdown),
-            TextField(name="response2", title="Response 2", use_markdown=use_markdown),
-        ]
+        ] + response_fields
+
         if context:
             fields.insert(1, TextField(name="context", use_markdown=use_markdown, required=False))
+
         return cls(
             fields=fields,
             questions=[
                 LabelQuestion(
-                    name="preference", labels=["Response 1", "Response 2"], description="Choose your preference."
+                    name="preference",
+                    labels=["Response " + str(response) for response in range(1, number_of_responses + 1)],
+                    description="Choose your preference.",
                 )
             ],
             guidelines=default_guidelines if guidelines is None else guidelines,
+            metadata_properties=metadata_properties,
         )
 
     @classmethod
     def for_reward_modeling(
         cls: Type["FeedbackDataset"],
+        number_of_responses: int = 2,
         context: bool = False,
         use_markdown: bool = False,
         guidelines: str = None,
+        metadata_properties: List["AllowedMetadataPropertyTypes"] = None,
     ) -> "FeedbackDataset":
-        return cls.for_preference_modeling(context=context, use_markdown=use_markdown, guidelines=guidelines)
+        default_guidelines = "This is a reward modeling dataset that contains contexts and options. Please choose the option that you would prefer in the given context."
+        return cls.for_preference_modeling(
+            number_of_responses=number_of_responses,
+            context=context,
+            use_markdown=use_markdown,
+            guidelines=default_guidelines if guidelines is None else guidelines,
+            metadata_properties=metadata_properties,
+        )
 
     @classmethod
     def for_proximal_policy_optimization(
         cls: Type["FeedbackDataset"],
+        rating_scale: int = 7,
         context: bool = False,
         use_markdown: bool = False,
         guidelines: str = None,
@@ -751,9 +780,9 @@ class TaskTemplateMixin:
         return cls(
             fields=fields,
             questions=[
-                LabelQuestion(
+                RatingQuestion(
                     name="prompt",
-                    labels=["good", "bad"],
+                    values=list(range(1, rating_scale + 1)),
                     description="Choose one of the labels that best describes the prompt.",
                 )
             ],
@@ -763,45 +792,26 @@ class TaskTemplateMixin:
     @classmethod
     def for_direct_preference_optimization(
         cls: Type["FeedbackDataset"],
+        number_of_responses: int = 2,
         context: bool = False,
         use_markdown: bool = False,
         guidelines: str = None,
+        metadata_properties: List["AllowedMetadataPropertyTypes"] = None,
     ) -> "FeedbackDataset":
-        """
-        You can use this method to create a basic dataset for direct preference optimization tasks.
-
-        Args:
-            context: Set this parameter to True if you want to add context to your dataset
-            use_markdown: Set this parameter to True if you want to use markdown in your dataset
-
-        Returns:
-            A `FeedbackDataset` object for direct preference optimization containing "prompt", "response1", "response2" with the optional "context" fields and a LabelQuestion named "preference"
-        """
         default_guidelines = "This is a direct preference optimization dataset that contains contexts and options. Please choose the option that you would prefer in the given context."
-        dataset_fields = [
-            TextField(name="prompt", use_markdown=use_markdown),
-            TextField(name="response1", title="Response 1", use_markdown=use_markdown),
-            TextField(name="response2", title="Response 2", use_markdown=use_markdown),
-        ]
-        if context:
-            dataset_fields.insert(1, TextField(name="context", use_markdown=use_markdown, required=False))
-        return cls(
-            fields=dataset_fields,
-            questions=[
-                LabelQuestion(
-                    name="preference",
-                    labels=["Response 1", "Response 2"],
-                    description="Choose the label that is your preference.",
-                )
-            ],
+        return cls.for_preference_modeling(
+            number_of_responses=number_of_responses,
+            context=context,
+            use_markdown=use_markdown,
             guidelines=default_guidelines if guidelines is None else guidelines,
+            metadata_properties=metadata_properties,
         )
 
     @classmethod
     def for_retrieval_augmented_generation(
         cls: Type["FeedbackDataset"],
         number_of_retrievals: int = 1,
-        rating_scale: int = 10,
+        rating_scale: int = 7,
         use_markdown: bool = False,
         guidelines: str = None,
     ) -> "FeedbackDataset":
@@ -810,6 +820,7 @@ class TaskTemplateMixin:
 
         Args:
             number_of_retrievals: Set this parameter to the number of documents you want to add to your dataset
+            rating_scale: Set this parameter to the number of relevancy scale you want to add to your dataset
             use_markdown: Set this parameter to True if you want to use markdown in your dataset
 
         Returns:

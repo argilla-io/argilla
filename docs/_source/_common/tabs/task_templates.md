@@ -150,21 +150,53 @@ ds
 import argilla as rg
 
 ds = rg.FeedbackDataset.for_preference_modeling(
+    number_of_responses=2,
+    context=False,
     use_markdown=True,
     guidelines=None,
+    metadata_properties=None,
 )
 ds
 # FeedbackDataset(
 #   fields=[
 #       TextField(name="prompt", use_markdown=True),
 #       TextField(name="context", use_markdown=True),
-#       TextField(name="response-1", use_markdown=True),
-#       TextField(name="response-2", use_markdown=True),
+#       TextField(name="response1", use_markdown=True),
+#       TextField(name="response2", use_markdown=True),
 #   ],
 #   questions=[
-#       LabelQuestion(name="preference", values=["response-1", "response-2"])
+#       LabelQuestion(name="preference", labels=["Response 1", "Response 2"])
 #   ]
 #   guidelines="<Guidelines for the task>",
+#   metadata_properties="<Metadata Properties>"
+# )
+```
+:::
+
+:::{tab-item} Reward Modeling
+```python
+import argilla as rg
+
+ds = rg.FeedbackDataset.for_reward_modeling(
+    number_of_responses=2,
+    context=False,
+    use_markdown=True,
+    guidelines=None,
+    metadata_properties=None,
+)
+ds
+# FeedbackDataset(
+#   fields=[
+#       TextField(name="prompt", use_markdown=True),
+#       TextField(name="context", use_markdown=True),
+#       TextField(name="response1", use_markdown=True),
+#       TextField(name="response2", use_markdown=True),
+#   ],
+#   questions=[
+#       LabelQuestion(name="preference", labels=["Response 1", "Response 2"])
+#   ]
+#   guidelines="<Guidelines for the task>",
+#   metadata_properties="<Metadata Properties>"
 # )
 ```
 :::
