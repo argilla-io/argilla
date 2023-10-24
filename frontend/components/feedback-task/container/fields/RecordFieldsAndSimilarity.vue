@@ -8,10 +8,13 @@
       <div class="fields__header">
         <div class="fields__header--left">
           <StatusTag class="fields__status" :recordStatus="record.status" />
-          <BaseBadge :text="similarityScore" data-title="Similarity Score" />
+          <BaseCircleProgress
+            :value="similarityScore"
+            data-title="Similarity Score"
+          />
         </div>
         <SimilarityFilter
-          v-if="datasetVectors.length"
+          v-if="datasetVectors?.length"
           :available-vectors="datasetVectors"
           :recordCriteria="recordCriteria"
           :recordId="record.id"
@@ -35,7 +38,7 @@ export default {
   },
   data() {
     return {
-      similarityScore: "80 %",
+      similarityScore: 80,
     };
   },
   setup(props) {
@@ -74,11 +77,7 @@ export default {
   }
 }
 
-.badge {
-  color: #ee7b00;
-  border-color: #ee7b00;
-  background: lighten(#ee7b00, 50%);
-  font-weight: 500;
+.circle-progress {
   &[data-title] {
     position: relative;
     @extend %has-tooltip--right;
