@@ -120,10 +120,6 @@ $color-bg-preview: #ffd1ab;
       color: $black-87;
     }
   }
-  &__button-close {
-    opacity: 0;
-    pointer-events: none;
-  }
   &__preview {
     display: flex;
     flex: 1;
@@ -150,12 +146,6 @@ $color-bg-preview: #ffd1ab;
   :deep(.dropdown__content) {
     left: -$base-space;
     right: auto;
-  }
-  &:hover {
-    .similarity-reference__button-close {
-      opacity: 1;
-      pointer-events: all;
-    }
   }
   p {
     margin: 0;

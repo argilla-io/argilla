@@ -76,6 +76,16 @@ $color-bg: #fff3e9;
     overflow: auto;
     @extend .record-reference;
     border: 1px solid $black-10;
+    :deep(.similarity-reference__button-close) {
+      opacity: 0;
+      pointer-events: none;
+    }
+    &:hover {
+      :deep(.similarity-reference__button-close) {
+        opacity: 1;
+        pointer-events: all;
+      }
+    }
     #{$this}__header {
       padding: $base-space $base-space * 2;
     }
