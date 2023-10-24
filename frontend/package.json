@@ -1,6 +1,6 @@
 {
   "name": "argilla",
-  "version": "1.18.0-dev",
+  "version": "1.18.0",
   "private": true,
   "scripts": {
     "dev": "nuxt",
