@@ -41,6 +41,7 @@ from argilla.server.schemas.v1.datasets import (
     FieldCreate,
     MetadataPropertyCreate,
     QuestionCreate,
+    RecordCreate,
     RecordsCreate,
     ResponseValueCreate,
 )
@@ -541,7 +542,6 @@ async def validate_vector(
         vectors_settings = {}
 
     vector_settings = vectors_settings.get(vector_name, None)
-
     if not vector_settings:
         vector_settings = await get_vector_settings_by_name_and_dataset_id(db, vector_name, dataset_id)
         if not vector_settings or vector_settings.dataset_id != dataset_id:
@@ -562,86 +562,35 @@ async def create_records(
         raise ValueError("Records cannot be created for a non published dataset")
 
     records = []
-    vectors = []
+    all_vectors = []
+
+    # TODO: Review and unify the cache for DB Query cache
+    users_ids_cache: Set[UUID] = set()
+    questions_cache: Dict[UUID, Question] = {}
+    metadata_properties_cache: Dict[str, MetadataProperty] = {}
+    vectors_settings_cache: Dict[str, VectorSettingsSchema] = {}
     for record_i, record_create in enumerate(records_create.items):
         validate_record_fields(dataset, fields=record_create.fields)
+        await validate_record_metadata(
+            db, dataset, record_i, metadata=record_create.metadata, cache=metadata_properties_cache
+        )
+
+        record_responses = await create_record_responses(db, dataset, record_i, record_create, cache=users_ids_cache)
+        record_suggestions = await create_record_suggestions(db, record_i, record_create, cache=questions_cache)
+        record_vectors = await create_record_vectors(db, dataset, record_i, record_create, cache=vectors_settings_cache)
 
         record = Record(
             fields=record_create.fields,
             metadata_=record_create.metadata,
             external_id=record_create.external_id,
             dataset_id=dataset.id,
+            responses=record_responses,
+            suggestions=record_suggestions,
+            vectors=record_vectors,
         )
 
-        if record_create.responses:
-            users_ids_cache: Set[UUID] = set()
-            for i, response in enumerate(record_create.responses):
-                try:
-                    users_ids_cache = await validate_user(db, response.user_id, users_ids_cache)
-                    validate_response_values(dataset, values=response.values, status=response.status)
-                except ValueError as e:
-                    raise ValueError(
-                        f"Provided response at position {i} of record at position {record_i} is not valid: {e}"
-                    ) from e
-
-                record.responses.append(
-                    Response(
-                        values=jsonable_encoder(response.values),
-                        status=response.status,
-                        user_id=response.user_id,
-                    )
-                )
-
-        if record_create.suggestions:
-            questions_cache: Dict[UUID, Question] = {}
-            for suggestion in record_create.suggestions:
-                try:
-                    questions_cache = await _validate_suggestion(db, suggestion, questions=questions_cache)
-                except ValueError as e:
-                    raise ValueError(f"Provided suggestion for record at position {record_i} is not valid: {e}") from e
-
-                record.suggestions.append(
-                    Suggestion(
-                        type=suggestion.type,
-                        score=suggestion.score,
-                        value=suggestion.value,
-                        agent=suggestion.agent,
-                        question_id=suggestion.question_id,
-                    )
-                )
-
-        if record_create.metadata:
-            metadata_properties: Dict[str, Union[MetadataProperty, Literal["extra"]]] = {}
-            try:
-                metadata_properties = await _validate_metadata(
-                    db,
-                    dataset=dataset,
-                    metadata=record_create.metadata,
-                    metadata_properties=metadata_properties,
-                )
-            except ValueError as e:
-                raise ValueError(f"Provided metadata for record at position {record_i} is not valid: {e}") from e
-
-        if record_create.vectors:
-            vectors_settings_cache: Dict[str, VectorSettingsSchema] = {}
-            for vector_name, vector_value in record_create.vectors.items():
-                try:
-                    vectors_settings_cache = await validate_vector(
-                        db, dataset.id, vector_name, vector_value, vectors_settings_cache
-                    )
-                except ValueError as e:
-                    raise ValueError(
-                        f"Provided vector with name={vector_name} of record at position {record_i} is not valid: {e}"
-                    ) from e
-
-                vector = Vector(
-                    value=vector_value, dataset_id=dataset.id, vector_settings_id=vectors_settings_cache[vector_name].id
-                )
-
-                record.vectors.append(vector)
-                vectors.append(vector)
-
         records.append(record)
+        all_vectors.extend(record_vectors)
 
     async with db.begin_nested():
         db.add_all(records)
@@ -649,14 +598,115 @@ async def create_records(
         # TODO: We need to remove these asynchronicity requirements somehow
         for record in records:
             await record.awaitable_attrs.responses
-        for vector in vectors:
+        for vector in all_vectors:
             await vector.awaitable_attrs.vector_settings
         # TODO: Review and unify in a single method
         await search_engine.index_records(dataset, records)
-        if vectors:
-            await search_engine.set_records_vectors(dataset, vectors)
+        if all_vectors:
+            await search_engine.set_records_vectors(dataset, all_vectors)
 
     await db.commit()
+
+
+async def validate_record_metadata(
+    db: "AsyncSession",
+    dataset: Dataset,
+    record_idx: int,
+    metadata: Dict[str, Any],
+    cache: Dict[str, MetadataProperty] = {},
+):
+    """Validate metadata for a record."""
+    if not metadata:
+        return
+
+    try:
+        await _validate_metadata(db, dataset=dataset, metadata=metadata, metadata_properties=cache)
+    except ValueError as e:
+        raise ValueError(f"Provided metadata for record at position {record_idx} is not valid: {e}") from e
+
+
+async def create_record_vectors(
+    db: "AsyncSession",
+    dataset: Dataset,
+    record_idx: int,
+    record_create: "RecordCreate",
+    cache: Dict[str, VectorSettingsSchema] = {},
+) -> List[Vector]:
+    """Create vectors for a record."""
+    if not record_create.vectors:
+        return []
+
+    vectors = []
+    for vector_name, vector_value in record_create.vectors.items():
+        try:
+            await validate_vector(db, dataset.id, vector_name, vector_value, vectors_settings=cache)
+            vectors.append(
+                Vector(
+                    value=vector_value,
+                    dataset_id=dataset.id,
+                    vector_settings_id=cache[vector_name].id,
+                )
+            )
+        except ValueError as e:
+            raise ValueError(
+                f"Provided vector with name={vector_name} of record at position {record_idx} is not valid: {e}"
+            ) from e
+
+    return vectors
+
+
+async def create_record_responses(
+    db: "AsyncSession", dataset: Dataset, record_idx: int, record_create: RecordCreate, cache: Set[UUID] = set()
+) -> List[Response]:
+    """Create responses for a record."""
+    if not record_create.responses:
+        return []
+
+    responses = []
+
+    for idx, response in enumerate(record_create.responses):
+        try:
+            await validate_user(db, response.user_id, cache)
+            validate_response_values(dataset, values=response.values, status=response.status)
+            responses.append(
+                Response(
+                    values=jsonable_encoder(response.values),
+                    status=response.status,
+                    user_id=response.user_id,
+                )
+            )
+        except ValueError as e:
+            raise ValueError(
+                f"Provided response at position {idx} of record at position {record_idx} is not valid: {e}"
+            ) from e
+
+    return responses
+
+
+async def create_record_suggestions(
+    db: "AsyncSession", record_idx: int, record_create: "RecordCreate", cache: Dict[UUID, Question] = {}
+) -> List[Suggestion]:
+    """Create suggestions for a record."""
+
+    if not record_create.suggestions:
+        return []
+
+    suggestions = []
+    for suggestion in record_create.suggestions:
+        try:
+            await _validate_suggestion(db, suggestion, questions=cache)
+            suggestions.append(
+                Suggestion(
+                    type=suggestion.type,
+                    score=suggestion.score,
+                    value=suggestion.value,
+                    agent=suggestion.agent,
+                    question_id=suggestion.question_id,
+                )
+            )
+        except ValueError as e:
+            raise ValueError(f"Provided suggestion for record at position {record_idx} is not valid: {e}") from e
+    return suggestions
 
 
 async def _exists_records_with_ids(db: "AsyncSession", dataset_id: UUID, records_ids: List[UUID]) -> List[UUID]:
