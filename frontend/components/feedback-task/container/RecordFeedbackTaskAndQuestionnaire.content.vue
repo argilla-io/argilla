@@ -52,7 +52,7 @@ export default {
     noRecordsMessage() {
       const { status } = this.recordCriteria.committed;
 
-      if (this.recordCriteria.isFilteringByText)
+      if (this.recordCriteria.isFilteredByText)
         return `You have no ${status} records matching the search input`;
 
       return `You have no ${status} records`;

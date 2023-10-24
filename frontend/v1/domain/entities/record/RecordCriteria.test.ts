@@ -1,7 +1,7 @@
 import { RecordCriteria } from "./RecordCriteria";
 
 describe("RecordCriteria", () => {
-  describe("isFilteringByText", () => {
+  describe("isFilteredByText", () => {
     test("should return true if searchText is not empty", () => {
       const criteria = new RecordCriteria(
         "datasetId",
@@ -13,7 +13,7 @@ describe("RecordCriteria", () => {
         null
       );
 
-      expect(criteria.isFilteringByText).toBe(true);
+      expect(criteria.isFilteredByText).toBe(true);
     });
 
     test("should return false if searchText is empty", () => {
@@ -27,7 +27,7 @@ describe("RecordCriteria", () => {
         null
       );
 
-      expect(criteria.isFilteringByText).toBe(false);
+      expect(criteria.isFilteredByText).toBe(false);
     });
 
     test("should return false if searchText is undefined", () => {
@@ -41,11 +41,11 @@ describe("RecordCriteria", () => {
         null
       );
 
-      expect(criteria.isFilteringByText).toBe(false);
+      expect(criteria.isFilteredByText).toBe(false);
     });
   });
 
-  describe("isFilteringByMetadata should", () => {
+  describe("isFilteredByMetadata should", () => {
     test("return true if metadata is not empty", () => {
       const criteria = new RecordCriteria(
         "datasetId",
@@ -57,7 +57,7 @@ describe("RecordCriteria", () => {
         null
       );
 
-      expect(criteria.isFilteringByMetadata).toBe(true);
+      expect(criteria.isFilteredByMetadata).toBe(true);
     });
 
     test("return false if metadata is empty", () => {
@@ -71,7 +71,7 @@ describe("RecordCriteria", () => {
         null
       );
 
-      expect(criteria.isFilteringByMetadata).toBe(false);
+      expect(criteria.isFilteredByMetadata).toBe(false);
     });
 
     test("return false if metadata is undefined", () => {
@@ -85,7 +85,7 @@ describe("RecordCriteria", () => {
         null
       );
 
-      expect(criteria.isFilteringByMetadata).toBe(false);
+      expect(criteria.isFilteredByMetadata).toBe(false);
     });
   });
 

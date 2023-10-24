@@ -38,8 +38,8 @@ export default {
       similarityScore: "80 %",
     };
   },
-  setup() {
-    return useRecordFieldsAndSimilarityViewModel();
+  setup(props) {
+    return useRecordFieldsAndSimilarityViewModel(props);
   },
 };
 </script>

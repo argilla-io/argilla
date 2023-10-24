@@ -36,3 +36,17 @@ export interface BackedRecords {
 export interface BackendSearchRecords {
   record: BackedRecord;
 }
+
+export interface BackendAdvanceSearchQuery {
+  query: {
+    vector?: {
+      name: string;
+      record_id: string;
+      max_results: number;
+      // order
+    };
+    text?: {
+      q: string;
+    };
+  };
+}

@@ -69,20 +69,11 @@ export class LoadRecordsToAnnotateUseCase {
   }
 
   private async loadRecords(mode: LoadRecordsMode, criteria: RecordCriteria) {
-    const { datasetId, status, searchText, metadata, sortBy, page } = criteria;
+    const { datasetId, page } = criteria;
     const savedRecords = this.recordsStorage.get();
+    const pagination = savedRecords.getPageToFind(criteria);
 
-    const { fromRecord, howMany } = savedRecords.getPageToFind(page, status);
-
-    const getRecords = this.recordRepository.getRecords(
-      datasetId,
-      fromRecord,
-      howMany,
-      status,
-      searchText,
-      metadata,
-      sortBy
-    );
+    const getRecords = this.recordRepository.getRecords(criteria, pagination);
 
     const getQuestions = this.questionRepository.getQuestions(datasetId);
     const getFields = this.fieldRepository.getFields(datasetId);

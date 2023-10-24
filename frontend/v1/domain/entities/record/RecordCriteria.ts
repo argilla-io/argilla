@@ -50,12 +50,20 @@ export class RecordCriteria {
     return this._similaritySearch;
   }
 
-  get isFilteringByText() {
+  get isFilteredByText() {
     return this.committed.searchText.length > 0;
   }
 
-  get isFilteringByMetadata() {
+  get isFilteredByMetadata() {
     return this.committed.metadata.length > 0;
+  }
+
+  get isFilteringByText() {
+    return this.searchText.length > 0;
+  }
+
+  get isFilteringBySimilarity() {
+    return this.similaritySearch.isCompleted;
   }
 
   get hasChanges(): boolean {
