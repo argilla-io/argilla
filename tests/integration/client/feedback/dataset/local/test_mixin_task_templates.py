@@ -18,6 +18,7 @@ from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
     LabelQuestion,
     MultiLabelQuestion,
+    RankingQuestion,
     RatingQuestion,
     TextQuestion,
 )
@@ -218,7 +219,7 @@ def test_for_sentence_similarity():
     assert dataset.questions[0].name == "similarity"
     assert dataset.questions[0].description == "Rate the similarity between the two sentences."
     assert isinstance(dataset.questions[0], RatingQuestion)
-    assert dataset.questions[0].values == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    assert dataset.questions[0].values == [1, 2, 3, 4, 5, 6, 7]
     assert dataset.fields[0].name == "sentence1"
     assert dataset.fields[0].use_markdown is False
     assert dataset.fields[1].name == "sentence2"
@@ -255,9 +256,9 @@ def test_for_preference_modeling():
     )
     assert len(dataset) == 0
     assert dataset.questions[0].name == "preference"
-    assert dataset.questions[0].description == "Choose your preference."
-    assert isinstance(dataset.questions[0], LabelQuestion)
-    assert dataset.questions[0].labels == ["Response 1", "Response 2"]
+    assert dataset.questions[0].description == "1 = Best, 2 = Worst. Ties are allowed."
+    assert isinstance(dataset.questions[0], RankingQuestion)
+    assert dataset.questions[0].values == {"response1": "Response 1", "response2": "Response 2"}
     assert dataset.fields[0].name == "prompt"
     assert dataset.fields[0].use_markdown is False
     assert dataset.fields[1].name == "context"
@@ -271,7 +272,7 @@ def test_for_preference_modeling():
     assert dataset.fields[3].use_markdown is False
     assert (
         dataset.guidelines
-        == "This is a preference dataset that contains contexts and options. Please choose the option that you would prefer in the given context."
+        == "This is a preference dataset that contains contexts and options. Please rank the options that you would prefer in the given context."
     )
     assert dataset.metadata_properties[0].name == "test"
 
@@ -317,13 +318,13 @@ def test_for_proximal_policy_optimization():
     assert len(dataset) == 0
     assert dataset.questions[0].name == "prompt"
     assert dataset.questions[0].description == "Choose one of the labels that best describes the prompt."
-    assert isinstance(dataset.questions[0], LabelQuestion)
-    assert dataset.questions[0].labels == ["good", "bad"]
+    assert isinstance(dataset.questions[0], RatingQuestion)
+    assert dataset.questions[0].values == list(range(1, 8))
     assert dataset.fields[0].name == "prompt"
     assert dataset.fields[0].use_markdown is False
     assert (
         dataset.guidelines
-        == "This is a proximal policy optimization dataset that contains contexts and prompts. Please choose the label that best prompt."
+        == "This is a proximal policy optimization dataset that contains contexts and prompts. Please choose the label that best describes prompt."
     )
     assert dataset.metadata_properties[0].name == "test"
 
@@ -334,15 +335,15 @@ def test_for_proximal_policy_optimization():
     assert len(dataset) == 0
     assert dataset.questions[0].name == "prompt"
     assert dataset.questions[0].description == "Choose one of the labels that best describes the prompt."
-    assert isinstance(dataset.questions[0], LabelQuestion)
-    assert dataset.questions[0].labels == ["good", "bad"]
+    assert isinstance(dataset.questions[0], RatingQuestion)
+    assert dataset.questions[0].values == list(range(1, 8))
     assert dataset.fields[0].name == "prompt"
     assert dataset.fields[0].use_markdown is True
     assert dataset.fields[1].name == "context"
     assert dataset.fields[1].use_markdown is True
     assert (
         dataset.guidelines
-        == "This is a proximal policy optimization dataset that contains contexts and prompts. Please choose the label that best prompt."
+        == "This is a proximal policy optimization dataset that contains contexts and prompts. Please choose the label that best describes prompt."
     )
     assert dataset.metadata_properties[0].name == "test"
 
@@ -354,9 +355,9 @@ def test_for_direct_preference_optimization():
     )
     assert len(dataset) == 0
     assert dataset.questions[0].name == "preference"
-    assert dataset.questions[0].description == "Choose the label that is your preference."
-    assert isinstance(dataset.questions[0], LabelQuestion)
-    assert dataset.questions[0].labels == ["Response 1", "Response 2"]
+    assert dataset.questions[0].description == "1 = Best, 2 = Worst. Ties are allowed."
+    assert isinstance(dataset.questions[0], RankingQuestion)
+    assert dataset.questions[0].values == {"response1": "Response 1", "response2": "Response 2"}
     assert dataset.fields[0].name == "prompt"
     assert dataset.fields[0].use_markdown is False
     assert dataset.fields[1].name == "response1"
@@ -367,7 +368,7 @@ def test_for_direct_preference_optimization():
     assert dataset.fields[2].use_markdown is False
     assert (
         dataset.guidelines
-        == "This is a direct preference optimization dataset that contains contexts and options. Please choose the option that you would prefer in the given context."
+        == "This is a direct preference optimization dataset that contains contexts and options. Please rank the options that you would prefer in the given context."
     )
     assert dataset.metadata_properties[0].name == "test"
 
@@ -377,9 +378,9 @@ def test_for_direct_preference_optimization():
     )
     assert len(dataset) == 0
     assert dataset.questions[0].name == "preference"
-    assert dataset.questions[0].description == "Choose the label that is your preference."
-    assert isinstance(dataset.questions[0], LabelQuestion)
-    assert dataset.questions[0].labels == ["Response 1", "Response 2"]
+    assert dataset.questions[0].description == "1 = Best, 2 = Worst. Ties are allowed."
+    assert isinstance(dataset.questions[0], RankingQuestion)
+    assert dataset.questions[0].values == {"response1": "Response 1", "response2": "Response 2"}
     assert dataset.fields[0].name == "prompt"
     assert dataset.fields[0].use_markdown is True
     assert dataset.fields[1].name == "context"
@@ -392,6 +393,6 @@ def test_for_direct_preference_optimization():
     assert dataset.fields[3].use_markdown is True
     assert (
         dataset.guidelines
-        == "This is a direct preference optimization dataset that contains contexts and options. Please choose the option that you would prefer in the given context."
+        == "This is a direct preference optimization dataset that contains contexts and options. Please rank the options that you would prefer in the given context."
     )
     assert dataset.metadata_properties[0].name == "test"

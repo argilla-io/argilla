@@ -1,6 +1,6 @@
 ::::{tab-set}
 
-:::{tab-item} Text classification
+:::{tab-item} Text Classification
 ```python
 import argilla as rg
 
@@ -9,12 +9,14 @@ ds = rg.FeedbackDataset.for_text_classification(
     multi_label=False,
     use_markdown=True,
     guidelines=None,
+    metadata_properties=None,
 )
 ds
 # FeedbackDataset(
 #   fields=[TextField(name="text", use_markdown=True)],
-#   questions=[LabelQuestion(name="label", labels=["positive", "negative"])]
+#   questions=[LabelQuestion(name="label", labels=["positive", "negative"])],
 #   guidelines="<Guidelines for the task>",
+#   metadata_properties="<Metadata Properties>",
 # )
 ```
 :::
@@ -26,12 +28,14 @@ import argilla as rg
 ds = rg.FeedbackDataset.for_summarization(
     use_markdown=True,
     guidelines=None,
+    metadata_properties=None,
 )
 ds
 # FeedbackDataset(
 #   fields=[TextField(name="text", use_markdown=True)],
-#   questions=[TextQuestion(name="summary", use_markdown=True)]
+#   questions=[TextQuestion(name="summary", use_markdown=True)],
 #   guidelines="<Guidelines for the task>",
+#   metadata_properties="<Metadata Properties>",
 # )
 ```
 :::
@@ -43,12 +47,14 @@ import argilla as rg
 ds = rg.FeedbackDataset.for_translation(
     use_markdown=True,
     guidelines=None,
+    metadata_properties=None,
 )
 ds
 # FeedbackDataset(
 #   fields=[TextField(name="source", use_markdown=True)],
-#   questions=[TextQuestion(name="target", use_markdown=True)]
+#   questions=[TextQuestion(name="target", use_markdown=True)],
 #   guidelines="<Guidelines for the task>",
+#   metadata_properties="<Metadata Properties>",
 # )
 ```
 :::
@@ -61,6 +67,7 @@ ds = rg.FeedbackDataset.for_natural_language_inference(
     labels=None
     use_markdown=True,
     guidelines=None,
+    metadata_properties=None,
 )
 ds
 # FeedbackDataset(
@@ -72,8 +79,9 @@ ds
 #       LabelQuestion(
 #           name="label", labels=["entailment", "neutral", "contradiction"]
 #      )
-#   ]
+#   ],
 #   guidelines="<Guidelines for the task>",
+#   metadata_properties="<Metadata Properties>",
 # )
 ```
 :::
@@ -83,9 +91,10 @@ ds
 import argilla as rg
 
 ds = rg.FeedbackDataset.for_sentence_similarity(
-    rating_scale=10,
+    rating_scale=7,
     use_markdown=True,
     guidelines=None,
+    metadata_properties=None,
 )
 ds
 # FeedbackDataset(
@@ -94,9 +103,10 @@ ds
 #       TextField(name="sentence-2", use_markdown=True)
 #   ],
 #   questions=[
-#       RatingQuestion(name="similarity", values=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-#   ]
+#       RatingQuestion(name="similarity", values=[1, 2, 3, 4, 5, 6, 7])
+#   ],
 #   guidelines="<Guidelines for the task>",
+#   metadata_properties="<Metadata Properties>",
 # )
 ```
 :::
@@ -108,6 +118,7 @@ import argilla as rg
 ds = rg.FeedbackDataset.for_question_answering(
     use_markdown=True,
     guidelines=None,
+    metadata_properties=None,
 )
 ds
 # FeedbackDataset(
@@ -117,8 +128,9 @@ ds
 #   ],
 #   questions=[
 #       TextQuestion(name="answer", use_markdown=True)
-#   ]
+#   ],
 #   guidelines="<Guidelines for the task>",
+#   metadata_properties="<Metadata Properties>",
 # )
 ```
 :::
@@ -131,6 +143,7 @@ ds = rg.FeedbackDataset.for_supervised_fine_tuning(
     context=True,
     use_markdown=True,
     guidelines=None,
+    metadata_properties=None,
 )
 ds
 # FeedbackDataset(
@@ -140,31 +153,36 @@ ds
 #   ],
 #   questions=[
 #       TextQuestion(name="response", use_markdown=True)
-#   ]
+#   ],
 #   guidelines="<Guidelines for the task>",
+#   metadata_properties="<Metadata Properties>",
 # )
 ```
+:::
 
 :::{tab-item} Preference Modeling
 ```python
 import argilla as rg
 
 ds = rg.FeedbackDataset.for_preference_modeling(
+    number_of_responses=2,
+    context=False,
     use_markdown=True,
     guidelines=None,
+    metadata_properties=None,
 )
 ds
 # FeedbackDataset(
 #   fields=[
 #       TextField(name="prompt", use_markdown=True),
 #       TextField(name="context", use_markdown=True),
-#       TextField(name="response-1", use_markdown=True),
-#       TextField(name="response-2", use_markdown=True),
+#       TextField(name="response1", use_markdown=True),
+#       TextField(name="response2", use_markdown=True),
 #   ],
 #   questions=[
-#       LabelQuestion(name="preference", values=["response-1", "response-2"])
-#   ]
+#       RankingQuestion(name="preference", values=["Response 1", "Response 2"])],
 #   guidelines="<Guidelines for the task>",
+#   metadata_properties="<Metadata Properties>"
 # )
 ```
 :::
@@ -174,9 +192,11 @@ ds
 import argilla as rg
 
 ds = rg.FeedbackDataset.for_proximal_policy_optimization(
+    rating_scale=7,
     context=True,
     use_markdown=True,
     guidelines=None,
+    metadata_properties=None,
 )
 ds
 # FeedbackDataset(
@@ -185,7 +205,10 @@ ds
 #       TextField(name="context", use_markdown=True)
 #   ],
 #   questions=[
-#       TextQuestion(name="response", use_markdown=True)
+#       TextQuestion(name="response", use_markdown=True)],
+#   guidelines="<Guidelines for the task>",
+#   metadata_properties="<Metadata Properties>",
+# )
 ```
 :::
 
@@ -194,22 +217,25 @@ ds
 import argilla as rg
 
 ds = rg.FeedbackDataset.for_direct_preference_optimization(
-    context=True,
+    number_of_responses=2,
+    context=False,
     use_markdown=True,
     guidelines=None,
+    metadata_properties=None,
 )
 ds
 # FeedbackDataset(
 #   fields=[
 #       TextField(name="prompt", use_markdown=True),
-#       TextField(name="context", use_markdown=True)
-#       TextField(name="response-1", use_markdown=True),
-#       TextField(name="response-2", use_markdown=True),
+#       TextField(name="context", use_markdown=True),
+#       TextField(name="response1", use_markdown=True),
+#       TextField(name="response2", use_markdown=True),
 #   ],
 #   questions=[
-#       LabelQuestion(name="preference", values=["response-1", "response-2"])
-#   ]
+#       RankingQuestion(name="preference", values=["Response 1", "Response 2"])
+#   ],
 #   guidelines="<Guidelines for the task>",
+#   metadata_properties="<Metadata Properties>",
 # )
 ```
 :::
@@ -220,22 +246,23 @@ import argilla as rg
 
 ds = rg.FeedbackDataset.for_retrieval_augmented_generation(
     number_of_retrievals=1,
-    rating_scale=10,
+    rating_scale=7,
     use_markdown=False,
     guidelines=None,
+    metadata_properties=None,
 )
 ds
-
 # FeedbackDataset(
 #   fields=[
 #       TextField(name="query", use_markdown=False),
 #       TextField(name="retrieved_document_1", use_markdown=False),
 #   ],
 #   questions=[
-#       RatingQuestion(name="question_rating_1", values=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+#       RatingQuestion(name="question_rating_1", values=[1, 2, 3, 4, 5, 6, 7]),
 #       TextQuestion(name="response", use_markdown=False),
-#   ]
+#   ],
 #   guidelines="<Guidelines for the task>",
+#   metadata_properties="<Metadata Properties>",
 # )
 ```
 :::
