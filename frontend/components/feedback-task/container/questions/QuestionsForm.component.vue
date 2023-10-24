@@ -232,7 +232,7 @@ export default {
 .questions-form {
   display: flex;
   flex-direction: column;
-  flex-basis: max(520px, 30%);
+  flex-basis: max(520px, 33%);
   max-height: 100%;
   justify-content: space-between;
   border-radius: $border-radius-m;

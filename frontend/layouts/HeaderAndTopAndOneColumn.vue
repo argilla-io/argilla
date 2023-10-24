@@ -54,7 +54,7 @@ $gap-width: $base-space * 2;
   transition: 0.4s ease-in-out;
   &.--panel {
     @include media(">desktop") {
-      grid-template-columns: auto 1fr auto $sidebarWidth;
+      grid-template-columns: 1fr $sidebarWidth;
       transition: 0.4s ease-out;
     }
   }
@@ -77,11 +77,6 @@ $gap-width: $base-space * 2;
   min-width: 0;
 }
 .container {
-  max-width: min(calc(100% - $base-space * 8), 1700px);
-  width: 100%;
-  margin: 0 auto;
-  @include media("<desktopLarge") {
-    max-width: min(calc(100% - $base-space * 4), 1700px);
-  }
+  padding: 0 $base-space * 3;
 }
 </style>

@@ -9,7 +9,7 @@
         class="similarity-reference__dropdown"
         v-model="recordCriteria.similaritySearch.order"
       />
-      <p v-if="!isExpanded">Similar to:</p>
+      <p v-if="!isExpanded">Similar to</p>
       <span v-if="!isExpanded" class="similarity-reference__preview">
         <span
           v-for="text in preview"
