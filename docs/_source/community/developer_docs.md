@@ -53,7 +53,36 @@ During the installation, you may encounter the following error: Microsoft Visual
 
 ### Build the documentation
 
-If the installation was smooth, then use `sphinx-autobuild` to continuously deploy the webpage using the following command:
+To build the documentation, it is used [`sphinx`](https://www.sphinx-doc.org/en/master/),an open-source documentation generator, that is, it uses reStructuredText for writing documentation. Using Sphinx's command-line tool, it takes a collection of source files in plain text and generate them in HTML format. It also automatically creates a table of contents, index pages, and search features, enhancing navigation. To do so, the following files are required:
+
+* **index.rst**: This serves as the main entry point for our documentation, accessible at the root URL. It typically includes a table of contents (using the toc trees), connecting users to other documentation sections.
+* **conf.py**: This file enables customization of the documentation's output.
+* **Makefile**: A crucial component provided by Sphinx, serving as the primary tool for local development.
+* **Other .rst files**: These are intended for specific subsections of the documentation.
+* **Markdown files**: The source files with plain text.
+
+In our case, we rely on [`MyST-Parser`](https://myst-parser.readthedocs.io/en/latest/) to facilitate our work with Markdown. So, it's essential that when writing the documentation, we utilize [proper cross-references](https://docs.readthedocs.io/en/stable/guides/cross-referencing-with-sphinx.html) to connect various sections and documents. Below, you can find a typical illustration of commonly used cross-references:
+
+```md
+# To reference a previous section
+[](#explicit-targets).
+
+# To reference a section in another document
+(my_target)=
+    ## Explicit targets
+Reference [](my_target).
+
+# To add explicit references
+- {ref}`my target`.
+- {ref}`Target to paragraph <target_to_paragraph>`.
+
+# To link to a page in the same directory
+- {doc}`reference`
+- {doc}`/guides/reference`
+- {doc}`Custom title </guides/reference>`
+```
+
+So, once the documentation is written or fixed, if the installation was smooth, then use `sphinx-autobuild` to continuously deploy the webpage using the following command:
 
 ```sh
 sphinx-autobuild docs/_source docs/_build/html
@@ -196,7 +225,19 @@ After deleting the database, you will need to run the [database migration](#run-
 
 ## Set up the Frontend
 
-If you want to work on the frontend of Argilla, you can do so by following the steps below:
+If you want to work on the frontend of Argilla, you can do so by following the steps below.
+
+### Clone the Argilla Repository
+
+Firstly, you have to [fork our repository and clone the fork]((/community/contributing.md#work-with-a-fork)) to your computer.
+```sh
+git clone https://github.com/[your-github-username]/argilla.git
+cd argilla
+```
+To keep your fork’s develop branch up to date with our repo you should add it as an [upstream remote branch](https://dev.to/louhayes3/git-add-an-upstream-to-a-forked-repo-1mik):
+```sh
+git remote add upstream https://github.com/argilla-io/argilla.git
+```
 
 ### Build Frontend Static Files
 
