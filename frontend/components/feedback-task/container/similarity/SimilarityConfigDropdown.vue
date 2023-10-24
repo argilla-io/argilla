@@ -3,7 +3,7 @@
     class="similarity-config"
     :visible="dropdownIsVisible"
     @visibility="onVisibility"
-    v-if="filteredOptions.length"
+    v-if="options.length"
   >
     <template slot="dropdown-header">
       {{ value }}<svgicon name="chevron-down" height="8" />
@@ -11,8 +11,12 @@
     <template slot="dropdown-content">
       <ul class="similarity-config__options">
         <li
-          class="similarity-config__option"
-          v-for="option in filteredOptions"
+          :class="
+            value === option
+              ? 'similarity-config__option--selected'
+              : 'similarity-config__option'
+          "
+          v-for="option in options"
           :key="option"
           @click="selectOption(option)"
         >
@@ -44,11 +48,6 @@ export default {
       dropdownIsVisible: false,
     };
   },
-  computed: {
-    filteredOptions() {
-      return this.options.filter((o) => o !== this.value);
-    },
-  },
   methods: {
     onVisibility(value) {
       this.dropdownIsVisible = value;
@@ -65,11 +64,16 @@ export default {
 .similarity-config {
   user-select: none;
   text-transform: capitalize;
+  font-weight: 500;
 
   &__options {
     list-style: none;
+    min-width: 100px;
     padding: calc($base-space / 2);
     margin: 0;
+    &:hover :not(.similarity-config__option:hover) {
+      background: none;
+    }
   }
   &__option {
     padding: calc($base-space / 2);
@@ -79,6 +83,10 @@ export default {
     &:hover {
       background: $black-4;
       transition: all 0.2s ease-out;
+    }
+    &--selected {
+      @extend .similarity-config__option;
+      background: $black-4;
     }
   }
   .svg-icon {

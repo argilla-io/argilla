@@ -9,10 +9,11 @@
         class="similarity-reference__dropdown"
         v-model="recordCriteria.similaritySearch.order"
       />
-      <p v-if="!isExpanded">Similar to</p>
-      <span v-if="!isExpanded" class="similarity-reference__preview">
+      <p>Similar to</p>
+      <span class="similarity-reference__preview">
         <span
           v-for="text in preview"
+          :title="text"
           :key="text"
           class="similarity-reference__preview__text"
           >{{ text }}</span
@@ -20,30 +21,26 @@
         <BaseButton
           class="similarity-reference__preview__button-close"
           @on-click="removeSimilaritySearch"
-          ><svgicon name="close" height="8"
+          ><svgicon name="close" height="14"
         /></BaseButton>
       </span>
     </div>
     <div class="similarity-reference__right">
       <BaseButton
-        v-if="isExpanded"
-        class="similarity-reference__button-close"
-        @on-click="removeSimilaritySearch"
-        ><svgicon name="close" height="12"
-      /></BaseButton>
-      <BaseButton
-        :title="isExpanded ? $t('minimize') : $t('expand')"
-        class="similarity-reference__button-expand"
-        @on-click="$emit(isExpanded ? 'minimize' : 'expand')"
-        ><svgicon
-          height="12"
-          :name="isExpanded ? 'minimize-arrows' : 'expand-arrows'"
+        class="similarity-reference__button-icon"
+        @on-click="
+          $emit(
+            visibleReferenceRecord
+              ? 'hide-reference-record'
+              : 'show-reference-record'
+          )
+        "
+        ><svgicon height="16" name="chevron-down"
       /></BaseButton>
     </div>
   </div>
 </template>
 <script>
-import "assets/icons/expand-arrows";
 import "assets/icons/chevron-down";
 export default {
   props: {
@@ -51,7 +48,7 @@ export default {
       type: Array,
       required: true,
     },
-    isExpanded: {
+    visibleReferenceRecord: {
       type: Boolean,
       default: false,
     },
@@ -69,12 +66,6 @@ export default {
     },
   },
   methods: {
-    expand() {
-      this.$emit("expand");
-    },
-    minimize() {
-      this.$emit("minimize");
-    },
     removeSimilaritySearch() {
       this.recordCriteria.similaritySearch.reset();
 
@@ -90,17 +81,20 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$color-bg-preview: #ffd1ab;
 .similarity-reference {
   display: flex;
   align-items: center;
   gap: $base-space;
-  padding: calc($base-space / 2);
-  justify-content: space-between;
-  border-radius: $border-radius-m;
+  padding: $base-space 12px;
+  max-width: 600px;
+  border-radius: $border-radius;
   color: $black-54;
+  background: $black-4;
   @include font-size(13px);
   transition: background 0.3s ease-in-out;
+  &:hover {
+    background: $black-6;
+  }
   &__left {
     display: flex;
     gap: $base-space;
@@ -112,31 +106,33 @@ $color-bg-preview: #ffd1ab;
     flex-shrink: 0;
     min-width: 0;
   }
-  &__button-expand,
-  &__button-close {
+  &__button-icon {
     padding: 0;
     color: $black-54;
-    &:hover {
-      color: $black-87;
-    }
   }
   &__preview {
     display: flex;
     flex: 1;
+    align-items: center;
     gap: $base-space;
-    background: $color-bg-preview;
-    padding: 0 $base-space;
-    border-radius: $border-radius-l;
     min-width: 0;
+    background: $similarity-color;
+    border: 1px solid darken($similarity-color, 15%);
+    padding: 2px $base-space;
+    border-radius: $border-radius-l;
     @include font-size(12px);
     &__text {
       flex: 1;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      font-weight: 500;
+      line-height: 1rem;
+      color: darken($similarity-color, 55%);
     }
     &__button-close {
       padding: 0;
+      color: darken($similarity-color, 55%);
     }
   }
   :deep(.dropdown__header) {
@@ -150,6 +146,7 @@ $color-bg-preview: #ffd1ab;
   p {
     margin: 0;
     white-space: nowrap;
+    font-weight: 500;
   }
 }
 </style>

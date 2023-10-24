@@ -1,21 +1,17 @@
 <template>
-  <div
-    :class="
-      isExpanded
-        ? 'record-reference--isExpanded'
-        : 'record-reference--isCollapsed'
-    "
-  >
-    <div class="record-reference__header">
-      <SimilarityReference
-        :preview="fieldsPreview"
-        :isExpanded="isExpanded"
-        :recordCriteria="recordCriteria"
-        @expand="expand"
-        @minimize="minimize"
-      />
-    </div>
-    <RecordFields v-if="isExpanded" :fields="fields" />
+  <div class="record-reference__wrapper">
+    <SimilarityReference
+      :preview="fieldsPreview"
+      :visibleReferenceRecord="visibleReferenceRecord"
+      :recordCriteria="recordCriteria"
+      @show-reference-record="showReferenceRecord"
+      @hide-reference-record="hideReferenceRecord"
+    />
+    <RecordFields
+      v-if="visibleReferenceRecord"
+      class="record-reference"
+      :fields="fields"
+    />
   </div>
 </template>
 
@@ -33,7 +29,7 @@ export default {
   },
   data() {
     return {
-      isExpanded: false,
+      visibleReferenceRecord: false,
       numberOfVisibleCharsInPreview: 30,
     };
   },
@@ -47,61 +43,24 @@ export default {
     },
   },
   methods: {
-    expand() {
-      this.isExpanded = true;
+    showReferenceRecord() {
+      this.visibleReferenceRecord = true;
     },
-    minimize() {
-      this.isExpanded = false;
+    hideReferenceRecord() {
+      this.visibleReferenceRecord = false;
     },
   },
 };
 </script>
 <style lang="scss" scoped>
-$color-bg: #fff3e9;
 .record-reference {
-  $this: &;
-  display: flex;
-  flex-direction: column;
-  border-radius: $border-radius-m;
-  background: palette(white);
-  .record {
-    border: none;
-    padding-top: 0;
-  }
-  :deep(.text_field_component) {
-    background: $color-bg;
-  }
-  &--isExpanded {
-    max-height: 30vh;
-    overflow: auto;
-    @extend .record-reference;
-    border: 1px solid $black-10;
-    :deep(.similarity-reference__button-close) {
-      opacity: 0;
-      pointer-events: none;
-    }
-    &:hover {
-      :deep(.similarity-reference__button-close) {
-        opacity: 1;
-        pointer-events: all;
-      }
-    }
-    #{$this}__header {
-      padding: $base-space $base-space * 2;
-    }
-  }
-  &--isCollapsed {
-    @extend .record-reference;
-    background: $black-4;
-    border-radius: $border-radius;
-    transition: background 0.2s ease;
-    &:hover {
-      transition: background 0.2s ease;
-      background: $black-6;
-    }
-    #{$this}__header {
-      padding: calc($base-space / 2) $base-space;
-    }
+  max-height: 30vh;
+  overflow: auto;
+  border: 1px solid darken($similarity-color, 15%);
+  &__wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: $base-space;
   }
 }
 </style>
