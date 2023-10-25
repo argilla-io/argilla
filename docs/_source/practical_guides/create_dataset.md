@@ -74,6 +74,20 @@ ds.questions[0].description = 'New description for the question.'
 ```
 :::
 
+:::{tab-item} Metadata
+```python
+# Add metadata to the dataset
+ds = rg.FeedbackDataset.for_task()
+
+metadata = rg.TermsMetadataProperty(name="metadata", values=["like", "dislike"])
+
+ds.add_metadata_property(metadata)
+
+# Delete a metadata property
+ds.delete_metadata_properties(metadata_properties="metadata")
+```
+:::
+
 ::::
 
 #### Custom Configuration
