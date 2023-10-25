@@ -73,8 +73,6 @@ class Settings(BaseSettings):
     elasticsearch_ca_path: Optional[str] = None
     cors_origins: List[str] = ["*"]
 
-    search_engine: str = "opensearch"
-
     docs_enabled: bool = True
 
     search_engine: str = "elasticsearch"
