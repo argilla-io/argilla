@@ -5206,24 +5206,7 @@ class TestSuiteDatasets:
         )
 
         query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
-        params = [("include", include.value) for include in includes]
-        response = await async_client.post(
-            f"/api/v1/me/datasets/{dataset.id}/records/search",
-            headers={API_KEY_HEADER_NAME: user.api_key},
-            json=query_json,
-            params=params,
-        )
-
-        mock_search_engine.search.assert_called_once_with(
-            dataset=dataset,
-            query=TextQuery(q="Hello", field="input"),
-            metadata_filters=[],
-            user_response_status_filter=None,
-            offset=0,
-            limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
-            sort_by=None,
-        )
-
+        params = [("include", include) for include in includes]
         expected = {
             "items": [
                 {
@@ -5321,7 +5304,7 @@ class TestSuiteDatasets:
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
-            query=StringQuery(q="Hello", field="input"),
+            query=TextQuery(q="Hello", field="input"),
             metadata_filters=[],
             sort_by=None,
             user_response_status_filter=None,
