@@ -13,10 +13,14 @@ ds = rg.FeedbackDataset.for_text_classification(
 )
 ds
 # FeedbackDataset(
-#   fields=[TextField(name="text", use_markdown=True)],
-#   questions=[LabelQuestion(name="label", labels=["positive", "negative"])],
-#   guidelines="<Guidelines for the task>",
-#   metadata_properties="<Metadata Properties>",
+#     fields=[
+#         TextField(name="text", use_markdown=True)
+#     ],
+#     questions=[
+#         LabelQuestion(name="label", labels=["positive", "negative"])
+#     ],
+#     guidelines="<Guidelines for the task>",
+#     metadata_properties="<Metadata Properties>",
 # )
 ```
 :::
@@ -32,10 +36,14 @@ ds = rg.FeedbackDataset.for_summarization(
 )
 ds
 # FeedbackDataset(
-#   fields=[TextField(name="text", use_markdown=True)],
-#   questions=[TextQuestion(name="summary", use_markdown=True)],
-#   guidelines="<Guidelines for the task>",
-#   metadata_properties="<Metadata Properties>",
+#     fields=[
+#         TextField(name="text", use_markdown=True)
+#     ],
+#     questions=[
+#         TextQuestion(name="summary", use_markdown=True)
+#     ],
+#     guidelines="<Guidelines for the task>",
+#     metadata_properties="<Metadata Properties>",
 # )
 ```
 :::
@@ -51,10 +59,14 @@ ds = rg.FeedbackDataset.for_translation(
 )
 ds
 # FeedbackDataset(
-#   fields=[TextField(name="source", use_markdown=True)],
-#   questions=[TextQuestion(name="target", use_markdown=True)],
-#   guidelines="<Guidelines for the task>",
-#   metadata_properties="<Metadata Properties>",
+#     fields=[
+#         TextField(name="source", use_markdown=True)
+#     ],
+#     questions=[
+#         TextQuestion(name="target", use_markdown=True)
+#     ],
+#     guidelines="<Guidelines for the task>",
+#     metadata_properties="<Metadata Properties>",
 # )
 ```
 :::
@@ -71,17 +83,15 @@ ds = rg.FeedbackDataset.for_natural_language_inference(
 )
 ds
 # FeedbackDataset(
-#   fields=[
-#       TextField(name="premise", use_markdown=True),
-#       TextField(name="hypothesis", use_markdown=True)
-#   ],
-#   questions=[
-#       LabelQuestion(
-#           name="label", labels=["entailment", "neutral", "contradiction"]
-#      )
-#   ],
-#   guidelines="<Guidelines for the task>",
-#   metadata_properties="<Metadata Properties>",
+#     fields=[
+#         TextField(name="premise", use_markdown=True),
+#         TextField(name="hypothesis", use_markdown=True)
+#     ],
+#     questions=[
+#         LabelQuestion(name="label", labels=["entailment", "neutral", "contradiction"])
+#     ],
+#     guidelines="<Guidelines for the task>",
+#     metadata_properties="<Metadata Properties>",
 # )
 ```
 :::
@@ -98,15 +108,15 @@ ds = rg.FeedbackDataset.for_sentence_similarity(
 )
 ds
 # FeedbackDataset(
-#   fields=[
-#       TextField(name="sentence-1", use_markdown=True),
-#       TextField(name="sentence-2", use_markdown=True)
-#   ],
-#   questions=[
-#       RatingQuestion(name="similarity", values=[1, 2, 3, 4, 5, 6, 7])
-#   ],
-#   guidelines="<Guidelines for the task>",
-#   metadata_properties="<Metadata Properties>",
+#     fields=[
+#         TextField(name="sentence-1", use_markdown=True),
+#         TextField(name="sentence-2", use_markdown=True)
+#     ],
+#     questions=[
+#         RatingQuestion(name="similarity", values=[1, 2, 3, 4, 5, 6, 7])
+#     ],
+#     guidelines="<Guidelines for the task>",
+#     metadata_properties="<Metadata Properties>",
 # )
 ```
 :::
@@ -122,15 +132,15 @@ ds = rg.FeedbackDataset.for_question_answering(
 )
 ds
 # FeedbackDataset(
-#   fields=[
-#       TextField(name="question", use_markdown=True),
-#       TextField(name="context", use_markdown=True)
-#   ],
-#   questions=[
-#       TextQuestion(name="answer", use_markdown=True)
-#   ],
-#   guidelines="<Guidelines for the task>",
-#   metadata_properties="<Metadata Properties>",
+#     fields=[
+#         TextField(name="question", use_markdown=True),
+#         TextField(name="context", use_markdown=True)
+#     ],
+#     questions=[
+#         TextQuestion(name="answer", use_markdown=True)
+#     ],
+#     guidelines="<Guidelines for the task>",
+#     metadata_properties="<Metadata Properties>",
 # )
 ```
 :::
@@ -147,15 +157,15 @@ ds = rg.FeedbackDataset.for_supervised_fine_tuning(
 )
 ds
 # FeedbackDataset(
-#   fields=[
-#       TextField(name="prompt", use_markdown=True),
-#       TextField(name="context", use_markdown=True)
-#   ],
-#   questions=[
-#       TextQuestion(name="response", use_markdown=True)
-#   ],
-#   guidelines="<Guidelines for the task>",
-#   metadata_properties="<Metadata Properties>",
+#     fields=[
+#         TextField(name="prompt", use_markdown=True),
+#         TextField(name="context", use_markdown=True)
+#     ],
+#     questions=[
+#         TextQuestion(name="response", use_markdown=True)
+#     ],
+#     guidelines="<Guidelines for the task>",
+#     metadata_properties="<Metadata Properties>",
 # )
 ```
 :::
@@ -173,16 +183,17 @@ ds = rg.FeedbackDataset.for_preference_modeling(
 )
 ds
 # FeedbackDataset(
-#   fields=[
-#       TextField(name="prompt", use_markdown=True),
-#       TextField(name="context", use_markdown=True),
-#       TextField(name="response1", use_markdown=True),
-#       TextField(name="response2", use_markdown=True),
-#   ],
-#   questions=[
-#       RankingQuestion(name="preference", values=["Response 1", "Response 2"])],
-#   guidelines="<Guidelines for the task>",
-#   metadata_properties="<Metadata Properties>"
+#     fields=[
+#         TextField(name="prompt", use_markdown=True),
+#         TextField(name="context", use_markdown=True),
+#         TextField(name="response1", use_markdown=True),
+#         TextField(name="response2", use_markdown=True),
+#     ],
+#     questions=[
+#         RankingQuestion(name="preference", values=["Response 1", "Response 2"])
+#     ],
+#     guidelines="<Guidelines for the task>",
+#     metadata_properties="<Metadata Properties>"
 # )
 ```
 :::
@@ -200,14 +211,15 @@ ds = rg.FeedbackDataset.for_proximal_policy_optimization(
 )
 ds
 # FeedbackDataset(
-#   fields=[
-#       TextField(name="prompt", use_markdown=True),
-#       TextField(name="context", use_markdown=True)
-#   ],
-#   questions=[
-#       TextQuestion(name="response", use_markdown=True)],
-#   guidelines="<Guidelines for the task>",
-#   metadata_properties="<Metadata Properties>",
+#     fields=[
+#         TextField(name="prompt", use_markdown=True),
+#         TextField(name="context", use_markdown=True)
+#     ],
+#     questions=[
+#         TextQuestion(name="response", use_markdown=True)
+#     ],
+#     guidelines="<Guidelines for the task>",
+#     metadata_properties="<Metadata Properties>",
 # )
 ```
 :::
@@ -225,17 +237,17 @@ ds = rg.FeedbackDataset.for_direct_preference_optimization(
 )
 ds
 # FeedbackDataset(
-#   fields=[
-#       TextField(name="prompt", use_markdown=True),
-#       TextField(name="context", use_markdown=True),
-#       TextField(name="response1", use_markdown=True),
-#       TextField(name="response2", use_markdown=True),
-#   ],
-#   questions=[
-#       RankingQuestion(name="preference", values=["Response 1", "Response 2"])
-#   ],
-#   guidelines="<Guidelines for the task>",
-#   metadata_properties="<Metadata Properties>",
+#     fields=[
+#         TextField(name="prompt", use_markdown=True),
+#         TextField(name="context", use_markdown=True),
+#         TextField(name="response1", use_markdown=True),
+#         TextField(name="response2", use_markdown=True),
+#     ],
+#     questions=[
+#         RankingQuestion(name="preference", values=["Response 1", "Response 2"])
+#     ],
+#     guidelines="<Guidelines for the task>",
+#     metadata_properties="<Metadata Properties>",
 # )
 ```
 :::
@@ -253,16 +265,16 @@ ds = rg.FeedbackDataset.for_retrieval_augmented_generation(
 )
 ds
 # FeedbackDataset(
-#   fields=[
-#       TextField(name="query", use_markdown=False),
-#       TextField(name="retrieved_document_1", use_markdown=False),
-#   ],
-#   questions=[
-#       RatingQuestion(name="question_rating_1", values=[1, 2, 3, 4, 5, 6, 7]),
-#       TextQuestion(name="response", use_markdown=False),
-#   ],
-#   guidelines="<Guidelines for the task>",
-#   metadata_properties="<Metadata Properties>",
+#     fields=[
+#         TextField(name="query", use_markdown=False),
+#         TextField(name="retrieved_document_1", use_markdown=False),
+#     ],
+#     questions=[
+#         RatingQuestion(name="question_rating_1", values=[1, 2, 3, 4, 5, 6, 7]),
+#         TextQuestion(name="response", use_markdown=False),
+#     ],
+#     guidelines="<Guidelines for the task>",
+#     metadata_properties="<Metadata Properties>",
 # )
 ```
 :::
