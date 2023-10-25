@@ -13,12 +13,18 @@
 #  limitations under the License.
 
 import json
+import re
 from typing import TYPE_CHECKING, List
 from uuid import uuid4
 
 import pytest
 from argilla.client.feedback.integrations.huggingface.card import ArgillaDatasetCard
 from argilla.client.feedback.schemas.fields import TextField
+from argilla.client.feedback.schemas.metadata import (
+    FloatMetadataProperty,
+    IntegerMetadataProperty,
+    TermsMetadataProperty,
+)
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
@@ -27,16 +33,20 @@ from argilla.client.feedback.schemas.questions import (
     TextQuestion,
 )
 from argilla.client.feedback.schemas.records import FeedbackRecord
+from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes
 from huggingface_hub import DatasetCardData
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import FeedbackRecord
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.feedback.schemas.types import (
+        AllowedFieldTypes,
+        AllowedQuestionTypes,
+    )
 
 
 class TestSuiteArgillaDatasetCard:
     @pytest.mark.parametrize(
-        "repo_id,fields,questions,guidelines,record",
+        "repo_id,fields,questions,guidelines,metadata_properties,record",
         [
             (
                 f"argilla/dataset-card-{uuid4()}",
@@ -49,6 +59,11 @@ class TestSuiteArgillaDatasetCard:
                     RankingQuestion(name="ranking-question", values=["a", "b", "c"]),
                 ],
                 "## Guidelines",
+                [
+                    TermsMetadataProperty(name="color", values=["red", "blue"]),
+                    IntegerMetadataProperty(name="day", min=0, max=31, visible_for_annotators=False),
+                    FloatMetadataProperty(name="price", min=0, max=100),
+                ],
                 FeedbackRecord(
                     fields={"text-field": "text"},
                     responses=[
@@ -98,16 +113,20 @@ class TestSuiteArgillaDatasetCard:
         questions: List["AllowedQuestionTypes"],
         guidelines: str,
         record: FeedbackRecord,
+        metadata_properties: List[AllowedMetadataPropertyTypes],
     ) -> None:
         card = ArgillaDatasetCard.from_template(
             card_data=DatasetCardData(
-                language="en", size_categories="n<1K", tags=["rlfh", "argilla", "human-feedback"]
+                language="en",
+                size_categories="n<1K",
+                tags=["rlfh", "argilla", "human-feedback"],
             ),
             template_path=ArgillaDatasetCard.default_template_path,
             repo_id=repo_id,
             argilla_fields=fields,
             argilla_questions=questions,
             argilla_guidelines=guidelines,
+            argilla_metadata_properties=metadata_properties,
             argilla_record=json.loads(record.json()),
             huggingface_record=record.json(),
         )
@@ -118,3 +137,11 @@ class TestSuiteArgillaDatasetCard:
         assert all(field.name in card.content for field in fields)
         assert all(question.name in card.content for question in questions)
         assert guidelines in card.content
+        assert re.search("\| color \| color \| terms \| \['red', 'blue'\] \| True \|", card.content)
+        assert re.search("\| day \| day \| integer \| 0 - 31 \| False \|", card.content)
+        assert re.search("\| price \| price \| float \| 0\.0 - 100\.0 \| True \|", card.content)
+
+        # In case we implement new metadata_property types and forget about the poor little dataset cards ...
+        for allowed_metadata_type in AllowedMetadataPropertyTypes.__args__:
+            if allowed_metadata_type not in [type(metadata) for metadata in metadata_properties]:
+                raise NotImplementedError(f"ArgillaDatasetCard not tested for '{allowed_metadata_type}'.")
