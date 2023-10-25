@@ -69,7 +69,7 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
 
     def _mapping_for_vector_settings(self, vector_settings: VectorSettings) -> dict:
         return {
-            f"vectors.{vector_settings.id}": {
+            field_name_for_vector_settings(vector_settings): {
                 "type": "dense_vector",
                 "dims": vector_settings.dimensions,
                 "index": True,
