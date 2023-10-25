@@ -177,7 +177,7 @@ export class RecordRepository {
       sortBy,
       searchText,
       similaritySearch,
-      isFilteredByText,
+      isFilteringByText,
       isFilteringBySimilarity,
     } = criteria;
     const { from, many } = pagination;
@@ -198,7 +198,7 @@ export class RecordRepository {
         };
       }
 
-      if (isFilteredByText) {
+      if (isFilteringByText) {
         body.query.text = {
           q: searchText,
         };
@@ -212,7 +212,12 @@ export class RecordRepository {
 
       const { items, total } = data;
 
-      const records = items.map((item) => item.record);
+      const records = items.map((item) => {
+        return {
+          ...item.record,
+          query_score: item.query_score,
+        };
+      });
 
       return {
         records,

@@ -133,6 +133,7 @@ export class LoadRecordsToAnnotateUseCase {
           fields,
           answer,
           suggestions,
+          record.query_score,
           index + page
         );
       }
@@ -170,6 +171,7 @@ export class LoadRecordsToAnnotateUseCase {
           fields,
           null,
           [],
+          0,
           0
         );
       }

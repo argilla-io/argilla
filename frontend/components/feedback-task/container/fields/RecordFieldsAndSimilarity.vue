@@ -9,8 +9,9 @@
         <div class="fields__header--left">
           <StatusTag class="fields__status" :recordStatus="record.status" />
           <BaseCircleProgress
-            :value="similarityScore"
-            data-title="Similarity Score"
+            v-if="record.score"
+            :value="record.score"
+            :data-title="`Similarity Score ${record.score}`"
           />
         </div>
         <SimilarityFilter
@@ -35,11 +36,6 @@ export default {
       type: Object,
       required: true,
     },
-  },
-  data() {
-    return {
-      similarityScore: 80,
-    };
   },
   setup(props) {
     return useRecordFieldsAndSimilarityViewModel(props);
