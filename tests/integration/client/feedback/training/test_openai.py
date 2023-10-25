@@ -17,6 +17,7 @@ import re
 import argilla as rg
 import pytest
 from argilla.client.feedback.training.schemas import TrainingTaskForChatCompletionFormat
+from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
 
 
 def test_training_task_for_chat_completion(mocked_openai):
@@ -78,3 +79,38 @@ def test_training_task_for_chat_completion(mocked_openai):
         framework="openai",
     )
     trainer.train("mock")
+
+
+def test_push_to_huggingface(mocked_openai, mocked_is_on_huggingface):
+    dataset = FeedbackDataset.from_huggingface("argilla/customer_assistant")
+    # adapation from LlamaIndex's TEXT_QA_PROMPT_TMPL_MSGS[1].content
+    user_message_prompt = """Context information is below.
+    ---------------------
+    {context_str}
+    ---------------------
+    Given the context information and not prior knowledge but keeping your Argilla Cloud assistant style, answer the query.
+    Query: {query_str}
+    Answer:
+    """
+    # adapation from LlamaIndex's TEXT_QA_SYSTEM_PROMPT
+    system_prompt = """You are an expert customer service assistant for the Argilla Cloud product that is trusted around the world."""
+
+    def formatting_func(sample: dict):
+        from uuid import uuid4
+
+        if sample["response"]:
+            chat = str(uuid4())
+            user_message = user_message_prompt.format(context_str=sample["context"], query_str=sample["user-message"])
+            return [
+                (chat, "0", "system", system_prompt),
+                (chat, "1", "user", user_message),
+                (chat, "2", "assistant", sample["response"][0]["value"]),
+            ]
+        else:
+            return None
+
+    task = TrainingTask.for_chat_completion(formatting_func=formatting_func)
+    trainer = ArgillaTrainer(dataset=dataset, task=task, framework="openai")
+    repo_id = "test/model"
+    with pytest.raises(NotImplementedError, match="This method is not implemented for `ArgillaOpenAITrainer`."):
+        trainer.push_to_huggingface(repo_id, generate_card=True)
