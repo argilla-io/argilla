@@ -78,6 +78,52 @@ async def create_ranking_question(dataset: "Dataset") -> None:
 
 @pytest.mark.asyncio
 class TestSuiteRecords:
+    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
+    async def test_get_record(self, async_client: "AsyncClient", role: UserRole):
+        dataset = await DatasetFactory.create()
+        record = await RecordFactory.create(dataset=dataset)
+        user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
+
+        response = await async_client.get(f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: user.api_key})
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(record.id),
+            "fields": {"text": "This is a text", "sentiment": "neutral"},
+            "metadata": None,
+            "external_id": record.external_id,
+            "responses": None,
+            "suggestions": [],
+            "inserted_at": record.inserted_at.isoformat(),
+            "updated_at": record.updated_at.isoformat(),
+        }
+
+    async def test_get_record_without_authentication(self, async_client: "AsyncClient"):
+        record = await RecordFactory.create()
+
+        response = await async_client.get(f"/api/v1/records/{record.id}")
+
+        assert response.status_code == 401
+
+    @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
+    async def test_get_record_as_restricted_user_from_different_workspace(
+        self, async_client: "AsyncClient", role: UserRole
+    ):
+        dataset = await DatasetFactory.create()
+        record = await RecordFactory.create(dataset=dataset)
+        user = await UserFactory.create(role=role)
+
+        response = await async_client.get(f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: user.api_key})
+
+        assert response.status_code == 403
+
+    async def test_get_record_with_nonexistent_record_id(self, async_client: "AsyncClient", owner_auth_header: dict):
+        await RecordFactory.create()
+
+        response = await async_client.get(f"/api/v1/records/{uuid4()}", headers=owner_auth_header)
+
+        assert response.status_code == 404
+
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_update_record(self, async_client: "AsyncClient", mock_search_engine: SearchEngine, role: UserRole):
         dataset = await DatasetFactory.create()
