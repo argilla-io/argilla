@@ -182,7 +182,7 @@ export class LoadRecordsToAnnotateUseCase {
         referenceRecord
       );
 
-      this.recordsStorage.save(recordsWithReference);
+      this.recordsStorage.replace(recordsWithReference);
 
       return recordsWithReference;
     }

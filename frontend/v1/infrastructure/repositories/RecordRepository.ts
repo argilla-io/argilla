@@ -49,11 +49,9 @@ export class RecordRepository {
     try {
       const url = `/v1/records/${recordId}`;
 
-      const { data } = await this.axios.get<ResponseWithTotal<BackedRecord>>(
-        url
-      );
+      const { data } = await this.axios.get<BackedRecord>(url);
 
-      return data.items;
+      return data;
     } catch (err) {
       throw {
         response: RECORD_API_ERRORS.ERROR_FETCHING_RECORD_BY_ID,
@@ -191,7 +189,7 @@ export class RecordRepository {
 
       if (isFilteringBySimilarity) {
         body.query.vector = {
-          name: similaritySearch.vectorId,
+          name: similaritySearch.vectorName,
           record_id: similaritySearch.recordId,
           max_results: similaritySearch.limit,
           order: BACKEND_ORDER[similaritySearch.order],

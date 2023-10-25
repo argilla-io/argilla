@@ -3,8 +3,8 @@
     <BaseRadioButton
       v-for="vector in vectors"
       :key="vector.id"
-      :id="vector.id"
-      :value="vector.id"
+      :id="vector.name"
+      :value="vector.name"
       v-model="selected"
     >
       {{ vector.title }}
@@ -30,11 +30,6 @@ export default {
     return {
       selected: this.value,
     };
-  },
-  mounted() {
-    if (!this.selected) {
-      this.selected = this.vectors[0].id;
-    }
   },
   watch: {
     selected() {

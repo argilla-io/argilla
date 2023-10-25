@@ -4,6 +4,8 @@
     <template v-if="!!record">
       <RecordFieldsAndSimilarity
         :key="`${record.id}_fields`"
+        :datasetVectors="datasetVectors"
+        :records="records"
         :recordCriteria="recordCriteria"
         :record="record"
       />
@@ -152,8 +154,8 @@ export default {
       }, 100);
     },
   },
-  setup() {
-    return useRecordFeedbackTaskViewModel();
+  setup(props) {
+    return useRecordFeedbackTaskViewModel(props);
   },
   mounted() {
     this.$root.$on("on-change-record-page", this.onChangeRecordPage);

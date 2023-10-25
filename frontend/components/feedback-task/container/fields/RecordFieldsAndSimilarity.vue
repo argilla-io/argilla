@@ -1,7 +1,8 @@
 <template>
   <div class="fields">
     <SimilarityRecordReference
-      :fields="record.fields"
+      v-if="!!records.reference"
+      :fields="records.reference.fields"
       :recordCriteria="recordCriteria"
     />
     <RecordFields :fields="record.fields">
@@ -26,7 +27,6 @@
   </div>
 </template>
 <script>
-import { useRecordFieldsAndSimilarityViewModel } from "./useRecordFieldsAndSimilarityViewModel";
 import "assets/icons/similarity";
 
 export default {
@@ -39,9 +39,14 @@ export default {
       type: Object,
       required: true,
     },
-  },
-  setup(props) {
-    return useRecordFieldsAndSimilarityViewModel(props);
+    datasetVectors: {
+      type: Array,
+      required: false,
+    },
+    records: {
+      type: Object,
+      required: true,
+    },
   },
 };
 </script>

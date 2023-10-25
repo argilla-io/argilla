@@ -37,7 +37,7 @@ export class RecordCriteria {
 
       this.similaritySearch.complete(
         parsed.recordId,
-        parsed.vectorId,
+        parsed.vectorName,
         parsed.limit,
         parsed.order
       );
@@ -83,7 +83,7 @@ export class RecordCriteria {
     const similaritySearchCommitted = new SimilarityCriteria();
     similaritySearchCommitted.complete(
       this.similaritySearch.recordId,
-      this.similaritySearch.vectorId,
+      this.similaritySearch.vectorName,
       this.similaritySearch.limit,
       this.similaritySearch.order
     );

@@ -8,7 +8,7 @@
   <BaseDropdown
     v-else
     :visible="dropdownIsVisible"
-    @visibility="onVisibility"
+    @visibility="onChangeDropDownVisibility"
     class="similarity-filter"
   >
     <template slot="dropdown-header">
@@ -60,17 +60,22 @@ export default {
       dropdownIsVisible: false,
     };
   },
+  mounted() {
+    this.recordCriteria.similaritySearch.vectorName =
+      this.availableVectors[0].name;
+  },
   methods: {
-    onVisibility(value) {
+    onChangeDropDownVisibility(value) {
       this.dropdownIsVisible = value;
     },
     cancel() {
-      this.dropdownIsVisible = false;
+      this.onChangeDropDownVisibility(false);
     },
     findSimilar() {
-      this.dropdownIsVisible = false;
+      this.onChangeDropDownVisibility(false);
 
       if (!this.recordCriteria.hasChanges) return;
+
       this.recordCriteria.page = 1;
       this.recordCriteria.similaritySearch.recordId = this.recordId;
 
