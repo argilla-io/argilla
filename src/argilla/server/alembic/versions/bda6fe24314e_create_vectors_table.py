@@ -34,13 +34,11 @@ def upgrade() -> None:
     op.create_table(
         "vectors",
         sa.Column("value", sa.JSON(), nullable=False),
-        sa.Column("dataset_id", sa.Uuid(), nullable=False),
         sa.Column("record_id", sa.Uuid(), nullable=False),
         sa.Column("vector_settings_id", sa.Uuid(), nullable=False),
         sa.Column("id", sa.Uuid(), nullable=False),
         sa.Column("inserted_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(["dataset_id"], ["datasets.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["record_id"], ["records.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["vector_settings_id"], ["vectors_settings.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),

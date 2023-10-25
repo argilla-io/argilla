@@ -640,13 +640,7 @@ async def create_record_vectors(
     for vector_name, vector_value in record_create.vectors.items():
         try:
             await validate_vector(db, dataset.id, vector_name, vector_value, vectors_settings=cache)
-            vectors.append(
-                Vector(
-                    value=vector_value,
-                    dataset_id=dataset.id,
-                    vector_settings_id=cache[vector_name].id,
-                )
-            )
+            vectors.append(Vector(value=vector_value, vector_settings_id=cache[vector_name].id))
         except ValueError as e:
             raise ValueError(
                 f"Provided vector with name={vector_name} of record at position {record_idx} is not valid: {e}"
