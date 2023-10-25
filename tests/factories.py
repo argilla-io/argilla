@@ -240,8 +240,8 @@ class VectorFactory(BaseFactory):
     class Meta:
         model = Vector
 
-    vector_settings = factory.SubFactory(VectorSettingsFactory)
     record = factory.SubFactory(RecordFactory)
+    vector_settings = factory.SubFactory(VectorSettingsFactory)
 
 
 class FieldFactory(BaseFactory):

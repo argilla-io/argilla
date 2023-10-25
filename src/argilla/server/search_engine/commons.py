@@ -199,7 +199,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         bulk_actions = [
             {
                 # If document exist, we update source with latest version
-                "_op_type": "index",
+                "_op_type": "index",  # TODO: Review and maybe change to partial update
                 "_id": record.id,
                 "_index": index_name,
                 **SearchDocument.from_orm(record).dict(exclude_unset=True),
@@ -252,6 +252,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         ]
 
         await self._bulk_op_request(bulk_actions)
+        await self._refresh_index_request(index_name)
 
     async def similarity_search(
         self,

@@ -18,9 +18,14 @@ These are the section headers that we use:
 
 ### Added
 
-- Added `POST /api/v1/datasets/{dataset_id}/vectors-settings` endpoint for creating vector settings for a dataset ([#3776](https://github.com/argilla-io/argilla/pull/3776)).
-- Added `GET /api/v1/datasets/{dataset_id}/vectors-settings` endpoint for listing the vectors settings for a dataset ([#3776](https://github.com/argilla-io/argilla/pull/3776)).
-- Added `POST /api/v1/vectors-settings/{vector_settings_id}` endpoint for deleting a vector settings ([#3776](https://github.com/argilla-io/argilla/pull/3776)).
+- Added `POST /api/v1/datasets/:dataset_id/vectors-settings` endpoint for creating vector settings for a dataset. ([#3776](https://github.com/argilla-io/argilla/pull/3776))
+- Added `GET /api/v1/datasets/:dataset_id/vectors-settings` endpoint for listing the vectors settings for a dataset. ([#3776](https://github.com/argilla-io/argilla/pull/3776))
+- Added `DELETE /api/v1/vectors-settings/:vector_settings_id` endpoint for deleting a vector settings. ([#3776](https://github.com/argilla-io/argilla/pull/3776))
+- Added `GET /api/v1/records/:record_id` endpoint to get a specific record. ([#4039](https://github.com/argilla-io/argilla/pull/4039))
+
+### Changed
+
+- Updated `POST /api/v1/datasets/:dataset_id/records` endpoint to allow to create records with `vectors` ([#4022](https://github.com/argilla-io/argilla/pull/4022))
 
 ## [1.18.0]()
 

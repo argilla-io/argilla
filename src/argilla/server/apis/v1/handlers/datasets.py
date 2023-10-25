@@ -671,7 +671,9 @@ async def create_dataset_records(
     records_create: RecordsCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset(db, dataset_id, with_fields=True, with_questions=True, with_metadata_properties=True)
+    dataset = await _get_dataset(
+        db, dataset_id, with_fields=True, with_questions=True, with_metadata_properties=True, with_vectors_settings=True
+    )
 
     await authorize(current_user, DatasetPolicyV1.create_records(dataset))
 
