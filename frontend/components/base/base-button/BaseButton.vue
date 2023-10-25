@@ -145,6 +145,10 @@ export default {
   line-height: 13px;
   padding: $base-space;
 }
+.full-width {
+  width: 100%;
+  justify-content: center;
+}
 .primary {
   background-color: $primary-color;
   color: palette(white);

@@ -80,7 +80,7 @@ def keywords(name: str, query: Optional[str] = None, size: int = 20) -> MetricSu
         query:
             An ElasticSearch query with the [query string syntax](https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html)
         size:
-            The number of kewords to retrieve. Default to `20`
+            The number of keywords to retrieve. Default to `20`
 
     Returns:
         The dataset keywords occurrence distribution

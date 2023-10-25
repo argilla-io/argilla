@@ -24,7 +24,7 @@ Learn how to fine-tune and evaluate gpt3.5-turbo models with human feedback for 
 
 Learn how to use the ArgillaTrainer to fine-tune your Feedback Dataset using Setfit.
 ```
-```{grid-item-card} 🏆 Train a Reward Model for RLHF
+```{grid-item-card} 🏆 Fine-tuning a Reward Model for RLHF
 :link: feedback/train-reward-model-rlhf.html
 
 Learn how to collect comparison or human preference data and train a reward model with the trl library.

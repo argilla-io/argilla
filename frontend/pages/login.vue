@@ -64,6 +64,8 @@
 </template>
 
 <script>
+import { Notification } from "@/models/Notifications";
+
 export default {
   layout: "app",
   data() {
@@ -131,6 +133,8 @@ export default {
       await this.$auth.loginWith("authProvider", {
         data: this.encodedLoginData(authData),
       });
+
+      Notification.dispatch("clear");
 
       this.nextRedirect();
     },
