@@ -65,7 +65,7 @@ def test_search_records(mock_httpx_client: httpx.Client) -> None:
     dataset_id = uuid4()
     query = FeedbackRecordsSearchQuery(
         text=FeedbackRecordsSearchTextQuery(q="text query", field="field_name"),
-        vector=FeedbackRecordsSearchVectorQuery(name="vector_name", record_id=uuid4(), value=[1.0, 2.0, 3.0]),
+        vector=FeedbackRecordsSearchVectorQuery(name="vector_name", value=[1.0, 2.0, 3.0]),
     )
 
     response = api.search_records(client=mock_httpx_client, id=dataset_id, query=query)
@@ -104,10 +104,9 @@ def test_search_records(mock_httpx_client: httpx.Client) -> None:
     )
 
     mock_httpx_client.post.assert_called_once_with(
-        url=f"/api/v1/me/datasets/{dataset_id}/records/search",
+        url=f"/api/me/datasets/{dataset_id}/records/search",
         params={
             "include": ["responses", "suggestions"],
-            "offset": 0,
             "limit": 50,
         },
         json={"query": query},

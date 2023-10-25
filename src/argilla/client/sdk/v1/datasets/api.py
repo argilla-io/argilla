@@ -217,31 +217,27 @@ def get_records(
     return handle_response_error(response)
 
 
-# TODO: Add small docstring to the function.
-# TODO: Add the rest of search supported parameters.
+# TODO: We must change endpoint URL to "/api/v1/me/datasets/{id}/records/search" once the endpoint is available.
 def search_records(
     client: httpx.Client,
     id: UUID,
     query: FeedbackRecordsSearchQuery,
-    # TODO: This should be named response_statuses (like we are already doing in the API) but get_records is using response_status
-    response_status: Optional[List[FeedbackResponseStatusFilter]] = None,
-    metadata_filters: Optional[List[str]] = None,
-    sort_by: Optional[List[str]] = None,
-    offset: int = 0,
     limit: int = 50,
 ) -> Response[Union[FeedbackRecordsSearchModel, ErrorMessage, HTTPValidationError]]:
-    url = f"/api/v1/me/datasets/{id}/records/search"
-    params = {"include": ["responses", "suggestions"], "offset": offset, "limit": limit}
+    """Sends a POST request to `/api/me/datasets/{id}/records/search` endpoint to search for records inside an specific dataset.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to add the records to.
+        query: a FeedbackRecordsSearchQuery to specify the parameters of the search.
+        limit: an optional value to limit the number of returned records by the search.
+
+    Returns:
+        A `Response` object with the response itself, and/or the error codes if applicable.
+    """
+    url = f"/api/me/datasets/{id}/records/search"
+    params = {"include": ["responses", "suggestions"], "limit": limit}
     json = {"query": query}
-
-    if response_status:
-        params["response_status"] = response_status
-
-    if metadata_filters:
-        params["metadata"] = metadata_filters
-
-    if sort_by:
-        params["sort_by"] = sort_by
 
     response = client.post(url=url, params=params, json=json)
 

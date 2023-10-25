@@ -44,7 +44,7 @@ from argilla.client.feedback.unification import (
 from argilla.client.models import Framework
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
-from argilla.client.sdk.v1.datasets.models import FeedbackRecordsSearchQuery
+from argilla.client.sdk.v1.datasets.models import FeedbackRecordsSearchQuery, FeedbackRecordsSearchVectorQuery
 from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
@@ -482,25 +482,37 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         self._records.add(records=records, show_progress=show_progress)
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    # TODO: We are using an API schema as query parameter, not sure if this match with the current design of the SDK.
-    # Maybe we should try a different approach here.
-    def search_records(
-        self, query: FeedbackRecordsSearchQuery, offset: int = 0, limit: int = 50
+    def search_by(
+        self,
+        vector_name: str,
+        value: Optional[List[float]] = None,
+        record: Optional[RemoteFeedbackRecord] = None,
+        max_results: int = 50,
     ) -> List[Tuple[RemoteFeedbackRecord, float]]:
+        """Search for record in the dataset in Argilla.
+
+        Args:
+            vector_name: a vector name to use for searching by similarity.
+            value: an optional vector value to be used for searching by similarity.
+            record: an optional record to be used for searching by similarity.
+            max_results: the maximum number of results for the search.
+
+        Returns:
+            A list of tuples with each tuple including a record and a similarity score.
+        """
         try:
             response = datasets_api_v1.search_records(
                 client=self._client,
                 id=self.id,
-                query=query,
-                # TODO: Add support for these additional search attributes too.
-                # response_status=,
-                # metadata_filters=,
-                # sort_by=,
-                offset=offset,
-                limit=limit,
+                query=FeedbackRecordsSearchQuery(
+                    vector=FeedbackRecordsSearchVectorQuery(
+                        name=vector_name,
+                        record_id=record and record.id,
+                        value=value,
+                    ),
+                ),
+                limit=max_results,
             )
-        # TODO: We are using exceptions to control logic. The API response should include
-        # a way to check if the response finished correctly or not instead of raising an exception.
         except Exception as e:
             raise RuntimeError(f"Failed searching records for dataset with exception: {e}") from e
 

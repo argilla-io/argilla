@@ -121,7 +121,7 @@ class FeedbackRecordsSearchVectorQuery(BaseModel):
         record_id = values.get("record_id")
         value = values.get("value")
 
-        if record_id is None and value is None:
+        if bool(record_id) == bool(value):
             raise ValueError("Either 'record_id' or 'value' must be provided")
 
         return values
