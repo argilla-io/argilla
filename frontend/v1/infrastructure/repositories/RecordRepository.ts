@@ -19,6 +19,7 @@ import { SimilarityOrder } from "@/v1/domain/entities/similarity/SimilarityCrite
 
 const RECORD_API_ERRORS = {
   ERROR_FETCHING_RECORDS: "ERROR_FETCHING_RECORDS",
+  ERROR_FETCHING_RECORD_BY_ID: "ERROR_FETCHING_RECORD_BY_ID",
   ERROR_DELETING_RECORD_RESPONSE: "ERROR_DELETING_RECORD_RESPONSE",
   ERROR_UPDATING_RECORD_RESPONSE: "ERROR_UPDATING_RECORD_RESPONSE",
   ERROR_CREATING_RECORD_RESPONSE: "ERROR_CREATING_RECORD_RESPONSE",
@@ -39,9 +40,25 @@ export class RecordRepository {
     pagination: Pagination
   ): Promise<BackedRecords> {
     if (criteria.isFilteringByText || criteria.isFilteringBySimilarity)
-      return this.getRecordsByText(criteria, pagination);
+      return this.getRecordsByAdvanceSearch(criteria, pagination);
 
-    return this.getRecordsDatasetId(criteria, pagination);
+    return this.getRecordsByDatasetId(criteria, pagination);
+  }
+
+  async getRecord(recordId: string): Promise<BackedRecord> {
+    try {
+      const url = `/v1/records/${recordId}`;
+
+      const { data } = await this.axios.get<ResponseWithTotal<BackedRecord>>(
+        url
+      );
+
+      return data.items;
+    } catch (err) {
+      throw {
+        response: RECORD_API_ERRORS.ERROR_FETCHING_RECORD_BY_ID,
+      };
+    }
   }
 
   async deleteRecordResponse(record: Record) {
@@ -119,7 +136,7 @@ export class RecordRepository {
     }
   }
 
-  private async getRecordsDatasetId(
+  private async getRecordsByDatasetId(
     criteria: RecordCriteria,
     pagination: Pagination
   ): Promise<BackedRecords> {
@@ -149,7 +166,7 @@ export class RecordRepository {
     }
   }
 
-  private async getRecordsByText(
+  private async getRecordsByAdvanceSearch(
     criteria: RecordCriteria,
     pagination: Pagination
   ): Promise<BackedRecords> {

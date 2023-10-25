@@ -71,21 +71,7 @@ export class Records {
 }
 
 export class RecordsWithReference extends Records {
-  constructor(
-    records: Record[] = [],
-    total = 0,
-    public readonly reference: Record
-  ) {
+  constructor(records: Record[], total, public readonly reference: Record) {
     super(records, total);
-  }
-
-  getById(recordId: string): Record {
-    if (this.reference.id === recordId) return this.reference;
-
-    const reference = super.getById(recordId);
-
-    if (reference) return reference;
-
-    throw new Error(`Record with id ${recordId} not found`);
   }
 }

@@ -74,7 +74,6 @@ export class LoadRecordsToAnnotateUseCase {
     const pagination = savedRecords.getPageToFind(criteria);
 
     const getRecords = this.recordRepository.getRecords(criteria, pagination);
-
     const getQuestions = this.questionRepository.getQuestions(datasetId);
     const getFields = this.fieldRepository.getFields(datasetId);
 
@@ -139,11 +138,46 @@ export class LoadRecordsToAnnotateUseCase {
       }
     );
 
-    if (criteria.similaritySearch.isCompleted) {
+    if (criteria.isFilteringBySimilarity) {
+      let referenceRecord = savedRecords.getById(
+        criteria.similaritySearch.recordId
+      );
+
+      if (!referenceRecord) {
+        const referenceRecordFromBackend =
+          await this.recordRepository.getRecord(
+            criteria.similaritySearch.recordId
+          );
+
+        const fields = fieldsFromBackend
+          .filter((f) => referenceRecordFromBackend.fields[f.name])
+          .map((field) => {
+            return new Field(
+              field.id,
+              field.name,
+              field.title,
+              referenceRecordFromBackend.fields[field.name],
+              datasetId,
+              field.required,
+              field.settings
+            );
+          });
+
+        referenceRecord = new Record(
+          referenceRecordFromBackend.id,
+          datasetId,
+          [],
+          fields,
+          null,
+          [],
+          0
+        );
+      }
+
       const recordsWithReference = new RecordsWithReference(
         recordsToAnnotate,
         recordsFromBackend.total,
-        savedRecords.getById(criteria.similaritySearch.recordId)
+        referenceRecord
       );
 
       this.recordsStorage.save(recordsWithReference);
