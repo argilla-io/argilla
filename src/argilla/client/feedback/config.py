@@ -66,6 +66,10 @@ class DeprecatedDatasetConfig(BaseModel):
     fields: List[AllowedFieldTypes]
     questions: List[AllowedQuestionTypes]
     guidelines: Optional[str] = None
+    metadata_properties: Optional[
+        List[Annotated[AllowedMetadataPropertyTypes, Field(..., discriminator="type")]]
+    ] = None
+    allow_extra_metadata: bool = True
 
     def to_json(self) -> str:
         warnings.warn(
