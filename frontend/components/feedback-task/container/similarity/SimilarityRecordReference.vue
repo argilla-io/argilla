@@ -54,9 +54,11 @@ export default {
 </script>
 <style lang="scss" scoped>
 .record-reference {
-  max-height: 30vh;
-  overflow: auto;
-  border: 1px solid darken($similarity-color, 15%);
+  &.record {
+    max-height: 30vh;
+    overflow: auto;
+    border: 1px solid darken($similarity-color, 15%);
+  }
   &__wrapper {
     display: flex;
     flex-direction: column;
