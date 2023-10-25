@@ -98,7 +98,7 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
             # TODO: Add metadata !!!!
             knn_query["filter"] = self._build_response_status_filter(user_response_status_filter)
 
-        return await self.client.search(index=index, knn=knn_query, _source=False, track_total_hits=True)
+        return await self.client.search(index=index, knn=knn_query, _source=False, track_total_hits=True, size=k)
 
     async def _create_index_request(self, index_name: str, mappings: dict, settings: dict) -> None:
         await self.client.indices.create(index=index_name, settings=settings, mappings=mappings)
