@@ -1,5 +1,5 @@
 <template>
-  <SimilarityConfigDropdown v-model="selected" :options="[50, 100, 200]" />
+  <SimilarityConfigDropdown v-model="selected" :options="[10, 50, 100, 200]" />
 </template>
 <script>
 export default {
