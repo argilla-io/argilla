@@ -8,10 +8,12 @@
       <div class="fields__header">
         <div class="fields__header--left">
           <StatusTag class="fields__status" :recordStatus="record.status" />
-          <BaseCircleProgress
-            :value="similarityScore"
-            data-title="Similarity Score"
-          />
+          <span
+            class="similarity-icon"
+            :data-title="`Similarity Score ${similarityScore}`"
+          >
+            <svgicon name="similarity" width="30" height="30" />
+          </span>
         </div>
         <SimilarityFilter
           v-if="datasetVectors?.length"
@@ -24,6 +26,7 @@
 </template>
 <script>
 import { useRecordFieldsAndSimilarityViewModel } from "./useRecordFieldsAndSimilarityViewModel";
+import "assets/icons/similarity";
 
 export default {
   props: {
@@ -77,7 +80,8 @@ export default {
   }
 }
 
-.circle-progress {
+.similarity-icon {
+  color: darken($similarity-color, 20%);
   &[data-title] {
     position: relative;
     @extend %has-tooltip--right;
