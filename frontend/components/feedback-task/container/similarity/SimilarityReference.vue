@@ -35,13 +35,16 @@
               : 'show-reference-record'
           )
         "
-        ><svgicon height="16" name="chevron-down"
+        ><svgicon
+          height="16"
+          :name="visibleReferenceRecord ? 'minimize-arrows' : 'expand-arrows'"
       /></BaseButton>
     </div>
   </div>
 </template>
 <script>
-import "assets/icons/chevron-down";
+import "assets/icons/expand-arrows";
+import "assets/icons/minimize-arrows";
 export default {
   props: {
     preview: {
