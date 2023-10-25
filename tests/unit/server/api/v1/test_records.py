@@ -505,7 +505,7 @@ class TestSuiteRecords:
             f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
         )
         assert response.status_code == 422
-        assert response.json() == {"detail": "Missing required question: 'input_ok'"}
+        assert response.json() == {"detail": "missing question with name=input_ok"}
 
     @pytest.mark.parametrize("response_status", [ResponseStatus.discarded, ResponseStatus.draft])
     async def test_create_record_response_with_missing_required_questions(
@@ -665,9 +665,7 @@ class TestSuiteRecords:
         )
 
         assert response.status_code == 422
-        assert response.json() == {
-            "detail": "Error: found responses for non configured questions: ['unknown_question']"
-        }
+        assert response.json() == {"detail": "found responses for non configured questions: ['unknown_question']"}
 
     @pytest.mark.parametrize(
         "create_questions_func, responses, expected_error_msg",
@@ -951,7 +949,7 @@ class TestSuiteRecords:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Error: found responses for non configured questions: ['wrong_question']"}
+        assert response.json() == {"detail": "found responses for non configured questions: ['wrong_question']"}
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
