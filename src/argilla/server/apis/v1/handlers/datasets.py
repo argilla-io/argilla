@@ -218,6 +218,7 @@ async def _get_search_responses(
     if vector_query:
         if vector_query.record_id is not None:
             record = await datasets.get_record_by_id(db, vector_query.record_id)
+            await record.awaitable_attrs.vectors
 
         vector_settings = await datasets.get_vector_settings_by_name_and_dataset_id(
             db, name=vector_query.name, dataset_id=dataset.id
