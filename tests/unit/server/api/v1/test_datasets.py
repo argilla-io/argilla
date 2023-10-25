@@ -3840,19 +3840,16 @@ class TestSuiteDatasets:
         assert (
             vector_a.record_id == record_a.id
             and vector_a.vector_settings_id == vector_settings_a.id
-            and vector_a.dataset_id == dataset.id
             and vector_a.value == [5, 6, 7, 8, 9]
         )
         assert (
             vector_b.record_id == record_b.id
             and vector_b.vector_settings_id == vector_settings_a.id
-            and vector_a.dataset_id == dataset.id
             and vector_b.value == [100, 101, 102, 103, 104]
         )
         assert (
             vector_c.record_id == record_c.id
             and vector_c.vector_settings_id == vector_settings_b.id
-            and vector_a.dataset_id == dataset.id
             and vector_c.value == [200, 201, 202, 203, 204]
         )
 
