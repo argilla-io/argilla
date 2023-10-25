@@ -35,6 +35,17 @@ export const useAnnotationModeViewModel = () => {
     )
   );
 
+  routes.watchBrowserNavigation(() => {
+    recordCriteria.value.complete(
+      routes.getQueryParams<number>("_page"),
+      routes.getQueryParams<RecordStatus>("_status"),
+      routes.getQueryParams<RecordStatus>("_search"),
+      routes.getQueryParams<string>("_metadata")?.split("+"),
+      routes.getQueryParams<string>("_sort")?.split(","),
+      routes.getQueryParams<string>("_similarity")
+    );
+  });
+
   const updateQueryParams = async () => {
     await routes.setQueryParams(
       {

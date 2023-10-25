@@ -52,6 +52,8 @@ export const useRoutes = () => {
   const setQueryParams = async (
     ...params: { key: KindOfParam; value: string }[]
   ) => {
+    const actualQuery = route.value.query;
+    const funcToUse = Object.keys(actualQuery).length ? "push" : "replace";
     let newQuery = {};
 
     params.forEach(({ key, value }) => {
@@ -63,7 +65,7 @@ export const useRoutes = () => {
       };
     });
 
-    await router.push({
+    await router[funcToUse]({
       path: route.value.path,
       query: {
         ...newQuery,
@@ -81,5 +83,8 @@ export const useRoutes = () => {
     getDatasetLink,
     setQueryParams,
     getQueryParams,
+    watchBrowserNavigation: (callBack: () => void) => {
+      window.addEventListener("popstate", callBack);
+    },
   };
 };

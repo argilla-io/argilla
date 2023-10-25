@@ -25,23 +25,7 @@ export class RecordCriteria {
     public sortBy: string[],
     similaritySearch: string
   ) {
-    this.page = page ? Number(page) : 1;
-    this.status = status || "pending";
-    this.searchText = searchText ?? "";
-    this.metadata = metadata ?? [];
-    this.sortBy = sortBy ?? [];
-    this._similaritySearch = new SimilarityCriteria();
-
-    if (similaritySearch) {
-      const parsed = JSON.parse(similaritySearch);
-
-      this.similaritySearch.complete(
-        parsed.recordId,
-        parsed.vectorName,
-        parsed.limit,
-        parsed.order
-      );
-    }
+    this.complete(page, status, searchText, metadata, sortBy, similaritySearch);
 
     this.commit();
   }
@@ -77,6 +61,33 @@ export class RecordCriteria {
       return true;
 
     return false;
+  }
+
+  complete(
+    page: number,
+    status: RecordStatus,
+    searchText: string,
+    metadata: string[],
+    sortBy: string[],
+    similaritySearch: string
+  ) {
+    this.page = page ? Number(page) : 1;
+    this.status = status || "pending";
+    this.searchText = searchText ?? "";
+    this.metadata = metadata ?? [];
+    this.sortBy = sortBy ?? [];
+    this._similaritySearch = new SimilarityCriteria();
+
+    if (similaritySearch) {
+      const parsed = JSON.parse(similaritySearch);
+
+      this.similaritySearch.complete(
+        parsed.recordId,
+        parsed.vectorName,
+        parsed.limit,
+        parsed.order
+      );
+    }
   }
 
   commit() {
