@@ -383,13 +383,16 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
             NotImplementedError:
                 For `CrossEncoder` models, that currently aren't implemented underneath.
         """
-        if self._cross_encoder:
-            raise NotImplementedError("Cross Encoder based models don't implement this option yet.")
+        raise NotImplementedError("sentence-transformers doesn't implement this functionality yet.")
 
         if not self._trainer:
             raise ValueError(
                 "The model must be initialized prior to this point. You can either call `train` or `init_model`."
             )
+        expected_kwargs = set(get_default_args(self._trainer.save_to_hub).keys())
+        for kw in tuple(kwargs.keys()):
+            if kw not in expected_kwargs:
+                kwargs.pop(kw)
 
         url = self._trainer.save_to_hub(repo_id, **kwargs)
         self._logger.info(f"Model pushed to: {url}")
