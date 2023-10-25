@@ -162,38 +162,6 @@ class LoadDatasets:
 
         dataset.push_to_argilla(name=repo_id.split("/")[-1])
 
-    @staticmethod
-    def build_error_analysis_record(
-        row: pd.Series, legacy: bool = False
-    ) -> Union[rg.FeedbackRecord, rg.TextClassificationRecord]:
-        fields = {
-            "user-message-1": row["HumanMessage1"],
-            "llm-output": row["llm_output"]
-            if not row["llm_output"].__contains__("```json")
-            else row["llm_output"].replace("'", '"'),
-            "ai-message": (f"```json\n{row['AIMessage']}\n```" if not legacy else row["AIMessage"]).replace("'", '"'),
-            "function-message": (f"```json\n{row['FunctionMessage']}\n```" if not legacy else row["AIMessage"]).replace(
-                "'", '"'
-            ),
-            "system-message": "You are an AI assistant name ACME",
-            "langsmith-url": f"https://smith.langchain.com/o/{row['parent_id']}",
-        }
-        metadata = {
-            "correctness-langsmith": row["correctness_langsmith"],
-            "model-name": row["model_name"],
-            "temperature": row["temperature"],
-            "max-tokens": int(row["max_tokens"]),
-            "cpu-user": row["cpu_time_user"],
-            "cpu-system": row["cpu_time_system"],
-            "library-version": row["library_version"],
-        }
-
-        if legacy:
-            return rg.TextClassificationRecord(
-                inputs=fields, metadata=metadata, vectors=eval(row["vectors"]), multi_label=True
-            )
-        return rg.FeedbackRecord(fields=fields, metadata=metadata)
-
 
 if __name__ == "__main__":
     API_KEY = sys.argv[1]
@@ -226,6 +194,9 @@ if __name__ == "__main__":
                         )
                         ld.load_feedback_dataset_from_huggingface(
                             repo_id="argilla/oasst_response_comparison", split="train", samples=100
+                        )
+                        ld.load_feedback_dataset_from_huggingface(
+                            repo_id="argilla/text-descriptives-metadata", split="train", samples=100
                         )
             except requests.exceptions.ConnectionError:
                 pass
