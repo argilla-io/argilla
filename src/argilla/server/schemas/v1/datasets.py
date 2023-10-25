@@ -17,8 +17,6 @@ from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
 from fastapi import HTTPException, Query
-from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
-from fastapi import Query
 from pydantic import BaseModel, PositiveInt, conint, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
 from pydantic.generics import GenericModel
