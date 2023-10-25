@@ -115,17 +115,14 @@ class Client(_ClientCommonDefaults, _Client):
         return hash(self.base_url)
 
     def with_httpx_error_handler(func):
-        def wrap_error(base_url: str):
-            err_str = f"Your Api endpoint at {base_url} is not available or not responding."
-            raise BaseClientError(err_str) from None
-
         @functools.wraps(func)
         def inner(self, *args, **kwargs):
             try:
                 result = func(self, *args, **kwargs)
                 return result
-            except httpx.ConnectError as err:  # noqa: F841
-                return wrap_error(self.base_url)
+            except httpx.ConnectError as err:
+                err_str = f"Your Api endpoint at {self.base_url} is not available or not responding: {err}"
+                raise BaseClientError(err_str) from err
 
         return inner
 
