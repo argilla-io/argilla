@@ -326,64 +326,61 @@ def test_push_to_huggingface(
     feedback_dataset_records: List[FeedbackRecord],
     mocked_is_on_huggingface,
 ) -> None:
+    # This framework is not implemented yet. Cross-Encoder models don't implement the functionality
+    # for pushing a model to huggingface, and SentenceTransformer models have the functionality
+    # but is outdated and doesn't work with the current versions of 'huggingface-hub'.
+    # The present test is let here for the future, when we either implement the functionality
+    # in 'argilla', or to 'sentence-transformers'.
+
+    # The token will be grabbed internally, but fail and warn soon if the user has no token available
+    token = HfFolder.get_token()
+    if token is None:
+        raise ValueError("No token available, please set it with the following env var name: 'HUGGING_FACE_HUB_TOKEN'")
+
+    hf_api = HfApi()
+
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records * 2)
+
+    def formatting_func(sample):
+        labels = [
+            annotation["value"]
+            for annotation in sample["question-3"]
+            if annotation["status"] == "submitted" and annotation["value"] is not None
+        ]
+        if labels:
+            # Three cases for the tests: None, one tuple and yielding multiple tuples
+            if labels[0] == "a":
+                return None
+            elif labels[0] == "b":
+                return {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1}
+            elif labels[0] == "c":
+                return [
+                    {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1},
+                    {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0},
+                ]
+
+    task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func)
+
+    model = "all-MiniLM-L6-v2"
+
+    trainer = ArgillaTrainer(dataset=dataset, task=task, framework=__FRAMEWORK__, model=model)
+
+    trainer.update_config(max_steps=1)
+
+    # NOTE: This is just to test locally, we need a better solution for the CI.
+    username = "plaguss"
+    model_name = "test_model"
+    repo_id = f"{username}/{model_name}"
+    # Filename to check on huggingface
+    filename = "config.json"
+
+    train_with_cleanup(trainer, __OUTPUT_DIR__)
     with pytest.raises(NotImplementedError, match="sentence-transformers doesn't implement this functionality yet."):
-        # This framework is not implemented yet. Cross-Encoder models don't implement the functionality
-        # for pushing a model to huggingface, and SentenceTransformer models have the functionality
-        # but is outdated and doesn't work with the current versions of 'huggingface-hub'.
-        # The present test is let here for the future, when we either implement the functionality
-        # in 'argilla', or to 'sentence-transformers'.
-
-        # The token will be grabbed internally, but fail and warn soon if the user has no token available
-        token = HfFolder.get_token()
-        if token is None:
-            raise ValueError(
-                "No token available, please set it with the following env var name: 'HUGGING_FACE_HUB_TOKEN'"
-            )
-
-        hf_api = HfApi()
-
-        dataset = FeedbackDataset(
-            guidelines=feedback_dataset_guidelines,
-            fields=feedback_dataset_fields,
-            questions=feedback_dataset_questions,
-        )
-        dataset.add_records(records=feedback_dataset_records * 2)
-
-        def formatting_func(sample):
-            labels = [
-                annotation["value"]
-                for annotation in sample["question-3"]
-                if annotation["status"] == "submitted" and annotation["value"] is not None
-            ]
-            if labels:
-                # Three cases for the tests: None, one tuple and yielding multiple tuples
-                if labels[0] == "a":
-                    return None
-                elif labels[0] == "b":
-                    return {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1}
-                elif labels[0] == "c":
-                    return [
-                        {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1},
-                        {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0},
-                    ]
-
-        task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func)
-
-        model = "all-MiniLM-L6-v2"
-
-        trainer = ArgillaTrainer(dataset=dataset, task=task, framework=__FRAMEWORK__, model=model)
-
-        trainer.update_config(max_steps=1)
-
-        # NOTE: This is just to test locally, we need a better solution for the CI.
-        username = "plaguss"
-        model_name = "test_model"
-        repo_id = f"{username}/{model_name}"
-        # Filename to check on huggingface
-        filename = "config.json"
-
-        train_with_cleanup(trainer, __OUTPUT_DIR__)
-
         trainer.push_to_huggingface(repo_id, generate_card=True)
 
         # Check the repo is created, the same check done at:
