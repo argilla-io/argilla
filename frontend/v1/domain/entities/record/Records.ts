@@ -22,6 +22,10 @@ export class Records {
     return this.records.find((record) => record.page === page);
   }
 
+  getById(recordId: string): Record {
+    return this.records.find((record) => record.id === recordId);
+  }
+
   getPageToFind(criteria: RecordCriteria): Pagination {
     const { page, status, isFilteringBySimilarity, similaritySearch } =
       criteria;
@@ -63,5 +67,25 @@ export class Records {
 
   private quantityOfRecordsAnnotated(status: string) {
     return this.records.filter((record) => record.status !== status).length;
+  }
+}
+
+export class RecordsWithReference extends Records {
+  constructor(
+    records: Record[] = [],
+    total = 0,
+    public readonly reference: Record
+  ) {
+    super(records, total);
+  }
+
+  getById(recordId: string): Record {
+    if (this.reference.id === recordId) return this.reference;
+
+    const reference = super.getById(recordId);
+
+    if (reference) return reference;
+
+    throw new Error(`Record with id ${recordId} not found`);
   }
 }

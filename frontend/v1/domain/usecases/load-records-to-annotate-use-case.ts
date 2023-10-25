@@ -3,7 +3,7 @@ import { Question } from "../entities/question/Question";
 import { Record } from "../entities/record/Record";
 import { Suggestion } from "../entities/question/Suggestion";
 import { IRecordStorage } from "../services/IRecordStorage";
-import { Records } from "../entities/record/Records";
+import { Records, RecordsWithReference } from "../entities/record/Records";
 import { RecordAnswer } from "../entities/record/RecordAnswer";
 import { RecordCriteria } from "../entities/record/RecordCriteria";
 import {
@@ -138,6 +138,18 @@ export class LoadRecordsToAnnotateUseCase {
         );
       }
     );
+
+    if (criteria.similaritySearch.isCompleted) {
+      const recordsWithReference = new RecordsWithReference(
+        recordsToAnnotate,
+        recordsFromBackend.total,
+        savedRecords.getById(criteria.similaritySearch.recordId)
+      );
+
+      this.recordsStorage.save(recordsWithReference);
+
+      return recordsWithReference;
+    }
 
     const records = new Records(recordsToAnnotate, recordsFromBackend.total);
 
