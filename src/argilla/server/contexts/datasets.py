@@ -410,7 +410,11 @@ async def _configure_query_relationships(
 
     elif include_params.with_some_vector:
         query = query.outerjoin(
-            Vector, and_(Vector.record_id == Record.id, Vector.vector_settings_id.in_(include_params.vectors))
+            Vector,
+            and_(
+                Vector.record_id == Record.id,
+                Vector.vector_settings_id.in_(include_params.vectors),
+            ),
         ).options(contains_eager(Record.vectors))
 
     return query

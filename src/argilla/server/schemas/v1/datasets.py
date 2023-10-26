@@ -399,14 +399,6 @@ class VectorSettingsCreate(BaseModel):
     )
 
 
-class Vector(BaseModel):
-    value: List[float]
-    vector_settings_id: UUID
-
-    class Config:
-        orm_mode = True
-
-
 class ResponseValue(BaseModel):
     value: Any
 
