@@ -857,7 +857,7 @@ PPO requires a trained supervised fine-tuned model and reward model to work. Tak
 ```{include} /_common/dolly_dataset_info.md
 ```
 
-In the case of training a PPO, we then use the prompt and context data and correct the generated response from the SFT model by using the reward model. Hence, we will need to format the following `text`.
+In the case of training an PPO, we then use the prompt and context data and correct the generated response from the SFT model by using the reward model. Hence, we will need to format the following `text`.
 
 ```
 ### Instruction
@@ -1013,7 +1013,7 @@ Within the DPO approach, we infer the reward from the formatted prompt and the p
 ```{include} /_common/dolly_dataset_load.md
 ```
 
-**Data Preperation**
+**Data Preparation**
 
 We will start with our basic example of a formatting function. For DPO it should return `prompt-chosen-rejected`-pairs, where the prompt is formatted according to a template.
 
@@ -1086,7 +1086,7 @@ print(output_text)
 
 ##### Background
 
-With the rise of chat-oriented models under OpenAI's ChatGPT, we have seen a lot of interest in the use of LLMs for chat-oriented tasks. The main difference between chat-oriented models and the other LLMs is that they are trained on a differently formatted dataset. Instead of using a dataset of prompts and responses, they are trained on a dataset of conversations. This allows them to generate more conversational responses. And, OpenAI does support fine-tuning LLMs for chat-completion use cases. More information at https://openai.com/blog/gpt-3-5-turbo-fine-tuning-and-api-updates.
+With the rise of chat-oriented models under OpenAI's ChatGPT, we have seen a lot of interest in the use of LLMs for chat-oriented tasks. The main difference between chat-oriented models and the other LLMs is that they are trained on a differently formatted dataset. Instead of using a dataset of prompts and responses, they are trained on a dataset of conversations. This allows them to generate responses that are more conversational. And, OpenAI does support fine-tuning LLMs for chat-completion use cases. More information at https://openai.com/blog/gpt-3-5-turbo-fine-tuning-and-api-updates.
 
 ::::{tab-set}
 
@@ -1148,7 +1148,7 @@ from argilla.feedback import TrainingTask
 from typing import Dict, Any, Iterator
 
 
-# Adaptation from LlamaIndex's TEXT_QA_PROMPT_TMPL_MSGS[1].content
+# adapation from LlamaIndex's TEXT_QA_PROMPT_TMPL_MSGS[1].content
 user_message_prompt ="""Context information is below.
 ---------------------
 {context_str}
@@ -1157,7 +1157,7 @@ Given the context information and not prior knowledge but keeping your Argilla C
 Query: {query_str}
 Answer:
 """
-# Adaptation from LlamaIndex's TEXT_QA_SYSTEM_PROMPT
+# Adapation from LlamaIndex's TEXT_QA_SYSTEM_PROMPT
 system_prompt = """You are an expert customer service assistant for the Argilla Cloud product that is trusted around the world.
 Always answer the query using the provided context information, and not prior knowledge.
 Some rules to follow:
@@ -1170,7 +1170,7 @@ def formatting_func(sample: dict) -> Union[Tuple[str, str, str, str], List[Tuple
     if sample["response"]:
         chat = str(uuid4())
         user_message = user_message_prompt.format(context_str=sample["context"], query_str=sample["user-message"])
-        return [
+        yield [
             (chat, "0", "system", system_prompt),
             (chat, "1", "user", user_message),
             (chat, "2", "assistant", sample["response"][0]["value"])
@@ -1196,7 +1196,7 @@ trainer.train(output_dir="chat-completion")
 
 **Inference**
 
-After training, we can directly use the model and we'll use the `openai` framework. Therefore, we suggest taking a look at [their docs](https://platform.openai.com/docs/guides/fine-tuning/use-a-fine-tuned-model).
+After training, we can directly use the model but we need to do so so, we need to use the `openai` framework. Therefore, we suggest taking a look at [their docs](https://platform.openai.com/docs/guides/fine-tuning/use-a-fine-tuned-model).
 
 ```python
 import openai
@@ -1217,11 +1217,9 @@ completion = openai.ChatCompletion.create(
 
 ### The `ArgillaTrainer`
 
-The ArgillaTrainer is a wrapper around many of our favorite NLP libraries. It provides a very intuitive abstract representation to facilitate simple training workflows using decent default pre-set configurations without having to worry about any data transformations from Argilla.
+The `ArgillaTrainer` is a wrapper around many of our favorite NLP libraries. It provides a very intuitive abstract representation to facilitate simple training workflows using decent default pre-set configurations without having to worry about any data transformations from Argilla.
 
 #### Supported frameworks
-
-We plan on adding more support for other tasks and frameworks so feel free to reach out on our Slack or GitHub to help us prioritize each task.
 
 | Framework/Task    | TextClassification | TokenClassification | Text2Text |
 |-------------------|--------------------|---------------------|-----------|
@@ -1232,6 +1230,7 @@ We plan on adding more support for other tasks and frameworks so feel free to re
 | PEFT              | ✔️                  | ✔️                   |           |
 | SpanMarker        |                    | ✔️                   |           |
 
+
 ##### Training configs
 
 The trainer also has an `ArgillaTrainer.update_config()` method, which maps a dict with `**kwargs` to the respective framework. So, these can be derived from the underlying framework that was used to initialize the trainer. Underneath, you can find an overview of these variables for the supported frameworks.
@@ -1240,10 +1239,12 @@ The trainer also has an `ArgillaTrainer.update_config()` method, which maps a di
 Note that you don't need to pass all of them directly and that the values below are their default configurations.
 ```
 
-```{include} /_common/tabs/train_update_config.md
+```{include} /_common/tabs/train_update_config_other_datasets.md
 ```
 
 ### Tasks
+
+In this part, we'll explore Text Classification, Token Classification, and Text2Text tasks. We'll provide concise descriptions of what each task entails and the steps involved in training and making predictions.
 
 #### Text Classification
 
@@ -1297,4 +1298,108 @@ trainer = ArgillaTrainer(
 trainer.update_config(num_iterations=1)
 trainer.train(output_dir="my_setfit_model")
 trainer.predict("This is awesome!")
-``````
+```
+
+
+#### Token Classification
+
+##### Background
+
+Token classification is a crucial concept in the domain of NLP. It entails the act of assigning specific labels to individual words or tokens in a given text. These labels can encompass diverse linguistic or semantic attributes, such as part-of-speech annotations, named entities (including people's names, organizations, or locations), or sentiment indicators (expressing positivity, negativity, or neutrality). This process serves as an indispensable foundation for numerous NLP applications, facilitating the extraction of valuable insights from textual data.
+
+##### Training
+
+```python
+import argilla as rg
+from datasets import load_dataset
+from argilla.training import ArgillaTrainer
+
+dataset_rg = rg.DatasetForTokenClassification.from_datasets(
+    dataset=load_dataset("conll2003", split="train[:100]"),
+    tags="ner_tags",
+)
+rg.log(dataset_rg, name="conll2003", workspace="admin")
+
+trainer = ArgillaTrainer(
+    name="conll2003",
+    workspace="admin",
+    framework="spacy",
+    train_size=0.8
+)
+trainer.update_config(max_epochs=2)
+trainer.train(output_dir="my_spacy_model")
+records = trainer.predict("The ArgillaTrainer is great!", as_argilla_records=True)
+rg.log(records=records, name="conll2003", workspace="admin")
+```
+
+
+#### Text2Text
+
+##### Background
+
+The Text2Text task in the realm of NLP represents a framework that takes a piece of text as input to transform it into another. Instead of approaching different NLP challenges as isolated issues, T2T seeks to create a generalized solution by framing them as sequence-to-sequence transformations. In this approach, both the input and output are considered as sequences of text, and their lengths can vary.
+
+##### Training
+
+```python
+import argilla as rg
+from datasets import load_dataset
+from argilla.training import ArgillaTrainer
+
+dataset_rg = rg.DatasetForText2Text.from_datasets(
+    dataset=load_dataset("opus_books", "en-fr", split="train[:100]"),
+    tags="ner_tags",
+)
+rg.log(dataset_rg, name="opus_books", workspace="admin")
+
+trainer = ArgillaTrainer(
+    name="opus_books",
+    workspace="admin",
+    framework="openAI",
+    train_size=0.8
+)
+trainer.update_config(max_epochs=2)
+trainer.train(output_dir="my_openAI_model")
+records = trainer.predict("The ArgillaTrainer is great!", as_argilla_records=True)
+rg.log(records=records, name="opus_books", workspace="admin")
+```
+
+### Other options
+
+#### Prepare for training
+
+If you want to train a model we provide a handy method to prepare your dataset: `DatasetFor*.prepare_for_training()`.
+It will return a Hugging Face dataset, a spaCy DocBin or a SparkNLP-formatted DataFrame, optimized for the training process with the Hugging Face Trainer, the spaCy CLI or the SparkNLP API.
+
+It is possible to directly include train-test splits to the `prepare_for_training` by passing the `train_size` and `test_size` parameters.
+
+```{include} /_common/tabs/train_prepare_for_training.md
+```
+
+#### CLI support
+
+We also have CLI support for the ArgillaTrainer. This can be used when, for example, executing training on an external machine. Not that the --update-config-kwargs always uses the update_config() method for the corresponding class. Hence, you should take this into account to configure training via the CLI command by passing a JSON-serializable string.
+
+```bash	
+
+Usage: python -m argilla train [OPTIONS] COMMAND [ARGS]...
+
+Starts the ArgillaTrainer.
+
+Options:
+--name                        TEXT                                                      The name of the dataset to be used for training. [default: None]
+--framework                   [transformers|peft|setfit|spacy|                          The framework to be used for training. [default: None]
+                            spacy-transformers|span_marker|spark-nlp|
+                            openai|trl|trlx|sentence-transformers]
+--workspace                   TEXT                                                      The workspace to be used for training. [default: None]
+--limit                       INTEGER                                                   The number of record to be used. [default: None]
+--query                       TEXT                                                      The query to be used. [default: None]
+--model                       TEXT                                                      The modelname or path to be used for training. [default: None]
+--train-size                  FLOAT                                                     The train split to be used. [default: 1.0]
+--seed                        INTEGER                                                   The random seed number. [default: 42]
+--device                      INTEGER                                                   The GPU id to be used for training. [default: -1]
+--output-dir                  TEXT                                                      Output directory for the saved model. [default: model]
+--update-config-kwargs        TEXT                                                      update_config() kwargs to be passed as a dictionary. [default: {}]
+--help                                                                                  Show this message and exit.
+
+```
