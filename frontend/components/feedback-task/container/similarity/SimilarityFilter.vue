@@ -80,11 +80,10 @@ export default {
     },
     findSimilar() {
       this.onChangeDropDownVisibility(false);
+      this.recordCriteria.similaritySearch.recordId = this.recordId;
 
       if (!this.recordCriteria.hasChanges) return;
-
       this.recordCriteria.page = 1;
-      this.recordCriteria.similaritySearch.recordId = this.recordId;
 
       this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
     },
