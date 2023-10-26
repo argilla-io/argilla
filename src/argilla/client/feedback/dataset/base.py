@@ -20,6 +20,7 @@ from pydantic import BaseModel, ValidationError
 from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas.records import FeedbackRecord, SortBy
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes, AllowedQuestionTypes
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.feedback.utils import generate_pydantic_schema_for_fields, generate_pydantic_schema_for_metadata
 from argilla.utils.dependency import requires_dependencies
 
@@ -247,6 +248,18 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
             f"Metadata property with name='{name}' not found, available metadata property names are:"
             f" {', '.join([metadata_property.name for metadata_property in existing_metadata_properties])}"
         )
+
+    @abstractmethod
+    def vector_settings_by_name(self, name: str) -> "VectorSettings":
+        """Returns the vector settings by name if it exists. Otherwise a `ValueError` is raised.
+
+        Args:
+            name: the name of the vector settings to return.
+
+        Raises:
+            KeyError: if the vector settings with the given name does not exist.
+        """
+        pass
 
     @abstractmethod
     def sort_by(self, sort: List[SortBy]) -> "FeedbackDatasetBase":

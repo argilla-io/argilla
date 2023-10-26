@@ -254,6 +254,13 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
         self._metadata_properties.append(metadata_property)
         return metadata_property
 
+    def vector_settings_by_name(self, name: str) -> VectorSettings:
+        vector_settings = self._vector_settings.get(name)
+        if not vector_settings:
+            raise KeyError(f"Vector settings with name {name!r} does not exist in the dataset.")
+
+        return vector_settings
+
     def add_vector_settings(self, vector_settings: VectorSettings) -> VectorSettings:
         if self._vector_settings.get(vector_settings.name):
             raise ValueError(f"Vector settings with name '{vector_settings.name}' already exists in the dataset.")
