@@ -81,7 +81,7 @@ def test_training_task_for_chat_completion(mocked_openai):
     trainer.train("mock")
 
 
-def test_push_to_huggingface(mocked_openai, mocked_is_on_huggingface):
+def test_push_to_huggingface(mocked_openai):
     dataset = FeedbackDataset.from_huggingface("argilla/customer_assistant")
     # adapation from LlamaIndex's TEXT_QA_PROMPT_TMPL_MSGS[1].content
     user_message_prompt = """Context information is below.
@@ -111,6 +111,5 @@ def test_push_to_huggingface(mocked_openai, mocked_is_on_huggingface):
 
     task = TrainingTask.for_chat_completion(formatting_func=formatting_func)
     trainer = ArgillaTrainer(dataset=dataset, task=task, framework="openai")
-    repo_id = "test/model"
     with pytest.raises(NotImplementedError, match="This method is not implemented for `ArgillaOpenAITrainer`."):
-        trainer.push_to_huggingface(repo_id, generate_card=True)
+        trainer.push_to_huggingface("mocked", generate_card=True)

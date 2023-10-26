@@ -22,7 +22,7 @@ from argilla.client.feedback.training.base import ArgillaTrainer
 from argilla.client.feedback.training.schemas import (
     TrainingTask,
 )
-from huggingface_hub import HfApi, HfFolder, hf_hub_download
+from huggingface_hub import HfFolder
 from sentence_transformers import CrossEncoder, InputExample, SentenceTransformer
 
 from tests.integration.training.helpers import train_with_cleanup
@@ -312,7 +312,6 @@ def test_prepare_for_training_sentence_transformers_with_defaults(
     assert len(eval_trainer.predict(["first sentence", ["to compare", "another one"]])) == 2
 
 
-@pytest.mark.slow
 @pytest.mark.usefixtures(
     "feedback_dataset_guidelines",
     "feedback_dataset_fields",
@@ -324,7 +323,7 @@ def test_push_to_huggingface(
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
-    mocked_is_on_huggingface,
+    mocked_trainer_push_to_huggingface,
 ) -> None:
     # This framework is not implemented yet. Cross-Encoder models don't implement the functionality
     # for pushing a model to huggingface, and SentenceTransformer models have the functionality
@@ -336,8 +335,6 @@ def test_push_to_huggingface(
     token = HfFolder.get_token()
     if token is None:
         raise ValueError("No token available, please set it with the following env var name: 'HUGGING_FACE_HUB_TOKEN'")
-
-    hf_api = HfApi()
 
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -372,39 +369,6 @@ def test_push_to_huggingface(
 
     trainer.update_config(max_steps=1)
 
-    # NOTE: This is just to test locally, we need a better solution for the CI.
-    username = "plaguss"
-    model_name = "test_model"
-    repo_id = f"{username}/{model_name}"
-    # Filename to check on huggingface
-    filename = "config.json"
-
     train_with_cleanup(trainer, __OUTPUT_DIR__)
     with pytest.raises(NotImplementedError, match="sentence-transformers doesn't implement this functionality yet."):
-        trainer.push_to_huggingface(repo_id, generate_card=True)
-
-        # Check the repo is created, the same check done at:
-        # https://github.com/huggingface/huggingface_hub/blob/v0.18.0.rc0/tests/test_hubmixin.py#L154
-        model_info = hf_api.model_info(repo_id)
-        assert model_info.modelId == repo_id
-
-        tmp_config_path = hf_hub_download(
-            repo_id=repo_id,
-            filename=filename,
-            use_auth_token=token,
-        )
-
-        with open(tmp_config_path) as f:
-            conf = json.load(f)
-            assert isinstance(conf, dict)
-            assert len(conf) > 0
-
-        # No need to test this file, if the download succeeds its working
-        tmp_readme_path = hf_hub_download(
-            repo_id=repo_id,
-            filename="README.md",
-            use_auth_token=token,
-        )
-
-        # Delete repo
-        hf_api.delete_repo(repo_id=repo_id)
+        trainer.push_to_huggingface("mocked", generate_card=True)
