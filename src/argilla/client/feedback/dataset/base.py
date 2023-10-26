@@ -454,6 +454,21 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         pass
 
     @abstractmethod
+    def add_vector_settings(self, *args, **kwargs):
+        """Adds a new `vecto_settings` to the current `FeedbackDataset`."""
+        pass
+
+    @abstractmethod
+    def update_vector_settings(self, *args, **kwargs):
+        """Updates the `vector_settings` of the current `FeedbackDataset`."""
+        pass
+
+    @abstractmethod
+    def delete_vector_settings(self, *args, **kwargs):
+        """Deletes a list of `vector_settings` from the current `FeedbackDataset`."""
+        pass
+
+    @abstractmethod
     def push_to_huggingface(self, repo_id, generate_card, *args, **kwargs):
         """Pushes the current `FeedbackDataset` to HuggingFace Hub.
 
