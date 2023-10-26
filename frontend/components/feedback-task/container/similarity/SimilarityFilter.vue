@@ -2,13 +2,13 @@
   <BaseButton
     v-if="availableVectors.length === 1"
     class="small"
-    @click="findSimilar"
+    @click="findSimilarUniqueVector"
     >Find similar</BaseButton
   >
   <BaseDropdown
     v-else
     :visible="dropdownIsVisible"
-    @visibility="onVisibility"
+    @visibility="onChangeDropDownVisibility"
     class="similarity-filter"
   >
     <template slot="dropdown-header">
@@ -23,7 +23,7 @@
           similar using:
         </span>
         <SimilarityFilterVectors
-          v-model="recordCriteria.similaritySearch.vectorId"
+          v-model="recordCriteria.similaritySearch.vectorName"
           :vectors="availableVectors"
         />
         <div class="similarity-filter__buttons">
@@ -60,19 +60,30 @@ export default {
       dropdownIsVisible: false,
     };
   },
+  mounted() {
+    this.onSetDefaultVector();
+  },
   methods: {
-    onVisibility(value) {
+    onSetDefaultVector() {
+      this.recordCriteria.similaritySearch.vectorName =
+        this.availableVectors[0].name;
+    },
+    onChangeDropDownVisibility(value) {
       this.dropdownIsVisible = value;
     },
     cancel() {
-      this.dropdownIsVisible = false;
+      this.onChangeDropDownVisibility(false);
+    },
+    findSimilarUniqueVector() {
+      this.onSetDefaultVector();
+      this.findSimilar();
     },
     findSimilar() {
-      this.dropdownIsVisible = false;
+      this.onChangeDropDownVisibility(false);
+      this.recordCriteria.similaritySearch.recordId = this.recordId;
 
       if (!this.recordCriteria.hasChanges) return;
       this.recordCriteria.page = 1;
-      this.recordCriteria.similaritySearch.recordId = this.recordId;
 
       this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
     },

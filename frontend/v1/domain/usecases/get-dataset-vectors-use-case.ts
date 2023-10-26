@@ -1,9 +1,5 @@
+import { DatasetVector } from "../entities/vector/DatasetVector";
 import { VectorRepository } from "@/v1/infrastructure/repositories/VectorRepository";
-
-export interface DatasetVector {
-  id: string;
-  title: string;
-}
 
 export class GetDatasetVectorsUseCase {
   constructor(private readonly vectorRepository: VectorRepository) {}

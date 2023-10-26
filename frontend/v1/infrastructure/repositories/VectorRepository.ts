@@ -16,7 +16,10 @@ export class VectorRepository {
         `/v1/datasets/${datasetId}/vectors-settings`
       );
 
-      return data.items;
+      return data.items.map((v) => ({
+        ...v,
+        title: v.title ?? v.name, // TODO: Remove when we have titles for vectors
+      }));
     } catch (err) {
       throw {
         response: QUESTION_API_ERRORS.GET_QUESTIONS,

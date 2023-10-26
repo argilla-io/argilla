@@ -1,7 +1,8 @@
 <template>
   <div class="fields">
     <SimilarityRecordReference
-      :fields="record.fields"
+      v-if="recordCriteria.isFilteredBySimilarity && !!records.reference"
+      :fields="records.reference.fields"
       :recordCriteria="recordCriteria"
     />
     <RecordFields :fields="record.fields">
@@ -9,8 +10,9 @@
         <div class="fields__header--left">
           <StatusTag class="fields__status" :recordStatus="record.status" />
           <span
+            v-if="recordCriteria.isFilteredBySimilarity && record.score"
             class="similarity-icon"
-            :data-title="`Similarity Score ${similarityScore}`"
+            :data-title="`Similarity Score ${record.score}`"
           >
             <svgicon name="similarity" width="30" height="30" />
           </span>
@@ -25,7 +27,6 @@
   </div>
 </template>
 <script>
-import { useRecordFieldsAndSimilarityViewModel } from "./useRecordFieldsAndSimilarityViewModel";
 import "assets/icons/similarity";
 
 export default {
@@ -38,14 +39,14 @@ export default {
       type: Object,
       required: true,
     },
-  },
-  data() {
-    return {
-      similarityScore: 80,
-    };
-  },
-  setup(props) {
-    return useRecordFieldsAndSimilarityViewModel(props);
+    datasetVectors: {
+      type: Array,
+      required: false,
+    },
+    records: {
+      type: Object,
+      required: true,
+    },
   },
 };
 </script>

@@ -206,7 +206,7 @@ describe("RecordCriteria", () => {
 
       criteria.similaritySearch.order = "least";
       criteria.similaritySearch.recordId = "1";
-      criteria.similaritySearch.vectorId = "2";
+      criteria.similaritySearch.vectorName = "2";
       criteria.similaritySearch.limit = 50;
 
       criteria.commit();

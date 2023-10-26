@@ -2,7 +2,7 @@ export type SimilarityOrder = "most" | "least";
 
 export class SimilarityCriteria {
   public recordId: string;
-  public vectorId: string;
+  public vectorName: string;
   public limit: number;
   public order: SimilarityOrder;
 
@@ -12,12 +12,12 @@ export class SimilarityCriteria {
 
   complete(
     recordId: string,
-    vectorId: string,
+    vectorName: string,
     limit: number,
     order: SimilarityOrder
   ) {
     this.recordId = recordId;
-    this.vectorId = vectorId;
+    this.vectorName = vectorName;
     this.limit = limit;
     this.order = order;
   }
@@ -25,7 +25,7 @@ export class SimilarityCriteria {
   get isCompleted() {
     return (
       this.recordId !== undefined &&
-      this.vectorId !== undefined &&
+      this.vectorName !== undefined &&
       this.limit !== undefined &&
       this.order !== undefined
     );
@@ -33,7 +33,7 @@ export class SimilarityCriteria {
 
   reset() {
     this.recordId = undefined;
-    this.vectorId = undefined;
+    this.vectorName = undefined;
     this.limit = 50;
     this.order = "most";
   }
@@ -41,7 +41,7 @@ export class SimilarityCriteria {
   isEqual(other: SimilarityCriteria): boolean {
     return (
       this.recordId === other.recordId &&
-      this.vectorId === other.vectorId &&
+      this.vectorName === other.vectorName &&
       this.limit === other.limit &&
       this.order === other.order
     );

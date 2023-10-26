@@ -74,15 +74,22 @@ export class LoadRecordsToAnnotateUseCase {
     const pagination = savedRecords.getPageToFind(criteria);
 
     const getRecords = this.recordRepository.getRecords(criteria, pagination);
-
     const getQuestions = this.questionRepository.getQuestions(datasetId);
     const getFields = this.fieldRepository.getFields(datasetId);
 
     const [recordsFromBackend, questionsFromBackend, fieldsFromBackend] =
       await Promise.all([getRecords, getQuestions, getFields]);
 
-    const recordsToAnnotate = recordsFromBackend.records.map(
-      (record, index) => {
+    const recordsToAnnotate = recordsFromBackend.records
+      .filter((r) => {
+        // TODO: Delete the filter when the backend remove the reference record.
+        if (criteria.isFilteringBySimilarity) {
+          return r.id !== criteria.similaritySearch.recordId;
+        }
+
+        return true;
+      })
+      .map((record, index) => {
         const fields = fieldsFromBackend
           .filter((f) => record.fields[f.name])
           .map((field) => {
@@ -134,19 +141,55 @@ export class LoadRecordsToAnnotateUseCase {
           fields,
           answer,
           suggestions,
+          record.query_score,
           index + page
         );
-      }
-    );
+      });
 
-    if (criteria.similaritySearch.isCompleted) {
+    if (criteria.isFilteringBySimilarity) {
+      let referenceRecord = savedRecords.getById(
+        criteria.similaritySearch.recordId
+      );
+
+      if (!referenceRecord) {
+        const referenceRecordFromBackend =
+          await this.recordRepository.getRecord(
+            criteria.similaritySearch.recordId
+          );
+
+        const fields = fieldsFromBackend
+          .filter((f) => referenceRecordFromBackend.fields[f.name])
+          .map((field) => {
+            return new Field(
+              field.id,
+              field.name,
+              field.title,
+              referenceRecordFromBackend.fields[field.name],
+              datasetId,
+              field.required,
+              field.settings
+            );
+          });
+
+        referenceRecord = new Record(
+          referenceRecordFromBackend.id,
+          datasetId,
+          [],
+          fields,
+          null,
+          [],
+          0,
+          0
+        );
+      }
+
       const recordsWithReference = new RecordsWithReference(
         recordsToAnnotate,
         recordsFromBackend.total,
-        savedRecords.getById(criteria.similaritySearch.recordId)
+        referenceRecord
       );
 
-      this.recordsStorage.save(recordsWithReference);
+      this.recordsStorage.replace(recordsWithReference);
 
       return recordsWithReference;
     }
