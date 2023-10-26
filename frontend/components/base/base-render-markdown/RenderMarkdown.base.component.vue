@@ -85,6 +85,13 @@ export default {
       margin-top: 0;
       margin-bottom: $base-space;
     }
+    svg {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+    img {
+      max-width: 100%;
+    }
   }
 }
 :deep() {

@@ -18,7 +18,7 @@
     </div>
     <div class="content-area --body1">
       <div v-if="!useMarkdown" v-html="text" />
-      <RenderMarkdownBaseComponent v-else :markdown="text" />
+      <RenderMarkdownBaseComponent v-else :markdown="renderedText" />
     </div>
   </div>
 </template>
@@ -47,6 +47,24 @@ export default {
   },
   setup(props) {
     return useTextFieldViewModel(props);
+  },
+  computed: {
+    renderedText() {
+      const doc = new DOMParser().parseFromString(this.text, "text/html");
+      const svgElement = doc.querySelector("svg");
+      if (svgElement) {
+        const width = svgElement.getAttribute("width");
+        const height = svgElement.getAttribute("height");
+        const viewBox = svgElement.getAttribute("viewBox");
+        if (!viewBox && width && height) {
+          svgElement.setAttribute("viewBox", `0 0 ${width} ${height}`);
+          return doc.body.innerHTML;
+        } else {
+          return this.text;
+        }
+      }
+      return this.text;
+    },
   },
 };
 </script>
