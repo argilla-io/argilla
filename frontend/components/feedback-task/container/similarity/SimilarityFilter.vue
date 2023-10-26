@@ -23,7 +23,7 @@
           similar using:
         </span>
         <SimilarityFilterVectors
-          v-model="recordCriteria.similaritySearch.vectorId"
+          v-model="recordCriteria.similaritySearch.vectorName"
           :vectors="availableVectors"
         />
         <div class="similarity-filter__buttons">
