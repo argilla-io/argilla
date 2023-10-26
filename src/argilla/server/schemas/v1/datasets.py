@@ -399,6 +399,14 @@ class VectorSettingsCreate(BaseModel):
     )
 
 
+class Vector(BaseModel):
+    value: List[float]
+    vector_settings_id: UUID
+
+    class Config:
+        orm_mode = True
+
+
 class ResponseValue(BaseModel):
     value: Any
 
@@ -423,10 +431,19 @@ class RecordGetterDict(GetterDict):
     def get(self, key: str, default: Any) -> Any:
         if key == "metadata":
             return getattr(self._obj, "metadata_", None)
+
         if key == "responses" and not self._obj.is_relationship_loaded("responses"):
             return default
+
         if key == "suggestions" and not self._obj.is_relationship_loaded("suggestions"):
             return default
+
+        if key == "vectors":
+            if self._obj.is_relationship_loaded("vectors"):
+                return {vector.vector_settings.name: vector.value for vector in self._obj.vectors}
+            else:
+                return default
+
         return super().get(key, default)
 
 
@@ -439,6 +456,7 @@ class Record(BaseModel):
     # response: Optional[Response]
     responses: Optional[List[Response]]
     suggestions: Optional[List[Suggestion]]
+    vectors: Optional[Dict[str, List[float]]]
     inserted_at: datetime
     updated_at: datetime
 
@@ -506,6 +524,48 @@ class RecordsUpdate(BaseModel):
     items: List[RecordUpdateWithId] = PydanticField(
         ..., min_items=RECORDS_UPDATE_MIN_ITEMS, max_items=RECORDS_UPDATE_MAX_ITEMS
     )
+
+
+class RecordIncludeParam(BaseModel):
+    relationships: Optional[List[RecordInclude]] = PydanticField(None, alias="keys")
+    vectors: Optional[List[UUID]] = PydanticField(None, alias="vectors")
+
+    @root_validator
+    def check(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        relationships = values.get("relationships")
+        if not relationships:
+            return values
+
+        vectors = values.get("vectors")
+        if vectors is not None and len(vectors) > 0 and RecordInclude.vectors in relationships:
+            # TODO: once we have a exception handler for ValueError in v1, remove HTTPException
+            # raise ValueError("Cannot include both 'vectors' and 'relationships' in the same request")
+            raise HTTPException(
+                status_code=422,
+                detail="'include' query param cannot have both 'vectors' and 'vectors:vector_settings_id_1,vectors_settings_id_2,...'",
+            )
+
+        return values
+
+    @property
+    def with_responses(self) -> bool:
+        return self._has_relationships and RecordInclude.responses in self.relationships
+
+    @property
+    def with_suggestions(self) -> bool:
+        return self._has_relationships and RecordInclude.suggestions in self.relationships
+
+    @property
+    def with_all_vectors(self) -> bool:
+        return self._has_relationships and not self.vectors and RecordInclude.vectors in self.relationships
+
+    @property
+    def with_some_vector(self) -> bool:
+        return self.vectors is not None and len(self.vectors) > 0
+
+    @property
+    def _has_relationships(self):
+        return self.relationships is not None
 
 
 NT = TypeVar("NT", int, float)
