@@ -128,5 +128,17 @@ class FeedbackRecordsMetricsModel(BaseModel):
     count: int
 
 
+class FeedbackVectorSettingsModel(BaseModel):
+    id: UUID
+    name: str
+    dimensions: int
+    inserted_at: datetime
+    updated_at: datetime
+
+
+class FeedbackListVectorSettingsModel(BaseModel):
+    items: List[FeedbackVectorSettingsModel]
+
+
 class FeedbackMetricsModel(BaseModel):
     records: FeedbackRecordsMetricsModel
