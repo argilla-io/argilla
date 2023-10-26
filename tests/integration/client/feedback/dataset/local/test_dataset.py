@@ -650,6 +650,7 @@ def test_add_duplicated_vector_settings():
     with pytest.raises(ValueError, match="Vector settings with name 'vector-settings' already exists"):
         dataset.add_vector_settings(expected_settings)
 
+
 @pytest.mark.usefixtures(
     "feedback_dataset_guidelines",
     "feedback_dataset_fields",
