@@ -635,7 +635,7 @@ def test_add_vector_settings():
     new_settings = dataset.add_vector_settings(expected_settings)
     assert expected_settings == new_settings
     assert len(dataset.vector_settings) == 1
-    assert dataset.vector_settings[0] == expected_settings
+    assert dataset.vector_settings_by_name("vector-settings") == expected_settings
 
 
 def test_add_duplicated_vector_settings():
@@ -649,7 +649,6 @@ def test_add_duplicated_vector_settings():
 
     with pytest.raises(ValueError, match="Vector settings with name 'vector-settings' already exists"):
         dataset.add_vector_settings(expected_settings)
-
 
 @pytest.mark.usefixtures(
     "feedback_dataset_guidelines",

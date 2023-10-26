@@ -424,21 +424,21 @@ class TestRemoteFeedbackDataset:
         remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
         vector_settings = remote_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=10))
 
-        dataset_vectors_settings = remote_dataset.vector_settings
-        assert len(dataset_vectors_settings) == 1
+        assert len(remote_dataset.vector_settings) == 1
 
-        assert vector_settings.name == dataset_vectors_settings[0].name
-        assert vector_settings.id == dataset_vectors_settings[0].id
-        assert vector_settings.dimensions == dataset_vectors_settings[0].dimensions
+        remote_vector_settings = remote_dataset.vector_settings_by_name("vector")
+        assert vector_settings.name == remote_vector_settings.name
+        assert vector_settings.id == remote_vector_settings.id
+        assert vector_settings.dimensions == remote_vector_settings.dimensions
 
         other_vector_settings = remote_dataset.add_vector_settings(VectorSettings(name="other-vector", dimensions=100))
 
-        dataset_vectors_settings = remote_dataset.vector_settings
-        assert len(dataset_vectors_settings) == 2
+        assert len(remote_dataset.vector_settings) == 2
 
-        assert other_vector_settings.name == dataset_vectors_settings[1].name
-        assert other_vector_settings.id == dataset_vectors_settings[1].id
-        assert other_vector_settings.dimensions == dataset_vectors_settings[1].dimensions
+        remote_vector_settings = remote_dataset.vector_settings_by_name("other-vector")
+        assert other_vector_settings.name == remote_vector_settings.name
+        assert other_vector_settings.id == remote_vector_settings.id
+        assert other_vector_settings.dimensions == remote_vector_settings.dimensions
 
     def test_adding_vector_setting_with_the_same_name(self, owner: "User", feedback_dataset: FeedbackDataset):
         api.init(api_key=owner.api_key)
