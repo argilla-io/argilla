@@ -44,6 +44,7 @@ from argilla.client.feedback.schemas.remote.metadata import (
     RemoteTermsMetadataProperty,
 )
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.sdk.commons.errors import ValidationApiError
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.workspaces import Workspace
@@ -415,6 +416,41 @@ class TestRemoteFeedbackDataset:
         # TODO: Use entities instead of names
         remote_dataset.delete_metadata_properties(names)
         assert len(remote_dataset.metadata_properties) == 0
+
+    def test_adding_vector_settings(self, owner: "User", feedback_dataset: FeedbackDataset):
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+        vector_settings = remote_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=10))
+
+        dataset_vectors_settings = remote_dataset.vector_settings
+        assert len(dataset_vectors_settings) == 1
+
+        assert vector_settings.name == dataset_vectors_settings[0].name
+        assert vector_settings.id == dataset_vectors_settings[0].id
+        assert vector_settings.dimensions == dataset_vectors_settings[0].dimensions
+
+        other_vector_settings = remote_dataset.add_vector_settings(VectorSettings(name="other-vector", dimensions=100))
+
+        dataset_vectors_settings = remote_dataset.vector_settings
+        assert len(dataset_vectors_settings) == 2
+
+        assert other_vector_settings.name == dataset_vectors_settings[1].name
+        assert other_vector_settings.id == dataset_vectors_settings[1].id
+        assert other_vector_settings.dimensions == dataset_vectors_settings[1].dimensions
+
+    def test_adding_vector_setting_with_the_same_name(self, owner: "User", feedback_dataset: FeedbackDataset):
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+        remote_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=10))
+        dataset_vectors_settings = remote_dataset.vector_settings
+        assert len(dataset_vectors_settings) == 1
+
+        with pytest.raises(ValueError, match=f"Vector settings with name 'vector' already exists"):
+            remote_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=10))
 
     def test_delete_metadata_property_one_by_one(self, owner: "User", feedback_dataset: FeedbackDataset) -> None:
         api.init(api_key=owner.api_key)

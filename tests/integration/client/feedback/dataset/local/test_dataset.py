@@ -30,6 +30,7 @@ from argilla.client.feedback.schemas.metadata import (
 from argilla.client.feedback.schemas.questions import TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteSuggestionSchema
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.feedback.training.schemas import TrainingTask
 from argilla.client.models import Framework
 
@@ -622,6 +623,32 @@ def test_prepare_for_training_text_classification(
 
     data = remote.prepare_for_training(framework=framework, task=task)
     assert data is not None
+
+
+def test_add_vector_settings():
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field")],
+        questions=[TextQuestion(name="question")],
+    )
+
+    expected_settings = VectorSettings(name="vector-settings", dimensions=100)
+    new_settings = dataset.add_vector_settings(expected_settings)
+    assert expected_settings == new_settings
+    assert len(dataset.vector_settings) == 1
+    assert dataset.vector_settings[0] == expected_settings
+
+
+def test_add_duplicated_vector_settings():
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field")],
+        questions=[TextQuestion(name="question")],
+    )
+
+    expected_settings = VectorSettings(name="vector-settings", dimensions=100)
+    dataset.add_vector_settings(expected_settings)
+
+    with pytest.raises(ValueError, match="Vector settings with name 'vector-settings' already exists"):
+        dataset.add_vector_settings(expected_settings)
 
 
 @pytest.mark.usefixtures(
