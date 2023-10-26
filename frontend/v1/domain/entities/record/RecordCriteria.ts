@@ -50,6 +50,10 @@ export class RecordCriteria {
     return this.similaritySearch.isCompleted;
   }
 
+  get isFilteredBySimilarity() {
+    return this.committed.similaritySearch.isCompleted;
+  }
+
   get hasChanges(): boolean {
     if (this.committed.page !== this.page) return true;
     if (this.committed.status !== this.status) return true;

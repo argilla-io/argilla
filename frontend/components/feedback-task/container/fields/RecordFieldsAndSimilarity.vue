@@ -1,7 +1,7 @@
 <template>
   <div class="fields">
     <SimilarityRecordReference
-      v-if="!!records.reference"
+      v-if="recordCriteria.isFilteredBySimilarity && !!records.reference"
       :fields="records.reference.fields"
       :recordCriteria="recordCriteria"
     />
@@ -10,8 +10,8 @@
         <div class="fields__header--left">
           <StatusTag class="fields__status" :recordStatus="record.status" />
           <span
+            v-if="recordCriteria.isFilteredBySimilarity && record.score"
             class="similarity-icon"
-            v-if="record.score"
             :data-title="`Similarity Score ${record.score}`"
           >
             <svgicon name="similarity" width="30" height="30" />

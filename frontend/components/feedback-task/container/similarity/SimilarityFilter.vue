@@ -2,7 +2,7 @@
   <BaseButton
     v-if="availableVectors.length === 1"
     class="small"
-    @click="findSimilar"
+    @click="findSimilarUniqueVector"
     >Find similar</BaseButton
   >
   <BaseDropdown
@@ -61,15 +61,22 @@ export default {
     };
   },
   mounted() {
-    this.recordCriteria.similaritySearch.vectorName =
-      this.availableVectors[0].name;
+    this.onSetDefaultVector();
   },
   methods: {
+    onSetDefaultVector() {
+      this.recordCriteria.similaritySearch.vectorName =
+        this.availableVectors[0].name;
+    },
     onChangeDropDownVisibility(value) {
       this.dropdownIsVisible = value;
     },
     cancel() {
       this.onChangeDropDownVisibility(false);
+    },
+    findSimilarUniqueVector() {
+      this.onSetDefaultVector();
+      this.findSimilar();
     },
     findSimilar() {
       this.onChangeDropDownVisibility(false);
