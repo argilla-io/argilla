@@ -1380,7 +1380,7 @@ It is possible to directly include train-test splits to the `prepare_for_trainin
 
 We also have CLI support for the ArgillaTrainer. This can be used when, for example, executing training on an external machine. Not that the --update-config-kwargs always uses the update_config() method for the corresponding class. Hence, you should take this into account to configure training via the CLI command by passing a JSON-serializable string.
 
-```bash	
+```bash
 
 Usage: python -m argilla train [OPTIONS] COMMAND [ARGS]...
 
