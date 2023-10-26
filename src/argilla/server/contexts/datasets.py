@@ -43,6 +43,7 @@ from argilla.server.schemas.v1.datasets import (
     QuestionCreate,
     RecordCreate,
     RecordsCreate,
+    RecordUpdateWithId,
     ResponseValueCreate,
 )
 from argilla.server.schemas.v1.datasets import (
@@ -531,7 +532,7 @@ async def validate_user(db: "AsyncSession", user_id: UUID, users_ids: Optional[S
     return users_ids
 
 
-async def validate_vector(
+async def _validate_vector(
     db: "AsyncSession",
     dataset_id: UUID,
     vector_name: str,
@@ -629,18 +630,21 @@ async def _build_record_vectors(
     db: "AsyncSession",
     dataset: Dataset,
     record_position: int,
-    record_create: "RecordCreate",
+    record_schema: Union["RecordCreate", "RecordUpdateWithId"],
     cache: Dict[str, VectorSettingsSchema] = {},
 ) -> List[Vector]:
     """Create vectors for a record."""
-    if not record_create.vectors:
+    if not record_schema.vectors:
         return []
 
     vectors = []
-    for vector_name, vector_value in record_create.vectors.items():
+    for vector_name, vector_value in record_schema.vectors.items():
         try:
-            await validate_vector(db, dataset.id, vector_name, vector_value, vectors_settings=cache)
-            vectors.append(Vector(value=vector_value, vector_settings_id=cache[vector_name].id))
+            await _validate_vector(db, dataset.id, vector_name, vector_value, vectors_settings=cache)
+            vector = Vector(value=vector_value, vector_settings_id=cache[vector_name].id)
+            if isinstance(record_schema, RecordUpdateWithId):
+                vector.record_id = record_schema.id
+            vectors.append(vector)
         except ValueError as e:
             raise ValueError(
                 f"Provided vector with name={vector_name} of record at position {record_position} is not valid: {e}"
@@ -678,26 +682,30 @@ async def _build_record_responses(
 
 
 async def _build_record_suggestions(
-    db: "AsyncSession", record_position: int, record_create: "RecordCreate", cache: Dict[UUID, Question] = {}
+    db: "AsyncSession",
+    record_position: int,
+    record_schema: Union["RecordCreate", "RecordUpdateWithId"],
+    cache: Dict[UUID, Question] = {},
 ) -> List[Suggestion]:
     """Create suggestions for a record."""
 
-    if not record_create.suggestions:
+    if not record_schema.suggestions:
         return []
 
     suggestions = []
-    for suggestion in record_create.suggestions:
+    for suggestion in record_schema.suggestions:
         try:
             await _validate_suggestion(db, suggestion, questions=cache)
-            suggestions.append(
-                Suggestion(
-                    type=suggestion.type,
-                    score=suggestion.score,
-                    value=suggestion.value,
-                    agent=suggestion.agent,
-                    question_id=suggestion.question_id,
-                )
+            suggestion = Suggestion(
+                type=suggestion.type,
+                score=suggestion.score,
+                value=suggestion.value,
+                agent=suggestion.agent,
+                question_id=suggestion.question_id,
             )
+            if isinstance(record_schema, RecordUpdateWithId):
+                suggestion.record_id = record_schema.id
+            suggestions.append(suggestion)
         except ValueError as e:
             raise ValueError(f"Provided suggestion for record at position {record_position} is not valid: {e}") from e
     return suggestions
@@ -728,18 +736,21 @@ async def update_records(
     records_update_objects: List[Dict[str, Any]] = []
     records_search_engine_update: List[UUID] = []
     records_delete_suggestions: List[UUID] = []
+    records_delete_vectors: List[UUID] = []
 
     # Cache dictionaries to avoid querying the database multiple times
-    metadata_properties: Dict[str, Union[MetadataProperty, Literal["extra"]]] = {}
-    questions: Dict[UUID, Question] = {}
+    metadata_properties_cache: Dict[str, Union[MetadataProperty, Literal["extra"]]] = {}
+    questions_cache: Dict[UUID, Question] = {}
+    vector_settings_cache: Dict[str, VectorSettingsSchema] = {}
 
     suggestions = []
+    vectors = []
     for record_i, record_update in enumerate(records_update.items):
         params = record_update.dict(exclude_unset=True)
 
         if "metadata_" in params and (metadata := params["metadata_"]) is not None:
             try:
-                metadata_properties = await _validate_metadata(db, dataset, metadata, metadata_properties)
+                metadata_properties_cache = await _validate_metadata(db, dataset, metadata, metadata_properties_cache)
             except ValueError as err:
                 raise ValueError(f"Provided metadata for record at position {record_i} is not valid: {err}") from err
             records_search_engine_update.append(record_update.id)
@@ -751,16 +762,16 @@ async def update_records(
             if len(questions_ids) != len(set(questions_ids)):
                 raise ValueError(f"Found duplicate suggestions question IDs for record at position {record_i}")
 
-            for suggestion_i, suggestion in enumerate(record_update.suggestions):
-                try:
-                    questions = await _validate_suggestion(db, suggestion, questions)
-                    suggestions.append(Suggestion(record_id=record_update.id, **suggestion.dict()))
-                except ValueError as err:
-                    raise ValueError(
-                        f"Provided suggestion for record at position {record_i} and suggestion at position "
-                        f"{suggestion_i} is not valid: {err}"
-                    ) from err
+            record_suggestions = await _build_record_suggestions(db, record_i, record_update, questions_cache)
+            suggestions.extend(record_suggestions)
             records_delete_suggestions.append(record_update.id)
+
+        if record_update.vectors is not None:
+            params.pop("vectors")
+
+            record_vectors = await _build_record_vectors(db, dataset, record_i, record_update, vector_settings_cache)
+            vectors.extend(record_vectors)
+            records_delete_vectors.append(record_update.id)
 
         records_update_objects.append(params)
 
@@ -768,6 +779,11 @@ async def update_records(
         params = [Suggestion.record_id.in_(records_delete_suggestions)]
         await Suggestion.delete_many(db, params=params, autocommit=False)
         db.add_all(suggestions)
+
+        params = [Vector.record_id.in_(records_delete_vectors)]
+        await Vector.delete_many(db, params=params, autocommit=False)
+        db.add_all(vectors)
+
         await Record.update_many(db, records_update_objects, autocommit=False)
         records = await get_records_by_ids(db, dataset_id=dataset.id, records_ids=records_search_engine_update)
         await search_engine.index_records(dataset, records)

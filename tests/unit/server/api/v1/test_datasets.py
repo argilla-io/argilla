@@ -91,6 +91,7 @@ from tests.factories import (
     TextFieldFactory,
     TextQuestionFactory,
     UserFactory,
+    VectorFactory,
     VectorSettingsFactory,
     WorkspaceFactory,
 )
@@ -4391,38 +4392,75 @@ class TestSuiteDatasets:
     ):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
+        question_0 = await TextQuestionFactory.create(dataset=dataset)
         question_1 = await TextQuestionFactory.create(dataset=dataset)
         question_2 = await TextQuestionFactory.create(dataset=dataset)
-        question_3 = await TextQuestionFactory.create(dataset=dataset)
         await TermsMetadataPropertyFactory.create(name="terms-metadata-property", dataset=dataset)
         await IntegerMetadataPropertyFactory.create(name="integer-metadata-property", dataset=dataset)
         await FloatMetadataPropertyFactory.create(name="float-metadata-property", dataset=dataset)
+        vector_settings_0 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        vector_settings_1 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        vector_settings_2 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
         records = await RecordFactory.create_batch(
             size=10,
             dataset=dataset,
             metadata_={"terms-metadata-property": "a", "integer-metadata-property": 1, "float-metadata-property": 1.0},
         )
 
-        # record 0 suggestions (should be deleted)
+        # record 0 suggestions and vectors (should be deleted)
         suggestions_records_0 = [
-            await SuggestionFactory.create(question=question_1, record=records[0], value="suggestion 0 1"),
-            await SuggestionFactory.create(question=question_2, record=records[0], value="suggestion 0 2"),
-            await SuggestionFactory.create(question=question_3, record=records[0], value="suggestion 0 3"),
+            await SuggestionFactory.create(question=question_0, record=records[0], value="suggestion 0 1"),
+            await SuggestionFactory.create(question=question_1, record=records[0], value="suggestion 0 2"),
+            await SuggestionFactory.create(question=question_2, record=records[0], value="suggestion 0 3"),
+        ]
+
+        vector_records_0 = [
+            await VectorFactory.create(vector_settings=vector_settings_0, record=records[0], value=[0, 0, 0, 0, 0]),
+            await VectorFactory.create(vector_settings=vector_settings_1, record=records[0], value=[1, 1, 1, 1, 1]),
+            await VectorFactory.create(vector_settings=vector_settings_2, record=records[0], value=[2, 2, 2, 2, 2]),
         ]
 
         # record 1 suggestions (should be deleted)
         suggestions_records_1 = [
-            await SuggestionFactory.create(question=question_1, record=records[1], value="suggestion 1 1"),
-            await SuggestionFactory.create(question=question_2, record=records[1], value="suggestion 1 2"),
-            await SuggestionFactory.create(question=question_3, record=records[1], value="suggestion 1 3"),
+            await SuggestionFactory.create(question=question_0, record=records[1], value="suggestion 1 1"),
+            await SuggestionFactory.create(question=question_1, record=records[1], value="suggestion 1 2"),
+            await SuggestionFactory.create(question=question_2, record=records[1], value="suggestion 1 3"),
+        ]
+
+        vector_records_1 = [
+            await VectorFactory.create(vector_settings=vector_settings_0, record=records[1], value=[0, 0, 0, 0, 0]),
+            await VectorFactory.create(vector_settings=vector_settings_1, record=records[1], value=[1, 1, 1, 1, 1]),
+            await VectorFactory.create(vector_settings=vector_settings_2, record=records[1], value=[2, 2, 2, 2, 2]),
         ]
 
         # record 2 suggestions (should be kept)
         suggestions_records_2 = [
-            await SuggestionFactory.create(question=question_1, record=records[2], value="suggestion 2 1"),
-            await SuggestionFactory.create(question=question_2, record=records[2], value="suggestion 2 2"),
-            await SuggestionFactory.create(question=question_3, record=records[2], value="suggestion 2 3"),
+            await SuggestionFactory.create(question=question_0, record=records[2], value="suggestion 2 1"),
+            await SuggestionFactory.create(question=question_1, record=records[2], value="suggestion 2 2"),
+            await SuggestionFactory.create(question=question_2, record=records[2], value="suggestion 2 3"),
         ]
+
+        vector_records_2 = [
+            await VectorFactory.create(vector_settings=vector_settings_0, record=records[2], value=[0, 0, 0, 0, 0]),
+            await VectorFactory.create(vector_settings=vector_settings_1, record=records[2], value=[1, 1, 1, 1, 1]),
+            await VectorFactory.create(vector_settings=vector_settings_2, record=records[2], value=[2, 2, 2, 2, 2]),
+        ]
+
+        records_0_updated_vectors = {
+            vector_settings_0.name: [0.1, 0.1, 0.1, 0.1, 0.1],
+            vector_settings_1.name: [1.1, 1.1, 1.1, 1.1, 1.1],
+            vector_settings_2.name: [2.1, 2.1, 2.1, 2.1, 2.1],
+        }
+
+        records_1_updated_vectors = {
+            vector_settings_0.name: [0.1, 0.1, 0.1, 0.1, 0.1],
+        }
+
+        records_3_updated_vectors = {
+            vector_settings_0.name: [0.1, 0.1, 0.1, 0.1, 0.1],
+            vector_settings_1.name: [0.1, 0.1, 0.1, 0.1, 0.1],
+            vector_settings_2.name: [0.1, 0.1, 0.1, 0.1, 0.1],
+        }
 
         response = await async_client.patch(
             f"/api/v1/datasets/{dataset.id}/records",
@@ -4439,15 +4477,16 @@ class TestSuiteDatasets:
                         },
                         "suggestions": [
                             {
-                                "question_id": str(question_1.id),
+                                "question_id": str(question_0.id),
                                 "value": "suggestion updated 0 1",
                             },
                             {
-                                "question_id": str(question_2.id),
+                                "question_id": str(question_1.id),
                                 "value": "suggestion updated 0 2",
                             },
-                            {"question_id": str(question_3.id), "value": "suggestion updated 0 3"},
+                            {"question_id": str(question_2.id), "value": "suggestion updated 0 3"},
                         ],
+                        "vectors": records_0_updated_vectors,
                     },
                     {
                         "id": str(records[1].id),
@@ -4459,10 +4498,11 @@ class TestSuiteDatasets:
                         },
                         "suggestions": [
                             {
-                                "question_id": str(question_1.id),
+                                "question_id": str(question_0.id),
                                 "value": "suggestion updated 1 1",
                             }
                         ],
+                        "vectors": records_1_updated_vectors,
                     },
                     {
                         "id": str(records[2].id),
@@ -4477,15 +4517,16 @@ class TestSuiteDatasets:
                         "id": str(records[3].id),
                         "suggestions": [
                             {
-                                "question_id": str(question_1.id),
+                                "question_id": str(question_0.id),
                                 "value": "suggestion updated 3 1",
                             },
                             {
-                                "question_id": str(question_2.id),
+                                "question_id": str(question_1.id),
                                 "value": "suggestion updated 3 2",
                             },
-                            {"question_id": str(question_3.id), "value": "suggestion updated 3 3"},
+                            {"question_id": str(question_2.id), "value": "suggestion updated 3 3"},
                         ],
+                        "vectors": records_3_updated_vectors,
                     },
                 ]
             },
@@ -4501,12 +4542,17 @@ class TestSuiteDatasets:
             "extra-metadata": "yes",
         }
         await records[0].awaitable_attrs.suggestions
+        await records[0].awaitable_attrs.vectors
         assert len(records[0].suggestions) == 3
         assert records[0].suggestions[0].value == "suggestion updated 0 1"
         assert records[0].suggestions[1].value == "suggestion updated 0 2"
         assert records[0].suggestions[2].value == "suggestion updated 0 3"
+        for vector in records[0].vectors:
+            assert records_0_updated_vectors[vector.vector_settings.name] == vector.value
         for suggestion in suggestions_records_0:
             assert inspect(suggestion).deleted
+        for vector in vector_records_0:
+            assert inspect(vector).deleted
 
         # Record 1
         assert records[1].metadata_ == {
@@ -4516,10 +4562,15 @@ class TestSuiteDatasets:
             "extra-metadata": "yes",
         }
         await records[1].awaitable_attrs.suggestions
+        await records[1].awaitable_attrs.vectors
         assert len(records[1].suggestions) == 1
         assert records[1].suggestions[0].value == "suggestion updated 1 1"
+        for vector in records[1].vectors:
+            assert records_1_updated_vectors[vector.vector_settings.name] == vector.value
         for suggestion in suggestions_records_1:
             assert inspect(suggestion).deleted
+        for vector in vector_records_1:
+            assert inspect(vector).deleted
 
         # Record 2
         assert records[2].metadata_ == {
@@ -4529,15 +4580,21 @@ class TestSuiteDatasets:
             "extra-metadata": "yes",
         }
         await records[2].awaitable_attrs.suggestions
+        await records[2].awaitable_attrs.vectors
         for suggestion in suggestions_records_2:
             assert inspect(suggestion).persistent
+        for vector in vector_records_2:
+            assert inspect(vector).persistent
 
         # Record 3
         await records[3].awaitable_attrs.suggestions
+        await records[3].awaitable_attrs.vectors
         assert len(records[3].suggestions) == 3
         assert records[3].suggestions[0].value == "suggestion updated 3 1"
         assert records[3].suggestions[1].value == "suggestion updated 3 2"
         assert records[3].suggestions[2].value == "suggestion updated 3 3"
+        for vector in records[3].vectors:
+            assert records_3_updated_vectors[vector.vector_settings.name] == vector.value
 
         # it should be called only with the first three records (metadata was updated for them)
         mock_search_engine.index_records.assert_called_once_with(dataset, records[:3])
@@ -4599,8 +4656,31 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": "Provided suggestion for record at position 0 and suggestion at position 0 is not valid: "
+            "detail": "Provided suggestion for record at position 0 is not valid: "
             "'option-a' is not a valid option.\nValid options are: ['option1', 'option2', 'option3']"
+        }
+
+    async def test_update_dataset_records_with_invalid_vectors(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        vector_settings = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        records = await RecordFactory.create_batch(5, dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {"id": str(records[0].id), "vectors": {vector_settings.name: [0.0, 1.0, 2.0, 3.0, 4.0]}},
+                    {"id": str(records[1].id), "vectors": {vector_settings.name: [0.0, 1.0, 2.0, 3.0, 4.0, 6.0]}},
+                ]
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"Provided vector with name={vector_settings.name} of record at position 1 is not valid: vector must have 5 elements, got 6 elements"
         }
 
     async def test_update_dataset_records_with_nonexistent_dataset_id(
@@ -4642,6 +4722,46 @@ class TestSuiteDatasets:
         assert response.status_code == 422
         assert response.json() == {
             "detail": f"Found records that do not exist: {records[0]['id']}, {records[1]['id']}, {records[2]['id']}"
+        }
+
+    async def test_update_dataset_records_with_nonexistent_question_id(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record = await RecordFactory.create(dataset=dataset)
+
+        question_id = str(uuid4())
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {"id": str(record.id), "suggestions": [{"question_id": question_id, "value": "shit"}]},
+                ]
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"Provided suggestion for record at position 0 is not valid: question_id={question_id} does not exist"
+        }
+
+    async def test_update_dataset_records_with_nonexistent_vector_settings_name(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record = await RecordFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={"items": [{"id": str(record.id), "vectors": {"i-do-not-exist": [1, 2, 3, 4]}}]},
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"Provided vector with name=i-do-not-exist of record at position 0 is not valid: vector with name=i-do-not-exist does not exist for dataset_id={dataset.id}"
         }
 
     async def test_update_dataset_records_with_duplicate_records_ids(
