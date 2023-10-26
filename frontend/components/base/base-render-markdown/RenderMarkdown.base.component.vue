@@ -6,7 +6,30 @@ import { marked } from "marked";
 import { markedHighlight } from "marked-highlight";
 import hljs from "highlight.js";
 import * as DOMPurify from "dompurify";
+const tokenizer = {
+  html(src) {
+    const doc = new DOMParser().parseFromString(src, "text/html");
+    const svgElement = doc.querySelector("svg");
+    if (svgElement) {
+      const width = svgElement.getAttribute("width");
+      const height = svgElement.getAttribute("height");
+      const viewBox = svgElement.getAttribute("viewBox");
+      if (!viewBox && width && height) {
+        svgElement.setAttribute("viewBox", `0 0 ${width} ${height}`);
+        return {
+          type: "html",
+          raw: doc.body.innerHTML,
+          text: doc.body.innerHTML,
+        };
+      } else {
+        return false;
+      }
+    }
+    return false;
+  },
+};
 marked.use(
+  { tokenizer },
   markedHighlight({
     langPrefix: "hljs language-",
     highlight(code, lang) {
@@ -37,7 +60,6 @@ export default {
         mangle: false,
         breaks: true,
       });
-
       return DOMPurify.sanitize(dirtyMarkdown);
     },
   },
