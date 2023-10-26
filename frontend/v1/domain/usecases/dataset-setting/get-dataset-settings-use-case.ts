@@ -1,11 +1,13 @@
 import { DatasetSetting } from "../../entities/DatasetSetting";
 import { Field } from "../../entities/field/Field";
 import { Question } from "../../entities/question/Question";
+import { Vector } from "../../entities/vector/Vector";
 import { IDatasetRepository } from "../../services/IDatasetRepository";
 import { IDatasetSettingStorage } from "../../services/IDatasetSettingStorage";
 import {
   FieldRepository,
   QuestionRepository,
+  VectorRepository,
 } from "~/v1/infrastructure/repositories";
 
 export class GetDatasetSettingsUseCase {
@@ -13,6 +15,7 @@ export class GetDatasetSettingsUseCase {
     private readonly datasetRepository: IDatasetRepository,
     private readonly questionRepository: QuestionRepository,
     private readonly fieldRepository: FieldRepository,
+    private readonly vectorRepository: VectorRepository,
     private readonly datasetSettingStorage: IDatasetSettingStorage
   ) {}
 
@@ -20,12 +23,10 @@ export class GetDatasetSettingsUseCase {
     const getDataset = this.datasetRepository.getById(datasetId);
     const getQuestions = this.questionRepository.getQuestions(datasetId);
     const getFields = this.fieldRepository.getFields(datasetId);
+    const getVectors = this.vectorRepository.getVectors(datasetId);
 
-    const [dataset, backendQuestions, backendFields] = await Promise.all([
-      getDataset,
-      getQuestions,
-      getFields,
-    ]);
+    const [dataset, backendQuestions, backendFields, backendVectors] =
+      await Promise.all([getDataset, getQuestions, getFields, getVectors]);
 
     const questions = backendQuestions.map((question) => {
       return new Question(
@@ -51,7 +52,21 @@ export class GetDatasetSettingsUseCase {
       );
     });
 
-    const datasetSetting = new DatasetSetting(dataset, questions, fields);
+    const vectors = backendVectors.map((vector) => {
+      return new Vector(
+        vector.id,
+        vector.name,
+        vector.title,
+        vector.dimensions
+      );
+    });
+
+    const datasetSetting = new DatasetSetting(
+      dataset,
+      questions,
+      fields,
+      vectors
+    );
 
     this.datasetSettingStorage.save(datasetSetting);
   }

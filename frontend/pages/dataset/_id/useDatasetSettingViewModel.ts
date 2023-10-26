@@ -34,6 +34,11 @@ export const useDatasetSettingViewModel = () => {
     { id: "fields", name: "Fields", component: "settingsFields" },
     { id: "questions", name: "Questions", component: "settingsQuestions" },
     {
+      id: "vector",
+      name: "Vectors",
+      component: "SettingsVectors",
+    },
+    {
       id: "danger-zone",
       name: "Danger zone",
       component: "settingsDangerZone",

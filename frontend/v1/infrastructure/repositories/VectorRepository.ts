@@ -1,10 +1,11 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { BackendVector } from "../types/vector";
 import { Response } from "../types";
-import { QUESTION_API_ERRORS } from "./QuestionRepository";
+import { Vector } from "~/v1/domain/entities/vector/Vector";
 
 export const enum VECTOR_API_ERRORS {
-  GET_VECTORS = "ERROR_FETCHING_VECTORS",
+  FETCHING = "ERROR_FETCHING_VECTORS",
+  UPDATE = "ERROR_PATCHING_VECTORS",
 }
 
 export class VectorRepository {
@@ -22,8 +23,29 @@ export class VectorRepository {
       }));
     } catch (err) {
       throw {
-        response: QUESTION_API_ERRORS.GET_QUESTIONS,
+        response: VECTOR_API_ERRORS.FETCHING,
       };
     }
+  }
+
+  async update(vector: Vector): Promise<BackendVector> {
+    try {
+      const { data } = await this.axios.patch<BackendVector>(
+        `/v1/vector/${vector.id}`,
+        this.createRequest(vector)
+      );
+
+      return data;
+    } catch (err) {
+      throw {
+        response: VECTOR_API_ERRORS.UPDATE,
+      };
+    }
+  }
+
+  private createRequest({ title }: Vector): Partial<BackendVector> {
+    return {
+      title,
+    };
   }
 }
