@@ -350,7 +350,11 @@ async def create_vector_settings(
 
 
 async def get_record_by_id(
-    db: "AsyncSession", record_id: UUID, with_dataset: bool = False, with_suggestions: bool = False
+    db: "AsyncSession",
+    record_id: UUID,
+    with_dataset: bool = False,
+    with_suggestions: bool = False,
+    with_vectors: bool = False,
 ) -> Union[Record, None]:
     query = select(Record).filter_by(id=record_id)
     if with_dataset:
@@ -360,6 +364,8 @@ async def get_record_by_id(
         )
     if with_suggestions:
         query = query.options(selectinload(Record.suggestions))
+    if with_vectors:
+        query = query.options(selectinload(Record.vectors))
     result = await db.execute(query)
     return result.scalar_one_or_none()
 
@@ -576,9 +582,9 @@ async def create_records(
             db, dataset, record_i, metadata=record_create.metadata, cache=metadata_properties_cache
         )
 
-        record_responses = await _build_record_responses(db, dataset, record_i, record_create, cache=users_ids_cache)
-        record_suggestions = await _build_record_suggestions(db, record_i, record_create, cache=questions_cache)
-        record_vectors = await _build_record_vectors(db, dataset, record_i, record_create, cache=vectors_settings_cache)
+        record_responses = await _build_record_responses(db, dataset, record_create, users_ids_cache, record_i)
+        record_suggestions = await _build_record_suggestions(db, record_create, questions_cache, record_i)
+        record_vectors = await _build_record_vectors(db, dataset, record_create, vectors_settings_cache, record_i)
 
         record = Record(
             fields=record_create.fields,
@@ -626,35 +632,12 @@ async def _validate_record_metadata(
         raise ValueError(f"Provided metadata for record at position {record_position} is not valid: {e}") from e
 
 
-async def _build_record_vectors(
+async def _build_record_responses(
     db: "AsyncSession",
     dataset: Dataset,
-    record_position: int,
-    record_schema: Union["RecordCreate", "RecordUpdateWithId"],
-    cache: Dict[str, VectorSettingsSchema] = {},
-) -> List[Vector]:
-    """Create vectors for a record."""
-    if not record_schema.vectors:
-        return []
-
-    vectors = []
-    for vector_name, vector_value in record_schema.vectors.items():
-        try:
-            await _validate_vector(db, dataset.id, vector_name, vector_value, vectors_settings=cache)
-            vector = Vector(value=vector_value, vector_settings_id=cache[vector_name].id)
-            if isinstance(record_schema, RecordUpdateWithId):
-                vector.record_id = record_schema.id
-            vectors.append(vector)
-        except ValueError as e:
-            raise ValueError(
-                f"Provided vector with name={vector_name} of record at position {record_position} is not valid: {e}"
-            ) from e
-
-    return vectors
-
-
-async def _build_record_responses(
-    db: "AsyncSession", dataset: Dataset, record_position: int, record_create: RecordCreate, cache: Set[UUID] = set()
+    record_create: RecordCreate,
+    cache: Set[UUID] = set(),
+    record_position: Optional[int] = None,
 ) -> List[Response]:
     """Create responses for a record."""
     if not record_create.responses:
@@ -674,18 +657,21 @@ async def _build_record_responses(
                 )
             )
         except ValueError as e:
-            raise ValueError(
-                f"Provided response at position {idx} of record at position {record_position} is not valid: {e}"
-            ) from e
+            err_msg = (
+                f"Provided response at position {idx} for record at position {record_position} is not valid: {e}"
+                if record_position is not None
+                else f"Provided response at position {idx} is not valid: {e}"
+            )
+            raise ValueError(err_msg) from e
 
     return responses
 
 
 async def _build_record_suggestions(
     db: "AsyncSession",
-    record_position: int,
     record_schema: Union["RecordCreate", "RecordUpdateWithId"],
     cache: Dict[UUID, Question] = {},
+    record_position: Optional[int] = None,
 ) -> List[Suggestion]:
     """Create suggestions for a record."""
 
@@ -707,8 +693,45 @@ async def _build_record_suggestions(
                 suggestion.record_id = record_schema.id
             suggestions.append(suggestion)
         except ValueError as e:
-            raise ValueError(f"Provided suggestion for record at position {record_position} is not valid: {e}") from e
+            err_msg = (
+                f"Provided suggestion for record at position {record_position} is not valid: {e}"
+                if record_position is not None
+                else f"Provided suggestion is not valid: {e}"
+            )
+            raise ValueError(err_msg) from e
     return suggestions
+
+
+async def _build_record_vectors(
+    db: "AsyncSession",
+    dataset: Dataset,
+    record_schema: Union["RecordCreate", "RecordUpdateWithId"],
+    cache: Dict[str, VectorSettingsSchema] = {},
+    record_position: Optional[int] = None,
+) -> List[Vector]:
+    """Create vectors for a record."""
+    if not record_schema.vectors:
+        return []
+
+    vectors = []
+    for vector_name, vector_value in record_schema.vectors.items():
+        try:
+            await _validate_vector(db, dataset.id, vector_name, vector_value, vectors_settings=cache)
+            vector = Vector(value=vector_value, vector_settings_id=cache[vector_name].id)
+            if isinstance(record_schema, RecordUpdateWithId):
+                vector.record_id = record_schema.id
+            vectors.append(vector)
+        except ValueError as e:
+            err_msg = (
+                f"Provided vector with name={vector_name} of record at position {record_position} is not valid: {e}"
+                if record_position is not None
+                else f"Provided vector with name={vector_name} is not valid: {e}"
+                if record_position is not None
+                else f"Provided vector with name={vector_name} is not valid: {e}"
+            )
+            raise ValueError(err_msg) from e
+
+    return vectors
 
 
 async def _exists_records_with_ids(db: "AsyncSession", dataset_id: UUID, records_ids: List[UUID]) -> List[UUID]:
@@ -762,14 +785,14 @@ async def update_records(
             if len(questions_ids) != len(set(questions_ids)):
                 raise ValueError(f"Found duplicate suggestions question IDs for record at position {record_i}")
 
-            record_suggestions = await _build_record_suggestions(db, record_i, record_update, questions_cache)
+            record_suggestions = await _build_record_suggestions(db, record_update, questions_cache, record_i)
             suggestions.extend(record_suggestions)
             records_delete_suggestions.append(record_update.id)
 
         if record_update.vectors is not None:
             params.pop("vectors")
 
-            record_vectors = await _build_record_vectors(db, dataset, record_i, record_update, vector_settings_cache)
+            record_vectors = await _build_record_vectors(db, dataset, record_update, vector_settings_cache, record_i)
             vectors.extend(record_vectors)
             records_delete_vectors.append(record_update.id)
 
@@ -815,19 +838,16 @@ async def update_record(
         if len(questions_ids) != len(set(questions_ids)):
             raise ValueError("Found duplicate suggestions question IDs")
 
-        suggestions = []
-        for suggestion in record_update.suggestions:
-            try:
-                await _validate_suggestion(db, suggestion)
-                suggestions.append(Suggestion(**suggestion.dict()))
-            except ValueError as err:
-                raise ValueError(
-                    f"Provided suggestion for question_id={suggestion.question_id} is not valid: {err}"
-                ) from err
-
+        suggestions = await _build_record_suggestions(db, record_update)
         # Remove existing suggestions
         record.suggestions = []
         params["suggestions"] = suggestions
+
+    if record_update.vectors is not None:
+        vectors = await _build_record_vectors(db, record.dataset, record_update)
+        # Remove existing vectors
+        record.vectors = []
+        params["vectors"] = vectors
 
     async with db.begin_nested():
         record = await record.update(db, **params, replace_dict=True, autocommit=False)
