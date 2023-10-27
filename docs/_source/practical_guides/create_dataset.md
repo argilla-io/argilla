@@ -17,7 +17,7 @@ To follow the steps in this guide, you will first need to connect to Argilla. Ch
 
 A record in Argilla refers to a data item that requires annotation and can consist of one or multiple `fields` i.e., the pieces of information that will be shown to the user in the UI in order to complete the annotation task. This can be, for example, a prompt and output pair in the case of instruction datasets. Additionally, the record will contain `questions` that the annotators will need to answer and guidelines to help them complete the task.
 
-All of this is [fully configurable](#custom-configuration) using the Python SDK. However, we can also use pre-made [Hugging Face datasets](#hugging-face-hub-datasets) or out-of-the-box [task templates](#task-templates).
+All of this is fully configurable with [custom configuration](#custom-configuration) using the Python SDK. However, we can also use pre-made [Hugging Face datasets](#hugging-face-hub-datasets) or out-of-the-box [task templates](#task-templates).
 
 #### Hugging Face hub datasets
 
