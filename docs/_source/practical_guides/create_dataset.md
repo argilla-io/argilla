@@ -19,6 +19,16 @@ A record in Argilla refers to a data item that requires annotation and can consi
 
 The `FeedbackDataset` has a set of predefined task templates that you can use to quickly set up your dataset. These templates include the `fields` and `questions` needed for the task, as well as the `guidelines` to provide to the annotators. Additionally, you can customize the `fields`, `questions`, and `guidelines` to fit your specific needs using a [custom configuration](#custom-configuration).
 
+#### Hugging Face hub datasets
+
+Argilla loves Hugging Face and is tightly integrated with their eco-system. To get started with a `FeedbackDataset`, we can directly retrieve a [Argilla-compatible dataset from the Hugging Face datasets hub](https://huggingface.co/datasets?other=argilla). These datasets already contain a complete configuration and data.
+
+```python
+import argilla as rg
+
+ds = rg.FeedbackDataset.from_huggingface("<huggingface_dataset_id>")
+```
+
 #### Task Templates
 
 ```{include} /_common/tabs/task_templates.md
