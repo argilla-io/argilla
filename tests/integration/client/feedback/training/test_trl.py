@@ -427,4 +427,6 @@ def test_push_to_huggingface(
     else:
         trainer.update_config(max_steps=1)
 
+    train_with_cleanup(trainer, OUTPUT_DIR)
+
     trainer.push_to_huggingface("mocked", generate_card=False)

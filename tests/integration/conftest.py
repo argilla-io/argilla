@@ -362,23 +362,18 @@ def mocked_openai(mocker):
 def mocked_trainer_push_to_huggingface(mocker: "MockerFixture"):
     # Mock the push_to_huggingface methods for the different trainers,
     # most of the functionality is already tested by the frameworks itself.
-    mocker.patch(
-        "argilla.client.feedback.training.frameworks.transformers.ArgillaTransformersTrainer.push_to_huggingface",
-        return_value=True,
-    )
-    mocker.patch(
-        "argilla.client.feedback.training.frameworks.peft.ArgillaPeftTrainer.push_to_huggingface", return_value=True
-    )
-    mocker.patch(
-        "argilla.client.feedback.training.frameworks.setfit.ArgillaSetFitTrainer.push_to_huggingface", return_value=True
-    )
-    mocker.patch(
-        "argilla.client.feedback.training.frameworks.spacy.ArgillaSpaCyTrainer.push_to_huggingface", return_value=True
-    )
-    mocker.patch(
-        "argilla.client.feedback.training.frameworks.spacy.ArgillaSpaCyTransformersTrainer.push_to_huggingface",
-        return_value=True,
-    )
-    mocker.patch(
-        "argilla.client.feedback.training.frameworks.trl.ArgillaTRLTrainer.push_to_huggingface", return_value=True
-    )
+    # For transformers' model and tokenizer
+    mocker.patch("transformers.PreTrainedModel.push_to_hub", return_value="model_url")
+    mocker.patch("transformers.PreTrainedTokenizer.push_to_hub", return_value="model_url")
+    # For setfit
+    mocker.patch("setfit.trainer.SetFitTrainer.push_to_hub", return_value="model_url")
+    # For peft
+    mocker.patch("peft.PeftModel.push_to_hub", return_value="model_url")
+    mocker.patch("transformers.PreTrainedTokenizerBase.push_to_hub", return_value="model_url")
+    # For spacy and spacy-transformers
+    mocker.patch("spacy_huggingface_hub.push", return_value={"url": "model_url"})
+    # For trl
+    mocker.patch("trl.trainer.sft_trainer.SFTTrainer.push_to_hub", return_value="model_url")
+    mocker.patch("trl.trainer.reward_trainer.RewardTrainer.push_to_hub", return_value="model_url")
+    mocker.patch("trl.trainer.base.BaseTrainer.push_to_hub", return_value="model_url")
+    mocker.patch("trl.trainer.dpo_trainer.DPOTrainer.push_to_hub", return_value="model_url")

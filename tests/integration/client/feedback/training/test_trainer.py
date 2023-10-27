@@ -383,7 +383,9 @@ def test_tokenizer_warning_wrong_framework(
         Framework("transformers"),
         Framework("setfit"),
         Framework("peft"),
-        # Framework("span_marker"),  # The FeedbackDataset needs to work with token classification for this framework to work.
+        Framework(
+            "span_marker"
+        ),  # The FeedbackDataset needs to work with token classification for this framework to work.
     ],
 )
 @pytest.mark.usefixtures(
@@ -437,18 +439,27 @@ def test_push_to_huggingface(
 
     # We need to initialize the model (is faster than calling the whole training process) before calling push_to_huggingface.
     # The remaining models need to call the train method first.
+    repo_id = "mocked"
     if framework in (Framework("transformers"), Framework("peft")):
         trainer.update_config(num_iterations=1)
         trainer._trainer.init_model(new=True)
     elif framework in (Framework("setfit"), Framework("spacy"), Framework("spacy-transformers")):
         if framework in (Framework("spacy"), Framework("spacy-transformers")):
             trainer.update_config(max_steps=1)
-
+            repo_id = __OUTPUT_DIR__
         else:
             trainer.update_config(num_iterations=1)
-
     else:
         trainer._trainer.init_model()
 
+    # We have to train the model and push it with spacy before removing the
+    # generated folder, as it needs to be packaged.
+    if framework in (Framework("spacy"), Framework("spacy-transformers")):
+        trainer.train(__OUTPUT_DIR__)
+    else:
+        train_with_cleanup(trainer, __OUTPUT_DIR__)
+
     # This functionality is mocked, no need to check the generated card too.
-    trainer.push_to_huggingface("mocked", generate_card=False)
+    trainer.push_to_huggingface(repo_id, generate_card=False)
+    if Path(__OUTPUT_DIR__).exists():
+        shutil.rmtree(__OUTPUT_DIR__)
