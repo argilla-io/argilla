@@ -602,15 +602,7 @@ async def create_records(
     async with db.begin_nested():
         db.add_all(records)
         await db.flush(records)
-        # TODO: We need to remove these asynchronicity requirements somehow
-        for record in records:
-            await record.awaitable_attrs.responses
-        for vector in all_vectors:
-            await vector.awaitable_attrs.vector_settings
-        # TODO: Review and unify in a single method
         await search_engine.index_records(dataset, records)
-        if all_vectors:
-            await search_engine.set_records_vectors(dataset, all_vectors)
 
     await db.commit()
 
@@ -810,6 +802,9 @@ async def update_records(
 
         await Record.update_many(db, records_update_objects, autocommit=False)
         records = await get_records_by_ids(db, dataset_id=dataset.id, records_ids=records_search_engine_update)
+        for record in records:
+            await record.awaitable_attrs.vectors
+        await dataset.awaitable_attrs.vectors_settings
         await search_engine.index_records(dataset, records)
 
     await db.commit()

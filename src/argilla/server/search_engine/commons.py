@@ -68,6 +68,13 @@ def _build_metadata_field_payload(dataset: Dataset, metadata: Union[Dict[str, An
     return search_engine_metadata
 
 
+def _build_vectors_field_payload(vectors) -> Dict[str, List[float]]:
+    if vectors is None:
+        return {}
+
+    return {str(vector.vector_settings.id): vector.value for vector in vectors}
+
+
 class SearchDocumentGetter(GetterDict):
     def get(self, key: Any, default: Any = None) -> Any:
         if key == "responses":
@@ -85,6 +92,11 @@ class SearchDocumentGetter(GetterDict):
             }
         elif key == "metadata":
             return _build_metadata_field_payload(self._obj.dataset, self._obj.metadata_)
+        elif key == "vectors":
+            if not self._obj.is_relationship_loaded("vectors"):
+                return default
+
+            return _build_vectors_field_payload(self._obj.vectors)
 
         return super().get(key, default)
 
@@ -95,6 +107,7 @@ class SearchDocument(BaseModel):
 
     metadata: Optional[Dict[str, Any]] = None
     responses: Optional[Dict[str, UserResponse]]
+    vectors: Optional[Dict[str, List[float]]]
 
     inserted_at: datetime.datetime
     updated_at: datetime.datetime

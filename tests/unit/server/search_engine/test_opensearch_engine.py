@@ -260,7 +260,7 @@ async def _refresh_dataset(dataset: Dataset):
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(not server_settings.search_engine == "opensearch", reason="Running on opensearch engine")
+# @pytest.mark.skipif(not server_settings.search_engine == "opensearch", reason="Running on opensearch engine")
 class TestSuiteOpenSearchEngine:
     async def test_get_index_or_raise(self, opensearch_engine: OpenSearchEngine):
         dataset = await DatasetFactory.create()
@@ -836,6 +836,43 @@ class TestSuiteOpenSearchEngine:
                     str(metadata_prop.name): record.metadata_[metadata_prop.name]
                     for metadata_prop in metadata_properties
                 },
+            }
+            for record in records
+        ]
+
+    async def test_index_records_with_vectors(self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch):
+        dataset = await DatasetFactory.create()
+        text_fields = await TextFieldFactory.create_batch(size=5, dataset=dataset)
+        vectors_settings = await VectorSettingsFactory.create_batch(size=5, dataset=dataset, dimensions=5)
+        records = await RecordFactory.create_batch(
+            size=5, fields={field.name: f"This is the value for {field.name}" for field in text_fields}, responses=[]
+        )
+
+        for record in records:
+            for vector_settings in vectors_settings:
+                await VectorFactory.create(
+                    record=record, vector_settings=vector_settings, value=[1.0, 2.0, 3.0, 4.0, 5.0]
+                )
+            await record.awaitable_attrs.vectors
+
+        await _refresh_dataset(dataset)
+
+        await opensearch_engine.create_index(dataset)
+        await opensearch_engine.index_records(dataset, records)
+
+        index_name = index_name_for_dataset(dataset)
+        opensearch.indices.refresh(index=index_name)
+
+        es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
+        assert es_docs == [
+            {
+                "id": str(record.id),
+                "fields": record.fields,
+                "inserted_at": record.inserted_at.isoformat(),
+                "updated_at": record.updated_at.isoformat(),
+                "responses": {},
+                "metadata": {},
+                "vectors": {str(vector_settings.id): [1.0, 2.0, 3.0, 4.0, 5.0] for vector_settings in vectors_settings},
             }
             for record in records
         ]
