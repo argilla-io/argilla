@@ -165,12 +165,13 @@ class _ArgillaSpaCyTrainerBase(_ArgillaSpaCyTrainerBaseV1, ArgillaTrainerSkeleto
                 If the url of a model is: https://huggingface.co/<NAMESPACE>/<MODEL_NAME>,
                 pass <NAMESPACE>/<MODEL_NAME>.
         """
-        # TODO: Update to emulate the other frameworks, as if "output_dir"
-        # could work as "repo_id"
         from spacy.cli.package import package
         from spacy_huggingface_hub import push
 
-        # TODO: Review the model has already been trained before calling this method.
+        if self._nlp is None:
+            raise ValueError(
+                "No pipeline was initialized, you must call either `init_model` or `train` before calling this method."
+            )
 
         output_dir = Path(output_dir)
         with TemporaryDirectory() as tmpdirname:

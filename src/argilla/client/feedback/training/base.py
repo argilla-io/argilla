@@ -297,7 +297,6 @@ class ArgillaTrainer(ArgillaTrainerV1):
 
         return model_card
 
-    # TODO(plaguss): Include the option of using push_to_huggingface in `train` method.
     def push_to_huggingface(self, repo_id: str, generate_card: Optional[bool] = False, **kwargs) -> None:
         """Push your model to [huggingface's model hub](https://huggingface.co/models).
 

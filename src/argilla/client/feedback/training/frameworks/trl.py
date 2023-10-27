@@ -424,8 +424,6 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
     def push_to_huggingface(self, repo_id: str, **kwargs) -> None:
         """Uploads the transformer model and tokenizer to [huggingface's model hub](https://huggingface.co/models).
 
-        TODO: Update the checks for NotImplementedError.
-
         The full list of parameters for PPO can be seen:
         [here](https://huggingface.co/docs/huggingface_hub/package_reference/mixins#huggingface_hub.ModelHubMixin.push_to_hub)
         and for the remaining types of trainers,
