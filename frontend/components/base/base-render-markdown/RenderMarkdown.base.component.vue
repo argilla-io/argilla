@@ -6,30 +6,27 @@ import { marked } from "marked";
 import { markedHighlight } from "marked-highlight";
 import hljs from "highlight.js";
 import * as DOMPurify from "dompurify";
-const tokenizer = {
-  html(src) {
-    const doc = new DOMParser().parseFromString(src, "text/html");
-    const svgElement = doc.querySelector("svg");
-    if (svgElement) {
-      const width = svgElement.getAttribute("width");
-      const height = svgElement.getAttribute("height");
-      const viewBox = svgElement.getAttribute("viewBox");
-      if (!viewBox && width && height) {
-        svgElement.setAttribute("viewBox", `0 0 ${width} ${height}`);
-        return {
-          type: "html",
-          raw: doc.body.innerHTML,
-          text: doc.body.innerHTML,
-        };
-      } else {
-        return false;
-      }
-    }
-    return false;
-  },
+
+const preprocess = (html) => {
+  return html.replace(/[^\S\r\n]+$/gm, "");
 };
+const postprocess = (html) => {
+  return DOMPurify.sanitize(html);
+};
+
+DOMPurify.addHook("beforeSanitizeAttributes", (node) => {
+  if (node.tagName === "svg") {
+    const width = node.getAttribute("width");
+    const height = node.getAttribute("height");
+    const viewBox = node.getAttribute("viewBox");
+    if (!viewBox && width && height) {
+      node.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    }
+  }
+});
+
 marked.use(
-  { tokenizer },
+  { hooks: { preprocess, postprocess } },
   markedHighlight({
     langPrefix: "hljs language-",
     highlight(code, lang) {
@@ -47,20 +44,13 @@ export default {
       required: true,
     },
   },
-  methods: {
-    cleanMarkdown(markdown) {
-      return markdown.replace(/[^\S\r\n]+$/gm, "");
-    },
-  },
   computed: {
     markdownToHtml() {
-      const cleanedMarkdown = this.cleanMarkdown(this.markdown);
-      const dirtyMarkdown = marked.parse(cleanedMarkdown, {
+      return marked.parse(this.markdown, {
         headerIds: false,
         mangle: false,
         breaks: true,
       });
-      return DOMPurify.sanitize(dirtyMarkdown);
     },
   },
 };
