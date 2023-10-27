@@ -166,7 +166,7 @@ conda activate argilla
 
 In the new Conda environment, Argilla will already be installed in editable mode with all the server dependencies. But if you’re willing to install any other dependency you can do so via `pip` to install your own, or just see the available extras besides the `server` extras, which are: `listeners`, `postgresql`, and `tests`; all those installable as `pip install -e ".[<EXTRA_NAME>]"`.
 
-Now, the Argilla package is set up on your system and you need to make further installments for a thorough development setup.
+Now, the Argilla package is set up on your system and you need to make further installations for a thorough development setup.
 
 ### Install Code Formatting Tools
 
