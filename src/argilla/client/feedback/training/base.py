@@ -297,7 +297,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
 
         return model_card
 
-    def push_to_huggingface(self, repo_id: str, generate_card: Optional[bool] = False, **kwargs) -> None:
+    def push_to_huggingface(self, repo_id: str, generate_card: Optional[bool] = True, **kwargs) -> None:
         """Push your model to [huggingface's model hub](https://huggingface.co/models).
 
         Args:
@@ -305,7 +305,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 The name of the repository you want to push your model and tokenizer to.
                 It should contain your organization name when pushing to a given organization.
             generate_card:
-                Whether to generate (and push) a model card for your model. Defaults to False.
+                Whether to generate (and push) a model card for your model. Defaults to True.
         """
         if not kwargs.get("token"):
             # Try obtaining the token with huggingface_hub utils as a last resort, or let it fail.
@@ -323,7 +323,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             if getattr(self._trainer, "language", None):
                 repo_id = url
 
-            model_card.push_to_hub(repo_id, repo_type="model", token=token)
+            model_card.push_to_hub(repo_id, repo_type="model", token=kwargs["token"])
 
 
 class ArgillaTrainerSkeleton(ABC):
