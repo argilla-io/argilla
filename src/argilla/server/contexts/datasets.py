@@ -409,12 +409,11 @@ async def _configure_query_relationships(
         query = query.options(joinedload(Record.vectors))
 
     elif include_params.with_some_vector:
+        vector_settings_ids_subquery = (
+            select(VectorSettings.id).filter(VectorSettings.name.in_(include_params.vectors)).subquery()
+        )
         query = query.outerjoin(
-            Vector,
-            and_(
-                Vector.record_id == Record.id,
-                Vector.vector_settings_id.in_(include_params.vectors),
-            ),
+            Vector, and_(Vector.record_id == Record.id, Vector.vector_settings_id.in_(vector_settings_ids_subquery))
         ).options(contains_eager(Record.vectors))
 
     return query

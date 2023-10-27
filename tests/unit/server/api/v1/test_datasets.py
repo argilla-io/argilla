@@ -857,7 +857,7 @@ class TestSuiteDatasets:
 
         response = await async_client.get(
             f"/api/v1/datasets/{dataset.id}/records",
-            params={"include": f"{RecordInclude.vectors.value}:{vector_settings_a.id},{vector_settings_b.id}"},
+            params={"include": f"{RecordInclude.vectors.value}:{vector_settings_a.name},{vector_settings_b.name}"},
             headers=owner_auth_header,
         )
 
@@ -1591,7 +1591,7 @@ class TestSuiteDatasets:
 
         response = await async_client.get(
             f"/api/v1/me/datasets/{dataset.id}/records",
-            params={"include": f"{RecordInclude.vectors.value}:{vector_settings_a.id},{vector_settings_b.id}"},
+            params={"include": f"{RecordInclude.vectors.value}:{vector_settings_a.name},{vector_settings_b.name}"},
             headers=owner_auth_header,
         )
 

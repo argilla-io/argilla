@@ -520,7 +520,7 @@ class RecordsUpdate(BaseModel):
 
 class RecordIncludeParam(BaseModel):
     relationships: Optional[List[RecordInclude]] = PydanticField(None, alias="keys")
-    vectors: Optional[List[UUID]] = PydanticField(None, alias="vectors")
+    vectors: Optional[List[str]] = PydanticField(None, alias="vectors")
 
     @root_validator
     def check(cls, values: Dict[str, Any]) -> Dict[str, Any]:
@@ -534,7 +534,7 @@ class RecordIncludeParam(BaseModel):
             # raise ValueError("Cannot include both 'vectors' and 'relationships' in the same request")
             raise HTTPException(
                 status_code=422,
-                detail="'include' query param cannot have both 'vectors' and 'vectors:vector_settings_id_1,vectors_settings_id_2,...'",
+                detail="'include' query param cannot have both 'vectors' and 'vectors:vector_settings_name_1,vectors_settings_name_2,...'",
             )
 
         return values
