@@ -1,8 +1,11 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { BackendMetadata, Response } from "../types";
 import { MetadataMetricsRepository } from "./MetadataMetricsRepository";
-const RECORD_API_ERRORS = {
+import { Metadata } from "~/v1/domain/entities/metadata/Metadata";
+
+const METADATA_API_ERRORS = {
   ERROR_FETCHING_METADATA: "ERROR_FETCHING_METADATA",
+  ERROR_UPDATING_METADATA: "ERROR_UPDATING_METADATA",
 };
 
 export class MetadataRepository {
@@ -20,9 +23,48 @@ export class MetadataRepository {
       return this.completeEmptyMetadataFilters(data.items);
     } catch (err) {
       throw {
-        response: RECORD_API_ERRORS.ERROR_FETCHING_METADATA,
+        response: METADATA_API_ERRORS.ERROR_FETCHING_METADATA,
       };
     }
+  }
+
+  async getMetadataProperties(datasetId: string) {
+    try {
+      // TODO: Review this endpoint, for admin should be /v1/datasets/${datasetId}/metadata-properties without ME.
+      const url = `/v1/me/datasets/${datasetId}/metadata-properties`;
+      const { data } = await this.axios.get<Response<BackendMetadata[]>>(url);
+
+      return data.items;
+    } catch (err) {
+      throw {
+        response: METADATA_API_ERRORS.ERROR_FETCHING_METADATA,
+      };
+    }
+  }
+
+  async update(metadata: Metadata): Promise<BackendMetadata> {
+    try {
+      const { data } = await this.axios.patch<BackendMetadata>(
+        `/v1/metadata-properties/${metadata.id}`,
+        this.createRequest(metadata)
+      );
+
+      return data;
+    } catch (err) {
+      throw {
+        response: METADATA_API_ERRORS.ERROR_UPDATING_METADATA,
+      };
+    }
+  }
+
+  private createRequest({
+    title,
+    visibleForAnnotators,
+  }: Metadata): Partial<BackendMetadata> {
+    return {
+      title,
+      visible_for_annotators: visibleForAnnotators,
+    };
   }
 
   private async completeEmptyMetadataFilters(

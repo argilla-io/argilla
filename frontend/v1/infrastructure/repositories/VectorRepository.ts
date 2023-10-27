@@ -3,7 +3,7 @@ import { BackendVector } from "../types/vector";
 import { Response } from "../types";
 import { Vector } from "~/v1/domain/entities/vector/Vector";
 
-export const enum VECTOR_API_ERRORS {
+const enum VECTOR_API_ERRORS {
   FETCHING = "ERROR_FETCHING_VECTORS",
   UPDATE = "ERROR_PATCHING_VECTORS",
 }
