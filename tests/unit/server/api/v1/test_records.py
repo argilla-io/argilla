@@ -40,6 +40,7 @@ from tests.factories import (
     TermsMetadataPropertyFactory,
     TextQuestionFactory,
     UserFactory,
+    VectorSettingsFactory,
     WorkspaceFactory,
 )
 
@@ -128,9 +129,9 @@ class TestSuiteRecords:
     async def test_update_record(self, async_client: "AsyncClient", mock_search_engine: SearchEngine, role: UserRole):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
+        question_0 = await TextQuestionFactory.create(dataset=dataset)
         question_1 = await TextQuestionFactory.create(dataset=dataset)
         question_2 = await TextQuestionFactory.create(dataset=dataset)
-        question_3 = await TextQuestionFactory.create(dataset=dataset)
         await TermsMetadataPropertyFactory.create(name="terms-metadata-property", dataset=dataset)
         await IntegerMetadataPropertyFactory.create(name="integer-metadata-property", dataset=dataset)
         await FloatMetadataPropertyFactory.create(name="float-metadata-property", dataset=dataset)
@@ -138,9 +139,12 @@ class TestSuiteRecords:
             dataset=dataset,
             metadata_={"terms-metadata-property": "a", "integer-metadata-property": 1, "float-metadata-property": 1.0},
         )
-        await SuggestionFactory.create(question=question_1, record=record, value="suggestion 1")
-        await SuggestionFactory.create(question=question_2, record=record, value="suggestion 2")
-        await SuggestionFactory.create(question=question_3, record=record, value="suggestion 3")
+        await SuggestionFactory.create(question=question_0, record=record, value="suggestion 1")
+        await SuggestionFactory.create(question=question_1, record=record, value="suggestion 2")
+        await SuggestionFactory.create(question=question_2, record=record, value="suggestion 3")
+        vector_settings_0 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        vector_settings_1 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        vector_settings_2 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
 
         response = await async_client.patch(
             f"/api/v1/records/{record.id}",
@@ -154,14 +158,19 @@ class TestSuiteRecords:
                 },
                 "suggestions": [
                     {
-                        "question_id": str(question_1.id),
+                        "question_id": str(question_0.id),
                         "value": "suggestion updated 1",
                     },
                     {
-                        "question_id": str(question_2.id),
+                        "question_id": str(question_1.id),
                         "value": "suggestion updated 2",
                     },
                 ],
+                "vectors": {
+                    vector_settings_0.name: [1, 1, 1, 1, 1],
+                    vector_settings_1.name: [2, 2, 2, 2, 2],
+                    vector_settings_2.name: [3, 3, 3, 3, 3],
+                },
             },
         )
 
@@ -179,7 +188,7 @@ class TestSuiteRecords:
             "responses": None,
             "suggestions": [
                 {
-                    "question_id": str(question_1.id),
+                    "question_id": str(question_0.id),
                     "type": None,
                     "score": None,
                     "value": "suggestion updated 1",
@@ -187,7 +196,7 @@ class TestSuiteRecords:
                     "id": str(record.suggestions[0].id),
                 },
                 {
-                    "question_id": str(question_2.id),
+                    "question_id": str(question_1.id),
                     "type": None,
                     "score": None,
                     "value": "suggestion updated 2",
@@ -195,6 +204,7 @@ class TestSuiteRecords:
                     "id": str(record.suggestions[1].id),
                 },
             ],
+            # TODO: add vectors to response
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
@@ -358,7 +368,7 @@ class TestSuiteRecords:
             "detail": f"'extra-metadata' metadata property does not exists for dataset '{dataset.id}' and extra metadata is not allowed for this dataset"
         }
 
-    async def test_update_record_with_not_valid_suggestion(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_update_record_with_invalid_suggestion(self, async_client: "AsyncClient", owner_auth_header: dict):
         dataset = await DatasetFactory.create()
         question = await LabelSelectionQuestionFactory.create(dataset=dataset)
         record = await RecordFactory.create(dataset=dataset)
@@ -376,6 +386,22 @@ class TestSuiteRecords:
         assert response.status_code == 422
         assert response.json() == {
             "detail": f"Provided suggestion for question_id={question.id} is not valid: 'not a valid value' is not a valid option.\nValid options are: ['option1', 'option2', 'option3']"
+        }
+
+    async def test_update_record_with_invalid_vector(self, async_client: "AsyncClient", owner_auth_header: dict):
+        dataset = await DatasetFactory.create()
+        vector_settings = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        record = await RecordFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers=owner_auth_header,
+            json={"vectors": {vector_settings.name: [1, 2, 3, 4, 5, 6]}},
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"Provided vector with name={vector_settings.name} is not valid: vector must have 5 elements, got 6 elements"
         }
 
     async def test_update_record_with_suggestion_for_nonexistent_question(
@@ -399,6 +425,23 @@ class TestSuiteRecords:
         assert response.status_code == 422
         assert response.json() == {
             "detail": f"Provided suggestion for question_id={question_id} is not valid: question_id={question_id} does not exist"
+        }
+
+    async def test_update_record_with_nonexistent_vector_settings(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record = await RecordFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers=owner_auth_header,
+            json={"vectors": {"i-do-not-exist": [1, 2, 3, 4, 5, 6]}},
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"Provided vector with name=i-do-not-exist is not valid: vector with name=i-do-not-exist does not exist for dataset_id={dataset.id}"
         }
 
     async def test_update_record_with_duplicate_suggestions_question_ids(

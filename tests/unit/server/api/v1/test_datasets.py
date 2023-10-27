@@ -4656,7 +4656,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": "Provided suggestion for record at position 0 is not valid: "
+            "detail": f"Provided suggestion for question_id={question.id} and record at position 0 is not valid: "
             "'option-a' is not a valid option.\nValid options are: ['option1', 'option2', 'option3']"
         }
 
@@ -4744,7 +4744,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Provided suggestion for record at position 0 is not valid: question_id={question_id} does not exist"
+            "detail": f"Provided suggestion for question_id={question_id} and record at position 0 is not valid: question_id={question_id} does not exist"
         }
 
     async def test_update_dataset_records_with_nonexistent_vector_settings_name(

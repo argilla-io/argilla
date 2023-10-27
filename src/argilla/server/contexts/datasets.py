@@ -694,9 +694,10 @@ async def _build_record_suggestions(
             suggestions.append(suggestion)
         except ValueError as e:
             err_msg = (
-                f"Provided suggestion for record at position {record_position} is not valid: {e}"
+                f"Provided suggestion for question_id={suggestion.question_id} and record at position {record_position}"
+                f" is not valid: {e}"
                 if record_position is not None
-                else f"Provided suggestion is not valid: {e}"
+                else f"Provided suggestion for question_id={suggestion.question_id} is not valid: {e}"
             )
             raise ValueError(err_msg) from e
     return suggestions
