@@ -392,3 +392,9 @@ class ArgillaTrainerSkeleton(ABC):
         """
         Generates a `FrameworkCardData` instance to generate a model card from.
         """
+
+    @abstractmethod
+    def push_to_huggingface(self, repo_id: str, **kwargs) -> Optional[str]:
+        """
+        Uploads the model to [Huggingface Hub](https://huggingface.co/docs/hub/models-the-hub).
+        """
