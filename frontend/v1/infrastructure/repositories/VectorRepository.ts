@@ -31,7 +31,7 @@ export class VectorRepository {
   async update(vector: Vector): Promise<BackendVector> {
     try {
       const { data } = await this.axios.patch<BackendVector>(
-        `/v1/vector/${vector.id}`,
+        `/v1/vectors-settings/${vector.id}`,
         this.createRequest(vector)
       );
 
