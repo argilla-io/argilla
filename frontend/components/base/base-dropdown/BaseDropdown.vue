@@ -82,13 +82,13 @@ export default {
     setViewportPosition() {
       return this.$nextTick(() => {
         const { top, left, height } =
-          this.$refs.dropdown?.getBoundingClientRect();
+          this.$refs.dropdown.getBoundingClientRect();
         this.dropdownTop = top + height + this.gap;
         this.dropdownLeft = left;
       });
     },
   },
-  created() {
+  mounted() {
     if (this.isViewportBoundary) {
       this.setViewportPosition();
       window.addEventListener("resize", this.setViewportPosition);
