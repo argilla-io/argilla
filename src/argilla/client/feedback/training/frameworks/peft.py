@@ -57,8 +57,6 @@ class ArgillaPeftTrainer(ArgillaPeftTrainerV1, ArgillaTransformersTrainer):
                 The name of the repository you want to push your model and tokenizer to.
                 It should contain your organization name when pushing to a given organization.
         """
-        # TODO(plaguss): This should only upload the PEFT adapters to the hub, check it.
-        # The self._transformer_model is indeed a lora model
         if not self._transformers_model:
             raise ValueError(
                 "The model must be initialized prior to this point. You can either call `train` or `init_model`."

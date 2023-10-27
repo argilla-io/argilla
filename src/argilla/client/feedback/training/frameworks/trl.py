@@ -446,9 +446,6 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
             # passed to the `TrainingArguments`. To keep a similar API we overwrite
             # the args.hub_model_id with the argument repo_id, and the repo_id
             # will be obtained from there.
-            from transformers import Trainer
-
-            self._trainer: Trainer
             self._trainer.args.hub_model_id = repo_id
             model_url = self._trainer.model.push_to_hub(repo_id, **kwargs)
             tokenizer_url = self._trainer.tokenizer.push_to_hub(repo_id, **kwargs)
