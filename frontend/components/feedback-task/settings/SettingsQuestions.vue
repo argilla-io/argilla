@@ -201,7 +201,6 @@ export default {
 
     &__footer {
       width: 100%;
-      display: flex;
       flex-direction: row;
       justify-content: flex-end;
       align-items: center;
