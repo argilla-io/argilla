@@ -260,7 +260,7 @@ async def _refresh_dataset(dataset: Dataset):
 
 
 @pytest.mark.asyncio
-# @pytest.mark.skipif(not server_settings.search_engine == "opensearch", reason="Running on opensearch engine")
+@pytest.mark.skipif(not server_settings.search_engine == "opensearch", reason="Running on opensearch engine")
 class TestSuiteOpenSearchEngine:
     async def test_get_index_or_raise(self, opensearch_engine: OpenSearchEngine):
         dataset = await DatasetFactory.create()
