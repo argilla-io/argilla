@@ -82,7 +82,7 @@ $secondary-color: palette(grey, 200);
 $secondary-lighten-color: lighten(palette(grey, 200), 5%);
 $secondary-darken-color: darken(palette(grey, 200), 5%);
 $highlight: $brand-primary-color;
-$similarity-color: lighten($brand-primary-color, 20%);
+$similarity-color: palette(orange-red-crayola);
 $bg: palette(grey, 800);
 
 // Black opacity
