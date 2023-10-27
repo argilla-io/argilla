@@ -50,6 +50,11 @@ Learn how to create synthetic data and annotations with OpenAI, LangChain, Trans
 
 Learn how to set up a project to curate a public dataset that can be used to fine-tune an instruction-following model.
 ```
+```{grid-item-card} 🖼️ Use TRL to train a QA model with human feedback
+:link: feedback/training-qa-with-dpo.html
+
+Learn how to train a QA model
+```
 
 ````
 
