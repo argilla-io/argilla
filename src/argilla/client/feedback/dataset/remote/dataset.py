@@ -618,7 +618,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
                 dimensions=vector_settings.dimensions,
             ).parsed
         except AlreadyExistsApiError:
-            raise ValueError(f"Vector settings with name {vector_settings.name!r} already exists")
+            raise ValueError(f"Vector settings with name '{vector_settings.name!r}' already exists.")
 
         return RemoteVectorSettings.from_orm(new_vector_settings)
 

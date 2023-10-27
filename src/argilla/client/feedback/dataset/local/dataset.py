@@ -257,7 +257,7 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
     def vector_settings_by_name(self, name: str) -> VectorSettings:
         vector_settings = self._vector_settings.get(name)
         if not vector_settings:
-            raise KeyError(f"Vector settings with name {name!r} does not exist in the dataset.")
+            raise KeyError(f"Vector settings with name '{name!r}' does not exist in the dataset.")
 
         return vector_settings
 

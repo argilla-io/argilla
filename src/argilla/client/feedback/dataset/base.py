@@ -468,7 +468,7 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
 
     @abstractmethod
     def add_vector_settings(self, *args, **kwargs):
-        """Adds a new `vecto_settings` to the current `FeedbackDataset`."""
+        """Adds a new `vector_settings` to the current `FeedbackDataset`."""
         pass
 
     @abstractmethod
