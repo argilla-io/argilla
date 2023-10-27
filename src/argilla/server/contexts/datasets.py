@@ -848,8 +848,8 @@ async def update_record(
     async with db.begin_nested():
         record = await record.update(db, **params, replace_dict=True, autocommit=False)
 
-        # If "metadata" has been included in the update, then we need to also update it in the search engine
-        if "metadata_" in params:
+        if "metadata_" in params or "vectors" in params:
+            await record.dataset.awaitable_attrs.vectors_settings
             await search_engine.index_records(record.dataset, [record])
 
     await db.commit()

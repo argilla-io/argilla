@@ -423,10 +423,19 @@ class RecordGetterDict(GetterDict):
     def get(self, key: str, default: Any) -> Any:
         if key == "metadata":
             return getattr(self._obj, "metadata_", None)
+
         if key == "responses" and not self._obj.is_relationship_loaded("responses"):
             return default
+
         if key == "suggestions" and not self._obj.is_relationship_loaded("suggestions"):
             return default
+
+        if key == "vectors":
+            if self._obj.is_relationship_loaded("vectors"):
+                return {vector.vector_settings.name: vector.value for vector in self._obj.vectors}
+            else:
+                return default
+
         return super().get(key, default)
 
 
@@ -439,6 +448,7 @@ class Record(BaseModel):
     # response: Optional[Response]
     responses: Optional[List[Response]]
     suggestions: Optional[List[Suggestion]]
+    vectors: Optional[Dict[str, List[float]]]
     inserted_at: datetime
     updated_at: datetime
 

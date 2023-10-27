@@ -95,6 +95,7 @@ class TestSuiteRecords:
             "external_id": record.external_id,
             "responses": None,
             "suggestions": [],
+            "vectors": None,
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
@@ -204,7 +205,11 @@ class TestSuiteRecords:
                     "id": str(record.suggestions[1].id),
                 },
             ],
-            # TODO: add vectors to response
+            "vectors": {
+                vector_settings_0.name: [1, 1, 1, 1, 1],
+                vector_settings_1.name: [2, 2, 2, 2, 2],
+                vector_settings_2.name: [3, 3, 3, 3, 3],
+            },
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
@@ -238,6 +243,7 @@ class TestSuiteRecords:
             "external_id": record.external_id,
             "responses": None,
             "suggestions": [],
+            "vectors": {},
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
@@ -263,6 +269,7 @@ class TestSuiteRecords:
             "external_id": record.external_id,
             "responses": None,
             "suggestions": [],
+            "vectors": {},
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
@@ -288,6 +295,7 @@ class TestSuiteRecords:
             "external_id": record.external_id,
             "responses": None,
             "suggestions": [],
+            "vectors": {},
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
