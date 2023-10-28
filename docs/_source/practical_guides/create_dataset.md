@@ -93,7 +93,7 @@ Check out the following tabs to learn how to set up questions according to their
 ```{include} /_common/tabs/question_settings.md
 ```
 
-##### Define metadata properties
+##### Define `metadata`
 
 Metadata properties allow you to configure the use of metadata information for the filtering and sorting features available in the UI and Python SDK.
 
