@@ -284,9 +284,6 @@ dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 
 ::::
 
-Now you're ready to start [the annotation process](/practical_guides/annotate_dataset).
-
-
 ### Configure the records
 
 We can add records to our `FeedbackDataset`. Take some time to explore and find data that fits the purpose of your project. If you are planning to use public data, the [Datasets page](https://huggingface.co/datasets) of the Hugging Face Hub is a good place to start.
