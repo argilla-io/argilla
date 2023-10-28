@@ -341,7 +341,7 @@ dataset.add_records(records)
 ```
 
 
-###### Add suggestions
+###### Add `suggestions`
 
 Suggestions refer to suggested responses (e.g. model predictions) that you can add to your records to make the annotation process faster. These can be added during the creation of the record or at a later stage. Only one suggestion can be provided for each question, and suggestion values must be compliant with the pre-defined questions e.g. if we have a `RatingQuestion` between 1 and 5, the suggestion should have a valid value within that range.
 
@@ -435,7 +435,7 @@ record = rg.FeedbackRecord(
 
 
 
-###### Add responses
+###### Add `responses`
 
 If your dataset includes some annotations, you can add those to the records as you create them. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered. Note that just one response with an empty `user_id` can be specified, as the first occurrence of `user_id=None` will be set to the active `user_id`, while the rest of the responses with `user_id=None` will be discarded.
 
@@ -542,7 +542,7 @@ record = rg.FeedbackRecord(
 
 ::::
 
-###### Add metadata
+###### Add `metadata`
 
 Metadata properties allow you to configure the use of metadata information for the filtering and sorting features available in the UI and Python SDK. You can add metadata to your records as you create them. If you want the metadata to correspond with the metadata properties configured for your dataset, make sure that the key of the dictionary corresponds with the metadata property `name`. When the key doesn't correspond, this will be considered extra metadata that will get stored with the record, but will not be usable for filtering and sorting.
 
@@ -572,7 +572,7 @@ for record in dataset.records:
  dataset.update_records(modified_records)
 ```
 
-###### Update suggestions
+###### Update `suggestions`
 
 You can also add suggestions to existing records that have been already pushed to Argilla:
 
@@ -608,11 +608,11 @@ dataset.push_to_argilla() # No need to provide `name` and `workspace` as has bee
 ::::
 
 
-###### Update responses
+###### Update `responses`
 
 In contrary to suggestions, responses cannot be updated directly in Argilla. Instead, you will need to delete the record and add it again with the updated responses.
 
-###### Update metadata
+###### Update `metadata`
 
 In contrary to suggestions, metadata cannot be updated directly in Argilla. Instead, you will need to delete the record and add it again with the updated metadata.
 
