@@ -21,14 +21,18 @@ import textdescriptives as td
 from tqdm import tqdm
 
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
-from argilla.client.feedback.schemas.metadata import FloatMetadataProperty, IntegerMetadataProperty, TermsMetadataProperty
+from argilla.client.feedback.schemas.metadata import (
+    FloatMetadataProperty,
+    IntegerMetadataProperty,
+    TermsMetadataProperty,
+)
 from argilla.client.feedback.schemas.records import FeedbackRecord
 
 
 class TextDescriptivesExtractor:
-    """This class extracts a number of basic text descriptives from FeedbackDataset 
+    """This class extracts a number of basic text descriptives from FeedbackDataset
     records using the TextDescriptives library and adds them as record metadata."""
-    
+
     def __init__(
         self,
         model: str = "en",
@@ -38,7 +42,7 @@ class TextDescriptivesExtractor:
     ):
         """
         Initialize a new TextDescriptivesExtractor object.
-        
+
         Args:
             model (str): The language model to use for text descriptives.
             metrics (list[str]): The list of metrics to extract.
@@ -54,10 +58,10 @@ class TextDescriptivesExtractor:
         """
         Extract text descriptives metrics for multiple fields from a list of feedback records
         using the TextDescriptives library.
-        
+
         Args:
             records (List[FeedbackRecord]): A list of FeedbackDataset records.
-            
+
         Returns:
             pd.DataFrame: A dataframe containing the text descriptives metrics for each record and field.
         """
@@ -86,10 +90,10 @@ class TextDescriptivesExtractor:
     def clean_column_name(self, col_name: str) -> str:
         """
         Clean the column name of a dataframe to fit a specific regex pattern.
-        
+
         Args:
             col_name (str): A column name.
-            
+
         Returns:
             str: A column name that fits the regex pattern.
         """
@@ -99,12 +103,12 @@ class TextDescriptivesExtractor:
 
     def cast_to_python_types(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Convert integer, boolean and floats columns in a dataframe 
+        Convert integer, boolean and floats columns in a dataframe
         to Python native types.
-        
+
         Args:
             df (pd.DataFrame): The text descriptives dataframe.
-            
+
         Returns:
             pd.DataFrame: The text descriptives dataframe with integer and boolean columns cast to Python native types.
         """
@@ -125,10 +129,10 @@ class TextDescriptivesExtractor:
     def create_metadata_properties(self, df: pd.DataFrame) -> List:
         """
         Generate metadata properties based on dataframe columns and data types.
-        
+
         Args:
             df (pd.DataFrame): The text descriptives dataframe.
-            
+
         Returns:
             List: A list of metadata properties.
         """
@@ -140,7 +144,9 @@ class TextDescriptivesExtractor:
             if dtype == "object":
                 prop = TermsMetadataProperty(name=name, title=title, visible_for_annotators=self.visible_for_annotators)
             elif dtype == "int64":
-                prop = IntegerMetadataProperty(name=name, title=title, visible_for_annotators=self.visible_for_annotators)
+                prop = IntegerMetadataProperty(
+                    name=name, title=title, visible_for_annotators=self.visible_for_annotators
+                )
             elif dtype == "float64":
                 prop = FloatMetadataProperty(name=name, title=title, visible_for_annotators=self.visible_for_annotators)
             elif dtype == "bool":
@@ -150,16 +156,18 @@ class TextDescriptivesExtractor:
                 continue
             properties.append(prop)
         return properties
-    
-    def add_text_descriptives_to_metadata(self, records: List[FeedbackRecord], df:pd.DataFrame) -> List[FeedbackRecord]:
+
+    def add_text_descriptives_to_metadata(
+        self, records: List[FeedbackRecord], df: pd.DataFrame
+    ) -> List[FeedbackRecord]:
         """
         Add the text descriptives metrics extracted previously as metadata
         to a list of FeedbackDataset records.
-        
+
         Args:
             records (List[FeedbackRecord]): A list of FeedbackDataset records.
             df (pd.DataFrame): The text descriptives dataframe.
-            
+
         Returns:
             List[FeedbackRecord]: A list of FeedbackDataset records with updated metadata.
         """
@@ -186,12 +194,12 @@ class TextDescriptivesExtractor:
 
     def update_dataset(self, dataset: FeedbackDataset) -> FeedbackDataset:
         """
-        Take a FeedbackDataset and add text descriptives metrics for all of its 
+        Take a FeedbackDataset and add text descriptives metrics for all of its
         records as record metadata.
-        
+
         Args:
             dataset (FeedbackDataset): A FeedbackDataset.
-            
+
         Returns:
             FeedbackDataset: A FeedbackDataset with updated metadata.
         """
