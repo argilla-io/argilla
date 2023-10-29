@@ -57,5 +57,6 @@ dependencies:
       - trl>=0.5.0
       - sentence-transformers
       - rich!=13.1.0
+      - textdescriptives>=2.7.0
       # install Argilla in editable mode
       - -e .[server,listeners]
