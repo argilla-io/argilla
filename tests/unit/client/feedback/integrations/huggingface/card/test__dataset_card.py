@@ -38,10 +38,7 @@ from huggingface_hub import DatasetCardData
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import FeedbackRecord
-    from argilla.client.feedback.schemas.types import (
-        AllowedFieldTypes,
-        AllowedQuestionTypes,
-    )
+    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 
 class TestSuiteArgillaDatasetCard:
@@ -117,9 +114,7 @@ class TestSuiteArgillaDatasetCard:
     ) -> None:
         card = ArgillaDatasetCard.from_template(
             card_data=DatasetCardData(
-                language="en",
-                size_categories="n<1K",
-                tags=["rlfh", "argilla", "human-feedback"],
+                language="en", size_categories="n<1K", tags=["rlfh", "argilla", "human-feedback"],
             ),
             template_path=ArgillaDatasetCard.default_template_path,
             repo_id=repo_id,
