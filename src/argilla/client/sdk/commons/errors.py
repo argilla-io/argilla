@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import Any
+from typing import Any, Optional
 
 import httpx
 
@@ -68,7 +68,8 @@ class ArApiResponseError(BaseClientError):
 
     def __str__(self):
         return (
-            f"Argilla server returned an error with http status: {self.HTTP_STATUS}" + f"\nError details: [{self.ctx}]"
+            f"Argilla server returned an error with http status: {self.HTTP_STATUS}. " 
+            f"Error details: {self.ctx!r}"
         )
 
 
@@ -99,8 +100,8 @@ class AlreadyExistsApiError(ArApiResponseError):
 class ValidationApiError(ArApiResponseError):
     HTTP_STATUS = 422
 
-    def __init__(self, client_ctx, params, **ctx):
-        for error in params.get("errors", []):
+    def __init__(self, client_ctx, params: Optional[dict] = None, **ctx):
+        for error in (params or {}).get("errors", []):
             current_level = client_ctx
             for loc in error["loc"]:
                 new_value = None
