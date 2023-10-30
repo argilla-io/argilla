@@ -299,6 +299,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             k=max_results,
             excluded_id=record_id,
             user_response_status_filter=user_response_status_filter,
+            metadata_filters=metadata_filters,
         )
 
         return await self._process_search_response(response, threshold)
