@@ -314,11 +314,10 @@ class ArgillaTrainer(ArgillaTrainerV1):
             if token := HfFolder.get_token():
                 kwargs["token"] = token
 
-            if not kwargs.get("token", None):
-                # One last check for the tests. We use a different env var name
-                # that the one gathered with HfFolder.get_token
-                if token := kwargs.get("token", os.environ.get("HF_HUB_ACCESS_TOKEN", None)):
-                    kwargs["token"] = token
+            # One last check for the tests. We use a different env var name
+            # that the one gathered with HfFolder.get_token
+            if token := kwargs.get("token", os.environ.get("HF_HUB_ACCESS_TOKEN", None)):
+                kwargs["token"] = token
 
         url = self._trainer.push_to_huggingface(repo_id, **kwargs)
 
