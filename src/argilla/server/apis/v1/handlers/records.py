@@ -50,6 +50,20 @@ async def _get_record(
     return record
 
 
+@router.get("/records/{record_id}", response_model=RecordSchema)
+async def get_record(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    record_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    record = await _get_record(db, record_id, with_dataset=True, with_suggestions=True)
+
+    await authorize(current_user, RecordPolicyV1.get(record))
+
+    return record
+
+
 @router.patch("/records/{record_id}", status_code=status.HTTP_200_OK, response_model=RecordSchema)
 async def update_record(
     *,

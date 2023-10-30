@@ -14,7 +14,7 @@
 from typing import TYPE_CHECKING, Any, AsyncGenerator, List, Optional, Union
 
 from argilla.server.enums import MetadataPropertyType, ResponseStatusFilter
-from argilla.server.models import Record, User
+from argilla.server.models import Record, User, VectorSettings
 from argilla.server.search_engine import (
     FloatMetadataFilter,
     IntegerMetadataFilter,
@@ -26,7 +26,6 @@ from argilla.server.search_engine import (
 from argilla.server.search_engine.commons import ALL_RESPONSES_STATUSES_FIELD, index_name_for_dataset
 from argilla.server.settings import settings as server_settings
 from opensearchpy import RequestError
-from sqlalchemy.orm import Session
 
 from tests.factories import (
     FloatMetadataPropertyFactory,
@@ -55,6 +54,8 @@ from tests.factories import (
     RecordFactory,
     TextFieldFactory,
     TextQuestionFactory,
+    VectorFactory,
+    VectorSettingsFactory,
 )
 
 
@@ -211,6 +212,38 @@ async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine, op
     return dataset
 
 
+@pytest_asyncio.fixture(scope="function")
+@pytest.mark.asyncio
+async def test_banking_sentiment_dataset_with_vectors(
+    opensearch_engine: OpenSearchEngine, opensearch: OpenSearch, test_banking_sentiment_dataset: Dataset
+) -> Dataset:
+    vectors_settings = await VectorSettingsFactory.create_batch(5, dataset=test_banking_sentiment_dataset)
+
+    for settings in vectors_settings:
+        await opensearch_engine.configure_index_vectors(settings)
+
+    vectors = []
+    for record in test_banking_sentiment_dataset.records:
+        for settings in vectors_settings:
+            vectors.append(
+                await VectorFactory.create(
+                    vector_settings=settings,
+                    record=record,
+                    value=[random.uniform(-10, 10) for _ in range(0, settings.dimensions)],
+                )
+            )
+        await record.awaitable_attrs.vectors
+
+    await opensearch_engine.set_records_vectors(test_banking_sentiment_dataset, vectors=vectors)
+
+    opensearch.indices.refresh(index=index_name_for_dataset(test_banking_sentiment_dataset))
+
+    await test_banking_sentiment_dataset.awaitable_attrs.vectors_settings
+    await test_banking_sentiment_dataset.awaitable_attrs.records
+
+    return test_banking_sentiment_dataset
+
+
 @pytest_asyncio.fixture()
 async def opensearch_engine(elasticsearch_config: dict) -> AsyncGenerator[OpenSearchEngine, None]:
     engine = OpenSearchEngine(config=elasticsearch_config, number_of_replicas=0, number_of_shards=1)
@@ -223,6 +256,7 @@ async def _refresh_dataset(dataset: Dataset):
     await dataset.awaitable_attrs.fields
     await dataset.awaitable_attrs.questions
     await dataset.awaitable_attrs.metadata_properties
+    await dataset.awaitable_attrs.vectors_settings
 
 
 @pytest.mark.asyncio
@@ -267,6 +301,7 @@ class TestSuiteOpenSearchEngine:
                 "metadata": {"dynamic": "false", "type": "object"},
             },
         }
+        assert index["settings"]["index"]["knn"] == "false"
         assert index["settings"]["index"]["max_result_window"] == str(opensearch_engine.max_result_window)
         assert index["settings"]["index"]["number_of_shards"] == str(opensearch_engine.number_of_shards)
         assert index["settings"]["index"]["number_of_replicas"] == str(opensearch_engine.number_of_replicas)
@@ -984,6 +1019,85 @@ class TestSuiteOpenSearchEngine:
         metrics = await opensearch_engine.compute_metrics_for(property)
 
         assert metrics.dict() == {"type": property_type, **expected_metrics}
+
+    async def test_create_dataset_index_with_vectors(self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch):
+        vectors_settings = await VectorSettingsFactory.create_batch(5)
+        dataset = await DatasetFactory.create(vectors_settings=vectors_settings)
+
+        await _refresh_dataset(dataset)
+        await opensearch_engine.create_index(dataset)
+
+        index_name = index_name_for_dataset(dataset)
+        assert opensearch.indices.exists(index=index_name)
+
+        index = opensearch.indices.get(index=index_name)[index_name]
+        assert index["mappings"]["properties"]["vectors"]["properties"] == {
+            str(settings.id): {
+                "type": "knn_vector",
+                "dimension": settings.dimensions,
+                "method": {
+                    "engine": "lucene",
+                    "space_type": "l2",
+                    "name": "hnsw",
+                    "parameters": {"ef_construction": 4, "m": 2},
+                },
+            }
+            for settings in vectors_settings
+        }
+
+        assert index["settings"]["index"]["knn"] == "false"
+
+    async def test_similarity_search_with_incomplete_inputs(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset_with_vectors: Dataset,
+    ):
+        settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
+        with pytest.raises(
+            expected_exception=ValueError, match="Must provide vector value or record to compute the similarity search"
+        ):
+            await opensearch_engine.similarity_search(
+                dataset=test_banking_sentiment_dataset_with_vectors, vector_settings=settings
+            )
+
+    async def test_similarity_search_by_vector_value(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset_with_vectors: Dataset,
+    ):
+        selected_record = test_banking_sentiment_dataset_with_vectors.records[0]
+        selected_vector = selected_record.vectors[0]
+
+        responses = await opensearch_engine.similarity_search(
+            dataset=test_banking_sentiment_dataset_with_vectors,
+            vector_settings=selected_vector.vector_settings,
+            value=selected_vector.value,
+            max_results=1,
+        )
+
+        assert responses.total == 1
+        assert responses.items[0].record_id == selected_record.id
+
+    async def test_similarity_search_by_record(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset_with_vectors: Dataset,
+    ):
+        selected_record: Record = test_banking_sentiment_dataset_with_vectors.records[0]
+        vector_settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
+
+        responses = await opensearch_engine.similarity_search(
+            dataset=test_banking_sentiment_dataset_with_vectors,
+            vector_settings=vector_settings,
+            record=selected_record,
+            max_results=1,
+        )
+
+        assert responses.total == 1
+        assert responses.items[0].record_id == selected_record.id
 
     async def _configure_record_responses(
         self,
