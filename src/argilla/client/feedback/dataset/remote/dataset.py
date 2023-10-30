@@ -557,7 +557,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
     def vector_settings(self) -> List[RemoteVectorSettings]:
         """Retrieves the `vector_settings` of the current dataset from Argilla"""
         response = datasets_api_v1.list_vector_settings(client=self._client, id=self.id)
-        
+
         return [RemoteVectorSettings.from_orm(vector_settings) for vector_settings in response.parsed.items]
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
