@@ -21,7 +21,7 @@ from argilla.server.contexts import datasets
 from argilla.server.database import get_async_db
 from argilla.server.models import User, VectorSettings
 from argilla.server.policies import VectorSettingsPolicyV1, authorize
-from argilla.server.schemas.v1.datasets import VectorSettings as VectorSettingsSchema
+from argilla.server.schemas.v1.vector_settings import VectorSettings as VectorSettingsSchema
 from argilla.server.schemas.v1.vector_settings import VectorSettingsUpdate
 from argilla.server.security import auth
 

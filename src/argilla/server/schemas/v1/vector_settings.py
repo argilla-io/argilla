@@ -12,10 +12,27 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from datetime import datetime
 from typing import Optional
+from uuid import UUID
+
+from pydantic import BaseModel
 
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.datasets import VectorSettingsTitle
+
+
+class VectorSettings(BaseModel):
+    id: UUID
+    name: str
+    title: str
+    dimensions: int
+    dataset_id: UUID
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
 
 
 class VectorSettingsUpdate(UpdateSchema):
