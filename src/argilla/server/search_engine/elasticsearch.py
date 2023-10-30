@@ -20,7 +20,8 @@ from elasticsearch8 import AsyncElasticsearch, helpers
 
 from argilla.server.models import VectorSettings
 from argilla.server.search_engine import (
-    MetadataFilter, SearchEngine,
+    MetadataFilter,
+    SearchEngine,
     UserResponseStatusFilter,
 )
 from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine, field_name_for_vector_settings
