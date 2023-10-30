@@ -254,8 +254,7 @@ async def _get_search_responses(
             vector_settings=vector_settings,
             value=vector_query.value,
             record=record,
-            # TODO: Uncomment this when we support ordering in similarity search
-            # order=vector_query.order,
+            order=vector_query.order,
             metadata_filters=metadata_filters,
             user_response_status_filter=response_status_filter,
             max_results=limit,

@@ -293,6 +293,10 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         if not vector_value:
             raise ValueError("Cannot find a vector value to apply with provided info")
 
+        if order == "least_similar":
+            for i in range(0, len(vector_value)):
+                vector_value[i] *= -1
+
         query_filters = []
         if query:
             query_filters.append(self._build_text_query(dataset, query))
