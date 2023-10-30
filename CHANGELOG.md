@@ -19,7 +19,7 @@ These are the section headers that we use:
 ### Added
 
 - Added `limit` argument to `pull()` method for `RemoteFeedbackDataset`.([#4074](https://github.com/argilla-io/argilla/pull/4074))
-- 
+-
 ### Fixed
 
 - Fix svg images out of screen with too large images ([#4047](https://github.com/argilla-io/argilla/pull/4047))
