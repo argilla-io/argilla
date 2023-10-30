@@ -17,10 +17,9 @@ default dataset fields.
 - sentence-transformers and trl with formatting_func.
 """
 
-from collections import Counter
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Union
+from typing import TYPE_CHECKING, Callable, List, Union
 
 import pytest
 from argilla.client.feedback.schemas import (
@@ -39,6 +38,7 @@ from tests.integration.client.feedback.helpers import (
     formatting_func_rm,
     formatting_func_sentence_transformers,
     formatting_func_sft,
+    model_card_pattern,
 )
 
 if TYPE_CHECKING:
@@ -67,7 +67,6 @@ MODEL_CARD_NAME = "README.md"
     "feedback_dataset_fields",
     "feedback_dataset_questions",
     "feedback_dataset_records",
-    "model_card_pattern",
 )
 def test_model_card_with_defaults(
     framework: Union[Framework, str],
@@ -76,7 +75,6 @@ def test_model_card_with_defaults(
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
-    model_card_pattern: str,
     mocked_is_on_huggingface,
 ) -> None:
     # This test is almost a copy from the one in `test_trainer.py`, it's separated for
@@ -157,14 +155,12 @@ def test_model_card_with_defaults(
     "feedback_dataset_questions",
     "feedback_dataset_guidelines",
     "feedback_dataset_records",
-    "model_card_pattern",
 )
 def test_model_card_sentence_transformers(
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_guidelines: str,
     feedback_dataset_records: List["FeedbackRecord"],
-    model_card_pattern: str,
     mocked_is_on_huggingface,
 ) -> None:
     dataset = FeedbackDataset(
@@ -199,10 +195,7 @@ def test_model_card_sentence_transformers(
         assert model_card.content.find(pattern) > -1
 
 
-@pytest.mark.usefixtures(
-    "model_card_pattern",
-)
-def test_model_card_openai(model_card_pattern: str, mocked_openai, mocked_is_on_huggingface):
+def test_model_card_openai(mocked_openai, mocked_is_on_huggingface):
     dataset = FeedbackDataset.from_huggingface("argilla/customer_assistant")
     dataset._records = dataset._records[:3]
     task = TrainingTask.for_chat_completion(formatting_func=formatting_func_chat_completion)
@@ -249,7 +242,6 @@ def test_model_card_openai(model_card_pattern: str, mocked_openai, mocked_is_on_
     "feedback_dataset_questions",
     "feedback_dataset_guidelines",
     "feedback_dataset_records",
-    "model_card_pattern",
 )
 def test_model_card_trl(
     formatting_func: Callable,
@@ -258,7 +250,6 @@ def test_model_card_trl(
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
-    model_card_pattern: str,
     mocked_is_on_huggingface,
 ) -> None:
     dataset = FeedbackDataset(
