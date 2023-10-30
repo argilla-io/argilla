@@ -94,6 +94,7 @@ class TestSuiteRecords:
             "external_id": record.external_id,
             "responses": None,
             "suggestions": [],
+            "vectors": None,
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
@@ -195,6 +196,7 @@ class TestSuiteRecords:
                     "id": str(record.suggestions[1].id),
                 },
             ],
+            "vectors": None,
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
@@ -228,6 +230,7 @@ class TestSuiteRecords:
             "external_id": record.external_id,
             "responses": None,
             "suggestions": [],
+            "vectors": None,
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
@@ -253,6 +256,7 @@ class TestSuiteRecords:
             "external_id": record.external_id,
             "responses": None,
             "suggestions": [],
+            "vectors": None,
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
@@ -278,6 +282,7 @@ class TestSuiteRecords:
             "external_id": record.external_id,
             "responses": None,
             "suggestions": [],
+            "vectors": None,
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }

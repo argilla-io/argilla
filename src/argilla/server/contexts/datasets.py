@@ -18,7 +18,7 @@ from uuid import UUID
 
 import sqlalchemy
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import Select, and_, func, or_, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
@@ -59,6 +59,7 @@ if TYPE_CHECKING:
 
     from argilla.server.schemas.v1.datasets import (
         DatasetUpdate,
+        RecordIncludeParam,
         RecordsUpdate,
         VectorSettingsCreate,
     )
@@ -357,9 +358,12 @@ async def get_record_by_id(
             selectinload(Record.dataset).selectinload(Dataset.questions),
             selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
         )
+
     if with_suggestions:
         query = query.options(selectinload(Record.suggestions))
+
     result = await db.execute(query)
+
     return result.scalar_one_or_none()
 
 
@@ -367,24 +371,20 @@ async def get_records_by_ids(
     db: "AsyncSession",
     dataset_id: UUID,
     records_ids: List[UUID],
-    include: Optional[List[RecordInclude]] = None,
+    include: Optional["RecordIncludeParam"] = None,
     user_id: Optional[UUID] = None,
 ) -> List[Record]:
-    if include is None:
-        include = []
-
     query = select(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(records_ids))
 
-    if RecordInclude.responses in include:
-        if user_id:
+    if include and include.with_responses:
+        if not user_id:
+            query = query.options(joinedload(Record.responses))
+        else:
             query = query.outerjoin(
                 Response, and_(Response.record_id == Record.id, Response.user_id == user_id)
             ).options(contains_eager(Record.responses))
-        else:
-            query = query.options(joinedload(Record.responses))
 
-    if RecordInclude.suggestions in include:
-        query = query.options(joinedload(Record.suggestions))
+    query = await _configure_query_relationships(query, include_params=include)
 
     result = await db.execute(query)
     records = result.unique().scalars().all()
@@ -396,11 +396,34 @@ async def get_records_by_ids(
     return ordered_records
 
 
+async def _configure_query_relationships(
+    query: "Select", include_params: Optional["RecordIncludeParam"] = None
+) -> "Select":
+    if not include_params:
+        return query
+
+    if include_params.with_suggestions:
+        query = query.options(joinedload(Record.suggestions))
+
+    if include_params.with_all_vectors:
+        query = query.options(joinedload(Record.vectors))
+
+    elif include_params.with_some_vector:
+        vector_settings_ids_subquery = (
+            select(VectorSettings.id).filter(VectorSettings.name.in_(include_params.vectors)).subquery()
+        )
+        query = query.outerjoin(
+            Vector, and_(Vector.record_id == Record.id, Vector.vector_settings_id.in_(vector_settings_ids_subquery))
+        ).options(contains_eager(Record.vectors))
+
+    return query
+
+
 async def list_records_by_dataset_id(
     db: "AsyncSession",
     dataset_id: UUID,
     user_id: Optional[UUID] = None,
-    include: List[RecordInclude] = [],
+    include: Optional["RecordIncludeParam"] = None,
     response_statuses: List[ResponseStatusFilter] = [],
     offset: int = 0,
     limit: int = LIST_RECORDS_LIMIT,
@@ -433,12 +456,10 @@ async def list_records_by_dataset_id(
     if response_status_filter_expressions:
         records_query = records_query.filter(or_(*response_status_filter_expressions))
 
-    if RecordInclude.responses in include:
+    if include and include.with_responses:
         records_query = records_query.options(contains_eager(Record.responses))
 
-    if RecordInclude.suggestions in include:
-        records_query = records_query.options(joinedload(Record.suggestions))
-
+    records_query = await _configure_query_relationships(query=records_query, include_params=include)
     records_query = records_query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
     result_records = await db.execute(records_query)
 

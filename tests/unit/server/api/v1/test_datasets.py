@@ -89,6 +89,8 @@ from tests.factories import (
     TextFieldFactory,
     TextQuestionFactory,
     UserFactory,
+    VectorFactory,
+    VectorSettingsFactory,
     WorkspaceFactory,
 )
 
@@ -728,6 +730,128 @@ class TestSuiteDatasets:
 
         assert response.status_code == 200
 
+    async def test_list_dataset_records_with_include_vectors(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record_a = await RecordFactory.create(dataset=dataset)
+        record_b = await RecordFactory.create(dataset=dataset)
+        record_c = await RecordFactory.create(dataset=dataset)
+        vector_settings_a = await VectorSettingsFactory.create(name="vector-a", dimensions=3, dataset=dataset)
+        vector_settings_b = await VectorSettingsFactory.create(name="vector-b", dimensions=2, dataset=dataset)
+
+        await VectorFactory.create(value=[1.0, 2.0, 3.0], vector_settings=vector_settings_a, record=record_a)
+        await VectorFactory.create(value=[4.0, 5.0], vector_settings=vector_settings_b, record=record_a)
+        await VectorFactory.create(value=[1.0, 2.0], vector_settings=vector_settings_b, record=record_b)
+
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/records",
+            params={"include": RecordInclude.vectors.value},
+            headers=owner_auth_header,
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "items": [
+                {
+                    "id": str(record_a.id),
+                    "fields": {"text": "This is a text", "sentiment": "neutral"},
+                    "metadata": None,
+                    "external_id": record_a.external_id,
+                    "vectors": {
+                        "vector-a": [1.0, 2.0, 3.0],
+                        "vector-b": [4.0, 5.0],
+                    },
+                    "inserted_at": record_a.inserted_at.isoformat(),
+                    "updated_at": record_a.updated_at.isoformat(),
+                },
+                {
+                    "id": str(record_b.id),
+                    "fields": {"text": "This is a text", "sentiment": "neutral"},
+                    "metadata": None,
+                    "external_id": record_b.external_id,
+                    "vectors": {
+                        "vector-b": [1.0, 2.0],
+                    },
+                    "inserted_at": record_b.inserted_at.isoformat(),
+                    "updated_at": record_b.updated_at.isoformat(),
+                },
+                {
+                    "id": str(record_c.id),
+                    "fields": {"text": "This is a text", "sentiment": "neutral"},
+                    "metadata": None,
+                    "external_id": record_c.external_id,
+                    "vectors": {},
+                    "inserted_at": record_c.inserted_at.isoformat(),
+                    "updated_at": record_c.updated_at.isoformat(),
+                },
+            ],
+            "total": 3,
+        }
+
+    async def test_list_dataset_records_with_include_specific_vectors(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record_a = await RecordFactory.create(dataset=dataset)
+        record_b = await RecordFactory.create(dataset=dataset)
+        record_c = await RecordFactory.create(dataset=dataset)
+        vector_settings_a = await VectorSettingsFactory.create(name="vector-a", dimensions=3, dataset=dataset)
+        vector_settings_b = await VectorSettingsFactory.create(name="vector-b", dimensions=2, dataset=dataset)
+        vector_settings_c = await VectorSettingsFactory.create(name="vector-c", dimensions=4, dataset=dataset)
+
+        await VectorFactory.create(value=[1.0, 2.0, 3.0], vector_settings=vector_settings_a, record=record_a)
+        await VectorFactory.create(value=[4.0, 5.0], vector_settings=vector_settings_b, record=record_a)
+        await VectorFactory.create(value=[6.0, 7.0, 8.0, 9.0], vector_settings=vector_settings_c, record=record_a)
+        await VectorFactory.create(value=[1.0, 2.0], vector_settings=vector_settings_b, record=record_b)
+        await VectorFactory.create(value=[10.0, 11.0, 12.0, 13.0], vector_settings=vector_settings_c, record=record_b)
+        await VectorFactory.create(value=[14.0, 15.0, 16.0, 17.0], vector_settings=vector_settings_c, record=record_c)
+
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/records",
+            params={"include": f"{RecordInclude.vectors.value}:{vector_settings_a.name},{vector_settings_b.name}"},
+            headers=owner_auth_header,
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "items": [
+                {
+                    "id": str(record_a.id),
+                    "fields": {"text": "This is a text", "sentiment": "neutral"},
+                    "metadata": None,
+                    "external_id": record_a.external_id,
+                    "vectors": {
+                        "vector-a": [1.0, 2.0, 3.0],
+                        "vector-b": [4.0, 5.0],
+                    },
+                    "inserted_at": record_a.inserted_at.isoformat(),
+                    "updated_at": record_a.updated_at.isoformat(),
+                },
+                {
+                    "id": str(record_b.id),
+                    "fields": {"text": "This is a text", "sentiment": "neutral"},
+                    "metadata": None,
+                    "external_id": record_b.external_id,
+                    "vectors": {
+                        "vector-b": [1.0, 2.0],
+                    },
+                    "inserted_at": record_b.inserted_at.isoformat(),
+                    "updated_at": record_b.updated_at.isoformat(),
+                },
+                {
+                    "id": str(record_c.id),
+                    "fields": {"text": "This is a text", "sentiment": "neutral"},
+                    "metadata": None,
+                    "external_id": record_c.external_id,
+                    "vectors": {},
+                    "inserted_at": record_c.inserted_at.isoformat(),
+                    "updated_at": record_c.updated_at.isoformat(),
+                },
+            ],
+            "total": 3,
+        }
+
     async def test_list_dataset_records_with_offset(self, async_client: "AsyncClient", owner_auth_header: dict):
         dataset = await DatasetFactory.create()
         await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
@@ -1359,6 +1483,128 @@ class TestSuiteDatasets:
 
         assert response.status_code == 200
         assert response.json() == expected
+
+    async def test_list_current_user_dataset_records_with_include_vectors(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record_a = await RecordFactory.create(dataset=dataset)
+        record_b = await RecordFactory.create(dataset=dataset)
+        record_c = await RecordFactory.create(dataset=dataset)
+        vector_settings_a = await VectorSettingsFactory.create(name="vector-a", dimensions=3, dataset=dataset)
+        vector_settings_b = await VectorSettingsFactory.create(name="vector-b", dimensions=2, dataset=dataset)
+
+        await VectorFactory.create(value=[1.0, 2.0, 3.0], vector_settings=vector_settings_a, record=record_a)
+        await VectorFactory.create(value=[4.0, 5.0], vector_settings=vector_settings_b, record=record_a)
+        await VectorFactory.create(value=[1.0, 2.0], vector_settings=vector_settings_b, record=record_b)
+
+        response = await async_client.get(
+            f"/api/v1/me/datasets/{dataset.id}/records",
+            params={"include": RecordInclude.vectors.value},
+            headers=owner_auth_header,
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "items": [
+                {
+                    "id": str(record_a.id),
+                    "fields": {"text": "This is a text", "sentiment": "neutral"},
+                    "metadata": None,
+                    "external_id": record_a.external_id,
+                    "vectors": {
+                        "vector-a": [1.0, 2.0, 3.0],
+                        "vector-b": [4.0, 5.0],
+                    },
+                    "inserted_at": record_a.inserted_at.isoformat(),
+                    "updated_at": record_a.updated_at.isoformat(),
+                },
+                {
+                    "id": str(record_b.id),
+                    "fields": {"text": "This is a text", "sentiment": "neutral"},
+                    "metadata": None,
+                    "external_id": record_b.external_id,
+                    "vectors": {
+                        "vector-b": [1.0, 2.0],
+                    },
+                    "inserted_at": record_b.inserted_at.isoformat(),
+                    "updated_at": record_b.updated_at.isoformat(),
+                },
+                {
+                    "id": str(record_c.id),
+                    "fields": {"text": "This is a text", "sentiment": "neutral"},
+                    "metadata": None,
+                    "external_id": record_c.external_id,
+                    "vectors": {},
+                    "inserted_at": record_c.inserted_at.isoformat(),
+                    "updated_at": record_c.updated_at.isoformat(),
+                },
+            ],
+            "total": 3,
+        }
+
+    async def test_list_current_user_dataset_records_with_include_specific_vectors(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record_a = await RecordFactory.create(dataset=dataset)
+        record_b = await RecordFactory.create(dataset=dataset)
+        record_c = await RecordFactory.create(dataset=dataset)
+        vector_settings_a = await VectorSettingsFactory.create(name="vector-a", dimensions=3, dataset=dataset)
+        vector_settings_b = await VectorSettingsFactory.create(name="vector-b", dimensions=2, dataset=dataset)
+        vector_settings_c = await VectorSettingsFactory.create(name="vector-c", dimensions=4, dataset=dataset)
+
+        await VectorFactory.create(value=[1.0, 2.0, 3.0], vector_settings=vector_settings_a, record=record_a)
+        await VectorFactory.create(value=[4.0, 5.0], vector_settings=vector_settings_b, record=record_a)
+        await VectorFactory.create(value=[6.0, 7.0, 8.0, 9.0], vector_settings=vector_settings_c, record=record_a)
+        await VectorFactory.create(value=[1.0, 2.0], vector_settings=vector_settings_b, record=record_b)
+        await VectorFactory.create(value=[10.0, 11.0, 12.0, 13.0], vector_settings=vector_settings_c, record=record_b)
+        await VectorFactory.create(value=[14.0, 15.0, 16.0, 17.0], vector_settings=vector_settings_c, record=record_c)
+
+        response = await async_client.get(
+            f"/api/v1/me/datasets/{dataset.id}/records",
+            params={"include": f"{RecordInclude.vectors.value}:{vector_settings_a.name},{vector_settings_b.name}"},
+            headers=owner_auth_header,
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "items": [
+                {
+                    "id": str(record_a.id),
+                    "fields": {"text": "This is a text", "sentiment": "neutral"},
+                    "metadata": None,
+                    "external_id": record_a.external_id,
+                    "vectors": {
+                        "vector-a": [1.0, 2.0, 3.0],
+                        "vector-b": [4.0, 5.0],
+                    },
+                    "inserted_at": record_a.inserted_at.isoformat(),
+                    "updated_at": record_a.updated_at.isoformat(),
+                },
+                {
+                    "id": str(record_b.id),
+                    "fields": {"text": "This is a text", "sentiment": "neutral"},
+                    "metadata": None,
+                    "external_id": record_b.external_id,
+                    "vectors": {
+                        "vector-b": [1.0, 2.0],
+                    },
+                    "inserted_at": record_b.inserted_at.isoformat(),
+                    "updated_at": record_b.updated_at.isoformat(),
+                },
+                {
+                    "id": str(record_c.id),
+                    "fields": {"text": "This is a text", "sentiment": "neutral"},
+                    "metadata": None,
+                    "external_id": record_c.external_id,
+                    "vectors": {},
+                    "inserted_at": record_c.inserted_at.isoformat(),
+                    "updated_at": record_c.updated_at.isoformat(),
+                },
+            ],
+            "total": 3,
+        }
 
     async def test_list_current_user_dataset_records_with_offset(
         self, async_client: "AsyncClient", owner_auth_header: dict
@@ -4972,6 +5218,194 @@ class TestSuiteDatasets:
 
         assert response.status_code == 200
         assert response.json() == expected
+
+        mock_search_engine.search.assert_called_once_with(
+            dataset=dataset,
+            query=StringQuery(q="Hello", field="input"),
+            metadata_filters=[],
+            sort_by=None,
+            user_response_status_filter=None,
+            offset=0,
+            limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
+        )
+
+    async def test_search_dataset_records_with_include_vectors(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record_a = await RecordFactory.create(dataset=dataset)
+        record_b = await RecordFactory.create(dataset=dataset)
+        record_c = await RecordFactory.create(dataset=dataset)
+        vector_settings_a = await VectorSettingsFactory.create(name="vector-a", dimensions=3, dataset=dataset)
+        vector_settings_b = await VectorSettingsFactory.create(name="vector-b", dimensions=2, dataset=dataset)
+
+        await VectorFactory.create(value=[1.0, 2.0, 3.0], vector_settings=vector_settings_a, record=record_a)
+        await VectorFactory.create(value=[4.0, 5.0], vector_settings=vector_settings_b, record=record_a)
+        await VectorFactory.create(value=[1.0, 2.0], vector_settings=vector_settings_b, record=record_b)
+
+        await TextFieldFactory.create(name="input", dataset=dataset)
+
+        mock_search_engine.search.return_value = SearchResponses(
+            items=[
+                SearchResponseItem(record_id=record_a.id, score=10.0),
+                SearchResponseItem(record_id=record_b.id, score=9.0),
+                SearchResponseItem(record_id=record_c.id, score=8.0),
+            ],
+            total=3,
+        )
+
+        response = await async_client.post(
+            f"/api/v1/me/datasets/{dataset.id}/records/search",
+            headers=owner_auth_header,
+            params={"include": RecordInclude.vectors.value},
+            json={
+                "query": {
+                    "text": {
+                        "q": "query",
+                        "field": "input",
+                    }
+                }
+            },
+        )
+
+        assert response.status_code == 200, response.text
+        assert response.json() == {
+            "items": [
+                {
+                    "record": {
+                        "id": str(record_a.id),
+                        "fields": {"text": "This is a text", "sentiment": "neutral"},
+                        "metadata": None,
+                        "external_id": record_a.external_id,
+                        "vectors": {
+                            "vector-a": [1.0, 2.0, 3.0],
+                            "vector-b": [4.0, 5.0],
+                        },
+                        "inserted_at": record_a.inserted_at.isoformat(),
+                        "updated_at": record_a.updated_at.isoformat(),
+                    },
+                    "query_score": 10.0,
+                },
+                {
+                    "record": {
+                        "id": str(record_b.id),
+                        "fields": {"text": "This is a text", "sentiment": "neutral"},
+                        "metadata": None,
+                        "external_id": record_b.external_id,
+                        "vectors": {
+                            "vector-b": [1.0, 2.0],
+                        },
+                        "inserted_at": record_b.inserted_at.isoformat(),
+                        "updated_at": record_b.updated_at.isoformat(),
+                    },
+                    "query_score": 9.0,
+                },
+                {
+                    "record": {
+                        "id": str(record_c.id),
+                        "fields": {"text": "This is a text", "sentiment": "neutral"},
+                        "metadata": None,
+                        "external_id": record_c.external_id,
+                        "vectors": {},
+                        "inserted_at": record_c.inserted_at.isoformat(),
+                        "updated_at": record_c.updated_at.isoformat(),
+                    },
+                    "query_score": 8.0,
+                },
+            ],
+            "total": 3,
+        }
+
+    async def test_search_dataset_records_with_include_specific_vectors(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record_a = await RecordFactory.create(dataset=dataset)
+        record_b = await RecordFactory.create(dataset=dataset)
+        record_c = await RecordFactory.create(dataset=dataset)
+        vector_settings_a = await VectorSettingsFactory.create(name="vector-a", dimensions=3, dataset=dataset)
+        vector_settings_b = await VectorSettingsFactory.create(name="vector-b", dimensions=2, dataset=dataset)
+        vector_settings_c = await VectorSettingsFactory.create(name="vector-c", dimensions=4, dataset=dataset)
+
+        await VectorFactory.create(value=[1.0, 2.0, 3.0], vector_settings=vector_settings_a, record=record_a)
+        await VectorFactory.create(value=[4.0, 5.0], vector_settings=vector_settings_b, record=record_a)
+        await VectorFactory.create(value=[6.0, 7.0, 8.0, 9.0], vector_settings=vector_settings_c, record=record_a)
+        await VectorFactory.create(value=[1.0, 2.0], vector_settings=vector_settings_b, record=record_b)
+        await VectorFactory.create(value=[10.0, 11.0, 12.0, 13.0], vector_settings=vector_settings_c, record=record_b)
+        await VectorFactory.create(value=[14.0, 15.0, 16.0, 17.0], vector_settings=vector_settings_c, record=record_c)
+
+        await TextFieldFactory.create(name="input", dataset=dataset)
+
+        mock_search_engine.search.return_value = SearchResponses(
+            items=[
+                SearchResponseItem(record_id=record_a.id, score=10.0),
+                SearchResponseItem(record_id=record_b.id, score=9.0),
+                SearchResponseItem(record_id=record_c.id, score=8.0),
+            ],
+            total=3,
+        )
+
+        response = await async_client.post(
+            f"/api/v1/me/datasets/{dataset.id}/records/search",
+            headers=owner_auth_header,
+            params={"include": f"{RecordInclude.vectors.value}:{vector_settings_a.name},{vector_settings_b.name}"},
+            json={
+                "query": {
+                    "text": {
+                        "q": "query",
+                        "field": "input",
+                    }
+                }
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "items": [
+                {
+                    "record": {
+                        "id": str(record_a.id),
+                        "fields": {"text": "This is a text", "sentiment": "neutral"},
+                        "metadata": None,
+                        "external_id": record_a.external_id,
+                        "vectors": {
+                            "vector-a": [1.0, 2.0, 3.0],
+                            "vector-b": [4.0, 5.0],
+                        },
+                        "inserted_at": record_a.inserted_at.isoformat(),
+                        "updated_at": record_a.updated_at.isoformat(),
+                    },
+                    "query_score": 10.0,
+                },
+                {
+                    "record": {
+                        "id": str(record_b.id),
+                        "fields": {"text": "This is a text", "sentiment": "neutral"},
+                        "metadata": None,
+                        "external_id": record_b.external_id,
+                        "vectors": {
+                            "vector-b": [1.0, 2.0],
+                        },
+                        "inserted_at": record_b.inserted_at.isoformat(),
+                        "updated_at": record_b.updated_at.isoformat(),
+                    },
+                    "query_score": 9.0,
+                },
+                {
+                    "record": {
+                        "id": str(record_c.id),
+                        "fields": {"text": "This is a text", "sentiment": "neutral"},
+                        "metadata": None,
+                        "external_id": record_c.external_id,
+                        "vectors": {},
+                        "inserted_at": record_c.inserted_at.isoformat(),
+                        "updated_at": record_c.updated_at.isoformat(),
+                    },
+                    "query_score": 8.0,
+                },
+            ],
+            "total": 3,
+        }
 
     async def test_search_dataset_records_with_response_status_filter(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
