@@ -709,10 +709,29 @@ class TestSuiteElasticSearchEngine:
     ):
         settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
         with pytest.raises(
-            expected_exception=ValueError, match="Must provide vector value or record to compute the similarity search"
+            expected_exception=ValueError,
+            match="Must provide either vector value or record to compute the similarity search",
         ):
             await elasticsearch_engine.similarity_search(
                 dataset=test_banking_sentiment_dataset_with_vectors, vector_settings=settings
+            )
+
+    async def test_similarity_search_with_too_much_inputs(
+        self,
+        elasticsearch_engine: ElasticSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset_with_vectors: Dataset,
+    ):
+        settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
+        with pytest.raises(
+            expected_exception=ValueError,
+            match="Must provide either vector value or record to compute the similarity search",
+        ):
+            await elasticsearch_engine.similarity_search(
+                dataset=test_banking_sentiment_dataset_with_vectors,
+                vector_settings=settings,
+                value=[1, 2, 3],
+                record=test_banking_sentiment_dataset_with_vectors.records[0],
             )
 
     async def test_similarity_search_by_vector_value(
