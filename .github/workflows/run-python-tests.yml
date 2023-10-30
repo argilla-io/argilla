@@ -93,9 +93,6 @@ jobs:
         env:
           ARGILLA_ENABLE_TELEMETRY: 0
         run: |
-          df -h
-          # ulimit to avoid segmentation fault
-          ulimit -c unlimited
           pip install -e ".[server,listeners]"
           pytest --cov=argilla --cov-report=xml:${{ env.COVERAGE_REPORT }}.xml ${{ inputs.pytestArgs }} -vs
       - name: Upload coverage report artifact
