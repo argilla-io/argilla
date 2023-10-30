@@ -73,13 +73,13 @@ def model_card_pattern() -> str:
             return SENTENCE_TRANSFORMERS_CODE_SNIPPET
         elif framework == Framework("trl"):
             if training_task == TrainingTask.for_supervised_fine_tuning:
-                return TR_SFT_CODE_SNIPPET
+                return TRL_SFT_CODE_SNIPPET
             elif training_task == TrainingTask.for_reward_modeling:
-                return TR_RM_CODE_SNIPPET
+                return TRL_RM_CODE_SNIPPET
             elif training_task == TrainingTask.for_proximal_policy_optimization:
-                return TR_PPO_CODE_SNIPPET
+                return TRL_PPO_CODE_SNIPPET
             elif training_task == TrainingTask.for_direct_preference_optimization:
-                return TR_DPO_CODE_SNIPPET
+                return TRL_DPO_CODE_SNIPPET
         elif framework == Framework("openai"):
             return OPENAI_CODE_SNIPPET
         else:
@@ -94,25 +94,25 @@ SENTENCE_TRANSFORMERS_CODE_SNIPPET = """\
 dataset = FeedbackDataset.from_huggingface("argilla/emotion")
 
 # Create the training task:
-    def formatting_func(sample):
-        labels = [
-            annotation["value"]
-            for annotation in sample["question-3"]
-            if annotation["status"] == "submitted" and annotation["value"] is not None
-        ]
-        if labels:
-            # Three cases for the tests: None, one tuple and yielding multiple tuples
-            if labels[0] == "a":
-                return None
-            elif labels[0] == "b":
-                return {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1}
-            elif labels[0] == "c":
-                return [
-                    {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1},
-                    {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0},
-                ]
+def formatting_func_sentence_transformers(sample: dict):
+    labels = [
+        annotation["value"]
+        for annotation in sample["question-3"]
+        if annotation["status"] == "submitted" and annotation["value"] is not None
+    ]
+    if labels:
+        # Three cases for the tests: None, one tuple and yielding multiple tuples
+        if labels[0] == "a":
+            return None
+        elif labels[0] == "b":
+            return {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1}
+        elif labels[0] == "c":
+            return [
+                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1},
+                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0},
+            ]
 
-task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func)
+task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func_sentence_transformers)
 
 # Create the ArgillaTrainer:
 trainer = ArgillaTrainer(
@@ -295,21 +295,21 @@ OPENAI_CODE_SNIPPET = """\
 dataset = FeedbackDataset.from_huggingface("argilla/emotion")
 
 # Create the training task:
-    def formatting_func(sample: dict):
-        from uuid import uuid4
+def formatting_func_chat_completion(sample: dict):
+    from uuid import uuid4
 
-        if sample["response"]:
-            chat = str(uuid4())
-            user_message = user_message_prompt.format(context_str=sample["context"], query_str=sample["user-message"])
-            return [
-                (chat, "0", "system", system_prompt),
-                (chat, "1", "user", user_message),
-                (chat, "2", "assistant", sample["response"][0]["value"]),
-            ]
-        else:
-            return None
+    if sample["response"]:
+        chat = str(uuid4())
+        user_message = user_message_prompt.format(context_str=sample["context"], query_str=sample["user-message"])
+        return [
+            (chat, "0", "system", system_prompt),
+            (chat, "1", "user", user_message),
+            (chat, "2", "assistant", sample["response"][0]["value"]),
+        ]
+    else:
+        return None
 
-task = TrainingTask.for_chat_completion(formatting_func=formatting_func)
+task = TrainingTask.for_chat_completion(formatting_func=formatting_func_chat_completion)
 
 # Create the ArgillaTrainer:
 trainer = ArgillaTrainer(
@@ -339,7 +339,7 @@ completion = openai.ChatCompletion.create(
 """
 
 
-TR_SFT_CODE_SNIPPET = """\
+TRL_SFT_CODE_SNIPPET = """\
 ```python
 # Load the dataset:
 dataset = FeedbackDataset.from_huggingface("argilla/emotion")
@@ -362,7 +362,7 @@ def formatting_func_sft(sample: Dict[str, Any]) -> Iterator[str]:
         return f"### Text\\n{sample['text']}"
     return None
 
-task = TrainingTask.for_supervised_fine_tuning(formatting_func=formatting_func)
+task = TrainingTask.for_supervised_fine_tuning(formatting_func=formatting_func_sft)
 
 # Create the ArgillaTrainer:
 trainer = ArgillaTrainer(
@@ -413,7 +413,7 @@ generate("sft_model", "Is a toad a frog?")
 """
 
 
-TR_RM_CODE_SNIPPET = """\
+TRL_RM_CODE_SNIPPET = """\
 ```python
 # Load the dataset:
 dataset = FeedbackDataset.from_huggingface("argilla/emotion")
@@ -435,7 +435,7 @@ def formatting_func_rm(sample: Dict[str, Any]):
         elif labels[0] == "c":
             return [(sample["text"], sample["text"][5:10]), (sample["text"], sample["text"][:5])]
 
-task = TrainingTask.for_reward_modeling(formatting_func=formatting_func)
+task = TrainingTask.for_reward_modeling(formatting_func=formatting_func_rm)
 
 # Create the ArgillaTrainer:
 trainer = ArgillaTrainer(
@@ -483,7 +483,7 @@ print(score)
 """
 
 
-TR_PPO_CODE_SNIPPET = """\
+TRL_PPO_CODE_SNIPPET = """\
 ```python
 # Load the dataset:
 dataset = FeedbackDataset.from_huggingface("argilla/emotion")
@@ -492,7 +492,7 @@ dataset = FeedbackDataset.from_huggingface("argilla/emotion")
 def formatting_func_ppo(sample: Dict[str, Any]):
     return sample["text"]
 
-task = TrainingTask.for_proximal_policy_optimization(formatting_func=formatting_func)
+task = TrainingTask.for_proximal_policy_optimization(formatting_func=formatting_func_ppo)
 
 # Create the ArgillaTrainer:
 trainer = ArgillaTrainer(
@@ -528,7 +528,7 @@ print(output_text)
 """
 
 
-TR_DPO_CODE_SNIPPET = """\
+TRL_DPO_CODE_SNIPPET = """\
 ```python
 # Load the dataset:
 dataset = FeedbackDataset.from_huggingface("argilla/emotion")
@@ -553,7 +553,7 @@ def formatting_func_dpo(sample: Dict[str, Any]):
                 (sample["text"][::-1], sample["text"], sample["text"][:5]),
             ]
 
-task = TrainingTask.for_direct_preference_optimization(formatting_func=formatting_func)
+task = TrainingTask.for_direct_preference_optimization(formatting_func=formatting_func_dpo)
 
 # Create the ArgillaTrainer:
 trainer = ArgillaTrainer(
