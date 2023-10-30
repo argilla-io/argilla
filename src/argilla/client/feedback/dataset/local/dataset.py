@@ -15,6 +15,7 @@
 import logging
 import textwrap
 import warnings
+from operator import attrgetter
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
@@ -29,7 +30,7 @@ from argilla.client.feedback.schemas.questions import (
     RatingQuestion,
     TextQuestion,
 )
-from argilla.client.feedback.schemas.records import FeedbackRecord
+from argilla.client.feedback.schemas.records import FeedbackRecord, SortBy
 from argilla.client.feedback.schemas.types import AllowedQuestionTypes
 from argilla.client.feedback.training.schemas import (
     TrainingTaskForChatCompletion,
@@ -460,16 +461,16 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
             "If your are working with local data, you can just iterate over the records and update them."
         )
 
-    def sort_by(
-        self, field: Union[str, RecordSortField], order: Union[str, SortOrder] = SortOrder.asc
-    ) -> "FeedbackDataset":
-        warnings.warn(
-            "`sort_by` method is not supported for local datasets and won't take any effect. "
-            "First, you need to push the dataset to Argilla with `FeedbackDataset.push_to_argilla()`. "
-            "After, use `FeedbackDataset.from_argilla(...).sort_by()`.",
-            UserWarning,
-            stacklevel=1,
-        )
+    def sort_by(self, sort: List[SortBy]) -> "FeedbackDataset":
+        """Sorts the current `FeedbackDataset` based on the given sort fields and orders."""
+        for sorting in sort:
+            self._records.sort(
+                key=lambda rec: rec.metadata[sorting.metadata_name]
+                if sorting.is_metadata_field
+                else lambda rec: rec.fields[sorting.field],
+                reverse=sorting.order == SortOrder.desc,
+            )
+
         return self
 
     def pull(self) -> "FeedbackDataset":
