@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, List, Type, Union
 
 import datasets
 import pytest
-from argilla import Workspace
+from argilla import User, Workspace
 from argilla.client import api
 from argilla.client.feedback.config import DatasetConfig
 from argilla.client.feedback.dataset import FeedbackDataset
@@ -623,6 +623,21 @@ def test_prepare_for_training_text_classification(
 
     data = remote.prepare_for_training(framework=framework, task=task)
     assert data is not None
+
+
+def test_push_to_argilla_with_vector_settings(argilla_user: User):
+    api.init(api_key=argilla_user.api_key)
+
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field")],
+        questions=[TextQuestion(name="question")],
+        vector_settings=[VectorSettings(name="vector-settings", dimensions=100)],
+    )
+
+    remote = dataset.push_to_argilla(name="test-dataset-vector01")
+    assert len(remote.vector_settings) == 1
+    assert remote.vector_settings[0].name == "vector-settings"
+    assert remote.vector_settings[0].dimensions == 100
 
 
 def test_add_vector_settings():
