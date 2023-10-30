@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import random
 import tempfile
 from typing import TYPE_CHECKING, List, Type, Union
 
@@ -28,7 +29,7 @@ from argilla.client.feedback.schemas.metadata import (
     TermsMetadataProperty,
 )
 from argilla.client.feedback.schemas.questions import TextQuestion
-from argilla.client.feedback.schemas.records import FeedbackRecord
+from argilla.client.feedback.schemas.records import FeedbackRecord, SortBy
 from argilla.client.feedback.schemas.remote.records import RemoteSuggestionSchema
 from argilla.client.feedback.training.schemas import TrainingTask
 from argilla.client.models import Framework
@@ -656,3 +657,33 @@ def test_warning_remote_dataset_methods(
         UserWarning, match="`delete` method is not supported for local datasets and won't take any effect."
     ):
         dataset.delete()
+
+
+def test_sort_by(test_dataset_with_records):
+    expected_terms_values = ["a", "a", "a", "a", "b", "b", "b", "b", "c", "c"]
+
+    random.shuffle(test_dataset_with_records._records)
+
+    assert [
+        r.metadata["terms-metadata"]
+        for r in test_dataset_with_records.sort_by([SortBy(field="metadata.terms-metadata", order="asc")]).records
+    ] == expected_terms_values
+
+    assert [
+        r.metadata["terms-metadata"]
+        for r in test_dataset_with_records.sort_by([SortBy(field="metadata.terms-metadata", order="desc")]).records
+    ] == sorted(expected_terms_values, reverse=True)
+
+    # two nested sort options
+    expected_terms_values = ["a", "a", "a", "a", "b", "b", "b", "b", "c", "c"]
+    expected_integer_values = [2, 2, 4, 4, 4, 4, 5, 5, 6, 6]
+
+    assert [
+        (r.metadata["terms-metadata"], r.metadata["integer-metadata"])
+        for r in test_dataset_with_records.sort_by(
+            [
+                SortBy(field="metadata.terms-metadata", order="asc"),
+                SortBy(field="metadata.integer-metadata", order="asc"),
+            ]
+        ).records
+    ] == list(zip(expected_terms_values, expected_integer_values))
