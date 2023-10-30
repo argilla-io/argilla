@@ -25,7 +25,7 @@ except ImportError:
 from pydantic import BaseModel, Field
 
 try:
-    from yaml import SafeLoader, dump, load
+    from yaml import SafeLoader, load, safe_dump
 except ImportError:
     raise ImportError(
         "Please make sure to install `PyYAML` in order to use `DatasetConfig`. To do"
@@ -45,7 +45,7 @@ class DatasetConfig(BaseModel):
     allow_extra_metadata: bool = True
 
     def to_yaml(self) -> str:
-        return dump(self.dict())
+        return safe_dump(self.dict())
 
     @classmethod
     def from_yaml(cls, yaml_str: str) -> "DatasetConfig":
