@@ -335,8 +335,8 @@ async def create_vector_settings(
         vector_settings = await VectorSettings.create(
             db,
             name=vector_settings_create.name,
+            title=vector_settings_create.title,
             dimensions=vector_settings_create.dimensions,
-            description=vector_settings_create.description,
             dataset_id=dataset.id,
             autocommit=False,
         )
