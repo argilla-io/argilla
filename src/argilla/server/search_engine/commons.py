@@ -265,15 +265,18 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         max_results: int = 100,
         threshold: Optional[float] = None,
     ) -> SearchResponses:
-        if not (value or record):
-            raise ValueError("Must provide vector value or record to compute the similarity search")
+        if bool(value) == bool(record):
+            raise ValueError("Must provide either vector value or record to compute the similarity search")
 
         vector_value = value
+        record_id = None
 
         if not vector_value:
             for vector in record.vectors:
                 if vector.vector_settings_id == vector_settings.id:
                     vector_value = vector.value
+                    record_id = record.id
+                    break
 
         if not vector_value:
             raise ValueError("Cannot find a vector value to apply with provided info")
@@ -284,18 +287,11 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             vector_settings=vector_settings,
             value=vector_value,
             k=max_results,
+            excluded_id=record_id,
             user_response_status_filter=user_response_status_filter,
         )
 
         return await self._process_search_response(response, threshold)
-
-    async def delete_record_response(self, response: Response):
-        record = response.record
-        index_name = await self._get_index_or_raise(record.dataset)
-
-        await self._update_document_request(
-            index_name, id=record.id, body={"script": f'ctx._source["responses"].remove("{response.user.username}")'}
-        )
 
     async def configure_index_vectors(self, vector_settings: VectorSettings) -> None:
         index = await self._get_index_or_raise(vector_settings.dataset)
@@ -588,8 +584,9 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         vector_settings: VectorSettings,
         value: List[float],
         k: int,
-        # TODO(@frascuchon): Add metadata filters
+        excluded_id: Optional[UUID] = None,
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
+        metadata_filters: Optional[List[MetadataFilter]] = None,
     ) -> dict:
         """
         Applies the similarity search request based on a vector configuration, a vector value,

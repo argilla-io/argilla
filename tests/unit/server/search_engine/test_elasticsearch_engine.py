@@ -751,7 +751,7 @@ class TestSuiteElasticSearchEngine:
         )
 
         assert responses.total == 1
-        assert responses.items[0].record_id == selected_record.id
+        assert responses.items[0].record_id != selected_record.id
 
     async def _configure_record_responses(
         self, opensearch: OpenSearch, dataset: Dataset, response_status: List[ResponseStatusFilter], user: User
