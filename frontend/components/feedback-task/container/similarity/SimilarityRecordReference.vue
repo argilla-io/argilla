@@ -57,7 +57,7 @@ export default {
   &.record {
     max-height: 30vh;
     overflow: auto;
-    border: 1px solid darken($similarity-color, 15%);
+    border: 1px solid $similarity-color;
   }
   &__wrapper {
     display: flex;

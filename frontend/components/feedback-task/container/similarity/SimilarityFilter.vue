@@ -7,6 +7,7 @@
   >
   <BaseDropdown
     v-else
+    boundary="viewport"
     :visible="dropdownIsVisible"
     @visibility="onChangeDropDownVisibility"
     class="similarity-filter"

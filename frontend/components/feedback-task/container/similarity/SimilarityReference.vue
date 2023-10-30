@@ -28,6 +28,7 @@
     <div class="similarity-reference__right">
       <BaseButton
         class="similarity-reference__button-icon"
+        :title="visibleReferenceRecord ? $t('minimize') : $t('expand')"
         @on-click="
           $emit(
             visibleReferenceRecord
@@ -89,7 +90,9 @@ export default {
   align-items: center;
   gap: $base-space;
   padding: $base-space 12px;
+  justify-content: space-between;
   max-width: 600px;
+  margin-right: auto;
   border-radius: $border-radius;
   color: $black-54;
   background: $black-4;
@@ -119,8 +122,8 @@ export default {
     align-items: center;
     gap: $base-space;
     min-width: 0;
-    background: $similarity-color;
-    border: 1px solid darken($similarity-color, 15%);
+    background: lighten($similarity-color, 25%);
+    border: 1px solid lighten($similarity-color, 10%);
     padding: 2px $base-space;
     border-radius: $border-radius-l;
     @include font-size(12px);
@@ -131,11 +134,11 @@ export default {
       text-overflow: ellipsis;
       font-weight: 500;
       line-height: 1rem;
-      color: darken($similarity-color, 55%);
+      color: $similarity-color;
     }
     &__button-close {
       padding: 0;
-      color: darken($similarity-color, 55%);
+      color: $similarity-color;
     }
   }
   :deep(.dropdown__header) {
