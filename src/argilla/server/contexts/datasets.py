@@ -22,7 +22,7 @@ from sqlalchemy import Select, and_, func, or_, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
-from argilla.server.enums import DatasetStatus, RecordInclude, ResponseStatusFilter, UserRole
+from argilla.server.enums import DatasetStatus, ResponseStatusFilter, UserRole
 from argilla.server.models import (
     Dataset,
     Field,
@@ -68,6 +68,7 @@ if TYPE_CHECKING:
     from argilla.server.schemas.v1.questions import QuestionUpdate
     from argilla.server.schemas.v1.records import RecordUpdate
     from argilla.server.schemas.v1.suggestions import SuggestionCreate
+    from argilla.server.schemas.v1.vector_settings import VectorSettingsUpdate
 
 LIST_RECORDS_LIMIT = 20
 
@@ -321,6 +322,13 @@ async def get_vector_settings_by_name_and_dataset_id(
     db: "AsyncSession", name: str, dataset_id: UUID
 ) -> Union[VectorSettings, None]:
     return await VectorSettings.read_by(db, name=name, dataset_id=dataset_id)
+
+
+async def update_vector_settings(
+    db: "AsyncSession", vector_settings: VectorSettings, vector_settings_update: "VectorSettingsUpdate"
+) -> VectorSettings:
+    params = vector_settings_update.dict(exclude_unset=True)
+    return await vector_settings.update(db, **params)
 
 
 async def delete_vector_settings(db: "AsyncSession", vector_settings: VectorSettings) -> VectorSettings:
