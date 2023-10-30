@@ -68,10 +68,7 @@ def _build_metadata_field_payload(dataset: Dataset, metadata: Union[Dict[str, An
     return search_engine_metadata
 
 
-def _build_vectors_field_payload(vectors) -> Dict[str, List[float]]:
-    if vectors is None:
-        return {}
-
+def _build_vectors_field_payload(vectors: List[Vector]) -> Dict[str, List[float]]:
     return {str(vector.vector_settings.id): vector.value for vector in vectors}
 
 
@@ -93,7 +90,7 @@ class SearchDocumentGetter(GetterDict):
         elif key == "metadata":
             return _build_metadata_field_payload(self._obj.dataset, self._obj.metadata_)
         elif key == "vectors":
-            if not self._obj.is_relationship_loaded("vectors"):
+            if not self._obj.is_relationship_loaded("vectors") or not self._obj.vectors:
                 return default
 
             return _build_vectors_field_payload(self._obj.vectors)
@@ -106,8 +103,8 @@ class SearchDocument(BaseModel):
     fields: Dict[str, Any]
 
     metadata: Optional[Dict[str, Any]] = None
-    responses: Optional[Dict[str, UserResponse]]
-    vectors: Optional[Dict[str, List[float]]]
+    responses: Optional[Dict[str, UserResponse]] = None
+    vectors: Optional[Dict[str, List[float]]] = None
 
     inserted_at: datetime.datetime
     updated_at: datetime.datetime
@@ -590,7 +587,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
     @abstractmethod
     def _mapping_for_vector_settings(self, vector_settings: VectorSettings) -> dict:
-        """Defines one mapping property configuration for a vector_setting definitio"""
+        """Defines one mapping property configuration for a vector_setting definition"""
         pass
 
     @abstractmethod
