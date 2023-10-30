@@ -39,8 +39,6 @@ from argilla.client.feedback.schemas.records import (
 )
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
 
-
-
 __all__ = [
     "FieldTypes",
     "QuestionTypes",
