@@ -270,7 +270,7 @@ class TestSuiteRemoteDataset:
             vector_settings=VectorSettings(name=expected_name, dimensions=expected_dimensions)
         )
 
-        mock_httpx_client.post.assert_called_with(
+        mock_httpx_client.post.assert_called_once_with(
             url=f"/api/v1/datasets/{test_remote_dataset.id}/vectors-settings",
             json={"name": expected_name, "title": expected_name, "dimensions": expected_dimensions},
         )
