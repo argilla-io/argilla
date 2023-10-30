@@ -518,6 +518,48 @@ class RecordsUpdate(BaseModel):
     )
 
 
+class RecordIncludeParam(BaseModel):
+    relationships: Optional[List[RecordInclude]] = PydanticField(None, alias="keys")
+    vectors: Optional[List[str]] = PydanticField(None, alias="vectors")
+
+    @root_validator
+    def check(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        relationships = values.get("relationships")
+        if not relationships:
+            return values
+
+        vectors = values.get("vectors")
+        if vectors is not None and len(vectors) > 0 and RecordInclude.vectors in relationships:
+            # TODO: once we have a exception handler for ValueError in v1, remove HTTPException
+            # raise ValueError("Cannot include both 'vectors' and 'relationships' in the same request")
+            raise HTTPException(
+                status_code=422,
+                detail="'include' query param cannot have both 'vectors' and 'vectors:vector_settings_name_1,vectors_settings_name_2,...'",
+            )
+
+        return values
+
+    @property
+    def with_responses(self) -> bool:
+        return self._has_relationships and RecordInclude.responses in self.relationships
+
+    @property
+    def with_suggestions(self) -> bool:
+        return self._has_relationships and RecordInclude.suggestions in self.relationships
+
+    @property
+    def with_all_vectors(self) -> bool:
+        return self._has_relationships and not self.vectors and RecordInclude.vectors in self.relationships
+
+    @property
+    def with_some_vector(self) -> bool:
+        return self.vectors is not None and len(self.vectors) > 0
+
+    @property
+    def _has_relationships(self):
+        return self.relationships is not None
+
+
 NT = TypeVar("NT", int, float)
 
 
