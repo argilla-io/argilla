@@ -88,7 +88,7 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
     ) -> dict:
-        knn_query = {field_name_for_vector_settings(vector_settings): {"vector": value, "k": k}}
+        knn_query = {"vector": value, "k": k}
 
         bool_query = {}
         query_filters = []
@@ -105,10 +105,11 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
 
         if bool_query:
             # See https://opensearch.org/docs/latest/search-plugins/knn/filter-search-knn/#efficient-k-nn-filtering
-            # Will work from Opensearch >= v2.4
+            # Will work from Opensearch >= v2.5
             knn_query["filter"] = {"bool": bool_query}
 
-        body = {"query": {"knn": knn_query}}
+        body = {"query": {"knn": {field_name_for_vector_settings(vector_settings): knn_query}}}
+
         return await self.client.search(index=index, body=body, _source=False, track_total_hits=True, size=k)
 
     async def _create_index_request(self, index_name: str, mappings: dict, settings: dict) -> None:
