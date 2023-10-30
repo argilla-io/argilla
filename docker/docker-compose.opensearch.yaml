@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   opensearch:
-    image: opensearchproject/opensearch:2.3.0
+    image: opensearchproject/opensearch:2.5.0
     container_name: opensearch-node1
     environment:
       - cluster.name=opensearch-cluster
@@ -23,7 +23,7 @@ services:
     volumes:
       - opensearch-data:/usr/share/opensearch/data
   opensearch-dashboards:
-    image: opensearchproject/opensearch-dashboards:2.3.0
+    image: opensearchproject/opensearch-dashboards:2.5.0
     container_name: opensearch-dashboards
     ports:
       - 5601:5601 # Map host port 5601 to container port 5601
