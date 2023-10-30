@@ -41,7 +41,9 @@ from argilla.client.feedback.schemas.remote.questions import (
     RemoteRatingQuestion,
     RemoteTextQuestion,
 )
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.feedback.utils import feedback_dataset_in_argilla
+from argilla.client.sdk.commons.errors import AlreadyExistsApiError
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.workspaces import Workspace
 
@@ -286,6 +288,8 @@ class ArgillaMixin:
             metadata_properties=self.metadata_properties, client=httpx_client, id=argilla_id
         )
 
+        ArgillaMixin.__add_vectors_settings(vectors_settings=self.vector_settings, client=httpx_client, id=argilla_id)
+
         ArgillaMixin.__publish_dataset(client=httpx_client, id=argilla_id)
 
         ArgillaMixin.__push_records(
@@ -442,6 +446,26 @@ class ArgillaMixin:
             )
             for dataset in datasets
         ]
+
+    @staticmethod
+    def __add_vectors_settings(
+        vectors_settings: Union[List[VectorSettings], None], client: "httpx.Client", id: UUID
+    ) -> None:
+        try:
+            for vector_settings in vectors_settings or []:
+                try:
+                    datasets_api_v1.add_vector_settings(
+                        client=client,
+                        id=id,
+                        title=vector_settings.name,
+                        name=vector_settings.name,
+                        dimensions=vector_settings.dimensions,
+                    ).parsed
+                except AlreadyExistsApiError:
+                    raise ValueError(f"Vector settings with name {vector_settings.name!r} already exists.")
+        except Exception as e:
+            ArgillaMixin.__delete_dataset(client=client, id=id)
+            raise Exception(f"Failed adding vectors to the `FeedbackDataset` in Argilla with exception: {e}") from e
 
 
 class TaskTemplateMixin:

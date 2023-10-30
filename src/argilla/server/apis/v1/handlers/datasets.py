@@ -22,7 +22,7 @@ from typing_extensions import Annotated
 
 from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_async_db
-from argilla.server.enums import MetadataPropertyType, RecordInclude, RecordSortField, ResponseStatusFilter, SortOrder
+from argilla.server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SortOrder
 from argilla.server.models import Dataset as DatasetModel
 from argilla.server.models import ResponseStatus, User
 from argilla.server.policies import DatasetPolicyV1, MetadataPropertyPolicyV1, authorize, is_authorized
@@ -43,6 +43,7 @@ from argilla.server.schemas.v1.datasets import (
     Question,
     QuestionCreate,
     Questions,
+    RecordIncludeParam,
     Records,
     RecordsCreate,
     RecordsUpdate,
@@ -79,6 +80,10 @@ LIST_DATASET_RECORDS_LIMIT_LTE = 1000
 DELETE_DATASET_RECORDS_LIMIT = 100
 
 router = APIRouter(tags=["datasets"])
+
+parse_record_include_param = parse_query_param(
+    name="include", help="Relationships to include in the response", model=RecordIncludeParam
+)
 
 
 async def _get_dataset(
@@ -276,7 +281,7 @@ async def _filter_records_using_search_engine(
     offset: int,
     user: Optional[User] = None,
     response_statuses: Optional[List[ResponseStatusFilter]] = None,
-    include: Optional[List[RecordInclude]] = None,
+    include: Optional[RecordIncludeParam] = None,
     sort_by_query_param: Optional[Dict[str, str]] = None,
 ) -> Tuple[List["Record"], int]:
     search_responses = await _get_search_responses(
@@ -331,6 +336,7 @@ async def list_current_user_datasets(
             dataset_list = current_user.datasets
     else:
         dataset_list = await datasets.list_datasets_by_workspace_id(db, workspace_id)
+
     return Datasets(items=dataset_list)
 
 
@@ -406,7 +412,7 @@ async def list_current_user_dataset_records(
     dataset_id: UUID,
     metadata: MetadataQueryParams = Depends(),
     sort_by_query_param: SortByQueryParamParsed,
-    include: List[RecordInclude] = Query([], description="Relationships to include in the response"),
+    include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
     response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
@@ -451,7 +457,7 @@ async def list_dataset_records(
     dataset_id: UUID,
     metadata: MetadataQueryParams = Depends(),
     sort_by_query_param: SortByQueryParamParsed,
-    include: List[RecordInclude] = Query([], description="Relationships to include in the response"),
+    include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
     response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
@@ -751,7 +757,7 @@ async def search_dataset_records(
     body: SearchRecordsQuery,
     metadata: MetadataQueryParams = Depends(),
     sort_by_query_param: SortByQueryParamParsed,
-    include: List[RecordInclude] = Query([]),
+    include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
     response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = Query(0, ge=0),
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),

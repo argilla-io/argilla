@@ -26,6 +26,7 @@ from argilla.client.feedback.schemas.metadata import (
 )
 from argilla.client.feedback.schemas.questions import RatingQuestion, TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import (
@@ -35,7 +36,22 @@ if TYPE_CHECKING:
     )
 
 
+# TODO: Since this test is check all functionally related to feedback dataset creation and setup,
+#  it should be tested from the local FeedbackDataset test suite instead. This will allow us
+#  to avoid maintain the TestFeedbackDataset class each time that the base class add a new abstract method.
 class TestFeedbackDataset(FeedbackDatasetBase):
+    def vector_settings_by_name(self, name: str) -> "VectorSettings":
+        pass
+
+    def add_vector_settings(self, *args, **kwargs):
+        pass
+
+    def update_vector_settings(self, *args, **kwargs):
+        pass
+
+    def delete_vector_settings(self, *args, **kwargs):
+        pass
+
     def push_to_huggingface(self, *args, **kwargs):
         pass
 
