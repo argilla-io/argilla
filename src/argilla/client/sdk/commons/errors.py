@@ -67,10 +67,7 @@ class ArApiResponseError(BaseClientError):
         self.ctx = ctx
 
     def __str__(self):
-        return (
-            f"Argilla server returned an error with http status: {self.HTTP_STATUS}. " 
-            f"Error details: {self.ctx!r}"
-        )
+        return f"Argilla server returned an error with http status: {self.HTTP_STATUS}. " f"Error details: {self.ctx!r}"
 
 
 class BadRequestApiError(ArApiResponseError):
