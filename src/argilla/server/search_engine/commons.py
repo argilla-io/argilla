@@ -15,7 +15,7 @@
 import dataclasses
 import datetime
 from abc import abstractmethod
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Literal, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, conint
@@ -270,9 +270,11 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         vector_settings: VectorSettings,
         value: Optional[List[float]] = None,
         record: Optional[Record] = None,
+        query: Optional[Union[TextQuery, str]] = None,
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
         max_results: int = 100,
+        order: Union[Literal["most_similar"], Literal["least_similar"]] = "most_similar",
         threshold: Optional[float] = None,
     ) -> SearchResponses:
         if bool(value) == bool(record):
@@ -291,6 +293,14 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         if not vector_value:
             raise ValueError("Cannot find a vector value to apply with provided info")
 
+        query_filters = []
+        if query:
+            query_filters.append(self._build_text_query(dataset, query))
+        if user_response_status_filter and user_response_status_filter.statuses:
+            query_filters.append(self._build_response_status_filter(user_response_status_filter))
+        if metadata_filters:
+            query_filters.extend(self._build_metadata_filters(metadata_filters))
+
         index = await self._get_index_or_raise(dataset)
         response = await self._request_similarity_search(
             index=index,
@@ -298,8 +308,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             value=vector_value,
             k=max_results,
             excluded_id=record_id,
-            user_response_status_filter=user_response_status_filter,
-            metadata_filters=metadata_filters,
+            query_filters=query_filters,
         )
 
         return await self._process_search_response(response, threshold)
@@ -322,10 +331,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     ) -> SearchResponses:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html
 
-        if isinstance(query, str):
-            query = TextQuery(q=query)
-
-        text_query = self._text_query_builder(dataset, text=query)
+        text_query = self._build_text_query(dataset, text=query)
         bool_query: Dict[str, Any] = {"must": [text_query]}
 
         query_filters = []
@@ -417,9 +423,13 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         return SearchResponses(items=items, total=total)
 
     @staticmethod
-    def _text_query_builder(dataset: Dataset, text: Optional[TextQuery] = None) -> dict:
+    def _build_text_query(dataset: Dataset, text: Optional[Union[TextQuery, str]] = None) -> dict:
         if text is None:
             return {"match_all": {}}
+
+        if isinstance(text, str):
+            text = TextQuery(q=text)
+
         if not text.field:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html
             field_names = [
@@ -596,8 +606,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         value: List[float],
         k: int,
         excluded_id: Optional[UUID] = None,
-        user_response_status_filter: Optional[UserResponseStatusFilter] = None,
-        metadata_filters: Optional[List[MetadataFilter]] = None,
+        query_filters: Optional[List[dict]] = None,
     ) -> dict:
         """
         Applies the similarity search request based on a vector configuration, a vector value,

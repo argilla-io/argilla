@@ -14,7 +14,7 @@
 
 from abc import ABCMeta, abstractmethod
 from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator, ClassVar, Dict, Generic, Iterable, List, Optional, Type, TypeVar, Union
+from typing import Any, AsyncGenerator, ClassVar, Dict, Generic, Iterable, List, Literal, Optional, Type, TypeVar, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Field, root_validator
@@ -266,9 +266,11 @@ class SearchEngine(metaclass=ABCMeta):
         vector_settings: VectorSettings,
         value: Optional[List[float]] = None,
         record: Optional[Record] = None,
+        query: Optional[Union[TextQuery, str]] = None,
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
         max_results: int = 100,
+        order: Union[Literal["most_similar"], Literal["least_similar"]] = "most_similar",
         threshold: Optional[float] = None,
     ) -> SearchResponses:
         pass
