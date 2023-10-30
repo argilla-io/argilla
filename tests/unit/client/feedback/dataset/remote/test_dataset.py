@@ -25,8 +25,13 @@ from argilla.client.feedback.schemas import SuggestionSchema
 from argilla.client.feedback.schemas.remote.fields import RemoteTextField
 from argilla.client.feedback.schemas.remote.questions import RemoteTextQuestion
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.sdk.users.models import UserModel, UserRole
-from argilla.client.sdk.v1.datasets.models import FeedbackItemModel, FeedbackSuggestionModel
+from argilla.client.sdk.v1.datasets.models import (
+    FeedbackItemModel,
+    FeedbackSuggestionModel,
+    FeedbackVectorSettingsModel,
+)
 from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 from pytest_mock import MockerFixture
 
@@ -233,3 +238,39 @@ class TestSuiteRemoteDataset:
             "because `push_to_huggingface` is not supported for a `RemoteFeedbackDataset`",
         ):
             test_remote_dataset.push_to_huggingface("repo_id")
+
+    def test_add_vector_settings(
+        self,
+        mock_httpx_client: httpx.Client,
+        test_remote_dataset: RemoteFeedbackDataset,
+        test_remote_record: RemoteFeedbackRecord,
+    ) -> None:
+        mock_routes = create_mock_routes(test_remote_dataset, test_remote_record)
+
+        expected_name = "mock-vector"
+        expected_dimensions = 100
+        mock_routes["post"].update(
+            {
+                f"/api/v1/datasets/{test_remote_dataset.id}/vectors-settings": httpx.Response(
+                    status_code=201,
+                    content=FeedbackVectorSettingsModel(
+                        id=uuid4(),
+                        name=expected_name,
+                        dimensions=expected_dimensions,
+                        inserted_at=datetime.utcnow(),
+                        updated_at=datetime.utcnow(),
+                    ).json(),
+                )
+            }
+        )
+
+        configure_mock_routes(mock_httpx_client, mock_routes)
+
+        test_remote_dataset.add_vector_settings(
+            vector_settings=VectorSettings(name=expected_name, dimensions=expected_dimensions)
+        )
+
+        mock_httpx_client.post.assert_called_once_with(
+            url=f"/api/v1/datasets/{test_remote_dataset.id}/vectors-settings",
+            json={"name": expected_name, "title": expected_name, "dimensions": expected_dimensions},
+        )

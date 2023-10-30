@@ -31,6 +31,7 @@ from argilla.client.feedback.schemas.questions import (
 )
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.types import AllowedQuestionTypes
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.feedback.training.schemas import (
     TrainingTaskForChatCompletion,
     TrainingTaskForDPO,
@@ -70,6 +71,7 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
         fields: List["AllowedFieldTypes"],
         questions: List["AllowedQuestionTypes"],
         metadata_properties: Optional[List["AllowedMetadataPropertyTypes"]] = None,
+        vector_settings: Optional[List[VectorSettings]] = None,
         guidelines: Optional[str] = None,
         allow_extra_metadata: bool = True,
     ) -> None:
@@ -154,6 +156,16 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
         )
 
         self._records = []
+
+        if vector_settings:
+            self._vector_settings = {vector_setting.name: vector_setting for vector_setting in vector_settings}
+        else:
+            self._vector_settings: Dict[str, VectorSettings] = {}
+
+    @property
+    def vector_settings(self) -> List["VectorSettings"]:
+        """Returns the vector settings of the dataset."""
+        return [v for v in self._vector_settings.values()]
 
     @property
     def records(self) -> List["FeedbackRecord"]:
@@ -246,6 +258,26 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
         self._unique_metadata_property(metadata_property)
         self._metadata_properties.append(metadata_property)
         return metadata_property
+
+    def vector_settings_by_name(self, name: str) -> VectorSettings:
+        vector_settings = self._vector_settings.get(name)
+        if not vector_settings:
+            raise KeyError(f"Vector settings with name '{name!r}' does not exist in the dataset.")
+
+        return vector_settings
+
+    def add_vector_settings(self, vector_settings: VectorSettings) -> VectorSettings:
+        if self._vector_settings.get(vector_settings.name):
+            raise ValueError(f"Vector settings with name '{vector_settings.name}' already exists in the dataset.")
+
+        self._vector_settings[vector_settings.name] = vector_settings
+        return vector_settings
+
+    def update_vector_settings(self, *args, **kwargs):
+        pass
+
+    def delete_vector_settings(self, *args, **kwargs):
+        pass
 
     def update_metadata_properties(
         self,

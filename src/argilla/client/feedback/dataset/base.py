@@ -20,6 +20,7 @@ from pydantic import BaseModel, ValidationError
 from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas.records import FeedbackRecord, SortBy
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes, AllowedQuestionTypes
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.feedback.utils import generate_pydantic_schema_for_fields, generate_pydantic_schema_for_metadata
 from argilla.utils.dependency import requires_dependencies
 
@@ -249,6 +250,18 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         )
 
     @abstractmethod
+    def vector_settings_by_name(self, name: str) -> "VectorSettings":
+        """Returns the vector settings by name if it exists. Otherwise a `ValueError` is raised.
+
+        Args:
+            name: the name of the vector settings to return.
+
+        Raises:
+            KeyError: if the vector settings with the given name does not exist.
+        """
+        pass
+
+    @abstractmethod
     def sort_by(self, sort: List[SortBy]) -> "FeedbackDatasetBase":
         """Sorts the records in the dataset by the given field."""
         pass
@@ -451,6 +464,21 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
     @abstractmethod
     def delete_metadata_properties(self, *args, **kwargs):
         """Deletes a list of `metadata_properties` from the current `FeedbackDataset`."""
+        pass
+
+    @abstractmethod
+    def add_vector_settings(self, *args, **kwargs):
+        """Adds a new `vector_settings` to the current `FeedbackDataset`."""
+        pass
+
+    @abstractmethod
+    def update_vector_settings(self, *args, **kwargs):
+        """Updates the `vector_settings` of the current `FeedbackDataset`."""
+        pass
+
+    @abstractmethod
+    def delete_vector_settings(self, *args, **kwargs):
+        """Deletes a list of `vector_settings` from the current `FeedbackDataset`."""
         pass
 
     @abstractmethod
