@@ -17,24 +17,20 @@ from typing import List, Union
 from uuid import UUID
 
 import pytest
-from argilla import SortBy, TextField, TextQuestion
+from argilla import SortBy
 from argilla.client import api
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataFilter,
-    FloatMetadataProperty,
     IntegerMetadataFilter,
-    IntegerMetadataProperty,
     MetadataFilters,
     TermsMetadataFilter,
-    TermsMetadataProperty,
 )
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.sdk.users.models import UserRole
-from argilla.client.sdk.v1.datasets.models import FeedbackResponseStatusFilter
 from argilla.client.workspaces import Workspace
 from argilla.server.models import User
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -47,20 +43,6 @@ from tests.factories import (
     TextQuestionFactory,
     UserFactory,
 )
-
-
-@pytest.fixture()
-def test_dataset():
-    dataset = FeedbackDataset(
-        fields=[TextField(name="text")],
-        questions=[TextQuestion(name="question")],
-        metadata_properties=[
-            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
-            IntegerMetadataProperty(name="integer-metadata"),
-            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
-        ],
-    )
-    return dataset
 
 
 @pytest.mark.asyncio
