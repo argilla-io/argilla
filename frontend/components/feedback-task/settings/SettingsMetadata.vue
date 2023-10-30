@@ -4,7 +4,7 @@
       <h2 class="--heading5 --medium">Edit metadata properties</h2>
       <div v-for="metadata in settings.metadataProperties" :key="metadata.id">
         <form
-          @submit.prevent="onSubmit(metadata)"
+          @submit.prevent="updateMetadata(metadata)"
           class="settings__edition-form__metadata"
         >
           <div class="settings__edition-form__name">
@@ -43,6 +43,33 @@
           </div>
         </form>
       </div>
+
+      <h2 class="--heading5 --medium">Extra metadata</h2>
+      <form
+        @submit.prevent="updateDataset(settings.dataset)"
+        class="settings__edition-form__metadata"
+      >
+        <BaseSwitch v-model="settings.dataset.allowExtraMetadata"
+          >Allow extra metadata</BaseSwitch
+        >
+        <div class="settings__edition-form__footer">
+          <BaseButton
+            type="button"
+            class="secondary light small"
+            @on-click="settings.dataset.restore()"
+            :disabled="!settings.dataset.isModified"
+          >
+            <span v-text="'Cancel'" />
+          </BaseButton>
+          <BaseButton
+            type="submit"
+            class="primary small"
+            :disabled="!settings.dataset.isModified"
+          >
+            <span v-text="'Update'" />
+          </BaseButton>
+        </div>
+      </form>
     </div>
   </div>
 </template>
@@ -56,11 +83,6 @@ export default {
     settings: {
       type: Object,
       required: true,
-    },
-  },
-  methods: {
-    onSubmit(vector) {
-      this.update(vector);
     },
   },
   setup() {
