@@ -16,12 +16,13 @@ from datetime import datetime
 from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
-from fastapi import Query
-from pydantic import BaseModel, conlist, constr, root_validator, validator
+from fastapi import HTTPException, Query
+from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
 from pydantic.generics import GenericModel
 from pydantic.utils import GetterDict
 
+from argilla.server.enums import RecordInclude
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.records import RecordUpdate
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
@@ -60,6 +61,12 @@ METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH = 1
 METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH = 200
 METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH = 1
 METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH = 500
+
+VECTOR_SETTINGS_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH = 1
+VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH = 200
+VECTOR_SETTINGS_CREATE_DESCRIPTION_MIN_LENGTH = 1
+VECTOR_SETTINGS_CREATE_DESCRIPTION_MAX_LENGTH = 1000
 
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 10
@@ -356,6 +363,42 @@ class QuestionCreate(BaseModel):
     settings: QuestionSettingsCreate
 
 
+class VectorSettings(BaseModel):
+    id: UUID
+    name: str
+    dimensions: int
+    description: Optional[str] = None
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+    def check_vector(self, value: List[float]) -> None:
+        num_elements = len(value)
+        if num_elements != self.dimensions:
+            raise ValueError(f"vector must have {self.dimensions} elements, got {num_elements} elements")
+
+
+class VectorsSettings(BaseModel):
+    items: List[VectorSettings]
+
+
+class VectorSettingsCreate(BaseModel):
+    name: str = PydanticField(
+        ...,
+        regex=VECTOR_SETTINGS_CREATE_NAME_REGEX,
+        min_length=VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH,
+        max_length=VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
+    )
+    dimensions: PositiveInt
+    description: Optional[str] = PydanticField(
+        None,
+        min_length=VECTOR_SETTINGS_CREATE_DESCRIPTION_MIN_LENGTH,
+        max_length=VECTOR_SETTINGS_CREATE_DESCRIPTION_MAX_LENGTH,
+    )
+
+
 class ResponseValue(BaseModel):
     value: Any
 
@@ -434,6 +477,7 @@ class RecordCreate(BaseModel):
     external_id: Optional[str]
     responses: Optional[List[UserResponseCreate]]
     suggestions: Optional[List[SuggestionCreate]]
+    vectors: Optional[Dict[str, List[float]]]
 
     @validator("responses")
     def check_user_id_is_unique(cls, values: Optional[List[UserResponseCreate]]) -> Optional[List[UserResponseCreate]]:
@@ -443,16 +487,14 @@ class RecordCreate(BaseModel):
         user_ids = []
         for value in values:
             if value.user_id in user_ids:
-                raise ValueError(f"Responses contains several responses for the same user_id: {str(value.user_id)!r}")
+                raise ValueError(f"'responses' contains several responses for the same user_id={str(value.user_id)!r}")
             user_ids.append(value.user_id)
 
         return values
 
 
 class RecordsCreate(BaseModel):
-    items: List[RecordCreate] = PydanticField(
-        ..., min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS
-    )
+    items: conlist(item_type=RecordCreate, min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
 
 
 class RecordUpdateWithId(RecordUpdate):
@@ -460,6 +502,7 @@ class RecordUpdateWithId(RecordUpdate):
 
 
 class RecordsUpdate(BaseModel):
+    # TODO: review this definition and align to create model
     items: List[RecordUpdateWithId] = PydanticField(
         ..., min_items=RECORDS_UPDATE_MIN_ITEMS, max_items=RECORDS_UPDATE_MAX_ITEMS
     )

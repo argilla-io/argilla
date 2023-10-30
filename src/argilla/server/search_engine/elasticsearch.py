@@ -17,10 +17,12 @@ from typing import Any, Dict, List, Optional
 
 from elasticsearch8 import AsyncElasticsearch, helpers
 
+from argilla.server.models import VectorSettings
 from argilla.server.search_engine import (
     SearchEngine,
+    UserResponseStatusFilter,
 )
-from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine
+from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine, field_name_for_vector_settings
 from argilla.server.settings import settings
 
 
@@ -65,11 +67,44 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
             "number_of_replicas": self.number_of_replicas,
         }
 
+    def _mapping_for_vector_settings(self, vector_settings: VectorSettings) -> dict:
+        return {
+            f"vectors.{vector_settings.id}": {
+                "type": "dense_vector",
+                "dims": vector_settings.dimensions,
+                "index": True,
+                # can similarity property also be part of config @frascuchon ?
+                # relates vector search similarity metric
+                "similarity": "l2_norm",  ## default value regarding the knn best practices es documentation
+            }
+        }
+
+    async def _request_similarity_search(
+        self,
+        index: str,
+        vector_settings: VectorSettings,
+        value: List[float],
+        k: int,
+        user_response_status_filter: Optional[UserResponseStatusFilter] = None,
+    ) -> dict:
+        knn_query = {
+            "field": field_name_for_vector_settings(vector_settings),
+            "query_vector": value,
+            "k": k,
+            "num_candidates": _compute_num_candidates_from_k(k=k),
+        }
+
+        if user_response_status_filter:
+            # TODO: Add metadata !!!!
+            knn_query["filter"] = self._build_response_status_filter(user_response_status_filter)
+
+        return await self.client.search(index=index, knn=knn_query, _source=False, track_total_hits=True)
+
     async def _create_index_request(self, index_name: str, mappings: dict, settings: dict) -> None:
         await self.client.indices.create(index=index_name, settings=settings, mappings=mappings)
 
     async def _delete_index_request(self, index_name: str):
-        await self.client.indices.delete(index_name, ignore=[404], ignore_unavailable=True)
+        await self.client.indices.delete(index=index_name, ignore=[404], ignore_unavailable=True)
 
     async def _update_document_request(self, index_name: str, id: str, body: dict):
         await self.client.update(index=index_name, id=id, **body)
@@ -106,4 +141,4 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
             raise RuntimeError(errors)
 
     async def _refresh_index_request(self, index_name: str):
-        await self.client.indices.refresh(index_name)
+        await self.client.indices.refresh(index=index_name)

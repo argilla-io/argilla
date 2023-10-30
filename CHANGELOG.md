@@ -18,6 +18,19 @@ These are the section headers that we use:
 
 ### Added
 
+- Added `POST /api/v1/datasets/:dataset_id/vectors-settings` endpoint for creating vector settings for a dataset. ([#3776](https://github.com/argilla-io/argilla/pull/3776))
+- Added `GET /api/v1/datasets/:dataset_id/vectors-settings` endpoint for listing the vectors settings for a dataset. ([#3776](https://github.com/argilla-io/argilla/pull/3776))
+- Added `DELETE /api/v1/vectors-settings/:vector_settings_id` endpoint for deleting a vector settings. ([#3776](https://github.com/argilla-io/argilla/pull/3776))
+- Added `GET /api/v1/records/:record_id` endpoint to get a specific record. ([#4039](https://github.com/argilla-io/argilla/pull/4039))
+
+### Changed
+
+- Updated `POST /api/v1/datasets/:dataset_id/records` endpoint to allow to create records with `vectors` ([#4022](https://github.com/argilla-io/argilla/pull/4022))
+
+## [1.18.0]()
+
+### Added
+
 - New `GET /api/v1/datasets/:dataset_id/metadata-properties` endpoint for listing dataset metadata properties. ([#3813](https://github.com/argilla-io/argilla/pull/3813))
 - New `POST /api/v1/datasets/:dataset_id/metadata-properties` endpoint for creating dataset metadata properties. ([#3813](https://github.com/argilla-io/argilla/pull/3813))
 - New `PATCH /api/v1/metadata-properties/:metadata_property_id` endpoint allowing the update of a specific metadata property. ([#3952](https://github.com/argilla-io/argilla/pull/3952))

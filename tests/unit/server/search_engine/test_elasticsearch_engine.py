@@ -14,12 +14,12 @@
 from typing import TYPE_CHECKING, AsyncGenerator, List, Union
 
 from argilla.server.enums import ResponseStatusFilter
-from argilla.server.models import User
+from argilla.server.models import Record, User, VectorSettings
 from argilla.server.search_engine import (
     StringQuery,
     UserResponseStatusFilter,
 )
-from argilla.server.search_engine.commons import index_name_for_dataset
+from argilla.server.search_engine.commons import ALL_RESPONSES_STATUSES_FIELD, index_name_for_dataset
 from argilla.server.settings import settings as server_settings
 from sqlalchemy.orm import Session
 
@@ -47,6 +47,8 @@ from tests.factories import (
     RecordFactory,
     TextFieldFactory,
     TextQuestionFactory,
+    VectorFactory,
+    VectorSettingsFactory,
 )
 
 
@@ -96,8 +98,7 @@ async def test_banking_sentiment_dataset(elasticsearch_engine: ElasticSearchEngi
         questions=[text_question, rating_question],
     )
 
-    await dataset.awaitable_attrs.fields
-    await dataset.awaitable_attrs.questions
+    await _refresh_dataset(dataset)
 
     await elasticsearch_engine.create_index(dataset)
 
@@ -185,6 +186,38 @@ async def test_banking_sentiment_dataset(elasticsearch_engine: ElasticSearchEngi
     return dataset
 
 
+@pytest_asyncio.fixture(scope="function")
+@pytest.mark.asyncio
+async def test_banking_sentiment_dataset_with_vectors(
+    elasticsearch_engine: ElasticSearchEngine, opensearch: OpenSearch, test_banking_sentiment_dataset: Dataset
+) -> Dataset:
+    vectors_settings = await VectorSettingsFactory.create_batch(5, dataset=test_banking_sentiment_dataset)
+
+    for settings in vectors_settings:
+        await elasticsearch_engine.configure_index_vectors(settings)
+
+    vectors = []
+    for record in test_banking_sentiment_dataset.records:
+        for settings in vectors_settings:
+            vectors.append(
+                await VectorFactory.create(
+                    vector_settings=settings,
+                    record=record,
+                    value=[random.uniform(-10, 10) for _ in range(0, settings.dimensions)],
+                )
+            )
+        await record.awaitable_attrs.vectors
+
+    await elasticsearch_engine.set_records_vectors(test_banking_sentiment_dataset, vectors=vectors)
+
+    opensearch.indices.refresh(index=index_name_for_dataset(test_banking_sentiment_dataset))
+
+    await _refresh_dataset(test_banking_sentiment_dataset)
+    await test_banking_sentiment_dataset.awaitable_attrs.records
+
+    return test_banking_sentiment_dataset
+
+
 @pytest_asyncio.fixture()
 async def elasticsearch_engine(elasticsearch_config: dict) -> AsyncGenerator[ElasticSearchEngine, None]:
     engine = ElasticSearchEngine(config=elasticsearch_config, number_of_replicas=0, number_of_shards=1)
@@ -196,6 +229,8 @@ async def elasticsearch_engine(elasticsearch_config: dict) -> AsyncGenerator[Ela
 async def _refresh_dataset(dataset: Dataset):
     await dataset.awaitable_attrs.fields
     await dataset.awaitable_attrs.questions
+    await dataset.awaitable_attrs.metadata_properties
+    await dataset.awaitable_attrs.vectors_settings
 
 
 @pytest.mark.asyncio
@@ -225,13 +260,23 @@ class TestSuiteElasticSearchEngine:
         assert index["mappings"] == {
             "dynamic": "strict",
             "dynamic_templates": [
-                {"status_responses": {"mapping": {"type": "keyword"}, "path_match": "responses.*.status"}}
+                {
+                    "status_responses": {
+                        "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_STATUSES_FIELD},
+                        "path_match": "responses.*.status",
+                    }
+                }
             ],
             "properties": {
                 "id": {"type": "keyword"},
+                "inserted_at": {"type": "date_nanos"},
+                "updated_at": {"type": "date_nanos"},
+                ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
                 "responses": {"dynamic": "true", "type": "object"},
+                "metadata": {"dynamic": "false", "type": "object"},
             },
         }
+
         assert index["settings"]["index"]["number_of_shards"] == str(elasticsearch_engine.number_of_shards)
         assert index["settings"]["index"]["number_of_replicas"] == str(elasticsearch_engine.number_of_replicas)
 
@@ -255,12 +300,21 @@ class TestSuiteElasticSearchEngine:
         assert index["mappings"] == {
             "dynamic": "strict",
             "dynamic_templates": [
-                {"status_responses": {"mapping": {"type": "keyword"}, "path_match": "responses.*.status"}}
+                {
+                    "status_responses": {
+                        "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_STATUSES_FIELD},
+                        "path_match": "responses.*.status",
+                    }
+                }
             ],
             "properties": {
                 "id": {"type": "keyword"},
+                "inserted_at": {"type": "date_nanos"},
+                "updated_at": {"type": "date_nanos"},
+                ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
                 "fields": {"properties": {field.name: {"type": "text"} for field in dataset.fields}},
                 "responses": {"type": "object", "dynamic": "true"},
+                "metadata": {"dynamic": "false", "type": "object"},
             },
         }
 
@@ -295,10 +349,19 @@ class TestSuiteElasticSearchEngine:
             "dynamic": "strict",
             "properties": {
                 "id": {"type": "keyword"},
+                "inserted_at": {"type": "date_nanos"},
+                "updated_at": {"type": "date_nanos"},
+                ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
                 "responses": {"dynamic": "true", "type": "object"},
+                "metadata": {"dynamic": "false", "type": "object"},
             },
             "dynamic_templates": [
-                {"status_responses": {"mapping": {"type": "keyword"}, "path_match": "responses.*.status"}},
+                {
+                    "status_responses": {
+                        "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_STATUSES_FIELD},
+                        "path_match": "responses.*.status",
+                    }
+                },
                 *[
                     config
                     for question in text_questions
@@ -474,7 +537,7 @@ class TestSuiteElasticSearchEngine:
         records = sorted(dataset_for_pagination.records, key=lambda r: r.id)
         assert [record.id for record in records[offset : offset + limit]] == [item.record_id for item in results.items]
 
-    async def test_index_records(self, elasticsearch_engine: ElasticSearchEngine, opensearch: OpenSearch):
+    async def test_add_records(self, elasticsearch_engine: ElasticSearchEngine, opensearch: OpenSearch):
         text_fields = await TextFieldFactory.create_batch(5)
         dataset = await DatasetFactory.create(fields=text_fields, questions=[])
         records = await RecordFactory.create_batch(
@@ -493,7 +556,17 @@ class TestSuiteElasticSearchEngine:
         opensearch.indices.refresh(index=index_name)
 
         es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
-        assert es_docs == [{"id": str(record.id), "fields": record.fields, "responses": {}} for record in records]
+        assert es_docs == [
+            {
+                "id": str(record.id),
+                "fields": record.fields,
+                "inserted_at": record.inserted_at.isoformat(),
+                "updated_at": record.updated_at.isoformat(),
+                "metadata": {},
+                "responses": {},
+            }
+            for record in records
+        ]
 
     async def test_delete_records(self, elasticsearch_engine: ElasticSearchEngine, opensearch: OpenSearch):
         text_fields = await TextFieldFactory.create_batch(5)
@@ -564,7 +637,7 @@ class TestSuiteElasticSearchEngine:
             "properties": {
                 response.user.username: {
                     "properties": {
-                        "status": {"type": "keyword"},
+                        "status": {"type": "keyword", "copy_to": [ALL_RESPONSES_STATUSES_FIELD]},
                         "values": {"properties": {question.name: {"index": False, "type": "text"}}},
                     }
                 }
@@ -604,6 +677,81 @@ class TestSuiteElasticSearchEngine:
 
         results = opensearch.get(index=index_name, id=record.id)
         assert results["_source"]["responses"] == {}
+
+    async def test_create_dataset_index_with_vectors(
+        self, elasticsearch_engine: ElasticSearchEngine, opensearch: OpenSearch
+    ):
+        vectors_settings = await VectorSettingsFactory.create_batch(5)
+        dataset = await DatasetFactory.create(vectors_settings=vectors_settings)
+
+        await _refresh_dataset(dataset)
+        await elasticsearch_engine.create_index(dataset)
+
+        index_name = index_name_for_dataset(dataset)
+        assert opensearch.indices.exists(index=index_name)
+
+        index = opensearch.indices.get(index=index_name)[index_name]
+        assert index["mappings"]["properties"]["vectors"]["properties"] == {
+            str(settings.id): {
+                "type": "dense_vector",
+                "dims": settings.dimensions,
+                "index": True,
+                "similarity": "l2_norm",
+            }
+            for settings in vectors_settings
+        }
+
+    async def test_similarity_search_with_incomplete_inputs(
+        self,
+        elasticsearch_engine: ElasticSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset_with_vectors: Dataset,
+    ):
+        settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
+        with pytest.raises(
+            expected_exception=ValueError, match="Must provide vector value or record to compute the similarity search"
+        ):
+            await elasticsearch_engine.similarity_search(
+                dataset=test_banking_sentiment_dataset_with_vectors, vector_settings=settings
+            )
+
+    async def test_similarity_search_by_vector_value(
+        self,
+        elasticsearch_engine: ElasticSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset_with_vectors: Dataset,
+    ):
+        selected_record = test_banking_sentiment_dataset_with_vectors.records[0]
+        selected_vector = selected_record.vectors[0]
+
+        responses = await elasticsearch_engine.similarity_search(
+            dataset=test_banking_sentiment_dataset_with_vectors,
+            vector_settings=selected_vector.vector_settings,
+            value=selected_vector.value,
+            max_results=1,
+        )
+
+        assert responses.total == 1
+        assert responses.items[0].record_id == selected_record.id
+
+    async def test_similarity_search_by_record(
+        self,
+        elasticsearch_engine: ElasticSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset_with_vectors: Dataset,
+    ):
+        selected_record: Record = test_banking_sentiment_dataset_with_vectors.records[0]
+        vector_settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
+
+        responses = await elasticsearch_engine.similarity_search(
+            dataset=test_banking_sentiment_dataset_with_vectors,
+            vector_settings=vector_settings,
+            record=selected_record,
+            max_results=1,
+        )
+
+        assert responses.total == 1
+        assert responses.items[0].record_id == selected_record.id
 
     async def _configure_record_responses(
         self, opensearch: OpenSearch, dataset: Dataset, response_status: List[ResponseStatusFilter], user: User

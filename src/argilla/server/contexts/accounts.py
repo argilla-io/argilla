@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, List, Union
 from uuid import UUID
 
 from passlib.context import CryptContext
-from sqlalchemy import select
+from sqlalchemy import exists, select
 from sqlalchemy.orm import Session, selectinload
 
 from argilla.server.models import User, Workspace, WorkspaceUser
@@ -83,6 +83,10 @@ async def delete_workspace(db: "AsyncSession", workspace: Workspace):
 
 async def get_user_by_id(db: "AsyncSession", user_id: UUID) -> Union[User, None]:
     return await User.read(db, id=user_id)
+
+
+async def user_exists(db: "AsyncSession", user_id: UUID) -> bool:
+    return await db.scalar(select(exists().where(User.id == user_id)))
 
 
 def get_user_by_username_sync(db: Session, username: str) -> Union[User, None]:
