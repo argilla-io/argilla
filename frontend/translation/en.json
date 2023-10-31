@@ -27,5 +27,6 @@
       "submit": "Submit (⇧ shift + ↵ enter)"
     }
   },
-  "filterBy": "Filter by..."
+  "filterBy": "Filter by...",
+  "findSimilar": "Find similar"
 }

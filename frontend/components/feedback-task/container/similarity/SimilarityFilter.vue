@@ -3,7 +3,7 @@
     v-if="availableVectors.length === 1"
     class="small"
     @click="findSimilarUniqueVector"
-    >Find similar</BaseButton
+    >{{ $t("findSimilar") }}</BaseButton
   >
   <BaseDropdown
     v-else
@@ -13,7 +13,7 @@
     class="similarity-filter"
   >
     <template slot="dropdown-header">
-      <BaseButton class="small">Find similar</BaseButton>
+      <BaseButton class="small">{{ $t("findSimilar") }}</BaseButton>
     </template>
     <template slot="dropdown-content">
       <div class="similarity-filter__dropdown">
