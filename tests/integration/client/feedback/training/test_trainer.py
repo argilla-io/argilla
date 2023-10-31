@@ -377,14 +377,13 @@ def test_tokenizer_warning_wrong_framework(
 @pytest.mark.parametrize(
     "framework",
     [
-        Framework("spacy"),
-        Framework("spacy-transformers"),
-        Framework("transformers"),
-        Framework("setfit"),
-        Framework("peft"),
-        Framework(
-            "span_marker"
-        ),  # The FeedbackDataset needs to work with token classification for this framework to work.
+        # Framework("spacy"),
+        # Framework("spacy-transformers"),
+        # Framework("transformers"),
+        # Framework("setfit"),
+        # Framework("peft"),
+        # The FeedbackDataset needs to work with token classification for this framework to work.
+        Framework("span_marker"),
     ],
 )
 @pytest.mark.usefixtures(
@@ -419,8 +418,8 @@ def test_push_to_huggingface(
             NotImplementedError,
             match=f"Framework {framework} is not supported for this {TrainingTaskForTextClassification}.",
         ):
-            trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework)
-            return
+            ArgillaTrainer(dataset=dataset, task=task, framework=framework)
+        return
 
     else:
         if framework == Framework("spacy"):

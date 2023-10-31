@@ -235,25 +235,7 @@ def test_push_to_huggingface(
     )
     dataset.add_records(records=feedback_dataset_records * 2)
 
-    def formatting_func(sample):
-        labels = [
-            annotation["value"]
-            for annotation in sample["question-3"]
-            if annotation["status"] == "submitted" and annotation["value"] is not None
-        ]
-        if labels:
-            # Three cases for the tests: None, one tuple and yielding multiple tuples
-            if labels[0] == "a":
-                return None
-            elif labels[0] == "b":
-                return {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1}
-            elif labels[0] == "c":
-                return [
-                    {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1},
-                    {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0},
-                ]
-
-    task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func)
+    task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func_sentence_transformers)
 
     model = "all-MiniLM-L6-v2"
 
@@ -262,5 +244,7 @@ def test_push_to_huggingface(
     trainer.update_config(max_steps=1)
 
     train_with_cleanup(trainer, __OUTPUT_DIR__)
-    with pytest.raises(NotImplementedError, match="sentence-transformers doesn't implement this functionality yet."):
+    with pytest.raises(
+        NotImplementedError, match="This method is not implemented for `ArgillaSentenceTransformersTrainer`."
+    ):
         trainer.push_to_huggingface("mocked", generate_card=True)
