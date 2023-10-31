@@ -12,6 +12,7 @@
         :key="category.name"
       >
         <BaseButton
+          :disabled="!category.canSort"
           @on-click="includeCategory(category)"
           class="sort-categories__item"
           ><span>{{ category.title }}</span></BaseButton

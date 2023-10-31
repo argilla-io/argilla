@@ -70,8 +70,8 @@ We are working on it! We will be adding new features to the `FeedbackDataset` ov
 |-------------------------------	|-----------------	|-------------------|
 | Record status filters 	| ✔️               	| ✔️                   |
 | Text query 	            | ✔️               	| ✔️                   |
-| Metadata filters       	|                	| ✔️                   |
-| Sorting 	            |                	| ✔️                   |
+| Metadata filters       	| ✔️               	| ✔️                   |
+| Sorting 	                | ✔️             	| ✔️                   |
 | Prediction filters 	            |                	| ✔️                   |
 | Annotation filters 	            |                	| ✔️                   |
 | Similarity search 	            |                	| ✔️                   |

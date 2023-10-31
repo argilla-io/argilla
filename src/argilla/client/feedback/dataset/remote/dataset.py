@@ -360,7 +360,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         self._fields = fields
         self._fields_schema = None
         self._questions = questions
-        self._metadata_properties = metadata_properties
         self._guidelines = guidelines
         self._allow_extra_metadata = allow_extra_metadata
 

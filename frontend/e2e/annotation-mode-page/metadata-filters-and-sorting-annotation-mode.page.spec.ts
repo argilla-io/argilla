@@ -162,11 +162,14 @@ test.describe("Annotation page Metadata filters", () => {
       await expect(page).toHaveScreenshot();
 
       await page.getByRole("button", { name: "cpu-user" }).click();
-      await page.getByRole("spinbutton").first().fill("0");
+      await page.getByRole("spinbutton").first().fill("0", { force: true });
 
       await expect(page).toHaveScreenshot();
 
       await page.keyboard.press("Tab");
+      await page
+        .getByRole("button", { name: "cpu-user-title" })
+        .waitFor({ state: "visible" });
 
       await expect(page).toHaveScreenshot();
     });

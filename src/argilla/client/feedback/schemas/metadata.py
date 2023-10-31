@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Type, Union
 
 from pydantic import (
     BaseModel,
@@ -27,7 +27,7 @@ from pydantic import (
     validator,
 )
 
-from argilla.client.feedback.constants import METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE
+from argilla.client.feedback.constants import METADATA_PROPERTY_TYPE_TO_PYDANTIC_TYPE, PYDANTIC_STRICT_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
 from argilla.client.feedback.schemas.validators import (
     validate_numeric_metadata_filter_bounds,
@@ -93,6 +93,15 @@ class MetadataPropertySchema(BaseModel, ABC):
     def _validate_filter(self, metadata_filter: "MetadataFilters") -> None:
         pass
 
+    def _check_allowed_value_type(self, value: Any) -> Any:
+        expected_type = PYDANTIC_STRICT_TO_PYTHON_TYPE[METADATA_PROPERTY_TYPE_TO_PYDANTIC_TYPE[self.type]]
+        if not isinstance(value, expected_type):
+            raise ValueError(
+                f"Provided '{self.name}={value}' of type {type(value)} is not valid, "
+                f"only values of type {expected_type} are allowed."
+            )
+        return value
+
 
 class TermsMetadataProperty(MetadataPropertySchema):
     """Schema for the `FeedbackDataset` metadata properties of type `terms`. This kind
@@ -136,18 +145,22 @@ class TermsMetadataProperty(MetadataPropertySchema):
             settings["values"] = self.values
         return settings
 
-    def _all_values_exist(self, introduced_value: Optional[str] = None) -> str:
+    def _all_values_exist(self, introduced_value: Optional[str] = None) -> Optional[str]:
         if introduced_value is not None and self.values is not None and introduced_value not in self.values:
             raise ValueError(
                 f"Provided '{self.name}={introduced_value}' is not valid, only values in {self.values} are allowed."
             )
         return introduced_value
 
+    def _validator(self, value: Any) -> Any:
+        return self._all_values_exist(self._check_allowed_value_type(value))
+
     @property
     def _pydantic_field_with_validator(self) -> Tuple[Dict[str, Tuple[StrictStr, None]], Dict[str, Callable]]:
+        # TODO: Simplify the validation logic and do not base on dynamic pydantic models
         return (
-            {self.name: (METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE[self.type], None)},
-            {f"{self.name}_validator": validator(self.name, allow_reuse=True)(self._all_values_exist)},
+            {self.name: (METADATA_PROPERTY_TYPE_TO_PYDANTIC_TYPE[self.type], None)},
+            {f"{self.name}_validator": validator(self.name, allow_reuse=True, pre=True)(self._validator)},
         )
 
     def _validate_filter(self, metadata_filter: "TermsMetadataFilter") -> None:
@@ -209,13 +222,16 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
                     )
         return provided_value
 
+    def _validator(self, value: Any) -> Any:
+        return self._value_in_bounds(self._check_allowed_value_type(value))
+
     @property
     def _pydantic_field_with_validator(
         self,
     ) -> Tuple[Dict[str, Tuple[Union[StrictInt, StrictFloat], None]], Dict[str, Callable]]:
         return (
-            {self.name: (METADATA_PROPERTY_TYPE_TO_PYTHON_TYPE[self.type], None)},
-            {f"{self.name}_validator": validator(self.name, allow_reuse=True)(self._value_in_bounds)},
+            {self.name: (METADATA_PROPERTY_TYPE_TO_PYDANTIC_TYPE[self.type], None)},
+            {f"{self.name}_validator": validator(self.name, allow_reuse=True, pre=True)(self._validator)},
         )
 
     def _validate_filter(self, metadata_filter: Union["IntegerMetadataFilter", "FloatMetadataFilter"]) -> None:
