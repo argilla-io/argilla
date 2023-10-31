@@ -24,7 +24,71 @@ The `FeedbackDataset` has a set of predefined task templates that you can use to
 ```{include} /_common/tabs/task_templates.md
 ```
 
-After having initialized the `FeedbackDataset` templates, we can still alter the `fields`, `questions`, and `guidelines` to fit our specific needs using a [custom configuration](#custom-configuration).
+After having initialized the `FeedbackDataset` templates, we can still alter the `fields`, `questions`, and `guidelines` to fit our specific needs using a [custom configuration](#custom-configuration). Below you can find a quick example of how to alter them:
+
+::::{tab-set}
+
+:::{tab-item} Fields
+```python
+# Add new fields
+ds = rg.FeedbackDataset.for_task()
+
+new_fields=[
+        rg.Type_of_field(.,.,.),
+        rg.Type_of_field(.,.,.),
+    ]
+
+ds.fields.extend(new_fields)
+
+# Remove a non-required field
+ds.fields.pop(0)
+```
+:::
+
+:::{tab-item} Questions
+```python
+# Add new questions
+ds = rg.FeedbackDataset.for_task()
+
+new_questions=[
+        rg.Type_of_question(.,.,.),
+        rg.Type_of_question(.,.,.),
+    ]
+
+ds.questions.extend(new_questions)
+
+# Remove a non-required question
+ds.questions.pop(0)
+```
+:::
+
+:::{tab-item} Guidelines
+```python
+# Define new guidelines from the template
+ds = rg.FeedbackDataset.for_task(
+    guidelines="New custom guidelines."
+)
+
+# Define new guidelines for a question
+ds.questions[0].description = 'New description for the question.'
+```
+:::
+
+:::{tab-item} Metadata
+```python
+# Add metadata to the dataset
+ds = rg.FeedbackDataset.for_task()
+
+metadata = rg.TermsMetadataProperty(name="metadata", values=["like", "dislike"])
+
+ds.add_metadata_property(metadata)
+
+# Delete a metadata property
+ds.delete_metadata_properties(metadata_properties="metadata")
+```
+:::
+
+::::
 
 #### Custom Configuration
 
@@ -52,7 +116,7 @@ fields = [
 The order of the fields in the UI follows the order in which these are added to the `fields` attribute in the Python SDK.
 ```
 
-#### Define `questions`
+##### Define `questions`
 
 To collect feedback for your dataset, you need to formulate questions. The Feedback Task currently supports the following types of questions:
 
@@ -81,7 +145,7 @@ Check out the following tabs to learn how to set up questions according to their
 ```{include} /_common/tabs/question_settings.md
 ```
 
-#### Define metadata properties
+##### Define metadata properties
 
 Metadata properties allow you to configure the use of metadata information for the filtering and sorting features available in the UI and Python SDK.
 
@@ -97,6 +161,10 @@ The following arguments apply to specific metadata types:
 - `max` (optional): In an `IntengerMetadataProperty` or a `FloatMetadataProperty`, you can pass a maximum valid value. If none is provided, the maximum value will be computed from the values provided in the records.
 
 ```{include} /_common/tabs/metadata_types.md
+```
+
+```{note}
+You can also define metadata properties after the dataset has been configured or add them to an existing dataset in Argilla. To do that use the `add_metadata_property` method as explained [here](/practical_guides/update_dataset.md#add-or-delete-metadata-properties).
 ```
 
 ##### Define `guidelines`
@@ -140,7 +208,21 @@ dataset = rg.FeedbackDataset(
             description="If you think the answer is not accurate, please, correct it.",
             required=False,
         ),
-    ]
+    ],
+    metadata_properties = [
+        rg.TermsMetadataProperty(
+            name="groups",
+            title="Annotation groups",
+            values=["group-a", "group-b", "group-c"] #optional
+        ),
+        rg.FloatMetadataProperty(
+            name="temperature",
+            min=-0, #optional
+            max=1, #optional
+            visible_for_annotators=False
+        )
+    ],
+    allow_extra_metadata = False
 )
 ```
 

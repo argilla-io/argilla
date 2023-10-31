@@ -12,332 +12,211 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING
+from typing import Callable
 
+import pytest
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
     LabelQuestion,
     MultiLabelQuestion,
+    RankingQuestion,
     RatingQuestion,
     TextQuestion,
 )
+from argilla.client.feedback.schemas.metadata import TermsMetadataProperty
 
-if TYPE_CHECKING:
-    pass
+parametrized_task_templates = {
+    "for_question_anwsering": (
+        FeedbackDataset.for_question_answering(
+            use_markdown=True, metadata_properties=[TermsMetadataProperty(name="test")]
+        ),
+        "This is a question answering dataset",
+        True,
+        2,
+        [TextQuestion],
+    ),
+    "for_text_classification_1": (
+        FeedbackDataset.for_text_classification(
+            labels=["positive", "negative"], metadata_properties=[TermsMetadataProperty(name="test")]
+        ),
+        "This is a text classification",
+        False,
+        1,
+        [LabelQuestion],
+    ),
+    "for_text_classification_2": (
+        FeedbackDataset.for_text_classification(
+            labels=["positive", "negative"], multi_label=True, metadata_properties=[TermsMetadataProperty(name="test")]
+        ),
+        "This is a text classification",
+        False,
+        1,
+        [MultiLabelQuestion],
+    ),
+    "for_summarization": (
+        FeedbackDataset.for_summarization(use_markdown=True, metadata_properties=[TermsMetadataProperty(name="test")]),
+        "This is a summarization",
+        True,
+        1,
+        [TextQuestion],
+    ),
+    "for_supervised_fine_tuning_1": (
+        FeedbackDataset.for_supervised_fine_tuning(
+            context=False, use_markdown=False, guidelines=None, metadata_properties=[TermsMetadataProperty(name="test")]
+        ),
+        "This is a supervised fine-tuning",
+        False,
+        1,
+        [TextQuestion],
+    ),
+    "for_supervised_fine_tuning_2": (
+        FeedbackDataset.for_supervised_fine_tuning(
+            context=True,
+            use_markdown=True,
+            guidelines="Custom guidelines",
+            metadata_properties=[TermsMetadataProperty(name="test")],
+        ),
+        "Custom guidelines",
+        True,
+        2,
+        [TextQuestion],
+    ),
+    "for_retrieval_augmented_generation_1": (
+        FeedbackDataset.for_retrieval_augmented_generation(
+            number_of_retrievals=1,
+            rating_scale=5,
+            use_markdown=True,
+            metadata_properties=[TermsMetadataProperty(name="test")],
+        ),
+        "This is a retrieval augmented",
+        True,
+        2,
+        [RatingQuestion, TextQuestion],
+    ),
+    "for_retrieval_augmented_generation_2": (
+        FeedbackDataset.for_retrieval_augmented_generation(
+            number_of_retrievals=3,
+            rating_scale=10,
+            use_markdown=False,
+            guidelines="Custom guidelines",
+            metadata_properties=[TermsMetadataProperty(name="test")],
+        ),
+        "Custom guidelines",
+        False,
+        4,
+        [RatingQuestion, RatingQuestion, RatingQuestion, TextQuestion],
+    ),
+    "for_sentence_similarity_1": (
+        FeedbackDataset.for_sentence_similarity(metadata_properties=[TermsMetadataProperty(name="test")]),
+        "This is a sentence similarity",
+        False,
+        2,
+        [RatingQuestion],
+    ),
+    "for_sentence_similarity_2": (
+        FeedbackDataset.for_sentence_similarity(
+            rating_scale=5,
+            use_markdown=True,
+            guidelines="Custom guidelines",
+            metadata_properties=[TermsMetadataProperty(name="test")],
+        ),
+        "Custom guidelines",
+        True,
+        2,
+        [RatingQuestion],
+    ),
+    "for_preference_modeling": (
+        FeedbackDataset.for_preference_modeling(
+            use_markdown=False, context=True, metadata_properties=[TermsMetadataProperty(name="test")]
+        ),
+        "This is a preference dataset",
+        False,
+        4,
+        [RankingQuestion],
+    ),
+    "for_natural_language_inference_1": (
+        FeedbackDataset.for_natural_language_inference(metadata_properties=[TermsMetadataProperty(name="test")]),
+        "This is a natural language inference",
+        False,
+        2,
+        [LabelQuestion],
+    ),
+    "for_natural_language_inference_2": (
+        FeedbackDataset.for_natural_language_inference(
+            labels=["yes", "no"],
+            guidelines="Custom guidelines",
+            metadata_properties=[TermsMetadataProperty(name="test")],
+        ),
+        "Custom guidelines",
+        False,
+        2,
+        [LabelQuestion],
+    ),
+    "for_proximal_policy_optimization_1": (
+        FeedbackDataset.for_proximal_policy_optimization(metadata_properties=[TermsMetadataProperty(name="test")]),
+        "This is a proximal policy optimization",
+        False,
+        1,
+        [RatingQuestion],
+    ),
+    "for_proximal_policy_optimization_2": (
+        FeedbackDataset.for_proximal_policy_optimization(
+            context=True, use_markdown=True, metadata_properties=[TermsMetadataProperty(name="test")]
+        ),
+        "This is a proximal policy optimization",
+        True,
+        2,
+        [RatingQuestion],
+    ),
+    "for_direct_preference_optimization_1": (
+        FeedbackDataset.for_direct_preference_optimization(metadata_properties=[TermsMetadataProperty(name="test")]),
+        "This is a direct preference optimization",
+        False,
+        3,
+        [RankingQuestion],
+    ),
+    "for_direct_preference_optimization_2": (
+        FeedbackDataset.for_direct_preference_optimization(
+            context=True, use_markdown=True, metadata_properties=[TermsMetadataProperty(name="test")]
+        ),
+        "This is a direct preference optimization",
+        True,
+        4,
+        [RankingQuestion],
+    ),
+}
 
 
-def test_for_question_answering():
-    dataset = FeedbackDataset.for_question_answering(use_markdown=True)
-    assert len(dataset.fields) == 2
-    assert len(dataset.questions) == 1
-    assert dataset.questions[0].name == "answer"
-    assert (
-        dataset.questions[0].description == "Answer the question. Note that the answer must exactly be in the context."
-    )
-    assert dataset.questions[0].required is True
-    assert dataset.fields[0].name == "question"
-    assert dataset.fields[0].use_markdown is True
-    assert dataset.fields[1].name == "context"
-    assert dataset.fields[1].use_markdown is True
-    assert (
-        dataset.guidelines
-        == "This is a question answering dataset that contains questions and contexts. Please answer the question by using the context."
-    )
-
-
-def test_for_text_classification():
-    # Test case 1: Single label classification
-    dataset = FeedbackDataset.for_text_classification(labels=["positive", "negative"])
+@pytest.mark.parametrize(
+    "dataset, guidelines_start, use_markdown, number_of_fields, question_types",
+    [
+        parametrized_task_templates["for_question_anwsering"],
+        parametrized_task_templates["for_text_classification_1"],
+        parametrized_task_templates["for_text_classification_2"],
+        parametrized_task_templates["for_summarization"],
+        parametrized_task_templates["for_supervised_fine_tuning_1"],
+        parametrized_task_templates["for_supervised_fine_tuning_2"],
+        parametrized_task_templates["for_retrieval_augmented_generation_1"],
+        parametrized_task_templates["for_retrieval_augmented_generation_2"],
+        parametrized_task_templates["for_sentence_similarity_1"],
+        parametrized_task_templates["for_sentence_similarity_2"],
+        parametrized_task_templates["for_preference_modeling"],
+        parametrized_task_templates["for_proximal_policy_optimization_1"],
+        parametrized_task_templates["for_proximal_policy_optimization_2"],
+        parametrized_task_templates["for_direct_preference_optimization_1"],
+        parametrized_task_templates["for_direct_preference_optimization_2"],
+    ],
+)
+def test_task_templates(
+    dataset: FeedbackDataset, guidelines_start: str, use_markdown: bool, number_of_fields: int, question_types: Callable
+):
     assert len(dataset) == 0
-    assert dataset.questions[0].name == "label"
-    assert (
-        dataset.questions[0].description
-        == "Classify the text by selecting the correct label from the given list of labels."
-    )
-    assert isinstance(dataset.questions[0], LabelQuestion)
-    assert dataset.questions[0].labels == ["positive", "negative"]
-    assert dataset.fields[0].name == "text"
-    assert dataset.fields[0].use_markdown is False
-    assert (
-        dataset.guidelines == "This is a text classification dataset that contains texts and labels. "
-        "Given a set of texts and a predefined set of labels, the goal of text classification is to assign one label "
-        "to each text based on its content. Please classify the texts by making the correct selection."
-    )
-
-    # Test case 2: Multi-label classification
-    dataset = FeedbackDataset.for_text_classification(labels=["positive", "negative"], multi_label=True)
-    assert len(dataset) == 0
-    assert dataset.questions[0].name == "label"
-    assert (
-        dataset.questions[0].description
-        == "Classify the text by selecting the correct label from the given list of labels."
-    )
-    assert isinstance(dataset.questions[0], MultiLabelQuestion)
-    assert dataset.questions[0].labels == ["positive", "negative"]
-    assert dataset.fields[0].name == "text"
-    assert dataset.fields[0].use_markdown is False
-    print(dataset.guidelines)
-    assert (
-        dataset.guidelines == "This is a text classification dataset that contains texts and labels. "
-        "Given a set of texts and a predefined set of labels, the goal of text classification is to assign one "
-        "or more labels to each text based on its content. Please classify the texts by making the correct selection."
-    )
-
-
-def test_for_summarization():
-    dataset = FeedbackDataset.for_summarization(use_markdown=True)
-    assert len(dataset) == 0
-    assert dataset.questions[0].name == "summary"
-    assert dataset.questions[0].description == "Write a summary of the text."
-    assert isinstance(dataset.questions[0], TextQuestion)
-    assert dataset.fields[0].name == "text"
-    assert dataset.fields[0].use_markdown is True
-    assert (
-        dataset.guidelines
-        == "This is a summarization dataset that contains texts. Please summarize the text in the text field."
-    )
-
-
-def test_for_supervised_fine_tuning():
-    # Test case 1: context=False, use_markdown=False, guidelines=None
-    dataset = FeedbackDataset.for_supervised_fine_tuning(context=False, use_markdown=False, guidelines=None)
-    assert len(dataset) == 0
-    assert dataset.questions[0].name == "response"
-    assert dataset.questions[0].description == "Write the response to the instruction."
-    assert isinstance(dataset.questions[0], TextQuestion)
-    assert dataset.questions[0].use_markdown is False
-    assert dataset.fields[0].name == "prompt"
-    assert dataset.fields[0].use_markdown is False
-    assert (
-        dataset.guidelines
-        == "This is a supervised fine-tuning dataset that contains instructions. Please write the response to the instruction in the response field."
-    )
-
-    # Test case 2: context=True, use_markdown=True, guidelines="Custom guidelines"
-    dataset = FeedbackDataset.for_supervised_fine_tuning(
-        context=True, use_markdown=True, guidelines="Custom guidelines"
-    )
-    assert len(dataset) == 0
-    assert dataset.questions[0].name == "response"
-    assert dataset.questions[0].description == "Write the response to the instruction."
-    assert isinstance(dataset.questions[0], TextQuestion)
-    assert dataset.questions[0].use_markdown is True
-    assert dataset.fields[0].name == "prompt"
-    assert dataset.fields[0].use_markdown is True
-    assert dataset.fields[1].name == "context"
-    assert dataset.fields[1].use_markdown is True
-    assert dataset.guidelines == "Custom guidelines"
-
-
-def test_for_retrieval_augmented_generation():
-    # Test case 1: Single document retrieval augmented generation
-    dataset = FeedbackDataset.for_retrieval_augmented_generation(
-        number_of_retrievals=1, rating_scale=5, use_markdown=True
-    )
-    assert len(dataset) == 0
-    assert dataset.questions[0].name == "question_rating_1"
-    assert dataset.questions[0].description == "Rate the relevance of the retrieved document."
-    assert isinstance(dataset.questions[0], RatingQuestion)
-    assert dataset.questions[0].values == [1, 2, 3, 4, 5]
-    assert dataset.questions[1].name == "response"
-    assert dataset.questions[1].description == "Write the response to the query."
-    assert isinstance(dataset.questions[1], TextQuestion)
-    assert dataset.fields[0].name == "query"
-    assert dataset.fields[0].use_markdown is True
-    assert dataset.fields[1].name == "retrieved_document_1"
-    assert dataset.fields[1].use_markdown is True
-    assert (
-        dataset.guidelines
-        == "This is a retrieval augmented generation dataset that contains queries and retrieved documents. Please rate the relevancy of retrieved document and write the response to the query in the response field."
-    )
-
-    # Test case 2: Multiple document retrieval augmented generation
-    dataset = FeedbackDataset.for_retrieval_augmented_generation(
-        number_of_retrievals=3, rating_scale=10, use_markdown=False, guidelines="Custom guidelines"
-    )
-    assert len(dataset) == 0
-    assert dataset.questions[0].name == "question_rating_1"
-    assert dataset.questions[0].description == "Rate the relevance of the retrieved document."
-    assert isinstance(dataset.questions[0], RatingQuestion)
-    assert dataset.questions[0].values == list(range(1, 11))
-    assert dataset.questions[1].name == "question_rating_2"
-    assert dataset.questions[1].description == "Rate the relevance of the retrieved document."
-    assert isinstance(dataset.questions[1], RatingQuestion)
-    assert dataset.questions[1].values == list(range(1, 11))
-    assert dataset.questions[2].name == "question_rating_3"
-    assert dataset.questions[2].description == "Rate the relevance of the retrieved document."
-    assert isinstance(dataset.questions[2], RatingQuestion)
-    assert dataset.questions[2].values == list(range(1, 11))
-    assert dataset.questions[3].name == "response"
-    assert dataset.questions[3].description == "Write the response to the query."
-    assert isinstance(dataset.questions[3], TextQuestion)
-    assert dataset.fields[0].name == "query"
-    assert dataset.fields[0].use_markdown is False
-    assert dataset.fields[1].name == "retrieved_document_1"
-    assert dataset.fields[1].use_markdown is False
-    assert dataset.fields[2].name == "retrieved_document_2"
-    assert dataset.fields[2].use_markdown is False
-    assert dataset.fields[3].name == "retrieved_document_3"
-    assert dataset.fields[3].use_markdown is False
-    assert dataset.guidelines == "Custom guidelines"
-
-
-def test_for_sentence_similarity():
-    # Test case 1: Default parameters
-    dataset = FeedbackDataset.for_sentence_similarity()
-    assert len(dataset) == 0
-    assert dataset.questions[0].name == "similarity"
-    assert dataset.questions[0].description == "Rate the similarity between the two sentences."
-    assert isinstance(dataset.questions[0], RatingQuestion)
-    assert dataset.questions[0].values == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    assert dataset.fields[0].name == "sentence1"
-    assert dataset.fields[0].use_markdown is False
-    assert dataset.fields[1].name == "sentence2"
-    assert dataset.fields[1].use_markdown is False
-    assert (
-        dataset.guidelines
-        == "This is a sentence similarity dataset that contains two sentences. Please rate the similarity between the two sentences."
-    )
-
-    # Test case 2: Custom parameters
-    dataset = FeedbackDataset.for_sentence_similarity(rating_scale=5, use_markdown=True, guidelines="Custom guidelines")
-    assert len(dataset) == 0
-    assert dataset.questions[0].name == "similarity"
-    assert dataset.questions[0].description == "Rate the similarity between the two sentences."
-    assert isinstance(dataset.questions[0], RatingQuestion)
-    assert dataset.questions[0].values == [1, 2, 3, 4, 5]
-    assert dataset.fields[0].name == "sentence1"
-    assert dataset.fields[0].use_markdown is True
-    assert dataset.fields[1].name == "sentence2"
-    assert dataset.fields[1].use_markdown is True
-    assert dataset.guidelines == "Custom guidelines"
-
-
-def test_for_preference_modeling():
-    dataset = FeedbackDataset.for_preference_modeling(use_markdown=False, context=True)
-    assert len(dataset) == 0
-    assert dataset.questions[0].name == "preference"
-    assert dataset.questions[0].description == "Choose your preference."
-    assert isinstance(dataset.questions[0], LabelQuestion)
-    assert dataset.questions[0].labels == ["Response 1", "Response 2"]
-    assert dataset.fields[0].name == "prompt"
-    assert dataset.fields[0].use_markdown is False
-    assert dataset.fields[1].name == "context"
-    assert dataset.fields[1].use_markdown is False
-    assert dataset.fields[1].required is False
-    assert dataset.fields[2].name == "response1"
-    assert dataset.fields[2].title == "Response 1"
-    assert dataset.fields[2].use_markdown is False
-    assert dataset.fields[3].name == "response2"
-    assert dataset.fields[3].title == "Response 2"
-    assert dataset.fields[3].use_markdown is False
-    assert (
-        dataset.guidelines
-        == "This is a preference dataset that contains contexts and options. Please choose the option that you would prefer in the given context."
-    )
-
-
-def test_for_natural_language_inference():
-    # Test case 1: Default labels and guidelines
-    dataset = FeedbackDataset.for_natural_language_inference()
-    assert len(dataset) == 0
-    assert dataset.questions[0].name == "label"
-    assert dataset.questions[0].description == "Choose one of the labels."
-    assert isinstance(dataset.questions[0], LabelQuestion)
-    assert dataset.questions[0].labels == ["entailment", "neutral", "contradiction"]
-    assert dataset.fields[0].name == "premise"
-    assert dataset.fields[0].use_markdown is False
-    assert dataset.fields[1].name == "hypothesis"
-    assert dataset.fields[1].use_markdown is False
-    assert (
-        dataset.guidelines
-        == "This is a natural language inference dataset that contains premises and hypotheses. Please choose the correct label for the given premise and hypothesis."
-    )
-    # Test case 2: Custom labels and guidelines
-    dataset = FeedbackDataset.for_natural_language_inference(labels=["yes", "no"], guidelines="Custom guidelines")
-    assert len(dataset) == 0
-    assert dataset.questions[0].name == "label"
-    assert dataset.questions[0].description == "Choose one of the labels."
-    assert isinstance(dataset.questions[0], LabelQuestion)
-    assert dataset.questions[0].labels == ["yes", "no"]
-    assert dataset.fields[0].name == "premise"
-    assert dataset.fields[0].use_markdown is False
-    assert dataset.fields[1].name == "hypothesis"
-    assert dataset.fields[1].use_markdown is False
-    assert dataset.guidelines == "Custom guidelines"
-
-
-def test_for_proximal_policy_optimization():
-    # Test case 1: Without context and without markdown
-    dataset = FeedbackDataset.for_proximal_policy_optimization()
-    assert len(dataset) == 0
-    assert dataset.questions[0].name == "prompt"
-    assert dataset.questions[0].description == "Choose one of the labels that best describes the prompt."
-    assert isinstance(dataset.questions[0], LabelQuestion)
-    assert dataset.questions[0].labels == ["good", "bad"]
-    assert dataset.fields[0].name == "prompt"
-    assert dataset.fields[0].use_markdown is False
-    assert (
-        dataset.guidelines
-        == "This is a proximal policy optimization dataset that contains contexts and prompts. Please choose the label that best prompt."
-    )
-
-    # Test case 2: With context and with markdown
-    dataset = FeedbackDataset.for_proximal_policy_optimization(context=True, use_markdown=True)
-    assert len(dataset) == 0
-    assert dataset.questions[0].name == "prompt"
-    assert dataset.questions[0].description == "Choose one of the labels that best describes the prompt."
-    assert isinstance(dataset.questions[0], LabelQuestion)
-    assert dataset.questions[0].labels == ["good", "bad"]
-    assert dataset.fields[0].name == "prompt"
-    assert dataset.fields[0].use_markdown is True
-    assert dataset.fields[1].name == "context"
-    assert dataset.fields[1].use_markdown is True
-    assert (
-        dataset.guidelines
-        == "This is a proximal policy optimization dataset that contains contexts and prompts. Please choose the label that best prompt."
-    )
-
-
-def test_for_direct_preference_optimization():
-    # Test case 1: Without context and markdown
-    dataset = FeedbackDataset.for_direct_preference_optimization()
-    assert len(dataset) == 0
-    assert dataset.questions[0].name == "preference"
-    assert dataset.questions[0].description == "Choose the label that is your preference."
-    assert isinstance(dataset.questions[0], LabelQuestion)
-    assert dataset.questions[0].labels == ["Response 1", "Response 2"]
-    assert dataset.fields[0].name == "prompt"
-    assert dataset.fields[0].use_markdown is False
-    assert dataset.fields[1].name == "response1"
-    assert dataset.fields[1].title == "Response 1"
-    assert dataset.fields[1].use_markdown is False
-    assert dataset.fields[2].name == "response2"
-    assert dataset.fields[2].title == "Response 2"
-    assert dataset.fields[2].use_markdown is False
-    assert (
-        dataset.guidelines
-        == "This is a direct preference optimization dataset that contains contexts and options. Please choose the option that you would prefer in the given context."
-    )
-
-    # Test case 2: With context and markdown
-    dataset = FeedbackDataset.for_direct_preference_optimization(context=True, use_markdown=True)
-    assert len(dataset) == 0
-    assert dataset.questions[0].name == "preference"
-    assert dataset.questions[0].description == "Choose the label that is your preference."
-    assert isinstance(dataset.questions[0], LabelQuestion)
-    assert dataset.questions[0].labels == ["Response 1", "Response 2"]
-    assert dataset.fields[0].name == "prompt"
-    assert dataset.fields[0].use_markdown is True
-    assert dataset.fields[1].name == "context"
-    assert dataset.fields[1].use_markdown is True
-    assert dataset.fields[2].name == "response1"
-    assert dataset.fields[2].title == "Response 1"
-    assert dataset.fields[2].use_markdown is True
-    assert dataset.fields[3].name == "response2"
-    assert dataset.fields[3].title == "Response 2"
-    assert dataset.fields[3].use_markdown is True
-    assert (
-        dataset.guidelines
-        == "This is a direct preference optimization dataset that contains contexts and options. Please choose the option that you would prefer in the given context."
-    )
+    assert len(dataset.fields) == number_of_fields
+    assert len(dataset.questions) == len(question_types)
+    assert dataset.guidelines.startswith(guidelines_start)
+    for field in dataset.fields:
+        assert field.use_markdown is use_markdown
+    for question, question_type in zip(dataset.questions, question_types):
+        assert isinstance(question, question_type)
+    for metadata in dataset.metadata_properties:
+        assert metadata == TermsMetadataProperty(name="test")

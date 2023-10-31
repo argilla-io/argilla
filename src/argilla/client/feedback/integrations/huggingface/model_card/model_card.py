@@ -177,7 +177,7 @@ class SpacyModelCardDataBase(FrameworkCardData):
         task_call = ""
         if formatting_func := self.task.formatting_func:
             task_call += getsource(formatting_func) + "\n"
-            training_task_args = "formatting_func=formatting_func"
+            training_task_args = f"formatting_func={formatting_func.__name__}"
         else:
             text = f'dataset.field_by_name("{self.task.text.name}")'
             training_task_args = f'text={text}, label=dataset.question_by_name("{self.task.label.question.name}")'
@@ -229,7 +229,7 @@ class TransformersModelCardDataBase(FrameworkCardData):
         task_call = ""
         if formatting_func := self.task.formatting_func:
             task_call += getsource(formatting_func) + "\n"
-            training_task_args = "formatting_func=formatting_func"
+            training_task_args = f"formatting_func={formatting_func.__name__}"
         else:
             text = f'dataset.field_by_name("{self.task.text.name}")'
             training_task_args = f'text={text}, label=dataset.question_by_name("{self.task.label.question.name}")'
@@ -250,7 +250,7 @@ class TransformersModelCardData(TransformersModelCardDataBase):
         task_call = ""
         if formatting_func := self.task.formatting_func:
             task_call += getsource(formatting_func) + "\n"
-            training_task_args = "formatting_func=formatting_func"
+            training_task_args = f"formatting_func={formatting_func.__name__}"
         else:
             if self.task_type == "for_text_classification":
                 training_task_args = (
@@ -506,7 +506,7 @@ class SentenceTransformerCardData(FrameworkCardData):
         task_call = ""
         if formatting_func := self.task.formatting_func:
             task_call += getsource(formatting_func) + "\n"
-            training_task_args = "formatting_func=formatting_func"
+            training_task_args = f"formatting_func={formatting_func.__name__}"
         else:
             texts = ", ".join([f'dataset.field_by_name("{text.name}")' for text in self.task.texts])
             training_task_args = f"texts=[{texts}]{f', label=dataset.question_by_name({self.task.label.question.name})' if self.task.label else ''}"
@@ -555,7 +555,7 @@ def _formatting_func_call(formatting_func: Callable, task_type: str) -> str:
         formatting_func_call
     """
     task_call = getsource(formatting_func) + "\n"
-    training_task_args = "formatting_func=formatting_func"
+    training_task_args = f"formatting_func={formatting_func.__name__}"
     return task_call + TEMPLATE_TASK_CALL.format(task_type=task_type, training_task_args=training_task_args)
 
 

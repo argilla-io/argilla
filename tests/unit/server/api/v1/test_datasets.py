@@ -1132,6 +1132,25 @@ class TestSuiteDatasets:
             ]
         )
 
+    async def test_list_dataset_records_with_multiple_response_per_record(
+        self, async_client: "AsyncClient", owner: "User", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record = await RecordFactory.create(dataset=dataset)
+        await ResponseFactory.create(record=record)
+        await ResponseFactory.create(record=record)
+
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/records?include=responses", headers=owner_auth_header
+        )
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert response_json["total"] == 1
+        assert len(response_json["items"]) == 1
+        assert len(response_json["items"][0]["responses"]) == 2
+
     @pytest.mark.parametrize(
         "sorts",
         [
