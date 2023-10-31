@@ -162,6 +162,7 @@ h2 {
   border-radius: 5px;
   z-index: 100; /* Make sure it's above your content */
   background: linear-gradient(-45deg, #e73a3a, #fa655f);
+  text-align: center;
 }
 .floating-button:hover {
   color: white !important;

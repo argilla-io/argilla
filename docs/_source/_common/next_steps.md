@@ -3,7 +3,7 @@
 <iframe
   src="https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB"
   width="100%"
-  height="550px"
+  height="600px"
   frameborder="0"
   style="border: 1px solid #bfcbda88; border-radius: 4px;"
   allowfullscreen=""
