@@ -40,10 +40,11 @@ export class Records {
 
     if (!this.hasRecordsToAnnotate) return currentPage;
 
-    const recordsAnnotated = this.quantityOfRecordsAnnotated(status);
     const isMovingToNext = page > this.lastRecord.page;
 
     if (isMovingToNext) {
+      const recordsAnnotated = this.quantityOfRecordsAnnotated(status);
+
       return {
         from: this.lastRecord.page + 1 - recordsAnnotated,
         many: NEXT_RECORDS_TO_FETCH,
