@@ -22,7 +22,7 @@ from sqlalchemy import Select, and_, func, or_, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
-from argilla.server.enums import DatasetStatus, ResponseStatusFilter, UserRole
+from argilla.server.enums import DatasetStatus, RecordInclude, ResponseStatusFilter, UserRole
 from argilla.server.models import (
     Dataset,
     Field,
@@ -53,7 +53,7 @@ from argilla.server.schemas.v1.datasets import (
 from argilla.server.schemas.v1.metadata_properties import MetadataPropertyUpdate
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate, ResponseValueUpdate
-from argilla.server.schemas.v1.vectors import VectorUpdate
+from argilla.server.schemas.v1.vectors import Vector as VectorSchema
 from argilla.server.search_engine import SearchEngine
 from argilla.server.security.model import User
 
@@ -757,10 +757,6 @@ async def _build_record_vectors(
         try:
             await _validate_vector(db, dataset.id, vector_name, vector_value, vectors_settings=cache)
             vectors.append(build_vector_func(vector_value, cache[vector_name].id))
-            # vector = Vector(value=vector_value, vector_settings_id=cache[vector_name].id)
-            # if isinstance(record_schema, RecordUpdateWithId):
-            #     vector.record_id = record_schema.id
-            # vectors.ap -> VectorUpdatepend(vector)
         except ValueError as e:
             err_msg = (
                 f"Provided vector with name={vector_name} of record at position {record_position} is not valid: {e}"
@@ -835,7 +831,7 @@ async def update_records(
                 db,
                 dataset,
                 record_update,
-                build_vector_func=lambda value, vector_settings_id: VectorUpdate(
+                build_vector_func=lambda value, vector_settings_id: VectorSchema(
                     value=value, record_id=record_update.id, vector_settings_id=vector_settings_id
                 ),
                 cache=vector_settings_cache,
@@ -898,11 +894,14 @@ async def update_record(
 
     vectors = None
     if record_update.vectors is not None:
-
-        def build_vector_func(value, vector_settings_id) -> VectorUpdate:
-            return VectorUpdate(record_id=record.id, value=value, vector_settings_id=vector_settings_id)
-
-        vectors = await _build_record_vectors(db, record.dataset, record_update, build_vector_func=build_vector_func)
+        vectors = await _build_record_vectors(
+            db,
+            record.dataset,
+            record_update,
+            build_vector_func=lambda value, vector_settings_id: VectorSchema(
+                value=value, record_id=record.id, vector_settings_id=vector_settings_id
+            ),
+        )
         params.pop("vectors")
 
     async with db.begin_nested():

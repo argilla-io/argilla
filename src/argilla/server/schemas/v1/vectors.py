@@ -18,7 +18,7 @@ from uuid import UUID
 from argilla.server.schemas.base import BaseModel
 
 
-class VectorUpdate(BaseModel):
+class Vector(BaseModel):
     record_id: UUID
     vector_settings_id: UUID
     value: List[float]
