@@ -46,6 +46,8 @@ from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes
 from argilla.client.feedback.utils import feedback_dataset_in_argilla
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.workspaces import Workspace
+from rich.console import Console
+from argilla.cli.rich import get_argilla_themed_table
 
 if TYPE_CHECKING:
     import httpx
@@ -213,7 +215,7 @@ class ArgillaMixin:
             return
 
         for i in trange(
-            0, len(records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=show_progress
+            0, len(records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=False if show_progress else True
         ):
             try:
                 datasets_api_v1.add_records(
@@ -229,12 +231,12 @@ class ArgillaMixin:
                 raise Exception(
                     f"Failed while adding the records to the `FeedbackDataset` in Argilla with exception: {e}"
                 ) from e
-
+        
     def push_to_argilla(
         self: Union["FeedbackDataset", "ArgillaMixin"],
         name: str,
         workspace: Optional[Union[str, Workspace]] = None,
-        show_progress: bool = False,
+        show_progress: bool = True,
     ) -> RemoteFeedbackDataset:
         """Pushes the `FeedbackDataset` to Argilla.
 
@@ -298,7 +300,7 @@ class ArgillaMixin:
             question_name_to_id=question_name_to_id,
         )
 
-        return RemoteFeedbackDataset(
+        remote_feedback_dataset = RemoteFeedbackDataset(
             client=httpx_client,
             id=argilla_id,
             name=name,
@@ -311,6 +313,31 @@ class ArgillaMixin:
             guidelines=self.guidelines,
             allow_extra_metadata=self.allow_extra_metadata,
         )
+
+        ArgillaMixin.__dataset_print_table(remote_feedback_dataset, self.records)
+
+        return remote_feedback_dataset
+    
+    
+    def __dataset_print_table(dataset, records):
+
+        console = Console()
+        table = get_argilla_themed_table(title="Dataset Uploaded", show_lines=True)
+
+        for column in ("ID", "Name", "Workspace", "Type", "Fields", "Questions", "Number of Records", "URL", "Creation Date"):
+            table.add_column(column, justify="center")
+        table.add_row(
+            str(dataset.id),
+            dataset.name,
+            dataset.workspace.name,
+            "Feedback",
+            ", ".join([fields.name for fields in dataset.fields]),
+            ", ".join([questions.name for questions in dataset.questions]),
+            str(len(records)),
+            dataset.url,
+            dataset.created_at.isoformat(sep=" "),
+        )
+        console.print(table)
 
     @staticmethod
     def __get_fields(client: "httpx.Client", id: UUID) -> List["AllowedRemoteFieldTypes"]:
