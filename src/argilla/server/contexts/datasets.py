@@ -913,7 +913,7 @@ async def update_record(
             )
             await db.refresh(record, attribute_names=["vectors"])
 
-        if "metadata_" in params or "vectors" in params:
+        if "metadata_" in params or vectors is not None:
             await record.dataset.awaitable_attrs.vectors_settings
             await search_engine.index_records(record.dataset, [record])
 
