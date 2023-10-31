@@ -28,7 +28,7 @@ These are the section headers that we use:
 - Added `add_vector_settings` method to local and remote FeedbackDataset. ([#4055](https://github.com/argilla-io/argilla/pull/4055))
 - Added `vector_settings_by_name` method to local and remote Feedback datasets. ([#4055](https://github.com/argilla-io/argilla/pull/4055))
 - Added `ARGILLA_SEARCH_ENGINE` environment variable to configure the search engine to use. ([#4019](https://github.com/argilla-io/argilla/pull/4019))
- 
+
 ### Changed
 
 - Updated `POST /api/v1/datasets/:dataset_id/records` endpoint to allow to create records with `vectors` ([#4022](https://github.com/argilla-io/argilla/pull/4022))
