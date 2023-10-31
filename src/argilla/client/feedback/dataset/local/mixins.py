@@ -459,8 +459,9 @@ class ArgillaMixin:
                     datasets_api_v1.add_vector_settings(
                         client=client,
                         id=id,
-                        title=vector_settings.name,
                         name=vector_settings.name,
+                        title=vector_settings.name,
+                        
                         dimensions=vector_settings.dimensions,
                     ).parsed
                 except AlreadyExistsApiError:
