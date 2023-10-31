@@ -13,7 +13,7 @@
 #  limitations under the License.
 import copy
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Set, Tuple, TypeVar, Union
 from uuid import UUID
 
 import sqlalchemy
@@ -22,7 +22,7 @@ from sqlalchemy import Select, and_, func, or_, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
-from argilla.server.enums import DatasetStatus, ResponseStatusFilter, UserRole
+from argilla.server.enums import DatasetStatus, RecordInclude, ResponseStatusFilter, UserRole
 from argilla.server.models import (
     Dataset,
     Field,
@@ -42,6 +42,7 @@ from argilla.server.schemas.v1.datasets import (
     MetadataPropertyCreate,
     QuestionCreate,
     RecordCreate,
+    RecordIncludeParam,
     RecordsCreate,
     RecordUpdateWithId,
     ResponseValueCreate,
@@ -52,6 +53,7 @@ from argilla.server.schemas.v1.datasets import (
 from argilla.server.schemas.v1.metadata_properties import MetadataPropertyUpdate
 from argilla.server.schemas.v1.records import ResponseCreate
 from argilla.server.schemas.v1.responses import ResponseUpdate, ResponseValueUpdate
+from argilla.server.schemas.v1.vectors import VectorUpdate
 from argilla.server.search_engine import SearchEngine
 from argilla.server.security.model import User
 
@@ -60,7 +62,6 @@ if TYPE_CHECKING:
 
     from argilla.server.schemas.v1.datasets import (
         DatasetUpdate,
-        RecordIncludeParam,
         RecordsUpdate,
         VectorSettingsCreate,
     )
@@ -610,9 +611,22 @@ async def create_records(
             db, dataset, record_i, metadata=record_create.metadata, cache=metadata_properties_cache
         )
 
-        record_responses = await _build_record_responses(db, dataset, record_create, users_ids_cache, record_i)
-        record_suggestions = await _build_record_suggestions(db, record_create, questions_cache, record_i)
-        record_vectors = await _build_record_vectors(db, dataset, record_create, vectors_settings_cache, record_i)
+        record_responses = await _build_record_responses(
+            db, dataset, record_create, cache=users_ids_cache, record_position=record_i
+        )
+        record_suggestions = await _build_record_suggestions(
+            db, record_create, cache=questions_cache, record_position=record_i
+        )
+        record_vectors = await _build_record_vectors(
+            db,
+            dataset,
+            record_create,
+            build_vector_func=lambda value, vector_settings_id: Vector(
+                value=value, vector_settings_id=vector_settings_id
+            ),
+            cache=vectors_settings_cache,
+            record_position=record_i,
+        )
 
         record = Record(
             fields=record_create.fields,
@@ -723,13 +737,17 @@ async def _build_record_suggestions(
     return suggestions
 
 
+R = TypeVar("R")
+
+
 async def _build_record_vectors(
     db: "AsyncSession",
     dataset: Dataset,
     record_schema: Union["RecordCreate", "RecordUpdateWithId"],
+    build_vector_func: Callable[[List[float], UUID], R],
     cache: Dict[str, VectorSettingsSchema] = {},
     record_position: Optional[int] = None,
-) -> List[Vector]:
+) -> List[R]:
     """Create vectors for a record."""
     if not record_schema.vectors:
         return []
@@ -738,10 +756,11 @@ async def _build_record_vectors(
     for vector_name, vector_value in record_schema.vectors.items():
         try:
             await _validate_vector(db, dataset.id, vector_name, vector_value, vectors_settings=cache)
-            vector = Vector(value=vector_value, vector_settings_id=cache[vector_name].id)
-            if isinstance(record_schema, RecordUpdateWithId):
-                vector.record_id = record_schema.id
-            vectors.append(vector)
+            vectors.append(build_vector_func(vector_value, cache[vector_name].id))
+            # vector = Vector(value=vector_value, vector_settings_id=cache[vector_name].id)
+            # if isinstance(record_schema, RecordUpdateWithId):
+            #     vector.record_id = record_schema.id
+            # vectors.ap -> VectorUpdatepend(vector)
         except ValueError as e:
             err_msg = (
                 f"Provided vector with name={vector_name} of record at position {record_position} is not valid: {e}"
@@ -780,7 +799,6 @@ async def update_records(
     records_update_objects: List[Dict[str, Any]] = []
     records_search_engine_update: List[UUID] = []
     records_delete_suggestions: List[UUID] = []
-    records_delete_vectors: List[UUID] = []
 
     # Cache dictionaries to avoid querying the database multiple times
     metadata_properties_cache: Dict[str, Union[MetadataProperty, Literal["extra"]]] = {}
@@ -788,7 +806,7 @@ async def update_records(
     vector_settings_cache: Dict[str, VectorSettingsSchema] = {}
 
     suggestions = []
-    vectors = []
+    upsert_vectors = []
     for record_i, record_update in enumerate(records_update.items):
         params = record_update.dict(exclude_unset=True)
 
@@ -813,9 +831,17 @@ async def update_records(
         if record_update.vectors is not None:
             params.pop("vectors")
 
-            record_vectors = await _build_record_vectors(db, dataset, record_update, vector_settings_cache, record_i)
-            vectors.extend(record_vectors)
-            records_delete_vectors.append(record_update.id)
+            record_vectors = await _build_record_vectors(
+                db,
+                dataset,
+                record_update,
+                build_vector_func=lambda value, vector_settings_id: VectorUpdate(
+                    value=value, record_id=record_update.id, vector_settings_id=vector_settings_id
+                ),
+                cache=vector_settings_cache,
+                record_position=record_i,
+            )
+            upsert_vectors.extend(record_vectors)
 
         records_update_objects.append(params)
 
@@ -824,14 +850,17 @@ async def update_records(
         await Suggestion.delete_many(db, params=params, autocommit=False)
         db.add_all(suggestions)
 
-        params = [Vector.record_id.in_(records_delete_vectors)]
-        await Vector.delete_many(db, params=params, autocommit=False)
-        db.add_all(vectors)
+        await Vector.upsert_many(
+            db, objects=upsert_vectors, constraints=[Vector.record_id, Vector.vector_settings_id], autocommit=False
+        )
 
         await Record.update_many(db, records_update_objects, autocommit=False)
-        records = await get_records_by_ids(db, dataset_id=dataset.id, records_ids=records_search_engine_update)
-        for record in records:
-            await record.awaitable_attrs.vectors
+        records = await get_records_by_ids(
+            db,
+            dataset_id=dataset.id,
+            records_ids=records_search_engine_update,
+            include=RecordIncludeParam(keys=[RecordInclude.vectors], vectors=None),
+        )
         await dataset.awaitable_attrs.vectors_settings
         await search_engine.index_records(dataset, records)
 
@@ -867,14 +896,23 @@ async def update_record(
         record.suggestions = []
         params["suggestions"] = suggestions
 
+    vectors = None
     if record_update.vectors is not None:
-        vectors = await _build_record_vectors(db, record.dataset, record_update)
-        # Remove existing vectors
-        record.vectors = []
-        params["vectors"] = vectors
+
+        def build_vector_func(value, vector_settings_id) -> VectorUpdate:
+            return VectorUpdate(record_id=record.id, value=value, vector_settings_id=vector_settings_id)
+
+        vectors = await _build_record_vectors(db, record.dataset, record_update, build_vector_func=build_vector_func)
+        params.pop("vectors")
 
     async with db.begin_nested():
         record = await record.update(db, **params, replace_dict=True, autocommit=False)
+
+        if vectors is not None:
+            vectors = await Vector.upsert_many(
+                db, objects=vectors, constraints=[Vector.record_id, Vector.vector_settings_id], autocommit=False
+            )
+            await db.refresh(record, attribute_names=["vectors"])
 
         if "metadata_" in params or "vectors" in params:
             await record.dataset.awaitable_attrs.vectors_settings
