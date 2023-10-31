@@ -40,8 +40,8 @@ class TestSuiteVectorsSettings:
         assert response.json() == {
             "id": str(vector_settings.id),
             "name": vector_settings.name,
+            "title": vector_settings.title,
             "dimensions": vector_settings.dimensions,
-            "description": None,
             "inserted_at": vector_settings.inserted_at.isoformat(),
             "updated_at": vector_settings.updated_at.isoformat(),
         }

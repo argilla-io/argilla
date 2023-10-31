@@ -19,6 +19,6 @@ from pydantic import BaseModel
 
 class VectorSettings(BaseModel):
     name: str
-    dimensions: int
-    # TODO Uncomment when is supported
+    # TODO: Uncomment when is supported
     # title: Optional[str] = None
+    dimensions: int

@@ -150,8 +150,8 @@ class VectorSettings(DatabaseModel):
     __tablename__ = "vectors_settings"
 
     name: Mapped[str] = mapped_column(index=True)
+    title: Mapped[str] = mapped_column(Text)
     dimensions: Mapped[int] = mapped_column()
-    description: Mapped[str] = mapped_column(Text, nullable=True)
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
 
     dataset: Mapped["Dataset"] = relationship(back_populates="vectors_settings")

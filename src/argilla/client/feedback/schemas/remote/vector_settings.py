@@ -16,6 +16,7 @@ from datetime import datetime
 from uuid import UUID
 
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
+from argilla.client.sdk.v1.datasets.models import FeedbackVectorSettingsModel
 
 
 class RemoteVectorSettings(VectorSettings):
@@ -25,3 +26,7 @@ class RemoteVectorSettings(VectorSettings):
 
     class Config:
         orm_mode = True
+
+    @classmethod
+    def from_api(cls, api_model: FeedbackVectorSettingsModel) -> "RemoteVectorSettings":
+        return cls.from_orm(api_model)

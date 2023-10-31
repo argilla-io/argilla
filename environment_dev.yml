@@ -33,7 +33,7 @@ dependencies:
       - sphinx-copybutton==0.5.0
       - sphinx-notfound-page==0.8.3
       # code formatting
-      - pre-commit~=2.15.0
+      - pre-commit~=3.2.0
       # extra test dependencies
       - cleanlab~=2.0.0 # With this version, tests are failing
       - datasets>1.17.0,!= 2.3.2 # TODO: push_to_hub fails up to 2.3.2, check patches when they come out eventually

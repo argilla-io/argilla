@@ -47,8 +47,8 @@ export default {
     },
     shouldShowTotalRecords() {
       return (
-        this.recordCriteria.isFilteringByText ||
-        this.recordCriteria.isFilteringByMetadata
+        this.recordCriteria.isFilteredByText ||
+        this.recordCriteria.isFilteredByMetadata
       );
     },
   },

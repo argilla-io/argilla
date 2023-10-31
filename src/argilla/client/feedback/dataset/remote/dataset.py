@@ -360,7 +360,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         self._fields = fields
         self._fields_schema = None
         self._questions = questions
-        self._metadata_properties = metadata_properties
         self._guidelines = guidelines
         self._allow_extra_metadata = allow_extra_metadata
 
@@ -558,7 +557,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         """Retrieves the `vector_settings` of the current dataset from Argilla"""
         response = datasets_api_v1.list_vector_settings(client=self._client, id=self.id)
 
-        return [RemoteVectorSettings.from_orm(vector_settings) for vector_settings in response.parsed.items]
+        return [RemoteVectorSettings.from_api(vector_settings) for vector_settings in response.parsed.items]
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def add_metadata_property(
@@ -620,8 +619,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             ).parsed
         except AlreadyExistsApiError:
             raise ValueError(f"Vector settings with name {vector_settings.name!r} already exists.")
-
-        return RemoteVectorSettings.from_orm(new_vector_settings)
+        return RemoteVectorSettings.from_api(new_vector_settings)
 
     def update_vector_settings(self, *args, **kwargs):
         pass

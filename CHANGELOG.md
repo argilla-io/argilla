@@ -16,6 +16,12 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Fixed
+
+- Fix svg images out of screen with too large images ([#4047](https://github.com/argilla-io/argilla/pull/4047))
+
+## [1.18.0](https://github.com/argilla-io/argilla/compare/v1.17.0...v1.18.0)
+
 ### Added
 
 - Added `POST /api/v1/datasets/:dataset_id/vectors-settings` endpoint for creating vector settings for a dataset. ([#3776](https://github.com/argilla-io/argilla/pull/3776))
@@ -25,8 +31,8 @@ These are the section headers that we use:
 - Added support to include vectors for `GET /api/v1/datasets/:dataset_id/records` endpoint response using `include` query param. ([#4063](https://github.com/argilla-io/argilla/pull/4063))
 - Added support to include vectors for `GET /api/v1/me/datasets/:dataset_id/records` endpoint response using `include` query param. ([#4063](https://github.com/argilla-io/argilla/pull/4063))
 - Added support to include vectors for `POST /api/v1/me/datasets/:dataset_id/records/search` endpoint response using `include` query param. ([#4063](https://github.com/argilla-io/argilla/pull/4063))
-- Added `add_vector_settings` method to local and remote FeedbackDataset. ([#4055](https://github.com/argilla-io/argilla/pull/4055))
-- Added `vector_settings_by_name` method to local and remote Feedback datasets. ([#4055](https://github.com/argilla-io/argilla/pull/4055))
+- Added `add_vector_settings` method to local and remote `FeedbackDataset`. ([#4055](https://github.com/argilla-io/argilla/pull/4055))
+- Added `vector_settings_by_name` method to local and remote `FeedbackDataset`. ([#4055](https://github.com/argilla-io/argilla/pull/4055))
 - Added `ARGILLA_SEARCH_ENGINE` environment variable to configure the search engine to use. ([#4019](https://github.com/argilla-io/argilla/pull/4019))
 
 ### Changed
@@ -35,7 +41,7 @@ These are the section headers that we use:
 - Update `PATCH /api/v1/datasets/:dataset_id/records` endpoint to allow to update records with `vectors`. ([#4062](https://github.com/argilla-io/argilla/pull/4062))
 - Update `PATCH /api/v1/records/:record_id` endpoint to allow to update record with `vectors`. ([#4062](https://github.com/argilla-io/argilla/pull/4062))
 - Update `BaseElasticAndOpenSearchEngine.index_records` method to also index record vectors. ([#4062](https://github.com/argilla-io/argilla/pull/4062))
-- Update `FeedbackDataset.__init__` to allow passing a vector_settings list. ([#4055](https://github.com/argilla-io/argilla/pull/4055))
+- Update `FeedbackDataset.__init__` to allow passing a list of vector settings. ([#4055](https://github.com/argilla-io/argilla/pull/4055))
 - Update `FeedbackDataset.push_to_argilla` to also push vector settings. ([#4055](https://github.com/argilla-io/argilla/pull/4055))
 - Update `FeedbackDatasetRecord` to support the creation of records with vectors. ([#4043](https://github.com/argilla-io/argilla/pull/4043))
 - Update `POST /api/v1/me/datasets/:dataset_id/records/search` endpoint to allow to search records with vectors. ([#4019](https://github.com/argilla-io/argilla/pull/4019))
