@@ -17,11 +17,9 @@ default dataset fields.
 - sentence-transformers and trl with formatting_func.
 """
 
-import shutil
-from collections import Counter
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Union
+from typing import TYPE_CHECKING, Callable, List, Union
 
 import pytest
 from argilla.client.feedback.schemas import (
@@ -32,6 +30,16 @@ from argilla.client.feedback.schemas import (
 from argilla.client.feedback.unification import LabelQuestionUnification
 from argilla.client.models import Framework
 from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
+
+from tests.integration.client.feedback.helpers import (
+    formatting_func_chat_completion,
+    formatting_func_dpo,
+    formatting_func_ppo,
+    formatting_func_rm,
+    formatting_func_sentence_transformers,
+    formatting_func_sft,
+    model_card_pattern,
+)
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import FeedbackRecord
@@ -59,7 +67,6 @@ MODEL_CARD_NAME = "README.md"
     "feedback_dataset_fields",
     "feedback_dataset_questions",
     "feedback_dataset_records",
-    "model_card_pattern",
 )
 def test_model_card_with_defaults(
     framework: Union[Framework, str],
@@ -68,7 +75,6 @@ def test_model_card_with_defaults(
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
-    model_card_pattern: str,
     mocked_is_on_huggingface,
 ) -> None:
     # This test is almost a copy from the one in `test_trainer.py`, it's separated for
@@ -149,14 +155,12 @@ def test_model_card_with_defaults(
     "feedback_dataset_questions",
     "feedback_dataset_guidelines",
     "feedback_dataset_records",
-    "model_card_pattern",
 )
 def test_model_card_sentence_transformers(
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_guidelines: str,
     feedback_dataset_records: List["FeedbackRecord"],
-    model_card_pattern: str,
     mocked_is_on_huggingface,
 ) -> None:
     dataset = FeedbackDataset(
@@ -166,25 +170,7 @@ def test_model_card_sentence_transformers(
     )
     dataset.add_records(records=feedback_dataset_records * 2)
 
-    def formatting_func(sample):
-        labels = [
-            annotation["value"]
-            for annotation in sample["question-3"]
-            if annotation["status"] == "submitted" and annotation["value"] is not None
-        ]
-        if labels:
-            # Three cases for the tests: None, one tuple and yielding multiple tuples
-            if labels[0] == "a":
-                return None
-            elif labels[0] == "b":
-                return {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1}
-            elif labels[0] == "c":
-                return [
-                    {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1},
-                    {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0},
-                ]
-
-    task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func)
+    task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func_sentence_transformers)
 
     trainer = ArgillaTrainer(
         dataset=dataset,
@@ -209,38 +195,11 @@ def test_model_card_sentence_transformers(
         assert model_card.content.find(pattern) > -1
 
 
-@pytest.mark.usefixtures(
-    "model_card_pattern",
-)
-def test_model_card_openai(model_card_pattern: str, mocked_openai, mocked_is_on_huggingface):
+def test_model_card_openai(mocked_openai, mocked_is_on_huggingface):
     dataset = FeedbackDataset.from_huggingface("argilla/customer_assistant")
-    # adapation from LlamaIndex's TEXT_QA_PROMPT_TMPL_MSGS[1].content
-    user_message_prompt = """Context information is below.
-    ---------------------
-    {context_str}
-    ---------------------
-    Given the context information and not prior knowledge but keeping your Argilla Cloud assistant style, answer the query.
-    Query: {query_str}
-    Answer:
-    """
-    # adapation from LlamaIndex's TEXT_QA_SYSTEM_PROMPT
-    system_prompt = """You are an expert customer service assistant for the Argilla Cloud product that is trusted around the world."""
+    dataset._records = dataset._records[:3]
+    task = TrainingTask.for_chat_completion(formatting_func=formatting_func_chat_completion)
 
-    def formatting_func(sample: dict):
-        from uuid import uuid4
-
-        if sample["response"]:
-            chat = str(uuid4())
-            user_message = user_message_prompt.format(context_str=sample["context"], query_str=sample["user-message"])
-            return [
-                (chat, "0", "system", system_prompt),
-                (chat, "1", "user", user_message),
-                (chat, "2", "assistant", sample["response"][0]["value"]),
-            ]
-        else:
-            return None
-
-    task = TrainingTask.for_chat_completion(formatting_func=formatting_func)
     trainer = ArgillaTrainer(
         dataset=dataset,
         task=task,
@@ -269,65 +228,6 @@ def test_model_card_openai(model_card_pattern: str, mocked_openai, mocked_is_on_
         assert model_card.content.find(pattern) > -1
 
 
-def formatting_func_sft(sample: Dict[str, Any]) -> Iterator[str]:
-    # For example, the sample must be most frequently rated as "1" in question-2 and
-    # label "b" from "question-3" must have not been set by any annotator
-    ratings = [
-        annotation["value"]
-        for annotation in sample["question-2"]
-        if annotation["status"] == "submitted" and annotation["value"] is not None
-    ]
-    labels = [
-        annotation["value"]
-        for annotation in sample["question-3"]
-        if annotation["status"] == "submitted" and annotation["value"] is not None
-    ]
-    if ratings and Counter(ratings).most_common(1)[0][0] == 1 and "b" not in labels:
-        return f"### Text\n{sample['text']}"
-    return None
-
-
-def formatting_func_rm(sample: Dict[str, Any]):
-    # The FeedbackDataset isn't really set up for RM, so we'll just use an arbitrary example here
-    labels = [
-        annotation["value"]
-        for annotation in sample["question-3"]
-        if annotation["status"] == "submitted" and annotation["value"] is not None
-    ]
-    if labels:
-        # Three cases for the tests: None, one tuple and yielding multiple tuples
-        if labels[0] == "a":
-            return None
-        elif labels[0] == "b":
-            return sample["text"], sample["text"][:5]
-        elif labels[0] == "c":
-            return [(sample["text"], sample["text"][5:10]), (sample["text"], sample["text"][:5])]
-
-
-def formatting_func_ppo(sample: Dict[str, Any]):
-    return sample["text"]
-
-
-def formatting_func_dpo(sample: Dict[str, Any]):
-    # The FeedbackDataset isn't really set up for DPO, so we'll just use an arbitrary example here
-    labels = [
-        annotation["value"]
-        for annotation in sample["question-3"]
-        if annotation["status"] == "submitted" and annotation["value"] is not None
-    ]
-    if labels:
-        # Three cases for the tests: None, one tuple and yielding multiple tuples
-        if labels[0] == "a":
-            return None
-        elif labels[0] == "b":
-            return sample["text"][::-1], sample["text"], sample["text"][:5]
-        elif labels[0] == "c":
-            return [
-                (sample["text"], sample["text"][::-1], sample["text"][:5]),
-                (sample["text"][::-1], sample["text"], sample["text"][:5]),
-            ]
-
-
 @pytest.mark.parametrize(
     "formatting_func, training_task",
     (
@@ -342,7 +242,6 @@ def formatting_func_dpo(sample: Dict[str, Any]):
     "feedback_dataset_questions",
     "feedback_dataset_guidelines",
     "feedback_dataset_records",
-    "model_card_pattern",
 )
 def test_model_card_trl(
     formatting_func: Callable,
@@ -351,7 +250,6 @@ def test_model_card_trl(
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
-    model_card_pattern: str,
     mocked_is_on_huggingface,
 ) -> None:
     dataset = FeedbackDataset(
