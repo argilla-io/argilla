@@ -66,21 +66,15 @@ class TestSuiteVectorsSettings:
 
         assert response.status_code == 422
 
-    @pytest.mark.parametrize(
-        "payload",
-        [
-            {"title": None},
-        ],
-    )
-    async def test_update_vector_settings_with_invalid_payload(
-        self, async_client: "AsyncClient", owner_auth_header: dict, payload: dict
+    async def test_update_vector_settings_with_title_as_none(
+        self, async_client: "AsyncClient", owner_auth_header: dict
     ):
         vector_settings = await VectorSettingsFactory.create()
 
         response = await async_client.patch(
             f"/api/v1/vectors-settings/{vector_settings.id}",
             headers=owner_auth_header,
-            json=payload,
+            json={"title": None},
         )
 
         assert response.status_code == 422
