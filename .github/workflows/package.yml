@@ -56,9 +56,9 @@ jobs:
             searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
             coverageReport: coverage-elasticsearch-8.8.2
             runsOn: extended-runner
-          - searchEngineDockerImage: opensearchproject/opensearch:2.5.0
+          - searchEngineDockerImage: opensearchproject/opensearch:2.6.0
             searchEngineDockerEnv: '{"discovery.type": "single-node", "plugins.security.disabled": "true"}'
-            coverageReport: coverage-opensearch-2.5.0
+            coverageReport: coverage-opensearch-2.6.0
             runsOn: ubuntu-latest
     name: Run unit tests
     uses: ./.github/workflows/run-python-tests.yml
