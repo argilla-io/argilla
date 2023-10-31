@@ -5914,6 +5914,7 @@ class TestSuiteDatasets:
             vector_settings=vector_settings,
             record=records[0],
             value=None,
+            query=None,
             order="most_similar",
             max_results=5,
             metadata_filters=[],
@@ -5957,6 +5958,56 @@ class TestSuiteDatasets:
             vector_settings=vector_settings,
             record=None,
             value=selected_vector.value,
+            query=None,
+            order="most_similar",
+            max_results=10,
+            metadata_filters=[],
+            user_response_status_filter=None,
+        )
+
+    async def test_search_dataset_records_with_vector_value_and_query(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+    ):
+        workspace = await WorkspaceFactory.create()
+        dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        vector_settings = await VectorSettingsFactory.create(dataset=dataset)
+        selected_vector = await VectorFactory.create(
+            vector_settings=vector_settings, record=records[0], value=[1.0, 2.0, 3.0]
+        )
+
+        mock_search_engine.similarity_search.return_value = SearchResponses(
+            items=[
+                SearchResponseItem(record_id=records[0].id, score=14.2),
+                SearchResponseItem(record_id=records[1].id, score=12.2),
+            ],
+            total=2,
+        )
+
+        query_json = {
+            "query": {
+                "text": {"q": "Test query"},
+                "vector": {"name": vector_settings.name, "value": selected_vector.value},
+            }
+        }
+        response = await async_client.post(
+            f"/api/v1/me/datasets/{dataset.id}/records/search",
+            headers=owner_auth_header,
+            json=query_json,
+            params={"offset": 0, "limit": 10},
+        )
+
+        assert response.status_code == 200
+        response_json = response.json()
+        assert len(response_json["items"]) == 2
+        assert response_json["total"] == 2
+
+        mock_search_engine.search.assert_not_called()
+        mock_search_engine.similarity_search.assert_called_once_with(
+            dataset=dataset,
+            vector_settings=vector_settings,
+            record=None,
+            value=selected_vector.value,
+            query=TextQuery(q="Test query"),
             order="most_similar",
             max_results=10,
             metadata_filters=[],
