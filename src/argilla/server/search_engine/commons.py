@@ -294,8 +294,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             raise ValueError("Cannot find a vector value to apply with provided info")
 
         if order == SimilarityOrder.least_similar:
-            for i in range(0, len(vector_value)):
-                vector_value[i] *= -1
+            vector_value = await self._inverse_vector(vector_value)
 
         query_filters = []
         if query:
@@ -316,6 +315,9 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         )
 
         return await self._process_search_response(response, threshold)
+
+    async def _inverse_vector(self, vector_value: List[float]) -> List[float]:
+        return [vector_value[i] * -1 for i in range(0, len(vector_value))]
 
     async def configure_index_vectors(self, vector_settings: VectorSettings) -> None:
         index = await self._get_index_or_raise(vector_settings.dataset)
