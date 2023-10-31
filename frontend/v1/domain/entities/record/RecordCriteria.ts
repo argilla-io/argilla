@@ -11,6 +11,7 @@ interface CommittedRecordCriteria {
 }
 
 export class RecordCriteria {
+  public isChangingAutomatically = false;
   public committed: CommittedRecordCriteria;
   public page: number;
   public status: RecordStatus;
@@ -75,6 +76,8 @@ export class RecordCriteria {
     sortBy: string[],
     similaritySearch: string
   ) {
+    this.isChangingAutomatically = true;
+
     this.page = page ? Number(page) : 1;
     this.status = status || "pending";
     this.searchText = searchText ?? "";
@@ -111,6 +114,8 @@ export class RecordCriteria {
       sortBy: this.sortBy,
       similaritySearch: similaritySearchCommitted,
     };
+
+    this.isChangingAutomatically = false;
   }
 
   reset() {
