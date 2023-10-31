@@ -137,7 +137,7 @@ class TestSuiteRemoteDataset:
 
         mock_httpx_client.patch.assert_called_once_with(
             url=f"/api/v1/datasets/{test_remote_dataset.id}/records",
-            json={"items": [{"id": str(test_remote_record.id), "metadata": {"new": "metadata"}}]},
+            json={"items": [{"id": str(test_remote_record.id), "suggestions": [], "metadata": {"new": "metadata"}}]},
         )
 
     def test_update_multiple_records(
@@ -305,5 +305,5 @@ class TestSuiteRemoteDataset:
 
         mock_httpx_client.post.assert_called_once_with(
             url=f"/api/v1/datasets/{test_remote_dataset.id}/records",
-            json={"items": [{"fields": {"text": "test"}, "vectors": {"test": [1, 2, 3]}}]},
+            json={"items": [{"fields": {"text": "test"}, "suggestions": [], "vectors": {"test": [1, 2, 3]}}]},
         )
