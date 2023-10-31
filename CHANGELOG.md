@@ -16,6 +16,12 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Fixed
+
+- Fix svg images out of screen with too large images ([#4047](https://github.com/argilla-io/argilla/pull/4047))
+
+## [1.18.0](https://github.com/argilla-io/argilla/compare/v1.17.0...v1.18.0)
+
 ### Added
 
 - Added `POST /api/v1/datasets/:dataset_id/vectors-settings` endpoint for creating vector settings for a dataset. ([#3776](https://github.com/argilla-io/argilla/pull/3776))
@@ -29,6 +35,9 @@ These are the section headers that we use:
 ### Changed
 
 - Updated `POST /api/v1/datasets/:dataset_id/records` endpoint to allow to create records with `vectors` ([#4022](https://github.com/argilla-io/argilla/pull/4022))
+- Update `PATCH /api/v1/datasets/:dataset_id/records` endpoint to allow to update records with `vectors`. ([#4062](https://github.com/argilla-io/argilla/pull/4062))
+- Update `PATCH /api/v1/records/:record_id` endpoint to allow to update record with `vectors`. ([#4062](https://github.com/argilla-io/argilla/pull/4062))
+- Update `BaseElasticAndOpenSearchEngine.index_records` method to also index record vectors. ([#4062](https://github.com/argilla-io/argilla/pull/4062))
 
 ## [1.18.0]()
 

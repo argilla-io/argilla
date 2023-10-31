@@ -34,8 +34,8 @@ def upgrade() -> None:
     op.create_table(
         "vectors_settings",
         sa.Column("name", sa.String(), nullable=False),
+        sa.Column("title", sa.Text(), nullable=False),
         sa.Column("dimensions", sa.Integer(), nullable=False),
-        sa.Column("description", sa.Text(), nullable=True),
         sa.Column("dataset_id", sa.Uuid(), nullable=False),
         sa.Column("id", sa.Uuid(), nullable=False),
         sa.Column("inserted_at", sa.DateTime(), nullable=False),

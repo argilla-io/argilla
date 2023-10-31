@@ -77,8 +77,6 @@ class Settings(BaseSettings):
 
     docs_enabled: bool = True
 
-    search_engine: str = "elasticsearch"
-
     namespace: str = Field(default=None, regex=r"^[a-z]+$")
 
     enable_migration: bool = Field(
