@@ -14,14 +14,12 @@
 
 import dataclasses
 from typing import Any, Dict, List, Optional
+from uuid import UUID
 
 from elasticsearch8 import AsyncElasticsearch, helpers
 
 from argilla.server.models import VectorSettings
-from argilla.server.search_engine import (
-    SearchEngine,
-    UserResponseStatusFilter,
-)
+from argilla.server.search_engine import SearchEngine
 from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine, field_name_for_vector_settings
 from argilla.server.settings import settings
 
@@ -69,7 +67,7 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
 
     def _mapping_for_vector_settings(self, vector_settings: VectorSettings) -> dict:
         return {
-            f"vectors.{vector_settings.id}": {
+            field_name_for_vector_settings(vector_settings): {
                 "type": "dense_vector",
                 "dims": vector_settings.dimensions,
                 "index": True,
@@ -85,7 +83,8 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
         vector_settings: VectorSettings,
         value: List[float],
         k: int,
-        user_response_status_filter: Optional[UserResponseStatusFilter] = None,
+        excluded_id: Optional[UUID] = None,
+        query_filters: Optional[List[dict]] = None,
     ) -> dict:
         knn_query = {
             "field": field_name_for_vector_settings(vector_settings),
@@ -94,11 +93,15 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
             "num_candidates": _compute_num_candidates_from_k(k=k),
         }
 
-        if user_response_status_filter:
-            # TODO: Add metadata !!!!
-            knn_query["filter"] = self._build_response_status_filter(user_response_status_filter)
+        bool_filter_query = {}
+        if query_filters:
+            bool_filter_query = {"should": query_filters, "minimum_should_match": "100%"}
+        if excluded_id:
+            bool_filter_query["must_not"] = [{"ids": {"values": [str(excluded_id)]}}]
 
-        return await self.client.search(index=index, knn=knn_query, _source=False, track_total_hits=True)
+        if bool_filter_query:
+            knn_query["filter"] = {"bool": bool_filter_query}
+        return await self.client.search(index=index, knn=knn_query, _source=False, track_total_hits=True, size=k)
 
     async def _create_index_request(self, index_name: str, mappings: dict, settings: dict) -> None:
         await self.client.indices.create(index=index_name, settings=settings, mappings=mappings)

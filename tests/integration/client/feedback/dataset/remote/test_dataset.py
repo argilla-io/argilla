@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import random
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, List, Tuple, Type
 from uuid import UUID
@@ -467,6 +467,60 @@ class TestRemoteFeedbackDataset:
 
         with pytest.raises(ValueError, match=f"Vector settings with name 'vector' already exists"):
             remote_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=10))
+
+    def test_adding_records_with_vectors(self, owner: "User", feedback_dataset: FeedbackDataset):
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        feedback_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=4))
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+
+        records = [
+            FeedbackRecord(
+                external_id=str(i),
+                fields={"text": "Hello world!", "text-2": "Hello world!"},
+                vectors={"vector": [random.uniform(0, 1) for _ in range(4)]},
+            )
+            for i in range(1, 20)
+        ]
+        remote_dataset.add_records(records)
+
+        assert len(remote_dataset.records) == len(records)
+        # TODO: test this once the list of vectors is returned
+        # assert all(record.vectors["vector"] for record in remote_dataset.records)
+
+    @pytest.mark.parametrize(
+        "invalid_vectors, expected_error",
+        [
+            (
+                {"vector": [1, 1, 1, 1, 1]},
+                f"Argilla server returned an error with http status: 422. "
+                "Error details: {'response': 'Provided vector with name=vector of record at position 0 is not valid",
+            ),
+            (
+                {"unknown-vector": [1, 1, 1, 1]},
+                f"Argilla server returned an error with http status: 422. "
+                "Error details: {'response': 'Provided vector with name=unknown-vector of record at position 0 is not valid",
+            ),
+        ],
+    )
+    def test_adding_records_with_invalid_vectors(
+        self, owner: "User", feedback_dataset: FeedbackDataset, invalid_vectors: dict, expected_error: str
+    ):
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        vector_dimension = 4
+        feedback_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=vector_dimension))
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+
+        with pytest.raises(ValidationApiError, match=expected_error):
+            remote_dataset.add_records(
+                FeedbackRecord(
+                    fields={"text": "Hello world!", "text-2": "Hello world!"},
+                    vectors=invalid_vectors,
+                )
+            )
 
     def test_delete_metadata_property_one_by_one(self, owner: "User", feedback_dataset: FeedbackDataset) -> None:
         api.init(api_key=owner.api_key)
