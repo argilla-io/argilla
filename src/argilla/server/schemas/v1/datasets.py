@@ -384,18 +384,6 @@ class VectorsSettings(BaseModel):
     items: List[VectorSettings]
 
 
-VectorSettingsName = Annotated[
-    constr(
-        regex=VECTOR_SETTINGS_CREATE_NAME_REGEX,
-        min_length=VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH,
-        max_length=VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
-    ),
-    PydanticField(
-        ...,
-        description="The name of the vector settings",
-    ),
-]
-
 VectorSettingsTitle = Annotated[
     constr(
         min_length=VECTOR_SETTINGS_CREATE_TITLE_MIN_LENGTH,
@@ -406,7 +394,13 @@ VectorSettingsTitle = Annotated[
 
 
 class VectorSettingsCreate(BaseModel):
-    name: VectorSettingsName
+    name: str = PydanticField(
+        ...,
+        regex=VECTOR_SETTINGS_CREATE_NAME_REGEX,
+        min_length=VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH,
+        max_length=VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
+        description="The title of the vector settings",
+    )
     title: VectorSettingsTitle
     dimensions: PositiveInt
 
