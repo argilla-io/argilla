@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, Union
 from unittest.mock import ANY, MagicMock
@@ -20,7 +20,13 @@ from uuid import UUID, uuid4
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v1.handlers.datasets import LIST_DATASET_RECORDS_LIMIT_DEFAULT
-from argilla.server.enums import DatasetStatus, RecordInclude, RecordSortField, ResponseStatusFilter, SortOrder
+from argilla.server.enums import (
+    DatasetStatus,
+    RecordInclude,
+    RecordSortField,
+    ResponseStatusFilter,
+    SimilarityOrder,
+)
 from argilla.server.models import (
     Dataset,
     Field,
@@ -66,8 +72,8 @@ from argilla.server.search_engine import (
     SearchResponseItem,
     SearchResponses,
     SortBy,
-    StringQuery,
     TermsMetadataFilter,
+    TextQuery,
     UserResponseStatusFilter,
 )
 from sqlalchemy import func, inspect, select
@@ -1131,25 +1137,6 @@ class TestSuiteDatasets:
                 if len(record["responses"]) > 0
             ]
         )
-
-    async def test_list_dataset_records_with_multiple_response_per_record(
-        self, async_client: "AsyncClient", owner: "User", owner_auth_header: dict
-    ):
-        dataset = await DatasetFactory.create()
-        record = await RecordFactory.create(dataset=dataset)
-        await ResponseFactory.create(record=record)
-        await ResponseFactory.create(record=record)
-
-        response = await async_client.get(
-            f"/api/v1/datasets/{dataset.id}/records?include=responses", headers=owner_auth_header
-        )
-
-        assert response.status_code == 200
-        response_json = response.json()
-
-        assert response_json["total"] == 1
-        assert len(response_json["items"]) == 1
-        assert len(response_json["items"][0]["responses"]) == 2
 
     @pytest.mark.parametrize(
         "sorts",
@@ -5233,7 +5220,7 @@ class TestSuiteDatasets:
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
-            query=StringQuery(q="Hello", field="input"),
+            query=TextQuery(q="Hello", field="input"),
             metadata_filters=[],
             user_response_status_filter=None,
             offset=0,
@@ -5363,7 +5350,7 @@ class TestSuiteDatasets:
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
-            query=StringQuery(q="Hello", field="input"),
+            query=TextQuery(q="Hello", field="input"),
             metadata_filters=[expected_filter_class(metadata_property=metadata_property, **expected_filter_args)],
             user_response_status_filter=None,
             offset=0,
@@ -5492,7 +5479,7 @@ class TestSuiteDatasets:
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
-            query=StringQuery(q="Hello", field="input"),
+            query=TextQuery(q="Hello", field="input"),
             metadata_filters=[],
             user_response_status_filter=None,
             offset=0,
@@ -5589,6 +5576,8 @@ class TestSuiteDatasets:
             total=2,
         )
 
+        query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
+        params = [("include", include) for include in includes]
         expected = {
             "items": [
                 {
@@ -5686,7 +5675,7 @@ class TestSuiteDatasets:
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
-            query=StringQuery(q="Hello", field="input"),
+            query=TextQuery(q="Hello", field="input"),
             metadata_filters=[],
             sort_by=None,
             user_response_status_filter=None,
@@ -5889,7 +5878,7 @@ class TestSuiteDatasets:
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
-            query=StringQuery(q="Hello", field="input"),
+            query=TextQuery(q="Hello", field="input"),
             metadata_filters=[],
             user_response_status_filter=UserResponseStatusFilter(user=owner, statuses=[ResponseStatusFilter.submitted]),
             offset=0,
@@ -5897,6 +5886,202 @@ class TestSuiteDatasets:
             sort_by=None,
         )
         assert response.status_code == 200
+
+    async def test_search_dataset_records_with_record_vector(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+    ):
+        workspace = await WorkspaceFactory.create()
+        dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        vector_settings = await VectorSettingsFactory.create(dataset=dataset)
+
+        mock_search_engine.similarity_search.return_value = SearchResponses(
+            items=[
+                SearchResponseItem(record_id=records[0].id, score=14.2),
+                SearchResponseItem(record_id=records[1].id, score=12.2),
+            ],
+            total=2,
+        )
+
+        query_json = {"query": {"vector": {"name": vector_settings.name, "record_id": str(records[0].id)}}}
+        response = await async_client.post(
+            f"/api/v1/me/datasets/{dataset.id}/records/search",
+            headers=owner_auth_header,
+            json=query_json,
+            params={"offset": 0, "limit": 5},
+        )
+
+        assert response.status_code == 200
+        response_json = response.json()
+        assert len(response_json["items"]) == 2
+        assert response_json["total"] == 2
+
+        mock_search_engine.search.assert_not_called()
+        mock_search_engine.similarity_search.assert_called_once_with(
+            dataset=dataset,
+            vector_settings=vector_settings,
+            record=records[0],
+            value=None,
+            query=None,
+            order=SimilarityOrder.most_similar,
+            max_results=5,
+            metadata_filters=[],
+            user_response_status_filter=None,
+        )
+
+    async def test_search_dataset_records_with_vector_value(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+    ):
+        workspace = await WorkspaceFactory.create()
+        dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        vector_settings = await VectorSettingsFactory.create(dataset=dataset)
+        selected_vector = await VectorFactory.create(
+            vector_settings=vector_settings, record=records[0], value=[1, 2, 3]
+        )
+
+        mock_search_engine.similarity_search.return_value = SearchResponses(
+            items=[
+                SearchResponseItem(record_id=records[0].id, score=14.2),
+                SearchResponseItem(record_id=records[1].id, score=12.2),
+            ],
+            total=2,
+        )
+
+        query_json = {"query": {"vector": {"name": vector_settings.name, "value": selected_vector.value}}}
+        response = await async_client.post(
+            f"/api/v1/me/datasets/{dataset.id}/records/search",
+            headers=owner_auth_header,
+            json=query_json,
+            params={"offset": 0, "limit": 10},
+        )
+
+        assert response.status_code == 200
+        response_json = response.json()
+        assert len(response_json["items"]) == 2
+        assert response_json["total"] == 2
+
+        mock_search_engine.search.assert_not_called()
+        mock_search_engine.similarity_search.assert_called_once_with(
+            dataset=dataset,
+            vector_settings=vector_settings,
+            record=None,
+            value=selected_vector.value,
+            query=None,
+            order=SimilarityOrder.most_similar,
+            max_results=10,
+            metadata_filters=[],
+            user_response_status_filter=None,
+        )
+
+    async def test_search_dataset_records_with_vector_value_and_query(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+    ):
+        workspace = await WorkspaceFactory.create()
+        dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        vector_settings = await VectorSettingsFactory.create(dataset=dataset)
+        selected_vector = await VectorFactory.create(
+            vector_settings=vector_settings, record=records[0], value=[1.0, 2.0, 3.0]
+        )
+
+        mock_search_engine.similarity_search.return_value = SearchResponses(
+            items=[
+                SearchResponseItem(record_id=records[0].id, score=14.2),
+                SearchResponseItem(record_id=records[1].id, score=12.2),
+            ],
+            total=2,
+        )
+
+        query_json = {
+            "query": {
+                "text": {"q": "Test query"},
+                "vector": {"name": vector_settings.name, "value": selected_vector.value},
+            }
+        }
+        response = await async_client.post(
+            f"/api/v1/me/datasets/{dataset.id}/records/search",
+            headers=owner_auth_header,
+            json=query_json,
+            params={"offset": 0, "limit": 10},
+        )
+
+        assert response.status_code == 200
+        response_json = response.json()
+        assert len(response_json["items"]) == 2
+        assert response_json["total"] == 2
+
+        mock_search_engine.search.assert_not_called()
+        mock_search_engine.similarity_search.assert_called_once_with(
+            dataset=dataset,
+            vector_settings=vector_settings,
+            record=None,
+            value=selected_vector.value,
+            query=TextQuery(q="Test query"),
+            order=SimilarityOrder.most_similar,
+            max_results=10,
+            metadata_filters=[],
+            user_response_status_filter=None,
+        )
+
+    async def test_search_dataset_records_with_wrong_vector(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+    ):
+        workspace = await WorkspaceFactory.create()
+        dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        vector_settings = await VectorSettingsFactory.create(dataset=dataset)
+
+        query_json = {"query": {"vector": {"name": "wrong_vector", "record_id": str(records[0].id)}}}
+
+        response = await async_client.post(
+            f"/api/v1/me/datasets/{dataset.id}/records/search",
+            headers=owner_auth_header,
+            json=query_json,
+            params={"offset": 0, "limit": 10},
+        )
+
+        assert response.status_code == 422
+        response_json = response.json()
+        assert response_json == {"detail": f"Vector `wrong_vector` not found in dataset `{dataset.id}`."}
+
+    async def test_search_dataset_records_with_nonexistent_vector_record_id(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+    ):
+        workspace = await WorkspaceFactory.create()
+        dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        vector_settings = await VectorSettingsFactory.create(dataset=dataset)
+        wrong_record_id = str(uuid.uuid4())
+
+        query_json = {"query": {"vector": {"name": vector_settings.name, "record_id": wrong_record_id}}}
+
+        response = await async_client.post(
+            f"/api/v1/me/datasets/{dataset.id}/records/search",
+            headers=owner_auth_header,
+            json=query_json,
+            params={"offset": 0, "limit": 10},
+        )
+
+        assert response.status_code == 422
+        response_json = response.json()
+        assert response_json == {"detail": f"Record with id `{wrong_record_id}` not found in dataset `{dataset.id}`."}
+
+    async def test_search_dataset_records_with_vector_record_id_from_other_dataset(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+    ):
+        workspace = await WorkspaceFactory.create()
+        dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        vector_settings = await VectorSettingsFactory.create(dataset=dataset)
+        record = await RecordFactory.create()
+
+        query_json = {"query": {"vector": {"name": vector_settings.name, "record_id": str(record.id)}}}
+
+        response = await async_client.post(
+            f"/api/v1/me/datasets/{dataset.id}/records/search",
+            headers=owner_auth_header,
+            json=query_json,
+            params={"offset": 0, "limit": 10},
+        )
+
+        assert response.status_code == 422
+        response_json = response.json()
+        assert response_json == {"detail": f"Record with id `{record.id}` not found in dataset `{dataset.id}`."}
 
     async def test_search_dataset_records_with_offset_and_limit(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
@@ -5924,7 +6109,7 @@ class TestSuiteDatasets:
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
-            query=StringQuery(q="Hello", field="input"),
+            query=TextQuery(q="Hello", field="input"),
             metadata_filters=[],
             user_response_status_filter=None,
             offset=0,

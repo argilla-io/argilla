@@ -22,6 +22,7 @@ export interface BackendMetadata {
     | MetadataTermsSettings
     | MetadataIntegerSettings
     | MetadataFloatSettings;
+  visible_for_annotators: boolean;
 }
 
 export interface BackendMetadataMetric {

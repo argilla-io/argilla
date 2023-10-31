@@ -74,7 +74,7 @@ $tooltip-border-radius: $border-radius-s;
   &:after {
     top: 50%;
     transform: translateY(-50%);
-    right: calc(-100% + 10px);
+    left: calc(100% + 10px);
   }
   &:before {
     @extend %triangle-left;
@@ -123,11 +123,11 @@ $tooltip-border-radius: $border-radius-s;
 }
 
 %triangle-left {
-  right: calc(100% + $tooltip-triangle-size/2);
+  left: calc(100% + $tooltip-triangle-size/2);
   top: 50%;
   transform: translateY(-50%);
   @include triangle(
-    right,
+    left,
     $tooltip-triangle-size,
     $tooltip-triangle-size,
     $tooltip-bg

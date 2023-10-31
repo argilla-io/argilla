@@ -22,7 +22,7 @@ from sqlalchemy import Select, and_, func, or_, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
 from argilla.server.contexts import accounts
-from argilla.server.enums import DatasetStatus, RecordInclude, ResponseStatusFilter, UserRole
+from argilla.server.enums import DatasetStatus, ResponseStatusFilter, UserRole
 from argilla.server.models import (
     Dataset,
     Field,

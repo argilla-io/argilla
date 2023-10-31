@@ -50,6 +50,7 @@ from argilla.server.schemas.v1.datasets import (
     SearchRecord,
     SearchRecordsQuery,
     SearchRecordsResult,
+    VectorQuery,
     VectorSettings,
     VectorSettingsCreate,
     VectorsSettings,
@@ -71,7 +72,7 @@ from argilla.utils.telemetry import TelemetryClient, get_telemetry_client
 
 if TYPE_CHECKING:
     from argilla.server.models import Record
-    from argilla.server.schemas.v1.datasets import StringQuery
+    from argilla.server.schemas.v1.datasets import TextQuery
     from argilla.server.search_engine.base import SearchResponses
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
@@ -210,24 +211,84 @@ async def _get_search_responses(
     parsed_metadata: List[MetadataParsedQueryParam],
     limit: int,
     offset: int,
-    query: Optional["StringQuery"] = None,
+    text_query: Optional["TextQuery"] = None,
+    vector_query: Optional["VectorQuery"] = None,
     user: Optional[User] = None,
     response_statuses: Optional[List[ResponseStatusFilter]] = None,
     sort_by_query_param: Optional[Dict[str, str]] = None,
 ) -> "SearchResponses":
+    vector_settings = None
+    record = None
+
+    if vector_query:
+        vector_settings = await _get_vector_settings_by_name_or_raise(db, dataset, vector_query.name)
+        if vector_query.record_id is not None:
+            record = await _get_dataset_record_by_id_or_raise(db, dataset, vector_query.record_id)
+            await record.awaitable_attrs.vectors
+
+    if (
+        text_query
+        and text_query.field
+        and not await datasets.get_field_by_name_and_dataset_id(db, text_query.field, dataset.id)
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Field `{text_query.field}` not found in dataset `{dataset.id}`.",
+        )
+
     metadata_filters = await _build_metadata_filters(db, dataset, parsed_metadata)
     response_status_filter = await _build_response_status_filter_for_search(response_statuses, user=user)
     sort_by = await _build_sort_by(db, dataset, sort_by_query_param)
 
-    return await search_engine.search(
-        dataset=dataset,
-        query=query,
-        metadata_filters=metadata_filters,
-        user_response_status_filter=response_status_filter,
-        offset=offset,
-        limit=limit,
-        sort_by=sort_by,
+    if vector_query and vector_settings:
+        return await search_engine.similarity_search(
+            dataset=dataset,
+            vector_settings=vector_settings,
+            value=vector_query.value,
+            record=record,
+            query=text_query,
+            order=vector_query.order,
+            metadata_filters=metadata_filters,
+            user_response_status_filter=response_status_filter,
+            max_results=limit,
+        )
+    else:
+        return await search_engine.search(
+            dataset=dataset,
+            query=text_query,
+            metadata_filters=metadata_filters,
+            user_response_status_filter=response_status_filter,
+            offset=offset,
+            limit=limit,
+            sort_by=sort_by,
+        )
+
+
+async def _get_dataset_record_by_id_or_raise(db: "AsyncSession", dataset: Dataset, record_id: UUID) -> "Record":
+    record = await datasets.get_record_by_id(db, record_id)
+    if record is None or record.dataset_id != dataset.id:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Record with id `{record_id}` not found in dataset `{dataset.id}`.",
+        )
+
+    return record
+
+
+async def _get_vector_settings_by_name_or_raise(
+    db: "AsyncSession", dataset: Dataset, vector_name: str
+) -> VectorSettings:
+    vector_settings = await datasets.get_vector_settings_by_name_and_dataset_id(
+        db, name=vector_name, dataset_id=dataset.id
     )
+
+    if vector_settings is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Vector `{vector_name}` not found in dataset `{dataset.id}`.",
+        )
+
+    return vector_settings
 
 
 async def _filter_records_using_search_engine(
@@ -712,7 +773,7 @@ async def search_dataset_records(
     search_engine: SearchEngine = Depends(get_search_engine),
     telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
-    query: SearchRecordsQuery,
+    body: SearchRecordsQuery,
     metadata: MetadataQueryParams = Depends(),
     sort_by_query_param: SortByQueryParamParsed,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
@@ -724,20 +785,12 @@ async def search_dataset_records(
     dataset = await _get_dataset(db, dataset_id, with_fields=True)
     await authorize(current_user, DatasetPolicyV1.search_records(dataset))
 
-    search_engine_query = query.query
-    if search_engine_query.text.field and not await datasets.get_field_by_name_and_dataset_id(
-        db, search_engine_query.text.field, dataset_id
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Field `{search_engine_query.text.field}` not found in dataset `{dataset_id}`.",
-        )
-
     search_responses = await _get_search_responses(
         db=db,
         search_engine=search_engine,
         dataset=dataset,
-        query=search_engine_query.text,
+        text_query=body.query.text,
+        vector_query=body.query.vector,
         parsed_metadata=metadata.metadata_parsed,
         limit=limit,
         offset=offset,

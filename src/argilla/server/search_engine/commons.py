@@ -15,13 +15,13 @@
 import dataclasses
 import datetime
 from abc import abstractmethod
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Literal, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, conint
 from pydantic.utils import GetterDict
 
-from argilla.server.enums import FieldType, MetadataPropertyType, RecordSortField, ResponseStatusFilter
+from argilla.server.enums import FieldType, MetadataPropertyType, RecordSortField, ResponseStatusFilter, SimilarityOrder
 from argilla.server.models import (
     Dataset,
     Field,
@@ -45,9 +45,9 @@ from argilla.server.search_engine.base import (
     SearchResponseItem,
     SearchResponses,
     SortBy,
-    StringQuery,
     TermsMetadataFilter,
     TermsMetadataMetrics,
+    TextQuery,
     UserResponse,
     UserResponseStatusFilter,
 )
@@ -270,22 +270,39 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         vector_settings: VectorSettings,
         value: Optional[List[float]] = None,
         record: Optional[Record] = None,
+        query: Optional[Union[TextQuery, str]] = None,
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
-        max_results: conint(ge=2, le=500) = 100,
+        metadata_filters: Optional[List[MetadataFilter]] = None,
+        max_results: int = 100,
+        order: SimilarityOrder = SimilarityOrder.most_similar,
         threshold: Optional[float] = None,
     ) -> SearchResponses:
-        if not (value or record):
-            raise ValueError("Must provide vector value or record to compute the similarity search")
+        if bool(value) == bool(record):
+            raise ValueError("Must provide either vector value or record to compute the similarity search")
 
         vector_value = value
+        record_id = None
 
         if not vector_value:
             for vector in record.vectors:
                 if vector.vector_settings_id == vector_settings.id:
                     vector_value = vector.value
+                    record_id = record.id
+                    break
 
         if not vector_value:
             raise ValueError("Cannot find a vector value to apply with provided info")
+
+        if order == SimilarityOrder.least_similar:
+            vector_value = self._inverse_vector(vector_value)
+
+        query_filters = []
+        if query:
+            query_filters.append(self._build_text_query(dataset, query))
+        if user_response_status_filter and user_response_status_filter.statuses:
+            query_filters.append(self._build_response_status_filter(user_response_status_filter))
+        if metadata_filters:
+            query_filters.extend(self._build_metadata_filters(metadata_filters))
 
         index = await self._get_index_or_raise(dataset)
         response = await self._request_similarity_search(
@@ -293,18 +310,14 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             vector_settings=vector_settings,
             value=vector_value,
             k=max_results,
-            user_response_status_filter=user_response_status_filter,
+            excluded_id=record_id,
+            query_filters=query_filters,
         )
 
         return await self._process_search_response(response, threshold)
 
-    async def delete_record_response(self, response: Response):
-        record = response.record
-        index_name = await self._get_index_or_raise(record.dataset)
-
-        await self._update_document_request(
-            index_name, id=record.id, body={"script": f'ctx._source["responses"].remove("{response.user.username}")'}
-        )
+    def _inverse_vector(self, vector_value: List[float]) -> List[float]:
+        return [vector_value[i] * -1 for i in range(0, len(vector_value))]
 
     async def configure_index_vectors(self, vector_settings: VectorSettings) -> None:
         index = await self._get_index_or_raise(vector_settings.dataset)
@@ -315,7 +328,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     async def search(
         self,
         dataset: Dataset,
-        query: Optional[Union[StringQuery, str]] = None,
+        query: Optional[Union[TextQuery, str]] = None,
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
         offset: int = 0,
@@ -324,10 +337,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     ) -> SearchResponses:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html
 
-        if isinstance(query, str):
-            query = StringQuery(q=query)
-
-        text_query = self._text_query_builder(dataset, text=query)
+        text_query = self._build_text_query(dataset, text=query)
         bool_query: Dict[str, Any] = {"must": [text_query]}
 
         query_filters = []
@@ -419,9 +429,13 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         return SearchResponses(items=items, total=total)
 
     @staticmethod
-    def _text_query_builder(dataset: Dataset, text: Optional[StringQuery] = None) -> dict:
+    def _build_text_query(dataset: Dataset, text: Optional[Union[TextQuery, str]] = None) -> dict:
         if text is None:
             return {"match_all": {}}
+
+        if isinstance(text, str):
+            text = TextQuery(q=text)
+
         if not text.field:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html
             field_names = [
@@ -597,8 +611,8 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         vector_settings: VectorSettings,
         value: List[float],
         k: int,
-        # TODO(@frascuchon): Add metadata filters
-        user_response_status_filter: Optional[UserResponseStatusFilter] = None,
+        excluded_id: Optional[UUID] = None,
+        query_filters: Optional[List[dict]] = None,
     ) -> dict:
         """
         Applies the similarity search request based on a vector configuration, a vector value,
