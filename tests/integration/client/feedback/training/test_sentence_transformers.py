@@ -23,6 +23,14 @@ from argilla.client.feedback.training.schemas import (
 )
 from sentence_transformers import CrossEncoder, InputExample, SentenceTransformer
 
+from tests.integration.client.feedback.helpers import (
+    formatting_func_sentence_transformers,
+    formatting_func_sentence_transformers_case_1_b,
+    formatting_func_sentence_transformers_case_2,
+    formatting_func_sentence_transformers_case_3_a,
+    formatting_func_sentence_transformers_case_3_b,
+    formatting_func_sentence_transformers_case_4,
+)
 from tests.integration.training.helpers import train_with_cleanup
 
 if TYPE_CHECKING:
@@ -30,116 +38,6 @@ if TYPE_CHECKING:
 
 __OUTPUT_DIR__ = "tmp"
 __FRAMEWORK__ = "sentence-transformers"
-
-
-# All the formatting functions generate dummy datasets with the formats allowed (almost a copy than those of trl)
-
-
-def formatting_func_case_1_a(sample):
-    labels = [
-        annotation["value"]
-        for annotation in sample["question-3"]
-        if annotation["status"] == "submitted" and annotation["value"] is not None
-    ]
-    if labels:
-        # Three cases for the tests: None, one tuple and yielding multiple tuples
-        if labels[0] == "a":
-            return None
-        elif labels[0] == "b":
-            return {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1}
-        elif labels[0] == "c":
-            return [
-                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1},
-                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0},
-            ]
-
-
-def formatting_func_case_1_b(sample):
-    labels = [
-        annotation["value"]
-        for annotation in sample["question-3"]
-        if annotation["status"] == "submitted" and annotation["value"] is not None
-    ]
-    if labels:
-        if labels[0] == "a":
-            return None
-        elif labels[0] == "b":
-            return {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0.786}
-        elif labels[0] == "c":
-            return [
-                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0.786},
-                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0.56},
-            ]
-
-
-def formatting_func_case_2(sample):
-    labels = [
-        annotation["value"]
-        for annotation in sample["question-3"]
-        if annotation["status"] == "submitted" and annotation["value"] is not None
-    ]
-    if labels:
-        # Three cases for the tests: None, one tuple and yielding multiple tuples
-        if labels[0] == "a":
-            return None
-        elif labels[0] == "b":
-            return {"sentence-1": sample["text"], "sentence-2": sample["text"]}
-        elif labels[0] == "c":
-            return [{"sentence-1": sample["text"], "sentence-2": sample["text"]}] * 2
-
-
-def formatting_func_case_3_a(sample):
-    labels = [
-        annotation["value"]
-        for annotation in sample["question-3"]
-        if annotation["status"] == "submitted" and annotation["value"] is not None
-    ]
-    if labels:
-        # Three cases for the tests: None, one tuple and yielding multiple tuples
-        if labels[0] == "a":
-            return None
-        elif labels[0] == "b":
-            return {"sentence": sample["text"], "label": 1}
-        elif labels[0] == "c":
-            return [{"sentence": sample["text"], "label": 1}, {"sentence": sample["text"], "label": 0}]
-
-
-def formatting_func_case_3_b(sample):
-    labels = [
-        annotation["value"]
-        for annotation in sample["question-3"]
-        if annotation["status"] == "submitted" and annotation["value"] is not None
-    ]
-    if labels:
-        if labels[0] == "a":
-            return None
-        elif labels[0] == "b":
-            return {
-                "sentence-1": sample["text"],
-                "sentence-2": sample["text"],
-                "sentence-3": sample["text"],
-                "label": 1,
-            }
-        elif labels[0] == "c":
-            return [
-                {"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"], "label": 1},
-                {"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"], "label": 0},
-            ]
-
-
-def formatting_func_case_4(sample):
-    labels = [
-        annotation["value"]
-        for annotation in sample["question-3"]
-        if annotation["status"] == "submitted" and annotation["value"] is not None
-    ]
-    if labels:
-        if labels[0] == "a":
-            return None
-        elif labels[0] == "b":
-            return {"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"]}
-        elif labels[0] == "c":
-            return [{"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"]}] * 2
 
 
 def formatting_func_errored(sample):
@@ -156,11 +54,11 @@ def formatting_func_errored(sample):
 @pytest.mark.parametrize(
     "formatting_func",
     [
-        formatting_func_case_1_a,
-        formatting_func_case_1_b,
-        formatting_func_case_2,
-        formatting_func_case_3_b,
-        formatting_func_case_4,
+        formatting_func_sentence_transformers,
+        formatting_func_sentence_transformers_case_1_b,
+        formatting_func_sentence_transformers_case_2,
+        formatting_func_sentence_transformers_case_3_b,
+        formatting_func_sentence_transformers_case_4,
     ],
 )
 @pytest.mark.usefixtures(
@@ -230,7 +128,7 @@ def test_prepare_for_training_sentence_transformers(
 
 
 @pytest.mark.parametrize("cross_encoder", [False, True])
-@pytest.mark.parametrize("formatting_func", [formatting_func_case_3_a, formatting_func_errored])
+@pytest.mark.parametrize("formatting_func", [formatting_func_sentence_transformers_case_3_a, formatting_func_errored])
 @pytest.mark.usefixtures(
     "feedback_dataset_guidelines",
     "feedback_dataset_fields",
