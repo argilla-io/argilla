@@ -90,8 +90,10 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
             bool_filter_query["must_not"] = [{"ids": {"values": [str(excluded_id)]}}]
 
         if bool_filter_query:
+            # This will work only for lucene versions >= 9.5.0 (OpenSearch >= 2.6.0)
+            # Otherwise, knn + filter can raise a "failed to create query: Rewrite first" query shard exception
+            # See https://github.com/apache/lucene/pull/12072
             # See https://opensearch.org/docs/latest/search-plugins/knn/filter-search-knn/#efficient-k-nn-filtering
-            # Will work from Opensearch >= v2.5
             knn_query["filter"] = {"bool": bool_filter_query}
 
         body = {"query": {"knn": {field_name_for_vector_settings(vector_settings): knn_query}}}
