@@ -23,7 +23,7 @@ authors = [{ name = "argilla", email = "contact@argilla.io" }]
 maintainers = [{ name = "argilla", email = "contact@argilla.io" }]
 dependencies = [
     # Client
-    "httpx >= 0.15,< 0.24",
+    "httpx >= 0.15,<= 0.25",
     "deprecated ~= 1.2.0",
     "packaging >= 20.0",
     # pandas -> For data loading
@@ -42,7 +42,7 @@ dependencies = [
     # for logging, tracebacks, printing, progressbars
     "rich != 13.1.0",
     # for CLI
-    "typer >= 0.6.0, < 0.8.0", # spaCy only supports typer<0.8.0
+    "typer >= 0.6.0, < 0.10.0", # spaCy only supports typer<0.10.0
 ]
 dynamic = ["version"]
 

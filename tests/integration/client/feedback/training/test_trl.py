@@ -33,6 +33,12 @@ from peft import LoraConfig, TaskType
 from transformers import AutoModelForCausalLM, AutoModelForSequenceClassification, AutoTokenizer
 from trl import AutoModelForCausalLMWithValueHead
 
+from tests.integration.client.feedback.helpers import (
+    formatting_func_dpo,
+    formatting_func_ppo,
+    formatting_func_rm,
+    formatting_func_sft,
+)
 from tests.integration.training.helpers import train_with_cleanup
 
 if TYPE_CHECKING:
@@ -342,24 +348,7 @@ def test_sft_with_peft(
     )
     dataset.add_records(records=feedback_dataset_records * 2)
 
-    def formatting_func(sample: Dict[str, Any]) -> Iterator[str]:
-        # For example, the sample must be most frequently rated as "1" in question-2 and
-        # label "b" from "question-3" must have not been set by any annotator
-        ratings = [
-            annotation["value"]
-            for annotation in sample["question-2"]
-            if annotation["status"] == "submitted" and annotation["value"] is not None
-        ]
-        labels = [
-            annotation["value"]
-            for annotation in sample["question-3"]
-            if annotation["status"] == "submitted" and annotation["value"] is not None
-        ]
-        if ratings and Counter(ratings).most_common(1)[0][0] == 1 and "b" not in labels:
-            return f"### Text\n{sample['text']}"
-        return None
-
-    task = TrainingTask.for_supervised_fine_tuning(formatting_func)
+    task = TrainingTask.for_supervised_fine_tuning(formatting_func_sft)
 
     small_model_id = "sshleifer/tiny-gpt2"
     loaded_model = AutoModelForCausalLM.from_pretrained(small_model_id)
