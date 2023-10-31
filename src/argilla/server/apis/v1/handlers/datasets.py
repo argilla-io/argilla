@@ -221,23 +221,10 @@ async def _get_search_responses(
     record = None
 
     if vector_query:
+        vector_settings = await _get_vector_settings_by_name_or_raise(db, dataset, vector_query.name)
         if vector_query.record_id is not None:
-            record = await datasets.get_record_by_id(db, vector_query.record_id)
-            if record is None:
-                raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail=f"Record with id `{vector_query.record_id}` not found in dataset `{dataset.id}`.",
-                )
+            record = await _get_dataset_record_by_id_or_raise(db, dataset, vector_query.record_id)
             await record.awaitable_attrs.vectors
-
-        vector_settings = await datasets.get_vector_settings_by_name_and_dataset_id(
-            db, name=vector_query.name, dataset_id=dataset.id
-        )
-        if vector_settings is None:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Vector `{vector_query.name}` not found in dataset `{dataset.id}`.",
-            )
 
     if (
         text_query
@@ -275,6 +262,31 @@ async def _get_search_responses(
             limit=limit,
             sort_by=sort_by,
         )
+
+
+async def _get_dataset_record_by_id_or_raise(db: "AsyncSession", dataset: Dataset, record_id: UUID) -> "Record":
+    record = await datasets.get_record_by_id(db, record_id)
+    if record is None or record.dataset_id != dataset.id:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Record with id `{record_id}` not found in dataset `{dataset.id}`.",
+        )
+
+    return record
+
+
+async def _get_vector_settings_by_name_or_raise(db: "AsyncSession", dataset: Dataset, vector_name: str) -> VectorSettings:
+    vector_settings = await datasets.get_vector_settings_by_name_and_dataset_id(
+        db, name=vector_name, dataset_id=dataset.id
+    )
+
+    if vector_settings is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Vector `{vector_name}` not found in dataset `{dataset.id}`.",
+        )
+
+    return vector_settings
 
 
 async def _filter_records_using_search_engine(
