@@ -179,6 +179,10 @@ export default {
   flex-wrap: wrap;
   gap: $base-space * 2;
   height: 100%;
+  overflow: auto;
+  @include media("<tablet") {
+    flex-flow: column;
+  }
   &__text {
     color: $black-54;
   }
