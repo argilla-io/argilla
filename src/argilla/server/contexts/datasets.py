@@ -846,9 +846,10 @@ async def update_records(
         await Suggestion.delete_many(db, params=params, autocommit=False)
         db.add_all(suggestions)
 
-        await Vector.upsert_many(
-            db, objects=upsert_vectors, constraints=[Vector.record_id, Vector.vector_settings_id], autocommit=False
-        )
+        if upsert_vectors:
+            await Vector.upsert_many(
+                db, objects=upsert_vectors, constraints=[Vector.record_id, Vector.vector_settings_id], autocommit=False
+            )
 
         await Record.update_many(db, records_update_objects, autocommit=False)
         records = await get_records_by_ids(
