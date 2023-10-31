@@ -44,7 +44,6 @@ from argilla.client.feedback.training.schemas import (
 )
 from argilla.client.feedback.unification import LabelQuestionUnification
 from argilla.client.models import Framework
-from huggingface_hub import HfApi, HfFolder
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 from tests.integration.training.helpers import train_with_cleanup
@@ -421,6 +420,7 @@ def test_push_to_huggingface(
             match=f"Framework {framework} is not supported for this {TrainingTaskForTextClassification}.",
         ):
             trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework)
+            return
 
     else:
         if framework == Framework("spacy"):

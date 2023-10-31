@@ -22,7 +22,6 @@ from argilla.client.feedback.training.base import ArgillaTrainer
 from argilla.client.feedback.training.schemas import (
     TrainingTask,
 )
-from huggingface_hub import HfFolder
 from sentence_transformers import CrossEncoder, InputExample, SentenceTransformer
 
 from tests.integration.training.helpers import train_with_cleanup
@@ -330,11 +329,6 @@ def test_push_to_huggingface(
     # but is outdated and doesn't work with the current versions of 'huggingface-hub'.
     # The present test is let here for the future, when we either implement the functionality
     # in 'argilla', or to 'sentence-transformers'.
-
-    # The token will be grabbed internally, but fail and warn soon if the user has no token available
-    token = HfFolder.get_token()
-    if token is None:
-        raise ValueError("No token available, please set it with the following env var name: 'HUGGING_FACE_HUB_TOKEN'")
 
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,

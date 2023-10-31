@@ -29,7 +29,6 @@ from argilla.client.feedback.training.schemas import (
     TrainingTaskForSFTFormat,
 )
 from datasets import Dataset, DatasetDict
-from huggingface_hub import HfFolder
 from peft import LoraConfig, TaskType
 from transformers import AutoModelForCausalLM, AutoModelForSequenceClassification, AutoTokenizer
 from trl import AutoModelForCausalLMWithValueHead
@@ -401,11 +400,6 @@ def test_push_to_huggingface(
     feedback_dataset_records: List[FeedbackRecord],
     mocked_trainer_push_to_huggingface,
 ) -> None:
-    # The token will be grabbed internally, but fail and warn soon if the user has no token available
-    token = HfFolder.get_token()
-    if token is None:
-        raise ValueError("No token available, please set it with the following env var name: 'HUGGING_FACE_HUB_TOKEN'")
-
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
         fields=feedback_dataset_fields,
