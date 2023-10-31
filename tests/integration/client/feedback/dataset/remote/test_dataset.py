@@ -474,7 +474,7 @@ class TestRemoteFeedbackDataset:
         # assert all(record.vectors["vector"] for record in remote_dataset.records)
 
     @pytest.mark.parametrize(
-        "wrong_vectors, expected_error",
+        "invalid_vectors, expected_error",
         [
             (
                 {"vector": [1, 1, 1, 1, 1]},
@@ -488,8 +488,8 @@ class TestRemoteFeedbackDataset:
             ),
         ],
     )
-    def test_adding_records_with_wrong_vectors(
-        self, owner: "User", feedback_dataset: FeedbackDataset, wrong_vectors: dict, expected_error: str
+    def test_adding_records_with_invalid_vectors(
+        self, owner: "User", feedback_dataset: FeedbackDataset, invalid_vectors: dict, expected_error: str
     ):
         api.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
@@ -502,7 +502,7 @@ class TestRemoteFeedbackDataset:
             remote_dataset.add_records(
                 FeedbackRecord(
                     fields={"text": "Hello world!", "text-2": "Hello world!"},
-                    vectors=wrong_vectors,
+                    vectors=invalid_vectors,
                 )
             )
 
