@@ -17,16 +17,16 @@ from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
 from fastapi import HTTPException, Query
-from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
+from pydantic import BaseModel, PositiveInt, conint, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
 from pydantic.generics import GenericModel
 from pydantic.utils import GetterDict
 
-from argilla.server.enums import RecordInclude
+from argilla.server.enums import RecordInclude, SimilarityOrder
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.records import RecordUpdate
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
-from argilla.server.search_engine import StringQuery
+from argilla.server.search_engine import TextQuery
 
 try:
     from typing import Annotated
@@ -673,12 +673,42 @@ class MetadataQueryParams(BaseModel):
         return [MetadataParsedQueryParam(q) for q in self.metadata]
 
 
-class TextQuery(BaseModel):
-    text: StringQuery
+class VectorQuery(BaseModel):
+    name: str
+    record_id: Optional[UUID] = None
+    value: Optional[List[float]] = None
+    order: SimilarityOrder = SimilarityOrder.most_similar
+
+    @root_validator
+    def check_required(cls, values: dict) -> dict:
+        """Check that either 'record_id' or 'value' is provided"""
+        record_id = values.get("record_id")
+        value = values.get("value")
+
+        if bool(record_id) == bool(value):
+            raise ValueError("Either 'record_id' or 'value' must be provided")
+
+        return values
+
+
+class Query(BaseModel):
+    text: Optional[TextQuery] = None
+    vector: Optional[VectorQuery] = None
+
+    @root_validator
+    def check_required(cls, values: dict) -> dict:
+        """Check that either 'text' or 'vector' is provided"""
+        text = values.get("text")
+        vector = values.get("vector")
+
+        if text is None and vector is None:
+            raise ValueError("Either 'text' or 'vector' must be provided")
+
+        return values
 
 
 class SearchRecordsQuery(BaseModel):
-    query: TextQuery
+    query: Query
 
 
 class SearchRecord(BaseModel):

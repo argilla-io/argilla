@@ -27,6 +27,7 @@ These are the section headers that we use:
 - Added support to include vectors for `POST /api/v1/me/datasets/:dataset_id/records/search` endpoint response using `include` query param. ([#4063](https://github.com/argilla-io/argilla/pull/4063))
 - Added `add_vector_settings` method to local and remote FeedbackDataset. ([#4055](https://github.com/argilla-io/argilla/pull/4055))
 - Added `vector_settings_by_name` method to local and remote Feedback datasets. ([#4055](https://github.com/argilla-io/argilla/pull/4055))
+- Added `ARGILLA_SEARCH_ENGINE` environment variable to configure the search engine to use. ([#4019](https://github.com/argilla-io/argilla/pull/4019))
 
 ### Changed
 
@@ -37,6 +38,8 @@ These are the section headers that we use:
 - Update `FeedbackDataset.__init__` to allow passing a vector_settings list. ([#4055](https://github.com/argilla-io/argilla/pull/4055))
 - Update `FeedbackDataset.push_to_argilla` to also push vector settings. ([#4055](https://github.com/argilla-io/argilla/pull/4055))
 - Update `FeedbackDatasetRecord` to support the creation of records with vectors. ([#4043](https://github.com/argilla-io/argilla/pull/4043))
+- Update `POST /api/v1/me/datasets/:dataset_id/records/search` endpoint to allow to search records with vectors. ([#4019](https://github.com/argilla-io/argilla/pull/4019))
+- [breaking] Users working with OpenSearch engines must use version >=2.5 and set `ARGILLA_SEARCH_ENGINE=opensearch`. ([#4019](https://github.com/argilla-io/argilla/pull/4019))
 
 ## [1.18.0]()
 

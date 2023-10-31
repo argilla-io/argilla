@@ -13,10 +13,10 @@
 #  limitations under the License.
 from typing import TYPE_CHECKING, AsyncGenerator, List, Union
 
-from argilla.server.enums import ResponseStatusFilter
+from argilla.server.enums import ResponseStatusFilter, SimilarityOrder
 from argilla.server.models import Record, User, VectorSettings
 from argilla.server.search_engine import (
-    StringQuery,
+    TextQuery,
     UserResponseStatusFilter,
 )
 from argilla.server.search_engine.commons import ALL_RESPONSES_STATUSES_FIELD, index_name_for_dataset
@@ -429,16 +429,16 @@ class TestSuiteElasticSearchEngine:
             ("00000", 1),
             ("card payment", 5),
             ("nothing", 0),
-            (StringQuery(q="card"), 5),
-            (StringQuery(q="account"), 1),
-            (StringQuery(q="payment"), 6),
-            (StringQuery(q="cash"), 3),
-            (StringQuery(q="card payment"), 5),
-            (StringQuery(q="nothing"), 0),
-            (StringQuery(q="rate negative"), 1),  # Terms are found in two different fields
-            (StringQuery(q="negative", field="label"), 4),
-            (StringQuery(q="00000", field="textId"), 1),
-            (StringQuery(q="card payment", field="text"), 5),
+            (TextQuery(q="card"), 5),
+            (TextQuery(q="account"), 1),
+            (TextQuery(q="payment"), 6),
+            (TextQuery(q="cash"), 3),
+            (TextQuery(q="card payment"), 5),
+            (TextQuery(q="nothing"), 0),
+            (TextQuery(q="rate negative"), 1),  # Terms are found in two different fields
+            (TextQuery(q="negative", field="label"), 4),
+            (TextQuery(q="00000", field="textId"), 1),
+            (TextQuery(q="card payment", field="text"), 5),
         ],
     )
     async def test_search_with_query_string(
@@ -446,7 +446,7 @@ class TestSuiteElasticSearchEngine:
         elasticsearch_engine: ElasticSearchEngine,
         opensearch: OpenSearch,
         test_banking_sentiment_dataset: Dataset,
-        query: Union[str, StringQuery],
+        query: Union[str, TextQuery],
         expected_items: int,
     ):
         opensearch.indices.refresh(index=index_name_for_dataset(test_banking_sentiment_dataset))
@@ -491,7 +491,7 @@ class TestSuiteElasticSearchEngine:
 
         result = await elasticsearch_engine.search(
             test_banking_sentiment_dataset,
-            query=StringQuery(q="payment"),
+            query=TextQuery(q="payment"),
             user_response_status_filter=UserResponseStatusFilter(user=user, statuses=statuses),
         )
         assert len(result.items) == expected_items
@@ -507,11 +507,11 @@ class TestSuiteElasticSearchEngine:
 
         no_filter_results = await elasticsearch_engine.search(
             test_banking_sentiment_dataset,
-            query=StringQuery(q="payment"),
+            query=TextQuery(q="payment"),
         )
         results = await elasticsearch_engine.search(
             test_banking_sentiment_dataset,
-            query=StringQuery(q="payment"),
+            query=TextQuery(q="payment"),
             user_response_status_filter=UserResponseStatusFilter(user=user, statuses=all_statuses),
         )
         assert len(no_filter_results.items) == len(results.items)
@@ -709,10 +709,29 @@ class TestSuiteElasticSearchEngine:
     ):
         settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
         with pytest.raises(
-            expected_exception=ValueError, match="Must provide vector value or record to compute the similarity search"
+            expected_exception=ValueError,
+            match="Must provide either vector value or record to compute the similarity search",
         ):
             await elasticsearch_engine.similarity_search(
                 dataset=test_banking_sentiment_dataset_with_vectors, vector_settings=settings
+            )
+
+    async def test_similarity_search_with_too_much_inputs(
+        self,
+        elasticsearch_engine: ElasticSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset_with_vectors: Dataset,
+    ):
+        settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
+        with pytest.raises(
+            expected_exception=ValueError,
+            match="Must provide either vector value or record to compute the similarity search",
+        ):
+            await elasticsearch_engine.similarity_search(
+                dataset=test_banking_sentiment_dataset_with_vectors,
+                vector_settings=settings,
+                value=[1, 2, 3],
+                record=test_banking_sentiment_dataset_with_vectors.records[0],
             )
 
     async def test_similarity_search_by_vector_value(
@@ -734,6 +753,26 @@ class TestSuiteElasticSearchEngine:
         assert responses.total == 1
         assert responses.items[0].record_id == selected_record.id
 
+    async def test_similarity_search_by_vector_value_with_order(
+        self,
+        elasticsearch_engine: ElasticSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset_with_vectors: Dataset,
+    ):
+        selected_record: Record = test_banking_sentiment_dataset_with_vectors.records[0]
+        vector_settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
+
+        responses = await elasticsearch_engine.similarity_search(
+            dataset=test_banking_sentiment_dataset_with_vectors,
+            vector_settings=vector_settings,
+            value=selected_record.vectors[0].value,
+            order=SimilarityOrder.least_similar,
+            max_results=1,
+        )
+
+        assert responses.total == 1
+        assert responses.items[0].record_id != selected_record.id
+
     async def test_similarity_search_by_record(
         self,
         elasticsearch_engine: ElasticSearchEngine,
@@ -751,7 +790,7 @@ class TestSuiteElasticSearchEngine:
         )
 
         assert responses.total == 1
-        assert responses.items[0].record_id == selected_record.id
+        assert responses.items[0].record_id != selected_record.id
 
     async def _configure_record_responses(
         self, opensearch: OpenSearch, dataset: Dataset, response_status: List[ResponseStatusFilter], user: User

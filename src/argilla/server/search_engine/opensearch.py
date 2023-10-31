@@ -14,16 +14,12 @@
 
 import dataclasses
 from typing import Any, Dict, List, Optional
+from uuid import UUID
 
 from opensearchpy import AsyncOpenSearch, helpers
 
-from argilla.server.models import (
-    VectorSettings,
-)
-from argilla.server.search_engine.base import (
-    SearchEngine,
-    UserResponseStatusFilter,
-)
+from argilla.server.models import VectorSettings
+from argilla.server.search_engine.base import SearchEngine
 from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine, field_name_for_vector_settings
 from argilla.server.settings import settings
 
@@ -82,18 +78,25 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
         vector_settings: VectorSettings,
         value: List[float],
         k: int,
-        user_response_status_filter: Optional[UserResponseStatusFilter] = None,
+        excluded_id: Optional[UUID] = None,
+        query_filters: Optional[List[dict]] = None,
     ) -> dict:
-        knn_query = {field_name_for_vector_settings(vector_settings): {"vector": value, "k": k}}
+        knn_query = {"vector": value, "k": k}
 
-        if user_response_status_filter:
+        bool_filter_query = {}
+        if query_filters:
+            bool_filter_query = {"should": query_filters, "minimum_should_match": "100%"}
+        if excluded_id:
+            bool_filter_query["must_not"] = [{"ids": {"values": [str(excluded_id)]}}]
+
+        if bool_filter_query:
             # See https://opensearch.org/docs/latest/search-plugins/knn/filter-search-knn/#efficient-k-nn-filtering
-            # Will work from Opensearch >= v2.4
-            # TODO: Add metadata !!!!
-            knn_query["filter"] = self._build_response_status_filter(user_response_status_filter)
+            # Will work from Opensearch >= v2.5
+            knn_query["filter"] = {"bool": bool_filter_query}
 
-        body = {"query": {"knn": knn_query}}
-        return await self.client.search(index=index, body=body, _source=False, track_total_hits=True)
+        body = {"query": {"knn": {field_name_for_vector_settings(vector_settings): knn_query}}}
+
+        return await self.client.search(index=index, body=body, _source=False, track_total_hits=True, size=k)
 
     async def _create_index_request(self, index_name: str, mappings: dict, settings: dict) -> None:
         await self.client.indices.create(index=index_name, body=dict(settings=settings, mappings=mappings))
