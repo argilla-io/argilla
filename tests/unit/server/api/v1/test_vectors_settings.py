@@ -18,6 +18,7 @@ from uuid import uuid4
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.enums import UserRole
+from argilla.server.schemas.v1.datasets import VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH
 
 from tests.factories import AdminFactory, AnnotatorFactory, UserFactory, VectorSettingsFactory
 
@@ -27,6 +28,92 @@ if TYPE_CHECKING:
 
 @pytest.mark.asyncio
 class TestSuiteVectorsSettings:
+    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+    async def test_update_vector_settings(self, async_client: "AsyncClient", role: UserRole):
+        vector_settings = await VectorSettingsFactory.create()
+        user = await UserFactory.create(role=role, workspaces=[vector_settings.dataset.workspace])
+
+        response = await async_client.patch(
+            f"/api/v1/vectors-settings/{vector_settings.id}",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            json={"title": "New Title"},
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(vector_settings.id),
+            "name": vector_settings.name,
+            "title": "New Title",
+            "dimensions": vector_settings.dimensions,
+            "dataset_id": str(vector_settings.dataset_id),
+            "inserted_at": vector_settings.inserted_at.isoformat(),
+            "updated_at": vector_settings.updated_at.isoformat(),
+        }
+
+        assert vector_settings.title == "New Title"
+
+    @pytest.mark.parametrize("title", [None, "", "t" * (VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH + 1)])
+    async def test_update_vector_settings_with_invalid_title(
+        self, async_client: "AsyncClient", owner_auth_header: dict, title: str
+    ):
+        vector_settings = await VectorSettingsFactory.create()
+
+        response = await async_client.patch(
+            f"/api/v1/vectors-settings/{vector_settings.id}",
+            headers=owner_auth_header,
+            json={"title": title},
+        )
+
+        assert response.status_code == 422
+
+    async def test_update_vector_settings_with_title_as_none(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        vector_settings = await VectorSettingsFactory.create()
+
+        response = await async_client.patch(
+            f"/api/v1/vectors-settings/{vector_settings.id}",
+            headers=owner_auth_header,
+            json={"title": None},
+        )
+
+        assert response.status_code == 422
+
+    async def test_update_vector_settings_non_existent(self, async_client: "AsyncClient", owner_auth_header: dict):
+        response = await async_client.patch(
+            f"/api/v1/vectors-settings/{uuid4()}",
+            headers=owner_auth_header,
+            json={"title": "New Title"},
+        )
+
+        assert response.status_code == 404
+
+    async def test_update_vector_settings_as_admin_from_different_workspace(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        vector_settings = await VectorSettingsFactory.create()
+        user = await AdminFactory.create()
+
+        response = await async_client.patch(
+            f"/api/v1/vectors-settings/{vector_settings.id}",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            json={"title": "New Title"},
+        )
+
+        assert response.status_code == 403
+
+    async def test_update_vector_settings_as_annotator(self, async_client: "AsyncClient", owner_auth_header: dict):
+        vector_settings = await VectorSettingsFactory.create()
+        user = await UserFactory.create()
+
+        response = await async_client.patch(
+            f"/api/v1/vectors-settings/{vector_settings.id}",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            json={"title": "New Title"},
+        )
+
+        assert response.status_code == 403
+
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_delete_vector_settings(self, async_client: "AsyncClient", role: UserRole):
         vector_settings = await VectorSettingsFactory.create()
@@ -42,6 +129,7 @@ class TestSuiteVectorsSettings:
             "name": vector_settings.name,
             "title": vector_settings.title,
             "dimensions": vector_settings.dimensions,
+            "dataset_id": str(vector_settings.dataset_id),
             "inserted_at": vector_settings.inserted_at.isoformat(),
             "updated_at": vector_settings.updated_at.isoformat(),
         }
